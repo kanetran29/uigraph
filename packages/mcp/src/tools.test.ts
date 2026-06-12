@@ -82,6 +82,23 @@ function proposal(id: string, over: Partial<Proposal> = {}): Proposal {
   }
 }
 
+describe('Tier-3 fold: confirmed observation enters the graph', () => {
+  it('a confirmed report_observation becomes a witnessed runtime edge in get_graph', () => {
+    const ctx = chainWorkspace()
+    expect(getGraph(ctx).edges.find((e) => e.from === 'a' && e.to === 'c')).toBeUndefined()
+    reportObservation(ctx, { from: 'a', to: 'c', event: 'click', outcome: 'confirmed' })
+    const e = getGraph(ctx).edges.find((x) => x.from === 'a' && x.to === 'c')
+    expect(e?.source).toBe('runtime')
+    expect(e?.witness?.source).toBe('runtime')
+  })
+
+  it('a refuted observation does not add an edge', () => {
+    const ctx = chainWorkspace()
+    reportObservation(ctx, { from: 'a', to: 'c', event: 'click', outcome: 'refuted' })
+    expect(getGraph(ctx).edges.find((x) => x.from === 'a' && x.to === 'c')).toBeUndefined()
+  })
+})
+
 describe('loadMergedGraph integrity (red-team)', () => {
   it('rejects a stale overlay whose base hash no longer matches', async () => {
     const { loadMergedGraph } = await import('./tools')
@@ -200,17 +217,18 @@ describe('updateGraph', () => {
 describe('reportObservation', () => {
   it('appends a JSON line to observations.log.jsonl and returns the entry', () => {
     const ctx = chainWorkspace()
-    const entry = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'success' })
+    const entry = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed' })
     expect(entry.from).toBe('a')
-    expect(entry.outcome).toBe('success')
+    expect(entry.outcome).toBe('confirmed')
     expect(typeof entry.ts).toBe('string')
+    expect(typeof entry.id).toBe('string')
 
     expect(existsSync(observationsPath(ctx))).toBe(true)
     const logged = readObservations(ctx)
     expect(logged).toHaveLength(1)
     expect(logged[0]).toEqual(entry)
 
-    reportObservation(ctx, { from: 'b', to: 'c', event: 'submit', outcome: 'blocked' })
+    reportObservation(ctx, { from: 'b', to: 'c', event: 'submit', outcome: 'refuted' })
     expect(readObservations(ctx)).toHaveLength(2)
   })
 })

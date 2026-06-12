@@ -27,6 +27,7 @@ export type {
 } from './adapter'
 
 export { stableStringify, fnv1a, hashValue } from './hash'
+export { confirmedEdges, applyObservations, runtimeEdgeId, type Observation } from './runtime'
 export { validateGraphShape, validateOverlayShape, assertGraphShape, assertOverlayShape } from './schema'
 export { validateGraph, validateMerged, validateOverlay, type ValidationError } from './validate'
 export { mergeOverlay, emptyOverlay } from './overlay'
