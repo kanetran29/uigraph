@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { applyObservations, confirmedEdges, type Observation } from './runtime'
-import { graph, node } from './fixtures'
+import { edge, graph, node } from './fixtures'
 
 function obs(over: Partial<Observation> = {}): Observation {
   return { id: 'o1', from: 'a', to: 'b', event: 'click', outcome: 'confirmed', ...over }
@@ -35,5 +35,17 @@ describe('applyObservations', () => {
   it('skips observations referencing unknown nodes', () => {
     const g = graph([node('a')], [])
     expect(applyObservations(g, [obs({ to: 'ghost' })]).edges).toHaveLength(0)
+  })
+
+  it('upgrades an existing edge in place instead of adding a duplicate twin', () => {
+    const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'static', modality: 'may', guard: 'isAuth' })])
+    const merged = applyObservations(g, [obs({ from: 'a', to: 'b' })])
+    expect(merged.edges).toHaveLength(1)
+    const e = merged.edges[0]
+    expect(e?.id).toBe('e1')
+    expect(e?.source).toBe('runtime')
+    expect(e?.modality).toBe('must')
+    expect(e?.guard).toBe('isAuth')
+    expect(e?.witness?.source).toBe('runtime')
   })
 })
