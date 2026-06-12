@@ -515,11 +515,15 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     const firstLayout = lastKey.current === null
     lastKey.current = key
     const laid = toFlowNodes(layoutInput, expanded, proposalCount)
-    // Preserve the live (possibly user-dragged) position of any node that already
-    // exists; only newly-revealed nodes (e.g. controls on expand) take the fresh
-    // dagre position. On the very first layout there is nothing to preserve.
+    // Keep the user's dragged positions ONLY when the node SET is unchanged (a pure
+    // re-style). When nodes are added or removed (expand, proposals on/off), take a
+    // FULL fresh dagre layout so every node is placed by one consistent pass — mixing
+    // old screen positions with fresh ghost positions is what caused overlaps.
     setNodes((prev) => {
       if (firstLayout) return laid
+      const prevIds = new Set(prev.map((n) => n.id))
+      const sameSet = laid.length === prev.length && laid.every((n) => prevIds.has(n.id))
+      if (!sameSet) return laid
       const prevPos = new Map(prev.map((n) => [n.id, n.position]))
       return laid.map((n) => {
         const kept = prevPos.get(n.id)
