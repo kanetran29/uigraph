@@ -3,7 +3,7 @@
 // a single manual overlay edit. The overlay op shape mirrors @uigraph/mcp's
 // UpdateGraphArgs so the dashboard and the server cannot drift apart.
 
-import type { GraphEdge, GraphNode, UiGraph } from '@uigraph/core'
+import type { GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
 import sampleGraph from './sample-graph.json'
 
 /** The bundled fallback graph, used when the serve API is unreachable (static open). */
@@ -33,6 +33,25 @@ export async function fetchGraph(): Promise<{ graph: UiGraph; live: boolean }> {
     return { graph, live: true }
   } catch {
     return { graph: SAMPLE_GRAPH, live: false }
+  }
+}
+
+/** An empty proposals sidecar, used when the serve API is offline or lacks the route. */
+export const EMPTY_PROPOSALS: Proposals = { version: 0, base: '', proposals: [] }
+
+/**
+ * Fetch the quarantined Tier-2 proposals sidecar from the serve API. Proposals are
+ * read-only and optional: on any failure (network error, 404 from an older server,
+ * non-OK status, bad JSON) this resolves to an empty sidecar so the dashboard still
+ * renders the proven graph without them.
+ */
+export async function fetchProposals(): Promise<Proposals> {
+  try {
+    const res = await fetch('/api/proposals')
+    if (!res.ok) return EMPTY_PROPOSALS
+    return (await res.json()) as Proposals
+  } catch {
+    return EMPTY_PROPOSALS
   }
 }
 

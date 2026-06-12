@@ -6,10 +6,11 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
-import type { GraphEdge, UiGraph } from '@uigraph/core'
-import { fetchGraph, postOverlay, type UpdateOp } from './api'
+import type { GraphEdge, Proposals, UiGraph } from '@uigraph/core'
+import { EMPTY_PROPOSALS, fetchGraph, fetchProposals, postOverlay, type UpdateOp } from './api'
 import { GraphCanvas, type Selection } from './GraphCanvas'
 import { Inspector } from './Inspector'
+import { ProposalsPanel } from './Proposals'
 import { Steps } from './Steps'
 
 /** Build a stable manual edge id from its endpoints so repeated adds are idempotent-ish. */
@@ -39,15 +40,17 @@ function newManualEdge(from: string, to: string): GraphEdge {
 /** The whole dashboard, wired to the serve API with a sample fallback. */
 export function App(): JSX.Element {
   const [graph, setGraph] = useState<UiGraph | null>(null)
+  const [proposals, setProposals] = useState<Proposals>(EMPTY_PROPOSALS)
   const [live, setLive] = useState(false)
   const [selection, setSelection] = useState<Selection>(null)
   const [pathEdgeIds, setPathEdgeIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const { graph: g, live: isLive } = await fetchGraph()
+    const [{ graph: g, live: isLive }, props] = await Promise.all([fetchGraph(), fetchProposals()])
     setGraph(g)
     setLive(isLive)
+    setProposals(props)
   }, [])
 
   useEffect(() => {
@@ -116,6 +119,7 @@ export function App(): JSX.Element {
           <ReactFlowProvider>
             <GraphCanvas
               graph={graph}
+              proposals={proposals}
               selection={selection}
               pathEdgeIds={pathEdgeIds}
               onSelect={setSelection}
@@ -126,6 +130,12 @@ export function App(): JSX.Element {
         <div className="side">
           <Inspector selection={selection} onEditEdge={handleEditEdge} onDelete={handleDelete} />
           <Steps graph={graph} onPathChange={handlePathChange} />
+          <ProposalsPanel
+            proposals={proposals}
+            graph={graph}
+            selection={selection}
+            onClearFilter={() => setSelection(null)}
+          />
         </div>
       </div>
     </div>
