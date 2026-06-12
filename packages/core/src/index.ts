@@ -1,6 +1,39 @@
-// Public entry point for @uigraph/core. The framework-agnostic IR, pure graph
-// operations, the adapter contract, and graph algorithms are re-exported here.
-// Filled in incrementally per docs/roadmap.md (milestones M0–M1).
+// Public entry point for @uigraph/core: the framework-agnostic IR, the adapter
+// contract, and the pure graph operations. Browser-safe — no node:fs here; the
+// node-only IO helpers live in the "./node" subpath export.
 
-/** Marker for the core package version; replaced by real exports as M0–M1 land. */
-export const CORE_VERSION = '0.0.0'
+export const CORE_VERSION = '0.1.0'
+
+export type {
+  Modality,
+  Source,
+  NodeKind,
+  GraphNode,
+  Witness,
+  GraphEdge,
+  UiGraphMeta,
+  UiGraph,
+  Overlay,
+} from './ir'
+
+export type {
+  Logger,
+  AdapterContext,
+  ExtractOptions,
+  SoundinessNote,
+  ExtractResult,
+  Adapter,
+} from './adapter'
+
+export { stableStringify, fnv1a, hashValue } from './hash'
+export { validateGraphShape, validateOverlayShape, assertGraphShape, assertOverlayShape } from './schema'
+export { validateGraph, validateOverlay, type ValidationError } from './validate'
+export { mergeOverlay, emptyOverlay } from './overlay'
+export { diffGraphs, type GraphDiff, type EdgeChange } from './diff'
+export {
+  buildAdjacency,
+  reachableFrom,
+  planPath,
+  type PlanStep,
+  type PlanPathOptions,
+} from './algorithms'
