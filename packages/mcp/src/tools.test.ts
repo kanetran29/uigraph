@@ -7,14 +7,17 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
-import { loadGraph, loadOverlay, saveGraph } from '@uigraph/core/node'
+import { emptyProposals, type Proposal } from '@uigraph/core'
+import { loadGraph, loadOverlay, saveGraph, saveProposals } from '@uigraph/core/node'
 import {
   baseGraphPath,
   diffTool,
   getGraph,
+  getProposals,
   observationsPath,
   overlayPath,
   planPathTool,
+  proposalsPath,
   readObservations,
   reportObservation,
   updateGraph,
@@ -62,6 +65,47 @@ function chainWorkspace(): ToolContext {
   const g = graph([node('a'), node('b'), node('c')], [edge('e_ab', 'a', 'b'), edge('e_bc', 'b', 'c')])
   return newWorkspace(g)
 }
+
+function proposal(id: string, over: Partial<Proposal> = {}): Proposal {
+  return {
+    id,
+    kind: 'interaction',
+    category: 'disclosure',
+    screen: 'a',
+    title: 'read more expands',
+    rationale: 'truncated text + read-more control',
+    evidenced: true,
+    confidence: 0.6,
+    source: 'proposal',
+    status: 'proposed',
+    ...over,
+  }
+}
+
+describe('getProposals', () => {
+  it('returns empty when no proposals sidecar exists', () => {
+    const ctx = chainWorkspace()
+    expect(getProposals(ctx).total).toBe(0)
+  })
+
+  it('serves proposals and applies filters', () => {
+    const ctx = chainWorkspace()
+    saveProposals(proposalsPath(ctx), {
+      ...emptyProposals('h'),
+      proposals: [
+        proposal('p1', { category: 'keyboard', evidenced: true, confidence: 0.9 }),
+        proposal('p2', { category: 'keyboard', evidenced: false, confidence: 0.2 }),
+        proposal('p3', { category: 'async-state', screen: 'b', evidenced: true, confidence: 0.7 }),
+      ],
+    })
+    expect(getProposals(ctx).total).toBe(3)
+    expect(getProposals(ctx, { category: 'keyboard' }).total).toBe(2)
+    expect(getProposals(ctx, { evidencedOnly: true }).total).toBe(2)
+    expect(getProposals(ctx, { screen: 'b' }).proposals.map((p) => p.id)).toEqual(['p3'])
+    expect(getProposals(ctx, { minConfidence: 0.5 }).total).toBe(2)
+    expect(getProposals(ctx, { category: 'keyboard' }).byCategory).toEqual({ keyboard: 2 })
+  })
+})
 
 describe('getGraph', () => {
   it('returns the merged nodes/edges and counts from the base graph', () => {

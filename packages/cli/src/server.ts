@@ -4,9 +4,19 @@
 // @uigraph/mcp's updateGraph so the CLI and the MCP server cannot drift apart.
 
 import { createServer as createHttpServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import type { ToolContext, UpdateGraphArgs } from '@uigraph/mcp'
 import { loadMergedGraph, updateGraph } from '@uigraph/mcp'
+import { loadProposals } from '@uigraph/core/node'
 import { readSoundiness } from './commands'
+
+/** Read the quarantined proposals sidecar (<dir>/proposals.json), or empty if absent. */
+function readProposals(dir: string): unknown {
+  const path = join(dir, 'proposals.json')
+  if (!existsSync(path)) return { version: 0, base: '', proposals: [] }
+  return loadProposals(path)
+}
 
 /** A method + path request reduced to what the API router needs to dispatch. */
 export interface ApiRequest {
@@ -35,6 +45,9 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
     }
     if (req.method === 'GET' && req.path === '/api/soundiness') {
       return { status: 200, body: readSoundiness(ctx.dir) ?? [] }
+    }
+    if (req.method === 'GET' && req.path === '/api/proposals') {
+      return { status: 200, body: readProposals(ctx.dir) }
     }
     if (req.method === 'POST' && req.path === '/api/overlay') {
       const result = updateGraph(ctx, req.body as UpdateGraphArgs)

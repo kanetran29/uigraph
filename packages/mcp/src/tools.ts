@@ -6,10 +6,10 @@
 
 import { appendFileSync, existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { GraphEdge, GraphNode, Modality, Overlay, UiGraph } from '@uigraph/core'
+import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
 import { diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateOverlay } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
-import { loadGraph, loadOverlay, saveOverlay } from '@uigraph/core/node'
+import { loadGraph, loadOverlay, loadProposals, saveOverlay } from '@uigraph/core/node'
 
 /**
  * Where a server instance is rooted: a workspace directory holding
@@ -75,6 +75,56 @@ export function getGraph(ctx: ToolContext): GetGraphResult {
     edges: g.edges,
     nodeCount: g.nodes.length,
     edgeCount: g.edges.length,
+  }
+}
+
+/** Standard file name for the quarantined Tier-2 proposals sidecar. */
+export const PROPOSALS_FILE = 'proposals.json'
+
+/** Absolute path to the proposals sidecar for a context. */
+export function proposalsPath(ctx: ToolContext): string {
+  return join(ctx.dir, PROPOSALS_FILE)
+}
+
+/** Optional filters for get_proposals so an agent can request a focused slice. */
+export interface GetProposalsArgs {
+  screen?: string
+  category?: string
+  evidencedOnly?: boolean
+  minConfidence?: number
+}
+
+/** get_proposals result: the filtered quarantined proposals plus quick aggregates. */
+export interface GetProposalsResult {
+  total: number
+  evidenced: number
+  byCategory: Record<string, number>
+  proposals: Proposal[]
+}
+
+/**
+ * Serve the quarantined Tier-2 proposals (the reviewer agent's long-tail
+ * hypotheses) to the connecting agent, with optional filters. These are
+ * possibilities to explore/confirm — NOT proven edges; an agent should treat them
+ * as leads and confirm via runtime observation before trusting them.
+ */
+export function getProposals(ctx: ToolContext, args: GetProposalsArgs = {}): GetProposalsResult {
+  const path = proposalsPath(ctx)
+  const all: Proposal[] = existsSync(path) ? loadProposals(path).proposals : []
+  const filtered = all.filter(
+    (p) =>
+      (args.screen === undefined || p.screen === args.screen) &&
+      (args.category === undefined || p.category === args.category) &&
+      (args.evidencedOnly !== true || p.evidenced) &&
+      (args.minConfidence === undefined || p.confidence >= args.minConfidence),
+  )
+  const byCategory: Record<string, number> = {}
+  for (const p of filtered) byCategory[p.category] = (byCategory[p.category] ?? 0) + 1
+  return {
+    total: filtered.length,
+    evidenced: filtered.filter((p) => p.evidenced).length,
+    byCategory,
+    proposals: filtered,
   }
 }
 

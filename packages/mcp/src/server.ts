@@ -12,10 +12,12 @@ import type { ToolContext } from './tools'
 import {
   diffTool,
   getGraph,
+  getProposals,
   planPathTool,
   reportObservation,
   updateGraph,
   type DiffArgs,
+  type GetProposalsArgs,
   type PlanPathArgs,
   type ReportObservationArgs,
   type UpdateGraphArgs,
@@ -33,6 +35,20 @@ const TOOLS: Tool[] = [
     name: 'get_graph',
     description: 'Return the merged UI transition graph (base + manual overlay) with node/edge counts.',
     inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'get_proposals',
+    description:
+      'Return the quarantined Tier-2 proposals (a reviewer agent\'s long-tail behavior hypotheses: read-more, load-more, drag-drop, keyboard, async states...). These are leads to explore/confirm at runtime, NOT proven edges. Optional filters: screen, category, evidencedOnly, minConfidence.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        screen: { type: 'string', description: 'filter to one screen node id (or "app" for global)' },
+        category: { type: 'string', description: 'filter to one category, e.g. keyboard, async-state, disclosure' },
+        evidencedOnly: { type: 'boolean', description: 'only proposals grounded in concrete source' },
+        minConfidence: { type: 'number', description: '0..1 lower bound on confidence' },
+      },
+    },
   },
   {
     name: 'plan_path',
@@ -106,6 +122,8 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
     switch (name) {
       case 'get_graph':
         return jsonResult(getGraph(ctx))
+      case 'get_proposals':
+        return jsonResult(getProposals(ctx, args as unknown as GetProposalsArgs))
       case 'plan_path':
         return jsonResult(planPathTool(ctx, args as unknown as PlanPathArgs))
       case 'update_graph':

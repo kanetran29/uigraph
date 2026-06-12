@@ -7,6 +7,7 @@ export { startServer, createServer, type StartServerOptions } from './server'
 
 export {
   getGraph,
+  getProposals,
   planPathTool,
   updateGraph,
   reportObservation,
@@ -16,11 +17,15 @@ export {
   baseGraphPath,
   overlayPath,
   observationsPath,
+  proposalsPath,
   BASE_FILE,
   OVERLAY_FILE,
   OBSERVATIONS_FILE,
+  PROPOSALS_FILE,
   type ToolContext,
   type GetGraphResult,
+  type GetProposalsArgs,
+  type GetProposalsResult,
   type PlanPathArgs,
   type PlanPathStep,
   type PlanPathResult,
