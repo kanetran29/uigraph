@@ -16,6 +16,7 @@ export interface Observation {
   effect?: string
   outcome: 'confirmed' | 'refuted'
   proposalId?: string
+  screenshot?: string
   ts?: string
 }
 
@@ -47,7 +48,7 @@ export function confirmedEdges(observations: Observation[]): GraphEdge[] {
       modality: 'must',
       source: 'runtime',
       confidence: 1,
-      witness: { source: 'runtime', observationId: o.id },
+      witness: { source: 'runtime', observationId: o.id, ...(o.screenshot ? { screenshot: o.screenshot } : {}) },
     })
   }
   return edges
