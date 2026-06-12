@@ -119,6 +119,15 @@ function ControlLabel(props: { control: ControlMeta; label: string }): JSX.Eleme
         <span className="control-name">{name}</span>
         <span className="control-type">{control.controlType}</span>
       </div>
+      {control.events && control.events.length > 0 ? (
+        <div className="control-events">
+          {control.events.map((ev) => (
+            <span key={ev} className="event-chip">
+              {ev}
+            </span>
+          ))}
+        </div>
+      ) : null}
       {control.effects && control.effects.length > 0 ? (
         <div className="control-effects">
           {control.effects.map((eff) => (

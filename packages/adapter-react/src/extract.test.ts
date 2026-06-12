@@ -106,6 +106,26 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
 
     const withApi = controls.find((c) => (c.control?.effects ?? []).some((e) => e.startsWith('api:POST')))
     expect(withApi).toBeDefined()
+
+    const allEvents = new Set(controls.flatMap((c) => c.control?.events ?? []))
+    expect(allEvents.has('keydown')).toBe(true)
+    expect(allEvents.has('mouseenter')).toBe(true)
+  })
+
+  it('treats any element with an on* handler as a control and records its events', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+        '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); return <div onMouseEnter={() => setHover(true)} onContextMenu={() => navigate('/b')} onKeyDown={() => navigate('/b')}>x</div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const div = graph.nodes.find((n) => n.control?.element === 'div')
+    expect(div?.control?.controlType).toBe('element')
+    expect(new Set(div?.control?.events)).toEqual(new Set(['mouseenter', 'contextmenu', 'keydown']))
+    expect(graph.edges.some((e) => e.from === div?.id && e.to === 'n_b' && e.event === 'contextmenu')).toBe(true)
+    expect(graph.edges.some((e) => e.from === div?.id && e.to === 'n_b' && e.event === 'keydown')).toBe(true)
   })
 
   it('keeps the route graph identical without opts.controls', () => {

@@ -31,6 +31,7 @@ export interface ControlMeta {
   element: string
   controlType: string
   name?: string
+  events?: string[]
   effects?: string[]
 }
 

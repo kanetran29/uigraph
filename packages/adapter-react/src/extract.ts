@@ -334,7 +334,17 @@ function inputControlType(el: Node): string {
   return 'input'
 }
 
-/** Classify an interactive JSX element as a control, or null if it is not one. */
+/** Does an element carry any React `on*` event handler attribute? */
+function hasEventHandler(el: Node): boolean {
+  return jsxAttrs(el).some((a) => /^on[A-Z]/.test(a.getNameNode().getText()))
+}
+
+/**
+ * Classify an interactive JSX element as a control, or null if it is not one. A
+ * control is a native form element (button/input/textarea/select/form),
+ * contentEditable, or ANY lowercase DOM element carrying an `on*` handler (so a
+ * `<div onMouseEnter>` or `<li onKeyDown>` counts too).
+ */
 function controlMetaFor(el: Node): ControlInfo | null {
   const tag = jsxTag(el)
   const lower = tag.toLowerCase()
@@ -345,8 +355,9 @@ function controlMetaFor(el: Node): ControlInfo | null {
   else if (lower === 'select') controlType = 'select'
   else if (lower === 'form') controlType = 'form'
   else if (findAttr(el, 'contentEditable') || findAttr(el, 'contenteditable')) controlType = 'richtext'
+  else if (/^[a-z]/.test(tag) && hasEventHandler(el)) controlType = 'element'
   else return null
-  const textLabel = controlType === 'button' ? getJsxText(el) : undefined
+  const textLabel = controlType === 'button' || controlType === 'element' ? getJsxText(el) : undefined
   const name =
     stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? stringAttr(el, 'placeholder') ?? stringAttr(el, 'aria-label') ?? textLabel
   return { element: tag, controlType, ...(name ? { name } : {}) }
@@ -365,22 +376,54 @@ function resolveFunctionNode(sf: SourceFile, name: string): Node | undefined {
   return undefined
 }
 
-/** Resolve a control's event handler (onSubmit/onClick/onChange) to its function node. */
-function resolveHandler(el: Node, sf: SourceFile): Node | undefined {
-  for (const name of ['onSubmit', 'onClick', 'onChange']) {
-    const attr = findAttr(el, name)
-    if (!attr) continue
-    const init = attr.getInitializer()
-    if (!init || !Node.isJsxExpression(init)) continue
-    const expr = init.getExpression()
-    if (!expr) continue
-    if (Node.isArrowFunction(expr) || Node.isFunctionExpression(expr)) return expr
-    if (Node.isIdentifier(expr)) {
-      const fn = resolveFunctionNode(sf, expr.getText())
-      if (fn) return fn
-    }
-  }
+/** React `onXxx` attribute name → DOM event name (e.g. onMouseEnter -> mouseenter). */
+function eventNameOf(attrName: string): string {
+  return attrName.slice(2).toLowerCase()
+}
+
+/** Resolve a single handler attribute's value to its function node. */
+function handlerFnFromAttr(attr: JsxAttribute, sf: SourceFile): Node | undefined {
+  const init = attr.getInitializer()
+  if (!init || !Node.isJsxExpression(init)) return undefined
+  const expr = init.getExpression()
+  if (!expr) return undefined
+  if (Node.isArrowFunction(expr) || Node.isFunctionExpression(expr)) return expr
+  if (Node.isIdentifier(expr)) return resolveFunctionNode(sf, expr.getText())
   return undefined
+}
+
+interface Interaction {
+  event: string
+  ti: TargetInfo
+  guard: string | null
+  node: Node
+}
+
+/**
+ * Collect every event handler on a control: the distinct DOM events it listens
+ * to, the navigations each handler performs (tagged with the triggering event),
+ * and the non-navigational effects.
+ */
+function collectInteractions(
+  el: Node,
+  sf: SourceFile,
+  navInfo: { navSet: Set<string>; histSet: Set<string> },
+): { events: string[]; navs: Interaction[]; effects: string[] } {
+  const events = new Set<string>()
+  const navs: Interaction[] = []
+  const effects = new Set<string>()
+  for (const attr of jsxAttrs(el)) {
+    const an = attr.getNameNode().getText()
+    if (!/^on[A-Z]/.test(an)) continue
+    const ev = eventNameOf(an)
+    events.add(ev)
+    const fn = handlerFnFromAttr(attr, sf)
+    if (!fn) continue
+    const a = analyzeHandler(fn, navInfo)
+    for (const nc of a.navCalls) navs.push({ event: ev, ti: nc.ti, guard: nc.guard, node: nc.node })
+    for (const e of a.effects) effects.add(e)
+  }
+  return { events: [...events], navs, effects: [...effects] }
 }
 
 function literalOf(node: Node | undefined): string {
@@ -533,20 +576,18 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const meta = controlMetaFor(el)
         if (!meta) continue
         const cId = `cc_${route.nodeId}__${meta.controlType}_${cidx++}`
-        const handler = resolveHandler(el, sf)
-        const analysis = handler ? analyzeHandler(handler, navInfo) : { navCalls: [], effects: [] }
+        const inter = collectInteractions(el, sf, navInfo)
         const lc = sf.getLineAndColumnAtPos(el.getStart())
         const loc = { line: lc.line, col: lc.column }
-        for (const nav of analysis.navCalls) {
-          const event = meta.controlType === 'form' ? 'submit' : 'click'
+        for (const nav of inter.navs) {
           if (nav.ti.kind === 'literal') {
             const target = matchLiteral(nav.ti.value, routeLikes)
             if (!target) continue
             const guarded = nav.guard !== null
-            pushEdge(cId, target.nodeId, { ti: nav.ti, event, effect: 'navigate', node: nav.node, guard: nav.guard }, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
+            pushEdge(cId, target.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: nav.guard }, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
           } else if (nav.ti.kind === 'template') {
             for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
-              pushEdge(cId, cand.nodeId, { ti: nav.ti, event, effect: 'navigate', node: nav.node, guard: nav.guard }, 'may', 0.5, file, loc)
+              pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: nav.guard }, 'may', 0.5, file, loc)
           }
         }
         nodes.push({
@@ -560,7 +601,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             element: meta.element,
             controlType: meta.controlType,
             ...(meta.name ? { name: meta.name } : {}),
-            ...(analysis.effects.length > 0 ? { effects: analysis.effects } : {}),
+            ...(inter.events.length > 0 ? { events: inter.events } : {}),
+            ...(inter.effects.length > 0 ? { effects: inter.effects } : {}),
           },
         })
       }
