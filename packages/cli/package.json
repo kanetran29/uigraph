@@ -9,7 +9,11 @@
       "default": "./src/index.ts"
     }
   },
+  "bin": {
+    "uigraph": "./src/cli.ts"
+  },
   "scripts": {
+    "uigraph": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
