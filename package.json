@@ -1,0 +1,20 @@
+{
+  "name": "uigraph-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "test": "pnpm -r --if-present run test",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^10.5.0",
+    "typescript-eslint": "^8.61.0",
+    "typescript": "catalog:",
+    "tsx": "catalog:",
+    "vitest": "catalog:",
+    "@types/node": "catalog:"
+  }
+}
