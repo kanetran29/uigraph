@@ -20,17 +20,21 @@ function patternMatches(target: string, pattern: string): boolean {
   return p.every((seg, i) => seg.startsWith(':') || seg === t[i])
 }
 
+function normalizeTarget(target: string): string {
+  return target.split('?')[0]?.split('#')[0] ?? target
+}
+
 /**
- * Resolve a literal navigation target to a single declared route. Prefers an
- * exact path match, then a parameterized pattern match. Returns null if no
- * declared route matches (the caller records this as a soundiness gap).
+ * Resolve a literal target into an exact match (the only result safe to assert as
+ * a `must`-edge) and the set of parameterized patterns it could also match.
+ * Ambiguity (no exact, or several `:param` candidates) must NOT become a single
+ * `must`-edge — the caller fans it out to `may`-edges over the candidates.
  */
-export function matchLiteral(target: string, routes: RouteLike[]): RouteLike | null {
-  const norm = target.split('?')[0]?.split('#')[0] ?? target
-  const exact = routes.find((r) => r.fullPath === norm)
-  if (exact) return exact
-  const byPattern = routes.find((r) => patternMatches(norm, r.fullPath))
-  return byPattern ?? null
+export function matchLiteralAll(target: string, routes: RouteLike[]): { exact: RouteLike | null; candidates: RouteLike[] } {
+  const norm = normalizeTarget(target)
+  const exact = routes.find((r) => r.fullPath === norm) ?? null
+  const candidates = routes.filter((r) => r.fullPath !== norm && patternMatches(norm, r.fullPath))
+  return { exact, candidates }
 }
 
 /**

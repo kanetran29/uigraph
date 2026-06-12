@@ -7,7 +7,7 @@
 import { appendFileSync, existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
-import { diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateOverlay } from '@uigraph/core'
+import { diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateMerged, validateOverlay } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
 import { loadGraph, loadOverlay, loadProposals, saveOverlay } from '@uigraph/core/node'
 
@@ -49,7 +49,15 @@ export function loadMergedGraph(ctx: ToolContext): UiGraph {
   const op = overlayPath(ctx)
   if (!existsSync(op)) return base
   const overlay = loadOverlay(op)
-  return mergeOverlay(base, overlay)
+  if (overlay.base && overlay.base !== hashValue(base)) {
+    throw new Error(
+      `stale overlay: it was authored against base ${overlay.base}, but the current base hashes to ${hashValue(base)} — re-author or discard the overlay`,
+    )
+  }
+  const merged = mergeOverlay(base, overlay)
+  const errs = validateMerged(merged)
+  if (errs.length > 0) throw new Error(`merged graph is invalid:\n  ${errs.map((e) => e.message).join('\n  ')}`)
+  return merged
 }
 
 /** The merged graph plus node/edge counts, the payload returned by get_graph. */
@@ -211,11 +219,12 @@ function loadOrInitOverlay(ctx: ToolContext): Overlay {
 }
 
 /**
- * Force a node/edge to `source: 'manual'`, the only provenance the overlay
- * accepts. Edits arrive from an agent and must not claim static/runtime origin.
+ * Force an edge to `source: 'manual'`, the only provenance the overlay accepts.
+ * Edits arrive from an agent and must not claim static/runtime origin, nor a
+ * proven `must` modality — a human/agent assertion is at most a `may`-edge.
  */
 function asManualEdge(edge: GraphEdge): GraphEdge {
-  return { ...edge, source: 'manual', witness: undefined }
+  return { ...edge, source: 'manual', modality: edge.modality === 'must' ? 'may' : edge.modality, witness: undefined }
 }
 
 /**

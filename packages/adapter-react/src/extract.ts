@@ -9,7 +9,7 @@ import type { JsxAttribute, SourceFile } from 'ts-morph'
 import { dirname, join, relative } from 'node:path'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@uigraph/core'
 import { routeToNodeId, edgeId } from './ids'
-import { matchLiteral, matchPrefix, type RouteLike } from './matcher'
+import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'rr-v5v6-2026.06'
@@ -112,6 +112,65 @@ function getGuard(node: Node): string | null {
     }
     cur = parent
   }
+}
+
+const ITERATION_METHODS = /^(map|forEach|filter|reduce|find|some|every|flatMap)$/
+
+/**
+ * A non-dominance condition that makes a programmatic navigation NOT unconditional
+ * (so it must be a `may`-edge, never a proven `must`): an enclosing loop, switch
+ * case, catch, or array-iteration callback, or a preceding early-return/throw
+ * guard in the same block. Complements getGuard (if/ternary/&&) — together they
+ * close the phantom-`must` gap where only nearest-enclosing-syntax was checked.
+ */
+function extraConditionGuard(node: Node): string | null {
+  let cur: Node = node
+  for (;;) {
+    const parent = cur.getParent()
+    if (!parent) break
+    if (
+      Node.isForStatement(parent) ||
+      Node.isForOfStatement(parent) ||
+      Node.isForInStatement(parent) ||
+      Node.isWhileStatement(parent) ||
+      Node.isDoStatement(parent)
+    ) {
+      return 'loop'
+    }
+    if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) return 'switch-case'
+    if (Node.isCatchClause(parent)) return 'catch'
+    if ((Node.isArrowFunction(cur) || Node.isFunctionExpression(cur)) && Node.isCallExpression(parent)) {
+      const callee = parent.getExpression()
+      if (Node.isPropertyAccessExpression(callee) && ITERATION_METHODS.test(callee.getName())) return 'iteration'
+      break
+    }
+    cur = parent
+  }
+  return earlyReturnGuard(node)
+}
+
+/**
+ * If a statement earlier in the same block guards exit with `if (cond) return`
+ * (or `throw`), a later navigation is reached only when `!(cond)` — so it is
+ * conditional. Returns that negated guard, or null.
+ */
+function earlyReturnGuard(node: Node): string | null {
+  const stmt = node.getFirstAncestor((a) => Node.isStatement(a) && Node.isBlock(a.getParent()))
+  if (!stmt) return null
+  const block = stmt.getParent()
+  if (!block || !Node.isBlock(block)) return null
+  for (const sibling of block.getStatements()) {
+    if (sibling.getStart() >= stmt.getStart()) break
+    if (!Node.isIfStatement(sibling) || sibling.getElseStatement()) continue
+    const then = sibling.getThenStatement()
+    const exits =
+      then.getDescendantsOfKind(SyntaxKind.ReturnStatement).length > 0 ||
+      then.getDescendantsOfKind(SyntaxKind.ThrowStatement).length > 0 ||
+      Node.isReturnStatement(then) ||
+      Node.isThrowStatement(then)
+    if (exits) return `!(${sibling.getExpression().getText()})`
+  }
+  return null
 }
 
 function getComponentName(el: Node): string | null {
@@ -291,7 +350,7 @@ function collectTargets(sf: SourceFile): RawTarget[] {
     }
     if (effect === null) continue
     const arg0 = call.getArguments()[0]
-    out.push({ ti: classifyTarget(arg0), event: 'navigate', effect, node: call, guard: getGuard(call) })
+    out.push({ ti: classifyTarget(arg0), event: 'navigate', effect, node: call, guard: getGuard(call) ?? extraConditionGuard(call) })
   }
   return out
 }
@@ -558,14 +617,14 @@ function analyzeHandler(fnNode: Node, navInfo: { navSet: Set<string>; histSet: S
   for (const call of calls) {
     const expr = call.getExpression()
     if (Node.isIdentifier(expr) && navInfo.navSet.has(expr.getText())) {
-      navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call), node: call, ctx: branchContextOf(call) })
+      navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call) ?? extraConditionGuard(call), node: call, ctx: branchContextOf(call) })
       continue
     }
     if (Node.isPropertyAccessExpression(expr)) {
       const obj = expr.getExpression()
       const m = expr.getName()
       if (Node.isIdentifier(obj) && navInfo.histSet.has(obj.getText()) && (m === 'push' || m === 'replace')) {
-        navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call), node: call, ctx: branchContextOf(call) })
+        navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call) ?? extraConditionGuard(call), node: call, ctx: branchContextOf(call) })
         continue
       }
     }
@@ -634,13 +693,16 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const lc = sf.getLineAndColumnAtPos(t.node.getStart())
       const loc = { line: lc.line, col: lc.column }
       if (t.ti.kind === 'literal') {
-        const target = matchLiteral(t.ti.value, routeLikes)
-        if (!target) {
+        const { exact, candidates } = matchLiteralAll(t.ti.value, routeLikes)
+        if (exact) {
+          const guarded = t.guard !== null
+          pushEdge(route.nodeId, exact.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
+        } else if (candidates.length > 0) {
+          soundiness.push({ kind: 'ambiguous-target', file, loc, detail: `literal target "${t.ti.value}" matched ${candidates.length} parameterized route(s); emitted as may, never must` })
+          for (const cand of candidates) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
+        } else {
           soundiness.push({ kind: 'unresolved-target', file, loc, detail: `literal target "${t.ti.value}" matches no declared route` })
-          continue
         }
-        const guarded = t.guard !== null
-        pushEdge(route.nodeId, target.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
       } else if (t.ti.kind === 'template') {
         const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
         soundiness.push({ kind: 'over-approximation', file, loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
@@ -692,9 +754,13 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           const modality: 'must' | 'may' = guard !== null ? 'may' : 'must'
           const confidence = nav.ctx === 'error' ? 0.5 : nav.ctx === 'success' ? 0.7 : guard !== null ? 0.6 : 1
           if (nav.ti.kind === 'literal') {
-            const target = matchLiteral(nav.ti.value, routeLikes)
-            if (!target) continue
-            pushEdge(cId, target.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard }, modality, confidence, file, loc)
+            const { exact, candidates } = matchLiteralAll(nav.ti.value, routeLikes)
+            if (exact) {
+              pushEdge(cId, exact.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard }, modality, confidence, file, loc)
+            } else {
+              for (const cand of candidates)
+                pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: guard ?? 'ambiguous' }, 'may', 0.5, file, loc)
+            }
           } else if (nav.ti.kind === 'template') {
             for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
               pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard }, 'may', Math.min(confidence, 0.5), file, loc)
