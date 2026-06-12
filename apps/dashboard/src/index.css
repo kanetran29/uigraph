@@ -1,10 +1,75 @@
+/* Design tokens. One corner-radius scale (--radius / --radius-sm) and one accent
+   (--accent) used throughout. Colours are off-black / off-white, never pure
+   #000/#fff. The dark palette is supplied via prefers-color-scheme below; the
+   canvas (xyflow) reads the same edge/node vars so both modes stay consistent. */
 :root {
-  --bg: #f8fafc;
-  --panel: #ffffff;
-  --border: #e2e8f0;
+  color-scheme: light dark;
+
+  --radius: 8px;
+  --radius-sm: 6px;
+
+  --bg: #f1f5f9;
+  --panel: #fbfcfe;
+  --panel-subtle: #f1f5f9;
+  --border: #d8dee9;
+  --border-strong: #cbd5e1;
   --text: #0f172a;
-  --muted: #64748b;
-  --accent: #7c3aed;
+  --muted: #55617a;
+  --accent: #6d28d9;
+  --accent-contrast: #ffffff;
+  --danger: #c0322b;
+  --danger-contrast: #ffffff;
+  --focus: #6d28d9;
+
+  --status-live-bg: #d8f5e3;
+  --status-live-fg: #146c43;
+  --status-offline-bg: #fdf0c9;
+  --status-offline-fg: #7a4f06;
+
+  /* Canvas surfaces + the edge/source palette the xyflow canvas binds to. */
+  --node-bg: #ffffff;
+  --node-subtle-bg: #f1f5f9;
+  --node-manual-bg: #f3effe;
+  --node-border: #94a3b8;
+  --label-bg: #ffffffee;
+
+  --edge: #475569;
+  --edge-manual: #7c3aed;
+  --edge-runtime: #047857;
+  --edge-highlight: #15803d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-subtle: #1c2230;
+    --border: #2b3240;
+    --border-strong: #3a4250;
+    --text: #e6edf3;
+    --muted: #97a3b6;
+    --accent: #a78bfa;
+    --accent-contrast: #1a1430;
+    --danger: #f0726a;
+    --danger-contrast: #2a0f0d;
+    --focus: #a78bfa;
+
+    --status-live-bg: #0f3320;
+    --status-live-fg: #6ee7a8;
+    --status-offline-bg: #3a2e0a;
+    --status-offline-fg: #fcd34d;
+
+    --node-bg: #1c2230;
+    --node-subtle-bg: #161b22;
+    --node-manual-bg: #241a3d;
+    --node-border: #4a5568;
+    --label-bg: #1c2230f2;
+
+    --edge: #8b98ac;
+    --edge-manual: #b794f6;
+    --edge-runtime: #34d399;
+    --edge-highlight: #4ade80;
+  }
 }
 
 * {
@@ -24,17 +89,21 @@ body {
   background: var(--bg);
 }
 
+/* A single visible focus ring on every interactive control. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 .app {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-.loading {
-  display: grid;
-  place-items: center;
-  height: 100%;
-  color: var(--muted);
 }
 
 .topbar {
@@ -51,16 +120,17 @@ body {
   font-size: 12px;
   padding: 2px 8px;
   border-radius: 999px;
+  font-weight: 600;
 }
 
 .status.live {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--status-live-bg);
+  color: var(--status-live-fg);
 }
 
 .status.offline {
-  background: #fef9c3;
-  color: #854d0e;
+  background: var(--status-offline-bg);
+  color: var(--status-offline-fg);
 }
 
 .counts {
@@ -69,9 +139,28 @@ body {
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--danger);
   font-size: 12px;
   margin-left: auto;
+  font-weight: 600;
+}
+
+.banner {
+  padding: 8px 16px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.banner.offline {
+  background: var(--status-offline-bg);
+  color: var(--status-offline-fg);
+}
+
+.banner code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
 .body {
@@ -85,8 +174,30 @@ body {
   min-width: 0;
 }
 
+.empty-state {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--muted);
+}
+
+.empty-state h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.empty-state p {
+  max-width: 420px;
+}
+
+/* The right rail scrolls independently of the canvas; each section is separated. */
 .side {
-  width: 320px;
+  width: 340px;
+  flex-shrink: 0;
   border-left: 1px solid var(--border);
   background: var(--panel);
   overflow-y: auto;
@@ -95,21 +206,30 @@ body {
 }
 
 .inspector,
-.steps {
-  padding: 16px;
+.steps,
+.proposals {
+  padding: 16px 18px;
   border-bottom: 1px solid var(--border);
 }
 
+.proposals {
+  border-bottom: none;
+}
+
 .inspector h2,
-.steps h2 {
+.steps h2,
+.proposals h2 {
   margin: 0 0 12px;
   font-size: 15px;
+  letter-spacing: -0.01em;
 }
 
 .inspector h3 {
   margin: 16px 0 8px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .muted {
@@ -121,7 +241,7 @@ body {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 4px 0;
+  padding: 5px 0;
   font-size: 12px;
   border-bottom: 1px dashed var(--border);
 }
@@ -142,6 +262,7 @@ body {
   padding: 1px 6px;
   border-radius: 999px;
   vertical-align: middle;
+  margin-left: 4px;
 }
 
 .editor {
@@ -158,11 +279,14 @@ body {
   color: var(--muted);
 }
 
-.edit-row input {
+.edit-row input,
+.steps-controls select {
   padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
   font-size: 13px;
+  background: var(--panel);
+  color: var(--text);
 }
 
 .editor-actions {
@@ -173,17 +297,23 @@ body {
 
 button {
   padding: 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #ffffff;
+  color: var(--accent-contrast);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
 }
 
+button:hover {
+  filter: brightness(1.06);
+}
+
 button.danger {
-  background: #dc2626;
-  border-color: #dc2626;
+  background: var(--danger);
+  color: var(--danger-contrast);
+  border-color: var(--danger);
 }
 
 .steps-controls {
@@ -198,13 +328,12 @@ button.danger {
   gap: 4px;
   font-size: 12px;
   color: var(--muted);
+  flex: 1;
+  min-width: 0;
 }
 
 .steps-controls select {
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 13px;
+  width: 100%;
 }
 
 .steps-list {
@@ -220,8 +349,8 @@ button.danger {
   font-size: 13px;
   padding: 8px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
+  border-radius: var(--radius-sm);
+  background: var(--panel-subtle);
 }
 
 .step-index {
@@ -270,21 +399,6 @@ button.danger {
   letter-spacing: 0.03em;
 }
 
-.control-effects {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-}
-
-.effect-chip {
-  font-size: 9px;
-  padding: 1px 5px;
-  border-radius: 999px;
-  background: #e2e8f0;
-  color: #334155;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
 .effects-list {
   margin: 0 0 8px;
   padding-left: 0;
@@ -299,20 +413,25 @@ button.danger {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   padding: 4px 8px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
+  border-radius: var(--radius-sm);
+  background: var(--panel-subtle);
   word-break: break-all;
 }
 
-.control-events { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
-.event-chip {
+.control-events-line {
+  margin-top: 2px;
   font-size: 9px;
-  line-height: 1.4;
-  padding: 0 5px;
-  border-radius: 8px;
-  background: #eef2ff;
-  color: #4338ca;
-  border: 1px solid #c7d2fe;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Canvas toggles + legend overlays. */
+.canvas-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .edge-toggle {
@@ -320,28 +439,63 @@ button.danger {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #334155;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
   padding: 4px 8px;
   cursor: pointer;
   user-select: none;
 }
 
-.control-events-line {
-  margin-top: 2px;
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.legend-title {
   font-size: 9px;
-  color: #64748b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 4px;
 }
 
-.proposals {
-  padding: 16px;
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 0;
 }
 
+.legend-swatch {
+  display: inline-block;
+  width: 20px;
+  height: 0;
+}
+
+/* Selection emphasis on nodes, applied via className so drags are preserved. */
+.react-flow__node.rf-selected {
+  box-shadow: 0 0 0 2px var(--accent);
+  border-radius: var(--radius);
+}
+
+.react-flow__node.rf-neighbor {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: var(--radius);
+}
+
+.react-flow__node.rf-dimmed {
+  opacity: 0.42;
+}
+
+/* Proposals panel. */
 .prop-legend {
   display: flex;
   gap: 6px;
@@ -357,13 +511,13 @@ button.danger {
 }
 
 .prop-badge.evidenced {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--status-live-bg);
+  color: var(--status-live-fg);
 }
 
 .prop-badge.speculative {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--status-offline-bg);
+  color: var(--status-offline-fg);
 }
 
 .prop-filter {
@@ -373,9 +527,9 @@ button.danger {
   gap: 8px;
   font-size: 11px;
   color: var(--muted);
-  background: #f5f3ff;
-  border: 1px solid #ddd6fe;
-  border-radius: 6px;
+  background: var(--node-manual-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   padding: 6px 8px;
   margin-bottom: 12px;
 }
@@ -390,7 +544,7 @@ button.danger {
   font-size: 11px;
   background: var(--panel);
   color: var(--accent);
-  border: 1px solid #ddd6fe;
+  border: 1px solid var(--border-strong);
 }
 
 .prop-screen {
@@ -434,9 +588,9 @@ button.danger {
 
 .prop-row {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 6px 8px;
-  background: var(--bg);
+  background: var(--panel-subtle);
 }
 
 .prop-row-head {
@@ -462,8 +616,8 @@ button.danger {
   font-size: 9px;
   padding: 1px 5px;
   border-radius: 4px;
-  background: #ede9fe;
-  color: #6d28d9;
+  background: var(--node-manual-bg);
+  color: var(--accent);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   flex-shrink: 0;
 }
@@ -485,7 +639,7 @@ button.danger {
   flex: 1;
   height: 4px;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--border);
   overflow: hidden;
 }
 
@@ -514,4 +668,75 @@ button.danger {
   font-size: 11px;
   color: var(--text);
   line-height: 1.4;
+}
+
+/* Loading skeleton. */
+.skeleton {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--panel-subtle) 25%, var(--border) 50%, var(--panel-subtle) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-pill {
+  width: 88px;
+  height: 18px;
+  border-radius: 999px;
+}
+
+.skeleton-text {
+  width: 120px;
+  height: 12px;
+}
+
+.skeleton-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  background: var(--bg);
+}
+
+.skeleton-node {
+  width: 200px;
+  height: 64px;
+}
+
+.skeleton-panel {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-heading {
+  width: 50%;
+  height: 14px;
+}
+
+.skeleton-line {
+  width: 100%;
+  height: 10px;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Honour reduced-motion: stop the skeleton shimmer and animated edge dashes. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+
+  .react-flow__edge-path {
+    animation: none !important;
+  }
 }
