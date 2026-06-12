@@ -1,6 +1,10 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 
+function MapContainer() {
+  return <div className="map">map widget</div>
+}
+
 export default function Dashboard() {
   const { isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
@@ -22,6 +26,7 @@ export default function Dashboard() {
       >
         Logout
       </button>
+      <MapContainer />
     </div>
   )
 }

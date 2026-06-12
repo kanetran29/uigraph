@@ -309,10 +309,13 @@ interface ControlInfo {
   name?: string
 }
 
+type BranchContext = 'success' | 'error' | null
+
 interface NavCall {
   ti: TargetInfo
   guard: string | null
   node: Node
+  ctx: BranchContext
 }
 
 /** Visible text inside a JSX element (e.g. a button's label), or undefined. */
@@ -331,6 +334,7 @@ function inputControlType(el: Node): string {
   const t = (stringAttr(el, 'type') ?? 'text').toLowerCase()
   if (t === 'checkbox' || t === 'radio') return 'checkbox'
   if (t === 'submit' || t === 'button') return 'button'
+  if (t === 'file') return 'file'
   return 'input'
 }
 
@@ -397,6 +401,7 @@ interface Interaction {
   ti: TargetInfo
   guard: string | null
   node: Node
+  ctx: BranchContext
 }
 
 /**
@@ -420,7 +425,7 @@ function collectInteractions(
     const fn = handlerFnFromAttr(attr, sf)
     if (!fn) continue
     const a = analyzeHandler(fn, navInfo)
-    for (const nc of a.navCalls) navs.push({ event: ev, ti: nc.ti, guard: nc.guard, node: nc.node })
+    for (const nc of a.navCalls) navs.push({ event: ev, ti: nc.ti, guard: nc.guard, node: nc.node, ctx: nc.ctx })
     for (const e of a.effects) effects.add(e)
   }
   return { events: [...events], navs, effects: [...effects] }
@@ -471,6 +476,79 @@ function detectStateEffect(call: Node): string | null {
   return null
 }
 
+/** A modal-opening setter like setShowConfirm(true)/setOpen(true), or null. */
+function detectModalOpen(call: Node): string | null {
+  if (!Node.isCallExpression(call)) return null
+  const expr = call.getExpression()
+  if (!Node.isIdentifier(expr)) return null
+  if (!/^set(Show|Open|Visible|Modal|Dialog|Drawer|Popover|Sheet)/i.test(expr.getText())) return null
+  const arg = call.getArguments()[0]
+  if (arg && arg.getText() === 'true') return 'open:modal'
+  return null
+}
+
+/**
+ * Whether a screen embeds a third-party map/canvas widget whose gestures
+ * (zoom/pan/drag) are runtime-only — detected by import specifier or component tag.
+ * Such interactions are NOT statically modelable; we record a soundiness note
+ * rather than invent transitions.
+ */
+function detectDynamicWidget(sf: SourceFile): boolean {
+  for (const imp of sf.getImportDeclarations()) {
+    if (/mapbox|leaflet|google-?maps|react-map-gl|maplibre|@react-google-maps/i.test(imp.getModuleSpecifierValue())) return true
+  }
+  for (const el of allJsxElements(sf)) {
+    if (/^(Map|MapView|MapContainer|MapGL|GoogleMap|MapboxMap|LeafletMap)$/.test(jsxTag(el))) return true
+  }
+  return false
+}
+
+/** Whether a call writes an error-ish state (setError/setErr or a state set in an error branch). */
+function isErrorSetter(call: Node): boolean {
+  if (!Node.isCallExpression(call)) return false
+  const expr = call.getExpression()
+  return Node.isIdentifier(expr) && /^set(Error|Err|Failure|Failed)/i.test(expr.getText())
+}
+
+/**
+ * Classify a node as being on the success or error branch of an async flow:
+ * inside a catch clause / `.catch()` / error `if`-branch is "error"; inside a try
+ * block / `.then()` success arg / ok `if`-branch is "success".
+ */
+function branchContextOf(node: Node): BranchContext {
+  let cur: Node = node
+  for (;;) {
+    const parent = cur.getParent()
+    if (!parent) return null
+    if (Node.isCatchClause(parent)) return 'error'
+    if (Node.isTryStatement(parent)) {
+      const tryBlock = parent.getTryBlock()
+      if (tryBlock && within(tryBlock, node)) return 'success'
+    }
+    if ((Node.isArrowFunction(cur) || Node.isFunctionExpression(cur)) && Node.isCallExpression(parent)) {
+      const callee = parent.getExpression()
+      if (Node.isPropertyAccessExpression(callee)) {
+        const m = callee.getName()
+        if (m === 'catch') return 'error'
+        if (m === 'then') {
+          const args = parent.getArguments()
+          if (args[1] === cur) return 'error'
+          if (args[0] === cur) return 'success'
+        }
+      }
+    }
+    if (Node.isIfStatement(parent)) {
+      const cond = parent.getExpression().getText()
+      const errCond = /!|error|fail|catch/i.test(cond)
+      const then = parent.getThenStatement()
+      const els = parent.getElseStatement()
+      if (then && within(then, node)) return errCond ? 'error' : 'success'
+      if (els && within(els, node)) return errCond ? 'success' : 'error'
+    }
+    cur = parent
+  }
+}
+
 /** Analyze a handler body for navigation calls and non-navigational effects. */
 function analyzeHandler(fnNode: Node, navInfo: { navSet: Set<string>; histSet: Set<string> }): { navCalls: NavCall[]; effects: string[] } {
   const calls = [...fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)]
@@ -480,14 +558,14 @@ function analyzeHandler(fnNode: Node, navInfo: { navSet: Set<string>; histSet: S
   for (const call of calls) {
     const expr = call.getExpression()
     if (Node.isIdentifier(expr) && navInfo.navSet.has(expr.getText())) {
-      navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call), node: call })
+      navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call), node: call, ctx: branchContextOf(call) })
       continue
     }
     if (Node.isPropertyAccessExpression(expr)) {
       const obj = expr.getExpression()
       const m = expr.getName()
       if (Node.isIdentifier(obj) && navInfo.histSet.has(obj.getText()) && (m === 'push' || m === 'replace')) {
-        navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call), node: call })
+        navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call), node: call, ctx: branchContextOf(call) })
         continue
       }
     }
@@ -496,8 +574,16 @@ function analyzeHandler(fnNode: Node, navInfo: { navSet: Set<string>; histSet: S
       effects.add(api)
       continue
     }
+    const modal = detectModalOpen(call)
+    if (modal) {
+      effects.add(modal)
+      continue
+    }
     const st = detectStateEffect(call)
-    if (st) effects.add(st)
+    if (st) {
+      const errorBranch = isErrorSetter(call) || branchContextOf(call) === 'error'
+      effects.add(errorBranch ? st.replace('state:', 'error:') : st)
+    }
   }
   return { navCalls, effects: [...effects] }
 }
@@ -567,11 +653,32 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
 
   if (opts.controls) {
     let cidx = 0
+    let midx = 0
     for (const route of routes) {
       if (!route.componentFile) continue
       const sf = route.componentFile
       const file = relative(projectDir, sf.getFilePath())
       const navInfo = navIdentifiers(sf)
+
+      const modalIds: string[] = []
+      const seenModalTags = new Set<string>()
+      for (const el of allJsxElements(sf)) {
+        const tag = jsxTag(el)
+        if (!/(Modal|Dialog|Drawer|Sheet|Popover)$/.test(tag) || seenModalTags.has(tag)) continue
+        seenModalTags.add(tag)
+        const mId = `m_${route.nodeId}_${midx++}`
+        modalIds.push(mId)
+        nodes.push({ id: mId, route: null, componentPath: file, label: stringAttr(el, 'title') ?? tag, kind: 'modal' })
+      }
+
+      if (detectDynamicWidget(sf)) {
+        soundiness.push({
+          kind: 'dynamic-widget',
+          file,
+          detail: 'interactive map/canvas widget: gestures (zoom/pan/drag) are runtime-only and not statically modelable',
+        })
+      }
+
       for (const el of allJsxElements(sf)) {
         const meta = controlMetaFor(el)
         if (!meta) continue
@@ -580,16 +687,26 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const lc = sf.getLineAndColumnAtPos(el.getStart())
         const loc = { line: lc.line, col: lc.column }
         for (const nav of inter.navs) {
+          const ctxGuard = nav.ctx === 'success' ? 'onSuccess' : nav.ctx === 'error' ? 'onError' : null
+          const guard = nav.guard ?? ctxGuard
+          const modality: 'must' | 'may' = guard !== null ? 'may' : 'must'
+          const confidence = nav.ctx === 'error' ? 0.5 : nav.ctx === 'success' ? 0.7 : guard !== null ? 0.6 : 1
           if (nav.ti.kind === 'literal') {
             const target = matchLiteral(nav.ti.value, routeLikes)
             if (!target) continue
-            const guarded = nav.guard !== null
-            pushEdge(cId, target.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: nav.guard }, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
+            pushEdge(cId, target.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard }, modality, confidence, file, loc)
           } else if (nav.ti.kind === 'template') {
             for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
-              pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: nav.guard }, 'may', 0.5, file, loc)
+              pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard }, 'may', Math.min(confidence, 0.5), file, loc)
           }
         }
+
+        const modalTarget = modalIds[0]
+        if (inter.effects.includes('open:modal') && modalTarget !== undefined) {
+          const ev = inter.events[0] ?? 'click'
+          pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, 'must', 1, file, loc)
+        }
+
         nodes.push({
           id: cId,
           route: null,
