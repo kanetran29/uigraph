@@ -293,29 +293,41 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
 }
 
 /**
- * Map quarantined proposals to dashed, half-opacity ghost edges. Only `kind:'edge'`
- * proposals whose `screen` and `to` are BOTH real screen nodes in the graph become
- * ghost edges — proposals pointing at tokens like '<modal>'/'<dynamic>' have no node
- * to anchor to and live only in the panel.
+ * Map every quarantined proposal to a dashed ghost edge — a proposal IS a
+ * hypothesized transition (event, guard, effect). Resolve its target node:
+ * a real screen target -> that screen; a `<modal>` token -> the screen's modal
+ * node when one exists; any other in-place token (`<self>`/`<state>`/`<dynamic>`)
+ * -> a self-loop on the screen (the behavior changes a sub-state the graph does
+ * not materialize as its own node). Proposals on a non-node owner (e.g. 'app')
+ * are skipped. All ghost edges are non-selectable and read as "proposed".
  */
 function toGhostEdges(graph: UiGraph, proposals: Proposal[]): Edge[] {
+  const nodeIds = new Set(graph.nodes.map((n) => n.id))
   const screenIds = new Set<string>()
   for (const n of graph.nodes) if (n.kind !== 'control') screenIds.add(n.id)
+  const modalFor = (screen: string): string | undefined =>
+    graph.nodes.find((n) => n.kind === 'modal' && n.id.startsWith(`m_${screen}`))?.id
 
   const out: Edge[] = []
   for (const p of proposals) {
-    if (p.kind !== 'edge' || p.to === undefined) continue
-    if (!screenIds.has(p.screen) || !screenIds.has(p.to)) continue
+    if (!nodeIds.has(p.screen)) continue
+    let target: string | undefined
+    if (p.to !== undefined && screenIds.has(p.to)) target = p.to
+    else if (p.to === '<modal>') target = modalFor(p.screen)
+    // In-place proposals (<self>/<state>/<dynamic>) transition to a sub-state the
+    // graph does not materialize as a node, so they are surfaced by the per-screen
+    // badge + the panel, not as a degenerate self-loop edge.
+    if (target === undefined || target === p.screen) continue
     out.push({
       id: `ghost_${p.id}`,
       source: p.screen,
-      target: p.to,
+      target,
       type: 'smoothstep',
       selectable: false,
       style: {
         stroke: GHOST_COLOR,
-        strokeWidth: 1.6,
-        strokeOpacity: 0.5,
+        strokeWidth: 1.4,
+        strokeOpacity: 0.55,
         strokeDasharray: '2 4',
       },
     })
