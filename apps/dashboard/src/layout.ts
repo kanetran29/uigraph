@@ -29,6 +29,9 @@ export interface GraphLayout {
 const SCREEN_WIDTH = 210
 const SCREEN_HEIGHT = 64
 
+const GHOST_WIDTH = 150
+const GHOST_HEIGHT = 40
+
 const CONTROL_WIDTH = 176
 const CONTROL_HEIGHT = 56
 const CONTROL_GAP = 10
@@ -68,15 +71,17 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
   const childrenOf = controlsByParent(graph)
   const screens = graph.nodes.filter((n) => !isControl(n))
   const screenIds = new Set(screens.map((n) => n.id))
+  const isGhost = (id: string): boolean => id.startsWith('ps_')
+  const widthOf = (id: string): number => (isGhost(id) ? GHOST_WIDTH : SCREEN_WIDTH)
   const heightOf = (id: string): number =>
-    expanded.has(id) ? screenHeight((childrenOf.get(id) ?? []).length) : SCREEN_HEIGHT
+    isGhost(id) ? GHOST_HEIGHT : expanded.has(id) ? screenHeight((childrenOf.get(id) ?? []).length) : SCREEN_HEIGHT
 
   const g = new dagre.graphlib.Graph()
-  g.setGraph({ rankdir: 'LR', nodesep: 130, ranksep: 360, edgesep: 40, marginx: 36, marginy: 36, ranker: 'network-simplex' })
+  g.setGraph({ rankdir: 'LR', nodesep: 90, ranksep: 320, edgesep: 60, marginx: 36, marginy: 36, ranker: 'network-simplex' })
   g.setDefaultEdgeLabel(() => ({}))
 
   for (const node of screens) {
-    g.setNode(node.id, { width: SCREEN_WIDTH, height: heightOf(node.id) })
+    g.setNode(node.id, { width: widthOf(node.id), height: heightOf(node.id) })
   }
   const seenEdge = new Set<string>()
   for (const e of graph.edges) {
@@ -93,12 +98,13 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
   const sizes = new Map<string, NodeSize>()
 
   for (const node of screens) {
+    const width = widthOf(node.id)
     const height = heightOf(node.id)
-    sizes.set(node.id, { width: SCREEN_WIDTH, height })
+    sizes.set(node.id, { width, height })
 
     const laid = g.node(node.id)
     positions.set(node.id, {
-      x: (laid?.x ?? 0) - SCREEN_WIDTH / 2,
+      x: (laid?.x ?? 0) - width / 2,
       y: (laid?.y ?? 0) - height / 2,
     })
 
