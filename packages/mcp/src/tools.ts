@@ -7,7 +7,8 @@
 import { appendFileSync, existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
-import { diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateMerged, validateOverlay } from '@uigraph/core'
+import { applyObservations, diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateMerged, validateOverlay } from '@uigraph/core'
+import type { Observation } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
 import { loadGraph, loadOverlay, loadProposals, saveOverlay } from '@uigraph/core/node'
 
@@ -46,15 +47,18 @@ export function observationsPath(ctx: ToolContext): string {
  */
 export function loadMergedGraph(ctx: ToolContext): UiGraph {
   const base = loadGraph(baseGraphPath(ctx))
+  let merged = base
   const op = overlayPath(ctx)
-  if (!existsSync(op)) return base
-  const overlay = loadOverlay(op)
-  if (overlay.base && overlay.base !== hashValue(base)) {
-    throw new Error(
-      `stale overlay: it was authored against base ${overlay.base}, but the current base hashes to ${hashValue(base)} — re-author or discard the overlay`,
-    )
+  if (existsSync(op)) {
+    const overlay = loadOverlay(op)
+    if (overlay.base && overlay.base !== hashValue(base)) {
+      throw new Error(
+        `stale overlay: it was authored against base ${overlay.base}, but the current base hashes to ${hashValue(base)} — re-author or discard the overlay`,
+      )
+    }
+    merged = mergeOverlay(base, overlay)
   }
-  const merged = mergeOverlay(base, overlay)
+  merged = applyObservations(merged, readObservations(ctx))
   const errs = validateMerged(merged)
   if (errs.length > 0) throw new Error(`merged graph is invalid:\n  ${errs.map((e) => e.message).join('\n  ')}`)
   return merged
@@ -264,35 +268,42 @@ export function updateGraph(ctx: ToolContext, args: UpdateGraphArgs): UpdateGrap
   }
 }
 
-/** Arguments for report_observation: a witnessed runtime transition, logged only. */
+/**
+ * Arguments for report_observation: the result of actually attempting a
+ * transition at runtime (e.g. via Playwright). `outcome:'confirmed'` means the
+ * transition was observed to happen — it becomes a witnessed runtime edge;
+ * `'refuted'` means it did not, and produces no edge. `proposalId` links the
+ * observation back to the Tier-2 proposal it verifies.
+ */
 export interface ReportObservationArgs {
   from: string
   to: string
   event: string
-  outcome: string
+  outcome: 'confirmed' | 'refuted'
+  effect?: string
+  proposalId?: string
 }
 
-/** A single recorded observation line, with the server-stamped timestamp. */
-export interface ObservationEntry {
-  ts: string
-  from: string
-  to: string
-  event: string
-  outcome: string
-}
+/** A recorded observation line (the core Observation plus a server timestamp). */
+export type ObservationEntry = Observation
 
 /**
  * Append a runtime observation as one JSON line to observations.log.jsonl
- * (append-only; created if absent) and return the recorded entry. v1 has no
- * replay engine — observations are logged, never folded into the base graph.
+ * (append-only; created if absent) and return the recorded entry. A confirmed
+ * observation is folded into the served graph by loadMergedGraph (Tier-3): the
+ * observation — not the original guess — enters the graph as a witnessed edge.
  */
 export function reportObservation(ctx: ToolContext, args: ReportObservationArgs): ObservationEntry {
+  const ts = new Date().toISOString()
   const entry: ObservationEntry = {
-    ts: new Date().toISOString(),
+    id: `o_${hashValue({ from: args.from, to: args.to, event: args.event, ts }).slice(0, 10)}`,
+    ts,
     from: args.from,
     to: args.to,
     event: args.event,
     outcome: args.outcome,
+    ...(args.effect ? { effect: args.effect } : {}),
+    ...(args.proposalId ? { proposalId: args.proposalId } : {}),
   }
   appendFileSync(observationsPath(ctx), JSON.stringify(entry) + '\n', 'utf8')
   return entry
