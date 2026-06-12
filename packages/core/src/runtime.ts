@@ -55,15 +55,50 @@ export function confirmedEdges(observations: Observation[]): GraphEdge[] {
 }
 
 /**
- * Fold confirmed observations into a graph: append the runtime edges whose
- * endpoints exist and whose id is not already present. Returns a new graph; the
- * input is not mutated. Observations referencing unknown nodes are skipped (a
- * v1 conservatism — runtime-discovered states are future work).
+ * Fold confirmed observations into a graph. A confirmation of an EXISTING edge
+ * (same from→to) UPGRADES that edge in place to a witnessed runtime must-edge —
+ * keeping its event/guard/effect and stable id, so the graph is not doubled up
+ * with a static/runtime twin. A confirmation of a NEW transition appends a fresh
+ * runtime edge. Refuted observations and ones referencing unknown nodes are
+ * skipped. Returns a new graph; the input is not mutated.
  */
 export function applyObservations(graph: UiGraph, observations: Observation[]): UiGraph {
   const nodeIds = new Set(graph.nodes.map((n) => n.id))
-  const existing = new Set(graph.edges.map((e) => e.id))
-  const add = confirmedEdges(observations).filter((e) => !existing.has(e.id) && nodeIds.has(e.from) && nodeIds.has(e.to))
-  if (add.length === 0) return graph
-  return { ...graph, edges: [...graph.edges, ...add] }
+  const edges = graph.edges.slice()
+  const idxByPair = new Map<string, number>()
+  edges.forEach((e, i) => {
+    const pair = `${e.from}->${e.to}`
+    if (!idxByPair.has(pair)) idxByPair.set(pair, i)
+  })
+
+  let changed = false
+  const seen = new Set<string>()
+  for (const o of observations) {
+    if (o.outcome !== 'confirmed' || !nodeIds.has(o.from) || !nodeIds.has(o.to)) continue
+    const pair = `${o.from}->${o.to}`
+    if (seen.has(pair)) continue
+    seen.add(pair)
+    const witness = { source: 'runtime' as const, observationId: o.id, ...(o.screenshot ? { screenshot: o.screenshot } : {}) }
+    const idx = idxByPair.get(pair)
+    const cur = idx !== undefined ? edges[idx] : undefined
+    if (idx !== undefined && cur !== undefined) {
+      edges[idx] = { ...cur, modality: 'must', source: 'runtime', confidence: 1, witness }
+    } else {
+      edges.push({
+        id: runtimeEdgeId(o.from, o.to, o.event),
+        from: o.from,
+        to: o.to,
+        event: o.event,
+        guard: null,
+        effect: o.effect ?? 'navigate',
+        modality: 'must',
+        source: 'runtime',
+        confidence: 1,
+        witness,
+      })
+      idxByPair.set(pair, edges.length - 1)
+    }
+    changed = true
+  }
+  return changed ? { ...graph, edges } : graph
 }
