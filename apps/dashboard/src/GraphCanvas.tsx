@@ -19,7 +19,7 @@ import {
   type NodeMouseHandler,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import type { ControlMeta, GraphEdge, GraphNode, Modality, UiGraph } from '@uigraph/core'
+import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposal, Proposals, UiGraph } from '@uigraph/core'
 import { layoutGraph } from './layout'
 
 /** What the canvas reports as the current selection, or null when nothing is selected. */
@@ -28,11 +28,15 @@ export type Selection = { kind: 'node'; node: GraphNode } | { kind: 'edge'; edge
 /** Props for the canvas: the graph to draw, the selection, the highlighted path, and callbacks. */
 export interface GraphCanvasProps {
   graph: UiGraph
+  proposals: Proposals
   selection: Selection
   pathEdgeIds: Set<string>
   onSelect: (selection: Selection) => void
   onConnect: (from: string, to: string) => void
 }
+
+/** The ghost-edge hue: a distinct violet, unmistakably separate from must/may/manual edges. */
+const GHOST_COLOR = '#a855f7'
 
 /** A glyph prefix per control type, so each chip reads as its kind at a glance. */
 function controlGlyph(controlType: string): string {
@@ -254,13 +258,51 @@ function toFlowEdges(graph: UiGraph, selection: Selection, pathEdgeIds: Set<stri
 }
 
 /**
+ * Map quarantined proposals to dashed, half-opacity ghost edges. Only `kind:'edge'`
+ * proposals whose `screen` and `to` are BOTH real screen nodes in the graph become
+ * ghost edges — proposals pointing at tokens like '<modal>'/'<dynamic>' have no node
+ * to anchor to and live only in the panel. Ghosts use a distinct violet hue, a dotted
+ * stroke, and 50% opacity so they read as "proposed / not proven" at a glance.
+ */
+function toGhostEdges(graph: UiGraph, proposals: Proposal[]): Edge[] {
+  const screenIds = new Set<string>()
+  for (const n of graph.nodes) if (n.kind !== 'control') screenIds.add(n.id)
+
+  const out: Edge[] = []
+  for (const p of proposals) {
+    if (p.kind !== 'edge' || p.to === undefined) continue
+    if (!screenIds.has(p.screen) || !screenIds.has(p.to)) continue
+    out.push({
+      id: `ghost_${p.id}`,
+      source: p.screen,
+      target: p.to,
+      type: 'smoothstep',
+      label: p.category,
+      selectable: false,
+      labelStyle: { fontSize: 9, fill: GHOST_COLOR },
+      labelBgStyle: { fill: '#ffffff', fillOpacity: 0.7 },
+      style: {
+        stroke: GHOST_COLOR,
+        strokeWidth: 1.6,
+        strokeOpacity: 0.5,
+        strokeDasharray: '2 4',
+      },
+    })
+  }
+  return out
+}
+
+/**
  * Render the interactive graph. Memoizes the node/edge mapping on the inputs so a
  * pan/zoom does not recompute the layout. Wraps ReactFlow with a Background grid
- * and Controls, and forwards selection and connect events to the parent.
+ * and Controls, and forwards selection and connect events to the parent. A
+ * "show proposals" toggle overlays dashed ghost edges for proposed transitions
+ * (default OFF so the proven graph stays clean).
  */
 export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
-  const { graph, selection, pathEdgeIds, onSelect, onConnect } = props
+  const { graph, proposals, selection, pathEdgeIds, onSelect, onConnect } = props
   const [expandAll, setExpandAll] = useState(false)
+  const [showProposals, setShowProposals] = useState(false)
 
   const expanded = useMemo(() => {
     const withChildren = new Set<string>()
@@ -276,10 +318,11 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   }, [graph, selection, expandAll])
 
   const nodes = useMemo(() => toFlowNodes(graph, selection, expanded), [graph, selection, expanded])
-  const edges = useMemo(
-    () => toFlowEdges(graph, selection, pathEdgeIds, expanded),
-    [graph, selection, pathEdgeIds, expanded],
-  )
+  const edges = useMemo(() => {
+    const base = toFlowEdges(graph, selection, pathEdgeIds, expanded)
+    if (!showProposals) return base
+    return [...base, ...toGhostEdges(graph, proposals.proposals)]
+  }, [graph, proposals, selection, pathEdgeIds, expanded, showProposals])
 
   const handleNodeClick: NodeMouseHandler = (_evt, node) => {
     const found = graph.nodes.find((n) => n.id === node.id)
@@ -309,6 +352,10 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
         <label className="edge-toggle">
           <input type="checkbox" checked={expandAll} onChange={(e) => setExpandAll(e.target.checked)} />
           expand all controls
+        </label>
+        <label className="edge-toggle">
+          <input type="checkbox" checked={showProposals} onChange={(e) => setShowProposals(e.target.checked)} />
+          show proposals
         </label>
       </Panel>
     </ReactFlow>
