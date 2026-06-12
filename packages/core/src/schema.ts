@@ -30,6 +30,10 @@ function checkNode(n: unknown, i: number, errs: string[]): void {
     else {
       if (typeof c['element'] !== 'string') errs.push(`nodes[${i}].control.element must be a string`)
       if (typeof c['controlType'] !== 'string') errs.push(`nodes[${i}].control.controlType must be a string`)
+      for (const arr of ['events', 'effects']) {
+        if (c[arr] !== undefined && !(Array.isArray(c[arr]) && c[arr].every((s) => typeof s === 'string')))
+          errs.push(`nodes[${i}].control.${arr} must be a string array`)
+      }
     }
   }
 }

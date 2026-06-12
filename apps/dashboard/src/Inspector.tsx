@@ -114,6 +114,16 @@ export function Inspector(props: InspectorProps): JSX.Element {
           <Field label="element" value={c.element} />
           <Field label="controlType" value={c.controlType} />
           <Field label="name" value={c.name ?? '—'} />
+          <h3>events</h3>
+          {c.events && c.events.length > 0 ? (
+            <ul className="effects-list">
+              {c.events.map((ev) => (
+                <li key={ev}>{ev}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">No events.</p>
+          )}
           <h3>effects</h3>
           {c.effects && c.effects.length > 0 ? (
             <ul className="effects-list">

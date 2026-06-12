@@ -303,3 +303,14 @@ button.danger {
   background: var(--bg);
   word-break: break-all;
 }
+
+.control-events { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+.event-chip {
+  font-size: 9px;
+  line-height: 1.4;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+}
