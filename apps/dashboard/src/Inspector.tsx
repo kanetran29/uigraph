@@ -33,11 +33,11 @@ function Badge(props: { text: string; tone: string }): JSX.Element {
   )
 }
 
-/** A background colour per source provenance, so manual edits stand out. */
+/** A background colour per source provenance, matching the canvas legend (manual violet, runtime emerald, static slate). */
 function sourceTone(source: string): string {
   if (source === 'manual') return '#7c3aed'
-  if (source === 'runtime') return '#0891b2'
-  return '#64748b'
+  if (source === 'runtime') return '#047857'
+  return '#475569'
 }
 
 /**

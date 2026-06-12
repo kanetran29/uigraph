@@ -42,6 +42,7 @@ export function App(): JSX.Element {
   const [graph, setGraph] = useState<UiGraph | null>(null)
   const [proposals, setProposals] = useState<Proposals>(EMPTY_PROPOSALS)
   const [live, setLive] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [selection, setSelection] = useState<Selection>(null)
   const [pathEdgeIds, setPathEdgeIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
@@ -51,6 +52,7 @@ export function App(): JSX.Element {
     setGraph(g)
     setLive(isLive)
     setProposals(props)
+    setLoading(false)
   }, [])
 
   useEffect(() => {
@@ -100,9 +102,11 @@ export function App(): JSX.Element {
     setPathEdgeIds(new Set(edgeIds))
   }, [])
 
-  if (graph === null) {
-    return <div className="loading">Loading graph…</div>
+  if (loading || graph === null) {
+    return <LoadingSkeleton />
   }
+
+  const isEmpty = graph.nodes.length === 0
 
   return (
     <div className="app">
@@ -112,20 +116,30 @@ export function App(): JSX.Element {
         <span className="counts">
           {graph.nodes.length} nodes · {graph.edges.length} edges
         </span>
-        {error ? <span className="error">{error}</span> : null}
+        {error ? <span className="error" role="alert">{error}</span> : null}
       </header>
+      {!live ? (
+        <div className="banner offline" role="status">
+          Serve API unreachable — showing a bundled sample graph. Edits are not persisted. Run{' '}
+          <code>uigraph serve</code> to connect a live project.
+        </div>
+      ) : null}
       <div className="body">
         <main className="canvas">
-          <ReactFlowProvider>
-            <GraphCanvas
-              graph={graph}
-              proposals={proposals}
-              selection={selection}
-              pathEdgeIds={pathEdgeIds}
-              onSelect={setSelection}
-              onConnect={handleConnect}
-            />
-          </ReactFlowProvider>
+          {isEmpty ? (
+            <EmptyState live={live} />
+          ) : (
+            <ReactFlowProvider>
+              <GraphCanvas
+                graph={graph}
+                proposals={proposals}
+                selection={selection}
+                pathEdgeIds={pathEdgeIds}
+                onSelect={setSelection}
+                onConnect={handleConnect}
+              />
+            </ReactFlowProvider>
+          )}
         </main>
         <div className="side">
           <Inspector selection={selection} onEditEdge={handleEditEdge} onDelete={handleDelete} />
@@ -138,6 +152,54 @@ export function App(): JSX.Element {
           />
         </div>
       </div>
+    </div>
+  )
+}
+
+/**
+ * The initial fetch placeholder: a structural skeleton of the topbar, canvas, and
+ * right rail rather than a bare spinner, so the layout is stable when data lands.
+ */
+function LoadingSkeleton(): JSX.Element {
+  return (
+    <div className="app" aria-busy="true" aria-label="Loading graph">
+      <header className="topbar">
+        <strong>uigraph</strong>
+        <span className="skeleton skeleton-pill" />
+        <span className="skeleton skeleton-text" />
+      </header>
+      <div className="body">
+        <main className="canvas skeleton-canvas">
+          <div className="skeleton skeleton-node" />
+          <div className="skeleton skeleton-node" />
+          <div className="skeleton skeleton-node" />
+        </main>
+        <div className="side">
+          <div className="skeleton-panel">
+            <span className="skeleton skeleton-heading" />
+            <span className="skeleton skeleton-line" />
+            <span className="skeleton skeleton-line" />
+          </div>
+          <div className="skeleton-panel">
+            <span className="skeleton skeleton-heading" />
+            <span className="skeleton skeleton-line" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Shown when the loaded graph has zero nodes: explains the likely cause per connection state. */
+function EmptyState(props: { live: boolean }): JSX.Element {
+  return (
+    <div className="empty-state">
+      <h2>No nodes in this graph</h2>
+      <p className="muted">
+        {props.live
+          ? 'The serve API returned an empty graph. Extract a project (e.g. uigraph extract) so there is something to show.'
+          : 'The bundled sample is empty. Connect a live project with uigraph serve to load a real graph.'}
+      </p>
     </div>
   )
 }
