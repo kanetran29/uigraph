@@ -30,6 +30,15 @@ export { stableStringify, fnv1a, hashValue } from './hash'
 export { validateGraphShape, validateOverlayShape, assertGraphShape, assertOverlayShape } from './schema'
 export { validateGraph, validateOverlay, type ValidationError } from './validate'
 export { mergeOverlay, emptyOverlay } from './overlay'
+export {
+  validateProposals,
+  emptyProposals,
+  type Proposal,
+  type Proposals,
+  type ProposalKind,
+  type ProposalStatus,
+  type ProposalError,
+} from './proposals'
 export { diffGraphs, type GraphDiff, type EdgeChange } from './diff'
 export {
   buildAdjacency,
