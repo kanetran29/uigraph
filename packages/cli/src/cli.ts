@@ -22,8 +22,9 @@ export function buildProgram(): Command {
     .argument('<dir>', 'project directory to map')
     .requiredOption('--adapter <name>', 'adapter to use: react | angular')
     .option('--out <file>', 'output graph path (default <dir>/ui-graph.json)')
-    .action(async (dir: string, opts: { adapter: string; out?: string }) => {
-      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out })
+    .option('--controls', 'also extract interactive controls (buttons/inputs/etc.) as nested nodes')
+    .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean }) => {
+      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false })
       console.log(formatMapSummary(summary))
     })
 

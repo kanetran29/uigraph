@@ -57,6 +57,7 @@ export interface RunMapOptions {
   dir: string
   adapter: AdapterName
   out?: string
+  controls?: boolean
   logger?: Logger
 }
 
@@ -88,7 +89,7 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   const adapter = pickAdapter(opts.adapter)
   const ctx = makeContext(logger)
 
-  const { graph, soundiness } = await adapter.extract(opts.dir, {}, ctx)
+  const { graph, soundiness } = await adapter.extract(opts.dir, { controls: opts.controls ?? false }, ctx)
 
   const graphPath = opts.out ?? join(opts.dir, GRAPH_FILE)
   const soundPath = soundinessPathFor(graphPath)

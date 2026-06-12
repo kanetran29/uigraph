@@ -6,7 +6,7 @@ import type { GraphEdge, GraphNode, Overlay, UiGraph } from './ir'
 
 const MODALITIES = new Set(['must', 'may', 'unknown'])
 const SOURCES = new Set(['static', 'manual', 'runtime'])
-const NODE_KINDS = new Set(['screen', 'route', 'modal', 'unknown'])
+const NODE_KINDS = new Set(['screen', 'route', 'modal', 'unknown', 'control'])
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v)
@@ -23,6 +23,15 @@ function checkNode(n: unknown, i: number, errs: string[]): void {
     errs.push(`nodes[${i}].componentPath must be string|null`)
   if (typeof n['label'] !== 'string') errs.push(`nodes[${i}].label must be a string`)
   if (typeof n['kind'] !== 'string' || !NODE_KINDS.has(n['kind'])) errs.push(`nodes[${i}].kind is invalid`)
+  if (n['parent'] !== undefined && typeof n['parent'] !== 'string') errs.push(`nodes[${i}].parent must be a string`)
+  if (n['control'] !== undefined) {
+    const c = n['control']
+    if (!isObject(c)) errs.push(`nodes[${i}].control must be an object`)
+    else {
+      if (typeof c['element'] !== 'string') errs.push(`nodes[${i}].control.element must be a string`)
+      if (typeof c['controlType'] !== 'string') errs.push(`nodes[${i}].control.controlType must be a string`)
+    }
+  }
 }
 
 function checkEdge(e: unknown, i: number, errs: string[]): void {

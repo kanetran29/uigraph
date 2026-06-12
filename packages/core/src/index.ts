@@ -8,6 +8,7 @@ export type {
   Modality,
   Source,
   NodeKind,
+  ControlMeta,
   GraphNode,
   Witness,
   GraphEdge,
