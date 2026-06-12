@@ -1,5 +1,10 @@
 {
   "name": "@uigraph/sample-angular-app",
   "version": "0.0.0",
-  "private": true
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@angular/core": "^18.0.0",
+    "@angular/router": "^18.0.0"
+  }
 }
