@@ -40,4 +40,4 @@ export const reactAdapter: Adapter = {
 
 export { buildProject, extractGraph } from './extract'
 export { routeToNodeId, edgeId } from './ids'
-export { matchLiteral, matchPrefix } from './matcher'
+export { matchLiteralAll, matchPrefix } from './matcher'

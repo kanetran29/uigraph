@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { matchLiteral, matchPrefix, type RouteLike } from './matcher'
+import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
 
 const routes: RouteLike[] = [
   { fullPath: '/', nodeId: 'n_root' },
@@ -8,21 +8,37 @@ const routes: RouteLike[] = [
   { fullPath: '/checkout', nodeId: 'n_checkout' },
 ]
 
-describe('matchLiteral', () => {
-  it('matches an exact path', () => {
-    expect(matchLiteral('/checkout', routes)?.nodeId).toBe('n_checkout')
+describe('matchLiteralAll', () => {
+  it('returns an exact match (safe to assert as must)', () => {
+    const { exact, candidates } = matchLiteralAll('/checkout', routes)
+    expect(exact?.nodeId).toBe('n_checkout')
+    expect(candidates).toEqual([])
   })
 
-  it('matches a parameterized pattern for a concrete path', () => {
-    expect(matchLiteral('/products/42', routes)?.nodeId).toBe('n_products_id')
+  it('ignores query and hash for the exact match', () => {
+    expect(matchLiteralAll('/checkout?step=1', routes).exact?.nodeId).toBe('n_checkout')
   })
 
-  it('ignores query and hash', () => {
-    expect(matchLiteral('/checkout?step=1', routes)?.nodeId).toBe('n_checkout')
+  it('returns no exact but a param candidate for a concrete sub-path (never a single must)', () => {
+    const { exact, candidates } = matchLiteralAll('/products/42', routes)
+    expect(exact).toBeNull()
+    expect(candidates.map((c) => c.nodeId)).toEqual(['n_products_id'])
   })
 
-  it('returns null for an undeclared target', () => {
-    expect(matchLiteral('/nope', routes)).toBeNull()
+  it('returns nothing for an undeclared target', () => {
+    const { exact, candidates } = matchLiteralAll('/nope', routes)
+    expect(exact).toBeNull()
+    expect(candidates).toEqual([])
+  })
+
+  it('fans out an ambiguous literal to all matching param patterns', () => {
+    const ambiguous: RouteLike[] = [
+      { fullPath: '/:org/:repo', nodeId: 'n_org_repo' },
+      { fullPath: '/settings/:tab', nodeId: 'n_settings_tab' },
+    ]
+    const { exact, candidates } = matchLiteralAll('/settings/billing', ambiguous)
+    expect(exact).toBeNull()
+    expect(candidates.map((c) => c.nodeId).sort()).toEqual(['n_org_repo', 'n_settings_tab'])
   })
 })
 

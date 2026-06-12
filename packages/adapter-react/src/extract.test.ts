@@ -181,6 +181,47 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(graph.nodes.some((n) => n.control?.controlType === 'richtext')).toBe(true)
   })
 
+  describe('no phantom must-edges (red-team soundness)', () => {
+    const navTo = (body: string) =>
+      extractGraph(
+        inMemory({
+          '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+          '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); ${body}; return null }`,
+        }),
+        '/',
+      ).graph.edges.find((e) => e.to === 'n_b')
+
+    it('demotes navigate after an early return to may', () => {
+      const e = navTo(`function go(){ if (!ok) return; navigate('/b') }`)
+      expect(e?.modality).toBe('may')
+      expect(e?.guard).toContain('ok')
+    })
+
+    it('demotes navigate inside an array iteration callback to may', () => {
+      expect(navTo(`function go(){ [1,2].forEach(() => navigate('/b')) }`)?.modality).toBe('may')
+    })
+
+    it('demotes navigate inside a loop to may', () => {
+      expect(navTo(`function go(){ for (let i=0;i<3;i++) navigate('/b') }`)?.modality).toBe('may')
+    })
+
+    it('keeps an unconditional handler navigate as must', () => {
+      expect(navTo(`function go(){ navigate('/b') }`)?.modality).toBe('must')
+    })
+
+    it('never emits a single must-edge for an ambiguous param literal', () => {
+      const { graph } = extractGraph(
+        inMemory({
+          '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/:org/:repo" element={<A/>} /><Route path="/settings/:tab" element={<A/>} /></Routes>)`,
+          '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); return <button onClick={() => navigate('/settings/billing')}>x</button> }`,
+        }),
+        '/',
+      )
+      expect(graph.edges.every((e) => e.modality !== 'must')).toBe(true)
+      expect(graph.edges.length).toBeGreaterThan(0)
+    })
+  })
+
   it('supports react-router v5 component + Redirect', () => {
     const { graph } = extractGraph(
       inMemory({

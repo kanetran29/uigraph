@@ -44,8 +44,13 @@ export function validateGraph(graph: UiGraph): ValidationError[] {
     if (!nodeIds.has(e.from)) errs.push({ code: 'DANGLING_FROM', message: `edge "${e.id}" from unknown node "${e.from}"`, id: e.id })
     if (!nodeIds.has(e.to)) errs.push({ code: 'DANGLING_TO', message: `edge "${e.id}" to unknown node "${e.to}"`, id: e.id })
 
-    if ((e.source === 'static' || e.source === 'runtime') && e.witness === undefined)
-      errs.push({ code: 'UNWITNESSED', message: `edge "${e.id}" is ${e.source} but has no witness`, id: e.id })
+    if (e.source === 'static' || e.source === 'runtime') {
+      if (e.witness === undefined) {
+        errs.push({ code: 'UNWITNESSED', message: `edge "${e.id}" is ${e.source} but has no witness`, id: e.id })
+      } else if (e.witness.source !== e.source) {
+        errs.push({ code: 'WITNESS_PROVENANCE', message: `edge "${e.id}" is ${e.source} but its witness is ${e.witness.source}`, id: e.id })
+      }
+    }
 
     if (e.source === 'manual') errs.push({ code: 'MANUAL_IN_BASE', message: `base graph contains manual edge "${e.id}"`, id: e.id })
 
@@ -56,6 +61,17 @@ export function validateGraph(graph: UiGraph): ValidationError[] {
   }
 
   return errs
+}
+
+/**
+ * Validate a MERGED graph (base + overlay) for structural integrity: shape,
+ * unique ids, no dangling refs, witnessed/provenance-consistent static/runtime
+ * edges, must-edge provenance, and confidence range. Unlike validateGraph it does
+ * NOT forbid source:'manual' elements, because a merge legitimately contains the
+ * overlay's manual edits.
+ */
+export function validateMerged(graph: UiGraph): ValidationError[] {
+  return validateGraph(graph).filter((e) => e.code !== 'MANUAL_IN_BASE')
 }
 
 /** Validate an overlay: shape + overlay purity (every element is source:'manual'). */

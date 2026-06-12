@@ -24,6 +24,11 @@ describe('validateGraph', () => {
     expect(validateGraph(g).map((e) => e.code)).toContain('UNWITNESSED')
   })
 
+  it('rejects provenance laundering: a static edge with a manual witness', () => {
+    const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { witness: { source: 'manual' } })])
+    expect(validateGraph(g).map((e) => e.code)).toContain('WITNESS_PROVENANCE')
+  })
+
   it('rejects manual edges in the base graph', () => {
     const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'manual', modality: 'may', witness: undefined })])
     expect(validateGraph(g).map((e) => e.code)).toContain('MANUAL_IN_BASE')

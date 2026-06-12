@@ -28,7 +28,7 @@ export type {
 
 export { stableStringify, fnv1a, hashValue } from './hash'
 export { validateGraphShape, validateOverlayShape, assertGraphShape, assertOverlayShape } from './schema'
-export { validateGraph, validateOverlay, type ValidationError } from './validate'
+export { validateGraph, validateMerged, validateOverlay, type ValidationError } from './validate'
 export { mergeOverlay, emptyOverlay } from './overlay'
 export {
   validateProposals,

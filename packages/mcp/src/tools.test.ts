@@ -82,6 +82,36 @@ function proposal(id: string, over: Partial<Proposal> = {}): Proposal {
   }
 }
 
+describe('loadMergedGraph integrity (red-team)', () => {
+  it('rejects a stale overlay whose base hash no longer matches', async () => {
+    const { loadMergedGraph } = await import('./tools')
+    const { saveOverlay } = await import('@uigraph/core/node')
+    const ctx = chainWorkspace()
+    saveOverlay(overlayPath(ctx), { version: 0, base: 'deadbeef', addedNodes: [], addedEdges: [], editedEdges: [], removedRefs: [] })
+    expect(() => loadMergedGraph(ctx)).toThrow(/stale overlay/)
+  })
+
+  it('rejects a merged graph made invalid by the overlay (dangling ref)', async () => {
+    const { loadMergedGraph } = await import('./tools')
+    const { saveOverlay } = await import('@uigraph/core/node')
+    const { hashValue } = await import('@uigraph/core')
+    const { loadGraph } = await import('@uigraph/core/node')
+    const ctx = chainWorkspace()
+    const base = loadGraph(baseGraphPath(ctx))
+    saveOverlay(overlayPath(ctx), {
+      version: 0,
+      base: hashValue(base),
+      addedNodes: [],
+      addedEdges: [
+        { id: 'm1', from: 'a', to: 'ghost', event: 'navigate', guard: null, effect: 'navigate', modality: 'may', source: 'manual', confidence: 0.5 },
+      ],
+      editedEdges: [],
+      removedRefs: [],
+    })
+    expect(() => loadMergedGraph(ctx)).toThrow(/invalid/)
+  })
+})
+
 describe('getProposals', () => {
   it('returns empty when no proposals sidecar exists', () => {
     const ctx = chainWorkspace()
