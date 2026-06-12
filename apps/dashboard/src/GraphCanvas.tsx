@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import {
   Background,
   Controls,
+  MarkerType,
   Panel,
   ReactFlow,
   useEdgesState,
@@ -159,6 +160,20 @@ function screenStyle(manual: boolean, size: { width: number; height: number }): 
   }
 }
 
+/** Box style for a materialized ghost STATE node (a proposed sub-state): dashed, ghost-tinted. */
+function ghostStateStyle(): CSSProperties {
+  return {
+    borderRadius: 'var(--radius-sm)',
+    border: `1.5px dashed ${GHOST_COLOR}`,
+    background: 'var(--surface)',
+    color: GHOST_COLOR,
+    fontSize: 10,
+    fontStyle: 'italic',
+    padding: '4px 10px',
+    opacity: 0.9,
+  }
+}
+
 /** Box style for a control node, accented by its control type (manual still tints). */
 function controlStyle(manual: boolean, control: ControlMeta, size: { width: number; height: number }): CSSProperties {
   const tone = manual ? 'var(--edge-manual)' : controlTone(control.controlType)
@@ -205,6 +220,14 @@ function toFlowNodes(graph: UiGraph, expanded: ReadonlySet<string>, proposalCoun
         data: { label: <ControlLabel control={n.control} label={n.label} /> },
         style: controlStyle(manual, n.control, size),
       })
+    } else if (n.id.startsWith('ps_')) {
+      screens.push({
+        id: n.id,
+        position: pos,
+        data: { label: n.label },
+        selectable: false,
+        style: ghostStateStyle(),
+      })
     } else {
       const count = childCount.get(n.id) ?? 0
       const base = n.route ? `${n.label}\n${n.route}` : n.label
@@ -247,8 +270,14 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
   const controlParent = new Map<string, string | undefined>()
   for (const n of graph.nodes) if (n.kind === 'control') controlParent.set(n.id, n.parent)
 
+  // A runtime-confirmed edge supersedes its static/may twin between the same pair:
+  // render only the witnessed (green) edge so the canvas is not doubled up.
+  const runtimePairs = new Set<string>()
+  for (const e of graph.edges) if (e.source === 'runtime') runtimePairs.add(`${e.from}->${e.to}`)
+
   const out: Edge[] = []
   for (const e of graph.edges) {
+    if (e.source !== 'runtime' && runtimePairs.has(`${e.from}->${e.to}`)) continue
     const isControlEdge = controlParent.has(e.from) || controlParent.has(e.to)
     const onPath = pathEdgeIds.has(e.id)
     const selected = e.id === selectedEdgeId
@@ -281,6 +310,7 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
       labelBgStyle: { fill: 'var(--label-bg)' },
       labelBgPadding: [6, 3],
       labelBgBorderRadius: 6,
+      markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
       style: {
         stroke: color,
         strokeWidth: width,
@@ -293,46 +323,83 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
 }
 
 /**
- * Map every quarantined proposal to a dashed ghost edge — a proposal IS a
- * hypothesized transition (event, guard, effect). Resolve its target node:
- * a real screen target -> that screen; a `<modal>` token -> the screen's modal
- * node when one exists; any other in-place token (`<self>`/`<state>`/`<dynamic>`)
- * -> a self-loop on the screen (the behavior changes a sub-state the graph does
- * not materialize as its own node). Proposals on a non-node owner (e.g. 'app')
- * are skipped. All ghost edges are non-selectable and read as "proposed".
+ * The sub-state a proposal transitions into, or null for a pure micro-interaction
+ * (focus/debounce/highlight/keyboard-nav) that does not open a distinct UI surface.
+ * Used to materialize ghost state nodes so a proposal can be drawn as a real edge.
  */
-function toGhostEdges(graph: UiGraph, proposals: Proposal[]): Edge[] {
-  const nodeIds = new Set(graph.nodes.map((n) => n.id))
-  const screenIds = new Set<string>()
-  for (const n of graph.nodes) if (n.kind !== 'control') screenIds.add(n.id)
+function proposalStateKind(p: Proposal): string | null {
+  const hay = `${p.category} ${p.effect ?? ''} ${p.title} ${p.to ?? ''}`.toLowerCase()
+  if (/modal|dialog|drawer|sheet/.test(hay)) return 'modal'
+  if (/popover|dropdown|autocomplete|suggest|combobox|tooltip|context.?menu|\bmenu\b/.test(hay)) return 'popover'
+  if (/error|fail|invalid|reject/.test(hay)) return 'error'
+  if (/empty|no results|no matches/.test(hay)) return 'empty'
+  if (/loading|spinner|skeleton|fetching/.test(hay)) return 'loading'
+  if (/expand|collapse|accordion|read more|show more|see all|disclos/.test(hay)) return 'expanded'
+  if (/toast|success|confirmation|\bsaved\b/.test(hay)) return 'toast'
+  return null
+}
+
+/**
+ * Materialize proposals as graph elements (only when proposals are shown). A
+ * proposal IS a hypothesized transition, so it becomes a ghost edge to a target
+ * node: a real screen target -> that screen; a `<modal>` -> the screen's modal
+ * node; a state-changing proposal -> a deduped ghost STATE node (modal/popover/
+ * error/empty/loading/expanded/toast) created here. Pure micro-interactions have
+ * no distinct target state and stay on the per-screen badge + panel. Edges carry
+ * an arrowhead and read as dashed/"proposed".
+ */
+function materializeProposals(graph: UiGraph, proposals: Proposal[]): { nodes: GraphNode[]; edges: Edge[] } {
+  const realNodeIds = new Set(graph.nodes.map((n) => n.id))
+  const realScreens = new Set<string>()
+  for (const n of graph.nodes) if (n.kind !== 'control') realScreens.add(n.id)
   const modalFor = (screen: string): string | undefined =>
     graph.nodes.find((n) => n.kind === 'modal' && n.id.startsWith(`m_${screen}`))?.id
 
-  const out: Edge[] = []
-  for (const p of proposals) {
-    if (!nodeIds.has(p.screen)) continue
-    let target: string | undefined
-    if (p.to !== undefined && screenIds.has(p.to)) target = p.to
-    else if (p.to === '<modal>') target = modalFor(p.screen)
-    // In-place proposals (<self>/<state>/<dynamic>) transition to a sub-state the
-    // graph does not materialize as a node, so they are surfaced by the per-screen
-    // badge + the panel, not as a degenerate self-loop edge.
-    if (target === undefined || target === p.screen) continue
-    out.push({
-      id: `ghost_${p.id}`,
-      source: p.screen,
-      target,
+  const stateNodes = new Map<string, GraphNode>()
+  const edges: Edge[] = []
+  const seen = new Set<string>()
+  const link = (from: string, to: string): void => {
+    const pid = `${from}->${to}`
+    if (seen.has(pid)) return
+    seen.add(pid)
+    edges.push({
+      id: `ghost_${pid}`,
+      source: from,
+      target: to,
       type: 'smoothstep',
       selectable: false,
-      style: {
-        stroke: GHOST_COLOR,
-        strokeWidth: 1.4,
-        strokeOpacity: 0.55,
-        strokeDasharray: '2 4',
-      },
+      markerEnd: { type: MarkerType.ArrowClosed, color: GHOST_COLOR, width: 14, height: 14 },
+      style: { stroke: GHOST_COLOR, strokeWidth: 1.4, strokeOpacity: 0.6, strokeDasharray: '2 4' },
     })
   }
-  return out
+
+  for (const p of proposals) {
+    if (!realNodeIds.has(p.screen)) continue
+    if (p.to !== undefined && realScreens.has(p.to)) {
+      link(p.screen, p.to)
+      continue
+    }
+    if (p.to === '<modal>') {
+      const m = modalFor(p.screen)
+      if (m) {
+        link(p.screen, m)
+        continue
+      }
+    }
+    const kind = proposalStateKind(p)
+    if (kind === null) continue
+    const id = `ps_${p.screen}__${kind}`
+    if (!stateNodes.has(id)) {
+      stateNodes.set(id, { id, route: null, componentPath: null, label: kind, kind: kind === 'modal' || kind === 'popover' ? 'modal' : 'unknown' })
+    }
+    link(p.screen, id)
+  }
+  return { nodes: [...stateNodes.values()], edges }
+}
+
+/** A layout-only placeholder edge (never served/styled), so dagre positions ghost state nodes near their screen. */
+function layoutEdge(from: string, to: string): GraphEdge {
+  return { id: `L_${from}_${to}`, from, to, event: '', guard: null, effect: null, modality: 'may', source: 'static', confidence: 0 }
 }
 
 /** A structural key over node ids, edge ids, and the expanded set: changes only on relayout-worthy edits. */
@@ -408,6 +475,24 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     return m
   }, [proposals])
 
+  // When proposals are shown, materialize ghost state nodes + ghost edges — but
+  // SCOPED to the selected screen, so the canvas stays readable (one screen's
+  // proposed sub-states at a time) instead of dumping all 117. With no screen
+  // selected, proposals live on the per-screen badge + the panel.
+  const ghost = useMemo<{ nodes: GraphNode[]; edges: Edge[] }>(() => {
+    if (!showProposals || selection?.kind !== 'node') return { nodes: [], edges: [] }
+    const screenId = selection.node.id
+    const scoped = proposals.proposals.filter((p) => p.screen === screenId)
+    return materializeProposals(graph, scoped)
+  }, [graph, proposals, showProposals, selection])
+  const layoutInput = useMemo<UiGraph>(
+    () =>
+      ghost.nodes.length === 0
+        ? graph
+        : { ...graph, nodes: [...graph.nodes, ...ghost.nodes], edges: [...graph.edges, ...ghost.edges.map((e) => layoutEdge(e.source!, e.target!))] },
+    [graph, ghost],
+  )
+
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
 
@@ -423,13 +508,13 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
 
   // Re-seed node positions from the dagre layout only when structure/expansion changes,
   // so user drags survive selection, hover, and re-style passes.
-  const key = useMemo(() => `${structuralKey(graph, expanded)}|p:${proposals.proposals.length}`, [graph, expanded, proposals])
+  const key = useMemo(() => `${structuralKey(layoutInput, expanded)}|p:${proposals.proposals.length}`, [layoutInput, expanded, proposals])
   const lastKey = useRef<string | null>(null)
   useEffect(() => {
     if (lastKey.current === key) return
     const firstLayout = lastKey.current === null
     lastKey.current = key
-    const laid = toFlowNodes(graph, expanded, proposalCount)
+    const laid = toFlowNodes(layoutInput, expanded, proposalCount)
     // Preserve the live (possibly user-dragged) position of any node that already
     // exists; only newly-revealed nodes (e.g. controls on expand) take the fresh
     // dagre position. On the very first layout there is nothing to preserve.
@@ -441,7 +526,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
         return kept ? { ...n, position: kept } : n
       })
     })
-  }, [key, graph, expanded, proposalCount, setNodes])
+  }, [key, layoutInput, expanded, proposalCount, setNodes])
 
   // Apply selection emphasis (selected node, neighbours) onto the live, user-positioned
   // nodes without resetting their positions.
@@ -464,8 +549,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   )
   useEffect(() => {
     const base = toFlowEdges(graph, edgeCtx)
-    setEdges(showProposals ? [...base, ...toGhostEdges(graph, proposals.proposals)] : base)
-  }, [graph, edgeCtx, showProposals, proposals, setEdges])
+    setEdges(showProposals ? [...base, ...ghost.edges] : base)
+  }, [graph, edgeCtx, showProposals, ghost, setEdges])
 
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_evt, node) => {
