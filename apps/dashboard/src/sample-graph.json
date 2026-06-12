@@ -1,0 +1,53 @@
+{
+  "version": 0,
+  "meta": {
+    "adapter": "@uigraph/adapter-react",
+    "adapterVersion": "0.1.0",
+    "rulesetVersion": "rr-v6-2026.06",
+    "commit": "sample"
+  },
+  "nodes": [
+    { "id": "n_home", "route": "/", "componentPath": "src/Home.tsx", "label": "Home", "kind": "screen" },
+    { "id": "n_login", "route": "/login", "componentPath": "src/Login.tsx", "label": "Login", "kind": "screen" },
+    { "id": "n_dash", "route": "/dashboard", "componentPath": "src/Dashboard.tsx", "label": "Dashboard", "kind": "screen" },
+    { "id": "n_settings", "route": "/settings", "componentPath": "src/Settings.tsx", "label": "Settings", "kind": "screen" }
+  ],
+  "edges": [
+    {
+      "id": "e_home_login",
+      "from": "n_home",
+      "to": "n_login",
+      "event": "click:Link",
+      "guard": null,
+      "effect": "navigate",
+      "modality": "must",
+      "source": "static",
+      "confidence": 1.0,
+      "witness": { "source": "static", "file": "src/Home.tsx", "loc": { "line": 12, "col": 6 }, "ruleId": "rr.link-to" }
+    },
+    {
+      "id": "e_login_dash",
+      "from": "n_login",
+      "to": "n_dash",
+      "event": "submit",
+      "guard": "isAuthenticated",
+      "effect": "history.push('/dashboard')",
+      "modality": "may",
+      "source": "static",
+      "confidence": 0.6,
+      "witness": { "source": "static", "file": "src/Login.tsx", "loc": { "line": 30, "col": 4 }, "ruleId": "rr.use-history-push" }
+    },
+    {
+      "id": "e_dash_settings",
+      "from": "n_dash",
+      "to": "n_settings",
+      "event": "click:Link",
+      "guard": null,
+      "effect": "navigate",
+      "modality": "must",
+      "source": "static",
+      "confidence": 1.0,
+      "witness": { "source": "static", "file": "src/Dashboard.tsx", "loc": { "line": 18, "col": 8 }, "ruleId": "rr.link-to" }
+    }
+  ]
+}
