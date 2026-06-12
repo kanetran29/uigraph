@@ -6,10 +6,11 @@
 // behavior edges. Selecting a node/edge drives the Inspector; connecting two nodes
 // raises an "add edge" request the parent turns into an overlay edit.
 
-import { useMemo, type CSSProperties } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import {
   Background,
   Controls,
+  Panel,
   ReactFlow,
   type Connection,
   type Edge,
@@ -97,9 +98,10 @@ function strokeColor(edge: GraphEdge, highlighted: boolean): string {
   return '#475569'
 }
 
-/** Compose an edge label from its event and, when present, its effect in brackets. */
+/** Compose an edge label from its event and effect, collapsing redundant duplicates. */
 function edgeLabel(edge: GraphEdge): string {
-  return edge.effect ? `${edge.event} · ${edge.effect}` : edge.event
+  if (!edge.effect || edge.effect === edge.event || edge.effect === 'navigate') return edge.event
+  return `${edge.event} · ${edge.effect}`
 }
 
 /**
@@ -220,28 +222,54 @@ function toFlowNodes(graph: UiGraph, selection: Selection): Node[] {
   return [...screens, ...controls]
 }
 
-/** Map UiGraph edges to ReactFlow edges, styled by modality, source, and highlight. */
-function toFlowEdges(graph: UiGraph, selection: Selection, pathEdgeIds: Set<string>): Edge[] {
-  const selectedId = selection?.kind === 'edge' ? selection.edge.id : null
-  return graph.edges.map((e) => {
+/**
+ * Map UiGraph edges to ReactFlow edges. Behavior edges out of control nodes are
+ * dense, so by default they are hidden — shown only when their control (or its
+ * parent screen) is selected, when highlighted by a planned path, or when the
+ * "show control edges" toggle is on. Screen→screen route edges always render.
+ * Control edges are drawn lighter and only labelled when relevant.
+ */
+function toFlowEdges(graph: UiGraph, selection: Selection, pathEdgeIds: Set<string>, showControlEdges: boolean): Edge[] {
+  const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
+  const selectedNodeId = selection?.kind === 'node' ? selection.node.id : null
+  const controlParent = new Map<string, string | undefined>()
+  for (const n of graph.nodes) if (n.kind === 'control') controlParent.set(n.id, n.parent)
+
+  const out: Edge[] = []
+  for (const e of graph.edges) {
+    const isControlEdge = controlParent.has(e.from) || controlParent.has(e.to)
     const highlighted = pathEdgeIds.has(e.id)
+    const selected = e.id === selectedEdgeId
+    const touchesSelection =
+      selectedNodeId !== null &&
+      (e.from === selectedNodeId ||
+        e.to === selectedNodeId ||
+        controlParent.get(e.from) === selectedNodeId ||
+        controlParent.get(e.to) === selectedNodeId)
+
+    if (isControlEdge && !(showControlEdges || highlighted || selected || touchesSelection)) continue
+
     const color = strokeColor(e, highlighted)
-    return {
+    const reveal = highlighted || selected || touchesSelection
+    out.push({
       id: e.id,
       source: e.from,
       target: e.to,
-      label: edgeLabel(e),
+      type: 'smoothstep',
+      label: !isControlEdge || reveal ? edgeLabel(e) : undefined,
       animated: highlighted,
-      selected: e.id === selectedId,
-      labelStyle: { fontSize: 11, fill: color },
+      selected,
+      labelStyle: { fontSize: 10, fill: color },
       labelBgStyle: { fill: '#ffffff', fillOpacity: 0.85 },
       style: {
         stroke: color,
-        strokeWidth: highlighted ? 3 : e.source === 'manual' ? 2 : 1.5,
+        strokeWidth: highlighted ? 3 : e.source === 'manual' ? 2 : 1.4,
+        strokeOpacity: isControlEdge && !reveal ? 0.45 : 1,
         strokeDasharray: strokeDash(e.modality),
       },
-    }
-  })
+    })
+  }
+  return out
 }
 
 /**
@@ -251,9 +279,13 @@ function toFlowEdges(graph: UiGraph, selection: Selection, pathEdgeIds: Set<stri
  */
 export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const { graph, selection, pathEdgeIds, onSelect, onConnect } = props
+  const [showControlEdges, setShowControlEdges] = useState(false)
 
   const nodes = useMemo(() => toFlowNodes(graph, selection), [graph, selection])
-  const edges = useMemo(() => toFlowEdges(graph, selection, pathEdgeIds), [graph, selection, pathEdgeIds])
+  const edges = useMemo(
+    () => toFlowEdges(graph, selection, pathEdgeIds, showControlEdges),
+    [graph, selection, pathEdgeIds, showControlEdges],
+  )
 
   const handleNodeClick: NodeMouseHandler = (_evt, node) => {
     const found = graph.nodes.find((n) => n.id === node.id)
@@ -279,6 +311,12 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     >
       <Background />
       <Controls />
+      <Panel position="top-left">
+        <label className="edge-toggle">
+          <input type="checkbox" checked={showControlEdges} onChange={(e) => setShowControlEdges(e.target.checked)} />
+          show control edges
+        </label>
+      </Panel>
     </ReactFlow>
   )
 }

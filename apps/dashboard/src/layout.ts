@@ -1,10 +1,11 @@
-// Layered layout for the graph canvas. Screen-like nodes are placed by BFS depth
-// from a root (distance over the screen→screen edge graph) and stacked vertically
-// within a depth. Control nodes are NOT placed on the main grid: each is laid out
-// as a vertical stack inside its parent screen, at a position relative to that
-// parent (so @xyflow/react subflows render them nested). Screens that contain
-// controls are grown so their children fit.
+// Layered layout for the graph canvas. Screen nodes are placed by dagre over the
+// screen→screen edge graph only (control edges are excluded from ranking so a
+// button does not warp the route layout), giving proper spacing and far fewer
+// crossings. Control nodes are laid out as a vertical stack inside their parent
+// screen at parent-relative positions, so @xyflow/react subflows render them
+// nested; screens that own controls are grown to contain the stack.
 
+import * as dagre from '@dagrejs/dagre'
 import type { GraphNode, UiGraph } from '@uigraph/core'
 
 /** A laid-out position in canvas pixels (absolute for screens, parent-relative for controls). */
@@ -19,40 +20,28 @@ export interface NodeSize {
   height: number
 }
 
-/**
- * The computed layout: an absolute position for every screen-like node, a
- * parent-relative position for every control node, and a size for every node
- * (screens with controls are enlarged to contain them).
- */
+/** The computed layout: positions and sizes for every node. */
 export interface GraphLayout {
   positions: Map<string, NodePosition>
   sizes: Map<string, NodeSize>
 }
 
-const COL_WIDTH = 300
-const ROW_HEIGHT = 130
-const ORIGIN_X = 40
-const ORIGIN_Y = 40
-
-const SCREEN_WIDTH = 200
+const SCREEN_WIDTH = 210
 const SCREEN_HEIGHT = 64
 
-const CONTROL_WIDTH = 168
-const CONTROL_HEIGHT = 52
+const CONTROL_WIDTH = 176
+const CONTROL_HEIGHT = 56
 const CONTROL_GAP = 10
-const CHILD_INSET_X = 12
-const CHILD_TOP = 56
-const CHILD_BOTTOM_PAD = 12
+const CHILD_INSET_X = 14
+const CHILD_TOP = 58
+const CHILD_BOTTOM_PAD = 14
 
 /** Whether a node is a nested control (has a parent screen). */
 function isControl(node: GraphNode): boolean {
   return node.kind === 'control'
 }
 
-/**
- * Group control node ids by their parent screen id, preserving graph order so the
- * vertical stack inside a screen is stable across renders.
- */
+/** Group control node ids by their parent screen id, preserving graph order. */
 function controlsByParent(graph: UiGraph): Map<string, string[]> {
   const byParent = new Map<string, string[]>()
   for (const n of graph.nodes) {
@@ -64,74 +53,53 @@ function controlsByParent(graph: UiGraph): Map<string, string[]> {
   return byParent
 }
 
+/** Height a screen needs to contain its stack of child controls. */
+function screenHeight(childCount: number): number {
+  if (childCount === 0) return SCREEN_HEIGHT
+  return CHILD_TOP + childCount * (CONTROL_HEIGHT + CONTROL_GAP) - CONTROL_GAP + CHILD_BOTTOM_PAD
+}
+
 /**
- * Compute the full canvas layout. Screen-like nodes are layered by BFS depth over
- * the screen→screen edges (control nodes and their edges are excluded from the
- * grid so a button does not push its screen into a new column). Each screen that
- * owns controls is sized to fit a vertical stack of child boxes, and every child
- * gets a parent-relative position within that stack.
+ * Compute the full canvas layout. Screens are ranked left-to-right by dagre over
+ * the screen→screen edges (with each screen sized to fit its controls), then each
+ * control is positioned relative to its parent within a vertical stack.
  */
 export function layoutGraph(graph: UiGraph): GraphLayout {
   const childrenOf = controlsByParent(graph)
-  const screenIds = new Set(graph.nodes.filter((n) => !isControl(n)).map((n) => n.id))
-
-  const adj = new Map<string, string[]>()
-  for (const e of graph.edges) {
-    if (!screenIds.has(e.from) || !screenIds.has(e.to)) continue
-    const list = adj.get(e.from)
-    if (list === undefined) adj.set(e.from, [e.to])
-    else list.push(e.to)
-  }
-
-  const hasIncoming = new Set(
-    graph.edges.filter((e) => screenIds.has(e.from) && screenIds.has(e.to)).map((e) => e.to),
-  )
   const screens = graph.nodes.filter((n) => !isControl(n))
-  const roots = screens.filter((n) => !hasIncoming.has(n.id)).map((n) => n.id)
-  if (roots.length === 0 && screens.length > 0) {
-    const first = screens[0]
-    if (first !== undefined) roots.push(first.id)
+  const screenIds = new Set(screens.map((n) => n.id))
+
+  const g = new dagre.graphlib.Graph()
+  g.setGraph({ rankdir: 'LR', nodesep: 36, ranksep: 110, marginx: 24, marginy: 24 })
+  g.setDefaultEdgeLabel(() => ({}))
+
+  for (const node of screens) {
+    const height = screenHeight((childrenOf.get(node.id) ?? []).length)
+    g.setNode(node.id, { width: SCREEN_WIDTH, height })
+  }
+  const seenEdge = new Set<string>()
+  for (const e of graph.edges) {
+    if (!screenIds.has(e.from) || !screenIds.has(e.to) || e.from === e.to) continue
+    const key = `${e.from}->${e.to}`
+    if (seenEdge.has(key)) continue
+    seenEdge.add(key)
+    g.setEdge(e.from, e.to)
   }
 
-  const depth = new Map<string, number>()
-  const queue: string[] = []
-  for (const r of roots) {
-    depth.set(r, 0)
-    queue.push(r)
-  }
-  while (queue.length > 0) {
-    const cur = queue.shift() as string
-    const d = depth.get(cur) ?? 0
-    for (const next of adj.get(cur) ?? []) {
-      if (!depth.has(next)) {
-        depth.set(next, d + 1)
-        queue.push(next)
-      }
-    }
-  }
-
-  let maxDepth = 0
-  for (const d of depth.values()) maxDepth = Math.max(maxDepth, d)
-  const unreachedDepth = maxDepth + 1
+  dagre.layout(g)
 
   const positions = new Map<string, NodePosition>()
   const sizes = new Map<string, NodeSize>()
 
-  const rowCursor = new Map<number, number>()
   for (const node of screens) {
     const children = childrenOf.get(node.id) ?? []
-    const height =
-      children.length === 0
-        ? SCREEN_HEIGHT
-        : CHILD_TOP + children.length * (CONTROL_HEIGHT + CONTROL_GAP) - CONTROL_GAP + CHILD_BOTTOM_PAD
+    const height = screenHeight(children.length)
     sizes.set(node.id, { width: SCREEN_WIDTH, height })
 
-    const d = depth.get(node.id) ?? unreachedDepth
-    const row = rowCursor.get(d) ?? 0
-    rowCursor.set(d, row + 1)
+    const laid = g.node(node.id)
     positions.set(node.id, {
-      x: ORIGIN_X + d * COL_WIDTH,
-      y: ORIGIN_Y + row * ROW_HEIGHT,
+      x: (laid?.x ?? 0) - SCREEN_WIDTH / 2,
+      y: (laid?.y ?? 0) - height / 2,
     })
 
     children.forEach((childId, i) => {
