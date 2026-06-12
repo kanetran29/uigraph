@@ -53,6 +53,7 @@ export interface Witness {
   loc?: { line: number; col: number }
   ruleId?: string
   observationId?: string
+  screenshot?: string
 }
 
 /** A transition: (event, symbolic guard, effect) from one node to another. */

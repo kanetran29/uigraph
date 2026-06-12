@@ -282,6 +282,7 @@ export interface ReportObservationArgs {
   outcome: 'confirmed' | 'refuted'
   effect?: string
   proposalId?: string
+  screenshot?: string
 }
 
 /** A recorded observation line (the core Observation plus a server timestamp). */
@@ -304,6 +305,7 @@ export function reportObservation(ctx: ToolContext, args: ReportObservationArgs)
     outcome: args.outcome,
     ...(args.effect ? { effect: args.effect } : {}),
     ...(args.proposalId ? { proposalId: args.proposalId } : {}),
+    ...(args.screenshot ? { screenshot: args.screenshot } : {}),
   }
   appendFileSync(observationsPath(ctx), JSON.stringify(entry) + '\n', 'utf8')
   return entry

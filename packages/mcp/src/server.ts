@@ -76,14 +76,18 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'report_observation',
-    description: 'Append a runtime observation to observations.log.jsonl (append-only; no replay in v1).',
+    description:
+      'Record the result of attempting a transition at runtime (e.g. via Playwright). A confirmed observation is folded into the served graph as a witnessed runtime edge; a refuted one produces no edge. Attach a screenshot path as evidence and a proposalId to confirm a Tier-2 proposal.',
     inputSchema: {
       type: 'object',
       properties: {
-        from: { type: 'string' },
-        to: { type: 'string' },
+        from: { type: 'string', description: 'source node id' },
+        to: { type: 'string', description: 'target node id' },
         event: { type: 'string' },
-        outcome: { type: 'string' },
+        outcome: { type: 'string', enum: ['confirmed', 'refuted'] },
+        effect: { type: 'string' },
+        proposalId: { type: 'string', description: 'the Tier-2 proposal this verifies, if any' },
+        screenshot: { type: 'string', description: 'path to a screenshot captured as evidence' },
       },
       required: ['from', 'to', 'event', 'outcome'],
     },
