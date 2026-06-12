@@ -72,7 +72,7 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
     expanded.has(id) ? screenHeight((childrenOf.get(id) ?? []).length) : SCREEN_HEIGHT
 
   const g = new dagre.graphlib.Graph()
-  g.setGraph({ rankdir: 'LR', nodesep: 36, ranksep: 110, marginx: 24, marginy: 24 })
+  g.setGraph({ rankdir: 'LR', nodesep: 52, ranksep: 170, marginx: 28, marginy: 28, ranker: 'tight-tree' })
   g.setDefaultEdgeLabel(() => ({}))
 
   for (const node of screens) {
