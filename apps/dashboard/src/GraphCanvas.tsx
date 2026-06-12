@@ -74,16 +74,6 @@ function controlTone(controlType: string): string {
   }
 }
 
-/**
- * Split a typed effect string ("api:POST /api/orders", "state:setEmail", "submit")
- * into a short kind prefix and the rest, so it can render as "api POST /api/orders".
- */
-function formatEffect(effect: string): string {
-  const idx = effect.indexOf(':')
-  if (idx === -1) return effect
-  return `${effect.slice(0, idx)} ${effect.slice(idx + 1)}`
-}
-
 /** Dash pattern per modality: must is solid, may is dashed, unknown is dotted. */
 function strokeDash(modality: Modality): string | undefined {
   if (modality === 'may') return '6 4'
@@ -122,22 +112,7 @@ function ControlLabel(props: { control: ControlMeta; label: string }): JSX.Eleme
         <span className="control-type">{control.controlType}</span>
       </div>
       {control.events && control.events.length > 0 ? (
-        <div className="control-events">
-          {control.events.map((ev) => (
-            <span key={ev} className="event-chip">
-              {ev}
-            </span>
-          ))}
-        </div>
-      ) : null}
-      {control.effects && control.effects.length > 0 ? (
-        <div className="control-effects">
-          {control.effects.map((eff) => (
-            <span key={eff} className="effect-chip">
-              {formatEffect(eff)}
-            </span>
-          ))}
-        </div>
+        <div className="control-events-line">{control.events.join(', ')}</div>
       ) : null}
     </div>
   )
@@ -186,9 +161,14 @@ function controlStyle(manual: boolean, control: ControlMeta, size: { width: numb
  * @xyflow/react renders them nested. IMPORTANT: a parent must precede its children
  * in the array, so screens are emitted first and controls after.
  */
-function toFlowNodes(graph: UiGraph, selection: Selection): Node[] {
-  const { positions, sizes } = layoutGraph(graph)
+function toFlowNodes(graph: UiGraph, selection: Selection, expanded: ReadonlySet<string>): Node[] {
+  const { positions, sizes } = layoutGraph(graph, expanded)
   const selectedId = selection?.kind === 'node' ? selection.node.id : null
+
+  const childCount = new Map<string, number>()
+  for (const n of graph.nodes) {
+    if (n.kind === 'control' && n.parent !== undefined) childCount.set(n.parent, (childCount.get(n.parent) ?? 0) + 1)
+  }
 
   const screens: Node[] = []
   const controls: Node[] = []
@@ -199,6 +179,7 @@ function toFlowNodes(graph: UiGraph, selection: Selection): Node[] {
     const selected = n.id === selectedId
 
     if (n.kind === 'control' && n.control && n.parent !== undefined) {
+      if (!expanded.has(n.parent)) continue
       controls.push({
         id: n.id,
         position: pos,
@@ -209,10 +190,13 @@ function toFlowNodes(graph: UiGraph, selection: Selection): Node[] {
         style: controlStyle(manual, n.control, size),
       })
     } else {
+      const count = childCount.get(n.id) ?? 0
+      const base = n.route ? `${n.label}\n${n.route}` : n.label
+      const label = count > 0 && !expanded.has(n.id) ? `${base}\n▸ ${count} control${count > 1 ? 's' : ''}` : base
       screens.push({
         id: n.id,
         position: pos,
-        data: { label: n.route ? `${n.label}\n${n.route}` : n.label },
+        data: { label },
         selected,
         style: screenStyle(manual, size),
       })
@@ -229,9 +213,8 @@ function toFlowNodes(graph: UiGraph, selection: Selection): Node[] {
  * "show control edges" toggle is on. Screen→screen route edges always render.
  * Control edges are drawn lighter and only labelled when relevant.
  */
-function toFlowEdges(graph: UiGraph, selection: Selection, pathEdgeIds: Set<string>, showControlEdges: boolean): Edge[] {
+function toFlowEdges(graph: UiGraph, selection: Selection, pathEdgeIds: Set<string>, expanded: ReadonlySet<string>): Edge[] {
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
-  const selectedNodeId = selection?.kind === 'node' ? selection.node.id : null
   const controlParent = new Map<string, string | undefined>()
   for (const n of graph.nodes) if (n.kind === 'control') controlParent.set(n.id, n.parent)
 
@@ -240,14 +223,12 @@ function toFlowEdges(graph: UiGraph, selection: Selection, pathEdgeIds: Set<stri
     const isControlEdge = controlParent.has(e.from) || controlParent.has(e.to)
     const highlighted = pathEdgeIds.has(e.id)
     const selected = e.id === selectedEdgeId
-    const touchesSelection =
-      selectedNodeId !== null &&
-      (e.from === selectedNodeId ||
-        e.to === selectedNodeId ||
-        controlParent.get(e.from) === selectedNodeId ||
-        controlParent.get(e.to) === selectedNodeId)
+    const parentExpanded =
+      (controlParent.has(e.from) && expanded.has(controlParent.get(e.from) ?? '')) ||
+      (controlParent.has(e.to) && expanded.has(controlParent.get(e.to) ?? ''))
+    const touchesSelection = parentExpanded
 
-    if (isControlEdge && !(showControlEdges || highlighted || selected || touchesSelection)) continue
+    if (isControlEdge && !(highlighted || selected || parentExpanded)) continue
 
     const color = strokeColor(e, highlighted)
     const reveal = highlighted || selected || touchesSelection
@@ -279,12 +260,25 @@ function toFlowEdges(graph: UiGraph, selection: Selection, pathEdgeIds: Set<stri
  */
 export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const { graph, selection, pathEdgeIds, onSelect, onConnect } = props
-  const [showControlEdges, setShowControlEdges] = useState(false)
+  const [expandAll, setExpandAll] = useState(false)
 
-  const nodes = useMemo(() => toFlowNodes(graph, selection), [graph, selection])
+  const expanded = useMemo(() => {
+    const withChildren = new Set<string>()
+    for (const n of graph.nodes) if (n.kind === 'control' && n.parent !== undefined) withChildren.add(n.parent)
+    if (expandAll) return withChildren
+    const set = new Set<string>()
+    if (selection?.kind === 'node') {
+      const n = selection.node
+      if (n.kind === 'control' && n.parent !== undefined) set.add(n.parent)
+      else if (withChildren.has(n.id)) set.add(n.id)
+    }
+    return set
+  }, [graph, selection, expandAll])
+
+  const nodes = useMemo(() => toFlowNodes(graph, selection, expanded), [graph, selection, expanded])
   const edges = useMemo(
-    () => toFlowEdges(graph, selection, pathEdgeIds, showControlEdges),
-    [graph, selection, pathEdgeIds, showControlEdges],
+    () => toFlowEdges(graph, selection, pathEdgeIds, expanded),
+    [graph, selection, pathEdgeIds, expanded],
   )
 
   const handleNodeClick: NodeMouseHandler = (_evt, node) => {
@@ -313,8 +307,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       <Controls />
       <Panel position="top-left">
         <label className="edge-toggle">
-          <input type="checkbox" checked={showControlEdges} onChange={(e) => setShowControlEdges(e.target.checked)} />
-          show control edges
+          <input type="checkbox" checked={expandAll} onChange={(e) => setExpandAll(e.target.checked)} />
+          expand all controls
         </label>
       </Panel>
     </ReactFlow>
