@@ -91,7 +91,7 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
 
   it('extracts nested controls when opts.controls is set', () => {
     const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
-    const { graph } = extractGraph(buildProject(dir), dir, { controls: true })
+    const { graph, soundiness } = extractGraph(buildProject(dir), dir, { controls: true })
 
     expect(validateGraph(graph)).toEqual([])
     const controls = graph.nodes.filter((n) => n.kind === 'control')
@@ -110,6 +110,35 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     const allEvents = new Set(controls.flatMap((c) => c.control?.events ?? []))
     expect(allEvents.has('keydown')).toBe(true)
     expect(allEvents.has('mouseenter')).toBe(true)
+
+    const form = controls.find((c) => c.control?.controlType === 'form')
+    expect(form?.control?.effects).toContain('error:setError')
+    const successNav = graph.edges.find((e) => e.from === form?.id && e.guard === 'onSuccess')
+    expect(successNav?.modality).toBe('may')
+
+    expect(graph.nodes.some((n) => n.kind === 'modal')).toBe(true)
+    expect(graph.edges.some((e) => e.effect === 'open:modal')).toBe(true)
+    expect(controls.some((c) => c.control?.controlType === 'file')).toBe(true)
+    expect(soundiness.some((s) => s.kind === 'dynamic-widget')).toBe(true)
+  })
+
+  it('tags success/error branches and opens modals (F2.5+)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import C from './C'\nexport default () => (<Routes><Route path="/c" element={<C/>} /><Route path="/" element={<C/>} /></Routes>)`,
+        '/C.tsx': `import { useState } from 'react'\nimport { useNavigate } from 'react-router-dom'\nfunction Dialog(p){ return p.open ? <div>x</div> : null }\nexport default function C(){ const navigate = useNavigate(); const [o,setOpen]=useState(false); const [e,setError]=useState(''); async function go(){ try { await fetch('/api/x',{method:'POST'}); navigate('/') } catch { setError('bad') } } return (<form onSubmit={go}><button type="button" onClick={() => setOpen(true)}>open</button><Dialog open={o} /></form>) }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const form = graph.nodes.find((n) => n.control?.controlType === 'form')
+    expect(form?.control?.effects).toContain('error:setError')
+    const nav = graph.edges.find((x) => x.from === form?.id && x.to === 'n_root')
+    expect(nav?.guard).toBe('onSuccess')
+    expect(nav?.modality).toBe('may')
+    const modal = graph.nodes.find((n) => n.kind === 'modal')
+    expect(modal).toBeDefined()
+    expect(graph.edges.some((x) => x.to === modal?.id && x.effect === 'open:modal')).toBe(true)
   })
 
   it('treats any element with an on* handler as a control and records its events', () => {
