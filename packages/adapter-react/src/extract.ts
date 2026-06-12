@@ -131,6 +131,30 @@ function getComponentName(el: Node): string | null {
       if (inner && Node.isIdentifier(inner)) return inner.getText()
     }
   }
+  const render = findAttr(el, 'render')
+  if (render) {
+    const init = render.getInitializer()
+    if (init && Node.isJsxExpression(init)) {
+      const expr = init.getExpression()
+      if (expr) {
+        const tag = firstComponentTag(expr)
+        if (tag) return tag
+      }
+    }
+  }
+  return null
+}
+
+/** First capitalized (component) JSX tag inside a node, e.g. the body of a `render` prop. */
+function firstComponentTag(node: Node): string | null {
+  const candidates = [
+    ...node.getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement),
+    ...node.getDescendantsOfKind(SyntaxKind.JsxOpeningElement),
+  ].sort((a, b) => a.getStart() - b.getStart())
+  for (const c of candidates) {
+    const tag = c.getTagNameNode().getText()
+    if (/^[A-Z]/.test(tag)) return tag
+  }
   return null
 }
 

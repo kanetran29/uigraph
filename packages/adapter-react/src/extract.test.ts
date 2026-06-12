@@ -76,6 +76,19 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(graph.edges.find((x) => x.to === 'n_b')?.modality).toBe('must')
   })
 
+  it('resolves react-router v5 render-prop routes', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import A from './A'\nimport B from './B'\nexport default () => (<Switch><Route path="/a" render={() => <A/>} /><Route path="/b" render={() => <B/>} /></Switch>)`,
+        '/A.tsx': `import { useHistory } from 'react-router-dom'\nexport default function A(){ const history = useHistory(); return <button onClick={() => history.push('/b')}>go</button> }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.find((n) => n.id === 'n_a')?.componentPath).toBe('A.tsx')
+    expect(graph.edges.some((e) => e.from === 'n_a' && e.to === 'n_b' && e.modality === 'must')).toBe(true)
+  })
+
   it('supports react-router v5 component + Redirect', () => {
     const { graph } = extractGraph(
       inMemory({
