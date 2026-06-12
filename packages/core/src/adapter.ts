@@ -23,6 +23,8 @@ export interface AdapterContext {
 export interface ExtractOptions {
   commit?: string
   rulesetVersion?: string
+  /** When true, also extract interactive controls (buttons/inputs/etc.) as nested nodes. */
+  controls?: boolean
 }
 
 /** One declared-but-unresolved case an adapter deliberately over-approximated. */

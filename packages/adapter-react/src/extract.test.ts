@@ -89,6 +89,49 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(graph.edges.some((e) => e.from === 'n_a' && e.to === 'n_b' && e.modality === 'must')).toBe(true)
   })
 
+  it('extracts nested controls when opts.controls is set', () => {
+    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const { graph } = extractGraph(buildProject(dir), dir, { controls: true })
+
+    expect(validateGraph(graph)).toEqual([])
+    const controls = graph.nodes.filter((n) => n.kind === 'control')
+    expect(controls.length).toBeGreaterThan(0)
+
+    const nodeIds = new Set(graph.nodes.map((n) => n.id))
+    for (const c of controls) expect(nodeIds.has(c.parent ?? '')).toBe(true)
+
+    const checkoutControls = controls.filter((c) => c.parent === 'n_checkout')
+    expect(checkoutControls.some((c) => c.control?.controlType === 'richtext')).toBe(true)
+    expect(checkoutControls.some((c) => c.control?.controlType === 'input')).toBe(true)
+
+    const withApi = controls.find((c) => (c.control?.effects ?? []).some((e) => e.startsWith('api:POST')))
+    expect(withApi).toBeDefined()
+  })
+
+  it('keeps the route graph identical without opts.controls', () => {
+    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const { graph } = extractGraph(buildProject(dir), dir)
+    expect(graph.nodes.every((n) => n.kind === 'screen')).toBe(true)
+    expect(graph.nodes).toHaveLength(8)
+    expect(graph.edges).toHaveLength(13)
+  })
+
+  it('captures a multi-behavior submit (api + state + navigate)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import C from './C'\nexport default () => (<Routes><Route path="/checkout" element={<C/>} /><Route path="/" element={<C/>} /></Routes>)`,
+        '/C.tsx': `import { useState } from 'react'\nimport { useNavigate } from 'react-router-dom'\nexport default function C(){ const navigate = useNavigate(); const [n,setNotes] = useState(''); async function submit(){ await fetch('/api/orders',{method:'POST'}); setNotes(''); navigate('/') } return (<form onSubmit={submit}><input name="email" type="email" /><textarea name="notes" /><button type="submit">Place order</button></form>) }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const form = graph.nodes.find((n) => n.control?.controlType === 'form')
+    expect(form?.control?.effects).toContain('api:POST /api/orders')
+    expect(form?.control?.effects).toContain('state:setNotes')
+    expect(graph.edges.some((e) => e.from === form?.id && e.to === 'n_root' && e.effect === 'navigate')).toBe(true)
+    expect(graph.nodes.some((n) => n.control?.controlType === 'richtext')).toBe(true)
+  })
+
   it('supports react-router v5 component + Redirect', () => {
     const { graph } = extractGraph(
       inMemory({

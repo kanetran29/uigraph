@@ -18,15 +18,31 @@ export type Modality = 'must' | 'may' | 'unknown'
 export type Source = 'static' | 'manual' | 'runtime'
 
 /** What a node represents in the app's state space. */
-export type NodeKind = 'screen' | 'route' | 'modal' | 'unknown'
+export type NodeKind = 'screen' | 'route' | 'modal' | 'unknown' | 'control'
 
-/** A screen/state in the app. `id` is stable and unique within a graph. */
+/**
+ * Metadata for a `control` node — an interactive element (button, input,
+ * rich-text, form, select, link) extracted within a screen. `effects` lists the
+ * non-navigational behaviors of the control as typed strings (e.g.
+ * "api:POST /orders", "state:clearCart", "submit"); navigational behaviors are
+ * edges to other nodes instead.
+ */
+export interface ControlMeta {
+  element: string
+  controlType: string
+  name?: string
+  effects?: string[]
+}
+
+/** A screen/state (or a nested control) in the app. `id` is stable and unique. */
 export interface GraphNode {
   id: string
   route: string | null
   componentPath: string | null
   label: string
   kind: NodeKind
+  parent?: string
+  control?: ControlMeta
 }
 
 /** A deterministic proof that an edge exists (static source loc or runtime obs). */

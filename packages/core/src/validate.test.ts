@@ -38,6 +38,19 @@ describe('validateGraph', () => {
     const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { confidence: 1.5 })])
     expect(validateGraph(g).map((e) => e.code)).toContain('CONFIDENCE_RANGE')
   })
+
+  it('accepts a nested control node', () => {
+    const g = graph(
+      [node('a'), node('c1', { kind: 'control', parent: 'a', control: { element: 'button', controlType: 'button', name: 'Submit', effects: ['api:POST /x'] } })],
+      [],
+    )
+    expect(validateGraph(g)).toEqual([])
+  })
+
+  it('flags a control with an unknown parent', () => {
+    const g = graph([node('c1', { kind: 'control', parent: 'missing', control: { element: 'button', controlType: 'button' } })], [])
+    expect(validateGraph(g).map((e) => e.code)).toContain('DANGLING_PARENT')
+  })
 })
 
 describe('validateOverlay', () => {

@@ -36,6 +36,10 @@ export function validateGraph(graph: UiGraph): ValidationError[] {
   for (const id of dup(graph.edges, (e) => e.id)) errs.push({ code: 'DUP_EDGE_ID', message: `duplicate edge id "${id}"`, id })
 
   const nodeIds = new Set(graph.nodes.map((n) => n.id))
+  for (const n of graph.nodes) {
+    if (n.parent !== undefined && !nodeIds.has(n.parent))
+      errs.push({ code: 'DANGLING_PARENT', message: `node "${n.id}" has unknown parent "${n.parent}"`, id: n.id })
+  }
   for (const e of graph.edges) {
     if (!nodeIds.has(e.from)) errs.push({ code: 'DANGLING_FROM', message: `edge "${e.id}" from unknown node "${e.from}"`, id: e.id })
     if (!nodeIds.has(e.to)) errs.push({ code: 'DANGLING_TO', message: `edge "${e.id}" to unknown node "${e.to}"`, id: e.id })

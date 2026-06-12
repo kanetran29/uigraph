@@ -303,6 +303,162 @@ function ruleIdFor(event: string, effect: string): string {
   return 'rr.use-navigate'
 }
 
+interface ControlInfo {
+  element: string
+  controlType: string
+  name?: string
+}
+
+interface NavCall {
+  ti: TargetInfo
+  guard: string | null
+  node: Node
+}
+
+/** Visible text inside a JSX element (e.g. a button's label), or undefined. */
+function getJsxText(el: Node): string | undefined {
+  if (!Node.isJsxElement(el)) return undefined
+  const txt = el
+    .getDescendantsOfKind(SyntaxKind.JsxText)
+    .map((t) => t.getText())
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return txt.length > 0 ? txt : undefined
+}
+
+function inputControlType(el: Node): string {
+  const t = (stringAttr(el, 'type') ?? 'text').toLowerCase()
+  if (t === 'checkbox' || t === 'radio') return 'checkbox'
+  if (t === 'submit' || t === 'button') return 'button'
+  return 'input'
+}
+
+/** Classify an interactive JSX element as a control, or null if it is not one. */
+function controlMetaFor(el: Node): ControlInfo | null {
+  const tag = jsxTag(el)
+  const lower = tag.toLowerCase()
+  let controlType: string | null = null
+  if (lower === 'button') controlType = 'button'
+  else if (lower === 'input') controlType = inputControlType(el)
+  else if (lower === 'textarea') controlType = 'richtext'
+  else if (lower === 'select') controlType = 'select'
+  else if (lower === 'form') controlType = 'form'
+  else if (findAttr(el, 'contentEditable') || findAttr(el, 'contenteditable')) controlType = 'richtext'
+  else return null
+  const textLabel = controlType === 'button' ? getJsxText(el) : undefined
+  const name =
+    stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? stringAttr(el, 'placeholder') ?? stringAttr(el, 'aria-label') ?? textLabel
+  return { element: tag, controlType, ...(name ? { name } : {}) }
+}
+
+/** Find the named function/arrow declared in a file (for indirect event handlers). */
+function resolveFunctionNode(sf: SourceFile, name: string): Node | undefined {
+  for (const vd of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    if (vd.getNameNode().getText() !== name) continue
+    const init = vd.getInitializer()
+    if (init && (Node.isArrowFunction(init) || Node.isFunctionExpression(init))) return init
+  }
+  for (const fd of sf.getDescendantsOfKind(SyntaxKind.FunctionDeclaration)) {
+    if (fd.getName() === name) return fd
+  }
+  return undefined
+}
+
+/** Resolve a control's event handler (onSubmit/onClick/onChange) to its function node. */
+function resolveHandler(el: Node, sf: SourceFile): Node | undefined {
+  for (const name of ['onSubmit', 'onClick', 'onChange']) {
+    const attr = findAttr(el, name)
+    if (!attr) continue
+    const init = attr.getInitializer()
+    if (!init || !Node.isJsxExpression(init)) continue
+    const expr = init.getExpression()
+    if (!expr) continue
+    if (Node.isArrowFunction(expr) || Node.isFunctionExpression(expr)) return expr
+    if (Node.isIdentifier(expr)) {
+      const fn = resolveFunctionNode(sf, expr.getText())
+      if (fn) return fn
+    }
+  }
+  return undefined
+}
+
+function literalOf(node: Node | undefined): string {
+  if (!node) return '?'
+  if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) return node.getLiteralValue()
+  if (Node.isTemplateExpression(node)) return node.getHead().getLiteralText() + '…'
+  return '?'
+}
+
+function methodFromFetchOpts(node: Node | undefined): string {
+  if (!node || !Node.isObjectLiteralExpression(node)) return 'GET'
+  const prop = node.getProperty('method')
+  if (prop && Node.isPropertyAssignment(prop)) {
+    const v = prop.getInitializer()
+    if (v && (Node.isStringLiteral(v) || Node.isNoSubstitutionTemplateLiteral(v))) return v.getLiteralValue().toUpperCase()
+  }
+  return 'GET'
+}
+
+/** A network call effect like "api:POST /orders", or null. */
+function detectApiEffect(call: Node): string | null {
+  if (!Node.isCallExpression(call)) return null
+  const expr = call.getExpression()
+  if (Node.isIdentifier(expr) && expr.getText() === 'fetch') {
+    return `api:${methodFromFetchOpts(call.getArguments()[1])} ${literalOf(call.getArguments()[0])}`
+  }
+  if (Node.isPropertyAccessExpression(expr)) {
+    const m = expr.getName().toLowerCase()
+    if (['post', 'get', 'put', 'delete', 'patch'].includes(m) && /axios|api|http|client|request/i.test(expr.getExpression().getText())) {
+      return `api:${m.toUpperCase()} ${literalOf(call.getArguments()[0])}`
+    }
+  }
+  return null
+}
+
+/** A state-mutation effect like "state:setCart", or null. */
+function detectStateEffect(call: Node): string | null {
+  if (!Node.isCallExpression(call)) return null
+  const expr = call.getExpression()
+  if (Node.isIdentifier(expr)) {
+    const n = expr.getText()
+    if (/^set[A-Z]/.test(n)) return `state:${n}`
+    if (n === 'dispatch') return 'state:dispatch'
+  }
+  return null
+}
+
+/** Analyze a handler body for navigation calls and non-navigational effects. */
+function analyzeHandler(fnNode: Node, navInfo: { navSet: Set<string>; histSet: Set<string> }): { navCalls: NavCall[]; effects: string[] } {
+  const calls = [...fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)]
+  if (Node.isCallExpression(fnNode)) calls.push(fnNode)
+  const navCalls: NavCall[] = []
+  const effects = new Set<string>()
+  for (const call of calls) {
+    const expr = call.getExpression()
+    if (Node.isIdentifier(expr) && navInfo.navSet.has(expr.getText())) {
+      navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call), node: call })
+      continue
+    }
+    if (Node.isPropertyAccessExpression(expr)) {
+      const obj = expr.getExpression()
+      const m = expr.getName()
+      if (Node.isIdentifier(obj) && navInfo.histSet.has(obj.getText()) && (m === 'push' || m === 'replace')) {
+        navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call), node: call })
+        continue
+      }
+    }
+    const api = detectApiEffect(call)
+    if (api) {
+      effects.add(api)
+      continue
+    }
+    const st = detectStateEffect(call)
+    if (st) effects.add(st)
+  }
+  return { navCalls, effects: [...effects] }
+}
+
 /** Extract a graph from an already-built ts-morph project (testable in memory). */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const routes = collectRoutes(project)
@@ -362,6 +518,51 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         for (const cand of cands) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
       } else {
         soundiness.push({ kind: 'dynamic-target', file, loc, detail: `fully dynamic navigation target (event ${t.event})` })
+      }
+    }
+  }
+
+  if (opts.controls) {
+    let cidx = 0
+    for (const route of routes) {
+      if (!route.componentFile) continue
+      const sf = route.componentFile
+      const file = relative(projectDir, sf.getFilePath())
+      const navInfo = navIdentifiers(sf)
+      for (const el of allJsxElements(sf)) {
+        const meta = controlMetaFor(el)
+        if (!meta) continue
+        const cId = `cc_${route.nodeId}__${meta.controlType}_${cidx++}`
+        const handler = resolveHandler(el, sf)
+        const analysis = handler ? analyzeHandler(handler, navInfo) : { navCalls: [], effects: [] }
+        const lc = sf.getLineAndColumnAtPos(el.getStart())
+        const loc = { line: lc.line, col: lc.column }
+        for (const nav of analysis.navCalls) {
+          const event = meta.controlType === 'form' ? 'submit' : 'click'
+          if (nav.ti.kind === 'literal') {
+            const target = matchLiteral(nav.ti.value, routeLikes)
+            if (!target) continue
+            const guarded = nav.guard !== null
+            pushEdge(cId, target.nodeId, { ti: nav.ti, event, effect: 'navigate', node: nav.node, guard: nav.guard }, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
+          } else if (nav.ti.kind === 'template') {
+            for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
+              pushEdge(cId, cand.nodeId, { ti: nav.ti, event, effect: 'navigate', node: nav.node, guard: nav.guard }, 'may', 0.5, file, loc)
+          }
+        }
+        nodes.push({
+          id: cId,
+          route: null,
+          componentPath: file,
+          label: meta.name ?? meta.element,
+          kind: 'control',
+          parent: route.nodeId,
+          control: {
+            element: meta.element,
+            controlType: meta.controlType,
+            ...(meta.name ? { name: meta.name } : {}),
+            ...(analysis.effects.length > 0 ? { effects: analysis.effects } : {}),
+          },
+        })
       }
     }
   }
