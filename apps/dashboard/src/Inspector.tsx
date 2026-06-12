@@ -99,6 +99,40 @@ export function Inspector(props: InspectorProps): JSX.Element {
   if (selection.kind === 'node') {
     const n = selection.node
     const manual = n.id.startsWith('n_manual')
+
+    if (n.kind === 'control' && n.control) {
+      const c = n.control
+      return (
+        <aside className="inspector">
+          <h2>
+            Control <Badge text={c.controlType} tone="#334155" />
+            {manual ? <Badge text="manual" tone="#7c3aed" /> : null}
+          </h2>
+          <Field label="id" value={n.id} />
+          <Field label="label" value={n.label} />
+          <Field label="parent" value={n.parent ?? '—'} />
+          <Field label="element" value={c.element} />
+          <Field label="controlType" value={c.controlType} />
+          <Field label="name" value={c.name ?? '—'} />
+          <h3>effects</h3>
+          {c.effects && c.effects.length > 0 ? (
+            <ul className="effects-list">
+              {c.effects.map((eff) => (
+                <li key={eff}>{eff}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">No effects.</p>
+          )}
+          <div className="editor-actions">
+            <button className="danger" onClick={() => onDelete(n.id)}>
+              Delete
+            </button>
+          </div>
+        </aside>
+      )
+    }
+
     return (
       <aside className="inspector">
         <h2>
