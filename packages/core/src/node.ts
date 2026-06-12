@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import type { Overlay, UiGraph } from './ir'
 import type { Proposals } from './proposals'
+import type { ApiBindings } from './openapi'
 import { assertGraphShape, assertOverlayShape } from './schema'
 import { validateGraph } from './validate'
 import { validateProposals } from './proposals'
@@ -53,4 +54,22 @@ export function loadProposals(path: string): Proposals {
 export function saveProposals(path: string, proposals: Proposals): void {
   mkdirSync(dirname(path), { recursive: true })
   writeFileSync(path, JSON.stringify(proposals, null, 2) + '\n', 'utf8')
+}
+
+/** Read and parse a JSON OpenAPI spec file into a plain object. */
+export function loadOpenApi(path: string): Record<string, unknown> {
+  const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
+  if (typeof parsed !== 'object' || parsed === null) throw new Error(`OpenAPI spec at ${path} is not an object`)
+  return parsed as Record<string, unknown>
+}
+
+/** Serialize an api-bindings sidecar to a JSON file, creating parent dirs. */
+export function saveApiBindings(path: string, bindings: ApiBindings): void {
+  mkdirSync(dirname(path), { recursive: true })
+  writeFileSync(path, JSON.stringify(bindings, null, 2) + '\n', 'utf8')
+}
+
+/** Read and parse an api-bindings sidecar JSON file. */
+export function loadApiBindings(path: string): ApiBindings {
+  return JSON.parse(readFileSync(path, 'utf8')) as ApiBindings
 }

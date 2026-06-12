@@ -39,6 +39,16 @@ export {
   type ProposalStatus,
   type ProposalError,
 } from './proposals'
+export {
+  parseApiEffect,
+  summarizeApiEffect,
+  collectApiEffects,
+  buildApiBindings,
+  type ApiField,
+  type ApiResponseSummary,
+  type ApiOperationSummary,
+  type ApiBindings,
+} from './openapi'
 export { diffGraphs, type GraphDiff, type EdgeChange } from './diff'
 export {
   buildAdjacency,
