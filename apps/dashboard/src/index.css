@@ -314,3 +314,17 @@ button.danger {
   color: #4338ca;
   border: 1px solid #c7d2fe;
 }
+
+.edge-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  user-select: none;
+}
