@@ -235,3 +235,71 @@ button.danger {
   font-size: 11px;
   margin-top: 2px;
 }
+
+.control-node {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  white-space: normal;
+}
+
+.control-head {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.control-glyph {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.control-name {
+  font-weight: 600;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.control-type {
+  margin-left: auto;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.control-effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.effect-chip {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.effects-list {
+  margin: 0 0 8px;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.effects-list li {
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  word-break: break-all;
+}

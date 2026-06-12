@@ -1,39 +1,95 @@
-// Simple layered layout for the graph canvas: assign each node an x by its BFS
-// depth (distance from a root) and stack nodes within a depth vertically. Roots
-// are nodes with no incoming edge; any node unreached from a root falls into a
-// trailing column so disconnected pieces still render.
+// Layered layout for the graph canvas. Screen-like nodes are placed by BFS depth
+// from a root (distance over the screen→screen edge graph) and stacked vertically
+// within a depth. Control nodes are NOT placed on the main grid: each is laid out
+// as a vertical stack inside its parent screen, at a position relative to that
+// parent (so @xyflow/react subflows render them nested). Screens that contain
+// controls are grown so their children fit.
 
-import type { UiGraph } from '@uigraph/core'
+import type { GraphNode, UiGraph } from '@uigraph/core'
 
-/** A laid-out position in canvas pixels for one node id. */
+/** A laid-out position in canvas pixels (absolute for screens, parent-relative for controls). */
 export interface NodePosition {
   x: number
   y: number
 }
 
-const COL_WIDTH = 240
-const ROW_HEIGHT = 110
+/** A box size in canvas pixels. */
+export interface NodeSize {
+  width: number
+  height: number
+}
+
+/**
+ * The computed layout: an absolute position for every screen-like node, a
+ * parent-relative position for every control node, and a size for every node
+ * (screens with controls are enlarged to contain them).
+ */
+export interface GraphLayout {
+  positions: Map<string, NodePosition>
+  sizes: Map<string, NodeSize>
+}
+
+const COL_WIDTH = 300
+const ROW_HEIGHT = 130
 const ORIGIN_X = 40
 const ORIGIN_Y = 40
 
+const SCREEN_WIDTH = 200
+const SCREEN_HEIGHT = 64
+
+const CONTROL_WIDTH = 168
+const CONTROL_HEIGHT = 52
+const CONTROL_GAP = 10
+const CHILD_INSET_X = 12
+const CHILD_TOP = 56
+const CHILD_BOTTOM_PAD = 12
+
+/** Whether a node is a nested control (has a parent screen). */
+function isControl(node: GraphNode): boolean {
+  return node.kind === 'control'
+}
+
 /**
- * Compute an x/y position per node id by layering on BFS depth from the graph's
- * roots (nodes with no incoming edge, or the first node when every node has one).
- * Nodes at the same depth are stacked vertically; unreached nodes get a final
- * column so the layout never drops a node.
+ * Group control node ids by their parent screen id, preserving graph order so the
+ * vertical stack inside a screen is stable across renders.
  */
-export function layoutByDepth(graph: UiGraph): Map<string, NodePosition> {
+function controlsByParent(graph: UiGraph): Map<string, string[]> {
+  const byParent = new Map<string, string[]>()
+  for (const n of graph.nodes) {
+    if (!isControl(n) || n.parent === undefined) continue
+    const list = byParent.get(n.parent)
+    if (list === undefined) byParent.set(n.parent, [n.id])
+    else list.push(n.id)
+  }
+  return byParent
+}
+
+/**
+ * Compute the full canvas layout. Screen-like nodes are layered by BFS depth over
+ * the screen→screen edges (control nodes and their edges are excluded from the
+ * grid so a button does not push its screen into a new column). Each screen that
+ * owns controls is sized to fit a vertical stack of child boxes, and every child
+ * gets a parent-relative position within that stack.
+ */
+export function layoutGraph(graph: UiGraph): GraphLayout {
+  const childrenOf = controlsByParent(graph)
+  const screenIds = new Set(graph.nodes.filter((n) => !isControl(n)).map((n) => n.id))
+
   const adj = new Map<string, string[]>()
   for (const e of graph.edges) {
+    if (!screenIds.has(e.from) || !screenIds.has(e.to)) continue
     const list = adj.get(e.from)
     if (list === undefined) adj.set(e.from, [e.to])
     else list.push(e.to)
   }
 
-  const hasIncoming = new Set(graph.edges.map((e) => e.to))
-  const roots = graph.nodes.filter((n) => !hasIncoming.has(n.id)).map((n) => n.id)
-  if (roots.length === 0 && graph.nodes.length > 0) {
-    const first = graph.nodes[0]
+  const hasIncoming = new Set(
+    graph.edges.filter((e) => screenIds.has(e.from) && screenIds.has(e.to)).map((e) => e.to),
+  )
+  const screens = graph.nodes.filter((n) => !isControl(n))
+  const roots = screens.filter((n) => !hasIncoming.has(n.id)).map((n) => n.id)
+  if (roots.length === 0 && screens.length > 0) {
+    const first = screens[0]
     if (first !== undefined) roots.push(first.id)
   }
 
@@ -58,9 +114,18 @@ export function layoutByDepth(graph: UiGraph): Map<string, NodePosition> {
   for (const d of depth.values()) maxDepth = Math.max(maxDepth, d)
   const unreachedDepth = maxDepth + 1
 
-  const rowCursor = new Map<number, number>()
   const positions = new Map<string, NodePosition>()
-  for (const node of graph.nodes) {
+  const sizes = new Map<string, NodeSize>()
+
+  const rowCursor = new Map<number, number>()
+  for (const node of screens) {
+    const children = childrenOf.get(node.id) ?? []
+    const height =
+      children.length === 0
+        ? SCREEN_HEIGHT
+        : CHILD_TOP + children.length * (CONTROL_HEIGHT + CONTROL_GAP) - CONTROL_GAP + CHILD_BOTTOM_PAD
+    sizes.set(node.id, { width: SCREEN_WIDTH, height })
+
     const d = depth.get(node.id) ?? unreachedDepth
     const row = rowCursor.get(d) ?? 0
     rowCursor.set(d, row + 1)
@@ -68,6 +133,15 @@ export function layoutByDepth(graph: UiGraph): Map<string, NodePosition> {
       x: ORIGIN_X + d * COL_WIDTH,
       y: ORIGIN_Y + row * ROW_HEIGHT,
     })
+
+    children.forEach((childId, i) => {
+      sizes.set(childId, { width: CONTROL_WIDTH, height: CONTROL_HEIGHT })
+      positions.set(childId, {
+        x: CHILD_INSET_X,
+        y: CHILD_TOP + i * (CONTROL_HEIGHT + CONTROL_GAP),
+      })
+    })
   }
-  return positions
+
+  return { positions, sizes }
 }
