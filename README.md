@@ -44,6 +44,26 @@ pnpm --filter @uigraph/dashboard dev      # http://localhost:5173 (proxies /api 
 `map --adapter angular` works the same on an Angular project. `uigraph mcp <dir>`
 starts the MCP server for Claude Code / Cursor.
 
+## Status & honest limitations (post red-team)
+
+This is an early static-extraction spine. What is actually true today:
+
+**Proven / enforced:**
+- Framework-agnostic core (no React/Angular/ts-morph import in `@uigraph/core`).
+- The LLM/proposal/manual **quarantine is structurally enforced** — nothing promotes a proposal or a manual edit into a `must`/base edge.
+- The **`must`-tier soundness holes are closed**: a programmatic navigation after an early-return, or inside a loop / switch / catch / array-iteration callback, is a `may`-edge; an ambiguous param literal fans out to `may`, never a single wrong `must`; the served base+overlay is re-validated and stale overlays are rejected.
+
+**Not yet true (do not rely on these):**
+- **No proof the graph beats an agent grepping the repo.** The dossier's #1 kill-switch — a one-day agent+repo vs agent+repo+graph ablation — has not been run. Adopt with that caveat.
+- **The Tier-2 "reviewer" is a session workflow, not shipped code.** `proposals.json` is currently a hand/agent-authored sidecar format; the tool ships no `uigraph review` generator yet.
+- **Tier-3 is open**: `report_observation` only appends a log; no observation is folded into a confirmed edge, so a proposal is never promoted by runtime.
+- **The artifact is a static snapshot + manual overlay**, not an event-sourced "lockfile" (no reducer/fold, no composite extractor/ruleset/obs-log hash).
+- **`unknown` modality** exists in the IR but no adapter emits it yet.
+- Adapters extract a partial route set on real apps (refapp: ~half the routes resolved); **an empty/partial graph is not yet always distinguishable from a blind spot** for every router style (e.g. `createBrowserRouter`, aliased hooks, constant route paths).
+- OpenAPI binding is core-only (no CLI/MCP/dashboard wiring yet, JSON specs only); the Angular adapter does not extract controls/events/api effects.
+
+The honest near-term priority is **validating the premise** (the ablation) before adding more surface area.
+
 ## Development
 
 Each feature is built through the cycle in
