@@ -328,3 +328,12 @@ button.danger {
   cursor: pointer;
   user-select: none;
 }
+
+.control-events-line {
+  margin-top: 2px;
+  font-size: 9px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

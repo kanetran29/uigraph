@@ -61,21 +61,22 @@ function screenHeight(childCount: number): number {
 
 /**
  * Compute the full canvas layout. Screens are ranked left-to-right by dagre over
- * the screen→screen edges (with each screen sized to fit its controls), then each
- * control is positioned relative to its parent within a vertical stack.
+ * the screen→screen edges; only screens in `expanded` are grown to contain their
+ * controls (collapsed screens stay compact, and their controls are not placed).
  */
-export function layoutGraph(graph: UiGraph): GraphLayout {
+export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): GraphLayout {
   const childrenOf = controlsByParent(graph)
   const screens = graph.nodes.filter((n) => !isControl(n))
   const screenIds = new Set(screens.map((n) => n.id))
+  const heightOf = (id: string): number =>
+    expanded.has(id) ? screenHeight((childrenOf.get(id) ?? []).length) : SCREEN_HEIGHT
 
   const g = new dagre.graphlib.Graph()
   g.setGraph({ rankdir: 'LR', nodesep: 36, ranksep: 110, marginx: 24, marginy: 24 })
   g.setDefaultEdgeLabel(() => ({}))
 
   for (const node of screens) {
-    const height = screenHeight((childrenOf.get(node.id) ?? []).length)
-    g.setNode(node.id, { width: SCREEN_WIDTH, height })
+    g.setNode(node.id, { width: SCREEN_WIDTH, height: heightOf(node.id) })
   }
   const seenEdge = new Set<string>()
   for (const e of graph.edges) {
@@ -92,8 +93,7 @@ export function layoutGraph(graph: UiGraph): GraphLayout {
   const sizes = new Map<string, NodeSize>()
 
   for (const node of screens) {
-    const children = childrenOf.get(node.id) ?? []
-    const height = screenHeight(children.length)
+    const height = heightOf(node.id)
     sizes.set(node.id, { width: SCREEN_WIDTH, height })
 
     const laid = g.node(node.id)
@@ -102,7 +102,8 @@ export function layoutGraph(graph: UiGraph): GraphLayout {
       y: (laid?.y ?? 0) - height / 2,
     })
 
-    children.forEach((childId, i) => {
+    if (!expanded.has(node.id)) continue
+    ;(childrenOf.get(node.id) ?? []).forEach((childId, i) => {
       sizes.set(childId, { width: CONTROL_WIDTH, height: CONTROL_HEIGHT })
       positions.set(childId, {
         x: CHILD_INSET_X,
