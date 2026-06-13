@@ -7,15 +7,18 @@ import { createServer as createHttpServer, type IncomingMessage, type Server, ty
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ToolContext, UpdateGraphArgs } from '@uigraph/mcp'
-import { loadMergedGraph, updateGraph } from '@uigraph/mcp'
-import { loadProposals } from '@uigraph/core/node'
+import { dbPath, loadMergedGraph, updateGraph } from '@uigraph/mcp'
+import { openStore } from '@uigraph/core/node'
 import { readSoundiness } from './commands'
 
-/** Read the quarantined proposals sidecar (<dir>/proposals.json), or empty if absent. */
-function readProposals(dir: string): unknown {
-  const path = join(dir, 'proposals.json')
-  if (!existsSync(path)) return { version: 0, base: '', proposals: [] }
-  return loadProposals(path)
+/** Read the quarantined Tier-2 proposals from the workspace store, or empty if none. */
+function readProposals(ctx: ToolContext): unknown {
+  const store = openStore(dbPath(ctx))
+  try {
+    return store.getProposals() ?? { version: 0, base: '', proposals: [] }
+  } finally {
+    store.close()
+  }
 }
 
 /** A method + path request reduced to what the API router needs to dispatch. */
@@ -44,10 +47,10 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
       return { status: 200, body: loadMergedGraph(ctx) }
     }
     if (req.method === 'GET' && req.path === '/api/soundiness') {
-      return { status: 200, body: readSoundiness(ctx.dir) ?? [] }
+      return { status: 200, body: readSoundiness(ctx.dir) }
     }
     if (req.method === 'GET' && req.path === '/api/proposals') {
-      return { status: 200, body: readProposals(ctx.dir) }
+      return { status: 200, body: readProposals(ctx) }
     }
     if (req.method === 'POST' && req.path === '/api/overlay') {
       const result = updateGraph(ctx, req.body as UpdateGraphArgs)

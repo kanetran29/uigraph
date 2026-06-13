@@ -3,18 +3,17 @@
 // These tie the workspace together: adapters produce the IR, @uigraph/core/node
 // persists it, and @uigraph/core diffs it. No commander or process state leaks in.
 
-import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import type { AdapterContext, Logger, SoundinessNote } from '@uigraph/core'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/core'
 import { diffGraphs } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
-import { loadGraph, saveGraph } from '@uigraph/core/node'
+import { loadGraph, openStore, importJsonWorkspace, type ImportSummary } from '@uigraph/core/node'
 import { reactAdapter } from '@uigraph/adapter-react'
 import { angularAdapter } from '@uigraph/adapter-angular'
 
-/** Standard file names a `map` run writes into the project directory. */
-export const GRAPH_FILE = 'ui-graph.json'
-export const SOUNDINESS_FILE = 'ui-graph.soundiness.json'
+/** The SQLite database file that is a workspace's canonical store. */
+export const DB_FILE = 'uigraph.db'
 
 /** The frameworks the CLI can map; selects the adapter for a `map` run. */
 export type AdapterName = 'react' | 'angular'
@@ -52,7 +51,7 @@ export function pickAdapter(name: AdapterName) {
   throw new Error(`unknown adapter: ${String(name)} (expected 'react' or 'angular')`)
 }
 
-/** Options for `runMap`: the project dir, the framework, and an optional out path. */
+/** Options for `runMap`: the project dir, the framework, and an optional db path. */
 export interface RunMapOptions {
   dir: string
   adapter: AdapterName
@@ -61,10 +60,9 @@ export interface RunMapOptions {
   logger?: Logger
 }
 
-/** The summary `runMap` returns (and prints): where it wrote and the headline counts. */
+/** The summary `runMap` returns (and prints): the db it wrote and headline counts. */
 export interface MapSummary {
-  graphPath: string
-  soundinessPath: string
+  dbPath: string
   nodes: number
   edges: number
   must: number
@@ -73,16 +71,16 @@ export interface MapSummary {
   soundiness: number
 }
 
-/** Absolute path of the soundiness file that sits beside a given graph path. */
-export function soundinessPathFor(graphPath: string): string {
-  return join(dirname(graphPath), SOUNDINESS_FILE)
+/** Absolute path to a workspace's SQLite database. */
+export function dbPathFor(dir: string): string {
+  return join(dir, DB_FILE)
 }
 
 /**
- * Run an adapter over a project directory, persist the resulting graph (to
- * `--out` or `<dir>/ui-graph.json`) and its soundiness report (beside the graph),
- * and return a summary of counts. The base graph file is written via the core's
- * validating saveGraph so an invalid extraction can never be persisted.
+ * Run an adapter over a project directory and persist the resulting graph +
+ * soundiness report into the workspace SQLite database (`--out` or
+ * `<dir>/uigraph.db`), returning a summary of counts. The store's setBaseGraph
+ * validates, so an invalid extraction can never be persisted.
  */
 export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   const logger = opts.logger ?? consoleLogger()
@@ -91,15 +89,16 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
 
   const { graph, soundiness } = await adapter.extract(opts.dir, { controls: opts.controls ?? false }, ctx)
 
-  const graphPath = opts.out ?? join(opts.dir, GRAPH_FILE)
-  const soundPath = soundinessPathFor(graphPath)
-
-  saveGraph(graphPath, graph)
-  writeSoundiness(soundPath, soundiness)
+  const dbPath = opts.out ?? dbPathFor(opts.dir)
+  const store = openStore(dbPath)
+  try {
+    store.setBaseGraph(graph, soundiness)
+  } finally {
+    store.close()
+  }
 
   return {
-    graphPath,
-    soundinessPath: soundPath,
+    dbPath,
     nodes: graph.nodes.length,
     edges: graph.edges.length,
     must: graph.edges.filter((e) => e.modality === 'must').length,
@@ -109,34 +108,59 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   }
 }
 
-/** Serialize a soundiness report to JSON (pretty-printed), creating parent dirs. */
-export function writeSoundiness(path: string, notes: SoundinessNote[]): void {
-  mkdirSync(dirname(path), { recursive: true })
-  writeFileSync(path, JSON.stringify(notes, null, 2) + '\n', 'utf8')
-}
-
 /** Format a MapSummary as the multi-line block the `map` command prints. */
 export function formatMapSummary(s: MapSummary): string {
   return [
-    `Wrote ${s.graphPath}`,
-    `Wrote ${s.soundinessPath}`,
+    `Wrote ${s.dbPath}`,
     `  nodes: ${s.nodes}`,
     `  edges: ${s.edges} (must: ${s.must}, may: ${s.may}, unknown: ${s.unknown})`,
     `  soundiness notes: ${s.soundiness}`,
   ].join('\n')
 }
 
-/** Options for `runDiff`: the two graph file paths to compare. */
+/** Run the JSON→SQLite migration for a workspace dir; returns what was imported. */
+export function runMigrate(dir: string): ImportSummary {
+  const store = openStore(dbPathFor(dir))
+  try {
+    return importJsonWorkspace(dir, store)
+  } finally {
+    store.close()
+  }
+}
+
+/** Format an ImportSummary as the block the `migrate` command prints. */
+export function formatMigrateSummary(dir: string, s: ImportSummary): string {
+  return [
+    `Migrated ${dir} -> ${dbPathFor(dir)}`,
+    `  graph: ${s.graph ? 'yes' : 'no'} · soundiness: ${s.soundiness}`,
+    `  overlay: ${s.overlay ? 'yes' : 'no'} · observations: ${s.observations} · proposals: ${s.proposals}`,
+  ].join('\n')
+}
+
+/** Options for `runDiff`: the two graph sources to compare (.db or .json). */
 export interface RunDiffOptions {
   a: string
   b: string
 }
 
-/** Load two graph files and diff them by stable id, returning the structured diff. */
+/** Load a graph from a path: SQLite store when `.db`, else a JSON graph file. */
+function loadGraphSource(path: string): UiGraph {
+  if (path.endsWith('.db')) {
+    const store = openStore(path)
+    try {
+      const g = store.getBaseGraph()
+      if (g === null) throw new Error(`no base graph in ${path}`)
+      return g
+    } finally {
+      store.close()
+    }
+  }
+  return loadGraph(path)
+}
+
+/** Load two graph sources (.db or .json) and diff them by stable id. */
 export function runDiff(opts: RunDiffOptions): GraphDiff {
-  const a = loadGraph(opts.a)
-  const b = loadGraph(opts.b)
-  return diffGraphs(a, b)
+  return diffGraphs(loadGraphSource(opts.a), loadGraphSource(opts.b))
 }
 
 /**
@@ -155,19 +179,12 @@ export function formatDiff(diff: GraphDiff): string {
   return lines.join('\n')
 }
 
-/** Resolve the base graph path for a workspace dir (the file `map` writes). */
-export function graphPathFor(dir: string): string {
-  return join(dir, GRAPH_FILE)
-}
-
-/** Resolve the soundiness file path for a workspace dir, if one was written. */
-export function workspaceSoundinessPath(dir: string): string {
-  return join(dir, SOUNDINESS_FILE)
-}
-
-/** Read a workspace's soundiness report, or null when none has been written. */
-export function readSoundiness(dir: string): SoundinessNote[] | null {
-  const path = workspaceSoundinessPath(dir)
-  if (!existsSync(path)) return null
-  return JSON.parse(readFileSync(path, 'utf8')) as SoundinessNote[]
+/** Read a workspace's soundiness report from its SQLite store (empty if none). */
+export function readSoundiness(dir: string): SoundinessNote[] {
+  const store = openStore(dbPathFor(dir))
+  try {
+    return store.getSoundiness()
+  } finally {
+    store.close()
+  }
 }

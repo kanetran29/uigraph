@@ -10,11 +10,19 @@ import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
-import { loadGraph, saveGraph } from '@uigraph/core/node'
+import { openStore, saveGraph } from '@uigraph/core/node'
 import type { Server } from 'node:http'
-import { formatDiff, readSoundiness, runDiff, runMap, soundinessPathFor } from './commands'
+import { dbPathFor, formatDiff, readSoundiness, runDiff, runMap } from './commands'
 import { handleApiRequest, resolveShotPath, startApiServer } from './server'
 import { mkdirSync, writeFileSync } from 'node:fs'
+
+/** Seed a workspace dir's SQLite store with a base graph; returns the dir. */
+function seedWorkspace(dir: string, g: UiGraph): string {
+  const store = openStore(dbPathFor(dir))
+  store.setBaseGraph(g)
+  store.close()
+  return dir
+}
 
 const SAMPLE_REACT = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
 
@@ -61,27 +69,24 @@ afterEach(async () => {
 })
 
 describe('runMap', () => {
-  it('extracts the sample-react-app, writes a loadable ui-graph.json with 8 nodes', async () => {
-    const out = join(tempDir('uigraph-cli-map-'), 'ui-graph.json')
+  it('extracts the sample-react-app into a loadable uigraph.db with 8 nodes', async () => {
+    const out = join(tempDir('uigraph-cli-map-'), 'uigraph.db')
     const summary = await runMap({ dir: SAMPLE_REACT, adapter: 'react', out })
 
     expect(existsSync(out)).toBe(true)
-    const reloaded = loadGraph(out)
-    expect(reloaded.nodes).toHaveLength(8)
+    const store = openStore(out)
+    const reloaded = store.getBaseGraph()
+    store.close()
+    expect(reloaded?.nodes).toHaveLength(8)
     expect(summary.nodes).toBe(8)
-    expect(summary.edges).toBe(reloaded.edges.length)
+    expect(summary.edges).toBe(reloaded?.edges.length)
     expect(summary.must + summary.may + summary.unknown).toBe(summary.edges)
   })
 
-  it('writes the soundiness report beside the graph', async () => {
-    const out = join(tempDir('uigraph-cli-sound-'), 'ui-graph.json')
-    const summary = await runMap({ dir: SAMPLE_REACT, adapter: 'react', out })
-
-    const soundPath = soundinessPathFor(out)
-    expect(existsSync(soundPath)).toBe(true)
-    const notes = readSoundiness(join(soundPath, '..'))
-    expect(notes).not.toBeNull()
-    expect(notes?.length).toBe(summary.soundiness)
+  it('persists the soundiness report into the store', async () => {
+    const dir = tempDir('uigraph-cli-sound-')
+    const summary = await runMap({ dir: SAMPLE_REACT, adapter: 'react', out: join(dir, 'uigraph.db') })
+    expect(readSoundiness(dir).length).toBe(summary.soundiness)
   })
 })
 
@@ -126,9 +131,7 @@ describe('runDiff / formatDiff', () => {
 
 describe('handleApiRequest (pure router)', () => {
   function workspace(): string {
-    const dir = tempDir('uigraph-cli-api-')
-    saveGraph(join(dir, 'ui-graph.json'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
-    return dir
+    return seedWorkspace(tempDir('uigraph-cli-api-'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
   }
 
   it('GET /api/graph returns the merged graph', () => {
@@ -190,8 +193,7 @@ describe('resolveShotPath (proposal evidence screenshots)', () => {
 
 describe('startApiServer (end-to-end on an ephemeral port)', () => {
   it('serves GET /api/graph as JSON over HTTP', async () => {
-    const dir = tempDir('uigraph-cli-http-')
-    saveGraph(join(dir, 'ui-graph.json'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
+    const dir = seedWorkspace(tempDir('uigraph-cli-http-'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
 
     const { server, url } = await startApiServer({ dir, port: 0 })
     openServers.push(server)
