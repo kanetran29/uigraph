@@ -7,7 +7,7 @@
 // and (c) prune hypotheses that reference a control or effect the screen lacks.
 // It invents nothing — every field is read straight from the graph.
 
-import type { UiGraph } from './ir'
+import type { ControlSelector, UiGraph } from './ir'
 import { hashValue } from './hash'
 
 /** A control that exists on a screen, with the events/effects the adapter wired to it. */
@@ -16,6 +16,7 @@ export interface GroundedControl {
   element: string
   controlType: string
   name?: string
+  selector?: ControlSelector
   events: string[]
   effects: string[]
 }
@@ -71,6 +72,7 @@ export function buildGrounding(graph: UiGraph): Grounding {
         element: n.control?.element ?? '',
         controlType: n.control?.controlType ?? '',
         ...(n.control?.name ? { name: n.control.name } : {}),
+        ...(n.control?.selector ? { selector: n.control.selector } : {}),
         events: n.control?.events ?? [],
         effects: n.control?.effects ?? [],
       }))

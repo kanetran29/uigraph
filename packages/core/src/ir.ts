@@ -21,11 +21,27 @@ export type Source = 'static' | 'manual' | 'runtime'
 export type NodeKind = 'screen' | 'route' | 'modal' | 'unknown' | 'control'
 
 /**
+ * How a control is located, in precedence order: a test id, an ARIA role +
+ * accessible name, a label (id/name attribute), a structural tag:nth path, or
+ * visible text. Stable across edits, and the basis for both the control's node id
+ * and a real automation locator (Playwright getByTestId/getByRole/getByLabel…).
+ */
+export type SelectorStrategy = 'testid' | 'role-name' | 'label' | 'structural' | 'text'
+
+/** A deterministic locator for a control. `nth` disambiguates identical selectors on one screen. */
+export interface ControlSelector {
+  strategy: SelectorStrategy
+  value: string
+  nth?: number
+}
+
+/**
  * Metadata for a `control` node — an interactive element (button, input,
  * rich-text, form, select, link) extracted within a screen. `effects` lists the
  * non-navigational behaviors of the control as typed strings (e.g.
  * "api:POST /orders", "state:clearCart", "submit"); navigational behaviors are
- * edges to other nodes instead.
+ * edges to other nodes instead. `selector` is the stable locator the control's id
+ * is derived from (so identity survives edits) and a real automation handle.
  */
 export interface ControlMeta {
   element: string
@@ -33,6 +49,7 @@ export interface ControlMeta {
   name?: string
   events?: string[]
   effects?: string[]
+  selector?: ControlSelector
 }
 
 /** A screen/state (or a nested control) in the app. `id` is stable and unique. */

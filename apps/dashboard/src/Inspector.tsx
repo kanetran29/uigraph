@@ -114,6 +114,10 @@ export function Inspector(props: InspectorProps): JSX.Element {
           <Field label="element" value={c.element} />
           <Field label="controlType" value={c.controlType} />
           <Field label="name" value={c.name ?? '—'} />
+          <Field
+            label="selector"
+            value={c.selector ? `${c.selector.strategy}: ${c.selector.value}${c.selector.nth ? ` #${c.selector.nth}` : ''}` : '—'}
+          />
           <h3>events</h3>
           {c.events && c.events.length > 0 ? (
             <ul className="effects-list">
