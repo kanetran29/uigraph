@@ -10,6 +10,7 @@ import type { CoverageReport, GraphEdge, Proposals, UiGraph } from '@uigraph/cor
 import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, postOverlay, type UpdateOp } from './api'
 import { GraphCanvas, type Selection } from './GraphCanvas'
 import { Coverage } from './Coverage'
+import { Plan } from './Plan'
 import { Inspector } from './Inspector'
 import { ProposalsPanel } from './Proposals'
 import { Steps } from './Steps'
@@ -105,6 +106,33 @@ export function App(): JSX.Element {
     setPathEdgeIds(new Set(edgeIds))
   }, [])
 
+  // Sketch a new screen for a planned feature: a manual screen node in the overlay.
+  const handleAddScreen = useCallback(
+    (label: string, route: string) => {
+      const id = `n_manual_${label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')}`
+      void applyOp({ kind: 'addNode', node: { id, route: route.length > 0 ? route : null, componentPath: null, label, kind: 'screen' } })
+    },
+    [applyOp],
+  )
+
+  // Export the overlay as a markdown "planned changes" spec for a dev/agent.
+  const handleExport = useCallback(async () => {
+    try {
+      const res = await fetch('/api/plan')
+      const body = (await res.json()) as { spec?: string }
+      const spec = body.spec ?? '# Planned changes\n\n_unavailable_\n'
+      const blob = new Blob([spec], { type: 'text/markdown' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'uigraph-plan.md'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      setError('Export needs a live serve API (uigraph serve).')
+    }
+  }, [])
+
   if (loading || graph === null) {
     return <LoadingSkeleton />
   }
@@ -146,6 +174,7 @@ export function App(): JSX.Element {
         </main>
         <div className="side">
           <Inspector selection={selection} onEditEdge={handleEditEdge} onDelete={handleDelete} />
+          <Plan live={live} onAddScreen={handleAddScreen} onExport={handleExport} />
           <Steps graph={graph} onPathChange={handlePathChange} />
           {coverage ? <Coverage coverage={coverage} graph={graph} onSelect={setSelection} /> : null}
           <ProposalsPanel

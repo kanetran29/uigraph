@@ -9,7 +9,19 @@ import { join } from 'node:path'
 import type { ToolContext, UpdateGraphArgs } from '@uigraph/mcp'
 import { dbPath, loadMergedGraph, updateGraph } from '@uigraph/mcp'
 import { openStore } from '@uigraph/core/node'
-import { buildCoverage } from '@uigraph/core'
+import { buildCoverage, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
+
+/** Render the workspace overlay as a markdown "planned changes" spec. */
+function readPlan(ctx: ToolContext): string {
+  const store = openStore(dbPath(ctx))
+  try {
+    const base = store.getBaseGraph()
+    if (base === null) return '_No graph in this workspace._\n'
+    return exportOverlaySpec(base, store.getOverlay() ?? emptyOverlay(hashValue(base)))
+  } finally {
+    store.close()
+  }
+}
 import { readSoundiness } from './commands'
 
 /** Read the quarantined Tier-2 proposals from the workspace store, or empty if none. */
@@ -55,6 +67,9 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
     }
     if (req.method === 'GET' && req.path === '/api/coverage') {
       return { status: 200, body: buildCoverage(loadMergedGraph(ctx)) }
+    }
+    if (req.method === 'GET' && req.path === '/api/plan') {
+      return { status: 200, body: { spec: readPlan(ctx) } }
     }
     if (req.method === 'POST' && req.path === '/api/overlay') {
       const result = updateGraph(ctx, req.body as UpdateGraphArgs)
