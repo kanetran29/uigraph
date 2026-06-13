@@ -20,10 +20,11 @@ export interface NodeSize {
   height: number
 }
 
-/** The computed layout: positions and sizes for every node. */
+/** The computed layout: positions and sizes for every node, plus dagre's routed edge polylines. */
 export interface GraphLayout {
   positions: Map<string, NodePosition>
   sizes: Map<string, NodeSize>
+  edgePoints: Map<string, NodePosition[]>
 }
 
 const SCREEN_WIDTH = 210
@@ -97,6 +98,15 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
   const positions = new Map<string, NodePosition>()
   const sizes = new Map<string, NodeSize>()
 
+  // Dagre routes each edge as a de-crossed, edgesep-padded polyline. Because node
+  // positions below are emitted as dagreCenter - size/2 (top-left), the dagre and
+  // flow-space origins coincide, so these points are usable directly as flow coords.
+  const edgePoints = new Map<string, NodePosition[]>()
+  for (const { v, w } of g.edges()) {
+    const routed = g.edge(v, w)?.points
+    if (routed && routed.length > 0) edgePoints.set(`${v}->${w}`, routed.map((p: NodePosition) => ({ x: p.x, y: p.y })))
+  }
+
   for (const node of screens) {
     const width = widthOf(node.id)
     const height = heightOf(node.id)
@@ -118,5 +128,5 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
     })
   }
 
-  return { positions, sizes }
+  return { positions, sizes, edgePoints }
 }
