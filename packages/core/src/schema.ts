@@ -86,6 +86,7 @@ export function validateOverlayShape(value: unknown): string[] {
   if (Array.isArray(value['addedNodes'])) value['addedNodes'].forEach((n, i) => checkNode(n, i, errs))
   if (Array.isArray(value['addedEdges'])) value['addedEdges'].forEach((e, i) => checkEdge(e, i, errs))
   if (Array.isArray(value['editedEdges'])) value['editedEdges'].forEach((e, i) => checkEdge(e, i, errs))
+  if (Array.isArray(value['editedNodes'])) value['editedNodes'].forEach((n, i) => checkNode(n, i, errs))
   if (Array.isArray(value['removedRefs']))
     value['removedRefs'].forEach((r, i) => {
       if (typeof r !== 'string') errs.push(`overlay.removedRefs[${i}] must be a string`)

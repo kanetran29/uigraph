@@ -11,9 +11,10 @@ import type { GraphEdge, GraphNode, Overlay, UiGraph } from './ir'
 export function mergeOverlay(base: UiGraph, overlay: Overlay): UiGraph {
   const removed = new Set(overlay.removedRefs)
   const edited = new Map(overlay.editedEdges.map((e) => [e.id, e]))
+  const editedNodes = new Map((overlay.editedNodes ?? []).map((n) => [n.id, n]))
 
-  const nodes: GraphNode[] = base.nodes.filter((n) => !removed.has(n.id))
-  for (const n of overlay.addedNodes) nodes.push(n)
+  const nodes: GraphNode[] = base.nodes.filter((n) => !removed.has(n.id)).map((n) => editedNodes.get(n.id) ?? n)
+  for (const n of overlay.addedNodes) nodes.push(editedNodes.get(n.id) ?? n)
 
   const edges: GraphEdge[] = []
   for (const e of base.edges) {
@@ -27,7 +28,7 @@ export function mergeOverlay(base: UiGraph, overlay: Overlay): UiGraph {
 
 /** An empty overlay bound to a given base content hash. */
 export function emptyOverlay(baseHash: string): Overlay {
-  return { version: 0, base: baseHash, addedNodes: [], addedEdges: [], editedEdges: [], removedRefs: [] }
+  return { version: 0, base: baseHash, addedNodes: [], addedEdges: [], editedEdges: [], editedNodes: [], removedRefs: [] }
 }
 
 /**
@@ -56,13 +57,18 @@ export function exportOverlaySpec(base: UiGraph, overlay: Overlay): string {
     for (const e of overlay.editedEdges) lines.push(edgeLine(e))
     lines.push('')
   }
+  if ((overlay.editedNodes ?? []).length > 0) {
+    lines.push('## Edited screens', '')
+    for (const n of overlay.editedNodes ?? []) lines.push(`- **${n.label}** (${n.route ?? n.id})`)
+    lines.push('')
+  }
   if (overlay.removedRefs.length > 0) {
     lines.push('## Removed', '')
     for (const id of overlay.removedRefs) lines.push(`- ${labelOf(id)} (${id})`)
     lines.push('')
   }
 
-  const planned = overlay.addedNodes.length + overlay.addedEdges.length + overlay.editedEdges.length + overlay.removedRefs.length
+  const planned = overlay.addedNodes.length + overlay.addedEdges.length + overlay.editedEdges.length + (overlay.editedNodes ?? []).length + overlay.removedRefs.length
   if (planned === 0) lines.push('_No planned changes yet — add screens and transitions to the overlay._')
   return lines.join('\n').trimEnd() + '\n'
 }

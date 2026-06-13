@@ -4,14 +4,42 @@
 // element raises a request the parent turns into an overlay POST.
 
 import { useEffect, useState } from 'react'
-import type { GraphEdge } from '@uigraph/core'
+import type { GraphEdge, GraphNode } from '@uigraph/core'
 import type { Selection } from './GraphCanvas'
 
 /** Props for the inspector: the current selection plus edit/delete callbacks. */
 export interface InspectorProps {
   selection: Selection
   onEditEdge: (edge: GraphEdge, event: string, guard: string | null) => void
+  onEditNode: (node: GraphNode) => void
   onDelete: (id: string) => void
+}
+
+/** Inline editor for a screen node's label + route; Save raises an editNode overlay op. */
+function NodeEditor(props: { node: GraphNode; onEditNode: (node: GraphNode) => void }): JSX.Element {
+  const { node, onEditNode } = props
+  const [label, setLabel] = useState(node.label)
+  const [route, setRoute] = useState(node.route ?? '')
+  useEffect(() => {
+    setLabel(node.label)
+    setRoute(node.route ?? '')
+  }, [node.id, node.label, node.route])
+  const dirty = label.trim() !== node.label || route.trim() !== (node.route ?? '')
+  return (
+    <div className="node-editor">
+      <label className="field-edit">
+        <span>label</span>
+        <input value={label} onChange={(e) => setLabel(e.target.value)} />
+      </label>
+      <label className="field-edit">
+        <span>route</span>
+        <input value={route} placeholder="(none)" onChange={(e) => setRoute(e.target.value)} />
+      </label>
+      <button className="plan-add" disabled={!dirty || label.trim().length === 0} onClick={() => onEditNode({ ...node, label: label.trim(), route: route.trim().length > 0 ? route.trim() : null })}>
+        Save changes
+      </button>
+    </div>
+  )
 }
 
 /** A single label/value row in the inspector's field list. */
@@ -85,7 +113,7 @@ function EdgeEditor(props: {
  * plus the manual editor for an edge.
  */
 export function Inspector(props: InspectorProps): JSX.Element {
-  const { selection, onEditEdge, onDelete } = props
+  const { selection, onEditEdge, onEditNode, onDelete } = props
 
   if (selection === null) {
     return (
@@ -163,6 +191,7 @@ export function Inspector(props: InspectorProps): JSX.Element {
         <Field label="route" value={n.route ?? '—'} />
         <Field label="componentPath" value={n.componentPath ?? '—'} />
         <Field label="kind" value={n.kind} />
+        {n.kind === 'screen' ? <NodeEditor node={n} onEditNode={onEditNode} /> : null}
         <div className="editor-actions">
           <button className="danger" onClick={() => onDelete(n.id)}>
             Delete

@@ -271,9 +271,10 @@ export function planPathTool(ctx: ToolContext, args: PlanPathArgs): PlanPathResu
   return { found: true, from: args.from, to: args.to, steps }
 }
 
-/** A manual edit applied to the overlay only; one of four discriminated ops. */
+/** A manual edit applied to the overlay only; one of five discriminated ops. */
 export type UpdateOp =
   | { kind: 'addNode'; node: GraphNode }
+  | { kind: 'editNode'; node: GraphNode }
   | { kind: 'addEdge'; edge: GraphEdge }
   | { kind: 'editEdge'; edge: GraphEdge }
   | { kind: 'remove'; id: string }
@@ -287,6 +288,7 @@ export interface UpdateGraphArgs {
 export interface UpdateGraphResult {
   applied: UpdateOp['kind']
   addedNodes: number
+  editedNodes: number
   addedEdges: number
   editedEdges: number
   removedRefs: number
@@ -317,6 +319,9 @@ export function updateGraph(ctx: ToolContext, args: UpdateGraphArgs): UpdateGrap
       case 'addNode':
         overlay.addedNodes.push(op.node)
         break
+      case 'editNode':
+        overlay.editedNodes = [...(overlay.editedNodes ?? []).filter((n) => n.id !== op.node.id), op.node]
+        break
       case 'addEdge':
         overlay.addedEdges.push(asManualEdge(op.edge))
         break
@@ -335,6 +340,7 @@ export function updateGraph(ctx: ToolContext, args: UpdateGraphArgs): UpdateGrap
     return {
       applied: op.kind,
       addedNodes: overlay.addedNodes.length,
+      editedNodes: (overlay.editedNodes ?? []).length,
       addedEdges: overlay.addedEdges.length,
       editedEdges: overlay.editedEdges.length,
       removedRefs: overlay.removedRefs.length,
