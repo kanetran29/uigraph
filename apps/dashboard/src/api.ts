@@ -3,7 +3,8 @@
 // a single manual overlay edit. The overlay op shape mirrors @uigraph/mcp's
 // UpdateGraphArgs so the dashboard and the server cannot drift apart.
 
-import type { GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
+import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
+import { buildCoverage } from '@uigraph/core'
 import sampleGraph from './sample-graph.json'
 
 /** The bundled fallback graph, used when the serve API is unreachable (static open). */
@@ -52,6 +53,20 @@ export async function fetchProposals(): Promise<Proposals> {
     return (await res.json()) as Proposals
   } catch {
     return EMPTY_PROPOSALS
+  }
+}
+
+/**
+ * Fetch runtime-verification coverage from the serve API. On any failure, fall back
+ * to computing coverage over the bundled sample graph so the panel still renders.
+ */
+export async function fetchCoverage(): Promise<CoverageReport> {
+  try {
+    const res = await fetch('/api/coverage')
+    if (!res.ok) return buildCoverage(SAMPLE_GRAPH)
+    return (await res.json()) as CoverageReport
+  } catch {
+    return buildCoverage(SAMPLE_GRAPH)
   }
 }
 

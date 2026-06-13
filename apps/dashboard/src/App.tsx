@@ -6,9 +6,10 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
-import type { GraphEdge, Proposals, UiGraph } from '@uigraph/core'
-import { EMPTY_PROPOSALS, fetchGraph, fetchProposals, postOverlay, type UpdateOp } from './api'
+import type { CoverageReport, GraphEdge, Proposals, UiGraph } from '@uigraph/core'
+import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, postOverlay, type UpdateOp } from './api'
 import { GraphCanvas, type Selection } from './GraphCanvas'
+import { Coverage } from './Coverage'
 import { Inspector } from './Inspector'
 import { ProposalsPanel } from './Proposals'
 import { Steps } from './Steps'
@@ -41,6 +42,7 @@ function newManualEdge(from: string, to: string): GraphEdge {
 export function App(): JSX.Element {
   const [graph, setGraph] = useState<UiGraph | null>(null)
   const [proposals, setProposals] = useState<Proposals>(EMPTY_PROPOSALS)
+  const [coverage, setCoverage] = useState<CoverageReport | null>(null)
   const [live, setLive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selection, setSelection] = useState<Selection>(null)
@@ -48,10 +50,11 @@ export function App(): JSX.Element {
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const [{ graph: g, live: isLive }, props] = await Promise.all([fetchGraph(), fetchProposals()])
+    const [{ graph: g, live: isLive }, props, cov] = await Promise.all([fetchGraph(), fetchProposals(), fetchCoverage()])
     setGraph(g)
     setLive(isLive)
     setProposals(props)
+    setCoverage(cov)
     setLoading(false)
   }, [])
 
@@ -144,6 +147,7 @@ export function App(): JSX.Element {
         <div className="side">
           <Inspector selection={selection} onEditEdge={handleEditEdge} onDelete={handleDelete} />
           <Steps graph={graph} onPathChange={handlePathChange} />
+          {coverage ? <Coverage coverage={coverage} graph={graph} onSelect={setSelection} /> : null}
           <ProposalsPanel
             proposals={proposals}
             graph={graph}
