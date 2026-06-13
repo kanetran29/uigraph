@@ -3,12 +3,13 @@
 // These tie the workspace together: adapters produce the IR, @uigraph/core/node
 // persists it, and @uigraph/core diffs it. No commander or process state leaks in.
 
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/core'
-import { diffGraphs } from '@uigraph/core'
+import { diffGraphs, planPath, buildSpecPlan, renderPlaywrightSpec } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
 import { loadGraph, openStore, importJsonWorkspace, type ImportSummary } from '@uigraph/core/node'
+import { loadMergedGraph } from '@uigraph/mcp'
 import { reactAdapter } from '@uigraph/adapter-react'
 import { angularAdapter } from '@uigraph/adapter-angular'
 
@@ -126,6 +127,51 @@ export function runMigrate(dir: string): ImportSummary {
   } finally {
     store.close()
   }
+}
+
+/** Options for `runGen`: the workspace dir, the from/to node ids, and codegen knobs. */
+export interface RunGenOptions {
+  dir: string
+  from: string
+  to: string
+  out?: string
+  baseUrl?: string
+  framework?: string
+}
+
+/** Result of a `gen` run: the rendered spec, its leg count, and where it was written. */
+export interface GenSummary {
+  from: string
+  to: string
+  legs: number
+  out?: string
+  spec: string
+}
+
+/**
+ * Plan a path over the workspace graph and render it as an e2e spec. Throws when
+ * the framework is unsupported or no path exists. Writes the spec to `--out` when
+ * given, else returns it for printing.
+ */
+export function runGen(opts: RunGenOptions): GenSummary {
+  const framework = opts.framework ?? 'playwright'
+  if (framework !== 'playwright') throw new Error(`unsupported framework: ${framework} (only 'playwright')`)
+  const graph = loadMergedGraph({ dir: opts.dir })
+  const steps = planPath(graph, opts.from, opts.to)
+  if (steps === null) throw new Error(`no path from ${opts.from} to ${opts.to}`)
+  const plan = buildSpecPlan(graph, steps, { baseUrl: opts.baseUrl ?? '', title: `${opts.from} → ${opts.to}` })
+  const spec = renderPlaywrightSpec(plan)
+  if (opts.out !== undefined) {
+    mkdirSync(dirname(opts.out), { recursive: true })
+    writeFileSync(opts.out, spec, 'utf8')
+  }
+  return { from: opts.from, to: opts.to, legs: plan.legs.length, out: opts.out, spec }
+}
+
+/** Format a GenSummary for the `gen` command (header + the spec when not written to a file). */
+export function formatGenSummary(s: GenSummary): string {
+  const head = s.out !== undefined ? `Wrote ${s.out} (${s.legs} legs: ${s.from} → ${s.to})` : `Generated spec (${s.legs} legs: ${s.from} → ${s.to})`
+  return s.out !== undefined ? head : `${head}\n\n${s.spec}`
 }
 
 /** Format an ImportSummary as the block the `migrate` command prints. */

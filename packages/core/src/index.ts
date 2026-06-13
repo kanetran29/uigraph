@@ -61,6 +61,15 @@ export {
   type VerifyTarget,
 } from './coverage'
 export {
+  buildSpecPlan,
+  renderPlaywrightSpec,
+  locatorFor,
+  type SpecPlan,
+  type SpecLeg,
+  type SpecAction,
+  type SpecAssertion,
+} from './codegen'
+export {
   parseApiEffect,
   summarizeApiEffect,
   collectApiEffects,

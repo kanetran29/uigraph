@@ -6,7 +6,7 @@
 
 import { join } from 'node:path'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
-import { applyObservations, buildCoverage, buildGrounding, diffGraphs, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, validateMerged, validateOverlay } from '@uigraph/core'
+import { applyObservations, buildCoverage, buildGrounding, buildSpecPlan, diffGraphs, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
 import type { CoverageReport, Grounding, ProposalGraph, ScreenGrounding, VerifyTarget } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
@@ -197,6 +197,29 @@ export interface NextToVerifyArgs {
  */
 export function nextToVerifyTool(ctx: ToolContext, args: NextToVerifyArgs = {}): VerifyTarget[] {
   return nextToVerify(loadMergedGraph(ctx), getProposalGraph(ctx), args.limit)
+}
+
+/** Arguments for gen_spec: the from/to node ids and an optional base URL. */
+export interface GenSpecArgs {
+  from: string
+  to: string
+  baseUrl?: string
+}
+
+/** gen_spec result: the rendered Playwright spec + its leg count, or an error. */
+export type GenSpecResult = { spec: string; legs: number } | { error: string }
+
+/**
+ * Generate a Playwright e2e spec for the route from one node to another: plan the
+ * path over the merged graph, then render each leg to a locator action (from the
+ * control's stable selector) + assertions (target URL, dialog, request).
+ */
+export function genSpec(ctx: ToolContext, args: GenSpecArgs): GenSpecResult {
+  const graph = loadMergedGraph(ctx)
+  const steps = planPath(graph, args.from, args.to)
+  if (steps === null) return { error: `no path from ${args.from} to ${args.to}` }
+  const plan = buildSpecPlan(graph, steps, { baseUrl: args.baseUrl ?? '', title: `${args.from} → ${args.to}` })
+  return { spec: renderPlaywrightSpec(plan), legs: plan.legs.length }
 }
 
 /** Arguments for plan_path: source/target node ids and optional allowed modalities. */

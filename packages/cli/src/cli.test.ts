@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
 import { openStore, saveGraph } from '@uigraph/core/node'
 import type { Server } from 'node:http'
-import { dbPathFor, formatDiff, readSoundiness, runDiff, runMap } from './commands'
+import { dbPathFor, formatDiff, readSoundiness, runDiff, runGen, runMap } from './commands'
 import { handleApiRequest, resolveShotPath, startApiServer } from './server'
 import { mkdirSync, writeFileSync } from 'node:fs'
 
@@ -126,6 +126,22 @@ describe('runDiff / formatDiff', () => {
     saveGraph(aPath, g)
     saveGraph(bPath, g)
     expect(formatDiff(runDiff({ a: aPath, b: bPath }))).toBe('No differences.')
+  })
+})
+
+describe('runGen (codegen)', () => {
+  it('renders a Playwright spec for a planned path from the workspace db', () => {
+    const dir = seedWorkspace(tempDir('uigraph-cli-gen-'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
+    const sum = runGen({ dir, from: 'a', to: 'b', baseUrl: 'http://x' })
+    expect(sum.legs).toBe(1)
+    expect(sum.spec).toContain("import { test, expect } from '@playwright/test'")
+    expect(sum.spec).toContain('await page.goto(')
+    expect(sum.spec).toContain('toHaveURL("http://x/b")')
+  })
+
+  it('throws on an unsupported framework', () => {
+    const dir = seedWorkspace(tempDir('uigraph-cli-gen2-'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
+    expect(() => runGen({ dir, from: 'a', to: 'b', framework: 'cypress' })).toThrow(/unsupported framework/)
   })
 })
 
