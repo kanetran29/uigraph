@@ -40,6 +40,7 @@ export interface Proposal {
   confidence: number
   source: 'proposal'
   status: ProposalStatus
+  screenshot?: string
 }
 
 /** The proposals sidecar: a set of quarantined proposals bound to a base graph hash. */

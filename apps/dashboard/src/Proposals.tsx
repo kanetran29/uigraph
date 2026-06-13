@@ -97,6 +97,9 @@ function ProposalRow(props: { proposal: Proposal; labels: Map<string, string> })
       <ConfidenceBar confidence={proposal.confidence} />
       {meta ? <div className="prop-meta">{meta}</div> : null}
       {open ? <p className="prop-rationale">{proposal.rationale}</p> : null}
+      {open && proposal.screenshot ? (
+        <img className="prop-shot" src={`/api/${proposal.screenshot}`} alt={`${proposal.screen} screen`} loading="lazy" />
+      ) : null}
     </li>
   )
 }
