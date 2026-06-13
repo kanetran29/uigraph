@@ -6,6 +6,7 @@ import Settings from './pages/Settings'
 import Products from './pages/Products'
 import ProductDetail from './pages/ProductDetail'
 import Checkout from './pages/Checkout'
+import Showcase from './pages/Showcase'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
       <Route path="/products" element={<Products />} />
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/showcase" element={<Showcase />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
