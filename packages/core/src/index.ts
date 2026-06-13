@@ -61,6 +61,7 @@ export {
   type EdgeCoverage,
   type VerifyTarget,
 } from './coverage'
+export { reconcileProposals, buildResolution, type ResolutionReport } from './reconcile'
 export {
   buildSpecPlan,
   renderPlaywrightSpec,

@@ -23,6 +23,10 @@ import {
   planPathTool,
   setScenario,
   reportObservation,
+  reconcileProposalsTool,
+  withdrawProposal,
+  markUnverifiable,
+  getLoopStatus,
   updateGraph,
   type DescribeScreenArgs,
   type DiffArgs,
@@ -33,6 +37,7 @@ import {
   type NextToVerifyArgs,
   type PlanPathArgs,
   type ReportObservationArgs,
+  type ResolveProposalArgs,
   type UpdateGraphArgs,
 } from './tools'
 
@@ -60,6 +65,7 @@ const TOOLS: Tool[] = [
         category: { type: 'string', description: 'filter to one category, e.g. keyboard, async-state, disclosure' },
         evidencedOnly: { type: 'boolean', description: 'only proposals grounded in concrete source' },
         minConfidence: { type: 'number', description: '0..1 lower bound on confidence' },
+        status: { type: 'string', enum: ['proposed', 'confirmed', 'rejected', 'unverifiable'], description: "filter by lifecycle status; 'proposed' is the open worklist" },
       },
     },
   },
@@ -182,6 +188,40 @@ const TOOLS: Tool[] = [
       required: ['a', 'b'],
     },
   },
+  {
+    name: 'get_loop_status',
+    description: 'The deterministic DONE signal for the proposal reconciliation loop. loopDone is true iff the verify worklist is empty AND no proposed proposals remain (100% = every uncertain edge runtime-witnessed AND every proposal resolved). Returns coverage + resolution + worklistSize.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'reconcile_proposals',
+    description: 'Re-derive every proposal status from the observation log (confirmed→archived, refuted→withdrawn); idempotent. Use after observations are appended out-of-band (e.g. by the Tier-3 runner). Returns what changed + the resolution snapshot.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'withdraw_proposal',
+    description: 'Withdraw a proposal judged hallucinated/impossible: set status rejected with a reason, removing it from the active worklist. Never touches the proven graph.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'proposal id to withdraw' },
+        reason: { type: 'string', description: 'why it is hallucinated / cannot exist' },
+      },
+      required: ['id', 'reason'],
+    },
+  },
+  {
+    name: 'mark_unverifiable',
+    description: 'Park a plausible-but-undrivable proposal as unverifiable with a reason: it leaves the active worklist (so the loop can terminate) but stays queryable for a human. Distinct from withdraw (a disproven lead).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'proposal id to park' },
+        reason: { type: 'string', description: 'why it cannot be driven/reached now' },
+      },
+      required: ['id', 'reason'],
+    },
+  },
 ]
 
 /** Wrap any JSON-serializable payload as a single text content block. */
@@ -228,6 +268,14 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(updateGraph(ctx, args as unknown as UpdateGraphArgs))
       case 'report_observation':
         return jsonResult(reportObservation(ctx, args as unknown as ReportObservationArgs))
+      case 'get_loop_status':
+        return jsonResult(getLoopStatus(ctx))
+      case 'reconcile_proposals':
+        return jsonResult(reconcileProposalsTool(ctx))
+      case 'withdraw_proposal':
+        return jsonResult(withdrawProposal(ctx, args as unknown as ResolveProposalArgs))
+      case 'mark_unverifiable':
+        return jsonResult(markUnverifiable(ctx, args as unknown as ResolveProposalArgs))
       case 'diff':
         return jsonResult(diffTool(args as unknown as DiffArgs))
       default:

@@ -12,8 +12,15 @@
 
 import type { UiGraph } from './ir'
 
-/** Lifecycle of a proposal as it moves toward (or away from) the proven graph. */
-export type ProposalStatus = 'proposed' | 'confirmed' | 'rejected'
+/**
+ * Lifecycle of a proposal as it moves toward (or away from) the proven graph.
+ * `proposed` = an open lead on the verification worklist; `confirmed` = a runtime
+ * observation witnessed it (archived — the proven edge already exists via the
+ * observation fold); `rejected` = disproven/hallucinated (withdrawn); `unverifiable`
+ * = plausible but not drivable/reachable, parked out of the worklist for a human.
+ * Only `proposed` proposals stay in the active proposal graph + verify worklist.
+ */
+export type ProposalStatus = 'proposed' | 'confirmed' | 'rejected' | 'unverifiable'
 
 /** What a proposal asserts: a new transition, a new state/node, or an interaction on a control. */
 export type ProposalKind = 'edge' | 'node' | 'interaction'
@@ -42,6 +49,7 @@ export interface Proposal {
   confidence: number
   source: 'proposal'
   status: ProposalStatus
+  reason?: string
   screenshot?: string
 }
 
@@ -59,7 +67,7 @@ export interface ProposalError {
   id?: string
 }
 
-const STATUSES = new Set<ProposalStatus>(['proposed', 'confirmed', 'rejected'])
+const STATUSES = new Set<ProposalStatus>(['proposed', 'confirmed', 'rejected', 'unverifiable'])
 const KINDS = new Set<ProposalKind>(['edge', 'node', 'interaction'])
 
 function isObject(v: unknown): v is Record<string, unknown> {
@@ -181,6 +189,7 @@ export function materializeProposalGraph(graph: UiGraph, proposals: Proposal[]):
   }
 
   for (const p of proposals) {
+    if (p.status !== 'proposed') continue
     if (!realNodeIds.has(p.screen)) continue
     if (p.to !== undefined && realScreens.has(p.to)) {
       link(p, p.to)

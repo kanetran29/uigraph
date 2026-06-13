@@ -6,8 +6,8 @@
 
 import { join } from 'node:path'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
-import { applyObservations, buildCoverage, buildGrounding, buildSpecPlan, diffGraphs, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
-import type { CoverageReport, Grounding, ProposalGraph, ScreenGrounding, VerifyTarget } from '@uigraph/core'
+import { applyObservations, buildCoverage, buildGrounding, buildResolution, buildSpecPlan, diffGraphs, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
+import type { CoverageReport, Grounding, ProposalGraph, ProposalStatus, ResolutionReport, ScreenGrounding, VerifyTarget } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
 import { loadGraph, openStore, type Store } from '@uigraph/core/node'
@@ -97,6 +97,7 @@ export interface GetProposalsArgs {
   category?: string
   evidencedOnly?: boolean
   minConfidence?: number
+  status?: ProposalStatus
 }
 
 /** get_proposals result: the filtered quarantined proposals plus quick aggregates. */
@@ -120,6 +121,7 @@ export function getProposals(ctx: ToolContext, args: GetProposalsArgs = {}): Get
       ...(args.category !== undefined ? { category: args.category } : {}),
       ...(args.evidencedOnly !== undefined ? { evidencedOnly: args.evidencedOnly } : {}),
       ...(args.minConfidence !== undefined ? { minConfidence: args.minConfidence } : {}),
+      ...(args.status !== undefined ? { status: args.status } : {}),
     }),
   )
   const byCategory: Record<string, number> = {}
@@ -396,13 +398,18 @@ export interface ReportObservationArgs {
 /** A recorded observation line (the core Observation plus a server timestamp). */
 export type ObservationEntry = Observation
 
+/** report_observation result: the recorded entry plus any proposals whose status the observation reconciled. */
+export type ReportObservationResult = ObservationEntry & { reconciled: { id: string; status: ProposalStatus }[] }
+
 /**
  * Append a runtime observation to the workspace store (append-only observations
- * table) and return the recorded entry. A confirmed observation is folded into the
- * served graph by loadMergedGraph (Tier-3): the observation — not the original
- * guess — enters the graph as a witnessed edge.
+ * table), reconcile any proposal it witnesses (confirmed→archived, refuted→
+ * withdrawn), and return the entry plus the reconciled proposals. A confirmed
+ * observation is independently folded into the served graph by loadMergedGraph
+ * (Tier-3): the observation — not the original guess — enters the graph as a
+ * witnessed edge. Two derivations from one witness; no proposal ever becomes an edge.
  */
-export function reportObservation(ctx: ToolContext, args: ReportObservationArgs): ObservationEntry {
+export function reportObservation(ctx: ToolContext, args: ReportObservationArgs): ReportObservationResult {
   const ts = new Date().toISOString()
   const entry: ObservationEntry = {
     id: `o_${hashValue({ from: args.from, to: args.to, event: args.event, ts }).slice(0, 10)}`,
@@ -415,8 +422,77 @@ export function reportObservation(ctx: ToolContext, args: ReportObservationArgs)
     ...(args.proposalId ? { proposalId: args.proposalId } : {}),
     ...(args.screenshot ? { screenshot: args.screenshot } : {}),
   }
-  withStore(ctx, (store) => store.appendObservation(entry))
-  return entry
+  const reconciled = withStore(ctx, (store) => {
+    store.appendObservation(entry)
+    return store.reconcileFromObservations()
+  })
+  return { ...entry, reconciled }
+}
+
+/** reconcile_proposals result: how many statuses changed + the proposal resolution snapshot. */
+export interface ReconcileResult {
+  changed: { id: string; status: ProposalStatus }[]
+  resolution: ResolutionReport
+}
+
+/**
+ * Re-derive every proposal's status from the observation log (idempotent) and
+ * return what changed plus the resolution snapshot. Use after observations are
+ * appended out-of-band (e.g. by the Tier-3 runner) to re-sync the proposal set.
+ */
+export function reconcileProposalsTool(ctx: ToolContext): ReconcileResult {
+  return withStore(ctx, (store) => {
+    const changed = store.reconcileFromObservations()
+    return { changed, resolution: buildResolution(store.queryProposals()) }
+  })
+}
+
+/** Arguments for withdraw_proposal / mark_unverifiable: the proposal id + a reason. */
+export interface ResolveProposalArgs {
+  id: string
+  reason: string
+}
+
+/**
+ * Withdraw a proposal the agent has judged hallucinated/impossible (no refuting
+ * observation needed): set status 'rejected' with a reason, removing it from the
+ * active worklist. NEVER touches the proven graph — a proposal cannot become an edge.
+ */
+export function withdrawProposal(ctx: ToolContext, args: ResolveProposalArgs): { id: string; status: ProposalStatus; reason: string } {
+  withStore(ctx, (store) => store.setProposalStatus(args.id, 'rejected', args.reason))
+  return { id: args.id, status: 'rejected', reason: args.reason }
+}
+
+/**
+ * Park a plausible-but-undrivable proposal as 'unverifiable' with a reason: it
+ * leaves the active worklist (so the loop can terminate) but stays queryable for a
+ * human. Distinct from withdraw (which marks a disproven/hallucinated lead).
+ */
+export function markUnverifiable(ctx: ToolContext, args: ResolveProposalArgs): { id: string; status: ProposalStatus; reason: string } {
+  withStore(ctx, (store) => store.setProposalStatus(args.id, 'unverifiable', args.reason))
+  return { id: args.id, status: 'unverifiable', reason: args.reason }
+}
+
+/** get_loop_status result: the deterministic DONE signal for the reconciliation loop. */
+export interface LoopStatus {
+  coverage: CoverageReport
+  resolution: ResolutionReport
+  worklistSize: number
+  loopDone: boolean
+}
+
+/**
+ * Compose the model-free loop-completion signal: 100% = every uncertain edge
+ * runtime-witnessed AND every proposal resolved. loopDone is true iff the verify
+ * worklist is empty AND no 'proposed' proposals remain. The LLM loops until this
+ * flips true (or it parks the stuck remainder via mark_unverifiable).
+ */
+export function getLoopStatus(ctx: ToolContext): LoopStatus {
+  const merged = loadMergedGraph(ctx)
+  const coverage = buildCoverage(merged)
+  const worklist = nextToVerify(merged, getProposalGraph(ctx))
+  const resolution = withStore(ctx, (store) => buildResolution(store.queryProposals()))
+  return { coverage, resolution, worklistSize: worklist.length, loopDone: worklist.length === 0 && resolution.openCount === 0 }
 }
 
 /** Arguments for diff: two graph file paths to compare. */
