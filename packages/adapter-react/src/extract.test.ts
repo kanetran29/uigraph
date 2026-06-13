@@ -314,3 +314,64 @@ describe('extractGraph — interprocedural call-graph reachability (F2.8)', () =
     expect(e).toBeUndefined()
   })
 })
+
+describe('extractGraph — shared-component SPA shells (refapp-driven)', () => {
+  // Two routes render the same shell component; a third has its own component.
+  const sharedShell = (controls = false) =>
+    extractGraph(
+      inMemory({
+        '/App.tsx': `import Shell from './Shell'\nimport C from './C'\nexport default () => (<Switch><Route path="/a" render={() => <Shell/>} /><Route path="/b" render={() => <Shell/>} /><Route path="/c" component={C} /></Switch>)`,
+        '/Shell.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function Shell(){ const navigate = useNavigate(); return <button onClick={() => navigate('/c')}>go</button> }`,
+        '/C.tsx': `export default function C(){ return null }`,
+      }),
+      '/',
+      { controls },
+    ).graph
+
+  it('labels shared-component nodes by route, unique-component nodes by name', () => {
+    const g = sharedShell()
+    const labelOf = (id: string) => g.nodes.find((n) => n.id === id)?.label
+    expect(labelOf('n_a')).toBe('/a')
+    expect(labelOf('n_b')).toBe('/b')
+    expect(labelOf('n_c')).toBe('C')
+  })
+
+  it('extracts a shared component once, attributed to the first (representative) route', () => {
+    const g = sharedShell(true)
+    const controls = g.nodes.filter((n) => n.kind === 'control')
+    expect(controls).toHaveLength(1)
+    expect(controls[0]?.parent).toBe('n_a')
+    expect(g.nodes.filter((n) => n.kind === 'control' && n.parent === 'n_b')).toHaveLength(0)
+  })
+})
+
+describe('extractGraph — dynamic navigation targets surfaced (refapp-driven)', () => {
+  it('emits a fully-dynamic navigate(var) as an unknown-modality edge to a dynamic sink', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /></Routes>)`,
+        '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); const dest = pickUrl(); navigate(dest); return null }`,
+      }),
+      '/',
+    )
+    expect(validateGraph(graph)).toEqual([])
+    const sink = graph.nodes.find((n) => n.kind === 'unknown')
+    expect(sink?.id).toBe('u_n_a')
+    const e = graph.edges.find((x) => x.to === 'u_n_a')
+    expect(e?.modality).toBe('unknown')
+    expect(e?.guard).toBe('dest')
+    expect(e?.witness?.ruleId).toBe('rr.dynamic-target')
+  })
+
+  it('does not invent a dynamic edge when every target is literal (sample app unaffected)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import A from './A'\nimport B from './B'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<B/>} /></Routes>)`,
+        '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); return <button onClick={() => navigate('/b')}>go</button> }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.some((n) => n.kind === 'unknown')).toBe(false)
+  })
+})
