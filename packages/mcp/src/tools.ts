@@ -4,14 +4,13 @@
 // transport is touched, so these are directly unit-testable without a server.
 // src/server.ts wires these to the SDK; the bulk of the value lives here.
 
-import { appendFileSync, existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
 import { applyObservations, buildGrounding, diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateMerged, validateOverlay } from '@uigraph/core'
 import type { Grounding } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
-import { loadGraph, loadOverlay, loadProposals, saveOverlay } from '@uigraph/core/node'
+import { loadGraph, openStore, type Store } from '@uigraph/core/node'
 
 /**
  * Where a server instance is rooted: a workspace directory holding
@@ -22,47 +21,48 @@ export interface ToolContext {
   dir: string
 }
 
-/** Standard file names inside a uigraph workspace directory. */
-export const BASE_FILE = 'ui-graph.json'
-export const OVERLAY_FILE = 'ui-graph.overlay.json'
-export const OBSERVATIONS_FILE = 'observations.log.jsonl'
+/** The SQLite database file that is the workspace's canonical store. */
+export const DB_FILE = 'uigraph.db'
 
-/** Absolute path to the base graph file for a context. */
-export function baseGraphPath(ctx: ToolContext): string {
-  return join(ctx.dir, BASE_FILE)
+/** Absolute path to the workspace SQLite database for a context. */
+export function dbPath(ctx: ToolContext): string {
+  return join(ctx.dir, DB_FILE)
 }
 
-/** Absolute path to the manual overlay file for a context. */
-export function overlayPath(ctx: ToolContext): string {
-  return join(ctx.dir, OVERLAY_FILE)
-}
-
-/** Absolute path to the observation log file for a context. */
-export function observationsPath(ctx: ToolContext): string {
-  return join(ctx.dir, OBSERVATIONS_FILE)
+/** Open the workspace store, run `fn`, and always close it. */
+function withStore<T>(ctx: ToolContext, fn: (store: Store) => T): T {
+  const store = openStore(dbPath(ctx))
+  try {
+    return fn(store)
+  } finally {
+    store.close()
+  }
 }
 
 /**
- * Load the base graph and apply the overlay if one exists on disk, returning the
- * merged UiGraph the agent should see. The base file is never mutated.
+ * Load the base graph, apply the manual overlay (if any) and fold in runtime
+ * observations, returning the merged UiGraph the agent should see. The stored base
+ * is never mutated. Reads from the workspace SQLite database.
  */
 export function loadMergedGraph(ctx: ToolContext): UiGraph {
-  const base = loadGraph(baseGraphPath(ctx))
-  let merged = base
-  const op = overlayPath(ctx)
-  if (existsSync(op)) {
-    const overlay = loadOverlay(op)
-    if (overlay.base && overlay.base !== hashValue(base)) {
-      throw new Error(
-        `stale overlay: it was authored against base ${overlay.base}, but the current base hashes to ${hashValue(base)} — re-author or discard the overlay`,
-      )
+  return withStore(ctx, (store) => {
+    const base = store.getBaseGraph()
+    if (base === null) throw new Error(`no base graph in ${dbPath(ctx)} — run \`uigraph map\` or \`uigraph migrate\` first`)
+    let merged = base
+    const overlay = store.getOverlay()
+    if (overlay !== null) {
+      if (overlay.base && overlay.base !== hashValue(base)) {
+        throw new Error(
+          `stale overlay: it was authored against base ${overlay.base}, but the current base hashes to ${hashValue(base)} — re-author or discard the overlay`,
+        )
+      }
+      merged = mergeOverlay(base, overlay)
     }
-    merged = mergeOverlay(base, overlay)
-  }
-  merged = applyObservations(merged, readObservations(ctx))
-  const errs = validateMerged(merged)
-  if (errs.length > 0) throw new Error(`merged graph is invalid:\n  ${errs.map((e) => e.message).join('\n  ')}`)
-  return merged
+    merged = applyObservations(merged, store.getObservations())
+    const errs = validateMerged(merged)
+    if (errs.length > 0) throw new Error(`merged graph is invalid:\n  ${errs.map((e) => e.message).join('\n  ')}`)
+    return merged
+  })
 }
 
 /** The merged graph plus node/edge counts, the payload returned by get_graph. */
@@ -91,14 +91,6 @@ export function getGraph(ctx: ToolContext): GetGraphResult {
   }
 }
 
-/** Standard file name for the quarantined Tier-2 proposals sidecar. */
-export const PROPOSALS_FILE = 'proposals.json'
-
-/** Absolute path to the proposals sidecar for a context. */
-export function proposalsPath(ctx: ToolContext): string {
-  return join(ctx.dir, PROPOSALS_FILE)
-}
-
 /** Optional filters for get_proposals so an agent can request a focused slice. */
 export interface GetProposalsArgs {
   screen?: string
@@ -122,14 +114,13 @@ export interface GetProposalsResult {
  * as leads and confirm via runtime observation before trusting them.
  */
 export function getProposals(ctx: ToolContext, args: GetProposalsArgs = {}): GetProposalsResult {
-  const path = proposalsPath(ctx)
-  const all: Proposal[] = existsSync(path) ? loadProposals(path).proposals : []
-  const filtered = all.filter(
-    (p) =>
-      (args.screen === undefined || p.screen === args.screen) &&
-      (args.category === undefined || p.category === args.category) &&
-      (args.evidencedOnly !== true || p.evidenced) &&
-      (args.minConfidence === undefined || p.confidence >= args.minConfidence),
+  const filtered = withStore(ctx, (store) =>
+    store.queryProposals({
+      ...(args.screen !== undefined ? { screen: args.screen } : {}),
+      ...(args.category !== undefined ? { category: args.category } : {}),
+      ...(args.evidencedOnly !== undefined ? { evidencedOnly: args.evidencedOnly } : {}),
+      ...(args.minConfidence !== undefined ? { minConfidence: args.minConfidence } : {}),
+    }),
   )
   const byCategory: Record<string, number> = {}
   for (const p of filtered) byCategory[p.category] = (byCategory[p.category] ?? 0) + 1
@@ -229,18 +220,6 @@ export interface UpdateGraphResult {
 }
 
 /**
- * Load the manual overlay for a context, creating an empty one bound to the
- * current base hash when none exists. Edits target the overlay exclusively so
- * the base graph is never touched.
- */
-function loadOrInitOverlay(ctx: ToolContext): Overlay {
-  const op = overlayPath(ctx)
-  if (existsSync(op)) return loadOverlay(op)
-  const base = loadGraph(baseGraphPath(ctx))
-  return emptyOverlay(hashValue(base))
-}
-
-/**
  * Force an edge to `source: 'manual'`, the only provenance the overlay accepts.
  * Edits arrive from an agent and must not claim static/runtime origin, nor a
  * proven `must` modality — a human/agent assertion is at most a `may`-edge.
@@ -251,39 +230,43 @@ function asManualEdge(edge: GraphEdge): GraphEdge {
 
 /**
  * Apply a manual edit to the OVERLAY only (never the base), validate the result
- * with validateOverlay, and persist it. Supports addNode, addEdge, editEdge, and
- * remove (by id). Throws if the resulting overlay is invalid.
+ * with validateOverlay, and persist it to the store. Supports addNode, addEdge,
+ * editEdge, and remove (by id). Throws if the resulting overlay is invalid.
  */
 export function updateGraph(ctx: ToolContext, args: UpdateGraphArgs): UpdateGraphResult {
-  const overlay = loadOrInitOverlay(ctx)
-  const op = args.op
+  return withStore(ctx, (store) => {
+    const base = store.getBaseGraph()
+    if (base === null) throw new Error(`no base graph in ${dbPath(ctx)} — run \`uigraph map\` or \`uigraph migrate\` first`)
+    const overlay: Overlay = store.getOverlay() ?? emptyOverlay(hashValue(base))
+    const op = args.op
 
-  switch (op.kind) {
-    case 'addNode':
-      overlay.addedNodes.push(op.node)
-      break
-    case 'addEdge':
-      overlay.addedEdges.push(asManualEdge(op.edge))
-      break
-    case 'editEdge':
-      overlay.editedEdges.push(asManualEdge(op.edge))
-      break
-    case 'remove':
-      overlay.removedRefs.push(op.id)
-      break
-  }
+    switch (op.kind) {
+      case 'addNode':
+        overlay.addedNodes.push(op.node)
+        break
+      case 'addEdge':
+        overlay.addedEdges.push(asManualEdge(op.edge))
+        break
+      case 'editEdge':
+        overlay.editedEdges.push(asManualEdge(op.edge))
+        break
+      case 'remove':
+        overlay.removedRefs.push(op.id)
+        break
+    }
 
-  const errs = validateOverlay(overlay)
-  if (errs.length > 0) throw new Error(`Invalid overlay after ${op.kind}:\n  ${errs.map((e) => e.message).join('\n  ')}`)
+    const errs = validateOverlay(overlay)
+    if (errs.length > 0) throw new Error(`Invalid overlay after ${op.kind}:\n  ${errs.map((e) => e.message).join('\n  ')}`)
 
-  saveOverlay(overlayPath(ctx), overlay)
-  return {
-    applied: op.kind,
-    addedNodes: overlay.addedNodes.length,
-    addedEdges: overlay.addedEdges.length,
-    editedEdges: overlay.editedEdges.length,
-    removedRefs: overlay.removedRefs.length,
-  }
+    store.setOverlay(overlay)
+    return {
+      applied: op.kind,
+      addedNodes: overlay.addedNodes.length,
+      addedEdges: overlay.addedEdges.length,
+      editedEdges: overlay.editedEdges.length,
+      removedRefs: overlay.removedRefs.length,
+    }
+  })
 }
 
 /**
@@ -307,10 +290,10 @@ export interface ReportObservationArgs {
 export type ObservationEntry = Observation
 
 /**
- * Append a runtime observation as one JSON line to observations.log.jsonl
- * (append-only; created if absent) and return the recorded entry. A confirmed
- * observation is folded into the served graph by loadMergedGraph (Tier-3): the
- * observation — not the original guess — enters the graph as a witnessed edge.
+ * Append a runtime observation to the workspace store (append-only observations
+ * table) and return the recorded entry. A confirmed observation is folded into the
+ * served graph by loadMergedGraph (Tier-3): the observation — not the original
+ * guess — enters the graph as a witnessed edge.
  */
 export function reportObservation(ctx: ToolContext, args: ReportObservationArgs): ObservationEntry {
   const ts = new Date().toISOString()
@@ -325,7 +308,7 @@ export function reportObservation(ctx: ToolContext, args: ReportObservationArgs)
     ...(args.proposalId ? { proposalId: args.proposalId } : {}),
     ...(args.screenshot ? { screenshot: args.screenshot } : {}),
   }
-  appendFileSync(observationsPath(ctx), JSON.stringify(entry) + '\n', 'utf8')
+  withStore(ctx, (store) => store.appendObservation(entry))
   return entry
 }
 
@@ -345,15 +328,7 @@ export function diffTool(args: DiffArgs): GraphDiff {
   return diffGraphs(a, b)
 }
 
-/**
- * Read an observation log into an array of entries (one per line). Tolerant of a
- * missing file (returns []) and of blank trailing lines.
- */
+/** Read all recorded observations from the workspace store, in insertion order. */
 export function readObservations(ctx: ToolContext): ObservationEntry[] {
-  const op = observationsPath(ctx)
-  if (!existsSync(op)) return []
-  return readFileSync(op, 'utf8')
-    .split('\n')
-    .filter((line) => line.trim().length > 0)
-    .map((line) => JSON.parse(line) as ObservationEntry)
+  return withStore(ctx, (store) => store.getObservations())
 }

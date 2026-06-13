@@ -8,7 +8,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
-import { formatDiff, formatMapSummary, runDiff, runMap, type AdapterName } from './commands'
+import { formatDiff, formatMapSummary, formatMigrateSummary, runDiff, runMap, runMigrate, type AdapterName } from './commands'
 import { startApiServer } from './server'
 
 /** Build the commander program with every uigraph subcommand registered. */
@@ -21,7 +21,7 @@ export function buildProgram(): Command {
     .description('Extract the UI graph from a project directory using an adapter.')
     .argument('<dir>', 'project directory to map')
     .requiredOption('--adapter <name>', 'adapter to use: react | angular')
-    .option('--out <file>', 'output graph path (default <dir>/ui-graph.json)')
+    .option('--out <file>', 'output database path (default <dir>/uigraph.db)')
     .option('--controls', 'also extract interactive controls (buttons/inputs/etc.) as nested nodes')
     .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean }) => {
       const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false })
@@ -29,10 +29,18 @@ export function buildProgram(): Command {
     })
 
   program
+    .command('migrate')
+    .description('Import legacy JSON sidecars (ui-graph.json, overlay, observations, proposals) into the workspace SQLite database.')
+    .argument('<dir>', 'workspace directory holding the legacy JSON files')
+    .action((dir: string) => {
+      console.log(formatMigrateSummary(dir, runMigrate(dir)))
+    })
+
+  program
     .command('diff')
-    .description('Diff two graph files by stable id and print a human-readable summary.')
-    .argument('<a>', 'first graph file')
-    .argument('<b>', 'second graph file')
+    .description('Diff two graphs by stable id (.db or .json) and print a human-readable summary.')
+    .argument('<a>', 'first graph (.db or .json)')
+    .argument('<b>', 'second graph (.db or .json)')
     .action((a: string, b: string) => {
       console.log(formatDiff(runDiff({ a, b })))
     })

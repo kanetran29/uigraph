@@ -1,24 +1,22 @@
 // Tests for the pure, model-free MCP tools. They run against a real temp
-// workspace dir (no transport, no LLM): save a small valid graph, then exercise
-// each tool's contract directly per docs/20-development-cycle.md (TDD).
+// workspace whose canonical store is a SQLite uigraph.db (no transport, no LLM):
+// seed a small valid graph into the store, then exercise each tool's contract
+// directly per docs/20-development-cycle.md (TDD).
 
-import { existsSync, mkdtempSync, readFileSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
-import { emptyProposals, type Proposal } from '@uigraph/core'
-import { loadGraph, loadOverlay, saveGraph, saveProposals } from '@uigraph/core/node'
+import type { GraphEdge, GraphNode, Overlay, Proposals, UiGraph, Witness } from '@uigraph/core'
+import { type Proposal } from '@uigraph/core'
+import { openStore, saveGraph } from '@uigraph/core/node'
 import {
-  baseGraphPath,
+  dbPath,
   diffTool,
   getGraph,
   getGrounding,
   getProposals,
-  observationsPath,
-  overlayPath,
   planPathTool,
-  proposalsPath,
   readObservations,
   reportObservation,
   updateGraph,
@@ -32,39 +30,37 @@ function node(id: string): GraphNode {
 }
 
 function edge(id: string, from: string, to: string): GraphEdge {
-  return {
-    id,
-    from,
-    to,
-    event: 'navigate',
-    guard: null,
-    effect: 'navigate',
-    modality: 'must',
-    source: 'static',
-    confidence: 1,
-    witness: staticWitness,
-  }
+  return { id, from, to, event: 'navigate', guard: null, effect: 'navigate', modality: 'must', source: 'static', confidence: 1, witness: staticWitness }
 }
 
 function graph(nodes: GraphNode[], edges: GraphEdge[]): UiGraph {
-  return {
-    version: 0,
-    meta: { adapter: '@uigraph/test', adapterVersion: '0.0.0', rulesetVersion: 'test' },
-    nodes,
-    edges,
-  }
+  return { version: 0, meta: { adapter: '@uigraph/test', adapterVersion: '0.0.0', rulesetVersion: 'test' }, nodes, edges }
 }
 
 function newWorkspace(g: UiGraph): ToolContext {
   const dir = mkdtempSync(join(tmpdir(), 'uigraph-mcp-'))
-  saveGraph(join(dir, 'ui-graph.json'), g)
-  return { dir }
+  const ctx: ToolContext = { dir }
+  const store = openStore(dbPath(ctx))
+  store.setBaseGraph(g)
+  store.close()
+  return ctx
+}
+
+function seedOverlay(ctx: ToolContext, overlay: Overlay): void {
+  const store = openStore(dbPath(ctx))
+  store.setOverlay(overlay)
+  store.close()
+}
+
+function seedProposals(ctx: ToolContext, sidecar: Proposals): void {
+  const store = openStore(dbPath(ctx))
+  store.setProposals(sidecar)
+  store.close()
 }
 
 // A 3-node, 2-hop chain: a -> b -> c. c is unreachable from itself backwards.
 function chainWorkspace(): ToolContext {
-  const g = graph([node('a'), node('b'), node('c')], [edge('e_ab', 'a', 'b'), edge('e_bc', 'b', 'c')])
-  return newWorkspace(g)
+  return newWorkspace(graph([node('a'), node('b'), node('c')], [edge('e_ab', 'a', 'b'), edge('e_bc', 'b', 'c')]))
 }
 
 function proposal(id: string, over: Partial<Proposal> = {}): Proposal {
@@ -103,26 +99,21 @@ describe('Tier-3 fold: confirmed observation enters the graph', () => {
 describe('loadMergedGraph integrity (red-team)', () => {
   it('rejects a stale overlay whose base hash no longer matches', async () => {
     const { loadMergedGraph } = await import('./tools')
-    const { saveOverlay } = await import('@uigraph/core/node')
     const ctx = chainWorkspace()
-    saveOverlay(overlayPath(ctx), { version: 0, base: 'deadbeef', addedNodes: [], addedEdges: [], editedEdges: [], removedRefs: [] })
+    seedOverlay(ctx, { version: 0, base: 'deadbeef', addedNodes: [], addedEdges: [], editedEdges: [], removedRefs: [] })
     expect(() => loadMergedGraph(ctx)).toThrow(/stale overlay/)
   })
 
   it('rejects a merged graph made invalid by the overlay (dangling ref)', async () => {
     const { loadMergedGraph } = await import('./tools')
-    const { saveOverlay } = await import('@uigraph/core/node')
     const { hashValue } = await import('@uigraph/core')
-    const { loadGraph } = await import('@uigraph/core/node')
     const ctx = chainWorkspace()
-    const base = loadGraph(baseGraphPath(ctx))
-    saveOverlay(overlayPath(ctx), {
+    const base = getGraph(ctx)
+    seedOverlay(ctx, {
       version: 0,
-      base: hashValue(base),
+      base: hashValue({ version: base.version, meta: base.meta, nodes: base.nodes, edges: base.edges }),
       addedNodes: [],
-      addedEdges: [
-        { id: 'm1', from: 'a', to: 'ghost', event: 'navigate', guard: null, effect: 'navigate', modality: 'may', source: 'manual', confidence: 0.5 },
-      ],
+      addedEdges: [{ id: 'm1', from: 'a', to: 'ghost', event: 'navigate', guard: null, effect: 'navigate', modality: 'may', source: 'manual', confidence: 0.5 }],
       editedEdges: [],
       removedRefs: [],
     })
@@ -131,15 +122,15 @@ describe('loadMergedGraph integrity (red-team)', () => {
 })
 
 describe('getProposals', () => {
-  it('returns empty when no proposals sidecar exists', () => {
-    const ctx = chainWorkspace()
-    expect(getProposals(ctx).total).toBe(0)
+  it('returns empty when no proposals exist', () => {
+    expect(getProposals(chainWorkspace()).total).toBe(0)
   })
 
   it('serves proposals and applies filters', () => {
     const ctx = chainWorkspace()
-    saveProposals(proposalsPath(ctx), {
-      ...emptyProposals('h'),
+    seedProposals(ctx, {
+      version: 0,
+      base: 'h',
       proposals: [
         proposal('p1', { category: 'keyboard', evidenced: true, confidence: 0.9 }),
         proposal('p2', { category: 'keyboard', evidenced: false, confidence: 0.2 }),
@@ -179,8 +170,7 @@ describe('getGrounding', () => {
 
 describe('getGraph', () => {
   it('returns the merged nodes/edges and counts from the base graph', () => {
-    const ctx = chainWorkspace()
-    const res = getGraph(ctx)
+    const res = getGraph(chainWorkspace())
     expect(res.nodeCount).toBe(3)
     expect(res.edgeCount).toBe(2)
     expect(res.nodes.map((n) => n.id).sort()).toEqual(['a', 'b', 'c'])
@@ -192,16 +182,13 @@ describe('getGraph', () => {
     updateGraph(ctx, { op: { kind: 'addEdge', edge: edge('e_ca', 'c', 'a') } })
     const res = getGraph(ctx)
     expect(res.edgeCount).toBe(3)
-    const added = res.edges.find((e) => e.id === 'e_ca')
-    expect(added).toBeDefined()
-    expect(added?.source).toBe('manual')
+    expect(res.edges.find((e) => e.id === 'e_ca')?.source).toBe('manual')
   })
 })
 
 describe('planPathTool', () => {
   it('returns a correct ordered path on a 2-hop graph', () => {
-    const ctx = chainWorkspace()
-    const res = planPathTool(ctx, { from: 'a', to: 'c' })
+    const res = planPathTool(chainWorkspace(), { from: 'a', to: 'c' })
     expect(res.found).toBe(true)
     expect(res.steps.map((s) => s.edgeId)).toEqual(['e_ab', 'e_bc'])
     expect(res.steps.map((s) => s.fromLabel)).toEqual(['A', 'B'])
@@ -209,8 +196,7 @@ describe('planPathTool', () => {
   })
 
   it('returns "no path" when the target is unreachable', () => {
-    const ctx = chainWorkspace()
-    const res = planPathTool(ctx, { from: 'c', to: 'a' })
+    const res = planPathTool(chainWorkspace(), { from: 'c', to: 'a' })
     expect(res.found).toBe(false)
     expect(res.steps).toEqual([])
   })
@@ -219,26 +205,24 @@ describe('planPathTool', () => {
 describe('updateGraph', () => {
   it('addEdge writes a source:manual edge to the overlay and leaves the base unchanged', () => {
     const ctx = chainWorkspace()
-    const baseBefore = readFileSync(baseGraphPath(ctx), 'utf8')
-
     updateGraph(ctx, { op: { kind: 'addEdge', edge: edge('e_ca', 'c', 'a') } })
 
-    expect(existsSync(overlayPath(ctx))).toBe(true)
-    const overlay = loadOverlay(overlayPath(ctx))
-    expect(overlay.addedEdges).toHaveLength(1)
-    expect(overlay.addedEdges[0]?.id).toBe('e_ca')
-    expect(overlay.addedEdges[0]?.source).toBe('manual')
-    expect(overlay.addedEdges[0]?.witness).toBeUndefined()
+    const store = openStore(dbPath(ctx))
+    const overlay = store.getOverlay()
+    const base = store.getBaseGraph()
+    store.close()
 
-    const baseAfter = readFileSync(baseGraphPath(ctx), 'utf8')
-    expect(baseAfter).toBe(baseBefore)
-    const reloaded = loadGraph(baseGraphPath(ctx))
-    expect(reloaded.edges.map((e) => e.id).sort()).toEqual(['e_ab', 'e_bc'])
+    expect(overlay?.addedEdges).toHaveLength(1)
+    expect(overlay?.addedEdges[0]?.id).toBe('e_ca')
+    expect(overlay?.addedEdges[0]?.source).toBe('manual')
+    expect(overlay?.addedEdges[0]?.witness).toBeUndefined()
+    // base is untouched
+    expect(base?.edges.map((e) => e.id).sort()).toEqual(['e_ab', 'e_bc'])
   })
 })
 
 describe('reportObservation', () => {
-  it('appends a JSON line to observations.log.jsonl and returns the entry', () => {
+  it('records an observation in the store and returns the entry', () => {
     const ctx = chainWorkspace()
     const entry = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed' })
     expect(entry.from).toBe('a')
@@ -246,7 +230,6 @@ describe('reportObservation', () => {
     expect(typeof entry.ts).toBe('string')
     expect(typeof entry.id).toBe('string')
 
-    expect(existsSync(observationsPath(ctx))).toBe(true)
     const logged = readObservations(ctx)
     expect(logged).toHaveLength(1)
     expect(logged[0]).toEqual(entry)

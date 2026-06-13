@@ -2,14 +2,19 @@
 // the dashboard can import @uigraph/core without pulling in node:fs. The CLI and
 // MCP server import these from "@uigraph/core/node".
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import type { Overlay, UiGraph } from './ir'
+import type { SoundinessNote } from './adapter'
+import type { Observation } from './runtime'
 import type { Proposals } from './proposals'
 import type { ApiBindings } from './openapi'
 import { assertGraphShape, assertOverlayShape } from './schema'
 import { validateGraph } from './validate'
 import { validateProposals } from './proposals'
+import type { Store } from './store'
+
+export { Store, openStore, type ProposalQuery } from './store'
 
 /** Read and parse a UiGraph JSON file, asserting its shape and invariants. */
 export function loadGraph(path: string): UiGraph {
@@ -72,4 +77,56 @@ export function saveApiBindings(path: string, bindings: ApiBindings): void {
 /** Read and parse an api-bindings sidecar JSON file. */
 export function loadApiBindings(path: string): ApiBindings {
   return JSON.parse(readFileSync(path, 'utf8')) as ApiBindings
+}
+
+/** What a workspace import found and loaded into the SQLite store. */
+export interface ImportSummary {
+  graph: boolean
+  soundiness: number
+  overlay: boolean
+  observations: number
+  proposals: number
+}
+
+/**
+ * One-shot migration: read whatever legacy JSON sidecars exist in a workspace dir
+ * (ui-graph.json + ui-graph.soundiness.json, ui-graph.overlay.json,
+ * observations.log.jsonl, proposals.json) and load them into the given SQLite
+ * store. Idempotent for documents; observations append, so call once per dir.
+ */
+export function importJsonWorkspace(dir: string, store: Store): ImportSummary {
+  const summary: ImportSummary = { graph: false, soundiness: 0, overlay: false, observations: 0, proposals: 0 }
+
+  const graphPath = join(dir, 'ui-graph.json')
+  if (existsSync(graphPath)) {
+    const soundPath = join(dir, 'ui-graph.soundiness.json')
+    const soundiness: SoundinessNote[] = existsSync(soundPath) ? (JSON.parse(readFileSync(soundPath, 'utf8')) as SoundinessNote[]) : []
+    store.setBaseGraph(loadGraph(graphPath), soundiness)
+    summary.graph = true
+    summary.soundiness = soundiness.length
+  }
+
+  const overlayPath = join(dir, 'ui-graph.overlay.json')
+  if (existsSync(overlayPath)) {
+    store.setOverlay(loadOverlay(overlayPath))
+    summary.overlay = true
+  }
+
+  const obsPath = join(dir, 'observations.log.jsonl')
+  if (existsSync(obsPath)) {
+    for (const line of readFileSync(obsPath, 'utf8').split('\n')) {
+      if (line.trim().length === 0) continue
+      store.appendObservation(JSON.parse(line) as Observation)
+      summary.observations++
+    }
+  }
+
+  const proposalsPath = join(dir, 'proposals.json')
+  if (existsSync(proposalsPath)) {
+    const sidecar = loadProposals(proposalsPath)
+    store.setProposals(sidecar)
+    summary.proposals = sidecar.proposals.length
+  }
+
+  return summary
 }

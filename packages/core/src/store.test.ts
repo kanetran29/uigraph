@@ -1,0 +1,87 @@
+import { describe, it, expect } from 'vitest'
+import { openStore } from './store'
+import { edge, graph, node } from './fixtures'
+import { emptyOverlay } from './overlay'
+import { hashValue } from './hash'
+import type { Proposals } from './proposals'
+import type { Observation } from './runtime'
+
+const g = () => graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')])
+
+const sidecar = (over: Partial<Proposals> = {}): Proposals => ({
+  version: 0,
+  base: 'h',
+  proposals: [
+    { id: 'p1', kind: 'interaction', category: 'keyboard', screen: 'a', title: 'press enter', rationale: 'r', evidenced: true, confidence: 0.9, source: 'proposal', status: 'proposed', screenshot: 'shots/a.jpeg' },
+    { id: 'p2', kind: 'edge', category: 'navigation', screen: 'b', title: 'go a', to: 'a', rationale: 'r', evidenced: false, confidence: 0.3, source: 'proposal', status: 'proposed' },
+  ],
+  ...over,
+})
+
+describe('Store (SQLite)', () => {
+  it('round-trips the base graph + soundiness as documents', () => {
+    const s = openStore(':memory:')
+    expect(s.getBaseGraph()).toBeNull()
+    s.setBaseGraph(g(), [{ kind: 'dynamic-target', detail: 'x' }])
+    expect(s.getBaseGraph()).toEqual(g())
+    expect(s.getSoundiness()).toEqual([{ kind: 'dynamic-target', detail: 'x' }])
+    s.close()
+  })
+
+  it('rejects an invalid base graph', () => {
+    const s = openStore(':memory:')
+    const bad = graph([node('a')], [edge('e_ax', 'a', 'ghost')])
+    expect(() => s.setBaseGraph(bad)).toThrow(/invalid graph/)
+    s.close()
+  })
+
+  it('round-trips the overlay document', () => {
+    const s = openStore(':memory:')
+    const o = emptyOverlay(hashValue(g()))
+    s.setOverlay(o)
+    expect(s.getOverlay()).toEqual(o)
+    s.close()
+  })
+
+  it('appends and reads observations in order, preserving optional fields', () => {
+    const s = openStore(':memory:')
+    const o1: Observation = { id: 'o1', from: 'a', to: 'b', event: 'click', outcome: 'confirmed', screenshot: 'e.png' }
+    const o2: Observation = { id: 'o2', from: 'b', to: 'a', event: 'nav', outcome: 'refuted' }
+    s.appendObservation(o1)
+    s.appendObservation(o2)
+    expect(s.getObservations()).toEqual([o1, o2])
+    s.close()
+  })
+
+  it('stores proposals and reconstructs the sidecar, dropping null optionals', () => {
+    const s = openStore(':memory:')
+    expect(s.getProposals()).toBeNull()
+    s.setProposals(sidecar())
+    const got = s.getProposals()
+    expect(got?.base).toBe('h')
+    expect(got?.proposals).toHaveLength(2)
+    const p2 = got?.proposals.find((p) => p.id === 'p2')
+    expect(p2?.to).toBe('a')
+    expect('screenshot' in (p2 as object)).toBe(false)
+    expect(got?.proposals.find((p) => p.id === 'p1')?.screenshot).toBe('shots/a.jpeg')
+    s.close()
+  })
+
+  it('filters proposals with SQL (screen, category, evidenced, confidence)', () => {
+    const s = openStore(':memory:')
+    s.setProposals(sidecar())
+    expect(s.queryProposals({ screen: 'a' }).map((p) => p.id)).toEqual(['p1'])
+    expect(s.queryProposals({ category: 'navigation' }).map((p) => p.id)).toEqual(['p2'])
+    expect(s.queryProposals({ evidencedOnly: true }).map((p) => p.id)).toEqual(['p1'])
+    expect(s.queryProposals({ minConfidence: 0.5 }).map((p) => p.id)).toEqual(['p1'])
+    s.close()
+  })
+
+  it('setProposals replaces the previous set (no accumulation)', () => {
+    const s = openStore(':memory:')
+    s.setProposals(sidecar())
+    s.setProposals(sidecar({ proposals: [{ id: 'p3', kind: 'interaction', category: 'x', screen: 'a', title: 't', rationale: 'r', evidenced: false, confidence: 0.5, source: 'proposal', status: 'proposed' }] }))
+    expect(s.queryProposals().map((p) => p.id)).toEqual(['p3'])
+    s.close()
+  })
+})
