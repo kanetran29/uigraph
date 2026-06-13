@@ -316,6 +316,7 @@ interface RawTarget {
   effect: string
   node: Node
   guard: string | null
+  ruleId?: string
 }
 
 function collectTargets(sf: SourceFile): RawTarget[] {
@@ -375,6 +376,7 @@ interface NavCall {
   guard: string | null
   node: Node
   ctx: BranchContext
+  interprocedural?: boolean
 }
 
 /** Visible text inside a JSX element (e.g. a button's label), or undefined. */
@@ -461,6 +463,7 @@ interface Interaction {
   guard: string | null
   node: Node
   ctx: BranchContext
+  interprocedural?: boolean
 }
 
 /**
@@ -483,8 +486,8 @@ function collectInteractions(
     events.add(ev)
     const fn = handlerFnFromAttr(attr, sf)
     if (!fn) continue
-    const a = analyzeHandler(fn, navInfo)
-    for (const nc of a.navCalls) navs.push({ event: ev, ti: nc.ti, guard: nc.guard, node: nc.node, ctx: nc.ctx })
+    const a = analyzeHandler(fn, navInfo, sf)
+    for (const nc of a.navCalls) navs.push({ event: ev, ti: nc.ti, guard: nc.guard, node: nc.node, ctx: nc.ctx, interprocedural: nc.interprocedural })
     for (const e of a.effects) effects.add(e)
   }
   return { events: [...events], navs, effects: [...effects] }
@@ -608,43 +611,173 @@ function branchContextOf(node: Node): BranchContext {
   }
 }
 
-/** Analyze a handler body for navigation calls and non-navigational effects. */
-function analyzeHandler(fnNode: Node, navInfo: { navSet: Set<string>; histSet: Set<string> }): { navCalls: NavCall[]; effects: string[] } {
-  const calls = [...fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)]
-  if (Node.isCallExpression(fnNode)) calls.push(fnNode)
-  const navCalls: NavCall[] = []
-  const effects = new Set<string>()
-  for (const call of calls) {
+const MAX_CALL_DEPTH = 5
+
+/**
+ * A lexical scope for the interprocedural walk: which identifiers resolve to a
+ * navigate/history function here (by closure or parameter binding), and what each
+ * parameter was bound to, so a route passed as an argument can be resolved to its
+ * literal at the sink.
+ */
+interface Scope {
+  navSet: Set<string>
+  histSet: Set<string>
+  bindings: Map<string, Node>
+}
+
+/** Parameter names of a function-like node, or [] when it is not function-like. */
+function fnParams(fn: Node): string[] {
+  if (Node.isArrowFunction(fn) || Node.isFunctionExpression(fn) || Node.isFunctionDeclaration(fn) || Node.isMethodDeclaration(fn)) {
+    return fn.getParameters().map((p) => p.getNameNode().getText())
+  }
+  return []
+}
+
+/** Find a project-local function exported as `default` (only direct declarations). */
+function resolveDefaultFunction(sf: SourceFile): Node | undefined {
+  for (const fd of sf.getFunctions()) {
+    if (fd.isDefaultExport()) return fd
+  }
+  return undefined
+}
+
+/** Resolve a named/default import of `name` in `sf` to its function node — relative modules only. */
+function resolveImportedFunction(sf: SourceFile, name: string): Node | undefined {
+  for (const imp of sf.getImportDeclarations()) {
+    if (!imp.getModuleSpecifierValue().startsWith('.')) continue
+    for (const ni of imp.getNamedImports()) {
+      const alias = ni.getAliasNode()?.getText() ?? ni.getNameNode().getText()
+      if (alias !== name) continue
+      const target = imp.getModuleSpecifierSourceFile() ?? resolveRelative(sf, imp.getModuleSpecifierValue())
+      return target ? resolveFunctionNode(target, ni.getNameNode().getText()) : undefined
+    }
+    if (imp.getDefaultImport()?.getText() === name) {
+      const target = imp.getModuleSpecifierSourceFile() ?? resolveRelative(sf, imp.getModuleSpecifierValue())
+      return target ? resolveDefaultFunction(target) : undefined
+    }
+  }
+  return undefined
+}
+
+/**
+ * Resolve a CallExpression's callee to a user-defined function node inside the
+ * project: a locally declared function/arrow, or a named/default import resolved
+ * via the relative-module resolver. Returns undefined for library calls
+ * (non-relative imports) and unresolved symbols, so the walk never leaves app code.
+ */
+function resolveCallee(call: Node, sf: SourceFile): Node | undefined {
+  if (!Node.isCallExpression(call)) return undefined
+  const expr = call.getExpression()
+  if (!Node.isIdentifier(expr)) return undefined
+  const name = expr.getText()
+  return resolveFunctionNode(sf, name) ?? resolveImportedFunction(sf, name)
+}
+
+/** Conjoin two symbolic guards; either may be null. Identical guards collapse. */
+function combineGuard(a: string | null, b: string | null): string | null {
+  if (a !== null && b !== null) return a === b ? a : `${a} && ${b}`
+  return a ?? b
+}
+
+/**
+ * The callee's scope when entered from `call`: the callee file's own nav/history
+ * identifiers (closures), plus parameters bound to nav/history arguments, plus a
+ * binding of each parameter to its argument node (for literal target resolution).
+ */
+function deriveScope(callee: Node, call: Node, caller: Scope): Scope {
+  const own = navIdentifiers(callee.getSourceFile())
+  const navSet = new Set(own.navSet)
+  const histSet = new Set(own.histSet)
+  const bindings = new Map<string, Node>()
+  const args = Node.isCallExpression(call) ? call.getArguments() : []
+  fnParams(callee).forEach((pname, i) => {
+    const arg = args[i]
+    if (!arg) return
+    if (Node.isIdentifier(arg)) {
+      const an = arg.getText()
+      if (caller.navSet.has(an)) navSet.add(pname)
+      if (caller.histSet.has(an)) histSet.add(pname)
+      bindings.set(pname, caller.bindings.get(an) ?? arg)
+    } else {
+      bindings.set(pname, arg)
+    }
+  })
+  return { navSet, histSet, bindings }
+}
+
+/** Follow parameter bindings (a few hops) so an identifier target resolves to the literal passed in. */
+function resolveArgForTarget(arg: Node | undefined, scope: Scope): Node | undefined {
+  let cur = arg
+  for (let i = 0; i < MAX_CALL_DEPTH && cur && Node.isIdentifier(cur); i++) {
+    const next = scope.bindings.get(cur.getText())
+    if (!next || next === cur) break
+    cur = next
+  }
+  return cur
+}
+
+/**
+ * Walk a function body for navigation sinks and effects, recursing into reachable
+ * user-defined callees (the call graph). Navs found below the entry function are
+ * tagged interprocedural; guards on the call path are conjoined onto each sink. A
+ * visited set + depth cap bound cycles and blow-up.
+ */
+function walkReachable(
+  fn: Node,
+  sf: SourceFile,
+  scope: Scope,
+  pathGuard: string | null,
+  visited: Set<Node>,
+  depth: number,
+  out: { navCalls: NavCall[]; effects: Set<string> },
+): void {
+  for (const call of fn.getDescendantsOfKind(SyntaxKind.CallExpression)) {
     const expr = call.getExpression()
-    if (Node.isIdentifier(expr) && navInfo.navSet.has(expr.getText())) {
-      navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call) ?? extraConditionGuard(call), node: call, ctx: branchContextOf(call) })
+    const guard = combineGuard(pathGuard, getGuard(call) ?? extraConditionGuard(call))
+    if (Node.isIdentifier(expr) && scope.navSet.has(expr.getText())) {
+      out.navCalls.push({ ti: classifyTarget(resolveArgForTarget(call.getArguments()[0], scope)), guard, node: call, ctx: branchContextOf(call), interprocedural: depth > 0 })
       continue
     }
     if (Node.isPropertyAccessExpression(expr)) {
       const obj = expr.getExpression()
       const m = expr.getName()
-      if (Node.isIdentifier(obj) && navInfo.histSet.has(obj.getText()) && (m === 'push' || m === 'replace')) {
-        navCalls.push({ ti: classifyTarget(call.getArguments()[0]), guard: getGuard(call) ?? extraConditionGuard(call), node: call, ctx: branchContextOf(call) })
+      if (Node.isIdentifier(obj) && scope.histSet.has(obj.getText()) && (m === 'push' || m === 'replace')) {
+        out.navCalls.push({ ti: classifyTarget(resolveArgForTarget(call.getArguments()[0], scope)), guard, node: call, ctx: branchContextOf(call), interprocedural: depth > 0 })
         continue
       }
     }
     const api = detectApiEffect(call)
     if (api) {
-      effects.add(api)
+      out.effects.add(api)
       continue
     }
     const modal = detectModalOpen(call)
     if (modal) {
-      effects.add(modal)
+      out.effects.add(modal)
       continue
     }
     const st = detectStateEffect(call)
     if (st) {
       const errorBranch = isErrorSetter(call) || branchContextOf(call) === 'error'
-      effects.add(errorBranch ? st.replace('state:', 'error:') : st)
+      out.effects.add(errorBranch ? st.replace('state:', 'error:') : st)
+      continue
+    }
+    if (depth < MAX_CALL_DEPTH) {
+      const callee = resolveCallee(call, sf)
+      if (callee && !visited.has(callee)) {
+        visited.add(callee)
+        walkReachable(callee, callee.getSourceFile(), deriveScope(callee, call, scope), guard, visited, depth + 1, out)
+      }
     }
   }
-  return { navCalls, effects: [...effects] }
+}
+
+/** Analyze a handler for navigations and effects across the reachable call graph. */
+function analyzeHandler(fnNode: Node, navInfo: { navSet: Set<string>; histSet: Set<string> }, sf: SourceFile): { navCalls: NavCall[]; effects: string[] } {
+  const out = { navCalls: [] as NavCall[], effects: new Set<string>() }
+  const scope: Scope = { navSet: new Set(navInfo.navSet), histSet: new Set(navInfo.histSet), bindings: new Map() }
+  walkReachable(fnNode, sf, scope, null, new Set<Node>([fnNode]), 0, out)
+  return { navCalls: out.navCalls, effects: [...out.effects] }
 }
 
 /** Extract a graph from an already-built ts-morph project (testable in memory). */
@@ -678,7 +811,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       modality,
       source: 'static',
       confidence,
-      witness: { source: 'static', file, loc, ruleId: ruleIdFor(t.event, t.effect) },
+      witness: { source: 'static', file, loc, ruleId: t.ruleId ?? ruleIdFor(t.event, t.effect) },
     })
   }
 
@@ -753,17 +886,18 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           const guard = nav.guard ?? ctxGuard
           const modality: 'must' | 'may' = guard !== null ? 'may' : 'must'
           const confidence = nav.ctx === 'error' ? 0.5 : nav.ctx === 'success' ? 0.7 : guard !== null ? 0.6 : 1
+          const ruleId = nav.interprocedural ? 'rr.use-navigate.interprocedural' : undefined
           if (nav.ti.kind === 'literal') {
             const { exact, candidates } = matchLiteralAll(nav.ti.value, routeLikes)
             if (exact) {
-              pushEdge(cId, exact.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard }, modality, confidence, file, loc)
+              pushEdge(cId, exact.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, modality, confidence, file, loc)
             } else {
               for (const cand of candidates)
-                pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: guard ?? 'ambiguous' }, 'may', 0.5, file, loc)
+                pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: guard ?? 'ambiguous', ruleId }, 'may', 0.5, file, loc)
             }
           } else if (nav.ti.kind === 'template') {
             for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
-              pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard }, 'may', Math.min(confidence, 0.5), file, loc)
+              pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, 'may', Math.min(confidence, 0.5), file, loc)
           }
         }
 
