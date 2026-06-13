@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
 import { openStore, saveGraph } from '@uigraph/core/node'
 import type { Server } from 'node:http'
-import { dbPathFor, formatDiff, readSoundiness, runDiff, runGen, runMap } from './commands'
+import { dbPathFor, formatDiff, readSoundiness, runDiff, runGen, runKitInstall, runKitPrint, runMap } from './commands'
 import { handleApiRequest, resolveShotPath, startApiServer } from './server'
 import { mkdirSync, writeFileSync } from 'node:fs'
 
@@ -246,5 +246,29 @@ describe('startApiServer (end-to-end on an ephemeral port)', () => {
     const body = (await res.json()) as UiGraph
     expect(body.nodes).toHaveLength(2)
     expect(body.edges.map((e) => e.id)).toEqual(['e_ab'])
+  })
+})
+
+describe('runKit (agent kit)', () => {
+  it('print emits the kit including the golden invariant and tool names', () => {
+    const out = runKitPrint()
+    expect(out).toContain('Golden invariant')
+    expect(out).toContain('reconciliation loop')
+    expect(out).toContain('report_observation')
+  })
+
+  it('install copies the kit files under .uigraph/kit/', () => {
+    const dir = tempDir('uigraph-cli-kit-')
+    const { written } = runKitInstall({ dir })
+    expect(written.length).toBeGreaterThan(0)
+    expect(written.every((p) => existsSync(p))).toBe(true)
+    expect(existsSync(join(dir, '.uigraph', 'kit', 'SKILL.md'))).toBe(true)
+  })
+
+  it('install --claude drops a single SKILL.md skill', () => {
+    const dir = tempDir('uigraph-cli-kit-claude-')
+    const { written } = runKitInstall({ dir, claude: true })
+    expect(written).toEqual([join(dir, '.claude', 'skills', 'uigraph', 'SKILL.md')])
+    expect(existsSync(written[0]!)).toBe(true)
   })
 })

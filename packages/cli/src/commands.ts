@@ -9,7 +9,7 @@ import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/c
 import { diffGraphs, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, hashValue } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
 import { loadGraph, openStore, importJsonWorkspace, type ImportSummary } from '@uigraph/core/node'
-import { loadMergedGraph } from '@uigraph/mcp'
+import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@uigraph/mcp'
 import { reactAdapter } from '@uigraph/adapter-react'
 import { angularAdapter } from '@uigraph/adapter-angular'
 import { vueAdapter } from '@uigraph/adapter-vue'
@@ -247,4 +247,40 @@ export function readSoundiness(dir: string): SoundinessNote[] {
   } finally {
     store.close()
   }
+}
+
+/** Print the whole agent kit (skill + rules + guides + loop) for piping into an agent prompt or CI. */
+export function runKitPrint(): string {
+  return readKitAll()
+}
+
+/** Options for `uigraph kit install`: where to write, and whether to drop the Claude skill. */
+export interface RunKitInstallOptions {
+  dir?: string
+  claude?: boolean
+}
+
+/**
+ * Install the agent kit into a target. By default copies every kit file under
+ * `<dir>/.uigraph/kit/` (preserving the manifest paths); with `--claude`, instead
+ * drops SKILL.md at `<dir>/.claude/skills/uigraph/SKILL.md` for Claude Code. Returns
+ * the list of written file paths.
+ */
+export function runKitInstall(opts: RunKitInstallOptions = {}): { written: string[] } {
+  const root = opts.dir ?? process.cwd()
+  if (opts.claude === true) {
+    const out = join(root, '.claude', 'skills', 'uigraph', 'SKILL.md')
+    mkdirSync(dirname(out), { recursive: true })
+    writeFileSync(out, readKitFile('SKILL.md'))
+    return { written: [out] }
+  }
+  const base = join(root, '.uigraph', 'kit')
+  const written: string[] = []
+  for (const f of listKit()) {
+    const out = join(base, f.path)
+    mkdirSync(dirname(out), { recursive: true })
+    writeFileSync(out, readKitFile(f.path))
+    written.push(out)
+  }
+  return { written }
 }

@@ -1,0 +1,35 @@
+{
+  "version": 0,
+  "name": "uigraph-agent-kit",
+  "files": [
+    { "path": "SKILL.md", "title": "uigraph agent kit", "kind": "skill" },
+    { "path": "rules/00-golden-invariant.md", "title": "Golden invariant", "kind": "rule" },
+    { "path": "rules/01-modality.md", "title": "Modality: must / may / unknown", "kind": "rule" },
+    { "path": "rules/02-provenance.md", "title": "Provenance: static / manual / runtime / proposal", "kind": "rule" },
+    { "path": "rules/03-proposal-is-a-lead.md", "title": "A proposal is a lead, not a fact", "kind": "rule" },
+    { "path": "guides/00-tools.md", "title": "uigraph MCP tools", "kind": "guide" },
+    { "path": "guides/01-verify-flow.md", "title": "Tier-3 runtime verification", "kind": "guide" },
+    { "path": "guides/02-reading-state.md", "title": "Deciding what to do next", "kind": "guide" },
+    { "path": "loop/reconciliation-loop.md", "title": "The proposal reconciliation loop", "kind": "loop" }
+  ],
+  "tools": [
+    "get_graph",
+    "get_proposals",
+    "get_grounding",
+    "get_proposal_graph",
+    "describe_screen",
+    "get_coverage",
+    "next_to_verify",
+    "gen_spec",
+    "list_scenarios",
+    "set_scenario",
+    "plan_path",
+    "update_graph",
+    "report_observation",
+    "diff",
+    "get_loop_status",
+    "reconcile_proposals",
+    "withdraw_proposal",
+    "mark_unverifiable"
+  ]
+}

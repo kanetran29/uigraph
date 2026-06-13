@@ -5,10 +5,11 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+import { CallToolRequestSchema, ListResourcesRequestSchema, ListToolsRequestSchema, ReadResourceRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import type { ToolContext } from './tools'
+import { listKit, readKitAll, readKitFile } from './kit'
 import {
   describeScreen,
   diffTool,
@@ -47,8 +48,11 @@ export interface StartServerOptions {
   transport?: Transport
 }
 
+/** The URI scheme the server exposes the bundled agent kit under. */
+const KIT_SCHEME = 'uigraph-kit://'
+
 /** The fixed catalogue of model-free tools the server advertises. */
-const TOOLS: Tool[] = [
+export const TOOLS: Tool[] = [
   {
     name: 'get_graph',
     description: 'Return the merged UI transition graph (base + manual overlay) with node/edge counts.',
@@ -295,13 +299,29 @@ export function createServer(dir: string): Server {
   const ctx: ToolContext = { dir }
   const server = new Server(
     { name: '@uigraph/mcp', version: '0.1.0' },
-    { capabilities: { tools: {} } },
+    { capabilities: { tools: {}, resources: {} } },
   )
 
   server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: TOOLS }))
   server.setRequestHandler(CallToolRequestSchema, (request) =>
     dispatch(ctx, request.params.name, request.params.arguments ?? {}),
   )
+
+  // Expose the bundled agent kit as readable resources: one per file plus an
+  // aggregate `uigraph-kit://all` that a consumer can read in a single call.
+  server.setRequestHandler(ListResourcesRequestSchema, () => ({
+    resources: [
+      { uri: `${KIT_SCHEME}all`, name: 'uigraph agent kit (all)', description: 'The whole kit — skill + rules + guides + loop — concatenated.', mimeType: 'text/markdown' },
+      ...listKit().map((f) => ({ uri: `${KIT_SCHEME}${f.path}`, name: f.title, mimeType: f.path.endsWith('.json') ? 'application/json' : 'text/markdown' })),
+    ],
+  }))
+  server.setRequestHandler(ReadResourceRequestSchema, (request) => {
+    const uri = request.params.uri
+    if (!uri.startsWith(KIT_SCHEME)) throw new Error(`unknown resource: ${uri}`)
+    const rel = uri.slice(KIT_SCHEME.length)
+    const text = rel === 'all' ? readKitAll() : readKitFile(rel)
+    return { contents: [{ uri, mimeType: rel.endsWith('.json') ? 'application/json' : 'text/markdown', text }] }
+  })
 
   return server
 }
