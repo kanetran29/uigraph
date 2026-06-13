@@ -24,6 +24,9 @@
     "@uigraph/mcp": "workspace:*",
     "commander": "catalog:"
   },
+  "optionalDependencies": {
+    "playwright-core": "^1.60.0"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "vitest": "catalog:",
