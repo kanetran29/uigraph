@@ -35,6 +35,13 @@ export interface ControlSelector {
   nth?: number
 }
 
+/** Input constraints on a field control (input/textarea/select), for codegen fill values + validation probes. */
+export interface ControlInput {
+  type?: string
+  required?: boolean
+  pattern?: string
+}
+
 /**
  * Metadata for a `control` node — an interactive element (button, input,
  * rich-text, form, select, link) extracted within a screen. `effects` lists the
@@ -50,6 +57,7 @@ export interface ControlMeta {
   events?: string[]
   effects?: string[]
   selector?: ControlSelector
+  input?: ControlInput
 }
 
 /** A screen/state (or a nested control) in the app. `id` is stable and unique. */

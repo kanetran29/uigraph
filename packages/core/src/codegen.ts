@@ -5,7 +5,7 @@
 // the CLI/MCP supply the planned path. Input values + guards are coarse here and
 // refined by the input/guard feature.
 
-import type { ControlSelector, UiGraph } from './ir'
+import type { ControlMeta, ControlSelector, UiGraph } from './ir'
 import type { PlanStep } from './algorithms'
 
 /** A single Playwright action for one leg. */
@@ -69,9 +69,29 @@ export function locatorFor(sel: ControlSelector): string {
   return sel.nth !== undefined && sel.nth > 0 ? `${base}.nth(${sel.nth})` : base
 }
 
-/** A placeholder fill value for an input/richtext control (refined by F-input-guard). */
-function fillValue(controlType: string): string {
-  return controlType === 'richtext' ? 'sample text' : 'test'
+/** A type-appropriate fill value for a field control, from its input constraints. */
+function fillValue(controlType: string, input: ControlMeta['input']): string {
+  switch (input?.type) {
+    case 'email':
+      return 'test@example.com'
+    case 'password':
+      return 'Passw0rd!'
+    case 'number':
+    case 'range':
+      return '42'
+    case 'tel':
+      return '0401234567'
+    case 'url':
+      return 'https://example.com'
+    case 'date':
+      return '2024-01-01'
+    case 'search':
+      return 'query'
+    case 'color':
+      return '#3366ff'
+    default:
+      return controlType === 'richtext' ? 'sample text' : 'test'
+  }
 }
 
 /**
@@ -97,7 +117,7 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     if (fromNode.kind === 'control' && fromNode.control?.selector) {
       const locator = locatorFor(fromNode.control.selector)
       const ct = fromNode.control.controlType
-      action = ct === 'input' || ct === 'richtext' ? { kind: 'fill', locator, value: fillValue(ct) } : { kind: 'click', locator }
+      action = ct === 'input' || ct === 'richtext' ? { kind: 'fill', locator, value: fillValue(ct, fromNode.control.input) } : { kind: 'click', locator }
     } else if (e.effect === 'contains') {
       action = { kind: 'available' }
     } else {

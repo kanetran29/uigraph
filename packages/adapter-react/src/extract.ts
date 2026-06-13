@@ -7,7 +7,7 @@
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
 import type { JsxAttribute, SourceFile } from 'ts-morph'
 import { dirname, join, relative } from 'node:path'
-import type { ControlSelector, ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@uigraph/core'
+import type { ControlInput, ControlSelector, ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@uigraph/core'
 import { routeToNodeId, edgeId, controlNodeId } from './ids'
 import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
 
@@ -368,6 +368,7 @@ interface ControlInfo {
   controlType: string
   name?: string
   selector: ControlSelector
+  input?: ControlInput
 }
 
 type BranchContext = 'success' | 'error' | null
@@ -447,6 +448,20 @@ function controlSelector(el: Node, tag: string, controlType: string, text: strin
 }
 
 /**
+ * Input constraints for a field control (input/textarea/select): its HTML type,
+ * whether it is required, and any validation pattern — so codegen can produce a
+ * type-appropriate fill value and probe validation. Undefined for non-field controls.
+ */
+function inputConstraints(el: Node, controlType: string): ControlInput | undefined {
+  if (controlType !== 'input' && controlType !== 'checkbox' && controlType !== 'richtext' && controlType !== 'select') return undefined
+  const type = stringAttr(el, 'type') ?? undefined
+  const pattern = stringAttr(el, 'pattern') ?? undefined
+  const required = findAttr(el, 'required') !== undefined
+  if (type === undefined && pattern === undefined && !required) return undefined
+  return { ...(type !== undefined ? { type } : {}), ...(required ? { required: true } : {}), ...(pattern !== undefined ? { pattern } : {}) }
+}
+
+/**
  * Classify an interactive JSX element as a control, or null if it is not one. A
  * control is a native form element (button/input/textarea/select/form),
  * contentEditable, or ANY lowercase DOM element carrying an `on*` handler (so a
@@ -468,7 +483,8 @@ function controlMetaFor(el: Node): ControlInfo | null {
   const name =
     stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? stringAttr(el, 'placeholder') ?? stringAttr(el, 'aria-label') ?? textLabel
   const selector = controlSelector(el, tag, controlType, getJsxText(el))
-  return { element: tag, controlType, selector, ...(name ? { name } : {}) }
+  const input = inputConstraints(el, controlType)
+  return { element: tag, controlType, selector, ...(input ? { input } : {}), ...(name ? { name } : {}) }
 }
 
 /** Find the named function/arrow declared in a file (for indirect event handlers). */
@@ -1014,6 +1030,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             element: meta.element,
             controlType: meta.controlType,
             selector: meta.selector,
+            ...(meta.input ? { input: meta.input } : {}),
             ...(meta.name ? { name: meta.name } : {}),
             ...(inter.events.length > 0 ? { events: inter.events } : {}),
             ...(inter.effects.length > 0 ? { effects: inter.effects } : {}),

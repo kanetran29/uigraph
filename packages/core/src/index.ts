@@ -11,6 +11,7 @@ export type {
   ControlMeta,
   SelectorStrategy,
   ControlSelector,
+  ControlInput,
   GraphNode,
   Witness,
   GraphEdge,

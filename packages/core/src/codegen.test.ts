@@ -45,6 +45,17 @@ describe('buildSpecPlan + renderPlaywrightSpec', () => {
     expect(spec).toContain("await expect(page.getByRole('dialog')).toBeVisible()")
   })
 
+  it('fills a field control with a type-appropriate value from input constraints', () => {
+    const emailInput: GraphNode = {
+      id: 'cc_email', route: null, componentPath: null, label: 'Email', kind: 'control', parent: 'n_form',
+      control: { element: 'input', controlType: 'input', selector: { strategy: 'label', value: 'email' }, input: { type: 'email', required: true } },
+    }
+    const gg = graph([node('n_form', { route: '/form' }), node('n_done', { route: '/done' }), emailInput], [edge('e', 'cc_email', 'n_done', { event: 'change' })])
+    const steps = planPath(gg, 'n_form', 'n_done')
+    const spec = renderPlaywrightSpec(buildSpecPlan(gg, steps!, {}))
+    expect(spec).toContain('await page.getByLabel("email").fill("test@example.com")')
+  })
+
   it('surfaces path guards as preconditions (guard-aware)', () => {
     const gg = graph(
       [node('n_home', { route: '/' }), node('n_dash', { route: '/dash' })],
