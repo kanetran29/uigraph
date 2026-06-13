@@ -56,8 +56,9 @@ export function buildProgram(): Command {
     .argument('<dir>', 'workspace directory holding uigraph.db')
     .requiredOption('--app-url <url>', 'base URL of the running app (e.g. http://localhost:3000)')
     .option('--limit <n>', 'max targets to attempt', '10')
-    .action(async (dir: string, opts: { appUrl: string; limit: string }) => {
-      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit) })
+    .option('--storage-state <file>', 'Playwright storageState JSON for an authenticated session (drives the app logged in)')
+    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string }) => {
+      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState })
       console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)`)
     })
 
