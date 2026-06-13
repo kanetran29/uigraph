@@ -44,4 +44,15 @@ describe('buildSpecPlan + renderPlaywrightSpec', () => {
     // open:modal -> dialog visible
     expect(spec).toContain("await expect(page.getByRole('dialog')).toBeVisible()")
   })
+
+  it('surfaces path guards as preconditions (guard-aware)', () => {
+    const gg = graph(
+      [node('n_home', { route: '/' }), node('n_dash', { route: '/dash' })],
+      [edge('e', 'n_home', 'n_dash', { event: 'navigate', modality: 'may', guard: 'isAuthenticated' })],
+    )
+    const steps = planPath(gg, 'n_home', 'n_dash')
+    const plan = buildSpecPlan(gg, steps!, {})
+    expect(plan.preconditions).toEqual(['isAuthenticated'])
+    expect(renderPlaywrightSpec(plan)).toContain('// Preconditions to satisfy first: isAuthenticated')
+  })
 })

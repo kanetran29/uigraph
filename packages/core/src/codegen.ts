@@ -37,6 +37,7 @@ export interface SpecPlan {
   title: string
   baseUrl: string
   startUrl: string
+  preconditions: string[]
   legs: SpecLeg[]
 }
 
@@ -111,13 +112,21 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     return { from: fromNode.id, to: toNode.id, event: e.event, description, action, assertions }
   })
 
-  return { title: opts.title ?? `${start?.label ?? 'start'} to ${steps[steps.length - 1]?.to.label ?? 'target'}`, baseUrl, startUrl, legs }
+  // Guard-aware: distinct symbolic guards along the path are the preconditions the
+  // test must satisfy first (e.g. isAuthenticated -> log in). Surfaced, never
+  // evaluated — the consumer decides how to satisfy them.
+  const preconditions = [...new Set(steps.map((s) => s.edge.guard).filter((g): g is string => g !== null && g.length > 0))]
+  return { title: opts.title ?? `${start?.label ?? 'start'} to ${steps[steps.length - 1]?.to.label ?? 'target'}`, baseUrl, startUrl, preconditions, legs }
 }
 
 /** Render a SpecPlan as a Playwright spec source file. */
 export function renderPlaywrightSpec(plan: SpecPlan): string {
   const url = (path: string): string => q(plan.baseUrl + path)
-  const lines: string[] = ["import { test, expect } from '@playwright/test'", '', `test(${q(plan.title)}, async ({ page }) => {`, `  await page.goto(${url(plan.startUrl)})`]
+  const lines: string[] = ["import { test, expect } from '@playwright/test'", '', `test(${q(plan.title)}, async ({ page }) => {`]
+  if (plan.preconditions.length > 0) {
+    lines.push(`  // Preconditions to satisfy first: ${plan.preconditions.join(', ')}`)
+  }
+  lines.push(`  await page.goto(${url(plan.startUrl)})`)
   for (const leg of plan.legs) {
     lines.push('', `  // ${leg.description}`)
     const a = leg.action
