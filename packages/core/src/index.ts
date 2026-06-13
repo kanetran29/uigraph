@@ -41,6 +41,13 @@ export {
   type ProposalError,
 } from './proposals'
 export {
+  buildGrounding,
+  type Grounding,
+  type ScreenGrounding,
+  type GroundedControl,
+  type GroundedEdge,
+} from './grounding'
+export {
   parseApiEffect,
   summarizeApiEffect,
   collectApiEffects,

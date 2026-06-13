@@ -12,11 +12,13 @@ import type { ToolContext } from './tools'
 import {
   diffTool,
   getGraph,
+  getGrounding,
   getProposals,
   planPathTool,
   reportObservation,
   updateGraph,
   type DiffArgs,
+  type GetGroundingArgs,
   type GetProposalsArgs,
   type PlanPathArgs,
   type ReportObservationArgs,
@@ -47,6 +49,17 @@ const TOOLS: Tool[] = [
         category: { type: 'string', description: 'filter to one category, e.g. keyboard, async-state, disclosure' },
         evidencedOnly: { type: 'boolean', description: 'only proposals grounded in concrete source' },
         minConfidence: { type: 'number', description: '0..1 lower bound on confidence' },
+      },
+    },
+  },
+  {
+    name: 'get_grounding',
+    description:
+      'Return the Tier-2 grounding digest derived from the proven graph: per screen, the controls that actually exist (with their wired events/effects from call-graph analysis) and the transitions already witnessed. Feed this to a reviewer so it proposes only the uncovered long tail, cites real controls/effects, and prunes hypotheses referencing nothing real. Optional filter: screen.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        screen: { type: 'string', description: 'restrict the digest to one screen node id' },
       },
     },
   },
@@ -128,6 +141,8 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(getGraph(ctx))
       case 'get_proposals':
         return jsonResult(getProposals(ctx, args as unknown as GetProposalsArgs))
+      case 'get_grounding':
+        return jsonResult(getGrounding(ctx, args as unknown as GetGroundingArgs))
       case 'plan_path':
         return jsonResult(planPathTool(ctx, args as unknown as PlanPathArgs))
       case 'update_graph':
