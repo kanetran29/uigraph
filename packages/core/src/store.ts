@@ -16,6 +16,7 @@ import type { Proposal, Proposals, ProposalGraph } from './proposals'
 import type { Observation } from './runtime'
 import { validateGraph } from './validate'
 import { validateProposals, materializeProposalGraph } from './proposals'
+import { hashValue } from './hash'
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS docs (key TEXT PRIMARY KEY, json TEXT NOT NULL);
@@ -111,12 +112,41 @@ export class Store {
     return this.getDoc<SoundinessNote[]>('soundiness') ?? []
   }
 
-  getOverlay(): Overlay | null {
-    return this.getDoc<Overlay>('overlay')
+  // Named scenarios = one overlay per name (a feature you draft, toggle, compare).
+  // The 'default' scenario is the legacy single 'overlay' doc (back-compat); others
+  // live under 'overlay::<name>'. Edits + the merged graph target the ACTIVE scenario.
+  private overlayKey(name: string): string {
+    return name === 'default' ? 'overlay' : `overlay::${name}`
   }
 
-  setOverlay(overlay: Overlay): void {
-    this.setDoc('overlay', overlay)
+  /** The active scenario name (defaults to 'default'). */
+  getActiveScenario(): string {
+    return this.getDoc<string>('active_scenario') ?? 'default'
+  }
+
+  /** Switch the active scenario, creating an empty overlay for it if new. */
+  setActiveScenario(name: string): void {
+    this.setDoc('active_scenario', name)
+    if (this.getDoc<Overlay>(this.overlayKey(name)) === null) {
+      const base = this.getBaseGraph()
+      this.setDoc(this.overlayKey(name), { version: 0, base: base ? hashValue(base) : '', addedNodes: [], addedEdges: [], editedEdges: [], editedNodes: [], removedRefs: [] })
+    }
+  }
+
+  /** All scenario names ('default' first, then any named overlays). */
+  listScenarios(): string[] {
+    const rows = this.db.prepare("SELECT key FROM docs WHERE key LIKE 'overlay::%'").all() as { key: string }[]
+    return ['default', ...rows.map((r) => r.key.slice('overlay::'.length))]
+  }
+
+  /** The overlay for a scenario (the active one by default), or null when absent. */
+  getOverlay(name = this.getActiveScenario()): Overlay | null {
+    return this.getDoc<Overlay>(this.overlayKey(name))
+  }
+
+  /** Persist the overlay for a scenario (the active one by default). */
+  setOverlay(overlay: Overlay, name = this.getActiveScenario()): void {
+    this.setDoc(this.overlayKey(name), overlay)
   }
 
   /** Append one runtime observation; returns the stored entry. */

@@ -268,7 +268,8 @@ select:focus-visible,
   font-size: 11px;
   color: var(--muted);
 }
-.field-edit input {
+.field-edit input,
+.field-edit select {
   font-size: 12px;
   padding: 4px 8px;
   border: 1px solid var(--border);

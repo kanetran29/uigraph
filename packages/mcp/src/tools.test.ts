@@ -280,6 +280,23 @@ describe('updateGraph', () => {
     expect(a?.label).toBe('Home')
     expect(a?.route).toBe('/home')
   })
+
+  it('named scenarios isolate overlay edits per scenario', async () => {
+    const { listScenarios, setScenario } = await import('./tools')
+    const ctx = chainWorkspace()
+    // default scenario: add an edge
+    updateGraph(ctx, { op: { kind: 'addEdge', edge: edge('e_def', 'c', 'a') } })
+    // switch to a new scenario + add a different edge
+    setScenario(ctx, { name: 'feature-x' })
+    expect(listScenarios(ctx)).toEqual({ active: 'feature-x', names: ['default', 'feature-x'] })
+    updateGraph(ctx, { op: { kind: 'addEdge', edge: edge('e_fx', 'a', 'c') } })
+    expect(getGraph(ctx).edges.some((e) => e.id === 'e_fx')).toBe(true)
+    expect(getGraph(ctx).edges.some((e) => e.id === 'e_def')).toBe(false)
+    // back to default: its edge is there, feature-x's is not
+    setScenario(ctx, { name: 'default' })
+    expect(getGraph(ctx).edges.some((e) => e.id === 'e_def')).toBe(true)
+    expect(getGraph(ctx).edges.some((e) => e.id === 'e_fx')).toBe(false)
+  })
 })
 
 describe('reportObservation', () => {
