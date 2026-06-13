@@ -23,12 +23,13 @@ export interface VerifyResult {
 /** Drives one spec plan against the app and reports whether the transition happened. */
 export type VerifyDriver = (plan: SpecPlan, appUrl: string) => Promise<VerifyResult>
 
-/** Options for runVerify: workspace dir, the app's base URL, a cap, and an optional driver. */
+/** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, and an optional saved auth session. */
 export interface RunVerifyOptions {
   dir: string
   appUrl: string
   limit?: number
   driver?: VerifyDriver
+  storageState?: string
 }
 
 /** What a verification run did: how many targets it attempted, confirmed, refuted. */
@@ -51,7 +52,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   store.close()
 
   const targets = nextToVerify(graph, proposalGraph, opts.limit)
-  const driver = opts.driver ?? playwrightDriver
+  const driver = opts.driver ?? makePlaywrightDriver(opts.storageState)
   let confirmed = 0
   let refuted = 0
 
@@ -91,35 +92,48 @@ async function loadPlaywright(): Promise<{ chromium: { launch: () => Promise<unk
 }
 
 /**
- * Default driver: launch Chromium (playwright-core), execute the plan's legs
- * (goto/click/fill via the selector locators), then judge the transition by its
- * final assertion (URL match and/or a visible dialog).
+ * Build the default driver: launch Chromium (playwright-core), open a context
+ * (optionally hydrated from a saved auth `storageState` so the run is logged in),
+ * execute the plan's legs (goto/click/fill via the selector locators), then judge
+ * the transition by its final assertion (URL match and/or a visible dialog).
  */
-async function playwrightDriver(plan: SpecPlan, appUrl: string): Promise<VerifyResult> {
-  const { chromium } = await loadPlaywright()
-  const browser = (await chromium.launch()) as { newPage: () => Promise<PwPage>; close: () => Promise<void> }
-  try {
-    const page = await browser.newPage()
-    await page.goto(plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl)
-    let lastUrlAssertion: string | undefined
-    let expectDialog = false
-    for (const leg of plan.legs) {
-      const a = leg.action
-      if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
-      else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
-      else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
-      for (const as of leg.assertions) {
-        if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
-        if (as.kind === 'dialog') expectDialog = true
+function makePlaywrightDriver(storageState?: string): VerifyDriver {
+  return async (plan: SpecPlan, appUrl: string): Promise<VerifyResult> => {
+    const { chromium } = await loadPlaywright()
+    const browser = (await chromium.launch()) as PwBrowser
+    try {
+      const context = await browser.newContext(storageState !== undefined ? { storageState } : {})
+      const page = await context.newPage()
+      await page.goto(plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl)
+      let lastUrlAssertion: string | undefined
+      let expectDialog = false
+      for (const leg of plan.legs) {
+        const a = leg.action
+        if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
+        else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
+        else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+        for (const as of leg.assertions) {
+          if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
+          if (as.kind === 'dialog') expectDialog = true
+        }
       }
+      let confirmed = true
+      if (lastUrlAssertion !== undefined) confirmed = page.url() === lastUrlAssertion
+      if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
+      return { confirmed }
+    } finally {
+      await browser.close()
     }
-    let confirmed = true
-    if (lastUrlAssertion !== undefined) confirmed = page.url() === lastUrlAssertion
-    if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
-    return { confirmed }
-  } finally {
-    await browser.close()
   }
+}
+
+/** The slice of the Playwright Browser/Context API the driver uses (typed loosely; playwright-core is optional). */
+interface PwBrowser {
+  newContext: (opts?: unknown) => Promise<PwContext>
+  close: () => Promise<void>
+}
+interface PwContext {
+  newPage: () => Promise<PwPage>
 }
 
 /** The slice of the Playwright Page API the driver uses (typed loosely; playwright-core is optional). */
