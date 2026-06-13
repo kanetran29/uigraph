@@ -7,7 +7,7 @@
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
 import type { JsxAttribute, SourceFile } from 'ts-morph'
 import { dirname, join, relative } from 'node:path'
-import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@uigraph/core'
+import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@uigraph/core'
 import { routeToNodeId, edgeId } from './ids'
 import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
 
@@ -17,7 +17,7 @@ const DEFAULT_RULESET = 'rr-v5v6-2026.06'
 type TargetInfo =
   | { kind: 'literal'; value: string }
   | { kind: 'template'; staticPrefix: string }
-  | { kind: 'dynamic' }
+  | { kind: 'dynamic'; expr?: string }
 
 interface RouteInfo {
   fullPath: string
@@ -76,7 +76,7 @@ function classifyTarget(expr: Node | undefined): TargetInfo {
   if (Node.isStringLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isNoSubstitutionTemplateLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isTemplateExpression(expr)) return { kind: 'template', staticPrefix: expr.getHead().getLiteralText() }
-  return { kind: 'dynamic' }
+  return { kind: 'dynamic', expr: expr.getText() }
 }
 
 function classifyToAttr(attr: JsxAttribute | undefined): TargetInfo {
@@ -85,7 +85,7 @@ function classifyToAttr(attr: JsxAttribute | undefined): TargetInfo {
   if (!init) return { kind: 'dynamic' }
   if (Node.isStringLiteral(init)) return { kind: 'literal', value: init.getLiteralValue() }
   if (Node.isJsxExpression(init)) return classifyTarget(init.getExpression())
-  return { kind: 'dynamic' }
+  return { kind: 'dynamic', expr: init.getText() }
 }
 
 function within(container: Node, node: Node): boolean {
@@ -785,19 +785,40 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const routes = collectRoutes(project)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
 
+  // Disambiguate labels: a component backing exactly one route reads best by its
+  // name (Home, Checkout); a component shared across many routes (a map/SPA shell
+  // like AppContent rendered by /, /explore, /could-buy…) would label every node
+  // identically, so those nodes label by their route instead.
+  const nameCount = new Map<string, number>()
+  for (const r of routes) if (r.componentName) nameCount.set(r.componentName, (nameCount.get(r.componentName) ?? 0) + 1)
+  const labelFor = (r: RouteInfo): string => (r.componentName && (nameCount.get(r.componentName) ?? 0) === 1 ? r.componentName : r.fullPath)
+
   const nodes: GraphNode[] = routes.map((r) => ({
     id: r.nodeId,
     route: r.fullPath,
     componentPath: r.componentFile ? relative(projectDir, r.componentFile.getFilePath()) : null,
-    label: r.componentName ?? r.fullPath,
+    label: labelFor(r),
     kind: 'screen',
   }))
+
+  // A component file shared by several routes is extracted ONCE, attributed to a
+  // representative route node (the first declared), so a map shell rendered by ten
+  // routes does not duplicate its controls/modals/navigations ten times.
+  const repByFile = new Map<string, string>()
+  for (const r of routes) {
+    if (!r.componentFile) continue
+    const fp = r.componentFile.getFilePath()
+    if (!repByFile.has(fp)) repByFile.set(fp, r.nodeId)
+  }
+  const isRepresentative = (r: RouteInfo): boolean =>
+    r.componentFile !== undefined && repByFile.get(r.componentFile.getFilePath()) === r.nodeId
 
   const edges: GraphEdge[] = []
   const soundiness: SoundinessNote[] = []
   const seen = new Set<string>()
+  const unknownSinks = new Set<string>()
 
-  function pushEdge(from: string, to: string, t: RawTarget, modality: 'must' | 'may', confidence: number, file: string, loc: { line: number; col: number }): void {
+  function pushEdge(from: string, to: string, t: RawTarget, modality: Modality, confidence: number, file: string, loc: { line: number; col: number }): void {
     const id = edgeId(from, to, t.event, t.guard)
     if (seen.has(id)) return
     seen.add(id)
@@ -815,11 +836,27 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     })
   }
 
+  // Surface a fully-dynamic navigation (navigate(redirectUrl), history.push(var))
+  // as an `unknown`-modality edge to a per-screen "dynamic ⋯" sink, carrying the
+  // symbolic target as the guard. The transition is real (the call is witnessed);
+  // only its destination is undecidable — so it is recorded, never silently
+  // dropped ("can be wrong but cannot be missed"), and never promoted to must.
+  function pushDynamicEdge(from: string, t: RawTarget, file: string, loc: { line: number; col: number }): void {
+    const sinkId = `u_${from}`
+    if (!unknownSinks.has(sinkId)) {
+      unknownSinks.add(sinkId)
+      nodes.push({ id: sinkId, route: null, componentPath: null, label: 'dynamic ⋯', kind: 'unknown' })
+    }
+    const expr = t.ti.kind === 'dynamic' ? t.ti.expr : undefined
+    pushEdge(from, sinkId, { ...t, guard: t.guard ?? expr ?? null, ruleId: 'rr.dynamic-target' }, 'unknown', 0.3, file, loc)
+  }
+
   for (const route of routes) {
     if (!route.componentFile) {
       soundiness.push({ kind: 'unresolved-component', detail: `route ${route.fullPath} has no resolvable component file` })
       continue
     }
+    if (!isRepresentative(route)) continue
     const file = relative(projectDir, route.componentFile.getFilePath())
     for (const t of collectTargets(route.componentFile)) {
       const sf = t.node.getSourceFile()
@@ -842,6 +879,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         for (const cand of cands) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
       } else {
         soundiness.push({ kind: 'dynamic-target', file, loc, detail: `fully dynamic navigation target (event ${t.event})` })
+        pushDynamicEdge(route.nodeId, t, file, loc)
       }
     }
   }
@@ -851,6 +889,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     let midx = 0
     for (const route of routes) {
       if (!route.componentFile) continue
+      if (!isRepresentative(route)) continue
       const sf = route.componentFile
       const file = relative(projectDir, sf.getFilePath())
       const navInfo = navIdentifiers(sf)
@@ -898,6 +937,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           } else if (nav.ti.kind === 'template') {
             for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
               pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, 'may', Math.min(confidence, 0.5), file, loc)
+          } else {
+            pushDynamicEdge(cId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, file, loc)
           }
         }
 
