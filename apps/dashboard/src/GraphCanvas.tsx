@@ -122,33 +122,27 @@ interface DagreEdgeData extends Record<string, unknown> {
 }
 
 /**
- * Build an SVG path through a polyline with lightly rounded corners. Each interior
- * vertex is replaced by a short quadratic arc whose radius is capped to a fraction
- * of the two adjacent segment lengths, so tight turns stay clean and never overshoot.
+ * Build a single smooth SVG path that flows through every waypoint as one organic
+ * curve. We fit a Catmull-Rom spline (converted to cubic beziers) through the points,
+ * so the edge keeps dagre's de-crossed, spaced routing but reads as a flowing curve
+ * instead of mechanical right-angle bends. Two points degrade to a straight line.
  */
-function roundedPath(points: NodePosition[], radius = 12): string {
-  const first = points[0]
+function roundedPath(points: NodePosition[]): string {
+  const p = points.filter((q): q is NodePosition => q !== undefined)
+  const first = p[0]
   if (first === undefined) return ''
+  if (p.length === 2) return `M ${first.x},${first.y} L ${p[1]!.x},${p[1]!.y}`
   let d = `M ${first.x},${first.y}`
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1]
-    const curr = points[i]
-    if (prev === undefined || curr === undefined) continue
-    const next = points[i + 1]
-    if (next === undefined) {
-      d += ` L ${curr.x},${curr.y}`
-      continue
-    }
-    const dIn = Math.hypot(curr.x - prev.x, curr.y - prev.y)
-    const dOut = Math.hypot(next.x - curr.x, next.y - curr.y)
-    const r = Math.min(radius, dIn / 2, dOut / 2)
-    const t1 = dIn === 0 ? 0 : r / dIn
-    const t2 = dOut === 0 ? 0 : r / dOut
-    const ax = curr.x + (prev.x - curr.x) * t1
-    const ay = curr.y + (prev.y - curr.y) * t1
-    const bx = curr.x + (next.x - curr.x) * t2
-    const by = curr.y + (next.y - curr.y) * t2
-    d += ` L ${ax},${ay} Q ${curr.x},${curr.y} ${bx},${by}`
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[i - 1] ?? p[i]!
+    const p1 = p[i]!
+    const p2 = p[i + 1]!
+    const p3 = p[i + 2] ?? p2
+    const cp1x = p1.x + (p2.x - p0.x) / 6
+    const cp1y = p1.y + (p2.y - p0.y) / 6
+    const cp2x = p2.x - (p3.x - p1.x) / 6
+    const cp2y = p2.y - (p3.y - p1.y) / 6
+    d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`
   }
   return d
 }
@@ -409,12 +403,14 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
       labelBgStyle: { fill: 'var(--label-bg)' },
       labelBgPadding: [6, 3],
       labelBgBorderRadius: 6,
-      markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
+      markerEnd: { type: MarkerType.ArrowClosed, color, width: 12, height: 12 },
       style: {
         stroke: color,
         strokeWidth: width,
         strokeOpacity: opacity,
         strokeDasharray: strokeDash(e.modality),
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
       },
     })
   }
