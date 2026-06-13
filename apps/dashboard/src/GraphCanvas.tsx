@@ -16,9 +16,7 @@ import {
   EdgeLabelRenderer,
   MarkerType,
   Panel,
-  Position,
   ReactFlow,
-  getBezierPath,
   useEdgesState,
   useInternalNode,
   useNodesState,
@@ -31,8 +29,8 @@ import {
   type NodeMouseHandler,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposal, Proposals, Source, UiGraph } from '@uigraph/core'
-import { layoutGraph, type GraphLayout, type NodePosition } from './layout'
+import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@uigraph/core'
+import { layoutGraph, type GraphLayout } from './layout'
 
 /** What the canvas reports as the current selection, or null when nothing is selected. */
 export type Selection = { kind: 'node'; node: GraphNode } | { kind: 'edge'; edge: GraphEdge } | null
@@ -149,37 +147,48 @@ function boundaryPoint(node: InternalNode, other: InternalNode): { x: number; y:
   return { x: a.x + dx * scale, y: a.y + dy * scale }
 }
 
-/** Which side of `node` the boundary point sits on (for the bezier tangent). */
-function sideOf(node: InternalNode, p: { x: number; y: number }): Position {
-  const a = nodeCenter(node)
-  if (Math.abs(p.x - a.x) / (a.w / 2 || 1) >= Math.abs(p.y - a.y) / (a.h / 2 || 1)) {
-    return p.x >= a.x ? Position.Right : Position.Left
-  }
-  return p.y >= a.y ? Position.Bottom : Position.Top
+/** A stable ±1 from an edge id, so an edge always bows the same way and two edges
+ * between the same pair (opposite directions) tend to bow apart rather than overlap. */
+function edgeSign(id: string): number {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0
+  return h % 2 === 0 ? 1 : -1
 }
 
 /**
- * A floating edge: a bezier curve between the two nodes' boundaries (computed from
- * their live positions, so it attaches to the facing side from any angle and stays
- * connected while dragging). The arrowhead + style are honoured; the label, when
- * present, is drawn as an opaque pill at the curve midpoint via EdgeLabelRenderer,
- * so it floats ABOVE nodes and other edges and never gets hidden.
+ * A floating edge: a quadratic curve between the two nodes' boundaries (computed
+ * from their live positions, so it attaches to the facing side from any angle and
+ * stays connected while dragging). The curve BOWS perpendicular to the straight
+ * line — proportional to length — so a long edge arcs clear of any node sitting
+ * between its endpoints, and parallel edges separate. A small endpoint gap keeps
+ * the arrowhead off the node border. The label is an opaque pill at the curve's
+ * midpoint via EdgeLabelRenderer, floating ABOVE nodes and edges.
  */
 function FloatingEdge(props: EdgeProps<Edge<FloatingEdgeData>>): JSX.Element | null {
-  const { source, target, data, markerEnd, style } = props
+  const { id, source, target, data, markerEnd, style } = props
   const sourceNode = useInternalNode(source)
   const targetNode = useInternalNode(target)
   if (!sourceNode || !targetNode) return null
-  const sp = boundaryPoint(sourceNode, targetNode)
-  const tp = boundaryPoint(targetNode, sourceNode)
-  const [path, labelX, labelY] = getBezierPath({
-    sourceX: sp.x,
-    sourceY: sp.y,
-    targetX: tp.x,
-    targetY: tp.y,
-    sourcePosition: sideOf(sourceNode, sp),
-    targetPosition: sideOf(targetNode, tp),
-  })
+  const a = nodeCenter(sourceNode)
+  const b = nodeCenter(targetNode)
+  const rawSp = boundaryPoint(sourceNode, targetNode)
+  const rawTp = boundaryPoint(targetNode, sourceNode)
+  const dist = Math.hypot(b.x - a.x, b.y - a.y) || 1
+  const ux = (b.x - a.x) / dist
+  const uy = (b.y - a.y) / dist
+  const GAP = 8
+  const sp = { x: rawSp.x + ux * GAP, y: rawSp.y + uy * GAP }
+  const tp = { x: rawTp.x - ux * GAP, y: rawTp.y - uy * GAP }
+  const bow = edgeSign(id) * Math.min(dist * 0.16, 120)
+  const mx = (sp.x + tp.x) / 2
+  const my = (sp.y + tp.y) / 2
+  const cx = mx + -uy * bow
+  const cy = my + ux * bow
+  const path = `M ${sp.x},${sp.y} Q ${cx},${cy} ${tp.x},${tp.y}`
+  // Point on the quadratic at t=0.5, where the label rides the curve (off the
+  // straight line, so it clears any node the chord would pass through).
+  const labelX = 0.25 * sp.x + 0.5 * cx + 0.25 * tp.x
+  const labelY = 0.25 * sp.y + 0.5 * cy + 0.25 * tp.y
   const label = data?.label
   return (
     <>
@@ -228,8 +237,12 @@ function isManualNode(graph: UiGraph, nodeId: string): boolean {
   return graph.edges.some((e) => e.source === 'manual' && (e.from === nodeId || e.to === nodeId))
 }
 
-/** Box style for a screen node, tinted violet when manual. */
-function screenStyle(manual: boolean, size: { width: number; height: number }): CSSProperties {
+/**
+ * Box style for a screen node, tinted violet when manual. The multi-line label is
+ * centred when collapsed; when expanded it is pinned to the top header strip so it
+ * sits above the nested control grid rather than behind it.
+ */
+function screenStyle(manual: boolean, size: { width: number; height: number }, expanded: boolean): CSSProperties {
   return {
     whiteSpace: 'pre-line',
     borderRadius: 'var(--radius)',
@@ -237,7 +250,13 @@ function screenStyle(manual: boolean, size: { width: number; height: number }): 
     background: manual ? 'var(--node-manual-bg)' : 'var(--node-bg)',
     color: 'var(--text)',
     fontSize: 12,
-    padding: 8,
+    lineHeight: 1.3,
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: expanded ? 'flex-start' : 'center',
+    padding: expanded ? '8px 8px 0' : 8,
     width: size.width,
     height: size.height,
   }
@@ -326,7 +345,7 @@ function toFlowNodes(
         id: n.id,
         position: pos,
         data: { label },
-        style: screenStyle(manual, size),
+        style: screenStyle(manual, size, expanded.has(n.id)),
       })
     }
   }
@@ -341,7 +360,6 @@ interface EdgeContext {
   expanded: ReadonlySet<string>
   hoveredEdgeId: string | null
   incidentEdgeIds: Set<string>
-  edgePoints: Map<string, NodePosition[]>
   focusEdgeActive: boolean
 }
 
@@ -356,7 +374,7 @@ interface EdgeContext {
  * arrows follow the spaced, de-crossed polyline; control/ghost edges stay smoothstep.
  */
 function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
-  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, edgePoints, focusEdgeActive } = ctx
+  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
   const hasNodeSelection = selection?.kind === 'node'
   const controlParent = new Map<string, string | undefined>()
@@ -382,8 +400,9 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     if (isControlEdge && !(onPath || selected || incident || parentExpanded)) continue
 
     const emphasized = onPath || selected || incident || hovered
-    // Dim non-incident edges whenever a node OR an edge selection is focusing a flow.
-    const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected) || (isControlEdge && !emphasized && !parentExpanded)
+    // Dim every edge outside the focused flow (node/edge selection OR planned path);
+    // an edge on the path, incident, or selected stays lit.
+    const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded)
     const color = strokeColor(e, onPath || selected)
     const baseWidth = e.source === 'manual' ? 2 : 1.4
     const width = onPath ? 3 : selected ? 2.8 : emphasized ? 2.4 : baseWidth
@@ -421,86 +440,6 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     })
   }
   return out
-}
-
-/**
- * The sub-state a proposal transitions into, or null for a pure micro-interaction
- * (focus/debounce/highlight/keyboard-nav) that does not open a distinct UI surface.
- * Used to materialize ghost state nodes so a proposal can be drawn as a real edge.
- */
-function proposalStateKind(p: Proposal): string | null {
-  const hay = `${p.category} ${p.effect ?? ''} ${p.title} ${p.to ?? ''}`.toLowerCase()
-  if (/modal|dialog|drawer|sheet/.test(hay)) return 'modal'
-  if (/popover|dropdown|autocomplete|suggest|combobox|tooltip|context.?menu|\bmenu\b/.test(hay)) return 'popover'
-  if (/error|fail|invalid|reject/.test(hay)) return 'error'
-  if (/empty|no results|no matches/.test(hay)) return 'empty'
-  if (/loading|spinner|skeleton|fetching/.test(hay)) return 'loading'
-  if (/expand|collapse|accordion|read more|show more|see all|disclos/.test(hay)) return 'expanded'
-  if (/toast|success|confirmation|\bsaved\b/.test(hay)) return 'toast'
-  return null
-}
-
-/**
- * Materialize proposals as graph elements (only when proposals are shown). A
- * proposal IS a hypothesized transition, so it becomes a ghost edge to a target
- * node: a real screen target -> that screen; a `<modal>` -> the screen's modal
- * node; a state-changing proposal -> a deduped ghost STATE node (modal/popover/
- * error/empty/loading/expanded/toast) created here. Pure micro-interactions have
- * no distinct target state and stay on the per-screen badge + panel. Edges carry
- * an arrowhead and read as dashed/"proposed".
- */
-function materializeProposals(graph: UiGraph, proposals: Proposal[]): { nodes: GraphNode[]; edges: Edge[] } {
-  const realNodeIds = new Set(graph.nodes.map((n) => n.id))
-  const realScreens = new Set<string>()
-  for (const n of graph.nodes) if (n.kind !== 'control') realScreens.add(n.id)
-  const modalFor = (screen: string): string | undefined =>
-    graph.nodes.find((n) => n.kind === 'modal' && n.id.startsWith(`m_${screen}`))?.id
-
-  const stateNodes = new Map<string, GraphNode>()
-  const edges: Edge[] = []
-  const seen = new Set<string>()
-  const link = (from: string, to: string): void => {
-    const pid = `${from}->${to}`
-    if (seen.has(pid)) return
-    seen.add(pid)
-    edges.push({
-      id: `ghost_${pid}`,
-      source: from,
-      target: to,
-      type: 'smoothstep',
-      selectable: false,
-      markerEnd: { type: MarkerType.ArrowClosed, color: GHOST_COLOR, width: 14, height: 14 },
-      style: { stroke: GHOST_COLOR, strokeWidth: 1.4, strokeOpacity: 0.6, strokeDasharray: '2 4' },
-    })
-  }
-
-  for (const p of proposals) {
-    if (!realNodeIds.has(p.screen)) continue
-    if (p.to !== undefined && realScreens.has(p.to)) {
-      link(p.screen, p.to)
-      continue
-    }
-    if (p.to === '<modal>') {
-      const m = modalFor(p.screen)
-      if (m) {
-        link(p.screen, m)
-        continue
-      }
-    }
-    const kind = proposalStateKind(p)
-    if (kind === null) continue
-    const id = `ps_${p.screen}__${kind}`
-    if (!stateNodes.has(id)) {
-      stateNodes.set(id, { id, route: null, componentPath: null, label: kind, kind: kind === 'modal' || kind === 'popover' ? 'modal' : 'unknown' })
-    }
-    link(p.screen, id)
-  }
-  return { nodes: [...stateNodes.values()], edges }
-}
-
-/** A layout-only placeholder edge (never served/styled), so dagre positions ghost state nodes near their screen. */
-function layoutEdge(from: string, to: string): GraphEdge {
-  return { id: `L_${from}_${to}`, from, to, event: '', guard: null, effect: null, modality: 'may', source: 'static', confidence: 0 }
 }
 
 /** A structural key over node ids, edge ids, and the expanded set: changes only on relayout-worthy edits. */
@@ -554,7 +493,6 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const { graph, proposals, selection, pathEdgeIds, onSelect, onConnect } = props
   const [expandAll, setExpandAll] = useState(false)
   const [highlightFlow, setHighlightFlow] = useState(true)
-  const [showProposals, setShowProposals] = useState(false)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
 
   const expanded = useMemo(() => {
@@ -576,28 +514,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     return m
   }, [proposals])
 
-  // When proposals are shown, materialize ghost state nodes + ghost edges — but
-  // SCOPED to the selected screen, so the canvas stays readable (one screen's
-  // proposed sub-states at a time) instead of dumping all 117. With no screen
-  // selected, proposals live on the per-screen badge + the panel.
-  const ghost = useMemo<{ nodes: GraphNode[]; edges: Edge[] }>(() => {
-    if (!showProposals || selection?.kind !== 'node') return { nodes: [], edges: [] }
-    const screenId = selection.node.id
-    const scoped = proposals.proposals.filter((p) => p.screen === screenId)
-    return materializeProposals(graph, scoped)
-  }, [graph, proposals, showProposals, selection])
-  const layoutInput = useMemo<UiGraph>(
-    () =>
-      ghost.nodes.length === 0
-        ? graph
-        : { ...graph, nodes: [...graph.nodes, ...ghost.nodes], edges: [...graph.edges, ...ghost.edges.map((e) => layoutEdge(e.source!, e.target!))] },
-    [graph, ghost],
-  )
-
-  // Compute the dagre layout ONCE per relayout-worthy change and share it: node
-  // positions/sizes seed the flow nodes, and the routed edge polylines drive the
-  // custom 'dagre' edges so arrows follow dagre's spaced, de-crossed routes.
-  const layout = useMemo<GraphLayout>(() => layoutGraph(layoutInput, expanded), [layoutInput, expanded])
+  // Proposals are NOT drawn on the canvas (they are persisted as nodes/edges in the
+  // database and read via the proposals panel); the graph shows only the proven IR.
+  const layout = useMemo<GraphLayout>(() => layoutGraph(graph, expanded), [graph, expanded])
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
@@ -618,19 +537,30 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     return new Set<string>()
   }, [graph, selectedNodeId, selectedEdge])
 
+  // A planned path focuses the graph just like a selection: its edges + the nodes
+  // they touch are highlighted and everything else is dimmed.
+  const pathActive = pathEdgeIds.size > 0
+  const pathNodeIds = useMemo(() => {
+    const out = new Set<string>()
+    for (const e of graph.edges) if (pathEdgeIds.has(e.id)) {
+      out.add(e.from)
+      out.add(e.to)
+    }
+    return out
+  }, [graph, pathEdgeIds])
+
   // Re-seed node positions from the dagre layout only when structure/expansion changes,
   // so user drags survive selection, hover, and re-style passes.
-  const key = useMemo(() => `${structuralKey(layoutInput, expanded)}|p:${proposals.proposals.length}`, [layoutInput, expanded, proposals])
+  const key = useMemo(() => `${structuralKey(graph, expanded)}|p:${proposals.proposals.length}`, [graph, expanded, proposals])
   const lastKey = useRef<string | null>(null)
   useEffect(() => {
     if (lastKey.current === key) return
     const firstLayout = lastKey.current === null
     lastKey.current = key
-    const laid = toFlowNodes(layoutInput, layout, expanded, proposalCount)
+    const laid = toFlowNodes(graph, layout, expanded, proposalCount)
     // Keep the user's dragged positions ONLY when the node SET is unchanged (a pure
-    // re-style). When nodes are added or removed (expand, proposals on/off), take a
-    // FULL fresh dagre layout so every node is placed by one consistent pass — mixing
-    // old screen positions with fresh ghost positions is what caused overlaps.
+    // re-style). When nodes are added or removed (expand collapse), take a FULL fresh
+    // layout so every node is placed by one consistent radial pass.
     setNodes((prev) => {
       if (firstLayout) return laid
       const prevIds = new Set(prev.map((n) => n.id))
@@ -642,34 +572,33 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
         return kept ? { ...n, position: kept } : n
       })
     })
-  }, [key, layoutInput, layout, expanded, proposalCount, setNodes])
+  }, [key, graph, layout, expanded, proposalCount, setNodes])
 
   // Apply selection emphasis onto the live, user-positioned nodes without resetting
   // their positions. A node selection marks the node 'rf-selected' and its neighbours
   // 'rf-neighbor'; an edge selection marks BOTH endpoints 'rf-neighbor' (so the one
   // flow reads clearly). Whenever a flow is focused, every other node is dimmed.
   const selectedId = selection?.kind === 'node' ? selection.node.id : null
-  const focusActive = selectedNodeId !== null || selectedEdge !== null
+  const focusActive = selectedNodeId !== null || selectedEdge !== null || pathActive
   useEffect(() => {
     setNodes((prev) =>
       prev.map((n) => {
         const isSelected = n.id === selectedId
-        const isNeighbor = neighborIds.has(n.id)
-        const className = isSelected ? 'rf-selected' : isNeighbor ? 'rf-neighbor' : focusActive ? 'rf-dimmed' : ''
+        const highlighted = neighborIds.has(n.id) || pathNodeIds.has(n.id)
+        const className = isSelected ? 'rf-selected' : highlighted ? 'rf-neighbor' : focusActive ? 'rf-dimmed' : ''
         if (n.selected === isSelected && n.className === (className || undefined)) return n
         return { ...n, selected: isSelected, className: className || undefined }
       }),
     )
-  }, [selectedId, focusActive, neighborIds, setNodes])
+  }, [selectedId, focusActive, neighborIds, pathNodeIds, setNodes])
 
   const edgeCtx = useMemo<EdgeContext>(
-    () => ({ selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, edgePoints: layout.edgePoints, focusEdgeActive: selectedEdge !== null }),
-    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, layout, selectedEdge],
+    () => ({ selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive: selectedEdge !== null || pathActive }),
+    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive],
   )
   useEffect(() => {
-    const base = toFlowEdges(graph, edgeCtx)
-    setEdges(showProposals ? [...base, ...ghost.edges] : base)
-  }, [graph, edgeCtx, showProposals, ghost, setEdges])
+    setEdges(toFlowEdges(graph, edgeCtx))
+  }, [graph, edgeCtx, setEdges])
 
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_evt, node) => {
@@ -725,10 +654,6 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
           <label className="edge-toggle">
             <input type="checkbox" checked={highlightFlow} onChange={(e) => setHighlightFlow(e.target.checked)} />
             highlight flow on select
-          </label>
-          <label className="edge-toggle">
-            <input type="checkbox" checked={showProposals} onChange={(e) => setShowProposals(e.target.checked)} />
-            show proposals
           </label>
         </div>
       </Panel>

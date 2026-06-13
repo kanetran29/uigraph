@@ -12,10 +12,10 @@ import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import type { Overlay, UiGraph } from './ir'
 import type { SoundinessNote } from './adapter'
-import type { Proposal, Proposals } from './proposals'
+import type { Proposal, Proposals, ProposalGraph } from './proposals'
 import type { Observation } from './runtime'
 import { validateGraph } from './validate'
-import { validateProposals } from './proposals'
+import { validateProposals, materializeProposalGraph } from './proposals'
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS docs (key TEXT PRIMARY KEY, json TEXT NOT NULL);
@@ -100,6 +100,7 @@ export class Store {
     if (errs.length > 0) throw new Error(`refusing to store invalid graph:\n  ${errs.map((e) => e.message).join('\n  ')}`)
     this.setDoc('graph', graph)
     this.setDoc('soundiness', soundiness)
+    this.rebuildProposalGraph()
   }
 
   getBaseGraph(): UiGraph | null {
@@ -164,6 +165,23 @@ export class Store {
       this.db.exec('ROLLBACK')
       throw e
     }
+    this.rebuildProposalGraph()
+  }
+
+  /**
+   * Recompute and store the proposal graph (proposals projected to nodes + edges,
+   * quarantined from the proven IR) from the current base graph + proposals. Called
+   * whenever either changes. No-op until a base graph exists.
+   */
+  rebuildProposalGraph(): void {
+    const graph = this.getBaseGraph()
+    if (graph === null) return
+    this.setDoc('proposed', materializeProposalGraph(graph, this.queryProposals()))
+  }
+
+  /** The stored proposal graph (proposals as nodes + edges), or empty when none. */
+  getProposalGraph(): ProposalGraph {
+    return this.getDoc<ProposalGraph>('proposed') ?? { nodes: [], edges: [] }
   }
 
   /** The full proposals sidecar, or null when none has been stored. */

@@ -84,4 +84,17 @@ describe('Store (SQLite)', () => {
     expect(s.queryProposals().map((p) => p.id)).toEqual(['p3'])
     s.close()
   })
+
+  it('persists proposals as a quarantined node/edge graph (queryable, not in the proven IR)', () => {
+    const s = openStore(':memory:')
+    s.setBaseGraph(g())
+    s.setProposals(sidecar())
+    const pg = s.getProposalGraph()
+    // p2 targets a real screen 'a' -> a direct proposed edge b->a
+    const direct = pg.edges.find((e) => e.from === 'b' && e.to === 'a')
+    expect(direct?.proposalIds).toContain('p2')
+    // the proven graph is untouched (still its single static edge)
+    expect(s.getBaseGraph()?.edges).toHaveLength(1)
+    s.close()
+  })
 })

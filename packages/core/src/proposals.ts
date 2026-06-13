@@ -10,6 +10,8 @@
 // proposal therefore degrades planning at worst; it can never mint a phantom
 // proven transition.
 
+import type { UiGraph } from './ir'
+
 /** Lifecycle of a proposal as it moves toward (or away from) the proven graph. */
 export type ProposalStatus = 'proposed' | 'confirmed' | 'rejected'
 
@@ -101,4 +103,102 @@ export function validateProposals(value: unknown): ProposalError[] {
 /** An empty proposals sidecar bound to a base graph hash. */
 export function emptyProposals(baseHash: string): Proposals {
   return { version: 0, base: baseHash, proposals: [] }
+}
+
+/** A node in the quarantined proposal graph (a real screen, a screen's modal, or a synthesized sub-state). */
+export interface ProposalGraphNode {
+  id: string
+  label: string
+  kind: string
+}
+
+/** A proposed transition as an edge: source screen → target node, carrying the originating proposal ids. */
+export interface ProposalGraphEdge {
+  id: string
+  from: string
+  to: string
+  event: string
+  guard: string | null
+  effect: string | null
+  modality: 'may' | 'unknown'
+  proposalIds: string[]
+}
+
+/** The proposal graph: proposals rendered AS nodes + edges, kept separate from the proven IR. */
+export interface ProposalGraph {
+  nodes: ProposalGraphNode[]
+  edges: ProposalGraphEdge[]
+}
+
+/** The sub-state kind a state-changing proposal opens, or null for a pure micro-interaction. */
+function proposalStateKind(p: Proposal): string | null {
+  const hay = `${p.category} ${p.effect ?? ''} ${p.title} ${p.to ?? ''}`.toLowerCase()
+  if (/modal|dialog|drawer|sheet/.test(hay)) return 'modal'
+  if (/popover|dropdown|autocomplete|suggest|combobox|tooltip|context.?menu|\bmenu\b/.test(hay)) return 'popover'
+  if (/error|fail|invalid|reject/.test(hay)) return 'error'
+  if (/empty|no results|no matches/.test(hay)) return 'empty'
+  if (/loading|spinner|skeleton|fetching/.test(hay)) return 'loading'
+  if (/expand|collapse|accordion|read more|show more|see all|disclos/.test(hay)) return 'expanded'
+  if (/toast|success|confirmation|\bsaved\b/.test(hay)) return 'toast'
+  return null
+}
+
+/**
+ * Project proposals into a graph of nodes + edges, kept SEPARATE from the proven
+ * IR (proposal edges cannot be GraphEdges — those require a static/manual/runtime
+ * witness). Each proposal becomes an edge from its screen to a target: a real
+ * screen, that screen's modal, or a synthesized sub-state node (modal/popover/
+ * error/empty/loading/expanded/toast). Pure micro-interactions (no distinct target
+ * state) are skipped. Edges dedupe by from→to, merging the originating proposal
+ * ids. This is what gets stored so proposals are queryable as a graph without
+ * polluting the proven graph.
+ */
+export function materializeProposalGraph(graph: UiGraph, proposals: Proposal[]): ProposalGraph {
+  const realNodeIds = new Set(graph.nodes.map((n) => n.id))
+  const realScreens = new Set(graph.nodes.filter((n) => n.kind !== 'control').map((n) => n.id))
+  const modalFor = (screen: string): string | undefined =>
+    graph.nodes.find((n) => n.kind === 'modal' && n.id.startsWith(`m_${screen}`))?.id
+
+  const stateNodes = new Map<string, ProposalGraphNode>()
+  const edgeByPair = new Map<string, ProposalGraphEdge>()
+  const link = (p: Proposal, to: string): void => {
+    const pair = `${p.screen}->${to}`
+    const existing = edgeByPair.get(pair)
+    if (existing) {
+      existing.proposalIds.push(p.id)
+      return
+    }
+    edgeByPair.set(pair, {
+      id: `pe_${pair}`,
+      from: p.screen,
+      to,
+      event: p.event ?? '',
+      guard: p.guard ?? null,
+      effect: p.effect ?? null,
+      modality: 'may',
+      proposalIds: [p.id],
+    })
+  }
+
+  for (const p of proposals) {
+    if (!realNodeIds.has(p.screen)) continue
+    if (p.to !== undefined && realScreens.has(p.to)) {
+      link(p, p.to)
+      continue
+    }
+    if (p.to === '<modal>') {
+      const m = modalFor(p.screen)
+      if (m !== undefined) {
+        link(p, m)
+        continue
+      }
+    }
+    const kind = proposalStateKind(p)
+    if (kind === null) continue
+    const id = `ps_${p.screen}__${kind}`
+    if (!stateNodes.has(id)) stateNodes.set(id, { id, label: kind, kind: kind === 'modal' || kind === 'popover' ? 'modal' : 'unknown' })
+    link(p, id)
+  }
+
+  return { nodes: [...stateNodes.values()], edges: [...edgeByPair.values()] }
 }

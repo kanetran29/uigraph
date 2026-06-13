@@ -31,7 +31,7 @@
   --node-subtle-bg: #f1f5f9;
   --node-manual-bg: #f3effe;
   --node-border: #94a3b8;
-  --label-bg: #ffffffee;
+  --label-bg: #ffffff;
 
   --edge: #475569;
   --edge-manual: #7c3aed;
@@ -63,7 +63,7 @@
     --node-subtle-bg: #161b22;
     --node-manual-bg: #241a3d;
     --node-border: #4a5568;
-    --label-bg: #1c2230f2;
+    --label-bg: #1c2230;
 
     --edge: #8b98ac;
     --edge-manual: #b794f6;
@@ -480,17 +480,22 @@ button.danger {
   height: 0;
 }
 
-/* DagreEdge label pill, mirroring the built-in edge label background/padding/radius. */
+/* Floating edge label pill: an opaque, bordered chip that sits ABOVE the edge
+ * strokes (z-index) so the event/effect text is never hidden behind an arrow. */
 .dagre-edge-label {
   position: absolute;
+  z-index: 20;
   pointer-events: none;
   background: var(--label-bg);
   color: var(--text);
   font-size: 11px;
-  font-weight: 500;
-  padding: 3px 6px;
-  border-radius: 6px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
   white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
 }
 
 /* Selection emphasis on nodes, applied via className so drags are preserved. */
@@ -668,11 +673,19 @@ button.danger {
   flex-shrink: 0;
 }
 
-.prop-meta {
-  margin-top: 5px;
-  font-size: 10px;
-  color: var(--muted);
+/* The compact event·to·effect·[guard] meta line, rendered as a code block. */
+.prop-code {
+  display: block;
+  margin-top: 6px;
+  padding: 6px 8px;
+  font-size: 10.5px;
+  line-height: 1.45;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text);
+  background: var(--panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  white-space: pre-wrap;
   word-break: break-word;
 }
 
@@ -680,7 +693,17 @@ button.danger {
   margin: 6px 0 0;
   font-size: 11px;
   color: var(--text);
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+/* `backtick` spans inside a rationale: a subtle inline code chip. */
+.inline-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  padding: 1px 4px;
+  background: var(--panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 4px;
 }
 
 /* Per-screen evidence screenshot, revealed with the rationale. */
