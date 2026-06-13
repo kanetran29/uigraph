@@ -81,6 +81,16 @@ function metaLine(p: Proposal, labels: Map<string, string>): string | null {
   return parts.length > 0 ? parts.join(' · ') : null
 }
 
+/** Render text with `backtick`-quoted spans as inline <code>, plain text otherwise. */
+function withInlineCode(text: string): JSX.Element {
+  const parts = text.split('`')
+  return (
+    <>
+      {parts.map((part, i) => (i % 2 === 1 ? <code key={i} className="inline-code">{part}</code> : <span key={i}>{part}</span>))}
+    </>
+  )
+}
+
 /** A single expandable proposal row; the rationale is revealed on click. */
 function ProposalRow(props: { proposal: Proposal; labels: Map<string, string> }): JSX.Element {
   const { proposal, labels } = props
@@ -95,8 +105,8 @@ function ProposalRow(props: { proposal: Proposal; labels: Map<string, string> })
         <EvidenceBadge evidenced={proposal.evidenced} />
       </button>
       <ConfidenceBar confidence={proposal.confidence} />
-      {meta ? <div className="prop-meta">{meta}</div> : null}
-      {open ? <p className="prop-rationale">{proposal.rationale}</p> : null}
+      {meta ? <code className="prop-code">{meta}</code> : null}
+      {open ? <p className="prop-rationale">{withInlineCode(proposal.rationale)}</p> : null}
       {open && proposal.screenshot ? (
         <img className="prop-shot" src={`/api/${proposal.screenshot}`} alt={`${proposal.screen} screen`} loading="lazy" />
       ) : null}

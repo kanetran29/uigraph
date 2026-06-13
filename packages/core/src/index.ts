@@ -34,11 +34,15 @@ export { mergeOverlay, emptyOverlay } from './overlay'
 export {
   validateProposals,
   emptyProposals,
+  materializeProposalGraph,
   type Proposal,
   type Proposals,
   type ProposalKind,
   type ProposalStatus,
   type ProposalError,
+  type ProposalGraph,
+  type ProposalGraphNode,
+  type ProposalGraphEdge,
 } from './proposals'
 export {
   buildGrounding,

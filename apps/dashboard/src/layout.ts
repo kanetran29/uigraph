@@ -28,22 +28,47 @@ export interface GraphLayout {
   edgePoints: Map<string, NodePosition[]>
 }
 
-const SCREEN_WIDTH = 210
-const SCREEN_HEIGHT = 64
+const SCREEN_WIDTH = 248
+// Collapsed screen height fits the four-line label (name, route, controls badge,
+// proposals badge) without clipping.
+const SCREEN_HEIGHT = 98
 
 const GHOST_WIDTH = 150
 const GHOST_HEIGHT = 40
 
-const CONTROL_WIDTH = 176
-const CONTROL_HEIGHT = 56
+const CONTROL_WIDTH = 188
+const CONTROL_HEIGHT = 60
 const CONTROL_GAP = 10
 const CHILD_INSET_X = 14
-const CHILD_TOP = 58
-const CHILD_BOTTOM_PAD = 14
+const CHILD_TOP = 62
+const CHILD_BOTTOM_PAD = 16
 
 // Radius added per BFS ring. Generous so a ring's circumference comfortably holds
 // its nodes and the spokes between rings have room for edge labels.
-const RING = 460
+const RING = 520
+
+/** Column count for an expanded screen's controls: wrap into a grid (max 3 cols) so a
+ * control-heavy screen grows wide rather than into an unreadable tall column. */
+function gridCols(count: number): number {
+  if (count <= 3) return 1
+  if (count <= 8) return 2
+  return 3
+}
+
+/** The {cols, rows} grid an expanded screen lays its controls into. */
+function gridDims(count: number): { cols: number; rows: number } {
+  const cols = gridCols(count)
+  return { cols, rows: Math.ceil(count / cols) }
+}
+
+/** Box size an expanded screen needs to contain its control grid. */
+function expandedSize(count: number): { width: number; height: number } {
+  if (count === 0) return { width: SCREEN_WIDTH, height: SCREEN_HEIGHT }
+  const { cols, rows } = gridDims(count)
+  const width = Math.max(SCREEN_WIDTH, CHILD_INSET_X * 2 + cols * CONTROL_WIDTH + (cols - 1) * CONTROL_GAP)
+  const height = CHILD_TOP + rows * (CONTROL_HEIGHT + CONTROL_GAP) - CONTROL_GAP + CHILD_BOTTOM_PAD
+  return { width, height }
+}
 
 /** Whether a node is a nested control (has a parent screen). */
 function isControl(node: GraphNode): boolean {
@@ -62,25 +87,21 @@ function controlsByParent(graph: UiGraph): Map<string, string[]> {
   return byParent
 }
 
-/** Height a screen needs to contain its stack of child controls. */
-function screenHeight(childCount: number): number {
-  if (childCount === 0) return SCREEN_HEIGHT
-  return CHILD_TOP + childCount * (CONTROL_HEIGHT + CONTROL_GAP) - CONTROL_GAP + CHILD_BOTTOM_PAD
-}
-
 /**
  * Compute the full canvas layout. Screens are placed radially around the root by
  * BFS depth (root centred); only screens in `expanded` are grown to contain their
- * controls. Returns empty edge points — edges route as floating curves at render.
+ * control grid. Returns empty edge points — edges route as floating curves at render.
  */
 export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): GraphLayout {
   const childrenOf = controlsByParent(graph)
   const screens = graph.nodes.filter((n) => !isControl(n))
   const screenIds = new Set(screens.map((n) => n.id))
   const isGhost = (id: string): boolean => id.startsWith('ps_')
-  const widthOf = (id: string): number => (isGhost(id) ? GHOST_WIDTH : SCREEN_WIDTH)
+  const childN = (id: string): number => (childrenOf.get(id) ?? []).length
+  const widthOf = (id: string): number =>
+    isGhost(id) ? GHOST_WIDTH : expanded.has(id) ? expandedSize(childN(id)).width : SCREEN_WIDTH
   const heightOf = (id: string): number =>
-    isGhost(id) ? GHOST_HEIGHT : expanded.has(id) ? screenHeight((childrenOf.get(id) ?? []).length) : SCREEN_HEIGHT
+    isGhost(id) ? GHOST_HEIGHT : expanded.has(id) ? expandedSize(childN(id)).height : SCREEN_HEIGHT
 
   // Undirected adjacency among screen nodes (control edges are ignored for ranking).
   const adj = new Map<string, Set<string>>()
@@ -167,9 +188,16 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
     positions.set(node.id, { x: cx - width / 2, y: cy - height / 2 })
 
     if (!expanded.has(node.id)) continue
-    ;(childrenOf.get(node.id) ?? []).forEach((childId, i) => {
+    const kids = childrenOf.get(node.id) ?? []
+    const cols = gridCols(kids.length)
+    kids.forEach((childId, i) => {
+      const col = i % cols
+      const row = Math.floor(i / cols)
       sizes.set(childId, { width: CONTROL_WIDTH, height: CONTROL_HEIGHT })
-      positions.set(childId, { x: CHILD_INSET_X, y: CHILD_TOP + i * (CONTROL_HEIGHT + CONTROL_GAP) })
+      positions.set(childId, {
+        x: CHILD_INSET_X + col * (CONTROL_WIDTH + CONTROL_GAP),
+        y: CHILD_TOP + row * (CONTROL_HEIGHT + CONTROL_GAP),
+      })
     })
   }
 
