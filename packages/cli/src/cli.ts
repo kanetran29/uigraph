@@ -10,6 +10,7 @@ import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
 import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, runDiff, runExport, runGen, runMap, runMigrate, type AdapterName } from './commands'
 import { startApiServer } from './server'
+import { runVerify } from './runner'
 
 /** Build the commander program with every uigraph subcommand registered. */
 export function buildProgram(): Command {
@@ -47,6 +48,17 @@ export function buildProgram(): Command {
     .argument('<dir>', 'workspace directory holding the legacy JSON files')
     .action((dir: string) => {
       console.log(formatMigrateSummary(dir, runMigrate(dir)))
+    })
+
+  program
+    .command('verify')
+    .description('Tier-3: drive the running app to confirm uncertain transitions + proposals, recording runtime observations.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .requiredOption('--app-url <url>', 'base URL of the running app (e.g. http://localhost:3000)')
+    .option('--limit <n>', 'max targets to attempt', '10')
+    .action(async (dir: string, opts: { appUrl: string; limit: string }) => {
+      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit) })
+      console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)`)
     })
 
   program
