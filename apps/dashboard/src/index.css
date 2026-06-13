@@ -254,6 +254,28 @@ select:focus-visible,
 .plan-export {
   margin-top: 8px;
 }
+
+.node-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.field-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.field-edit input {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-subtle);
+  color: var(--text);
+}
 .plan-add:hover:not(:disabled),
 .plan-export:hover {
   background: var(--border);

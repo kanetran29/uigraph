@@ -122,5 +122,6 @@ export interface Overlay {
   addedNodes: GraphNode[]
   addedEdges: GraphEdge[]
   editedEdges: GraphEdge[]
+  editedNodes?: GraphNode[]
   removedRefs: string[]
 }

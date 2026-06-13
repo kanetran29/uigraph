@@ -22,6 +22,15 @@ describe('exportOverlaySpec', () => {
   it('reports an empty plan clearly', () => {
     expect(exportOverlaySpec(planBase, emptyOverlay('h'))).toContain('No planned changes yet')
   })
+
+  it('merges editedNodes by id (replacing the base node) and lists them in the spec', () => {
+    const ov: Overlay = { ...emptyOverlay('h'), editedNodes: [node('a', { label: 'Dashboard', route: '/dash' })] }
+    const merged = mergeOverlay(planBase, ov)
+    const a = merged.nodes.find((n) => n.id === 'a')
+    expect(a?.label).toBe('Dashboard')
+    expect(a?.route).toBe('/dash')
+    expect(exportOverlaySpec(planBase, ov)).toContain('## Edited screens')
+  })
 })
 
 describe('mergeOverlay', () => {

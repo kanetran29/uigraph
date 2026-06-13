@@ -17,6 +17,7 @@ export const SAMPLE_GRAPH = sampleGraph as unknown as UiGraph
  */
 export type UpdateOp =
   | { kind: 'addNode'; node: GraphNode }
+  | { kind: 'editNode'; node: GraphNode }
   | { kind: 'addEdge'; edge: GraphEdge }
   | { kind: 'editEdge'; edge: GraphEdge }
   | { kind: 'remove'; id: string }

@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
-import type { CoverageReport, GraphEdge, Proposals, UiGraph } from '@uigraph/core'
+import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
 import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, postOverlay, type UpdateOp } from './api'
 import { GraphCanvas, type Selection } from './GraphCanvas'
 import { Coverage } from './Coverage'
@@ -95,6 +95,13 @@ export function App(): JSX.Element {
     [applyOp],
   )
 
+  const handleEditNode = useCallback(
+    (node: GraphNode) => {
+      void applyOp({ kind: 'editNode', node })
+    },
+    [applyOp],
+  )
+
   const handleDelete = useCallback(
     (id: string) => {
       void applyOp({ kind: 'remove', id })
@@ -173,7 +180,7 @@ export function App(): JSX.Element {
           )}
         </main>
         <div className="side">
-          <Inspector selection={selection} onEditEdge={handleEditEdge} onDelete={handleDelete} />
+          <Inspector selection={selection} onEditEdge={handleEditEdge} onEditNode={handleEditNode} onDelete={handleDelete} />
           <Plan live={live} onAddScreen={handleAddScreen} onExport={handleExport} />
           <Steps graph={graph} onPathChange={handlePathChange} />
           {coverage ? <Coverage coverage={coverage} graph={graph} onSelect={setSelection} /> : null}

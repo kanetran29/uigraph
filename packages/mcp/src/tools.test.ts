@@ -271,6 +271,15 @@ describe('updateGraph', () => {
     // base is untouched
     expect(base?.edges.map((e) => e.id).sort()).toEqual(['e_ab', 'e_bc'])
   })
+
+  it('editNode overlays a renamed/re-routed node onto the merged graph; base untouched', () => {
+    const ctx = chainWorkspace()
+    updateGraph(ctx, { op: { kind: 'editNode', node: { id: 'a', route: '/home', componentPath: null, label: 'Home', kind: 'screen' } } })
+    const merged = getGraph(ctx)
+    const a = merged.nodes.find((n) => n.id === 'a')
+    expect(a?.label).toBe('Home')
+    expect(a?.route).toBe('/home')
+  })
 })
 
 describe('reportObservation', () => {
