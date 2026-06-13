@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { validateProposals, emptyProposals, type Proposal } from './proposals'
+import { validateProposals, emptyProposals, materializeProposalGraph, type Proposal } from './proposals'
+import { node, graph } from './fixtures'
 
 function proposal(over: Partial<Proposal> = {}): Proposal {
   return {
@@ -34,5 +35,25 @@ describe('validateProposals', () => {
     }).map((e) => e.code)
     expect(codes).toContain('DUP_ID')
     expect(codes).toContain('CONFIDENCE_RANGE')
+  })
+
+  it('accepts the unverifiable status and an optional reason', () => {
+    const p = { ...proposal(), status: 'unverifiable' as const, reason: 'route is behind a feature flag not enabled in dev' }
+    expect(validateProposals({ ...emptyProposals('h'), proposals: [p] })).toEqual([])
+  })
+})
+
+describe('materializeProposalGraph — active-graph guard', () => {
+  const g = graph([node('n_a'), node('n_b')], [])
+  const p = (over: Partial<Proposal> = {}) => proposal({ screen: 'n_a', to: 'n_b', ...over })
+
+  it('emits an edge for a proposed proposal', () => {
+    expect(materializeProposalGraph(g, [p()]).edges).toHaveLength(1)
+  })
+
+  it('excludes resolved proposals (confirmed/rejected/unverifiable) from the active graph', () => {
+    for (const status of ['confirmed', 'rejected', 'unverifiable'] as const) {
+      expect(materializeProposalGraph(g, [p({ status })]).edges).toHaveLength(0)
+    }
   })
 })

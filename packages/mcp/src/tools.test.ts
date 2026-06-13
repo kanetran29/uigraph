@@ -19,11 +19,15 @@ import {
   getGrounding,
   getProposalGraph,
   getProposals,
+  getLoopStatus,
+  markUnverifiable,
   nextToVerifyTool,
   planPathTool,
   readObservations,
+  reconcileProposalsTool,
   reportObservation,
   updateGraph,
+  withdrawProposal,
   type ToolContext,
 } from './tools'
 
@@ -310,7 +314,9 @@ describe('reportObservation', () => {
 
     const logged = readObservations(ctx)
     expect(logged).toHaveLength(1)
-    expect(logged[0]).toEqual(entry)
+    const { reconciled: _reconciled, ...stored } = entry
+    expect(logged[0]).toEqual(stored)
+    expect(Array.isArray(entry.reconciled)).toBe(true)
 
     reportObservation(ctx, { from: 'b', to: 'c', event: 'submit', outcome: 'refuted' })
     expect(readObservations(ctx)).toHaveLength(2)
@@ -331,5 +337,70 @@ describe('diffTool', () => {
     expect(res.addedEdges.map((e) => e.id)).toEqual(['e_ba'])
     expect(res.removedEdges).toEqual([])
     expect(res.changedEdges).toEqual([])
+  })
+})
+
+describe('proposal reconciliation loop', () => {
+  // A workspace whose only uncertain transitions are proposals (no may/unknown edges),
+  // so the verify worklist == the open proposal set and loopDone is easy to reason about.
+  function loopWorkspace(): ToolContext {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    seedProposals(ctx, { version: 0, base: 'h', proposals: [proposal('p1', { kind: 'edge', screen: 'a', to: 'b', event: 'click' })] })
+    return ctx
+  }
+
+  it('report_observation(confirmed, proposalId) archives the proposal AND mints the runtime edge (two derivations, one witness)', () => {
+    const ctx = loopWorkspace()
+    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', proposalId: 'p1' })
+    expect(res.reconciled).toEqual([{ id: 'p1', status: 'confirmed' }])
+    expect(getProposals(ctx, { status: 'confirmed' }).proposals.map((p) => p.id)).toEqual(['p1'])
+    const e = getGraph(ctx).edges.find((x) => x.from === 'a' && x.to === 'b')
+    expect(e?.source).toBe('runtime')
+  })
+
+  it('report_observation(refuted, proposalId) rejects the proposal and adds NO proven edge (phantom-must check)', () => {
+    const ctx = loopWorkspace()
+    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'refuted', proposalId: 'p1' })
+    expect(res.reconciled).toEqual([{ id: 'p1', status: 'rejected' }])
+    expect(getGraph(ctx).edges).toHaveLength(0)
+    expect(getProposalGraph(ctx).edges).toHaveLength(0)
+  })
+
+  it('withdraw_proposal removes a hallucinated lead from the active graph without touching the proven graph', () => {
+    const ctx = loopWorkspace()
+    expect(getProposalGraph(ctx).edges).toHaveLength(1)
+    const r = withdrawProposal(ctx, { id: 'p1', reason: 'references a control that does not exist' })
+    expect(r.status).toBe('rejected')
+    expect(getProposalGraph(ctx).edges).toHaveLength(0)
+    expect(getGraph(ctx).edges).toHaveLength(0)
+    expect(getProposals(ctx, { status: 'rejected' }).proposals[0]?.reason).toContain('does not exist')
+  })
+
+  it('mark_unverifiable parks a proposal out of the worklist but keeps it queryable', () => {
+    const ctx = loopWorkspace()
+    expect(nextToVerifyTool(ctx).some((t) => t.kind === 'proposal')).toBe(true)
+    markUnverifiable(ctx, { id: 'p1', reason: 'route behind a feature flag off in dev' })
+    expect(nextToVerifyTool(ctx).some((t) => t.kind === 'proposal')).toBe(false)
+    expect(getProposals(ctx, { status: 'unverifiable' }).proposals.map((p) => p.id)).toEqual(['p1'])
+  })
+
+  it('get_loop_status.loopDone flips true only once worklist is empty AND no proposed remain', () => {
+    const ctx = loopWorkspace()
+    expect(getLoopStatus(ctx).loopDone).toBe(false)
+    reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', proposalId: 'p1' })
+    const s = getLoopStatus(ctx)
+    expect(s.loopDone).toBe(true)
+    expect(s.resolution.openCount).toBe(0)
+    expect(s.worklistSize).toBe(0)
+  })
+
+  it('reconcile_proposals re-syncs out-of-band observations and is idempotent', () => {
+    const ctx = loopWorkspace()
+    // append an observation directly (as the Tier-3 runner would), bypassing report_observation reconcile
+    const store = openStore(dbPath(ctx))
+    store.appendObservation({ id: 'o1', from: 'a', to: 'b', event: 'click', outcome: 'refuted' })
+    store.close()
+    expect(reconcileProposalsTool(ctx).changed).toEqual([{ id: 'p1', status: 'rejected' }])
+    expect(reconcileProposalsTool(ctx).changed).toEqual([])
   })
 })

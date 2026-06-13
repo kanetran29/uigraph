@@ -97,4 +97,40 @@ describe('Store (SQLite)', () => {
     expect(s.getBaseGraph()?.edges).toHaveLength(1)
     s.close()
   })
+
+  it('setProposalStatus updates one row + reason, dropping it from the active proposal graph', () => {
+    const s = openStore(':memory:')
+    s.setBaseGraph(g())
+    s.setProposals(sidecar())
+    expect(s.getProposalGraph().edges.some((e) => e.proposalIds.includes('p2'))).toBe(true)
+    expect(s.setProposalStatus('p2', 'rejected', 'disproven at runtime')).toBe(true)
+    expect(s.getProposalGraph().edges.some((e) => e.proposalIds.includes('p2'))).toBe(false)
+    expect(s.queryProposals({ status: 'rejected' })[0]?.reason).toBe('disproven at runtime')
+    expect(s.setProposalStatus('missing', 'rejected')).toBe(false)
+    s.close()
+  })
+
+  it('reconcileFromObservations derives statuses from the log and is idempotent', () => {
+    const s = openStore(':memory:')
+    s.setBaseGraph(g())
+    s.setProposals(sidecar())
+    s.appendObservation({ id: 'o1', from: 'b', to: 'a', event: 'click', outcome: 'confirmed' })
+    expect(s.reconcileFromObservations()).toEqual([{ id: 'p2', status: 'confirmed' }])
+    expect(s.queryProposals({ status: 'confirmed' }).map((p) => p.id)).toEqual(['p2'])
+    // p2 left the active worklist; the proven graph is unchanged
+    expect(s.getProposalGraph().edges.some((e) => e.proposalIds.includes('p2'))).toBe(false)
+    expect(s.getBaseGraph()?.edges).toHaveLength(1)
+    // second call with no new observations changes nothing
+    expect(s.reconcileFromObservations()).toEqual([])
+    s.close()
+  })
+
+  it('filters proposals by status', () => {
+    const s = openStore(':memory:')
+    s.setProposals(sidecar())
+    s.setProposalStatus('p1', 'unverifiable', 'not reachable in dev')
+    expect(s.queryProposals({ status: 'proposed' }).map((p) => p.id)).toEqual(['p2'])
+    expect(s.queryProposals({ status: 'unverifiable' }).map((p) => p.id)).toEqual(['p1'])
+    s.close()
+  })
 })

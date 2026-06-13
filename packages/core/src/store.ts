@@ -15,7 +15,8 @@ import type { SoundinessNote } from './adapter'
 import type { Proposal, Proposals, ProposalGraph } from './proposals'
 import type { Observation } from './runtime'
 import { validateGraph } from './validate'
-import { validateProposals, materializeProposalGraph } from './proposals'
+import { validateProposals, materializeProposalGraph, type ProposalStatus } from './proposals'
+import { reconcileProposals } from './reconcile'
 import { hashValue } from './hash'
 
 const SCHEMA = `
@@ -29,7 +30,7 @@ CREATE TABLE IF NOT EXISTS observations (
 CREATE TABLE IF NOT EXISTS proposals (
   id TEXT PRIMARY KEY, kind TEXT, category TEXT, screen TEXT, title TEXT,
   event TEXT, control TEXT, "from" TEXT, "to" TEXT, guard TEXT, effect TEXT,
-  rationale TEXT, evidenced INTEGER, confidence REAL, source TEXT, status TEXT, screenshot TEXT
+  rationale TEXT, evidenced INTEGER, confidence REAL, source TEXT, status TEXT, reason TEXT, screenshot TEXT
 );
 `
 
@@ -39,11 +40,12 @@ export interface ProposalQuery {
   category?: string
   evidencedOnly?: boolean
   minConfidence?: number
+  status?: ProposalStatus
 }
 
 const PROPOSAL_COLS = [
   'id', 'kind', 'category', 'screen', 'title', 'event', 'control', 'from', 'to',
-  'guard', 'effect', 'rationale', 'evidenced', 'confidence', 'source', 'status', 'screenshot',
+  'guard', 'effect', 'rationale', 'evidenced', 'confidence', 'source', 'status', 'reason', 'screenshot',
 ] as const
 
 /** Map a proposals DB row back into a Proposal, dropping null optionals. */
@@ -60,7 +62,7 @@ function rowToProposal(row: Record<string, unknown>): Proposal {
     source: row['source'],
     status: row['status'],
   }
-  for (const k of ['event', 'control', 'from', 'to', 'guard', 'effect', 'screenshot']) {
+  for (const k of ['event', 'control', 'from', 'to', 'guard', 'effect', 'reason', 'screenshot']) {
     if (row[k] !== null && row[k] !== undefined) p[k] = row[k]
   }
   return p as unknown as Proposal
@@ -78,6 +80,12 @@ export class Store {
     if (dbPath !== ':memory:') mkdirSync(dirname(dbPath), { recursive: true })
     this.db = new DatabaseSync(dbPath)
     this.db.exec(SCHEMA)
+    // Older workspaces predate the proposals.reason column; add it if missing.
+    try {
+      this.db.exec('ALTER TABLE proposals ADD COLUMN reason TEXT')
+    } catch {
+      // column already exists
+    }
   }
 
   close(): void {
@@ -221,6 +229,43 @@ export class Store {
     return { version: 0, base: meta.value, proposals: this.queryProposals() }
   }
 
+  /**
+   * Set one proposal's lifecycle status (and optional reason), then rebuild the
+   * active proposal graph so a resolved proposal leaves the worklist. Returns
+   * whether a row changed. Touches only the proposals table — never the proven graph.
+   */
+  setProposalStatus(id: string, status: ProposalStatus, reason?: string): boolean {
+    const res = this.db.prepare('UPDATE proposals SET status = ?, reason = ? WHERE id = ?').run(status, reason ?? null, id)
+    const changed = Number(res.changes) > 0
+    if (changed) this.rebuildProposalGraph()
+    return changed
+  }
+
+  /**
+   * Derive proposal statuses from the observation log (confirmed→archived,
+   * refuted→withdrawn) and persist any that changed in one transaction, then
+   * rebuild the proposal graph. Pure-fold-backed + idempotent: a second call with
+   * no new observations changes nothing. Returns the proposals whose status changed.
+   */
+  reconcileFromObservations(): { id: string; status: ProposalStatus }[] {
+    const current = this.queryProposals()
+    const reconciled = reconcileProposals(current, this.getObservations())
+    const byId = new Map(current.map((p) => [p.id, p.status]))
+    const changed = reconciled.filter((p) => byId.get(p.id) !== p.status)
+    if (changed.length === 0) return []
+    const update = this.db.prepare('UPDATE proposals SET status = ? WHERE id = ?')
+    this.db.exec('BEGIN')
+    try {
+      for (const p of changed) update.run(p.status, p.id)
+      this.db.exec('COMMIT')
+    } catch (e) {
+      this.db.exec('ROLLBACK')
+      throw e
+    }
+    this.rebuildProposalGraph()
+    return changed.map((p) => ({ id: p.id, status: p.status }))
+  }
+
   /** Query proposals with optional filters; returns matching rows as Proposals. */
   queryProposals(filter: ProposalQuery = {}): Proposal[] {
     const where: string[] = []
@@ -229,6 +274,7 @@ export class Store {
     if (filter.category !== undefined) { where.push('category = ?'); params.push(filter.category) }
     if (filter.evidencedOnly === true) where.push('evidenced = 1')
     if (filter.minConfidence !== undefined) { where.push('confidence >= ?'); params.push(filter.minConfidence) }
+    if (filter.status !== undefined) { where.push('status = ?'); params.push(filter.status) }
     const sql = `SELECT * FROM proposals${where.length ? ' WHERE ' + where.join(' AND ') : ''} ORDER BY rowid`
     const rows = this.db.prepare(sql).all(...params) as Record<string, unknown>[]
     return rows.map(rowToProposal)
