@@ -118,6 +118,12 @@ export function Inspector(props: InspectorProps): JSX.Element {
             label="selector"
             value={c.selector ? `${c.selector.strategy}: ${c.selector.value}${c.selector.nth ? ` #${c.selector.nth}` : ''}` : '—'}
           />
+          {c.input ? (
+            <Field
+              label="input"
+              value={[c.input.type, c.input.required ? 'required' : null, c.input.pattern].filter(Boolean).join(' · ') || '—'}
+            />
+          ) : null}
           <h3>events</h3>
           {c.events && c.events.length > 0 ? (
             <ul className="effects-list">

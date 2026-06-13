@@ -393,6 +393,15 @@ describe('extractGraph — control selectors + stable identity (F1)', () => {
     expect(controls.every((c) => (c.control?.selector?.value ?? '').length > 0)).toBe(true)
   })
 
+  it('extracts input constraints (type/required) from field controls', () => {
+    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const controls = extractGraph(buildProject(dir), dir, { controls: true }).graph.nodes.filter((n) => n.kind === 'control')
+    const email = controls.find((c) => c.control?.input?.type === 'email')
+    expect(email?.control?.input?.required).toBe(true)
+    const dateField = controls.find((c) => c.control?.input?.type === 'date')
+    expect(dateField).toBeDefined()
+  })
+
   it('a control id is stable when an unrelated control is added earlier (was positional, now selector-keyed)', () => {
     const shellBefore = `<div><button onClick={()=>{}}>Save</button></div>`
     const shellAfter = `<div><button onClick={()=>{}}>Cancel</button><button onClick={()=>{}}>Save</button></div>`
