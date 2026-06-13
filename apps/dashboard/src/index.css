@@ -211,11 +211,56 @@ select:focus-visible,
 .steps,
 .proposals,
 .coverage,
+.plan,
 .prop-row,
 .prop-screen,
 .prop-category {
   min-width: 0;
   max-width: 100%;
+}
+
+.plan {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.plan h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.plan-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.plan-input {
+  font-size: 12px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-subtle);
+  color: var(--text);
+}
+.plan-add,
+.plan-export {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-subtle);
+  color: var(--text);
+  cursor: pointer;
+}
+.plan-export {
+  margin-top: 8px;
+}
+.plan-add:hover:not(:disabled),
+.plan-export:hover {
+  background: var(--border);
+}
+.plan-add:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .coverage {

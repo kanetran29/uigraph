@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/core'
-import { diffGraphs, planPath, buildSpecPlan, renderPlaywrightSpec } from '@uigraph/core'
+import { diffGraphs, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, hashValue } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
 import { loadGraph, openStore, importJsonWorkspace, type ImportSummary } from '@uigraph/core/node'
 import { loadMergedGraph } from '@uigraph/mcp'
@@ -117,6 +117,18 @@ export function formatMapSummary(s: MapSummary): string {
     `  edges: ${s.edges} (must: ${s.must}, may: ${s.may}, unknown: ${s.unknown})`,
     `  soundiness notes: ${s.soundiness}`,
   ].join('\n')
+}
+
+/** Render the workspace overlay as a markdown "planned changes" spec. */
+export function runExport(dir: string): string {
+  const store = openStore(dbPathFor(dir))
+  try {
+    const base = store.getBaseGraph()
+    if (base === null) throw new Error(`no graph in ${dir} — run \`uigraph map\` first`)
+    return exportOverlaySpec(base, store.getOverlay() ?? emptyOverlay(hashValue(base)))
+  } finally {
+    store.close()
+  }
 }
 
 /** Run the JSON→SQLite migration for a workspace dir; returns what was imported. */

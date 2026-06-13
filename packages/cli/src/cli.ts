@@ -8,7 +8,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
-import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, runDiff, runGen, runMap, runMigrate, type AdapterName } from './commands'
+import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, runDiff, runExport, runGen, runMap, runMigrate, type AdapterName } from './commands'
 import { startApiServer } from './server'
 
 /** Build the commander program with every uigraph subcommand registered. */
@@ -47,6 +47,14 @@ export function buildProgram(): Command {
     .argument('<dir>', 'workspace directory holding the legacy JSON files')
     .action((dir: string) => {
       console.log(formatMigrateSummary(dir, runMigrate(dir)))
+    })
+
+  program
+    .command('export')
+    .description('Render the workspace overlay (planned screens/transitions) as a markdown change spec.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .action((dir: string) => {
+      console.log(runExport(dir))
     })
 
   program
