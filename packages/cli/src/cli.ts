@@ -8,7 +8,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
-import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, runDiff, runExport, runGen, runMap, runMigrate, type AdapterName } from './commands'
+import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, runDiff, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runVerify } from './runner'
 
@@ -102,6 +102,24 @@ export function buildProgram(): Command {
       console.log(`uigraph API serving ${dir} at ${url}`)
       console.log('To view the dashboard, run its dev server and point it at this API URL:')
       console.log(`  UIGRAPH_API=${url} pnpm --filter @uigraph/dashboard dev`)
+    })
+
+  const kit = program.command('kit').description('The shippable LLM agent kit: skill + rules + guides + the reconciliation-loop playbook.')
+  kit
+    .command('print')
+    .description('Print the whole agent kit to stdout (pipe into an agent prompt or CI).')
+    .action(() => {
+      console.log(runKitPrint())
+    })
+  kit
+    .command('install')
+    .description('Copy the agent kit into a project (default <dir>/.uigraph/kit/, or --claude for a Claude skill).')
+    .option('--dir <dir>', 'target project directory', process.cwd())
+    .option('--claude', 'install SKILL.md as a Claude Code skill (.claude/skills/uigraph/)')
+    .action((opts: { dir: string; claude?: boolean }) => {
+      const { written } = runKitInstall({ dir: opts.dir, claude: opts.claude ?? false })
+      console.log(`Installed uigraph agent kit (${written.length} file(s)):`)
+      for (const f of written) console.log(`  ${f}`)
     })
 
   program

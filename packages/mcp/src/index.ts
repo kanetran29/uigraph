@@ -3,7 +3,8 @@
 // pure, directly-testable tool functions are exported alongside the server so
 // consumers (and tests) can call them without a transport.
 
-export { startServer, createServer, type StartServerOptions } from './server'
+export { startServer, createServer, TOOLS, type StartServerOptions } from './server'
+export { kitDir, kitManifest, listKit, readKitFile, readKitAll, type KitFile, type KitManifest } from './kit'
 
 export {
   getGraph,
