@@ -15,7 +15,7 @@
       "effect": "navigate",
       "rationale": "Home has a controlled search input (`const [query, setQuery] = useState('')`, `name=\"search\"`, `placeholder=\"Search\"`) with an existing `onKeyDown` handler. A search box with an Enter key handler almost always submits the query; in this app the natural target is the Products list filtered by query. The current onKeyDown only calls setQuery, so the submit/navigate behavior is not yet wired — hence speculative.",
       "evidenced": false,
-      "confidence": 0.5,
+      "confidence": 0.7,
       "source": "proposal",
       "status": "proposed"
     },
@@ -31,7 +31,7 @@
       "effect": "filter",
       "rationale": "The input is fully controlled via `onChange={(e) => setQuery(e.target.value)}` updating `query` state. A live `query` state on a labeled Search field is the canonical signal for search-as-you-type filtering or an autosuggest dropdown; the state exists but no list is rendered from it yet.",
       "evidenced": false,
-      "confidence": 0.45,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -48,7 +48,7 @@
       "effect": "open:popover",
       "rationale": "A controlled `query` state on a Search input typically backs a typeahead/suggestions popover that opens as the user types and lists matching products/recent searches. No dropdown is rendered in current source, so this is a plausible-but-unproven state.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -65,7 +65,7 @@
       "effect": "reset",
       "rationale": "A controlled search field with a non-empty `query` commonly renders a clear button that resets the input to ''. setQuery('') is the obvious reset path. Not present in current markup.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -81,7 +81,7 @@
       "effect": "reset",
       "rationale": "The input already has an `onKeyDown` handler, so it observes key events. Search inputs conventionally clear or dismiss suggestions on Escape. The current handler does not branch on key, so Esc handling is unproven.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -97,7 +97,7 @@
       "effect": "highlight",
       "rationale": "If a typeahead suggestion list backs the `query` state, ArrowUp/ArrowDown to move the active suggestion and Enter to choose is the standard combobox keyboard pattern. The existing onKeyDown hook is where this would live. No suggestion list exists yet.",
       "evidenced": false,
-      "confidence": 0.25,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -113,7 +113,7 @@
       "effect": "debounce",
       "rationale": "A search `query` updated on every onChange keystroke is the classic case for debounce/throttle before issuing a request or filtering. Current code updates state synchronously with no debounce, so this is a likely-needed-but-absent behavior.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -129,7 +129,7 @@
       "effect": "focus",
       "rationale": "Apps with a prominent Search field on the home/landing screen frequently bind a global shortcut (e.g. '/' or Cmd/Ctrl+K) to focus it. No global key listener exists in this component, so purely conventional.",
       "evidenced": false,
-      "confidence": 0.2,
+      "confidence": 0.4,
       "source": "proposal",
       "status": "proposed"
     },
@@ -146,7 +146,7 @@
       "effect": "empty-state",
       "rationale": "Any search experience backed by `query` needs a no-results state once results are wired up. Not rendered in current minimal source.",
       "evidenced": false,
-      "confidence": 0.25,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -162,7 +162,7 @@
       "effect": "navigate",
       "rationale": "Home renders two react-router `<Link>`s (to /login and /products). With client-side routing, the browser back button returns the user to '/'. This is inherent to react-router Link navigation already in source, though it's an implicit browser behavior rather than an explicit handler.",
       "evidenced": true,
-      "confidence": 0.4,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -178,7 +178,7 @@
       "effect": "highlight",
       "rationale": "The two `<Link>` elements are interactive anchors; hover/focus styling and keyboard focus (tab order) are standard for nav links. This is conventional anchor behavior, not an explicit handler in source.",
       "evidenced": false,
-      "confidence": 0.2,
+      "confidence": 0.45,
       "source": "proposal",
       "status": "proposed"
     },
@@ -194,7 +194,7 @@
       "effect": "focus",
       "rationale": "Home contains three focusable controls in DOM order (input, Login Link, Products Link). Tabbing moves focus through them; this is grounded in the actual rendered elements, though tab order is browser-default rather than explicitly coded.",
       "evidenced": true,
-      "confidence": 0.3,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -210,7 +210,7 @@
       "effect": "state:setEmail",
       "rationale": "A real login screen pairs the 'Sign in' button with credential inputs. The current stub has only a button and a synchronous login() with no fields, so an email/username input is implied, not present in source.",
       "evidenced": false,
-      "confidence": 0.75,
+      "confidence": 0.8,
       "source": "proposal",
       "status": "proposed"
     },
@@ -226,7 +226,7 @@
       "effect": "state:setPassword",
       "rationale": "Login implies a password input alongside the Sign in button. Not present in the current stub (login() just flips a boolean), so this is the expected real-version field.",
       "evidenced": false,
-      "confidence": 0.75,
+      "confidence": 0.8,
       "source": "proposal",
       "status": "proposed"
     },
@@ -242,7 +242,7 @@
       "effect": "toggle:passwordVisibility",
       "rationale": "A password field on a login form almost always has a reveal toggle (eye icon) flipping input type between password and text. Not in source; standard for this screen.",
       "evidenced": false,
-      "confidence": 0.6,
+      "confidence": 0.62,
       "source": "proposal",
       "status": "proposed"
     },
@@ -259,7 +259,7 @@
       "effect": "submit",
       "rationale": "Login forms submit on Enter from within an input. The static graph only captures the button click; Enter-to-submit is a separate keyboard path not modeled. Speculative since the stub has no fields/form yet.",
       "evidenced": false,
-      "confidence": 0.65,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -276,7 +276,7 @@
       "effect": "validate",
       "rationale": "Real login forms validate required fields and email pattern before submit, showing field-level errors. The current onSubmit unconditionally calls login() with no validation, so this is the expected hardened behavior.",
       "evidenced": false,
-      "confidence": 0.6,
+      "confidence": 0.65,
       "source": "proposal",
       "status": "proposed"
     },
@@ -326,7 +326,7 @@
       "effect": "disabled",
       "rationale": "Login submit buttons are typically disabled when fields are empty or a request is in flight to prevent double-submit. The stub's button has no disabled guard, so this is the expected guarded behavior.",
       "evidenced": false,
-      "confidence": 0.55,
+      "confidence": 0.58,
       "source": "proposal",
       "status": "proposed"
     },
@@ -342,7 +342,7 @@
       "effect": "navigate",
       "rationale": "Login screens conventionally include a 'Forgot password?' link to a recovery flow. No such route/link exists in the current app or source, so this is a plausible-but-unproven navigation.",
       "evidenced": false,
-      "confidence": 0.45,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -358,7 +358,7 @@
       "effect": "navigate",
       "rationale": "Login screens commonly offer a 'Create account' / 'Sign up' link to registration. No registration route exists in the router and no link in source, so this is speculative for a real version.",
       "evidenced": false,
-      "confidence": 0.45,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -375,7 +375,7 @@
       "effect": "navigate",
       "rationale": "Dashboard/Checkout already redirect to /login when !isAuthenticated (see e_n_dashboard__n_login guard). The symmetric guard — redirecting an already-authenticated user away from /login to /dashboard — is a standard auth-route behavior the stub Login does not implement.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -391,7 +391,7 @@
       "effect": "state:setRemember",
       "rationale": "Login forms frequently include a 'Remember me' / persist-session checkbox controlling token persistence. Not present in the stub; a plausible field of the real screen.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -407,7 +407,7 @@
       "effect": "state:setCredential",
       "rationale": "Credential fields commonly receive a paste/autofill event from a password manager that should populate and revalidate. Speculative since the stub has no input fields.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -422,8 +422,8 @@
       "to": "<self>",
       "effect": "pan",
       "rationale": "A <MapContainer> widget renders a div.map (lines 4-6, 29). Map widgets are pannable by click-drag; a real map (Leaflet/Mapbox/Google Maps) attaches mousedown+mousemove+mouseup drag-pan handlers to recenter the viewport.",
-      "evidenced": true,
-      "confidence": 0.55,
+      "evidenced": false,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -438,8 +438,8 @@
       "to": "<self>",
       "effect": "zoom",
       "rationale": "The MapContainer widget (lines 4-6, 29) is a map. Map widgets bind wheel/pinch handlers to zoom the viewport in and out around the cursor.",
-      "evidenced": true,
-      "confidence": 0.5,
+      "evidenced": false,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -455,7 +455,7 @@
       "effect": "open:popover",
       "rationale": "MapContainer (lines 4-6, 29) is a map widget; markers/pins on such widgets respond to click by opening an info popover/tooltip with details.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -471,7 +471,7 @@
       "effect": "loading",
       "rationale": "MapContainer (lines 4-6) currently renders a static 'map widget' placeholder. A real map tile layer fetches asynchronously, so the screen would show a loading/skeleton state until tiles render.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -488,7 +488,7 @@
       "effect": "highlight-active",
       "rationale": "Line 20 uses <NavLink to=\"/products\"> rather than a plain Link. NavLink uniquely applies an active class/aria-current when the current route matches, giving in-place visual feedback distinct from navigation.",
       "evidenced": true,
-      "confidence": 0.6,
+      "confidence": 0.9,
       "source": "proposal",
       "status": "proposed"
     },
@@ -505,7 +505,7 @@
       "effect": "redirect",
       "rationale": "Lines 12-14 call navigate('/login') during render when !isAuthenticated but still fall through to return the dashboard JSX. The guarded redirect is an unstable transient state where dashboard content may briefly flash before the route change commits.",
       "evidenced": true,
-      "confidence": 0.5,
+      "confidence": 0.85,
       "source": "proposal",
       "status": "proposed"
     },
@@ -522,9 +522,9 @@
       "effect": "toast:error",
       "rationale": "The Logout button (lines 21-28) calls logout() then navigate('/'). If logout() performs an async session-clear that fails, the navigate may be blocked and an error toast shown instead of leaving the dashboard.",
       "evidenced": false,
-      "confidence": 0.25,
+      "confidence": 0.85,
       "source": "proposal",
-      "status": "proposed"
+      "status": "rejected"
     },
     {
       "id": "pr_033",
@@ -538,7 +538,7 @@
       "effect": "navigate",
       "rationale": "The Logout <button> (lines 21-28) is a native button and is keyboard-focusable; pressing Enter or Space when focused fires the same onClick (logout + navigate) as a mouse click.",
       "evidenced": true,
-      "confidence": 0.6,
+      "confidence": 0.85,
       "source": "proposal",
       "status": "proposed"
     },
@@ -554,7 +554,7 @@
       "effect": "focus-move",
       "rationale": "The screen has three focusable controls in source order: Link 'Settings' (19), NavLink 'Products' (20), button 'Logout' (21). Tab/Shift-Tab cycles focus through them, an interaction agents rely on for keyboard navigation.",
       "evidenced": true,
-      "confidence": 0.55,
+      "confidence": 0.85,
       "source": "proposal",
       "status": "proposed"
     },
@@ -570,7 +570,7 @@
       "effect": "open:context-menu",
       "rationale": "Lines 19-20 render anchor-based <Link>/<NavLink> elements which carry real hrefs. Right-clicking an anchor surfaces the browser context menu with 'Open in new tab', a common navigation interaction.",
       "evidenced": true,
-      "confidence": 0.4,
+      "confidence": 0.75,
       "source": "proposal",
       "status": "proposed"
     },
@@ -587,7 +587,7 @@
       "effect": "open:new-tab",
       "rationale": "Settings (line 19) and Products (line 20) are anchor-based router links with hrefs. Modifier-clicking lets the browser open /dashboard/settings or /products in a new tab instead of in-app SPA navigation.",
       "evidenced": true,
-      "confidence": 0.4,
+      "confidence": 0.75,
       "source": "proposal",
       "status": "proposed"
     },
@@ -602,8 +602,8 @@
       "to": "<dynamic>",
       "effect": "navigate",
       "rationale": "This screen is a react-router route (/dashboard) reached via in-app navigation from Login/Home. Browser back/forward triggers router history popstate, moving between dashboard and previously visited screens without a full reload.",
-      "evidenced": false,
-      "confidence": 0.35,
+      "evidenced": true,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -619,7 +619,7 @@
       "effect": "navigate",
       "rationale": "Settings.tsx uses useNavigate to go to '/dashboard' (line 8); because this is a real route push, the browser back/forward buttons and history would also navigate between Settings and Dashboard. This is a navigation path not captured as a control edge.",
       "evidenced": true,
-      "confidence": 0.55,
+      "confidence": 0.7,
       "source": "proposal",
       "status": "proposed"
     },
@@ -635,7 +635,7 @@
       "effect": "state:setPreference",
       "rationale": "A page literally titled 'Settings' almost universally contains toggle/switch controls for user preferences. Not present in this stub source, so unproven, but it is the defining interaction of a real settings screen.",
       "evidenced": false,
-      "confidence": 0.5,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -651,7 +651,7 @@
       "effect": "state:setTheme",
       "rationale": "Theme selection is a canonical settings-page control. No theme state exists in the current stub, so speculative, but highly conventional for this screen type.",
       "evidenced": false,
-      "confidence": 0.45,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -667,7 +667,7 @@
       "effect": "api:PUT /api/settings; toast:success",
       "rationale": "Real settings screens persist changes to the server (autosave or explicit Save) and surface a confirmation toast. No api/fetch exists in the current stub, so unproven.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.45,
       "source": "proposal",
       "status": "proposed"
     },
@@ -684,7 +684,7 @@
       "effect": "toast:error; rollback",
       "rationale": "If settings persist over the network, a failed save would surface an error toast and likely roll back the optimistic toggle. Sibling Checkout.tsx already uses error:setError, suggesting the app's convention; not present in Settings stub.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.4,
       "source": "proposal",
       "status": "proposed"
     },
@@ -701,7 +701,7 @@
       "effect": "validate; error:message",
       "rationale": "Settings pages commonly include editable profile fields with required/pattern validation. The sibling Checkout uses an email input with state, hinting the app handles such fields; not in this stub.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.4,
       "source": "proposal",
       "status": "proposed"
     },
@@ -717,7 +717,7 @@
       "effect": "expand",
       "rationale": "Settings UIs frequently group preferences into collapsible sections/accordions. No disclosure state in the current stub, so speculative.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.35,
       "source": "proposal",
       "status": "proposed"
     },
@@ -733,7 +733,7 @@
       "effect": "state:setActiveTab",
       "rationale": "Tabbed navigation within Settings is a very common pattern for organizing preference categories. Not present in this minimal source.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.35,
       "source": "proposal",
       "status": "proposed"
     },
@@ -749,7 +749,7 @@
       "effect": "open:modal",
       "rationale": "Settings pages often host destructive actions guarded by a confirm modal. Checkout.tsx already uses a ConfirmDialog modal pattern in this app, so the convention exists; not wired in Settings stub.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.35,
       "source": "proposal",
       "status": "proposed"
     },
@@ -765,7 +765,7 @@
       "effect": "navigate",
       "rationale": "Many settings/sub-pages bind Escape to the same action as the Back button. The Back navigation to /dashboard exists (line 8) but no keyboard handler is wired, so this is speculative.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.4,
       "source": "proposal",
       "status": "proposed"
     },
@@ -781,7 +781,7 @@
       "effect": "loading",
       "rationale": "A real settings page fetches the user's current preferences on mount and shows a loading/skeleton state. No useEffect/fetch exists in the stub, so unproven.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.4,
       "source": "proposal",
       "status": "proposed"
     },
@@ -797,7 +797,7 @@
       "effect": "state:setLocale",
       "rationale": "Language selection is a standard settings control. Not present in this stub; purely conventional.",
       "evidenced": false,
-      "confidence": 0.25,
+      "confidence": 0.3,
       "source": "proposal",
       "status": "proposed"
     },
@@ -813,7 +813,7 @@
       "effect": "reveal:quick-actions",
       "rationale": "The screen renders a list of product Links via ids.map(...) (Products.tsx lines 9-13). Product catalog items conventionally surface hover affordances (highlight, quick-view, add-to-cart). The ProductDetail Buy control already tracks mouseenter/setHovered in the graph, signaling this app uses hover state, but no hover behavior exists on the Products list items themselves.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -830,7 +830,7 @@
       "effect": "show:empty-state",
       "rationale": "The list is produced by ids.map(...) over an array (Products.tsx line 9). A real catalog fetches products and must handle the zero-results case; currently the hardcoded ['1','2','3'] never empties, so an empty-state branch is unproven but expected.",
       "evidenced": false,
-      "confidence": 0.45,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -847,7 +847,7 @@
       "effect": "show:skeleton",
       "rationale": "ids is currently a hardcoded constant (Products.tsx line 3) with no fetch, but a real products screen loads its list async. Sibling screens in this app use loading/error state (Checkout form has error:setError, Dashboard guards on auth), so a loading state here is plausible-but-unproven.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -864,7 +864,7 @@
       "effect": "toast:error",
       "rationale": "No fetch exists yet (ids is a literal array), but the app already models fetch errors elsewhere (cc_n_checkout__form_6 effect error:setError). A products listing that loads data from a server would surface an error/retry path.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -880,7 +880,7 @@
       "effect": "filter:list",
       "rationale": "This is the catalog index screen (route /products) rendering a mapped list. The Home screen already has a debounced search input (cc_n_root__input_0 with keydown/change -> state:setQuery), establishing a search pattern in this app; a search box over the products list is a natural extension though not present in source.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -896,7 +896,7 @@
       "effect": "reorder:list",
       "rationale": "The screen maps over a product collection (ids.map, line 9). Product listings conventionally expose a sort control; no sort state or control exists in the current source, so this is speculative.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.45,
       "source": "proposal",
       "status": "proposed"
     },
@@ -912,7 +912,7 @@
       "effect": "filter:list",
       "rationale": "A mapped product collection (line 9) on the /products index is the canonical place for category/facet filtering. Not present in source; proposed for catalog completeness.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.45,
       "source": "proposal",
       "status": "proposed"
     },
@@ -929,7 +929,7 @@
       "effect": "load-more",
       "rationale": "Only 3 hardcoded ids are rendered (line 3), but a real catalog paginates. There is no onScroll/IntersectionObserver/page state in the source, so infinite-scroll is plausible-but-unproven.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.4,
       "source": "proposal",
       "status": "proposed"
     },
@@ -945,7 +945,7 @@
       "effect": "load:page",
       "rationale": "Catalog index over a mapped list (line 9). With a server-backed product set, page navigation is expected; no page state exists in current source.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.4,
       "source": "proposal",
       "status": "proposed"
     },
@@ -961,7 +961,7 @@
       "effect": "navigate",
       "rationale": "Each list item is a react-router <Link> (lines 10-12), which renders an anchor that is natively keyboard-focusable and activates on Enter. The static extractor captured the click:Link navigation but not the keyboard-activation path.",
       "evidenced": true,
-      "confidence": 0.55,
+      "confidence": 0.85,
       "source": "proposal",
       "status": "proposed"
     },
@@ -977,7 +977,7 @@
       "effect": "move:focus",
       "rationale": "The screen renders multiple sequential anchor Links from ids.map (lines 9-13), forming a natural tab order; sequential focus traversal across the list items is an inherent keyboard interaction not modeled by the click-only extractor edge.",
       "evidenced": true,
-      "confidence": 0.45,
+      "confidence": 0.8,
       "source": "proposal",
       "status": "proposed"
     },
@@ -993,7 +993,7 @@
       "effect": "open:new-tab",
       "rationale": "react-router <Link> (line 10) emits a real <a href='/products/:id'>, so browser-native cmd/ctrl-click and right-click 'Open in new tab' work on each list item. This is an inherent capability of anchor-based links the extractor does not enumerate.",
       "evidenced": true,
-      "confidence": 0.4,
+      "confidence": 0.8,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1009,7 +1009,7 @@
       "effect": "expand",
       "rationale": "Source has `const [hovered, setHovered] = useState(false)` and `onMouseEnter={() => setHovered(true)}` driving `aria-pressed={hovered}` on the Buy button. This in-place visual state toggle is distinct from the navigate edge the extractor captured; notably there is no onMouseLeave, so hover state never resets — a real hover-styling behavior on the button.",
       "evidenced": true,
-      "confidence": 0.7,
+      "confidence": 0.95,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1024,7 +1024,7 @@
       "effect": "load-more",
       "rationale": "Route is /products/:id with a dynamic param, and the page renders a single product. A real product-detail page fetches the product by id on mount, so a loading/skeleton state before data arrives is expected. Not present in the stub source (renders static 'Product' h1), so speculative.",
       "evidenced": false,
-      "confidence": 0.55,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1040,7 +1040,7 @@
       "effect": "toast:error",
       "rationale": "/products/:id takes an arbitrary id param; fetching a non-existent product would yield a 404/error state with a retry. The Products list links to detail with may/0.5 confidence, implying ids can be wrong. Not in stub source, so speculative.",
       "evidenced": false,
-      "confidence": 0.45,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1056,7 +1056,7 @@
       "effect": "open:modal",
       "rationale": "Product detail pages conventionally show a primary image with thumbnails that swap the main image or open a zoom lightbox. No media elements exist in the stub source, so purely speculative for a real version of this screen.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1072,7 +1072,7 @@
       "effect": "validate",
       "rationale": "A Buy action on a product detail page typically pairs with a quantity selector (stepper or number input) feeding the cart/checkout. Not present in the stub (only the Buy button), so speculative.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1088,7 +1088,7 @@
       "effect": "expand",
       "rationale": "Product detail screens commonly truncate the description with a read-more toggle or use accordion sections for specs/reviews/shipping. The stub renders no description, so speculative for a fuller version.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1104,9 +1104,9 @@
       "effect": "optimistic",
       "rationale": "Real Buy/add-to-cart flows show an immediate optimistic cart-count bump and a success toast/confirmation. The stub's Buy only calls navigate('/checkout') with no async feedback, so this richer behavior is speculative.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.7,
       "source": "proposal",
-      "status": "proposed"
+      "status": "rejected"
     },
     {
       "id": "pr_069",
@@ -1120,7 +1120,7 @@
       "effect": "open:modal",
       "rationale": "The Buy is a native <button>, so keyboard Enter/Space activation (firing the same onClick navigate) is inherent. The extractor recorded only click+mouseenter; keyboard activation is an additional plausible-to-exercise path on the same control.",
       "evidenced": true,
-      "confidence": 0.5,
+      "confidence": 0.85,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1136,7 +1136,7 @@
       "effect": "load-more",
       "rationale": "Reached via navigate from /products (e_n_products__n_products_id, click:Link) inside react-router history, so browser back/forward returns to the Products list. This history transition isn't an extractor-captured control edge.",
       "evidenced": true,
-      "confidence": 0.45,
+      "confidence": 0.7,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1152,7 +1152,7 @@
       "effect": "optimistic",
       "rationale": "Product detail pages commonly offer a wishlist/favorite heart toggle alongside the buy action. Not present in the stub source, so speculative.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1168,7 +1168,7 @@
       "effect": "toast:error",
       "rationale": "Product detail screens often expose a share or copy-link control for the deep-linkable /products/:id URL. Not in the stub source, so speculative.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.45,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1202,7 +1202,7 @@
       "effect": "api:POST /api/orders",
       "rationale": "After setError shows the alert, the 'Place order' submit button remains; the message literally says 'Try again', implying the user re-submits the same form to retry the POST /api/orders call. The retry path is not modeled as its own interaction.",
       "evidenced": true,
-      "confidence": 0.7,
+      "confidence": 0.78,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1219,7 +1219,7 @@
       "effect": "validate",
       "rationale": "The email input has both required and type=email attributes (`<input name=\"email\" type=\"email\" required>`). On submit with empty/invalid value the browser blocks submission and shows a native validation bubble before placeOrder runs.",
       "evidenced": true,
-      "confidence": 0.9,
+      "confidence": 0.92,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1236,7 +1236,7 @@
       "effect": "validate",
       "rationale": "type=email enforces an email pattern; entering text without a valid email format triggers the browser's pattern/type validation message on blur or submit. Distinct from the required check.",
       "evidenced": true,
-      "confidence": 0.7,
+      "confidence": 0.82,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1253,7 +1253,7 @@
       "effect": "api:POST /api/orders",
       "rationale": "Single-line <input> inside a <form onSubmit={placeOrder}>; pressing Enter in a text input within a form natively triggers submit. This implicit keyboard submit path is not captured as a distinct interaction.",
       "evidenced": true,
-      "confidence": 0.8,
+      "confidence": 0.85,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1270,7 +1270,7 @@
       "effect": "close:modal",
       "rationale": "ConfirmDialog renders a <button onClick={props.onClose}>Cancel</button> wired to onClose={() => setShowConfirm(false)}, which unmounts the dialog (returns null when !open). The control node exists statically but its close:modal effect/transition is not modeled.",
       "evidenced": true,
-      "confidence": 0.9,
+      "confidence": 0.93,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1287,7 +1287,7 @@
       "effect": "close:modal",
       "rationale": "ConfirmDialog uses role=\"dialog\"; a conventional dialog supports Escape-to-dismiss. The source has no keydown handler, so this is the expected-but-unimplemented behavior a real version would add.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1304,7 +1304,7 @@
       "effect": "close:modal",
       "rationale": "role=\"dialog\" overlays conventionally close on backdrop/click-outside. No backdrop handler exists in source, so this is a plausible-but-unproven affordance for a real confirm modal.",
       "evidenced": false,
-      "confidence": 0.35,
+      "confidence": 0.58,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1321,9 +1321,9 @@
       "effect": "api:POST /api/orders",
       "rationale": "ConfirmDialog asks 'Confirm your order?' but only renders a Cancel button (no confirm action wired). A complete confirm flow would have a Confirm button that triggers placeOrder/POST /api/orders. This is a missing-but-expected primary action in the dialog.",
       "evidenced": false,
-      "confidence": 0.5,
+      "confidence": 0.85,
       "source": "proposal",
-      "status": "proposed"
+      "status": "rejected"
     },
     {
       "id": "pr_082",
@@ -1337,8 +1337,8 @@
       "guard": "request pending",
       "effect": "loading",
       "rationale": "placeOrder is async and awaits fetch('/api/orders'); between click and resolution there is an in-flight state. The button is not disabled in source, so a real version would show a spinner / disable submit to prevent double-submit. Currently unmodeled.",
-      "evidenced": true,
-      "confidence": 0.55,
+      "evidenced": false,
+      "confidence": 0.62,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1354,8 +1354,8 @@
       "guard": "file selected",
       "effect": "loading",
       "rationale": "uploadReceipt is async and awaits fetch('/api/upload', {method:'POST'}) with no error handling or progress UI. A real file upload would surface uploading/success/error states. Only the change->api effect is captured statically, not the resulting states.",
-      "evidenced": true,
-      "confidence": 0.55,
+      "evidenced": false,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1372,7 +1372,7 @@
       "effect": "api:POST /api/upload",
       "rationale": "There is a <input type=\"file\" name=\"receipt\"> onChange={uploadReceipt}. A real receipt uploader commonly supports drag-drop of a file in addition to the file picker. No drop handler in source, so speculative.",
       "evidenced": false,
-      "confidence": 0.3,
+      "confidence": 0.5,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1389,7 +1389,7 @@
       "effect": "state:setNotes",
       "rationale": "notes is a <textarea> bound to setNotes. The change->setNotes is captured, but textarea-specific behavior (Enter inserts a newline rather than submitting, unlike the email input) is a distinct keyboard interaction worth modeling for agents.",
       "evidenced": true,
-      "confidence": 0.5,
+      "confidence": 0.8,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1405,8 +1405,8 @@
       "guard": "textarea focused",
       "effect": "state:setNotes",
       "rationale": "The notes textarea accepts free text via onChange; users commonly paste multi-line content from the clipboard. Paste fires change/setNotes too but is a distinct user action for coverage.",
-      "evidenced": false,
-      "confidence": 0.35,
+      "evidenced": true,
+      "confidence": 0.7,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1423,7 +1423,7 @@
       "effect": "navigate",
       "rationale": "Top of Checkout: `if (!isAuthenticated) { navigate('/login') }` runs during render, redirecting guests. The static graph has a low-confidence 'may' edge; flagging it as a concrete auth-gate interaction (effect = session/auth redirect) for agent coverage.",
       "evidenced": true,
-      "confidence": 0.85,
+      "confidence": 0.9,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1440,7 +1440,7 @@
       "effect": "focus-move",
       "rationale": "The form has a sequence of focusable controls (email input, notes textarea, file input, two buttons). Keyboard-only users tab through them in DOM order; focus traversal is a real interaction not represented in the graph.",
       "evidenced": true,
-      "confidence": 0.45,
+      "confidence": 0.85,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1456,7 +1456,7 @@
       "effect": "navigate",
       "rationale": "The only control is <Link to=\"/\">Home</Link> (NotFound.tsx line 7). Links render as anchors that are keyboard-focusable; pressing Enter while focused activates them, mirroring the already-covered click navigation but via a distinct event the static extractor only captured as click:Link.",
       "evidenced": true,
-      "confidence": 0.7,
+      "confidence": 0.85,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1472,7 +1472,7 @@
       "effect": "highlight",
       "rationale": "The <Link> anchor (line 7) is an interactive element; on hover it typically applies a hover/underline style. Tiny in-place affordance, not a state transition.",
       "evidenced": false,
-      "confidence": 0.4,
+      "confidence": 0.6,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1488,7 +1488,7 @@
       "effect": "navigate",
       "rationale": "The wildcard route (route \"*\") is reached when a user lands on an unknown URL. A user can press the browser Back button to return to where they came from. This is a universal navigation affordance on any routed screen and is not captured by the static Link extractor.",
       "evidenced": false,
-      "confidence": 0.45,
+      "confidence": 0.55,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1505,7 +1505,7 @@
       "effect": "render:empty-state",
       "rationale": "This component is the catch-all route (route \"*\" in the graph, NotFound label). Navigating to any unrecognized URL deep-links into this empty-state screen. The screen itself IS the empty/not-found state, worth modeling as an explicit fallback state node distinct from a populated screen.",
       "evidenced": true,
-      "confidence": 0.6,
+      "confidence": 0.75,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1521,7 +1521,7 @@
       "effect": "navigate",
       "rationale": "Real-world 404 pages commonly offer a search box or suggested links to help users recover. The current minimal source only has a Home link, so this is speculative for THIS implementation but plausible for a production version of the screen.",
       "evidenced": false,
-      "confidence": 0.2,
+      "confidence": 0.7,
       "source": "proposal",
       "status": "proposed"
     },
@@ -1538,7 +1538,7 @@
       "effect": "open:new-tab",
       "rationale": "The Home <Link> (line 7) renders an <a href=\"/\">; Cmd/Ctrl+click or middle-click opens the target in a new tab rather than performing in-app navigation. Distinct event from the plain click already covered.",
       "evidenced": true,
-      "confidence": 0.45,
+      "confidence": 0.8,
       "source": "proposal",
       "status": "proposed"
     },
