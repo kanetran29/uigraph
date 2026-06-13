@@ -69,7 +69,7 @@ afterEach(async () => {
 })
 
 describe('runMap', () => {
-  it('extracts the sample-react-app into a loadable uigraph.db with 8 nodes', async () => {
+  it('extracts the sample-react-app into a loadable uigraph.db with 9 nodes', async () => {
     const out = join(tempDir('uigraph-cli-map-'), 'uigraph.db')
     const summary = await runMap({ dir: SAMPLE_REACT, adapter: 'react', out })
 
@@ -77,8 +77,8 @@ describe('runMap', () => {
     const store = openStore(out)
     const reloaded = store.getBaseGraph()
     store.close()
-    expect(reloaded?.nodes).toHaveLength(8)
-    expect(summary.nodes).toBe(8)
+    expect(reloaded?.nodes).toHaveLength(9)
+    expect(summary.nodes).toBe(9)
     expect(summary.edges).toBe(reloaded?.edges.length)
     expect(summary.must + summary.may + summary.unknown).toBe(summary.edges)
   })

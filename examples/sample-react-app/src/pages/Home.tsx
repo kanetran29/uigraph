@@ -15,6 +15,7 @@ export default function Home() {
       />
       <Link to="/login">Login</Link>
       <Link to="/products">Products</Link>
+      <Link to="/showcase">Showcase</Link>
     </div>
   )
 }

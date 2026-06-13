@@ -20,13 +20,13 @@ describe('extractGraph — sample-react-app golden (F2.7)', () => {
 
   it('extracts exactly the declared route nodes', () => {
     expect(new Set(graph.nodes.map((n) => n.id))).toEqual(
-      new Set(['n_root', 'n_login', 'n_dashboard', 'n_dashboard_settings', 'n_products', 'n_products_id', 'n_checkout', 'n_wildcard']),
+      new Set(['n_root', 'n_login', 'n_dashboard', 'n_dashboard_settings', 'n_products', 'n_products_id', 'n_checkout', 'n_showcase', 'n_wildcard']),
     )
   })
 
   it('extracts the expected edge count and modality split', () => {
-    expect(graph.edges).toHaveLength(13)
-    expect(graph.edges.filter((e) => e.modality === 'must')).toHaveLength(10)
+    expect(graph.edges).toHaveLength(15)
+    expect(graph.edges.filter((e) => e.modality === 'must')).toHaveLength(12)
     expect(graph.edges.filter((e) => e.modality === 'may')).toHaveLength(3)
   })
 
@@ -121,6 +121,15 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(controls.some((c) => c.control?.controlType === 'file')).toBe(true)
     expect(soundiness.some((s) => s.kind === 'dynamic-widget')).toBe(true)
 
+    // The Showcase page exercises the full control/event surface: every native
+    // control type is extracted, each named, across the spread of DOM events.
+    const showcase = controls.filter((c) => c.parent === 'n_showcase')
+    const types = new Set(showcase.map((c) => c.control?.controlType))
+    for (const t of ['form', 'input', 'checkbox', 'richtext', 'select', 'button', 'file', 'element']) expect(types.has(t)).toBe(true)
+    expect(showcase.every((c) => (c.control?.name ?? '').length > 0)).toBe(true)
+    const showcaseEvents = new Set(showcase.flatMap((c) => c.control?.events ?? []))
+    for (const ev of ['change', 'input', 'focus', 'blur', 'keyup', 'paste', 'contextmenu', 'doubleclick', 'wheel', 'drop', 'dragstart']) expect(showcaseEvents.has(ev)).toBe(true)
+
     const productControls = new Set(controls.filter((c) => c.parent === 'n_products').map((c) => c.id))
     const indirect = graph.edges.find(
       (e) => productControls.has(e.from) && e.to === 'n_dashboard' && e.witness?.ruleId === 'rr.use-navigate.interprocedural',
@@ -167,8 +176,8 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
     const { graph } = extractGraph(buildProject(dir), dir)
     expect(graph.nodes.every((n) => n.kind === 'screen')).toBe(true)
-    expect(graph.nodes).toHaveLength(8)
-    expect(graph.edges).toHaveLength(13)
+    expect(graph.nodes).toHaveLength(9)
+    expect(graph.edges).toHaveLength(15)
   })
 
   it('captures a multi-behavior submit (api + state + navigate)', () => {
