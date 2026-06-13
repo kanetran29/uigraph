@@ -18,6 +18,7 @@ export {
   getProposalGraph,
   describeScreen,
   getCoverage,
+  getLoopStatus,
   nextToVerifyTool,
   genSpec,
   listScenarios,

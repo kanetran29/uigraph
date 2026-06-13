@@ -27,7 +27,12 @@ function CountChip(props: { label: string; n: number }): JSX.Element {
  */
 export function Coverage(props: CoverageProps): JSX.Element {
   const { coverage, graph, onSelect } = props
-  const pct = Math.round(coverage.ratio * 100)
+  // Headline is the HONEST "done" metric (accounted-for); runtime-verified is always
+  // co-reported beside it so a parked-heavy graph can never read as "100% verified".
+  const accountedPct = Math.round((coverage.accountedRatio ?? coverage.ratio) * 100)
+  const runtimePct = Math.round(coverage.runtimeRatio * 100)
+  const open = coverage.open ?? coverage.unverified
+  const parked = coverage.parked ?? []
   const edgeById = new Map(graph.edges.map((e) => [e.id, e]))
   const selectEdge = (id: string): void => {
     const e: GraphEdge | undefined = edgeById.get(id)
@@ -37,14 +42,17 @@ export function Coverage(props: CoverageProps): JSX.Element {
   return (
     <section className="coverage">
       <h2>Coverage</h2>
-      <div className="cov-headline" title={`${coverage.verified} of ${coverage.total} edges runtime-witnessed`}>
+      <div className="cov-headline" title={`${coverage.accounted} of ${coverage.total} edges accounted-for (witnessed or parked)`}>
         <div className="cov-bar">
-          <div className="cov-bar-fill" style={{ width: `${pct}%` }} />
+          <div className="cov-bar-fill" style={{ width: `${accountedPct}%` }} />
         </div>
         <span className="cov-pct">
-          {pct}% verified <span className="muted">({coverage.verified}/{coverage.total})</span>
+          {accountedPct}% accounted-for <span className="muted">({coverage.accounted ?? coverage.verified}/{coverage.total})</span>
         </span>
       </div>
+      <p className="muted cov-sub">
+        runtime-verified {runtimePct}% ({coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · parked {parked.length}
+      </p>
 
       <div className="cov-chips">
         {Object.entries(coverage.bySource).map(([k, n]) => (
@@ -57,13 +65,13 @@ export function Coverage(props: CoverageProps): JSX.Element {
         ))}
       </div>
 
-      <h3>unverified ({coverage.unverified.length})</h3>
-      {coverage.unverified.length > 0 ? (
+      <h3>open ({open.length})</h3>
+      {open.length > 0 ? (
         <ul className="cov-list">
-          {coverage.unverified.map((e) => (
+          {open.map((e) => (
             <li key={e.id}>
               <button className="cov-row" onClick={() => selectEdge(e.id)} title="select this edge">
-                <span className="cov-modality">{e.modality}</span>
+                <span className="cov-modality">{e.status ?? e.modality}</span>
                 <span className="cov-edge">
                   {e.from} → {e.to}
                 </span>
@@ -73,7 +81,26 @@ export function Coverage(props: CoverageProps): JSX.Element {
           ))}
         </ul>
       ) : (
-        <p className="muted">Every edge is runtime-witnessed.</p>
+        <p className="muted">100% accounted-for — every edge is witnessed or parked.</p>
+      )}
+
+      {parked.length > 0 && (
+        <>
+          <h3>parked ({parked.length})</h3>
+          <ul className="cov-list">
+            {parked.map((e) => (
+              <li key={e.id}>
+                <button className="cov-row" onClick={() => selectEdge(e.id)} title={e.reason ?? 'parked'}>
+                  <span className="cov-modality">parked</span>
+                  <span className="cov-edge">
+                    {e.from} → {e.to}
+                  </span>
+                  <span className="cov-event">{e.reason}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </section>
   )

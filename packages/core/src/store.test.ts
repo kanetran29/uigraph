@@ -125,6 +125,25 @@ describe('Store (SQLite)', () => {
     s.close()
   })
 
+  it('parks and un-parks edges as auditable sidecar metadata (never touching the graph)', () => {
+    const s = openStore(':memory:')
+    s.setBaseGraph(g())
+    expect(s.getParkedEdges()).toEqual([])
+    const entry = s.parkEdge('e_ab', 'route behind a feature flag', 'runner')
+    expect(entry).toMatchObject({ edgeId: 'e_ab', reason: 'route behind a feature flag', by: 'runner' })
+    expect(s.getParkedEdges().map((p) => p.edgeId)).toEqual(['e_ab'])
+    // upsert dedupes by edge id
+    s.parkEdge('e_ab', 'updated reason')
+    expect(s.getParkedEdges()).toHaveLength(1)
+    // the proven graph is untouched
+    expect(s.getBaseGraph()?.edges).toHaveLength(1)
+    expect(s.unparkEdge('e_ab')).toBe(true)
+    expect(s.getParkedEdges()).toEqual([])
+    expect(s.unparkEdge('missing')).toBe(false)
+    expect(() => s.parkEdge('e_ab', '   ')).toThrow(/reason/)
+    s.close()
+  })
+
   it('filters proposals by status', () => {
     const s = openStore(':memory:')
     s.setProposals(sidecar())

@@ -17,6 +17,7 @@ import type { Observation } from './runtime'
 import { validateGraph } from './validate'
 import { validateProposals, materializeProposalGraph, type ProposalStatus } from './proposals'
 import { reconcileProposals } from './reconcile'
+import type { ParkedEdge } from './coverage'
 import { hashValue } from './hash'
 
 const SCHEMA = `
@@ -264,6 +265,35 @@ export class Store {
     }
     this.rebuildProposalGraph()
     return changed.map((p) => ({ id: p.id, status: p.status }))
+  }
+
+  /**
+   * Park a may/unknown edge out of the verify worklist with an auditable reason
+   * (upsert, deduped by edge id). Pure sidecar metadata in the docs table — never
+   * edits the edge, its modality, witness, or source, so the proven graph is
+   * untouched. A reason is mandatory.
+   */
+  parkEdge(edgeId: string, reason: string, by: 'agent' | 'runner' = 'agent'): ParkedEdge {
+    if (reason.trim().length === 0) throw new Error('parkEdge requires a non-empty reason')
+    const entry: ParkedEdge = { edgeId, reason, by, ts: new Date().toISOString() }
+    const next = this.getParkedEdges().filter((p) => p.edgeId !== edgeId)
+    next.push(entry)
+    this.setDoc('parked_edges', next)
+    return entry
+  }
+
+  /** Un-park an edge (return it to the worklist); returns whether one was removed. */
+  unparkEdge(edgeId: string): boolean {
+    const current = this.getParkedEdges()
+    const next = current.filter((p) => p.edgeId !== edgeId)
+    if (next.length === current.length) return false
+    this.setDoc('parked_edges', next)
+    return true
+  }
+
+  /** The parked-edge sidecar (empty when none). */
+  getParkedEdges(): ParkedEdge[] {
+    return this.getDoc<ParkedEdge[]>('parked_edges') ?? []
   }
 
   /** Query proposals with optional filters; returns matching rows as Proposals. */

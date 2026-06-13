@@ -60,6 +60,7 @@ export {
   type CoverageReport,
   type EdgeCoverage,
   type VerifyTarget,
+  type ParkedEdge,
 } from './coverage'
 export { reconcileProposals, buildResolution, type ResolutionReport } from './reconcile'
 export {

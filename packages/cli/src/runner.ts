@@ -12,7 +12,7 @@
 import type { SpecPlan } from '@uigraph/core'
 import { buildSpecPlan, nextToVerify, planPath } from '@uigraph/core'
 import { openStore } from '@uigraph/core/node'
-import { dbPath, loadMergedGraph, reportObservation } from '@uigraph/mcp'
+import { dbPath, loadMergedGraph, reportObservation, getLoopStatus } from '@uigraph/mcp'
 
 /** The outcome of attempting one planned transition in a real browser. */
 export interface VerifyResult {
@@ -49,9 +49,10 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   const graph = loadMergedGraph(ctx)
   const store = openStore(dbPath(ctx))
   const proposalGraph = store.getProposalGraph()
+  const parkedIds = new Set(store.getParkedEdges().map((p) => p.edgeId))
   store.close()
 
-  const targets = nextToVerify(graph, proposalGraph, opts.limit)
+  const targets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds)
   const driver = opts.driver ?? makePlaywrightDriver(opts.storageState)
   let confirmed = 0
   let refuted = 0
@@ -79,6 +80,107 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   }
 
   return { attempted: targets.length, confirmed, refuted }
+}
+
+/** Options for the autonomous until-done loop. */
+export interface RunVerifyUntilDoneOptions extends RunVerifyOptions {
+  maxRounds?: number
+  parkTries?: number
+}
+
+/** What the autonomous loop did, with BOTH honest metrics + how it ended. */
+export interface UntilDoneSummary {
+  rounds: number
+  confirmed: number
+  parkedEdges: number
+  parkedProposals: number
+  loopDone: boolean
+  exitReason: 'loopDone' | 'max-rounds-parked'
+  runtimeRatio: number
+  accountedRatio: number
+}
+
+/**
+ * Drive the verify worklist round after round until the loop is DONE (every edge
+ * accounted-for: witnessed or parked, and every proposal resolved). Each round runs
+ * one verify pass; any target still open after `parkTries` attempts is PARKED with
+ * an auditable autonomous reason (edges via parkEdge, proposals via 'unverifiable')
+ * so the open set strictly shrinks and the loop terminates. If the round cap is hit
+ * with anything still open, the remainder is parked for human review (exitReason
+ * 'max-rounds-parked'). 100%-accounted reached by parking is HONEST: parked is
+ * excluded from runtimeRatio and tagged by:'runner', and both ratios are returned.
+ */
+export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promise<UntilDoneSummary> {
+  const ctx = { dir: opts.dir }
+  const maxRounds = opts.maxRounds ?? 10
+  const parkTries = opts.parkTries ?? 2
+  const tries = new Map<string, number>()
+  let rounds = 0
+  let confirmed = 0
+  let parkedEdges = 0
+  let parkedProposals = 0
+
+  for (; rounds < maxRounds; rounds++) {
+    if (getLoopStatus(ctx).loopDone) break
+    const pass = await runVerify(opts)
+    confirmed += pass.confirmed
+    // bump attempts for everything still open; park targets that exhausted their tries
+    const status = getLoopStatus(ctx)
+    const store = openStore(dbPath(ctx))
+    try {
+      for (const e of status.openEdges) {
+        const n = (tries.get(e.id) ?? 0) + 1
+        tries.set(e.id, n)
+        if (n >= parkTries) {
+          store.parkEdge(e.id, `autonomous: unreachable/undrivable after ${n} attempts`, 'runner')
+          parkedEdges++
+        }
+      }
+      for (const p of store.queryProposals({ status: 'proposed' })) {
+        const key = `prop:${p.id}`
+        const n = (tries.get(key) ?? 0) + 1
+        tries.set(key, n)
+        if (n >= parkTries) {
+          store.setProposalStatus(p.id, 'unverifiable', `autonomous: unverified after ${n} attempts`)
+          parkedProposals++
+        }
+      }
+    } finally {
+      store.close()
+    }
+  }
+
+  // Backstop: if the cap was hit with anything still open, park the remainder for a human.
+  let exitReason: UntilDoneSummary['exitReason'] = 'loopDone'
+  const before = getLoopStatus(ctx)
+  if (!before.loopDone) {
+    exitReason = 'max-rounds-parked'
+    const store = openStore(dbPath(ctx))
+    try {
+      for (const e of before.openEdges) {
+        store.parkEdge(e.id, 'autonomous: parked at round cap for human review', 'runner')
+        parkedEdges++
+      }
+      for (const p of store.queryProposals({ status: 'proposed' })) {
+        store.setProposalStatus(p.id, 'unverifiable', 'autonomous: parked at round cap for human review')
+        parkedProposals++
+      }
+    } finally {
+      store.close()
+    }
+  }
+
+  const final = getLoopStatus(ctx)
+  return {
+    rounds,
+    confirmed,
+    parkedEdges,
+    parkedProposals,
+    loopDone: final.loopDone,
+    exitReason,
+    runtimeRatio: final.coverage.runtimeRatio,
+    accountedRatio: final.coverage.accountedRatio,
+  }
 }
 
 /** The optional playwright-core module, loaded via a variable specifier so a missing package is a runtime error, not a compile error. */

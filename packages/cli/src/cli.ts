@@ -10,7 +10,7 @@ import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
 import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, runDiff, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, type AdapterName } from './commands'
 import { startApiServer } from './server'
-import { runVerify } from './runner'
+import { runVerify, runVerifyUntilDone } from './runner'
 
 /** Build the commander program with every uigraph subcommand registered. */
 export function buildProgram(): Command {
@@ -55,9 +55,20 @@ export function buildProgram(): Command {
     .description('Tier-3: drive the running app to confirm uncertain transitions + proposals, recording runtime observations.')
     .argument('<dir>', 'workspace directory holding uigraph.db')
     .requiredOption('--app-url <url>', 'base URL of the running app (e.g. http://localhost:3000)')
-    .option('--limit <n>', 'max targets to attempt', '10')
+    .option('--limit <n>', 'max targets to attempt per pass', '10')
     .option('--storage-state <file>', 'Playwright storageState JSON for an authenticated session (drives the app logged in)')
-    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string }) => {
+    .option('--until-done', 'loop rounds until 100% accounted-for: drive, then park the undrivable remainder with reasons')
+    .option('--max-rounds <n>', 'cap for --until-done', '10')
+    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string; untilDone?: boolean; maxRounds: string }) => {
+      if (opts.untilDone === true) {
+        const s = await runVerifyUntilDone({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, maxRounds: Number(opts.maxRounds) })
+        console.log(
+          `verify --until-done: ${s.rounds} round(s), ${s.confirmed} confirmed, ${s.parkedEdges} edge(s) + ${s.parkedProposals} proposal(s) parked\n` +
+            `  loopDone: ${s.loopDone} (${s.exitReason})\n` +
+            `  accounted-for: ${Math.round(s.accountedRatio * 100)}% · runtime-verified: ${Math.round(s.runtimeRatio * 100)}%`,
+        )
+        return
+      }
       const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState })
       console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)`)
     })

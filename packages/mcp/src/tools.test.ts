@@ -22,6 +22,8 @@ import {
   getLoopStatus,
   markUnverifiable,
   nextToVerifyTool,
+  parkEdge,
+  unparkEdge,
   planPathTool,
   readObservations,
   reconcileProposalsTool,
@@ -216,11 +218,13 @@ describe('AI tools (F2): proposal graph, describe_screen, coverage, next_to_veri
     expect(cov.unverified.map((e) => e.id).sort()).toEqual(['e_au', 'e_bc'])
   })
 
-  it('next_to_verify ranks unknown > may > proposal, skipping runtime', () => {
+  it('next_to_verify skips runtime AND the dynamic sink whose source is already resolved, ranks may > proposal', () => {
     const targets = nextToVerifyTool(ws())
-    expect(targets[0]?.id).toBe('e_au')
-    expect(targets.some((t) => t.kind === 'proposal')).toBe(true)
+    // e_ab is runtime (skip); a has a concrete runtime out-edge so the dynamic sink e_au is resolved (skip)
     expect(targets.some((t) => t.id === 'e_ab')).toBe(false)
+    expect(targets.some((t) => t.id === 'e_au')).toBe(false)
+    expect(targets[0]?.id).toBe('e_bc')
+    expect(targets.some((t) => t.kind === 'proposal')).toBe(true)
   })
 })
 
@@ -314,7 +318,7 @@ describe('reportObservation', () => {
 
     const logged = readObservations(ctx)
     expect(logged).toHaveLength(1)
-    const { reconciled: _reconciled, ...stored } = entry
+    const { reconciled: _reconciled, dropped: _dropped, ...stored } = entry
     expect(logged[0]).toEqual(stored)
     expect(Array.isArray(entry.reconciled)).toBe(true)
 
@@ -402,5 +406,72 @@ describe('proposal reconciliation loop', () => {
     store.close()
     expect(reconcileProposalsTool(ctx).changed).toEqual([{ id: 'p1', status: 'rejected' }])
     expect(reconcileProposalsTool(ctx).changed).toEqual([])
+  })
+})
+
+describe('honest 100% accounted-for (edge resolution + park)', () => {
+  // a->b is a `may` edge (open until driven/parked); a->u_a is a dynamic sink.
+  function ws(): ToolContext {
+    const u: GraphNode = { id: 'u_a', route: null, componentPath: null, label: 'dynamic', kind: 'unknown' }
+    return newWorkspace(graph(
+      [node('a'), node('b'), u],
+      [
+        { ...edge('e_ab', 'a', 'b'), modality: 'may', source: 'static', guard: 'x' },
+        { ...edge('e_au', 'a', 'u_a'), modality: 'unknown', source: 'static' },
+      ],
+    ))
+  }
+
+  it('reports BOTH ratios; a may + dynamic-open edge keep accountedRatio < 1', () => {
+    const cov = getCoverage(ws())
+    expect(cov.runtimeRatio).toBe(0)
+    expect(cov.accountedRatio).toBeLessThan(1)
+    expect(cov.open.map((e) => e.id).sort()).toEqual(['e_ab', 'e_au'])
+  })
+
+  it('park_edge accounts for an edge WITHOUT verifying it; both buckets stay honest', () => {
+    const ctx = ws()
+    parkEdge(ctx, { id: 'e_ab', reason: 'guarded by a role flag off in dev' })
+    const cov = getCoverage(ctx)
+    expect(cov.parked.map((e) => e.id)).toEqual(['e_ab'])
+    expect(cov.parked[0]?.reason).toContain('role flag')
+    expect(cov.open.map((e) => e.id)).toEqual(['e_au'])
+    expect(cov.runtimeVerified).toBe(0)
+    expect(nextToVerifyTool(ctx).some((t) => t.id === 'e_ab')).toBe(false)
+    expect(unparkEdge(ctx, { id: 'e_ab' }).unparked).toBe(true)
+    expect(getCoverage(ctx).open.map((e) => e.id).sort()).toEqual(['e_ab', 'e_au'])
+  })
+
+  it('resolves a dynamic sink by minting a concrete runtime edge (the u_ edge leaves open; no fake)', () => {
+    const ctx = ws()
+    // drive the dynamic dispatch out of a, observe the real landing b
+    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'navigate', outcome: 'confirmed' })
+    expect(res.dropped).toBe(false)
+    const cov = getCoverage(ctx)
+    // a concrete runtime edge a->b now exists (witnessed); the u_ edge is resolved (out of open)
+    expect(getGraph(ctx).edges.some((e) => e.from === 'a' && e.to === 'b' && e.source === 'runtime')).toBe(true)
+    expect(cov.open.some((e) => e.id === 'e_au')).toBe(false)
+    // runtimeRatio reflects only the witnessed edge, never the synthetic sink
+    expect(cov.runtimeVerified).toBe(1)
+  })
+
+  it('flags a dropped observation when the landing node is not in the graph', () => {
+    const ctx = ws()
+    const res = reportObservation(ctx, { from: 'a', to: 'n_ghost', event: 'navigate', outcome: 'confirmed' })
+    expect(res.dropped).toBe(true)
+    expect(getGraph(ctx).edges.some((e) => e.to === 'n_ghost')).toBe(false)
+  })
+
+  it('loopDone only when every edge is accounted-for (open empty) AND no proposed proposals', () => {
+    const ctx = ws()
+    expect(getLoopStatus(ctx).loopDone).toBe(false)
+    parkEdge(ctx, { id: 'e_ab', reason: 'flag off' })
+    parkEdge(ctx, { id: 'e_au', reason: 'dynamic dispatch with no reachable concrete landing' })
+    const s = getLoopStatus(ctx)
+    expect(s.loopDone).toBe(true)
+    expect(s.coverage.accountedRatio).toBe(1)
+    // but it was reached by parking, NOT by runtime verification — stays visible
+    expect(s.coverage.runtimeRatio).toBe(0)
+    expect(s.openEdges).toHaveLength(0)
   })
 })
