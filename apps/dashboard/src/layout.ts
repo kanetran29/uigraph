@@ -1,11 +1,12 @@
-// Layered layout for the graph canvas. Screen nodes are placed by dagre over the
-// screen→screen edge graph only (control edges are excluded from ranking so a
-// button does not warp the route layout), giving proper spacing and far fewer
-// crossings. Control nodes are laid out as a vertical stack inside their parent
-// screen at parent-relative positions, so @xyflow/react subflows render them
-// nested; screens that own controls are grown to contain the stack.
+// Radial layout for the graph canvas. The root screen (Home / route '/') sits at
+// the centre; every other screen is placed on a ring whose radius grows with its
+// BFS distance from the root, so neighbours fan out on ALL sides instead of a
+// left-to-right column. Within a ring, nodes are ordered by their parent's angle
+// so children stay near their parent and edges (drawn as floating curves between
+// node boundaries) cross as little as possible, leaving open space for labels.
+// Control nodes are laid out as a vertical stack inside their parent screen at
+// parent-relative positions, so @xyflow/react renders them nested.
 
-import * as dagre from '@dagrejs/dagre'
 import type { GraphNode, UiGraph } from '@uigraph/core'
 
 /** A laid-out position in canvas pixels (absolute for screens, parent-relative for controls). */
@@ -20,7 +21,7 @@ export interface NodeSize {
   height: number
 }
 
-/** The computed layout: positions and sizes for every node, plus dagre's routed edge polylines. */
+/** The computed layout: positions and sizes for every node (edge routing is floating, so no points). */
 export interface GraphLayout {
   positions: Map<string, NodePosition>
   sizes: Map<string, NodeSize>
@@ -39,6 +40,10 @@ const CONTROL_GAP = 10
 const CHILD_INSET_X = 14
 const CHILD_TOP = 58
 const CHILD_BOTTOM_PAD = 14
+
+// Radius added per BFS ring. Generous so a ring's circumference comfortably holds
+// its nodes and the spokes between rings have room for edge labels.
+const RING = 460
 
 /** Whether a node is a nested control (has a parent screen). */
 function isControl(node: GraphNode): boolean {
@@ -64,9 +69,9 @@ function screenHeight(childCount: number): number {
 }
 
 /**
- * Compute the full canvas layout. Screens are ranked left-to-right by dagre over
- * the screen→screen edges; only screens in `expanded` are grown to contain their
- * controls (collapsed screens stay compact, and their controls are not placed).
+ * Compute the full canvas layout. Screens are placed radially around the root by
+ * BFS depth (root centred); only screens in `expanded` are grown to contain their
+ * controls. Returns empty edge points — edges route as floating curves at render.
  */
 export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): GraphLayout {
   const childrenOf = controlsByParent(graph)
@@ -77,56 +82,96 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
   const heightOf = (id: string): number =>
     isGhost(id) ? GHOST_HEIGHT : expanded.has(id) ? screenHeight((childrenOf.get(id) ?? []).length) : SCREEN_HEIGHT
 
-  const g = new dagre.graphlib.Graph()
-  g.setGraph({ rankdir: 'LR', nodesep: 90, ranksep: 320, edgesep: 60, marginx: 36, marginy: 36, ranker: 'network-simplex' })
-  g.setDefaultEdgeLabel(() => ({}))
-
-  for (const node of screens) {
-    g.setNode(node.id, { width: widthOf(node.id), height: heightOf(node.id) })
-  }
-  const seenEdge = new Set<string>()
+  // Undirected adjacency among screen nodes (control edges are ignored for ranking).
+  const adj = new Map<string, Set<string>>()
+  for (const s of screens) adj.set(s.id, new Set())
   for (const e of graph.edges) {
     if (!screenIds.has(e.from) || !screenIds.has(e.to) || e.from === e.to) continue
-    const key = `${e.from}->${e.to}`
-    if (seenEdge.has(key)) continue
-    seenEdge.add(key)
-    g.setEdge(e.from, e.to)
+    adj.get(e.from)?.add(e.to)
+    adj.get(e.to)?.add(e.from)
   }
 
-  dagre.layout(g)
+  const root = screens.find((s) => s.id === 'n_root') ?? screens.find((s) => s.route === '/') ?? screens[0]
+
+  // BFS depth + parent from the root; unreached screens land one ring past the deepest.
+  const depth = new Map<string, number>()
+  const parent = new Map<string, string | null>()
+  if (root !== undefined) {
+    depth.set(root.id, 0)
+    parent.set(root.id, null)
+    const queue = [root.id]
+    while (queue.length > 0) {
+      const cur = queue.shift() as string
+      for (const nb of adj.get(cur) ?? []) {
+        if (!depth.has(nb)) {
+          depth.set(nb, (depth.get(cur) ?? 0) + 1)
+          parent.set(nb, cur)
+          queue.push(nb)
+        }
+      }
+    }
+  }
+  let maxReached = 0
+  for (const d of depth.values()) maxReached = Math.max(maxReached, d)
+  // A modal node `m_<screen>_<i>` connects to its screen only through a control
+  // edge, so BFS never reaches it; anchor it one ring past its owning screen (and
+  // inheriting its angle) so it sits beside that screen rather than off in a
+  // catch-all ring.
+  for (const s of screens) {
+    if (depth.has(s.id)) continue
+    const owner = /^m_(.+)_\d+$/.exec(s.id)?.[1]
+    if (owner !== undefined && depth.has(owner)) {
+      depth.set(s.id, (depth.get(owner) ?? 0) + 1)
+      parent.set(s.id, owner)
+    } else {
+      depth.set(s.id, maxReached + 1)
+      parent.set(s.id, null)
+    }
+  }
+
+  const byDepth = new Map<number, string[]>()
+  for (const s of screens) {
+    const d = depth.get(s.id) ?? 0
+    const list = byDepth.get(d)
+    if (list === undefined) byDepth.set(d, [s.id])
+    else list.push(s.id)
+  }
+
+  const angle = new Map<string, number>()
+  const maxDepth = Math.max(0, ...byDepth.keys())
+  for (let d = 0; d <= maxDepth; d++) {
+    const ids = byDepth.get(d) ?? []
+    if (d === 0) {
+      for (const id of ids) angle.set(id, 0)
+      continue
+    }
+    // Keep children near their parent: order this ring by the parent's angle.
+    ids.sort((a, b) => (angle.get(parent.get(a) ?? '') ?? 0) - (angle.get(parent.get(b) ?? '') ?? 0))
+    const n = ids.length
+    ids.forEach((id, i) => angle.set(id, (i / Math.max(1, n)) * Math.PI * 2))
+  }
 
   const positions = new Map<string, NodePosition>()
   const sizes = new Map<string, NodeSize>()
-
-  // Dagre routes each edge as a de-crossed, edgesep-padded polyline. Because node
-  // positions below are emitted as dagreCenter - size/2 (top-left), the dagre and
-  // flow-space origins coincide, so these points are usable directly as flow coords.
-  const edgePoints = new Map<string, NodePosition[]>()
-  for (const { v, w } of g.edges()) {
-    const routed = g.edge(v, w)?.points
-    if (routed && routed.length > 0) edgePoints.set(`${v}->${w}`, routed.map((p: NodePosition) => ({ x: p.x, y: p.y })))
-  }
 
   for (const node of screens) {
     const width = widthOf(node.id)
     const height = heightOf(node.id)
     sizes.set(node.id, { width, height })
 
-    const laid = g.node(node.id)
-    positions.set(node.id, {
-      x: (laid?.x ?? 0) - width / 2,
-      y: (laid?.y ?? 0) - height / 2,
-    })
+    const d = depth.get(node.id) ?? 0
+    const a = angle.get(node.id) ?? 0
+    const r = d * RING
+    const cx = d === 0 ? 0 : Math.cos(a) * r
+    const cy = d === 0 ? 0 : Math.sin(a) * r
+    positions.set(node.id, { x: cx - width / 2, y: cy - height / 2 })
 
     if (!expanded.has(node.id)) continue
     ;(childrenOf.get(node.id) ?? []).forEach((childId, i) => {
       sizes.set(childId, { width: CONTROL_WIDTH, height: CONTROL_HEIGHT })
-      positions.set(childId, {
-        x: CHILD_INSET_X,
-        y: CHILD_TOP + i * (CONTROL_HEIGHT + CONTROL_GAP),
-      })
+      positions.set(childId, { x: CHILD_INSET_X, y: CHILD_TOP + i * (CONTROL_HEIGHT + CONTROL_GAP) })
     })
   }
 
-  return { positions, sizes, edgePoints }
+  return { positions, sizes, edgePoints: new Map() }
 }

@@ -16,13 +16,17 @@ import {
   EdgeLabelRenderer,
   MarkerType,
   Panel,
+  Position,
   ReactFlow,
+  getBezierPath,
   useEdgesState,
+  useInternalNode,
   useNodesState,
   type Connection,
   type Edge,
   type EdgeMouseHandler,
   type EdgeProps,
+  type InternalNode,
   type Node,
   type NodeMouseHandler,
 } from '@xyflow/react'
@@ -115,74 +119,74 @@ function edgeLabel(edge: GraphEdge): string {
   return `${edge.event} · ${edge.effect}`
 }
 
-/** The data a DagreEdge needs: the interior routed points and an optional label. */
-interface DagreEdgeData extends Record<string, unknown> {
-  points: NodePosition[]
+/** The data a FloatingEdge carries: an optional label drawn at the curve midpoint. */
+interface FloatingEdgeData extends Record<string, unknown> {
   label?: string
 }
 
+/** Centre point of an internal node in absolute (flow) coordinates. */
+function nodeCenter(n: InternalNode): { x: number; y: number; w: number; h: number } {
+  const w = n.measured.width ?? 0
+  const h = n.measured.height ?? 0
+  return { x: n.internals.positionAbsolute.x + w / 2, y: n.internals.positionAbsolute.y + h / 2, w, h }
+}
+
 /**
- * Build a single smooth SVG path that flows through every waypoint as one organic
- * curve. We fit a Catmull-Rom spline (converted to cubic beziers) through the points,
- * so the edge keeps dagre's de-crossed, spaced routing but reads as a flowing curve
- * instead of mechanical right-angle bends. Two points degrade to a straight line.
+ * The point on `node`'s rectangular boundary that lies on the line toward
+ * `other`'s centre — the standard React Flow "floating edge" intersection, so an
+ * edge attaches to whichever side faces its neighbour (essential for a radial
+ * layout where neighbours sit on every side).
  */
-function roundedPath(points: NodePosition[]): string {
-  const p = points.filter((q): q is NodePosition => q !== undefined)
-  const first = p[0]
-  if (first === undefined) return ''
-  if (p.length === 2) return `M ${first.x},${first.y} L ${p[1]!.x},${p[1]!.y}`
-  let d = `M ${first.x},${first.y}`
-  for (let i = 0; i < p.length - 1; i++) {
-    const p0 = p[i - 1] ?? p[i]!
-    const p1 = p[i]!
-    const p2 = p[i + 1]!
-    const p3 = p[i + 2] ?? p2
-    const cp1x = p1.x + (p2.x - p0.x) / 6
-    const cp1y = p1.y + (p2.y - p0.y) / 6
-    const cp2x = p2.x - (p3.x - p1.x) / 6
-    const cp2y = p2.y - (p3.y - p1.y) / 6
-    d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`
+function boundaryPoint(node: InternalNode, other: InternalNode): { x: number; y: number } {
+  const a = nodeCenter(node)
+  const b = nodeCenter(other)
+  const w = a.w / 2
+  const h = a.h / 2
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  if (dx === 0 && dy === 0) return { x: a.x, y: a.y }
+  const scale = 1 / Math.max(Math.abs(dx) / (w || 1), Math.abs(dy) / (h || 1))
+  return { x: a.x + dx * scale, y: a.y + dy * scale }
+}
+
+/** Which side of `node` the boundary point sits on (for the bezier tangent). */
+function sideOf(node: InternalNode, p: { x: number; y: number }): Position {
+  const a = nodeCenter(node)
+  if (Math.abs(p.x - a.x) / (a.w / 2 || 1) >= Math.abs(p.y - a.y) / (a.h / 2 || 1)) {
+    return p.x >= a.x ? Position.Right : Position.Left
   }
-  return d
-}
-
-/** The midpoint of a polyline, used to anchor the edge label pill. */
-function polylineMidpoint(points: NodePosition[]): NodePosition {
-  const mid = Math.floor(points.length / 2)
-  const b = points[mid]
-  if (b === undefined) return { x: 0, y: 0 }
-  if (points.length % 2 === 1) return b
-  const a = points[mid - 1]
-  if (a === undefined) return b
-  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+  return p.y >= a.y ? Position.Bottom : Position.Top
 }
 
 /**
- * A custom edge rendered ALONG dagre's de-crossed, edgesep-padded route. The path
- * starts at the live source handle, passes through the INTERIOR dagre points (the
- * first/last dagre points sit on the node borders, so skipping them keeps the edge
- * pinned to the handles and connected while a node is dragged), and ends at the live
- * target handle. The arrowhead (markerEnd) and the passed style are honoured; the
- * label, when present, is drawn as a pill at the route midpoint.
+ * A floating edge: a bezier curve between the two nodes' boundaries (computed from
+ * their live positions, so it attaches to the facing side from any angle and stays
+ * connected while dragging). The arrowhead + style are honoured; the label, when
+ * present, is drawn as an opaque pill at the curve midpoint via EdgeLabelRenderer,
+ * so it floats ABOVE nodes and other edges and never gets hidden.
  */
-function DagreEdge(props: EdgeProps<Edge<DagreEdgeData>>): JSX.Element {
-  const { sourceX, sourceY, targetX, targetY, data, markerEnd, style } = props
-  const interior = data?.points ?? []
-  const through = interior.slice(1, -1)
-  const points: NodePosition[] = [{ x: sourceX, y: sourceY }, ...through, { x: targetX, y: targetY }]
-  const path = roundedPath(points)
+function FloatingEdge(props: EdgeProps<Edge<FloatingEdgeData>>): JSX.Element | null {
+  const { source, target, data, markerEnd, style } = props
+  const sourceNode = useInternalNode(source)
+  const targetNode = useInternalNode(target)
+  if (!sourceNode || !targetNode) return null
+  const sp = boundaryPoint(sourceNode, targetNode)
+  const tp = boundaryPoint(targetNode, sourceNode)
+  const [path, labelX, labelY] = getBezierPath({
+    sourceX: sp.x,
+    sourceY: sp.y,
+    targetX: tp.x,
+    targetY: tp.y,
+    sourcePosition: sideOf(sourceNode, sp),
+    targetPosition: sideOf(targetNode, tp),
+  })
   const label = data?.label
-  const labelAt = label ? polylineMidpoint(points) : null
   return (
     <>
       <BaseEdge path={path} markerEnd={markerEnd} style={style} />
-      {label && labelAt ? (
+      {label ? (
         <EdgeLabelRenderer>
-          <div
-            className="dagre-edge-label nodrag nopan"
-            style={{ transform: `translate(-50%, -50%) translate(${labelAt.x}px, ${labelAt.y}px)` }}
-          >
+          <div className="dagre-edge-label nodrag nopan" style={{ transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)` }}>
             {label}
           </div>
         </EdgeLabelRenderer>
@@ -384,17 +388,19 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     const baseWidth = e.source === 'manual' ? 2 : 1.4
     const width = onPath ? 3 : selected ? 2.8 : emphasized ? 2.4 : baseWidth
     const opacity = dimmed ? 0.18 : emphasized ? 1 : 0.85
-    const points = edgePoints.get(`${e.from}->${e.to}`)
-    const useDagre = !isControlEdge && points !== undefined && points.length >= 2
-    const showLabel = emphasized ? edgeLabel(e) : undefined
+    // Screen→screen edges are the route skeleton: render as floating beziers and
+    // keep their label visible (unless dimmed by a focus). Control edges keep their
+    // label only when emphasized, to avoid clutter when a screen is expanded.
+    const screenEdge = !isControlEdge
+    const showLabel = (screenEdge && !dimmed) || emphasized ? edgeLabel(e) : undefined
 
     out.push({
       id: e.id,
       source: e.from,
       target: e.to,
-      type: useDagre ? 'dagre' : 'smoothstep',
-      data: useDagre ? { points, label: showLabel } : undefined,
-      label: useDagre ? undefined : showLabel,
+      type: screenEdge ? 'floating' : 'smoothstep',
+      data: screenEdge ? { label: showLabel } : undefined,
+      label: screenEdge ? undefined : showLabel,
       labelShowBg: true,
       animated: onPath,
       selected,
@@ -688,7 +694,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const handleEdgeEnter: EdgeMouseHandler = useCallback((_evt, edge) => setHoveredEdgeId(edge.id), [])
   const handleEdgeLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), [])
 
-  const edgeTypes = useMemo(() => ({ dagre: DagreEdge }), [])
+  const edgeTypes = useMemo(() => ({ floating: FloatingEdge }), [])
 
   return (
     <ReactFlow
@@ -705,6 +711,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       onPaneClick={() => onSelect(null)}
       colorMode="system"
       fitView
+      minZoom={0.05}
+      maxZoom={8}
     >
       <Background />
       <Controls />
