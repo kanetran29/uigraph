@@ -6,8 +6,8 @@
 
 import { join } from 'node:path'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
-import { applyObservations, buildGrounding, diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateMerged, validateOverlay } from '@uigraph/core'
-import type { Grounding } from '@uigraph/core'
+import { applyObservations, buildCoverage, buildGrounding, diffGraphs, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, validateMerged, validateOverlay } from '@uigraph/core'
+import type { CoverageReport, Grounding, ProposalGraph, ScreenGrounding, VerifyTarget } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
 import { loadGraph, openStore, type Store } from '@uigraph/core/node'
@@ -147,6 +147,56 @@ export function getGrounding(ctx: ToolContext, args: GetGroundingArgs = {}): Gro
   const g = buildGrounding(loadMergedGraph(ctx))
   if (args.screen === undefined) return g
   return { ...g, screens: g.screens.filter((s) => s.screen === args.screen) }
+}
+
+/**
+ * Serve the quarantined proposal graph (proposals projected to nodes + edges,
+ * stored separately from the proven IR). Lets an agent query proposed transitions
+ * AS a graph — distinct from get_proposals (the raw quarantined list).
+ */
+export function getProposalGraph(ctx: ToolContext): ProposalGraph {
+  return withStore(ctx, (store) => store.getProposalGraph())
+}
+
+/** Arguments for describe_screen: the screen node id to describe. */
+export interface DescribeScreenArgs {
+  screen: string
+}
+
+/** describe_screen result: a screen's controls + proven AND proposed actions, or an error. */
+export type ScreenDescription = (ScreenGrounding & { proposedEdges: ProposalGraph['edges'] }) | { error: string }
+
+/**
+ * Describe one screen as an action surface for an agent: its controls (with stable
+ * selectors, events, effects), the transitions PROVEN out of it (knownEdges), and
+ * the PROPOSED transitions out of it (proposedEdges). Answers "I am on screen X —
+ * what can I do and where does each action lead?" without dumping the whole graph.
+ */
+export function describeScreen(ctx: ToolContext, args: DescribeScreenArgs): ScreenDescription {
+  const grounding = buildGrounding(loadMergedGraph(ctx))
+  const screen = grounding.screens.find((s) => s.screen === args.screen)
+  if (screen === undefined) return { error: `no screen "${args.screen}" in the graph` }
+  const proposed = getProposalGraph(ctx).edges.filter((e) => e.from === args.screen)
+  return { ...screen, proposedEdges: proposed }
+}
+
+/** get_coverage result: the runtime-verification coverage of the proven graph. */
+export function getCoverage(ctx: ToolContext): CoverageReport {
+  return buildCoverage(loadMergedGraph(ctx))
+}
+
+/** Arguments for next_to_verify: an optional cap on the returned worklist size. */
+export interface NextToVerifyArgs {
+  limit?: number
+}
+
+/**
+ * The ranked worklist of transitions to confirm at runtime next: dynamic-target
+ * (`unknown`) edges, then `may` edges, then proposed transitions — minus anything
+ * already runtime-witnessed. Drives a Tier-3 runner / an agent's report_observation.
+ */
+export function nextToVerifyTool(ctx: ToolContext, args: NextToVerifyArgs = {}): VerifyTarget[] {
+  return nextToVerify(loadMergedGraph(ctx), getProposalGraph(ctx), args.limit)
 }
 
 /** Arguments for plan_path: source/target node ids and optional allowed modalities. */

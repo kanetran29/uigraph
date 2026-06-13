@@ -12,10 +12,14 @@ import { type Proposal } from '@uigraph/core'
 import { openStore, saveGraph } from '@uigraph/core/node'
 import {
   dbPath,
+  describeScreen,
   diffTool,
+  getCoverage,
   getGraph,
   getGrounding,
+  getProposalGraph,
   getProposals,
+  nextToVerifyTool,
   planPathTool,
   readObservations,
   reportObservation,
@@ -165,6 +169,54 @@ describe('getGrounding', () => {
     expect(a?.controls.map((c) => c.id)).toEqual(['cc_a_btn'])
     expect(a?.knownEdges.find((e) => e.to === 'b')?.interprocedural).toBe(true)
     expect(getGrounding(ctx, { screen: 'a' }).screens).toHaveLength(1)
+  })
+})
+
+describe('AI tools (F2): proposal graph, describe_screen, coverage, next_to_verify', () => {
+  const control: GraphNode = {
+    id: 'cc_a_btn', route: null, componentPath: null, label: 'go', kind: 'control', parent: 'a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|go' }, events: ['click'], effects: [] },
+  }
+  // a (screen) owns a button; a->b runtime, b->c static may, a->u unknown.
+  const ws = (): ToolContext => {
+    const u: GraphNode = { id: 'u_a', route: null, componentPath: null, label: 'dynamic', kind: 'unknown' }
+    const g = graph(
+      [node('a'), node('b'), node('c'), u, control],
+      [
+        { ...edge('e_ab', 'a', 'b'), source: 'runtime', witness: { source: 'runtime', observationId: 'o1' } },
+        { ...edge('e_bc', 'b', 'c'), source: 'static', modality: 'may', guard: 'x' },
+        { ...edge('e_au', 'a', 'u_a'), source: 'static', modality: 'unknown' },
+      ],
+    )
+    const ctx = newWorkspace(g)
+    seedProposals(ctx, { version: 0, base: 'h', proposals: [proposal('p1', { screen: 'a', to: 'c', event: 'click' })] })
+    return ctx
+  }
+
+  it('get_proposal_graph serves the stored proposal nodes/edges', () => {
+    const pg = getProposalGraph(ws())
+    expect(pg.edges.find((e) => e.from === 'a' && e.to === 'c')?.proposalIds).toContain('p1')
+  })
+
+  it('describe_screen returns controls + proven + proposed actions for one screen', () => {
+    const d = describeScreen(ws(), { screen: 'a' })
+    if ('error' in d) throw new Error(d.error)
+    expect(d.controls.map((c) => c.id)).toEqual(['cc_a_btn'])
+    expect(d.controls[0]?.selector?.value).toBe('button|go')
+    expect(d.proposedEdges.some((e) => e.to === 'c')).toBe(true)
+  })
+
+  it('get_coverage counts runtime-witnessed vs not', () => {
+    const cov = getCoverage(ws())
+    expect(cov.verified).toBe(1)
+    expect(cov.unverified.map((e) => e.id).sort()).toEqual(['e_au', 'e_bc'])
+  })
+
+  it('next_to_verify ranks unknown > may > proposal, skipping runtime', () => {
+    const targets = nextToVerifyTool(ws())
+    expect(targets[0]?.id).toBe('e_au')
+    expect(targets.some((t) => t.kind === 'proposal')).toBe(true)
+    expect(targets.some((t) => t.id === 'e_ab')).toBe(false)
   })
 })
 

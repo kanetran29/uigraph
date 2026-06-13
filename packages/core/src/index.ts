@@ -54,6 +54,13 @@ export {
   type GroundedEdge,
 } from './grounding'
 export {
+  buildCoverage,
+  nextToVerify,
+  type CoverageReport,
+  type EdgeCoverage,
+  type VerifyTarget,
+} from './coverage'
+export {
   parseApiEffect,
   summarizeApiEffect,
   collectApiEffects,

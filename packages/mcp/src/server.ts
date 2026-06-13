@@ -10,16 +10,22 @@ import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import type { ToolContext } from './tools'
 import {
+  describeScreen,
   diffTool,
+  getCoverage,
   getGraph,
   getGrounding,
+  getProposalGraph,
   getProposals,
+  nextToVerifyTool,
   planPathTool,
   reportObservation,
   updateGraph,
+  type DescribeScreenArgs,
   type DiffArgs,
   type GetGroundingArgs,
   type GetProposalsArgs,
+  type NextToVerifyArgs,
   type PlanPathArgs,
   type ReportObservationArgs,
   type UpdateGraphArgs,
@@ -61,6 +67,33 @@ const TOOLS: Tool[] = [
       properties: {
         screen: { type: 'string', description: 'restrict the digest to one screen node id' },
       },
+    },
+  },
+  {
+    name: 'get_proposal_graph',
+    description: 'Return the quarantined proposal graph — proposals projected to nodes + edges (proposed transitions), stored separately from the proven graph. Distinct from get_proposals (the raw list).',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'describe_screen',
+    description: 'Describe one screen as an action surface: its controls (stable selector, events, effects), the transitions PROVEN out of it, and the PROPOSED ones. Answers "I am on screen X — what can I do and where does each action lead?".',
+    inputSchema: {
+      type: 'object',
+      properties: { screen: { type: 'string', description: 'screen node id (e.g. n_checkout)' } },
+      required: ['screen'],
+    },
+  },
+  {
+    name: 'get_coverage',
+    description: 'Runtime-verification coverage of the proven graph: how many edges are runtime-witnessed vs static/manual, by modality/source, plus the list of unverified edges.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'next_to_verify',
+    description: 'Ranked worklist of transitions to confirm at runtime next: dynamic-target (unknown) edges, then may edges, then proposed transitions, minus anything already runtime-witnessed. Drives a Tier-3 runner / report_observation.',
+    inputSchema: {
+      type: 'object',
+      properties: { limit: { type: 'number', description: 'max targets to return (default 20)' } },
     },
   },
   {
@@ -143,6 +176,14 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(getProposals(ctx, args as unknown as GetProposalsArgs))
       case 'get_grounding':
         return jsonResult(getGrounding(ctx, args as unknown as GetGroundingArgs))
+      case 'get_proposal_graph':
+        return jsonResult(getProposalGraph(ctx))
+      case 'describe_screen':
+        return jsonResult(describeScreen(ctx, args as unknown as DescribeScreenArgs))
+      case 'get_coverage':
+        return jsonResult(getCoverage(ctx))
+      case 'next_to_verify':
+        return jsonResult(nextToVerifyTool(ctx, args as unknown as NextToVerifyArgs))
       case 'plan_path':
         return jsonResult(planPathTool(ctx, args as unknown as PlanPathArgs))
       case 'update_graph':
