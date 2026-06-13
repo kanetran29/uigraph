@@ -7,7 +7,8 @@
 import { appendFileSync, existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
-import { applyObservations, diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateMerged, validateOverlay } from '@uigraph/core'
+import { applyObservations, buildGrounding, diffGraphs, emptyOverlay, hashValue, mergeOverlay, planPath, validateMerged, validateOverlay } from '@uigraph/core'
+import type { Grounding } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
 import { loadGraph, loadOverlay, loadProposals, saveOverlay } from '@uigraph/core/node'
@@ -138,6 +139,23 @@ export function getProposals(ctx: ToolContext, args: GetProposalsArgs = {}): Get
     byCategory,
     proposals: filtered,
   }
+}
+
+/** Optional filter for get_grounding: restrict the digest to a single screen. */
+export interface GetGroundingArgs {
+  screen?: string
+}
+
+/**
+ * Serve the Tier-2 grounding digest (controls + their wired events/effects, and
+ * the already-witnessed transitions, per screen) derived from the merged graph.
+ * A reviewer agent feeds this to itself to propose only the uncovered long tail,
+ * cite real controls/effects, and prune hypotheses that reference nothing real.
+ */
+export function getGrounding(ctx: ToolContext, args: GetGroundingArgs = {}): Grounding {
+  const g = buildGrounding(loadMergedGraph(ctx))
+  if (args.screen === undefined) return g
+  return { ...g, screens: g.screens.filter((s) => s.screen === args.screen) }
 }
 
 /** Arguments for plan_path: source/target node ids and optional allowed modalities. */

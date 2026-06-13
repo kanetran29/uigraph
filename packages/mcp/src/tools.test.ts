@@ -13,6 +13,7 @@ import {
   baseGraphPath,
   diffTool,
   getGraph,
+  getGrounding,
   getProposals,
   observationsPath,
   overlayPath,
@@ -151,6 +152,28 @@ describe('getProposals', () => {
     expect(getProposals(ctx, { screen: 'b' }).proposals.map((p) => p.id)).toEqual(['p3'])
     expect(getProposals(ctx, { minConfidence: 0.5 }).total).toBe(2)
     expect(getProposals(ctx, { category: 'keyboard' }).byCategory).toEqual({ keyboard: 2 })
+  })
+})
+
+describe('getGrounding', () => {
+  it('digests controls + outgoing edges per screen, attributing control edges to the parent', () => {
+    const control: GraphNode = {
+      id: 'cc_a_btn',
+      route: null,
+      componentPath: null,
+      label: 'go',
+      kind: 'control',
+      parent: 'a',
+      control: { element: 'button', controlType: 'button', events: ['click'], effects: ['state:setX'] },
+    }
+    const g = graph([node('a'), node('b'), control], [{ ...edge('e_ab', 'cc_a_btn', 'b'), witness: { ...staticWitness, ruleId: 'rr.use-navigate.interprocedural' } }])
+    const ctx = newWorkspace(g)
+    const grounding = getGrounding(ctx)
+    const a = grounding.screens.find((s) => s.screen === 'a')
+    expect(grounding.screens.some((s) => s.screen === 'cc_a_btn')).toBe(false)
+    expect(a?.controls.map((c) => c.id)).toEqual(['cc_a_btn'])
+    expect(a?.knownEdges.find((e) => e.to === 'b')?.interprocedural).toBe(true)
+    expect(getGrounding(ctx, { screen: 'a' }).screens).toHaveLength(1)
   })
 })
 
