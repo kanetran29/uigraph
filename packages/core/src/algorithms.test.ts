@@ -35,4 +35,16 @@ describe('planPath', () => {
     const mustOnly = planPath(g, 'a', 'd', { allow: ['must'] })
     expect(mustOnly).toBeNull()
   })
+
+  it('routes through a control into the modal it opens (containment)', () => {
+    // a -> b (screen), b owns a control btn, btn opens modal m via open:modal.
+    const gm = graph(
+      [node('a'), node('b'), { id: 'btn', route: null, componentPath: null, label: 'Review', kind: 'control', parent: 'b' }, { id: 'm', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }],
+      [edge('e1', 'a', 'b'), edge('e2', 'btn', 'm', { event: 'click', effect: 'open:modal' })],
+    )
+    expect(reachableFrom(gm, 'a').has('m')).toBe(true)
+    const steps = planPath(gm, 'a', 'm')
+    expect(steps?.map((s) => s.to.id)).toEqual(['b', 'btn', 'm'])
+    expect(steps?.[1]?.edge.effect).toBe('contains')
+  })
 })
