@@ -112,3 +112,12 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 |----|-------|-------|------------|--------|-----|
 | F7.1 | Run React adapter on the refapp.example frontend | L2 | F2.7, F4.2 | planned | [F7.1](./features/F7.1-refapp-frontend-extraction-run.md) |
 | F7.2 | Coverage/sanity and soundiness-gap report for refapp frontend | L2 | F7.1 | planned | [F7.2](./features/F7.2-refapp-coverage-soundiness-report.md) |
+
+## M8 — Multi-framework control parity
+
+**Goal:** Bring every adapter to control-level parity so all three frameworks expose the same IR (screens + controls + selectors + nav edges) to agents. React was the reference; this milestone adds Angular control extraction and a brand-new Vue adapter, each validated against a sample-app golden graph and wired into `map --adapter`.
+
+| ID | Title | Level | Depends on | Status | Doc |
+|----|-------|-------|------------|--------|-----|
+| F8.1 | Angular control + selector extraction (parity with React) | L2 | F3.5, F-control-identity-selectors | done | [F-angular-controls](./features/F-angular-controls.md) |
+| F8.2 | Vue Router adapter + sample-vue-app + CLI wiring | L2 | F8.1 | done | [F-vue-adapter](./features/F-vue-adapter.md) |
