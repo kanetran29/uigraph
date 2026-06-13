@@ -379,6 +379,8 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
   const hasNodeSelection = selection?.kind === 'node'
   const controlParent = new Map<string, string | undefined>()
   for (const n of graph.nodes) if (n.kind === 'control') controlParent.set(n.id, n.parent)
+  const modalIds = new Set<string>()
+  for (const n of graph.nodes) if (n.kind === 'modal') modalIds.add(n.id)
 
   // A runtime-confirmed edge supersedes its static/may twin between the same pair:
   // render only the witnessed (green) edge so the canvas is not doubled up.
@@ -388,7 +390,13 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
   const out: Edge[] = []
   for (const e of graph.edges) {
     if (e.source !== 'runtime' && runtimePairs.has(`${e.from}->${e.to}`)) continue
-    const isControlEdge = controlParent.has(e.from) || controlParent.has(e.to)
+    // An edge that opens a modal originates at a control but is the only way the
+    // modal connects to the graph; draw it from the control's PARENT screen so the
+    // dialog has a visible incoming arrow (Checkout → ConfirmDialog) instead of
+    // floating disconnected. Such an edge is treated as a screen edge, not hidden.
+    const opensModal = modalIds.has(e.to) && controlParent.has(e.from)
+    const renderFrom = opensModal ? controlParent.get(e.from) ?? e.from : e.from
+    const isControlEdge = (controlParent.has(e.from) || controlParent.has(e.to)) && !opensModal
     const onPath = pathEdgeIds.has(e.id)
     const selected = e.id === selectedEdgeId
     const incident = incidentEdgeIds.has(e.id)
@@ -415,7 +423,7 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
 
     out.push({
       id: e.id,
-      source: e.from,
+      source: renderFrom,
       target: e.to,
       type: screenEdge ? 'floating' : 'smoothstep',
       data: screenEdge ? { label: showLabel } : undefined,
