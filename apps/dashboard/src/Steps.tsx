@@ -57,6 +57,17 @@ export function Steps(props: StepsProps): JSX.Element {
   const first = nav[0]?.id ?? ''
   const [from, setFrom] = useState(first)
   const [to, setTo] = useState(() => (first === '' ? '' : defaultTarget(graph, first, nav)))
+  // When cleared, no path is planned or highlighted (the whole graph stays visible);
+  // changing either endpoint re-arms planning.
+  const [cleared, setCleared] = useState(false)
+  const pickFrom = (id: string): void => {
+    setCleared(false)
+    setFrom(id)
+  }
+  const pickTo = (id: string): void => {
+    setCleared(false)
+    setTo(id)
+  }
 
   // Re-seed endpoints when the graph changes so they always point at live navigable nodes.
   useEffect(() => {
@@ -73,9 +84,9 @@ export function Steps(props: StepsProps): JSX.Element {
   const toLabel = useMemo(() => nav.find((n) => n.id === to)?.label ?? to, [nav, to])
 
   const path = useMemo<PlanStep[] | null>(() => {
-    if (from === '' || to === '') return null
+    if (cleared || from === '' || to === '') return null
     return planPath(graph, from, to)
-  }, [graph, from, to])
+  }, [graph, from, to, cleared])
 
   const pathKey = path ? path.map((s) => s.edge.id).join(',') : ''
   useEffect(() => {
@@ -93,18 +104,25 @@ export function Steps(props: StepsProps): JSX.Element {
 
   return (
     <section className="steps">
-      <h2>Plan path</h2>
+      <div className="steps-head">
+        <h2>Plan path</h2>
+        <button type="button" className="steps-clear" onClick={() => setCleared(true)} disabled={cleared}>
+          Clear
+        </button>
+      </div>
       <div className="steps-controls">
         <label>
           <span>from</span>
-          <NavSelect nodes={nav} value={from} onChange={setFrom} />
+          <NavSelect nodes={nav} value={from} onChange={pickFrom} />
         </label>
         <label>
           <span>to</span>
-          <NavSelect nodes={nav} value={to} onChange={setTo} />
+          <NavSelect nodes={nav} value={to} onChange={pickTo} />
         </label>
       </div>
-      {from === to ? (
+      {cleared ? (
+        <p className="muted">Path cleared — pick a from/to to plan a route. All edges shown.</p>
+      ) : from === to ? (
         <p className="muted">Start and target are the same node.</p>
       ) : path === null ? (
         <p className="muted">
