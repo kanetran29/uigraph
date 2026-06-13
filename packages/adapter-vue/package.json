@@ -1,5 +1,5 @@
 {
-  "name": "@uigraph/cli",
+  "name": "@uigraph/adapter-vue",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,29 +9,17 @@
       "default": "./src/index.ts"
     }
   },
-  "bin": {
-    "uigraph": "./src/cli.ts"
-  },
   "scripts": {
-    "uigraph": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@uigraph/core": "workspace:*",
-    "@uigraph/adapter-react": "workspace:*",
-    "@uigraph/adapter-angular": "workspace:*",
-    "@uigraph/adapter-vue": "workspace:*",
-    "@uigraph/mcp": "workspace:*",
-    "commander": "catalog:"
-  },
-  "optionalDependencies": {
-    "playwright-core": "^1.60.0"
+    "ts-morph": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "tsx": "catalog:",
     "@types/node": "catalog:"
   }
 }
