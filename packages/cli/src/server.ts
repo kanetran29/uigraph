@@ -66,7 +66,13 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
       return { status: 200, body: readProposals(ctx) }
     }
     if (req.method === 'GET' && req.path === '/api/coverage') {
-      return { status: 200, body: buildCoverage(loadMergedGraph(ctx)) }
+      const merged = loadMergedGraph(ctx)
+      const store = openStore(dbPath(ctx))
+      try {
+        return { status: 200, body: buildCoverage(merged, store.getParkedEdges()) }
+      } finally {
+        store.close()
+      }
     }
     if (req.method === 'GET' && req.path === '/api/plan') {
       return { status: 200, body: { spec: readPlan(ctx) } }

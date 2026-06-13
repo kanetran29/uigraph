@@ -272,3 +272,48 @@ describe('runKit (agent kit)', () => {
     expect(existsSync(written[0]!)).toBe(true)
   })
 })
+
+describe('runVerifyUntilDone (autonomous 100%-accounted loop)', () => {
+  it('drives, parks the undrivable remainder, and reaches loopDone within the round cap', async () => {
+    const { runVerifyUntilDone } = await import('./runner')
+    // two may edges; the driver confirms a->b, never confirms a->c
+    const g = graph(
+      [node('a'), node('b'), node('c')],
+      [
+        { ...edge('e_ab', 'a', 'b'), modality: 'may', source: 'static', guard: 'x' },
+        { ...edge('e_ac', 'a', 'c'), modality: 'may', source: 'static', guard: 'y' },
+      ],
+    )
+    const dir = seedWorkspace(tempDir('uigraph-cli-untildone-'), g)
+    const s = await runVerifyUntilDone({
+      dir,
+      appUrl: 'http://x',
+      maxRounds: 5,
+      parkTries: 2,
+      driver: async (plan) => ({ confirmed: plan.legs.some((l) => l.action.kind === 'goto') && JSON.stringify(plan).includes('/b') }),
+    })
+    expect(s.loopDone).toBe(true)
+    expect(s.accountedRatio).toBe(1)
+    // honest: not everything was runtime-verified — a->c got parked, not faked
+    expect(s.runtimeRatio).toBeLessThan(1)
+    expect(s.parkedEdges).toBeGreaterThanOrEqual(1)
+    expect(s.rounds).toBeLessThanOrEqual(5)
+
+    // the park is auditable + the proven graph was never edited to fake it
+    const store = openStore(dbPathFor(dir))
+    const parked = store.getParkedEdges()
+    store.close()
+    expect(parked.some((p) => p.edgeId === 'e_ac' && p.by === 'runner')).toBe(true)
+  })
+
+  it('terminates even when the driver never confirms anything (no infinite loop)', async () => {
+    const { runVerifyUntilDone } = await import('./runner')
+    const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), modality: 'unknown', source: 'static' }])
+    const dir = seedWorkspace(tempDir('uigraph-cli-untildone2-'), g)
+    const s = await runVerifyUntilDone({ dir, appUrl: 'http://x', maxRounds: 4, parkTries: 2, driver: async () => ({ confirmed: false }) })
+    expect(s.loopDone).toBe(true)
+    expect(s.rounds).toBeLessThanOrEqual(4)
+    expect(s.runtimeRatio).toBe(0)
+    expect(s.accountedRatio).toBe(1)
+  })
+})

@@ -27,6 +27,8 @@ import {
   reconcileProposalsTool,
   withdrawProposal,
   markUnverifiable,
+  parkEdge,
+  unparkEdge,
   getLoopStatus,
   updateGraph,
   type DescribeScreenArgs,
@@ -39,6 +41,7 @@ import {
   type PlanPathArgs,
   type ReportObservationArgs,
   type ResolveProposalArgs,
+  type ParkEdgeArgs,
   type UpdateGraphArgs,
 } from './tools'
 
@@ -226,6 +229,23 @@ export const TOOLS: Tool[] = [
       required: ['id', 'reason'],
     },
   },
+  {
+    name: 'park_edge',
+    description: 'Park a may/unknown EDGE out of the verify worklist with an auditable reason (unreachable/undrivable now: feature flag, external dep, dead code, dynamic target with no reachable landing). Becomes accounted-for but NEVER runtime-verified and NEVER edits the edge or the proven graph. This is how the loop reaches 100% accounted-for honestly.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'edge id to park' },
+        reason: { type: 'string', description: 'why it cannot be driven/reached now' },
+      },
+      required: ['id', 'reason'],
+    },
+  },
+  {
+    name: 'unpark_edge',
+    description: 'Return a previously parked edge to the verify worklist.',
+    inputSchema: { type: 'object', properties: { id: { type: 'string', description: 'edge id to un-park' } }, required: ['id'] },
+  },
 ]
 
 /** Wrap any JSON-serializable payload as a single text content block. */
@@ -280,6 +300,10 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(withdrawProposal(ctx, args as unknown as ResolveProposalArgs))
       case 'mark_unverifiable':
         return jsonResult(markUnverifiable(ctx, args as unknown as ResolveProposalArgs))
+      case 'park_edge':
+        return jsonResult(parkEdge(ctx, args as unknown as ParkEdgeArgs))
+      case 'unpark_edge':
+        return jsonResult(unparkEdge(ctx, args as unknown as { id: string }))
       case 'diff':
         return jsonResult(diffTool(args as unknown as DiffArgs))
       default:

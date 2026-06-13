@@ -182,9 +182,9 @@ export function describeScreen(ctx: ToolContext, args: DescribeScreenArgs): Scre
   return { ...screen, proposedEdges: proposed }
 }
 
-/** get_coverage result: the runtime-verification coverage of the proven graph. */
+/** get_coverage result: both the strict runtime metric and the accounted-for metric, plus parked edges. */
 export function getCoverage(ctx: ToolContext): CoverageReport {
-  return buildCoverage(loadMergedGraph(ctx))
+  return withStore(ctx, (store) => buildCoverage(loadMergedGraph(ctx), store.getParkedEdges()))
 }
 
 /** Arguments for next_to_verify: an optional cap on the returned worklist size. */
@@ -198,7 +198,8 @@ export interface NextToVerifyArgs {
  * already runtime-witnessed. Drives a Tier-3 runner / an agent's report_observation.
  */
 export function nextToVerifyTool(ctx: ToolContext, args: NextToVerifyArgs = {}): VerifyTarget[] {
-  return nextToVerify(loadMergedGraph(ctx), getProposalGraph(ctx), args.limit)
+  const parkedIds = new Set(withStore(ctx, (store) => store.getParkedEdges()).map((p) => p.edgeId))
+  return nextToVerify(loadMergedGraph(ctx), getProposalGraph(ctx), args.limit, parkedIds)
 }
 
 /** Arguments for gen_spec: the from/to node ids and an optional base URL. */
@@ -398,8 +399,14 @@ export interface ReportObservationArgs {
 /** A recorded observation line (the core Observation plus a server timestamp). */
 export type ObservationEntry = Observation
 
-/** report_observation result: the recorded entry plus any proposals whose status the observation reconciled. */
-export type ReportObservationResult = ObservationEntry & { reconciled: { id: string; status: ProposalStatus }[] }
+/**
+ * report_observation result: the recorded entry, any proposals it reconciled, and
+ * `dropped` — true when a CONFIRMED landing references a `to` node not yet in the
+ * graph, so the fold minted no edge (the runner must add the node, e.g. via
+ * update_graph, then re-report). A dropped observation must never be counted as
+ * progress or silently parked.
+ */
+export type ReportObservationResult = ObservationEntry & { reconciled: { id: string; status: ProposalStatus }[]; dropped: boolean }
 
 /**
  * Append a runtime observation to the workspace store (append-only observations
@@ -422,11 +429,14 @@ export function reportObservation(ctx: ToolContext, args: ReportObservationArgs)
     ...(args.proposalId ? { proposalId: args.proposalId } : {}),
     ...(args.screenshot ? { screenshot: args.screenshot } : {}),
   }
-  const reconciled = withStore(ctx, (store) => {
+  const { reconciled, dropped } = withStore(ctx, (store) => {
     store.appendObservation(entry)
-    return store.reconcileFromObservations()
+    const base = store.getBaseGraph()
+    // a confirmed landing on a node not in the graph mints no edge (applyObservations skips it)
+    const droppedFlag = args.outcome === 'confirmed' && base !== null && !base.nodes.some((n) => n.id === args.to)
+    return { reconciled: store.reconcileFromObservations(), dropped: droppedFlag }
   })
-  return { ...entry, reconciled }
+  return { ...entry, reconciled, dropped }
 }
 
 /** reconcile_proposals result: how many statuses changed + the proposal resolution snapshot. */
@@ -463,6 +473,29 @@ export function withdrawProposal(ctx: ToolContext, args: ResolveProposalArgs): {
   return { id: args.id, status: 'rejected', reason: args.reason }
 }
 
+/** Arguments for park_edge: the edge id + a mandatory reason. */
+export interface ParkEdgeArgs {
+  id: string
+  reason: string
+}
+
+/**
+ * Park a may/unknown edge out of the verify worklist with an auditable reason (an
+ * edge that cannot be reached/driven now — feature flag, external dep, dead code,
+ * dynamic target with no reachable concrete landing). It becomes "accounted-for"
+ * but is NEVER counted as runtime-verified and NEVER edits the edge (no modality,
+ * witness, or source change). The proven graph is untouched.
+ */
+export function parkEdge(ctx: ToolContext, args: ParkEdgeArgs): { id: string; reason: string } {
+  withStore(ctx, (store) => store.parkEdge(args.id, args.reason, 'agent'))
+  return { id: args.id, reason: args.reason }
+}
+
+/** Un-park an edge, returning it to the verify worklist. */
+export function unparkEdge(ctx: ToolContext, args: { id: string }): { id: string; unparked: boolean } {
+  return { id: args.id, unparked: withStore(ctx, (store) => store.unparkEdge(args.id)) }
+}
+
 /**
  * Park a plausible-but-undrivable proposal as 'unverifiable' with a reason: it
  * leaves the active worklist (so the loop can terminate) but stays queryable for a
@@ -478,6 +511,7 @@ export interface LoopStatus {
   coverage: CoverageReport
   resolution: ResolutionReport
   worklistSize: number
+  openEdges: CoverageReport['open']
   loopDone: boolean
 }
 
@@ -489,10 +523,14 @@ export interface LoopStatus {
  */
 export function getLoopStatus(ctx: ToolContext): LoopStatus {
   const merged = loadMergedGraph(ctx)
-  const coverage = buildCoverage(merged)
-  const worklist = nextToVerify(merged, getProposalGraph(ctx))
-  const resolution = withStore(ctx, (store) => buildResolution(store.queryProposals()))
-  return { coverage, resolution, worklistSize: worklist.length, loopDone: worklist.length === 0 && resolution.openCount === 0 }
+  const { coverage, resolution, parkedIds } = withStore(ctx, (store) => ({
+    coverage: buildCoverage(merged, store.getParkedEdges()),
+    resolution: buildResolution(store.queryProposals()),
+    parkedIds: new Set(store.getParkedEdges().map((p) => p.edgeId)),
+  }))
+  const worklist = nextToVerify(merged, getProposalGraph(ctx), undefined, parkedIds)
+  // done = no OPEN edges (accounted-for via witness/park) AND no open proposals.
+  return { coverage, resolution, worklistSize: worklist.length, openEdges: coverage.open, loopDone: coverage.open.length === 0 && resolution.openCount === 0 }
 }
 
 /** Arguments for diff: two graph file paths to compare. */

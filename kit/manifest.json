@@ -30,6 +30,8 @@
     "get_loop_status",
     "reconcile_proposals",
     "withdraw_proposal",
-    "mark_unverifiable"
+    "mark_unverifiable",
+    "park_edge",
+    "unpark_edge"
   ]
 }
