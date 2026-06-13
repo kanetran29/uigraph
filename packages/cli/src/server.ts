@@ -7,7 +7,7 @@ import { createServer as createHttpServer, type IncomingMessage, type Server, ty
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ToolContext, UpdateGraphArgs } from '@uigraph/mcp'
-import { dbPath, loadMergedGraph, updateGraph } from '@uigraph/mcp'
+import { dbPath, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
 import { openStore } from '@uigraph/core/node'
 import { buildCoverage, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
 
@@ -74,6 +74,14 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
     if (req.method === 'POST' && req.path === '/api/overlay') {
       const result = updateGraph(ctx, req.body as UpdateGraphArgs)
       return { status: 200, body: result }
+    }
+    if (req.method === 'GET' && req.path === '/api/scenarios') {
+      return { status: 200, body: listScenarios(ctx) }
+    }
+    if (req.method === 'POST' && req.path === '/api/scenario') {
+      const { name } = req.body as { name?: string }
+      if (typeof name !== 'string' || name.length === 0) return { status: 400, body: { error: 'scenario name required' } }
+      return { status: 200, body: setScenario(ctx, { name }) }
     }
     return { status: 404, body: { error: `not found: ${req.method} ${req.path}` } }
   } catch (err) {

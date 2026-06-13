@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
-import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, postOverlay, type UpdateOp } from './api'
+import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, postOverlay, postScenario, type ScenariosState, type UpdateOp } from './api'
 import { GraphCanvas, type Selection } from './GraphCanvas'
 import { Coverage } from './Coverage'
 import { Plan } from './Plan'
@@ -44,6 +44,7 @@ export function App(): JSX.Element {
   const [graph, setGraph] = useState<UiGraph | null>(null)
   const [proposals, setProposals] = useState<Proposals>(EMPTY_PROPOSALS)
   const [coverage, setCoverage] = useState<CoverageReport | null>(null)
+  const [scenarios, setScenarios] = useState<ScenariosState>({ active: 'default', names: ['default'] })
   const [live, setLive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selection, setSelection] = useState<Selection>(null)
@@ -51,13 +52,34 @@ export function App(): JSX.Element {
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const [{ graph: g, live: isLive }, props, cov] = await Promise.all([fetchGraph(), fetchProposals(), fetchCoverage()])
+    const [{ graph: g, live: isLive }, props, cov, scen] = await Promise.all([fetchGraph(), fetchProposals(), fetchCoverage(), fetchScenarios()])
     setGraph(g)
     setLive(isLive)
     setProposals(props)
     setCoverage(cov)
+    setScenarios(scen)
     setLoading(false)
   }, [])
+
+  // Switch (or create) the active planning scenario, then reload so the merged
+  // graph reflects that scenario's overlay.
+  const handleSwitchScenario = useCallback(
+    async (name: string) => {
+      setError(null)
+      if (!live) {
+        setError('Read-only: serve API not reachable, scenarios need a live project.')
+        return
+      }
+      try {
+        await postScenario(name)
+        await load()
+        setSelection(null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+      }
+    },
+    [live, load],
+  )
 
   useEffect(() => {
     void load()
@@ -181,7 +203,7 @@ export function App(): JSX.Element {
         </main>
         <div className="side">
           <Inspector selection={selection} onEditEdge={handleEditEdge} onEditNode={handleEditNode} onDelete={handleDelete} />
-          <Plan live={live} onAddScreen={handleAddScreen} onExport={handleExport} />
+          <Plan live={live} scenarios={scenarios} onAddScreen={handleAddScreen} onExport={handleExport} onSwitchScenario={handleSwitchScenario} />
           <Steps graph={graph} onPathChange={handlePathChange} />
           {coverage ? <Coverage coverage={coverage} graph={graph} onSelect={setSelection} /> : null}
           <ProposalsPanel

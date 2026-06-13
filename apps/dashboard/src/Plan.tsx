@@ -5,17 +5,20 @@
 
 import { useState } from 'react'
 
-/** Props: live status, an add-screen callback, and an export-plan callback. */
+/** Props: live status, scenarios, and add-screen/export/switch callbacks. */
 export interface PlanProps {
   live: boolean
+  scenarios: { active: string; names: string[] }
   onAddScreen: (label: string, route: string) => void
   onExport: () => void
+  onSwitchScenario: (name: string) => void
 }
 
-/** Render the add-screen form + export button. */
+/** Render the scenario selector + add-screen form + export button. */
 export function Plan(props: PlanProps): JSX.Element {
   const [label, setLabel] = useState('')
   const [route, setRoute] = useState('')
+  const [newScenario, setNewScenario] = useState('')
   const submit = (): void => {
     if (label.trim().length === 0) return
     props.onAddScreen(label.trim(), route.trim())
@@ -25,7 +28,30 @@ export function Plan(props: PlanProps): JSX.Element {
   return (
     <section className="plan">
       <h2>Plan a feature</h2>
-      <div className="plan-form">
+      <label className="field-edit">
+        <span>scenario</span>
+        <select value={props.scenarios.active} onChange={(e) => props.onSwitchScenario(e.target.value)}>
+          {props.scenarios.names.map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="plan-form" style={{ marginTop: 8 }}>
+        <input className="plan-input" placeholder="New scenario name" value={newScenario} onChange={(e) => setNewScenario(e.target.value)} />
+        <button
+          className="plan-add"
+          disabled={newScenario.trim().length === 0}
+          onClick={() => {
+            props.onSwitchScenario(newScenario.trim())
+            setNewScenario('')
+          }}
+        >
+          + New scenario
+        </button>
+      </div>
+      <div className="plan-form" style={{ marginTop: 8 }}>
         <input className="plan-input" placeholder="New screen label" value={label} onChange={(e) => setLabel(e.target.value)} />
         <input className="plan-input" placeholder="/route (optional)" value={route} onChange={(e) => setRoute(e.target.value)} />
         <button className="plan-add" disabled={label.trim().length === 0} onClick={submit}>

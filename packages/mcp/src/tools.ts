@@ -348,6 +348,34 @@ export function updateGraph(ctx: ToolContext, args: UpdateGraphArgs): UpdateGrap
   })
 }
 
+/** The set of named planning scenarios (overlays) and which one is active. */
+export interface ScenariosResult {
+  active: string
+  names: string[]
+}
+
+/** List the planning scenarios (named overlays) and the active one. */
+export function listScenarios(ctx: ToolContext): ScenariosResult {
+  return withStore(ctx, (store) => ({ active: store.getActiveScenario(), names: store.listScenarios() }))
+}
+
+/** Arguments for set_scenario: the scenario name to activate (created empty if new). */
+export interface SetScenarioArgs {
+  name: string
+}
+
+/**
+ * Switch the active planning scenario — subsequent overlay edits + the merged graph
+ * target it, so you can draft/toggle/compare features independently. Creates an
+ * empty scenario if the name is new. Returns the active name + the full list.
+ */
+export function setScenario(ctx: ToolContext, args: SetScenarioArgs): ScenariosResult {
+  return withStore(ctx, (store) => {
+    store.setActiveScenario(args.name)
+    return { active: store.getActiveScenario(), names: store.listScenarios() }
+  })
+}
+
 /**
  * Arguments for report_observation: the result of actually attempting a
  * transition at runtime (e.g. via Playwright). `outcome:'confirmed'` means the

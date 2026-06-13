@@ -57,6 +57,34 @@ export async function fetchProposals(): Promise<Proposals> {
   }
 }
 
+/** The named planning scenarios and the active one. */
+export interface ScenariosState {
+  active: string
+  names: string[]
+}
+
+/** Fetch the planning scenarios; falls back to a single default when offline. */
+export async function fetchScenarios(): Promise<ScenariosState> {
+  try {
+    const res = await fetch('/api/scenarios')
+    if (!res.ok) return { active: 'default', names: ['default'] }
+    return (await res.json()) as ScenariosState
+  } catch {
+    return { active: 'default', names: ['default'] }
+  }
+}
+
+/** Switch (or create) the active planning scenario; returns the new state. */
+export async function postScenario(name: string): Promise<ScenariosState> {
+  const res = await fetch('/api/scenario', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  if (!res.ok) throw new Error(`scenario switch failed (${res.status})`)
+  return (await res.json()) as ScenariosState
+}
+
 /**
  * Fetch runtime-verification coverage from the serve API. On any failure, fall back
  * to computing coverage over the bundled sample graph so the panel still renders.

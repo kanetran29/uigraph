@@ -18,13 +18,16 @@ import {
   getGrounding,
   getProposalGraph,
   getProposals,
+  listScenarios,
   nextToVerifyTool,
   planPathTool,
+  setScenario,
   reportObservation,
   updateGraph,
   type DescribeScreenArgs,
   type DiffArgs,
   type GenSpecArgs,
+  type SetScenarioArgs,
   type GetGroundingArgs,
   type GetProposalsArgs,
   type NextToVerifyArgs,
@@ -109,6 +112,20 @@ const TOOLS: Tool[] = [
         baseUrl: { type: 'string', description: 'base URL prepended to routes' },
       },
       required: ['from', 'to'],
+    },
+  },
+  {
+    name: 'list_scenarios',
+    description: 'List the planning scenarios (named overlays) and which one is active. Edits + the merged graph target the active scenario.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'set_scenario',
+    description: 'Switch the active planning scenario (creates it empty if new) so you can draft/toggle/compare features independently. The base graph is never touched.',
+    inputSchema: {
+      type: 'object',
+      properties: { name: { type: 'string', description: 'scenario name to activate' } },
+      required: ['name'],
     },
   },
   {
@@ -201,6 +218,10 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(nextToVerifyTool(ctx, args as unknown as NextToVerifyArgs))
       case 'gen_spec':
         return jsonResult(genSpec(ctx, args as unknown as GenSpecArgs))
+      case 'list_scenarios':
+        return jsonResult(listScenarios(ctx))
+      case 'set_scenario':
+        return jsonResult(setScenario(ctx, args as unknown as SetScenarioArgs))
       case 'plan_path':
         return jsonResult(planPathTool(ctx, args as unknown as PlanPathArgs))
       case 'update_graph':
