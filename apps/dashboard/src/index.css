@@ -683,6 +683,16 @@ button.danger {
   line-height: 1.4;
 }
 
+/* Per-screen evidence screenshot, revealed with the rationale. */
+.prop-shot {
+  display: block;
+  width: 100%;
+  margin: 8px 0 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-subtle);
+}
+
 /* Loading skeleton. */
 .skeleton {
   display: inline-block;

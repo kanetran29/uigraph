@@ -4,7 +4,7 @@
 // @uigraph/mcp's updateGraph so the CLI and the MCP server cannot drift apart.
 
 import { createServer as createHttpServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ToolContext, UpdateGraphArgs } from '@uigraph/mcp'
 import { loadMergedGraph, updateGraph } from '@uigraph/mcp'
@@ -59,6 +59,20 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
   }
 }
 
+/**
+ * Resolve a `GET /api/shots/<name>.jpg|jpeg` request to a safe absolute file path
+ * under `<dir>/shots`, or null when it is not a shot request, the name is unsafe,
+ * or the file is missing. The name charset excludes `/`, so path traversal cannot
+ * escape the shots directory. These are the per-screen evidence screenshots
+ * referenced by a proposal's `screenshot` field.
+ */
+export function resolveShotPath(dir: string, reqPath: string): string | null {
+  const m = /^\/api\/shots\/([A-Za-z0-9_.-]+\.jpe?g)$/.exec(reqPath)
+  if (!m || m[1] === undefined || m[1].includes('..')) return null
+  const file = join(dir, 'shots', m[1])
+  return existsSync(file) ? file : null
+}
+
 /** Permissive CORS headers for localhost dashboard development. */
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
@@ -101,6 +115,19 @@ async function handle(ctx: ToolContext, req: IncomingMessage, res: ServerRespons
   }
 
   const path = (req.url ?? '').split('?')[0] ?? ''
+
+  if (req.method === 'GET' && path.startsWith('/api/shots/')) {
+    const file = resolveShotPath(ctx.dir, path)
+    if (file === null) {
+      res.writeHead(404, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: 'shot not found' }))
+    } else {
+      res.writeHead(200, { 'Content-Type': 'image/jpeg' })
+      res.end(readFileSync(file))
+    }
+    return
+  }
+
   let body: unknown
   if (req.method === 'POST') {
     const raw = await readBody(req)

@@ -13,7 +13,8 @@ import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
 import { loadGraph, saveGraph } from '@uigraph/core/node'
 import type { Server } from 'node:http'
 import { formatDiff, readSoundiness, runDiff, runMap, soundinessPathFor } from './commands'
-import { handleApiRequest, startApiServer } from './server'
+import { handleApiRequest, resolveShotPath, startApiServer } from './server'
+import { mkdirSync, writeFileSync } from 'node:fs'
 
 const SAMPLE_REACT = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
 
@@ -172,6 +173,18 @@ describe('handleApiRequest (pure router)', () => {
       { method: 'POST', path: '/api/overlay', body: { op: { kind: 'addEdge', edge: malformed } } },
     )
     expect(res.status).toBe(400)
+  })
+})
+
+describe('resolveShotPath (proposal evidence screenshots)', () => {
+  it('resolves an existing shot and rejects traversal / non-shot / missing paths', () => {
+    const dir = tempDir('uigraph-cli-shots-')
+    mkdirSync(join(dir, 'shots'))
+    writeFileSync(join(dir, 'shots', 'n_root.jpeg'), 'jpegbytes')
+    expect(resolveShotPath(dir, '/api/shots/n_root.jpeg')).toBe(join(dir, 'shots', 'n_root.jpeg'))
+    expect(resolveShotPath(dir, '/api/shots/missing.jpeg')).toBeNull()
+    expect(resolveShotPath(dir, '/api/shots/..%2f..%2fui-graph.json')).toBeNull()
+    expect(resolveShotPath(dir, '/api/graph')).toBeNull()
   })
 })
 
