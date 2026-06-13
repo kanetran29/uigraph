@@ -8,7 +8,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
-import { formatDiff, formatMapSummary, formatMigrateSummary, runDiff, runMap, runMigrate, type AdapterName } from './commands'
+import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, runDiff, runGen, runMap, runMigrate, type AdapterName } from './commands'
 import { startApiServer } from './server'
 
 /** Build the commander program with every uigraph subcommand registered. */
@@ -26,6 +26,19 @@ export function buildProgram(): Command {
     .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean }) => {
       const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false })
       console.log(formatMapSummary(summary))
+    })
+
+  program
+    .command('gen')
+    .description('Generate an e2e test spec for the route from <from> to <to> over the workspace graph.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .argument('<from>', 'source node id (e.g. n_root)')
+    .argument('<to>', 'target node id (e.g. m_n_checkout_0)')
+    .option('--framework <name>', 'test framework (only playwright)', 'playwright')
+    .option('--out <file>', 'write the spec to a file instead of stdout')
+    .option('--base-url <url>', 'base URL prepended to routes', '')
+    .action((dir: string, from: string, to: string, opts: { framework: string; out?: string; baseUrl: string }) => {
+      console.log(formatGenSummary(runGen({ dir, from, to, framework: opts.framework, out: opts.out, baseUrl: opts.baseUrl })))
     })
 
   program

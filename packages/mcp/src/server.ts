@@ -12,6 +12,7 @@ import type { ToolContext } from './tools'
 import {
   describeScreen,
   diffTool,
+  genSpec,
   getCoverage,
   getGraph,
   getGrounding,
@@ -23,6 +24,7 @@ import {
   updateGraph,
   type DescribeScreenArgs,
   type DiffArgs,
+  type GenSpecArgs,
   type GetGroundingArgs,
   type GetProposalsArgs,
   type NextToVerifyArgs,
@@ -94,6 +96,19 @@ const TOOLS: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: { limit: { type: 'number', description: 'max targets to return (default 20)' } },
+    },
+  },
+  {
+    name: 'gen_spec',
+    description: 'Generate a Playwright e2e spec for the route from one node to another: plan the path, then render each leg to a locator action (from the control selector) + assertions (target URL, dialog, request).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        from: { type: 'string', description: 'source node id' },
+        to: { type: 'string', description: 'target node id' },
+        baseUrl: { type: 'string', description: 'base URL prepended to routes' },
+      },
+      required: ['from', 'to'],
     },
   },
   {
@@ -184,6 +199,8 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(getCoverage(ctx))
       case 'next_to_verify':
         return jsonResult(nextToVerifyTool(ctx, args as unknown as NextToVerifyArgs))
+      case 'gen_spec':
+        return jsonResult(genSpec(ctx, args as unknown as GenSpecArgs))
       case 'plan_path':
         return jsonResult(planPathTool(ctx, args as unknown as PlanPathArgs))
       case 'update_graph':
