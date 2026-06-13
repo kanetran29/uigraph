@@ -128,3 +128,135 @@ describe('extractGraph — in-memory units (M3)', () => {
     expect(soundiness.some((s) => s.kind === 'over-approximation')).toBe(true)
   })
 })
+
+describe('extractGraph — control extraction parity (F-angular-controls)', () => {
+  const dir = fileURLToPath(new URL('../../../examples/sample-angular-app', import.meta.url))
+
+  it('keeps the route graph identical (all screens) without opts.controls', () => {
+    const { graph } = extractGraph(buildProject(dir), dir)
+    expect(graph.nodes.every((n) => n.kind === 'screen')).toBe(true)
+    expect(graph.nodes).toHaveLength(8)
+    expect(graph.edges).toHaveLength(11)
+  })
+
+  describe('golden sample-angular-app with opts.controls', () => {
+    const { graph } = extractGraph(buildProject(dir), dir, { controls: true })
+    const controls = graph.nodes.filter((n) => n.kind === 'control')
+    const byId = new Map(graph.nodes.map((n) => [n.id, n]))
+    const ctrlEdge = (parent: string, to: string) =>
+      graph.edges.find((e) => e.to === to && byId.get(e.from)?.kind === 'control' && byId.get(e.from)?.parent === parent)
+
+    it('still satisfies the core invariants', () => {
+      expect(validateGraph(graph)).toEqual([])
+    })
+
+    it('emits control nodes whose parent is always a real node', () => {
+      expect(controls.length).toBeGreaterThan(0)
+      for (const c of controls) {
+        expect(c.parent).toBeDefined()
+        expect(byId.has(c.parent as string)).toBe(true)
+        expect(c.control?.selector?.value).toBeTruthy()
+      }
+    })
+
+    it("wires CheckoutComponent's button to n_root as a must-edge", () => {
+      const e = ctrlEdge('n_checkout', 'n_root')
+      expect(e?.modality).toBe('must')
+      expect(e?.witness?.ruleId).toMatch(/^ng\.control\./)
+    })
+
+    it('wires guarded control navigations as may-edges with AuthGuard', () => {
+      for (const [parent, to] of [
+        ['n_login', 'n_dashboard'],
+        ['n_dashboard_settings', 'n_dashboard'],
+        ['n_products_id', 'n_checkout'],
+      ] as const) {
+        const e = ctrlEdge(parent, to)
+        expect(e?.modality).toBe('may')
+        expect(e?.guard).toContain('AuthGuard')
+      }
+    })
+
+    it('exposes the email input constraints and the form/submit control', () => {
+      const loginControls = controls.filter((c) => c.parent === 'n_login')
+      const email = loginControls.find((c) => c.control?.controlType === 'input')
+      expect(email?.control?.input).toMatchObject({ type: 'email', required: true })
+      const form = loginControls.find((c) => c.control?.controlType === 'form')
+      expect(form?.control?.events).toContain('submit')
+    })
+
+    it('prefers a data-testid selector when present', () => {
+      const submit = controls.find((c) => c.control?.selector?.strategy === 'testid')
+      expect(submit?.control?.selector?.value).toBe('login-submit')
+    })
+  })
+})
+
+describe('control units (F-angular-controls)', () => {
+  function controlsOf(template: string, klassBody = '') {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { B } from './b.component'\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'\n@Component({ standalone: true, template: \`${template}\` })\nexport class A { constructor(private router: Router){} ${klassBody} }`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const controls = graph.nodes.filter((n) => n.kind === 'control' && n.parent === 'n_a')
+    const byId = new Map(graph.nodes.map((n) => [n.id, n]))
+    const navTo = (to: string) => graph.edges.find((e) => e.to === to && byId.get(e.from)?.kind === 'control')
+    return { controls, navTo, soundiness }
+  }
+
+  it('selector precedence: testid > role-name > label > text > structural', () => {
+    expect(controlsOf('<button data-testid="x" (click)="g()">Save</button>').controls[0]?.control?.selector).toMatchObject({ strategy: 'testid', value: 'x' })
+    expect(controlsOf('<button (click)="g()">Save</button>').controls[0]?.control?.selector).toMatchObject({ strategy: 'role-name', value: 'button|Save' })
+    expect(controlsOf('<input formControlName="email" (input)="g()" />').controls[0]?.control?.selector).toMatchObject({ strategy: 'label', value: 'email' })
+    expect(controlsOf('<div (mouseenter)="g()"></div>').controls[0]?.control?.selector).toMatchObject({ strategy: 'structural', value: 'div' })
+  })
+
+  it('nth disambiguates two identical controls into two distinct ids', () => {
+    const { controls } = controlsOf('<input name="plan" type="radio" /><input name="plan" type="radio" />')
+    expect(controls).toHaveLength(2)
+    expect(new Set(controls.map((c) => c.id)).size).toBe(2)
+  })
+
+  it('traces a (click) handler to a method that navigates (must when unguarded)', () => {
+    const { navTo } = controlsOf('<button (click)="go()">go</button>', 'go(){ this.router.navigate(["/b"]) }')
+    expect(navTo('n_b')?.modality).toBe('must')
+  })
+
+  it('demotes a conditional navigation to may with the condition as guard', () => {
+    const { navTo } = controlsOf('<button (click)="go()">go</button>', 'x = true; go(){ if (this.x) this.router.navigate(["/b"]) }')
+    expect(navTo('n_b')?.modality).toBe('may')
+    expect(navTo('n_b')?.guard).toContain('x')
+  })
+
+  it('demotes an early-returned navigation to may (no phantom must)', () => {
+    const { navTo } = controlsOf('<button (click)="go()">go</button>', 'ok = false; go(){ if (!this.ok) return; this.router.navigate(["/b"]) }')
+    expect(navTo('n_b')?.modality).toBe('may')
+  })
+
+  it('demotes a navigation inside forEach to may (iteration, not must)', () => {
+    const { navTo } = controlsOf('<button (click)="go()">go</button>', 'items = [1]; go(){ this.items.forEach(() => this.router.navigate(["/b"])) }')
+    expect(navTo('n_b')?.modality).toBe('may')
+  })
+
+  it('traces navigateByUrl handlers and emits no edge for non-navigating methods', () => {
+    expect(controlsOf('<button (click)="go()">go</button>', 'go(){ this.router.navigateByUrl("/b") }').navTo('n_b')?.modality).toBe('must')
+    expect(controlsOf('<button (click)="noop()">x</button>', 'noop(){ console.log("hi") }').navTo('n_b')).toBeUndefined()
+  })
+
+  it('captures multiple events and input constraints', () => {
+    const { controls } = controlsOf('<input type="email" required (input)="g()" (blur)="h()" />')
+    expect(controls[0]?.control?.events).toEqual(expect.arrayContaining(['input', 'blur']))
+    expect(controls[0]?.control?.input).toMatchObject({ type: 'email', required: true })
+  })
+
+  it('classifies a (submit) form as a form control', () => {
+    const { controls } = controlsOf('<form (submit)="g()"><button>ok</button></form>')
+    const form = controls.find((c) => c.control?.controlType === 'form')
+    expect(form?.control?.events).toContain('submit')
+  })
+})

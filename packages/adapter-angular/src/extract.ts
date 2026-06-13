@@ -9,8 +9,8 @@
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
 import type { ObjectLiteralExpression, SourceFile } from 'ts-morph'
 import { dirname, join, relative } from 'node:path'
-import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@uigraph/core'
-import { routeToNodeId, edgeId } from './ids'
+import type { ControlInput, ControlSelector, ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@uigraph/core'
+import { routeToNodeId, edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, type RouteLike } from './matcher'
 
 const ADAPTER_VERSION = '0.1.0'
@@ -249,6 +249,219 @@ function routerCallTargets(sf: SourceFile): RawTarget[] {
   return out
 }
 
+// --- Controls (parity with React): parse the inline template HTML for interactive
+// elements, give each a stable selector, and wire control->nav edges when a
+// (click)/(submit) handler calls a component method that navigates. ---
+
+/** A control parsed out of an Angular template. */
+interface NgControl {
+  tag: string
+  controlType: string
+  attrs: Map<string, string>
+  text: string | undefined
+  events: string[]
+  handlers: string[]
+  selector: ControlSelector
+  input: ControlInput | undefined
+}
+
+/** Parse an HTML open-tag attribute string into a name→value map (Angular bindings kept verbatim). */
+function parseAttrs(attrStr: string): Map<string, string> {
+  const out = new Map<string, string>()
+  const re = /([@([]?[\w:-]+[)\]]?)(?:\s*=\s*"([^"]*)"|\s*=\s*'([^']*)')?/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(attrStr)) !== null) {
+    if (m[1] === undefined || m[1].length === 0) continue
+    out.set(m[1], m[2] ?? m[3] ?? '')
+  }
+  return out
+}
+
+/** Classify a tag+attrs as a control type, or null when not interactive. */
+function ngControlType(tag: string, attrs: Map<string, string>): string | null {
+  const lower = tag.toLowerCase()
+  if (lower === 'button') return 'button'
+  if (lower === 'input') {
+    const t = (attrs.get('type') ?? 'text').toLowerCase()
+    if (t === 'checkbox' || t === 'radio') return 'checkbox'
+    if (t === 'submit' || t === 'button') return 'button'
+    if (t === 'file') return 'file'
+    return 'input'
+  }
+  if (lower === 'textarea') return 'richtext'
+  if (lower === 'select') return 'select'
+  if (lower === 'form') return 'form'
+  for (const k of attrs.keys()) if (/^\([a-zA-Z]+\)$/.test(k)) return 'element'
+  return null
+}
+
+/** The DOM event names from Angular `(event)` bindings on the element. */
+function ngEvents(attrs: Map<string, string>): string[] {
+  const out: string[] = []
+  for (const k of attrs.keys()) {
+    const m = /^\(([a-zA-Z]+)\)$/.exec(k)
+    if (m && m[1] !== undefined) out.push(m[1])
+  }
+  return out
+}
+
+/** The handler EXPRESSIONS bound to click/submit/keydown-ish events (for nav tracing). */
+function ngHandlers(attrs: Map<string, string>): string[] {
+  const out: string[] = []
+  for (const [k, v] of attrs) if (/^\((click|submit|keydown|keyup|keypress|change)\)$/.test(k) && v.length > 0) out.push(v)
+  return out
+}
+
+/** The ARIA role a control exposes, from an explicit role attr or its tag/type. */
+function ngRole(tag: string, attrs: Map<string, string>, controlType: string): string | undefined {
+  const explicit = attrs.get('role')
+  if (explicit !== undefined) return explicit
+  if (tag.toLowerCase() === 'a') return 'link'
+  switch (controlType) {
+    case 'button':
+      return 'button'
+    case 'checkbox':
+      return (attrs.get('type') ?? '').toLowerCase() === 'radio' ? 'radio' : 'checkbox'
+    case 'richtext':
+      return 'textbox'
+    case 'select':
+      return 'combobox'
+    case 'form':
+      return 'form'
+    case 'input':
+      return (attrs.get('type') ?? 'text').toLowerCase() === 'search' ? 'searchbox' : 'textbox'
+    default:
+      return undefined
+  }
+}
+
+/** Stable selector: data-testid -> role+name -> formControlName/id/name -> text -> structural. */
+function ngSelector(tag: string, attrs: Map<string, string>, controlType: string, text: string | undefined): ControlSelector {
+  const testid = attrs.get('data-testid') ?? attrs.get('data-test-id')
+  if (testid !== undefined) return { strategy: 'testid', value: testid }
+  const role = ngRole(tag, attrs, controlType)
+  const accName = attrs.get('aria-label') ?? attrs.get('placeholder') ?? (text !== undefined && text.length > 0 ? text : undefined) ?? attrs.get('name')
+  if (role !== undefined && accName !== undefined) return { strategy: 'role-name', value: `${role}|${accName}` }
+  const label = attrs.get('formControlName') ?? attrs.get('id') ?? attrs.get('name')
+  if (label !== undefined) return { strategy: 'label', value: label }
+  if (text !== undefined && text.length > 0) return { strategy: 'text', value: text }
+  return { strategy: 'structural', value: tag.toLowerCase() }
+}
+
+/** Input constraints (type/required/pattern) for a field control. */
+function ngInput(attrs: Map<string, string>, controlType: string): ControlInput | undefined {
+  if (!['input', 'checkbox', 'richtext', 'select'].includes(controlType)) return undefined
+  const type = attrs.get('type')
+  const pattern = attrs.get('pattern')
+  const required = attrs.has('required')
+  if (type === undefined && pattern === undefined && !required) return undefined
+  return { ...(type !== undefined ? { type } : {}), ...(required ? { required: true } : {}), ...(pattern !== undefined ? { pattern } : {}) }
+}
+
+/** Parse interactive controls out of a component's inline template HTML. */
+function parseControls(sf: SourceFile): NgControl[] {
+  const tpl = inlineTemplate(sf)
+  if (!tpl) return []
+  const html = tpl.text
+  const out: NgControl[] = []
+  const OPEN = /<([a-zA-Z][\w-]*)((?:[^<>]|"[^"]*")*?)(\/?)>/g
+  let m: RegExpExecArray | null
+  while ((m = OPEN.exec(html)) !== null) {
+    const tag = m[1] ?? ''
+    const attrs = parseAttrs(m[2] ?? '')
+    const controlType = ngControlType(tag, attrs)
+    if (controlType === null) continue
+    let text: string | undefined
+    if (m[3] !== '/' && tag.toLowerCase() !== 'input') {
+      const close = html.indexOf(`</${tag}`, OPEN.lastIndex)
+      if (close !== -1) {
+        const inner = html.slice(OPEN.lastIndex, close).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+        if (inner.length > 0) text = inner
+      }
+    }
+    out.push({ tag, controlType, attrs, text, events: ngEvents(attrs), handlers: ngHandlers(attrs), selector: ngSelector(tag, attrs, controlType, text), input: ngInput(attrs, controlType) })
+  }
+  return out
+}
+
+/** Nearest enclosing if/ternary/&& condition as symbolic text, or null. */
+function getGuard(node: Node): string | null {
+  let cur: Node = node
+  for (;;) {
+    const parent = cur.getParent()
+    if (!parent) return null
+    if (Node.isIfStatement(parent)) {
+      const cond = parent.getExpression().getText()
+      const then = parent.getThenStatement()
+      if (then && node.getStart() >= then.getStart() && node.getEnd() <= then.getEnd()) return cond
+      const els = parent.getElseStatement()
+      if (els && node.getStart() >= els.getStart() && node.getEnd() <= els.getEnd()) return `!(${cond})`
+    } else if (Node.isConditionalExpression(parent)) {
+      if (within(parent.getWhenTrue(), node)) return parent.getCondition().getText()
+      if (within(parent.getWhenFalse(), node)) return `!(${parent.getCondition().getText()})`
+    } else if (Node.isBinaryExpression(parent) && parent.getOperatorToken().getText() === '&&') {
+      if (within(parent.getRight(), node)) return parent.getLeft().getText()
+    }
+    cur = parent
+  }
+}
+
+/** Whether `node` lies within `container`'s source span. */
+function within(container: Node, node: Node): boolean {
+  return node.getStart() >= container.getStart() && node.getEnd() <= container.getEnd()
+}
+
+/** A loop/switch/catch/iteration/early-return context that demotes a nav to may, or null. */
+function extraConditionGuard(node: Node): string | null {
+  let cur: Node = node
+  for (;;) {
+    const parent = cur.getParent()
+    if (!parent) break
+    if (Node.isForStatement(parent) || Node.isForOfStatement(parent) || Node.isForInStatement(parent) || Node.isWhileStatement(parent) || Node.isCaseClause(parent) || Node.isCatchClause(parent)) return 'loop/branch'
+    if ((Node.isArrowFunction(cur) || Node.isFunctionExpression(cur)) && Node.isCallExpression(parent)) {
+      const callee = parent.getExpression()
+      if (Node.isPropertyAccessExpression(callee) && /^(map|forEach|filter|reduce|find|some|every|flatMap)$/.test(callee.getName())) return 'iteration'
+    }
+    cur = parent
+  }
+  // a preceding early-return/throw in the same block
+  const block = node.getFirstAncestorByKind(SyntaxKind.Block)
+  if (block) {
+    for (const stmt of block.getStatements()) {
+      if (stmt.getEnd() > node.getStart()) break
+      if (Node.isIfStatement(stmt) && /return|throw/.test(stmt.getThenStatement()?.getText() ?? '')) return 'early-return'
+    }
+  }
+  return null
+}
+
+/** Navigations a component method performs: trace `methodName` to its class method, collect router.navigate/navigateByUrl with guards. */
+function methodNavTargets(sf: SourceFile, methodName: string): { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null }[] {
+  const out: { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null }[] = []
+  for (const cls of sf.getClasses()) {
+    const method = cls.getMethod(methodName)
+    if (!method) continue
+    for (const call of method.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      const expr = call.getExpression()
+      if (!Node.isPropertyAccessExpression(expr)) continue
+      const member = expr.getName()
+      if (member !== 'navigate' && member !== 'navigateByUrl') continue
+      const lc = sf.getLineAndColumnAtPos(call.getStart())
+      const loc = { line: lc.line, col: lc.column }
+      const guard = getGuard(call) ?? extraConditionGuard(call)
+      if (member === 'navigateByUrl') {
+        out.push({ ti: classifyTarget(call.getArguments()[0]), event: 'click', effect: 'router.navigateByUrl', ruleId: 'ng.control.navigate-by-url', loc, guard })
+      } else {
+        const arg0 = call.getArguments()[0]
+        const first = arg0 && Node.isArrayLiteralExpression(arg0) ? arg0.getElements()[0] : undefined
+        out.push({ ti: classifyTarget(first), event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard })
+      }
+    }
+    return out
+  }
+  return out
+}
+
 /** Extract a graph from an already-built ts-morph project (testable in memory). */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const routes = collectRoutes(project)
@@ -313,6 +526,77 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         }
       } else {
         soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
+      }
+    }
+  }
+
+  if (opts.controls) {
+    for (const route of routes) {
+      if (!route.componentFile) continue
+      const sf = route.componentFile
+      const file = relative(projectDir, sf.getFilePath())
+      const controls = parseControls(sf)
+
+      // Assign nth per identical selector so each control's id is stable AND unique.
+      const nthBySig = new Map<string, number>()
+      for (const c of controls) {
+        const sig = `${c.selector.strategy}|${c.selector.value}`
+        const nth = nthBySig.get(sig) ?? 0
+        nthBySig.set(sig, nth + 1)
+        if (nth > 0) c.selector.nth = nth
+      }
+
+      for (const c of controls) {
+        const cId = controlNodeId(route.nodeId, c.selector)
+        const lc = sf.getLineAndColumnAtPos(inlineTemplate(sf)?.start ?? 0)
+        const navEffects = new Set<string>()
+        for (const handler of c.handlers) {
+          const methodName = /([a-zA-Z_$][\w$]*)\s*\(/.exec(handler)?.[1]
+          if (methodName === undefined) continue
+          for (const nav of methodNavTargets(sf, methodName)) {
+            const t: RawTarget = { ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc: { line: lc.line, col: lc.column } }
+            if (nav.ti.kind === 'literal') {
+              const target = matchLiteral(nav.ti.value, routeLikes)
+              if (!target) {
+                soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `control nav target "${nav.ti.value}" matches no declared route` })
+                continue
+              }
+              const targetGuards = guardsByNodeId.get(target.nodeId) ?? []
+              const guards = [nav.guard, ...targetGuards].filter((g): g is string => g != null)
+              const guarded = guards.length > 0
+              pushEdge(cId, target.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, guarded ? guards.join(',') : null, file)
+              navEffects.add('navigate')
+            } else if (nav.ti.kind === 'template') {
+              for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes)) {
+                const candGuards = guardsByNodeId.get(cand.nodeId) ?? []
+                const guards = [nav.guard, ...candGuards].filter((g): g is string => g != null)
+                pushEdge(cId, cand.nodeId, t, 'may', 0.5, guards.length > 0 ? guards.join(',') : null, file)
+                navEffects.add('navigate')
+              }
+            } else {
+              soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `control handler ${methodName}() navigates to a fully dynamic target` })
+            }
+          }
+        }
+
+        const name = c.text ?? c.attrs.get('aria-label') ?? c.attrs.get('placeholder') ?? c.attrs.get('name')
+        nodes.push({
+          id: cId,
+          route: null,
+          componentPath: file,
+          label: name ?? c.controlType,
+          kind: 'control',
+          parent: route.nodeId,
+          control: {
+            element: c.tag.toLowerCase(),
+            controlType: c.controlType,
+            selector: c.selector,
+            ...(c.input ? { input: c.input } : {}),
+            ...(name !== undefined ? { name } : {}),
+            ...(c.events.length > 0 ? { events: c.events } : {}),
+            ...(navEffects.size > 0 ? { effects: [...navEffects] } : {}),
+          },
+        })
       }
     }
   }
