@@ -182,9 +182,14 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
 
     const d = depth.get(node.id) ?? 0
     const a = angle.get(node.id) ?? 0
-    const r = d * RING
-    const cx = d === 0 ? 0 : Math.cos(a) * r
-    const cy = d === 0 ? 0 : Math.sin(a) * r
+    // A modal anchored to an owner screen sits just OUTBOARD of it (half a ring,
+    // slightly rotated) so it reads as "this screen's dialog" rather than a full
+    // ring away; other nodes sit on their ring.
+    const owned = node.kind === 'modal' && typeof parent.get(node.id) === 'string'
+    const r = owned ? (d - 0.45) * RING : d * RING
+    const ang = owned ? a + 0.18 : a
+    const cx = d === 0 ? 0 : Math.cos(ang) * r
+    const cy = d === 0 ? 0 : Math.sin(ang) * r
     positions.set(node.id, { x: cx - width / 2, y: cy - height / 2 })
 
     if (!expanded.has(node.id)) continue
