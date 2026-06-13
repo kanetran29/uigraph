@@ -210,11 +210,93 @@ select:focus-visible,
 .inspector,
 .steps,
 .proposals,
+.coverage,
 .prop-row,
 .prop-screen,
 .prop-category {
   min-width: 0;
   max-width: 100%;
+}
+
+.coverage {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.coverage h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.cov-headline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cov-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--panel-subtle);
+  overflow: hidden;
+}
+.cov-bar-fill {
+  height: 100%;
+  background: var(--edge-runtime);
+}
+.cov-pct {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.cov-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.cov-chip {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--panel-subtle);
+  border: 1px solid var(--border);
+}
+.cov-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.cov-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  font-size: 11px;
+}
+.cov-row:hover {
+  color: var(--accent);
+}
+.cov-modality {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--panel-subtle);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.cov-edge {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.cov-event {
+  color: var(--muted);
+  flex-shrink: 0;
 }
 
 .inspector,
