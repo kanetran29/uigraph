@@ -121,3 +121,12 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 |----|-------|-------|------------|--------|-----|
 | F8.1 | Angular control + selector extraction (parity with React) | L2 | F3.5, F-control-identity-selectors | done | [F-angular-controls](./features/F-angular-controls.md) |
 | F8.2 | Vue Router adapter + sample-vue-app + CLI wiring | L2 | F8.1 | done | [F-vue-adapter](./features/F-vue-adapter.md) |
+
+## M9 — Self-healing proposal loop + agent kit
+
+**Goal:** Close the loop on quarantined proposals — derive their lifecycle from the observation log (confirm→archive, refute/hallucinate→withdraw), expose a deterministic loop-completion signal so an LLM can drive to 100% resolution, and ship the whole protocol (rules + tool playbook + loop) as a kit any MCP client loads.
+
+| ID | Title | Level | Depends on | Status | Doc |
+|----|-------|-------|------------|--------|-----|
+| F9.1 | Proposal reconciliation loop (status fold, loop-done metric, MCP tools) | L2 | F5.5, F-coverage-tier3 | done | [F-proposal-loop](./features/F-proposal-loop.md) |
+| F9.2 | Shippable LLM agent kit (skill + rules + guides + loop), MCP resource + `uigraph kit` | L2 | F9.1 | done | [F-agent-kit](./features/F-agent-kit.md) |
