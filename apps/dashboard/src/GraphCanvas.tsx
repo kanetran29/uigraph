@@ -11,7 +11,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import {
   Background,
+  BaseEdge,
   Controls,
+  EdgeLabelRenderer,
   MarkerType,
   Panel,
   ReactFlow,
@@ -20,12 +22,13 @@ import {
   type Connection,
   type Edge,
   type EdgeMouseHandler,
+  type EdgeProps,
   type Node,
   type NodeMouseHandler,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposal, Proposals, Source, UiGraph } from '@uigraph/core'
-import { layoutGraph } from './layout'
+import { layoutGraph, type GraphLayout, type NodePosition } from './layout'
 
 /** What the canvas reports as the current selection, or null when nothing is selected. */
 export type Selection = { kind: 'node'; node: GraphNode } | { kind: 'edge'; edge: GraphEdge } | null
@@ -112,6 +115,88 @@ function edgeLabel(edge: GraphEdge): string {
   return `${edge.event} · ${edge.effect}`
 }
 
+/** The data a DagreEdge needs: the interior routed points and an optional label. */
+interface DagreEdgeData extends Record<string, unknown> {
+  points: NodePosition[]
+  label?: string
+}
+
+/**
+ * Build an SVG path through a polyline with lightly rounded corners. Each interior
+ * vertex is replaced by a short quadratic arc whose radius is capped to a fraction
+ * of the two adjacent segment lengths, so tight turns stay clean and never overshoot.
+ */
+function roundedPath(points: NodePosition[], radius = 12): string {
+  const first = points[0]
+  if (first === undefined) return ''
+  let d = `M ${first.x},${first.y}`
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1]
+    const curr = points[i]
+    if (prev === undefined || curr === undefined) continue
+    const next = points[i + 1]
+    if (next === undefined) {
+      d += ` L ${curr.x},${curr.y}`
+      continue
+    }
+    const dIn = Math.hypot(curr.x - prev.x, curr.y - prev.y)
+    const dOut = Math.hypot(next.x - curr.x, next.y - curr.y)
+    const r = Math.min(radius, dIn / 2, dOut / 2)
+    const t1 = dIn === 0 ? 0 : r / dIn
+    const t2 = dOut === 0 ? 0 : r / dOut
+    const ax = curr.x + (prev.x - curr.x) * t1
+    const ay = curr.y + (prev.y - curr.y) * t1
+    const bx = curr.x + (next.x - curr.x) * t2
+    const by = curr.y + (next.y - curr.y) * t2
+    d += ` L ${ax},${ay} Q ${curr.x},${curr.y} ${bx},${by}`
+  }
+  return d
+}
+
+/** The midpoint of a polyline, used to anchor the edge label pill. */
+function polylineMidpoint(points: NodePosition[]): NodePosition {
+  const mid = Math.floor(points.length / 2)
+  const b = points[mid]
+  if (b === undefined) return { x: 0, y: 0 }
+  if (points.length % 2 === 1) return b
+  const a = points[mid - 1]
+  if (a === undefined) return b
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+}
+
+/**
+ * A custom edge rendered ALONG dagre's de-crossed, edgesep-padded route. The path
+ * starts at the live source handle, passes through the INTERIOR dagre points (the
+ * first/last dagre points sit on the node borders, so skipping them keeps the edge
+ * pinned to the handles and connected while a node is dragged), and ends at the live
+ * target handle. The arrowhead (markerEnd) and the passed style are honoured; the
+ * label, when present, is drawn as a pill at the route midpoint.
+ */
+function DagreEdge(props: EdgeProps<Edge<DagreEdgeData>>): JSX.Element {
+  const { sourceX, sourceY, targetX, targetY, data, markerEnd, style } = props
+  const interior = data?.points ?? []
+  const through = interior.slice(1, -1)
+  const points: NodePosition[] = [{ x: sourceX, y: sourceY }, ...through, { x: targetX, y: targetY }]
+  const path = roundedPath(points)
+  const label = data?.label
+  const labelAt = label ? polylineMidpoint(points) : null
+  return (
+    <>
+      <BaseEdge path={path} markerEnd={markerEnd} style={style} />
+      {label && labelAt ? (
+        <EdgeLabelRenderer>
+          <div
+            className="dagre-edge-label nodrag nopan"
+            style={{ transform: `translate(-50%, -50%) translate(${labelAt.x}px, ${labelAt.y}px)` }}
+          >
+            {label}
+          </div>
+        </EdgeLabelRenderer>
+      ) : null}
+    </>
+  )
+}
+
 /**
  * The label content for a control node: a glyph + name on the first line, then a
  * compact events line beneath when the control has any.
@@ -195,8 +280,13 @@ function controlStyle(manual: boolean, control: ControlMeta, size: { width: numb
  * @xyflow/react renders them nested and draggable within the parent. A parent must
  * precede its children in the array, so screens are emitted first and controls after.
  */
-function toFlowNodes(graph: UiGraph, expanded: ReadonlySet<string>, proposalCount: ReadonlyMap<string, number>): Node[] {
-  const { positions, sizes } = layoutGraph(graph, expanded)
+function toFlowNodes(
+  graph: UiGraph,
+  layout: Pick<GraphLayout, 'positions' | 'sizes'>,
+  expanded: ReadonlySet<string>,
+  proposalCount: ReadonlyMap<string, number>,
+): Node[] {
+  const { positions, sizes } = layout
 
   const childCount = new Map<string, number>()
   for (const n of graph.nodes) {
@@ -253,6 +343,8 @@ interface EdgeContext {
   expanded: ReadonlySet<string>
   hoveredEdgeId: string | null
   incidentEdgeIds: Set<string>
+  edgePoints: Map<string, NodePosition[]>
+  focusEdgeActive: boolean
 }
 
 /**
@@ -261,10 +353,12 @@ interface EdgeContext {
  * screen is expanded, when highlighted by a planned path, or when selected.
  * Screen→screen route edges always render. An edge label is shown ONLY when the
  * edge is emphasized (selected, on the planned path, incident to the selected node,
- * or hovered); non-emphasized edges are dimmed when a selection is active.
+ * or hovered); non-emphasized edges are dimmed when a selection is active. Real
+ * screen↔screen edges with a dagre route render as the custom 'dagre' edge type so
+ * arrows follow the spaced, de-crossed polyline; control/ghost edges stay smoothstep.
  */
 function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
-  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds } = ctx
+  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, edgePoints, focusEdgeActive } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
   const hasNodeSelection = selection?.kind === 'node'
   const controlParent = new Map<string, string | undefined>()
@@ -290,18 +384,23 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     if (isControlEdge && !(onPath || selected || incident || parentExpanded)) continue
 
     const emphasized = onPath || selected || incident || hovered
-    const dimmed = (hasNodeSelection && !incident) || (isControlEdge && !emphasized && !parentExpanded)
+    // Dim non-incident edges whenever a node OR an edge selection is focusing a flow.
+    const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected) || (isControlEdge && !emphasized && !parentExpanded)
     const color = strokeColor(e, onPath || selected)
     const baseWidth = e.source === 'manual' ? 2 : 1.4
-    const width = onPath ? 3 : emphasized ? 2.4 : baseWidth
+    const width = onPath ? 3 : selected ? 2.8 : emphasized ? 2.4 : baseWidth
     const opacity = dimmed ? 0.18 : emphasized ? 1 : 0.85
+    const points = edgePoints.get(`${e.from}->${e.to}`)
+    const useDagre = !isControlEdge && points !== undefined && points.length >= 2
+    const showLabel = emphasized ? edgeLabel(e) : undefined
 
     out.push({
       id: e.id,
       source: e.from,
       target: e.to,
-      type: 'smoothstep',
-      label: emphasized ? edgeLabel(e) : undefined,
+      type: useDagre ? 'dagre' : 'smoothstep',
+      data: useDagre ? { points, label: showLabel } : undefined,
+      label: useDagre ? undefined : showLabel,
       labelShowBg: true,
       animated: onPath,
       selected,
@@ -493,18 +592,29 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     [graph, ghost],
   )
 
+  // Compute the dagre layout ONCE per relayout-worthy change and share it: node
+  // positions/sizes seed the flow nodes, and the routed edge polylines drive the
+  // custom 'dagre' edges so arrows follow dagre's spaced, de-crossed routes.
+  const layout = useMemo<GraphLayout>(() => layoutGraph(layoutInput, expanded), [layoutInput, expanded])
+
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
 
+  // A node selection focuses on the selected node's flow; an edge selection focuses
+  // on the selected edge's flow. Both are gated by the "highlight flow on select"
+  // toggle and produce the same incident-edge / neighbour-node emphasis + dimming.
   const selectedNodeId = highlightFlow && selection?.kind === 'node' ? selection.node.id : null
-  const incidentEdgeIds = useMemo(
-    () => (selectedNodeId ? incidentEdges(graph, selectedNodeId) : new Set<string>()),
-    [graph, selectedNodeId],
-  )
-  const neighborIds = useMemo(
-    () => (selectedNodeId ? neighborNodes(graph, selectedNodeId) : new Set<string>()),
-    [graph, selectedNodeId],
-  )
+  const selectedEdge = highlightFlow && selection?.kind === 'edge' ? selection.edge : null
+  const incidentEdgeIds = useMemo(() => {
+    if (selectedNodeId) return incidentEdges(graph, selectedNodeId)
+    if (selectedEdge) return new Set<string>([selectedEdge.id])
+    return new Set<string>()
+  }, [graph, selectedNodeId, selectedEdge])
+  const neighborIds = useMemo(() => {
+    if (selectedNodeId) return neighborNodes(graph, selectedNodeId)
+    if (selectedEdge) return new Set<string>([selectedEdge.from, selectedEdge.to])
+    return new Set<string>()
+  }, [graph, selectedNodeId, selectedEdge])
 
   // Re-seed node positions from the dagre layout only when structure/expansion changes,
   // so user drags survive selection, hover, and re-style passes.
@@ -514,7 +624,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     if (lastKey.current === key) return
     const firstLayout = lastKey.current === null
     lastKey.current = key
-    const laid = toFlowNodes(layoutInput, expanded, proposalCount)
+    const laid = toFlowNodes(layoutInput, layout, expanded, proposalCount)
     // Keep the user's dragged positions ONLY when the node SET is unchanged (a pure
     // re-style). When nodes are added or removed (expand, proposals on/off), take a
     // FULL fresh dagre layout so every node is placed by one consistent pass — mixing
@@ -530,26 +640,29 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
         return kept ? { ...n, position: kept } : n
       })
     })
-  }, [key, layoutInput, expanded, proposalCount, setNodes])
+  }, [key, layoutInput, layout, expanded, proposalCount, setNodes])
 
-  // Apply selection emphasis (selected node, neighbours) onto the live, user-positioned
-  // nodes without resetting their positions.
+  // Apply selection emphasis onto the live, user-positioned nodes without resetting
+  // their positions. A node selection marks the node 'rf-selected' and its neighbours
+  // 'rf-neighbor'; an edge selection marks BOTH endpoints 'rf-neighbor' (so the one
+  // flow reads clearly). Whenever a flow is focused, every other node is dimmed.
   const selectedId = selection?.kind === 'node' ? selection.node.id : null
+  const focusActive = selectedNodeId !== null || selectedEdge !== null
   useEffect(() => {
     setNodes((prev) =>
       prev.map((n) => {
         const isSelected = n.id === selectedId
         const isNeighbor = neighborIds.has(n.id)
-        const className = isSelected ? 'rf-selected' : isNeighbor ? 'rf-neighbor' : selectedNodeId ? 'rf-dimmed' : ''
+        const className = isSelected ? 'rf-selected' : isNeighbor ? 'rf-neighbor' : focusActive ? 'rf-dimmed' : ''
         if (n.selected === isSelected && n.className === (className || undefined)) return n
         return { ...n, selected: isSelected, className: className || undefined }
       }),
     )
-  }, [selectedId, selectedNodeId, neighborIds, setNodes])
+  }, [selectedId, focusActive, neighborIds, setNodes])
 
   const edgeCtx = useMemo<EdgeContext>(
-    () => ({ selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds }),
-    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds],
+    () => ({ selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, edgePoints: layout.edgePoints, focusEdgeActive: selectedEdge !== null }),
+    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, layout, selectedEdge],
   )
   useEffect(() => {
     const base = toFlowEdges(graph, edgeCtx)
@@ -579,10 +692,13 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const handleEdgeEnter: EdgeMouseHandler = useCallback((_evt, edge) => setHoveredEdgeId(edge.id), [])
   const handleEdgeLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), [])
 
+  const edgeTypes = useMemo(() => ({ dagre: DagreEdge }), [])
+
   return (
     <ReactFlow
       nodes={nodes}
       edges={edges}
+      edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onNodeClick={handleNodeClick}
