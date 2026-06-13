@@ -145,6 +145,33 @@ describe('runGen (codegen)', () => {
   })
 })
 
+describe('runVerify (Tier-3 runner)', () => {
+  it('attempts worklist targets via a driver and records observations (confirmed -> runtime edge)', async () => {
+    const { runVerify } = await import('./runner')
+    // a -> b is a may edge (uncertain) -> a verify target.
+    const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), source: 'static', modality: 'may', guard: 'x' }])
+    const dir = seedWorkspace(tempDir('uigraph-cli-verify-'), g)
+    const summary = await runVerify({ dir, appUrl: 'http://x', limit: 10, driver: async () => ({ confirmed: true, screenshot: 'shots/e.png' }) })
+    expect(summary.attempted).toBe(1)
+    expect(summary.confirmed).toBe(1)
+    // the observation was recorded + (confirmed) folds into a runtime edge on read
+    const store = openStore(dbPathFor(dir))
+    const obs = store.getObservations()
+    store.close()
+    expect(obs).toHaveLength(1)
+    expect(obs[0]?.outcome).toBe('confirmed')
+    expect(obs[0]?.screenshot).toBe('shots/e.png')
+  })
+
+  it('records a refuted observation when the driver does not confirm', async () => {
+    const { runVerify } = await import('./runner')
+    const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), source: 'static', modality: 'may', guard: 'x' }])
+    const dir = seedWorkspace(tempDir('uigraph-cli-verify2-'), g)
+    const summary = await runVerify({ dir, appUrl: 'http://x', driver: async () => ({ confirmed: false }) })
+    expect(summary.refuted).toBe(1)
+  })
+})
+
 describe('handleApiRequest (pure router)', () => {
   function workspace(): string {
     return seedWorkspace(tempDir('uigraph-cli-api-'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
