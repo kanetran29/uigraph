@@ -354,6 +354,53 @@ describe('extractGraph — shared-component SPA shells (refapp-driven)', () => {
   })
 })
 
+describe('extractGraph — control selectors + stable identity (F1)', () => {
+  const controlsOf = (a: string) =>
+    extractGraph(
+      inMemory({
+        '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /></Routes>)`,
+        '/A.tsx': `export default function A(){ return (${a}) }`,
+      }),
+      '/',
+      { controls: true },
+    ).graph.nodes.filter((n) => n.kind === 'control')
+
+  it('prefers data-testid, then role+name', () => {
+    const cs = controlsOf(`<div><button data-testid="save-btn" onClick={()=>{}}>Save</button><button onClick={()=>{}}>Cancel</button></div>`)
+    const save = cs.find((c) => c.control?.selector?.value === 'save-btn')
+    expect(save?.control?.selector?.strategy).toBe('testid')
+    const cancel = cs.find((c) => c.label === 'Cancel')
+    expect(cancel?.control?.selector).toEqual({ strategy: 'role-name', value: 'button|Cancel' })
+  })
+
+  it('disambiguates identical selectors with nth and gives distinct ids', () => {
+    const cs = controlsOf(`<form><input name="plan" type="radio" onChange={()=>{}} /><input name="plan" type="radio" onChange={()=>{}} /></form>`)
+    const radios = cs.filter((c) => c.control?.selector?.value === 'radio|plan')
+    expect(radios).toHaveLength(2)
+    expect(new Set(radios.map((r) => r.control?.selector?.nth ?? 0))).toEqual(new Set([0, 1]))
+    expect(new Set(radios.map((r) => r.id)).size).toBe(2)
+  })
+
+  it('falls back to structural for an attribute-less, textless handler element', () => {
+    const cs = controlsOf(`<div onMouseEnter={()=>{}}></div>`)
+    expect(cs[0]?.control?.selector?.strategy).toBe('structural')
+  })
+
+  it('every extracted control carries a non-empty selector', () => {
+    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const controls = extractGraph(buildProject(dir), dir, { controls: true }).graph.nodes.filter((n) => n.kind === 'control')
+    expect(controls.length).toBeGreaterThan(0)
+    expect(controls.every((c) => (c.control?.selector?.value ?? '').length > 0)).toBe(true)
+  })
+
+  it('a control id is stable when an unrelated control is added earlier (was positional, now selector-keyed)', () => {
+    const shellBefore = `<div><button onClick={()=>{}}>Save</button></div>`
+    const shellAfter = `<div><button onClick={()=>{}}>Cancel</button><button onClick={()=>{}}>Save</button></div>`
+    const idOfSave = (shell: string) => controlsOf(shell).find((c) => c.label === 'Save')?.id
+    expect(idOfSave(shellBefore)).toBe(idOfSave(shellAfter))
+  })
+})
+
 describe('extractGraph — dynamic navigation targets surfaced (refapp-driven)', () => {
   it('emits a fully-dynamic navigate(var) as an unknown-modality edge to a dynamic sink', () => {
     const { graph } = extractGraph(

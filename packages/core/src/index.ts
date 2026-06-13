@@ -9,6 +9,8 @@ export type {
   Source,
   NodeKind,
   ControlMeta,
+  SelectorStrategy,
+  ControlSelector,
   GraphNode,
   Witness,
   GraphEdge,

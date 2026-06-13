@@ -11,7 +11,7 @@ const sample = () =>
         kind: 'control',
         parent: 's_home',
         label: 'Back to products',
-        control: { element: 'button', controlType: 'button', events: ['click'], effects: ['state:setOpen'] },
+        control: { element: 'button', controlType: 'button', events: ['click'], effects: ['state:setOpen'], selector: { strategy: 'role-name', value: 'button|Back to products' } },
       }),
     ],
     [
@@ -27,6 +27,7 @@ describe('buildGrounding', () => {
     expect(home?.controls.map((c) => c.id)).toEqual(['cc_home_btn'])
     expect(home?.controls[0]?.events).toEqual(['click'])
     expect(home?.controls[0]?.effects).toEqual(['state:setOpen'])
+    expect(home?.controls[0]?.selector).toEqual({ strategy: 'role-name', value: 'button|Back to products' })
   })
 
   it('attributes a control-originated edge to its parent screen and resolves the target label', () => {

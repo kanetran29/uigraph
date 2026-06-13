@@ -7,8 +7,8 @@
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
 import type { JsxAttribute, SourceFile } from 'ts-morph'
 import { dirname, join, relative } from 'node:path'
-import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@uigraph/core'
-import { routeToNodeId, edgeId } from './ids'
+import type { ControlSelector, ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@uigraph/core'
+import { routeToNodeId, edgeId, controlNodeId } from './ids'
 import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
 
 const ADAPTER_VERSION = '0.1.0'
@@ -367,6 +367,7 @@ interface ControlInfo {
   element: string
   controlType: string
   name?: string
+  selector: ControlSelector
 }
 
 type BranchContext = 'success' | 'error' | null
@@ -404,11 +405,52 @@ function hasEventHandler(el: Node): boolean {
   return jsxAttrs(el).some((a) => /^on[A-Z]/.test(a.getNameNode().getText()))
 }
 
+/** The ARIA role a control exposes, from an explicit role attr or its tag/type. */
+function ariaRole(el: Node, tag: string, controlType: string): string | undefined {
+  const explicit = stringAttr(el, 'role')
+  if (explicit) return explicit
+  if (tag.toLowerCase() === 'a') return 'link'
+  switch (controlType) {
+    case 'button':
+      return 'button'
+    case 'checkbox':
+      return (stringAttr(el, 'type') ?? '').toLowerCase() === 'radio' ? 'radio' : 'checkbox'
+    case 'richtext':
+      return 'textbox'
+    case 'select':
+      return 'combobox'
+    case 'form':
+      return 'form'
+    case 'input':
+      return (stringAttr(el, 'type') ?? 'text').toLowerCase() === 'search' ? 'searchbox' : 'textbox'
+    default:
+      return undefined
+  }
+}
+
+/**
+ * The stable locator for a control, in precedence order: a data-testid, an ARIA
+ * role + accessible name, a label (id/name attr), visible text, or a structural
+ * tag fallback. `nth` (assigned later, per screen) disambiguates identical
+ * selectors. This is the basis for the control's id and a real automation handle.
+ */
+function controlSelector(el: Node, tag: string, controlType: string, text: string | undefined): ControlSelector {
+  const testid = stringAttr(el, 'data-testid') ?? stringAttr(el, 'data-test-id')
+  if (testid != null) return { strategy: 'testid', value: testid }
+  const role = ariaRole(el, tag, controlType)
+  const accName = stringAttr(el, 'aria-label') ?? stringAttr(el, 'name') ?? stringAttr(el, 'placeholder') ?? text ?? stringAttr(el, 'id')
+  if (role != null && accName != null) return { strategy: 'role-name', value: `${role}|${accName}` }
+  const label = stringAttr(el, 'id') ?? stringAttr(el, 'name')
+  if (label != null) return { strategy: 'label', value: label }
+  if (text != null) return { strategy: 'text', value: text }
+  return { strategy: 'structural', value: tag.toLowerCase() }
+}
+
 /**
  * Classify an interactive JSX element as a control, or null if it is not one. A
  * control is a native form element (button/input/textarea/select/form),
  * contentEditable, or ANY lowercase DOM element carrying an `on*` handler (so a
- * `<div onMouseEnter>` or `<li onKeyDown>` counts too).
+ * `<div onMouseEnter>` or `<li onKeyDown>` counts too). Carries a stable selector.
  */
 function controlMetaFor(el: Node): ControlInfo | null {
   const tag = jsxTag(el)
@@ -425,7 +467,8 @@ function controlMetaFor(el: Node): ControlInfo | null {
   const textLabel = controlType === 'button' || controlType === 'element' ? getJsxText(el) : undefined
   const name =
     stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? stringAttr(el, 'placeholder') ?? stringAttr(el, 'aria-label') ?? textLabel
-  return { element: tag, controlType, ...(name ? { name } : {}) }
+  const selector = controlSelector(el, tag, controlType, getJsxText(el))
+  return { element: tag, controlType, selector, ...(name ? { name } : {}) }
 }
 
 /** Find the named function/arrow declared in a file (for indirect event handlers). */
@@ -885,7 +928,6 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   }
 
   if (opts.controls) {
-    let cidx = 0
     let midx = 0
     for (const route of routes) {
       if (!route.componentFile) continue
@@ -913,10 +955,23 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         })
       }
 
+      // Collect this screen's controls, then assign nth per identical selector so
+      // each control's id (derived from its selector) is stable AND unique.
+      const screenControls: { el: Node; meta: ControlInfo }[] = []
       for (const el of allJsxElements(sf)) {
         const meta = controlMetaFor(el)
-        if (!meta) continue
-        const cId = `cc_${route.nodeId}__${meta.controlType}_${cidx++}`
+        if (meta) screenControls.push({ el, meta })
+      }
+      const nthBySig = new Map<string, number>()
+      for (const { meta } of screenControls) {
+        const sig = `${meta.selector.strategy}|${meta.selector.value}`
+        const nth = nthBySig.get(sig) ?? 0
+        nthBySig.set(sig, nth + 1)
+        if (nth > 0) meta.selector.nth = nth
+      }
+
+      for (const { el, meta } of screenControls) {
+        const cId = controlNodeId(route.nodeId, meta.selector)
         const inter = collectInteractions(el, sf, navInfo)
         const lc = sf.getLineAndColumnAtPos(el.getStart())
         const loc = { line: lc.line, col: lc.column }
@@ -958,6 +1013,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           control: {
             element: meta.element,
             controlType: meta.controlType,
+            selector: meta.selector,
             ...(meta.name ? { name: meta.name } : {}),
             ...(inter.events.length > 0 ? { events: inter.events } : {}),
             ...(inter.effects.length > 0 ? { effects: inter.effects } : {}),
