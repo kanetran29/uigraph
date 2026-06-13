@@ -120,6 +120,12 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(graph.edges.some((e) => e.effect === 'open:modal')).toBe(true)
     expect(controls.some((c) => c.control?.controlType === 'file')).toBe(true)
     expect(soundiness.some((s) => s.kind === 'dynamic-widget')).toBe(true)
+
+    const productControls = new Set(controls.filter((c) => c.parent === 'n_products').map((c) => c.id))
+    const indirect = graph.edges.find(
+      (e) => productControls.has(e.from) && e.to === 'n_dashboard' && e.witness?.ruleId === 'rr.use-navigate.interprocedural',
+    )
+    expect(indirect?.modality).toBe('must')
   })
 
   it('tags success/error branches and opens modals (F2.5+)', () => {
@@ -232,5 +238,79 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
       '/',
     )
     expect(graph.edges.some((e) => e.from === 'n_a' && e.to === 'n_b' && e.modality === 'must')).toBe(true)
+  })
+})
+
+describe('extractGraph — interprocedural call-graph reachability (F2.8)', () => {
+  // The interprocedural (control-level) edge, distinct from any coarse screen-level
+  // twin collectTargets emits from scanning the whole file.
+  const edgeTo = (files: Record<string, string>, to: string) =>
+    extractGraph(inMemory(files), '/', { controls: true }).graph.edges.find(
+      (e) => e.to === to && e.witness?.ruleId === 'rr.use-navigate.interprocedural',
+    )
+
+  it('follows a handler into a local helper that navigates (intra-file closure)', () => {
+    const e = edgeTo(
+      {
+        '/App.tsx': `import A from './A'\nimport B from './B'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<B/>} /></Routes>)`,
+        '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); function goB(){ navigate('/b') } return <button onClick={() => { goB() }}>go</button> }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      },
+      'n_b',
+    )
+    expect(e?.modality).toBe('must')
+    expect(e?.witness?.ruleId).toBe('rr.use-navigate.interprocedural')
+  })
+
+  it('binds navigate + literal across a cross-file nav service', () => {
+    const e = edgeTo(
+      {
+        '/App.tsx': `import A from './A'\nimport P from './P'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/products" element={<P/>} /></Routes>)`,
+        '/nav.ts': `export function leaveTo(nav, path){ nav(path) }`,
+        '/A.tsx': `import { useNavigate } from 'react-router-dom'\nimport { leaveTo } from './nav'\nexport default function A(){ const navigate = useNavigate(); return <button onClick={() => leaveTo(navigate, '/products')}>go</button> }`,
+        '/P.tsx': `export default function P(){ return null }`,
+      },
+      'n_products',
+    )
+    expect(e?.modality).toBe('must')
+    expect(e?.witness?.ruleId).toBe('rr.use-navigate.interprocedural')
+  })
+
+  it('conjoins a guard on the helper call into the interprocedural edge', () => {
+    const e = edgeTo(
+      {
+        '/App.tsx': `import A from './A'\nimport B from './B'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<B/>} /></Routes>)`,
+        '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); function goB(){ navigate('/b') } return <button onClick={() => { if (isAdmin) goB() }}>go</button> }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      },
+      'n_b',
+    )
+    expect(e?.modality).toBe('may')
+    expect(e?.guard).toContain('isAdmin')
+  })
+
+  it('terminates on mutually recursive helpers and emits the edge once', () => {
+    const graph = extractGraph(
+      inMemory({
+        '/App.tsx': `import A from './A'\nimport B from './B'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<B/>} /></Routes>)`,
+        '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); function pa(){ navigate('/b'); pb() } function pb(){ pa() } return <button onClick={() => pa()}>go</button> }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      }),
+      '/',
+      { controls: true },
+    ).graph
+    expect(graph.edges.filter((e) => e.to === 'n_b' && e.witness?.ruleId === 'rr.use-navigate.interprocedural')).toHaveLength(1)
+  })
+
+  it('never descends into a non-relative (library) import', () => {
+    const e = edgeTo(
+      {
+        '/App.tsx': `import A from './A'\nimport B from './B'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<B/>} /></Routes>)`,
+        '/A.tsx': `import { useNavigate } from 'react-router-dom'\nimport { foo } from 'somelib'\nexport default function A(){ const navigate = useNavigate(); return <button onClick={() => foo('/b')}>go</button> }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      },
+      'n_b',
+    )
+    expect(e).toBeUndefined()
   })
 })
