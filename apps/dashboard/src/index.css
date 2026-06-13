@@ -201,8 +201,20 @@ select:focus-visible,
   border-left: 1px solid var(--border);
   background: var(--panel);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Let every section shrink to the rail width so nothing forces a horizontal scrollbar. */
+.inspector,
+.steps,
+.proposals,
+.prop-row,
+.prop-screen,
+.prop-category {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .inspector,
@@ -674,8 +686,10 @@ button.danger {
 
 .prop-title {
   flex: 1;
-  font-size: 12px;
   min-width: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .prop-conf {
@@ -708,6 +722,7 @@ button.danger {
 /* The compact event·to·effect·[guard] meta line, rendered as a code block. */
 .prop-code {
   display: block;
+  max-width: 100%;
   margin-top: 6px;
   padding: 6px 8px;
   font-size: 10.5px;
@@ -718,7 +733,9 @@ button.danger {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   word-break: break-word;
+  box-sizing: border-box;
 }
 
 .prop-rationale {
@@ -726,9 +743,10 @@ button.danger {
   font-size: 11px;
   color: var(--text);
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
-/* `backtick` spans inside a rationale: a subtle inline code chip. */
+/* `backtick` spans inside a rationale: a subtle inline code chip that can break mid-token. */
 .inline-code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10.5px;
@@ -736,6 +754,8 @@ button.danger {
   background: var(--panel-subtle);
   border: 1px solid var(--border);
   border-radius: 4px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Per-screen evidence screenshot, revealed with the rationale. */

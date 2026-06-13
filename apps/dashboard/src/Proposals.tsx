@@ -81,14 +81,26 @@ function metaLine(p: Proposal, labels: Map<string, string>): string | null {
   return parts.length > 0 ? parts.join(' · ') : null
 }
 
-/** Render text with `backtick`-quoted spans as inline <code>, plain text otherwise. */
+// Code-ish spans in a rationale: explicit `backticks`, JSX/handler assignments
+// (onChange={...}, value={query}), function calls (setQuery(...), navigate('/x')),
+// and typed effect tokens (state:setX, api:POST /x). Each is rendered as inline code.
+const CODE_RE = /`([^`]+)`|([A-Za-z_$][\w$.]*\s*=\s*\{[^{}]*\})|([A-Za-z_$][\w$.]*\([^()]*\))|((?:state|api|error|open|effect|guard):[^\s,;()]+)/g
+
+/** Render a rationale with code-ish spans wrapped in inline <code>, plain text otherwise. */
 function withInlineCode(text: string): JSX.Element {
-  const parts = text.split('`')
-  return (
-    <>
-      {parts.map((part, i) => (i % 2 === 1 ? <code key={i} className="inline-code">{part}</code> : <span key={i}>{part}</span>))}
-    </>
-  )
+  const out: JSX.Element[] = []
+  let last = 0
+  let key = 0
+  CODE_RE.lastIndex = 0
+  let m: RegExpExecArray | null
+  while ((m = CODE_RE.exec(text)) !== null) {
+    if (m.index > last) out.push(<span key={key++}>{text.slice(last, m.index)}</span>)
+    const code = m[1] ?? m[0]
+    out.push(<code key={key++} className="inline-code">{code}</code>)
+    last = m.index + m[0].length
+  }
+  if (last < text.length) out.push(<span key={key++}>{text.slice(last)}</span>)
+  return <>{out}</>
 }
 
 /** A single expandable proposal row; the rationale is revealed on click. */
