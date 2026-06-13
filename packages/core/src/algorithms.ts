@@ -4,13 +4,28 @@
 
 import type { GraphEdge, GraphNode, Modality, UiGraph } from './ir'
 
-/** Outgoing edges keyed by source node id. */
+/** A synthetic "the control is available on this screen" edge (screen → control). */
+function containmentEdge(parent: string, child: string): GraphEdge {
+  return { id: `contains_${parent}__${child}`, from: parent, to: child, event: '(available)', guard: null, effect: 'contains', modality: 'must', source: 'static', confidence: 1 }
+}
+
+/**
+ * Outgoing edges keyed by source node id, for traversal. Includes synthetic
+ * containment edges (screen → its control children): a control is available once
+ * you are on its parent screen, so planning can route THROUGH a control into the
+ * state it opens (e.g. a modal reachable only via that control's open:modal edge),
+ * which is otherwise edge-reachable from the control but not from the screen.
+ */
 export function buildAdjacency(graph: UiGraph): Map<string, GraphEdge[]> {
   const adj = new Map<string, GraphEdge[]>()
-  for (const e of graph.edges) {
+  const push = (e: GraphEdge): void => {
     const list = adj.get(e.from)
     if (list === undefined) adj.set(e.from, [e])
     else list.push(e)
+  }
+  for (const e of graph.edges) push(e)
+  for (const n of graph.nodes) {
+    if (n.kind === 'control' && n.parent !== undefined) push(containmentEdge(n.parent, n.id))
   }
   return adj
 }
