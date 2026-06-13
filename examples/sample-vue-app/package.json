@@ -1,0 +1,19 @@
+{
+  "name": "sample-vue-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "vue": "^3.5.0",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.0",
+    "typescript": "catalog:",
+    "vite": "^7.0.0"
+  }
+}

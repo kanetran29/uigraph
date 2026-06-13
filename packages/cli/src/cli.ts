@@ -21,7 +21,7 @@ export function buildProgram(): Command {
     .command('map')
     .description('Extract the UI graph from a project directory using an adapter.')
     .argument('<dir>', 'project directory to map')
-    .requiredOption('--adapter <name>', 'adapter to use: react | angular')
+    .requiredOption('--adapter <name>', 'adapter to use: react | angular | vue')
     .option('--out <file>', 'output database path (default <dir>/uigraph.db)')
     .option('--controls', 'also extract interactive controls (buttons/inputs/etc.) as nested nodes')
     .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean }) => {

@@ -21,6 +21,7 @@
     "@uigraph/core": "workspace:*",
     "@uigraph/adapter-react": "workspace:*",
     "@uigraph/adapter-angular": "workspace:*",
+    "@uigraph/adapter-vue": "workspace:*",
     "@uigraph/mcp": "workspace:*",
     "commander": "catalog:"
   },
