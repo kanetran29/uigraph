@@ -103,7 +103,13 @@ function ChangesBody(props: {
                       <span className="cov-row-head">
                         <span className="cov-modality">~screen</span>
                         <span className="cov-edge">
-                          {c.fields.includes('label') ? `${c.before.label} → ${c.after.label}` : c.after.label}
+                          {c.fields.includes('label') ? (
+                            <>
+                              <span className="diff-old">{c.before.label}</span> → <span className="diff-new">{c.after.label}</span>
+                            </>
+                          ) : (
+                            c.after.label
+                          )}
                         </span>
                       </span>
                       <span className="cov-chips">

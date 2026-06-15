@@ -75,8 +75,8 @@ export function App(): JSX.Element {
     const d = changes.diff
     // changedNodes is defensive against an older serve that predates it (offline-safe contract).
     const changedNodes = d.changedNodes ?? []
-    const renameById = new Map<string, string>()
-    for (const c of changedNodes) if (c.fields.includes('label')) renameById.set(c.id, `${c.before.label} → ${c.after.label}`)
+    const renameById = new Map<string, { before: string; after: string }>()
+    for (const c of changedNodes) if (c.fields.includes('label')) renameById.set(c.id, { before: c.before.label, after: c.after.label })
     return {
       addedNodeIds: new Set(d.addedNodes.map((n) => n.id)),
       addedEdgeIds: new Set(d.addedEdges.map((e) => e.id)),

@@ -53,7 +53,7 @@ export interface DiffHighlight {
   addedEdgeIds: Set<string>
   changedEdgeIds: Set<string>
   changedNodeIds: Set<string>
-  renameById: Map<string, string>
+  renameById: Map<string, { before: string; after: string }>
   removedNodes: GraphNode[]
   removedEdges: GraphEdge[]
 }
@@ -351,7 +351,7 @@ function toFlowNodes(
   layout: Pick<GraphLayout, 'positions' | 'sizes' | 'bands'>,
   expanded: ReadonlySet<string>,
   proposalCount: ReadonlyMap<string, number>,
-  diffNames: ReadonlyMap<string, string>,
+  diffNames: ReadonlyMap<string, { before: string; after: string }>,
 ): Node[] {
   const { positions, sizes, bands } = layout
 
@@ -387,13 +387,27 @@ function toFlowNodes(
       })
     } else {
       const count = childCount.get(n.id) ?? 0
-      // In diff mode a renamed screen shows "Old → New" on its name line; the box size is
-      // unchanged (label only) so the layout never shifts when the diff toggle flips.
-      const name = diffNames.get(n.id) ?? n.label
-      const base = n.route ? `${name}\n${n.route}` : name
-      const withControls = count > 0 && !expanded.has(n.id) ? `${base}\n▸ ${count} control${count > 1 ? 's' : ''}` : base
+      // The lines beneath the name: route, a controls badge, a proposals badge — built as a
+      // string suffix so a renamed screen can swap just its NAME for colored JSX while the box
+      // size (and the layout) stays exactly the same whether the diff toggle is on or off.
+      const routeLine = n.route ? `\n${n.route}` : ''
+      const controlLine = count > 0 && !expanded.has(n.id) ? `\n▸ ${count} control${count > 1 ? 's' : ''}` : ''
       const pc = proposalCount.get(n.id) ?? 0
-      const label = pc > 0 ? `${withControls}\n◆ ${pc} proposal${pc > 1 ? 's' : ''}` : withControls
+      const proposalLine = pc > 0 ? `\n◆ ${pc} proposal${pc > 1 ? 's' : ''}` : ''
+      const suffix = `${routeLine}${controlLine}${proposalLine}`
+      // A rename reads as a deletion of the old name + an addition of the new: old in red,
+      // new in green (the same semantics as removed/added elsewhere).
+      const rename = diffNames.get(n.id)
+      const label = rename ? (
+        <span>
+          <span style={{ color: DIFF_REMOVED_COLOR, textDecoration: 'line-through' }}>{rename.before}</span>
+          {' → '}
+          <span style={{ color: DIFF_ADDED_COLOR }}>{rename.after}</span>
+          {suffix}
+        </span>
+      ) : (
+        `${n.label}${suffix}`
+      )
       screens.push({
         id: n.id,
         position: pos,
@@ -646,6 +660,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [showProposed, setShowProposed] = useState(false)
   const [diffMode, setDiffMode] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
+  // Where the user has dragged a removed-node ghost (ghosts aren't in the node STATE, so we
+  // remember their moved positions here; keyed by removed-node id).
+  const [ghostPos, setGhostPos] = useState<Map<string, { x: number; y: number }>>(new Map())
 
   // Diff-highlight is live only when there is a delta AND the toggle is on. Added nodes (green
   // ring) plus the endpoints of added/changed edges stay lit; everything else dims so the
@@ -664,9 +681,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     }
     return out
   }, [diffHighlight, rawGraph])
-  // Renamed-screen labels ("Old → New"), live only while the diff view is on.
-  const diffNames = useMemo<ReadonlyMap<string, string>>(
-    () => (diffActive && diffHighlight ? diffHighlight.renameById : new Map<string, string>()),
+  // Renamed-screen labels (old → new), live only while the diff view is on.
+  const diffNames = useMemo<ReadonlyMap<string, { before: string; after: string }>>(
+    () => (diffActive && diffHighlight ? diffHighlight.renameById : new Map<string, { before: string; after: string }>()),
     [diffActive, diffHighlight],
   )
 
@@ -791,7 +808,10 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
         // node → amber ring; an unchanged node outside the delta → dimmed; an endpoint of a
         // changed/added edge stays normal.
         const isAdded = diffActive && !focusActive && (diffHighlight?.addedNodeIds.has(n.id) ?? false)
-        const isChanged = diffActive && !focusActive && (diffHighlight?.changedNodeIds.has(n.id) ?? false)
+        // A renamed screen shows its old→new colored label (no extra ring); only a non-rename
+        // change (route/kind) gets the amber "changed" ring.
+        const isRenamed = diffHighlight?.renameById.has(n.id) ?? false
+        const isChanged = diffActive && !focusActive && !isRenamed && (diffHighlight?.changedNodeIds.has(n.id) ?? false)
         const diffDim = diffActive && !focusActive && !diffRelevantNodeIds.has(n.id)
         const className = isSelected
           ? 'rf-selected'
@@ -870,12 +890,17 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       } else {
         p = { x: minX - 360, y: fallbackI++ * 90 }
       }
-      placed.set(rn.id, p)
+      // A user-dragged position wins, so a moved ghost stays where it was put (it is read-only
+      // otherwise: draggable, but NOT selectable/connectable, so it can't be edited or deleted).
+      const finalPos = ghostPos.get(rn.id) ?? p
+      placed.set(rn.id, finalPos)
       ghostNodes.push({
         id: rn.id,
-        position: p,
+        position: finalPos,
         selectable: false,
-        draggable: false,
+        draggable: true,
+        connectable: false,
+        deletable: false,
         zIndex: 0,
         data: { label: rn.route ? `${rn.label}\n${rn.route}` : rn.label },
         style: removedGhostStyle(),
@@ -890,17 +915,34 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
         source: re.from,
         target: re.to,
         type: 'floating',
-        data: { label: 'removed' },
-        zIndex: 0,
-        markerEnd: { type: MarkerType.ArrowClosed, color: DIFF_REMOVED_COLOR, width: 12, height: 12 },
-        style: { stroke: DIFF_REMOVED_COLOR, strokeWidth: 1.6, strokeOpacity: 0.85, strokeDasharray: '5 4', strokeLinecap: 'round' },
+        zIndex: 5,
+        markerEnd: { type: MarkerType.ArrowClosed, color: DIFF_REMOVED_COLOR, width: 26, height: 26 },
+        style: { stroke: DIFF_REMOVED_COLOR, strokeWidth: 2.6, strokeOpacity: 0.95, strokeDasharray: '7 4', strokeLinecap: 'round' },
       })
     }
     return { nodes: ghostNodes, edges: ghostEdges }
-  }, [diffActive, diffHighlight, nodes])
+  }, [diffActive, diffHighlight, nodes, ghostPos])
 
   const rfNodes = useMemo(() => (ghosts.nodes.length > 0 ? [...nodes, ...ghosts.nodes] : nodes), [nodes, ghosts])
   const rfEdges = useMemo(() => (ghosts.edges.length > 0 ? [...edges, ...ghosts.edges] : edges), [edges, ghosts])
+
+  // Capture drags of a removed-node ghost into ghostPos (the ghost isn't in the node state, so
+  // useNodesState ignores its changes); everything else flows to the real node state as usual.
+  const handleNodesChange = useCallback(
+    (changes: Parameters<typeof onNodesChange>[0]) => {
+      if (diffHighlight && diffHighlight.removedNodes.length > 0) {
+        const ghostIds = new Set(diffHighlight.removedNodes.map((n) => n.id))
+        for (const c of changes) {
+          if (c.type === 'position' && c.position && ghostIds.has(c.id)) {
+            const { id, position } = c
+            setGhostPos((prev) => new Map(prev).set(id, position))
+          }
+        }
+      }
+      onNodesChange(changes)
+    },
+    [onNodesChange, diffHighlight],
+  )
 
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_evt, node) => {
@@ -982,7 +1024,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       nodes={rfNodes}
       edges={rfEdges}
       edgeTypes={edgeTypes}
-      onNodesChange={onNodesChange}
+      onNodesChange={handleNodesChange}
       onEdgesChange={onEdgesChange}
       onNodeClick={handleNodeClick}
       onEdgeClick={handleEdgeClick}
