@@ -295,6 +295,10 @@ function screenStyle(manual: boolean, size: { width: number; height: number }, e
   }
 }
 
+/** Fixed box size for a removed-node ghost (explicit so ReactFlow doesn't have to measure it). */
+const GHOST_W = 176
+const GHOST_H = 52
+
 /** Box style for a REMOVED node re-injected as a red dashed ghost (deleted since the last map). */
 function removedGhostStyle(): CSSProperties {
   return {
@@ -305,9 +309,13 @@ function removedGhostStyle(): CSSProperties {
     color: DIFF_REMOVED_COLOR,
     fontSize: 11,
     textAlign: 'center',
-    padding: '6px 10px',
-    width: 168,
-    opacity: 0.92,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: GHOST_W,
+    height: GHOST_H,
+    opacity: 0.95,
   }
 }
 
@@ -586,6 +594,82 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
   return out
 }
 
+/** True for a re-injected removed-element ghost node (excluded from save-layout + selection). */
+function isGhostNode(n: Node): boolean {
+  return (n.data as { ghost?: boolean } | undefined)?.ghost === true
+}
+
+/**
+ * Build the red-ghost NODES for removed screens. Each sits beside a surviving neighbour (a
+ * fallback column to the left when its whole neighbourhood was deleted); a previously-dragged
+ * position wins. They are MANAGED state nodes (so ReactFlow measures them + floating edges can
+ * attach) but read-only: draggable to pull clear, yet not selectable / connectable / deletable.
+ */
+function ghostNodesFor(
+  realPos: ReadonlyMap<string, { x: number; y: number }>,
+  dh: DiffHighlight,
+  prevGhostPos: ReadonlyMap<string, { x: number; y: number }>,
+): Node[] {
+  if (dh.removedNodes.length === 0) return []
+  const out: Node[] = []
+  const anchorCount = new Map<string, number>()
+  const xs = [...realPos.values()].map((p) => p.x)
+  const minX = xs.length > 0 ? Math.min(...xs) : 0
+  let fallbackI = 0
+  for (const rn of dh.removedNodes) {
+    let anchor: { x: number; y: number } | undefined
+    for (const re of dh.removedEdges) {
+      const other = re.from === rn.id ? re.to : re.to === rn.id ? re.from : undefined
+      if (other !== undefined && realPos.has(other)) {
+        anchor = realPos.get(other)
+        break
+      }
+    }
+    let p: { x: number; y: number }
+    if (anchor) {
+      const k = `${anchor.x},${anchor.y}`
+      const i = anchorCount.get(k) ?? 0
+      anchorCount.set(k, i + 1)
+      p = { x: anchor.x + 340, y: anchor.y + i * 110 }
+    } else {
+      p = { x: minX - 400, y: fallbackI++ * 110 }
+    }
+    out.push({
+      id: rn.id,
+      position: prevGhostPos.get(rn.id) ?? p,
+      width: GHOST_W,
+      height: GHOST_H,
+      selectable: false,
+      draggable: true,
+      connectable: false,
+      deletable: false,
+      zIndex: 2,
+      data: { ghost: true, label: rn.route ? `${rn.label}\n${rn.route}` : rn.label },
+      style: removedGhostStyle(),
+    })
+  }
+  return out
+}
+
+/** Build the red dashed ghost EDGES for removed transitions whose endpoints both exist now (a
+ *  surviving node or a removed-node ghost). */
+function ghostEdgesFor(dh: DiffHighlight, present: ReadonlySet<string>): Edge[] {
+  const out: Edge[] = []
+  for (const re of dh.removedEdges) {
+    if (!present.has(re.from) || !present.has(re.to)) continue
+    out.push({
+      id: `ghost_${re.id}`,
+      source: re.from,
+      target: re.to,
+      type: 'floating',
+      zIndex: 6,
+      markerEnd: { type: MarkerType.ArrowClosed, color: DIFF_REMOVED_COLOR, width: 22, height: 22 },
+      style: { stroke: DIFF_REMOVED_COLOR, strokeWidth: 2.4, strokeOpacity: 0.95, strokeDasharray: '7 4', strokeLinecap: 'round' },
+    })
+  }
+  return out
+}
+
 /** A structural key over node ids, edge ids, and the expanded set: changes only on relayout-worthy edits. */
 function structuralKey(graph: UiGraph, expanded: ReadonlySet<string>): string {
   const nodeIds = graph.nodes.map((n) => n.id).join(',')
@@ -660,9 +744,6 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [showProposed, setShowProposed] = useState(false)
   const [diffMode, setDiffMode] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
-  // Where the user has dragged a removed-node ghost (ghosts aren't in the node STATE, so we
-  // remember their moved positions here; keyed by removed-node id).
-  const [ghostPos, setGhostPos] = useState<Map<string, { x: number; y: number }>>(new Map())
 
   // Diff-highlight is live only when there is a delta AND the toggle is on. Added nodes (green
   // ring) plus the endpoints of added/changed edges stay lit; everything else dims so the
@@ -765,8 +846,10 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   // Re-seed node positions from the dagre layout only when structure/expansion changes,
   // so user drags survive selection, hover, and re-style passes.
   const key = useMemo(
-    () => `${structuralKey(graph, expanded)}|p:${proposals.proposals.length}|d:${diffActive ? 1 : 0}|${[...diffNames.keys()].sort().join(',')}`,
-    [graph, expanded, proposals, diffActive, diffNames],
+    () =>
+      `${structuralKey(graph, expanded)}|p:${proposals.proposals.length}|d:${diffActive ? 1 : 0}|${[...diffNames.keys()].sort().join(',')}` +
+      `|r:${diffHighlight ? diffHighlight.removedNodes.map((n) => n.id).sort().join(',') : ''}`,
+    [graph, expanded, proposals, diffActive, diffNames, diffHighlight],
   )
   const lastKey = useRef<string | null>(null)
   useEffect(() => {
@@ -778,18 +861,32 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     // re-style). When nodes are added or removed (expand collapse), take a FULL fresh
     // layout so every node is placed by one consistent radial pass.
     setNodes((prev) => {
-      // First mount: overlay any saved layout for THIS graph (stale/absent save = no-op).
-      if (firstLayout) return applySaved(laid, parsePositions(readStored(layoutStorageKey(graph))))
-      const prevIds = new Set(prev.map((n) => n.id))
-      const sameSet = laid.length === prev.length && laid.every((n) => prevIds.has(n.id))
-      if (!sameSet) return laid
-      const prevPos = new Map(prev.map((n) => [n.id, n.position]))
-      return laid.map((n) => {
-        const kept = prevPos.get(n.id)
-        return kept ? { ...n, position: kept } : n
-      })
+      const prevReal = prev.filter((n) => !isGhostNode(n))
+      let real: Node[]
+      if (firstLayout) {
+        // First mount: overlay any saved layout for THIS graph (stale/absent save = no-op).
+        real = applySaved(laid, parsePositions(readStored(layoutStorageKey(graph))))
+      } else {
+        const prevIds = new Set(prevReal.map((n) => n.id))
+        const sameSet = laid.length === prevReal.length && laid.every((n) => prevIds.has(n.id))
+        if (sameSet) {
+          const prevPos = new Map(prevReal.map((n) => [n.id, n.position]))
+          real = laid.map((n) => {
+            const kept = prevPos.get(n.id)
+            return kept ? { ...n, position: kept } : n
+          })
+        } else {
+          real = laid
+        }
+      }
+      // Append the removed-element ghosts (placed from the real node positions; a dragged ghost
+      // keeps its moved position). Done here so they live in the same managed state as real nodes.
+      if (!diffActive || diffHighlight === null) return real
+      const realPos = new Map(real.filter((n) => n.parentId === undefined).map((n) => [n.id, n.position]))
+      const prevGhostPos = new Map(prev.filter(isGhostNode).map((n) => [n.id, n.position]))
+      return [...real, ...ghostNodesFor(realPos, diffHighlight, prevGhostPos)]
     })
-  }, [key, graph, layout, expanded, proposalCount, diffNames, setNodes])
+  }, [key, graph, layout, expanded, proposalCount, diffNames, diffActive, diffHighlight, setNodes])
 
   // Apply selection emphasis onto the live, user-positioned nodes without resetting
   // their positions. A node selection marks the node 'rf-selected' and its neighbours
@@ -800,6 +897,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   useEffect(() => {
     setNodes((prev) =>
       prev.map((n) => {
+        // Ghosts carry their own red styling; never dim/emphasize them.
+        if (isGhostNode(n)) return n
         const isSelected = n.id === selectedId
         const highlighted = neighborIds.has(n.id) || pathNodeIds.has(n.id)
         // Search dims non-matches ONLY when no flow is focused — selection/path always win.
@@ -850,99 +949,19 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     }),
     [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds, diffActive, diffHighlight],
   )
+  // Real edges, plus the red dashed ghost edges for removed transitions when the diff view is
+  // on (their endpoints — a survivor or a removed-node ghost — are all present in the node state).
   useEffect(() => {
     const base = toFlowEdges(graph, edgeCtx)
-    setEdges(showProposed ? [...base, ...toProposedFlowEdges(proposedEdges)] : base)
-  }, [graph, edgeCtx, setEdges, showProposed, proposedEdges])
-
-  // Removed nodes/edges are gone from the laid-out graph, so when the diff view is on we
-  // re-inject them as red dashed ghosts: each removed node sits beside a surviving neighbour
-  // (a fallback column on the left when its whole neighbourhood was deleted), and each removed
-  // edge whose endpoints both resolve (survivor or ghost) draws between them. Display-only —
-  // the ghosts are never in the node/edge STATE, so drags/edits ignore them.
-  const ghosts = useMemo<{ nodes: Node[]; edges: Edge[] }>(() => {
-    if (!diffActive || !diffHighlight || (diffHighlight.removedNodes.length === 0 && diffHighlight.removedEdges.length === 0)) {
-      return { nodes: [], edges: [] }
+    const withProposed = showProposed ? [...base, ...toProposedFlowEdges(proposedEdges)] : base
+    if (!diffActive || !diffHighlight || diffHighlight.removedEdges.length === 0) {
+      setEdges(withProposed)
+      return
     }
-    const pos = new Map<string, { x: number; y: number }>()
-    for (const n of nodes) if (n.parentId === undefined) pos.set(n.id, n.position)
-    const placed = new Map<string, { x: number; y: number }>()
-    const anchorCount = new Map<string, number>()
-    const xs = [...pos.values()].map((p) => p.x)
-    const minX = xs.length > 0 ? Math.min(...xs) : 0
-    let fallbackI = 0
-    const ghostNodes: Node[] = []
-    for (const rn of diffHighlight.removedNodes) {
-      let anchor: { x: number; y: number } | undefined
-      for (const re of diffHighlight.removedEdges) {
-        const other = re.from === rn.id ? re.to : re.to === rn.id ? re.from : undefined
-        if (other !== undefined && pos.has(other)) {
-          anchor = pos.get(other)
-          break
-        }
-      }
-      let p: { x: number; y: number }
-      if (anchor) {
-        const k = `${anchor.x},${anchor.y}`
-        const i = anchorCount.get(k) ?? 0
-        anchorCount.set(k, i + 1)
-        p = { x: anchor.x + 300, y: anchor.y + i * 90 }
-      } else {
-        p = { x: minX - 360, y: fallbackI++ * 90 }
-      }
-      // A user-dragged position wins, so a moved ghost stays where it was put (it is read-only
-      // otherwise: draggable, but NOT selectable/connectable, so it can't be edited or deleted).
-      const finalPos = ghostPos.get(rn.id) ?? p
-      placed.set(rn.id, finalPos)
-      ghostNodes.push({
-        id: rn.id,
-        position: finalPos,
-        selectable: false,
-        draggable: true,
-        connectable: false,
-        deletable: false,
-        zIndex: 0,
-        data: { label: rn.route ? `${rn.label}\n${rn.route}` : rn.label },
-        style: removedGhostStyle(),
-      })
-    }
-    const resolvable = (id: string): boolean => pos.has(id) || placed.has(id)
-    const ghostEdges: Edge[] = []
-    for (const re of diffHighlight.removedEdges) {
-      if (!resolvable(re.from) || !resolvable(re.to)) continue
-      ghostEdges.push({
-        id: `ghost_${re.id}`,
-        source: re.from,
-        target: re.to,
-        type: 'floating',
-        zIndex: 5,
-        markerEnd: { type: MarkerType.ArrowClosed, color: DIFF_REMOVED_COLOR, width: 26, height: 26 },
-        style: { stroke: DIFF_REMOVED_COLOR, strokeWidth: 2.6, strokeOpacity: 0.95, strokeDasharray: '7 4', strokeLinecap: 'round' },
-      })
-    }
-    return { nodes: ghostNodes, edges: ghostEdges }
-  }, [diffActive, diffHighlight, nodes, ghostPos])
-
-  const rfNodes = useMemo(() => (ghosts.nodes.length > 0 ? [...nodes, ...ghosts.nodes] : nodes), [nodes, ghosts])
-  const rfEdges = useMemo(() => (ghosts.edges.length > 0 ? [...edges, ...ghosts.edges] : edges), [edges, ghosts])
-
-  // Capture drags of a removed-node ghost into ghostPos (the ghost isn't in the node state, so
-  // useNodesState ignores its changes); everything else flows to the real node state as usual.
-  const handleNodesChange = useCallback(
-    (changes: Parameters<typeof onNodesChange>[0]) => {
-      if (diffHighlight && diffHighlight.removedNodes.length > 0) {
-        const ghostIds = new Set(diffHighlight.removedNodes.map((n) => n.id))
-        for (const c of changes) {
-          if (c.type === 'position' && c.position && ghostIds.has(c.id)) {
-            const { id, position } = c
-            setGhostPos((prev) => new Map(prev).set(id, position))
-          }
-        }
-      }
-      onNodesChange(changes)
-    },
-    [onNodesChange, diffHighlight],
-  )
+    const present = new Set<string>(graph.nodes.map((n) => n.id))
+    for (const rn of diffHighlight.removedNodes) present.add(rn.id)
+    setEdges([...withProposed, ...ghostEdgesFor(diffHighlight, present)])
+  }, [graph, edgeCtx, setEdges, showProposed, proposedEdges, diffActive, diffHighlight])
 
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_evt, node) => {
@@ -1006,25 +1025,32 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   // parent-relative and excluded. Restored on next mount via the seeding effect above.
   const handleSaveLayout = useCallback(() => {
     const positions: Record<string, { x: number; y: number }> = {}
-    for (const n of nodes) if (n.parentId === undefined) positions[n.id] = { x: n.position.x, y: n.position.y }
+    // Ghosts are transient diff-view artifacts, not part of the saved graph layout.
+    for (const n of nodes) if (n.parentId === undefined && !isGhostNode(n)) positions[n.id] = { x: n.position.x, y: n.position.y }
     writeStored(layoutStorageKey(graph), serializePositions(positions))
   }, [nodes, graph])
 
   // Drop the saved layout + re-seed a fresh dagre layout, then fit it into view.
   const handleResetLayout = useCallback(() => {
     removeStored(layoutStorageKey(graph))
-    setNodes(toFlowNodes(graph, layout, expanded, proposalCount, diffNames))
+    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames)
+    if (diffActive && diffHighlight) {
+      const realPos = new Map(laid.filter((n) => n.parentId === undefined).map((n) => [n.id, n.position]))
+      setNodes([...laid, ...ghostNodesFor(realPos, diffHighlight, new Map())])
+    } else {
+      setNodes(laid)
+    }
     void rf.fitView({ padding: 0.2, duration: 450 })
-  }, [graph, layout, expanded, proposalCount, diffNames, setNodes, rf])
+  }, [graph, layout, expanded, proposalCount, diffNames, diffActive, diffHighlight, setNodes, rf])
 
   const edgeTypes = useMemo(() => ({ floating: FloatingEdge }), [])
 
   return (
     <ReactFlow
-      nodes={rfNodes}
-      edges={rfEdges}
+      nodes={nodes}
+      edges={edges}
       edgeTypes={edgeTypes}
-      onNodesChange={handleNodesChange}
+      onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onNodeClick={handleNodeClick}
       onEdgeClick={handleEdgeClick}
