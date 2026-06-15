@@ -218,6 +218,7 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
           <input type="password" placeholder="Password" />
           <input type="tel" placeholder={t('profile.phonePlaceholder')} />
           <button aria-label={t('actions.clearAll')} onClick={()=>{}} />
+          <button title={t('building.template.moreInfo')} onClick={()=>{}} />
         </div> }`,
       }),
       '/',
@@ -229,6 +230,7 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(names).toContain('Password')
     expect(names).toContain('Phone')
     expect(names).toContain('Clear all')
+    expect(names).toContain('More info')
     // a named input gets a role+name selector, not a bare structural one
     const email = named.find((n) => n.control?.name === 'Email')
     expect(email?.control?.selector?.strategy).toBe('role-name')
