@@ -13,12 +13,13 @@ import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@uigraph/mcp'
 import { reactAdapter } from '@uigraph/adapter-react'
 import { angularAdapter } from '@uigraph/adapter-angular'
 import { vueAdapter } from '@uigraph/adapter-vue'
+import { nextAdapter } from '@uigraph/adapter-next'
 
 /** The SQLite database file that is a workspace's canonical store. */
 export const DB_FILE = 'uigraph.db'
 
 /** The frameworks the CLI can map; selects the adapter for a `map` run. */
-export type AdapterName = 'react' | 'angular' | 'vue'
+export type AdapterName = 'react' | 'angular' | 'vue' | 'next'
 
 /**
  * A console-backed Logger satisfying the core adapter contract. `debug` is
@@ -51,7 +52,8 @@ export function pickAdapter(name: AdapterName) {
   if (name === 'react') return reactAdapter
   if (name === 'angular') return angularAdapter
   if (name === 'vue') return vueAdapter
-  throw new Error(`unknown adapter: ${String(name)} (expected 'react', 'angular', or 'vue')`)
+  if (name === 'next') return nextAdapter
+  throw new Error(`unknown adapter: ${String(name)} (expected 'react', 'angular', 'vue', or 'next')`)
 }
 
 /** Options for `runMap`: the project dir, the framework, and an optional db path. */
