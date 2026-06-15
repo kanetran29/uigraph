@@ -10,7 +10,7 @@ import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@
 import { EMPTY_CHANGES, EMPTY_PROPOSALS, fetchChanges, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, fetchWorkspaces, postOverlay, postScenario, type ChangesState, type ScenariosState, type UpdateOp, type WorkspaceSummary } from './api'
 import { readStored, writeStored } from './storage'
 import { searchMatchIds } from './search'
-import { GraphCanvas, type Selection } from './GraphCanvas'
+import { GraphCanvas, type DiffHighlight, type Selection } from './GraphCanvas'
 import { Logo } from './Logo'
 import { Settings } from './Settings'
 import { useTheme } from './theme'
@@ -67,6 +67,18 @@ export function App(): JSX.Element {
   // Node ids matching the canvas search — dims everything else (selection still wins).
   // Memoized on [graph, search] so it isn't recomputed on unrelated re-renders.
   const matchIds = useMemo(() => (graph ? searchMatchIds(graph.nodes, search) : new Set<string>()), [graph, search])
+
+  // The since-last-map delta projected onto the current graph (added/changed only — removed
+  // elements aren't on the canvas). Null unless there is a real delta, so the canvas toggle hides.
+  const diffHighlight = useMemo<DiffHighlight | null>(() => {
+    if (changes.state !== 'ok' || !changes.diff) return null
+    const d = changes.diff
+    return {
+      addedNodeIds: new Set(d.addedNodes.map((n) => n.id)),
+      addedEdgeIds: new Set(d.addedEdges.map((e) => e.id)),
+      changedEdgeIds: new Set(d.changedEdges.map((c) => c.id)),
+    }
+  }, [changes])
 
   // Load the registry once + reconcile the active workspace: keep a valid stored id, else
   // fall back to the first one. Empty list = single-workspace (or offline) — activeWs null.
@@ -273,6 +285,7 @@ export function App(): JSX.Element {
                 onSelect={setSelection}
                 onConnect={handleConnect}
                 searchMatchIds={matchIds}
+                diffHighlight={diffHighlight}
                 colorMode={resolved}
               />
             </ReactFlowProvider>

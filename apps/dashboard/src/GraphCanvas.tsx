@@ -45,6 +45,15 @@ const IMAGE_H = 1536
 /** What the canvas reports as the current selection, or null when nothing is selected. */
 export type Selection = { kind: 'node'; node: GraphNode } | { kind: 'edge'; edge: GraphEdge } | null
 
+/** The since-last-map delta projected onto the CURRENT graph: which nodes/edges are new or
+ *  changed. Removed elements are absent from the current graph, so they aren't representable
+ *  here (the Changes panel lists them instead). */
+export interface DiffHighlight {
+  addedNodeIds: Set<string>
+  addedEdgeIds: Set<string>
+  changedEdgeIds: Set<string>
+}
+
 /** Props for the canvas: the graph to draw, the selection, the highlighted path, and callbacks. */
 export interface GraphCanvasProps {
   graph: UiGraph
@@ -54,8 +63,13 @@ export interface GraphCanvasProps {
   onSelect: (selection: Selection) => void
   onConnect: (from: string, to: string) => void
   searchMatchIds?: Set<string>
+  diffHighlight?: DiffHighlight | null
   colorMode?: 'light' | 'dark' | 'system'
 }
+
+/** Diff-highlight hues: a node/edge added since the last map (green) and a changed edge (amber). */
+const DIFF_ADDED_COLOR = '#16a34a'
+const DIFF_CHANGED_COLOR = '#d97706'
 
 /** The ghost-edge hue: a distinct slate-violet, separate from the source palette. */
 const GHOST_COLOR = '#a855f7'
@@ -414,6 +428,9 @@ interface EdgeContext {
   focusEdgeActive: boolean
   searchActive: boolean
   searchMatchIds: Set<string>
+  diffActive: boolean
+  addedEdgeIds: Set<string>
+  changedEdgeIds: Set<string>
 }
 
 /**
@@ -445,7 +462,7 @@ function toProposedFlowEdges(edges: readonly ProposedEdge[]): Edge[] {
 }
 
 function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
-  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds } = ctx
+  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds, diffActive, addedEdgeIds, changedEdgeIds } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
   const hasNodeSelection = selection?.kind === 'node'
   const controlParent = new Map<string, string | undefined>()
@@ -484,11 +501,17 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     // When a search is active and nothing is selected, dim every edge that isn't between
     // two matches — the lowest-priority dim layer; any selection/path focus still wins.
     const searchDim = searchActive && !hasNodeSelection && !focusEdgeActive && !(searchMatchIds.has(e.from) && searchMatchIds.has(e.to))
-    const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded) || searchDim
-    const color = strokeColor(e, onPath || selected)
+    // Diff-highlight: when on (and no selection/path focus wins), an added edge is green and a
+    // changed edge is amber at full strength; every other edge is dimmed so the delta pops.
+    const diffAdded = diffActive && addedEdgeIds.has(e.id)
+    const diffChanged = diffActive && changedEdgeIds.has(e.id)
+    const diffLit = diffAdded || diffChanged
+    const diffDim = diffActive && !emphasized && !diffLit
+    const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded) || searchDim || diffDim
+    const color = diffLit && !emphasized ? (diffAdded ? DIFF_ADDED_COLOR : DIFF_CHANGED_COLOR) : strokeColor(e, onPath || selected)
     const baseWidth = e.source === 'manual' ? 2 : 1.4
-    const width = onPath ? 3 : selected ? 2.8 : emphasized ? 2.4 : baseWidth
-    const opacity = dimmed ? 0.18 : emphasized ? 1 : 0.85
+    const width = onPath ? 3 : selected ? 2.8 : emphasized || (diffLit && !dimmed) ? 2.4 : baseWidth
+    const opacity = dimmed ? 0.12 : emphasized || diffLit ? 1 : 0.85
     // Screen→screen edges are the route skeleton: render as floating beziers and
     // keep their label visible (unless dimmed by a focus). Control edges keep their
     // label only when emphasized, to avoid clutter when a screen is expanded.
@@ -572,8 +595,9 @@ function swatch(color: string, dash?: string): CSSProperties {
  * documents the modality (dash) and source (colour) encodings.
  */
 export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
-  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, onConnect, searchMatchIds = EMPTY_IDS, colorMode = 'system' } = props
+  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, onConnect, searchMatchIds = EMPTY_IDS, diffHighlight = null, colorMode = 'system' } = props
   const searchActive = searchMatchIds.size > 0
+  const diffCount = diffHighlight ? diffHighlight.addedNodeIds.size + diffHighlight.addedEdgeIds.size + diffHighlight.changedEdgeIds.size : 0
   // Hide the synthetic `u_<screen>` dynamic-target sinks (kind 'unknown') + any edge
   // touching them from the canvas. View-only: they stay in the IR + coverage worklist.
   const graph = useMemo<UiGraph>(() => {
@@ -588,7 +612,25 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [expandAll, setExpandAll] = useState(false)
   const [highlightFlow, setHighlightFlow] = useState(true)
   const [showProposed, setShowProposed] = useState(false)
+  const [diffMode, setDiffMode] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
+
+  // Diff-highlight is live only when there is a delta AND the toggle is on. Added nodes (green
+  // ring) plus the endpoints of added/changed edges stay lit; everything else dims so the
+  // change pops. Removed elements are not on the current canvas — the Changes panel lists them.
+  const diffActive = diffMode && diffCount > 0
+  const diffRelevantNodeIds = useMemo(() => {
+    const out = new Set<string>()
+    if (!diffHighlight) return out
+    for (const id of diffHighlight.addedNodeIds) out.add(id)
+    for (const e of rawGraph.edges) {
+      if (diffHighlight.addedEdgeIds.has(e.id) || diffHighlight.changedEdgeIds.has(e.id)) {
+        out.add(e.from)
+        out.add(e.to)
+      }
+    }
+    return out
+  }, [diffHighlight, rawGraph])
 
   // Quarantined proposal edges to a real on-canvas target (the formerly-orphan
   // modals/overlays) — overlaid only when the user opts in.
@@ -704,16 +746,44 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
         const highlighted = neighborIds.has(n.id) || pathNodeIds.has(n.id)
         // Search dims non-matches ONLY when no flow is focused — selection/path always win.
         const searchDim = searchActive && !focusActive && !searchMatchIds.has(n.id)
-        const className = isSelected ? 'rf-selected' : highlighted ? 'rf-neighbor' : focusActive ? 'rf-dimmed' : searchDim ? 'rf-dimmed' : ''
+        // Diff (when no selection/path focus wins): added node → green ring; an unchanged node
+        // outside the delta → dimmed; an endpoint of a changed/added edge stays normal.
+        const isAdded = diffActive && !focusActive && (diffHighlight?.addedNodeIds.has(n.id) ?? false)
+        const diffDim = diffActive && !focusActive && !diffRelevantNodeIds.has(n.id)
+        const className = isSelected
+          ? 'rf-selected'
+          : highlighted
+            ? 'rf-neighbor'
+            : focusActive
+              ? 'rf-dimmed'
+              : isAdded
+                ? 'rf-added'
+                : diffDim
+                  ? 'rf-dimmed'
+                  : searchDim
+                    ? 'rf-dimmed'
+                    : ''
         if (n.selected === isSelected && n.className === (className || undefined)) return n
         return { ...n, selected: isSelected, className: className || undefined }
       }),
     )
-  }, [selectedId, focusActive, neighborIds, pathNodeIds, setNodes, searchActive, searchMatchIds])
+  }, [selectedId, focusActive, neighborIds, pathNodeIds, setNodes, searchActive, searchMatchIds, diffActive, diffHighlight, diffRelevantNodeIds])
 
   const edgeCtx = useMemo<EdgeContext>(
-    () => ({ selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive: selectedEdge !== null || pathActive, searchActive, searchMatchIds }),
-    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds],
+    () => ({
+      selection,
+      pathEdgeIds,
+      expanded,
+      hoveredEdgeId,
+      incidentEdgeIds,
+      focusEdgeActive: selectedEdge !== null || pathActive,
+      searchActive,
+      searchMatchIds,
+      diffActive,
+      addedEdgeIds: diffHighlight?.addedEdgeIds ?? EMPTY_IDS,
+      changedEdgeIds: diffHighlight?.changedEdgeIds ?? EMPTY_IDS,
+    }),
+    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds, diffActive, diffHighlight],
   )
   useEffect(() => {
     const base = toFlowEdges(graph, edgeCtx)
@@ -847,6 +917,12 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <input type="checkbox" checked={showProposed} onChange={(e) => setShowProposed(e.target.checked)} />
             show proposed (LLM){proposedEdges.length > 0 ? ` · ${proposedEdges.length}` : ''}
           </label>
+          {diffCount > 0 ? (
+            <label className="edge-toggle">
+              <input type="checkbox" checked={diffMode} onChange={(e) => setDiffMode(e.target.checked)} />
+              highlight changes · {diffCount}
+            </label>
+          ) : null}
           <div className="layout-actions">
             <button type="button" className="layout-btn nodrag nopan" onClick={handleSaveLayout} aria-label="Save the current node layout">
               Save layout
@@ -872,6 +948,13 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <LegendRow swatch={swatch('var(--edge-runtime)')} label="runtime (witnessed)" />
             {showProposed ? <LegendRow swatch={swatch(GHOST_COLOR, '2 5')} label="proposed (LLM)" /> : null}
           </div>
+          {diffActive ? (
+            <div className="legend-group">
+              <div className="legend-title">since last map</div>
+              <LegendRow swatch={swatch(DIFF_ADDED_COLOR)} label="added" />
+              <LegendRow swatch={swatch(DIFF_CHANGED_COLOR)} label="changed" />
+            </div>
+          ) : null}
         </div>
       </Panel>
     </ReactFlow>
