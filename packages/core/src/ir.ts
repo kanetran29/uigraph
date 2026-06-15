@@ -58,6 +58,8 @@ export interface ControlMeta {
   effects?: string[]
   selector?: ControlSelector
   input?: ControlInput
+  loc?: { line: number; col: number }
+  nameInferred?: boolean
 }
 
 /** A screen/state (or a nested control) in the app. `id` is stable and unique. */

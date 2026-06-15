@@ -175,6 +175,18 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
   const positions = new Map<string, NodePosition>()
   const sizes = new Map<string, NodeSize>()
 
+  // Expanded screens grow into tall control-grid boxes; push the rings apart by the
+  // largest expanded box so boxes don't overlap (esp. with "expand all controls").
+  // Zero when nothing is expanded, so the collapsed layout is unchanged.
+  const expandedExtent =
+    expanded.size === 0
+      ? 0
+      : Math.max(0, ...[...expanded].map((id) => {
+          const e = expandedSize(childN(id))
+          return Math.max(e.width, e.height)
+        }))
+  const ringStep = RING + expandedExtent
+
   for (const node of screens) {
     const width = widthOf(node.id)
     const height = heightOf(node.id)
@@ -186,7 +198,7 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
     // slightly rotated) so it reads as "this screen's dialog" rather than a full
     // ring away; other nodes sit on their ring.
     const owned = node.kind === 'modal' && typeof parent.get(node.id) === 'string'
-    const r = owned ? (d - 0.45) * RING : d * RING
+    const r = owned ? (d - 0.45) * ringStep : d * ringStep
     const ang = owned ? a + 0.18 : a
     const cx = d === 0 ? 0 : Math.cos(ang) * r
     const cy = d === 0 ? 0 : Math.sin(ang) * r

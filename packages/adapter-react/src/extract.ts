@@ -1197,6 +1197,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             element: meta.element,
             controlType: meta.controlType,
             selector: meta.selector,
+            loc,
             ...(meta.input ? { input: meta.input } : {}),
             ...(meta.name ? { name: meta.name } : {}),
             ...(inter.events.length > 0 ? { events: inter.events } : {}),
