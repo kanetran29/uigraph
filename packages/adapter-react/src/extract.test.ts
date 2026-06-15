@@ -140,6 +140,50 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(fromSet.size).toBeGreaterThanOrEqual(2)
   })
 
+  it('names an otherwise-textless control from its i18n key / icon / className', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ return <div>
+          <button className="hdr__btn hdr__btn--could-sell"><SellIcon/><span><Trans i18nKey="building.offMarket.couldSell"/></span></button>
+          <button><CouldBuyIcon/></button>
+          <button className="menu__item--contact-us"/>
+        </div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const names = graph.nodes.filter((n) => n.kind === 'control').map((n) => n.control?.name)
+    expect(names).toContain('Could sell')   // from <Trans i18nKey="…couldSell">
+    expect(names).toContain('Could buy')    // from <CouldBuyIcon/>
+    expect(names).toContain('Contact us')   // from BEM modifier --contact-us
+    // and the i18n-named control gets a role+name selector, not structural
+    const sell = graph.nodes.find((n) => n.kind === 'control' && n.control?.name === 'Could sell')
+    expect(sell?.control?.selector?.strategy).toBe('role-name')
+  })
+
+  it('names an otherwise-textless control from its i18n key / icon / className', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ return <div>
+          <button className="hdr__btn hdr__btn--could-sell"><SellIcon/><span><Trans i18nKey="building.offMarket.couldSell"/></span></button>
+          <button><CouldBuyIcon/></button>
+          <button className="menu__item--contact-us"/>
+        </div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const names = graph.nodes.filter((n) => n.kind === 'control').map((n) => n.control?.name)
+    // from <Trans i18nKey>, from <CouldBuyIcon/>, and from the BEM --contact-us modifier
+    expect(names).toContain('Could sell')
+    expect(names).toContain('Could buy')
+    expect(names).toContain('Contact us')
+    const sell = graph.nodes.find((n) => n.kind === 'control' && n.control?.name === 'Could sell')
+    expect(sell?.control?.selector?.strategy).toBe('role-name')
+  })
+
   it('does not descend into node_modules / unresolved components', () => {
     const { graph } = extractGraph(
       inMemory({

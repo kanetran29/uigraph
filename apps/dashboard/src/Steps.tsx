@@ -30,13 +30,15 @@ function navigableNodes(graph: UiGraph): GraphNode[] {
 
 /**
  * Pick a sensible default target reachable from `from`: the farthest reachable
- * navigable node (last in BFS/graph order among the reachable set, excluding
- * `from` itself). Falls back to any other navigable node when nothing is reachable,
- * so the selectors are never seeded with an unreachable or control target.
+ * SCREEN (a real route reads as a more meaningful default than a modal/sub-state),
+ * falling back to the farthest reachable navigable node, then any navigable node.
+ * So the panel opens on a real, non-empty route and not, say, an IntroModal.
  */
 function defaultTarget(graph: UiGraph, from: string, nav: GraphNode[]): string {
   const reachable = reachableFrom(graph, from)
   const reachableNav = nav.filter((n) => n.id !== from && reachable.has(n.id))
+  const reachableScreens = reachableNav.filter((n) => n.kind === 'screen' || n.kind === 'route')
+  if (reachableScreens.length > 0) return reachableScreens[reachableScreens.length - 1]!.id
   if (reachableNav.length > 0) return reachableNav[reachableNav.length - 1]!.id
   const other = nav.find((n) => n.id !== from)
   return other?.id ?? from
