@@ -635,10 +635,10 @@ function controlMetaFor(el: Node): ControlInfo | null {
   else if (/^[a-z]/.test(tag) && hasEventHandler(el)) controlType = 'element'
   else return null
   const textLabel = controlType === 'button' || controlType === 'element' ? getJsxText(el) : undefined
-  // refapp inputs (and icon buttons) carry their label in placeholder / aria-label, often
-  // as a {t('key')} expression — the authoritative name when there is no visible text, so
-  // it slots ahead of the weaker i18n-key/icon/className inference.
-  const attrName = attrLabel(el, 'placeholder') ?? attrLabel(el, 'aria-label')
+  // refapp inputs (and icon buttons) carry their label in placeholder / aria-label / title
+  // (the tooltip), often as a {t('key')} expression — the authoritative name when there is
+  // no visible text, so it slots ahead of the weaker i18n-key/icon/className inference.
+  const attrName = attrLabel(el, 'placeholder') ?? attrLabel(el, 'aria-label') ?? attrLabel(el, 'title')
   const inferred = textLabel ?? attrName ?? inferredName(el)
   const name = stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? inferred
   const selector = controlSelector(el, tag, controlType, inferred)
