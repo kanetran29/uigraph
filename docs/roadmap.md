@@ -138,4 +138,4 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
 | F10.1 | Modal-control descent (imported modals → controls under the modal node) | L2 | F-control-identity-selectors, F2.9 | done | [F-modal-controls](./features/F-modal-controls.md) |
-| F10.2 | Deep non-modal view reach (selective path-gated descent; e.g. ProfileView) | L2 | F10.1 | planned | — |
+| F10.2 | Deep overlay-view reach (*Visible-gated sub-views; e.g. ProfileView) | L2 | F10.1 | done | [F-deep-view-controls](./features/F-deep-view-controls.md) |

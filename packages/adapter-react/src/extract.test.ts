@@ -684,3 +684,125 @@ describe('extractGraph — modal-control descent (F-modal-controls)', () => {
     expect(graph.edges).toHaveLength(15)
   })
 })
+
+describe('extractGraph — gated overlay-view control descent (F-deep-view-controls)', () => {
+  // refapp's ProfileView shape: a deep imported view gated by a *Visible state var
+  // (not a *Modal tag), holding a verify CTA + phone input + a NotificationSettings subview.
+  const profileApp = {
+    '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+    // Landing is depth 1; it gates the deep ProfileView (depth 2) behind a *Visible var.
+    '/H.tsx': `import Landing from './Landing'\nexport default function H(){ return <Landing/> }`,
+    '/Landing.tsx': `import { useState } from 'react'\nimport ProfileView from './ProfileView'\nexport default function Landing(){ const [profileViewVisible]=useState(false); const isLoggedIn=true; return <div><button onClick={()=>{}}>Open profile</button>{profileViewVisible && isLoggedIn && (<ProfileView/>)}</div> }`,
+    '/ProfileView.tsx': `import NotificationSettings from './NotificationSettings'\nexport default function ProfileView(){ return <div><button onClick={()=>{}}>Verify identity</button><input type="tel" name="phone"/><NotificationSettings/></div> }`,
+    '/NotificationSettings.tsx': `export default function NotificationSettings(){ return <button onClick={()=>{}}>Save notification settings</button> }`,
+  }
+
+  it('treats a *Visible-gated imported view as an overlay node and descends its controls', () => {
+    const { graph } = extractGraph(inMemory(profileApp), '/', { controls: true })
+    const overlay = graph.nodes.find((n) => n.kind === 'modal' && n.label === 'ProfileView')
+    expect(overlay).toBeDefined()
+    const kids = graph.nodes.filter((n) => n.kind === 'control' && n.parent === overlay!.id)
+    const labels = kids.map((c) => c.control?.name ?? c.control?.element)
+    expect(labels).toContain('Verify identity')
+    expect(kids.some((c) => c.control?.element === 'input')).toBe(true)
+    expect(validateGraph(graph)).toEqual([])
+  })
+
+  it('detects the gate through a multi-&& guard (a && b && <View/>) that modalGateVar misses', () => {
+    const { graph } = extractGraph(inMemory(profileApp), '/', { controls: true })
+    // profileViewVisible && isLoggedIn && <ProfileView/> — the overlay must still be found
+    expect(graph.nodes.some((n) => n.kind === 'modal' && n.label === 'ProfileView')).toBe(true)
+  })
+
+  it('reaches controls in a subview the gated view delegates to (ProfileView -> NotificationSettings)', () => {
+    const { graph } = extractGraph(inMemory(profileApp), '/', { controls: true })
+    const overlay = graph.nodes.find((n) => n.kind === 'modal' && n.label === 'ProfileView')
+    const save = graph.nodes.find((n) => n.kind === 'control' && n.parent === overlay!.id && n.control?.name === 'Save notification settings')
+    expect(save).toBeDefined()
+  })
+
+  it('does NOT turn a non-*Visible-gated component into an overlay (blow-up bound)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        // gated by showThing (NOT *Visible) -> ordinary conditional render, stays at depth-1 behaviour
+        '/H.tsx': `import { useState } from 'react'\nimport SharedHeader from './SharedHeader'\nexport default function H(){ const [showThing]=useState(false); return <div>{showThing && <SharedHeader/>}</div> }`,
+        '/SharedHeader.tsx': `import Deep from './Deep'\nexport default function SharedHeader(){ return <div><button onClick={()=>{}}>Header btn</button><Deep/></div> }`,
+        '/Deep.tsx': `export default function Deep(){ return <button onClick={()=>{}}>Deep btn</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    // no overlay node created for SharedHeader; and the depth-2 Deep btn is NOT reached
+    expect(graph.nodes.some((n) => n.kind === 'modal')).toBe(false)
+    expect(graph.nodes.some((n) => n.control?.name === 'Deep btn')).toBe(false)
+  })
+
+  it('caps a gated-view navigation to may', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /><Route path="/x" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'\nimport SettingsView from './SettingsView'\nexport default function H(){ const [settingsVisible]=useState(false); return <div>{settingsVisible && <SettingsView/>}</div> }`,
+        '/SettingsView.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function SettingsView(){ const navigate=useNavigate(); return <button onClick={()=>navigate('/x')}>Go x</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const e = graph.edges.find((x) => x.to === 'n_x')
+    expect(e).toBeDefined()
+    expect(e?.modality).toBe('may')
+    expect(e?.witness).toBeDefined()
+  })
+
+  it('does NOT promote a component merely NESTED inside a *Visible-gated wrapper (no re-home)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        // Card is rendered unconditionally AND nested inside a drawerVisible-gated <section>.
+        // The gate is on <section> (a host element), not on <Card/> — Card must NOT become an
+        // overlay, and its unconditional control must stay parented to the screen.
+        '/H.tsx': `import { useState } from 'react'\nimport Card from './Card'\nexport default function H(){ const [drawerVisible]=useState(false); return <div><Card/>{drawerVisible && <section><Card/></section>}</div> }`,
+        '/Card.tsx': `export default function Card(){ return <button onClick={()=>{}}>Card action</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    expect(graph.nodes.some((n) => n.kind === 'modal')).toBe(false)
+    const cardCtrl = graph.nodes.find((n) => n.kind === 'control' && n.control?.name === 'Card action')
+    expect(cardCtrl?.parent).toBe('n_root')
+  })
+
+  it('emits a nested overlay’s control exactly once (no double-count across overlays)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'\nimport OuterView from './OuterView'\nexport default function H(){ const [outerVisible]=useState(false); return <div>{outerVisible && <OuterView/>}</div> }`,
+        '/OuterView.tsx': `import { useState } from 'react'\nimport InnerView from './InnerView'\nexport default function OuterView(){ const [innerVisible]=useState(false); return <div><button onClick={()=>{}}>Outer btn</button>{innerVisible && <InnerView/>}</div> }`,
+        '/InnerView.tsx': `export default function InnerView(){ return <button onClick={()=>{}}>Inner btn</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const inner = graph.nodes.filter((n) => n.kind === 'control' && n.control?.name === 'Inner btn')
+    expect(inner).toHaveLength(1)
+  })
+
+  it('keeps screen control ids byte-stable when a gated view is added', () => {
+    const base = {
+      '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+    }
+    const without = extractGraph(inMemory({ ...base, '/H.tsx': `export default function H(){ return <div><button onClick={()=>{}}>Top</button></div> }` }), '/', { controls: true }).graph
+    const withView = extractGraph(
+      inMemory({
+        ...base,
+        '/H.tsx': `import { useState } from 'react'\nimport DetailView from './DetailView'\nexport default function H(){ const [detailVisible]=useState(false); return <div><button onClick={()=>{}}>Top</button>{detailVisible && <DetailView/>}</div> }`,
+        '/DetailView.tsx': `export default function DetailView(){ return <button onClick={()=>{}}>Top</button> }`,
+      }),
+      '/',
+      { controls: true },
+    ).graph
+    const topId = (g: typeof without): string | undefined =>
+      g.nodes.find((n) => n.kind === 'control' && n.parent === 'n_root' && n.control?.name === 'Top')?.id
+    expect(topId(withView)).toBe(topId(without))
+  })
+})

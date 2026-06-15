@@ -714,6 +714,36 @@ function detectModalOpen(call: Node): string | null {
   return v.length > 0 ? v.charAt(0).toLowerCase() + v.slice(1) : 'modal'
 }
 
+/**
+ * The *Visible state var gating an overlay sub-view's render — the first identifier
+ * ending in `Visible` among the guards of an enclosing `{ … && <Component/>}` conjunction
+ * (e.g. `profileViewVisible && isLoggedIn && <ProfileView/>`). Unlike modalGateVar (a
+ * single `{ident && …}`), this walks a multi-`&&` guard. Restricting to a `*Visible`
+ * suffix targets the overlay-view convention without firing on ordinary conditional renders.
+ */
+function gatedOverlayVar(el: Node): string | null {
+  let cur: Node | undefined = el.getParent()
+  const guards: string[] = []
+  for (let i = 0; i < 6 && cur; i++) {
+    if (Node.isParenthesizedExpression(cur)) {
+      cur = cur.getParent()
+      continue
+    }
+    if (Node.isBinaryExpression(cur) && cur.getOperatorToken().getText() === '&&') {
+      const left = cur.getLeft()
+      for (const id of [left, ...left.getDescendants()]) if (Node.isIdentifier(id)) guards.push(id.getText())
+      cur = cur.getParent()
+      continue
+    }
+    // The element must reach the `&&` guard through paren wrappers only; crossing a JSX
+    // element/fragment means it is merely NESTED inside a gated wrapper, not itself the
+    // gated render — promoting it would re-home an unrelated control.
+    if (Node.isJsxElement(cur) || Node.isJsxFragment(cur) || Node.isJsxExpression(cur)) break
+    cur = cur.getParent()
+  }
+  return guards.find((g) => /visible$/i.test(g)) ?? null
+}
+
 /** The state variable gating a modal element's render: an isOpen/open/visible/show prop bound to {ident}, or an enclosing `{ident && <Modal/>}`. */
 function modalGateVar(el: Node): string | null {
   for (const name of ['isOpen', 'open', 'visible', 'show', 'isVisible', 'active', 'isActive', 'opened']) {
@@ -1092,6 +1122,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
 
   if (opts.controls) {
     let midx = 0
+    let vidx = 0
     for (const route of routes) {
       if (!route.componentFile) continue
       if (!isRepresentative(route)) continue
@@ -1246,15 +1277,44 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         }
       }
 
-      // Pass 2: screen controls — skipping files owned by a descended modal (their
-      // controls belong to the modal node, emitted in pass 3).
+      // Pass 1b: detect state-gated overlay sub-views — a capitalized IMPORTED component
+      // gated by a *Visible state var (e.g. {profileViewVisible && <ProfileView/>}). These
+      // are overlay surfaces just like modals, but tagged by convention not suffix. Kept
+      // entirely separate from the modal pass — a distinct `mv_` id namespace + counter so
+      // adding a view never perturbs an existing modal's positional `m_<route>_<midx>` id,
+      // and they are NOT added to modalIds (they are not opened via a setShow* fallback).
+      const viewIdByTag = new Map<string, string>()
+      for (const [cf] of screenFiles) {
+        const file = relative(projectDir, cf.getFilePath())
+        for (const el of allJsxElements(cf)) {
+          const tag = jsxTag(el)
+          const base = tag.split('.')[0] ?? tag
+          if (/(Modal|Dialog|Drawer|Sheet|Popover)$/.test(tag)) continue
+          if (!/^[A-Z]/.test(base) || gatedOverlayVar(el) === null) continue
+          const vFile = resolveComponentFile(cf, base)
+          if (!vFile || vFile.getFilePath() === cf.getFilePath()) continue
+          if (modalFilePaths.has(vFile.getFilePath()) || viewIdByTag.has(tag)) continue
+          const vId = `mv_${route.nodeId}_${vidx++}`
+          viewIdByTag.set(tag, vId)
+          nodes.push({ id: vId, route: null, componentPath: file, label: tag, kind: 'modal' })
+          modalDescend.set(vId, vFile)
+          modalFilePaths.add(vFile.getFilePath())
+        }
+      }
+
+      // Pass 2: screen controls — skipping files owned by a descended overlay (their
+      // controls belong to the overlay node, emitted in pass 3).
       emitControls(route.nodeId, gatherControls(screenFiles, modalFilePaths), false, true)
 
-      // Pass 3: per imported modal, descend its own component tree (depth 1 reaches a
-      // modal that delegates to a child, e.g. SignupLoginModal -> LoginOrSignup) and
-      // emit its controls under the modal node, every nav capped to may.
+      // Pass 3: per imported overlay, descend its own component tree (depth 1 reaches an
+      // overlay that delegates to a child, e.g. SignupLoginModal -> LoginOrSignup) and
+      // emit its controls under the overlay node, every nav capped to may. Each descent
+      // skips the OTHER overlays' root files so a nested overlay's controls are emitted
+      // once (under that nested overlay's own pass), never double-counted.
+      const overlayRoots = new Set([...modalDescend.values()].map((f) => f.getFilePath()))
       for (const [mId, mFile] of modalDescend) {
-        emitControls(mId, gatherControls(screenSourceFiles(mFile, 1)), true, false)
+        const skip = new Set([...overlayRoots].filter((p) => p !== mFile.getFilePath()))
+        emitControls(mId, gatherControls(screenSourceFiles(mFile, 1), skip), true, false)
       }
     }
   }
