@@ -17,6 +17,7 @@ const DEFAULT_RULESET = 'rr-v5v6-2026.06'
 type TargetInfo =
   | { kind: 'literal'; value: string }
   | { kind: 'template'; staticPrefix: string }
+  | { kind: 'enum'; values: string[] }
   | { kind: 'dynamic'; expr?: string }
 
 interface RouteInfo {
@@ -71,12 +72,37 @@ function allJsxElements(sf: SourceFile): Node[] {
 }
 
 /** A literal/template/dynamic classification of a navigation target expression. */
-function classifyTarget(expr: Node | undefined): TargetInfo {
+function classifyTarget(expr: Node | undefined, sf?: SourceFile): TargetInfo {
   if (!expr) return { kind: 'dynamic' }
   if (Node.isStringLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isNoSubstitutionTemplateLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isTemplateExpression(expr)) return { kind: 'template', staticPrefix: expr.getHead().getLiteralText() }
+  // A computed lookup into a const route-map, e.g. push(subviewPaths[sv]) — over-
+  // approximate to the map's literal string values (the real possible destinations).
+  if (sf && (Node.isElementAccessExpression(expr) || Node.isPropertyAccessExpression(expr))) {
+    const obj = expr.getExpression()
+    if (Node.isIdentifier(obj)) {
+      const values = resolveConstStringValues(obj.getText(), sf)
+      if (values.length > 0) return { kind: 'enum', values }
+    }
+  }
   return { kind: 'dynamic', expr: expr.getText() }
+}
+
+/** The literal string values of a module-level `const X = {…}` / `const X = […]`, for const route-maps. */
+function resolveConstStringValues(name: string, sf: SourceFile): string[] {
+  const init = sf.getVariableDeclaration(name)?.getInitializer()
+  const out: string[] = []
+  if (init && Node.isObjectLiteralExpression(init)) {
+    for (const p of init.getProperties()) {
+      if (!Node.isPropertyAssignment(p)) continue
+      const v = p.getInitializer()
+      if (v && (Node.isStringLiteral(v) || Node.isNoSubstitutionTemplateLiteral(v))) out.push(v.getLiteralValue())
+    }
+  } else if (init && Node.isArrayLiteralExpression(init)) {
+    for (const e of init.getElements()) if (Node.isStringLiteral(e) || Node.isNoSubstitutionTemplateLiteral(e)) out.push(e.getLiteralValue())
+  }
+  return out
 }
 
 function classifyToAttr(attr: JsxAttribute | undefined): TargetInfo {
@@ -387,7 +413,7 @@ function collectTargets(sf: SourceFile): RawTarget[] {
     }
     if (effect === null) continue
     const arg0 = call.getArguments()[0]
-    out.push({ ti: classifyTarget(arg0), event: 'navigate', effect, node: call, guard: getGuard(call) ?? extraConditionGuard(call) })
+    out.push({ ti: classifyTarget(arg0, sf), event: 'navigate', effect, node: call, guard: getGuard(call) ?? extraConditionGuard(call) })
   }
   return out
 }
@@ -876,6 +902,16 @@ function analyzeHandler(fnNode: Node, navInfo: { navSet: Set<string>; histSet: S
 }
 
 /** Extract a graph from an already-built ts-morph project (testable in memory). */
+/** The declared route that is the longest strict path-prefix parent of fullPath, or null. */
+function parentRouteOf(fullPath: string, routes: RouteLike[]): RouteLike | null {
+  let best: RouteLike | null = null
+  for (const r of routes) {
+    if (r.fullPath === fullPath || r.fullPath === '/') continue
+    if (fullPath.startsWith(r.fullPath + '/') && (!best || r.fullPath.length > best.fullPath.length)) best = r
+  }
+  return best
+}
+
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const routes = collectRoutes(project)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
@@ -976,6 +1012,12 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
           soundiness.push({ kind: 'over-approximation', file, loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
           for (const cand of cands) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
+        } else if (t.ti.kind === 'enum') {
+          soundiness.push({ kind: 'over-approximation', file, loc, detail: `const route-map target over-approximated to ${t.ti.values.length} value(s)` })
+          for (const val of t.ti.values) {
+            const { exact } = matchLiteralAll(val, routeLikes)
+            if (exact) pushEdge(route.nodeId, exact.nodeId, { ...t, ti: { kind: 'literal', value: val } }, 'may', 0.5, file, loc)
+          }
         } else {
           soundiness.push({ kind: 'dynamic-target', file, loc, detail: `fully dynamic navigation target (event ${t.event})` })
           pushDynamicEdge(route.nodeId, t, file, loc)
@@ -1076,6 +1118,39 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             ...(inter.effects.length > 0 ? { effects: inter.effects } : {}),
           },
         })
+      }
+    }
+  }
+
+  // Shared/context navigations: a nav in a NON-route file (context/hook) to a nested
+  // sub-route is attributed to that route's declared parent as `may`, witnessed by the
+  // call — e.g. a profile context's push(subviewPaths[sv]) / push('/profile/x')
+  // connects /profile -> /profile/sell-listings, which no route component renders.
+  const routeFilePaths = new Set<string>(routes.flatMap((r) => (r.componentFile ? [String(r.componentFile.getFilePath())] : [])))
+  for (const sf of project.getSourceFiles()) {
+    if (routeFilePaths.has(String(sf.getFilePath()))) continue
+    for (const t of collectTargets(sf)) {
+      const lc = sf.getLineAndColumnAtPos(t.node.getStart())
+      const loc = { line: lc.line, col: lc.column }
+      const file = relative(projectDir, sf.getFilePath())
+      // Resolve the call's target(s) to declared routes: literal/enum -> exact match;
+      // template (`/profile/price-estimations/${id}`) -> prefix candidates.
+      const hits: RouteLike[] = []
+      if (t.ti.kind === 'literal') {
+        const { exact } = matchLiteralAll(t.ti.value, routeLikes)
+        if (exact) hits.push(exact)
+      } else if (t.ti.kind === 'enum') {
+        for (const v of t.ti.values) {
+          const { exact } = matchLiteralAll(v, routeLikes)
+          if (exact) hits.push(exact)
+        }
+      } else if (t.ti.kind === 'template') {
+        hits.push(...matchPrefix(t.ti.staticPrefix, routeLikes))
+      }
+      for (const hit of hits) {
+        const parent = parentRouteOf(hit.fullPath, routeLikes)
+        if (!parent) continue
+        pushEdge(parent.nodeId, hit.nodeId, { ...t, ti: { kind: 'literal', value: hit.fullPath }, ruleId: 'rr.shared-nav' }, 'may', 0.5, file, loc)
       }
     }
   }
