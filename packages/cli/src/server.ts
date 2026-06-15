@@ -8,7 +8,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ToolContext, UpdateGraphArgs } from '@uigraph/mcp'
 import { dbPath, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
-import { openStore } from '@uigraph/core/node'
+import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@uigraph/core/node'
 import { buildCoverage, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
 
 /** Render the workspace overlay as a markdown "planned changes" spec. */
@@ -133,15 +133,48 @@ function readBody(req: IncomingMessage): Promise<string> {
  * CORS, short-circuits preflight OPTIONS, parses the JSON body for writes, and
  * delegates every other request to the pure handleApiRequest router.
  */
+/**
+ * How a request picks its workspace. `resolveDir(wsId)` maps a client-supplied OPAQUE id
+ * to a server-vetted absolute dir (or null = unknown/unavailable → 404); the id is NEVER
+ * used to build a path. `workspaces()` is the client-safe switcher list (no dirs leak).
+ */
+export interface ServeConfig {
+  resolveDir: (wsId: string | null) => string | null
+  workspaces: () => WorkspaceSummary[]
+}
+
+/** Single-workspace mode: every request hits the one fixed dir; no switcher list. */
+export function singleConfig(dir: string): ServeConfig {
+  return { resolveDir: () => dir, workspaces: () => [] }
+}
+
+/** Registry mode: resolve ?ws against ~/.uigraph; null ws → the first AVAILABLE workspace. */
+export function registryConfig(): ServeConfig {
+  const dirHasDb = (dir: string): boolean => existsSync(dbPath({ dir }))
+  return {
+    resolveDir: (wsId) => {
+      const reg = readRegistry()
+      if (wsId === null) return reg.workspaces.find((w) => dirHasDb(w.dir))?.dir ?? null
+      const e = findWorkspace(reg, wsId)
+      return e && dirHasDb(e.dir) ? e.dir : null
+    },
+    workspaces: () => summarize(readRegistry(), (e) => dirHasDb(e.dir)),
+  }
+}
+
 export function createApiServer(dir: string): Server {
-  const ctx: ToolContext = { dir }
+  return createConfiguredServer(singleConfig(dir))
+}
+
+/** Build the node:http server from a ServeConfig (single or registry mode). */
+export function createConfiguredServer(config: ServeConfig): Server {
   return createHttpServer((req: IncomingMessage, res: ServerResponse) => {
-    void handle(ctx, req, res)
+    void handle(config, req, res)
   })
 }
 
-/** Serve one HTTP request: apply CORS, parse the body, route, and write JSON. */
-async function handle(ctx: ToolContext, req: IncomingMessage, res: ServerResponse): Promise<void> {
+/** Serve one HTTP request: apply CORS, resolve the workspace, route, and write JSON. */
+async function handle(config: ServeConfig, req: IncomingMessage, res: ServerResponse): Promise<void> {
   for (const [k, v] of Object.entries(CORS_HEADERS)) res.setHeader(k, v)
 
   if (req.method === 'OPTIONS') {
@@ -150,7 +183,24 @@ async function handle(ctx: ToolContext, req: IncomingMessage, res: ServerRespons
     return
   }
 
-  const path = (req.url ?? '').split('?')[0] ?? ''
+  const url = new URL(req.url ?? '/', 'http://localhost')
+  const path = url.pathname
+
+  // The switcher list — client-safe summaries (dirs omitted), independent of any workspace.
+  if (req.method === 'GET' && path === '/api/workspaces') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify(config.workspaces()))
+    return
+  }
+
+  // Resolve the per-request workspace from the OPAQUE ?ws id (never a path) → 404 if unknown.
+  const dir = config.resolveDir(url.searchParams.get('ws'))
+  if (dir === null) {
+    res.writeHead(404, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ error: 'unknown or unavailable workspace' }))
+    return
+  }
+  const ctx: ToolContext = { dir }
 
   if (req.method === 'GET' && path.startsWith('/api/shots/')) {
     const file = resolveShotPath(ctx.dir, path)
@@ -181,19 +231,20 @@ async function handle(ctx: ToolContext, req: IncomingMessage, res: ServerRespons
   res.end(JSON.stringify(result.body))
 }
 
-/** Options for starting the API server: the workspace dir and the listen port. */
+/** Options for starting the API server: a single workspace `dir`, OR registry mode (omit
+ *  dir → serve every registered workspace, selected per-request by ?ws). */
 export interface StartApiServerOptions {
-  dir: string
+  dir?: string
   port: number
 }
 
 /**
  * Start the serve API listening on a port, resolving with the server and the URL
  * once it is accepting connections. A port of 0 binds an ephemeral port, which
- * tests use to avoid collisions.
+ * tests use to avoid collisions. With `dir` → single-workspace; without → registry mode.
  */
 export function startApiServer(opts: StartApiServerOptions): Promise<{ server: Server; url: string }> {
-  const server = createApiServer(opts.dir)
+  const server = opts.dir !== undefined ? createApiServer(opts.dir) : createConfiguredServer(registryConfig())
   return new Promise((resolve) => {
     server.listen(opts.port, () => {
       const address = server.address()

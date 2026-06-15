@@ -7,7 +7,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
-import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, postOverlay, postScenario, type ScenariosState, type UpdateOp } from './api'
+import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, fetchWorkspaces, postOverlay, postScenario, type ScenariosState, type UpdateOp, type WorkspaceSummary } from './api'
+import { readStored, writeStored } from './storage'
 import { searchMatchIds } from './search'
 import { GraphCanvas, type Selection } from './GraphCanvas'
 import { Logo } from './Logo'
@@ -56,6 +57,8 @@ export function App(): JSX.Element {
   const [pathEdgeIds, setPathEdgeIds] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([])
+  const [activeWs, setActiveWs] = useState<string | null>(() => readStored('uigraph.activeWorkspace'))
   const { theme, setTheme, resolved } = useTheme()
   const { t } = useT()
 
@@ -63,8 +66,21 @@ export function App(): JSX.Element {
   // Memoized on [graph, search] so it isn't recomputed on unrelated re-renders.
   const matchIds = useMemo(() => (graph ? searchMatchIds(graph.nodes, search) : new Set<string>()), [graph, search])
 
-  const load = useCallback(async () => {
-    const [{ graph: g, live: isLive }, props, cov, scen] = await Promise.all([fetchGraph(), fetchProposals(), fetchCoverage(), fetchScenarios()])
+  // Load the registry once + reconcile the active workspace: keep a valid stored id, else
+  // fall back to the first one. Empty list = single-workspace (or offline) — activeWs null.
+  const reconcileWorkspaces = useCallback(async () => {
+    const list = await fetchWorkspaces()
+    setWorkspaces(list)
+    setActiveWs((prev) => {
+      if (list.length === 0) return null
+      const next = prev && list.some((w) => w.id === prev) ? prev : (list.find((w) => w.available)?.id ?? list[0]!.id)
+      writeStored('uigraph.activeWorkspace', next)
+      return next
+    })
+  }, [])
+
+  const load = useCallback(async (ws: string | null) => {
+    const [{ graph: g, live: isLive }, props, cov, scen] = await Promise.all([fetchGraph(ws), fetchProposals(ws), fetchCoverage(ws), fetchScenarios(ws)])
     setGraph(g)
     setLive(isLive)
     setProposals(props)
@@ -83,19 +99,33 @@ export function App(): JSX.Element {
         return
       }
       try {
-        await postScenario(name)
-        await load()
+        await postScenario(name, activeWs)
+        await load(activeWs)
         setSelection(null)
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err))
       }
     },
-    [live, load],
+    [live, load, activeWs],
   )
 
+  // Switch the active project: reset the focused view, persist, and let the load effect refetch.
+  const handleSwitchWorkspace = useCallback((id: string) => {
+    setSelection(null)
+    setPathEdgeIds(new Set())
+    setSearch('')
+    setError(null)
+    setActiveWs(id)
+    writeStored('uigraph.activeWorkspace', id)
+  }, [])
+
   useEffect(() => {
-    void load()
-  }, [load])
+    void reconcileWorkspaces()
+  }, [reconcileWorkspaces])
+
+  useEffect(() => {
+    void load(activeWs)
+  }, [activeWs, load])
 
   const applyOp = useCallback(
     async (op: UpdateOp) => {
@@ -105,14 +135,14 @@ export function App(): JSX.Element {
         return
       }
       try {
-        await postOverlay(op)
-        await load()
+        await postOverlay(op, activeWs)
+        await load(activeWs)
         setSelection(null)
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err))
       }
     },
-    [live, load],
+    [live, load, activeWs],
   )
 
   const handleConnect = useCallback(
@@ -184,6 +214,21 @@ export function App(): JSX.Element {
     <div className="app">
       <header className="topbar">
         <Logo />
+        {workspaces.length > 1 ? (
+          <select
+            className="workspace-switcher"
+            aria-label="Switch project"
+            value={activeWs ?? ''}
+            onChange={(e) => handleSwitchWorkspace(e.target.value)}
+          >
+            {workspaces.map((w) => (
+              <option key={w.id} value={w.id} disabled={!w.available}>
+                {w.name}
+                {w.available ? '' : ' (re-map)'}
+              </option>
+            ))}
+          </select>
+        ) : null}
         <span className={live ? 'status live' : 'status offline'}>{live ? t('status.live') : t('status.offline')}</span>
         <span className="counts">
           {graph.nodes.length} nodes · {graph.edges.length} edges

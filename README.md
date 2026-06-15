@@ -18,7 +18,7 @@ refapp.example frontend. See [docs/](docs/README.md) and the source dossier
 | `@uigraph/adapter-react` | react-router **v5 + v6** static extraction (ts-morph) |
 | `@uigraph/adapter-angular` | Angular `Routes` / `routerLink` / `canActivate` extraction |
 | `@uigraph/mcp` | model-free **stdio MCP server** (`get_graph`, `plan_path`, `update_graph`, `report_observation`, `diff`) |
-| `@uigraph/cli` | `uigraph map` / `diff` / `serve` / `mcp` |
+| `@uigraph/cli` | `uigraph map` / `diff` / `serve` (single or multi-project) / `workspace` / `mcp` |
 | `apps/dashboard` | **React Flow** editable graph view (the "Obsidian for the UI graph") |
 | `examples/sample-*-app` | golden fixtures (known graphs) |
 
@@ -41,8 +41,25 @@ pnpm --filter @uigraph/cli run uigraph -- serve /tmp/demo --port 4317 &
 pnpm --filter @uigraph/dashboard dev      # http://localhost:5173 (proxies /api -> :4317)
 ```
 
-`map --adapter angular` works the same on an Angular project. `uigraph mcp <dir>`
+`map --adapter angular|vue|next` works the same on those projects. `uigraph mcp <dir>`
 starts the MCP server for Claude Code / Cursor.
+
+### Multiple projects at once
+
+`uigraph map` auto-registers each project in a per-user registry (`~/.uigraph/`,
+or `$UIGRAPH_HOME`). Run `serve` **without a dir** to serve every registered
+workspace; a project switcher appears in the dashboard topbar.
+
+```bash
+uigraph map ~/work/shop  --adapter next     # registers "shop"
+uigraph map ~/work/admin --adapter react    # registers "admin"
+uigraph serve                               # serves both, switchable in the dashboard
+uigraph workspace list                      # ● available · ○ needs re-map
+```
+
+The dashboard selects a project via an **opaque** `?ws=<id>` — that id resolves
+only to a registered absolute dir on the server, never builds a path, and the
+`/api/workspaces` list omits absolute dirs. `map --no-register` opts out.
 
 ## Status & honest limitations (post red-team)
 

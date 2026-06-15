@@ -15,6 +15,10 @@ export {
   readSoundiness,
   dbPathFor,
   DB_FILE,
+  runWorkspaceAdd,
+  runWorkspaceList,
+  runWorkspaceRemove,
+  formatWorkspaceList,
   type AdapterName,
   type RunMapOptions,
   type RunDiffOptions,
@@ -24,8 +28,12 @@ export {
 export {
   handleApiRequest,
   createApiServer,
+  createConfiguredServer,
+  registryConfig,
+  singleConfig,
   startApiServer,
   type ApiRequest,
   type ApiResponse,
+  type ServeConfig,
   type StartApiServerOptions,
 } from './server'

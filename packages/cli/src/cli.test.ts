@@ -12,9 +12,10 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
 import { openStore, saveGraph } from '@uigraph/core/node'
 import type { Server } from 'node:http'
-import { dbPathFor, formatDiff, readSoundiness, runDiff, runGen, runKitInstall, runKitPrint, runMap } from './commands'
-import { handleApiRequest, resolveShotPath, startApiServer } from './server'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { dbPathFor, formatDiff, readSoundiness, runDiff, runGen, runKitInstall, runKitPrint, runMap, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove } from './commands'
+import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
+import { readRegistry, summarize } from '@uigraph/core/node'
+import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 
 /** Seed a workspace dir's SQLite store with a base graph; returns the dir. */
 function seedWorkspace(dir: string, g: UiGraph): string {
@@ -246,6 +247,122 @@ describe('startApiServer (end-to-end on an ephemeral port)', () => {
     const body = (await res.json()) as UiGraph
     expect(body.nodes).toHaveLength(2)
     expect(body.edges.map((e) => e.id)).toEqual(['e_ab'])
+  })
+})
+
+describe('multi-workspace serve (registry routing + security boundary)', () => {
+  // Two seeded workspaces behind a synthetic ServeConfig: 'a' has 2 nodes, 'b' has 1.
+  function twoWorkspaceConfig(): { config: ServeConfig; dirA: string; dirB: string } {
+    const dirA = seedWorkspace(tempDir('uigraph-ws-a-'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
+    const dirB = seedWorkspace(tempDir('uigraph-ws-b-'), graph([node('c')], []))
+    const byId: Record<string, string> = { a: dirA, b: dirB }
+    const config: ServeConfig = {
+      resolveDir: (ws) => (ws === null ? dirA : (byId[ws] ?? null)),
+      workspaces: () => [
+        { id: 'a', name: 'A', adapter: 'react', available: true },
+        { id: 'b', name: 'B', adapter: 'next', available: true },
+      ],
+    }
+    return { config, dirA, dirB }
+  }
+
+  it('routes ?ws to the matching workspace graph, defaults null ws to the first', async () => {
+    const { config } = twoWorkspaceConfig()
+    const server = createConfiguredServer(config)
+    openServers.push(server)
+    const { port } = await new Promise<{ port: number }>((resolve) =>
+      server.listen(0, () => resolve({ port: (server.address() as { port: number }).port })),
+    )
+    const base = `http://localhost:${port}`
+
+    const ga = (await (await fetch(`${base}/api/graph?ws=a`)).json()) as UiGraph
+    const gb = (await (await fetch(`${base}/api/graph?ws=b`)).json()) as UiGraph
+    const gDefault = (await (await fetch(`${base}/api/graph`)).json()) as UiGraph
+    expect(ga.nodes).toHaveLength(2)
+    expect(gb.nodes).toHaveLength(1)
+    expect(gDefault.nodes).toHaveLength(2)
+  })
+
+  it('GET /api/workspaces returns client-safe summaries with NO absolute dir', async () => {
+    const { config } = twoWorkspaceConfig()
+    const server = createConfiguredServer(config)
+    openServers.push(server)
+    const { port } = await new Promise<{ port: number }>((resolve) =>
+      server.listen(0, () => resolve({ port: (server.address() as { port: number }).port })),
+    )
+    const list = (await (await fetch(`http://localhost:${port}/api/workspaces`)).json()) as Array<Record<string, unknown>>
+    expect(list.map((w) => w.id)).toEqual(['a', 'b'])
+    expect(list.every((w) => !('dir' in w))).toBe(true)
+  })
+
+  it('404s an unknown ws id and a traversal-shaped ws id (opaque id never builds a path)', async () => {
+    const { config } = twoWorkspaceConfig()
+    const server = createConfiguredServer(config)
+    openServers.push(server)
+    const { port } = await new Promise<{ port: number }>((resolve) =>
+      server.listen(0, () => resolve({ port: (server.address() as { port: number }).port })),
+    )
+    const base = `http://localhost:${port}`
+    expect((await fetch(`${base}/api/graph?ws=nope`)).status).toBe(404)
+    expect((await fetch(`${base}/api/graph?ws=${encodeURIComponent('../../etc/passwd')}`)).status).toBe(404)
+  })
+
+  it('singleConfig regression: ignores ?ws, serves the one dir, empty switcher list', () => {
+    const dir = seedWorkspace(tempDir('uigraph-ws-single-'), graph([node('a')], []))
+    const config = singleConfig(dir)
+    expect(config.resolveDir(null)).toBe(dir)
+    expect(config.resolveDir('anything')).toBe(dir)
+    expect(config.workspaces()).toEqual([])
+  })
+})
+
+describe('workspace registry CLI (UIGRAPH_HOME isolated)', () => {
+  let home: string
+  afterEach(() => {
+    delete process.env.UIGRAPH_HOME
+    if (home) rmSync(home, { recursive: true, force: true })
+  })
+  function isolatedHome(): void {
+    home = tempDir('uigraph-home-')
+    process.env.UIGRAPH_HOME = home
+  }
+  // A throwaway copy of the react fixture so default-path runMap writes its db into temp, never the repo.
+  function fixtureCopy(): string {
+    const dst = tempDir('uigraph-fixture-')
+    cpSync(SAMPLE_REACT, dst, { recursive: true })
+    return dst
+  }
+
+  it('runMap auto-registers the workspace under its canonical dir', async () => {
+    isolatedHome()
+    await runMap({ dir: fixtureCopy(), adapter: 'react' })
+    const reg = readRegistry()
+    expect(reg.workspaces).toHaveLength(1)
+    expect(reg.workspaces[0]?.adapter).toBe('react')
+    expect(summarize(reg, () => true)[0]).not.toHaveProperty('dir')
+  })
+
+  it('--no-register (register:false) leaves the registry empty', async () => {
+    isolatedHome()
+    await runMap({ dir: fixtureCopy(), adapter: 'react', register: false })
+    expect(readRegistry().workspaces).toHaveLength(0)
+  })
+
+  it('--out (custom db path) does not auto-register', async () => {
+    isolatedHome()
+    await runMap({ dir: SAMPLE_REACT, adapter: 'react', out: join(tempDir('uigraph-out-'), 'g.db') })
+    expect(readRegistry().workspaces).toHaveLength(0)
+  })
+
+  it('add then remove round-trips through the registry; registryConfig resolves the live db', async () => {
+    isolatedHome()
+    const dir = seedWorkspace(tempDir('uigraph-ws-reg-'), graph([node('a')], []))
+    const e = runWorkspaceAdd(dir, 'react', 'My App')
+    expect(runWorkspaceList().entries.map((w) => w.id)).toContain(e.id)
+    expect(registryConfig().resolveDir(e.id)).toBe(e.dir)
+    runWorkspaceRemove(e.id)
+    expect(runWorkspaceList().entries).toHaveLength(0)
+    expect(registryConfig().resolveDir(e.id)).toBeNull()
   })
 })
 

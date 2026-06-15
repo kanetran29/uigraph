@@ -16,6 +16,23 @@ import type { Store } from './store'
 
 export { Store, openStore, type ProposalQuery } from './store'
 export { fingerprintSources, compareFingerprint, type Fingerprint, type FileScan, type FreshnessDiff } from './fingerprint'
+export {
+  emptyRegistry,
+  slugify,
+  makeId,
+  upsertWorkspace,
+  removeWorkspace,
+  findWorkspace,
+  canonicalDir,
+  registryPath,
+  readRegistry,
+  writeRegistry,
+  summarize,
+  defaultName,
+  type Registry,
+  type WorkspaceEntry,
+  type WorkspaceSummary,
+} from './registry'
 
 /** Read and parse a UiGraph JSON file, asserting its shape and invariants. */
 export function loadGraph(path: string): UiGraph {

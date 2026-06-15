@@ -10,6 +10,31 @@ import sampleGraph from './sample-graph.json'
 /** The bundled fallback graph, used when the serve API is unreachable (static open). */
 export const SAMPLE_GRAPH = sampleGraph as unknown as UiGraph
 
+/** A registered workspace as the switcher sees it (no absolute dir — never leaked to the client). */
+export interface WorkspaceSummary {
+  id: string
+  name: string
+  adapter: string
+  available: boolean
+}
+
+/** Append the opaque ?ws selector to a path; a null/undefined id leaves the path unchanged
+ *  (single-workspace mode + back-compat — bare /api/graph still works). */
+function withWs(path: string, wsId: string | null | undefined): string {
+  return wsId ? `${path}${path.includes('?') ? '&' : '?'}ws=${encodeURIComponent(wsId)}` : path
+}
+
+/** Fetch the registry of workspaces for the switcher; empty when offline / single-mode. */
+export async function fetchWorkspaces(): Promise<WorkspaceSummary[]> {
+  try {
+    const res = await fetch('/api/workspaces')
+    if (!res.ok) return []
+    return (await res.json()) as WorkspaceSummary[]
+  } catch {
+    return []
+  }
+}
+
 /**
  * A single manual overlay edit, the discriminated op the serve API accepts under
  * `{ op }`. Identical to @uigraph/mcp's UpdateOp so the POST body is type-checked
@@ -27,9 +52,9 @@ export type UpdateOp =
  * (network error, non-OK status, bad JSON) it resolves to the bundled sample so
  * a static `vite build` open still renders a graph.
  */
-export async function fetchGraph(): Promise<{ graph: UiGraph; live: boolean }> {
+export async function fetchGraph(wsId?: string | null): Promise<{ graph: UiGraph; live: boolean }> {
   try {
-    const res = await fetch('/api/graph')
+    const res = await fetch(withWs('/api/graph', wsId))
     if (!res.ok) return { graph: SAMPLE_GRAPH, live: false }
     const graph = (await res.json()) as UiGraph
     return { graph, live: true }
@@ -47,9 +72,9 @@ export const EMPTY_PROPOSALS: Proposals = { version: 0, base: '', proposals: [] 
  * non-OK status, bad JSON) this resolves to an empty sidecar so the dashboard still
  * renders the proven graph without them.
  */
-export async function fetchProposals(): Promise<Proposals> {
+export async function fetchProposals(wsId?: string | null): Promise<Proposals> {
   try {
-    const res = await fetch('/api/proposals')
+    const res = await fetch(withWs('/api/proposals', wsId))
     if (!res.ok) return EMPTY_PROPOSALS
     return (await res.json()) as Proposals
   } catch {
@@ -64,9 +89,9 @@ export interface ScenariosState {
 }
 
 /** Fetch the planning scenarios; falls back to a single default when offline. */
-export async function fetchScenarios(): Promise<ScenariosState> {
+export async function fetchScenarios(wsId?: string | null): Promise<ScenariosState> {
   try {
-    const res = await fetch('/api/scenarios')
+    const res = await fetch(withWs('/api/scenarios', wsId))
     if (!res.ok) return { active: 'default', names: ['default'] }
     return (await res.json()) as ScenariosState
   } catch {
@@ -75,8 +100,8 @@ export async function fetchScenarios(): Promise<ScenariosState> {
 }
 
 /** Switch (or create) the active planning scenario; returns the new state. */
-export async function postScenario(name: string): Promise<ScenariosState> {
-  const res = await fetch('/api/scenario', {
+export async function postScenario(name: string, wsId?: string | null): Promise<ScenariosState> {
+  const res = await fetch(withWs('/api/scenario', wsId), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name }),
@@ -89,9 +114,9 @@ export async function postScenario(name: string): Promise<ScenariosState> {
  * Fetch runtime-verification coverage from the serve API. On any failure, fall back
  * to computing coverage over the bundled sample graph so the panel still renders.
  */
-export async function fetchCoverage(): Promise<CoverageReport> {
+export async function fetchCoverage(wsId?: string | null): Promise<CoverageReport> {
   try {
-    const res = await fetch('/api/coverage')
+    const res = await fetch(withWs('/api/coverage', wsId))
     if (!res.ok) return buildCoverage(SAMPLE_GRAPH)
     return (await res.json()) as CoverageReport
   } catch {
@@ -104,8 +129,8 @@ export async function fetchCoverage(): Promise<CoverageReport> {
  * the server's error message so the caller can surface it. Only meaningful when
  * the live API is reachable; manual edits against the sample fallback are local.
  */
-export async function postOverlay(op: UpdateOp): Promise<void> {
-  const res = await fetch('/api/overlay', {
+export async function postOverlay(op: UpdateOp, wsId?: string | null): Promise<void> {
+  const res = await fetch(withWs('/api/overlay', wsId), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ op }),

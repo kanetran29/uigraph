@@ -8,7 +8,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
-import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, runDiff, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, type AdapterName } from './commands'
+import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, formatWorkspaceList, runDiff, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runVerify, runVerifyUntilDone } from './runner'
 
@@ -24,8 +24,9 @@ export function buildProgram(): Command {
     .requiredOption('--adapter <name>', 'adapter to use: react | angular | vue | next')
     .option('--out <file>', 'output database path (default <dir>/uigraph.db)')
     .option('--controls', 'also extract interactive controls (buttons/inputs/etc.) as nested nodes')
-    .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean }) => {
-      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false })
+    .option('--no-register', 'do not add this workspace to the ~/.uigraph registry')
+    .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean; register?: boolean }) => {
+      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false, register: opts.register })
       console.log(formatMapSummary(summary))
     })
 
@@ -100,15 +101,45 @@ export function buildProgram(): Command {
 
   program
     .command('serve')
-    .description('Start the local API server that serves the merged graph + overlay for the dashboard.')
-    .argument('<dir>', 'workspace directory holding ui-graph.json')
+    .description('Serve the merged graph + overlay for the dashboard. With <dir>: one workspace. Without: registry mode — serve every workspace you have mapped, switchable in the dashboard.')
+    .argument('[dir]', 'workspace directory (omit to serve all registered workspaces)')
     .option('--port <port>', 'port to listen on', '4317')
-    .action(async (dir: string, opts: { port: string }) => {
+    .action(async (dir: string | undefined, opts: { port: string }) => {
+      if (dir === undefined && runWorkspaceList().entries.length === 0) {
+        console.error('No workspaces registered. Run `uigraph map <dir> --adapter <name>` first, or `uigraph serve <dir>`.')
+        process.exitCode = 1
+        return
+      }
       const { url } = await startApiServer({ dir, port: Number(opts.port) })
-      console.log(`uigraph API serving ${dir} at ${url}`)
-      console.log(`  GET  ${url}/api/graph`)
-      console.log(`  GET  ${url}/api/soundiness`)
-      console.log(`  POST ${url}/api/overlay`)
+      console.log(`uigraph API serving ${dir ?? 'all registered workspaces'} at ${url}`)
+      console.log(`  GET  ${url}/api/workspaces`)
+      console.log(`  GET  ${url}/api/graph${dir === undefined ? '?ws=<id>' : ''}`)
+    })
+
+  const workspace = program.command('workspace').description('Manage the registry of workspaces (projects) the dashboard can switch between.')
+  workspace
+    .command('list')
+    .description('List registered workspaces (● available · ○ needs re-map).')
+    .action(() => {
+      console.log(formatWorkspaceList(runWorkspaceList()))
+    })
+  workspace
+    .command('add')
+    .description('Register a workspace explicitly.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .requiredOption('--adapter <name>', 'adapter: react | angular | vue | next')
+    .option('--name <name>', 'display name (default the dir basename)')
+    .action((dir: string, opts: { adapter: string; name?: string }) => {
+      const e = runWorkspaceAdd(dir, opts.adapter as AdapterName, opts.name)
+      console.log(`registered ${e.id} (${e.name}) → ${e.dir}`)
+    })
+  workspace
+    .command('remove')
+    .description('Unregister a workspace by id or dir (its uigraph.db is left untouched).')
+    .argument('<idOrDir>', 'workspace id or directory')
+    .action((idOrDir: string) => {
+      runWorkspaceRemove(idOrDir)
+      console.log(`removed ${idOrDir} from the registry`)
     })
 
   program

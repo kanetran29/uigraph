@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path'
 import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/core'
 import { diffGraphs, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, hashValue } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
-import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, type ImportSummary } from '@uigraph/core/node'
+import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@uigraph/core/node'
 import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@uigraph/mcp'
 import { reactAdapter } from '@uigraph/adapter-react'
 import { angularAdapter } from '@uigraph/adapter-angular'
@@ -62,6 +62,10 @@ export interface RunMapOptions {
   adapter: AdapterName
   out?: string
   controls?: boolean
+  /** Auto-register this workspace in ~/.uigraph (default true; off for --out / experiments). */
+  register?: boolean
+  /** Display name for the registry entry (default the dir basename). */
+  name?: string
   logger?: Logger
 }
 
@@ -104,6 +108,14 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
     store.setFingerprint({ projectDir: opts.dir, adapter: opts.adapter, hash: scan.hash, files: scan.files, mappedAt: new Date().toISOString() })
   } finally {
     store.close()
+  }
+
+  // Auto-register so the workspace shows up in the dashboard's project switcher. Skipped for
+  // --out (the db isn't at <dir>/uigraph.db then) or --no-register. Side-effect on ~/.uigraph
+  // only — never the project. The CLI owns the clock (addedAt).
+  if (opts.register !== false && opts.out === undefined) {
+    const canon = canonicalDir(opts.dir)
+    writeRegistry(upsertWorkspace(readRegistry(), canon, opts.name ?? defaultName(canon), opts.adapter, new Date().toISOString()))
   }
 
   return {
@@ -150,6 +162,32 @@ export function runStatus(dir: string): StatusResult {
   } finally {
     store.close()
   }
+}
+
+/** Register (or update) a workspace explicitly. Returns the registry entry's row. */
+export function runWorkspaceAdd(dir: string, adapter: AdapterName, name?: string): WorkspaceEntry {
+  const canon = canonicalDir(dir)
+  const reg = upsertWorkspace(readRegistry(), canon, name ?? defaultName(canon), adapter, new Date().toISOString())
+  writeRegistry(reg)
+  return reg.workspaces.find((w) => w.dir === canon)!
+}
+
+/** Remove a workspace from the registry by id or dir (the DB on disk is untouched). */
+export function runWorkspaceRemove(idOrDir: string): void {
+  writeRegistry(removeWorkspace(readRegistry(), idOrDir))
+}
+
+/** List registered workspaces with an availability marker (whether their uigraph.db exists). */
+export function runWorkspaceList(): { entries: WorkspaceEntry[]; available: (e: WorkspaceEntry) => boolean } {
+  return { entries: readRegistry().workspaces, available: (e) => existsSync(dbPathFor(e.dir)) }
+}
+
+/** Format the workspace list for the CLI. */
+export function formatWorkspaceList(list: { entries: WorkspaceEntry[]; available: (e: WorkspaceEntry) => boolean }): string {
+  if (list.entries.length === 0) return 'No workspaces registered. Run `uigraph map <dir> --adapter <name>` to add one.'
+  return list.entries
+    .map((e) => `${list.available(e) ? '●' : '○'} ${e.id}  ${e.name}  [${e.adapter}]  ${e.dir}${list.available(e) ? '' : '  (no uigraph.db — re-map)'}`)
+    .join('\n')
 }
 
 /** Format a StatusResult as the block the `status` command prints. */
