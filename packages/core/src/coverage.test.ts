@@ -1,7 +1,29 @@
 import { describe, it, expect } from 'vitest'
-import { buildCoverage, nextToVerify } from './coverage'
+import { buildCoverage, nextToVerify, nodeForUrl } from './coverage'
 import { edge, graph, node } from './fixtures'
 import type { ProposalGraph } from './proposals'
+
+describe('nodeForUrl', () => {
+  const g = graph(
+    [node('n_root', { route: '/' }), node('n_profile', { route: '/profile' }), node('n_product', { route: '/products/:id' }), node('u_n_root', { kind: 'unknown', route: null })],
+    [],
+  )
+  const A = 'http://app.local:3000'
+  it('matches an exact route', () => {
+    expect(nodeForUrl(g, `${A}/profile`, A)).toBe('n_profile')
+    expect(nodeForUrl(g, `${A}/`, A)).toBe('n_root')
+  })
+  it('strips query/hash + trailing slash', () => {
+    expect(nodeForUrl(g, `${A}/profile/?tab=x#y`, A)).toBe('n_profile')
+  })
+  it('maps to the sole parameterized candidate', () => {
+    expect(nodeForUrl(g, `${A}/products/42`, A)).toBe('n_product')
+  })
+  it('returns null for undeclared, external, or wildcard-only paths', () => {
+    expect(nodeForUrl(g, `${A}/nope`, A)).toBeNull()
+    expect(nodeForUrl(g, 'http://evil.com/profile', A)).toBeNull()
+  })
+})
 
 // a has a concrete runtime out-edge (e1), so the dynamic sink edge e3 out of a is
 // resolved; e2 is a `may` (open until driven/parked); e4 is a proven must-static.

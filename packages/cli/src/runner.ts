@@ -10,18 +10,19 @@
 // it to actually drive) and uses the system/cached Chromium.
 
 import type { SpecPlan } from '@uigraph/core'
-import { buildSpecPlan, nextToVerify, planPath } from '@uigraph/core'
+import { buildSpecPlan, fnv1a, nextToVerify, nodeForUrl, planPath } from '@uigraph/core'
 import { openStore } from '@uigraph/core/node'
-import { dbPath, loadMergedGraph, reportObservation, getLoopStatus } from '@uigraph/mcp'
+import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@uigraph/mcp'
 
-/** The outcome of attempting one planned transition in a real browser. */
+/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets). */
 export interface VerifyResult {
   confirmed: boolean
   screenshot?: string
+  landedUrl?: string
 }
 
-/** Drives one spec plan against the app and reports whether the transition happened. */
-export type VerifyDriver = (plan: SpecPlan, appUrl: string) => Promise<VerifyResult>
+/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. */
+export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }) => Promise<VerifyResult>
 
 /** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, and an optional saved auth session. */
 export interface RunVerifyOptions {
@@ -32,11 +33,14 @@ export interface RunVerifyOptions {
   storageState?: string
 }
 
-/** What a verification run did: how many targets it attempted, confirmed, refuted. */
+/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution. */
 export interface VerifySummary {
   attempted: number
   confirmed: number
   refuted: number
+  resolvedDynamic: number
+  discoveredNodes: number
+  parkedDynamic: number
 }
 
 /**
@@ -46,7 +50,7 @@ export interface VerifySummary {
  */
 export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> {
   const ctx = { dir: opts.dir }
-  const graph = loadMergedGraph(ctx)
+  let graph = loadMergedGraph(ctx)
   const store = openStore(dbPath(ctx))
   const proposalGraph = store.getProposalGraph()
   const parkedIds = new Set(store.getParkedEdges().map((p) => p.edgeId))
@@ -54,13 +58,70 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
 
   const targets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds)
   const driver = opts.driver ?? makePlaywrightDriver(opts.storageState)
+  const authed = opts.storageState !== undefined
   let confirmed = 0
   let refuted = 0
+  let resolvedDynamic = 0
+  let discoveredNodes = 0
+  let parkedDynamic = 0
 
   for (const t of targets) {
     const steps = planPath(graph, t.from, t.to)
     if (steps === null) continue
     const plan = buildSpecPlan(graph, steps, { baseUrl: opts.appUrl, title: `verify ${t.from} → ${t.to}` })
+    const toKind = graph.nodes.find((n) => n.id === t.to)?.kind
+
+    // Dynamic-sink target (u_<screen>): CAPTURE the real landing instead of asserting a URL.
+    if (toKind === 'unknown') {
+      let result: VerifyResult
+      try {
+        result = await driver(plan, opts.appUrl, { capture: true })
+      } catch {
+        result = { confirmed: false }
+      }
+      const park = (reason: string): void => {
+        const s = openStore(dbPath(ctx))
+        try {
+          s.parkEdge(t.id, reason, 'runner')
+        } finally {
+          s.close()
+        }
+        parkedDynamic++
+      }
+      if (!result.confirmed || result.landedUrl === undefined) {
+        park('dynamic nav did not fire on drive (no URL change) — needs runtime state/precondition')
+        continue
+      }
+      let realNode = nodeForUrl(graph, result.landedUrl, opts.appUrl)
+      // H5: an unauthenticated bounce to a login/auth route is NOT the dynamic target.
+      if (realNode !== null && !authed && /login|signin|sign-in|auth/i.test(graph.nodes.find((n) => n.id === realNode)?.route ?? '')) {
+        park('landed on an auth route while unauthenticated — likely a guard bounce, not the dynamic target')
+        continue
+      }
+      // H8: an undeclared same-origin landing is a real screen the static pass missed — add it honestly, then mint.
+      if (realNode === null) {
+        const path = result.landedUrl.startsWith(opts.appUrl) ? (result.landedUrl.slice(opts.appUrl.length).split('?')[0]?.split('#')[0] ?? '') : ''
+        if (path === '' || /login|signin|sign-in|auth|error|404/i.test(path)) {
+          park(`landed on an unattributable/external/auth URL (${result.landedUrl}) — not minting`)
+          continue
+        }
+        const newId = `n_observed_${fnv1a(path).slice(0, 8)}`
+        updateGraph(ctx, { op: { kind: 'addNode', node: { id: newId, route: path.startsWith('/') ? path : `/${path}`, componentPath: null, label: `observed ${path}`, kind: 'screen' } } })
+        graph = loadMergedGraph(ctx)
+        realNode = newId
+        discoveredNodes++
+      }
+      const res = reportObservation(ctx, { from: t.from, to: realNode, event: t.event, outcome: 'confirmed', effect: 'navigate', ...(result.screenshot ? { screenshot: result.screenshot } : {}) })
+      if (res.dropped) {
+        park('observed landing could not be attributed (dropped)')
+        continue
+      }
+      resolvedDynamic++
+      confirmed++
+      continue
+    }
+
+    // Normal assert-mode target (may edge / proposal).
     let result: VerifyResult
     try {
       result = await driver(plan, opts.appUrl)
@@ -79,7 +140,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     else refuted++
   }
 
-  return { attempted: targets.length, confirmed, refuted }
+  return { attempted: targets.length, confirmed, refuted, resolvedDynamic, discoveredNodes, parkedDynamic }
 }
 
 /** Options for the autonomous until-done loop. */
@@ -198,15 +259,43 @@ async function loadPlaywright(): Promise<{ chromium: { launch: () => Promise<unk
  * (optionally hydrated from a saved auth `storageState` so the run is logged in),
  * execute the plan's legs (goto/click/fill via the selector locators), then judge
  * the transition by its final assertion (URL match and/or a visible dialog).
+ *
+ * In CAPTURE mode (dynamic-sink targets): do NOT assert a URL and NEVER goto the
+ * synthetic sink. Load the start screen, capture the pre-trigger URL, run only the
+ * real interaction legs (clicks/fills) as the trigger, then wait for the URL to
+ * change (beating page-load/timer redirects) and settle, and report where it landed.
  */
 function makePlaywrightDriver(storageState?: string): VerifyDriver {
-  return async (plan: SpecPlan, appUrl: string): Promise<VerifyResult> => {
+  return async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }): Promise<VerifyResult> => {
     const { chromium } = await loadPlaywright()
     const browser = (await chromium.launch()) as PwBrowser
     try {
       const context = await browser.newContext(storageState !== undefined ? { storageState } : {})
       const page = await context.newPage()
       await page.goto(plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl)
+
+      if (opts?.capture === true) {
+        await page.waitForLoadState('networkidle').catch(() => {})
+        // H9: anchor the start URL immediately before the trigger, after the screen settled.
+        const startUrl = page.url()
+        for (const leg of plan.legs) {
+          const a = leg.action
+          // H1: never goto the synthetic sink; only run real interaction legs as the trigger.
+          if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
+          else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+        }
+        // H3: wait long enough to observe a timer/async redirect (>5s); H4: then settle to a stable URL.
+        await page.waitForURL((u) => u.toString() !== startUrl, { timeout: 6500 }).catch(() => {})
+        let landedUrl = page.url()
+        for (let i = 0; i < 5; i++) {
+          await page.waitForLoadState('networkidle').catch(() => {})
+          const next = page.url()
+          if (next === landedUrl) break
+          landedUrl = next
+        }
+        return { confirmed: landedUrl !== startUrl, landedUrl }
+      }
+
       let lastUrlAssertion: string | undefined
       let expectDialog = false
       for (const leg of plan.legs) {
@@ -248,6 +337,8 @@ interface PwPage {
   goto: (url: string) => Promise<unknown>
   url: () => string
   getByRole: (role: string) => PwLocator
+  waitForLoadState: (state: string) => Promise<void>
+  waitForURL: (predicate: (url: URL) => boolean, opts?: unknown) => Promise<void>
 }
 
 /** Evaluate a `page.getBy…`-style locator snippet against the page, then click/fill it. */
