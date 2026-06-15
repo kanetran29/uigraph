@@ -27,6 +27,14 @@ interface RouteInfo {
   componentFile: SourceFile | undefined
 }
 
+/**
+ * A pre-discovered route fed to extractGraphFromRoutes: the IR route path, its content-
+ * addressed node id, an optional component name (for label disambiguation), and the
+ * resolved page/component SourceFile. Adapters that don't use <Route> JSX (e.g. next)
+ * build these from their own route source.
+ */
+export type RouteSeed = RouteInfo
+
 /** Build a ts-morph project from a project directory, scanning src first. */
 export function buildProject(projectDir: string): Project {
   const project = new Project({
@@ -357,9 +365,10 @@ function collectRoutes(project: Project): RouteInfo[] {
   return [...byNodeId.values()]
 }
 
-function navIdentifiers(sf: SourceFile): { navSet: Set<string>; histSet: Set<string> } {
+function navIdentifiers(sf: SourceFile): { navSet: Set<string>; histSet: Set<string>; routerSet: Set<string>; redirectNames: Set<string> } {
   const navSet = new Set<string>()
   const histSet = new Set<string>()
+  const routerSet = new Set<string>()
   for (const vd of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
     const init = vd.getInitializer()
     if (!init || !Node.isCallExpression(init)) continue
@@ -368,8 +377,21 @@ function navIdentifiers(sf: SourceFile): { navSet: Set<string>; histSet: Set<str
     const name = vd.getNameNode().getText()
     if (callee.getText() === 'useNavigate') navSet.add(name)
     if (callee.getText() === 'useHistory') histSet.add(name)
+    // Next.js: const router = useRouter() — push/replace, from next/navigation OR next/router.
+    if (callee.getText() === 'useRouter') routerSet.add(name)
   }
-  return { navSet, histSet }
+  // Next.js: redirect / permanentRedirect imported from next/navigation (gated on the import
+  // so a user's local `redirect` is never mistaken for a navigation).
+  const redirectNames = new Set<string>()
+  for (const imp of sf.getImportDeclarations()) {
+    if (imp.getModuleSpecifierValue() !== 'next/navigation') continue
+    for (const ni of imp.getNamedImports()) {
+      if (ni.getNameNode().getText() === 'redirect' || ni.getNameNode().getText() === 'permanentRedirect') {
+        redirectNames.add(ni.getAliasNode()?.getText() ?? ni.getNameNode().getText())
+      }
+    }
+  }
+  return { navSet, histSet, routerSet, redirectNames }
 }
 
 interface RawTarget {
@@ -395,30 +417,38 @@ function collectTargets(sf: SourceFile): RawTarget[] {
       effect = 'redirect'
     }
     if (event === null) continue
-    out.push({ ti: classifyToAttr(findAttr(el, 'to')), event, effect, node: el, guard: getGuard(el) })
+    // react-router <Link to>; next/link <Link href> when there is no `to` (react Links
+    // always carry `to`, so this href fallback never changes react output).
+    out.push({ ti: classifyToAttr(findAttr(el, 'to') ?? findAttr(el, 'href')), event, effect, node: el, guard: getGuard(el) })
   }
 
-  const { navSet, histSet } = navIdentifiers(sf)
+  const { navSet, histSet, routerSet, redirectNames } = navIdentifiers(sf)
   for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
     const expr = call.getExpression()
     let effect: string | null = null
     if (Node.isIdentifier(expr) && navSet.has(expr.getText())) {
       effect = 'navigate'
+    } else if (Node.isIdentifier(expr) && redirectNames.has(expr.getText())) {
+      effect = 'redirect'
     } else if (Node.isPropertyAccessExpression(expr)) {
       const obj = expr.getExpression()
       const member = expr.getName()
       if (Node.isIdentifier(obj) && histSet.has(obj.getText()) && (member === 'push' || member === 'replace')) {
         effect = `history.${member}`
+      } else if (Node.isIdentifier(obj) && routerSet.has(obj.getText()) && (member === 'push' || member === 'replace')) {
+        effect = `router.${member}`
       }
     }
     if (effect === null) continue
-    const arg0 = call.getArguments()[0]
-    out.push({ ti: classifyTarget(arg0, sf), event: 'navigate', effect, node: call, guard: getGuard(call) ?? extraConditionGuard(call) })
+    out.push({ ti: classifyTarget(call.getArguments()[0], sf), event: 'navigate', effect, node: call, guard: getGuard(call) ?? extraConditionGuard(call) })
   }
   return out
 }
 
 function ruleIdFor(event: string, effect: string): string {
+  if (effect.startsWith('router.')) return 'next.use-router-push'
+  // next redirect() is a call (event 'navigate'); react <Navigate>/<Redirect> is JSX (event 'redirect').
+  if (effect === 'redirect' && event === 'navigate') return 'next.redirect'
   if (event === 'click:Link') return 'rr.link-to'
   if (event === 'redirect') return 'rr.redirect'
   if (effect.startsWith('history.')) return 'rr.use-history-push'
@@ -1068,7 +1098,22 @@ function parentRouteOf(fullPath: string, routes: RouteLike[]): RouteLike | null 
 }
 
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
-  const routes = collectRoutes(project)
+  return extractGraphFromRoutes(project, projectDir, collectRoutes(project), opts)
+}
+
+/**
+ * The route-source-agnostic engine: assemble the full graph (route nodes + nav edges +
+ * controls + modals/overlays + shared-nav attribution) from PRE-DISCOVERED route seeds.
+ * The react adapter feeds it collectRoutes(<Route> JSX); the next adapter feeds it routes
+ * discovered from the filesystem (app/ + pages/). `adapterName` stamps graph.meta.adapter.
+ */
+export function extractGraphFromRoutes(
+  project: Project,
+  projectDir: string,
+  routes: RouteSeed[],
+  opts: ExtractOptions = {},
+  adapterName = '@uigraph/adapter-react',
+): ExtractResult {
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
 
   // Disambiguate labels: a component backing exactly one route reads best by its
@@ -1416,7 +1461,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const graph = {
     version: 0 as const,
     meta: {
-      adapter: '@uigraph/adapter-react',
+      adapter: adapterName,
       adapterVersion: ADAPTER_VERSION,
       rulesetVersion: opts.rulesetVersion ?? DEFAULT_RULESET,
       ...(opts.commit ? { commit: opts.commit } : {}),

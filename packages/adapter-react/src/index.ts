@@ -38,6 +38,6 @@ export const reactAdapter: Adapter = {
   extract: extractReact,
 }
 
-export { buildProject, extractGraph } from './extract'
+export { buildProject, extractGraph, extractGraphFromRoutes, type RouteSeed } from './extract'
 export { routeToNodeId, edgeId } from './ids'
 export { matchLiteralAll, matchPrefix } from './matcher'
