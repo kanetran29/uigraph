@@ -184,6 +184,31 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(sell?.control?.selector?.strategy).toBe('role-name')
   })
 
+  it("names a control from a {t('key')} i18n hook-call label (refapp's form, not <Trans>)", () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        // The label is a runtime t() call in CHILD position; a DIFFERENT t() sits in the
+        // onClick handler (must be ignored) and a className BEM modifier would otherwise
+        // mislabel the button "Danger". The child t() key must win.
+        '/H.tsx': `export default function H(){ const t=(k)=>k; return <div>
+          <button className="cta cta--danger" onClick={() => setError(t('errors.bad'))}>{t('verification.verifyIdentity')}</button>
+          <button className="x--primary">{t('profile.removeNumber')}</button>
+          <button className="y--secondary"><span>{t('profile.verify')}</span></button>
+        </div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const names = graph.nodes.filter((n) => n.kind === 'control').map((n) => n.control?.name)
+    expect(names).toContain('Verify identity')
+    expect(names).toContain('Remove number')
+    expect(names).toContain('Verify')
+    // the handler key and the className variant must NOT become the name
+    expect(names).not.toContain('Bad')
+    expect(names).not.toContain('Danger')
+  })
+
   it('does not descend into node_modules / unresolved components', () => {
     const { graph } = extractGraph(
       inMemory({
