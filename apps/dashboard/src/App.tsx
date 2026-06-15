@@ -10,6 +10,7 @@ import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@
 import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, postOverlay, postScenario, type ScenariosState, type UpdateOp } from './api'
 import { searchMatchIds } from './search'
 import { GraphCanvas, type Selection } from './GraphCanvas'
+import { Logo } from './Logo'
 import { Coverage } from './Coverage'
 import { Plan } from './Plan'
 import { Inspector } from './Inspector'
@@ -177,7 +178,7 @@ export function App(): JSX.Element {
   return (
     <div className="app">
       <header className="topbar">
-        <strong>uigraph</strong>
+        <Logo />
         <span className={live ? 'status live' : 'status offline'}>{live ? 'live' : 'sample (offline)'}</span>
         <span className="counts">
           {graph.nodes.length} nodes · {graph.edges.length} edges
@@ -247,7 +248,7 @@ function LoadingSkeleton(): JSX.Element {
   return (
     <div className="app" aria-busy="true" aria-label="Loading graph">
       <header className="topbar">
-        <strong>uigraph</strong>
+        <Logo />
         <span className="skeleton skeleton-pill" />
         <span className="skeleton skeleton-text" />
       </header>
