@@ -268,10 +268,6 @@ select:focus-visible,
   padding: 16px 18px;
   border-bottom: 1px solid var(--border);
 }
-.plan h2 {
-  margin: 0 0 12px;
-  font-size: 15px;
-}
 .plan-form {
   display: flex;
   flex-direction: column;
@@ -334,10 +330,6 @@ select:focus-visible,
 .coverage {
   padding: 16px 18px;
   border-bottom: 1px solid var(--border);
-}
-.coverage h2 {
-  margin: 0 0 12px;
-  font-size: 15px;
 }
 .cov-headline {
   display: flex;
@@ -442,24 +434,42 @@ select:focus-visible,
   border-bottom: none;
 }
 
-.inspector h2,
-.steps h2,
-.proposals h2 {
-  margin: 0 0 12px;
-  font-size: 15px;
-  letter-spacing: -0.01em;
-}
-
-/* Plan-path header: title + a Clear button that drops the highlighted route. */
-.steps-head {
+/* Collapsible panel sections: the header is a full-width toggle button; the body is
+   hidden (not unmounted) when collapsed so each panel's local state survives. */
+.section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 8px;
 }
-
-.steps-head h2 {
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.section-toggle h2 {
   margin: 0;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.section-caret {
+  color: var(--muted);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.section-body {
+  margin-top: 12px;
+}
+.section-body[hidden] {
+  display: none;
 }
 
 .steps-clear {
@@ -690,6 +700,31 @@ button.danger {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* Export-PNG control (top-right canvas panel). */
+.canvas-export {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.download-btn {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.download-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.download-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .edge-toggle {

@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react'
 import type { Proposal, Proposals, ProposalStatus, UiGraph } from '@uigraph/core'
 import { matchProposal } from './search'
 import { FilterChip, toggled } from './Chips'
+import { CollapsibleSection } from './CollapsibleSection'
 import type { Selection } from './GraphCanvas'
 
 /** Props for the proposals panel: the sidecar, the graph (for screen labels), and the selection. */
@@ -197,8 +198,7 @@ export function ProposalsPanel(props: ProposalsPanelProps): JSX.Element {
   const byScreen = useMemo(() => groupBy(visible, (p) => p.screen), [visible])
 
   return (
-    <section className="proposals">
-      <h2>Proposals ({visible.length})</h2>
+    <CollapsibleSection id="proposals" className="proposals" title={`Proposals (${visible.length})`}>
       <div className="prop-legend">
         <span className="prop-badge evidenced">evidenced</span>
         <span className="prop-badge speculative">speculative</span>
@@ -236,6 +236,6 @@ export function ProposalsPanel(props: ProposalsPanelProps): JSX.Element {
           <ScreenGroup key={screen} screen={screen} items={items} labels={labels} />
         ))
       )}
-    </section>
+    </CollapsibleSection>
   )
 }

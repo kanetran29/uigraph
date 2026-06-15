@@ -3,8 +3,9 @@
 // exposes the manual-edit controls. Editing an edge's label/guard or deleting an
 // element raises a request the parent turns into an overlay POST.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { GraphEdge, GraphNode } from '@uigraph/core'
+import { CollapsibleSection } from './CollapsibleSection'
 import type { Selection } from './GraphCanvas'
 
 /** Props for the inspector: the current selection plus edit/delete callbacks. */
@@ -114,28 +115,23 @@ function EdgeEditor(props: {
  */
 export function Inspector(props: InspectorProps): JSX.Element {
   const { selection, onEditEdge, onEditNode, onDelete } = props
+  let title: ReactNode = 'Inspector'
+  let body: ReactNode = <p className="muted">Select a node or edge to inspect it.</p>
 
-  if (selection === null) {
-    return (
-      <aside className="inspector">
-        <h2>Inspector</h2>
-        <p className="muted">Select a node or edge to inspect it.</p>
-      </aside>
-    )
-  }
-
-  if (selection.kind === 'node') {
+  if (selection !== null && selection.kind === 'node') {
     const n = selection.node
     const manual = n.id.startsWith('n_manual')
 
     if (n.kind === 'control' && n.control) {
       const c = n.control
-      return (
-        <aside className="inspector">
-          <h2>
-            Control <Badge text={c.controlType} tone="#334155" />
-            {manual ? <Badge text="manual" tone="#7c3aed" /> : null}
-          </h2>
+      title = (
+        <>
+          Control <Badge text={c.controlType} tone="#334155" />
+          {manual ? <Badge text="manual" tone="#7c3aed" /> : null}
+        </>
+      )
+      body = (
+        <>
           <Field label="id" value={n.id} />
           <Field label="label" value={n.label} />
           <Field label="parent" value={n.parent ?? '—'} />
@@ -177,51 +173,57 @@ export function Inspector(props: InspectorProps): JSX.Element {
               Delete
             </button>
           </div>
-        </aside>
+        </>
+      )
+    } else {
+      title = <>Node {manual ? <Badge text="manual" tone="#7c3aed" /> : null}</>
+      body = (
+        <>
+          <Field label="id" value={n.id} />
+          <Field label="label" value={n.label} />
+          <Field label="route" value={n.route ?? '—'} />
+          <Field label="componentPath" value={n.componentPath ?? '—'} />
+          <Field label="kind" value={n.kind} />
+          {n.kind === 'screen' ? <NodeEditor node={n} onEditNode={onEditNode} /> : null}
+          <div className="editor-actions">
+            <button className="danger" onClick={() => onDelete(n.id)}>
+              Delete
+            </button>
+          </div>
+        </>
       )
     }
-
-    return (
-      <aside className="inspector">
-        <h2>
-          Node {manual ? <Badge text="manual" tone="#7c3aed" /> : null}
-        </h2>
-        <Field label="id" value={n.id} />
-        <Field label="label" value={n.label} />
-        <Field label="route" value={n.route ?? '—'} />
-        <Field label="componentPath" value={n.componentPath ?? '—'} />
-        <Field label="kind" value={n.kind} />
-        {n.kind === 'screen' ? <NodeEditor node={n} onEditNode={onEditNode} /> : null}
-        <div className="editor-actions">
-          <button className="danger" onClick={() => onDelete(n.id)}>
-            Delete
-          </button>
-        </div>
-      </aside>
+  } else if (selection !== null) {
+    const e = selection.edge
+    const w = e.witness
+    title = (
+      <>
+        Edge <Badge text={e.modality} tone="#334155" /> <Badge text={e.source} tone={sourceTone(e.source)} />
+      </>
+    )
+    body = (
+      <>
+        <Field label="id" value={e.id} />
+        <Field label="from → to" value={`${e.from} → ${e.to}`} />
+        <Field label="event" value={e.event} />
+        <Field label="guard" value={e.guard ?? '—'} />
+        <Field label="effect" value={e.effect ?? '—'} />
+        <Field label="modality" value={e.modality} />
+        <Field label="source" value={e.source} />
+        <Field label="confidence" value={e.confidence.toFixed(2)} />
+        <Field
+          label="witness"
+          value={w ? `${w.source}${w.file ? ` ${w.file}` : ''}${w.loc ? `:${w.loc.line}:${w.loc.col}` : ''}${w.ruleId ? ` (${w.ruleId})` : ''}` : '—'}
+        />
+        <h3>Manual edit</h3>
+        <EdgeEditor edge={e} onEditEdge={onEditEdge} onDelete={onDelete} />
+      </>
     )
   }
 
-  const e = selection.edge
-  const w = e.witness
   return (
-    <aside className="inspector">
-      <h2>
-        Edge <Badge text={e.modality} tone="#334155" /> <Badge text={e.source} tone={sourceTone(e.source)} />
-      </h2>
-      <Field label="id" value={e.id} />
-      <Field label="from → to" value={`${e.from} → ${e.to}`} />
-      <Field label="event" value={e.event} />
-      <Field label="guard" value={e.guard ?? '—'} />
-      <Field label="effect" value={e.effect ?? '—'} />
-      <Field label="modality" value={e.modality} />
-      <Field label="source" value={e.source} />
-      <Field label="confidence" value={e.confidence.toFixed(2)} />
-      <Field
-        label="witness"
-        value={w ? `${w.source}${w.file ? ` ${w.file}` : ''}${w.loc ? `:${w.loc.line}:${w.loc.col}` : ''}${w.ruleId ? ` (${w.ruleId})` : ''}` : '—'}
-      />
-      <h3>Manual edit</h3>
-      <EdgeEditor edge={e} onEditEdge={onEditEdge} onDelete={onDelete} />
-    </aside>
+    <CollapsibleSection id="inspector" className="inspector" title={title}>
+      {body}
+    </CollapsibleSection>
   )
 }

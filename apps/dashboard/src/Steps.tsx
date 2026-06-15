@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { planPath, type PlanStep } from '@uigraph/core'
 import type { GraphNode, UiGraph } from '@uigraph/core'
+import { CollapsibleSection } from './CollapsibleSection'
 
 /** Props for the steps panel: the graph to plan over and a path-change reporter. */
 export interface StepsProps {
@@ -79,21 +80,23 @@ export function Steps(props: StepsProps): JSX.Element {
 
   if (nav.length === 0) {
     return (
-      <section className="steps">
-        <h2>Plan path</h2>
+      <CollapsibleSection id="steps" className="steps" title="Plan path">
         <p className="muted">No navigable screens in this graph.</p>
-      </section>
+      </CollapsibleSection>
     )
   }
 
   return (
-    <section className="steps">
-      <div className="steps-head">
-        <h2>Plan path</h2>
+    <CollapsibleSection
+      id="steps"
+      className="steps"
+      title="Plan path"
+      headerExtra={
         <button type="button" className="steps-clear" onClick={() => setCleared(true)} disabled={cleared}>
           Clear
         </button>
-      </div>
+      }
+    >
       <div className="steps-controls">
         <label>
           <span>from</span>
@@ -127,7 +130,7 @@ export function Steps(props: StepsProps): JSX.Element {
           ))}
         </ol>
       )}
-    </section>
+    </CollapsibleSection>
   )
 }
 
