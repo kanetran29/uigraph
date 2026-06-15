@@ -4,10 +4,11 @@
 // canvas, inspector, and steps panels, and turns manual edits into overlay POSTs
 // (source:'manual'), re-fetching the merged graph after each successful write.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
 import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, postOverlay, postScenario, type ScenariosState, type UpdateOp } from './api'
+import { searchMatchIds } from './search'
 import { GraphCanvas, type Selection } from './GraphCanvas'
 import { Coverage } from './Coverage'
 import { Plan } from './Plan'
@@ -49,7 +50,12 @@ export function App(): JSX.Element {
   const [loading, setLoading] = useState(true)
   const [selection, setSelection] = useState<Selection>(null)
   const [pathEdgeIds, setPathEdgeIds] = useState<Set<string>>(new Set())
+  const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
+
+  // Node ids matching the canvas search — dims everything else (selection still wins).
+  // Memoized on [graph, search] so it isn't recomputed on unrelated re-renders.
+  const matchIds = useMemo(() => (graph ? searchMatchIds(graph.nodes, search) : new Set<string>()), [graph, search])
 
   const load = useCallback(async () => {
     const [{ graph: g, live: isLive }, props, cov, scen] = await Promise.all([fetchGraph(), fetchProposals(), fetchCoverage(), fetchScenarios()])
@@ -176,6 +182,20 @@ export function App(): JSX.Element {
         <span className="counts">
           {graph.nodes.length} nodes · {graph.edges.length} edges
         </span>
+        <input
+          type="search"
+          className="topbar-search"
+          role="searchbox"
+          aria-label="Search nodes by label, route, id, or control name"
+          placeholder="Search nodes…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        {search.trim().length > 0 ? (
+          <span className="search-hint muted" role="status" aria-live="polite">
+            {matchIds.size > 0 ? `${matchIds.size} match${matchIds.size > 1 ? 'es' : ''}` : 'no matches'}
+          </span>
+        ) : null}
         {error ? <span className="error" role="alert">{error}</span> : null}
       </header>
       {!live ? (
@@ -197,6 +217,7 @@ export function App(): JSX.Element {
                 pathEdgeIds={pathEdgeIds}
                 onSelect={setSelection}
                 onConnect={handleConnect}
+                searchMatchIds={matchIds}
               />
             </ReactFlowProvider>
           )}

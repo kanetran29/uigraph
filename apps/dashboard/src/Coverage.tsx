@@ -2,7 +2,10 @@
 // confirmed) vs static/manual, with the list of unverified edges. Clicking an
 // unverified edge selects it on the canvas so the user can see what to confirm.
 
-import type { CoverageReport, GraphEdge, UiGraph } from '@uigraph/core'
+import { useMemo, useState } from 'react'
+import type { CoverageReport, EdgeCoverage, GraphEdge, UiGraph } from '@uigraph/core'
+import { matchCoverageRow } from './search'
+import { FilterChip, toggled } from './Chips'
 import type { Selection } from './GraphCanvas'
 
 /** Props: the coverage report, the graph (to resolve an edge id back to a GraphEdge), and select. */
@@ -31,13 +34,24 @@ export function Coverage(props: CoverageProps): JSX.Element {
   // co-reported beside it so a parked-heavy graph can never read as "100% verified".
   const accountedPct = Math.round((coverage.accountedRatio ?? coverage.ratio) * 100)
   const runtimePct = Math.round(coverage.runtimeRatio * 100)
-  const open = coverage.open ?? coverage.unverified
-  const parked = coverage.parked ?? []
+  const allOpen = coverage.open ?? coverage.unverified
+  const allParked = coverage.parked ?? []
   const edgeById = new Map(graph.edges.map((e) => [e.id, e]))
   const selectEdge = (id: string): void => {
     const e: GraphEdge | undefined = edgeById.get(id)
     if (e) onSelect({ kind: 'edge', edge: e })
   }
+
+  // Local filter chips over the edge lists (empty axis = all). Built from the values
+  // actually present across the open + parked rows so no stale option is offered.
+  const [statuses, setStatuses] = useState<Set<EdgeCoverage['status']>>(new Set())
+  const [modalities, setModalities] = useState<Set<string>>(new Set())
+  const rows = useMemo(() => [...allOpen, ...allParked], [allOpen, allParked])
+  const presentStatuses = useMemo(() => [...new Set(rows.map((r) => r.status))].sort() as EdgeCoverage['status'][], [rows])
+  const presentModalities = useMemo(() => [...new Set(rows.map((r) => r.modality))].sort(), [rows])
+  const filter = { statuses, modalities, sources: new Set<string>() }
+  const open = useMemo(() => allOpen.filter((r) => matchCoverageRow(r, filter)), [allOpen, statuses, modalities])
+  const parked = useMemo(() => allParked.filter((r) => matchCoverageRow(r, filter)), [allParked, statuses, modalities])
 
   return (
     <section className="coverage">
@@ -51,7 +65,7 @@ export function Coverage(props: CoverageProps): JSX.Element {
         </span>
       </div>
       <p className="muted cov-sub">
-        runtime-verified {runtimePct}% ({coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · parked {parked.length}
+        runtime-verified {runtimePct}% ({coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · parked {allParked.length}
       </p>
 
       <div className="cov-chips">
@@ -64,6 +78,17 @@ export function Coverage(props: CoverageProps): JSX.Element {
           <CountChip key={`m-${k}`} label={k} n={n} />
         ))}
       </div>
+
+      {presentStatuses.length > 1 || presentModalities.length > 1 ? (
+        <div className="filter-chips" role="group" aria-label="Filter edges by status and modality">
+          {presentStatuses.map((s) => (
+            <FilterChip key={`st-${s}`} label={s} active={statuses.has(s)} onClick={() => setStatuses((p) => toggled(p, s))} />
+          ))}
+          {presentModalities.map((m) => (
+            <FilterChip key={`mo-${m}`} label={m} active={modalities.has(m)} onClick={() => setModalities((p) => toggled(p, m))} />
+          ))}
+        </div>
+      ) : null}
 
       <h3>open ({open.length})</h3>
       {open.length > 0 ? (
