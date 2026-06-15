@@ -76,6 +76,37 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(graph.edges.find((x) => x.to === 'n_b')?.modality).toBe('must')
   })
 
+  it('attributes a navigation in a nested child component to the screen (capped to may)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+        // A renders a nested Landing component (not a route) that holds the button.
+        '/A.tsx': `import Landing from './Landing'\nexport default function A(){ return <Landing/> }`,
+        '/Landing.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function Landing(){ const navigate = useNavigate(); return <button onClick={() => navigate('/b')}>go</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    // n_b was an orphan via the route component alone; descent into <Landing> connects it.
+    const e = graph.edges.find((x) => x.to === 'n_b')
+    expect(e).toBeDefined()
+    expect(e?.modality).toBe('may')
+    // and the button is attributed as a control under the screen (n_a)
+    expect(graph.nodes.some((n) => n.kind === 'control' && n.parent === 'n_a')).toBe(true)
+  })
+
+  it('does not descend into node_modules / unresolved components', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+        '/A.tsx': `import { Dialog } from 'some-lib'\nexport default function A(){ return <Dialog/> }`,
+      }),
+      '/',
+    )
+    // Dialog resolves to no project file -> no crash, no phantom edge.
+    expect(graph.edges.find((x) => x.to === 'n_b')).toBeUndefined()
+  })
+
   it('resolves react-router v5 render-prop routes', () => {
     const { graph } = extractGraph(
       inMemory({
