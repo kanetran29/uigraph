@@ -31,7 +31,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@uigraph/core'
-import { layoutGraph, type GraphLayout } from './layout'
+import { layoutGraph, proposedScreenEdges, type GraphLayout, type ProposedEdge } from './layout'
 
 /** What the canvas reports as the current selection, or null when nothing is selected. */
 export type Selection = { kind: 'node'; node: GraphNode } | { kind: 'edge'; edge: GraphEdge } | null
@@ -411,6 +411,24 @@ interface EdgeContext {
  * screen↔screen edges with a dagre route render as the custom 'dagre' edge type so
  * arrows follow the spaced, de-crossed polyline; control/ghost edges stay smoothstep.
  */
+/**
+ * Render the opt-in proposed (quarantined LLM) edges as dashed violet floating edges —
+ * the same ghost tint as proposed state nodes — so a formerly-orphan modal/overlay shows
+ * its proposed incoming connection without polluting the proven IR (default off).
+ */
+function toProposedFlowEdges(edges: readonly ProposedEdge[]): Edge[] {
+  return edges.map((e) => ({
+    id: e.id,
+    source: e.from,
+    target: e.to,
+    type: 'floating',
+    data: { label: e.count > 1 ? `proposed ×${e.count}` : 'proposed' },
+    zIndex: 0,
+    markerEnd: { type: MarkerType.ArrowClosed, color: GHOST_COLOR, width: 12, height: 12 },
+    style: { stroke: GHOST_COLOR, strokeWidth: 1.6, strokeOpacity: 0.75, strokeDasharray: '2 5', strokeLinecap: 'round' },
+  }))
+}
+
 function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
   const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
@@ -550,7 +568,12 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   }, [rawGraph])
   const [expandAll, setExpandAll] = useState(false)
   const [highlightFlow, setHighlightFlow] = useState(true)
+  const [showProposed, setShowProposed] = useState(false)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
+
+  // Quarantined proposal edges to a real on-canvas target (the formerly-orphan
+  // modals/overlays) — overlaid only when the user opts in.
+  const proposedEdges = useMemo(() => proposedScreenEdges(graph, proposals.proposals), [graph, proposals])
 
   const expanded = useMemo(() => {
     const withChildren = new Set<string>()
@@ -670,8 +693,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive],
   )
   useEffect(() => {
-    setEdges(toFlowEdges(graph, edgeCtx))
-  }, [graph, edgeCtx, setEdges])
+    const base = toFlowEdges(graph, edgeCtx)
+    setEdges(showProposed ? [...base, ...toProposedFlowEdges(proposedEdges)] : base)
+  }, [graph, edgeCtx, setEdges, showProposed, proposedEdges])
 
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_evt, node) => {
@@ -728,6 +752,10 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <input type="checkbox" checked={highlightFlow} onChange={(e) => setHighlightFlow(e.target.checked)} />
             highlight flow on select
           </label>
+          <label className="edge-toggle">
+            <input type="checkbox" checked={showProposed} onChange={(e) => setShowProposed(e.target.checked)} />
+            show proposed (LLM){proposedEdges.length > 0 ? ` · ${proposedEdges.length}` : ''}
+          </label>
         </div>
       </Panel>
       <Panel position="bottom-right">
@@ -743,6 +771,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <LegendRow swatch={swatch('var(--edge)')} label="static" />
             <LegendRow swatch={swatch('var(--edge-manual)')} label="manual" />
             <LegendRow swatch={swatch('var(--edge-runtime)')} label="runtime (witnessed)" />
+            {showProposed ? <LegendRow swatch={swatch(GHOST_COLOR, '2 5')} label="proposed (LLM)" /> : null}
           </div>
         </div>
       </Panel>

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import type { GraphEdge, GraphNode, UiGraph } from '@uigraph/core'
-import { componentGroups, componentLabel, layoutGraph } from './layout'
+import type { GraphEdge, GraphNode, Proposal, UiGraph } from '@uigraph/core'
+import { componentGroups, componentLabel, layoutGraph, proposedScreenEdges } from './layout'
 
 function screen(id: string, componentPath: string | null): GraphNode {
   return { id, route: `/${id}`, componentPath, label: id, kind: 'screen' }
@@ -51,6 +51,34 @@ describe('componentGroups', () => {
   it('produces NO band labeled like the page for page-root controls', () => {
     const groups = componentGroups(g, 's')
     expect(groups.filter((x) => x.isBand).map((x) => x.label)).not.toContain('Checkout')
+  })
+})
+
+describe('proposedScreenEdges', () => {
+  const prop = (over: Partial<Proposal>): Proposal => ({
+    id: over.id ?? 'p', kind: 'edge', category: 'disclosure', screen: 'n_root', title: 't',
+    rationale: 'r', evidenced: true, confidence: 0.8, source: 'proposal', status: 'proposed', ...over,
+  })
+  const g = graph([
+    screen('n_root', 'App.tsx'),
+    { id: 'm_x', route: null, componentPath: null, label: 'Modal X', kind: 'modal' },
+    ctrl('c1', 'n_root', 'App.tsx'),
+  ])
+
+  it('emits a deduped screen->target edge for a proposed proposal whose target is a real non-control node', () => {
+    const edges = proposedScreenEdges(g, [prop({ id: 'a', to: 'm_x' }), prop({ id: 'b', to: 'm_x' })])
+    expect(edges).toHaveLength(1)
+    expect(edges[0]).toMatchObject({ from: 'n_root', to: 'm_x', count: 2, id: 'pe_n_root->m_x' })
+  })
+
+  it('skips proposals with no target, an external target, a control target, or a non-proposed status', () => {
+    const edges = proposedScreenEdges(g, [
+      prop({ id: 'noTo' }),
+      prop({ id: 'ext', to: 'stripe-external' }),
+      prop({ id: 'ctrl', to: 'c1' }),
+      prop({ id: 'done', to: 'm_x', status: 'confirmed' }),
+    ])
+    expect(edges).toEqual([])
   })
 })
 

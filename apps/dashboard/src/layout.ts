@@ -7,7 +7,38 @@
 // Control nodes are laid out as a vertical stack inside their parent screen at
 // parent-relative positions, so @xyflow/react renders them nested.
 
-import type { GraphNode, UiGraph } from '@uigraph/core'
+import type { GraphNode, Proposal, UiGraph } from '@uigraph/core'
+
+/** A proposed (quarantined) screen-level edge to overlay on the canvas, deduped per pair. */
+export interface ProposedEdge {
+  id: string
+  from: string
+  to: string
+  count: number
+}
+
+/**
+ * The proposed edges worth drawing on the canvas: one per (screen → to) pair among
+ * 'proposed' proposals whose target is a REAL non-control node already on the canvas
+ * (the formerly-orphan modals/overlays). Proposals without such a target (e.g. an
+ * external Stripe redirect, or a synthetic state sink) stay panel-only. Deterministic
+ * + deduped so the dashed overlay mirrors the materialized proposal graph.
+ */
+export function proposedScreenEdges(graph: UiGraph, proposals: readonly Proposal[]): ProposedEdge[] {
+  const byId = new Map(graph.nodes.map((n) => [n.id, n]))
+  const byPair = new Map<string, ProposedEdge>()
+  for (const p of proposals) {
+    if (p.status !== 'proposed' || p.to === undefined) continue
+    if (!byId.has(p.screen)) continue
+    const target = byId.get(p.to)
+    if (target === undefined || target.kind === 'control') continue
+    const key = `${p.screen}->${p.to}`
+    const existing = byPair.get(key)
+    if (existing) existing.count++
+    else byPair.set(key, { id: `pe_${key}`, from: p.screen, to: p.to, count: 1 })
+  }
+  return [...byPair.values()]
+}
 
 /** A laid-out position in canvas pixels (absolute for screens, parent-relative for controls). */
 export interface NodePosition {
