@@ -484,6 +484,40 @@ function i18nCallKey(el: Node): string | undefined {
   return undefined
 }
 
+/** The i18n key from an attribute whose value is a `{t('key')}` call (e.g. `placeholder={t('…')}`). */
+function attrCallKey(el: Node, name: string): string | undefined {
+  const init = findAttr(el, name)?.getInitializer()
+  if (!init || !Node.isJsxExpression(init)) return undefined
+  const expr = init.getExpression()
+  if (!expr) return undefined
+  for (const call of [expr, ...expr.getDescendants()]) {
+    if (!Node.isCallExpression(call)) continue
+    const callee = call.getExpression().getText()
+    if (callee !== 't' && !callee.endsWith('.t')) continue
+    const arg = call.getArguments()[0]
+    if (arg && Node.isStringLiteral(arg)) {
+      const key = arg.getLiteralText()
+      if (key.length > 0) return key
+    }
+  }
+  return undefined
+}
+
+/**
+ * A human label from a control attribute (placeholder / aria-label) that is either a
+ * string literal OR a `{t('key')}` expression — refapp labels its inputs this way, which
+ * the text/icon/className inference cannot see. For an i18n key a trailing
+ * "Placeholder"/"Label" token is dropped so `emailPlaceholder` reads "Email".
+ */
+function attrLabel(el: Node, name: string): string | undefined {
+  const lit = stringAttr(el, name)
+  if (lit != null && lit.length > 0) return lit
+  const key = attrCallKey(el, name)
+  if (key == null) return undefined
+  const cleaned = key.replace(/(placeholder|label)$/i, '')
+  return humanize(cleaned.length > 0 ? cleaned : key)
+}
+
 /**
  * Derive a control's name from STATIC signals when it has no visible text/aria —
  * refapp-style apps label via `<Trans i18nKey="…">`, a `{t('key')}` hook call, an icon
@@ -601,12 +635,13 @@ function controlMetaFor(el: Node): ControlInfo | null {
   else if (/^[a-z]/.test(tag) && hasEventHandler(el)) controlType = 'element'
   else return null
   const textLabel = controlType === 'button' || controlType === 'element' ? getJsxText(el) : undefined
-  // Fall back to a name read from i18n key / icon / className when there is no
-  // literal text or aria (refapp labels via <Trans i18nKey>), so controls aren't nameless.
-  const inferred = textLabel ?? inferredName(el)
-  const name =
-    stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? stringAttr(el, 'placeholder') ?? stringAttr(el, 'aria-label') ?? inferred
-  const selector = controlSelector(el, tag, controlType, getJsxText(el) ?? inferredName(el))
+  // refapp inputs (and icon buttons) carry their label in placeholder / aria-label, often
+  // as a {t('key')} expression — the authoritative name when there is no visible text, so
+  // it slots ahead of the weaker i18n-key/icon/className inference.
+  const attrName = attrLabel(el, 'placeholder') ?? attrLabel(el, 'aria-label')
+  const inferred = textLabel ?? attrName ?? inferredName(el)
+  const name = stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? inferred
+  const selector = controlSelector(el, tag, controlType, inferred)
   const input = inputConstraints(el, controlType)
   return { element: tag, controlType, selector, ...(input ? { input } : {}), ...(name ? { name } : {}) }
 }
