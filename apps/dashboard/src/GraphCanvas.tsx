@@ -20,6 +20,7 @@ import {
   useEdgesState,
   useInternalNode,
   useNodesState,
+  useReactFlow,
   type Connection,
   type Edge,
   type EdgeMouseHandler,
@@ -539,6 +540,22 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
+  const rf = useReactFlow()
+
+  // Selecting a screen that owns controls expands them; zoom to that screen + its
+  // controls so they're actually readable (the per-screen alternative to the
+  // unreadable "expand all"). Other selections don't yank the viewport.
+  useEffect(() => {
+    if (selection?.kind !== 'node') return
+    const id = selection.node.id
+    const childIds = graph.nodes.filter((n) => n.kind === 'control' && n.parent === id).map((n) => n.id)
+    if (childIds.length === 0) return
+    const focus = [id, ...childIds].map((nodeId) => ({ id: nodeId }))
+    const t = setTimeout(() => {
+      void rf.fitView({ nodes: focus, padding: 0.3, duration: 450, maxZoom: 1.4 })
+    }, 80)
+    return () => clearTimeout(t)
+  }, [selection, graph, rf])
 
   // A node selection focuses on the selected node's flow; an edge selection focuses
   // on the selected edge's flow. Both are gated by the "highlight flow on select"
