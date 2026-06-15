@@ -30,6 +30,7 @@ import {
   parkEdge,
   unparkEdge,
   getLoopStatus,
+  getFreshness,
   updateGraph,
   type DescribeScreenArgs,
   type DiffArgs,
@@ -201,6 +202,11 @@ export const TOOLS: Tool[] = [
     inputSchema: { type: 'object', properties: {} },
   },
   {
+    name: 'get_freshness',
+    description: 'Is the stored graph current with the source? Returns state fresh | stale | unknown by comparing a source fingerprint stamped at map time to the source now. stale lists changed/added/removed files — the graph may be wrong, so notify the user to re-run `uigraph map`. unknown = never mapped, or the mapped source is not on this machine; treat as could-be-stale, never assume fresh. Call at session start / before trusting the graph.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
     name: 'reconcile_proposals',
     description: 'Re-derive every proposal status from the observation log (confirmed→archived, refuted→withdrawn); idempotent. Use after observations are appended out-of-band (e.g. by the Tier-3 runner). Returns what changed + the resolution snapshot.',
     inputSchema: { type: 'object', properties: {} },
@@ -294,6 +300,8 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(reportObservation(ctx, args as unknown as ReportObservationArgs))
       case 'get_loop_status':
         return jsonResult(getLoopStatus(ctx))
+      case 'get_freshness':
+        return jsonResult(getFreshness(ctx))
       case 'reconcile_proposals':
         return jsonResult(reconcileProposalsTool(ctx))
       case 'withdraw_proposal':

@@ -3,12 +3,12 @@
 // These tie the workspace together: adapters produce the IR, @uigraph/core/node
 // persists it, and @uigraph/core diffs it. No commander or process state leaks in.
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/core'
 import { diffGraphs, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, hashValue } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
-import { loadGraph, openStore, importJsonWorkspace, type ImportSummary } from '@uigraph/core/node'
+import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, type ImportSummary } from '@uigraph/core/node'
 import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@uigraph/mcp'
 import { reactAdapter } from '@uigraph/adapter-react'
 import { angularAdapter } from '@uigraph/adapter-angular'
@@ -98,6 +98,10 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   const store = openStore(dbPath)
   try {
     store.setBaseGraph(graph, soundiness)
+    // Stamp a source fingerprint so `uigraph status` / get_freshness can later tell the
+    // graph is stale. The CLI owns the clock (mappedAt); the store/core stay clock-free.
+    const scan = fingerprintSources(opts.dir)
+    store.setFingerprint({ projectDir: opts.dir, adapter: opts.adapter, hash: scan.hash, files: scan.files, mappedAt: new Date().toISOString() })
   } finally {
     store.close()
   }
@@ -111,6 +115,54 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
     unknown: graph.edges.filter((e) => e.modality === 'unknown').length,
     soundiness: soundiness.length,
   }
+}
+
+/** Graph freshness vs the current source: 'fresh' (current), 'stale' (re-map), 'unknown'
+ *  (never mapped, or the mapped source isn't on this machine — treat as could-be-stale). */
+export interface StatusResult {
+  state: 'fresh' | 'stale' | 'unknown'
+  mappedAt?: string
+  projectDir?: string
+  changed: string[]
+  added: string[]
+  removed: string[]
+  detail?: string
+}
+
+/**
+ * Recompute the source fingerprint and diff it against the one stamped at map time, so a
+ * stale graph is detectable without re-running the (slower) extraction. Pure reporting —
+ * never re-maps. 'unknown' when there is no map yet or the mapped source dir is unreadable
+ * from here (a remote/CI map); never reports 'fresh' when it cannot recompute.
+ */
+export function runStatus(dir: string): StatusResult {
+  const store = openStore(dbPathFor(dir))
+  try {
+    const fp = store.getFingerprint()
+    if (fp === null) {
+      return { state: 'unknown', changed: [], added: [], removed: [], detail: 'no fingerprint — run `uigraph map` first' }
+    }
+    if (!existsSync(fp.projectDir)) {
+      return { state: 'unknown', mappedAt: fp.mappedAt, projectDir: fp.projectDir, changed: [], added: [], removed: [], detail: 'mapped source dir is not on this machine — cannot recompute' }
+    }
+    const diff = compareFingerprint(fp, fingerprintSources(fp.projectDir))
+    return { state: diff.stale ? 'stale' : 'fresh', mappedAt: fp.mappedAt, projectDir: fp.projectDir, changed: diff.changed, added: diff.added, removed: diff.removed }
+  } finally {
+    store.close()
+  }
+}
+
+/** Format a StatusResult as the block the `status` command prints. */
+export function formatStatus(s: StatusResult): string {
+  if (s.state === 'unknown') return `graph freshness: unknown\n  ${s.detail ?? ''}`
+  if (s.state === 'fresh') return `graph freshness: fresh ✓ (mapped ${s.mappedAt})\n  no source files changed since the last map`
+  const sample = [...s.changed, ...s.added, ...s.removed].slice(0, 8)
+  return (
+    `graph freshness: STALE (mapped ${s.mappedAt})\n` +
+    `  ${s.changed.length} changed · ${s.added.length} added · ${s.removed.length} removed since the map\n` +
+    `  ${sample.join(', ')}${s.changed.length + s.added.length + s.removed.length > sample.length ? ', …' : ''}\n` +
+    '  → run `uigraph map` to refresh the graph'
+  )
 }
 
 /** Format a MapSummary as the multi-line block the `map` command prints. */

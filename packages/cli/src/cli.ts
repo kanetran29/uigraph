@@ -8,7 +8,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
-import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, runDiff, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, type AdapterName } from './commands'
+import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, runDiff, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runVerify, runVerifyUntilDone } from './runner'
 
@@ -27,6 +27,14 @@ export function buildProgram(): Command {
     .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean }) => {
       const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false })
       console.log(formatMapSummary(summary))
+    })
+
+  program
+    .command('status')
+    .description('Report whether the stored graph is current with the source (fresh / stale / unknown).')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .action((dir: string) => {
+      console.log(formatStatus(runStatus(dir)))
     })
 
   program

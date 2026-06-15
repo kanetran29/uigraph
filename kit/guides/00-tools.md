@@ -14,6 +14,7 @@ a test.)
 - **get_coverage** — runtime-verification coverage of the proven graph: `verified` (= `source:runtime`) / `total`, `unverified[]`.
 - **next_to_verify** `{limit?}` — the ranked worklist: `unknown` edges, then `may`, then proposed transitions, minus anything already runtime-witnessed.
 - **get_loop_status** — the DONE signal: `{coverage, resolution, worklistSize, loopDone}`. `loopDone` = worklist empty AND no `proposed` proposals left.
+- **get_freshness** — is the stored graph current with the source? `{state: fresh|stale|unknown, mappedAt, changed[], added[], removed[]}`. Call at session start; on `stale`, notify the user + offer to re-map (see rules/04-graph-freshness.md).
 
 ## Plan
 

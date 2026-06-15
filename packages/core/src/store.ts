@@ -14,6 +14,7 @@ import type { Overlay, UiGraph } from './ir'
 import type { SoundinessNote } from './adapter'
 import type { Proposal, Proposals, ProposalGraph } from './proposals'
 import type { Observation } from './runtime'
+import type { Fingerprint } from './fingerprint'
 import { validateGraph } from './validate'
 import { validateProposals, materializeProposalGraph, type ProposalStatus } from './proposals'
 import { reconcileProposals } from './reconcile'
@@ -119,6 +120,16 @@ export class Store {
 
   getSoundiness(): SoundinessNote[] {
     return this.getDoc<SoundinessNote[]>('soundiness') ?? []
+  }
+
+  // Source fingerprint stamped by `map` (the CLI supplies mappedAt — the store stays
+  // clock-free); read back by `uigraph status` / get_freshness to detect a stale graph.
+  setFingerprint(fp: Fingerprint): void {
+    this.setDoc('fingerprint', fp)
+  }
+
+  getFingerprint(): Fingerprint | null {
+    return this.getDoc<Fingerprint>('fingerprint')
   }
 
   // Named scenarios = one overlay per name (a feature you draft, toggle, compare).
