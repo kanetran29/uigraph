@@ -95,6 +95,21 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(graph.nodes.some((n) => n.kind === 'control' && n.parent === 'n_a')).toBe(true)
   })
 
+  it('attributes a nested-route nav in a shared context (const route-map) to the parent route', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import P from './P'\nexport default () => (<Routes><Route path="/profile" element={<P/>} /><Route path="/profile/sell-listings" element={<P/>} /></Routes>)`,
+        '/P.tsx': `export default function P(){ return null }`,
+        // a context/hook (not a route component) navigates via a const route-map lookup
+        '/ctx.tsx': `import { useHistory } from 'react-router-dom'\nconst subviewPaths = { sell: '/profile/sell-listings' }\nexport function useNav(){ const history = useHistory(); return { open: (k: string) => history.push(subviewPaths[k]) } }`,
+      }),
+      '/',
+    )
+    const e = graph.edges.find((x) => x.from === 'n_profile' && x.to === 'n_profile_sell-listings')
+    expect(e).toBeDefined()
+    expect(e?.modality).toBe('may')
+  })
+
   it('does not descend into node_modules / unresolved components', () => {
     const { graph } = extractGraph(
       inMemory({
