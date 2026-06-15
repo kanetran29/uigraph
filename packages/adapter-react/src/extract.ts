@@ -1191,20 +1191,20 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             }
           }
 
-          // Link each modal-opening effect to the SPECIFIC modal it shows (matched by
-          // the state var setShowX -> showX -> the modal gated by showX), falling back
-          // to the screen's first modal when the var can't be matched to a render.
-          if (linkModals) {
-            for (const eff of inter.effects) {
-              if (!eff.startsWith('open:modal')) continue
-              const v = eff.slice('open:modal:'.length)
-              // Precise: the modal gated by this state var; else the screen's modal only
-              // when unambiguous (exactly one). Never guess a target on a multi-modal screen.
-              const modalTarget = modalByVar.get(v) ?? (modalIds.length === 1 ? modalIds[0] : undefined)
-              if (modalTarget === undefined) continue
-              const ev = inter.events[0] ?? 'click'
-              pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, isDescended ? 'may' : 'must', isDescended ? 0.5 : 1, file, loc)
-            }
+          // Link each modal-opening effect to the SPECIFIC modal it shows (matched by the
+          // state var setShowX -> showX -> the modal gated by showX). The precise gate-var
+          // match is deterministic and allowed for ANY control — including one nested inside
+          // another overlay (refapp opens its login modal from controls deep in the buy/sell
+          // flow). The sole-modal FALLBACK is a guess, so only screen-level controls
+          // (linkModals) may use it — a nested control could mislink across unrelated overlays.
+          for (const eff of inter.effects) {
+            if (!eff.startsWith('open:modal')) continue
+            const v = eff.slice('open:modal:'.length)
+            const modalTarget = modalByVar.get(v) ?? (linkModals && modalIds.length === 1 ? modalIds[0] : undefined)
+            // A control never "opens" the overlay it already lives in.
+            if (modalTarget === undefined || modalTarget === ownerId) continue
+            const ev = inter.events[0] ?? 'click'
+            pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, isDescended ? 'may' : 'must', isDescended ? 0.5 : 1, file, loc)
           }
 
           nodes.push({
