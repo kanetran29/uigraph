@@ -327,6 +327,10 @@ export function formatDiff(diff: GraphDiff): string {
   const lines: string[] = []
   for (const n of diff.addedNodes) lines.push(`+ node ${n.id} (${n.label})`)
   for (const n of diff.removedNodes) lines.push(`- node ${n.id} (${n.label})`)
+  for (const c of diff.changedNodes) {
+    const rename = c.fields.includes('label') ? `: ${c.before.label} -> ${c.after.label}` : ` [${c.fields.join(', ')}]`
+    lines.push(`~ node ${c.id}${rename}`)
+  }
   for (const e of diff.addedEdges) lines.push(`+ edge ${e.id}: ${e.from} -> ${e.to} (${e.modality})`)
   for (const e of diff.removedEdges) lines.push(`- edge ${e.id}: ${e.from} -> ${e.to} (${e.modality})`)
   for (const c of diff.changedEdges) lines.push(`~ edge ${c.id}: changed [${c.fields.join(', ')}]`)
@@ -355,9 +359,9 @@ export function formatDiffSinceLast(r: SinceLastDiff): string {
   if (r.state === 'no-prior') return `mapped ${r.currentMappedAt ?? 'unknown'}\n  ${r.detail ?? ''}`
   const d = r.diff!
   const header = `UI graph delta since last map:\n  previous: ${r.previousMappedAt ?? 'unknown'}\n  current:  ${r.currentMappedAt ?? 'unknown'}`
-  const total = d.addedNodes.length + d.removedNodes.length + d.addedEdges.length + d.removedEdges.length + d.changedEdges.length
+  const total = d.addedNodes.length + d.removedNodes.length + d.changedNodes.length + d.addedEdges.length + d.removedEdges.length + d.changedEdges.length
   if (total === 0) return `${header}\n  No changes to the proven UI graph.`
-  const counts = `  +${d.addedNodes.length} / -${d.removedNodes.length} nodes · +${d.addedEdges.length} / -${d.removedEdges.length} edges · ~${d.changedEdges.length} changed`
+  const counts = `  +${d.addedNodes.length} / -${d.removedNodes.length} / ~${d.changedNodes.length} nodes · +${d.addedEdges.length} / -${d.removedEdges.length} / ~${d.changedEdges.length} edges`
   return `${header}\n${counts}\n${formatDiff(d)}`
 }
 

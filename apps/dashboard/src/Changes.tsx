@@ -70,7 +70,10 @@ function ChangesBody(props: {
   edgeById: Map<string, GraphEdge>
 }): JSX.Element {
   const { diff, prevMappedAt, mappedAt, selectNode, selectEdge, nodeById, edgeById } = props
-  const total = diff.addedNodes.length + diff.removedNodes.length + diff.addedEdges.length + diff.removedEdges.length + diff.changedEdges.length
+  // changedNodes is defensive against an older serve that predates it.
+  const changedNodes = diff.changedNodes ?? []
+  const total =
+    diff.addedNodes.length + diff.removedNodes.length + changedNodes.length + diff.addedEdges.length + diff.removedEdges.length + diff.changedEdges.length
 
   return (
     <>
@@ -84,10 +87,36 @@ function ChangesBody(props: {
           <div className="cov-chips">
             <CountChip label="+nodes" n={diff.addedNodes.length} />
             <CountChip label="−nodes" n={diff.removedNodes.length} />
+            <CountChip label="~nodes" n={changedNodes.length} />
             <CountChip label="+edges" n={diff.addedEdges.length} />
             <CountChip label="−edges" n={diff.removedEdges.length} />
             <CountChip label="~edges" n={diff.changedEdges.length} />
           </div>
+
+          {changedNodes.length > 0 ? (
+            <>
+              <h3>changed screens ({changedNodes.length})</h3>
+              <ul className="cov-list">
+                {changedNodes.map((c) => (
+                  <li key={`cn-${c.id}`}>
+                    <button className="cov-row cov-row--stacked" onClick={() => selectNode(c.after)} disabled={!nodeById.has(c.id)} title="select this screen">
+                      <span className="cov-row-head">
+                        <span className="cov-modality">~screen</span>
+                        <span className="cov-edge">
+                          {c.fields.includes('label') ? `${c.before.label} → ${c.after.label}` : c.after.label}
+                        </span>
+                      </span>
+                      <span className="cov-chips">
+                        {c.fields.map((f) => (
+                          <span key={f} className="cov-chip">{f}</span>
+                        ))}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
 
           {diff.addedNodes.length + diff.addedEdges.length > 0 ? (
             <>
