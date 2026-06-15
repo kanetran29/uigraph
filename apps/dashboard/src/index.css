@@ -980,6 +980,13 @@ button.danger {
   opacity: 0.42;
 }
 
+/* Diff-highlight: a node added since the last map gets a green ring (removed nodes can't
+ * be drawn — they are gone from the current graph — so they stay in the Changes panel). */
+.react-flow__node.rf-added {
+  box-shadow: 0 0 0 2px #16a34a, 0 0 12px color-mix(in srgb, #16a34a 55%, transparent);
+  border-radius: var(--radius);
+}
+
 /* Proposals panel. */
 .prop-legend {
   display: flex;
