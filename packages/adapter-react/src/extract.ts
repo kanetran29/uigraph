@@ -455,6 +455,39 @@ function getJsxText(el: Node): string | undefined {
   return txt.length > 0 ? txt : undefined
 }
 
+/** Humanize an i18n key / camel / kebab / BEM token into a readable name ("building.offMarket.couldSell" -> "Could sell"). */
+function humanize(raw: string): string | undefined {
+  const last = raw.split('.').pop() ?? raw
+  const s = last.replace(/[-_]+/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim().toLowerCase()
+  return s.length > 0 ? s.charAt(0).toUpperCase() + s.slice(1) : undefined
+}
+
+/**
+ * Derive a control's name from STATIC signals when it has no visible text/aria —
+ * refapp-style apps label via `<Trans i18nKey="…">`, an icon component (`<SellIcon/>`),
+ * or a BEM className modifier (`--could-sell`). The name is in the source, just not
+ * as literal text; reading it deterministically beats leaving the control unnamed
+ * (and upgrades its selector from structural to role+name).
+ */
+function inferredName(el: Node): string | undefined {
+  const kids = [el, ...el.getDescendantsOfKind(SyntaxKind.JsxElement), ...el.getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement)]
+  for (const d of kids) {
+    const key = stringAttr(d, 'i18nKey')
+    if (key != null && key.length > 0) return humanize(key)
+  }
+  for (const d of kids) {
+    const t = jsxTag(d)
+    const m = /^([A-Z][A-Za-z0-9]*?)(Icon|Svg)$/.exec(t)
+    if (m && m[1]) return humanize(m[1])
+  }
+  const cls = stringAttr(el, 'className')
+  if (cls != null) {
+    const mod = cls.split(/\s+/).map((c) => (c.includes('--') ? c.slice(c.lastIndexOf('--') + 2) : null)).find((x): x is string => x != null && /[a-z]/i.test(x))
+    if (mod) return humanize(mod)
+  }
+  return undefined
+}
+
 function inputControlType(el: Node): string {
   const t = (stringAttr(el, 'type') ?? 'text').toLowerCase()
   if (t === 'checkbox' || t === 'radio') return 'checkbox'
@@ -542,9 +575,12 @@ function controlMetaFor(el: Node): ControlInfo | null {
   else if (/^[a-z]/.test(tag) && hasEventHandler(el)) controlType = 'element'
   else return null
   const textLabel = controlType === 'button' || controlType === 'element' ? getJsxText(el) : undefined
+  // Fall back to a name read from i18n key / icon / className when there is no
+  // literal text or aria (refapp labels via <Trans i18nKey>), so controls aren't nameless.
+  const inferred = textLabel ?? inferredName(el)
   const name =
-    stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? stringAttr(el, 'placeholder') ?? stringAttr(el, 'aria-label') ?? textLabel
-  const selector = controlSelector(el, tag, controlType, getJsxText(el))
+    stringAttr(el, 'name') ?? stringAttr(el, 'id') ?? stringAttr(el, 'placeholder') ?? stringAttr(el, 'aria-label') ?? inferred
+  const selector = controlSelector(el, tag, controlType, getJsxText(el) ?? inferredName(el))
   const input = inputConstraints(el, controlType)
   return { element: tag, controlType, selector, ...(input ? { input } : {}), ...(name ? { name } : {}) }
 }
