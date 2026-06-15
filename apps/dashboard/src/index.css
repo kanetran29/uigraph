@@ -578,6 +578,12 @@ select:focus-visible,
   color: var(--muted);
   flex-shrink: 0;
 }
+/* The event rendered as a sublabel under a stacked edge row (diff added/removed edges), so it
+   reads beneath the from→to instead of being flex-pushed to the far right against the scrollbar. */
+.cov-event--sub {
+  font-size: 10px;
+  padding-left: 38px;
+}
 /* A parked row stacks its edge over its (long) reason so the reason never starves the
    edge column into a per-character wrap. */
 .cov-row--stacked {

@@ -138,10 +138,12 @@ function ChangesBody(props: {
                 ))}
                 {diff.addedEdges.map((e) => (
                   <li key={`ae-${e.id}`}>
-                    <button className="cov-row" onClick={() => selectEdge(e)} title="select this transition">
-                      <span className="cov-modality">+edge</span>
-                      <span className="cov-edge">{e.from} → {e.to}</span>
-                      <span className="cov-event">{e.event}</span>
+                    <button className="cov-row cov-row--stacked" onClick={() => selectEdge(e)} title="select this transition">
+                      <span className="cov-row-head">
+                        <span className="cov-modality">+edge</span>
+                        <span className="cov-edge">{e.from} → {e.to}</span>
+                      </span>
+                      <span className="cov-event cov-event--sub">{e.event}</span>
                     </button>
                   </li>
                 ))}
@@ -163,10 +165,12 @@ function ChangesBody(props: {
                 ))}
                 {diff.removedEdges.map((e) => (
                   <li key={`re-${e.id}`} className="cov-removed">
-                    <span className="cov-row cov-row--dim" title="no longer in the current graph">
-                      <span className="cov-modality">−edge</span>
-                      <span className="cov-edge">{e.from} → {e.to}</span>
-                      <span className="cov-event">{e.event}</span>
+                    <span className="cov-row cov-row--dim cov-row--stacked" title="no longer in the current graph">
+                      <span className="cov-row-head">
+                        <span className="cov-modality">−edge</span>
+                        <span className="cov-edge">{e.from} → {e.to}</span>
+                      </span>
+                      <span className="cov-event cov-event--sub">{e.event}</span>
                     </span>
                   </li>
                 ))}
