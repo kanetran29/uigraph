@@ -6,7 +6,7 @@
 // the path's edge ids upward lets the canvas highlight the route.
 
 import { useEffect, useMemo, useState } from 'react'
-import { planPath, reachableFrom, type PlanStep } from '@uigraph/core'
+import { planPath, type PlanStep } from '@uigraph/core'
 import type { GraphNode, UiGraph } from '@uigraph/core'
 
 /** Props for the steps panel: the graph to plan over and a path-change reporter. */
@@ -29,22 +29,6 @@ function navigableNodes(graph: UiGraph): GraphNode[] {
 }
 
 /**
- * Pick a sensible default target reachable from `from`: the farthest reachable
- * SCREEN (a real route reads as a more meaningful default than a modal/sub-state),
- * falling back to the farthest reachable navigable node, then any navigable node.
- * So the panel opens on a real, non-empty route and not, say, an IntroModal.
- */
-function defaultTarget(graph: UiGraph, from: string, nav: GraphNode[]): string {
-  const reachable = reachableFrom(graph, from)
-  const reachableNav = nav.filter((n) => n.id !== from && reachable.has(n.id))
-  const reachableScreens = reachableNav.filter((n) => n.kind === 'screen' || n.kind === 'route')
-  if (reachableScreens.length > 0) return reachableScreens[reachableScreens.length - 1]!.id
-  if (reachableNav.length > 0) return reachableNav[reachableNav.length - 1]!.id
-  const other = nav.find((n) => n.id !== from)
-  return other?.id ?? from
-}
-
-/**
  * Render the from/to selectors and the planned route. The selectors list only
  * navigable targets, grouped by route. Recomputes the path with core planPath
  * whenever the endpoints or graph change, lists each ordered step (event, guard,
@@ -58,7 +42,9 @@ export function Steps(props: StepsProps): JSX.Element {
 
   const first = nav[0]?.id ?? ''
   const [from, setFrom] = useState(first)
-  const [to, setTo] = useState(() => (first === '' ? '' : defaultTarget(graph, first, nav)))
+  // No default target — the panel opens with NO planned path highlighted; the user
+  // picks a `to` to plan one.
+  const [to, setTo] = useState('')
   // When cleared, no path is planned or highlighted (the whole graph stays visible);
   // changing either endpoint re-arms planning.
   const [cleared, setCleared] = useState(false)
@@ -71,16 +57,12 @@ export function Steps(props: StepsProps): JSX.Element {
     setTo(id)
   }
 
-  // Re-seed endpoints when the graph changes so they always point at live navigable nodes.
+  // Re-seed only when an endpoint points at a node that no longer exists; never
+  // auto-pick a `to` (an empty `to` is the intentional no-path default).
   useEffect(() => {
-    if (!navIds.has(from)) {
-      const nextFrom = first
-      setFrom(nextFrom)
-      setTo(nextFrom === '' ? '' : defaultTarget(graph, nextFrom, nav))
-    } else if (!navIds.has(to)) {
-      setTo(defaultTarget(graph, from, nav))
-    }
-  }, [graph, nav, navIds, first, from, to])
+    if (from !== '' && !navIds.has(from)) setFrom(first)
+    if (to !== '' && !navIds.has(to)) setTo('')
+  }, [navIds, first, from, to])
 
   const fromLabel = useMemo(() => nav.find((n) => n.id === from)?.label ?? from, [nav, from])
   const toLabel = useMemo(() => nav.find((n) => n.id === to)?.label ?? to, [nav, to])
@@ -119,11 +101,13 @@ export function Steps(props: StepsProps): JSX.Element {
         </label>
         <label>
           <span>to</span>
-          <NavSelect nodes={nav} value={to} onChange={pickTo} />
+          <NavSelect nodes={nav} value={to} onChange={pickTo} placeholder="(choose target)" />
         </label>
       </div>
       {cleared ? (
         <p className="muted">Path cleared — pick a from/to to plan a route. All edges shown.</p>
+      ) : to === '' ? (
+        <p className="muted">Pick a target to plan a path.</p>
       ) : from === to ? (
         <p className="muted">Start and target are the same node.</p>
       ) : path === null ? (
@@ -151,11 +135,12 @@ export function Steps(props: StepsProps): JSX.Element {
  * A <select> over navigable nodes, grouped by route via <optgroup> so targets read
  * by their location (route, or "(no route)" for nodes without one).
  */
-function NavSelect(props: { nodes: GraphNode[]; value: string; onChange: (id: string) => void }): JSX.Element {
-  const { nodes, value, onChange } = props
+function NavSelect(props: { nodes: GraphNode[]; value: string; onChange: (id: string) => void; placeholder?: string }): JSX.Element {
+  const { nodes, value, onChange, placeholder } = props
   const groups = useMemo(() => groupByRoute(nodes), [nodes])
   return (
     <select value={value} onChange={(e) => onChange(e.target.value)}>
+      {placeholder !== undefined ? <option value="">{placeholder}</option> : null}
       {[...groups.entries()].map(([route, items]) => (
         <optgroup key={route} label={route}>
           {items.map((n) => (
