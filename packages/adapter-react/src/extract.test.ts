@@ -209,6 +209,31 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(names).not.toContain('Danger')
   })
 
+  it('names an input from its placeholder / aria-label, including the {t(\'key\')} form', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ const t=(k)=>k; return <div>
+          <input type="email" placeholder={t('signupLoginModal.emailPlaceholder')} />
+          <input type="password" placeholder="Password" />
+          <input type="tel" placeholder={t('profile.phonePlaceholder')} />
+          <button aria-label={t('actions.clearAll')} onClick={()=>{}} />
+        </div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const named = graph.nodes.filter((n) => n.kind === 'control')
+    const names = named.map((n) => n.control?.name)
+    expect(names).toContain('Email')
+    expect(names).toContain('Password')
+    expect(names).toContain('Phone')
+    expect(names).toContain('Clear all')
+    // a named input gets a role+name selector, not a bare structural one
+    const email = named.find((n) => n.control?.name === 'Email')
+    expect(email?.control?.selector?.strategy).toBe('role-name')
+  })
+
   it('does not descend into node_modules / unresolved components', () => {
     const { graph } = extractGraph(
       inMemory({
