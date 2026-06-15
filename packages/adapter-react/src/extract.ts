@@ -463,11 +463,33 @@ function humanize(raw: string): string | undefined {
 }
 
 /**
+ * The i18n key from a `{t('key')}` / `{t("key", …)}` hook call used as the element's
+ * LABEL — searched only in the element's JSX CHILDREN (text position), never its
+ * attributes, so a `t()` inside an onClick/error handler can't be mistaken for the label.
+ * refapp labels most controls this way (the hook form), distinct from `<Trans i18nKey>`.
+ */
+function i18nCallKey(el: Node): string | undefined {
+  if (!Node.isJsxElement(el)) return undefined
+  for (const child of el.getJsxChildren()) {
+    for (const call of child.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      const callee = call.getExpression().getText()
+      if (callee !== 't' && !callee.endsWith('.t')) continue
+      const arg = call.getArguments()[0]
+      if (arg && Node.isStringLiteral(arg)) {
+        const key = arg.getLiteralText()
+        if (key.length > 0) return key
+      }
+    }
+  }
+  return undefined
+}
+
+/**
  * Derive a control's name from STATIC signals when it has no visible text/aria —
- * refapp-style apps label via `<Trans i18nKey="…">`, an icon component (`<SellIcon/>`),
- * or a BEM className modifier (`--could-sell`). The name is in the source, just not
- * as literal text; reading it deterministically beats leaving the control unnamed
- * (and upgrades its selector from structural to role+name).
+ * refapp-style apps label via `<Trans i18nKey="…">`, a `{t('key')}` hook call, an icon
+ * component (`<SellIcon/>`), or a BEM className modifier (`--could-sell`). The name is in
+ * the source, just not as literal text; reading it deterministically beats leaving the
+ * control unnamed (and upgrades its selector from structural to role+name).
  */
 function inferredName(el: Node): string | undefined {
   const kids = [el, ...el.getDescendantsOfKind(SyntaxKind.JsxElement), ...el.getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement)]
@@ -475,6 +497,10 @@ function inferredName(el: Node): string | undefined {
     const key = stringAttr(d, 'i18nKey')
     if (key != null && key.length > 0) return humanize(key)
   }
+  // The actual label text via the i18n hook — more accurate than the icon/className
+  // fallbacks below, which on refapp's design-system buttons leak the variant ("Danger").
+  const callKey = i18nCallKey(el)
+  if (callKey != null) return humanize(callKey)
   for (const d of kids) {
     const t = jsxTag(d)
     const m = /^([A-Z][A-Za-z0-9]*?)(Icon|Svg)$/.exec(t)
