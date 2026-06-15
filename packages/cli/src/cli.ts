@@ -8,7 +8,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
-import { formatDiff, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, formatWorkspaceList, runDiff, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
+import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, formatWorkspaceList, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runVerify, runVerifyUntilDone } from './runner'
 
@@ -93,10 +93,25 @@ export function buildProgram(): Command {
 
   program
     .command('diff')
-    .description('Diff two graphs by stable id (.db or .json) and print a human-readable summary.')
-    .argument('<a>', 'first graph (.db or .json)')
-    .argument('<b>', 'second graph (.db or .json)')
-    .action((a: string, b: string) => {
+    .description('Diff two graphs by stable id (.db or .json). With --since-last <dir>: diff a workspace\'s current map against its previous one.')
+    .argument('[a]', 'first graph (.db or .json), or the workspace dir with --since-last')
+    .argument('[b]', 'second graph (.db or .json)')
+    .option('--since-last', 'diff the current base graph against the previous map for this workspace (pass the workspace dir as <a>)')
+    .action((a: string | undefined, b: string | undefined, opts: { sinceLast?: boolean }) => {
+      if (opts.sinceLast === true) {
+        if (a === undefined || b !== undefined) {
+          console.error('usage: uigraph diff <dir> --since-last')
+          process.exitCode = 1
+          return
+        }
+        console.log(formatDiffSinceLast(runDiffSinceLast(a)))
+        return
+      }
+      if (a === undefined || b === undefined) {
+        console.error('usage: uigraph diff <a> <b>  (or: uigraph diff <dir> --since-last)')
+        process.exitCode = 1
+        return
+      }
       console.log(formatDiff(runDiff({ a, b })))
     })
 

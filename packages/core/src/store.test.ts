@@ -161,4 +161,62 @@ describe('Store (SQLite)', () => {
     expect(s.getFingerprint()).toEqual(fp)
     s.close()
   })
+
+  describe('snapshotCurrentAsPrevious / getPreviousGraph (temporal-diff rotation)', () => {
+    const fp = (mappedAt: string) => ({ projectDir: '/p', adapter: 'react', hash: 'h', files: {}, mappedAt })
+
+    it('is a no-op on the first map (no base graph yet): returns false, no previous written', () => {
+      const s = openStore(':memory:')
+      expect(s.snapshotCurrentAsPrevious()).toBe(false)
+      expect(s.getPreviousGraph()).toBeNull()
+      s.close()
+    })
+
+    it('captures the current graph + its fingerprint mappedAt as the previous snapshot', () => {
+      const s = openStore(':memory:')
+      const g1 = graph([node('a')], [])
+      s.setBaseGraph(g1)
+      s.setFingerprint(fp('2026-01-01T00:00:00Z'))
+      expect(s.snapshotCurrentAsPrevious()).toBe(true)
+      expect(s.getPreviousGraph()).toEqual({ graph: g1, mappedAt: '2026-01-01T00:00:00Z' })
+      s.close()
+    })
+
+    it('reads the PRIOR fingerprint mappedAt at rotation time, not a later one (clock-free)', () => {
+      const s = openStore(':memory:')
+      const g1 = graph([node('a')], [])
+      const g2 = graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')])
+      s.setBaseGraph(g1)
+      s.setFingerprint(fp('T1'))
+      s.snapshotCurrentAsPrevious()
+      s.setBaseGraph(g2)
+      s.setFingerprint(fp('T2'))
+      // previous still holds g1 stamped T1, untouched by the later T2 map
+      expect(s.getPreviousGraph()).toEqual({ graph: g1, mappedAt: 'T1' })
+      s.close()
+    })
+
+    it('stamps mappedAt="" when the current graph predates fingerprinting (e.g. a migrate import)', () => {
+      const s = openStore(':memory:')
+      s.setBaseGraph(graph([node('a')], []))
+      expect(s.snapshotCurrentAsPrevious()).toBe(true)
+      expect(s.getPreviousGraph()?.mappedAt).toBe('')
+      s.close()
+    })
+
+    it('keeps history depth ONE: a second rotation overwrites the previous slot', () => {
+      const s = openStore(':memory:')
+      const g1 = graph([node('a')], [])
+      const g2 = graph([node('a'), node('b')], [])
+      const g3 = graph([node('a'), node('b'), node('c')], [])
+      s.setBaseGraph(g1)
+      s.snapshotCurrentAsPrevious()
+      s.setBaseGraph(g2)
+      s.snapshotCurrentAsPrevious()
+      s.setBaseGraph(g3)
+      // previous is g2 (the immediately-prior map), not g1
+      expect(s.getPreviousGraph()?.graph).toEqual(g2)
+      s.close()
+    })
+  })
 })

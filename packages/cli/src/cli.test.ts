@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
 import { openStore, saveGraph } from '@uigraph/core/node'
 import type { Server } from 'node:http'
-import { dbPathFor, formatDiff, readSoundiness, runDiff, runGen, runKitInstall, runKitPrint, runMap, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove } from './commands'
+import { dbPathFor, formatDiff, formatDiffSinceLast, readSoundiness, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove } from './commands'
 import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
 import { readRegistry, summarize } from '@uigraph/core/node'
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -130,6 +130,86 @@ describe('runDiff / formatDiff', () => {
   })
 })
 
+describe('runDiffSinceLast / formatDiffSinceLast (temporal "since last map" diff)', () => {
+  // Seed a workspace db with two successive maps (g1 @ t1 rotated to previous, g2 @ t2 current).
+  function seedTwoMaps(prefix: string, g1: UiGraph, t1: string, g2: UiGraph, t2: string): string {
+    const dir = tempDir(prefix)
+    const store = openStore(dbPathFor(dir))
+    const fp = (mappedAt: string) => ({ projectDir: dir, adapter: 'react', hash: 'h', files: {}, mappedAt })
+    store.setBaseGraph(g1)
+    store.setFingerprint(fp(t1))
+    store.snapshotCurrentAsPrevious()
+    store.setBaseGraph(g2)
+    store.setFingerprint(fp(t2))
+    store.close()
+    return dir
+  }
+  // Seed a single map (no rotation) at the given timestamp.
+  function seedOneMap(prefix: string, g: UiGraph, at: string): string {
+    const dir = seedWorkspace(tempDir(prefix), g)
+    const store = openStore(dbPathFor(dir))
+    store.setFingerprint({ projectDir: dir, adapter: 'react', hash: 'h', files: {}, mappedAt: at })
+    store.close()
+    return dir
+  }
+
+  it('no-current: a never-mapped workspace', () => {
+    const r = runDiffSinceLast(tempDir('uigraph-since-empty-'))
+    expect(r.state).toBe('no-current')
+    expect(formatDiffSinceLast(r)).toMatch(/uigraph map/)
+  })
+
+  it('no-prior: mapped exactly once', () => {
+    const r = runDiffSinceLast(seedOneMap('uigraph-since-one-', graph([node('a')], []), '2026-02-02T00:00:00Z'))
+    expect(r.state).toBe('no-prior')
+    expect(formatDiffSinceLast(r)).toMatch(/no previous|re-map/i)
+  })
+
+  it('ok + added edge: reports the delta, both timestamps, and the reused per-change body', () => {
+    const g1 = graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')])
+    const g2 = graph([node('a'), node('b')], [edge('e_ab', 'a', 'b'), edge('e_ba', 'b', 'a')])
+    const r = runDiffSinceLast(seedTwoMaps('uigraph-since-add-', g1, 'T1', g2, 'T2'))
+    expect(r.state).toBe('ok')
+    expect(r.diff?.addedEdges.map((e) => e.id)).toEqual(['e_ba'])
+    const out = formatDiffSinceLast(r)
+    expect(out).toContain('previous: T1')
+    expect(out).toContain('current:  T2')
+    expect(out).toContain('+ edge e_ba')
+  })
+
+  it('ok + no changes: identical re-map shows both timestamps and "No changes"', () => {
+    const g1 = graph([node('a')], [])
+    const r = runDiffSinceLast(seedTwoMaps('uigraph-since-same-', g1, 'T1', g1, 'T2'))
+    expect(r.state).toBe('ok')
+    expect(formatDiffSinceLast(r)).toContain('No changes to the proven UI graph')
+  })
+
+  it('renders an unknown previous timestamp when the prior graph predated fingerprinting', () => {
+    const dir = tempDir('uigraph-since-unknown-')
+    const store = openStore(dbPathFor(dir))
+    store.setBaseGraph(graph([node('a')], []))
+    store.snapshotCurrentAsPrevious()
+    store.setBaseGraph(graph([node('a'), node('b')], []))
+    store.setFingerprint({ projectDir: dir, adapter: 'react', hash: 'h', files: {}, mappedAt: 'T2' })
+    store.close()
+    const r = runDiffSinceLast(dir)
+    expect(r.previousMappedAt).toBeNull()
+    expect(formatDiffSinceLast(r)).toContain('previous: unknown')
+  })
+
+  it('runMap rotation: a second map over the same dir leaves a previous to compare against', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'uigraph-since-remap-'))
+    cpSync(SAMPLE_REACT, dir, { recursive: true })
+    await runMap({ dir, adapter: 'react', register: false })
+    await runMap({ dir, adapter: 'react', register: false })
+    const r = runDiffSinceLast(dir)
+    expect(r.state).toBe('ok')
+    // two distinct map timestamps -> rotation captured the first map as previous
+    expect(r.previousMappedAt).not.toBeNull()
+    expect(r.previousMappedAt).not.toBe(r.currentMappedAt)
+  })
+})
+
 describe('runGen (codegen)', () => {
   it('renders a Playwright spec for a planned path from the workspace db', () => {
     const dir = seedWorkspace(tempDir('uigraph-cli-gen-'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
@@ -220,6 +300,33 @@ describe('handleApiRequest (pure router)', () => {
       { method: 'POST', path: '/api/overlay', body: { op: { kind: 'addEdge', edge: malformed } } },
     )
     expect(res.status).toBe(400)
+  })
+})
+
+describe('GET /api/changes (temporal diff over the serve API)', () => {
+  it('returns state no-prior for a one-map workspace', () => {
+    const dir = seedWorkspace(tempDir('uigraph-changes-one-'), graph([node('a')], []))
+    const res = handleApiRequest({ dir }, { method: 'GET', path: '/api/changes', body: undefined })
+    expect(res.status).toBe(200)
+    expect((res.body as { state: string }).state).toBe('no-prior')
+  })
+
+  it('returns the diff + both timestamps for a two-map workspace', () => {
+    const dir = tempDir('uigraph-changes-two-')
+    const store = openStore(dbPathFor(dir))
+    const fp = (mappedAt: string) => ({ projectDir: dir, adapter: 'react', hash: 'h', files: {}, mappedAt })
+    store.setBaseGraph(graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
+    store.setFingerprint(fp('T1'))
+    store.snapshotCurrentAsPrevious()
+    store.setBaseGraph(graph([node('a'), node('b')], [edge('e_ab', 'a', 'b'), edge('e_ba', 'b', 'a')]))
+    store.setFingerprint(fp('T2'))
+    store.close()
+    const res = handleApiRequest({ dir }, { method: 'GET', path: '/api/changes', body: undefined })
+    const body = res.body as { state: string; diff: { addedEdges: { id: string }[] }; previousMappedAt: string; currentMappedAt: string }
+    expect(body.state).toBe('ok')
+    expect(body.diff.addedEdges.map((e) => e.id)).toEqual(['e_ba'])
+    expect(body.previousMappedAt).toBe('T1')
+    expect(body.currentMappedAt).toBe('T2')
   })
 })
 

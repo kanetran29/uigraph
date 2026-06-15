@@ -35,3 +35,4 @@ a test.)
 ## Compare
 
 - **diff** `{a, b}` — diff two graph files by stable id (added/removed nodes+edges, changed-edge fields).
+- **diff_since_last** `{}` — what the last re-map did to the proven UI graph: the current base vs the previous map (added/removed nodes+edges, changed-edge fields) + both `mappedAt` timestamps. `{state: ok|no-prior|no-current, diff, previousMappedAt, currentMappedAt}`. No args (the previous base is in the workspace db, not a file). Base-graph only. After re-mapping, call it to tell the user what changed — distinct from `get_freshness` (source-file staleness). See rules/04-graph-freshness.md.

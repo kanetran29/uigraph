@@ -28,6 +28,7 @@
     "update_graph",
     "report_observation",
     "diff",
+    "diff_since_last",
     "get_loop_status",
     "get_freshness",
     "reconcile_proposals",

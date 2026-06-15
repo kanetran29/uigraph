@@ -49,3 +49,44 @@ export function diffGraphs(a: UiGraph, b: UiGraph): GraphDiff {
 
   return { addedNodes, removedNodes, addedEdges, removedEdges, changedEdges }
 }
+
+/**
+ * The temporal "since last map" diff result: a single shape shared by the CLI, the MCP
+ * tool, and the serve /api/changes endpoint. `state` discriminates: 'no-current' (the
+ * workspace was never mapped), 'no-prior' (mapped exactly once — nothing to compare yet),
+ * 'ok' (a real delta in `diff`). Timestamps are null when unknown (a graph that predates
+ * fingerprinting, e.g. a migrate import, carries an empty mappedAt → null here).
+ */
+export interface SinceLastDiff {
+  state: 'ok' | 'no-prior' | 'no-current'
+  diff: GraphDiff | null
+  previousMappedAt: string | null
+  currentMappedAt: string | null
+  detail: string | null
+}
+
+/**
+ * Compute the temporal diff from plain data (NOT the Store, so this stays pure + browser-
+ * safe and is the single source of the 3-state branch for every consumer). Orientation is
+ * load-bearing: diffGraphs(previous, current) so added* = what the new code introduced and
+ * removed* = what it deleted. An empty-string previous timestamp normalizes to null.
+ */
+export function diffSinceLast(
+  current: UiGraph | null,
+  currentMappedAt: string | null,
+  previous: { graph: UiGraph; mappedAt: string } | null,
+): SinceLastDiff {
+  if (current === null) {
+    return { state: 'no-current', diff: null, previousMappedAt: null, currentMappedAt: null, detail: 'no graph in this workspace — run `uigraph map` first' }
+  }
+  if (previous === null) {
+    return { state: 'no-prior', diff: null, previousMappedAt: null, currentMappedAt: currentMappedAt, detail: 'only one map — re-map after a code change to see what it did to the UI graph' }
+  }
+  return {
+    state: 'ok',
+    diff: diffGraphs(previous.graph, current),
+    previousMappedAt: previous.mappedAt === '' ? null : previous.mappedAt,
+    currentMappedAt: currentMappedAt,
+    detail: null,
+  }
+}

@@ -6,8 +6,8 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/core'
-import { diffGraphs, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, hashValue } from '@uigraph/core'
-import type { GraphDiff } from '@uigraph/core'
+import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, hashValue } from '@uigraph/core'
+import type { GraphDiff, SinceLastDiff } from '@uigraph/core'
 import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@uigraph/core/node'
 import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@uigraph/mcp'
 import { reactAdapter } from '@uigraph/adapter-react'
@@ -101,6 +101,9 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   const dbPath = opts.out ?? dbPathFor(opts.dir)
   const store = openStore(dbPath)
   try {
+    // Rotate the current graph into the 'previous' slot for the temporal "since last map" diff.
+    // MUST run before setBaseGraph/setFingerprint overwrite the graph + mappedAt it reads.
+    store.snapshotCurrentAsPrevious()
     store.setBaseGraph(graph, soundiness)
     // Stamp a source fingerprint so `uigraph status` / get_freshness can later tell the
     // graph is stale. The CLI owns the clock (mappedAt); the store/core stay clock-free.
@@ -329,6 +332,33 @@ export function formatDiff(diff: GraphDiff): string {
   for (const c of diff.changedEdges) lines.push(`~ edge ${c.id}: changed [${c.fields.join(', ')}]`)
   if (lines.length === 0) return 'No differences.'
   return lines.join('\n')
+}
+
+/**
+ * The temporal diff for a workspace: its current base graph against the previous map's
+ * (the "what did my code change do to the UI graph?" delta). Pure reporting — never maps.
+ * Reads base + fingerprint mappedAt + the rotated previous snapshot, then defers the
+ * 3-state branch to the shared pure core helper. Clock-free (passes stored ISO strings).
+ */
+export function runDiffSinceLast(dir: string): SinceLastDiff {
+  const store = openStore(dbPathFor(dir))
+  try {
+    return diffSinceLast(store.getBaseGraph(), store.getFingerprint()?.mappedAt ?? null, store.getPreviousGraph())
+  } finally {
+    store.close()
+  }
+}
+
+/** Render a SinceLastDiff: the two map timestamps, a counts headline, and the reused per-change body. */
+export function formatDiffSinceLast(r: SinceLastDiff): string {
+  if (r.state === 'no-current') return r.detail ?? 'no graph in this workspace'
+  if (r.state === 'no-prior') return `mapped ${r.currentMappedAt ?? 'unknown'}\n  ${r.detail ?? ''}`
+  const d = r.diff!
+  const header = `UI graph delta since last map:\n  previous: ${r.previousMappedAt ?? 'unknown'}\n  current:  ${r.currentMappedAt ?? 'unknown'}`
+  const total = d.addedNodes.length + d.removedNodes.length + d.addedEdges.length + d.removedEdges.length + d.changedEdges.length
+  if (total === 0) return `${header}\n  No changes to the proven UI graph.`
+  const counts = `  +${d.addedNodes.length} / -${d.removedNodes.length} nodes · +${d.addedEdges.length} / -${d.removedEdges.length} edges · ~${d.changedEdges.length} changed`
+  return `${header}\n${counts}\n${formatDiff(d)}`
 }
 
 /** Read a workspace's soundiness report from its SQLite store (empty if none). */

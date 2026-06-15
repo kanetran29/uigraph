@@ -5,10 +5,12 @@
 export {
   runMap,
   runDiff,
+  runDiffSinceLast,
   runMigrate,
   formatMapSummary,
   formatMigrateSummary,
   formatDiff,
+  formatDiffSinceLast,
   pickAdapter,
   makeContext,
   consoleLogger,

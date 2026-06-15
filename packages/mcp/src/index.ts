@@ -13,6 +13,7 @@ export {
   updateGraph,
   reportObservation,
   diffTool,
+  diffSinceLastTool,
   loadMergedGraph,
   readObservations,
   getProposalGraph,
