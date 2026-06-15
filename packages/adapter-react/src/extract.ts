@@ -276,6 +276,42 @@ function resolveComponentFile(sf: SourceFile, name: string): SourceFile | undefi
   return undefined
 }
 
+/**
+ * The set of source files that make up a route's screen: the route component plus
+ * the same-project child components it renders in JSX, breadth-first to maxDepth.
+ * refapp-style SPAs render most real navigation one or more component-hops below
+ * the route (a button in a nested <LandingPage>), so a route component scanned
+ * alone misses them. Bounded by maxDepth + a visited set; node_modules + framework
+ * wrappers are skipped. Returns each file with its descent depth (0 = the route
+ * component itself); callers cap depth>0 navigations to `may` since a child's
+ * render is not statically guaranteed.
+ */
+function screenSourceFiles(root: SourceFile, maxDepth: number): Map<SourceFile, number> {
+  const out = new Map<SourceFile, number>()
+  out.set(root, 0)
+  let frontier = [root]
+  for (let depth = 0; depth < maxDepth; depth++) {
+    const next: SourceFile[] = []
+    for (const sf of frontier) {
+      const tags = new Set<string>()
+      for (const el of allJsxElements(sf)) {
+        const tag = jsxTag(el).split('.')[0] ?? ''
+        if (!/^[A-Z]/.test(tag)) continue
+        if (/(Provider|Consumer|Context|Route|Routes|Switch|Router|Fragment|Suspense|ErrorBoundary)$/.test(tag)) continue
+        tags.add(tag)
+      }
+      for (const tag of tags) {
+        const child = resolveComponentFile(sf, tag)
+        if (!child || out.has(child) || child.getFilePath().includes('node_modules')) continue
+        out.set(child, depth + 1)
+        next.push(child)
+      }
+    }
+    frontier = next
+  }
+  return out
+}
+
 /** Collect <Route> declarations across the project into route nodes. */
 function collectRoutes(project: Project): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
@@ -916,29 +952,34 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       continue
     }
     if (!isRepresentative(route)) continue
-    const file = relative(projectDir, route.componentFile.getFilePath())
-    for (const t of collectTargets(route.componentFile)) {
-      const sf = t.node.getSourceFile()
-      const lc = sf.getLineAndColumnAtPos(t.node.getStart())
-      const loc = { line: lc.line, col: lc.column }
-      if (t.ti.kind === 'literal') {
-        const { exact, candidates } = matchLiteralAll(t.ti.value, routeLikes)
-        if (exact) {
-          const guarded = t.guard !== null
-          pushEdge(route.nodeId, exact.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
-        } else if (candidates.length > 0) {
-          soundiness.push({ kind: 'ambiguous-target', file, loc, detail: `literal target "${t.ti.value}" matched ${candidates.length} parameterized route(s); emitted as may, never must` })
-          for (const cand of candidates) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
+    for (const [cf, depth] of screenSourceFiles(route.componentFile, 2)) {
+      const file = relative(projectDir, cf.getFilePath())
+      // A navigation in a descended child component (depth>0) is real, but the
+      // child's render is not statically guaranteed — cap it to `may`, never must.
+      const descended = depth > 0
+      for (const t of collectTargets(cf)) {
+        const sf = t.node.getSourceFile()
+        const lc = sf.getLineAndColumnAtPos(t.node.getStart())
+        const loc = { line: lc.line, col: lc.column }
+        if (t.ti.kind === 'literal') {
+          const { exact, candidates } = matchLiteralAll(t.ti.value, routeLikes)
+          if (exact) {
+            const guarded = t.guard !== null || descended
+            pushEdge(route.nodeId, exact.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
+          } else if (candidates.length > 0) {
+            soundiness.push({ kind: 'ambiguous-target', file, loc, detail: `literal target "${t.ti.value}" matched ${candidates.length} parameterized route(s); emitted as may, never must` })
+            for (const cand of candidates) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
+          } else {
+            soundiness.push({ kind: 'unresolved-target', file, loc, detail: `literal target "${t.ti.value}" matches no declared route` })
+          }
+        } else if (t.ti.kind === 'template') {
+          const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
+          soundiness.push({ kind: 'over-approximation', file, loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
+          for (const cand of cands) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
         } else {
-          soundiness.push({ kind: 'unresolved-target', file, loc, detail: `literal target "${t.ti.value}" matches no declared route` })
+          soundiness.push({ kind: 'dynamic-target', file, loc, detail: `fully dynamic navigation target (event ${t.event})` })
+          pushDynamicEdge(route.nodeId, t, file, loc)
         }
-      } else if (t.ti.kind === 'template') {
-        const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
-        soundiness.push({ kind: 'over-approximation', file, loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
-        for (const cand of cands) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
-      } else {
-        soundiness.push({ kind: 'dynamic-target', file, loc, detail: `fully dynamic navigation target (event ${t.event})` })
-        pushDynamicEdge(route.nodeId, t, file, loc)
       }
     }
   }
@@ -948,35 +989,33 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     for (const route of routes) {
       if (!route.componentFile) continue
       if (!isRepresentative(route)) continue
-      const sf = route.componentFile
-      const file = relative(projectDir, sf.getFilePath())
-      const navInfo = navIdentifiers(sf)
 
+      // Gather controls + modals across the screen's whole render tree (route
+      // component + descended child components), then assign nth per identical
+      // selector ACROSS the screen so control ids stay stable AND unique.
       const modalIds: string[] = []
       const seenModalTags = new Set<string>()
-      for (const el of allJsxElements(sf)) {
-        const tag = jsxTag(el)
-        if (!/(Modal|Dialog|Drawer|Sheet|Popover)$/.test(tag) || seenModalTags.has(tag)) continue
-        seenModalTags.add(tag)
-        const mId = `m_${route.nodeId}_${midx++}`
-        modalIds.push(mId)
-        nodes.push({ id: mId, route: null, componentPath: file, label: stringAttr(el, 'title') ?? tag, kind: 'modal' })
-      }
-
-      if (detectDynamicWidget(sf)) {
-        soundiness.push({
-          kind: 'dynamic-widget',
-          file,
-          detail: 'interactive map/canvas widget: gestures (zoom/pan/drag) are runtime-only and not statically modelable',
-        })
-      }
-
-      // Collect this screen's controls, then assign nth per identical selector so
-      // each control's id (derived from its selector) is stable AND unique.
-      const screenControls: { el: Node; meta: ControlInfo }[] = []
-      for (const el of allJsxElements(sf)) {
-        const meta = controlMetaFor(el)
-        if (meta) screenControls.push({ el, meta })
+      const screenControls: { el: Node; meta: ControlInfo; cf: SourceFile; navInfo: ReturnType<typeof navIdentifiers>; file: string; descended: boolean }[] = []
+      // Shallower for controls: depth 1 catches direct-child buttons (a landing page's
+      // could-sell/could-buy) without pulling every control from deep shared components.
+      for (const [cf, depth] of screenSourceFiles(route.componentFile, 1)) {
+        const file = relative(projectDir, cf.getFilePath())
+        const navInfo = navIdentifiers(cf)
+        for (const el of allJsxElements(cf)) {
+          const tag = jsxTag(el)
+          if (!/(Modal|Dialog|Drawer|Sheet|Popover)$/.test(tag) || seenModalTags.has(tag)) continue
+          seenModalTags.add(tag)
+          const mId = `m_${route.nodeId}_${midx++}`
+          modalIds.push(mId)
+          nodes.push({ id: mId, route: null, componentPath: file, label: stringAttr(el, 'title') ?? tag, kind: 'modal' })
+        }
+        if (depth === 0 && detectDynamicWidget(cf)) {
+          soundiness.push({ kind: 'dynamic-widget', file, detail: 'interactive map/canvas widget: gestures (zoom/pan/drag) are runtime-only and not statically modelable' })
+        }
+        for (const el of allJsxElements(cf)) {
+          const meta = controlMetaFor(el)
+          if (meta) screenControls.push({ el, meta, cf, navInfo, file, descended: depth > 0 })
+        }
       }
       const nthBySig = new Map<string, number>()
       for (const { meta } of screenControls) {
@@ -986,16 +1025,17 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         if (nth > 0) meta.selector.nth = nth
       }
 
-      for (const { el, meta } of screenControls) {
+      for (const { el, meta, cf, navInfo, file, descended } of screenControls) {
         const cId = controlNodeId(route.nodeId, meta.selector)
-        const inter = collectInteractions(el, sf, navInfo)
-        const lc = sf.getLineAndColumnAtPos(el.getStart())
+        const inter = collectInteractions(el, cf, navInfo)
+        const lc = cf.getLineAndColumnAtPos(el.getStart())
         const loc = { line: lc.line, col: lc.column }
         for (const nav of inter.navs) {
           const ctxGuard = nav.ctx === 'success' ? 'onSuccess' : nav.ctx === 'error' ? 'onError' : null
           const guard = nav.guard ?? ctxGuard
-          const modality: 'must' | 'may' = guard !== null ? 'may' : 'must'
-          const confidence = nav.ctx === 'error' ? 0.5 : nav.ctx === 'success' ? 0.7 : guard !== null ? 0.6 : 1
+          // A control in a descended child is real but not guaranteed to render here -> cap to may.
+          const modality: 'must' | 'may' = guard !== null || descended ? 'may' : 'must'
+          const confidence = descended ? 0.5 : nav.ctx === 'error' ? 0.5 : nav.ctx === 'success' ? 0.7 : guard !== null ? 0.6 : 1
           const ruleId = nav.interprocedural ? 'rr.use-navigate.interprocedural' : undefined
           if (nav.ti.kind === 'literal') {
             const { exact, candidates } = matchLiteralAll(nav.ti.value, routeLikes)
@@ -1016,7 +1056,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const modalTarget = modalIds[0]
         if (inter.effects.includes('open:modal') && modalTarget !== undefined) {
           const ev = inter.events[0] ?? 'click'
-          pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, 'must', 1, file, loc)
+          pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, descended ? 'may' : 'must', descended ? 0.5 : 1, file, loc)
         }
 
         nodes.push({
