@@ -987,6 +987,12 @@ button.danger {
   border-radius: var(--radius);
 }
 
+/* Diff-highlight: a node changed since the last map (e.g. renamed) gets an amber ring. */
+.react-flow__node.rf-changed {
+  box-shadow: 0 0 0 2px #d97706, 0 0 12px color-mix(in srgb, #d97706 55%, transparent);
+  border-radius: var(--radius);
+}
+
 /* Proposals panel. */
 .prop-legend {
   display: flex;

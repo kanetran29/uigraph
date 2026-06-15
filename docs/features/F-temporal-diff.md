@@ -44,6 +44,13 @@ stamps a fingerprint) snapshots with `mappedAt = ''`, rendered as "unknown".
   `setBaseGraph` because `setBaseGraph` has a second caller — `importJsonWorkspace` (one-shot
   JSON→SQLite migration) — where rotating a non-existent previous would corrupt migration.
 
+> **Update (canvas viz):** `GraphDiff` now also carries `changedNodes: NodeChange[]`
+> (label/route/kind on a same-id node — a renamed screen), and the dashboard paints the
+> delta ON the canvas under a "highlight changes" toggle: added = green ring/edge, changed =
+> amber ring (a rename shows `Old → New` on the node, box size unchanged so layout holds),
+> removed = red dashed ghost re-injected beside a surviving neighbour. A retargeted link
+> still reads as remove+add (the edge id embeds `from→to`).
+
 ### Core diff (packages/core/src/diff.ts — pure, browser-safe)
 
 Reuse the existing pure `diffGraphs(a, b)`. Add ONE pure helper that takes **plain data, not the

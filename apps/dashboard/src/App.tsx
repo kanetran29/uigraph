@@ -73,10 +73,18 @@ export function App(): JSX.Element {
   const diffHighlight = useMemo<DiffHighlight | null>(() => {
     if (changes.state !== 'ok' || !changes.diff) return null
     const d = changes.diff
+    // changedNodes is defensive against an older serve that predates it (offline-safe contract).
+    const changedNodes = d.changedNodes ?? []
+    const renameById = new Map<string, string>()
+    for (const c of changedNodes) if (c.fields.includes('label')) renameById.set(c.id, `${c.before.label} → ${c.after.label}`)
     return {
       addedNodeIds: new Set(d.addedNodes.map((n) => n.id)),
       addedEdgeIds: new Set(d.addedEdges.map((e) => e.id)),
       changedEdgeIds: new Set(d.changedEdges.map((c) => c.id)),
+      changedNodeIds: new Set(changedNodes.map((c) => c.id)),
+      renameById,
+      removedNodes: d.removedNodes,
+      removedEdges: d.removedEdges,
     }
   }, [changes])
 

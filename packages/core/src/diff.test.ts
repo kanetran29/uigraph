@@ -13,6 +13,18 @@ describe('diffGraphs', () => {
     expect(d.removedEdges.map((e) => e.id)).toEqual(['e1'])
   })
 
+  it('reports changed fields for same-id nodes (a rename keeps the id, changes the label)', () => {
+    const a = graph([node('n_home', { label: 'Home', route: '/' })], [])
+    const b = graph([node('n_home', { label: 'Landing', route: '/' })], [])
+    const d = diffGraphs(a, b)
+    expect(d.addedNodes).toEqual([])
+    expect(d.removedNodes).toEqual([])
+    expect(d.changedNodes).toHaveLength(1)
+    expect(d.changedNodes[0]?.fields).toEqual(['label'])
+    expect(d.changedNodes[0]?.before.label).toBe('Home')
+    expect(d.changedNodes[0]?.after.label).toBe('Landing')
+  })
+
   it('reports changed fields for same-id edges', () => {
     const a = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { modality: 'must', guard: null })])
     const b = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { modality: 'may', guard: 'isAuth' })])

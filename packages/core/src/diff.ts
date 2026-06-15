@@ -10,9 +10,17 @@ export interface EdgeChange {
   after: GraphEdge
 }
 
+export interface NodeChange {
+  id: string
+  fields: string[]
+  before: GraphNode
+  after: GraphNode
+}
+
 export interface GraphDiff {
   addedNodes: GraphNode[]
   removedNodes: GraphNode[]
+  changedNodes: NodeChange[]
   addedEdges: GraphEdge[]
   removedEdges: GraphEdge[]
   changedEdges: EdgeChange[]
@@ -20,13 +28,23 @@ export interface GraphDiff {
 
 const EDGE_FIELDS = ['from', 'to', 'event', 'guard', 'effect', 'modality', 'source', 'confidence'] as const
 
-function changedFields(a: GraphEdge, b: GraphEdge): string[] {
+// The user-visible node identity fields. componentPath is deliberately excluded — a file
+// move that keeps the same screen/route is noise for "what did the change do to the UI".
+const NODE_FIELDS = ['label', 'route', 'kind'] as const
+
+function changedEdgeFields(a: GraphEdge, b: GraphEdge): string[] {
   return EDGE_FIELDS.filter((f) => a[f] !== b[f])
 }
 
+function changedNodeFields(a: GraphNode, b: GraphNode): string[] {
+  return NODE_FIELDS.filter((f) => a[f] !== b[f])
+}
+
 /**
- * Diff two graphs by id. Nodes report add/remove; edges report add/remove and,
- * for ids present in both, the list of fields whose values differ.
+ * Diff two graphs by id. Nodes and edges report add/remove and, for ids present in
+ * both, the list of fields whose values differ — a renamed screen (same id, new
+ * label) is a changedNode; a retargeted link changes the edge id, so it reads as
+ * remove+add rather than a changedEdge.
  */
 export function diffGraphs(a: UiGraph, b: UiGraph): GraphDiff {
   const aNodes = new Map(a.nodes.map((n) => [n.id, n]))
@@ -39,15 +57,23 @@ export function diffGraphs(a: UiGraph, b: UiGraph): GraphDiff {
   const addedEdges = b.edges.filter((e) => !aEdges.has(e.id))
   const removedEdges = a.edges.filter((e) => !bEdges.has(e.id))
 
+  const changedNodes: NodeChange[] = []
+  for (const [id, before] of aNodes) {
+    const after = bNodes.get(id)
+    if (after === undefined) continue
+    const fields = changedNodeFields(before, after)
+    if (fields.length > 0) changedNodes.push({ id, fields, before, after })
+  }
+
   const changedEdges: EdgeChange[] = []
   for (const [id, before] of aEdges) {
     const after = bEdges.get(id)
     if (after === undefined) continue
-    const fields = changedFields(before, after)
+    const fields = changedEdgeFields(before, after)
     if (fields.length > 0) changedEdges.push({ id, fields, before, after })
   }
 
-  return { addedNodes, removedNodes, addedEdges, removedEdges, changedEdges }
+  return { addedNodes, removedNodes, changedNodes, addedEdges, removedEdges, changedEdges }
 }
 
 /**
