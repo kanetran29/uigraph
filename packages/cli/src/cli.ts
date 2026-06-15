@@ -25,8 +25,9 @@ export function buildProgram(): Command {
     .option('--out <file>', 'output database path (default <dir>/uigraph.db)')
     .option('--controls', 'also extract interactive controls (buttons/inputs/etc.) as nested nodes')
     .option('--no-register', 'do not add this workspace to the ~/.uigraph registry')
-    .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean; register?: boolean }) => {
-      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false, register: opts.register })
+    .option('--name <name>', 'display name in the workspace registry / dashboard switcher (default the dir basename)')
+    .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean; register?: boolean; name?: string }) => {
+      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false, register: opts.register, name: opts.name })
       console.log(formatMapSummary(summary))
     })
 
