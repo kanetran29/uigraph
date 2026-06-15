@@ -110,6 +110,36 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(e?.modality).toBe('may')
   })
 
+  it('links each modal-opening control to the SPECIFIC modal (matched by its state var)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'\nexport default function H(){
+          const [showSell, setShowSell] = useState(false)
+          const [showLogin, setShowLogin] = useState(false)
+          return <div>
+            <button onClick={() => setShowSell(true)}>Sell</button>
+            <button onClick={() => setShowLogin(true)}>Login</button>
+            {showSell && <CouldSellModal isOpen={showSell}/>}
+            {showLogin && <SignupLoginModal isOpen={showLogin}/>}
+          </div>
+        }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const modals = graph.nodes.filter((n) => n.kind === 'modal')
+    const sellModal = modals.find((m) => m.label === 'CouldSellModal')
+    const loginModal = modals.find((m) => m.label === 'SignupLoginModal')
+    const openEdges = graph.edges.filter((e) => e.effect === 'open:modal')
+    // both modals receive an open edge (not just the first), each from its own button
+    expect(openEdges.some((e) => e.to === sellModal?.id)).toBe(true)
+    expect(openEdges.some((e) => e.to === loginModal?.id)).toBe(true)
+    // and they come from DIFFERENT controls
+    const fromSet = new Set(openEdges.map((e) => e.from))
+    expect(fromSet.size).toBeGreaterThanOrEqual(2)
+  })
+
   it('does not descend into node_modules / unresolved components', () => {
     const { graph } = extractGraph(
       inMemory({

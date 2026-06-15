@@ -659,14 +659,42 @@ function detectStateEffect(call: Node): string | null {
   return null
 }
 
-/** A modal-opening setter like setShowConfirm(true)/setOpen(true), or null. */
+/**
+ * The modal STATE VARIABLE a setter opens — setShowCouldSellModal(true) ->
+ * 'showCouldSellModal' — or null. The variable name links the opening control to
+ * the specific modal it shows (gated by `{showX && <Modal/>}` / `isOpen={showX}`).
+ */
 function detectModalOpen(call: Node): string | null {
   if (!Node.isCallExpression(call)) return null
   const expr = call.getExpression()
   if (!Node.isIdentifier(expr)) return null
-  if (!/^set(Show|Open|Visible|Modal|Dialog|Drawer|Popover|Sheet)/i.test(expr.getText())) return null
+  const name = expr.getText()
+  // setShow…/setOpen…/setVisible… OR any setter naming a Modal/Dialog/Drawer/etc.
+  // (e.g. setLoginModalVisible) — covers both `setShowX(true)` and `setXModalVisible(true)`.
+  if (!/^set(Show|Open|Visible)/i.test(name) && !/(Modal|Dialog|Drawer|Popover|Sheet)/i.test(name)) return null
   const arg = call.getArguments()[0]
-  if (arg && arg.getText() === 'true') return 'open:modal'
+  if (!arg || arg.getText() !== 'true') return null
+  const v = name.slice(3)
+  return v.length > 0 ? v.charAt(0).toLowerCase() + v.slice(1) : 'modal'
+}
+
+/** The state variable gating a modal element's render: an isOpen/open/visible/show prop bound to {ident}, or an enclosing `{ident && <Modal/>}`. */
+function modalGateVar(el: Node): string | null {
+  for (const name of ['isOpen', 'open', 'visible', 'show', 'isVisible', 'active', 'isActive', 'opened']) {
+    const init = findAttr(el, name)?.getInitializer()
+    if (init && Node.isJsxExpression(init)) {
+      const inner = init.getExpression()
+      if (inner && Node.isIdentifier(inner)) return inner.getText()
+    }
+  }
+  let cur: Node | undefined = el.getParent()
+  for (let i = 0; i < 4 && cur; i++) {
+    if (Node.isBinaryExpression(cur) && cur.getOperatorToken().getText() === '&&') {
+      const left = cur.getLeft()
+      if (Node.isIdentifier(left)) return left.getText()
+    }
+    cur = cur.getParent()
+  }
   return null
 }
 
@@ -872,9 +900,9 @@ function walkReachable(
       out.effects.add(api)
       continue
     }
-    const modal = detectModalOpen(call)
-    if (modal) {
-      out.effects.add(modal)
+    const modalVar = detectModalOpen(call)
+    if (modalVar) {
+      out.effects.add(`open:modal:${modalVar}`)
       continue
     }
     const st = detectStateEffect(call)
@@ -1036,7 +1064,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       // component + descended child components), then assign nth per identical
       // selector ACROSS the screen so control ids stay stable AND unique.
       const modalIds: string[] = []
-      const seenModalTags = new Set<string>()
+      const modalIdByTag = new Map<string, string>()
+      // Map each modal's gating state-var (showX) to its node, so a control that
+      // sets that var (setShowX(true)) links to the SPECIFIC modal, not just the first.
+      const modalByVar = new Map<string, string>()
       const screenControls: { el: Node; meta: ControlInfo; cf: SourceFile; navInfo: ReturnType<typeof navIdentifiers>; file: string; descended: boolean }[] = []
       // Shallower for controls: depth 1 catches direct-child buttons (a landing page's
       // could-sell/could-buy) without pulling every control from deep shared components.
@@ -1045,11 +1076,18 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const navInfo = navIdentifiers(cf)
         for (const el of allJsxElements(cf)) {
           const tag = jsxTag(el)
-          if (!/(Modal|Dialog|Drawer|Sheet|Popover)$/.test(tag) || seenModalTags.has(tag)) continue
-          seenModalTags.add(tag)
-          const mId = `m_${route.nodeId}_${midx++}`
-          modalIds.push(mId)
-          nodes.push({ id: mId, route: null, componentPath: file, label: stringAttr(el, 'title') ?? tag, kind: 'modal' })
+          if (!/(Modal|Dialog|Drawer|Sheet|Popover)$/.test(tag)) continue
+          let mId = modalIdByTag.get(tag)
+          if (mId === undefined) {
+            mId = `m_${route.nodeId}_${midx++}`
+            modalIdByTag.set(tag, mId)
+            modalIds.push(mId)
+            nodes.push({ id: mId, route: null, componentPath: file, label: stringAttr(el, 'title') ?? tag, kind: 'modal' })
+          }
+          // Every render of the modal (even same tag, e.g. couldSell + couldBuy) may
+          // carry a distinct gating var -> all map to the one deduped modal node.
+          const gate = modalGateVar(el)
+          if (gate !== null) modalByVar.set(gate, mId)
         }
         if (depth === 0 && detectDynamicWidget(cf)) {
           soundiness.push({ kind: 'dynamic-widget', file, detail: 'interactive map/canvas widget: gestures (zoom/pan/drag) are runtime-only and not statically modelable' })
@@ -1070,6 +1108,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       for (const { el, meta, cf, navInfo, file, descended } of screenControls) {
         const cId = controlNodeId(route.nodeId, meta.selector)
         const inter = collectInteractions(el, cf, navInfo)
+        // The state-var is needed only for edge targeting; normalize the stored
+        // effect to the stable 'open:modal' so the IR doesn't leak variable names.
+        const nodeEffects = [...new Set(inter.effects.map((e) => (e.startsWith('open:modal') ? 'open:modal' : e)))]
         const lc = cf.getLineAndColumnAtPos(el.getStart())
         const loc = { line: lc.line, col: lc.column }
         for (const nav of inter.navs) {
@@ -1095,8 +1136,16 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           }
         }
 
-        const modalTarget = modalIds[0]
-        if (inter.effects.includes('open:modal') && modalTarget !== undefined) {
+        // Link each modal-opening effect to the SPECIFIC modal it shows (matched by
+        // the state var setShowX -> showX -> the modal gated by showX), falling back
+        // to the screen's first modal when the var can't be matched to a render.
+        for (const eff of inter.effects) {
+          if (!eff.startsWith('open:modal')) continue
+          const v = eff.slice('open:modal:'.length)
+          // Precise: the modal gated by this state var; else the screen's modal only
+          // when unambiguous (exactly one). Never guess a target on a multi-modal screen.
+          const modalTarget = modalByVar.get(v) ?? (modalIds.length === 1 ? modalIds[0] : undefined)
+          if (modalTarget === undefined) continue
           const ev = inter.events[0] ?? 'click'
           pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, descended ? 'may' : 'must', descended ? 0.5 : 1, file, loc)
         }
@@ -1115,7 +1164,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             ...(meta.input ? { input: meta.input } : {}),
             ...(meta.name ? { name: meta.name } : {}),
             ...(inter.events.length > 0 ? { events: inter.events } : {}),
-            ...(inter.effects.length > 0 ? { effects: inter.effects } : {}),
+            ...(nodeEffects.length > 0 ? { effects: nodeEffects } : {}),
           },
         })
       }
