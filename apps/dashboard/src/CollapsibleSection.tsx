@@ -5,6 +5,7 @@
 // button + aria + caret + localStorage logic lives in one place (DRY across 5 real uses).
 
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
+import { readStored, writeStored } from './storage'
 
 const KEY_PREFIX = 'uigraph.section.'
 
@@ -19,19 +20,9 @@ export function parseStored(raw: string | null, fallback: boolean): boolean {
  *  to localStorage being unavailable (private mode / quota) by falling back without throwing. */
 function useCollapsed(id: string, fallback: boolean): [boolean, Dispatch<SetStateAction<boolean>>] {
   const key = KEY_PREFIX + id
-  const [open, setOpen] = useState<boolean>(() => {
-    try {
-      return parseStored(localStorage.getItem(key), fallback)
-    } catch {
-      return fallback
-    }
-  })
+  const [open, setOpen] = useState<boolean>(() => parseStored(readStored(key), fallback))
   useEffect(() => {
-    try {
-      localStorage.setItem(key, open ? '1' : '0')
-    } catch {
-      // localStorage unavailable — collapse still works for the session, just not persisted.
-    }
+    writeStored(key, open ? '1' : '0')
   }, [key, open])
   return [open, setOpen]
 }

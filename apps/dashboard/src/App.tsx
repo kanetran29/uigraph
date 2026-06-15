@@ -11,6 +11,9 @@ import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, fetchScenar
 import { searchMatchIds } from './search'
 import { GraphCanvas, type Selection } from './GraphCanvas'
 import { Logo } from './Logo'
+import { Settings } from './Settings'
+import { useTheme } from './theme'
+import { useT } from './i18n'
 import { Coverage } from './Coverage'
 import { Plan } from './Plan'
 import { Inspector } from './Inspector'
@@ -53,6 +56,8 @@ export function App(): JSX.Element {
   const [pathEdgeIds, setPathEdgeIds] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const { theme, setTheme, resolved } = useTheme()
+  const { t } = useT()
 
   // Node ids matching the canvas search — dims everything else (selection still wins).
   // Memoized on [graph, search] so it isn't recomputed on unrelated re-renders.
@@ -179,7 +184,7 @@ export function App(): JSX.Element {
     <div className="app">
       <header className="topbar">
         <Logo />
-        <span className={live ? 'status live' : 'status offline'}>{live ? 'live' : 'sample (offline)'}</span>
+        <span className={live ? 'status live' : 'status offline'}>{live ? t('status.live') : t('status.offline')}</span>
         <span className="counts">
           {graph.nodes.length} nodes · {graph.edges.length} edges
         </span>
@@ -188,7 +193,7 @@ export function App(): JSX.Element {
           className="topbar-search"
           role="searchbox"
           aria-label="Search nodes by label, route, id, or control name"
-          placeholder="Search nodes…"
+          placeholder={t('search.placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -198,6 +203,7 @@ export function App(): JSX.Element {
           </span>
         ) : null}
         {error ? <span className="error" role="alert">{error}</span> : null}
+        <Settings theme={theme} setTheme={setTheme} />
       </header>
       {!live ? (
         <div className="banner offline" role="status">
@@ -219,6 +225,7 @@ export function App(): JSX.Element {
                 onSelect={setSelection}
                 onConnect={handleConnect}
                 searchMatchIds={matchIds}
+                colorMode={resolved}
               />
             </ReactFlowProvider>
           )}

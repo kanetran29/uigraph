@@ -36,6 +36,8 @@ import { toPng } from 'html-to-image'
 import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@uigraph/core'
 import { layoutGraph, proposedScreenEdges, type GraphLayout, type ProposedEdge } from './layout'
 import { pngFilename } from './exportPng'
+import { applySaved, layoutStorageKey, parsePositions, serializePositions } from './layoutStore'
+import { readStored, removeStored, writeStored } from './storage'
 
 const IMAGE_W = 2048
 const IMAGE_H = 1536
@@ -52,6 +54,7 @@ export interface GraphCanvasProps {
   onSelect: (selection: Selection) => void
   onConnect: (from: string, to: string) => void
   searchMatchIds?: Set<string>
+  colorMode?: 'light' | 'dark' | 'system'
 }
 
 /** The ghost-edge hue: a distinct slate-violet, separate from the source palette. */
@@ -569,7 +572,7 @@ function swatch(color: string, dash?: string): CSSProperties {
  * documents the modality (dash) and source (colour) encodings.
  */
 export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
-  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, onConnect, searchMatchIds = EMPTY_IDS } = props
+  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, onConnect, searchMatchIds = EMPTY_IDS, colorMode = 'system' } = props
   const searchActive = searchMatchIds.size > 0
   // Hide the synthetic `u_<screen>` dynamic-target sinks (kind 'unknown') + any edge
   // touching them from the canvas. View-only: they stay in the IR + coverage worklist.
@@ -675,7 +678,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     // re-style). When nodes are added or removed (expand collapse), take a FULL fresh
     // layout so every node is placed by one consistent radial pass.
     setNodes((prev) => {
-      if (firstLayout) return laid
+      // First mount: overlay any saved layout for THIS graph (stale/absent save = no-op).
+      if (firstLayout) return applySaved(laid, parsePositions(readStored(layoutStorageKey(graph))))
       const prevIds = new Set(prev.map((n) => n.id))
       const sameSet = laid.length === prev.length && laid.every((n) => prevIds.has(n.id))
       if (!sameSet) return laid
@@ -774,6 +778,21 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     }
   }, [nodes, rawGraph])
 
+  // Persist the user's dragged TOP-LEVEL node positions for this graph; controls/bands are
+  // parent-relative and excluded. Restored on next mount via the seeding effect above.
+  const handleSaveLayout = useCallback(() => {
+    const positions: Record<string, { x: number; y: number }> = {}
+    for (const n of nodes) if (n.parentId === undefined) positions[n.id] = { x: n.position.x, y: n.position.y }
+    writeStored(layoutStorageKey(graph), serializePositions(positions))
+  }, [nodes, graph])
+
+  // Drop the saved layout + re-seed a fresh dagre layout, then fit it into view.
+  const handleResetLayout = useCallback(() => {
+    removeStored(layoutStorageKey(graph))
+    setNodes(toFlowNodes(graph, layout, expanded, proposalCount))
+    void rf.fitView({ padding: 0.2, duration: 450 })
+  }, [graph, layout, expanded, proposalCount, setNodes, rf])
+
   const edgeTypes = useMemo(() => ({ floating: FloatingEdge }), [])
 
   return (
@@ -789,7 +808,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       onEdgeMouseLeave={handleEdgeLeave}
       onConnect={handleConnect}
       onPaneClick={() => onSelect(null)}
-      colorMode="system"
+      colorMode={colorMode}
       fitView
       minZoom={0.05}
       maxZoom={8}
@@ -828,6 +847,14 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <input type="checkbox" checked={showProposed} onChange={(e) => setShowProposed(e.target.checked)} />
             show proposed (LLM){proposedEdges.length > 0 ? ` · ${proposedEdges.length}` : ''}
           </label>
+          <div className="layout-actions">
+            <button type="button" className="layout-btn nodrag nopan" onClick={handleSaveLayout} aria-label="Save the current node layout">
+              Save layout
+            </button>
+            <button type="button" className="layout-btn nodrag nopan" onClick={handleResetLayout} aria-label="Reset the node layout to the automatic layout">
+              Reset
+            </button>
+          </div>
         </div>
       </Panel>
       <Panel position="bottom-right">

@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { CollapsibleSection } from './CollapsibleSection'
+import { useT } from './i18n'
 
 /** Props: live status, scenarios, and add-screen/export/switch callbacks. */
 export interface PlanProps {
@@ -17,6 +18,7 @@ export interface PlanProps {
 
 /** Render the scenario selector + add-screen form + export button. */
 export function Plan(props: PlanProps): JSX.Element {
+  const { t } = useT()
   const [label, setLabel] = useState('')
   const [route, setRoute] = useState('')
   const [newScenario, setNewScenario] = useState('')
@@ -27,7 +29,7 @@ export function Plan(props: PlanProps): JSX.Element {
     setRoute('')
   }
   return (
-    <CollapsibleSection id="plan" className="plan" title="Plan a feature">
+    <CollapsibleSection id="plan" className="plan" title={t('panel.plan')}>
       <label className="field-edit">
         <span>scenario</span>
         <select value={props.scenarios.active} onChange={(e) => props.onSwitchScenario(e.target.value)}>

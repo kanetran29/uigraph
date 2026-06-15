@@ -6,6 +6,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { GraphEdge, GraphNode } from '@uigraph/core'
 import { CollapsibleSection } from './CollapsibleSection'
+import { useT } from './i18n'
 import type { Selection } from './GraphCanvas'
 
 /** Props for the inspector: the current selection plus edit/delete callbacks. */
@@ -115,7 +116,8 @@ function EdgeEditor(props: {
  */
 export function Inspector(props: InspectorProps): JSX.Element {
   const { selection, onEditEdge, onEditNode, onDelete } = props
-  let title: ReactNode = 'Inspector'
+  const { t } = useT()
+  let title: ReactNode = t('panel.inspector')
   let body: ReactNode = <p className="muted">Select a node or edge to inspect it.</p>
 
   if (selection !== null && selection.kind === 'node') {
