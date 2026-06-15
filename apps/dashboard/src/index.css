@@ -39,8 +39,13 @@
   --edge-highlight: #15803d;
 }
 
+/* Dark palette. Applied two ways that must stay in sync (no CSS way to share a block
+   across a media query + an attribute selector): (1) the OS preference when NO manual
+   theme is chosen — :root:not([data-theme]); (2) an explicit data-theme="dark" override
+   from the Settings menu. data-theme="light" needs no block — it disables the media query
+   below (the :not) so the base :root light tokens win even under an OS-dark environment. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --bg: #0d1117;
     --panel: #161b22;
     --panel-subtle: #1c2230;
@@ -70,6 +75,40 @@
     --edge-runtime: #34d399;
     --edge-highlight: #4ade80;
   }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0d1117;
+  --panel: #161b22;
+  --panel-subtle: #1c2230;
+  --border: #2b3240;
+  --border-strong: #3a4250;
+  --text: #e6edf3;
+  --muted: #97a3b6;
+  --accent: #a78bfa;
+  --accent-contrast: #1a1430;
+  --danger: #f0726a;
+  --danger-contrast: #2a0f0d;
+  --focus: #a78bfa;
+
+  --status-live-bg: #0f3320;
+  --status-live-fg: #6ee7a8;
+  --status-offline-bg: #3a2e0a;
+  --status-offline-fg: #fcd34d;
+
+  --node-bg: #1c2230;
+  --node-subtle-bg: #161b22;
+  --node-manual-bg: #241a3d;
+  --node-border: #4a5568;
+  --label-bg: #1c2230;
+
+  --edge: #8b98ac;
+  --edge-manual: #b794f6;
+  --edge-runtime: #34d399;
+  --edge-highlight: #4ade80;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 * {
@@ -183,6 +222,101 @@ select:focus-visible,
 .search-hint {
   font-size: 11.5px;
   white-space: nowrap;
+}
+
+/* Topbar settings: a gear button + a small popover (theme radiogroup + language select). */
+.settings {
+  position: relative;
+  display: inline-flex;
+}
+.settings-gear {
+  font-size: 15px;
+  line-height: 1;
+  padding: 5px 8px;
+  color: var(--text);
+  background: var(--panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.settings-gear:hover {
+  border-color: var(--accent);
+}
+.settings-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: 230px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.settings-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.settings-segments {
+  display: flex;
+  gap: 4px;
+}
+.settings-segments .seg {
+  flex: 1;
+  font-size: 12px;
+  padding: 5px 6px;
+  color: var(--text);
+  background: var(--panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.settings-segments .seg.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+.settings-row select {
+  font-size: 12.5px;
+  padding: 5px 8px;
+  color: var(--text);
+  background: var(--panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Save/Reset layout buttons in the canvas toggles panel. */
+.layout-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+.layout-btn {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  cursor: pointer;
+}
+.layout-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* Toggle filter chips on the Coverage / Proposals list panels (active = filtering on). */

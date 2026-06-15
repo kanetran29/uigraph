@@ -11,6 +11,7 @@ import type { Proposal, Proposals, ProposalStatus, UiGraph } from '@uigraph/core
 import { matchProposal } from './search'
 import { FilterChip, toggled } from './Chips'
 import { CollapsibleSection } from './CollapsibleSection'
+import { useT } from './i18n'
 import type { Selection } from './GraphCanvas'
 
 /** Props for the proposals panel: the sidecar, the graph (for screen labels), and the selection. */
@@ -179,6 +180,7 @@ function groupBy<T>(items: T[], key: (item: T) => string): Map<string, T[]> {
  */
 export function ProposalsPanel(props: ProposalsPanelProps): JSX.Element {
   const { proposals, graph, selection, onClearFilter } = props
+  const { t } = useT()
   const labels = useMemo(() => nodeLabels(graph), [graph])
   const filterScreen = selection?.kind === 'node' ? selection.node.id : null
 
@@ -198,7 +200,7 @@ export function ProposalsPanel(props: ProposalsPanelProps): JSX.Element {
   const byScreen = useMemo(() => groupBy(visible, (p) => p.screen), [visible])
 
   return (
-    <CollapsibleSection id="proposals" className="proposals" title={`Proposals (${visible.length})`}>
+    <CollapsibleSection id="proposals" className="proposals" title={`${t('panel.proposals')} (${visible.length})`}>
       <div className="prop-legend">
         <span className="prop-badge evidenced">evidenced</span>
         <span className="prop-badge speculative">speculative</span>

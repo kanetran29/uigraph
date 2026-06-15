@@ -7,6 +7,7 @@ import type { CoverageReport, EdgeCoverage, GraphEdge, UiGraph } from '@uigraph/
 import { matchCoverageRow } from './search'
 import { FilterChip, toggled } from './Chips'
 import { CollapsibleSection } from './CollapsibleSection'
+import { useT } from './i18n'
 import type { Selection } from './GraphCanvas'
 
 /** Props: the coverage report, the graph (to resolve an edge id back to a GraphEdge), and select. */
@@ -31,6 +32,7 @@ function CountChip(props: { label: string; n: number }): JSX.Element {
  */
 export function Coverage(props: CoverageProps): JSX.Element {
   const { coverage, graph, onSelect } = props
+  const { t } = useT()
   // Headline is the HONEST "done" metric (accounted-for); runtime-verified is always
   // co-reported beside it so a parked-heavy graph can never read as "100% verified".
   const accountedPct = Math.round((coverage.accountedRatio ?? coverage.ratio) * 100)
@@ -55,7 +57,7 @@ export function Coverage(props: CoverageProps): JSX.Element {
   const parked = useMemo(() => allParked.filter((r) => matchCoverageRow(r, filter)), [allParked, statuses, modalities])
 
   return (
-    <CollapsibleSection id="coverage" className="coverage" title="Coverage">
+    <CollapsibleSection id="coverage" className="coverage" title={t('panel.coverage')}>
       <div className="cov-headline" title={`${coverage.accounted} of ${coverage.total} edges accounted-for (witnessed or parked)`}>
         <div className="cov-bar">
           <div className="cov-bar-fill" style={{ width: `${accountedPct}%` }} />
