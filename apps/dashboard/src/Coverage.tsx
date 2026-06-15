@@ -90,12 +90,14 @@ export function Coverage(props: CoverageProps): JSX.Element {
           <ul className="cov-list">
             {parked.map((e) => (
               <li key={e.id}>
-                <button className="cov-row" onClick={() => selectEdge(e.id)} title={e.reason ?? 'parked'}>
-                  <span className="cov-modality">parked</span>
-                  <span className="cov-edge">
-                    {e.from} → {e.to}
+                <button className="cov-row cov-row--stacked" onClick={() => selectEdge(e.id)} title={e.reason ?? 'parked'}>
+                  <span className="cov-row-head">
+                    <span className="cov-modality">parked</span>
+                    <span className="cov-edge">
+                      {e.from} → {e.to}
+                    </span>
                   </span>
-                  <span className="cov-event">{e.reason}</span>
+                  {e.reason ? <span className="cov-reason">{e.reason}</span> : null}
                 </button>
               </li>
             ))}

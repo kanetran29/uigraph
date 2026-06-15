@@ -366,6 +366,25 @@ select:focus-visible,
   color: var(--muted);
   flex-shrink: 0;
 }
+/* A parked row stacks its edge over its (long) reason so the reason never starves the
+   edge column into a per-character wrap. */
+.cov-row--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+.cov-row-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.cov-reason {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
 
 .inspector,
 .steps,
