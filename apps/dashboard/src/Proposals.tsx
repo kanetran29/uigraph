@@ -7,7 +7,9 @@
 // proposals stay in lock-step with the canvas selection.
 
 import { useMemo, useState } from 'react'
-import type { Proposal, Proposals, UiGraph } from '@uigraph/core'
+import type { Proposal, Proposals, ProposalStatus, UiGraph } from '@uigraph/core'
+import { matchProposal } from './search'
+import { FilterChip, toggled } from './Chips'
 import type { Selection } from './GraphCanvas'
 
 /** Props for the proposals panel: the sidecar, the graph (for screen labels), and the selection. */
@@ -179,10 +181,18 @@ export function ProposalsPanel(props: ProposalsPanelProps): JSX.Element {
   const labels = useMemo(() => nodeLabels(graph), [graph])
   const filterScreen = selection?.kind === 'node' ? selection.node.id : null
 
+  // Local filter chips (empty set = all). Status + category chip sets are built from the
+  // values actually present, so no stale option is ever offered.
+  const [statuses, setStatuses] = useState<Set<ProposalStatus>>(new Set())
+  const [categories, setCategories] = useState<Set<string>>(new Set())
+  const [evidenced, setEvidenced] = useState<'all' | 'evidenced' | 'speculative'>('all')
+  const presentStatuses = useMemo(() => [...new Set(proposals.proposals.map((p) => p.status))].sort(), [proposals.proposals])
+  const presentCategories = useMemo(() => [...new Set(proposals.proposals.map((p) => p.category))].sort(), [proposals.proposals])
+
   const visible = useMemo(() => {
-    if (filterScreen === null) return proposals.proposals
-    return proposals.proposals.filter((p) => p.screen === filterScreen || p.screen === GLOBAL_SCREEN)
-  }, [proposals.proposals, filterScreen])
+    const screened = filterScreen === null ? proposals.proposals : proposals.proposals.filter((p) => p.screen === filterScreen || p.screen === GLOBAL_SCREEN)
+    return screened.filter((p) => matchProposal(p, { statuses, categories, evidenced }))
+  }, [proposals.proposals, filterScreen, statuses, categories, evidenced])
 
   const byScreen = useMemo(() => groupBy(visible, (p) => p.screen), [visible])
 
@@ -193,6 +203,20 @@ export function ProposalsPanel(props: ProposalsPanelProps): JSX.Element {
         <span className="prop-badge evidenced">evidenced</span>
         <span className="prop-badge speculative">speculative</span>
       </div>
+      <div className="filter-chips" role="group" aria-label="Filter proposals by status">
+        {presentStatuses.map((s) => (
+          <FilterChip key={s} label={s} active={statuses.has(s)} onClick={() => setStatuses((p) => toggled(p, s))} />
+        ))}
+        <FilterChip label="evidenced" active={evidenced === 'evidenced'} onClick={() => setEvidenced((v) => (v === 'evidenced' ? 'all' : 'evidenced'))} />
+        <FilterChip label="speculative" active={evidenced === 'speculative'} onClick={() => setEvidenced((v) => (v === 'speculative' ? 'all' : 'speculative'))} />
+      </div>
+      {presentCategories.length > 1 ? (
+        <div className="filter-chips" role="group" aria-label="Filter proposals by category">
+          {presentCategories.map((c) => (
+            <FilterChip key={c} label={c} active={categories.has(c)} onClick={() => setCategories((p) => toggled(p, c))} />
+          ))}
+        </div>
+      ) : null}
       {filterScreen !== null ? (
         <div className="prop-filter">
           <span>

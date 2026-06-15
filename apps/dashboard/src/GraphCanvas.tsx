@@ -44,10 +44,13 @@ export interface GraphCanvasProps {
   pathEdgeIds: Set<string>
   onSelect: (selection: Selection) => void
   onConnect: (from: string, to: string) => void
+  searchMatchIds?: Set<string>
 }
 
 /** The ghost-edge hue: a distinct slate-violet, separate from the source palette. */
 const GHOST_COLOR = '#a855f7'
+/** Stable empty id set, so an absent searchMatchIds prop doesn't churn memo deps. */
+const EMPTY_IDS: Set<string> = new Set()
 
 /** Edge stroke colour per provenance source: static slate, manual violet, runtime emerald. */
 const SOURCE_COLOR: Record<Source, string> = {
@@ -399,6 +402,8 @@ interface EdgeContext {
   hoveredEdgeId: string | null
   incidentEdgeIds: Set<string>
   focusEdgeActive: boolean
+  searchActive: boolean
+  searchMatchIds: Set<string>
 }
 
 /**
@@ -430,7 +435,7 @@ function toProposedFlowEdges(edges: readonly ProposedEdge[]): Edge[] {
 }
 
 function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
-  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive } = ctx
+  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
   const hasNodeSelection = selection?.kind === 'node'
   const controlParent = new Map<string, string | undefined>()
@@ -466,7 +471,10 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     const emphasized = onPath || selected || incident || hovered
     // Dim every edge outside the focused flow (node/edge selection OR planned path);
     // an edge on the path, incident, or selected stays lit.
-    const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded)
+    // When a search is active and nothing is selected, dim every edge that isn't between
+    // two matches — the lowest-priority dim layer; any selection/path focus still wins.
+    const searchDim = searchActive && !hasNodeSelection && !focusEdgeActive && !(searchMatchIds.has(e.from) && searchMatchIds.has(e.to))
+    const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded) || searchDim
     const color = strokeColor(e, onPath || selected)
     const baseWidth = e.source === 'manual' ? 2 : 1.4
     const width = onPath ? 3 : selected ? 2.8 : emphasized ? 2.4 : baseWidth
@@ -554,7 +562,8 @@ function swatch(color: string, dash?: string): CSSProperties {
  * documents the modality (dash) and source (colour) encodings.
  */
 export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
-  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, onConnect } = props
+  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, onConnect, searchMatchIds = EMPTY_IDS } = props
+  const searchActive = searchMatchIds.size > 0
   // Hide the synthetic `u_<screen>` dynamic-target sinks (kind 'unknown') + any edge
   // touching them from the canvas. View-only: they stay in the IR + coverage worklist.
   const graph = useMemo<UiGraph>(() => {
@@ -681,16 +690,18 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       prev.map((n) => {
         const isSelected = n.id === selectedId
         const highlighted = neighborIds.has(n.id) || pathNodeIds.has(n.id)
-        const className = isSelected ? 'rf-selected' : highlighted ? 'rf-neighbor' : focusActive ? 'rf-dimmed' : ''
+        // Search dims non-matches ONLY when no flow is focused — selection/path always win.
+        const searchDim = searchActive && !focusActive && !searchMatchIds.has(n.id)
+        const className = isSelected ? 'rf-selected' : highlighted ? 'rf-neighbor' : focusActive ? 'rf-dimmed' : searchDim ? 'rf-dimmed' : ''
         if (n.selected === isSelected && n.className === (className || undefined)) return n
         return { ...n, selected: isSelected, className: className || undefined }
       }),
     )
-  }, [selectedId, focusActive, neighborIds, pathNodeIds, setNodes])
+  }, [selectedId, focusActive, neighborIds, pathNodeIds, setNodes, searchActive, searchMatchIds])
 
   const edgeCtx = useMemo<EdgeContext>(
-    () => ({ selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive: selectedEdge !== null || pathActive }),
-    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive],
+    () => ({ selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive: selectedEdge !== null || pathActive, searchActive, searchMatchIds }),
+    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds],
   )
   useEffect(() => {
     const base = toFlowEdges(graph, edgeCtx)
