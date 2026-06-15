@@ -62,6 +62,7 @@ export {
   type VerifyTarget,
   type ParkedEdge,
 } from './coverage'
+export { nodeForUrl } from './coverage'
 export { reconcileProposals, buildResolution, type ResolutionReport } from './reconcile'
 export {
   buildSpecPlan,

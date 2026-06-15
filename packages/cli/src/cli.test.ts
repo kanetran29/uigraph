@@ -317,3 +317,51 @@ describe('runVerifyUntilDone (autonomous 100%-accounted loop)', () => {
     expect(s.accountedRatio).toBe(1)
   })
 })
+
+describe('runVerify — dynamic-sink resolution (capture mode)', () => {
+  const uNode = (id: string): GraphNode => ({ id, route: null, componentPath: null, label: 'dynamic', kind: 'unknown' })
+
+  it('captures the real landing, mints a CONCRETE edge, and never reports from->u_sink', async () => {
+    const { runVerify } = await import('./runner')
+    const g = graph(
+      [node('a'), node('b'), uNode('u_a')],
+      [{ ...edge('e_au', 'a', 'u_a'), modality: 'unknown', source: 'static' }],
+    )
+    const dir = seedWorkspace(tempDir('uigraph-cli-dyn-'), g)
+    // capture driver lands on /b (node 'b')
+    const summary = await runVerify({ dir, appUrl: 'http://x', driver: async (_p, appUrl, opts) => (opts?.capture ? { confirmed: true, landedUrl: `${appUrl}/b` } : { confirmed: false }) })
+    expect(summary.resolvedDynamic).toBe(1)
+
+    const store = openStore(dbPathFor(dir))
+    const obs = store.getObservations()
+    const merged = (await import('@uigraph/mcp')).loadMergedGraph({ dir })
+    store.close()
+    // a CONCRETE runtime edge a->b was minted; NO observation ever targeted the u_ sink
+    expect(merged.edges.some((e) => e.from === 'a' && e.to === 'b' && e.source === 'runtime')).toBe(true)
+    expect(obs.every((o) => o.to !== 'u_a')).toBe(true)
+  })
+
+  it('parks the u_ edge (specific reason) when no navigation fires', async () => {
+    const { runVerify } = await import('./runner')
+    const g = graph([node('a'), uNode('u_a')], [{ ...edge('e_au', 'a', 'u_a'), modality: 'unknown', source: 'static' }])
+    const dir = seedWorkspace(tempDir('uigraph-cli-dyn2-'), g)
+    const summary = await runVerify({ dir, appUrl: 'http://x', driver: async () => ({ confirmed: false }) })
+    expect(summary.parkedDynamic).toBe(1)
+    const store = openStore(dbPathFor(dir))
+    const parked = store.getParkedEdges()
+    store.close()
+    expect(parked[0]?.edgeId).toBe('e_au')
+    expect(parked[0]?.reason).toMatch(/did not fire|no URL change/)
+  })
+
+  it('discovers an undeclared landing as a new node, then mints the edge', async () => {
+    const { runVerify } = await import('./runner')
+    const g = graph([node('a'), uNode('u_a')], [{ ...edge('e_au', 'a', 'u_a'), modality: 'unknown', source: 'static' }])
+    const dir = seedWorkspace(tempDir('uigraph-cli-dyn3-'), g)
+    const summary = await runVerify({ dir, appUrl: 'http://x', driver: async (_p, appUrl, opts) => (opts?.capture ? { confirmed: true, landedUrl: `${appUrl}/surprise` } : { confirmed: false }) })
+    expect(summary.discoveredNodes).toBe(1)
+    const merged = (await import('@uigraph/mcp')).loadMergedGraph({ dir })
+    expect(merged.nodes.some((n) => n.route === '/surprise')).toBe(true)
+    expect(merged.edges.some((e) => e.from === 'a' && e.source === 'runtime')).toBe(true)
+  })
+})

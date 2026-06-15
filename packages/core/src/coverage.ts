@@ -117,6 +117,36 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
   }
 }
 
+/** Path segments (non-empty), for route matching. */
+function pathSegments(p: string): string[] {
+  return p.split('/').filter((s) => s.length > 0)
+}
+
+/**
+ * Map an observed browser URL to a declared screen node id, or null when it maps to
+ * none (undeclared / external / ambiguous). Strips the app origin + query/hash,
+ * normalizes a trailing slash, then matches the path against declared non-wildcard
+ * routes: an exact route wins; else the SOLE parameterized candidate (e.g. observed
+ * `/products/42` → the only `/products/:id` node); zero or >1 candidates → null.
+ * Used by the Tier-3 runner to resolve a dynamic landing into a concrete edge.
+ */
+export function nodeForUrl(graph: UiGraph, observedUrl: string, appUrl: string): string | null {
+  if (!observedUrl.startsWith(appUrl)) return null
+  let path = observedUrl.slice(appUrl.length).split('?')[0]?.split('#')[0] ?? ''
+  if (!path.startsWith('/')) path = '/' + path
+  if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1)
+  const exact = graph.nodes.find((n) => n.kind !== 'unknown' && n.route === path)
+  if (exact) return exact.id
+  const ps = pathSegments(path)
+  const candidates = graph.nodes.filter((n) => {
+    if (n.kind === 'unknown' || n.route === null || n.route.includes('*')) return false
+    const rs = pathSegments(n.route)
+    if (rs.length !== ps.length) return false
+    return rs.every((s, i) => s.startsWith(':') || s === ps[i])
+  })
+  return candidates.length === 1 ? (candidates[0]?.id ?? null) : null
+}
+
 /** A thing a Tier-3 runner should confirm next: an uncertain edge or a proposed transition. */
 export interface VerifyTarget {
   kind: 'edge' | 'proposal'
