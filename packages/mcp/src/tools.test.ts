@@ -14,6 +14,7 @@ import {
   dbPath,
   describeScreen,
   diffTool,
+  diffSinceLastTool,
   getCoverage,
   getGraph,
   getGrounding,
@@ -473,5 +474,23 @@ describe('honest 100% accounted-for (edge resolution + park)', () => {
     // but it was reached by parking, NOT by runtime verification — stays visible
     expect(s.coverage.runtimeRatio).toBe(0)
     expect(s.openEdges).toHaveLength(0)
+  })
+})
+
+describe('diffSinceLastTool', () => {
+  it('reports no-prior on a single-map workspace', () => {
+    const ctx = newWorkspace(graph([node('a')], []))
+    expect(diffSinceLastTool(ctx).state).toBe('no-prior')
+  })
+
+  it('reports the delta after a re-map (current vs the rotated previous)', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
+    const store = openStore(dbPath(ctx))
+    store.snapshotCurrentAsPrevious()
+    store.setBaseGraph(graph([node('a'), node('b')], [edge('e_ab', 'a', 'b'), edge('e_ba', 'b', 'a')]))
+    store.close()
+    const r = diffSinceLastTool(ctx)
+    expect(r.state).toBe('ok')
+    expect(r.diff?.addedEdges.map((e) => e.id)).toEqual(['e_ba'])
   })
 })

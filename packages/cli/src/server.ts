@@ -9,7 +9,7 @@ import { join } from 'node:path'
 import type { ToolContext, UpdateGraphArgs } from '@uigraph/mcp'
 import { dbPath, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
 import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@uigraph/core/node'
-import { buildCoverage, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
+import { buildCoverage, diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
 
 /** Render the workspace overlay as a markdown "planned changes" spec. */
 function readPlan(ctx: ToolContext): string {
@@ -76,6 +76,14 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
     }
     if (req.method === 'GET' && req.path === '/api/plan') {
       return { status: 200, body: { spec: readPlan(ctx) } }
+    }
+    if (req.method === 'GET' && req.path === '/api/changes') {
+      const store = openStore(dbPath(ctx))
+      try {
+        return { status: 200, body: diffSinceLast(store.getBaseGraph(), store.getFingerprint()?.mappedAt ?? null, store.getPreviousGraph()) }
+      } finally {
+        store.close()
+      }
     }
     if (req.method === 'POST' && req.path === '/api/overlay') {
       const result = updateGraph(ctx, req.body as UpdateGraphArgs)

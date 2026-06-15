@@ -13,6 +13,7 @@ import { listKit, readKitAll, readKitFile } from './kit'
 import {
   describeScreen,
   diffTool,
+  diffSinceLastTool,
   genSpec,
   getCoverage,
   getGraph,
@@ -197,6 +198,11 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'diff_since_last',
+    description: 'What did the last re-map do to the proven UI graph? Diffs the current base graph against the previous one for this workspace (added/removed nodes+edges, changed-edge fields) plus the two mappedAt timestamps. state: ok | no-prior (only one map) | no-current (never mapped). Proven base only — not overlay/proposals/observations. Distinct from get_freshness (source-file staleness): call this after re-mapping to explain the graph delta to the user.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
     name: 'get_loop_status',
     description: 'The deterministic DONE signal for the proposal reconciliation loop. loopDone is true iff the verify worklist is empty AND no proposed proposals remain (100% = every uncertain edge runtime-witnessed AND every proposal resolved). Returns coverage + resolution + worklistSize.',
     inputSchema: { type: 'object', properties: {} },
@@ -314,6 +320,8 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(unparkEdge(ctx, args as unknown as { id: string }))
       case 'diff':
         return jsonResult(diffTool(args as unknown as DiffArgs))
+      case 'diff_since_last':
+        return jsonResult(diffSinceLastTool(ctx))
       default:
         return errorResult(`unknown tool: ${name}`)
     }

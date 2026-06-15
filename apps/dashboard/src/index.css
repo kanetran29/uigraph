@@ -575,6 +575,15 @@ select:focus-visible,
   align-items: stretch;
   gap: 2px;
 }
+
+/* A removed node/edge is no longer in the rendered graph, so its row is non-navigable and dimmed. */
+.cov-row--dim {
+  opacity: 0.6;
+  cursor: default;
+}
+.cov-row--dim:hover {
+  background: transparent;
+}
 .cov-row-head {
   display: flex;
   align-items: center;

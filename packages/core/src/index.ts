@@ -83,7 +83,7 @@ export {
   type ApiOperationSummary,
   type ApiBindings,
 } from './openapi'
-export { diffGraphs, type GraphDiff, type EdgeChange } from './diff'
+export { diffGraphs, diffSinceLast, type GraphDiff, type EdgeChange, type SinceLastDiff } from './diff'
 export {
   buildAdjacency,
   reachableFrom,

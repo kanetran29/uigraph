@@ -37,6 +37,12 @@ CREATE TABLE IF NOT EXISTS proposals (
 `
 
 /** Optional filters for a proposals query, mirroring the get_proposals tool. */
+/** A snapshot of a base graph at a point in time — the previous map, for the temporal diff. */
+export interface GraphSnapshot {
+  graph: UiGraph
+  mappedAt: string
+}
+
 export interface ProposalQuery {
   screen?: string
   category?: string
@@ -130,6 +136,27 @@ export class Store {
 
   getFingerprint(): Fingerprint | null {
     return this.getDoc<Fingerprint>('fingerprint')
+  }
+
+  /**
+   * Rotate the current base graph into the 'previous' slot so the next map's delta is
+   * computable (temporal diff — "what did this re-map do to the graph?"). MUST be called
+   * BEFORE setBaseGraph (which overwrites 'graph') and BEFORE setFingerprint (which
+   * overwrites the mappedAt this reads). No-op (returns false, no write) on the first map
+   * when there is no current graph yet. Clock-free: the envelope's mappedAt is the prior
+   * map's stored fingerprint timestamp ('' when the graph predates fingerprinting, e.g. a
+   * migrate import), never a fresh clock read.
+   */
+  snapshotCurrentAsPrevious(): boolean {
+    const current = this.getBaseGraph()
+    if (current === null) return false
+    this.setDoc('graph_prev', { graph: current, mappedAt: this.getFingerprint()?.mappedAt ?? '' })
+    return true
+  }
+
+  /** The previous base graph snapshot (the map before the current one), or null when absent. */
+  getPreviousGraph(): GraphSnapshot | null {
+    return this.getDoc<GraphSnapshot>('graph_prev')
   }
 
   // Named scenarios = one overlay per name (a feature you draft, toggle, compare).

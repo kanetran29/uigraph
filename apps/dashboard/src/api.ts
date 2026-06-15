@@ -3,7 +3,7 @@
 // a single manual overlay edit. The overlay op shape mirrors @uigraph/mcp's
 // UpdateGraphArgs so the dashboard and the server cannot drift apart.
 
-import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
+import type { CoverageReport, GraphEdge, GraphNode, Proposals, SinceLastDiff, UiGraph } from '@uigraph/core'
 import { buildCoverage } from '@uigraph/core'
 import sampleGraph from './sample-graph.json'
 
@@ -79,6 +79,27 @@ export async function fetchProposals(wsId?: string | null): Promise<Proposals> {
     return (await res.json()) as Proposals
   } catch {
     return EMPTY_PROPOSALS
+  }
+}
+
+/** The temporal "since last map" diff for the active workspace (same shape the CLI/MCP return). */
+export type ChangesState = SinceLastDiff
+
+/** Offline / older-server fallback: looks like a never-mapped workspace (no panel content). */
+export const EMPTY_CHANGES: ChangesState = { state: 'no-current', diff: null, previousMappedAt: null, currentMappedAt: null, detail: null }
+
+/**
+ * Fetch the "what did the last re-map change" delta for the active workspace. Read-only and
+ * offline-safe: on any failure (network, 404 from an older server, non-OK, bad JSON) it
+ * resolves to EMPTY_CHANGES so the dashboard still renders the rest of the graph.
+ */
+export async function fetchChanges(wsId?: string | null): Promise<ChangesState> {
+  try {
+    const res = await fetch(withWs('/api/changes', wsId))
+    if (!res.ok) return EMPTY_CHANGES
+    return (await res.json()) as ChangesState
+  } catch {
+    return EMPTY_CHANGES
   }
 }
 

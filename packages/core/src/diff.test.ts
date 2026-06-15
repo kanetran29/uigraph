@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { diffGraphs } from './diff'
+import { diffGraphs, diffSinceLast } from './diff'
 import { edge, graph, node } from './fixtures'
 
 describe('diffGraphs', () => {
@@ -26,5 +26,42 @@ describe('diffGraphs', () => {
     const d = diffGraphs(a, a)
     expect(d.changedEdges).toEqual([])
     expect(d.addedEdges).toEqual([])
+  })
+})
+
+describe('diffSinceLast (temporal "since last map" diff)', () => {
+  const cur = graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')])
+
+  it('state no-current when the workspace was never mapped', () => {
+    const r = diffSinceLast(null, null, null)
+    expect(r.state).toBe('no-current')
+    expect(r.diff).toBeNull()
+    expect(r.detail).toMatch(/uigraph map/)
+  })
+
+  it('state no-prior when mapped exactly once (no previous to compare)', () => {
+    const r = diffSinceLast(cur, '2026-02-02T00:00:00Z', null)
+    expect(r.state).toBe('no-prior')
+    expect(r.diff).toBeNull()
+    expect(r.currentMappedAt).toBe('2026-02-02T00:00:00Z')
+    expect(r.detail).toMatch(/re-map/)
+  })
+
+  it('state ok diffs previous->current with load-bearing orientation (added in current = added)', () => {
+    const prev = graph([node('a')], [])
+    const r = diffSinceLast(cur, 'T2', { graph: prev, mappedAt: 'T1' })
+    expect(r.state).toBe('ok')
+    // node b + edge e_ab exist only in current -> ADDED (not removed) — pins diffGraphs(prev, current)
+    expect(r.diff?.addedNodes.map((n) => n.id)).toEqual(['b'])
+    expect(r.diff?.addedEdges.map((e) => e.id)).toEqual(['e_ab'])
+    expect(r.diff?.removedNodes).toEqual([])
+    expect(r.previousMappedAt).toBe('T1')
+    expect(r.currentMappedAt).toBe('T2')
+  })
+
+  it('normalizes an empty-string previous timestamp (migrated workspace) to null', () => {
+    const r = diffSinceLast(cur, 'T2', { graph: cur, mappedAt: '' })
+    expect(r.state).toBe('ok')
+    expect(r.previousMappedAt).toBeNull()
   })
 })

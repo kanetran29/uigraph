@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
-import { EMPTY_PROPOSALS, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, fetchWorkspaces, postOverlay, postScenario, type ScenariosState, type UpdateOp, type WorkspaceSummary } from './api'
+import { EMPTY_CHANGES, EMPTY_PROPOSALS, fetchChanges, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, fetchWorkspaces, postOverlay, postScenario, type ChangesState, type ScenariosState, type UpdateOp, type WorkspaceSummary } from './api'
 import { readStored, writeStored } from './storage'
 import { searchMatchIds } from './search'
 import { GraphCanvas, type Selection } from './GraphCanvas'
@@ -16,6 +16,7 @@ import { Settings } from './Settings'
 import { useTheme } from './theme'
 import { useT } from './i18n'
 import { Coverage } from './Coverage'
+import { Changes } from './Changes'
 import { Plan } from './Plan'
 import { Inspector } from './Inspector'
 import { ProposalsPanel } from './Proposals'
@@ -51,6 +52,7 @@ export function App(): JSX.Element {
   const [proposals, setProposals] = useState<Proposals>(EMPTY_PROPOSALS)
   const [coverage, setCoverage] = useState<CoverageReport | null>(null)
   const [scenarios, setScenarios] = useState<ScenariosState>({ active: 'default', names: ['default'] })
+  const [changes, setChanges] = useState<ChangesState>(EMPTY_CHANGES)
   const [live, setLive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selection, setSelection] = useState<Selection>(null)
@@ -80,12 +82,13 @@ export function App(): JSX.Element {
   }, [])
 
   const load = useCallback(async (ws: string | null) => {
-    const [{ graph: g, live: isLive }, props, cov, scen] = await Promise.all([fetchGraph(ws), fetchProposals(ws), fetchCoverage(ws), fetchScenarios(ws)])
+    const [{ graph: g, live: isLive }, props, cov, scen, chg] = await Promise.all([fetchGraph(ws), fetchProposals(ws), fetchCoverage(ws), fetchScenarios(ws), fetchChanges(ws)])
     setGraph(g)
     setLive(isLive)
     setProposals(props)
     setCoverage(cov)
     setScenarios(scen)
+    setChanges(chg)
     setLoading(false)
   }, [])
 
@@ -276,6 +279,7 @@ export function App(): JSX.Element {
           )}
         </main>
         <div className="side">
+          <Changes changes={changes} graph={graph} onSelect={setSelection} />
           <Inspector selection={selection} onEditEdge={handleEditEdge} onEditNode={handleEditNode} onDelete={handleDelete} />
           <Plan live={live} scenarios={scenarios} onAddScreen={handleAddScreen} onExport={handleExport} onSwitchScenario={handleSwitchScenario} />
           <Steps graph={graph} onPathChange={handlePathChange} />

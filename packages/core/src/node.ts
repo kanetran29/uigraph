@@ -14,7 +14,7 @@ import { validateGraph } from './validate'
 import { validateProposals } from './proposals'
 import type { Store } from './store'
 
-export { Store, openStore, type ProposalQuery } from './store'
+export { Store, openStore, type ProposalQuery, type GraphSnapshot } from './store'
 export { fingerprintSources, compareFingerprint, type Fingerprint, type FileScan, type FreshnessDiff } from './fingerprint'
 export {
   emptyRegistry,

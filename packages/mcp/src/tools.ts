@@ -7,10 +7,10 @@
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
-import { applyObservations, buildCoverage, buildGrounding, buildResolution, buildSpecPlan, diffGraphs, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
+import { applyObservations, buildCoverage, buildGrounding, buildResolution, buildSpecPlan, diffGraphs, diffSinceLast, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
 import type { CoverageReport, Grounding, ProposalGraph, ProposalStatus, ResolutionReport, ScreenGrounding, VerifyTarget } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
-import type { GraphDiff } from '@uigraph/core'
+import type { GraphDiff, SinceLastDiff } from '@uigraph/core'
 import { loadGraph, openStore, fingerprintSources, compareFingerprint, type Store } from '@uigraph/core/node'
 
 /**
@@ -578,6 +578,16 @@ export function diffTool(args: DiffArgs): GraphDiff {
   const a = loadGraph(args.a)
   const b = loadGraph(args.b)
   return diffGraphs(a, b)
+}
+
+/**
+ * The temporal "since last map" diff for the bound workspace — what the latest re-map did to
+ * the proven UI graph (current base vs the previous map). Distinct from get_freshness (which
+ * compares source files to the map, not two maps). The previous base is rotated INSIDE the db,
+ * so unlike diff (two file paths) the agent can call this with no arguments after a re-map.
+ */
+export function diffSinceLastTool(ctx: ToolContext): SinceLastDiff {
+  return withStore(ctx, (store) => diffSinceLast(store.getBaseGraph(), store.getFingerprint()?.mappedAt ?? null, store.getPreviousGraph()))
 }
 
 /** Read all recorded observations from the workspace store, in insertion order. */

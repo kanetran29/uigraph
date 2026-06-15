@@ -31,3 +31,15 @@ Notes:
   CLI) only *report*. uigraph holds no API key and runs no model — re-mapping and notifying
   are actions **you** take on the user's behalf. The re-map itself (`uigraph map`) is pure
   static analysis: no model call, no key, no cost.
+
+## After you re-map: report what changed
+
+A re-map snapshots the prior graph, so once you've re-mapped, call **`diff_since_last`** to
+see what the code change actually did to the proven UI graph — added/removed screens and
+transitions, and which edge fields changed — plus the two map timestamps. Use it to tell the
+user in plain language, e.g. *"Re-mapped: that change added a `Checkout → Confirmation`
+transition and removed the `Promo` screen."* It needs no arguments (the previous base lives
+in the workspace db, not a file). Keep `diff_since_last` distinct from `get_freshness`:
+freshness = *source files changed since the map*; diff-since-last = *the graph delta between
+two maps*. States: `ok` (a delta), `no-prior` (only one map yet), `no-current` (never mapped).
+This is **base-graph only** — it reports what the code did, never overlay/proposal/plan edits.
