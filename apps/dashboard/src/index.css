@@ -431,6 +431,7 @@ select:focus-visible,
 .steps,
 .proposals,
 .coverage,
+.changes,
 .plan,
 .prop-row,
 .prop-screen,
@@ -502,7 +503,8 @@ select:focus-visible,
   cursor: default;
 }
 
-.coverage {
+.coverage,
+.changes {
   padding: 16px 18px;
   border-bottom: 1px solid var(--border);
 }
