@@ -787,6 +787,49 @@ describe('extractGraph — gated overlay-view control descent (F-deep-view-contr
     expect(inner).toHaveLength(1)
   })
 
+  it('links a control nested INSIDE one overlay that opens ANOTHER overlay (precise gate-var match)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        // The screen renders an imported FlowModal (descended) and gates a LoginModal by
+        // loginModalVisible. A control INSIDE FlowModal opens the login modal via the same
+        // setter — exactly refapp's BuildingModal -> setLoginModalVisible(true) shape.
+        '/H.tsx': `import { useState } from 'react'\nimport FlowModal from './FlowModal'\nimport LoginModal from './LoginModal'\nexport default function H(){ const [loginModalVisible,setLoginModalVisible]=useState(false); return <div><FlowModal setLoginModalVisible={setLoginModalVisible}/>{loginModalVisible && <LoginModal isOpen={loginModalVisible}/>}</div> }`,
+        '/FlowModal.tsx': `export default function FlowModal({setLoginModalVisible}){ return <button onClick={()=>setLoginModalVisible(true)}>Sign in to continue</button> }`,
+        '/LoginModal.tsx': `export default function LoginModal(){ return <button onClick={()=>{}}>Google</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const login = graph.nodes.find((n) => n.kind === 'modal' && n.label === 'LoginModal')
+    const opener = graph.nodes.find((n) => n.kind === 'control' && n.control?.name === 'Sign in to continue')
+    const edge = graph.edges.find((e) => e.from === opener?.id && e.to === login?.id && e.effect === 'open:modal')
+    expect(edge).toBeDefined()
+    // opener is inside a descended overlay -> the open link is may, and witnessed
+    expect(edge?.modality).toBe('may')
+    expect(edge?.witness).toBeDefined()
+  })
+
+  it('does NOT let a nested-overlay control use the sole-modal fallback (no mislink)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        // One modal on the screen; a control inside FlowModal fires an open:modal effect whose
+        // var matches NOTHING. A screen control would fall back to the sole modal — a nested
+        // one must NOT (it could mislink across unrelated overlays).
+        '/H.tsx': `import FlowModal from './FlowModal'\nimport LoginModal from './LoginModal'\nexport default function H(){ return <div><FlowModal/>{true && <LoginModal isOpen/>}</div> }`,
+        '/FlowModal.tsx': `export default function FlowModal(){ return <button onClick={()=>setShowSomethingElseModal(true)}>x</button> }`,
+        '/LoginModal.tsx': `export default function LoginModal(){ return <button onClick={()=>{}}>Google</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const flow = graph.nodes.find((n) => n.kind === 'modal' && n.label === 'FlowModal')
+    const login = graph.nodes.find((n) => n.kind === 'modal' && n.label === 'LoginModal')
+    // the FlowModal control's effect var matches no gate -> NO open:modal edge to LoginModal
+    expect(graph.edges.some((e) => e.to === login?.id && e.effect === 'open:modal' && graph.nodes.find((n) => n.id === e.from)?.parent === flow?.id)).toBe(false)
+  })
+
   it('keeps screen control ids byte-stable when a gated view is added', () => {
     const base = {
       '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
