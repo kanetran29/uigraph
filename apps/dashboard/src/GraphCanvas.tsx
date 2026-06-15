@@ -300,11 +300,11 @@ function controlStyle(manual: boolean, control: ControlMeta, size: { width: numb
  */
 function toFlowNodes(
   graph: UiGraph,
-  layout: Pick<GraphLayout, 'positions' | 'sizes'>,
+  layout: Pick<GraphLayout, 'positions' | 'sizes' | 'bands'>,
   expanded: ReadonlySet<string>,
   proposalCount: ReadonlyMap<string, number>,
 ): Node[] {
-  const { positions, sizes } = layout
+  const { positions, sizes, bands } = layout
 
   const childCount = new Map<string, number>()
   for (const n of graph.nodes) {
@@ -351,7 +351,44 @@ function toFlowNodes(
     }
   }
 
-  return [...screens, ...controls]
+  // Component bands: presentational boxes (parentId=screen) drawn BEHIND the controls,
+  // labeling which component owns the controls inside. Never selectable, never edged.
+  const bandNodes: Node[] = (bands ?? [])
+    .filter((b) => expanded.has(b.parent))
+    .map((b) => ({
+      id: b.id,
+      position: positions.get(b.id) ?? { x: 0, y: 0 },
+      parentId: b.parent,
+      extent: 'parent' as const,
+      selectable: false,
+      draggable: false,
+      data: { label: b.label },
+      style: bandStyle(sizes.get(b.id) ?? { width: 200, height: 64 }),
+    }))
+
+  // Order: screens, then bands (behind), then controls (on top).
+  return [...screens, ...bandNodes, ...controls]
+}
+
+/** Style for a component band box: a subtle outlined container with its label as a top header. */
+function bandStyle(size: { width: number; height: number }): CSSProperties {
+  return {
+    width: size.width,
+    height: size.height,
+    background: 'var(--node-subtle-bg, rgba(99,102,241,0.04))',
+    border: '1px dashed var(--node-border, #c7c9d9)',
+    borderRadius: 8,
+    fontSize: 10,
+    fontWeight: 600,
+    letterSpacing: '0.02em',
+    color: 'var(--muted, #6b7280)',
+    textAlign: 'left',
+    padding: '4px 8px',
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    pointerEvents: 'none',
+  }
 }
 
 /** The set of edge styling inputs that decide emphasis, dimming, and label visibility. */

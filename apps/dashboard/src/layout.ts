@@ -21,11 +21,19 @@ export interface NodeSize {
   height: number
 }
 
+/** A component band drawn inside an expanded screen, grouping that component's controls. */
+export interface Band {
+  id: string
+  parent: string
+  label: string
+}
+
 /** The computed layout: positions and sizes for every node (edge routing is floating, so no points). */
 export interface GraphLayout {
   positions: Map<string, NodePosition>
   sizes: Map<string, NodeSize>
   edgePoints: Map<string, NodePosition[]>
+  bands: Band[]
 }
 
 const SCREEN_WIDTH = 248
@@ -42,6 +50,11 @@ const CONTROL_GAP = 10
 const CHILD_INSET_X = 14
 const CHILD_TOP = 62
 const CHILD_BOTTOM_PAD = 16
+// A component band groups one component's controls inside an expanded screen: a
+// header strip (BAND_HEADER) over the controls, inset from the screen edge.
+const BAND_HEADER = 22
+const BAND_GAP = 12
+const BAND_INSET = 8
 
 // Radius added per BFS ring. Generous so a ring's circumference comfortably holds
 // its nodes and the spokes between rings have room for edge labels.
@@ -87,6 +100,89 @@ function controlsByParent(graph: UiGraph): Map<string, string[]> {
   return byParent
 }
 
+/** A readable component name from a control's componentPath ("components/Header/index.tsx" -> "Header"). */
+export function componentLabel(path: string | null): string {
+  if (path === null || path.length === 0) return '(page)'
+  const parts = path.split('/').filter(Boolean)
+  let base = parts[parts.length - 1] ?? path
+  if (/^index\.[jt]sx?$/.test(base) && parts.length >= 2) base = parts[parts.length - 2] ?? base
+  return base.replace(/\.[jt]sx?$/, '')
+}
+
+/** One group of a screen's controls: the page-root (flat, unlabeled) or a child component band. */
+export interface ControlGroup {
+  key: string
+  label: string
+  controlIds: string[]
+  isBand: boolean
+}
+
+/**
+ * Group a screen's controls by their owning component. Controls from the screen's
+ * own component file (or with no file) are the page root and render FLAT; each
+ * distinct child component becomes a labeled band. Order-stable (first-seen).
+ */
+export function componentGroups(graph: UiGraph, screenId: string): ControlGroup[] {
+  const screenPath = graph.nodes.find((n) => n.id === screenId)?.componentPath ?? null
+  const order: string[] = []
+  const byKey = new Map<string, string[]>()
+  for (const n of graph.nodes) {
+    if (n.kind !== 'control' || n.parent !== screenId) continue
+    const path = n.componentPath
+    const key = path === null || path === screenPath ? '__root__' : path
+    const list = byKey.get(key)
+    if (list === undefined) {
+      byKey.set(key, [n.id])
+      order.push(key)
+    } else list.push(n.id)
+  }
+  return order.map((key) =>
+    key === '__root__'
+      ? { key, label: '(page)', controlIds: byKey.get(key) ?? [], isBand: false }
+      : { key, label: componentLabel(key), controlIds: byKey.get(key) ?? [], isBand: true },
+  )
+}
+
+/**
+ * Lay an expanded screen's controls in stacked component bands. Returns the screen
+ * box size + positions/sizes for every sub-node (controls AND band boxes) and the
+ * band list. Pure: no shared state, so repeated calls are independent.
+ */
+function layoutExpanded(screenId: string, groups: ControlGroup[]): { size: NodeSize; positions: Map<string, NodePosition>; sizes: Map<string, NodeSize>; bands: Band[] } {
+  const positions = new Map<string, NodePosition>()
+  const sizes = new Map<string, NodeSize>()
+  const bands: Band[] = []
+  let y = CHILD_TOP
+  let maxW = SCREEN_WIDTH
+  let bandIdx = 0
+  for (const g of groups) {
+    if (g.controlIds.length === 0) continue
+    const cols = gridCols(g.controlIds.length)
+    const rows = Math.ceil(g.controlIds.length / cols)
+    const gridH = rows * (CONTROL_HEIGHT + CONTROL_GAP) - CONTROL_GAP
+    const gridW = cols * CONTROL_WIDTH + (cols - 1) * CONTROL_GAP
+    const insetX = g.isBand ? BAND_INSET + CHILD_INSET_X : CHILD_INSET_X
+    const headerH = g.isBand ? BAND_HEADER : 0
+    const ctlTop = y + headerH
+    g.controlIds.forEach((id, i) => {
+      positions.set(id, { x: insetX + (i % cols) * (CONTROL_WIDTH + CONTROL_GAP), y: ctlTop + Math.floor(i / cols) * (CONTROL_HEIGHT + CONTROL_GAP) })
+      sizes.set(id, { width: CONTROL_WIDTH, height: CONTROL_HEIGHT })
+    })
+    if (g.isBand) {
+      const id = `cg_${screenId}__${bandIdx++}`
+      const bandW = gridW + CHILD_INSET_X * 2
+      bands.push({ id, parent: screenId, label: g.label })
+      positions.set(id, { x: BAND_INSET, y })
+      sizes.set(id, { width: bandW, height: headerH + gridH + 10 })
+      maxW = Math.max(maxW, BAND_INSET * 2 + bandW)
+    } else {
+      maxW = Math.max(maxW, CHILD_INSET_X * 2 + gridW)
+    }
+    y = ctlTop + gridH + BAND_GAP
+  }
+  return { size: { width: maxW, height: Math.max(SCREEN_HEIGHT, y - BAND_GAP + CHILD_BOTTOM_PAD) }, positions, sizes, bands }
+}
+
 /**
  * Compute the full canvas layout. Screens are placed radially around the root by
  * BFS depth (root centred); only screens in `expanded` are grown to contain their
@@ -98,10 +194,15 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
   const screenIds = new Set(screens.map((n) => n.id))
   const isGhost = (id: string): boolean => id.startsWith('ps_')
   const childN = (id: string): number => (childrenOf.get(id) ?? []).length
+  // Per expanded screen: its component-banded inner layout (controls + band boxes + size).
+  const expLayout = new Map<string, ReturnType<typeof layoutExpanded>>()
+  for (const s of screens) {
+    if (expanded.has(s.id) && childN(s.id) > 0) expLayout.set(s.id, layoutExpanded(s.id, componentGroups(graph, s.id)))
+  }
   const widthOf = (id: string): number =>
-    isGhost(id) ? GHOST_WIDTH : expanded.has(id) ? expandedSize(childN(id)).width : SCREEN_WIDTH
+    isGhost(id) ? GHOST_WIDTH : expLayout.get(id)?.size.width ?? (expanded.has(id) ? expandedSize(childN(id)).width : SCREEN_WIDTH)
   const heightOf = (id: string): number =>
-    isGhost(id) ? GHOST_HEIGHT : expanded.has(id) ? expandedSize(childN(id)).height : SCREEN_HEIGHT
+    isGhost(id) ? GHOST_HEIGHT : expLayout.get(id)?.size.height ?? (expanded.has(id) ? expandedSize(childN(id)).height : SCREEN_HEIGHT)
 
   // Undirected adjacency among screen nodes (control edges are ignored for ranking).
   const adj = new Map<string, Set<string>>()
@@ -182,11 +283,12 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
     expanded.size === 0
       ? 0
       : Math.max(0, ...[...expanded].map((id) => {
-          const e = expandedSize(childN(id))
+          const e = expLayout.get(id)?.size ?? expandedSize(childN(id))
           return Math.max(e.width, e.height)
         }))
   const ringStep = RING + expandedExtent
 
+  const bands: Band[] = []
   for (const node of screens) {
     const width = widthOf(node.id)
     const height = heightOf(node.id)
@@ -204,19 +306,13 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
     const cy = d === 0 ? 0 : Math.sin(ang) * r
     positions.set(node.id, { x: cx - width / 2, y: cy - height / 2 })
 
-    if (!expanded.has(node.id)) continue
-    const kids = childrenOf.get(node.id) ?? []
-    const cols = gridCols(kids.length)
-    kids.forEach((childId, i) => {
-      const col = i % cols
-      const row = Math.floor(i / cols)
-      sizes.set(childId, { width: CONTROL_WIDTH, height: CONTROL_HEIGHT })
-      positions.set(childId, {
-        x: CHILD_INSET_X + col * (CONTROL_WIDTH + CONTROL_GAP),
-        y: CHILD_TOP + row * (CONTROL_HEIGHT + CONTROL_GAP),
-      })
-    })
+    // Place this screen's controls + component bands from its banded inner layout.
+    const e = expLayout.get(node.id)
+    if (e === undefined) continue
+    for (const [id, p] of e.positions) positions.set(id, p)
+    for (const [id, sz] of e.sizes) sizes.set(id, sz)
+    bands.push(...e.bands)
   }
 
-  return { positions, sizes, edgePoints: new Map() }
+  return { positions, sizes, edgePoints: new Map(), bands }
 }
