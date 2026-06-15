@@ -498,7 +498,18 @@ function swatch(color: string, dash?: string): CSSProperties {
  * documents the modality (dash) and source (colour) encodings.
  */
 export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
-  const { graph, proposals, selection, pathEdgeIds, onSelect, onConnect } = props
+  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, onConnect } = props
+  // Hide the synthetic `u_<screen>` dynamic-target sinks (kind 'unknown') + any edge
+  // touching them from the canvas. View-only: they stay in the IR + coverage worklist.
+  const graph = useMemo<UiGraph>(() => {
+    const hidden = new Set(rawGraph.nodes.filter((n) => n.kind === 'unknown').map((n) => n.id))
+    if (hidden.size === 0) return rawGraph
+    return {
+      ...rawGraph,
+      nodes: rawGraph.nodes.filter((n) => !hidden.has(n.id)),
+      edges: rawGraph.edges.filter((e) => !hidden.has(e.from) && !hidden.has(e.to)),
+    }
+  }, [rawGraph])
   const [expandAll, setExpandAll] = useState(false)
   const [highlightFlow, setHighlightFlow] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
