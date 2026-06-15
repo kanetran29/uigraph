@@ -130,3 +130,12 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 |----|-------|-------|------------|--------|-----|
 | F9.1 | Proposal reconciliation loop (status fold, loop-done metric, MCP tools) | L2 | F5.5, F-coverage-tier3 | done | [F-proposal-loop](./features/F-proposal-loop.md) |
 | F9.2 | Shippable LLM agent kit (skill + rules + guides + loop), MCP resource + `uigraph kit` | L2 | F9.1 | done | [F-agent-kit](./features/F-agent-kit.md) |
+
+## M10 — Modal & deep-view control reach
+
+**Goal:** Stop treating modals as opaque leaves. Descend into a modal's own component file (incl. one delegation hop) to surface the controls rendered inside it — login OAuth + email form, could-buy/could-sell forms — parented to the modal node, ids byte-stable, navs capped to `may`. Deep non-modal views (profile) and a first-class external-redirect sink are deferred follow-ups.
+
+| ID | Title | Level | Depends on | Status | Doc |
+|----|-------|-------|------------|--------|-----|
+| F10.1 | Modal-control descent (imported modals → controls under the modal node) | L2 | F-control-identity-selectors, F2.9 | done | [F-modal-controls](./features/F-modal-controls.md) |
+| F10.2 | Deep non-modal view reach (selective path-gated descent; e.g. ProfileView) | L2 | F10.1 | planned | — |

@@ -1104,12 +1104,125 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       // Map each modal's gating state-var (showX) to its node, so a control that
       // sets that var (setShowX(true)) links to the SPECIFIC modal, not just the first.
       const modalByVar = new Map<string, string>()
-      const screenControls: { el: Node; meta: ControlInfo; cf: SourceFile; navInfo: ReturnType<typeof navIdentifiers>; file: string; descended: boolean }[] = []
+      // Imported modal component files to descend into for their OWN inner controls,
+      // keyed by modal node id. A modal defined INLINE (resolves to the same file, or
+      // is a local function) is not recorded here — its controls are already swept by
+      // the screen pass and stay screen-parented, so their content-addressed ids don't
+      // shift (re-parenting them would orphan bound proposals/observations).
+      const modalDescend = new Map<string, SourceFile>()
+      const modalFilePaths = new Set<string>()
+
+      type ControlItem = { el: Node; meta: ControlInfo; cf: SourceFile; navInfo: ReturnType<typeof navIdentifiers>; file: string; descended: boolean }
+
+      // Emit a set of controls under one owner (a screen or a modal). nth is scoped
+      // PER OWNER so a modal <button>Cancel</button> never perturbs a screen
+      // <button>Cancel</button>'s nth (hence id). forceMay caps every navigation to
+      // `may` (a modal's contents are conditionally rendered, never guaranteed to
+      // mount). linkModals wires open:modal effects to the screen's modals — done only
+      // for screen-level controls, since nested-modal targets aren't modelled in v1.
+      const emitControls = (ownerId: string, items: ControlItem[], forceMay: boolean, linkModals: boolean): void => {
+        const nthBySig = new Map<string, number>()
+        for (const { meta } of items) {
+          const sig = `${meta.selector.strategy}|${meta.selector.value}`
+          const nth = nthBySig.get(sig) ?? 0
+          nthBySig.set(sig, nth + 1)
+          if (nth > 0) meta.selector.nth = nth
+        }
+        for (const { el, meta, cf, navInfo, file, descended } of items) {
+          const isDescended = descended || forceMay
+          const cId = controlNodeId(ownerId, meta.selector)
+          const inter = collectInteractions(el, cf, navInfo)
+          // The state-var is needed only for edge targeting; normalize the stored
+          // effect to the stable 'open:modal' so the IR doesn't leak variable names.
+          const nodeEffects = [...new Set(inter.effects.map((e) => (e.startsWith('open:modal') ? 'open:modal' : e)))]
+          const lc = cf.getLineAndColumnAtPos(el.getStart())
+          const loc = { line: lc.line, col: lc.column }
+          for (const nav of inter.navs) {
+            const ctxGuard = nav.ctx === 'success' ? 'onSuccess' : nav.ctx === 'error' ? 'onError' : null
+            const guard = nav.guard ?? ctxGuard
+            // A control in a descended child / a modal is real but not guaranteed to render here -> cap to may.
+            const modality: 'must' | 'may' = guard !== null || isDescended ? 'may' : 'must'
+            const confidence = isDescended ? 0.5 : nav.ctx === 'error' ? 0.5 : nav.ctx === 'success' ? 0.7 : guard !== null ? 0.6 : 1
+            const ruleId = nav.interprocedural ? 'rr.use-navigate.interprocedural' : undefined
+            if (nav.ti.kind === 'literal') {
+              const { exact, candidates } = matchLiteralAll(nav.ti.value, routeLikes)
+              if (exact) {
+                pushEdge(cId, exact.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, modality, confidence, file, loc)
+              } else {
+                for (const cand of candidates)
+                  pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: guard ?? 'ambiguous', ruleId }, 'may', 0.5, file, loc)
+              }
+            } else if (nav.ti.kind === 'template') {
+              for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
+                pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, 'may', Math.min(confidence, 0.5), file, loc)
+            } else {
+              pushDynamicEdge(cId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, file, loc)
+            }
+          }
+
+          // Link each modal-opening effect to the SPECIFIC modal it shows (matched by
+          // the state var setShowX -> showX -> the modal gated by showX), falling back
+          // to the screen's first modal when the var can't be matched to a render.
+          if (linkModals) {
+            for (const eff of inter.effects) {
+              if (!eff.startsWith('open:modal')) continue
+              const v = eff.slice('open:modal:'.length)
+              // Precise: the modal gated by this state var; else the screen's modal only
+              // when unambiguous (exactly one). Never guess a target on a multi-modal screen.
+              const modalTarget = modalByVar.get(v) ?? (modalIds.length === 1 ? modalIds[0] : undefined)
+              if (modalTarget === undefined) continue
+              const ev = inter.events[0] ?? 'click'
+              pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, isDescended ? 'may' : 'must', isDescended ? 0.5 : 1, file, loc)
+            }
+          }
+
+          nodes.push({
+            id: cId,
+            route: null,
+            componentPath: file,
+            label: meta.name ?? meta.element,
+            kind: 'control',
+            parent: ownerId,
+            control: {
+              element: meta.element,
+              controlType: meta.controlType,
+              selector: meta.selector,
+              loc,
+              ...(meta.input ? { input: meta.input } : {}),
+              ...(meta.name ? { name: meta.name } : {}),
+              ...(inter.events.length > 0 ? { events: inter.events } : {}),
+              ...(nodeEffects.length > 0 ? { effects: nodeEffects } : {}),
+            },
+          })
+        }
+      }
+
+      // Gather controls from a file set (route tree or modal tree), capturing each
+      // control's element + descent depth so the emitter can cap deep controls to may.
+      const gatherControls = (files: Map<SourceFile, number>, skip?: Set<string>): ControlItem[] => {
+        const out: ControlItem[] = []
+        for (const [cf, depth] of files) {
+          if (skip?.has(cf.getFilePath())) continue
+          const file = relative(projectDir, cf.getFilePath())
+          const navInfo = navIdentifiers(cf)
+          if (depth === 0 && detectDynamicWidget(cf)) {
+            soundiness.push({ kind: 'dynamic-widget', file, detail: 'interactive map/canvas widget: gestures (zoom/pan/drag) are runtime-only and not statically modelable' })
+          }
+          for (const el of allJsxElements(cf)) {
+            const meta = controlMetaFor(el)
+            if (meta) out.push({ el, meta, cf, navInfo, file, descended: depth > 0 })
+          }
+        }
+        return out
+      }
+
       // Shallower for controls: depth 1 catches direct-child buttons (a landing page's
       // could-sell/could-buy) without pulling every control from deep shared components.
-      for (const [cf, depth] of screenSourceFiles(route.componentFile, 1)) {
+      const screenFiles = screenSourceFiles(route.componentFile, 1)
+
+      // Pass 1: detect modals + resolve each imported modal's own component file.
+      for (const [cf] of screenFiles) {
         const file = relative(projectDir, cf.getFilePath())
-        const navInfo = navIdentifiers(cf)
         for (const el of allJsxElements(cf)) {
           const tag = jsxTag(el)
           if (!/(Modal|Dialog|Drawer|Sheet|Popover)$/.test(tag)) continue
@@ -1119,91 +1232,29 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             modalIdByTag.set(tag, mId)
             modalIds.push(mId)
             nodes.push({ id: mId, route: null, componentPath: file, label: stringAttr(el, 'title') ?? tag, kind: 'modal' })
+            const base = tag.split('.')[0] ?? tag
+            const mFile = resolveComponentFile(cf, base)
+            if (mFile && mFile.getFilePath() !== cf.getFilePath()) {
+              modalDescend.set(mId, mFile)
+              modalFilePaths.add(mFile.getFilePath())
+            }
           }
           // Every render of the modal (even same tag, e.g. couldSell + couldBuy) may
           // carry a distinct gating var -> all map to the one deduped modal node.
           const gate = modalGateVar(el)
           if (gate !== null) modalByVar.set(gate, mId)
         }
-        if (depth === 0 && detectDynamicWidget(cf)) {
-          soundiness.push({ kind: 'dynamic-widget', file, detail: 'interactive map/canvas widget: gestures (zoom/pan/drag) are runtime-only and not statically modelable' })
-        }
-        for (const el of allJsxElements(cf)) {
-          const meta = controlMetaFor(el)
-          if (meta) screenControls.push({ el, meta, cf, navInfo, file, descended: depth > 0 })
-        }
-      }
-      const nthBySig = new Map<string, number>()
-      for (const { meta } of screenControls) {
-        const sig = `${meta.selector.strategy}|${meta.selector.value}`
-        const nth = nthBySig.get(sig) ?? 0
-        nthBySig.set(sig, nth + 1)
-        if (nth > 0) meta.selector.nth = nth
       }
 
-      for (const { el, meta, cf, navInfo, file, descended } of screenControls) {
-        const cId = controlNodeId(route.nodeId, meta.selector)
-        const inter = collectInteractions(el, cf, navInfo)
-        // The state-var is needed only for edge targeting; normalize the stored
-        // effect to the stable 'open:modal' so the IR doesn't leak variable names.
-        const nodeEffects = [...new Set(inter.effects.map((e) => (e.startsWith('open:modal') ? 'open:modal' : e)))]
-        const lc = cf.getLineAndColumnAtPos(el.getStart())
-        const loc = { line: lc.line, col: lc.column }
-        for (const nav of inter.navs) {
-          const ctxGuard = nav.ctx === 'success' ? 'onSuccess' : nav.ctx === 'error' ? 'onError' : null
-          const guard = nav.guard ?? ctxGuard
-          // A control in a descended child is real but not guaranteed to render here -> cap to may.
-          const modality: 'must' | 'may' = guard !== null || descended ? 'may' : 'must'
-          const confidence = descended ? 0.5 : nav.ctx === 'error' ? 0.5 : nav.ctx === 'success' ? 0.7 : guard !== null ? 0.6 : 1
-          const ruleId = nav.interprocedural ? 'rr.use-navigate.interprocedural' : undefined
-          if (nav.ti.kind === 'literal') {
-            const { exact, candidates } = matchLiteralAll(nav.ti.value, routeLikes)
-            if (exact) {
-              pushEdge(cId, exact.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, modality, confidence, file, loc)
-            } else {
-              for (const cand of candidates)
-                pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: guard ?? 'ambiguous', ruleId }, 'may', 0.5, file, loc)
-            }
-          } else if (nav.ti.kind === 'template') {
-            for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
-              pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, 'may', Math.min(confidence, 0.5), file, loc)
-          } else {
-            pushDynamicEdge(cId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, file, loc)
-          }
-        }
+      // Pass 2: screen controls — skipping files owned by a descended modal (their
+      // controls belong to the modal node, emitted in pass 3).
+      emitControls(route.nodeId, gatherControls(screenFiles, modalFilePaths), false, true)
 
-        // Link each modal-opening effect to the SPECIFIC modal it shows (matched by
-        // the state var setShowX -> showX -> the modal gated by showX), falling back
-        // to the screen's first modal when the var can't be matched to a render.
-        for (const eff of inter.effects) {
-          if (!eff.startsWith('open:modal')) continue
-          const v = eff.slice('open:modal:'.length)
-          // Precise: the modal gated by this state var; else the screen's modal only
-          // when unambiguous (exactly one). Never guess a target on a multi-modal screen.
-          const modalTarget = modalByVar.get(v) ?? (modalIds.length === 1 ? modalIds[0] : undefined)
-          if (modalTarget === undefined) continue
-          const ev = inter.events[0] ?? 'click'
-          pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, descended ? 'may' : 'must', descended ? 0.5 : 1, file, loc)
-        }
-
-        nodes.push({
-          id: cId,
-          route: null,
-          componentPath: file,
-          label: meta.name ?? meta.element,
-          kind: 'control',
-          parent: route.nodeId,
-          control: {
-            element: meta.element,
-            controlType: meta.controlType,
-            selector: meta.selector,
-            loc,
-            ...(meta.input ? { input: meta.input } : {}),
-            ...(meta.name ? { name: meta.name } : {}),
-            ...(inter.events.length > 0 ? { events: inter.events } : {}),
-            ...(nodeEffects.length > 0 ? { effects: nodeEffects } : {}),
-          },
-        })
+      // Pass 3: per imported modal, descend its own component tree (depth 1 reaches a
+      // modal that delegates to a child, e.g. SignupLoginModal -> LoginOrSignup) and
+      // emit its controls under the modal node, every nav capped to may.
+      for (const [mId, mFile] of modalDescend) {
+        emitControls(mId, gatherControls(screenSourceFiles(mFile, 1)), true, false)
       }
     }
   }

@@ -560,3 +560,127 @@ describe('extractGraph — dynamic navigation targets surfaced (refapp-driven)',
     expect(graph.nodes.some((n) => n.kind === 'unknown')).toBe(false)
   })
 })
+
+describe('extractGraph — modal-control descent (F-modal-controls)', () => {
+  // The login-modal shape: a screen renders an IMPORTED <LoginModal/>, whose own file
+  // holds an OAuth button + an email form. Today those are invisible (modal is a leaf).
+  const loginModalApp = {
+    '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+    '/H.tsx': `import { useState } from 'react'\nimport LoginModal from './LoginModal'\nexport default function H(){ const [show,setShow]=useState(false); return <div><button onClick={()=>setShow(true)}>Login</button>{show && <LoginModal isOpen={show}/>}</div> }`,
+    '/LoginModal.tsx': `export default function LoginModal(){ return <div><button onClick={()=>{}}>Continue with Google</button><form onSubmit={()=>{}}><input type="email" name="email"/><button type="submit">Sign in</button></form></div> }`,
+  }
+
+  it('descends into an IMPORTED modal file and parents its controls to the modal node', () => {
+    const { graph } = extractGraph(inMemory(loginModalApp), '/', { controls: true })
+    const modal = graph.nodes.find((n) => n.kind === 'modal' && n.label === 'LoginModal')
+    expect(modal).toBeDefined()
+    const modalControls = graph.nodes.filter((n) => n.kind === 'control' && n.parent === modal!.id)
+    const labels = modalControls.map((c) => c.control?.name ?? c.control?.element)
+    expect(labels).toContain('Continue with Google')
+    expect(modalControls.some((c) => c.control?.element === 'input')).toBe(true)
+    expect(modalControls.some((c) => c.control?.controlType === 'form')).toBe(true)
+    expect(modalControls.length).toBeGreaterThanOrEqual(3)
+    expect(validateGraph(graph)).toEqual([])
+  })
+
+  it('reaches controls in a component the modal DELEGATES to (modal -> child, depth 1)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import AuthModal from './AuthModal'\nexport default function H(){ return <div>{true && <AuthModal isOpen/>}</div> }`,
+        '/AuthModal.tsx': `import OAuthButtons from './OAuthButtons'\nexport default function AuthModal(){ return <div><OAuthButtons/></div> }`,
+        '/OAuthButtons.tsx': `export default function OAuthButtons(){ return <button onClick={()=>{}}>Continue with Facebook</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const modal = graph.nodes.find((n) => n.kind === 'modal' && n.label === 'AuthModal')
+    expect(modal).toBeDefined()
+    const fb = graph.nodes.find((n) => n.kind === 'control' && n.parent === modal!.id && n.control?.name === 'Continue with Facebook')
+    expect(fb).toBeDefined()
+  })
+
+  it('caps modal-control navigations to may (modal contents are conditionally rendered)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /><Route path="/dash" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import NavModal from './NavModal'\nexport default function H(){ return <div>{true && <NavModal isOpen/>}</div> }`,
+        '/NavModal.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function NavModal(){ const navigate=useNavigate(); return <button onClick={()=>navigate('/dash')}>Go dash</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const e = graph.edges.find((x) => x.to === 'n_dash')
+    expect(e).toBeDefined()
+    expect(e?.modality).toBe('may')
+    expect(e?.witness).toBeDefined()
+  })
+
+  it('does NOT re-parent an inline same-file modal (id stability): controls stay under the screen', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        // ConfirmDialog is a LOCAL function in the same file — not an import.
+        '/H.tsx': `function ConfirmDialog(){ return <button onClick={()=>{}}>Confirm inline</button> }\nexport default function H(){ return <div><button onClick={()=>{}}>Open</button>{true && <ConfirmDialog/>}</div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const inline = graph.nodes.find((n) => n.kind === 'control' && n.control?.name === 'Confirm inline')
+    expect(inline).toBeDefined()
+    // inline modal controls stay parented to the screen (n_root), NOT a modal node
+    expect(inline?.parent).toBe('n_root')
+  })
+
+  it('keeps a screen control id byte-stable whether or not an imported modal shares its label', () => {
+    const withoutModal = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ return <div><button onClick={()=>{}}>Cancel</button></div> }`,
+      }),
+      '/',
+      { controls: true },
+    ).graph
+    const withModal = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import CancelModal from './CancelModal'\nexport default function H(){ return <div><button onClick={()=>{}}>Cancel</button>{true && <CancelModal isOpen/>}</div> }`,
+        // imported modal with its OWN same-labelled Cancel button
+        '/CancelModal.tsx': `export default function CancelModal(){ return <button onClick={()=>{}}>Cancel</button> }`,
+      }),
+      '/',
+      { controls: true },
+    ).graph
+    const screenCancel = (g: typeof withoutModal): string | undefined =>
+      g.nodes.find((n) => n.kind === 'control' && n.parent === 'n_root' && n.control?.name === 'Cancel')?.id
+    expect(screenCancel(withModal)).toBe(screenCancel(withoutModal))
+    // and the modal got its own Cancel under the modal node (distinct id, net-new)
+    const modal = withModal.nodes.find((n) => n.kind === 'modal')
+    const modalCancel = withModal.nodes.find((n) => n.kind === 'control' && n.parent === modal?.id && n.control?.name === 'Cancel')
+    expect(modalCancel).toBeDefined()
+    expect(modalCancel?.id).not.toBe(screenCancel(withModal))
+  })
+
+  it('terminates on a self-importing modal (bounded recursion, no duplicate ids)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import LoopModal from './LoopModal'\nexport default function H(){ return <div>{true && <LoopModal isOpen/>}</div> }`,
+        // a modal whose file references its own tag — must not recurse forever
+        '/LoopModal.tsx': `import LoopModal from './LoopModal'\nexport default function LoopModal(){ return <div><button onClick={()=>{}}>Inner</button></div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const ids = graph.nodes.map((n) => n.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(validateGraph(graph)).toEqual([])
+  })
+
+  it('sample-app golden is byte-identical (no-controls: 9 nodes / 15 edges)', () => {
+    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const { graph } = extractGraph(buildProject(dir), dir)
+    expect(graph.nodes).toHaveLength(9)
+    expect(graph.edges).toHaveLength(15)
+  })
+})
