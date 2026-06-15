@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react'
 import type { CoverageReport, EdgeCoverage, GraphEdge, UiGraph } from '@uigraph/core'
 import { matchCoverageRow } from './search'
 import { FilterChip, toggled } from './Chips'
+import { CollapsibleSection } from './CollapsibleSection'
 import type { Selection } from './GraphCanvas'
 
 /** Props: the coverage report, the graph (to resolve an edge id back to a GraphEdge), and select. */
@@ -54,8 +55,7 @@ export function Coverage(props: CoverageProps): JSX.Element {
   const parked = useMemo(() => allParked.filter((r) => matchCoverageRow(r, filter)), [allParked, statuses, modalities])
 
   return (
-    <section className="coverage">
-      <h2>Coverage</h2>
+    <CollapsibleSection id="coverage" className="coverage" title="Coverage">
       <div className="cov-headline" title={`${coverage.accounted} of ${coverage.total} edges accounted-for (witnessed or parked)`}>
         <div className="cov-bar">
           <div className="cov-bar-fill" style={{ width: `${accountedPct}%` }} />
@@ -129,6 +129,6 @@ export function Coverage(props: CoverageProps): JSX.Element {
           </ul>
         </>
       )}
-    </section>
+    </CollapsibleSection>
   )
 }

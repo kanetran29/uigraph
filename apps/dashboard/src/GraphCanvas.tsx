@@ -17,6 +17,8 @@ import {
   MarkerType,
   Panel,
   ReactFlow,
+  getNodesBounds,
+  getViewportForBounds,
   useEdgesState,
   useInternalNode,
   useNodesState,
@@ -30,8 +32,13 @@ import {
   type NodeMouseHandler,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { toPng } from 'html-to-image'
 import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@uigraph/core'
 import { layoutGraph, proposedScreenEdges, type GraphLayout, type ProposedEdge } from './layout'
+import { pngFilename } from './exportPng'
+
+const IMAGE_W = 2048
+const IMAGE_H = 1536
 
 /** What the canvas reports as the current selection, or null when nothing is selected. */
 export type Selection = { kind: 'node'; node: GraphNode } | { kind: 'edge'; edge: GraphEdge } | null
@@ -609,6 +616,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
+  const [exportError, setExportError] = useState<string | null>(null)
   const rf = useReactFlow()
 
   // Selecting a screen that owns controls expands them; zoom to that screen + its
@@ -731,6 +739,41 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const handleEdgeEnter: EdgeMouseHandler = useCallback((_evt, edge) => setHoveredEdgeId(edge.id), [])
   const handleEdgeLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), [])
 
+  // Export the FULL graph (not just the viewport) as a PNG: fit every node's bounds into a
+  // fixed image, snapshot the viewport clone with html-to-image, and download. The clone is
+  // transformed (not the live canvas, so it never jumps); chrome (controls/panels/minimap/
+  // dotted bg) is filtered out and a solid themed --bg replaces transparency. No web fonts
+  // are loaded (system stacks only), so no font embedding is needed.
+  const handleExportPng = useCallback(async () => {
+    setExportError(null)
+    const viewport = document.querySelector<HTMLElement>('.react-flow__viewport')
+    if (viewport === null || nodes.length === 0) return
+    const bounds = getNodesBounds(nodes)
+    const { x, y, zoom } = getViewportForBounds(bounds, IMAGE_W, IMAGE_H, 0.2, 2, 0.1)
+    const flow = document.querySelector('.react-flow')
+    const bg = (flow ? getComputedStyle(flow).getPropertyValue('--bg').trim() : '') || '#ffffff'
+    try {
+      const dataUrl = await toPng(viewport, {
+        backgroundColor: bg,
+        width: IMAGE_W,
+        height: IMAGE_H,
+        pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        cacheBust: true,
+        style: { width: `${IMAGE_W}px`, height: `${IMAGE_H}px`, transform: `translate(${x}px, ${y}px) scale(${zoom})` },
+        filter: (el) => {
+          const cl = (el as HTMLElement).classList
+          return !cl || !(cl.contains('react-flow__controls') || cl.contains('react-flow__minimap') || cl.contains('react-flow__panel') || cl.contains('react-flow__attribution') || cl.contains('react-flow__background'))
+        },
+      })
+      const a = document.createElement('a')
+      a.href = dataUrl
+      a.download = pngFilename(rawGraph)
+      a.click()
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : 'PNG export failed')
+    }
+  }, [nodes, rawGraph])
+
   const edgeTypes = useMemo(() => ({ floating: FloatingEdge }), [])
 
   return (
@@ -753,6 +796,24 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     >
       <Background />
       <Controls />
+      <Panel position="top-right">
+        <div className="canvas-export">
+          <button
+            type="button"
+            className="download-btn nodrag nopan"
+            aria-label="Export the full graph as a PNG image"
+            disabled={nodes.length === 0}
+            onClick={() => void handleExportPng()}
+          >
+            Export PNG ↓
+          </button>
+          {exportError ? (
+            <span className="error" role="alert">
+              {exportError}
+            </span>
+          ) : null}
+        </div>
+      </Panel>
       <Panel position="top-left">
         <div className="canvas-toggles">
           <label className="edge-toggle">

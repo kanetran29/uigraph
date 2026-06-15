@@ -4,6 +4,7 @@
 // new screens uses the existing canvas affordances (drag-to-connect, edit edge).
 
 import { useState } from 'react'
+import { CollapsibleSection } from './CollapsibleSection'
 
 /** Props: live status, scenarios, and add-screen/export/switch callbacks. */
 export interface PlanProps {
@@ -26,8 +27,7 @@ export function Plan(props: PlanProps): JSX.Element {
     setRoute('')
   }
   return (
-    <section className="plan">
-      <h2>Plan a feature</h2>
+    <CollapsibleSection id="plan" className="plan" title="Plan a feature">
       <label className="field-edit">
         <span>scenario</span>
         <select value={props.scenarios.active} onChange={(e) => props.onSwitchScenario(e.target.value)}>
@@ -62,6 +62,6 @@ export function Plan(props: PlanProps): JSX.Element {
         Export plan ↓
       </button>
       {!props.live ? <p className="muted">Connect a live project (uigraph serve) to persist planned edits.</p> : null}
-    </section>
+    </CollapsibleSection>
   )
 }
