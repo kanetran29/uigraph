@@ -19,6 +19,8 @@ export {
   describeScreen,
   getCoverage,
   getLoopStatus,
+  getFreshness,
+  type FreshnessResult,
   nextToVerifyTool,
   genSpec,
   listScenarios,

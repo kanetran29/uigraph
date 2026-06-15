@@ -5,12 +5,13 @@
 // src/server.ts wires these to the SDK; the bulk of the value lives here.
 
 import { join } from 'node:path'
+import { existsSync } from 'node:fs'
 import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
 import { applyObservations, buildCoverage, buildGrounding, buildResolution, buildSpecPlan, diffGraphs, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
 import type { CoverageReport, Grounding, ProposalGraph, ProposalStatus, ResolutionReport, ScreenGrounding, VerifyTarget } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
 import type { GraphDiff } from '@uigraph/core'
-import { loadGraph, openStore, type Store } from '@uigraph/core/node'
+import { loadGraph, openStore, fingerprintSources, compareFingerprint, type Store } from '@uigraph/core/node'
 
 /**
  * Where a server instance is rooted: a workspace directory holding
@@ -531,6 +532,36 @@ export function getLoopStatus(ctx: ToolContext): LoopStatus {
   const worklist = nextToVerify(merged, getProposalGraph(ctx), undefined, parkedIds)
   // done = no OPEN edges (accounted-for via witness/park) AND no open proposals.
   return { coverage, resolution, worklistSize: worklist.length, openEdges: coverage.open, loopDone: coverage.open.length === 0 && resolution.openCount === 0 }
+}
+
+/** Whether the stored graph is current with its source: fresh / stale / unknown. */
+export interface FreshnessResult {
+  state: 'fresh' | 'stale' | 'unknown'
+  mappedAt?: string
+  projectDir?: string
+  changed: string[]
+  added: string[]
+  removed: string[]
+  detail?: string
+}
+
+/**
+ * Compare the source fingerprint stamped at map time against the source now, so an agent
+ * knows whether the graph still reflects the code. 'unknown' when never mapped or the
+ * mapped source dir isn't reachable from here (a remote/CI map) — it NEVER reports 'fresh'
+ * when it cannot recompute, so an agent treats unknown as could-be-stale. Pure report; the
+ * agent (per the freshness kit rule) decides whether to notify the user + re-map.
+ */
+export function getFreshness(ctx: ToolContext): FreshnessResult {
+  const fp = withStore(ctx, (store) => store.getFingerprint())
+  if (fp === null) {
+    return { state: 'unknown', changed: [], added: [], removed: [], detail: 'no fingerprint — run `uigraph map` first' }
+  }
+  if (!existsSync(fp.projectDir)) {
+    return { state: 'unknown', mappedAt: fp.mappedAt, projectDir: fp.projectDir, changed: [], added: [], removed: [], detail: 'mapped source dir is not on this machine — cannot recompute freshness' }
+  }
+  const diff = compareFingerprint(fp, fingerprintSources(fp.projectDir))
+  return { state: diff.stale ? 'stale' : 'fresh', mappedAt: fp.mappedAt, projectDir: fp.projectDir, changed: diff.changed, added: diff.added, removed: diff.removed }
 }
 
 /** Arguments for diff: two graph file paths to compare. */

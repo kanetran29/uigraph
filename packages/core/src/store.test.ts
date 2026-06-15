@@ -152,4 +152,13 @@ describe('Store (SQLite)', () => {
     expect(s.queryProposals({ status: 'unverifiable' }).map((p) => p.id)).toEqual(['p1'])
     s.close()
   })
+
+  it('round-trips a source fingerprint', () => {
+    const s = openStore(':memory:')
+    expect(s.getFingerprint()).toBeNull()
+    const fp = { projectDir: '/p', adapter: 'react', hash: 'h', files: { 'a.ts': 'A' }, mappedAt: '2026-01-01T00:00:00Z' }
+    s.setFingerprint(fp)
+    expect(s.getFingerprint()).toEqual(fp)
+    s.close()
+  })
 })

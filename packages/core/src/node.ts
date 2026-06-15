@@ -15,6 +15,7 @@ import { validateProposals } from './proposals'
 import type { Store } from './store'
 
 export { Store, openStore, type ProposalQuery } from './store'
+export { fingerprintSources, compareFingerprint, type Fingerprint, type FileScan, type FreshnessDiff } from './fingerprint'
 
 /** Read and parse a UiGraph JSON file, asserting its shape and invariants. */
 export function loadGraph(path: string): UiGraph {
