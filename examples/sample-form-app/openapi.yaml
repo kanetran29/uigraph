@@ -1,0 +1,69 @@
+openapi: 3.1.0
+info:
+  title: Sign-up API
+  version: 1.0.0
+  description: >
+    The backend behind the sample sign-up form. Every response case below maps to
+    one branch of the form's decision tree (see DECISION_TREE.md). The mock in
+    vite.config.ts returns each case deterministically, keyed off the email, so
+    the branches are reproducible at runtime.
+paths:
+  /api/signup:
+    post:
+      operationId: signup
+      summary: Create an account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: Created — the form navigates to /welcome.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId: { type: string }
+                required: [userId]
+        '400':
+          description: Server-side validation rejected the details — stay on the form, show field errors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: object
+                    additionalProperties: { type: string }
+        '409':
+          description: Email already registered — stay on the form, show an email error.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: Too many attempts — show a rate-limit toast.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '500':
+          description: Internal error — show a retry toast.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+components:
+  schemas:
+    SignupRequest:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        promo: { type: string, pattern: '^[A-Z0-9]{6}$' }
+      required: [email, password]
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
