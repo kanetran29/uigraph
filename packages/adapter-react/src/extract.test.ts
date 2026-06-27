@@ -951,3 +951,108 @@ describe('extractGraph — gated overlay-view control descent (F-deep-view-contr
     expect(topId(withView)).toBe(topId(without))
   })
 })
+
+describe('extractGraph — custom route wrappers (react-custom-route-wrappers)', () => {
+  // A component that renders an internal <Route> and forwards the call-site `path`
+  // (via {...rest}) and `component` prop. taniarascia/takenote wraps every route
+  // this way (PublicRoute / PrivateRoute); the adapter must treat the wrapper usage
+  // as a real route, not skip it because the JSX tag isn't literally <Route>.
+  const wrapperApp = (): Project =>
+    inMemory({
+      '/App.tsx': `import { Switch } from 'react-router-dom'
+import { LandingPage } from './LandingPage'
+import { TakeNoteApp } from './TakeNoteApp'
+import { PublicRoute } from './PublicRoute'
+import { PrivateRoute } from './PrivateRoute'
+export const App = () => (
+  <Switch>
+    <PublicRoute exact path="/" component={LandingPage} />
+    <PrivateRoute path="/app" component={TakeNoteApp} />
+  </Switch>
+)`,
+      '/PublicRoute.tsx': `import { Redirect, Route } from 'react-router-dom'
+export const PublicRoute = ({ component: Component, ...rest }) => (
+  <Route render={(props) => (isAuthed === false ? <Component {...props} /> : <Redirect to="/app" />)} {...rest} />
+)`,
+      '/PrivateRoute.tsx': `import { Redirect, Route } from 'react-router-dom'
+export const PrivateRoute = ({ component: Component, ...rest }) => (
+  <Route render={(props) => (isAuthed === true ? <Component {...props} /> : <Redirect to="/" />)} {...rest} />
+)`,
+      '/LandingPage.tsx': `import { Link } from 'react-router-dom'\nexport const LandingPage = () => <Link to="/app">Get started</Link>`,
+      '/TakeNoteApp.tsx': `export const TakeNoteApp = () => <div>app</div>`,
+    })
+
+  it('creates a route node for each custom-wrapper usage using its call-site path', () => {
+    const { graph } = extractGraph(wrapperApp(), '/')
+    const ids = new Set(graph.nodes.filter((n) => n.kind === 'screen').map((n) => n.id))
+    expect(ids.has('n_root')).toBe(true)
+    expect(ids.has('n_app')).toBe(true)
+  })
+
+  it('binds the wrapper route to the call-site component file (controls + navs extracted)', () => {
+    const { graph } = extractGraph(wrapperApp(), '/', { controls: true })
+    const landing = graph.nodes.find((n) => n.id === 'n_root')
+    expect(landing?.componentPath).toBe('LandingPage.tsx')
+    expect(graph.edges.some((e) => e.to === 'n_app' && e.event === 'click:Link')).toBe(true)
+  })
+
+  it('still satisfies the core invariants with custom wrappers', () => {
+    const { graph } = extractGraph(wrapperApp(), '/', { controls: true })
+    expect(validateGraph(graph)).toEqual([])
+  })
+
+  it('does NOT treat an ordinary component (no internal <Route>) as a route wrapper', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import { Route, Switch } from 'react-router-dom'\nimport Header from './Header'\nimport Home from './Home'\nexport default () => (<Switch><Header path="/" component={Home} /><Route path="/home" component={Home} /></Switch>)`,
+        '/Header.tsx': `export default function Header(){ return <nav>header</nav> }`,
+        '/Home.tsx': `export default function Home(){ return <div>home</div> }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.some((n) => n.id === 'n_root')).toBe(false)
+    expect(graph.nodes.some((n) => n.id === 'n_home')).toBe(true)
+  })
+})
+
+describe('extractGraph — real-world router patterns (OSS hardening)', () => {
+  const baseUrlDir = fileURLToPath(new URL('./__fixtures__/baseurl-app', import.meta.url))
+  const baseUrl = extractGraph(buildProject(baseUrlDir), baseUrlDir, { controls: true })
+
+  const hasEdgeTo = (g: typeof baseUrl.graph, to: string): boolean => g.edges.some((e) => e.to === to)
+
+  it('resolves bare/alias imports via jsconfig baseUrl so route components are found', () => {
+    const login = baseUrl.graph.nodes.find((n) => n.id === 'n_login')
+    expect(login?.componentPath).not.toBeNull()
+    expect(login?.componentPath).toContain('Login')
+    expect(baseUrl.soundiness.filter((s) => s.kind === 'unresolved-component')).toHaveLength(0)
+  })
+
+  it('normalizes a relative <Link to="register"> to /register', () => {
+    expect(hasEdgeTo(baseUrl.graph, 'n_register')).toBe(true)
+    expect(hasEdgeTo(baseUrl.graph, 'n_login')).toBe(true)
+  })
+
+  it('extracts a withRouter-injected this.props.history.replace navigation', () => {
+    const toRoot = baseUrl.graph.edges.filter((e) => e.to === 'n_root' && e.effect && e.effect.startsWith('history'))
+    expect(toRoot.length).toBeGreaterThan(0)
+  })
+
+  it('produces a connected graph (not zero edges) for the bare-import app', () => {
+    expect(baseUrl.graph.edges.length).toBeGreaterThan(0)
+    expect(validateGraph(baseUrl.graph)).toEqual([])
+  })
+
+  const inlineDir = fileURLToPath(new URL('./__fixtures__/inline-route-app', import.meta.url))
+  const inline = extractGraph(buildProject(inlineDir), inlineDir, { controls: true })
+
+  it('keeps a route whose element is inline JSX (<section>) as a node', () => {
+    expect(inline.graph.nodes.some((n) => n.id === 'n_root')).toBe(true)
+    expect(inline.graph.nodes.some((n) => n.id === 'n_posts_postId')).toBe(true)
+  })
+
+  it('extracts navigations from a shared root-level nav (Navbar sibling of Routes)', () => {
+    expect(inline.graph.edges.some((e) => e.to === 'n_root')).toBe(true)
+    expect(validateGraph(inline.graph)).toEqual([])
+  })
+})

@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { Project } from 'ts-morph'
 import { validateGraph } from '@uigraph/core'
 import { buildProject, extractGraph } from './extract'
+import { routeToNodeId as routeId } from './ids'
 
 function inMemory(files: Record<string, string>): Project {
   const p = new Project({ useInMemoryFileSystem: true })
@@ -189,6 +190,90 @@ describe('extractGraph — control extraction parity (F-angular-controls)', () =
       const submit = controls.find((c) => c.control?.selector?.strategy === 'testid')
       expect(submit?.control?.selector?.value).toBe('login-submit')
     })
+  })
+})
+
+describe('extractGraph — modern Angular routing (lazy + nested + array links)', () => {
+  it('ng-lazy-load-component: resolves loadComponent and emits edges from its (external) template', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nexport const routes: Routes = [\n  { path: '', loadComponent: () => import('./home.component') },\n  { path: 'about', loadComponent: () => import('./about.component') },\n]`,
+        '/home.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, templateUrl: './home.component.html' })\nexport default class HomeComponent {}`,
+        '/home.component.html': `<a routerLink="/about">about</a>`,
+        '/about.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>about</p>' })\nexport default class AboutComponent {}`,
+      }),
+      '/',
+    )
+    expect(new Set(graph.nodes.map((n) => n.id))).toEqual(new Set(['n_root', 'n_about']))
+    expect(graph.nodes.find((n) => n.id === 'n_root')?.componentPath).toBe('home.component.ts')
+    const e = graph.edges.find((x) => x.from === 'n_root' && x.to === 'n_about')
+    expect(e?.modality).toBe('must')
+    expect(e?.witness?.file).toBe('home.component.html')
+  })
+
+  it('ng-lazy-load-children: follows loadChildren and prefixes nested paths', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nexport const routes: Routes = [\n  { path: 'profile', loadChildren: () => import('./profile.routes') },\n]`,
+        '/profile.routes.ts': `import type { Routes } from '@angular/router'\nimport { ProfileComponent } from './profile.component'\nconst routes: Routes = [\n  { path: ':username', component: ProfileComponent, children: [\n    { path: 'favorites', loadComponent: () => import('./favorites.component') },\n  ] },\n]\nexport default routes`,
+        '/profile.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>profile</p>' })\nexport class ProfileComponent {}`,
+        '/favorites.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>favs</p>' })\nexport default class FavoritesComponent {}`,
+      }),
+      '/',
+    )
+    const ids = new Set(graph.nodes.map((n) => n.id))
+    expect(ids.has(routeId('/profile/:username'))).toBe(true)
+    expect(ids.has(routeId('/profile/:username/favorites'))).toBe(true)
+    expect(graph.nodes.find((n) => n.route === '/profile/:username/favorites')?.componentPath).toBe('favorites.component.ts')
+  })
+
+  it('scans a loadChildren module only under its parent prefix (no root-level dup)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nexport const routes: Routes = [{ path: 'profile', loadChildren: () => import('./profile.routes') }]`,
+        '/profile.routes.ts': `import type { Routes } from '@angular/router'\nimport { P } from './p.component'\nconst routes: Routes = [{ path: ':username', component: P }]\nexport default routes`,
+        '/p.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>p</p>' })\nexport class P {}`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/profile', '/profile/:username'])
+    expect(graph.nodes.some((n) => n.route === '/:username')).toBe(false)
+  })
+
+  it('ng-array-routerlink: array [routerLink] with a static prefix over-approximates (no dynamic drop)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { B } from './b.component'\nexport const routes: Routes = [{ path: '', component: A }, { path: 'tag/:tag', component: B }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a [routerLink]="[\\'/tag\\', tag]">t</a>' })\nexport class A { tag = 'x' }`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    const e = graph.edges.find((x) => x.to === routeId('/tag/:tag'))
+    expect(e?.modality).toBe('may')
+  })
+
+  it('ng-array-routerlink: a fully static single-element array is a literal must-edge', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { B } from './b.component'\nexport const routes: Routes = [{ path: '', component: A }, { path: 'about', component: B }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a [routerLink]="[\\'/about\\']">a</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    expect(graph.edges.find((x) => x.to === 'n_about')?.modality).toBe('must')
+  })
+
+  it('inline children are nested under the parent path', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { E } from './e.component'\nexport const routes: Routes = [\n  { path: 'editor', children: [\n    { path: '', component: E },\n    { path: ':slug', component: E },\n  ] },\n]`,
+        '/e.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>e</p>' })\nexport class E {}`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/editor', '/editor/:slug'])
   })
 })
 
