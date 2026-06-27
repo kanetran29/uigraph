@@ -255,15 +255,69 @@ async function loadPlaywright(): Promise<{ chromium: { launch: () => Promise<unk
 }
 
 /**
- * Build the default driver: launch Chromium (playwright-core), open a context
- * (optionally hydrated from a saved auth `storageState` so the run is logged in),
- * execute the plan's legs (goto/click/fill via the selector locators), then judge
- * the transition by its final assertion (URL match and/or a visible dialog).
+ * Run the driver's plan against an already-open page and judge the outcome. Split
+ * out from makePlaywrightDriver so the soundness-critical confirmation logic can be
+ * unit-tested with a fake page (no real browser): a parked leg never confirms, and
+ * URL-assert only fires for the legs codegen deemed safe (direct-nav / control-driven).
  *
  * In CAPTURE mode (dynamic-sink targets): do NOT assert a URL and NEVER goto the
- * synthetic sink. Load the start screen, capture the pre-trigger URL, run only the
- * real interaction legs (clicks/fills) as the trigger, then wait for the URL to
- * change (beating page-load/timer redirects) and settle, and report where it landed.
+ * synthetic sink. Capture the pre-trigger URL, run only the real interaction legs
+ * (clicks/fills) as the trigger, then wait for the URL to change (beating
+ * page-load/timer redirects) and settle, and report where it landed.
+ */
+async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }): Promise<VerifyResult> {
+  await page.goto(plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl)
+
+  if (opts?.capture === true) {
+    await page.waitForLoadState('networkidle').catch(() => {})
+    // H9: anchor the start URL immediately before the trigger, after the screen settled.
+    const startUrl = page.url()
+    for (const leg of plan.legs) {
+      const a = leg.action
+      // H1: never goto the synthetic sink; only run real interaction legs as the trigger.
+      if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
+      else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+    }
+    // H3: wait long enough to observe a timer/async redirect (>5s); H4: then settle to a stable URL.
+    await page.waitForURL((u) => u.toString() !== startUrl, { timeout: 6500 }).catch(() => {})
+    let landedUrl = page.url()
+    for (let i = 0; i < 5; i++) {
+      await page.waitForLoadState('networkidle').catch(() => {})
+      const next = page.url()
+      if (next === landedUrl) break
+      landedUrl = next
+    }
+    return { confirmed: landedUrl !== startUrl, landedUrl }
+  }
+
+  let lastUrlAssertion: string | undefined
+  let expectDialog = false
+  // Soundness: a parked leg is an interaction-triggered/guarded screen→screen nav
+  // with no drivable control — codegen refuses to emit goto+URL-assert for it, so
+  // the driver must NOT witness it; it stays asserted/llm-verified until truly driven.
+  let parked = false
+  for (const leg of plan.legs) {
+    const a = leg.action
+    if (a.kind === 'parked') parked = true
+    else if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
+    else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
+    else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+    for (const as of leg.assertions) {
+      if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
+      if (as.kind === 'dialog') expectDialog = true
+    }
+  }
+  if (parked) return { confirmed: false }
+  let confirmed = true
+  if (lastUrlAssertion !== undefined) confirmed = page.url() === lastUrlAssertion
+  if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
+  return { confirmed }
+}
+
+/**
+ * Build the default driver: launch Chromium (playwright-core), open a context
+ * (optionally hydrated from a saved auth `storageState` so the run is logged in),
+ * and run the plan via drivePlan against the live page.
  */
 function makePlaywrightDriver(storageState?: string): VerifyDriver {
   return async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }): Promise<VerifyResult> => {
@@ -272,51 +326,14 @@ function makePlaywrightDriver(storageState?: string): VerifyDriver {
     try {
       const context = await browser.newContext(storageState !== undefined ? { storageState } : {})
       const page = await context.newPage()
-      await page.goto(plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl)
-
-      if (opts?.capture === true) {
-        await page.waitForLoadState('networkidle').catch(() => {})
-        // H9: anchor the start URL immediately before the trigger, after the screen settled.
-        const startUrl = page.url()
-        for (const leg of plan.legs) {
-          const a = leg.action
-          // H1: never goto the synthetic sink; only run real interaction legs as the trigger.
-          if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
-          else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
-        }
-        // H3: wait long enough to observe a timer/async redirect (>5s); H4: then settle to a stable URL.
-        await page.waitForURL((u) => u.toString() !== startUrl, { timeout: 6500 }).catch(() => {})
-        let landedUrl = page.url()
-        for (let i = 0; i < 5; i++) {
-          await page.waitForLoadState('networkidle').catch(() => {})
-          const next = page.url()
-          if (next === landedUrl) break
-          landedUrl = next
-        }
-        return { confirmed: landedUrl !== startUrl, landedUrl }
-      }
-
-      let lastUrlAssertion: string | undefined
-      let expectDialog = false
-      for (const leg of plan.legs) {
-        const a = leg.action
-        if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
-        else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
-        else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
-        for (const as of leg.assertions) {
-          if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
-          if (as.kind === 'dialog') expectDialog = true
-        }
-      }
-      let confirmed = true
-      if (lastUrlAssertion !== undefined) confirmed = page.url() === lastUrlAssertion
-      if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
-      return { confirmed }
+      return await drivePlan(page, plan, appUrl, opts)
     } finally {
       await browser.close()
     }
   }
 }
+
+export { drivePlan }
 
 /** The slice of the Playwright Browser/Context API the driver uses (typed loosely; playwright-core is optional). */
 interface PwBrowser {

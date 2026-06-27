@@ -16,10 +16,13 @@ import {
   diffTool,
   diffSinceLastTool,
   getCoverage,
+  getFrontier,
   getGraph,
   getGrounding,
   getProposalGraph,
   getProposals,
+  getState,
+  listCases,
   getLoopStatus,
   markUnverifiable,
   nextToVerifyTool,
@@ -120,9 +123,10 @@ describe('loadMergedGraph integrity (red-team)', () => {
     const { hashValue } = await import('@uigraph/core')
     const ctx = chainWorkspace()
     const base = getGraph(ctx)
+    const baseEdges = base.edges.map(({ trustTier: _trustTier, ...e }) => e)
     seedOverlay(ctx, {
       version: 0,
-      base: hashValue({ version: base.version, meta: base.meta, nodes: base.nodes, edges: base.edges }),
+      base: hashValue({ version: base.version, meta: base.meta, nodes: base.nodes, edges: baseEdges }),
       addedNodes: [],
       addedEdges: [{ id: 'm1', from: 'a', to: 'ghost', event: 'navigate', guard: null, effect: 'navigate', modality: 'may', source: 'manual', confidence: 0.5 }],
       editedEdges: [],
@@ -492,5 +496,108 @@ describe('diffSinceLastTool', () => {
     const r = diffSinceLastTool(ctx)
     expect(r.state).toBe('ok')
     expect(r.diff?.addedEdges.map((e) => e.id)).toEqual(['e_ba'])
+  })
+})
+
+describe('recall-first read tools: get_state, list_cases, get_frontier, plan_path+minTier', () => {
+  // A form screen exhibiting every trust tier: a proven submit, an asserted close,
+  // an unknown dynamic dispatch, a witnessed runtime hop, plus a quarantined proposal.
+  // n_form -> n_success proven (static must) ; n_form -> n_home asserted (static may)
+  // n_form -> u_dyn unknown (static unknown, sink kind 'unknown')
+  // n_form -> n_loading witnessed (runtime) ; proposal n_form -> n_error (proposed)
+  function formWorkspace(): ToolContext {
+    const u: GraphNode = { id: 'u_dyn', route: null, componentPath: null, label: 'dynamic', kind: 'unknown' }
+    const g = graph(
+      [node('n_form'), node('n_success'), node('n_home'), node('n_loading'), node('n_error'), u],
+      [
+        { ...edge('e_submit', 'n_form', 'n_success'), source: 'static', modality: 'must', guard: 'valid' },
+        { ...edge('e_close', 'n_form', 'n_home'), source: 'static', modality: 'may', guard: null },
+        { ...edge('e_dyn', 'n_form', 'u_dyn'), source: 'static', modality: 'unknown' },
+        { ...edge('e_loading', 'n_form', 'n_loading'), source: 'runtime', witness: { source: 'runtime', observationId: 'o7' } },
+      ],
+    )
+    const ctx = newWorkspace(g)
+    seedProposals(ctx, { version: 0, base: 'h', proposals: [proposal('p_err', { screen: 'n_form', to: 'n_error', event: 'submit', category: 'async-state' })] })
+    return ctx
+  }
+
+  it('get_state returns the node + out-cases each carrying the right trust tier and evidence', () => {
+    const res = getState(formWorkspace(), { id: 'n_form' })
+    if ('error' in res) throw new Error(res.error)
+    expect(res.id).toBe('n_form')
+    expect(res.nodeKind).toBe('screen')
+    const byTo = new Map(res.cases.map((c) => [c.toNode, c]))
+    expect(byTo.get('n_success')?.trustTier).toBe('proven')
+    expect(byTo.get('n_home')?.trustTier).toBe('asserted')
+    expect(byTo.get('u_dyn')?.trustTier).toBe('unknown')
+    expect(byTo.get('n_loading')?.trustTier).toBe('witnessed')
+    expect(byTo.get('n_error')?.trustTier).toBe('proposed')
+    // proven submit cites its static witness; witnessed loading cites the observation; proposal cites its id
+    expect(byTo.get('n_success')?.evidence).toContain('x.tsx')
+    expect(byTo.get('n_loading')?.evidence).toBe('runtime:o7')
+    expect(byTo.get('n_error')?.evidence).toBe('proposal:p_err')
+    // outcomeClass is the to-node id; cases sorted most-trusted first
+    expect(res.cases[0]?.trustTier).toBe('witnessed')
+    expect(res.cases.map((c) => c.outcomeClass)).toContain('u_dyn')
+  })
+
+  it('get_state errors on an unknown node id (never serves a silent empty state)', () => {
+    const res = getState(formWorkspace(), { id: 'nope' })
+    expect('error' in res).toBe(true)
+  })
+
+  it('list_cases returns every case unfiltered, sorted by trust precedence', () => {
+    const res = listCases(formWorkspace())
+    // 4 graph edges + 1 proposal edge
+    expect(res.total).toBe(5)
+    expect(res.cases[0]?.trustTier).toBe('witnessed')
+    expect(res.cases[res.cases.length - 1]?.trustTier).toBe('unknown')
+  })
+
+  it('list_cases({minTier: "proven"}) keeps only witnessed + proven, dropping asserted/proposed/unknown', () => {
+    const res = listCases(formWorkspace(), { minTier: 'proven' })
+    expect(res.cases.map((c) => c.trustTier).sort()).toEqual(['proven', 'witnessed'])
+  })
+
+  it('list_cases({from}) returns only cases leaving that node; {outcomeClass} only those landing there', () => {
+    const ctx = formWorkspace()
+    expect(listCases(ctx, { from: 'n_form' }).total).toBe(5)
+    expect(listCases(ctx, { from: 'n_success' }).total).toBe(0)
+    const toErr = listCases(ctx, { outcomeClass: 'n_error' })
+    expect(toErr.total).toBe(1)
+    expect(toErr.cases[0]?.trustTier).toBe('proposed')
+  })
+
+  it('get_frontier lists states with unknown out-edges (and dead ends), with unknown-case counts', () => {
+    const res = getFrontier(formWorkspace())
+    const ids = res.nodes.map((n) => n.id)
+    // n_form has a dynamic-sink/unknown out-edge; the leaf screens have no out-edges (dead ends)
+    expect(ids).toContain('n_form')
+    const form = res.nodes.find((n) => n.id === 'n_form')
+    expect(form?.unknownCount).toBe(1)
+    expect(form?.cases[0]?.toNode).toBe('u_dyn')
+    // leaf screens are dead ends -> on the frontier with zero unknown cases
+    expect(res.nodes.find((n) => n.id === 'n_success')?.unknownCount).toBe(0)
+  })
+
+  it('get_frontier({state}) narrows to one frontier node (and is empty for a non-frontier state)', () => {
+    const ctx = formWorkspace()
+    expect(getFrontier(ctx, { state: 'n_form' }).nodes.map((n) => n.id)).toEqual(['n_form'])
+  })
+
+  it('plan_path with minTier flags low-trust hops in tierWarnings without dropping the path', () => {
+    // n_form -> n_home is an asserted (may) hop; planning to n_home with minTier proven warns.
+    const res = planPathTool(formWorkspace(), { from: 'n_form', to: 'n_home', minTier: 'proven' })
+    expect(res.found).toBe(true)
+    expect(res.steps.map((s) => s.edgeId)).toEqual(['e_close'])
+    expect(res.tierWarnings?.length).toBe(1)
+    expect(res.tierWarnings?.[0]).toContain('e_close')
+    expect(res.tierWarnings?.[0]).toContain('asserted')
+  })
+
+  it('plan_path with minTier adds no warnings when every hop meets the floor', () => {
+    const res = planPathTool(formWorkspace(), { from: 'n_form', to: 'n_success', minTier: 'proven' })
+    expect(res.found).toBe(true)
+    expect(res.tierWarnings).toBeUndefined()
   })
 })

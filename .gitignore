@@ -6,6 +6,7 @@ dist/
 coverage/
 *.tsbuildinfo
 .uigraph/
+.claude/
 
 # scratch screenshots / playwright output
 .playwright-mcp/

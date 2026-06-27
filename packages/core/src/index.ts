@@ -63,11 +63,14 @@ export {
   type ParkedEdge,
 } from './coverage'
 export { nodeForUrl } from './coverage'
+export { buildFrontier, type Frontier } from './frontier'
 export { reconcileProposals, buildResolution, type ResolutionReport } from './reconcile'
 export {
   buildSpecPlan,
   renderPlaywrightSpec,
   locatorFor,
+  isInteractionTriggeredEvent,
+  isDirectNavEdge,
   type SpecPlan,
   type SpecLeg,
   type SpecAction,
@@ -91,3 +94,10 @@ export {
   type PlanStep,
   type PlanPathOptions,
 } from './algorithms'
+export {
+  projectTrustTier,
+  enrichEdgesWithTier,
+  getTierLabel,
+  type TrustTier,
+  type EdgeWithTier,
+} from './trust-tier'

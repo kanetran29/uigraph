@@ -303,6 +303,49 @@ describe('handleApiRequest (pure router)', () => {
   })
 })
 
+describe('recall-first read routes (state / cases / frontier)', () => {
+  // a -> b proven (static must); a -> u_a unknown (dynamic sink) -> a is on the frontier.
+  function workspace(): string {
+    const u: GraphNode = { id: 'u_a', route: null, componentPath: null, label: 'dyn', kind: 'unknown' }
+    return seedWorkspace(
+      tempDir('uigraph-cli-recall-'),
+      graph([node('a'), node('b'), u], [edge('e_ab', 'a', 'b'), { ...edge('e_au', 'a', 'u_a'), modality: 'unknown' }]),
+    )
+  }
+
+  it('GET /api/state/:id returns the state + its trust-tiered cases (404 on unknown id)', () => {
+    const dir = workspace()
+    const res = handleApiRequest({ dir }, { method: 'GET', path: '/api/state/a', body: undefined })
+    expect(res.status).toBe(200)
+    const body = res.body as { id: string; cases: { toNode: string; trustTier: string }[] }
+    expect(body.id).toBe('a')
+    expect(body.cases.find((c) => c.toNode === 'b')?.trustTier).toBe('proven')
+    expect(body.cases.find((c) => c.toNode === 'u_a')?.trustTier).toBe('unknown')
+    expect(handleApiRequest({ dir }, { method: 'GET', path: '/api/state/nope', body: undefined }).status).toBe(404)
+  })
+
+  it('GET /api/cases applies from / minTier query filters', () => {
+    const dir = workspace()
+    const all = handleApiRequest({ dir }, { method: 'GET', path: '/api/cases', body: undefined, query: new URLSearchParams() })
+    expect((all.body as { total: number }).total).toBe(2)
+    const proven = handleApiRequest({ dir }, { method: 'GET', path: '/api/cases', body: undefined, query: new URLSearchParams({ minTier: 'proven' }) })
+    const body = proven.body as { total: number; cases: { trustTier: string }[] }
+    expect(body.total).toBe(1)
+    expect(body.cases[0]?.trustTier).toBe('proven')
+    const fromB = handleApiRequest({ dir }, { method: 'GET', path: '/api/cases', body: undefined, query: new URLSearchParams({ from: 'b' }) })
+    expect((fromB.body as { total: number }).total).toBe(0)
+  })
+
+  it('GET /api/frontier returns the known-unknowns, with an optional state filter', () => {
+    const dir = workspace()
+    const res = handleApiRequest({ dir }, { method: 'GET', path: '/api/frontier', body: undefined })
+    const ids = (res.body as { nodes: { id: string }[] }).nodes.map((n) => n.id)
+    expect(ids).toContain('a')
+    const filtered = handleApiRequest({ dir }, { method: 'GET', path: '/api/frontier', body: undefined, query: new URLSearchParams({ state: 'a' }) })
+    expect((filtered.body as { nodes: { id: string }[] }).nodes.map((n) => n.id)).toEqual(['a'])
+  })
+})
+
 describe('GET /api/changes (temporal diff over the serve API)', () => {
   it('returns state no-prior for a one-map workspace', () => {
     const dir = seedWorkspace(tempDir('uigraph-changes-one-'), graph([node('a')], []))
@@ -500,11 +543,12 @@ describe('runKit (agent kit)', () => {
 describe('runVerifyUntilDone (autonomous 100%-accounted loop)', () => {
   it('drives, parks the undrivable remainder, and reaches loopDone within the round cap', async () => {
     const { runVerifyUntilDone } = await import('./runner')
-    // two may edges; the driver confirms a->b, never confirms a->c
+    // two may edges; a->b is direct-nav (confirmable by goto), a->c is guarded
+    // (parked — a bare goto must not witness it, per the Tier-3 soundness fix)
     const g = graph(
       [node('a'), node('b'), node('c')],
       [
-        { ...edge('e_ab', 'a', 'b'), modality: 'may', source: 'static', guard: 'x' },
+        { ...edge('e_ab', 'a', 'b'), modality: 'may', source: 'static', guard: null },
         { ...edge('e_ac', 'a', 'c'), modality: 'may', source: 'static', guard: 'y' },
       ],
     )

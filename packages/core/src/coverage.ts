@@ -12,6 +12,8 @@
 
 import type { UiGraph } from './ir'
 import type { ProposalGraph } from './proposals'
+import { buildFrontier } from './frontier'
+import { projectTrustTier, type TrustTier } from './trust-tier'
 
 /** A may/unknown edge an agent has parked out of the worklist with an auditable reason. Never edits the edge. */
 export interface ParkedEdge {
@@ -49,6 +51,8 @@ export interface CoverageReport {
   unverified: EdgeCoverage[]
   open: EdgeCoverage[]
   parked: EdgeCoverage[]
+  tierDistribution: Record<TrustTier, number>
+  frontierCount: number
 }
 
 /** Graph-derived context for edge accounting: node kinds + sources whose dynamic dispatch is witnessed. */
@@ -84,6 +88,17 @@ function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: 
   return { status: 'open', accounted: false }
 }
 
+/**
+ * Tally how many edges fall in each trust tier (spec §7 "tier distribution"), using
+ * the shared on-read projection so the tier logic is never duplicated. Always emits
+ * all 6 tiers (zero-filled) so the distribution shape is stable for readers.
+ */
+function tierDistribution(graph: UiGraph): Record<TrustTier, number> {
+  const dist: Record<TrustTier, number> = { witnessed: 0, proven: 0, asserted: 0, 'llm-verified': 0, proposed: 0, unknown: 0 }
+  for (const e of graph.edges) dist[projectTrustTier(e)] += 1
+  return dist
+}
+
 /** Compute coverage under both metrics, given the proven graph + any parked edges. */
 export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): CoverageReport {
   const ctx = edgeContext(graph)
@@ -114,6 +129,8 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
     unverified: rows.filter((r) => !r.verified),
     open: rows.filter((r) => !r.accounted),
     parked: rows.filter((r) => r.status === 'parked'),
+    tierDistribution: tierDistribution(graph),
+    frontierCount: buildFrontier(graph).unknownCount,
   }
 }
 

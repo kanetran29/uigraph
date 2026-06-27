@@ -6,9 +6,9 @@
 
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
-import type { GraphEdge, GraphNode, Modality, Overlay, Proposal, UiGraph } from '@uigraph/core'
-import { applyObservations, buildCoverage, buildGrounding, buildResolution, buildSpecPlan, diffGraphs, diffSinceLast, emptyOverlay, hashValue, mergeOverlay, nextToVerify, planPath, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
-import type { CoverageReport, Grounding, ProposalGraph, ProposalStatus, ResolutionReport, ScreenGrounding, VerifyTarget } from '@uigraph/core'
+import type { EdgeWithTier, GraphEdge, GraphNode, Modality, Overlay, Proposal, Source, TrustTier, UiGraph } from '@uigraph/core'
+import { applyObservations, buildCoverage, buildFrontier, buildGrounding, buildResolution, buildSpecPlan, diffGraphs, diffSinceLast, emptyOverlay, getTierLabel, hashValue, mergeOverlay, nextToVerify, planPath, projectTrustTier, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
+import type { CoverageReport, Grounding, GroundedEdge, ProposalGraph, ProposalGraphEdge, ProposalStatus, ResolutionReport, ScreenGrounding, VerifyTarget } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
 import type { GraphDiff, SinceLastDiff } from '@uigraph/core'
 import { loadGraph, openStore, fingerprintSources, compareFingerprint, type Store } from '@uigraph/core/node'
@@ -71,24 +71,27 @@ export interface GetGraphResult {
   version: 0
   meta: UiGraph['meta']
   nodes: GraphNode[]
-  edges: GraphEdge[]
+  edges: EdgeWithTier[]
   nodeCount: number
   edgeCount: number
 }
 
 /**
  * Serve the merged (base + overlay) graph to the agent as plain JSON, including
- * node and edge counts so a consumer need not recount.
+ * node and edge counts so a consumer need not recount. Each edge is enriched on
+ * read with its projected trust tier (spec §3) so the agent knows how far to lean
+ * on each case; the projection is derived, never stored on the IR.
  */
 export function getGraph(ctx: ToolContext): GetGraphResult {
   const g = loadMergedGraph(ctx)
+  const edges = g.edges.map((e) => ({ ...e, trustTier: projectTrustTier(e) }))
   return {
     version: g.version,
     meta: g.meta,
     nodes: g.nodes,
-    edges: g.edges,
+    edges,
     nodeCount: g.nodes.length,
-    edgeCount: g.edges.length,
+    edgeCount: edges.length,
   }
 }
 
@@ -166,21 +169,47 @@ export interface DescribeScreenArgs {
   screen: string
 }
 
+/** A screen's known edge enriched on read with its projected trust tier. */
+export type KnownEdgeWithTier = GroundedEdge & { trustTier: TrustTier }
+
+/** A screen's proposed edge enriched on read with its (always 'proposed') trust tier. */
+export type ProposedEdgeWithTier = ProposalGraph['edges'][number] & { trustTier: TrustTier }
+
 /** describe_screen result: a screen's controls + proven AND proposed actions, or an error. */
-export type ScreenDescription = (ScreenGrounding & { proposedEdges: ProposalGraph['edges'] }) | { error: string }
+export type ScreenDescription =
+  | (Omit<ScreenGrounding, 'knownEdges'> & { knownEdges: KnownEdgeWithTier[]; proposedEdges: ProposedEdgeWithTier[] })
+  | { error: string }
+
+/**
+ * Project a trust tier from a grounded edge's `source` + `modality` strings. A
+ * GroundedEdge is a flattened digest (no GraphEdge object), so we tier from those
+ * two fields only — sufficient because the witness is irrelevant to the tier
+ * (static must is `proven` per spec, witness or not).
+ */
+function tierOfGroundedEdge(e: GroundedEdge): TrustTier {
+  const synthetic: GraphEdge = {
+    id: '', from: e.from, to: e.to, event: e.event, guard: e.guard, effect: e.effect,
+    modality: e.modality as Modality, source: e.source as GraphEdge['source'], confidence: 1,
+  }
+  return projectTrustTier(synthetic)
+}
 
 /**
  * Describe one screen as an action surface for an agent: its controls (with stable
  * selectors, events, effects), the transitions PROVEN out of it (knownEdges), and
- * the PROPOSED transitions out of it (proposedEdges). Answers "I am on screen X —
+ * the PROPOSED transitions out of it (proposedEdges). Each edge carries its trust
+ * tier (spec §3) so the agent knows how far to lean. Answers "I am on screen X —
  * what can I do and where does each action lead?" without dumping the whole graph.
  */
 export function describeScreen(ctx: ToolContext, args: DescribeScreenArgs): ScreenDescription {
   const grounding = buildGrounding(loadMergedGraph(ctx))
   const screen = grounding.screens.find((s) => s.screen === args.screen)
   if (screen === undefined) return { error: `no screen "${args.screen}" in the graph` }
-  const proposed = getProposalGraph(ctx).edges.filter((e) => e.from === args.screen)
-  return { ...screen, proposedEdges: proposed }
+  const knownEdges = screen.knownEdges.map((e) => ({ ...e, trustTier: tierOfGroundedEdge(e) }))
+  const proposedEdges = getProposalGraph(ctx).edges
+    .filter((e) => e.from === args.screen)
+    .map((e) => ({ ...e, trustTier: projectTrustTier({ id: e.id, from: e.from, to: e.to, event: e.event, guard: e.guard, effect: e.effect, modality: e.modality, source: 'manual', confidence: 0 }, 'proposed') }))
+  return { ...screen, knownEdges, proposedEdges }
 }
 
 /** get_coverage result: both the strict runtime metric and the accounted-for metric, plus parked edges. */
@@ -226,11 +255,238 @@ export function genSpec(ctx: ToolContext, args: GenSpecArgs): GenSpecResult {
   return { spec: renderPlaywrightSpec(plan), legs: plan.legs.length }
 }
 
-/** Arguments for plan_path: source/target node ids and optional allowed modalities. */
+/**
+ * Trust precedence (most-trusted first), the agent-facing read layer's copy of the
+ * tier order. It mirrors core's projection enum and is the basis for `minTier`
+ * filtering + tier sorting in the case tools; it is a comparison concern of the
+ * consumer, not a re-derivation of the projection logic (which stays in core).
+ */
+const TIER_ORDER: TrustTier[] = ['witnessed', 'proven', 'asserted', 'llm-verified', 'proposed', 'unknown']
+
+/** True when `tier` is at least as trusted as `floor` (lower index = more trusted). */
+function tierAtLeast(tier: TrustTier, floor: TrustTier): boolean {
+  return TIER_ORDER.indexOf(tier) <= TIER_ORDER.indexOf(floor)
+}
+
+/**
+ * One behavioral case as served to an agent (spec §3/§8): an out-edge flattened to
+ * its event/guard, the behaviorally-distinct outcome (`outcomeClass` = the to-node
+ * id, a real screen or a synthesized `ps_*` sub-state), the target's label, the
+ * projected `trustTier`, a short `evidence` cite, and the raw modality/source. This
+ * answers "what can I do from here and how far can I trust each path?".
+ */
+export interface CaseEdge {
+  event: string
+  guard: string | null
+  outcomeClass: string
+  toNode: string
+  toLabel: string
+  trustTier: TrustTier
+  evidence: string
+  modality: Modality
+  source: Source
+}
+
+/**
+ * Summarize where the evidence for an edge comes from, for the agent's `evidence`
+ * cite: a runtime observation id, a static source location/rule, a manual overlay
+ * edit, or (for a quarantined proposal edge) the originating proposal ids.
+ */
+function evidenceOf(edge: GraphEdge, proposalIds?: string[]): string {
+  if (proposalIds !== undefined) return `proposal:${proposalIds.join(',')}`
+  const w = edge.witness
+  if (w === undefined) return `${edge.source} (no witness)`
+  if (w.observationId !== undefined) return `runtime:${w.observationId}`
+  if (w.file !== undefined) return `${w.file}${w.loc ? `:${w.loc.line}:${w.loc.col}` : ''}${w.ruleId ? ` (${w.ruleId})` : ''}`
+  return edge.source
+}
+
+/**
+ * Project one merged-graph edge to a CaseEdge: tier from source+modality, label from
+ * the node map, evidence from its witness. Used by every case tool so proven/witnessed
+ * cases share one rendering.
+ */
+function graphEdgeToCase(edge: GraphEdge, labelOf: Map<string, string>): CaseEdge {
+  return {
+    event: edge.event,
+    guard: edge.guard,
+    outcomeClass: edge.to,
+    toNode: edge.to,
+    toLabel: labelOf.get(edge.to) ?? edge.to,
+    trustTier: projectTrustTier(edge),
+    evidence: evidenceOf(edge),
+    modality: edge.modality,
+    source: edge.source,
+  }
+}
+
+/**
+ * Project one quarantined proposal-graph edge to a CaseEdge tagged `proposed`. A
+ * proposal edge is a `source:'manual'` may/unknown hypothesis carrying the proposal
+ * ids it came from; only `proposed`-status proposals materialize into this graph, so
+ * the tier is always `proposed`. Its target may be a synthesized `ps_*` sub-state.
+ */
+function proposalEdgeToCase(pe: ProposalGraphEdge, labelOf: Map<string, string>): CaseEdge {
+  return {
+    event: pe.event,
+    guard: pe.guard,
+    outcomeClass: pe.to,
+    toNode: pe.to,
+    toLabel: labelOf.get(pe.to) ?? pe.to,
+    trustTier: 'proposed',
+    evidence: evidenceOf({ id: pe.id, from: pe.from, to: pe.to, event: pe.event, guard: pe.guard, effect: pe.effect, modality: pe.modality, source: 'manual', confidence: 0 }, pe.proposalIds),
+    modality: pe.modality,
+    source: 'manual',
+  }
+}
+
+/**
+ * Build the full case set for a workspace: every merged-graph edge plus every
+ * quarantined proposal-graph edge, each rendered as a CaseEdge and sorted by trust
+ * precedence (most-trusted first). The single source of cases reused by get_state,
+ * list_cases, and get_frontier so the three tools cannot disagree about a case.
+ */
+function buildCases(ctx: ToolContext): { cases: CaseEdge[]; fromOf: string[] } {
+  const g = loadMergedGraph(ctx)
+  const labelOf = new Map(g.nodes.map((n) => [n.id, n.label]))
+  const proposalEdges = getProposalGraph(ctx).edges
+  const cases: CaseEdge[] = []
+  const fromOf: string[] = []
+  for (const e of g.edges) {
+    cases.push(graphEdgeToCase(e, labelOf))
+    fromOf.push(e.from)
+  }
+  for (const pe of proposalEdges) {
+    cases.push(proposalEdgeToCase(pe, labelOf))
+    fromOf.push(pe.from)
+  }
+  const order = cases
+    .map((c, i) => ({ c, from: fromOf[i] as string }))
+    .sort((a, b) => TIER_ORDER.indexOf(a.c.trustTier) - TIER_ORDER.indexOf(b.c.trustTier))
+  return { cases: order.map((x) => x.c), fromOf: order.map((x) => x.from) }
+}
+
+/** Arguments for get_state: the node id to describe as an action surface. */
+export interface GetStateArgs {
+  id: string
+}
+
+/**
+ * get_state result: a node plus all out-edges as trust-tiered cases (spec §8).
+ * Answers "what can I do from state X and how far can I trust each path?".
+ */
+export interface GetStateResult {
+  id: string
+  label: string
+  route: string | null
+  nodeKind: GraphNode['kind']
+  cases: CaseEdge[]
+}
+
+/**
+ * Fetch a node and its out-edges rendered as trust-tiered cases. Reuses the merged
+ * graph + proposal graph via buildCases and filters to edges leaving `id`. Returns
+ * an `{ error }` when the node id is not in the graph (so an invalid id never serves
+ * an empty-looking state silently; risk §"outcomeClass must exist").
+ */
+export function getState(ctx: ToolContext, args: GetStateArgs): GetStateResult | { error: string } {
+  const g = loadMergedGraph(ctx)
+  const node = g.nodes.find((n) => n.id === args.id)
+  if (node === undefined) return { error: `no node "${args.id}" in the graph` }
+  const { cases, fromOf } = buildCases(ctx)
+  const out = cases.filter((_, i) => fromOf[i] === args.id)
+  return { id: node.id, label: node.label, route: node.route, nodeKind: node.kind, cases: out }
+}
+
+/**
+ * Optional filters for list_cases: `from` (source node id), `outcomeClass` (target
+ * node id), and `minTier` (include only cases whose tier is at least the floor).
+ */
+export interface ListCasesArgs {
+  from?: string
+  outcomeClass?: string
+  minTier?: TrustTier
+}
+
+/** list_cases result: the filtered case set plus its total count. */
+export interface ListCasesResult {
+  total: number
+  cases: CaseEdge[]
+}
+
+/**
+ * Query the full case set with optional `from` / `outcomeClass` / `minTier` filters,
+ * each case projected to its trust tier (spec §8). Supports tier-aware planning:
+ * `minTier: 'proven'` returns only witnessed/proven cases. Cases stay sorted by
+ * trust precedence (most-trusted first).
+ */
+export function listCases(ctx: ToolContext, args: ListCasesArgs = {}): ListCasesResult {
+  const { cases, fromOf } = buildCases(ctx)
+  const filtered = cases.filter((c, i) => {
+    if (args.from !== undefined && fromOf[i] !== args.from) return false
+    if (args.outcomeClass !== undefined && c.outcomeClass !== args.outcomeClass) return false
+    if (args.minTier !== undefined && !tierAtLeast(c.trustTier, args.minTier)) return false
+    return true
+  })
+  return { total: filtered.length, cases: filtered }
+}
+
+/** A frontier state: the node, how many unknown out-edges it has, and those cases. */
+export interface FrontierNode {
+  id: string
+  label: string
+  unknownCount: number
+  cases: CaseEdge[]
+}
+
+/** Arguments for get_frontier: an optional single-state filter. */
+export interface GetFrontierArgs {
+  state?: string
+}
+
+/** get_frontier result: the frontier states (known-unknowns) plus their count. */
+export interface GetFrontierResult {
+  total: number
+  nodes: FrontierNode[]
+}
+
+/**
+ * Fetch the frontier — the states with unresolved (`unknown`-modality or
+ * dynamic-sink) out-edges (spec §3/§7), reusing core buildFrontier to identify them.
+ * Each frontier state carries its `unknown`-tier cases and their count so the agent
+ * knows exactly where the map is incomplete and what to probe. Optional `state`
+ * filter narrows to one node. The safety spine: the agent is never silently blind.
+ */
+export function getFrontier(ctx: ToolContext, args: GetFrontierArgs = {}): GetFrontierResult {
+  const g = loadMergedGraph(ctx)
+  const labelOf = new Map(g.nodes.map((n) => [n.id, n.label]))
+  const frontierIds = new Set(buildFrontier(g).states)
+  const wanted = args.state !== undefined ? [args.state].filter((id) => frontierIds.has(id)) : [...frontierIds]
+  const unknownByFrom = new Map<string, CaseEdge[]>()
+  for (const e of g.edges) {
+    if (projectTrustTier(e) !== 'unknown') continue
+    const list = unknownByFrom.get(e.from) ?? []
+    list.push(graphEdgeToCase(e, labelOf))
+    unknownByFrom.set(e.from, list)
+  }
+  const nodes: FrontierNode[] = wanted.map((id) => {
+    const cases = unknownByFrom.get(id) ?? []
+    return { id, label: labelOf.get(id) ?? id, unknownCount: cases.length, cases }
+  })
+  return { total: nodes.length, nodes }
+}
+
+/**
+ * Arguments for plan_path: source/target node ids, optional allowed modalities, and
+ * an optional `minTier` floor. `minTier` does not exclude low-trust hops from the
+ * search (that could strand the agent); instead any hop below the floor is reported
+ * in `tierWarnings` so the agent plans with eyes open (spec §8).
+ */
 export interface PlanPathArgs {
   from: string
   to: string
   allow?: Modality[]
+  minTier?: TrustTier
 }
 
 /** One leg of a planned route, flattened to labels the agent can read. */
@@ -245,18 +501,26 @@ export interface PlanPathStep {
   modality: Modality
 }
 
-/** plan_path result: either an ordered list of steps or a clear "no path" signal. */
+/**
+ * plan_path result: either an ordered list of steps or a clear "no path" signal.
+ * `tierWarnings` lists any hop whose projected trust tier is below the requested
+ * `minTier` floor — present only when a `minTier` was given and some hop fell short.
+ */
 export interface PlanPathResult {
   found: boolean
   from: string
   to: string
   steps: PlanPathStep[]
+  tierWarnings?: string[]
 }
 
 /**
  * Plan a route over the merged graph via core planPath, flattening each step to
  * readable labels. Returns `found: false` with no steps when the target is
- * unreachable under the allowed modalities.
+ * unreachable under the allowed modalities. When `minTier` is given, each step's
+ * edge is projected to its trust tier and any hop below the floor is surfaced in
+ * `tierWarnings` (the path is still returned — low-trust hops are flagged, never
+ * silently dropped, so the agent is never stranded without knowing why; spec §9).
  */
 export function planPathTool(ctx: ToolContext, args: PlanPathArgs): PlanPathResult {
   const g = loadMergedGraph(ctx)
@@ -272,7 +536,15 @@ export function planPathTool(ctx: ToolContext, args: PlanPathArgs): PlanPathResu
     guard: s.edge.guard,
     modality: s.edge.modality,
   }))
-  return { found: true, from: args.from, to: args.to, steps }
+  const result: PlanPathResult = { found: true, from: args.from, to: args.to, steps }
+  if (args.minTier !== undefined) {
+    const warnings = path
+      .map((s) => ({ edge: s.edge, tier: projectTrustTier(s.edge) }))
+      .filter((x) => !tierAtLeast(x.tier, args.minTier as TrustTier))
+      .map((x) => `${x.edge.id} is '${x.tier}' (below minTier '${args.minTier as TrustTier}'): ${getTierLabel(x.tier)}`)
+    if (warnings.length > 0) result.tierWarnings = warnings
+  }
+  return result
 }
 
 /** A manual edit applied to the overlay only; one of five discriminated ops. */

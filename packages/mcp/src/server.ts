@@ -20,6 +20,9 @@ import {
   getGrounding,
   getProposalGraph,
   getProposals,
+  getState,
+  listCases,
+  getFrontier,
   listScenarios,
   nextToVerifyTool,
   planPathTool,
@@ -39,6 +42,9 @@ import {
   type SetScenarioArgs,
   type GetGroundingArgs,
   type GetProposalsArgs,
+  type GetStateArgs,
+  type ListCasesArgs,
+  type GetFrontierArgs,
   type NextToVerifyArgs,
   type PlanPathArgs,
   type ReportObservationArgs,
@@ -144,14 +150,44 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'get_state',
+    description: 'Describe one state (node) as a trust-tiered action surface: all out-edges rendered as cases, each with event, guard, outcomeClass (to-node, a real screen or a ps_* sub-state), trustTier (witnessed>proven>asserted>llm-verified>proposed>unknown), and an evidence cite. Answers "what can I do from state X and how far can I trust each path?".',
+    inputSchema: {
+      type: 'object',
+      properties: { id: { type: 'string', description: 'node id (e.g. n_checkout)' } },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'list_cases',
+    description: 'List behavioral cases across the merged graph + quarantined proposals, each tagged with its trust tier and evidence, sorted most-trusted first. Optional filters: from (source node), outcomeClass (target node / sub-state), minTier (include only cases at least this trusted, e.g. "proven" → witnessed+proven only).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        from: { type: 'string', description: 'filter to cases leaving this node id' },
+        outcomeClass: { type: 'string', description: 'filter to cases landing on this to-node / sub-state id' },
+        minTier: { type: 'string', enum: ['witnessed', 'proven', 'asserted', 'llm-verified', 'proposed', 'unknown'], description: 'include only cases at least this trusted' },
+      },
+    },
+  },
+  {
+    name: 'get_frontier',
+    description: 'The known-unknowns: states with unresolved (unknown-modality / dynamic-sink) out-edges, each with the count and the unknown cases. This is where the map is incomplete — probe or ask before relying. The safety spine: the agent is never silently blind. Optional filter: state (one node id).',
+    inputSchema: {
+      type: 'object',
+      properties: { state: { type: 'string', description: 'restrict the frontier to one node id' } },
+    },
+  },
+  {
     name: 'plan_path',
-    description: 'Plan the shortest route between two node ids over the merged graph; "no path" when unreachable.',
+    description: 'Plan the shortest route between two node ids over the merged graph; "no path" when unreachable. Optional minTier: any hop below that trust floor is reported in tierWarnings (the path is still returned — low-trust hops are flagged, never silently dropped).',
     inputSchema: {
       type: 'object',
       properties: {
         from: { type: 'string', description: 'source node id' },
         to: { type: 'string', description: 'target node id' },
         allow: { type: 'array', items: { type: 'string', enum: ['must', 'may', 'unknown'] } },
+        minTier: { type: 'string', enum: ['witnessed', 'proven', 'asserted', 'llm-verified', 'proposed', 'unknown'], description: 'flag hops below this trust floor in tierWarnings' },
       },
       required: ['from', 'to'],
     },
@@ -298,6 +334,12 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(listScenarios(ctx))
       case 'set_scenario':
         return jsonResult(setScenario(ctx, args as unknown as SetScenarioArgs))
+      case 'get_state':
+        return jsonResult(getState(ctx, args as unknown as GetStateArgs))
+      case 'list_cases':
+        return jsonResult(listCases(ctx, args as unknown as ListCasesArgs))
+      case 'get_frontier':
+        return jsonResult(getFrontier(ctx, args as unknown as GetFrontierArgs))
       case 'plan_path':
         return jsonResult(planPathTool(ctx, args as unknown as PlanPathArgs))
       case 'update_graph':
