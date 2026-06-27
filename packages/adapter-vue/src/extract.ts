@@ -363,15 +363,18 @@ function classifyBoundExpr(expr: string, component: VueComponent, project: Proje
 }
 
 /**
- * Classify a wrapper's bound `:name`. A static string/ternary resolves to its route(s);
- * a dynamic name (e.g. `link.routeName`) over-approximates to every declared named route
- * (may-edges) rather than dropping the navigation.
+ * Classify a wrapper's bound `:name`. A static string/ternary resolves to its route(s).
+ * A fully dynamic name (e.g. `link.routeName`) is left dynamic rather than fanned out to
+ * every declared named route: a bare `:name` on an arbitrary component is indistinguishable
+ * from a generic prop (e.g. `<Tag :name="t">`), so inventing an edge into every named route
+ * would violate the no-edge-without-a-static-witness invariant. The real navigation, if any,
+ * is recovered by scanning the wrapper's own template/script (see childTargets).
  */
 function classifyBoundName(expr: string, component: VueComponent, nameToPath: Map<string, string>): TargetInfo {
   const values = staticNamesFromString(expr, component).filter((n) => nameToPath.has(n))
   if (values.length === 1) return { kind: 'literal', value: nameToPath.get(values[0] as string) as string }
   if (values.length > 1) return { kind: 'names', values }
-  return { kind: 'names', values: [...nameToPath.keys()] }
+  return { kind: 'dynamic' }
 }
 
 /** Static string candidates a bound `:name` expression can take (literal/ternary, resolving identifiers). */
@@ -635,12 +638,22 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
 
   const edges: GraphEdge[] = []
   const soundiness: SoundinessNote[] = []
-  const seen = new Set<string>()
+  const byBehavior = new Map<string, number>()
 
   function pushEdge(from: string, to: string, t: RawTarget, modality: 'must' | 'may', confidence: number, guard: string | null, file: string): void {
+    const behaviorKey = `${from}|${to}|${t.event}`
+    const existingIdx = byBehavior.get(behaviorKey)
+    if (existingIdx !== undefined) {
+      const existing = edges[existingIdx] as GraphEdge
+      const supersedes = (modality === 'must' && existing.modality === 'may') || (modality === existing.modality && confidence > existing.confidence)
+      if (supersedes) {
+        const id = edgeId(from, to, t.event, guard)
+        edges[existingIdx] = { id, from, to, event: t.event, guard, effect: t.effect, modality, source: 'static', confidence, witness: { source: 'static', file, loc: t.loc, ruleId: t.ruleId } }
+      }
+      return
+    }
     const id = edgeId(from, to, t.event, guard)
-    if (seen.has(id)) return
-    seen.add(id)
+    byBehavior.set(behaviorKey, edges.length)
     edges.push({ id, from, to, event: t.event, guard, effect: t.effect, modality, source: 'static', confidence, witness: { source: 'static', file, loc: t.loc, ruleId: t.ruleId } })
   }
 

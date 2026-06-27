@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { controlNodeId, routeToNodeId } from './ids'
+import { controlNodeId, routeToNodeId, edgeId } from './ids'
 
 describe('controlNodeId', () => {
   it('is deterministic and prefixed c_<screen>__', () => {
@@ -25,5 +25,19 @@ describe('controlNodeId', () => {
 
   it('routeToNodeId still maps route patterns to stable ids', () => {
     expect(routeToNodeId('/products/:id')).toBe('n_products_id')
+  })
+})
+
+describe('edgeId', () => {
+  it('collapses isomorphic edges differing only in whitespace to one id', () => {
+    expect(edgeId('n_a', 'n_b', ' click ', 'x  >  0')).toBe(edgeId('n_a', 'n_b', 'click', 'x > 0'))
+  })
+
+  it('keeps genuinely distinct guards on the same pair distinct', () => {
+    expect(edgeId('n_a', 'n_b', 'submit', 'x > 0')).not.toBe(edgeId('n_a', 'n_b', 'submit', 'x < 0'))
+  })
+
+  it('endpoints participate in the id', () => {
+    expect(edgeId('n_a', 'n_b', 'click', null)).not.toBe(edgeId('n_a', 'n_c', 'click', null))
   })
 })

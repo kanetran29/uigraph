@@ -26,6 +26,10 @@ interface RouteInfo {
   nodeId: string
   componentName: string | null
   componentFile: SourceFile | undefined
+  /** The route was declared with an inline JSX element (e.g. element={<div>…}) rather
+   *  than a component reference, so there is no component file to scan for navigation.
+   *  `file` is the absolute declaration path (relativized when the note is emitted). */
+  inlineElement?: { file: string; loc: { line: number; col: number }; tag: string }
 }
 
 /**
@@ -319,6 +323,24 @@ function getComponentName(el: Node): string | null {
   return null
 }
 
+/**
+ * The inline HTML tag a route renders directly via `element={<tag>…}` (a lowercase
+ * tag, not a component reference) — e.g. element={<Navigate to="/x"/>} is a component,
+ * but element={<div>…} or element={<main>…} is inline markup with no component file to
+ * scan. Returns the tag for the inline-markup case, else null. This is a navigation
+ * intent we cannot soundly follow (the rendered subtree is not a scannable screen).
+ */
+function inlineElementTag(el: Node): string | null {
+  const element = findAttr(el, 'element')
+  if (!element) return null
+  const init = element.getInitializer()
+  if (!init || !Node.isJsxExpression(init)) return null
+  const inner = init.getExpression()
+  if (!inner || !isJsxEl(inner)) return null
+  const tag = jsxTag(inner)
+  return /^[a-z]/.test(tag) ? tag : null
+}
+
 /** First capitalized (component) JSX tag inside a node, e.g. the body of a `render` prop. */
 function firstComponentTag(node: Node): string | null {
   const candidates = [
@@ -544,7 +566,13 @@ function collectRoutes(project: Project): RouteInfo[] {
       const nodeId = routeToNodeId(fullPath)
       if (byNodeId.has(nodeId)) continue
       const { name: componentName, file: componentFile } = callSiteComponentFile(sf, el)
-      byNodeId.set(nodeId, { fullPath, nodeId, componentName, componentFile })
+      const inlineTag = componentFile ? null : inlineElementTag(el)
+      let inlineElement: RouteInfo['inlineElement']
+      if (inlineTag) {
+        const lc = sf.getLineAndColumnAtPos(el.getStart())
+        inlineElement = { file: sf.getFilePath(), loc: { line: lc.line, col: lc.column }, tag: inlineTag }
+      }
+      byNodeId.set(nodeId, { fullPath, nodeId, componentName, componentFile, inlineElement })
     }
   }
   return [...byNodeId.values()]
@@ -1428,7 +1456,12 @@ export function extractGraphFromRoutes(
 
   for (const route of routes) {
     if (!route.componentFile) {
-      soundiness.push({ kind: 'unresolved-component', detail: `route ${route.fullPath} has no resolvable component file` })
+      if (route.inlineElement) {
+        const ie = route.inlineElement
+        soundiness.push({ kind: 'inline-jsx-route', file: relative(projectDir, ie.file), loc: ie.loc, detail: `route ${route.fullPath} renders inline JSX <${ie.tag}> — no component file to scan for navigation` })
+      } else {
+        soundiness.push({ kind: 'unresolved-component', detail: `route ${route.fullPath} has no resolvable component file` })
+      }
       continue
     }
     if (!isRepresentative(route)) continue
@@ -1518,6 +1551,12 @@ export function extractGraphFromRoutes(
           const nodeEffects = [...new Set(inter.effects.map((e) => (e.startsWith('open:modal') ? 'open:modal' : e)))]
           const lc = cf.getLineAndColumnAtPos(el.getStart())
           const loc = { line: lc.line, col: lc.column }
+          // A handler that dispatch()es a redux/store action is a navigation INTENT we
+          // cannot soundly follow: the route change (if any) happens in a reducer/middleware,
+          // off the static AST. Record an honest note instead of inventing an edge.
+          if (inter.effects.includes('state:dispatch')) {
+            soundiness.push({ kind: 'dispatch-driven-nav', file, loc, detail: `${meta.name ?? meta.element} dispatches a store action; any resulting navigation is not statically extractable` })
+          }
           for (const nav of inter.navs) {
             const ctxGuard = nav.ctx === 'success' ? 'onSuccess' : nav.ctx === 'error' ? 'onError' : null
             const guard = nav.guard ?? ctxGuard

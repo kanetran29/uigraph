@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
 import { openStore, saveGraph } from '@uigraph/core/node'
 import type { Server } from 'node:http'
-import { dbPathFor, formatDiff, formatDiffSinceLast, readSoundiness, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove } from './commands'
+import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
 import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
 import { readRegistry, summarize } from '@uigraph/core/node'
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -88,6 +88,126 @@ describe('runMap', () => {
     const dir = tempDir('uigraph-cli-sound-')
     const summary = await runMap({ dir: SAMPLE_REACT, adapter: 'react', out: join(dir, 'uigraph.db') })
     expect(readSoundiness(dir).length).toBe(summary.soundiness)
+  })
+
+  it('records soundiness counts grouped by category', async () => {
+    const summary = await runMap({ dir: SAMPLE_REACT, adapter: 'react', out: join(tempDir('uigraph-cli-bykind-'), 'uigraph.db') })
+    const total = Object.values(summary.soundinessByKind).reduce((a, b) => a + b, 0)
+    expect(total).toBe(summary.soundiness)
+  })
+})
+
+describe('formatMapSummary (SOUNDINESS SUMMARY block)', () => {
+  const base: MapSummary = { dbPath: '/x/uigraph.db', adapter: 'react', detected: false, nodes: 3, edges: 2, must: 1, may: 1, unknown: 0, soundiness: 0, soundinessByKind: {} }
+
+  it('omits the SOUNDINESS SUMMARY when there are no notes', () => {
+    expect(formatMapSummary(base)).not.toContain('SOUNDINESS SUMMARY')
+  })
+
+  it('prints a category-grouped summary with counts and a recommendation, sorted by count', () => {
+    const out = formatMapSummary({ ...base, soundiness: 15, soundinessByKind: { 'dispatch-driven-nav': 12, 'inline-jsx-route': 3 } })
+    expect(out).toContain('SOUNDINESS SUMMARY')
+    expect(out).toContain('12 dispatch-driven-nav')
+    expect(out).toContain('3 inline-jsx-route')
+    expect(out).toMatch(/runtime-verify|annotate/)
+    expect(out.indexOf('dispatch-driven-nav')).toBeLessThan(out.indexOf('inline-jsx-route'))
+  })
+})
+
+describe('detectAdapter (framework inference from package.json contents)', () => {
+  const pkg = (deps: Record<string, string>, devDeps: Record<string, string> = {}) =>
+    JSON.stringify({ dependencies: deps, devDependencies: devDeps })
+
+  it('detects next from a `next` dependency (wins over the react it pulls in)', () => {
+    expect(detectAdapter(pkg({ next: '14.0.0', react: '18.0.0', 'react-dom': '18.0.0' }))).toEqual({ adapter: 'next' })
+  })
+
+  it('detects angular from an @angular/* dependency', () => {
+    expect(detectAdapter(pkg({ '@angular/core': '17.0.0', '@angular/router': '17.0.0' }))).toEqual({ adapter: 'angular' })
+  })
+
+  it('detects vue from vue / vue-router', () => {
+    expect(detectAdapter(pkg({ vue: '3.0.0', 'vue-router': '4.0.0' }))).toEqual({ adapter: 'vue' })
+  })
+
+  it('detects react from react-router (and from plain react)', () => {
+    expect(detectAdapter(pkg({ react: '18.0.0', 'react-router-dom': '6.0.0' }))).toEqual({ adapter: 'react' })
+    expect(detectAdapter(pkg({ react: '18.0.0' }))).toEqual({ adapter: 'react' })
+  })
+
+  it('reads devDependencies too', () => {
+    expect(detectAdapter(pkg({}, { vue: '3.0.0' }))).toEqual({ adapter: 'vue' })
+  })
+
+  it('returns the candidate list when ambiguous (no clear single framework)', () => {
+    const r = detectAdapter(pkg({ vue: '3.0.0', '@angular/core': '17.0.0' }))
+    expect(r).not.toBeNull()
+    expect('ambiguous' in r!).toBe(true)
+    expect((r as { ambiguous: string[] }).ambiguous.sort()).toEqual(['angular', 'vue'])
+  })
+
+  it('returns null for no supported framework and for malformed JSON', () => {
+    expect(detectAdapter(pkg({ lodash: '4.0.0' }))).toBeNull()
+    expect(detectAdapter('not json {')).toBeNull()
+  })
+})
+
+describe('resolveAdapter (explicit vs auto-detect, actionable errors)', () => {
+  it('honors an explicit adapter without reading package.json', () => {
+    expect(resolveAdapter('/does/not/matter', 'angular')).toEqual({ adapter: 'angular', detected: false })
+  })
+
+  it('auto-detects from the project package.json when --adapter is omitted', () => {
+    const dir = tempDir('uigraph-detect-')
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ dependencies: { vue: '3.0.0', 'vue-router': '4.0.0' } }))
+    expect(resolveAdapter(dir)).toEqual({ adapter: 'vue', detected: true })
+  })
+
+  it('errors with the candidates listed when detection is ambiguous', () => {
+    const dir = tempDir('uigraph-detect-ambig-')
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ dependencies: { vue: '3.0.0', '@angular/core': '17.0.0' } }))
+    expect(() => resolveAdapter(dir)).toThrow(CliError)
+    expect(() => resolveAdapter(dir)).toThrow(/ambiguous/)
+    expect(() => resolveAdapter(dir)).toThrow(/--adapter/)
+  })
+
+  it('errors actionably when there is no package.json', () => {
+    expect(() => resolveAdapter(tempDir('uigraph-detect-nopkg-'))).toThrow(/no package.json/)
+  })
+
+  it('errors actionably when no supported framework is found', () => {
+    const dir = tempDir('uigraph-detect-none-')
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ dependencies: { lodash: '4.0.0' } }))
+    expect(() => resolveAdapter(dir)).toThrow(/could not detect/)
+  })
+})
+
+describe('runMap auto-detection + formatMapSummary empty-graph guidance', () => {
+  it('runMap with no --adapter auto-detects react and flags it as detected', async () => {
+    const dir = tempDir('uigraph-map-autodetect-')
+    cpSync(SAMPLE_REACT, dir, { recursive: true })
+    const summary = await runMap({ dir, out: join(tempDir('uigraph-map-autodetect-out-'), 'g.db'), register: false })
+    expect(summary.adapter).toBe('react')
+    expect(summary.detected).toBe(true)
+    expect(formatMapSummary(summary)).toContain('auto-detected from package.json')
+  })
+
+  it('formatMapSummary prints empty-graph guidance pointing at verify when 0 edges', () => {
+    const base: MapSummary = { dbPath: '/x/uigraph.db', adapter: 'react', detected: false, nodes: 2, edges: 0, must: 0, may: 0, unknown: 0, soundiness: 0, soundinessByKind: {} }
+    const out = formatMapSummary(base)
+    expect(out).toContain('NO EDGES EXTRACTED')
+    expect(out).toMatch(/dispatch-driven|dynamic/)
+    expect(out).toContain('uigraph verify')
+  })
+
+  it('empty-graph guidance references the SOUNDINESS SUMMARY when notes exist', () => {
+    const base: MapSummary = { dbPath: '/x/uigraph.db', adapter: 'react', detected: false, nodes: 2, edges: 0, must: 0, may: 0, unknown: 0, soundiness: 3, soundinessByKind: { 'dispatch-driven-nav': 3 } }
+    expect(formatMapSummary(base)).toContain('see the SOUNDINESS SUMMARY above')
+  })
+
+  it('omits empty-graph guidance when edges exist', () => {
+    const base: MapSummary = { dbPath: '/x/uigraph.db', adapter: 'react', detected: false, nodes: 2, edges: 1, must: 1, may: 0, unknown: 0, soundiness: 0, soundinessByKind: {} }
+    expect(formatMapSummary(base)).not.toContain('NO EDGES EXTRACTED')
   })
 })
 
@@ -631,5 +751,66 @@ describe('runVerify — dynamic-sink resolution (capture mode)', () => {
     const merged = (await import('@uigraph/mcp')).loadMergedGraph({ dir })
     expect(merged.nodes.some((n) => n.route === '/surprise')).toBe(true)
     expect(merged.edges.some((e) => e.from === 'a' && e.source === 'runtime')).toBe(true)
+  })
+})
+
+describe('crash-safety: input validation + actionable errors (no raw stacks)', () => {
+  it('assertProjectDir: rejects a missing dir with a CliError that names the path', () => {
+    const missing = join(tmpdir(), 'uigraph-does-not-exist-' + Date.now())
+    expect(() => assertProjectDir(missing)).toThrow(CliError)
+    expect(() => assertProjectDir(missing)).toThrow(/directory not found/)
+    expect(() => assertProjectDir(missing)).toThrow(missing)
+  })
+
+  it('assertProjectDir: rejects a file passed where a directory is expected', () => {
+    const dir = tempDir('uigraph-notadir-')
+    const file = join(dir, 'a-file.txt')
+    writeFileSync(file, 'x')
+    expect(() => assertProjectDir(file)).toThrow(CliError)
+    expect(() => assertProjectDir(file)).toThrow(/not a directory/)
+  })
+
+  it('runMap: a missing project dir is a CliError, not a raw ENOENT', async () => {
+    const missing = join(tmpdir(), 'uigraph-map-missing-' + Date.now())
+    await expect(runMap({ dir: missing, adapter: 'react', register: false, out: join(tempDir('uigraph-out-'), 'g.db') })).rejects.toThrow(CliError)
+  })
+
+  it('openStoreSafe: a corrupt database is an actionable CliError, not a raw sqlite stack', () => {
+    const dir = tempDir('uigraph-corrupt-')
+    const dbPath = join(dir, 'uigraph.db')
+    writeFileSync(dbPath, 'this is not a sqlite database, just garbage bytes')
+    let thrown: unknown
+    try {
+      openStoreSafe(dbPath)
+    } catch (err) {
+      thrown = err
+    }
+    expect(thrown).toBeInstanceOf(CliError)
+    expect((thrown as Error).message).toContain('cannot open workspace database')
+    expect((thrown as Error).message).toContain(dbPath)
+    expect((thrown as Error).message).toMatch(/corrupt|locked/)
+  })
+
+  it('runMap: a corrupt output db surfaces as a CliError (downstream throw is wrapped, never raw)', async () => {
+    const dir = tempDir('uigraph-map-corrupt-')
+    const out = join(dir, 'out.db')
+    writeFileSync(out, 'not a database')
+    await expect(runMap({ dir, adapter: 'react', register: false, out })).rejects.toThrow(CliError)
+  })
+
+  it('runGen: an unwritable --out path (parent is a file) is an actionable CliError', () => {
+    const dir = seedWorkspace(tempDir('uigraph-gen-out-'), graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
+    const fileParent = join(dir, 'afile')
+    writeFileSync(fileParent, 'x')
+    expect(() => runGen({ dir, from: 'a', to: 'b', out: join(fileParent, 'spec.ts') })).toThrow(CliError)
+    expect(() => runGen({ dir, from: 'a', to: 'b', out: join(fileParent, 'spec.ts') })).toThrow(/cannot create output directory/)
+  })
+
+  it('runKitInstall: an unwritable target (parent is a file) is an actionable CliError', () => {
+    const dir = tempDir('uigraph-kit-out-')
+    const fileParent = join(dir, 'afile')
+    writeFileSync(fileParent, 'x')
+    expect(() => runKitInstall({ dir: fileParent })).toThrow(CliError)
+    expect(() => runKitInstall({ dir: fileParent })).toThrow(/cannot create output directory/)
   })
 })

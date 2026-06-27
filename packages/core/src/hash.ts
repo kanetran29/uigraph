@@ -37,3 +37,19 @@ export function fnv1a(input: string): string {
 export function hashValue(value: unknown): string {
   return fnv1a(stableStringify(value))
 }
+
+/**
+ * Canonical (event, guard) discriminator for an edge identity. Adapters key edge
+ * ids on this so that two edges differing only in whitespace — `" click "` vs
+ * `"click"`, `"x > 0"` vs `"x  >  0"` — collapse to ONE id and dedupe, instead of
+ * surviving as isomorphic duplicates. Normalization is whitespace-only
+ * (trim + collapse internal runs to a single space): it is semantics-preserving,
+ * so legitimately distinct guards (`x > 0` vs `x < 0`) keep distinct ids and no
+ * real guarded edge is dropped. A null/absent guard and a whitespace-only guard
+ * both canonicalize to the empty string — a guard with no non-space characters
+ * carries no condition, so it is treated as "no guard".
+ */
+export function canonicalEdgeTag(event: string, guard: string | null): string {
+  const norm = (s: string): string => s.replace(/\s+/g, ' ').trim()
+  return fnv1a(`${norm(event)}|${guard === null ? '' : norm(guard)}`).slice(0, 6)
+}

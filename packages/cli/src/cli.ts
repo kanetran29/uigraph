@@ -19,15 +19,15 @@ export function buildProgram(): Command {
 
   program
     .command('map')
-    .description('Extract the UI graph from a project directory using an adapter.')
+    .description('Extract the UI graph from a project directory using an adapter (auto-detected from package.json when --adapter is omitted).')
     .argument('<dir>', 'project directory to map')
-    .requiredOption('--adapter <name>', 'adapter to use: react | angular | vue | next')
+    .option('--adapter <name>', 'adapter to use: react | angular | vue | next (default: auto-detect from package.json)')
     .option('--out <file>', 'output database path (default <dir>/uigraph.db)')
     .option('--controls', 'also extract interactive controls (buttons/inputs/etc.) as nested nodes')
     .option('--no-register', 'do not add this workspace to the ~/.uigraph registry')
     .option('--name <name>', 'display name in the workspace registry / dashboard switcher (default the dir basename)')
-    .action(async (dir: string, opts: { adapter: string; out?: string; controls?: boolean; register?: boolean; name?: string }) => {
-      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName, out: opts.out, controls: opts.controls ?? false, register: opts.register, name: opts.name })
+    .action(async (dir: string, opts: { adapter?: string; out?: string; controls?: boolean; register?: boolean; name?: string }) => {
+      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName | undefined, out: opts.out, controls: opts.controls ?? false, register: opts.register, name: opts.name })
       console.log(formatMapSummary(summary))
     })
 
@@ -210,9 +210,19 @@ function stripPnpmSeparator(argv: string[]): string[] {
   return argv
 }
 
+/**
+ * Drop a `--debug` token from argv before commander parses, so it can appear in any
+ * position (before or after the subcommand) without commander rejecting it as an
+ * unknown option. Whether debug was requested is read from the original argv by the
+ * top-level catch, not from commander.
+ */
+function stripDebugFlag(argv: string[]): string[] {
+  return argv.filter((a) => a !== '--debug')
+}
+
 /** Parse argv and run the selected command; the module entry point. */
 export async function main(argv: string[] = processArgv): Promise<void> {
-  await buildProgram().parseAsync(stripPnpmSeparator(argv))
+  await buildProgram().parseAsync(stripDebugFlag(stripPnpmSeparator(argv)))
 }
 
 /** True when this module is the process entry point (run via tsx), not imported. */
@@ -222,9 +232,23 @@ function isEntryPoint(): boolean {
   return fileURLToPath(import.meta.url) === entry
 }
 
+/**
+ * True when the user asked for verbose error output, via a `--debug` flag anywhere
+ * in argv or the UIGRAPH_DEBUG env var, so the top-level catch can print the full
+ * stack instead of just the message.
+ */
+function wantsDebug(argv: string[]): boolean {
+  return argv.includes('--debug') || (process.env.UIGRAPH_DEBUG ?? '') !== ''
+}
+
 if (isEntryPoint()) {
   main().catch((err: unknown) => {
-    console.error(err instanceof Error ? err.message : String(err))
+    if (wantsDebug(processArgv) && err instanceof Error && err.stack !== undefined) {
+      console.error(err.stack)
+    } else {
+      console.error(err instanceof Error ? err.message : String(err))
+      if (err instanceof Error) console.error('  (re-run with --debug for the full stack)')
+    }
     process.exitCode = 1
   })
 }

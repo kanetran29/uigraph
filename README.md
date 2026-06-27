@@ -78,7 +78,9 @@ This is an early static-extraction spine. What is actually true today:
 - **The artifact is a static snapshot + manual overlay**, not an event-sourced "lockfile" (no reducer/fold, no composite extractor/ruleset/obs-log hash).
 - **`unknown` modality** exists in the IR but no adapter emits it yet.
 - Adapters extract a partial route set on real apps (refapp: ~half the routes resolved); **an empty/partial graph is not yet always distinguishable from a blind spot** for every router style (e.g. `createBrowserRouter`, aliased hooks, constant route paths).
-- OpenAPI binding is core-only (no CLI/MCP/dashboard wiring yet, JSON specs only); the Angular adapter does not extract controls/events/api effects.
+- OpenAPI binding is core-only (no CLI/MCP/dashboard wiring yet, JSON specs only); the Angular adapter extracts controls/events but **not** `api:*` effects (React/Vue parity gap), and does not yet trace signal-based routing.
+
+Per-adapter **supported / not-yet-supported** matrices (the honest coverage per framework — data-router config, parallel/intercepting routes, dispatch-driven nav, Angular signals, etc.) live in [docs/40-adapter-contract.md §5](docs/40-adapter-contract.md).
 
 The honest near-term priority is **validating the premise** (the ablation) before adding more surface area.
 

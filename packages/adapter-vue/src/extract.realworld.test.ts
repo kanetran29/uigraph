@@ -109,10 +109,10 @@ describe('custom router-link wrappers (F-vue-adapter)', () => {
     expect(graph.edges.some((e) => e.to === 'n_article_slug')).toBe(true)
   })
 
-  it('over-approximates a custom AppLink with a fully bound :name to declared routes', () => {
+  it('does not invent edges for a custom AppLink with a fully dynamic :name', () => {
     const { graph, soundiness } = build(appLinkRouter(`<AppLink :name="link.routeName" :params="link.routeParams">go</AppLink>`))
-    expect(graph.edges.length).toBeGreaterThan(0)
-    expect(soundiness.some((s) => s.kind === 'over-approximation')).toBe(true)
+    expect(graph.edges.filter((e) => e.from === 'n_a')).toHaveLength(0)
+    expect(soundiness.some((s) => s.kind === 'dynamic-target')).toBe(true)
   })
 })
 
@@ -136,6 +136,49 @@ describe('child-component navigations (F-vue-adapter)', () => {
       '/src/B.vue': `<template><p>b</p></template>`,
     })
     expect(graph.edges.some((e) => e.from === 'n_a' && e.to === 'n_b')).toBe(true)
+  })
+})
+
+// vue-child-undedup-1 / vue-edge-count-disparity / vue-duplicate-edges-same-event:
+// a parent rendering a child that itself <router-link>s must not double-count the nav,
+// and a generic `:name` prop on an arbitrary child must not fan out to every named route.
+describe('child over-extraction / duplicate dedup (F-vue-adapter)', () => {
+  // VTag-style: parent renders <Tag :name="t" /> (generic string prop, NOT a routing
+  // name) and Tag.vue internally <router-link :to="{ name: 'tag' }">. The real nav is
+  // the child's router-link; the parent's `:name` is not routing.
+  const tagRouter = {
+    '/src/router.ts': ROUTER(
+      `[{ path: '/', name: 'home', component: A }, { path: '/tag/:tag', name: 'tag', component: T }, { path: '/login', name: 'login', component: L }]`,
+      `import A from './A.vue'\nimport T from './T.vue'\nimport L from './L.vue'`,
+    ),
+    '/src/A.vue': `<template><Tag v-for="t in tags" :name="t" :key="t" /></template>\n<script setup>import Tag from './components/Tag.vue'\nconst tags = []</script>`,
+    '/src/components/Tag.vue': `<template><router-link :to="link">{{ name }}</router-link></template>\n<script setup>import { computed } from 'vue'\nconst props = defineProps({ name: String })\nconst link = computed(() => ({ name: 'tag', params: { tag: props.name } }))</script>`,
+    '/src/T.vue': `<template><p>t</p></template>`,
+    '/src/L.vue': `<template><p>l</p></template>`,
+  }
+
+  it('does not fan a generic :name prop out to every named route', () => {
+    const { graph } = build(tagRouter)
+    const targets = graph.edges.filter((e) => e.from === 'n_root').map((e) => e.to)
+    expect(targets).not.toContain('n_login')
+    expect(targets).toContain('n_tag_tag')
+  })
+
+  it('counts a parent->child nav exactly once per (from,to,event)', () => {
+    const { graph } = build(tagRouter)
+    const tagEdges = graph.edges.filter((e) => e.from === 'n_root' && e.to === 'n_tag_tag' && e.event === 'click:router-link')
+    expect(tagEdges).toHaveLength(1)
+  })
+
+  it('keeps a real <router-link to="literal"> in a child as a single edge', () => {
+    const { graph } = build({
+      '/src/router.ts': ROUTER(`[{ path: '/a', component: A }, { path: '/b', component: B }]`, `import A from './A.vue'\nimport B from './B.vue'`),
+      '/src/A.vue': `<template><Child /></template>\n<script setup>import Child from './Child.vue'</script>`,
+      '/src/Child.vue': `<template><router-link to="/b">go</router-link></template>`,
+      '/src/B.vue': `<template><p>b</p></template>`,
+    })
+    const bEdges = graph.edges.filter((e) => e.from === 'n_a' && e.to === 'n_b')
+    expect(bEdges).toHaveLength(1)
   })
 })
 
