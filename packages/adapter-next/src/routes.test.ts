@@ -62,6 +62,12 @@ describe('classifyAppRoute — intercepting routes', () => {
     expect(c?.path).toBe('/login')
     expect(c?.kind).toBe('modal')
   })
+  it('(..)(..) intercepts two levels up (no literal marker leaks into path/id)', () => {
+    const c = classifyAppRoute('app/a/b/c/(..)(..)photo/page.tsx')
+    expect(c?.path).toBe('/a/photo')
+    expect(c?.kind).toBe('modal')
+    expect(c?.nodeId).toBe('n_a_photo__intercept')
+  })
   it('gives the modal a distinct id so it does not collide with the real route at the same URL', () => {
     const real = classifyAppRoute('app/photo/[id]/page.tsx')
     const modal = classifyAppRoute('app/feed/(..)photo/[id]/page.tsx')

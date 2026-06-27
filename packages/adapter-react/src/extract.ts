@@ -705,7 +705,7 @@ function collectInlineRouteTargets(roots: Node[], sf: SourceFile): RawTarget[] {
       effect = 'redirect'
     }
     if (event === null) continue
-    out.push({ ti: absolutizeLinkTarget(classifyToAttr(findAttr(el, 'to') ?? findAttr(el, 'href'))), event, effect, node: el, guard: getGuard(el) })
+    out.push({ ti: absolutizeLinkTarget(classifyToAttr(findAttr(el, 'to') ?? findAttr(el, 'href'))), event, effect, node: el, guard: getGuard(el) ?? extraConditionGuard(el) })
   }
   const seenCalls = new Set<Node>()
   for (const root of roots) {
@@ -746,8 +746,11 @@ function collectTargets(sf: SourceFile): RawTarget[] {
     }
     if (event === null) continue
     // react-router <Link to>; next/link <Link href> when there is no `to` (react Links
-    // always carry `to`, so this href fallback never changes react output).
-    out.push({ ti: absolutizeLinkTarget(classifyToAttr(findAttr(el, 'to') ?? findAttr(el, 'href'))), event, effect, node: el, guard: getGuard(el) })
+    // always carry `to`, so this href fallback never changes react output). The guard
+    // combines if/ternary/&&/||/?? (getGuard) with loop/iteration/switch/catch/render-prop/
+    // early-return non-dominance (extraConditionGuard) so a <Link> rendered inside e.g.
+    // items.map(...) is a may-edge, never a phantom must (its render is not guaranteed).
+    out.push({ ti: absolutizeLinkTarget(classifyToAttr(findAttr(el, 'to') ?? findAttr(el, 'href'))), event, effect, node: el, guard: getGuard(el) ?? extraConditionGuard(el) })
   }
 
   const { navSet, histSet, routerSet, redirectNames } = navIdentifiers(sf)

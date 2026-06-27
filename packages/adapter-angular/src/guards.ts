@@ -16,6 +16,12 @@ import { fnv1a } from '@uigraph/core'
  * One analyzed `canActivate` guard. `text` is the symbolic guard string put on
  * the edge. `async` flags an Observable/Promise-returning guard (the body cannot
  * be evaluated statically, so confidence drops and a soundiness note is owed).
+ * `signal` flags a guard whose decision is read from an Angular signal
+ * (`inject(X).isAuthed()` / `.asReadonly()` / a `Signal<boolean>` field): it
+ * resolves SYNCHRONOUSLY (unlike an Observable) so confidence is NOT lowered, but
+ * the gate is reactive — its value can change between map-time and run-time — so a
+ * `signal-guard` soundiness note is owed. `async` and `signal` are mutually
+ * exclusive; an Observable wrapper wins (it is the stronger undecidability).
  * `literalBoolean` is set only when the guard body is a literal `true`/`false`,
  * in which case the gate is statically decided and modality need not be demoted.
  */
@@ -23,6 +29,7 @@ export interface GuardInfo {
   text: string
   kind: 'class' | 'functional'
   async: boolean
+  signal?: boolean
   literalBoolean?: boolean
 }
 
@@ -54,24 +61,30 @@ function asFunction(expr: Expression | undefined): Node | undefined {
 }
 
 const ASYNC_BODY_RE = /\.pipe\s*\(|\.subscribe\s*\(|\bObservable\b|\bPromise\b|\basync\b|\.then\s*\(|\btoPromise\s*\(|\bfirstValueFrom\b|\blastValueFrom\b/
+const SIGNAL_BODY_RE = /\.asReadonly\s*\(\s*\)|\bsignal\s*<|\bcomputed\s*\(|\bSignal\s*</
 
 /**
  * Classify a guard function's body: detect Observable/Promise-returning guards
- * (async, low-confidence) and literal-boolean guards (statically decided). The
- * async check is textual over the body so it covers `.pipe(...)` chains, explicit
+ * (async, low-confidence), Angular-signal-reading guards (synchronous but
+ * reactive), and literal-boolean guards (statically decided). The async check is
+ * textual over the body so it covers `.pipe(...)` chains, explicit
  * `Observable`/`Promise` annotations, and `async`/`.then(...)` forms without a
- * full type-resolution pass.
+ * full type-resolution pass. The signal check is likewise textual
+ * (`.asReadonly()`, `signal<…>`, `computed(…)`, a `Signal<…>` type hint); it is
+ * only reported when the guard is NOT async, since an Observable wrapper is the
+ * stronger undecidability and should not be masked by a co-occurring signal read.
  */
-function classifyBody(fn: Node): { async: boolean; literalBoolean?: boolean } {
+function classifyBody(fn: Node): { async: boolean; signal?: boolean; literalBoolean?: boolean } {
   const bodyText = fn.getText()
   const async = ASYNC_BODY_RE.test(bodyText)
+  const signal = !async && SIGNAL_BODY_RE.test(bodyText)
   let literalBoolean: boolean | undefined
   if (Node.isArrowFunction(fn)) {
     const body = fn.getBody()
     if (Node.isTrueLiteral(body)) literalBoolean = true
     else if (Node.isFalseLiteral(body)) literalBoolean = false
   }
-  return { async, ...(literalBoolean !== undefined ? { literalBoolean } : {}) }
+  return { async, ...(signal ? { signal } : {}), ...(literalBoolean !== undefined ? { literalBoolean } : {}) }
 }
 
 /**
@@ -95,16 +108,16 @@ function anonymousGuardText(fn: Node): string {
 function analyzeElement(sf: SourceFile, el: Node): GuardInfo | null {
   const inlineFn = asFunction(Node.isExpression(el) ? el : undefined)
   if (inlineFn) {
-    const { async, literalBoolean } = classifyBody(inlineFn)
-    return { text: anonymousGuardText(inlineFn), kind: 'functional', async, ...(literalBoolean !== undefined ? { literalBoolean } : {}) }
+    const { async, signal, literalBoolean } = classifyBody(inlineFn)
+    return { text: anonymousGuardText(inlineFn), kind: 'functional', async, ...(signal ? { signal } : {}), ...(literalBoolean !== undefined ? { literalBoolean } : {}) }
   }
   if (Node.isIdentifier(el)) {
     const name = el.getText()
     const init = localInitializer(sf, name)
     const fn = asFunction(init)
     if (fn) {
-      const { async, literalBoolean } = classifyBody(fn)
-      return { text: name, kind: 'functional', async, ...(literalBoolean !== undefined ? { literalBoolean } : {}) }
+      const { async, signal, literalBoolean } = classifyBody(fn)
+      return { text: name, kind: 'functional', async, ...(signal ? { signal } : {}), ...(literalBoolean !== undefined ? { literalBoolean } : {}) }
     }
     return { text: name, kind: 'class', async: false }
   }

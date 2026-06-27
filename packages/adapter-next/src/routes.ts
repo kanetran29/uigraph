@@ -17,7 +17,7 @@ const PAGE_EXT_RE = /\.(tsx|ts|jsx|js)$/
 // Pages Router special files + the api dir are not screens.
 const PAGES_EXCLUDE_RE = /(^|\/)(_app|_document|_error)\.(tsx|ts|jsx|js)$|(^|\/)api\//
 const GROUP_RE = /^\(.+\)$/
-const INTERCEPT_RE = /^(\(\.\)|\(\.\.\)|\(\.\.\.\))(.+)$/
+const INTERCEPT_RE = /^(\(\.\)|\(\.\.\)\(\.\.\)|\(\.\.\)|\(\.\.\.\))(.+)$/
 const DYNAMIC_CATCHALL_RE = /^\[\[?\.\.\..+\]\]?$/
 const DYNAMIC_RE = /^\[(.+)\]$/
 
@@ -54,14 +54,15 @@ function parseAppSegment(seg: string): ParsedSeg {
 
 /**
  * Resolve an intercepting route's overlay target path. The marker is relative to the
- * route's own directory: `(.)` same level, `(..)` one level up, `(...)` from the app root.
- * `base` is the already-mapped normal IR pieces leading to (and excluding) the intercept
- * segment; `target` is the intercepted segment's IR piece, plus any IR pieces nested under
- * the intercepting folder (e.g. the `[id]` in `(.)photo/[id]`).
+ * route's own directory: `(.)` same level, `(..)` one level up, `(..)(..)` two levels up,
+ * `(...)` from the app root. `base` is the already-mapped normal IR pieces leading to (and
+ * excluding) the intercept segment; `target` is the intercepted segment's IR piece, plus any
+ * IR pieces nested under the intercepting folder (e.g. the `[id]` in `(.)photo/[id]`).
  */
 function resolveInterceptPath(base: string[], marker: string, target: string[]): string {
   let dir: string[]
   if (marker === '(...)') dir = []
+  else if (marker === '(..)(..)') dir = base.slice(0, Math.max(0, base.length - 2))
   else if (marker === '(..)') dir = base.slice(0, Math.max(0, base.length - 1))
   else dir = base.slice()
   return '/' + [...dir, ...target].filter(Boolean).join('/')
