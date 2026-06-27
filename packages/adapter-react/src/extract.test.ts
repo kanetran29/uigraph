@@ -392,8 +392,58 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
       expect(navTo(`function go(){ for (let i=0;i<3;i++) navigate('/b') }`)?.modality).toBe('may')
     })
 
+    it('demotes a logical-OR short-circuit navigate to may with a negated guard', () => {
+      const e = navTo(`isReady || navigate('/b')`)
+      expect(e?.modality).toBe('may')
+      expect(e?.guard).toBe('!(isReady)')
+    })
+
+    it('demotes a nullish-coalescing short-circuit navigate to may with a negated guard', () => {
+      const e = navTo(`cached ?? navigate('/b')`)
+      expect(e?.modality).toBe('may')
+      expect(e?.guard).toBe('!(cached)')
+    })
+
+    it('demotes a navigate inside a render-prop callback to may', () => {
+      const { graph } = extractGraph(
+        inMemory({
+          '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+          '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); return <Foo render={() => navigate('/b')} /> }`,
+        }),
+        '/',
+      )
+      const e = graph.edges.find((x) => x.to === 'n_b')
+      expect(e).toBeDefined()
+      expect(e?.modality).toBe('may')
+    })
+
+    it('captures a navigate inside a JSX-children render-prop callback (over-approximated)', () => {
+      const { graph } = extractGraph(
+        inMemory({
+          '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+          '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); return <Foo>{() => navigate('/b')}</Foo> }`,
+        }),
+        '/',
+      )
+      const e = graph.edges.find((x) => x.to === 'n_b')
+      expect(e).toBeDefined()
+      expect(e?.modality).toBe('may')
+    })
+
     it('keeps an unconditional handler navigate as must', () => {
       expect(navTo(`function go(){ navigate('/b') }`)?.modality).toBe('must')
+    })
+
+    it('keeps an onClick handler navigate as must (not mistaken for a render-prop)', () => {
+      const { graph } = extractGraph(
+        inMemory({
+          '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+          '/A.tsx': `import { useNavigate } from 'react-router-dom'\nexport default function A(){ const navigate = useNavigate(); return <button onClick={() => navigate('/b')}>go</button> }`,
+        }),
+        '/',
+        { controls: true },
+      )
+      expect(graph.edges.some((e) => e.to === 'n_b' && e.modality === 'must')).toBe(true)
     })
 
     it('never emits a single must-edge for an ambiguous param literal', () => {

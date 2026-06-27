@@ -83,7 +83,14 @@ export interface Witness {
   screenshot?: string
 }
 
-/** A transition: (event, symbolic guard, effect) from one node to another. */
+/**
+ * A transition: (event, symbolic guard, effect) from one node to another.
+ * `irreversible` is an OPTIONAL gate hint: when true, the edge performs a
+ * destructive/non-undoable effect (delete, pay, submit-order, logout, reset) so
+ * an agent can require confirmation before traversing it. It is additive and
+ * defaults `undefined`; callers that want a value can derive one from the effect
+ * string via `classifyEffectRisk` in risk.ts.
+ */
 export interface GraphEdge {
   id: string
   from: string
@@ -95,6 +102,7 @@ export interface GraphEdge {
   source: Source
   confidence: number
   witness?: Witness
+  irreversible?: boolean
 }
 
 /** Provenance metadata for a whole graph (content-addressing inputs). */

@@ -126,7 +126,14 @@ function within(container: Node, node: Node): boolean {
   return node.getStart() >= container.getStart() && node.getEnd() <= container.getEnd()
 }
 
-/** Nearest enclosing guard condition (if / ternary / `&&`) as symbolic text, or null. */
+/**
+ * Nearest enclosing guard condition as symbolic text, or null. Covers if / ternary
+ * and every short-circuit operator: `&&` (RHS reached when LHS is truthy -> `lhs`),
+ * `||` (RHS reached only when LHS is FALSY -> `!(lhs)`), and `??` (RHS reached only
+ * when LHS is nullish -> `!(lhs)`). The `||`/`??` cases close a phantom-`must` gap:
+ * `isReady || navigate('/b')` runs the navigation only when `!isReady`, so it must
+ * be a `may`-edge with that guard, never an unconditional `must`.
+ */
 function getGuard(node: Node): string | null {
   let cur: Node = node
   for (;;) {
@@ -141,8 +148,10 @@ function getGuard(node: Node): string | null {
     } else if (Node.isConditionalExpression(parent)) {
       if (within(parent.getWhenTrue(), node)) return parent.getCondition().getText()
       if (within(parent.getWhenFalse(), node)) return `!(${parent.getCondition().getText()})`
-    } else if (Node.isBinaryExpression(parent) && parent.getOperatorToken().getText() === '&&') {
-      if (within(parent.getRight(), node)) return parent.getLeft().getText()
+    } else if (Node.isBinaryExpression(parent)) {
+      const op = parent.getOperatorToken().getText()
+      if (op === '&&' && within(parent.getRight(), node)) return parent.getLeft().getText()
+      if ((op === '||' || op === '??') && within(parent.getRight(), node)) return `!(${parent.getLeft().getText()})`
     }
     cur = parent
   }
@@ -151,11 +160,24 @@ function getGuard(node: Node): string | null {
 const ITERATION_METHODS = /^(map|forEach|filter|reduce|find|some|every|flatMap)$/
 
 /**
+ * Whether a JSX expression container is the value of an `on*` event-handler attribute
+ * (onClick, onSubmit, …). Used to tell a real interaction handler apart from a
+ * render-prop callback: a handler's direct navigation is a legitimate `must`, a
+ * render-prop's is only `may`.
+ */
+function isEventHandlerExpression(jsxExpr: Node): boolean {
+  const parent = jsxExpr.getParent()
+  if (!parent || !Node.isJsxAttribute(parent)) return false
+  return /^on[A-Z]/.test(parent.getNameNode().getText())
+}
+
+/**
  * A non-dominance condition that makes a programmatic navigation NOT unconditional
  * (so it must be a `may`-edge, never a proven `must`): an enclosing loop, switch
- * case, catch, or array-iteration callback, or a preceding early-return/throw
- * guard in the same block. Complements getGuard (if/ternary/&&) — together they
- * close the phantom-`must` gap where only nearest-enclosing-syntax was checked.
+ * case, catch, array-iteration callback, or render-prop callback, or a preceding
+ * early-return/throw guard in the same block. Complements getGuard (if/ternary/&&/
+ * ||/??) — together they close the phantom-`must` gap where only nearest-enclosing-
+ * syntax was checked.
  */
 function extraConditionGuard(node: Node): string | null {
   let cur: Node = node
@@ -173,9 +195,19 @@ function extraConditionGuard(node: Node): string | null {
     }
     if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) return 'switch-case'
     if (Node.isCatchClause(parent)) return 'catch'
-    if ((Node.isArrowFunction(cur) || Node.isFunctionExpression(cur)) && Node.isCallExpression(parent)) {
-      const callee = parent.getExpression()
-      if (Node.isPropertyAccessExpression(callee) && ITERATION_METHODS.test(callee.getName())) return 'iteration'
+    if (Node.isArrowFunction(cur) || Node.isFunctionExpression(cur)) {
+      if (Node.isCallExpression(parent)) {
+        const callee = parent.getExpression()
+        if (Node.isPropertyAccessExpression(callee) && ITERATION_METHODS.test(callee.getName())) return 'iteration'
+        break
+      }
+      // A render prop: an inline callback supplied as a NON-event-handler JSX attribute
+      // value (render={() => navigate(…)}) or a JSX expression child ({() => <X/>}). Its
+      // body runs only when the host component invokes it at render — never guaranteed —
+      // so a navigation inside it is conditional, never an unconditional `must`. An `on*`
+      // handler (onClick={() => navigate(…)}) is the opposite: a real interaction anchor
+      // whose direct nav IS a `must`, so it is deliberately excluded here.
+      if (Node.isJsxExpression(parent) && !isEventHandlerExpression(parent)) return 'render-prop'
       break
     }
     cur = parent

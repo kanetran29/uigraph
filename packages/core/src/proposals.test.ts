@@ -45,7 +45,7 @@ describe('validateProposals', () => {
 
 describe('materializeProposalGraph — active-graph guard', () => {
   const g = graph([node('n_a'), node('n_b')], [])
-  const p = (over: Partial<Proposal> = {}) => proposal({ screen: 'n_a', to: 'n_b', ...over })
+  const p = (over: Partial<Proposal> = {}) => proposal({ screen: 'n_a', to: 'n_b', event: 'click', ...over })
 
   it('emits an edge for a proposed proposal', () => {
     expect(materializeProposalGraph(g, [p()]).edges).toHaveLength(1)
@@ -55,5 +55,17 @@ describe('materializeProposalGraph — active-graph guard', () => {
     for (const status of ['confirmed', 'rejected', 'unverifiable'] as const) {
       expect(materializeProposalGraph(g, [p({ status })]).edges).toHaveLength(0)
     }
+  })
+
+  it('never emits an edge with an empty event (event-less proposal is skipped)', () => {
+    for (const event of [undefined, ''] as const) {
+      const out = materializeProposalGraph(g, [p({ event })])
+      expect(out.edges).toHaveLength(0)
+    }
+  })
+
+  it('every emitted edge carries a non-empty event', () => {
+    const out = materializeProposalGraph(g, [p({ id: 'p1', event: 'click' }), p({ id: 'p2', event: '' }), p({ id: 'p3', event: undefined })])
+    expect(out.edges.every((e) => e.event.length > 0)).toBe(true)
   })
 })

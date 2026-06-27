@@ -568,21 +568,30 @@ describe('recall-first read tools: get_state, list_cases, get_frontier, plan_pat
     expect(toErr.cases[0]?.trustTier).toBe('proposed')
   })
 
-  it('get_frontier lists states with unknown out-edges (and dead ends), with unknown-case counts', () => {
+  it('get_frontier lists only states with UNRESOLVED unknown out-edges (and dead ends)', () => {
     const res = getFrontier(formWorkspace())
     const ids = res.nodes.map((n) => n.id)
-    // n_form has a dynamic-sink/unknown out-edge; the leaf screens have no out-edges (dead ends)
-    expect(ids).toContain('n_form')
-    const form = res.nodes.find((n) => n.id === 'n_form')
-    expect(form?.unknownCount).toBe(1)
-    expect(form?.cases[0]?.toNode).toBe('u_dyn')
+    // n_form has a dynamic sink (u_dyn) BUT also a witnessed runtime landing (e_loading
+    // -> n_loading), so its dispatch is resolved => n_form is NOT on the frontier.
+    expect(ids).not.toContain('n_form')
     // leaf screens are dead ends -> on the frontier with zero unknown cases
+    expect(ids).toContain('n_success')
     expect(res.nodes.find((n) => n.id === 'n_success')?.unknownCount).toBe(0)
   })
 
-  it('get_frontier({state}) narrows to one frontier node (and is empty for a non-frontier state)', () => {
+  it('get_frontier surfaces a state whose dynamic sink is still UNresolved', () => {
+    // n_dead has only a dynamic-sink out-edge and no concrete runtime landing.
+    const u: GraphNode = { id: 'u_dead', route: null, componentPath: null, label: 'dyn', kind: 'unknown' }
+    const g = graph([node('n_dead'), u], [{ ...edge('e_d', 'n_dead', 'u_dead'), source: 'static', modality: 'unknown' }])
+    const res = getFrontier(newWorkspace(g))
+    expect(res.nodes.map((n) => n.id)).toEqual(['n_dead'])
+    expect(res.nodes[0]?.unknownCount).toBe(1)
+    expect(res.nodes[0]?.cases[0]?.toNode).toBe('u_dead')
+  })
+
+  it('get_frontier({state}) is empty for a resolved (non-frontier) state', () => {
     const ctx = formWorkspace()
-    expect(getFrontier(ctx, { state: 'n_form' }).nodes.map((n) => n.id)).toEqual(['n_form'])
+    expect(getFrontier(ctx, { state: 'n_form' }).nodes).toEqual([])
   })
 
   it('plan_path with minTier flags low-trust hops in tierWarnings without dropping the path', () => {
@@ -599,5 +608,85 @@ describe('recall-first read tools: get_state, list_cases, get_frontier, plan_pat
     const res = planPathTool(formWorkspace(), { from: 'n_form', to: 'n_success', minTier: 'proven' })
     expect(res.found).toBe(true)
     expect(res.tierWarnings).toBeUndefined()
+  })
+})
+
+describe('MCP surface: risk, verified-vs-accounted, staleness (red-team)', () => {
+  // a -> b is a benign navigate; a -> c is a destructive "pay" effect; a proposal
+  // a -> d carries a "state:deleteAccount" effect (irreversible derived from effect).
+  function riskWorkspace(): ToolContext {
+    const g = graph(
+      [node('a'), node('b'), node('c'), node('d')],
+      [
+        { ...edge('e_ab', 'a', 'b'), effect: 'navigate' },
+        { ...edge('e_ac', 'a', 'c'), effect: 'api:POST /pay' },
+      ],
+    )
+    const ctx = newWorkspace(g)
+    seedProposals(ctx, {
+      version: 0,
+      base: 'h',
+      proposals: [proposal('p_del', { kind: 'edge', screen: 'a', to: 'd', event: 'click', effect: 'state:deleteAccount' })],
+    })
+    return ctx
+  }
+
+  it('get_state cases carry an irreversible flag: destructive effects flagged, benign not', () => {
+    const res = getState(riskWorkspace(), { id: 'a' })
+    if ('error' in res) throw new Error(res.error)
+    const byTo = new Map(res.cases.map((c) => [c.toNode, c]))
+    expect(byTo.get('b')?.irreversible).toBe(false)
+    expect(byTo.get('c')?.irreversible).toBe(true)
+  })
+
+  it('list_cases flags an irreversible proposal edge from its effect string', () => {
+    const ctx = riskWorkspace()
+    const proposed = listCases(ctx, { outcomeClass: 'd' })
+    expect(proposed.total).toBe(1)
+    expect(proposed.cases[0]?.trustTier).toBe('proposed')
+    expect(proposed.cases[0]?.irreversible).toBe(true)
+  })
+
+  it('get_state honors an explicit irreversible:false even when the effect looks destructive', () => {
+    // explicit flag wins over the effect heuristic (the IR may override the keyword guess)
+    const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), effect: 'api:POST /pay', irreversible: false }])
+    const res = getState(newWorkspace(g), { id: 'a' })
+    if ('error' in res) throw new Error(res.error)
+    expect(res.cases[0]?.irreversible).toBe(false)
+  })
+
+  it('get_coverage exposes verifiedRatio + parkedCount (verified-vs-accounted) the agent must consult', () => {
+    // a->b may (open until driven/parked), a->u dynamic sink; park a->b so accounted=1 but verified<1
+    const u: GraphNode = { id: 'u_a', route: null, componentPath: null, label: 'dynamic', kind: 'unknown' }
+    const ctx = newWorkspace(graph(
+      [node('a'), node('b'), u],
+      [
+        { ...edge('e_ab', 'a', 'b'), modality: 'may', source: 'static', guard: 'x' },
+        { ...edge('e_au', 'a', 'u_a'), modality: 'unknown', source: 'static' },
+      ],
+    ))
+    parkEdge(ctx, { id: 'e_ab', reason: 'flag off in dev' })
+    const cov = getCoverage(ctx)
+    expect(cov.parkedCount).toBe(1)
+    // neither edge is runtime-witnessed nor a must-static proof, so nothing is "verified"
+    expect(cov.verifiedRatio).toBe(0)
+    expect(typeof cov.verifiedCount).toBe('number')
+  })
+
+  it('get_coverage includes a staleness summary; ok when sidecars match the base', () => {
+    const ctx = chainWorkspace()
+    const cov = getCoverage(ctx)
+    expect(cov.staleness.ok).toBe(true)
+    expect(cov.staleness.issues).toEqual([])
+  })
+
+  it('get_coverage staleness surfaces a dangling observation (ghost landing) — never silently fresh', () => {
+    const ctx = chainWorkspace()
+    // a confirmed landing on a node not in the graph is dropped; staleness must SAY so
+    reportObservation(ctx, { from: 'a', to: 'n_ghost', event: 'click', outcome: 'confirmed' })
+    const cov = getCoverage(ctx)
+    expect(cov.staleness.ok).toBe(false)
+    expect(cov.staleness.droppedObservationIds.length).toBe(1)
+    expect(cov.staleness.issues.some((i) => i.code === 'OBSERVATION_DANGLING')).toBe(true)
   })
 })

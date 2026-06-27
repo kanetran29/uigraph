@@ -31,7 +31,7 @@ a test.)
 - **reconcile_proposals** — re-derive all proposal statuses from the observation log (idempotent). Use after observations were appended out-of-band (e.g. by `uigraph verify`).
 - **withdraw_proposal** `{id, reason}` — mark a hallucinated/impossible lead `rejected` (out of the worklist). Never touches the proven graph.
 - **mark_unverifiable** `{id, reason}` — park a plausible-but-undrivable lead `unverifiable` (out of the worklist, kept for a human).
-- **park_edge** `{id, reason}` — park a may/unknown EDGE out of the worklist with an auditable reason. Becomes accounted-for but NEVER runtime-verified and never edits the edge. The honest path to 100% accounted-for.
+- **park_edge** `{id, reason}` — park a may/unknown EDGE out of the worklist with an auditable reason. Becomes **accounted-for but NEVER runtime-verified** (accounted ≠ verified) and never edits the edge. The honest path to a fully *accounted-for* known edge set — which is not the same as the app being fully mapped or fully verified.
 - **unpark_edge** `{id}` — return a parked edge to the worklist.
 - **update_graph** — apply a manual overlay edit (addNode/editNode/addEdge/editEdge/remove). Edits are `manual`, modality ≤ `may`.
 

@@ -215,6 +215,22 @@ function layoutExpanded(screenId: string, groups: ControlGroup[]): { size: NodeS
 }
 
 /**
+ * A canonical structural key over node ids, edge endpoints, and the expanded screen
+ * set: it changes ONLY on a relayout-worthy edit. It is the cache key that lets the
+ * canvas memoize `layoutGraph` so the O(nodes+edges) radial layout is not recomputed
+ * on selection/search/hover — those churn a fresh `expanded` Set without changing its
+ * contents, so keying the memo on the Set identity would relayout 200+ nodes per click.
+ * An edge selection or a childless-node selection collapses to the same empty expanded
+ * set and therefore the same key.
+ */
+export function structuralKey(graph: UiGraph, expanded: ReadonlySet<string>): string {
+  const nodeIds = graph.nodes.map((n) => n.id).join(',')
+  const edgeIds = graph.edges.map((e) => `${e.from}>${e.to}`).join(',')
+  const exp = [...expanded].sort().join(',')
+  return `${nodeIds}|${edgeIds}|${exp}`
+}
+
+/**
  * Compute the full canvas layout. Screens are placed radially around the root by
  * BFS depth (root centred); only screens in `expanded` are grown to contain their
  * control grid. Returns empty edge points — edges route as floating curves at render.

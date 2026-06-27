@@ -16,6 +16,7 @@ import type { Proposal, Proposals, ProposalGraph } from './proposals'
 import type { Observation } from './runtime'
 import type { Fingerprint } from './fingerprint'
 import { validateGraph } from './validate'
+import { validateRefs, type StalenessReport } from './staleness'
 import { validateProposals, materializeProposalGraph, type ProposalStatus } from './proposals'
 import { reconcileProposals } from './reconcile'
 import type { ParkedEdge } from './coverage'
@@ -332,6 +333,26 @@ export class Store {
   /** The parked-edge sidecar (empty when none). */
   getParkedEdges(): ParkedEdge[] {
     return this.getDoc<ParkedEdge[]>('parked_edges') ?? []
+  }
+
+  /**
+   * Report staleness/dangling refs of the current sidecars (active overlay,
+   * proposals, observations) against the current base, so serve/coverage can
+   * surface what would be dropped instead of silently trusting it. Returns an
+   * `ok: true` empty report when there is no base graph yet (nothing to be stale
+   * against). Pure read — touches no rows.
+   */
+  stalenessReport(): StalenessReport {
+    const base = this.getBaseGraph()
+    if (base === null) {
+      return { ok: true, baseHash: '', issues: [], droppedObservationIds: [], overlayStaleHash: false, proposalsStaleHash: false }
+    }
+    return validateRefs({
+      base,
+      overlay: this.getOverlay(),
+      proposals: this.getProposals(),
+      observations: this.getObservations(),
+    })
   }
 
   /** Query proposals with optional filters; returns matching rows as Proposals. */

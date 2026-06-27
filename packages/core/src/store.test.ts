@@ -13,7 +13,7 @@ const sidecar = (over: Partial<Proposals> = {}): Proposals => ({
   base: 'h',
   proposals: [
     { id: 'p1', kind: 'interaction', category: 'keyboard', screen: 'a', title: 'press enter', rationale: 'r', evidenced: true, confidence: 0.9, source: 'proposal', status: 'proposed', screenshot: 'shots/a.jpeg' },
-    { id: 'p2', kind: 'edge', category: 'navigation', screen: 'b', title: 'go a', to: 'a', rationale: 'r', evidenced: false, confidence: 0.3, source: 'proposal', status: 'proposed' },
+    { id: 'p2', kind: 'edge', category: 'navigation', screen: 'b', title: 'go a', to: 'a', event: 'click', rationale: 'r', evidenced: false, confidence: 0.3, source: 'proposal', status: 'proposed' },
   ],
   ...over,
 })

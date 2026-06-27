@@ -57,7 +57,10 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   store.close()
 
   const targets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds)
-  const driver = opts.driver ?? makePlaywrightDriver(opts.storageState)
+  // When we build the default driver we own its browser and must dispose it after
+  // the run; an injected driver brings its own lifecycle, so there is nothing to close.
+  const owned = opts.driver === undefined ? makePlaywrightDriver(opts.storageState) : null
+  const driver = opts.driver ?? owned!.driver
   const authed = opts.storageState !== undefined
   let confirmed = 0
   let refuted = 0
@@ -65,6 +68,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   let discoveredNodes = 0
   let parkedDynamic = 0
 
+  try {
   for (const t of targets) {
     const steps = planPath(graph, t.from, t.to)
     if (steps === null) continue
@@ -138,6 +142,9 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     })
     if (result.confirmed) confirmed++
     else refuted++
+  }
+  } finally {
+    if (owned !== null) await owned.dispose()
   }
 
   return { attempted: targets.length, confirmed, refuted, resolvedDynamic, discoveredNodes, parkedDynamic }
@@ -314,26 +321,47 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
   return { confirmed }
 }
 
-/**
- * Build the default driver: launch Chromium (playwright-core), open a context
- * (optionally hydrated from a saved auth `storageState` so the run is logged in),
- * and run the plan via drivePlan against the live page.
- */
-function makePlaywrightDriver(storageState?: string): VerifyDriver {
-  return async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }): Promise<VerifyResult> => {
-    const { chromium } = await loadPlaywright()
-    const browser = (await chromium.launch()) as PwBrowser
-    try {
-      const context = await browser.newContext(storageState !== undefined ? { storageState } : {})
-      const page = await context.newPage()
-      return await drivePlan(page, plan, appUrl, opts)
-    } finally {
-      await browser.close()
-    }
-  }
+/** A driver paired with the teardown for the browser it owns. dispose is idempotent and a no-op if no browser was ever launched. */
+export interface OwnedDriver {
+  driver: VerifyDriver
+  dispose: () => Promise<void>
 }
 
-export { drivePlan }
+/**
+ * Build the default driver: launch Chromium (playwright-core) ONCE per run and open
+ * a single context (optionally hydrated from a saved auth `storageState` so the run
+ * is logged in), both reused across every planned edge to avoid a per-edge launch
+ * cost. The browser/context are created lazily on the first driver call; each call
+ * opens a fresh page, drives the plan via drivePlan, and closes that page. The caller
+ * must invoke `dispose` after the run to close the shared browser.
+ */
+function makePlaywrightDriver(storageState?: string): OwnedDriver {
+  let browser: PwBrowser | null = null
+  let context: PwContext | null = null
+  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }): Promise<VerifyResult> => {
+    if (context === null) {
+      const { chromium } = await loadPlaywright()
+      browser = (await chromium.launch()) as PwBrowser
+      context = await browser.newContext(storageState !== undefined ? { storageState } : {})
+    }
+    const page = await context.newPage()
+    try {
+      return await drivePlan(page, plan, appUrl, opts)
+    } finally {
+      await page.close()
+    }
+  }
+  const dispose = async (): Promise<void> => {
+    if (browser !== null) {
+      await browser.close()
+      browser = null
+      context = null
+    }
+  }
+  return { driver, dispose }
+}
+
+export { drivePlan, makePlaywrightDriver }
 
 /** The slice of the Playwright Browser/Context API the driver uses (typed loosely; playwright-core is optional). */
 interface PwBrowser {
@@ -356,6 +384,7 @@ interface PwPage {
   getByRole: (role: string) => PwLocator
   waitForLoadState: (state: string) => Promise<void>
   waitForURL: (predicate: (url: URL) => boolean, opts?: unknown) => Promise<void>
+  close: () => Promise<void>
 }
 
 /** Evaluate a `page.getBy…`-style locator snippet against the page, then click/fill it. */

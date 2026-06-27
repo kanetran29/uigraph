@@ -9,12 +9,13 @@ import type { SoundinessNote } from './adapter'
 import type { Observation } from './runtime'
 import type { Proposals } from './proposals'
 import type { ApiBindings } from './openapi'
-import { assertGraphShape, assertOverlayShape } from './schema'
+import { assertGraphShape, assertObservationShape, assertOverlayShape } from './schema'
 import { validateGraph } from './validate'
 import { validateProposals } from './proposals'
 import type { Store } from './store'
 
 export { Store, openStore, type ProposalQuery, type GraphSnapshot } from './store'
+export { validateRefs, type StalenessReport, type StalenessIssue, type ValidateRefsInput } from './staleness'
 export { fingerprintSources, compareFingerprint, type Fingerprint, type FileScan, type FreshnessDiff } from './fingerprint'
 export {
   emptyRegistry,
@@ -134,7 +135,9 @@ export function importJsonWorkspace(dir: string, store: Store): ImportSummary {
   if (existsSync(obsPath)) {
     for (const line of readFileSync(obsPath, 'utf8').split('\n')) {
       if (line.trim().length === 0) continue
-      store.appendObservation(JSON.parse(line) as Observation)
+      const parsed = JSON.parse(line)
+      assertObservationShape(parsed)
+      store.appendObservation(parsed as Observation)
       summary.observations++
     }
   }

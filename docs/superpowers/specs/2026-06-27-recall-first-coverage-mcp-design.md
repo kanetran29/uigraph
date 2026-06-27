@@ -2,9 +2,11 @@
 
 **Date:** 2026-06-27
 **Status:** approved (brainstorming) — pending implementation plan
-**Topic:** an MCP server that lets an AI agent know *all the possible cases* in an app
-by maximizing the discovered case set (recall), then verifying each case so the
-agent can plan over a trustworthy, gap-aware behavioral map.
+**Topic:** an MCP server whose headline is the **frontier** — the known-unknowns it
+can name — not completeness. It maximizes the *discovered* case set (recall), verifies
+each case, and labels every case by trust, so the agent plans over a gap-aware
+behavioral map and is **never silently blind to a case**. It does not — and cannot —
+claim to know *all* cases; the denominator is unknowable (see §7, §9).
 
 ## 1. Problem & goal
 
@@ -15,9 +17,10 @@ be driven. This guarantees soundness but leaves most of an app's *behavioral* lo
 tail (per-input validation, error/async outcomes, retries, rate-limits) undiscovered.
 
 The product goal is the inverse emphasis: a **recall-first** system whose MCP server
-gives an AI agent the *most complete map of every behavioral case the app can
-exhibit*, with each case labeled by how much it can be trusted, so the agent can
-**act and plan safely in-app and never be silently blind to a case**.
+gives an AI agent *as many of the app's behavioral cases as it can discover* —
+**not all of them, and never claimed as all** — with each case labeled by how much it
+can be trusted and the un-enumerated remainder surfaced as an explicit frontier, so
+the agent can **act and plan safely in-app and never be silently blind to a case**.
 
 This is a shift of *priority*, not of primitives — it reuses uigraph's IR
 (nodes/edges with guard/effect, `modality` must/may/unknown, `source`
@@ -27,10 +30,13 @@ static/runtime/manual), proposals store, runtime observations, and coverage.
 
 - **Primary consumer:** an agent that *acts/plans in the app*. It needs a complete,
   trustworthy map and must **know what it does not know** (explicit unknowns).
-- **Case boundary:** **behavioral equivalence classes** — one case per
-  behaviorally-distinct outcome (valid-submit, invalid-email, 409-taken,
-  rate-limited, loading), NOT per concrete value. This bounds the otherwise-infinite
-  value/sequence space.
+- **Case boundary:** **behavioral equivalence class** — defined as: *a maximal set of
+  concrete `(input, sequence)` pairs that the app routes to the same observable
+  outcome* (same target state / sub-state, same effect). One case represents the whole
+  class (valid-submit, invalid-email, 409-taken, rate-limited, loading), NOT each
+  concrete value. This is the abstraction that bounds the otherwise-infinite
+  value/sequence space — and also its limit: two inputs the model lumps together may in
+  reality diverge (a class is only as fine-grained as the evidence that split it).
 - **Trust model:** **keep every case, tag by strongest evidence (tiered)**. Recall
   stays maximal; safety comes from honest labels, not from dropping the long tail.
 - **Approach:** **Generate–Verify–Promote loop** (A) as the spine, with a runtime
@@ -112,7 +118,34 @@ Each phase maps to an isolated, independently-testable unit (see §8).
 
 ## 7. Coverage metric (honest)
 
-The denominator (ALL cases) is unknowable, so completeness is never claimed. Report:
+The denominator (ALL cases) is unknowable, so completeness is never claimed.
+
+**Structural limits — what a finite IR graph cannot represent (so it is never counted):**
+- **Timing / async races** — debounce windows, double-submit, retry/backoff timing, a
+  50/50 flickering edge. The graph records *which* outcomes occur, not their timing or
+  ordering probabilities.
+- **Multi-field / cross-field interactions** — a case is keyed on a single
+  `(eventClass, outcomeClass)`; combinations of field values that jointly change the
+  outcome collapse into one class or are simply not enumerated.
+- **Cross-session / stateful history** — outcomes that depend on prior sessions,
+  server-side accumulation (rate-limit counters across visits), or data not visible to
+  a single drive. State = page × form × store × data × timing; any finite graph is an
+  abstraction that loses information by construction.
+
+These are out of scope by design, not bugs. A case the graph cannot represent does not
+appear as a frontier `unknown` either — it is simply outside the model; the docs say so
+rather than implying the map is closed over them.
+
+**`accounted%` ≠ `verified%`.** Two different ratios, never conflated:
+- **`verified%`** = runtime-witnessed (Tier-3) fraction of the *known* edge set — the
+  only fraction backed by an observation.
+- **`accounted%`** = known edges that are resolved *by any means* — witnessed, proven,
+  or **parked** (a `may`/`unknown` edge a human deliberately set aside with a reason).
+  Parked edges are accounted-for but **never runtime-verified**. A high `accounted%`
+  with a low `verified%` is honest and expected; it must never be reported as if the
+  behavior were confirmed.
+
+Report:
 1. **Recall saturation** — new cases/round; dry after K empty rounds →
    *"saturated after N rounds, M cases"* (recall signal, not a guarantee).
 2. **Tier distribution** — % of discovered cases per tier; *trustable coverage* =
@@ -149,6 +182,18 @@ Mostly additive — uigraph's MCP already has `get_graph`, `plan_path`, `update_
   (Tracked separately as the Tier-3 goto-fallback finding.)
 - Proposals are bound to the base-graph hash → reconcile/invalidate on re-map.
 - Loop bounded by `max-rounds` + token budget.
+- **BYOA burden (be honest about who does the work).** The core is model-free: the
+  connecting agent brings the LLM, the proposer lenses, the runtime driver, and the
+  token budget. Recall quality, hallucination rate, and how far the frontier shrinks
+  are therefore properties of *the operator's* setup, not guarantees of this system.
+  The design ships the primitives and the honest labels; it does not ship the
+  intelligence that fills the map.
+- **Not yet built.** This is a design, not shipped behavior. The **recall proposer
+  swarm** (the multi-lens loop-until-dry engine of §5) and the V1 LLM-judge of §6 are
+  **not implemented** — today proposals are a hand/agent-authored sidecar, and
+  `report_observation` only folds confirmed runtime edges. The trust tiers, frontier,
+  and coverage readouts describe the *target* surface; do not present them as a working
+  recall pipeline.
 
 ## 10. Testing
 

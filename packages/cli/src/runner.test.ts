@@ -5,11 +5,11 @@
 // confirm by a bare URL match, while a direct-nav link edge still confirms by URL,
 // and capture-mode is unaffected (it drives interactions and observes the landing).
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { buildSpecPlan } from '@uigraph/core'
 import { planPath } from '@uigraph/core'
-import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
-import { drivePlan } from './runner'
+import type { GraphEdge, GraphNode, SpecPlan, UiGraph, Witness } from '@uigraph/core'
+import { drivePlan, makePlaywrightDriver } from './runner'
 
 const staticWitness: Witness = { source: 'static', file: 'x.tsx', loc: { line: 1, col: 1 }, ruleId: 'test' }
 
@@ -118,5 +118,82 @@ describe('drivePlan: goto-fallback soundness (assert mode)', () => {
     expect(f.clicks).toBeGreaterThan(0)
     expect(res.landedUrl).toBe('http://app/landed')
     expect(res.confirmed).toBe(true)
+  })
+})
+
+// makePlaywrightDriver must launch ONE browser per run and reuse it across edges
+// (a fresh page per edge, closed after), not relaunch Chromium per edge. We mock
+// playwright-core with a fake chromium that tallies launches/contexts/pages so the
+// reuse contract is provable without a real browser, while still confirming the
+// orchestration drives each plan and judges confirm/refute correctly.
+const launches = { count: 0 }
+const contexts = { count: 0 }
+const pages = { open: 0, closed: 0 }
+
+vi.mock('playwright-core', () => {
+  const makePage = (): unknown => {
+    pages.open++
+    let current = ''
+    return {
+      goto: async (url: string) => {
+        current = url
+        return undefined
+      },
+      url: () => current,
+      getByRole: () => ({ click: async () => {}, fill: async () => {}, count: async () => 0 }),
+      locator: () => ({ click: async () => {}, fill: async () => {}, count: async () => 0 }),
+      waitForLoadState: async () => {},
+      waitForURL: async () => {},
+      close: async () => {
+        pages.closed++
+      },
+    }
+  }
+  const makeContext = (): unknown => {
+    contexts.count++
+    return { newPage: async () => makePage() }
+  }
+  return {
+    chromium: {
+      launch: async () => {
+        launches.count++
+        return { newContext: async () => makeContext(), close: async () => {} }
+      },
+    },
+  }
+})
+
+describe('makePlaywrightDriver: one browser per run, page per edge', () => {
+  it('launches Chromium once across many edges, opens+closes a page each, and judges each plan', async () => {
+    launches.count = 0
+    contexts.count = 0
+    pages.open = 0
+    pages.closed = 0
+
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e', 'n_a', 'n_b', { event: 'click:Link', guard: null })],
+    )
+    const plan: SpecPlan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+
+    const owned = makePlaywrightDriver()
+    const r1 = await owned.driver(plan, 'http://app')
+    const r2 = await owned.driver(plan, 'http://app')
+    const r3 = await owned.driver(plan, 'http://app')
+    await owned.dispose()
+
+    expect(launches.count).toBe(1)
+    expect(contexts.count).toBe(1)
+    expect(pages.open).toBe(3)
+    expect(pages.closed).toBe(3)
+    // The direct-nav link edge confirms by URL assert on every reused page.
+    expect([r1.confirmed, r2.confirmed, r3.confirmed]).toEqual([true, true, true])
+  })
+
+  it('dispose before any drive is a no-op (no browser launched)', async () => {
+    launches.count = 0
+    const owned = makePlaywrightDriver()
+    await owned.dispose()
+    expect(launches.count).toBe(0)
   })
 })
