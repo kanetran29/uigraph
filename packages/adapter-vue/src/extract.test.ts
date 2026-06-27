@@ -148,9 +148,14 @@ describe('navigation edges (F-vue-adapter)', () => {
   })
 
   it('records a fully dynamic push as a dynamic-target note (no edge)', () => {
-    const { graph, soundiness } = build(two('<button @click="go">go</button>', `const dest = '/b'\nfunction go(){ router.push(dest) }`))
+    const { graph, soundiness } = build(two('<button @click="go">go</button>', `function go(){ router.push(location.hash) }`))
     expect(graph.edges.some((e) => e.to === 'n_b')).toBe(false)
     expect(soundiness.some((s) => s.kind === 'dynamic-target')).toBe(true)
+  })
+
+  it('resolves a string-const push target (enum-resolvable, rule E.1)', () => {
+    const { graph } = build(two('<button @click="go">go</button>', `const dest = '/b'\nfunction go(){ router.push(dest) }`))
+    expect(graph.edges.find((e) => e.to === 'n_b')?.modality).toBe('must')
   })
 })
 

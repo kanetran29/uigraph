@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { nextRoutePath } from './routes'
+import { nextRoutePath, classifyAppRoute } from './routes'
 
 describe('nextRoutePath — App Router', () => {
   it('maps page files to their route path', () => {
@@ -44,5 +44,60 @@ describe('nextRoutePath — non-routes', () => {
   it('is null for files outside app/ and pages/', () => {
     expect(nextRoutePath('components/Header.tsx')).toBeNull()
     expect(nextRoutePath('lib/utils.ts')).toBeNull()
+  })
+})
+
+describe('classifyAppRoute — intercepting routes', () => {
+  it('(.) intercepts a sibling segment as a modal at the same level', () => {
+    const c = classifyAppRoute('app/feed/(.)photo/[id]/page.tsx')
+    expect(c).toEqual({ path: '/feed/photo/:id', kind: 'modal', nodeId: 'n_feed_photo_id__intercept' })
+  })
+  it('(..) intercepts one level up', () => {
+    const c = classifyAppRoute('app/feed/grid/(..)photo/page.tsx')
+    expect(c?.path).toBe('/feed/photo')
+    expect(c?.kind).toBe('modal')
+  })
+  it('(...) intercepts from the app root', () => {
+    const c = classifyAppRoute('app/dashboard/settings/(...)login/page.tsx')
+    expect(c?.path).toBe('/login')
+    expect(c?.kind).toBe('modal')
+  })
+  it('gives the modal a distinct id so it does not collide with the real route at the same URL', () => {
+    const real = classifyAppRoute('app/photo/[id]/page.tsx')
+    const modal = classifyAppRoute('app/feed/(..)photo/[id]/page.tsx')
+    expect(modal?.path).toBe(real?.path)
+    expect(modal?.path).toBe('/photo/:id')
+    expect(modal?.nodeId).not.toBe(real?.nodeId)
+  })
+})
+
+describe('classifyAppRoute — parallel routes (@slot)', () => {
+  it('emits a slot node with an id encoding parentPath + slot, URL strips the slot', () => {
+    const c = classifyAppRoute('app/dashboard/@team/page.tsx')
+    expect(c).toEqual({ path: '/dashboard', kind: 'route', nodeId: 'n_dashboard__slot_team' })
+  })
+  it('keeps the inner route path while still distinguishing slots', () => {
+    const members = classifyAppRoute('app/@analytics/views/page.tsx')
+    expect(members?.path).toBe('/views')
+    expect(members?.nodeId).toBe('n_root__slot_analytics_views')
+  })
+  it('two pages in the same slot get distinct ids (no collision)', () => {
+    const a = classifyAppRoute('app/dashboard/@team/members/page.tsx')
+    const b = classifyAppRoute('app/dashboard/@team/settings/page.tsx')
+    expect(a?.nodeId).not.toBe(b?.nodeId)
+  })
+  it('classifies a slot default.tsx (parallel-route fallback) too', () => {
+    const c = classifyAppRoute('app/dashboard/@team/default.tsx')
+    expect(c?.kind).toBe('route')
+    expect(c?.nodeId).toBe('n_dashboard__slot_team')
+  })
+})
+
+describe('classifyAppRoute — basic + groups still work', () => {
+  it('plain page is a screen', () => {
+    expect(classifyAppRoute('app/about/page.tsx')).toEqual({ path: '/about', kind: 'screen' })
+  })
+  it('route group is stripped, screen kind', () => {
+    expect(classifyAppRoute('app/(marketing)/pricing/page.tsx')).toEqual({ path: '/pricing', kind: 'screen' })
   })
 })

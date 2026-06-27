@@ -5,8 +5,8 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/core'
-import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, hashValue } from '@uigraph/core'
+import type { AdapterContext, Logger, SoundinessNote, UiGraph, Proposal } from '@uigraph/core'
+import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue } from '@uigraph/core'
 import type { GraphDiff, SinceLastDiff } from '@uigraph/core'
 import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@uigraph/core/node'
 import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@uigraph/mcp'
@@ -219,8 +219,9 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
 
   let graph: UiGraph
   let soundiness: SoundinessNote[]
+  let proposals: Proposal[] | undefined
   try {
-    ;({ graph, soundiness } = await adapter.extract(opts.dir, { controls: opts.controls ?? false }, ctx))
+    ;({ graph, soundiness, proposals } = await adapter.extract(opts.dir, { controls: opts.controls ?? false }, ctx))
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err)
     throw new CliError(`failed to extract the ${adapterName} graph from ${opts.dir}\n  ${reason}`)
@@ -233,6 +234,13 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
     // MUST run before setBaseGraph/setFingerprint overwrite the graph + mappedAt it reads.
     store.snapshotCurrentAsPrevious()
     store.setBaseGraph(graph, soundiness)
+    // Persist any static Tier-2 proposals the adapter derived (e.g. state-driven
+    // screens). Quarantined: stored via the proposals sidecar bound to the base
+    // graph hash, never folded into the proven graph. Skipped when the adapter
+    // emits none so existing workspaces are untouched.
+    if (proposals !== undefined && proposals.length > 0) {
+      store.setProposals({ ...emptyProposals(hashValue(graph)), proposals })
+    }
     // Stamp a source fingerprint so `uigraph status` / get_freshness can later tell the
     // graph is stale. The CLI owns the clock (mappedAt); the store/core stay clock-free.
     const scan = fingerprintSources(opts.dir)
