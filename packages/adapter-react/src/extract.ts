@@ -6,7 +6,8 @@
 
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
 import type { JsxAttribute, SourceFile } from 'ts-morph'
-import { dirname, join, relative } from 'node:path'
+import { dirname, isAbsolute, join, relative } from 'node:path'
+import { readFileSync } from 'node:fs'
 import type { ControlInput, ControlSelector, ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@uigraph/core'
 import { routeToNodeId, edgeId, controlNodeId } from './ids'
 import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
@@ -35,6 +36,53 @@ interface RouteInfo {
  */
 export type RouteSeed = RouteInfo
 
+/**
+ * The non-relative import resolution config read from an app's jsconfig/tsconfig:
+ * the absolute baseUrl directory and any `paths` alias map (with the absolute base
+ * each alias resolves against). Many real react apps import route components by a
+ * bare specifier (`import Login from "pages/Login"`) that only resolves through
+ * baseUrl/paths — without this the route component never resolves and the screen
+ * produces zero edges.
+ */
+interface AliasConfig {
+  baseUrl: string | null
+  paths: { prefix: string; targets: string[] }[]
+}
+
+const aliasConfigByProject = new WeakMap<Project, AliasConfig>()
+
+/**
+ * Read baseUrl + paths from `projectDir`'s jsconfig.json or tsconfig.json (best-effort,
+ * tolerant of comments/trailing commas via a light strip). Returns absolute paths so the
+ * resolver can join a bare specifier directly. A missing/unreadable config yields an empty
+ * config (relative-only resolution, the prior behaviour).
+ */
+function readAliasConfig(projectDir: string): AliasConfig {
+  for (const name of ['tsconfig.json', 'jsconfig.json']) {
+    let raw: string
+    try {
+      raw = readFileSync(join(projectDir, name), 'utf8')
+    } catch {
+      continue
+    }
+    // ts.parseConfigFileTextToJson handles JSONC (comments, trailing commas) correctly —
+    // a naive regex strip mis-handles `/*` inside path globs like ["./src/client/*"].
+    const { config, error } = ts.parseConfigFileTextToJson(join(projectDir, name), raw)
+    if (error || !config) continue
+    const parsed = config as { compilerOptions?: { baseUrl?: string; paths?: Record<string, string[]> } }
+    const co = parsed.compilerOptions ?? {}
+    const baseUrl = co.baseUrl != null ? join(projectDir, co.baseUrl) : null
+    const pathsBase = baseUrl ?? projectDir
+    const paths: AliasConfig['paths'] = []
+    for (const [pattern, targets] of Object.entries(co.paths ?? {})) {
+      const prefix = pattern.replace(/\*$/, '')
+      paths.push({ prefix, targets: targets.map((t) => join(pathsBase, t.replace(/\*$/, ''))) })
+    }
+    if (baseUrl != null || paths.length > 0) return { baseUrl, paths }
+  }
+  return { baseUrl: null, paths: [] }
+}
+
 /** Build a ts-morph project from a project directory, scanning src first. */
 export function buildProject(projectDir: string): Project {
   const project = new Project({
@@ -49,6 +97,7 @@ export function buildProject(projectDir: string): Project {
     skipLoadingLibFiles: true,
     useInMemoryFileSystem: false,
   })
+  aliasConfigByProject.set(project, readAliasConfig(projectDir))
   project.addSourceFilesAtPaths([`${projectDir}/src/**/*.{ts,tsx,js,jsx}`, `!${projectDir}/**/node_modules/**`])
   if (project.getSourceFiles().length === 0) {
     project.addSourceFilesAtPaths([`${projectDir}/**/*.{ts,tsx,js,jsx}`, `!${projectDir}/**/node_modules/**`])
@@ -318,16 +367,41 @@ function joinPath(ancestors: string[], own: string): string {
 
 const RESOLVE_EXTS = ['.tsx', '.ts', '.jsx', '.js', '/index.tsx', '/index.ts', '/index.jsx', '/index.js']
 
-/** Resolve a relative import specifier to an in-project source file by trying extensions. */
-function resolveRelative(sf: SourceFile, specifier: string): SourceFile | undefined {
-  if (!specifier.startsWith('.')) return undefined
-  const project = sf.getProject()
-  const base = join(dirname(sf.getFilePath()), specifier)
-  for (const ext of RESOLVE_EXTS) {
-    const found = project.getSourceFile(base + ext)
-    if (found) return found
+/** Try each candidate absolute base path with the known extensions, returning the first in-project file. */
+function tryBases(project: Project, bases: string[]): SourceFile | undefined {
+  for (const base of bases) {
+    for (const ext of RESOLVE_EXTS) {
+      const found = project.getSourceFile(base + ext)
+      if (found) return found
+    }
   }
   return undefined
+}
+
+/**
+ * Resolve an import specifier to an in-project source file. A relative ('.'/'./'/'../')
+ * specifier resolves against the importer's directory; a bare specifier resolves against
+ * the app's jsconfig/tsconfig `paths` aliases first, then its `baseUrl` — so a real app's
+ * `import Login from "pages/Login"` (baseUrl: "src") finds src/pages/Login. An absolute
+ * specifier is rejected; a bare specifier with no alias config is rejected (a node_modules
+ * package, never an in-project screen).
+ */
+function resolveRelative(sf: SourceFile, specifier: string): SourceFile | undefined {
+  const project = sf.getProject()
+  if (specifier.startsWith('.')) {
+    return tryBases(project, [join(dirname(sf.getFilePath()), specifier)])
+  }
+  if (isAbsolute(specifier)) return undefined
+  const cfg = aliasConfigByProject.get(project)
+  if (!cfg) return undefined
+  const bases: string[] = []
+  for (const { prefix, targets } of cfg.paths) {
+    if (!specifier.startsWith(prefix)) continue
+    const rest = specifier.slice(prefix.length)
+    for (const t of targets) bases.push(join(t, rest))
+  }
+  if (cfg.baseUrl != null) bases.push(join(cfg.baseUrl, specifier))
+  return tryBases(project, bases)
 }
 
 /** Resolve a route's component identifier to its backing source file. */
@@ -378,19 +452,98 @@ function screenSourceFiles(root: SourceFile, maxDepth: number): Map<SourceFile, 
   return out
 }
 
-/** Collect <Route> declarations across the project into route nodes. */
+/**
+ * Resolve a JSX component tag used in `sf` to its function definition: a locally
+ * declared function/arrow, else a named/default relative import. Returns undefined
+ * for library components and unresolved tags, so the wrapper check never leaves app code.
+ */
+function resolveExportedComponent(sf: SourceFile, name: string): Node | undefined {
+  return resolveFunctionNode(sf, name) ?? resolveImportedFunction(sf, name)
+}
+
+/**
+ * Whether a function-component node is a custom ROUTE WRAPPER: its JSX renders an
+ * internal <Route> that forwards the caller's props — either via a JSX spread
+ * ({...rest}/{...props}) onto the <Route>, or by binding the Route's `path` to one
+ * of the component's own parameters/destructured props. Apps like taniarascia/takenote
+ * wrap every route in PublicRoute/PrivateRoute that proxy `path`+`component` to an
+ * inner <Route>; recognizing them lets a wrapper USAGE count as a real route. The
+ * forwarding check keeps it sound — an ordinary component that merely renders some
+ * fixed <Route> internally (without forwarding the call-site path) is NOT treated as
+ * a wrapper, so its usages don't fabricate routes.
+ */
+function isRouteWrapperComponent(fn: Node): boolean {
+  const params = new Set(fnParams(fn))
+  for (const id of fn.getDescendantsOfKind(SyntaxKind.Identifier)) {
+    if (Node.isBindingElement(id.getParent()) || Node.isParameterDeclaration(id.getParent())) params.add(id.getText())
+  }
+  for (const el of [...fn.getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement), ...fn.getDescendantsOfKind(SyntaxKind.JsxElement)]) {
+    if (jsxTag(el) !== 'Route') continue
+    const attrs = Node.isJsxElement(el) ? el.getOpeningElement().getAttributes() : (el as import('ts-morph').JsxSelfClosingElement).getAttributes()
+    for (const a of attrs) {
+      if (Node.isJsxSpreadAttribute(a)) {
+        const e = a.getExpression()
+        if (Node.isIdentifier(e) && params.has(e.getText())) return true
+      }
+    }
+    const pathInit = findAttr(el, 'path')?.getInitializer()
+    if (pathInit && Node.isJsxExpression(pathInit)) {
+      const inner = pathInit.getExpression()
+      if (inner && Node.isIdentifier(inner) && params.has(inner.getText())) return true
+    }
+  }
+  return false
+}
+
+/**
+ * The component identifier passed to a route element at the CALL SITE, via
+ * `component={X}` or `element={<X/>}` — reused by both plain <Route> and custom
+ * route-wrapper usages. Returns null when no component prop is present.
+ */
+function callSiteComponentName(el: Node): string | null {
+  return getComponentName(el)
+}
+
+/** Resolve a route element's call-site component prop to its backing source file. */
+function callSiteComponentFile(sf: SourceFile, el: Node): { name: string | null; file: SourceFile | undefined } {
+  const name = callSiteComponentName(el)
+  const file = name ? resolveComponentFile(sf, name) : undefined
+  return { name, file }
+}
+
+/**
+ * Collect route nodes across the project: literal <Route> declarations PLUS custom
+ * route-wrapper usages (a capitalized component carrying a `path` whose definition
+ * forwards it to an inner <Route>). Wrapper usages contribute the same RouteInfo as a
+ * plain <Route> — call-site path + call-site component file — so downstream extraction
+ * (controls, navs, labels) is identical for both.
+ */
 function collectRoutes(project: Project): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
+  const wrapperCache = new Map<string, boolean>()
+  const isWrapperUsage = (sf: SourceFile, el: Node): boolean => {
+    const tag = jsxTag(el)
+    if (!/^[A-Z]/.test(tag) || tag === 'Route') return false
+    const fn = resolveExportedComponent(sf, tag)
+    if (!fn) return false
+    const key = fn.getSourceFile().getFilePath() + '#' + tag
+    let res = wrapperCache.get(key)
+    if (res === undefined) {
+      res = isRouteWrapperComponent(fn)
+      wrapperCache.set(key, res)
+    }
+    return res
+  }
   for (const sf of project.getSourceFiles()) {
     for (const el of allJsxElements(sf)) {
-      if (jsxTag(el) !== 'Route') continue
+      const isPlainRoute = jsxTag(el) === 'Route'
+      if (!isPlainRoute && !isWrapperUsage(sf, el)) continue
       const ownPath = stringAttr(el, 'path')
       if (ownPath === null) continue
       const fullPath = joinPath(ancestorRoutePaths(el), ownPath)
       const nodeId = routeToNodeId(fullPath)
       if (byNodeId.has(nodeId)) continue
-      const componentName = getComponentName(el)
-      const componentFile = componentName ? resolveComponentFile(sf, componentName) : undefined
+      const { name: componentName, file: componentFile } = callSiteComponentFile(sf, el)
       byNodeId.set(nodeId, { fullPath, nodeId, componentName, componentFile })
     }
   }
@@ -435,6 +588,35 @@ interface RawTarget {
   ruleId?: string
 }
 
+/**
+ * Whether an expression is a react-router v5 withRouter-injected history accessor:
+ * `this.props.history` or `props.history` (the prop the HOC injects). Used to treat
+ * `this.props.history.push/replace(...)` as a navigation even though `history` is not
+ * a useHistory()-bound local — the HOC pattern the older real-world apps still use.
+ */
+function isInjectedHistoryAccess(obj: Node): boolean {
+  if (!Node.isPropertyAccessExpression(obj) || obj.getName() !== 'history') return false
+  const base = obj.getExpression()
+  if (Node.isPropertyAccessExpression(base) && base.getName() === 'props' && base.getExpression().getKind() === SyntaxKind.ThisKeyword) return true
+  return Node.isIdentifier(base) && base.getText() === 'props'
+}
+
+/**
+ * Normalize a react-router v5 <Link to="register"> / <Redirect to="login"> relative
+ * literal target to an app-root absolute path ("/register"). react-router resolves
+ * such non-slash paths against the rendering location, but in a static single-page
+ * route table the declared routes are absolute, so prepending "/" recovers the match
+ * the over-approximation would otherwise miss. A literal already starting with "/",
+ * an empty string, an external URL, or a hash/query-only target is left untouched;
+ * non-literal targets pass through unchanged.
+ */
+function absolutizeLinkTarget(ti: TargetInfo): TargetInfo {
+  if (ti.kind !== 'literal') return ti
+  const v = ti.value
+  if (v.length === 0 || v.startsWith('/') || v.startsWith('#') || v.startsWith('?') || /^[a-z][a-z0-9+.-]*:/i.test(v)) return ti
+  return { kind: 'literal', value: '/' + v }
+}
+
 function collectTargets(sf: SourceFile): RawTarget[] {
   const out: RawTarget[] = []
   for (const el of allJsxElements(sf)) {
@@ -451,7 +633,7 @@ function collectTargets(sf: SourceFile): RawTarget[] {
     if (event === null) continue
     // react-router <Link to>; next/link <Link href> when there is no `to` (react Links
     // always carry `to`, so this href fallback never changes react output).
-    out.push({ ti: classifyToAttr(findAttr(el, 'to') ?? findAttr(el, 'href')), event, effect, node: el, guard: getGuard(el) })
+    out.push({ ti: absolutizeLinkTarget(classifyToAttr(findAttr(el, 'to') ?? findAttr(el, 'href'))), event, effect, node: el, guard: getGuard(el) })
   }
 
   const { navSet, histSet, routerSet, redirectNames } = navIdentifiers(sf)
@@ -469,6 +651,10 @@ function collectTargets(sf: SourceFile): RawTarget[] {
         effect = `history.${member}`
       } else if (Node.isIdentifier(obj) && routerSet.has(obj.getText()) && (member === 'push' || member === 'replace')) {
         effect = `router.${member}`
+      } else if ((member === 'push' || member === 'replace') && isInjectedHistoryAccess(obj)) {
+        // react-router v5 HOC: withRouter injects `history` as a prop, navigated via
+        // this.props.history.push/replace inside class-method event handlers.
+        effect = `history.${member}`
       }
     }
     if (effect === null) continue
@@ -979,10 +1165,11 @@ function resolveDefaultFunction(sf: SourceFile): Node | undefined {
   return undefined
 }
 
-/** Resolve a named/default import of `name` in `sf` to its function node — relative modules only. */
+/** Resolve a named/default import of `name` in `sf` to its function node — relative or alias modules. */
 function resolveImportedFunction(sf: SourceFile, name: string): Node | undefined {
   for (const imp of sf.getImportDeclarations()) {
-    if (!imp.getModuleSpecifierValue().startsWith('.')) continue
+    const spec = imp.getModuleSpecifierValue()
+    if (!spec.startsWith('.') && !aliasConfigByProject.get(sf.getProject())) continue
     for (const ni of imp.getNamedImports()) {
       const alias = ni.getAliasNode()?.getText() ?? ni.getNameNode().getText()
       if (alias !== name) continue
@@ -1139,6 +1326,31 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
  * The react adapter feeds it collectRoutes(<Route> JSX); the next adapter feeds it routes
  * discovered from the filesystem (app/ + pages/). `adapterName` stamps graph.meta.adapter.
  */
+/**
+ * The source files of shared nav components rendered at the app shell — a capitalized
+ * component (e.g. <Navbar/>, <Header/>) that sits in the SAME render as <Routes>/<Switch>
+ * but OUTSIDE the route tree (so no route component owns it). These hold cross-screen nav
+ * links the per-route scan never reaches. Router/Route/Routes/Switch and framework wrappers
+ * are excluded; only in-project, resolvable components are returned.
+ */
+function collectShellNavFiles(project: Project): Set<SourceFile> {
+  const out = new Set<SourceFile>()
+  for (const sf of project.getSourceFiles()) {
+    const routerEls = allJsxElements(sf).filter((el) => /^(Routes|Switch)$/.test(jsxTag(el)))
+    if (routerEls.length === 0) continue
+    for (const el of allJsxElements(sf)) {
+      const tag = jsxTag(el).split('.')[0] ?? ''
+      if (!/^[A-Z]/.test(tag)) continue
+      if (/^(Route|Routes|Switch|Router|BrowserRouter|HashRouter|MemoryRouter|Provider|Consumer|Context|Fragment|Suspense|ErrorBoundary)$/.test(tag)) continue
+      // Skip components rendered INSIDE the route tree — those are route screens, not shell nav.
+      if (routerEls.some((r) => within(r, el))) continue
+      const child = resolveComponentFile(sf, tag)
+      if (child && !child.getFilePath().includes('node_modules')) out.add(child)
+    }
+  }
+  return out
+}
+
 export function extractGraphFromRoutes(
   project: Project,
   projectDir: string,
@@ -1453,6 +1665,45 @@ export function extractGraphFromRoutes(
       for (const [mId, mFile] of modalDescend) {
         const skip = new Set([...overlayRoots].filter((p) => p !== mFile.getFilePath()))
         emitControls(mId, gatherControls(screenSourceFiles(mFile, 1), skip), true, false)
+      }
+    }
+  }
+
+  // Shared root-level navs: a <Navbar/>/<Header/> rendered as a SIBLING of <Routes>/
+  // <Switch> at the app shell (not inside any <Route>, so no route component renders it).
+  // Its links are reachable from every screen, so they are attributed to a single synthetic
+  // app-shell node (kind 'screen', since the IR has no app-nav kind) as `may`-edges. Only
+  // runs when such a shell nav exists, so apps without one are unaffected.
+  const shellNavFiles = collectShellNavFiles(project)
+  if (shellNavFiles.size > 0) {
+    const shellId = 'app_nav'
+    let shellCreated = false
+    for (const navFile of shellNavFiles) {
+      for (const [cf] of screenSourceFiles(navFile, 1)) {
+        const file = relative(projectDir, cf.getFilePath())
+        for (const t of collectTargets(cf)) {
+          const targets: RouteLike[] = []
+          if (t.ti.kind === 'literal') {
+            const { exact, candidates } = matchLiteralAll(t.ti.value, routeLikes)
+            if (exact) targets.push(exact)
+            else targets.push(...candidates)
+          } else if (t.ti.kind === 'template') {
+            targets.push(...matchPrefix(t.ti.staticPrefix, routeLikes))
+          } else if (t.ti.kind === 'enum') {
+            for (const v of t.ti.values) {
+              const { exact } = matchLiteralAll(v, routeLikes)
+              if (exact) targets.push(exact)
+            }
+          }
+          if (targets.length === 0) continue
+          if (!shellCreated) {
+            shellCreated = true
+            nodes.push({ id: shellId, route: null, componentPath: relative(projectDir, navFile.getFilePath()), label: 'app nav', kind: 'screen' })
+          }
+          const lc = cf.getLineAndColumnAtPos(t.node.getStart())
+          const loc = { line: lc.line, col: lc.column }
+          for (const hit of targets) pushEdge(shellId, hit.nodeId, { ...t, ruleId: 'rr.shell-nav' }, 'may', 0.5, file, loc)
+        }
       }
     }
   }

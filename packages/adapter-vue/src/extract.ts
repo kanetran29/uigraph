@@ -18,7 +18,11 @@ import { splitSfc, parseTemplateElements, eventHandlers, stringAttr, boundAttr, 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'vue-v3-2026.06'
 
-type TargetInfo = { kind: 'literal'; value: string } | { kind: 'template'; staticPrefix: string } | { kind: 'dynamic' }
+type TargetInfo =
+  | { kind: 'literal'; value: string }
+  | { kind: 'template'; staticPrefix: string }
+  | { kind: 'names'; values: string[] }
+  | { kind: 'dynamic' }
 
 /** A parsed .vue component: its source path, full source, split SFC, and virtual script source file. */
 export interface VueComponent {
@@ -116,8 +120,18 @@ function walkSources(dir: string): string[] {
   return out
 }
 
-/** Resolve a `.vue` import specifier (relative to a routes file) to a registered component. */
+/**
+ * Resolve a `.vue` import specifier to a registered component. Handles relative
+ * specifiers and the common `@/` / `~/` / `~@/` src-root aliases (matched by path
+ * suffix against `src/<rest>`), with `.vue` and `/index.vue` candidates.
+ */
 function resolveVueComponent(fromPath: string, specifier: string, components: VueComponent[]): VueComponent | undefined {
+  const alias = /^(@|~@?)\//.exec(specifier)
+  if (alias) {
+    const rest = specifier.slice(alias[0].length)
+    const tails = rest.endsWith('.vue') ? [`src/${rest}`] : [`src/${rest}.vue`, `src/${rest}/index.vue`]
+    return components.find((c) => tails.some((t) => c.vuePath.endsWith(`/${t}`) || c.vuePath.endsWith(`\\${t}`)))
+  }
   if (!specifier.startsWith('.')) return undefined
   const base = join(dirname(fromPath), specifier)
   const cands = specifier.endsWith('.vue') ? [base] : [`${base}.vue`, `${base}/index.vue`]
@@ -155,19 +169,30 @@ function resolveComponent(obj: ObjectLiteralExpression, routesSf: SourceFile, co
       const matches = imp.getDefaultImport()?.getText() === name || imp.getNamedImports().some((n) => n.getName() === name || n.getAliasNode()?.getText() === name)
       if (matches) return { name, component: resolveVueComponent(routesSf.getFilePath(), imp.getModuleSpecifierValue(), components) }
     }
+    // local `const X = () => import('../X.vue')` factory bound to the route component
+    const local = routesSf.getVariableDeclaration(name)?.getInitializer()
+    const localComp = local ? lazyImportComponent(local, routesSf, components) : undefined
+    if (localComp) return { name, component: localComp }
     return { name, component: undefined }
   }
-  // lazy: () => import('./X.vue')
-  const dyn = init.getFirstDescendantByKind(SyntaxKind.CallExpression)
-  if (dyn && dyn.getExpression().getKind() === SyntaxKind.ImportKeyword) {
-    const arg = dyn.getArguments()[0]
-    if (arg && (Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg))) {
-      const spec = arg.getLiteralValue()
-      const comp = resolveVueComponent(routesSf.getFilePath(), spec, components)
-      return { name: comp ? baseName(spec) : null, component: comp }
-    }
-  }
+  const inlineComp = lazyImportComponent(init, routesSf, components)
+  if (inlineComp) return { name: baseName(lazyImportSpec(init) ?? ''), component: inlineComp }
   return { name: null, component: undefined }
+}
+
+/** The `.vue` specifier string of a lazy `() => import('./X.vue')` expression, or null. */
+function lazyImportSpec(expr: Node): string | null {
+  const dyn = expr.getFirstDescendantByKind(SyntaxKind.CallExpression)
+  if (!dyn || dyn.getExpression().getKind() !== SyntaxKind.ImportKeyword) return null
+  const arg = dyn.getArguments()[0]
+  if (arg && (Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg))) return arg.getLiteralValue()
+  return null
+}
+
+/** Resolve a lazy `() => import('./X.vue')` expression to a registered component, or undefined. */
+function lazyImportComponent(expr: Node, routesSf: SourceFile, components: VueComponent[]): VueComponent | undefined {
+  const spec = lazyImportSpec(expr)
+  return spec ? resolveVueComponent(routesSf.getFilePath(), spec, components) : undefined
 }
 
 /** The component name from a .vue specifier, e.g. './pages/Home.vue' -> 'Home'. */
@@ -175,11 +200,20 @@ function baseName(spec: string): string {
   return spec.replace(/.*\//, '').replace(/\.vue$/, '')
 }
 
-/** Find the route-records array passed to (or referenced by) createRouter, with its declaring file. */
+/** Whether a router-constructing callee name (createRouter, or `new Router`/`new VueRouter`). */
+function isRouterConstructor(call: Node): boolean {
+  const callee = Node.isCallExpression(call) ? call.getExpression() : Node.isNewExpression(call) ? call.getExpression() : undefined
+  if (!callee) return false
+  const text = callee.getText()
+  return text === 'createRouter' || /(^|\.)(Vue)?Router$/.test(text)
+}
+
+/** Find the route-records array passed to (or referenced by) a router constructor, with its declaring file. */
 function findRoutesArray(project: Project): { elements: ObjectLiteralExpression[]; sf: SourceFile } | null {
   for (const sf of project.getSourceFiles()) {
-    for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
-      if (call.getExpression().getText() !== 'createRouter') continue
+    const calls = [...sf.getDescendantsOfKind(SyntaxKind.CallExpression), ...sf.getDescendantsOfKind(SyntaxKind.NewExpression)]
+    for (const call of calls) {
+      if (!isRouterConstructor(call)) continue
       const arg = call.getArguments()[0]
       if (!arg || !Node.isObjectLiteralExpression(arg)) continue
       const routesProp = arg.getProperty('routes')
@@ -252,16 +286,28 @@ function collectRoutes(vp: VueProject): RouteInfo[] {
 
 // --- target classification (shared by router-link, router.push, control handlers) ---
 
-/** Classify a ts-morph navigation argument as literal / template-prefix / dynamic. */
+/** Collect the static string values an expression can take: a literal, or each branch of a ternary. */
+function staticNameValues(expr: Node | undefined): string[] {
+  if (!expr) return []
+  if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return [expr.getLiteralValue()]
+  if (Node.isConditionalExpression(expr)) return [...staticNameValues(expr.getWhenTrue()), ...staticNameValues(expr.getWhenFalse())]
+  if (Node.isParenthesizedExpression(expr)) return staticNameValues(expr.getExpression())
+  return []
+}
+
+/** The `name` initializer of a route object literal, resolved to its static string candidates. */
+function routeNameValues(obj: ObjectLiteralExpression): string[] {
+  const prop = obj.getProperty('name')
+  if (!prop || !Node.isPropertyAssignment(prop)) return []
+  return staticNameValues(prop.getInitializer())
+}
+
+/** Classify a ts-morph navigation argument as literal / template-prefix / names / dynamic. */
 function classifyTarget(expr: Node | undefined, nameToPath: Map<string, string>): TargetInfo {
   if (!expr) return { kind: 'dynamic' }
   if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isTemplateExpression(expr)) return { kind: 'template', staticPrefix: expr.getHead().getLiteralText() }
-  if (Node.isObjectLiteralExpression(expr)) {
-    const name = stringProp(expr, 'name')
-    const path = name ? nameToPath.get(name) : undefined
-    if (path) return { kind: 'literal', value: path }
-  }
+  if (Node.isObjectLiteralExpression(expr)) return classifyRouteObject(expr, nameToPath)
   if (Node.isBinaryExpression(expr) && expr.getOperatorToken().getText() === '+') {
     const left = expr.getLeft()
     if (Node.isStringLiteral(left) || Node.isNoSubstitutionTemplateLiteral(left)) return { kind: 'template', staticPrefix: left.getLiteralValue() }
@@ -269,21 +315,101 @@ function classifyTarget(expr: Node | undefined, nameToPath: Map<string, string>)
   return { kind: 'dynamic' }
 }
 
-/** Classify a template `to` / `:to` expression STRING into literal / template / dynamic. */
-function classifyBoundTo(expr: string, nameToPath: Map<string, string>): TargetInfo {
-  const t = expr.trim()
-  const lit = /^'([^']*)'$/.exec(t) ?? /^"([^"]*)"$/.exec(t)
-  if (lit) return { kind: 'literal', value: lit[1] ?? '' }
-  const tmpl = /^`([^`$]*)\$\{/.exec(t)
-  if (tmpl) return { kind: 'template', staticPrefix: tmpl[1] ?? '' }
-  const concat = /^'([^']*)'\s*\+/.exec(t) ?? /^"([^"]*)"\s*\+/.exec(t)
-  if (concat) return { kind: 'template', staticPrefix: concat[1] ?? '' }
-  const named = /\bname\s*:\s*'([^']*)'/.exec(t) ?? /\bname\s*:\s*"([^"]*)"/.exec(t)
-  if (named) {
-    const path = nameToPath.get(named[1] ?? '')
-    if (path) return { kind: 'literal', value: path }
-  }
+/**
+ * Classify a `{ name, params, path }` route object. A `name` resolves the target
+ * route even when `params` are dynamic (params don't change which route is hit); a
+ * ternary `name` fans out to each branch. Falls back to `path` if present.
+ */
+function classifyRouteObject(obj: ObjectLiteralExpression, nameToPath: Map<string, string>): TargetInfo {
+  const names = routeNameValues(obj).filter((n) => nameToPath.has(n))
+  if (names.length === 1) return { kind: 'literal', value: nameToPath.get(names[0] as string) as string }
+  if (names.length > 1) return { kind: 'names', values: names }
+  const path = stringProp(obj, 'path')
+  if (path !== null) return { kind: 'literal', value: path }
   return { kind: 'dynamic' }
+}
+
+let exprCounter = 0
+
+/** Parse a template-bound JS expression string into a ts-morph Expression node, or undefined. */
+function parseExpr(project: Project, text: string): Node | undefined {
+  const trimmed = text.trim()
+  if (trimmed.length === 0) return undefined
+  try {
+    const sf = project.createSourceFile(`__expr_${exprCounter++}.ts`, `const __x = (${trimmed});`)
+    const init = sf.getVariableDeclaration('__x')?.getInitializer()
+    if (Node.isParenthesizedExpression(init)) return init.getExpression()
+    return init
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Classify a template `to`/`:to` (or wrapper `name`) bound expression. The string is
+ * parsed to an AST and run through classifyTarget so objects/ternaries behave like
+ * script navigations; a bare identifier (e.g. a `computed`) is resolved to its
+ * definition body in the component script before classification.
+ */
+function classifyBoundExpr(expr: string, component: VueComponent, project: Project, nameToPath: Map<string, string>): TargetInfo {
+  const node = parseExpr(project, expr)
+  if (!node) return { kind: 'dynamic' }
+  if (Node.isIdentifier(node)) {
+    const resolved = resolveIdentifierExpr(component.scriptSf, node.getText())
+    if (resolved) return classifyTarget(resolved, nameToPath)
+    return { kind: 'dynamic' }
+  }
+  return classifyTarget(node, nameToPath)
+}
+
+/**
+ * Classify a wrapper's bound `:name`. A static string/ternary resolves to its route(s);
+ * a dynamic name (e.g. `link.routeName`) over-approximates to every declared named route
+ * (may-edges) rather than dropping the navigation.
+ */
+function classifyBoundName(expr: string, component: VueComponent, nameToPath: Map<string, string>): TargetInfo {
+  const values = staticNamesFromString(expr, component).filter((n) => nameToPath.has(n))
+  if (values.length === 1) return { kind: 'literal', value: nameToPath.get(values[0] as string) as string }
+  if (values.length > 1) return { kind: 'names', values }
+  return { kind: 'names', values: [...nameToPath.keys()] }
+}
+
+/** Static string candidates a bound `:name` expression can take (literal/ternary, resolving identifiers). */
+function staticNamesFromString(expr: string, component: VueComponent): string[] {
+  const node = parseExpr(component.scriptSf.getProject(), expr)
+  if (!node) return []
+  if (Node.isIdentifier(node)) {
+    const resolved = resolveIdentifierExpr(component.scriptSf, node.getText())
+    return resolved ? staticNameValues(resolved) : []
+  }
+  return staticNameValues(node)
+}
+
+/** Resolve a component-script identifier (const/computed) to the expression it ultimately returns. */
+function resolveIdentifierExpr(sf: SourceFile, name: string): Node | undefined {
+  const vd = sf.getVariableDeclaration(name)
+  const init = vd?.getInitializer()
+  if (!init) return undefined
+  if (Node.isCallExpression(init) && init.getExpression().getText() === 'computed') {
+    const fn = init.getArguments()[0]
+    if (fn && (Node.isArrowFunction(fn) || Node.isFunctionExpression(fn))) return functionReturnExpr(fn)
+    return undefined
+  }
+  return init
+}
+
+/** The single returned expression of an arrow/function body (concise body or sole `return`), or undefined. */
+function functionReturnExpr(fn: Node): Node | undefined {
+  if (Node.isArrowFunction(fn)) {
+    const body = fn.getBody()
+    if (!Node.isBlock(body)) return Node.isParenthesizedExpression(body) ? body.getExpression() : body
+  }
+  const returns = fn.getDescendantsOfKind(SyntaxKind.ReturnStatement)
+  if (returns.length === 1) {
+    const e = returns[0]?.getExpression()
+    return e && Node.isParenthesizedExpression(e) ? e.getExpression() : e
+  }
+  return undefined
 }
 
 // --- guard analysis (framework-agnostic; demotes a navigation to may) ---
@@ -530,6 +656,17 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
       } else {
         soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${t.ti.value}" matches no declared route` })
       }
+    } else if (t.ti.kind === 'names') {
+      const ti = t.ti
+      const targets = ti.values.map((n) => nameToPath.get(n)).filter((p): p is string => p != null)
+      for (const path of targets) {
+        const r = routes.find((x) => x.fullPath === path)
+        if (!r) continue
+        const guards = [t.guard, ...(guardsByNodeId.get(r.nodeId) ?? [])].filter((g): g is string => g != null)
+        const multi = targets.length > 1
+        pushEdge(from, r.nodeId, t, multi || guards.length > 0 ? 'may' : 'must', multi || guards.length > 0 ? 0.6 : 1, guards.length > 0 ? guards.join(',') : multi ? 'branch' : null, file)
+      }
+      if (targets.length > 1) soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `branching named target over-approximated to ${targets.length} route(s)` })
     } else if (t.ti.kind === 'template') {
       const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
       soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
@@ -550,7 +687,7 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
     const file = relative(projectDir, route.component.vuePath)
     const sf = route.component.scriptSf
     const vars = routerVars(sf)
-    for (const t of [...templateTargets(route.component, nameToPath), ...navTargetsIn(sf, sf, vars, nameToPath)]) {
+    for (const t of [...templateTargets(route.component, vp.project, nameToPath), ...childTargets(route.component, vp, nameToPath), ...navTargetsIn(sf, sf, vars, nameToPath)]) {
       resolveTarget(route.nodeId, t, file)
     }
   }
@@ -632,16 +769,70 @@ function handlerNavTargets(expr: string, sf: SourceFile, vars: Set<string>, name
   return navTargetsIn(node, sf, vars, nameToPath).map((t) => ({ ...t, event: 'click' }))
 }
 
-/** Parse <router-link to|:to> / <RouterLink> navigations out of a component's template. */
-function templateTargets(component: VueComponent, nameToPath: Map<string, string>): RawTarget[] {
+/** Whether a tag is a Vue component (PascalCase or kebab-case multi-word), i.e. a possible router-link wrapper. */
+function isComponentTag(tag: string): boolean {
+  return /[A-Z]/.test(tag) || tag.includes('-')
+}
+
+/** A component's imported child .vue components (default-import specifiers resolved to registered SFCs). */
+function childComponents(component: VueComponent, components: VueComponent[]): VueComponent[] {
+  const out: VueComponent[] = []
+  for (const imp of component.scriptSf.getImportDeclarations()) {
+    const spec = imp.getModuleSpecifierValue()
+    if (!imp.getDefaultImport() && imp.getNamedImports().length === 0) continue
+    const child = resolveVueComponent(component.vuePath, spec, components)
+    if (child && child !== component) out.push(child)
+  }
+  return out
+}
+
+/**
+ * Collect navigations declared in a route's transitively-imported child components,
+ * attributing them to the parent route. Child navs are invisible to the per-route
+ * scan because they live in separate SFCs (e.g. an article page's <ArticleMeta>
+ * does the `router.push({ name: 'login' })`). Visited-set bounds cycles; child
+ * targets are demoted to may-edges since the child may render conditionally.
+ */
+function childTargets(component: VueComponent, vp: VueProject, nameToPath: Map<string, string>): RawTarget[] {
+  const out: RawTarget[] = []
+  const visited = new Set<string>([component.vuePath])
+  const walk = (comp: VueComponent): void => {
+    for (const child of childComponents(comp, vp.components)) {
+      if (visited.has(child.vuePath)) continue
+      visited.add(child.vuePath)
+      const file = relative(dirname(component.vuePath), child.vuePath)
+      const vars = routerVars(child.scriptSf)
+      const targets = [...templateTargets(child, vp.project, nameToPath), ...navTargetsIn(child.scriptSf, child.scriptSf, vars, nameToPath)]
+      for (const t of targets) out.push({ ...t, effect: `${t.effect} (child ${file})`, guard: t.guard ?? 'child-component' })
+      walk(child)
+    }
+  }
+  walk(component)
+  return out
+}
+
+/**
+ * Parse routing navigations out of a component's template. Recognizes <router-link>
+ * (`to`/`:to`) and custom wrapper components (e.g. <AppLink>) that forward routing
+ * props via `to`/`:to`/`name`/`:name`. A `name` wrapper prop is classified through a
+ * synthetic `{ name }` object so it resolves the same way as a router.push object.
+ */
+function templateTargets(component: VueComponent, project: Project, nameToPath: Map<string, string>): RawTarget[] {
   const out: RawTarget[] = []
   for (const el of parseTemplateElements(component.sfc.template, component.sfc.templateOffset)) {
-    if (!/^(router-link|routerlink)$/i.test(el.tag)) continue
+    const isRouterLink = /^(router-link|routerlink)$/i.test(el.tag)
+    const plainTo = stringAttr(el, 'to')
+    const boundTo = boundAttr(el, 'to')
+    const plainName = stringAttr(el, 'name')
+    const boundName = boundAttr(el, 'name')
+    const hasRouting = plainTo !== undefined || boundTo !== undefined || plainName !== undefined || boundName !== undefined
+    if (!isRouterLink && !(isComponentTag(el.tag) && hasRouting)) continue
     const lc = lineColAt(component.source, el.offset)
-    const plain = stringAttr(el, 'to')
-    const bound = boundAttr(el, 'to')
-    if (plain !== undefined) out.push({ ti: { kind: 'literal', value: plain }, event: 'click:router-link', effect: 'navigate', ruleId: 'vue.router-link', loc: lc, guard: null })
-    else if (bound !== undefined) out.push({ ti: classifyBoundTo(bound, nameToPath), event: 'click:router-link', effect: 'navigate', ruleId: 'vue.router-link', loc: lc, guard: null })
+    const push = (ti: TargetInfo) => out.push({ ti, event: 'click:router-link', effect: 'navigate', ruleId: 'vue.router-link', loc: lc, guard: null })
+    if (plainTo !== undefined) push({ kind: 'literal', value: plainTo })
+    else if (boundTo !== undefined) push(classifyBoundExpr(boundTo, component, project, nameToPath))
+    else if (plainName !== undefined) push(nameToPath.has(plainName) ? { kind: 'literal', value: nameToPath.get(plainName) as string } : { kind: 'dynamic' })
+    else if (boundName !== undefined) push(classifyBoundName(boundName, component, nameToPath))
   }
   return out
 }

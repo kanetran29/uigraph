@@ -2,9 +2,12 @@
 // adapter discovers RouteSeeds from the file tree (routes.ts) and feeds them into the shared
 // react extraction engine (extractGraphFromRoutes) — Next pages are plain React JSX, so all
 // control/nav/modal extraction is reused verbatim. The engine already recognizes next/link
-// <Link href>, useRouter().push/replace, and redirect() (route-level). v1 limitation: a nav
-// reached only through a button onClick handler (router.push inside a handler) or defined
-// only in a layout.tsx is not yet attributed — surfaced as the feature's documented floor.
+// <Link href>, useRouter().push/replace, and redirect() (route-level). On top of it, a Next-
+// specific pass (layout-nav.ts) attributes navigation declared in the App Router LAYOUT chain
+// that wraps each route (shared Navbar/Header → MainNav) and in deep wrapper components
+// (CustomLink / <Button href> → <a href>), which the page-rooted engine scan does not reach.
+// Remaining v1 floor: a nav reached only through a button onClick handler (router.push inside
+// a handler) defined in a layout/wrapper is not yet attributed.
 
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -12,6 +15,7 @@ import { Project, ts } from 'ts-morph'
 import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@uigraph/core'
 import { extractGraphFromRoutes } from '@uigraph/adapter-react'
 import { discoverRoutes } from './routes'
+import { addLayoutAndWrapperEdges } from './layout-nav'
 
 /** A ts-morph project over the WHOLE project (not src-first): Next routes live at root app/
  *  OR src/app, so a src-first glob could miss a root-level app/ when a src/ dir also exists. */
@@ -53,6 +57,10 @@ export function extractNextGraph(projectDir: string, opts: ExtractOptions = {}):
   const project = buildNextProject(projectDir)
   const { seeds, collisions } = discoverRoutes(project, projectDir)
   const result = extractGraphFromRoutes(project, projectDir, seeds, { ...opts, rulesetVersion: opts.rulesetVersion ?? 'next-app-pages-2026.06' }, '@uigraph/adapter-next')
+  const layoutEdges = addLayoutAndWrapperEdges(project, projectDir, seeds, result.graph.edges)
+  if (layoutEdges > 0) {
+    result.soundiness.push({ kind: 'layout-nav', detail: `added ${layoutEdges} may-edge(s) from App Router layout chain / wrapper-buried <Link href> not reached by the page scan` })
+  }
   for (const id of collisions) {
     result.soundiness.push({ kind: 'route-collision', detail: `route node ${id} is declared by BOTH app/ and pages/ — kept the first by sorted path order` })
   }

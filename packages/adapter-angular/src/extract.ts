@@ -7,7 +7,7 @@
 // is emitted without a static witness.
 
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
-import type { ObjectLiteralExpression, SourceFile } from 'ts-morph'
+import type { ArrayLiteralExpression, ObjectLiteralExpression, SourceFile } from 'ts-morph'
 import { dirname, join, relative } from 'node:path'
 import type { ControlInput, ControlSelector, ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@uigraph/core'
 import { routeToNodeId, edgeId, controlNodeId } from './ids'
@@ -75,12 +75,30 @@ function resolveImportedFile(sf: SourceFile, name: string): SourceFile | undefin
   return undefined
 }
 
-/** Normalize a declared route path to a leading-slash route ('' -> '/', '**' -> '*'). */
-function normalizeRoutePath(own: string): string {
-  if (own === '**' || own === '*' || own === '/*') return '*'
-  if (own === '') return '/'
-  const segs = own.split('/').filter(Boolean)
-  return '/' + segs.join('/')
+/**
+ * Extract the import specifier string from a lazy loader arrow function such as
+ * `() => import('./x.component')`, returning `'./x.component'`, or null when the
+ * initializer is not a recognizable dynamic-import loader.
+ */
+function lazyImportSpecifier(prop: ObjectLiteralExpression, name: string): string | null {
+  const p = prop.getProperty(name)
+  if (!p || !Node.isPropertyAssignment(p)) return null
+  const init = p.getInitializer()
+  if (!init || !Node.isArrowFunction(init)) return null
+  for (const call of init.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    if (call.getExpression().getKind() !== SyntaxKind.ImportKeyword) continue
+    const arg = call.getArguments()[0]
+    if (arg && (Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg))) return arg.getLiteralValue()
+  }
+  return null
+}
+
+/** Pick the @Component-decorated class name of a source file (default export or first), or null. */
+function componentClassName(sf: SourceFile): string | null {
+  for (const cls of sf.getClasses()) {
+    if (cls.getDecorators().some((d) => d.getName() === 'Component')) return cls.getName() ?? null
+  }
+  return null
 }
 
 /** Read a string-literal property value from a route object literal, or null. */
@@ -115,43 +133,107 @@ function canActivateGuards(obj: ObjectLiteralExpression): string[] {
   return names
 }
 
+/** Join a parent route path with an own segment, normalizing to a leading-slash route. */
+function joinRoutePath(parent: string, own: string): string {
+  if (own === '**' || own === '*' || own === '/*') return '*'
+  const parentSegs = parent === '/' ? [] : segments(parent)
+  const ownSegs = own.split('/').filter(Boolean)
+  const all = [...parentSegs, ...ownSegs]
+  return all.length === 0 ? '/' : '/' + all.join('/')
+}
+
+/** Split a route path into non-empty segments. */
+function segments(path: string): string[] {
+  return path.split('/').filter((s) => s.length > 0)
+}
+
 /**
- * Find every object literal that is an element of a declared `Routes` array
- * (`const routes: Routes = [ {...}, ... ]`) across the project. Returns the
- * route object literals paired with the source file declaring them.
+ * Find every top-level `Routes`-shaped array literal in a source file
+ * (`const routes: Routes = [...]`, including a `default routes` export). Returns
+ * the array literals so the caller can recurse into their route objects.
  */
-function findRouteObjects(project: Project): { obj: ObjectLiteralExpression; sf: SourceFile }[] {
-  const out: { obj: ObjectLiteralExpression; sf: SourceFile }[] = []
-  for (const sf of project.getSourceFiles()) {
-    for (const vd of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
-      const typeNode = vd.getTypeNode()
-      const isRoutesTyped = typeNode?.getText() === 'Routes'
-      const init = vd.getInitializer()
-      if (!init || !Node.isArrayLiteralExpression(init)) continue
-      const looksLikeRoutes = isRoutesTyped || init.getElements().some((e) => Node.isObjectLiteralExpression(e) && e.getProperty('path') !== undefined)
-      if (!looksLikeRoutes) continue
-      for (const el of init.getElements()) {
-        if (Node.isObjectLiteralExpression(el)) out.push({ obj: el, sf })
-      }
-    }
+function findRouteArrays(sf: SourceFile): ArrayLiteralExpression[] {
+  const out: ArrayLiteralExpression[] = []
+  for (const vd of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    const isRoutesTyped = vd.getTypeNode()?.getText() === 'Routes'
+    const init = vd.getInitializer()
+    if (!init || !Node.isArrayLiteralExpression(init)) continue
+    const looksLikeRoutes = isRoutesTyped || init.getElements().some((e) => Node.isObjectLiteralExpression(e) && e.getProperty('path') !== undefined)
+    if (looksLikeRoutes) out.push(init)
   }
   return out
 }
 
-/** Collect declared routes into route nodes, resolving components and guards. */
+/**
+ * Recursively walk a route array literal, emitting one RouteInfo per route
+ * object that declares a `path`. Inline `children` are visited with the parent
+ * path prefixed; `loadChildren: () => import('./x.routes')` is followed into the
+ * imported module's route array; `component` and `loadComponent` both resolve to
+ * a backing component file. Deduplicates by node id (first declaration wins).
+ */
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>): void {
+  for (const el of arr.getElements()) {
+    if (!Node.isObjectLiteralExpression(el)) continue
+    const ownPath = stringProp(el, 'path')
+    if (ownPath === null) continue
+    const fullPath = joinRoutePath(parentPath, ownPath)
+    const componentName = identifierProp(el, 'component')
+    let componentFile = componentName ? resolveImportedFile(sf, componentName) : undefined
+    let resolvedName = componentName
+    if (!componentFile) {
+      const spec = lazyImportSpecifier(el, 'loadComponent')
+      if (spec) {
+        componentFile = resolveRelative(sf, spec)
+        if (componentFile) resolvedName = componentClassName(componentFile)
+      }
+    }
+    const nodeId = routeToNodeId(fullPath)
+    if (!out.has(nodeId)) {
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards: canActivateGuards(el) })
+    }
+    const childrenProp = el.getProperty('children')
+    if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
+      const childInit = childrenProp.getInitializer()
+      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles)
+    }
+    const childSpec = lazyImportSpecifier(el, 'loadChildren')
+    if (childSpec) {
+      const childModule = resolveRelative(sf, childSpec)
+      if (childModule) {
+        loadedChildFiles.add(childModule.getFilePath())
+        for (const childArr of findRouteArrays(childModule)) walkRouteArray(childArr, childModule, fullPath, out, loadedChildFiles)
+      }
+    }
+  }
+}
+
+/**
+ * Collect declared routes (including nested + lazy) into route nodes. Files
+ * reached via `loadChildren` are scanned only under their parent prefix, never
+ * again at the root, so a child route array contributes a single correct path.
+ */
 function collectRoutes(project: Project): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
-  for (const { obj, sf } of findRouteObjects(project)) {
-    const ownPath = stringProp(obj, 'path')
-    if (ownPath === null) continue
-    const fullPath = normalizeRoutePath(ownPath)
-    const nodeId = routeToNodeId(fullPath)
-    if (byNodeId.has(nodeId)) continue
-    const componentName = identifierProp(obj, 'component')
-    const componentFile = componentName ? resolveImportedFile(sf, componentName) : undefined
-    byNodeId.set(nodeId, { fullPath, nodeId, componentName, componentFile, guards: canActivateGuards(obj) })
+  const loadedChildFiles = collectLoadChildrenTargets(project)
+  for (const sf of project.getSourceFiles()) {
+    if (loadedChildFiles.has(sf.getFilePath())) continue
+    for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles)
   }
   return [...byNodeId.values()]
+}
+
+/** Pre-pass: resolve every `loadChildren` import target across the project so those modules are scanned only under their parent prefix. */
+function collectLoadChildrenTargets(project: Project): Set<string> {
+  const targets = new Set<string>()
+  for (const sf of project.getSourceFiles()) {
+    for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+      const spec = lazyImportSpecifier(obj, 'loadChildren')
+      if (!spec) continue
+      const mod = resolveRelative(sf, spec)
+      if (mod) targets.add(mod.getFilePath())
+    }
+  }
+  return targets
 }
 
 /** Classify a navigation argument expression as literal / template-prefix / dynamic. */
@@ -169,23 +251,63 @@ function classifyTarget(expr: Node | undefined): TargetInfo {
   return { kind: 'dynamic' }
 }
 
-/** Read the inline template string from a component's `@Component({ template })` decorator. */
-function inlineTemplate(sf: SourceFile): { text: string; start: number } | null {
+/** A component's template text, with the witness position: an offset into `sf`, or an external HTML file path. */
+interface ComponentTemplate {
+  text: string
+  start: number
+  externalFile?: string
+}
+
+/**
+ * Read a component's template, from an inline `@Component({ template })` string
+ * or, failing that, an external `templateUrl: './x.html'` sibling resolved
+ * relative to the component file. Inline templates carry their `.ts` offset;
+ * external ones carry the html file path so witnesses point at the real source.
+ */
+function inlineTemplate(sf: SourceFile): ComponentTemplate | null {
   for (const cls of sf.getClasses()) {
     for (const dec of cls.getDecorators()) {
       if (dec.getName() !== 'Component') continue
       const arg = dec.getArguments()[0]
       if (!arg || !Node.isObjectLiteralExpression(arg)) continue
-      const prop = arg.getProperty('template')
-      if (!prop || !Node.isPropertyAssignment(prop)) continue
-      const init = prop.getInitializer()
-      if (!init) continue
-      if (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init)) {
-        return { text: init.getLiteralValue(), start: init.getStart() }
+      const inline = stringProp(arg, 'template')
+      if (inline !== null) {
+        const prop = arg.getProperty('template')
+        const init = Node.isPropertyAssignment(prop) ? prop.getInitializer() : undefined
+        return { text: inline, start: init ? init.getStart() : arg.getStart() }
+      }
+      const url = stringProp(arg, 'templateUrl')
+      if (url !== null) {
+        const html = readExternalTemplate(sf, url)
+        if (html !== null) return { text: html, start: 0, externalFile: resolveTemplatePath(sf, url) }
       }
     }
   }
   return null
+}
+
+/** Resolve a templateUrl relative to the component file into an absolute path. */
+function resolveTemplatePath(sf: SourceFile, url: string): string {
+  return join(dirname(sf.getFilePath()), url)
+}
+
+/**
+ * Read an external HTML template's contents, preferring a source file already
+ * registered at that path (covers in-memory projects) and falling back to the
+ * project filesystem (covers on-disk projects). Returns null when unavailable.
+ */
+function readExternalTemplate(sf: SourceFile, url: string): string | null {
+  const path = resolveTemplatePath(sf, url)
+  const project = sf.getProject()
+  const registered = project.getSourceFile(path)
+  if (registered) return registered.getFullText()
+  const fs = project.getFileSystem()
+  try {
+    if (!fs.fileExistsSync(path)) return null
+    return fs.readFileSync(path)
+  } catch {
+    return null
+  }
 }
 
 interface RawTarget {
@@ -194,37 +316,110 @@ interface RawTarget {
   effect: string
   ruleId: string
   loc: { line: number; col: number }
+  file?: string
 }
 
 const STATIC_LINK_RE = /(?<!\[)\brouterLink\s*=\s*"([^"]*)"/g
 const BOUND_LINK_RE = /\[routerLink\]\s*=\s*"([^"]*)"/g
 
-/** Parse routerLink / [routerLink] attributes out of an inline template string. */
-function templateTargets(sf: SourceFile): RawTarget[] {
+/**
+ * Parse routerLink / [routerLink] attributes out of a component's template
+ * (inline or external). Each target's witness loc is its line within the
+ * template text; for an external template the witness file is the html path.
+ */
+function templateTargets(sf: SourceFile, projectDir: string): RawTarget[] {
   const tpl = inlineTemplate(sf)
   if (!tpl) return []
   const out: RawTarget[] = []
+  const locAt = (index: number): { line: number; col: number } => templateLoc(sf, tpl, index)
+  const file = tpl.externalFile ? relative(projectDir, tpl.externalFile) : undefined
   for (const m of tpl.text.matchAll(STATIC_LINK_RE)) {
-    const value = m[1] ?? ''
-    const lc = sf.getLineAndColumnAtPos(tpl.start)
-    out.push({ ti: { kind: 'literal', value }, event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: { line: lc.line, col: lc.column } })
+    out.push({ ti: { kind: 'literal', value: m[1] ?? '' }, event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file })
   }
   for (const m of tpl.text.matchAll(BOUND_LINK_RE)) {
-    const expr = m[1] ?? ''
-    const lc = sf.getLineAndColumnAtPos(tpl.start)
-    out.push({ ti: classifyBoundLink(expr), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: { line: lc.line, col: lc.column } })
+    out.push({ ti: classifyBoundLink(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file })
   }
   return out
 }
 
-/** Classify a bound [routerLink] expression's textual value: "'/x/' + id" -> prefix "/x/". */
+/** Witness loc for a position inside a template: a line within an external html file, or the .ts offset for inline templates. */
+function templateLoc(sf: SourceFile, tpl: ComponentTemplate, index: number): { line: number; col: number } {
+  if (tpl.externalFile) {
+    const line = tpl.text.slice(0, index).split('\n').length
+    return { line, col: 1 }
+  }
+  const lc = sf.getLineAndColumnAtPos(tpl.start)
+  return { line: lc.line, col: lc.column }
+}
+
+/**
+ * Classify a bound [routerLink] expression's textual value. Handles bare string
+ * literals ("'/x'" -> literal), string concatenation ("'/x/' + id" -> prefix
+ * "/x/"), and array forms ("['/tag', tag]" -> prefix "/tag/"; "['/about']" ->
+ * literal "/about"). Anything else over-approximates to dynamic.
+ */
 function classifyBoundLink(expr: string): TargetInfo {
   const trimmed = expr.trim()
   const literalOnly = /^'([^']*)'$/.exec(trimmed) ?? /^"([^"]*)"$/.exec(trimmed)
   if (literalOnly) return { kind: 'literal', value: literalOnly[1] ?? '' }
   const concatPrefix = /^'([^']*)'\s*\+/.exec(trimmed) ?? /^"([^"]*)"\s*\+/.exec(trimmed)
   if (concatPrefix) return { kind: 'template', staticPrefix: concatPrefix[1] ?? '' }
+  if (trimmed.startsWith('[')) return classifyLinkArray(trimmed)
   return { kind: 'dynamic' }
+}
+
+/**
+ * Classify an array commands expression `['/seg', ...]`. A single static element
+ * is a literal; a leading static element followed by more elements is a template
+ * whose prefix is the static segments joined with trailing slash. A non-literal
+ * first element is dynamic.
+ */
+function classifyLinkArray(arr: string): TargetInfo {
+  const inner = arr.slice(1, arr.lastIndexOf(']'))
+  const parts = splitTopLevel(inner)
+  if (parts.length === 0) return { kind: 'dynamic' }
+  const lits: string[] = []
+  for (const p of parts) {
+    const lit = /^'([^']*)'$/.exec(p) ?? /^"([^"]*)"$/.exec(p)
+    if (!lit) break
+    lits.push(lit[1] ?? '')
+  }
+  if (lits.length === 0) return { kind: 'dynamic' }
+  const staticPath = lits.join('/').replace(/\/+/g, '/')
+  if (lits.length === parts.length) return { kind: 'literal', value: staticPath }
+  return { kind: 'template', staticPrefix: staticPath.endsWith('/') ? staticPath : staticPath + '/' }
+}
+
+/** Split a comma-separated expression list at top level (ignoring commas inside quotes/brackets). */
+function splitTopLevel(s: string): string[] {
+  const out: string[] = []
+  let depth = 0
+  let quote = ''
+  let cur = ''
+  for (const ch of s) {
+    if (quote) {
+      cur += ch
+      if (ch === quote) quote = ''
+      continue
+    }
+    if (ch === "'" || ch === '"') {
+      quote = ch
+      cur += ch
+      continue
+    }
+    if (ch === '[' || ch === '(' || ch === '{') depth++
+    else if (ch === ']' || ch === ')' || ch === '}') depth--
+    if (ch === ',' && depth === 0) {
+      const t = cur.trim()
+      if (t.length > 0) out.push(t)
+      cur = ''
+      continue
+    }
+    cur += ch
+  }
+  const t = cur.trim()
+  if (t.length > 0) out.push(t)
+  return out
 }
 
 /** Parse `this.router.navigate([...])` and `this.router.navigateByUrl(...)` calls. */
@@ -494,7 +689,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       modality,
       source: 'static',
       confidence,
-      witness: { source: 'static', file, loc: t.loc, ruleId: t.ruleId },
+      witness: { source: 'static', file: t.file ?? file, loc: t.loc, ruleId: t.ruleId },
     })
   }
 
@@ -504,7 +699,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       continue
     }
     const file = relative(projectDir, route.componentFile.getFilePath())
-    const targets = [...templateTargets(route.componentFile), ...routerCallTargets(route.componentFile)]
+    const targets = [...templateTargets(route.componentFile, projectDir), ...routerCallTargets(route.componentFile)]
     for (const t of targets) {
       if (t.ti.kind === 'literal') {
         const target = matchLiteral(t.ti.value, routeLikes)
