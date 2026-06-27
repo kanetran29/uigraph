@@ -37,15 +37,25 @@ export interface EdgeCoverage {
   reason?: string
 }
 
-/** Coverage of the proven graph under both the strict and the accounted-for metrics. */
+// Coverage of the proven graph under the honest metrics. THREE distinct ratios, do
+// not conflate them: runtimeRatio (actually witnessed in a browser) ≤ verifiedRatio
+// (witnessed OR a real deterministic must-static proof) ≤ accountedRatio (verified
+// PLUS resolved-dynamic PLUS explicitly parked, i.e. "nothing left in limbo").
+// accounted=100% does NOT mean "all verified" — parked + dynamic-resolved edges are
+// accounted without being verified, so verifiedRatio/parkedCount are what a reader
+// must consult to tell a fully-proven map from a fully-triaged one.
+/** Coverage of the proven graph under the strict, verified, and accounted-for metrics. */
 export interface CoverageReport {
   total: number
   verified: number
   ratio: number
   runtimeVerified: number
   runtimeRatio: number
+  verifiedCount: number
+  verifiedRatio: number
   accounted: number
   accountedRatio: number
+  parkedCount: number
   byModality: Record<string, number>
   bySource: Record<string, number>
   unverified: EdgeCoverage[]
@@ -114,6 +124,8 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
     bySource[e.source] = (bySource[e.source] ?? 0) + 1
   }
   const runtimeVerified = rows.filter((r) => r.verified).length
+  const verifiedCount = rows.filter((r) => r.status === 'runtime' || r.status === 'static').length
+  const parkedCount = rows.filter((r) => r.status === 'parked').length
   const accounted = rows.filter((r) => r.accounted).length
   const total = rows.length
   return {
@@ -122,8 +134,11 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
     ratio: total > 0 ? runtimeVerified / total : 0,
     runtimeVerified,
     runtimeRatio: total > 0 ? runtimeVerified / total : 0,
+    verifiedCount,
+    verifiedRatio: total > 0 ? verifiedCount / total : 1,
     accounted,
     accountedRatio: total > 0 ? accounted / total : 1,
+    parkedCount,
     byModality,
     bySource,
     unverified: rows.filter((r) => !r.verified),

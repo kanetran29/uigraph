@@ -62,6 +62,34 @@ describe('buildFrontier', () => {
     expect(f.states).toEqual(['a'])
   })
 
+  it('does NOT count a state as frontier once its dynamic-sink dispatch is resolved by a concrete runtime out-edge', () => {
+    // a has a synthetic sub-state sink (ps_a, kind 'unknown') AND a witnessed runtime
+    // landing a->b; the dispatch is resolved, so a is no longer a known-unknown.
+    const g = graph(
+      [node('a'), node('b'), node('ps_a__expanded', { kind: 'unknown' })],
+      [
+        edge('e1', 'a', 'ps_a__expanded', { source: 'static', modality: 'unknown' }),
+        edge('e2', 'a', 'b', { source: 'runtime', modality: 'must' }),
+        edge('e3', 'b', 'a', { source: 'static', modality: 'must', event: 'back' }),
+      ],
+    )
+    const f = buildFrontier(g)
+    expect(f.states).toEqual([])
+    expect(f.unknownCount).toBe(0)
+  })
+
+  it('still counts a state whose dynamic sink is UNresolved (runtime landing is itself a sink)', () => {
+    // a's only runtime out-edge lands on an unknown sink, not a concrete resolution;
+    // a stays on the frontier.
+    const g = graph(
+      [node('a'), node('u_a', { kind: 'unknown' })],
+      [edge('e1', 'a', 'u_a', { source: 'runtime', modality: 'unknown' })],
+    )
+    const f = buildFrontier(g)
+    expect(f.states).toEqual(['a'])
+    expect(f.unknownCount).toBe(1)
+  })
+
   it('counts a state once even when it has multiple unknown out-edges', () => {
     const g = graph(
       [node('a'), node('u1', { kind: 'unknown' }), node('u2', { kind: 'unknown' })],

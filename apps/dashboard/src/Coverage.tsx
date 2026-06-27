@@ -33,9 +33,12 @@ function CountChip(props: { label: string; n: number }): JSX.Element {
 export function Coverage(props: CoverageProps): JSX.Element {
   const { coverage, graph, onSelect } = props
   const { t } = useT()
-  // Headline is the HONEST "done" metric (accounted-for); runtime-verified is always
-  // co-reported beside it so a parked-heavy graph can never read as "100% verified".
+  // Headline is the HONEST "done" metric (accounted-for); verified% (runtime OR a
+  // deterministic must-static proof) and runtime-verified% and the parked count are
+  // always co-reported beside it so 100%-accounted (which credits parked + resolved-
+  // dynamic edges) can never be misread as "100% verified" on a triaged-but-unproven map.
   const accountedPct = Math.round((coverage.accountedRatio ?? coverage.ratio) * 100)
+  const verifiedPct = Math.round((coverage.verifiedRatio ?? coverage.runtimeRatio ?? coverage.ratio) * 100)
   const runtimePct = Math.round(coverage.runtimeRatio * 100)
   const allOpen = coverage.open ?? coverage.unverified
   const allParked = coverage.parked ?? []
@@ -67,7 +70,7 @@ export function Coverage(props: CoverageProps): JSX.Element {
         </span>
       </div>
       <p className="muted cov-sub">
-        runtime-verified {runtimePct}% ({coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · parked {allParked.length}
+        verified {verifiedPct}% ({coverage.verifiedCount ?? coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · runtime-verified {runtimePct}% ({coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · parked {coverage.parkedCount ?? allParked.length}
       </p>
 
       <div className="cov-chips">

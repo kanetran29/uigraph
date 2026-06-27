@@ -19,21 +19,28 @@ function pairKey(from: string, to: string): string {
  * Derive each proposal's status from the observation log. Pure + idempotent
  * (reconcile∘reconcile = reconcile); returns a new array, mutating nothing and
  * changing only `status`. Precedence: a CONFIRMED observation linked by
- * `proposalId` or matching the proposal's (from→to[, event]) pair ⇒ 'confirmed'
- * (confirmation always wins over a refutation for the same pair). Else a REFUTED
- * observation so linked/matched ⇒ 'rejected'. `confirmed`/`rejected`/`unverifiable`
- * are terminal and never demoted by later absence of evidence; `proposed` stays
- * `proposed` when no observation touches it.
+ * `proposalId` or matching the proposal's transition ⇒ 'confirmed' (confirmation
+ * always wins over a refutation). Else a REFUTED observation so linked/matched ⇒
+ * 'rejected'. Pair-matching is EVENT-AWARE: when a proposal specifies an event, an
+ * observation only matches if BOTH the (from→to) pair AND the event agree — a
+ * same-pair observation on a different event does not flip it (no loose pair-only
+ * match). Only when the proposal specifies no event does the bare (from→to) pair
+ * match. `confirmed`/`rejected`/`unverifiable` are terminal and never demoted by
+ * later absence of evidence; `proposed` stays `proposed` when no observation
+ * touches it.
  */
 export function reconcileProposals(proposals: Proposal[], observations: Observation[]): Proposal[] {
   const confirmedPairs = new Set<string>()
   const refutedPairs = new Set<string>()
+  const confirmedEventPairs = new Set<string>()
+  const refutedEventPairs = new Set<string>()
   const confirmedIds = new Set<string>()
   const refutedIds = new Set<string>()
   for (const o of observations) {
-    const set = o.outcome === 'confirmed' ? confirmedPairs : refutedPairs
-    set.add(pairKey(o.from, o.to))
-    set.add(`${pairKey(o.from, o.to)}->${o.event}`)
+    const pairs = o.outcome === 'confirmed' ? confirmedPairs : refutedPairs
+    const eventPairs = o.outcome === 'confirmed' ? confirmedEventPairs : refutedEventPairs
+    pairs.add(pairKey(o.from, o.to))
+    eventPairs.add(`${pairKey(o.from, o.to)}->${o.event}`)
     if (o.proposalId !== undefined) (o.outcome === 'confirmed' ? confirmedIds : refutedIds).add(o.proposalId)
   }
 
@@ -41,10 +48,13 @@ export function reconcileProposals(proposals: Proposal[], observations: Observat
     if (p.status !== 'proposed') return p
     const pair = p.to !== undefined ? pairKey(p.from ?? p.screen, p.to) : undefined
     const eventPair = pair !== undefined && p.event !== undefined ? `${pair}->${p.event}` : undefined
-    const matched = (ids: Set<string>, pairs: Set<string>): boolean =>
-      ids.has(p.id) || (pair !== undefined && (pairs.has(pair) || (eventPair !== undefined && pairs.has(eventPair))))
-    if (matched(confirmedIds, confirmedPairs)) return { ...p, status: 'confirmed' as ProposalStatus }
-    if (matched(refutedIds, refutedPairs)) return { ...p, status: 'rejected' as ProposalStatus }
+    const matched = (ids: Set<string>, pairs: Set<string>, eventPairs: Set<string>): boolean => {
+      if (ids.has(p.id)) return true
+      if (pair === undefined) return false
+      return eventPair !== undefined ? eventPairs.has(eventPair) : pairs.has(pair)
+    }
+    if (matched(confirmedIds, confirmedPairs, confirmedEventPairs)) return { ...p, status: 'confirmed' as ProposalStatus }
+    if (matched(refutedIds, refutedPairs, refutedEventPairs)) return { ...p, status: 'rejected' as ProposalStatus }
     return p
   })
 }

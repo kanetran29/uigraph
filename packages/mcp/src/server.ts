@@ -111,7 +111,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_coverage',
-    description: 'Runtime-verification coverage of the proven graph: how many edges are runtime-witnessed vs static/manual, by modality/source, plus the list of unverified edges.',
+    description: 'Coverage of the proven graph under THREE honest ratios — runtimeRatio (actually witnessed in a browser) ≤ verifiedRatio (witnessed OR a deterministic must-static proof) ≤ accountedRatio (verified + resolved-dynamic + parkedCount) — plus the unverified/open/parked lists and a `staleness` summary (dangling refs / stale-hash sidecars) so coverage is never read as fresh when the base or its sidecars are stale.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
@@ -151,7 +151,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_state',
-    description: 'Describe one state (node) as a trust-tiered action surface: all out-edges rendered as cases, each with event, guard, outcomeClass (to-node, a real screen or a ps_* sub-state), trustTier (witnessed>proven>asserted>llm-verified>proposed>unknown), and an evidence cite. Answers "what can I do from state X and how far can I trust each path?".',
+    description: 'Describe one state (node) as a trust-tiered action surface: all out-edges rendered as cases, each with event, guard, outcomeClass (to-node, a real screen or a ps_* sub-state), trustTier (witnessed>proven>asserted>llm-verified>proposed>unknown), an `irreversible` flag (true for destructive/non-undoable actions like delete/pay/logout — gate these behind confirmation), and an evidence cite. Answers "what can I do from state X, how far can I trust each path, and which are destructive?".',
     inputSchema: {
       type: 'object',
       properties: { id: { type: 'string', description: 'node id (e.g. n_checkout)' } },
@@ -160,7 +160,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'list_cases',
-    description: 'List behavioral cases across the merged graph + quarantined proposals, each tagged with its trust tier and evidence, sorted most-trusted first. Optional filters: from (source node), outcomeClass (target node / sub-state), minTier (include only cases at least this trusted, e.g. "proven" → witnessed+proven only).',
+    description: 'List behavioral cases across the merged graph + quarantined proposals, each tagged with its trust tier, evidence, and an `irreversible` flag (true for destructive/non-undoable actions — gate behind confirmation), sorted most-trusted first. Optional filters: from (source node), outcomeClass (target node / sub-state), minTier (include only cases at least this trusted, e.g. "proven" → witnessed+proven only).',
     inputSchema: {
       type: 'object',
       properties: {

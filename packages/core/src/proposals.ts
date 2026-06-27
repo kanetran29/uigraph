@@ -157,9 +157,10 @@ function proposalStateKind(p: Proposal): string | null {
  * witness). Each proposal becomes an edge from its screen to a target: a real
  * screen, that screen's modal, or a synthesized sub-state node (modal/popover/
  * error/empty/loading/expanded/toast). Pure micro-interactions (no distinct target
- * state) are skipped. Edges dedupe by from→to, merging the originating proposal
- * ids. This is what gets stored so proposals are queryable as a graph without
- * polluting the proven graph.
+ * state) are skipped, as are proposals with no event (an event-less transition is
+ * not a drivable lead — never emit an event:'' edge). Edges dedupe by from→to,
+ * merging the originating proposal ids. This is what gets stored so proposals are
+ * queryable as a graph without polluting the proven graph.
  */
 export function materializeProposalGraph(graph: UiGraph, proposals: Proposal[]): ProposalGraph {
   const realNodeIds = new Set(graph.nodes.map((n) => n.id))
@@ -169,6 +170,8 @@ export function materializeProposalGraph(graph: UiGraph, proposals: Proposal[]):
 
   const stateNodes = new Map<string, ProposalGraphNode>()
   const edgeByPair = new Map<string, ProposalGraphEdge>()
+  // Event-less proposals are screened out below before any `link` call, so
+  // `p.event` is a non-empty string here and never produces an event:'' edge.
   const link = (p: Proposal, to: string): void => {
     const pair = `${p.screen}->${to}`
     const existing = edgeByPair.get(pair)
@@ -180,7 +183,7 @@ export function materializeProposalGraph(graph: UiGraph, proposals: Proposal[]):
       id: `pe_${pair}`,
       from: p.screen,
       to,
-      event: p.event ?? '',
+      event: p.event as string,
       guard: p.guard ?? null,
       effect: p.effect ?? null,
       modality: 'may',
@@ -190,6 +193,7 @@ export function materializeProposalGraph(graph: UiGraph, proposals: Proposal[]):
 
   for (const p of proposals) {
     if (p.status !== 'proposed') continue
+    if (p.event === undefined || p.event === '') continue
     if (!realNodeIds.has(p.screen)) continue
     if (p.to !== undefined && realScreens.has(p.to)) {
       link(p, p.to)

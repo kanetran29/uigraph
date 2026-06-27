@@ -68,6 +68,7 @@ This is an early static-extraction spine. What is actually true today:
 **Proven / enforced:**
 - Framework-agnostic core (no React/Angular/ts-morph import in `@uigraph/core`).
 - The LLM/proposal/manual **quarantine is structurally enforced** — nothing promotes a proposal or a manual edit into a `must`/base edge.
+- **The map is partial by design and says so.** No coverage number is a completeness claim — the denominator (all real behaviors) is unknowable. Metrics are honest about which fraction they measure: `verified%` = runtime-confirmed edges, `accounted%` = edges resolved by any means (parking included); the two are kept distinct and a parked edge is accounted-for but **never** verified. `loopDone` means "all *known* work resolved," not "the app fully mapped." Timing/race, multi-field, and cross-session behaviors are outside what a finite graph represents and are never counted.
 - The **`must`-tier soundness holes are closed**: a programmatic navigation after an early-return, or inside a loop / switch / catch / array-iteration callback, is a `may`-edge; an ambiguous param literal fans out to `may`, never a single wrong `must`; the served base+overlay is re-validated and stale overlays are rejected.
 
 **Not yet true (do not rely on these):**

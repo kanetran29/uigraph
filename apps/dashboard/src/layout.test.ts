@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { GraphEdge, GraphNode, Proposal, UiGraph } from '@uigraph/core'
-import { componentGroups, componentLabel, layoutGraph, proposedScreenEdges } from './layout'
+import { componentGroups, componentLabel, layoutGraph, proposedScreenEdges, structuralKey } from './layout'
 
 function screen(id: string, componentPath: string | null): GraphNode {
   return { id, route: `/${id}`, componentPath, label: id, kind: 'screen' }
@@ -79,6 +79,33 @@ describe('proposedScreenEdges', () => {
       prop({ id: 'done', to: 'm_x', status: 'confirmed' }),
     ])
     expect(edges).toEqual([])
+  })
+})
+
+describe('structuralKey — layout memo cache key', () => {
+  const edge = (id: string, from: string, to: string): GraphEdge => ({
+    id, from, to, event: 'click', guard: null, effect: null, modality: 'must', source: 'static', confidence: 1,
+  })
+  const g = graph([screen('a', null), screen('b', null), ctrl('c_b', 'b', null)], [edge('e1', 'a', 'b')])
+
+  it('is stable across selections that leave the expanded set unchanged (fresh empty Set each time)', () => {
+    // An edge selection and a childless-node selection both produce a brand-new empty
+    // Set; the key must be identical so layoutGraph is not recomputed per click.
+    expect(structuralKey(g, new Set())).toBe(structuralKey(g, new Set()))
+  })
+
+  it('changes when a screen is expanded vs collapsed', () => {
+    expect(structuralKey(g, new Set(['b']))).not.toBe(structuralKey(g, new Set()))
+  })
+
+  it('changes on a relayout-worthy structural edit (a new edge)', () => {
+    const g2 = graph([screen('a', null), screen('b', null), ctrl('c_b', 'b', null)], [edge('e1', 'a', 'b'), edge('e2', 'b', 'a')])
+    expect(structuralKey(g2, new Set())).not.toBe(structuralKey(g, new Set()))
+  })
+
+  it('is order-independent over the expanded set', () => {
+    const ga = graph([screen('a', null), ctrl('c_a', 'a', null), screen('b', null), ctrl('c_b', 'b', null)])
+    expect(structuralKey(ga, new Set(['a', 'b']))).toBe(structuralKey(ga, new Set(['b', 'a'])))
   })
 })
 

@@ -34,7 +34,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import { toPng } from 'html-to-image'
 import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@uigraph/core'
-import { layoutGraph, proposedScreenEdges, type GraphLayout, type ProposedEdge } from './layout'
+import { layoutGraph, proposedScreenEdges, structuralKey, type GraphLayout, type ProposedEdge } from './layout'
 import { pngFilename } from './exportPng'
 import { applySaved, layoutStorageKey, parsePositions, serializePositions } from './layoutStore'
 import { readStored, removeStored, writeStored } from './storage'
@@ -670,14 +670,6 @@ function ghostEdgesFor(dh: DiffHighlight, present: ReadonlySet<string>): Edge[] 
   return out
 }
 
-/** A structural key over node ids, edge ids, and the expanded set: changes only on relayout-worthy edits. */
-function structuralKey(graph: UiGraph, expanded: ReadonlySet<string>): string {
-  const nodeIds = graph.nodes.map((n) => n.id).join(',')
-  const edgeIds = graph.edges.map((e) => `${e.from}>${e.to}`).join(',')
-  const exp = [...expanded].sort().join(',')
-  return `${nodeIds}|${edgeIds}|${exp}`
-}
-
 /** Edge ids incident to a node id (from === id || to === id). */
 function incidentEdges(graph: UiGraph, nodeId: string): Set<string> {
   const out = new Set<string>()
@@ -793,7 +785,13 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
 
   // Proposals are NOT drawn on the canvas (they are persisted as nodes/edges in the
   // database and read via the proposals panel); the graph shows only the proven IR.
-  const layout = useMemo<GraphLayout>(() => layoutGraph(graph, expanded), [graph, expanded])
+  // The radial layout is O(nodes+edges) and must NOT rerun on every selection/search:
+  // `expanded` is a fresh Set on each selection (even an edge or a childless node that
+  // leaves the actual expanded contents unchanged), so memoizing on its identity would
+  // relayout 200+ nodes per click. Key on the canonical structural string instead — it
+  // changes only on a relayout-worthy edit (node/edge ids or the expanded screen set).
+  const layoutKey = useMemo(() => structuralKey(graph, expanded), [graph, expanded])
+  const layout = useMemo<GraphLayout>(() => layoutGraph(graph, expanded), [layoutKey])
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])

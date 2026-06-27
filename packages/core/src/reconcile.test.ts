@@ -50,6 +50,31 @@ describe('reconcileProposals', () => {
     expect(p?.status).toBe('confirmed')
   })
 
+  it('requires the event to match when the proposal specifies one (no loose pair-only flip)', () => {
+    const [p] = reconcileProposals([proposal({ event: 'click' })], [obs({ event: 'submit' })])
+    expect(p?.status).toBe('proposed')
+  })
+
+  it('confirms when both the pair and the specified event agree', () => {
+    const [p] = reconcileProposals([proposal({ event: 'click' })], [obs({ event: 'click' })])
+    expect(p?.status).toBe('confirmed')
+  })
+
+  it('does not reject on a same-pair refutation of a different event', () => {
+    const [p] = reconcileProposals([proposal({ event: 'click' })], [obs({ event: 'submit', outcome: 'refuted' })])
+    expect(p?.status).toBe('proposed')
+  })
+
+  it('still matches on the bare pair when the proposal specifies no event', () => {
+    const [p] = reconcileProposals([proposal({ event: undefined })], [obs({ event: 'whatever' })])
+    expect(p?.status).toBe('confirmed')
+  })
+
+  it('honors a proposalId link even when the specified event differs', () => {
+    const [p] = reconcileProposals([proposal({ event: 'click' })], [obs({ event: 'submit', proposalId: 'p1' })])
+    expect(p?.status).toBe('confirmed')
+  })
+
   it('leaves an untouched proposal proposed and never demotes terminal statuses', () => {
     const out = reconcileProposals(
       [proposal({ id: 'open', to: 'n_z' }), proposal({ id: 'done', status: 'confirmed' }), proposal({ id: 'park', status: 'unverifiable' })],

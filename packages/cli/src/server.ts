@@ -7,10 +7,10 @@ import { createServer as createHttpServer, type IncomingMessage, type Server, ty
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ToolContext, ListCasesArgs, UpdateGraphArgs } from '@uigraph/mcp'
-import { dbPath, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
+import { dbPath, getCoverage, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
 import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@uigraph/core/node'
 import type { TrustTier } from '@uigraph/core'
-import { buildCoverage, diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
+import { diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
 
 /** Render the workspace overlay as a markdown "planned changes" spec. */
 function readPlan(ctx: ToolContext): string {
@@ -71,13 +71,7 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
       return { status: 200, body: readProposals(ctx) }
     }
     if (req.method === 'GET' && req.path === '/api/coverage') {
-      const merged = loadMergedGraph(ctx)
-      const store = openStore(dbPath(ctx))
-      try {
-        return { status: 200, body: buildCoverage(merged, store.getParkedEdges()) }
-      } finally {
-        store.close()
-      }
+      return { status: 200, body: getCoverage(ctx) }
     }
     if (req.method === 'GET' && req.path === '/api/plan') {
       return { status: 200, body: { spec: readPlan(ctx) } }

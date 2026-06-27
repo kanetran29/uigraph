@@ -7,7 +7,8 @@
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import type { EdgeWithTier, GraphEdge, GraphNode, Modality, Overlay, Proposal, Source, TrustTier, UiGraph } from '@uigraph/core'
-import { applyObservations, buildCoverage, buildFrontier, buildGrounding, buildResolution, buildSpecPlan, diffGraphs, diffSinceLast, emptyOverlay, getTierLabel, hashValue, mergeOverlay, nextToVerify, planPath, projectTrustTier, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
+import { applyObservations, buildCoverage, buildFrontier, buildGrounding, buildResolution, buildSpecPlan, classifyEffectRisk, diffGraphs, diffSinceLast, emptyOverlay, getTierLabel, hashValue, mergeOverlay, nextToVerify, planPath, projectTrustTier, renderPlaywrightSpec, validateMerged, validateOverlay } from '@uigraph/core'
+import type { StalenessReport } from '@uigraph/core'
 import type { CoverageReport, Grounding, GroundedEdge, ProposalGraph, ProposalGraphEdge, ProposalStatus, ResolutionReport, ScreenGrounding, VerifyTarget } from '@uigraph/core'
 import type { Observation } from '@uigraph/core'
 import type { GraphDiff, SinceLastDiff } from '@uigraph/core'
@@ -212,9 +213,21 @@ export function describeScreen(ctx: ToolContext, args: DescribeScreenArgs): Scre
   return { ...screen, knownEdges, proposedEdges }
 }
 
-/** get_coverage result: both the strict runtime metric and the accounted-for metric, plus parked edges. */
-export function getCoverage(ctx: ToolContext): CoverageReport {
-  return withStore(ctx, (store) => buildCoverage(loadMergedGraph(ctx), store.getParkedEdges()))
+/**
+ * get_coverage result: the full CoverageReport (strict runtime metric, verified
+ * metric, accounted-for metric, parked edges) plus a `staleness` summary so the
+ * agent never reads coverage numbers without seeing whether the underlying base +
+ * sidecars are stale (dangling refs / hash mismatch). Additive: the coverage
+ * fields are unchanged; `staleness` is a new sibling.
+ */
+export type GetCoverageResult = CoverageReport & { staleness: StalenessReport }
+
+/** Coverage of the proven graph plus a staleness summary for the base + its sidecars. */
+export function getCoverage(ctx: ToolContext): GetCoverageResult {
+  return withStore(ctx, (store) => ({
+    ...buildCoverage(loadMergedGraph(ctx), store.getParkedEdges()),
+    staleness: store.stalenessReport(),
+  }))
 }
 
 /** Arguments for next_to_verify: an optional cap on the returned worklist size. */
@@ -274,6 +287,9 @@ function tierAtLeast(tier: TrustTier, floor: TrustTier): boolean {
  * id, a real screen or a synthesized `ps_*` sub-state), the target's label, the
  * projected `trustTier`, a short `evidence` cite, and the raw modality/source. This
  * answers "what can I do from here and how far can I trust each path?".
+ * `irreversible` is the destructive-action gate: true when this case performs a
+ * non-undoable effect (delete, pay, submit-order, logout, reset), so an agent can
+ * require confirmation before traversal instead of treating every case as safe.
  */
 export interface CaseEdge {
   event: string
@@ -285,6 +301,7 @@ export interface CaseEdge {
   evidence: string
   modality: Modality
   source: Source
+  irreversible: boolean
 }
 
 /**
@@ -299,6 +316,16 @@ function evidenceOf(edge: GraphEdge, proposalIds?: string[]): string {
   if (w.observationId !== undefined) return `runtime:${w.observationId}`
   if (w.file !== undefined) return `${w.file}${w.loc ? `:${w.loc.line}:${w.loc.col}` : ''}${w.ruleId ? ` (${w.ruleId})` : ''}`
   return edge.source
+}
+
+/**
+ * Whether a case is destructive/non-undoable. Honors an explicit `irreversible`
+ * flag on the edge when present (the IR may carry one), otherwise derives it from
+ * the effect string via core's `classifyEffectRisk`. Lets an agent gate dangerous
+ * traversals without re-implementing the risk heuristic at the wire.
+ */
+function isIrreversible(irreversible: boolean | undefined, effect: string | null | undefined): boolean {
+  return irreversible ?? classifyEffectRisk(effect)
 }
 
 /**
@@ -317,6 +344,7 @@ function graphEdgeToCase(edge: GraphEdge, labelOf: Map<string, string>): CaseEdg
     evidence: evidenceOf(edge),
     modality: edge.modality,
     source: edge.source,
+    irreversible: isIrreversible(edge.irreversible, edge.effect),
   }
 }
 
@@ -337,6 +365,7 @@ function proposalEdgeToCase(pe: ProposalGraphEdge, labelOf: Map<string, string>)
     evidence: evidenceOf({ id: pe.id, from: pe.from, to: pe.to, event: pe.event, guard: pe.guard, effect: pe.effect, modality: pe.modality, source: 'manual', confidence: 0 }, pe.proposalIds),
     modality: pe.modality,
     source: 'manual',
+    irreversible: isIrreversible(undefined, pe.effect),
   }
 }
 

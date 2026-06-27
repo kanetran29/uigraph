@@ -20,9 +20,21 @@ export interface Observation {
   ts?: string
 }
 
-/** Stable id for the runtime edge produced by a confirmed transition. */
+/**
+ * Stable id for the runtime edge produced by a confirmed transition. Uses a
+ * readable sanitized event token PLUS the full (non-truncated) FNV-1a of the
+ * canonical event, so two distinct events on the same from→to pair can never
+ * collide into one id — a collision here would silently merge separate
+ * transitions during dedup. The full hash disambiguates events that sanitize to
+ * the same token (e.g. `a b` vs `a_b`).
+ */
 export function runtimeEdgeId(from: string, to: string, event: string): string {
-  return `r_${from}__${to}__${fnv1a(event).slice(0, 6)}`
+  return `r_${from}__${to}__${sanitizeEvent(event)}_${fnv1a(event)}`
+}
+
+/** Map an event string to a readable id token (non-`[A-Za-z0-9_-]` → `_`). */
+function sanitizeEvent(event: string): string {
+  return event.replace(/[^A-Za-z0-9_-]/g, '_')
 }
 
 /**

@@ -3,7 +3,7 @@ import { buildCoverage, nextToVerify, nodeForUrl } from './coverage'
 import { buildFrontier } from './frontier'
 import type { TrustTier } from './trust-tier'
 import { edge, graph, node } from './fixtures'
-import type { ProposalGraph } from './proposals'
+import { materializeProposalGraph, type Proposal, type ProposalGraph } from './proposals'
 
 describe('nodeForUrl', () => {
   const g = graph(
@@ -67,6 +67,33 @@ describe('buildCoverage — two metrics', () => {
     expect(byId.get('e4')?.status).toBe('static')
   })
 
+  it('exposes verifiedCount/verifiedRatio = witnessed + proven (runtime + must-static), below accounted', () => {
+    // e1 runtime (witnessed) + e4 must-static (proven) = 2 verified; e3 dynamic-resolved is
+    // accounted but NOT verified, so verifiedRatio (0.5) < accountedRatio (0.75).
+    const cov = buildCoverage(g())
+    expect(cov.verifiedCount).toBe(2)
+    expect(cov.verifiedRatio).toBeCloseTo(0.5)
+    expect(cov.verifiedRatio).toBeLessThan(cov.accountedRatio)
+    expect(cov.runtimeRatio).toBeLessThanOrEqual(cov.verifiedRatio)
+  })
+
+  it('accounted=100% does not imply verified=100%: a parked edge is accounted, not verified', () => {
+    // park the lone open `may` edge => accountedRatio 1, but verifiedRatio stays at the
+    // witnessed+proven fraction and parkedCount surfaces the un-verified triage.
+    const cov = buildCoverage(g(), [{ edgeId: 'e2', reason: 'behind a flag', by: 'agent' }])
+    expect(cov.accountedRatio).toBe(1)
+    expect(cov.parkedCount).toBe(1)
+    expect(cov.verifiedRatio).toBeLessThan(1)
+    expect(cov.verifiedCount).toBe(2)
+  })
+
+  it('verifiedRatio is 1 for an empty graph and equals 1 only when every edge is witnessed/proven', () => {
+    expect(buildCoverage(graph([], [])).verifiedRatio).toBe(1)
+    const allProven = buildCoverage(graph([node('x'), node('y')], [edge('p', 'x', 'y', { source: 'static', modality: 'must' })]))
+    expect(allProven.verifiedRatio).toBe(1)
+    expect(allProven.parkedCount).toBe(0)
+  })
+
   it('does NOT credit a `may` static edge (witness proves the call site, not that it fires)', () => {
     const cov = buildCoverage(graph([node('x'), node('y')], [edge('m', 'x', 'y', { source: 'static', modality: 'may' })]))
     expect(cov.open.map((e) => e.id)).toEqual(['m'])
@@ -121,13 +148,14 @@ describe('buildCoverage — tier distribution + frontier (additive)', () => {
     expect(cov.frontierCount).toBe(buildFrontier(g()).unknownCount)
   })
 
-  it('frontierCount reflects both unknown-modality edges AND zero-out-edge states', () => {
-    // a has out-edges incl. a dynamic sink (e3) => frontier; c & b: b has an out-edge (e2),
-    // c is a dead end => frontier; u_a is an unknown sink, not counted.
+  it('frontierCount excludes a RESOLVED dynamic source but keeps dead-end states', () => {
+    // a has a dynamic sink (e3) BUT also a concrete runtime out-edge (e1 a->b), so its
+    // dispatch is resolved => a is NOT frontier; b has an out-edge (e2); c is a dead end
+    // => frontier; u_a is an unknown sink, not counted.
     const cov = buildCoverage(g())
     const f = buildFrontier(g())
     expect(cov.frontierCount).toBe(f.unknownCount)
-    expect(f.states.sort()).toEqual(['a', 'c'])
+    expect(f.states.sort()).toEqual(['c'])
   })
 
   it('keeps existing fields unchanged (backward compatible)', () => {
@@ -163,5 +191,19 @@ describe('nextToVerify', () => {
 
   it('honours the limit', () => {
     expect(nextToVerify(g(), pg, 1)).toHaveLength(1)
+  })
+
+  it('never ranks a rejected proposal alongside proposed ones (only proposed reach the worklist)', () => {
+    const pg2 = graph([node('a'), node('b'), node('c')], [])
+    const base = (over: Partial<Proposal>): Proposal => ({
+      id: 'x', kind: 'edge', category: 'nav', screen: 'a', title: 't', rationale: 'r',
+      evidenced: true, confidence: 0.5, source: 'proposal', status: 'proposed', event: 'click', ...over,
+    })
+    const proposalGraph = materializeProposalGraph(pg2, [
+      base({ id: 'open', to: 'b', status: 'proposed' }),
+      base({ id: 'gone', to: 'c', status: 'rejected' }),
+    ])
+    const ids = nextToVerify(pg2, proposalGraph).filter((t) => t.kind === 'proposal').map((t) => t.id)
+    expect(ids).toEqual(['pe_a->b'])
   })
 })

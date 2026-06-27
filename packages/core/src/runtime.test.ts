@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { applyObservations, confirmedEdges, type Observation } from './runtime'
+import { applyObservations, confirmedEdges, runtimeEdgeId, type Observation } from './runtime'
 import { edge, graph, node } from './fixtures'
 
 function obs(over: Partial<Observation> = {}): Observation {
@@ -20,6 +20,26 @@ describe('confirmedEdges', () => {
 
   it('dedupes repeated confirmations of the same transition', () => {
     expect(confirmedEdges([obs({ id: 'o1' }), obs({ id: 'o2' })])).toHaveLength(1)
+  })
+
+  it('does NOT merge two distinct events on the same from→to pair', () => {
+    const edges = confirmedEdges([obs({ id: 'o1', event: 'click' }), obs({ id: 'o2', event: 'keydown:Enter' })])
+    expect(edges).toHaveLength(2)
+    expect(new Set(edges.map((e) => e.id)).size).toBe(2)
+  })
+})
+
+describe('runtimeEdgeId', () => {
+  it('is collision-free across distinct events (no truncated-hash collision)', () => {
+    expect(runtimeEdgeId('a', 'b', 'click')).not.toBe(runtimeEdgeId('a', 'b', 'submit'))
+  })
+
+  it('distinguishes events that sanitize to the same readable token', () => {
+    expect(runtimeEdgeId('a', 'b', 'a b')).not.toBe(runtimeEdgeId('a', 'b', 'a_b'))
+  })
+
+  it('is stable for the same (from,to,event)', () => {
+    expect(runtimeEdgeId('a', 'b', 'click')).toBe(runtimeEdgeId('a', 'b', 'click'))
   })
 })
 
