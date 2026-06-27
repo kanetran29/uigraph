@@ -29,7 +29,7 @@ export type {
   Adapter,
 } from './adapter'
 
-export { stableStringify, fnv1a, hashValue } from './hash'
+export { stableStringify, fnv1a, hashValue, canonicalEdgeTag } from './hash'
 export { confirmedEdges, applyObservations, runtimeEdgeId, type Observation } from './runtime'
 export {
   validateGraphShape,

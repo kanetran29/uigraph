@@ -1055,4 +1055,42 @@ describe('extractGraph — real-world router patterns (OSS hardening)', () => {
     expect(inline.graph.edges.some((e) => e.to === 'n_root')).toBe(true)
     expect(validateGraph(inline.graph)).toEqual([])
   })
+
+  it('emits an inline-jsx-route soundiness note (no component file to scan) with file:line', () => {
+    const notes = inline.soundiness.filter((s) => s.kind === 'inline-jsx-route')
+    expect(notes.length).toBe(2)
+    expect(notes.every((n) => typeof n.file === 'string' && n.loc !== undefined)).toBe(true)
+    expect(notes.some((n) => n.detail.includes('<section>'))).toBe(true)
+  })
+})
+
+describe('extractGraph — soundiness: navigation intent not statically extractable', () => {
+  it('emits a dispatch-driven-nav note when a handler dispatches a store action', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /><Route path="/next" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useDispatch } from 'react-redux'\nimport { goNext } from './actions'\nexport default function H(){ const dispatch = useDispatch(); return <button onClick={() => dispatch(goNext())}>go</button> }`,
+        '/actions.ts': `export const goNext = () => ({ type: 'GO_NEXT' })`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const notes = soundiness.filter((s) => s.kind === 'dispatch-driven-nav')
+    expect(notes.length).toBeGreaterThanOrEqual(1)
+    expect(notes[0]?.file).toBeDefined()
+    expect(notes[0]?.loc).toBeDefined()
+  })
+
+  it('emits both note categories together (dispatch nav + inline-JSX route)', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /><Route path="/raw" element={<div>raw</div>} /></Routes>)`,
+        '/H.tsx': `import { useDispatch } from 'react-redux'\nexport default function H(){ const dispatch = useDispatch(); return <button onClick={() => dispatch({ type: 'X' })}>go</button> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    expect(soundiness.some((s) => s.kind === 'dispatch-driven-nav')).toBe(true)
+    expect(soundiness.some((s) => s.kind === 'inline-jsx-route')).toBe(true)
+  })
 })

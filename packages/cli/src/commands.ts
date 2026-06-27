@@ -3,7 +3,7 @@
 // These tie the workspace together: adapters produce the IR, @uigraph/core/node
 // persists it, and @uigraph/core diffs it. No commander or process state leaks in.
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { AdapterContext, Logger, SoundinessNote, UiGraph } from '@uigraph/core'
 import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, hashValue } from '@uigraph/core'
@@ -20,6 +20,64 @@ export const DB_FILE = 'uigraph.db'
 
 /** The frameworks the CLI can map; selects the adapter for a `map` run. */
 export type AdapterName = 'react' | 'angular' | 'vue' | 'next'
+
+/**
+ * A user-facing CLI error: its message is meant to be printed verbatim (no stack)
+ * for an expected, actionable failure — a bad <dir>, an extraction error, a corrupt
+ * database. The top-level catch prints `.message` and exits non-zero; raw/unexpected
+ * errors fall through with their stack under --debug.
+ */
+export class CliError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'CliError'
+  }
+}
+
+/**
+ * Validate that `dir` is an existing directory before any extraction or store op,
+ * throwing a clear CliError otherwise. Guards every command that takes a <dir> arg
+ * so a normal mistake (typo, file passed instead of a folder) is a friendly message
+ * and non-zero exit, never a raw ENOENT stack.
+ */
+export function assertProjectDir(dir: string): void {
+  let stat
+  try {
+    stat = statSync(dir)
+  } catch {
+    throw new CliError(`directory not found: ${dir}\n  pass a path to an existing project directory`)
+  }
+  if (!stat.isDirectory()) throw new CliError(`not a directory: ${dir}\n  expected a project directory, not a file`)
+}
+
+/**
+ * Open a workspace SQLite store, translating a corrupt/locked/unreadable database
+ * into an actionable CliError instead of a raw node:sqlite stack. The original
+ * cause is attached so --debug can still surface it.
+ */
+export function openStoreSafe(dbPath: string) {
+  try {
+    return openStore(dbPath)
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err)
+    throw new CliError(
+      `cannot open workspace database: ${dbPath}\n  ${reason}\n  the file may be corrupt or locked — delete it and re-run \`uigraph map\``,
+    )
+  }
+}
+
+/**
+ * Create a directory (recursively) for an output file, turning a permission/path
+ * failure into an actionable CliError naming the path instead of a raw stack.
+ */
+function ensureDir(dir: string, outPath: string): void {
+  try {
+    mkdirSync(dir, { recursive: true })
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err)
+    throw new CliError(`cannot create output directory: ${dir}\n  ${reason}\n  (writing ${outPath})`)
+  }
+}
 
 /**
  * A console-backed Logger satisfying the core adapter contract. `debug` is
@@ -47,6 +105,61 @@ export function makeContext(logger: Logger = consoleLogger()): AdapterContext {
   }
 }
 
+/**
+ * Infer the adapter for a project from the dependency names in its package.json
+ * contents (deps + devDeps), so `map` works without an explicit `--adapter`. Returns
+ * a single detected name, or the list of candidates when the signals are ambiguous
+ * (more than one framework, e.g. a hand-rolled react+vue repo) so the caller can ask.
+ * Precedence: next wins over react (Next pulls react in); otherwise each framework is
+ * an independent signal. `null` when nothing matched.
+ */
+export function detectAdapter(packageJson: string): { adapter: AdapterName } | { ambiguous: AdapterName[] } | null {
+  let pkg: { dependencies?: Record<string, unknown>; devDependencies?: Record<string, unknown> }
+  try {
+    pkg = JSON.parse(packageJson)
+  } catch {
+    return null
+  }
+  const deps = new Set([...Object.keys(pkg.dependencies ?? {}), ...Object.keys(pkg.devDependencies ?? {})])
+  const has = (name: string) => deps.has(name)
+  const candidates: AdapterName[] = []
+  if (has('next')) candidates.push('next')
+  if ([...deps].some((d) => d === '@angular/core' || d.startsWith('@angular/'))) candidates.push('angular')
+  if (has('vue') || has('vue-router')) candidates.push('vue')
+  // Next already implies react; only treat react as its own candidate when Next is absent.
+  if (!has('next') && (has('react') || [...deps].some((d) => d === 'react-router' || d.startsWith('react-router')))) {
+    candidates.push('react')
+  }
+  if (candidates.length === 0) return null
+  if (candidates.length === 1) return { adapter: candidates[0]! }
+  return { ambiguous: candidates }
+}
+
+/**
+ * Resolve the adapter for a `map` run: use the explicit name when given, else read
+ * the project's package.json and auto-detect. Throws an actionable CliError when there
+ * is no package.json, when detection finds nothing, or when it is ambiguous (listing the
+ * candidates so the user can re-run with `--adapter`).
+ */
+export function resolveAdapter(dir: string, explicit?: AdapterName): { adapter: AdapterName; detected: boolean } {
+  if (explicit !== undefined) return { adapter: explicit, detected: false }
+  const pkgPath = join(dir, 'package.json')
+  let contents: string
+  try {
+    contents = readFileSync(pkgPath, 'utf8')
+  } catch {
+    throw new CliError(`no package.json in ${dir} — cannot auto-detect the adapter\n  pass one explicitly: --adapter react|angular|vue|next`)
+  }
+  const result = detectAdapter(contents)
+  if (result === null) {
+    throw new CliError(`could not detect a supported framework in ${pkgPath}\n  pass one explicitly: --adapter react|angular|vue|next`)
+  }
+  if ('ambiguous' in result) {
+    throw new CliError(`ambiguous framework in ${pkgPath} — found ${result.ambiguous.join(', ')}\n  pass one explicitly: --adapter ${result.ambiguous.join('|')}`)
+  }
+  return { adapter: result.adapter, detected: true }
+}
+
 /** Pick the adapter object for a framework name; throws on an unknown name. */
 export function pickAdapter(name: AdapterName) {
   if (name === 'react') return reactAdapter
@@ -59,7 +172,8 @@ export function pickAdapter(name: AdapterName) {
 /** Options for `runMap`: the project dir, the framework, and an optional db path. */
 export interface RunMapOptions {
   dir: string
-  adapter: AdapterName
+  /** Explicit adapter; omit to auto-detect from the project's package.json. */
+  adapter?: AdapterName
   out?: string
   controls?: boolean
   /** Auto-register this workspace in ~/.uigraph (default true; off for --out / experiments). */
@@ -72,12 +186,17 @@ export interface RunMapOptions {
 /** The summary `runMap` returns (and prints): the db it wrote and headline counts. */
 export interface MapSummary {
   dbPath: string
+  /** The adapter actually used, and whether it was auto-detected (vs passed explicitly). */
+  adapter: AdapterName
+  detected: boolean
   nodes: number
   edges: number
   must: number
   may: number
   unknown: number
   soundiness: number
+  /** Soundiness-note counts grouped by category (kind), for the SOUNDINESS SUMMARY block. */
+  soundinessByKind: Record<string, number>
 }
 
 /** Absolute path to a workspace's SQLite database. */
@@ -93,13 +212,22 @@ export function dbPathFor(dir: string): string {
  */
 export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   const logger = opts.logger ?? consoleLogger()
-  const adapter = pickAdapter(opts.adapter)
+  assertProjectDir(opts.dir)
+  const { adapter: adapterName, detected } = resolveAdapter(opts.dir, opts.adapter)
+  const adapter = pickAdapter(adapterName)
   const ctx = makeContext(logger)
 
-  const { graph, soundiness } = await adapter.extract(opts.dir, { controls: opts.controls ?? false }, ctx)
+  let graph: UiGraph
+  let soundiness: SoundinessNote[]
+  try {
+    ;({ graph, soundiness } = await adapter.extract(opts.dir, { controls: opts.controls ?? false }, ctx))
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err)
+    throw new CliError(`failed to extract the ${adapterName} graph from ${opts.dir}\n  ${reason}`)
+  }
 
   const dbPath = opts.out ?? dbPathFor(opts.dir)
-  const store = openStore(dbPath)
+  const store = openStoreSafe(dbPath)
   try {
     // Rotate the current graph into the 'previous' slot for the temporal "since last map" diff.
     // MUST run before setBaseGraph/setFingerprint overwrite the graph + mappedAt it reads.
@@ -108,7 +236,7 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
     // Stamp a source fingerprint so `uigraph status` / get_freshness can later tell the
     // graph is stale. The CLI owns the clock (mappedAt); the store/core stay clock-free.
     const scan = fingerprintSources(opts.dir)
-    store.setFingerprint({ projectDir: opts.dir, adapter: opts.adapter, hash: scan.hash, files: scan.files, mappedAt: new Date().toISOString() })
+    store.setFingerprint({ projectDir: opts.dir, adapter: adapterName, hash: scan.hash, files: scan.files, mappedAt: new Date().toISOString() })
   } finally {
     store.close()
   }
@@ -118,18 +246,28 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   // only — never the project. The CLI owns the clock (addedAt).
   if (opts.register !== false && opts.out === undefined) {
     const canon = canonicalDir(opts.dir)
-    writeRegistry(upsertWorkspace(readRegistry(), canon, opts.name ?? defaultName(canon), opts.adapter, new Date().toISOString()))
+    writeRegistry(upsertWorkspace(readRegistry(), canon, opts.name ?? defaultName(canon), adapterName, new Date().toISOString()))
   }
 
   return {
     dbPath,
+    adapter: adapterName,
+    detected,
     nodes: graph.nodes.length,
     edges: graph.edges.length,
     must: graph.edges.filter((e) => e.modality === 'must').length,
     may: graph.edges.filter((e) => e.modality === 'may').length,
     unknown: graph.edges.filter((e) => e.modality === 'unknown').length,
     soundiness: soundiness.length,
+    soundinessByKind: countByKind(soundiness),
   }
+}
+
+/** Tally soundiness notes by their `kind` category, for the SOUNDINESS SUMMARY block. */
+function countByKind(notes: SoundinessNote[]): Record<string, number> {
+  const out: Record<string, number> = {}
+  for (const n of notes) out[n.kind] = (out[n.kind] ?? 0) + 1
+  return out
 }
 
 /** Graph freshness vs the current source: 'fresh' (current), 'stale' (re-map), 'unknown'
@@ -151,7 +289,7 @@ export interface StatusResult {
  * from here (a remote/CI map); never reports 'fresh' when it cannot recompute.
  */
 export function runStatus(dir: string): StatusResult {
-  const store = openStore(dbPathFor(dir))
+  const store = openStoreSafe(dbPathFor(dir))
   try {
     const fp = store.getFingerprint()
     if (fp === null) {
@@ -206,19 +344,70 @@ export function formatStatus(s: StatusResult): string {
   )
 }
 
+/**
+ * A one-line, actionable recommendation per soundiness category — what the user should
+ * do about navigations/elements uigraph could detect but not soundly extract. Falls back
+ * to a generic line for categories without a tailored message.
+ */
+function soundinessRecommendation(kind: string, count: number): string {
+  const n = `${count} ${kind}`
+  switch (kind) {
+    case 'dispatch-driven-nav':
+      return `${n}: navigation runs through a store action — runtime-verify or annotate the target route`
+    case 'inline-jsx-route':
+      return `${n}: route renders inline JSX with no component to scan — extract it to a component to capture its navigations`
+    case 'dynamic-target':
+      return `${n}: fully dynamic navigation target — runtime-verify the destination(s)`
+    case 'unresolved-target':
+      return `${n}: navigation target matches no declared route — check for a dead link or an unmapped route`
+    case 'dynamic-widget':
+      return `${n}: interactive map/canvas gestures are runtime-only — verify manually`
+    default:
+      return `${n}: not statically extractable — runtime-verify or annotate`
+  }
+}
+
 /** Format a MapSummary as the multi-line block the `map` command prints. */
 export function formatMapSummary(s: MapSummary): string {
-  return [
+  const lines = [
     `Wrote ${s.dbPath}`,
+    `  adapter: ${s.adapter}${s.detected ? ' (auto-detected from package.json)' : ''}`,
     `  nodes: ${s.nodes}`,
     `  edges: ${s.edges} (must: ${s.must}, may: ${s.may}, unknown: ${s.unknown})`,
     `  soundiness notes: ${s.soundiness}`,
-  ].join('\n')
+  ]
+  const kinds = Object.keys(s.soundinessByKind).sort((a, b) => s.soundinessByKind[b]! - s.soundinessByKind[a]!)
+  if (kinds.length > 0) {
+    lines.push('', 'SOUNDINESS SUMMARY (detected but not statically extractable):')
+    for (const k of kinds) lines.push(`  • ${soundinessRecommendation(k, s.soundinessByKind[k]!)}`)
+  }
+  if (s.edges === 0) lines.push('', ...emptyGraphGuidance(s))
+  return lines.join('\n')
+}
+
+/**
+ * Actionable guidance when a map produced 0 edges, so an empty graph reads as a
+ * diagnosable result rather than a silent failure. Points at the soundiness summary
+ * when there were notes (navigation was detected but not statically extractable), and
+ * otherwise explains the common reasons a static scan finds no transitions.
+ */
+function emptyGraphGuidance(s: MapSummary): string[] {
+  const lines = ['NO EDGES EXTRACTED — the graph has no proven transitions. This usually means:']
+  if (s.soundiness > 0) {
+    lines.push('  • navigation was detected but is not statically extractable — see the SOUNDINESS SUMMARY above')
+  }
+  lines.push(
+    '  • navigation is dispatch-driven / dynamic (router pushed from a store action or a computed target)',
+    '  • navigation happens in an external/unscanned layer (a layout package, generated routes)',
+    '  • the wrong adapter was used, or routes live outside the scanned source',
+    '  → runtime-verify with `uigraph verify <dir> --app-url <url>` to capture transitions the static scan cannot prove',
+  )
+  return lines
 }
 
 /** Render the workspace overlay as a markdown "planned changes" spec. */
 export function runExport(dir: string): string {
-  const store = openStore(dbPathFor(dir))
+  const store = openStoreSafe(dbPathFor(dir))
   try {
     const base = store.getBaseGraph()
     if (base === null) throw new Error(`no graph in ${dir} — run \`uigraph map\` first`)
@@ -230,7 +419,7 @@ export function runExport(dir: string): string {
 
 /** Run the JSON→SQLite migration for a workspace dir; returns what was imported. */
 export function runMigrate(dir: string): ImportSummary {
-  const store = openStore(dbPathFor(dir))
+  const store = openStoreSafe(dbPathFor(dir))
   try {
     return importJsonWorkspace(dir, store)
   } finally {
@@ -271,7 +460,7 @@ export function runGen(opts: RunGenOptions): GenSummary {
   const plan = buildSpecPlan(graph, steps, { baseUrl: opts.baseUrl ?? '', title: `${opts.from} → ${opts.to}` })
   const spec = renderPlaywrightSpec(plan)
   if (opts.out !== undefined) {
-    mkdirSync(dirname(opts.out), { recursive: true })
+    ensureDir(dirname(opts.out), opts.out)
     writeFileSync(opts.out, spec, 'utf8')
   }
   return { from: opts.from, to: opts.to, legs: plan.legs.length, out: opts.out, spec }
@@ -301,7 +490,7 @@ export interface RunDiffOptions {
 /** Load a graph from a path: SQLite store when `.db`, else a JSON graph file. */
 function loadGraphSource(path: string): UiGraph {
   if (path.endsWith('.db')) {
-    const store = openStore(path)
+    const store = openStoreSafe(path)
     try {
       const g = store.getBaseGraph()
       if (g === null) throw new Error(`no base graph in ${path}`)
@@ -345,7 +534,7 @@ export function formatDiff(diff: GraphDiff): string {
  * 3-state branch to the shared pure core helper. Clock-free (passes stored ISO strings).
  */
 export function runDiffSinceLast(dir: string): SinceLastDiff {
-  const store = openStore(dbPathFor(dir))
+  const store = openStoreSafe(dbPathFor(dir))
   try {
     return diffSinceLast(store.getBaseGraph(), store.getFingerprint()?.mappedAt ?? null, store.getPreviousGraph())
   } finally {
@@ -367,7 +556,7 @@ export function formatDiffSinceLast(r: SinceLastDiff): string {
 
 /** Read a workspace's soundiness report from its SQLite store (empty if none). */
 export function readSoundiness(dir: string): SoundinessNote[] {
-  const store = openStore(dbPathFor(dir))
+  const store = openStoreSafe(dbPathFor(dir))
   try {
     return store.getSoundiness()
   } finally {
@@ -396,7 +585,7 @@ export function runKitInstall(opts: RunKitInstallOptions = {}): { written: strin
   const root = opts.dir ?? process.cwd()
   if (opts.claude === true) {
     const out = join(root, '.claude', 'skills', 'uigraph', 'SKILL.md')
-    mkdirSync(dirname(out), { recursive: true })
+    ensureDir(dirname(out), out)
     writeFileSync(out, readKitFile('SKILL.md'))
     return { written: [out] }
   }
@@ -404,7 +593,7 @@ export function runKitInstall(opts: RunKitInstallOptions = {}): { written: strin
   const written: string[] = []
   for (const f of listKit()) {
     const out = join(base, f.path)
-    mkdirSync(dirname(out), { recursive: true })
+    ensureDir(dirname(out), out)
     writeFileSync(out, readKitFile(f.path))
     written.push(out)
   }
