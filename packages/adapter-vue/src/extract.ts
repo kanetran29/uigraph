@@ -17,6 +17,7 @@ import { splitSfc, parseTemplateElements, eventHandlers, stringAttr, boundAttr, 
 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'vue-v3-2026.06'
+const MAX_DEPTH = 3
 
 type TargetInfo =
   | { kind: 'literal'; value: string }
@@ -295,19 +296,23 @@ function staticNameValues(expr: Node | undefined): string[] {
   return []
 }
 
-/** The `name` initializer of a route object literal, resolved to its static string candidates. */
-function routeNameValues(obj: ObjectLiteralExpression): string[] {
+/** An optional enum-resolver mapping an identifier/member node to its static initializer (rule E.1). */
+type TargetResolver = (node: Node | undefined) => Node | undefined
+
+/** The `name` initializer of a route object literal, resolved to its static string candidates (resolver applied to enum members). */
+function routeNameValues(obj: ObjectLiteralExpression, resolve?: TargetResolver): string[] {
   const prop = obj.getProperty('name')
   if (!prop || !Node.isPropertyAssignment(prop)) return []
-  return staticNameValues(prop.getInitializer())
+  const init = prop.getInitializer()
+  return staticNameValues(resolve ? resolve(init) : init)
 }
 
 /** Classify a ts-morph navigation argument as literal / template-prefix / names / dynamic. */
-function classifyTarget(expr: Node | undefined, nameToPath: Map<string, string>): TargetInfo {
+function classifyTarget(expr: Node | undefined, nameToPath: Map<string, string>, resolve?: TargetResolver): TargetInfo {
   if (!expr) return { kind: 'dynamic' }
   if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isTemplateExpression(expr)) return { kind: 'template', staticPrefix: expr.getHead().getLiteralText() }
-  if (Node.isObjectLiteralExpression(expr)) return classifyRouteObject(expr, nameToPath)
+  if (Node.isObjectLiteralExpression(expr)) return classifyRouteObject(expr, nameToPath, resolve)
   if (Node.isBinaryExpression(expr) && expr.getOperatorToken().getText() === '+') {
     const left = expr.getLeft()
     if (Node.isStringLiteral(left) || Node.isNoSubstitutionTemplateLiteral(left)) return { kind: 'template', staticPrefix: left.getLiteralValue() }
@@ -318,10 +323,11 @@ function classifyTarget(expr: Node | undefined, nameToPath: Map<string, string>)
 /**
  * Classify a `{ name, params, path }` route object. A `name` resolves the target
  * route even when `params` are dynamic (params don't change which route is hit); a
- * ternary `name` fans out to each branch. Falls back to `path` if present.
+ * ternary `name` fans out to each branch. Falls back to `path` if present. An
+ * optional resolver resolves an enum-member name (e.g. `{ name: NAMES.beta }`).
  */
-function classifyRouteObject(obj: ObjectLiteralExpression, nameToPath: Map<string, string>): TargetInfo {
-  const names = routeNameValues(obj).filter((n) => nameToPath.has(n))
+function classifyRouteObject(obj: ObjectLiteralExpression, nameToPath: Map<string, string>, resolve?: TargetResolver): TargetInfo {
+  const names = routeNameValues(obj, resolve).filter((n) => nameToPath.has(n))
   if (names.length === 1) return { kind: 'literal', value: nameToPath.get(names[0] as string) as string }
   if (names.length > 1) return { kind: 'names', values: names }
   const path = stringProp(obj, 'path')
@@ -386,6 +392,48 @@ function staticNamesFromString(expr: string, component: VueComponent): string[] 
     return resolved ? staticNameValues(resolved) : []
   }
   return staticNameValues(node)
+}
+
+/**
+ * Resolve a navigation-target expression to a static literal/object form for
+ * classifyTarget, following enum-resolvable indirections (rule E.1): a bare
+ * identifier bound to a string const (`const LOGIN = '/login'`) and a member
+ * access into a const object literal (`const PATHS = { login: '/login' }` then
+ * `PATHS.login`). Bounded by MAX_DEPTH with a cycle guard so chained consts never
+ * recurse unbounded; returns the original node when no static resolution applies.
+ */
+function resolveStaticTargetExpr(expr: Node | undefined, sf: SourceFile, depth: number, seen: Set<string>): Node | undefined {
+  if (!expr || depth > MAX_DEPTH) return expr
+  if (Node.isParenthesizedExpression(expr)) return resolveStaticTargetExpr(expr.getExpression(), sf, depth, seen)
+  if (Node.isIdentifier(expr)) {
+    const name = expr.getText()
+    if (seen.has(name)) return expr
+    seen.add(name)
+    const init = sf.getVariableDeclaration(name)?.getInitializer()
+    if (init && (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init) || Node.isObjectLiteralExpression(init) || Node.isConditionalExpression(init)))
+      return resolveStaticTargetExpr(init, sf, depth + 1, seen)
+    return expr
+  }
+  if (Node.isPropertyAccessExpression(expr)) {
+    const obj = expr.getExpression()
+    if (!Node.isIdentifier(obj)) return expr
+    const objName = obj.getText()
+    if (seen.has(objName)) return expr
+    seen.add(objName)
+    const init = sf.getVariableDeclaration(objName)?.getInitializer()
+    if (init && Node.isObjectLiteralExpression(init)) {
+      const member = init.getProperty(expr.getName())
+      if (member && Node.isPropertyAssignment(member)) return resolveStaticTargetExpr(member.getInitializer(), sf, depth + 1, seen)
+    }
+    return expr
+  }
+  return expr
+}
+
+/** Classify a navigation argument, first resolving enum-resolvable identifiers/members against the script (rule E.1). */
+function classifyTargetResolved(expr: Node | undefined, sf: SourceFile, nameToPath: Map<string, string>): TargetInfo {
+  const resolve: TargetResolver = (n) => resolveStaticTargetExpr(n, sf, 0, new Set())
+  return classifyTarget(resolve(expr), nameToPath, resolve)
 }
 
 /** Resolve a component-script identifier (const/computed) to the expression it ultimately returns. */
@@ -479,6 +527,65 @@ function routerVars(sf: SourceFile): Set<string> {
   return out
 }
 
+/** A project-local navigation wrapper: maps a wrapper fn name to how its first arg targets a route. */
+type RouterWrappers = Map<string, 'name' | 'target'>
+
+/**
+ * Whether a function/arrow body is a thin navigation wrapper around router.push/replace
+ * that forwards its FIRST parameter to the target (rule E.1, the realworld `routerPush`
+ * helper). Returns 'name' when the param is forwarded as `{ name: param }` (so a literal
+ * call arg is a route name) or 'target' when forwarded as the bare push argument (so a
+ * literal call arg is a path/name handled by classifyTarget), else null.
+ */
+function wrapperForwardMode(fn: Node): 'name' | 'target' | null {
+  const params = Node.isFunctionDeclaration(fn) || Node.isArrowFunction(fn) || Node.isFunctionExpression(fn) ? fn.getParameters() : []
+  const first = params[0]?.getName()
+  if (first === undefined) return null
+  for (const call of fn.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    const expr = call.getExpression()
+    if (!Node.isPropertyAccessExpression(expr)) continue
+    const member = expr.getName()
+    if (member !== 'push' && member !== 'replace') continue
+    const arg = call.getArguments()[0]
+    if (!arg) continue
+    if (Node.isIdentifier(arg) && arg.getText() === first) return 'target'
+    if (Node.isObjectLiteralExpression(arg)) {
+      if (objectPropForwards(arg, 'name', first)) return 'name'
+      if (objectPropForwards(arg, 'path', first)) return 'target'
+    }
+  }
+  return null
+}
+
+/** Whether an object literal forwards `param` through property `prop`, as shorthand `{ prop }` or `{ prop: param }`. */
+function objectPropForwards(obj: ObjectLiteralExpression, prop: string, param: string): boolean {
+  const p = obj.getProperty(prop)
+  if (!p) return false
+  if (Node.isShorthandPropertyAssignment(p)) return prop === param
+  if (Node.isPropertyAssignment(p)) return p.getInitializer()?.getText() === param
+  return false
+}
+
+/** Scan every project source for navigation-wrapper functions (top-level fn declarations and const-arrows). */
+function collectRouterWrappers(project: Project): RouterWrappers {
+  const out: RouterWrappers = new Map()
+  for (const sf of project.getSourceFiles()) {
+    for (const fn of sf.getFunctions()) {
+      const name = fn.getName()
+      const mode = wrapperForwardMode(fn)
+      if (name && mode) out.set(name, mode)
+    }
+    for (const vd of sf.getVariableDeclarations()) {
+      const init = vd.getInitializer()
+      if (init && (Node.isArrowFunction(init) || Node.isFunctionExpression(init))) {
+        const mode = wrapperForwardMode(init)
+        if (mode) out.set(vd.getName(), mode)
+      }
+    }
+  }
+  return out
+}
+
 /** Whether a `.push`/`.replace` receiver is a Vue router (useRouter var, useRouter() call, or this.$router). */
 function isRouterReceiver(receiver: Node, vars: Set<string>): boolean {
   if (Node.isIdentifier(receiver)) return vars.has(receiver.getText())
@@ -487,23 +594,47 @@ function isRouterReceiver(receiver: Node, vars: Set<string>): boolean {
   return false
 }
 
+/** Classify a wrapper call-site first argument: a 'name'-mode wrapper wraps it as `{ name }`, else classify as a target. */
+function classifyWrapperArg(arg: Node | undefined, mode: 'name' | 'target', sf: SourceFile, nameToPath: Map<string, string>): TargetInfo {
+  if (mode === 'name') {
+    const names = staticNameValues(resolveStaticTargetExpr(arg, sf, 0, new Set())).filter((n) => nameToPath.has(n))
+    if (names.length === 1) return { kind: 'literal', value: nameToPath.get(names[0] as string) as string }
+    if (names.length > 1) return { kind: 'names', values: names }
+    return { kind: 'dynamic' }
+  }
+  return classifyTargetResolved(arg, sf, nameToPath)
+}
+
 /** Collect router.push/replace navigations within a scope (whole file or a single method), with guards. */
-function navTargetsIn(scope: Node, sf: SourceFile, vars: Set<string>, nameToPath: Map<string, string>): RawTarget[] {
+function navTargetsIn(scope: Node, sf: SourceFile, vars: Set<string>, nameToPath: Map<string, string>, wrappers: RouterWrappers = new Map()): RawTarget[] {
   const out: RawTarget[] = []
   for (const call of scope.getDescendantsOfKind(SyntaxKind.CallExpression)) {
     const expr = call.getExpression()
+    const guard = getGuard(call) ?? extraConditionGuard(call)
+    const lc = sf.getLineAndColumnAtPos(call.getStart())
+    if (Node.isIdentifier(expr) && wrappers.has(expr.getText())) {
+      const mode = wrappers.get(expr.getText()) as 'name' | 'target'
+      out.push({
+        ti: classifyWrapperArg(call.getArguments()[0], mode, sf, nameToPath),
+        event: 'navigate',
+        effect: `${expr.getText()}()`,
+        ruleId: 'vue.router-wrapper',
+        loc: { line: lc.line, col: lc.column },
+        guard,
+      })
+      continue
+    }
     if (!Node.isPropertyAccessExpression(expr)) continue
     const member = expr.getName()
     if (member !== 'push' && member !== 'replace') continue
     if (!isRouterReceiver(expr.getExpression(), vars)) continue
-    const lc = sf.getLineAndColumnAtPos(call.getStart())
     out.push({
-      ti: classifyTarget(call.getArguments()[0], nameToPath),
+      ti: classifyTargetResolved(call.getArguments()[0], sf, nameToPath),
       event: 'navigate',
       effect: `router.${member}`,
       ruleId: `vue.router-${member}`,
       loc: { line: lc.line, col: lc.column },
-      guard: getGuard(call) ?? extraConditionGuard(call),
+      guard,
     })
   }
   return out
@@ -627,6 +758,7 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const nameToPath = new Map(routes.filter((r) => r.name).map((r) => [r.name as string, r.fullPath]))
+  const wrappers = collectRouterWrappers(vp.project)
 
   const nodes: GraphNode[] = routes.map((r) => ({
     id: r.nodeId,
@@ -700,7 +832,7 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
     const file = relative(projectDir, route.component.vuePath)
     const sf = route.component.scriptSf
     const vars = routerVars(sf)
-    for (const t of [...templateTargets(route.component, vp.project, nameToPath), ...childTargets(route.component, vp, nameToPath), ...navTargetsIn(sf, sf, vars, nameToPath)]) {
+    for (const t of [...templateTargets(route.component, vp.project, nameToPath), ...childTargets(route.component, vp, nameToPath, wrappers), ...navTargetsIn(sf, sf, vars, nameToPath, wrappers)]) {
       resolveTarget(route.nodeId, t, file)
     }
   }
@@ -725,7 +857,11 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
         const cId = controlNodeId(route.nodeId, c.selector)
         const navEffects = new Set<string>()
         for (const h of c.handlers) {
-          for (const t of handlerNavTargets(h.expr, sf, vars, nameToPath)) {
+          for (const m of handlerModalCloses(h.expr, sf)) {
+            pushEdge(cId, route.nodeId, m, m.guard ? 'may' : 'must', m.guard ? 0.6 : 1, m.guard, file)
+            navEffects.add('close:modal')
+          }
+          for (const t of handlerNavTargets(h.expr, sf, vars, nameToPath, wrappers)) {
             const before = edges.length
             resolveTarget(cId, t, file)
             if (edges.length > before) navEffects.add('navigate')
@@ -767,9 +903,12 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
   return { graph, soundiness }
 }
 
-/** Navigations a control handler expression performs: inline router.push, or a traced method. */
-function handlerNavTargets(expr: string, sf: SourceFile, vars: Set<string>, nameToPath: Map<string, string>): RawTarget[] {
+/** Navigations a control handler expression performs: inline router.push/wrapper, or a traced method. */
+function handlerNavTargets(expr: string, sf: SourceFile, vars: Set<string>, nameToPath: Map<string, string>, wrappers: RouterWrappers): RawTarget[] {
   if (/\.(push|replace)\s*\(/.test(expr)) {
+    const node = parseExpr(sf.getProject(), expr)
+    const inline = node ? inlineRouterPush(node, sf, vars, nameToPath) : undefined
+    if (inline) return [inline]
     const m = /\.(push|replace)\s*\(\s*(['"`])([^'"`]*)\2/.exec(expr)
     const lc = { line: 1, col: 1 }
     if (m) return [{ ti: { kind: 'literal', value: m[3] ?? '' }, event: 'click', effect: `router.${m[1]}`, ruleId: `vue.router-${m[1]}`, loc: lc, guard: null }]
@@ -777,9 +916,79 @@ function handlerNavTargets(expr: string, sf: SourceFile, vars: Set<string>, name
   }
   const methodName = /([a-zA-Z_$][\w$]*)\s*(?:\(|$)/.exec(expr.trim())?.[1]
   if (methodName === undefined) return []
+  if (wrappers.has(methodName)) {
+    const node = parseExpr(sf.getProject(), expr)
+    const arg = Node.isCallExpression(node) ? node.getArguments()[0] : undefined
+    const mode = wrappers.get(methodName) as 'name' | 'target'
+    return [{ ti: classifyWrapperArg(arg, mode, sf, nameToPath), event: 'click', effect: `${methodName}()`, ruleId: 'vue.router-wrapper', loc: { line: 1, col: 1 }, guard: null }]
+  }
   const node = resolveMethodNode(sf, methodName)
   if (!node) return []
-  return navTargetsIn(node, sf, vars, nameToPath).map((t) => ({ ...t, event: 'click' }))
+  return navTargetsIn(node, sf, vars, nameToPath, wrappers).map((t) => ({ ...t, event: 'click' }))
+}
+
+const MODAL_NAME = /modal|dialog|drawer|popup|overlay|sheet|lightbox/i
+
+/** Whether a target name (the ref/state being toggled) is semantically a modal/dialog/overlay. */
+function isModalName(name: string): boolean {
+  return MODAL_NAME.test(name)
+}
+
+/** The modal name set to false by an assignment (`show.value = false`, `state.modal = false`), or null. */
+function modalClosedBy(assign: Node): string | null {
+  if (!Node.isBinaryExpression(assign) || assign.getOperatorToken().getText() !== '=') return null
+  const rhs = assign.getRight()
+  if (rhs.getKind() !== SyntaxKind.FalseKeyword) return null
+  const lhs = assign.getLeft()
+  if (Node.isIdentifier(lhs)) return isModalName(lhs.getText()) ? lhs.getText() : null
+  if (Node.isPropertyAccessExpression(lhs)) {
+    const prop = lhs.getName()
+    const base = lhs.getExpression()
+    if (prop === 'value' && Node.isIdentifier(base)) return isModalName(base.getText()) ? base.getText() : null
+    return isModalName(prop) ? prop : null
+  }
+  return null
+}
+
+/**
+ * Modal-close markers a handler scope performs (rule: a ref/state semantically named
+ * like a modal set to false is a dismiss). Returns one RawTarget per close, witnessed
+ * at the assignment, so the caller can emit a `close:modal` edge alongside any
+ * dismiss-then-navigate router calls in the same handler (multiple edges allowed).
+ */
+function modalCloseTargets(scope: Node, sf: SourceFile): RawTarget[] {
+  const out: RawTarget[] = []
+  for (const bin of scope.getDescendantsOfKind(SyntaxKind.BinaryExpression)) {
+    const name = modalClosedBy(bin)
+    if (name === null) continue
+    const lc = sf.getLineAndColumnAtPos(bin.getStart())
+    out.push({ ti: { kind: 'dynamic' }, event: 'close:modal', effect: 'close:modal', ruleId: 'vue.modal-close', loc: { line: lc.line, col: lc.column }, guard: getGuard(bin) ?? extraConditionGuard(bin) })
+  }
+  return out
+}
+
+/** Modal-close markers from a control handler expression: inline assignment or a traced method body. */
+function handlerModalCloses(expr: string, sf: SourceFile): RawTarget[] {
+  const inline = parseExpr(sf.getProject(), expr)
+  if (inline) {
+    const direct = modalCloseTargets(inline, sf)
+    if (direct.length > 0) return direct
+  }
+  const methodName = /([a-zA-Z_$][\w$]*)\s*(?:\(|$)/.exec(expr.trim())?.[1]
+  if (methodName === undefined) return []
+  const node = resolveMethodNode(sf, methodName)
+  return node ? modalCloseTargets(node, sf) : []
+}
+
+/** Classify a parsed inline `router.push/replace(arg)` call expression, or undefined if it is not a router nav. */
+function inlineRouterPush(node: Node, sf: SourceFile, vars: Set<string>, nameToPath: Map<string, string>): RawTarget | undefined {
+  if (!Node.isCallExpression(node)) return undefined
+  const expr = node.getExpression()
+  if (!Node.isPropertyAccessExpression(expr)) return undefined
+  const member = expr.getName()
+  if (member !== 'push' && member !== 'replace') return undefined
+  if (!isRouterReceiver(expr.getExpression(), vars)) return undefined
+  return { ti: classifyTargetResolved(node.getArguments()[0], sf, nameToPath), event: 'click', effect: `router.${member}`, ruleId: `vue.router-${member}`, loc: { line: 1, col: 1 }, guard: null }
 }
 
 /** Whether a tag is a Vue component (PascalCase or kebab-case multi-word), i.e. a possible router-link wrapper. */
@@ -806,7 +1015,7 @@ function childComponents(component: VueComponent, components: VueComponent[]): V
  * does the `router.push({ name: 'login' })`). Visited-set bounds cycles; child
  * targets are demoted to may-edges since the child may render conditionally.
  */
-function childTargets(component: VueComponent, vp: VueProject, nameToPath: Map<string, string>): RawTarget[] {
+function childTargets(component: VueComponent, vp: VueProject, nameToPath: Map<string, string>, wrappers: RouterWrappers): RawTarget[] {
   const out: RawTarget[] = []
   const visited = new Set<string>([component.vuePath])
   const walk = (comp: VueComponent): void => {
@@ -815,7 +1024,7 @@ function childTargets(component: VueComponent, vp: VueProject, nameToPath: Map<s
       visited.add(child.vuePath)
       const file = relative(dirname(component.vuePath), child.vuePath)
       const vars = routerVars(child.scriptSf)
-      const targets = [...templateTargets(child, vp.project, nameToPath), ...navTargetsIn(child.scriptSf, child.scriptSf, vars, nameToPath)]
+      const targets = [...templateTargets(child, vp.project, nameToPath), ...navTargetsIn(child.scriptSf, child.scriptSf, vars, nameToPath, wrappers)]
       for (const t of targets) out.push({ ...t, effect: `${t.effect} (child ${file})`, guard: t.guard ?? 'child-component' })
       walk(child)
     }

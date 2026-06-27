@@ -345,3 +345,104 @@ describe('control units (F-angular-controls)', () => {
     expect(form?.control?.events).toContain('submit')
   })
 })
+
+describe('extractGraph — functional route guards (CanActivateFn)', () => {
+  const edgeTo = (graph: { edges: { to: string }[] }, to: string) => graph.edges.find((e) => (e as { to: string }).to === to) as
+    | { modality: string; guard: string | null; confidence: number }
+    | undefined
+
+  it('captures a NAMED functional guard by its function name and demotes the edge to may', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { A } from './a.component'\nimport { B } from './b.component'\nconst requireAuth = () => inject(Object).ok === true\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B, canActivate: [requireAuth] }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    const e = edgeTo(graph, 'n_b')
+    expect(e?.modality).toBe('may')
+    expect(e?.guard).toBe('requireAuth')
+    expect(e?.confidence).toBe(0.6)
+  })
+
+  it('captures an INLINE arrow guard by a stable body hash (fn#…), deterministic across runs', () => {
+    const build = () =>
+      extractGraph(
+        inMemory({
+          '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { A } from './a.component'\nimport { B } from './b.component'\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B, canActivate: [() => inject(Object).loggedIn] }]`,
+          '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+          '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+        }),
+        '/',
+      )
+    const g1 = build().graph
+    const g2 = build().graph
+    const e1 = edgeTo(g1, 'n_b')
+    expect(e1?.modality).toBe('may')
+    expect(e1?.guard).toMatch(/^fn#[0-9a-f]{8}$/)
+    expect(edgeTo(g2, 'n_b')?.guard).toBe(e1?.guard)
+  })
+
+  it('lowers confidence to ~0.5 and emits an async-guard soundiness note for an Observable-returning guard', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { map } from 'rxjs/operators'\nimport { A } from './a.component'\nimport { B } from './b.component'\nconst requireAuth = () => inject(Object).isAuthenticated.pipe(map((x: boolean) => x))\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B, canActivate: [requireAuth] }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    const e = edgeTo(graph, 'n_b')
+    expect(e?.modality).toBe('may')
+    expect(e?.guard).toBe('requireAuth')
+    expect(e?.confidence).toBe(0.5)
+    const note = soundiness.find((s) => s.kind === 'async-guard')
+    expect(note?.detail).toContain('requireAuth')
+    expect(note?.detail).toContain('Observable')
+  })
+
+  it('emits a single async-guard note even when several edges enter the same guarded route', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { A } from './a.component'\nimport { C } from './c.component'\nimport { B } from './b.component'\nconst requireAuth = () => inject(Object).x.pipe()\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'c', component: C }, { path: 'b', component: B, canActivate: [requireAuth] }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/c.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class C {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    expect(soundiness.filter((s) => s.kind === 'async-guard')).toHaveLength(1)
+  })
+
+  it('a literal-true functional guard does NOT gate: the edge stays must / unguarded', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { B } from './b.component'\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B, canActivate: [() => true] }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    const e = edgeTo(graph, 'n_b')
+    expect(e?.modality).toBe('must')
+    expect(e?.guard).toBeNull()
+    expect(e?.confidence).toBe(1)
+  })
+
+  it('still treats an imported guard CLASS reference as a class gate (may, 0.6, name as text)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { AuthGuard } from './auth.guard'\nimport { A } from './a.component'\nimport { B } from './b.component'\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B, canActivate: [AuthGuard] }]`,
+        '/auth.guard.ts': `export class AuthGuard {}`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    const e = edgeTo(graph, 'n_b')
+    expect(e?.modality).toBe('may')
+    expect(e?.guard).toBe('AuthGuard')
+    expect(e?.confidence).toBe(0.6)
+  })
+})

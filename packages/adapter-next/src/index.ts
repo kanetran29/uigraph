@@ -55,8 +55,12 @@ export function detectNext(projectDir: string): boolean {
 /** Discover filesystem routes + assemble the graph (no IO/logging) — the testable core. */
 export function extractNextGraph(projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const project = buildNextProject(projectDir)
-  const { seeds, collisions } = discoverRoutes(project, projectDir)
+  const { seeds, kindById, collisions } = discoverRoutes(project, projectDir)
   const result = extractGraphFromRoutes(project, projectDir, seeds, { ...opts, rulesetVersion: opts.rulesetVersion ?? 'next-app-pages-2026.06' }, '@uigraph/adapter-next')
+  for (const node of result.graph.nodes) {
+    const kind = kindById.get(node.id)
+    if (kind && kind !== 'screen') node.kind = kind
+  }
   const layoutEdges = addLayoutAndWrapperEdges(project, projectDir, seeds, result.graph.edges)
   if (layoutEdges > 0) {
     result.soundiness.push({ kind: 'layout-nav', detail: `added ${layoutEdges} may-edge(s) from App Router layout chain / wrapper-buried <Link href> not reached by the page scan` })

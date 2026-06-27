@@ -4,6 +4,7 @@
 // framework-agnostic. Adapters create their own TS project internally.
 
 import type { UiGraph } from './ir'
+import type { Proposal } from './proposals'
 
 /** Level-gated structured logger handed to an adapter by its host. */
 export interface Logger {
@@ -39,6 +40,13 @@ export interface SoundinessNote {
 export interface ExtractResult {
   graph: UiGraph
   soundiness: SoundinessNote[]
+  /**
+   * Optional Tier-2 PROPOSALS the adapter derived statically (e.g. state-driven
+   * "screens"/transitions an enum-like state var implies). These NEVER enter the
+   * base graph — they are quarantined (`source:'proposal'`) and persisted into the
+   * proposals store by `map`. Omitted/empty when an adapter emits none.
+   */
+  proposals?: Proposal[]
 }
 
 /**

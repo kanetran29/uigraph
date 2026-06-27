@@ -9,8 +9,10 @@ import type { JsxAttribute, SourceFile } from 'ts-morph'
 import { dirname, isAbsolute, join, relative } from 'node:path'
 import { readFileSync } from 'node:fs'
 import type { ControlInput, ControlSelector, ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@uigraph/core'
+import type { Proposal } from '@uigraph/core'
 import { routeToNodeId, edgeId, controlNodeId } from './ids'
 import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
+import { analyzeStateNav } from './state-nav'
 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'rr-v5v6-2026.06'
@@ -28,8 +30,11 @@ interface RouteInfo {
   componentFile: SourceFile | undefined
   /** The route was declared with an inline JSX element (e.g. element={<div>…}) rather
    *  than a component reference, so there is no component file to scan for navigation.
-   *  `file` is the absolute declaration path (relativized when the note is emitted). */
-  inlineElement?: { file: string; loc: { line: number; col: number }; tag: string }
+   *  `file` is the absolute declaration path (relativized when the note is emitted);
+   *  `exprNode` is the whole `element={…}` expression (the ternary/&& container, used to
+   *  read guards) and `roots` are the lowercase JSX element subtree(s) to walk for
+   *  inline Link/Navigate/useNavigate targets. */
+  inlineElement?: { file: string; loc: { line: number; col: number }; tag: string; exprNode: Node; roots: Node[] }
 }
 
 /**
@@ -330,15 +335,33 @@ function getComponentName(el: Node): string | null {
  * scan. Returns the tag for the inline-markup case, else null. This is a navigation
  * intent we cannot soundly follow (the rendered subtree is not a scannable screen).
  */
-function inlineElementTag(el: Node): string | null {
+function inlineElementTag(el: Node): { tag: string; exprNode: Node; roots: Node[] } | null {
   const element = findAttr(el, 'element')
   if (!element) return null
   const init = element.getInitializer()
   if (!init || !Node.isJsxExpression(init)) return null
   const inner = init.getExpression()
-  if (!inner || !isJsxEl(inner)) return null
-  const tag = jsxTag(inner)
-  return /^[a-z]/.test(tag) ? tag : null
+  if (!inner) return null
+  // The lowercase JSX root(s) the element renders. A bare `element={<div>…}` has one;
+  // a `cond ? <section/> : <Navigate/>` or `cond && <section/>` has its branch root(s).
+  // A single capitalized element (element={<X/>}) is a component reference, not inline
+  // markup — left to the component-file scan (returns null here).
+  const roots = jsxRootsOf(inner)
+  const lowercaseRoot = roots.find((r) => /^[a-z]/.test(jsxTag(r)))
+  if (!lowercaseRoot) return null
+  return { tag: jsxTag(lowercaseRoot), exprNode: inner, roots }
+}
+
+/** The top-level JSX element root(s) of an element expression: the element itself, or the JSX branches of an enclosing ternary/&&. */
+function jsxRootsOf(expr: Node): Node[] {
+  if (isJsxEl(expr)) return [expr]
+  if (Node.isParenthesizedExpression(expr)) {
+    const inner = expr.getExpression()
+    return inner ? jsxRootsOf(inner) : []
+  }
+  if (Node.isConditionalExpression(expr)) return [...jsxRootsOf(expr.getWhenTrue()), ...jsxRootsOf(expr.getWhenFalse())]
+  if (Node.isBinaryExpression(expr) && expr.getOperatorToken().getText() === '&&') return jsxRootsOf(expr.getRight())
+  return []
 }
 
 /** First capitalized (component) JSX tag inside a node, e.g. the body of a `render` prop. */
@@ -566,11 +589,11 @@ function collectRoutes(project: Project): RouteInfo[] {
       const nodeId = routeToNodeId(fullPath)
       if (byNodeId.has(nodeId)) continue
       const { name: componentName, file: componentFile } = callSiteComponentFile(sf, el)
-      const inlineTag = componentFile ? null : inlineElementTag(el)
+      const inlineInfo = componentFile ? null : inlineElementTag(el)
       let inlineElement: RouteInfo['inlineElement']
-      if (inlineTag) {
+      if (inlineInfo) {
         const lc = sf.getLineAndColumnAtPos(el.getStart())
-        inlineElement = { file: sf.getFilePath(), loc: { line: lc.line, col: lc.column }, tag: inlineTag }
+        inlineElement = { file: sf.getFilePath(), loc: { line: lc.line, col: lc.column }, tag: inlineInfo.tag, exprNode: inlineInfo.exprNode, roots: inlineInfo.roots }
       }
       byNodeId.set(nodeId, { fullPath, nodeId, componentName, componentFile, inlineElement })
     }
@@ -643,6 +666,69 @@ function absolutizeLinkTarget(ti: TargetInfo): TargetInfo {
   const v = ti.value
   if (v.length === 0 || v.startsWith('/') || v.startsWith('#') || v.startsWith('?') || /^[a-z][a-z0-9+.-]*:/i.test(v)) return ti
   return { kind: 'literal', value: '/' + v }
+}
+
+/**
+ * Collect navigation targets within a single inline-route element subtree (the
+ * `element={<tag>…}` markup). Walks only LITERAL JSX (Link/NavLink/Navigate/Redirect
+ * elements and useNavigate/useHistory calls) inside the given roots — it does NOT
+ * resolve nor descend into nested capitalized component imports (a <Child/> is opaque
+ * here; following it is the component-file scan's job, not the inline walk). Guards on
+ * an enclosing ternary/&& are read by the shared getGuard, so a target inside
+ * `cond ? <a/> : <Navigate/>` carries that condition. Targets dedupe by node identity
+ * across overlapping roots.
+ */
+function collectInlineRouteTargets(roots: Node[], sf: SourceFile): RawTarget[] {
+  const out: RawTarget[] = []
+  const seenNodes = new Set<Node>()
+  const elements: Node[] = []
+  for (const root of roots) {
+    if (isJsxEl(root) && !seenNodes.has(root)) {
+      seenNodes.add(root)
+      elements.push(root)
+    }
+    for (const el of [...root.getDescendantsOfKind(SyntaxKind.JsxElement), ...root.getDescendantsOfKind(SyntaxKind.JsxSelfClosingElement)]) {
+      if (seenNodes.has(el)) continue
+      seenNodes.add(el)
+      elements.push(el)
+    }
+  }
+  const { navSet, histSet } = navIdentifiers(sf)
+  for (const el of elements) {
+    const tag = jsxTag(el)
+    let event: string | null = null
+    let effect = 'navigate'
+    if (tag === 'Link' || tag === 'NavLink') {
+      event = 'click:Link'
+    } else if (tag === 'Navigate' || tag === 'Redirect') {
+      event = 'redirect'
+      effect = 'redirect'
+    }
+    if (event === null) continue
+    out.push({ ti: absolutizeLinkTarget(classifyToAttr(findAttr(el, 'to') ?? findAttr(el, 'href'))), event, effect, node: el, guard: getGuard(el) })
+  }
+  const seenCalls = new Set<Node>()
+  for (const root of roots) {
+    for (const call of root.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      if (seenCalls.has(call)) continue
+      seenCalls.add(call)
+      const expr = call.getExpression()
+      let effect: string | null = null
+      if (Node.isIdentifier(expr) && navSet.has(expr.getText())) {
+        effect = 'navigate'
+      } else if (Node.isCallExpression(expr) && Node.isIdentifier(expr.getExpression()) && expr.getExpression().getText() === 'useNavigate') {
+        // Inline `useNavigate()(target)` with no intermediate binding.
+        effect = 'navigate'
+      } else if (Node.isPropertyAccessExpression(expr)) {
+        const obj = expr.getExpression()
+        const member = expr.getName()
+        if (Node.isIdentifier(obj) && histSet.has(obj.getText()) && (member === 'push' || member === 'replace')) effect = `history.${member}`
+      }
+      if (effect === null) continue
+      out.push({ ti: classifyTarget(call.getArguments()[0], sf), event: 'navigate', effect, node: call, guard: getGuard(call) ?? extraConditionGuard(call) })
+    }
+  }
+  return out
 }
 
 function collectTargets(sf: SourceFile): RawTarget[] {
@@ -1052,6 +1138,23 @@ function detectModalOpen(call: Node): string | null {
 }
 
 /**
+ * Whether a call closes a modal: a setter (setShow…/setOpen…/setVisible… or any setter
+ * naming a Modal/Dialog/Drawer/Popover/Sheet) invoked with the BooleanLiteral `false`.
+ * The false check is SEMANTIC (Node.isFalseLiteral on the argument), not textual — a
+ * variable that happens to be named `false` or a non-literal falsy expression does not
+ * match. Returns true only for a literal-false dismiss.
+ */
+function detectModalClose(call: Node): boolean {
+  if (!Node.isCallExpression(call)) return false
+  const expr = call.getExpression()
+  if (!Node.isIdentifier(expr)) return false
+  const name = expr.getText()
+  if (!/^set(Show|Open|Visible)/i.test(name) && !/(Modal|Dialog|Drawer|Popover|Sheet)/i.test(name)) return false
+  const arg = call.getArguments()[0]
+  return arg !== undefined && Node.isFalseLiteral(arg)
+}
+
+/**
  * The *Visible state var gating an overlay sub-view's render — the first identifier
  * ending in `Visible` among the guards of an enclosing `{ … && <Component/>}` conjunction
  * (e.g. `profileViewVisible && isLoggedIn && <ProfileView/>`). Unlike modalGateVar (a
@@ -1304,6 +1407,13 @@ function walkReachable(
       out.effects.add(api)
       continue
     }
+    // Dismiss (setShowModal(false)) is checked BEFORE open/state so the same setter
+    // shape is not mis-read as a state-write; a guarded close still records the effect
+    // (the close edge it drives carries no guard — closing returns to the same screen).
+    if (detectModalClose(call)) {
+      out.effects.add('close:modal')
+      continue
+    }
     const modalVar = detectModalOpen(call)
     if (modalVar) {
       out.effects.add(`open:modal:${modalVar}`)
@@ -1454,10 +1564,53 @@ export function extractGraphFromRoutes(
     pushEdge(from, sinkId, { ...t, guard: t.guard ?? expr ?? null, ruleId: 'rr.dynamic-target' }, 'unknown', 0.3, file, loc)
   }
 
+  // Resolve one raw target against the declared route set and push the corresponding
+  // edge(s) from `fromId`, recording soundiness for ambiguous/over-approximated/dynamic
+  // cases. `descended` caps a literal match to `may` (the source's render is not
+  // guaranteed). Shared by the route-component scan and the inline-JSX-route walk so
+  // both resolve targets identically.
+  const resolveAndPushTarget = (fromId: string, t: RawTarget, file: string, descended: boolean): void => {
+    const sf = t.node.getSourceFile()
+    const lc = sf.getLineAndColumnAtPos(t.node.getStart())
+    const loc = { line: lc.line, col: lc.column }
+    if (t.ti.kind === 'literal') {
+      const { exact, candidates } = matchLiteralAll(t.ti.value, routeLikes)
+      if (exact) {
+        const guarded = t.guard !== null || descended
+        pushEdge(fromId, exact.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
+      } else if (candidates.length > 0) {
+        soundiness.push({ kind: 'ambiguous-target', file, loc, detail: `literal target "${t.ti.value}" matched ${candidates.length} parameterized route(s); emitted as may, never must` })
+        for (const cand of candidates) pushEdge(fromId, cand.nodeId, t, 'may', 0.5, file, loc)
+      } else {
+        soundiness.push({ kind: 'unresolved-target', file, loc, detail: `literal target "${t.ti.value}" matches no declared route` })
+      }
+    } else if (t.ti.kind === 'template') {
+      const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
+      soundiness.push({ kind: 'over-approximation', file, loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
+      for (const cand of cands) pushEdge(fromId, cand.nodeId, t, 'may', 0.5, file, loc)
+    } else if (t.ti.kind === 'enum') {
+      soundiness.push({ kind: 'over-approximation', file, loc, detail: `const route-map target over-approximated to ${t.ti.values.length} value(s)` })
+      for (const val of t.ti.values) {
+        const { exact } = matchLiteralAll(val, routeLikes)
+        if (exact) pushEdge(fromId, exact.nodeId, { ...t, ti: { kind: 'literal', value: val } }, 'may', 0.5, file, loc)
+      }
+    } else {
+      soundiness.push({ kind: 'dynamic-target', file, loc, detail: `fully dynamic navigation target (event ${t.event})` })
+      pushDynamicEdge(fromId, t, file, loc)
+    }
+  }
+
   for (const route of routes) {
     if (!route.componentFile) {
       if (route.inlineElement) {
         const ie = route.inlineElement
+        // Inline-JSX route: there is no component file, but the element subtree itself
+        // may declare LITERAL navigations (Link/Navigate/useNavigate). Walk it and emit
+        // those as static edges; a deeper nested component import is NOT followed, so the
+        // honest "no component file to scan" note still stands for that residual.
+        const ieSf = ie.exprNode.getSourceFile()
+        const ieFile = relative(projectDir, ieSf.getFilePath())
+        for (const t of collectInlineRouteTargets(ie.roots, ieSf)) resolveAndPushTarget(route.nodeId, t, ieFile, false)
         soundiness.push({ kind: 'inline-jsx-route', file: relative(projectDir, ie.file), loc: ie.loc, detail: `route ${route.fullPath} renders inline JSX <${ie.tag}> — no component file to scan for navigation` })
       } else {
         soundiness.push({ kind: 'unresolved-component', detail: `route ${route.fullPath} has no resolvable component file` })
@@ -1470,36 +1623,7 @@ export function extractGraphFromRoutes(
       // A navigation in a descended child component (depth>0) is real, but the
       // child's render is not statically guaranteed — cap it to `may`, never must.
       const descended = depth > 0
-      for (const t of collectTargets(cf)) {
-        const sf = t.node.getSourceFile()
-        const lc = sf.getLineAndColumnAtPos(t.node.getStart())
-        const loc = { line: lc.line, col: lc.column }
-        if (t.ti.kind === 'literal') {
-          const { exact, candidates } = matchLiteralAll(t.ti.value, routeLikes)
-          if (exact) {
-            const guarded = t.guard !== null || descended
-            pushEdge(route.nodeId, exact.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, file, loc)
-          } else if (candidates.length > 0) {
-            soundiness.push({ kind: 'ambiguous-target', file, loc, detail: `literal target "${t.ti.value}" matched ${candidates.length} parameterized route(s); emitted as may, never must` })
-            for (const cand of candidates) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
-          } else {
-            soundiness.push({ kind: 'unresolved-target', file, loc, detail: `literal target "${t.ti.value}" matches no declared route` })
-          }
-        } else if (t.ti.kind === 'template') {
-          const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
-          soundiness.push({ kind: 'over-approximation', file, loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
-          for (const cand of cands) pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, file, loc)
-        } else if (t.ti.kind === 'enum') {
-          soundiness.push({ kind: 'over-approximation', file, loc, detail: `const route-map target over-approximated to ${t.ti.values.length} value(s)` })
-          for (const val of t.ti.values) {
-            const { exact } = matchLiteralAll(val, routeLikes)
-            if (exact) pushEdge(route.nodeId, exact.nodeId, { ...t, ti: { kind: 'literal', value: val } }, 'may', 0.5, file, loc)
-          }
-        } else {
-          soundiness.push({ kind: 'dynamic-target', file, loc, detail: `fully dynamic navigation target (event ${t.event})` })
-          pushDynamicEdge(route.nodeId, t, file, loc)
-        }
-      }
+      for (const t of collectTargets(cf)) resolveAndPushTarget(route.nodeId, t, file, descended)
     }
   }
 
@@ -1578,6 +1702,16 @@ export function extractGraphFromRoutes(
             } else {
               pushDynamicEdge(cId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, file, loc)
             }
+          }
+
+          // Dismiss-then-navigate: a handler that calls a modal setter with literal false
+          // emits a close:modal edge BACK to the containing screen, in ADDITION to any
+          // navigate() the same handler performs (emitted above) — one handler, multiple
+          // edges. The target is the screen the modal lives on; closing returns there.
+          // The edge id keys on (control id, screen, event) so it is stable across re-maps.
+          if (inter.effects.includes('close:modal')) {
+            const ev = inter.events[0] ?? 'click'
+            pushEdge(cId, route.nodeId, { ti: { kind: 'literal', value: route.nodeId }, event: ev, effect: 'close:modal', node: el, guard: null, ruleId: 'rr.modal-close' }, isDescended ? 'may' : 'must', isDescended ? 0.6 : 1, file, loc)
           }
 
           // Link each modal-opening effect to the SPECIFIC modal it shows (matched by the
@@ -1780,6 +1914,16 @@ export function extractGraphFromRoutes(
     }
   }
 
+  // State-driven nav: Tier-2 PROPOSALS for enum-state "screens" (quarantined, never
+  // base edges) plus soundiness notes for helper/call-derived (dynamic) assignments.
+  // Proposals attach to the first real screen node so they materialize into the
+  // proposal graph; their ids derive only from (state-var, value) and so are
+  // re-map-stable regardless of that anchor.
+  const stateNav = analyzeStateNav(project, projectDir)
+  soundiness.push(...stateNav.soundiness)
+  const anchorScreen = nodes.find((n) => n.kind === 'screen')?.id
+  const proposals: Proposal[] = anchorScreen === undefined ? [] : stateNav.proposals.map((p) => ({ ...p, screen: anchorScreen }))
+
   const graph = {
     version: 0 as const,
     meta: {
@@ -1791,7 +1935,7 @@ export function extractGraphFromRoutes(
     nodes,
     edges,
   }
-  return { graph, soundiness }
+  return { graph, soundiness, ...(proposals.length > 0 ? { proposals } : {}) }
 }
 
 export { ADAPTER_VERSION, DEFAULT_RULESET }

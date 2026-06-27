@@ -3,8 +3,10 @@
 // nodes, and turns each route component's inline `@Component` template
 // (routerLink / [routerLink]) plus `Router.navigate` / `Router.navigateByUrl`
 // calls into edges. Non-literal targets are over-approximated over the declared
-// route set; canActivate guard class names become symbolic guard text. No edge
-// is emitted without a static witness.
+// route set; canActivate guards (class refs, named functional guards, and inline
+// arrow guards) become symbolic guard text via ./guards, with
+// Observable/Promise-returning guards lowered in confidence + a soundiness note.
+// No edge is emitted without a static witness.
 
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
 import type { ArrayLiteralExpression, ObjectLiteralExpression, SourceFile } from 'ts-morph'
@@ -12,6 +14,7 @@ import { dirname, join, relative } from 'node:path'
 import type { ControlInput, ControlSelector, ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@uigraph/core'
 import { routeToNodeId, edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, type RouteLike } from './matcher'
+import { analyzeCanActivate, type GuardInfo } from './guards'
 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'ng-v0-2026.06'
@@ -26,7 +29,7 @@ interface RouteInfo {
   nodeId: string
   componentName: string | null
   componentFile: SourceFile | undefined
-  guards: string[]
+  guards: GuardInfo[]
 }
 
 /** Build a ts-morph project from a project directory, scanning src first. */
@@ -120,17 +123,18 @@ function identifierProp(obj: ObjectLiteralExpression, name: string): string | nu
   return null
 }
 
-/** Read the guard class names from a `canActivate: [A, B]` array property. */
-function canActivateGuards(obj: ObjectLiteralExpression): string[] {
+/**
+ * Analyze a `canActivate: [A, B]` array into structured guard descriptors.
+ * Covers class-reference guards, named functional guards (`[requireAuth]`), and
+ * inline arrow guards (`[() => inject(X)...]`); the route's source file is needed
+ * to resolve named functional-guard consts.
+ */
+function canActivateGuards(sf: SourceFile, obj: ObjectLiteralExpression): GuardInfo[] {
   const prop = obj.getProperty('canActivate')
   if (!prop || !Node.isPropertyAssignment(prop)) return []
   const init = prop.getInitializer()
   if (!init || !Node.isArrayLiteralExpression(init)) return []
-  const names: string[] = []
-  for (const el of init.getElements()) {
-    if (Node.isIdentifier(el)) names.push(el.getText())
-  }
-  return names
+  return analyzeCanActivate(sf, init.getElements())
 }
 
 /** Join a parent route path with an own segment, normalizing to a leading-slash route. */
@@ -189,7 +193,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     }
     const nodeId = routeToNodeId(fullPath)
     if (!out.has(nodeId)) {
-      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards: canActivateGuards(el) })
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards: canActivateGuards(sf, el) })
     }
     const childrenProp = el.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
@@ -657,11 +661,53 @@ function methodNavTargets(sf: SourceFile, methodName: string): { ti: TargetInfo;
   return out
 }
 
+/** The reachability gate a target route's `canActivate` guards impose on an incoming edge. */
+interface Gate {
+  guarded: boolean
+  guardTexts: string[]
+  confidence: number
+  asyncGuards: GuardInfo[]
+}
+
+const FUNCTIONAL_GUARD_CONFIDENCE = 0.6
+const ASYNC_GUARD_CONFIDENCE = 0.5
+
+/**
+ * Reduce a target route's guards to a gate. A guard whose body is the literal
+ * `true` does not gate (it always passes), so it is dropped; every other guard
+ * gates the edge to `may`. Confidence is the minimum across guards:
+ * Observable/Promise-returning guards (whose body cannot be evaluated statically)
+ * pull it down to ~0.5, otherwise functional/class guards sit at 0.6. The
+ * `asyncGuards` are surfaced so the caller can owe one soundiness note each.
+ */
+function gateFromGuards(guards: GuardInfo[]): Gate {
+  const gating = guards.filter((g) => g.literalBoolean !== true)
+  if (gating.length === 0) return { guarded: false, guardTexts: [], confidence: 1, asyncGuards: [] }
+  const asyncGuards = gating.filter((g) => g.async)
+  const confidence = asyncGuards.length > 0 ? ASYNC_GUARD_CONFIDENCE : FUNCTIONAL_GUARD_CONFIDENCE
+  return { guarded: true, guardTexts: gating.map((g) => g.text), confidence, asyncGuards }
+}
+
+/**
+ * Push one soundiness note per distinct Observable/Promise-returning guard on
+ * `routePath`. Deduped via `seen` so a guard gating several incoming edges still
+ * yields a single note (one guard, one runtime-undecidable gate).
+ */
+function noteAsyncGuards(gate: Gate, routePath: string, sink: SoundinessNote[], seen: Set<string>): void {
+  for (const g of gate.asyncGuards) {
+    const key = `${routePath} ${g.text}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    sink.push({ kind: 'async-guard', detail: `guard "${g.text}" on route ${routePath} returns an Observable/Promise; gate decided at runtime` })
+  }
+}
+
 /** Extract a graph from an already-built ts-morph project (testable in memory). */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const routes = collectRoutes(project)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
+  const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
 
   const nodes: GraphNode[] = routes.map((r) => ({
     id: r.nodeId,
@@ -674,6 +720,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const edges: GraphEdge[] = []
   const soundiness: SoundinessNote[] = []
   const seen = new Set<string>()
+  const seenAsyncGuards = new Set<string>()
 
   function pushEdge(from: string, to: string, t: RawTarget, modality: 'must' | 'may', confidence: number, guard: string | null, file: string): void {
     const id = edgeId(from, to, t.event, guard)
@@ -707,17 +754,18 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${t.ti.value}" matches no declared route` })
           continue
         }
-        const targetGuards = guardsByNodeId.get(target.nodeId) ?? []
-        const guarded = targetGuards.length > 0
-        const guardText = guarded ? targetGuards.join(',') : null
-        pushEdge(route.nodeId, target.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, guardText, file)
+        const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
+        noteAsyncGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
+        const guardText = gate.guarded ? gate.guardTexts.join(',') : null
+        pushEdge(route.nodeId, target.nodeId, t, gate.guarded ? 'may' : 'must', gate.guarded ? gate.confidence : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
         const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
         soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
         for (const cand of cands) {
-          const candGuards = guardsByNodeId.get(cand.nodeId) ?? []
-          const guardText = candGuards.length > 0 ? candGuards.join(',') : null
-          pushEdge(route.nodeId, cand.nodeId, t, 'may', 0.5, guardText, file)
+          const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
+          noteAsyncGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
+          const guardText = gate.guarded ? gate.guardTexts.join(',') : null
+          pushEdge(route.nodeId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file)
         }
       } else {
         soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
@@ -756,16 +804,19 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
                 soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `control nav target "${nav.ti.value}" matches no declared route` })
                 continue
               }
-              const targetGuards = guardsByNodeId.get(target.nodeId) ?? []
-              const guards = [nav.guard, ...targetGuards].filter((g): g is string => g != null)
+              const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
+              noteAsyncGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
+              const guards = [nav.guard, ...gate.guardTexts].filter((g): g is string => g != null)
               const guarded = guards.length > 0
-              pushEdge(cId, target.nodeId, t, guarded ? 'may' : 'must', guarded ? 0.6 : 1, guarded ? guards.join(',') : null, file)
+              const confidence = gate.guarded ? gate.confidence : nav.guard != null ? 0.6 : 1
+              pushEdge(cId, target.nodeId, t, guarded ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
               navEffects.add('navigate')
             } else if (nav.ti.kind === 'template') {
               for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes)) {
-                const candGuards = guardsByNodeId.get(cand.nodeId) ?? []
-                const guards = [nav.guard, ...candGuards].filter((g): g is string => g != null)
-                pushEdge(cId, cand.nodeId, t, 'may', 0.5, guards.length > 0 ? guards.join(',') : null, file)
+                const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
+                noteAsyncGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
+                const guards = [nav.guard, ...gate.guardTexts].filter((g): g is string => g != null)
+                pushEdge(cId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guards.length > 0 ? guards.join(',') : null, file)
                 navEffects.add('navigate')
               }
             } else {
