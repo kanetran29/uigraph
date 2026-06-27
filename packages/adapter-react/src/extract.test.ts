@@ -457,6 +457,56 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
       expect(graph.edges.every((e) => e.modality !== 'must')).toBe(true)
       expect(graph.edges.length).toBeGreaterThan(0)
     })
+
+    it('demotes a <Link> rendered inside an array .map() to may (not a phantom must)', () => {
+      const { graph } = extractGraph(
+        inMemory({
+          '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+          '/A.tsx': `import { Link } from 'react-router-dom'\nexport default function A({ items }){ return <nav>{items.map((i) => <Link key={i} to="/b">go</Link>)}</nav> }`,
+        }),
+        '/',
+      )
+      const e = graph.edges.find((x) => x.to === 'n_b')
+      expect(e).toBeDefined()
+      expect(e?.modality).toBe('may')
+    })
+
+    it('demotes a <Navigate> inside an early-return-guarded component to may', () => {
+      const { graph } = extractGraph(
+        inMemory({
+          '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+          '/A.tsx': `import { Navigate } from 'react-router-dom'\nexport default function A({ user }){ if (!user) return null; return <Navigate to="/b" /> }`,
+        }),
+        '/',
+      )
+      const e = graph.edges.find((x) => x.to === 'n_b')
+      expect(e).toBeDefined()
+      expect(e?.modality).toBe('may')
+      expect(e?.guard).toContain('user')
+    })
+
+    it('keeps a top-level unconditional <Link> as must', () => {
+      const { graph } = extractGraph(
+        inMemory({
+          '/App.tsx': `import A from './A'\nexport default () => (<Routes><Route path="/a" element={<A/>} /><Route path="/b" element={<A/>} /></Routes>)`,
+          '/A.tsx': `import { Link } from 'react-router-dom'\nexport default function A(){ return <nav><Link to="/b">go</Link></nav> }`,
+        }),
+        '/',
+      )
+      expect(graph.edges.some((e) => e.to === 'n_b' && e.modality === 'must')).toBe(true)
+    })
+
+    it('demotes a <Link> in an inline-JSX route rendered inside .map() to may', () => {
+      const { graph } = extractGraph(
+        inMemory({
+          '/App.tsx': `import { Link } from 'react-router-dom'\nexport default () => (<Routes><Route path="/a" element={<nav>{[1,2].map((i) => <Link key={i} to="/b">go</Link>)}</nav>} /><Route path="/b" element={<div/>} /></Routes>)`,
+        }),
+        '/',
+      )
+      const e = graph.edges.find((x) => x.to === 'n_b')
+      expect(e).toBeDefined()
+      expect(e?.modality).toBe('may')
+    })
   })
 
   it('supports react-router v5 component + Redirect', () => {

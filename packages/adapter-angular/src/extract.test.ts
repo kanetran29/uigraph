@@ -446,3 +446,164 @@ describe('extractGraph — functional route guards (CanActivateFn)', () => {
     expect(e?.confidence).toBe(0.6)
   })
 })
+
+describe('extractGraph — signal-based route guards (Angular 17+)', () => {
+  const edgeTo = (graph: { edges: { to: string }[] }, to: string) => graph.edges.find((e) => (e as { to: string }).to === to) as
+    | { modality: string; guard: string | null; confidence: number }
+    | undefined
+
+  it('keeps a signal-reading guard SYNCHRONOUS (conf 0.6, not async) and emits a signal-guard note', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { A } from './a.component'\nimport { B } from './b.component'\nconst requireAuth = () => inject(Object).isAuthed.asReadonly()\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B, canActivate: [requireAuth] }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    const e = edgeTo(graph, 'n_b')
+    expect(e?.modality).toBe('may')
+    expect(e?.guard).toBe('requireAuth')
+    expect(e?.confidence).toBe(0.6)
+    expect(soundiness.some((s) => s.kind === 'async-guard')).toBe(false)
+    const note = soundiness.find((s) => s.kind === 'signal-guard')
+    expect(note?.detail).toContain('requireAuth')
+    expect(note?.detail).toContain('signal')
+  })
+
+  it('detects a Signal<boolean>-typed field read as a signal guard', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { A } from './a.component'\nimport { B } from './b.component'\nconst requireAuth = () => { const s: Signal<boolean> = inject(Object).flag; return s() }\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B, canActivate: [requireAuth] }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    expect(edgeTo(graph, 'n_b')?.confidence).toBe(0.6)
+    expect(soundiness.some((s) => s.kind === 'signal-guard')).toBe(true)
+  })
+
+  it('an Observable wrapper around a signal read still classifies as async (not signal)', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { toObservable } from '@angular/core/rxjs-interop'\nimport { A } from './a.component'\nimport { B } from './b.component'\nconst requireAuth = () => toObservable(inject(Object).flag).pipe()\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'b', component: B, canActivate: [requireAuth] }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    expect(edgeTo(graph, 'n_b')?.confidence).toBe(0.5)
+    expect(soundiness.some((s) => s.kind === 'async-guard')).toBe(true)
+    expect(soundiness.some((s) => s.kind === 'signal-guard')).toBe(false)
+  })
+
+  it('emits a single signal-guard note even when several edges enter the same guarded route', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { A } from './a.component'\nimport { C } from './c.component'\nimport { B } from './b.component'\nconst requireAuth = () => inject(Object).flag.asReadonly()\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'c', component: C }, { path: 'b', component: B, canActivate: [requireAuth] }]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class A {}`,
+        '/c.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/b">go</a>' })\nexport class C {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    expect(soundiness.filter((s) => s.kind === 'signal-guard')).toHaveLength(1)
+  })
+})
+
+describe('extractGraph — withComponentInputBinding + route-input binding (Angular 16+)', () => {
+  const notes = (s: { kind: string; detail: string }[]) => s.filter((n) => n.kind === 'route-input-binding')
+
+  it('binds a :param to a same-named signal input() when withComponentInputBinding() is enabled', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/main.ts': `import { provideRouter, withComponentInputBinding } from '@angular/router'\nimport { routes } from './app.routes'\nbootstrapApplication(App, { providers: [provideRouter(routes, withComponentInputBinding())] })`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Item } from './item.component'\nexport const routes: Routes = [{ path: 'items/:id', component: Item }]`,
+        '/item.component.ts': `import { Component, input } from '@angular/core'\n@Component({ standalone: true, template: '<p>item</p>' })\nexport class Item { id = input<string>() }`,
+      }),
+      '/',
+    )
+    const n = notes(soundiness)
+    expect(n).toHaveLength(1)
+    expect(n[0]?.detail).toContain('id')
+    expect(n[0]?.detail).toContain('/items/:id')
+    expect(n[0]?.detail).toContain('signal input')
+  })
+
+  it('binds a :param to a same-named @Input() decorator field', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/main.ts': `import { provideRouter, withComponentInputBinding } from '@angular/router'\nimport { routes } from './app.routes'\nprovideRouter(routes, withComponentInputBinding())`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Profile } from './profile.component'\nexport const routes: Routes = [{ path: 'u/:username', component: Profile }]`,
+        '/profile.component.ts': `import { Component, Input } from '@angular/core'\n@Component({ standalone: true, template: '<p>p</p>' })\nexport class Profile { @Input() username = '' }`,
+      }),
+      '/',
+    )
+    const n = notes(soundiness)
+    expect(n).toHaveLength(1)
+    expect(n[0]?.detail).toContain('username')
+  })
+
+  it('resolves an @Input("alias") to the alias name, not the field name', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/main.ts': `import { provideRouter, withComponentInputBinding } from '@angular/router'\nimport { routes } from './app.routes'\nprovideRouter(routes, withComponentInputBinding())`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Item } from './item.component'\nexport const routes: Routes = [{ path: 'x/:id', component: Item }]`,
+        '/item.component.ts': `import { Component, Input } from '@angular/core'\n@Component({ standalone: true, template: '<p>i</p>' })\nexport class Item { @Input('id') itemId = '' }`,
+      }),
+      '/',
+    )
+    const n = notes(soundiness)
+    expect(n).toHaveLength(1)
+    expect(n[0]?.detail).toContain('id')
+  })
+
+  it('binds a static data: { key } entry to a same-named input', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/main.ts': `import { provideRouter, withComponentInputBinding } from '@angular/router'\nimport { routes } from './app.routes'\nprovideRouter(routes, withComponentInputBinding())`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Page } from './page.component'\nexport const routes: Routes = [{ path: 'p', component: Page, data: { mode: 'edit' } }]`,
+        '/page.component.ts': `import { Component, input } from '@angular/core'\n@Component({ standalone: true, template: '<p>p</p>' })\nexport class Page { mode = input.required<string>() }`,
+      }),
+      '/',
+    )
+    const n = notes(soundiness)
+    expect(n.some((x) => x.detail.includes('mode') && x.detail.includes('data'))).toBe(true)
+  })
+
+  it('emits NOTHING when withComponentInputBinding() is absent (no binding witness)', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/main.ts': `import { provideRouter } from '@angular/router'\nimport { routes } from './app.routes'\nprovideRouter(routes)`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Item } from './item.component'\nexport const routes: Routes = [{ path: 'items/:id', component: Item }]`,
+        '/item.component.ts': `import { Component, input } from '@angular/core'\n@Component({ standalone: true, template: '<p>item</p>' })\nexport class Item { id = input<string>() }`,
+      }),
+      '/',
+    )
+    expect(notes(soundiness)).toHaveLength(0)
+  })
+
+  it('emits NOTHING when no component input name matches the route param (no witness)', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/main.ts': `import { provideRouter, withComponentInputBinding } from '@angular/router'\nimport { routes } from './app.routes'\nprovideRouter(routes, withComponentInputBinding())`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Item } from './item.component'\nexport const routes: Routes = [{ path: 'items/:id', component: Item }]`,
+        '/item.component.ts': `import { Component, input } from '@angular/core'\n@Component({ standalone: true, template: '<p>item</p>' })\nexport class Item { name = input<string>() }`,
+      }),
+      '/',
+    )
+    expect(notes(soundiness)).toHaveLength(0)
+  })
+
+  it('is deterministic: same input yields the same notes across runs', () => {
+    const files = {
+      '/main.ts': `import { provideRouter, withComponentInputBinding } from '@angular/router'\nimport { routes } from './app.routes'\nprovideRouter(routes, withComponentInputBinding())`,
+      '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Item } from './item.component'\nexport const routes: Routes = [{ path: 'items/:id', component: Item }]`,
+      '/item.component.ts': `import { Component, input } from '@angular/core'\n@Component({ standalone: true, template: '<p>item</p>' })\nexport class Item { id = input<string>() }`,
+    }
+    const a = notes(extractGraph(inMemory(files), '/').soundiness)
+    const b = notes(extractGraph(inMemory(files), '/').soundiness)
+    expect(a).toEqual(b)
+  })
+})

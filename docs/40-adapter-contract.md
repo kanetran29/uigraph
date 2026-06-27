@@ -101,7 +101,86 @@ cheaply available).
 | `routerLink` | `must`-edge |
 | `canActivate` guard class name | symbolic guard text → `may`-edge |
 
-## 5. Adding a third adapter
+## 5. Supported / not-yet-supported per adapter
+
+This is the honest coverage matrix as of the current code, after the
+crash-safety / soundiness / dedup hardening. It exists so community users set
+correct expectations: uigraph extracts the **statically witnessed** routing/nav
+surface per framework — and is deliberately silent (a soundiness note, never an
+invented edge) on everything below the line. Anything in "Not yet supported"
+needs a future adapter pass or **runtime verification** (`report_observation`)
+to enter the graph; none of it is a completeness claim.
+
+These limitations are surfaced at extraction time, not just here: `extract`
+returns a soundiness report (§2) listing the unresolved cases it
+over-approximated, and `uigraph map` prints a per-kind summary, so a partial map
+is distinguishable from a clean one.
+
+### React (`@uigraph/adapter-react`, react-router v5 + v6)
+
+**Supported**
+- `<Route path component|render|element>` inside `<Switch>` / `<Routes>`, including nested route trees → route nodes.
+- `<Link>` / `<NavLink>` `to`, `<Navigate>` / `<Redirect>` → `must`/`may` nav edges.
+- `useNavigate()` / `useHistory().push|replace` with a **literal** target → `must`-edge; non-literal (template prefix, const route-map, branch) → `may`-edges fanned over the declared route set.
+- `withRouter`-injected `history.push` (the older HOC pattern).
+- Guards / conditional renders captured as **symbolic text** → at most a `may`-edge.
+- Controls (buttons / inputs / links) and their nav handlers when run with `--controls`.
+
+**Not yet supported (soundiness note, no edge invented)**
+- **Data-router object config**: `createBrowserRouter([...])` / `createRoutesFromElements` + `RouterProvider`. Only JSX `<Route>` declarations are read today.
+- **Inline-JSX route elements**: `element={<div>…}` with no component file to scan — emitted as an `inline-jsx-route` note.
+- **Dispatch / state-driven navigation**: a handler that `dispatch()`es a store action whose reducer/effect navigates — recorded as a `dispatch-driven-nav` note. Needs runtime verify or a future dispatch-aware adapter.
+- **Aliased / indirected router hooks** and **fully dynamic targets** computed at runtime — `dynamic-target` / `over-approximation` notes; never a single guessed `must`.
+
+### Next.js (`@uigraph/adapter-next`, App Router + Pages Router)
+
+**Supported**
+- File-system routes: `app/**/page.*` (App Router) and `pages/**/*` (Pages Router) → route nodes.
+- Dynamic `[slug]` → `:slug`; catch-all `[...slug]` / optional `[[...slug]]` → wildcard segment; route groups `(marketing)` and named slots `@team` carry no URL segment.
+- `<Link href>`, `useRouter().push|replace`, route-level `redirect()` → nav edges (via the shared react engine).
+- **App Router layout-chain navigation**: `<Link href>` declared in the wrapping `layout.tsx` chain (shared chrome — Navbar/Sidebar) attributed to the routes it wraps → `may`-edges (`layout-nav` note records the count).
+
+**Not yet supported (soundiness note, no edge invented)**
+- **Parallel routes** (`@slot`) and **intercepting routes** (`(.)`, `(..)`, `(...)`) beyond treating the slot as carrying no segment — their interception/composition semantics are not modeled.
+- `next.config` **redirects / rewrites** (config-level, not in source).
+- The same dispatch/state-driven and fully-dynamic-target gaps as React (shared engine).
+
+### Vue (`@uigraph/adapter-vue`, vue-router)
+
+**Supported**
+- `Routes` array (`path` / `name` / `component`, incl. nesting) → route nodes; lazy `() => import('…')` components resolved.
+- `<router-link to|:to>` (literal, named-route, template-prefix) → nav edges over the route set.
+- `router.push|replace` from a `useRouter()`-bound ref — inline in a handler **or** traced from an `@event` handler to its method definition (script-setup fn/const-arrow or Options-API method) → `must`/`may` edges; guards captured symbolically.
+- Controls and their handlers when run with `--controls`.
+
+**Not yet supported (soundiness note, no edge invented)**
+- **Fully dynamic / computed targets** and non-`useRouter` navigation indirections — `dynamic-target` / `over-approximation` notes.
+- Programmatic navigation routed through a store action (Pinia/Vuex) — same dispatch-driven gap; needs runtime verify.
+
+### Angular (`@uigraph/adapter-angular`)
+
+**Supported**
+- `Routes` array (`path` / `component` / `loadComponent` / nested `children`) → route nodes; `loadChildren: () => import('./x.routes')` followed into the imported module under its parent prefix.
+- `routerLink` / `[routerLink]` (literal, template-prefix, array-segment) → nav edges over the route set.
+- `Router.navigate([...])` / `navigateByUrl(...)` literal → `must`-edge; non-literal → `may`.
+- `canActivate: [Guard]` class names captured as **symbolic guard text** → at most a `may`-edge.
+- Controls parsed from the inline component template (buttons / inputs / links) and their nav handlers when run with `--controls`.
+
+**Not yet supported (soundiness note, no edge invented)**
+- **Signal-based routing / `input`-binding router state** (Angular signals) — not traced; navigation that flows through a signal is not statically witnessed.
+- **API effects**: the Angular adapter does not yet attach `api:*` effects to controls (React/Vue parity gap).
+- Fully dynamic targets and store/effect-driven navigation — `dynamic-target` notes; needs runtime verify.
+
+### Cross-adapter floor
+
+For **every** adapter: timing/race, multi-field interactions, and cross-session
+behavior are outside what a finite static graph represents and are never emitted;
+`unknown`-modality nodes/edges exist in the IR but no adapter emits them yet.
+The golden invariant holds across the table: **no edge without a static
+witness** — when in doubt, the adapter records a soundiness note rather than
+inventing an edge.
+
+## 6. Adding a third adapter
 
 A new framework (say Vue or SolidStart) is added entirely outside the core:
 
@@ -115,7 +194,7 @@ A new framework (say Vue or SolidStart) is added entirely outside the core:
 No core file changes. The core consumes the resulting `UiGraph` identically to
 every other adapter's output.
 
-## 6. The one hard rule
+## 7. The one hard rule
 
 **No framework import may appear in `@uigraph/core`.** No `react`,
 `react-router`, `@angular/*`, ts-morph, or framework-specific AST type may be

@@ -15,6 +15,7 @@ import type { ControlInput, ControlSelector, ExtractOptions, ExtractResult, Grap
 import { routeToNodeId, edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, type RouteLike } from './matcher'
 import { analyzeCanActivate, type GuardInfo } from './guards'
+import { analyzeInputBindings } from './inputs'
 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'ng-v0-2026.06'
@@ -30,6 +31,7 @@ interface RouteInfo {
   componentName: string | null
   componentFile: SourceFile | undefined
   guards: GuardInfo[]
+  routeObj: ObjectLiteralExpression
 }
 
 /** Build a ts-morph project from a project directory, scanning src first. */
@@ -193,7 +195,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     }
     const nodeId = routeToNodeId(fullPath)
     if (!out.has(nodeId)) {
-      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards: canActivateGuards(sf, el) })
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards: canActivateGuards(sf, el), routeObj: el })
     }
     const childrenProp = el.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
@@ -667,6 +669,7 @@ interface Gate {
   guardTexts: string[]
   confidence: number
   asyncGuards: GuardInfo[]
+  signalGuards: GuardInfo[]
 }
 
 const FUNCTIONAL_GUARD_CONFIDENCE = 0.6
@@ -682,23 +685,33 @@ const ASYNC_GUARD_CONFIDENCE = 0.5
  */
 function gateFromGuards(guards: GuardInfo[]): Gate {
   const gating = guards.filter((g) => g.literalBoolean !== true)
-  if (gating.length === 0) return { guarded: false, guardTexts: [], confidence: 1, asyncGuards: [] }
+  if (gating.length === 0) return { guarded: false, guardTexts: [], confidence: 1, asyncGuards: [], signalGuards: [] }
   const asyncGuards = gating.filter((g) => g.async)
+  const signalGuards = gating.filter((g) => g.signal === true)
   const confidence = asyncGuards.length > 0 ? ASYNC_GUARD_CONFIDENCE : FUNCTIONAL_GUARD_CONFIDENCE
-  return { guarded: true, guardTexts: gating.map((g) => g.text), confidence, asyncGuards }
+  return { guarded: true, guardTexts: gating.map((g) => g.text), confidence, asyncGuards, signalGuards }
 }
 
 /**
- * Push one soundiness note per distinct Observable/Promise-returning guard on
- * `routePath`. Deduped via `seen` so a guard gating several incoming edges still
- * yields a single note (one guard, one runtime-undecidable gate).
+ * Push one soundiness note per distinct undecidable guard on `routePath`: an
+ * `async-guard` note for an Observable/Promise-returning guard (decided at
+ * runtime) and a `signal-guard` note for a guard that reads its decision from an
+ * Angular signal (resolves synchronously but is reactive, so its value can change
+ * between map-time and run-time). Deduped via `seen` (keyed by kind+route+guard)
+ * so a guard gating several incoming edges still yields a single note per kind.
  */
-function noteAsyncGuards(gate: Gate, routePath: string, sink: SoundinessNote[], seen: Set<string>): void {
+function noteGuards(gate: Gate, routePath: string, sink: SoundinessNote[], seen: Set<string>): void {
   for (const g of gate.asyncGuards) {
-    const key = `${routePath} ${g.text}`
+    const key = `async ${routePath} ${g.text}`
     if (seen.has(key)) continue
     seen.add(key)
     sink.push({ kind: 'async-guard', detail: `guard "${g.text}" on route ${routePath} returns an Observable/Promise; gate decided at runtime` })
+  }
+  for (const g of gate.signalGuards) {
+    const key = `signal ${routePath} ${g.text}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    sink.push({ kind: 'signal-guard', detail: `guard "${g.text}" on route ${routePath} reads an Angular signal; gate resolves synchronously but is reactive (value may change between map-time and run-time)` })
   }
 }
 
@@ -755,7 +768,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           continue
         }
         const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
-        noteAsyncGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
+        noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
         const guardText = gate.guarded ? gate.guardTexts.join(',') : null
         pushEdge(route.nodeId, target.nodeId, t, gate.guarded ? 'may' : 'must', gate.guarded ? gate.confidence : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
@@ -763,7 +776,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
         for (const cand of cands) {
           const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
-          noteAsyncGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
+          noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
           const guardText = gate.guarded ? gate.guardTexts.join(',') : null
           pushEdge(route.nodeId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file)
         }
@@ -805,7 +818,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
                 continue
               }
               const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
-              noteAsyncGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
+              noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
               const guards = [nav.guard, ...gate.guardTexts].filter((g): g is string => g != null)
               const guarded = guards.length > 0
               const confidence = gate.guarded ? gate.confidence : nav.guard != null ? 0.6 : 1
@@ -814,7 +827,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             } else if (nav.ti.kind === 'template') {
               for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes)) {
                 const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
-                noteAsyncGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
+                noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
                 const guards = [nav.guard, ...gate.guardTexts].filter((g): g is string => g != null)
                 pushEdge(cId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guards.length > 0 ? guards.join(',') : null, file)
                 navEffects.add('navigate')
@@ -846,6 +859,16 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       }
     }
   }
+
+  const routeObjects = new Map(routes.map((r) => [r.fullPath, r.routeObj as Node]))
+  soundiness.push(
+    ...analyzeInputBindings(
+      project,
+      projectDir,
+      routes.map((r) => ({ fullPath: r.fullPath, componentFile: r.componentFile })),
+      routeObjects,
+    ),
+  )
 
   const graph = {
     version: 0 as const,
