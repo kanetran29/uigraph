@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { buildCoverage, nextToVerify, nodeForUrl } from './coverage'
+import { buildFrontier } from './frontier'
+import type { TrustTier } from './trust-tier'
 import { edge, graph, node } from './fixtures'
 import type { ProposalGraph } from './proposals'
 
@@ -90,6 +92,54 @@ describe('buildCoverage — two metrics', () => {
   it('accountedRatio is 1 only when the open set is empty', () => {
     expect(buildCoverage(graph([node('x'), node('y')], [edge('m', 'x', 'y', { source: 'static', modality: 'may' })])).accountedRatio).toBe(0)
     expect(buildCoverage(graph([], [])).accountedRatio).toBe(1)
+  })
+})
+
+describe('buildCoverage — tier distribution + frontier (additive)', () => {
+  const ALL_TIERS: TrustTier[] = ['witnessed', 'proven', 'asserted', 'llm-verified', 'proposed', 'unknown']
+
+  it('exposes tierDistribution keyed by exactly the 6 trust tiers', () => {
+    const cov = buildCoverage(g())
+    expect(cov.tierDistribution).toBeDefined()
+    expect(Object.keys(cov.tierDistribution ?? {}).sort()).toEqual([...ALL_TIERS].sort())
+  })
+
+  it('tierDistribution sums to the total edge count', () => {
+    const cov = buildCoverage(g())
+    const sum = Object.values(cov.tierDistribution ?? {}).reduce((a, b) => a + b, 0)
+    expect(sum).toBe(cov.total)
+  })
+
+  it('counts tiers correctly for a mixed runtime+static graph', () => {
+    // e1 runtime->witnessed, e2 may->asserted, e3 unknown->unknown, e4 must->proven
+    const cov = buildCoverage(g())
+    expect(cov.tierDistribution).toEqual({ witnessed: 1, proven: 1, asserted: 1, 'llm-verified': 0, proposed: 0, unknown: 1 })
+  })
+
+  it('frontierCount matches buildFrontier on the same graph', () => {
+    const cov = buildCoverage(g())
+    expect(cov.frontierCount).toBe(buildFrontier(g()).unknownCount)
+  })
+
+  it('frontierCount reflects both unknown-modality edges AND zero-out-edge states', () => {
+    // a has out-edges incl. a dynamic sink (e3) => frontier; c & b: b has an out-edge (e2),
+    // c is a dead end => frontier; u_a is an unknown sink, not counted.
+    const cov = buildCoverage(g())
+    const f = buildFrontier(g())
+    expect(cov.frontierCount).toBe(f.unknownCount)
+    expect(f.states.sort()).toEqual(['a', 'c'])
+  })
+
+  it('keeps existing fields unchanged (backward compatible)', () => {
+    const cov = buildCoverage(g())
+    expect(cov.total).toBe(4)
+    expect(cov.verified).toBe(1)
+    expect(cov.accounted).toBe(3)
+    expect(cov.byModality).toBeDefined()
+    expect(cov.bySource).toBeDefined()
+    expect(cov.unverified).toBeDefined()
+    expect(cov.open).toBeDefined()
+    expect(cov.parked).toBeDefined()
   })
 })
 

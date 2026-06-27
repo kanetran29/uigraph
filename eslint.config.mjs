@@ -10,6 +10,7 @@ export default tseslint.config(
       '**/.vite/**',
       'examples/**',
       'apps/dashboard/**',
+      '**/.claude/**',
     ],
   },
   ...tseslint.configs.recommended,

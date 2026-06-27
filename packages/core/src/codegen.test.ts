@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildSpecPlan, renderPlaywrightSpec, locatorFor } from './codegen'
+import { buildSpecPlan, renderPlaywrightSpec, locatorFor, isInteractionTriggeredEvent, isDirectNavEdge } from './codegen'
 import { planPath } from './algorithms'
 import { edge, graph, node } from './fixtures'
 import type { GraphNode } from './ir'
@@ -65,5 +65,67 @@ describe('buildSpecPlan + renderPlaywrightSpec', () => {
     const plan = buildSpecPlan(gg, steps!, {})
     expect(plan.preconditions).toEqual(['isAuthenticated'])
     expect(renderPlaywrightSpec(plan)).toContain('// Preconditions to satisfy first: isAuthenticated')
+  })
+})
+
+describe('goto-fallback soundness: edge trigger classification', () => {
+  it('isInteractionTriggeredEvent: submit/click/change are interaction-triggered, navigate/click:Link are not', () => {
+    expect(isInteractionTriggeredEvent('submit')).toBe(true)
+    expect(isInteractionTriggeredEvent('click')).toBe(true)
+    expect(isInteractionTriggeredEvent('click:submit')).toBe(true)
+    expect(isInteractionTriggeredEvent('change')).toBe(true)
+    expect(isInteractionTriggeredEvent('input')).toBe(true)
+    expect(isInteractionTriggeredEvent('navigate')).toBe(false)
+    expect(isInteractionTriggeredEvent('click:Link')).toBe(false)
+  })
+
+  it('isDirectNavEdge: only a direct-nav event with a null guard is directly confirmable', () => {
+    expect(isDirectNavEdge(edge('e', 'a', 'b', { event: 'click:Link', guard: null }))).toBe(true)
+    expect(isDirectNavEdge(edge('e', 'a', 'b', { event: 'navigate', guard: null }))).toBe(true)
+    // a guard makes even a link edge interaction/conditional — not bare-goto confirmable
+    expect(isDirectNavEdge(edge('e', 'a', 'b', { event: 'click:Link', guard: 'isAuth' }))).toBe(false)
+    // a submit event is interaction-triggered even with a null guard
+    expect(isDirectNavEdge(edge('e', 'a', 'b', { event: 'submit', guard: null }))).toBe(false)
+  })
+})
+
+describe('goto-fallback soundness: buildSpecPlan', () => {
+  // A screen→screen edge whose source node is NOT a control falls into the leg-action fallback.
+  it('does NOT emit goto+url-assert for a guarded submit edge (parks it instead)', () => {
+    const gg = graph(
+      [node('n_form', { route: '/form' }), node('n_done', { route: '/done' })],
+      [edge('e', 'n_form', 'n_done', { event: 'submit', guard: 'hasEmail', modality: 'may' })],
+    )
+    const steps = planPath(gg, 'n_form', 'n_done')
+    const plan = buildSpecPlan(gg, steps!, {})
+    const leg = plan.legs[0]!
+    expect(leg.action.kind).toBe('parked')
+    expect(leg.parkedReason).toBeDefined()
+    // no url-assert: a bare URL match must not falsely witness a guarded submit
+    expect(leg.assertions.find((a) => a.kind === 'url')).toBeUndefined()
+    expect(renderPlaywrightSpec(plan)).not.toContain('await page.goto("/done")')
+  })
+
+  it('DOES emit goto+url-assert for a direct-nav link edge with null guard (safe)', () => {
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e', 'n_a', 'n_b', { event: 'click:Link', guard: null })],
+    )
+    const steps = planPath(gg, 'n_a', 'n_b')
+    const plan = buildSpecPlan(gg, steps!, {})
+    const leg = plan.legs[0]!
+    expect(leg.action.kind).toBe('goto')
+    expect(leg.action.url).toBe('/b')
+    expect(leg.assertions.find((a) => a.kind === 'url')?.value).toBe('/b')
+  })
+
+  it('parks a guarded link edge (non-null guard) rather than confirming by goto', () => {
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_dash', { route: '/dash' })],
+      [edge('e', 'n_a', 'n_dash', { event: 'click:Link', guard: 'isAuth', modality: 'may' })],
+    )
+    const steps = planPath(gg, 'n_a', 'n_dash')
+    const plan = buildSpecPlan(gg, steps!, {})
+    expect(plan.legs[0]!.action.kind).toBe('parked')
   })
 })

@@ -34,7 +34,7 @@ pnpm check                       # full self-heal gate: typecheck + 88 tests + l
 
 # extract a graph from an app
 pnpm --filter @uigraph/cli run uigraph -- \
-  map "$PWD/examples/sample-react-app" --adapter react --out /tmp/demo/ui-graph.json
+  map "$PWD/examples/sample-react-app" --adapter react --out /tmp/demo/uigraph.db
 
 # serve it + open the dashboard
 pnpm --filter @uigraph/cli run uigraph -- serve /tmp/demo --port 4317 &

@@ -12,6 +12,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "eslint": "^10.5.0",
+    "playwright-core": "^1.60.0",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "^8.61.0",

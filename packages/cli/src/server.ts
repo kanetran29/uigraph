@@ -6,9 +6,10 @@
 import { createServer as createHttpServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { ToolContext, UpdateGraphArgs } from '@uigraph/mcp'
-import { dbPath, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
+import type { ToolContext, ListCasesArgs, UpdateGraphArgs } from '@uigraph/mcp'
+import { dbPath, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
 import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@uigraph/core/node'
+import type { TrustTier } from '@uigraph/core'
 import { buildCoverage, diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
 
 /** Render the workspace overlay as a markdown "planned changes" spec. */
@@ -39,6 +40,7 @@ export interface ApiRequest {
   method: string
   path: string
   body: unknown
+  query?: URLSearchParams
 }
 
 /** A status code plus a JSON-serializable payload; the router's pure output. */
@@ -51,8 +53,11 @@ export interface ApiResponse {
  * Pure request router for the serve API, testable without a socket. Maps
  * `GET /api/graph` to the merged graph, `GET /api/soundiness` to the soundiness
  * report (or `[]` when absent), and `POST /api/overlay` to a single overlay edit
- * applied via the shared MCP updateGraph. Unknown routes return 404; a thrown
- * handler error becomes a 400 with the message.
+ * applied via the shared MCP updateGraph. The recall-first read tools are exposed
+ * for the dashboard/agent: `GET /api/state/<id>` (a state + its trust-tiered cases,
+ * 404 on unknown id), `GET /api/cases?from&outcomeClass&minTier` (the filterable
+ * case set), and `GET /api/frontier?state` (the known-unknowns). Unknown routes
+ * return 404; a thrown handler error becomes a 400 with the message.
  */
 export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse {
   try {
@@ -84,6 +89,24 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
       } finally {
         store.close()
       }
+    }
+    if (req.method === 'GET' && req.path.startsWith('/api/state/')) {
+      const id = decodeURIComponent(req.path.slice('/api/state/'.length))
+      const result = getState(ctx, { id })
+      return 'error' in result ? { status: 404, body: result } : { status: 200, body: result }
+    }
+    if (req.method === 'GET' && req.path === '/api/cases') {
+      const q = req.query
+      const args: ListCasesArgs = {
+        ...(q?.get('from') ? { from: q.get('from') as string } : {}),
+        ...(q?.get('outcomeClass') ? { outcomeClass: q.get('outcomeClass') as string } : {}),
+        ...(q?.get('minTier') ? { minTier: q.get('minTier') as TrustTier } : {}),
+      }
+      return { status: 200, body: listCases(ctx, args) }
+    }
+    if (req.method === 'GET' && req.path === '/api/frontier') {
+      const state = req.query?.get('state')
+      return { status: 200, body: getFrontier(ctx, state ? { state } : {}) }
     }
     if (req.method === 'POST' && req.path === '/api/overlay') {
       const result = updateGraph(ctx, req.body as UpdateGraphArgs)
@@ -234,7 +257,7 @@ async function handle(config: ServeConfig, req: IncomingMessage, res: ServerResp
     }
   }
 
-  const result = handleApiRequest(ctx, { method: req.method ?? 'GET', path, body })
+  const result = handleApiRequest(ctx, { method: req.method ?? 'GET', path, body, query: url.searchParams })
   res.writeHead(result.status, { 'Content-Type': 'application/json' })
   res.end(JSON.stringify(result.body))
 }

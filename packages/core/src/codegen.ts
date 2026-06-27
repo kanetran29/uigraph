@@ -5,12 +5,17 @@
 // the CLI/MCP supply the planned path. Input values + guards are coarse here and
 // refined by the input/guard feature.
 
-import type { ControlMeta, ControlSelector, UiGraph } from './ir'
+import type { ControlMeta, ControlSelector, GraphEdge, UiGraph } from './ir'
 import type { PlanStep } from './algorithms'
 
-/** A single Playwright action for one leg. */
+/**
+ * A single Playwright action for one leg. `parked` marks a transition that cannot
+ * be soundly confirmed by codegen alone (an interaction-triggered or guarded
+ * screen→screen nav with no drivable control): the runner must NOT witness it via a
+ * bare goto+URL-assert, so it stays asserted/llm-verified until truly driven.
+ */
 export interface SpecAction {
-  kind: 'click' | 'fill' | 'goto' | 'available'
+  kind: 'click' | 'fill' | 'goto' | 'available' | 'parked'
   locator?: string
   value?: string
   url?: string
@@ -22,7 +27,11 @@ export interface SpecAssertion {
   value: string
 }
 
-/** One step of the spec: the transition, its action, and its assertions. */
+/**
+ * One step of the spec: the transition, its action, and its assertions.
+ * `parkedReason` is set only when `action.kind === 'parked'` and explains why the
+ * leg is not auto-confirmable, so the runner and a human can audit the gap.
+ */
 export interface SpecLeg {
   from: string
   to: string
@@ -30,6 +39,7 @@ export interface SpecLeg {
   description: string
   action: SpecAction
   assertions: SpecAssertion[]
+  parkedReason?: string
 }
 
 /** A framework-agnostic plan the renderer turns into spec source. */
@@ -95,12 +105,40 @@ function fillValue(controlType: string, input: ControlMeta['input']): string {
 }
 
 /**
+ * True when an edge's event is interaction-triggered (a user must drive a control:
+ * submit/click/change/input/keydown/…) rather than a direct navigation. The event
+ * vocabulary is informal today, so this matches by prefix; the one direct-nav use
+ * of `click` is the special `click:Link` form, which is excluded. Why: an
+ * interaction-triggered transition can never be soundly witnessed by navigating
+ * straight to its target route — the triggering interaction must actually fire.
+ */
+export function isInteractionTriggeredEvent(event: string): boolean {
+  if (event === 'navigate' || event === 'click:Link') return false
+  return /^(submit|click|change|input|key|press|keydown|keyup|focus|blur|toggle|select)/i.test(event)
+}
+
+/**
+ * True when an edge is safely confirmable by a bare goto + URL-assert: its event is
+ * a direct navigation (navigate / click:Link) AND it carries no guard. A guard
+ * means the transition is conditional, so reaching the URL by goto does not prove
+ * the guarded edge fired; such edges are NOT direct-nav and must be driven (or left
+ * unconfirmed) instead.
+ */
+export function isDirectNavEdge(edge: GraphEdge): boolean {
+  return !isInteractionTriggeredEvent(edge.event) && (edge.guard === null || edge.guard.length === 0)
+}
+
+/**
  * Build a SpecPlan from a planned path. A leg whose source is a control with a
  * selector becomes a click/fill on that locator; a containment leg
  * (effect:'contains') is a no-op marker (the control is simply available on the
- * screen); any other leg falls back to navigating to the target's literal route.
- * Assertions: a literal target route -> toHaveURL; open:modal -> dialog visible;
- * api:* -> a request note.
+ * screen); a direct-nav screen→screen leg (navigate/click:Link, null guard) falls
+ * back to navigating to the target's literal route; any other screen→screen leg
+ * (interaction-triggered or guarded, with no drivable control) is PARKED — it must
+ * not be witnessed by a bare goto+URL-assert (the Tier-3 soundness fix).
+ * Assertions: a literal target route -> toHaveURL (ONLY for direct-nav legs, so a
+ * guarded/interaction edge is never falsely confirmed by URL match); open:modal ->
+ * dialog visible; api:* -> a request note.
  */
 export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl?: string; title?: string } = {}): SpecPlan {
   const baseUrl = opts.baseUrl ?? ''
@@ -113,23 +151,31 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     const e = s.edge
     const description = `${fromNode.label} → ${toNode.label} (${e.event})`
 
+    const directNav = isDirectNavEdge(e)
+
     let action: SpecAction
+    let parkedReason: string | undefined
     if (fromNode.kind === 'control' && fromNode.control?.selector) {
       const locator = locatorFor(fromNode.control.selector)
       const ct = fromNode.control.controlType
       action = ct === 'input' || ct === 'richtext' ? { kind: 'fill', locator, value: fillValue(ct, fromNode.control.input) } : { kind: 'click', locator }
     } else if (e.effect === 'contains') {
       action = { kind: 'available' }
-    } else {
+    } else if (directNav) {
       action = { kind: 'goto', url: toNode.route && !toNode.route.includes(':') ? toNode.route : (toNode.route ?? '/') }
+    } else {
+      action = { kind: 'parked' }
+      parkedReason = `${e.event}${e.guard ? ` [guard:${e.guard}]` : ''} is interaction-triggered/guarded with no drivable control — cannot be witnessed by goto+URL-assert`
     }
 
     const assertions: SpecAssertion[] = []
-    if (toNode.route && !toNode.route.includes(':')) assertions.push({ kind: 'url', value: toNode.route })
+    // Safety: a literal URL assert is sound ONLY for control-driven or direct-nav legs;
+    // a bare URL match would falsely witness a guarded/interaction-triggered screen→screen edge.
+    if (toNode.route && !toNode.route.includes(':') && action.kind !== 'parked') assertions.push({ kind: 'url', value: toNode.route })
     if (e.effect === 'open:modal') assertions.push({ kind: 'dialog', value: toNode.label })
     if (e.effect && e.effect.startsWith('api:')) assertions.push({ kind: 'request', value: e.effect.slice(4) })
 
-    return { from: fromNode.id, to: toNode.id, event: e.event, description, action, assertions }
+    return { from: fromNode.id, to: toNode.id, event: e.event, description, action, assertions, ...(parkedReason ? { parkedReason } : {}) }
   })
 
   // Guard-aware: distinct symbolic guards along the path are the preconditions the
@@ -154,6 +200,7 @@ export function renderPlaywrightSpec(plan: SpecPlan): string {
     else if (a.kind === 'fill' && a.locator) lines.push(`  await ${a.locator}.fill(${q(a.value ?? '')})`)
     else if (a.kind === 'goto' && a.url !== undefined) lines.push(`  await page.goto(${url(a.url)})`)
     else if (a.kind === 'available') lines.push(`  // (control available on this screen — no navigation)`)
+    else if (a.kind === 'parked') lines.push(`  /* parked: ${leg.parkedReason ?? 'not auto-confirmable — drive the triggering control or verify manually'} */`)
     for (const as of leg.assertions) {
       if (as.kind === 'url') lines.push(`  await expect(page).toHaveURL(${url(as.value)})`)
       else if (as.kind === 'dialog') lines.push(`  await expect(page.getByRole('dialog')).toBeVisible()`)

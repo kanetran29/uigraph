@@ -11,6 +11,9 @@ a test.)
 - **get_proposals** `{screen?, category?, evidencedOnly?, minConfidence?, status?}` — the quarantined leads. `status: 'proposed'` is your open worklist; `confirmed`/`rejected`/`unverifiable` are the resolved archive.
 - **get_proposal_graph** — proposals projected to nodes+edges (only `proposed` ones). The hypotheses as a graph.
 - **describe_screen** `{screen}` — one screen's controls + proven AND proposed outgoing actions.
+- **get_state** `{id}` — one state as a trust-tiered action surface: all out-edges as cases, each with `event`, `guard`, `outcomeClass` (to-node / `ps_*` sub-state), `trustTier` (witnessed>proven>asserted>llm-verified>proposed>unknown) and an `evidence` cite. Answers "what can I do here and how far can I trust each path?". 404s on an unknown id.
+- **list_cases** `{from?, outcomeClass?, minTier?}` — the behavioral case set across the merged graph + proposals, tier-tagged and sorted most-trusted first. `minTier: 'proven'` → witnessed+proven only; filter by source (`from`) or target (`outcomeClass`).
+- **get_frontier** `{state?}` — the known-unknowns: states with unresolved (`unknown`-modality / dynamic-sink) out-edges or no out-edges at all, each with its unknown-case count. Where the map is incomplete — probe or ask before relying. The safety spine.
 - **get_coverage** — runtime-verification coverage of the proven graph: `verified` (= `source:runtime`) / `total`, `unverified[]`.
 - **next_to_verify** `{limit?}` — the ranked worklist: `unknown` edges, then `may`, then proposed transitions, minus anything already runtime-witnessed.
 - **get_loop_status** — the DONE signal: `{coverage, resolution, worklistSize, loopDone}`. `loopDone` = worklist empty AND no `proposed` proposals left.
@@ -18,7 +21,7 @@ a test.)
 
 ## Plan
 
-- **plan_path** `{from, to, allow?}` — a directed route over the merged graph (optionally restricting allowed modalities). Returns the leg sequence or none.
+- **plan_path** `{from, to, allow?, minTier?}` — a directed route over the merged graph (optionally restricting allowed modalities). Returns the leg sequence or none. With `minTier`, any hop below that trust floor is reported in `tierWarnings` — the path is still returned, low-trust hops are flagged not dropped.
 - **gen_spec** `{from, to, baseUrl?}` — a Playwright spec for that route (locator actions from stable selectors + assertions). Drives verification.
 - **list_scenarios** / **set_scenario** `{name}` — named overlays (alternate planned states).
 
