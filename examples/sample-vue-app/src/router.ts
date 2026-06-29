@@ -23,6 +23,6 @@ export const router = createRouter({
     { path: '/products', name: 'products', component: Products },
     { path: '/products/:id', name: 'product', component: () => import('./pages/ProductDetail.vue') },
     { path: '/checkout', name: 'checkout', component: Checkout, beforeEnter: authGuard },
-    { path: '/:pathMatch(*)*', name: 'not-found', component: NotFound },
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
   ],
 })
