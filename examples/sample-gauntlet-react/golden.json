@@ -1,39 +1,309 @@
 {
   "expectations": [
-    { "id": "g01a", "category": "data-router", "kind": "node", "route": "/", "minimum": "node", "description": "createBrowserRouter table yields the index route node" },
-    { "id": "g01b", "category": "data-router", "kind": "node", "route": "/pricing", "minimum": "node", "description": "createBrowserRouter table yields the /pricing node" },
-    { "id": "g01c", "category": "data-router", "kind": "node", "route": "/products", "minimum": "node", "description": "createBrowserRouter table yields the /products node" },
-    { "id": "g01d", "category": "data-router", "kind": "node", "route": "/checkout", "minimum": "node", "description": "createBrowserRouter table yields the /checkout node" },
-    { "id": "g01e", "category": "data-router", "kind": "node", "route": "/login", "minimum": "node", "description": "createBrowserRouter table yields the /login node" },
-    { "id": "g01f", "category": "data-router", "kind": "node", "route": "/account", "minimum": "node", "description": "createBrowserRouter table yields the /account node (element is the ProtectedRoute wrapper)" },
-    { "id": "g01g", "category": "data-router", "kind": "node", "route": "/legacy", "minimum": "node", "description": "createBrowserRouter table yields the /legacy redirect-only node" },
-    { "id": "g01h", "category": "data-router", "kind": "node", "route": "*", "minimum": "node", "description": "createBrowserRouter table yields the catch-all NotFound node" },
-    { "id": "g02", "category": "nested-route", "kind": "node", "route": "/products/:productId", "minimum": "node", "description": "relative child ':productId' under /products (children + <Outlet/>, plus an index child) resolves to a full path" },
-    { "id": "g03", "category": "lazy-route", "kind": "node", "route": "/help", "minimum": "node", "description": "React.lazy(() => import(...)) route component still yields a route node" },
-    { "id": "g04", "category": "literal-link", "kind": "edge", "fromRoute": "/", "toRoute": "/pricing", "minimum": "must", "description": "<Link to=\"/pricing\"> literal" },
-    { "id": "g05", "category": "literal-navlink", "kind": "edge", "fromRoute": "/", "toRoute": "/products", "minimum": "must", "description": "<NavLink to=\"/products\"> literal" },
-    { "id": "g06", "category": "redirect-route", "kind": "edge", "fromRoute": "/legacy", "toRoute": "/pricing", "minimum": "must", "description": "route whose element is <Navigate to=\"/pricing\" replace/>" },
-    { "id": "g07", "category": "use-navigate-literal", "kind": "edge", "fromRoute": "/", "toRoute": "/checkout", "minimum": "must", "description": "navigate('/checkout') literal inside an onClick handler" },
-    { "id": "g08", "category": "aliased-navigate-helper", "kind": "edge", "fromRoute": "/pricing", "toRoute": "/checkout", "minimum": "honest", "description": "const go = useNavigate() passed into goCheckout(go) in nav-helpers.ts which calls go('/checkout') — cross-file alias" },
-    { "id": "g09", "category": "route-constants", "kind": "edge", "fromRoute": "/pricing", "toRoute": "/account", "minimum": "may", "description": "navigate(ROUTES.account) where ROUTES is an imported as-const literal map" },
-    { "id": "g10", "category": "dynamic-key", "kind": "edge", "fromRoute": "/pricing", "toRoute": null, "minimum": "honest", "description": "navigate(PLANS[plan]) with plan from component state — statically unresolvable" },
-    { "id": "g11", "category": "props-data", "kind": "edge", "fromRoute": "/products/:productId", "toRoute": null, "minimum": "honest", "description": "navigate(props.returnTo) — target flows in through props from query-param data" },
-    { "id": "g12a", "category": "guarded-nav", "kind": "edge", "fromRoute": "/pricing", "toRoute": "/login", "minimum": "may", "description": "guard branch: if (!loggedIn) navigate('/login')" },
-    { "id": "g12b", "category": "guarded-nav", "kind": "edge", "fromRoute": "/pricing", "toRoute": "/checkout", "minimum": "may", "description": "fall-through branch of the guarded handler: navigate('/checkout')" },
-    { "id": "g13", "category": "conditional-render-guard", "kind": "edge", "fromRoute": "/account", "toRoute": "/login", "minimum": "may", "description": "JSX {loggedIn ? <AccountPanel/> : <Navigate to=\"/login\"/>}" },
-    { "id": "g14", "category": "state-driven-effect", "kind": "edge", "fromRoute": "/login", "toRoute": "/account", "minimum": "honest", "description": "useEffect(() => { if (user) navigate('/account') }, [user]) — fires on store change, not a click" },
-    { "id": "g15", "category": "dispatch-driven", "kind": "edge", "fromRoute": "/account", "toRoute": "/", "minimum": "honest", "description": "button only dispatches {type:'LOGOUT'}; a store subscription in an effect performs navigate('/')" },
-    { "id": "g16", "category": "timer-redirect", "kind": "edge", "fromRoute": "/checkout", "toRoute": "/pricing", "minimum": "honest", "description": "setTimeout(() => navigate('/pricing'), 3000) inside an effect gated on success state" },
-    { "id": "g17a", "category": "window-location-external", "kind": "edge", "fromRoute": "/checkout", "toRoute": null, "minimum": "honest", "description": "window.location.href = 'https://external.example.com' — external, leaves the app" },
-    { "id": "g17b", "category": "window-location-internal", "kind": "edge", "fromRoute": "/checkout", "toRoute": "/help", "minimum": "honest", "description": "window.location.assign('/help') — internal target that bypasses the router" },
-    { "id": "g18a", "category": "plain-anchor-internal", "kind": "edge", "fromRoute": "/", "toRoute": "/pricing", "minimum": "honest", "description": "<a href=\"/pricing\"> non-router anchor causing a full reload" },
-    { "id": "g18b", "category": "plain-anchor-external", "kind": "edge", "fromRoute": "/", "toRoute": null, "minimum": "honest", "description": "<a href=\"https://github.com/x\" target=\"_blank\"> external anchor" },
-    { "id": "g19", "category": "form-submit-async", "kind": "edge", "fromRoute": "/products/:productId", "toRoute": "/checkout", "minimum": "must", "description": "onSubmit awaits fetch('/api/checkout', POST) then navigate('/checkout') — literal target after an await" },
-    { "id": "g20", "category": "keyboard-nav", "kind": "edge", "fromRoute": "/", "toRoute": "/products", "minimum": "may", "description": "onKeyDown handler: Enter → navigate('/products')" },
-    { "id": "g21", "category": "modal-confirm", "kind": "edge", "fromRoute": "/products", "toRoute": "/checkout", "minimum": "must", "description": "confirm button inside a useState-toggled dialog does navigate('/checkout'); cancel merely closes" },
-    { "id": "g22", "category": "history-back", "kind": "edge", "fromRoute": "/products/:productId", "toRoute": null, "minimum": "honest", "description": "navigate(-1) — target depends on history, unknowable statically" },
-    { "id": "g23", "category": "object-form-navigate", "kind": "edge", "fromRoute": "/products", "toRoute": "/products", "minimum": "must", "description": "navigate({ pathname: '/products', search: '?sort=price' }) — literal pathname in object form" },
-    { "id": "g24", "category": "template-prefix", "kind": "edge", "fromRoute": "/products", "toRoute": "/products/:productId", "minimum": "may", "description": "navigate(`/products/${id}`) with id from state — prefix matches the param route" },
-    { "id": "g25", "category": "protected-route-wrapper", "kind": "edge", "fromRoute": "/account", "toRoute": "/login", "minimum": "may", "description": "ProtectedRoute children pattern: {user ? children : <Navigate to=\"/login\"/>} wrapping /account" }
+    {
+      "id": "g01a",
+      "category": "data-router",
+      "kind": "node",
+      "route": "/",
+      "minimum": "node",
+      "description": "createBrowserRouter table yields the index route node"
+    },
+    {
+      "id": "g01b",
+      "category": "data-router",
+      "kind": "node",
+      "route": "/pricing",
+      "minimum": "node",
+      "description": "createBrowserRouter table yields the /pricing node"
+    },
+    {
+      "id": "g01c",
+      "category": "data-router",
+      "kind": "node",
+      "route": "/products",
+      "minimum": "node",
+      "description": "createBrowserRouter table yields the /products node"
+    },
+    {
+      "id": "g01d",
+      "category": "data-router",
+      "kind": "node",
+      "route": "/checkout",
+      "minimum": "node",
+      "description": "createBrowserRouter table yields the /checkout node"
+    },
+    {
+      "id": "g01e",
+      "category": "data-router",
+      "kind": "node",
+      "route": "/login",
+      "minimum": "node",
+      "description": "createBrowserRouter table yields the /login node"
+    },
+    {
+      "id": "g01f",
+      "category": "data-router",
+      "kind": "node",
+      "route": "/account",
+      "minimum": "node",
+      "description": "createBrowserRouter table yields the /account node (element is the ProtectedRoute wrapper)"
+    },
+    {
+      "id": "g01g",
+      "category": "data-router",
+      "kind": "node",
+      "route": "/legacy",
+      "minimum": "node",
+      "description": "createBrowserRouter table yields the /legacy redirect-only node"
+    },
+    {
+      "id": "g01h",
+      "category": "data-router",
+      "kind": "node",
+      "route": "*",
+      "minimum": "node",
+      "description": "createBrowserRouter table yields the catch-all NotFound node"
+    },
+    {
+      "id": "g02",
+      "category": "nested-route",
+      "kind": "node",
+      "route": "/products/:productId",
+      "minimum": "node",
+      "description": "relative child ':productId' under /products (children + <Outlet/>, plus an index child) resolves to a full path"
+    },
+    {
+      "id": "g03",
+      "category": "lazy-route",
+      "kind": "node",
+      "route": "/help",
+      "minimum": "node",
+      "description": "React.lazy(() => import(...)) route component still yields a route node"
+    },
+    {
+      "id": "g04",
+      "category": "literal-link",
+      "kind": "edge",
+      "fromRoute": "/",
+      "toRoute": "/pricing",
+      "minimum": "must",
+      "description": "<Link to=\"/pricing\"> literal"
+    },
+    {
+      "id": "g05",
+      "category": "literal-navlink",
+      "kind": "edge",
+      "fromRoute": "/",
+      "toRoute": "/products",
+      "minimum": "must",
+      "description": "<NavLink to=\"/products\"> literal"
+    },
+    {
+      "id": "g06",
+      "category": "redirect-route",
+      "kind": "edge",
+      "fromRoute": "/legacy",
+      "toRoute": "/pricing",
+      "minimum": "must",
+      "description": "route whose element is <Navigate to=\"/pricing\" replace/>"
+    },
+    {
+      "id": "g07",
+      "category": "use-navigate-literal",
+      "kind": "edge",
+      "fromRoute": "/",
+      "toRoute": "/checkout",
+      "minimum": "must",
+      "description": "navigate('/checkout') literal inside an onClick handler"
+    },
+    {
+      "id": "g08",
+      "category": "aliased-navigate-helper",
+      "kind": "edge",
+      "fromRoute": "/pricing",
+      "toRoute": "/checkout",
+      "minimum": "honest",
+      "description": "const go = useNavigate() passed into goCheckout(go) in nav-helpers.ts which calls go('/checkout') \u2014 cross-file alias"
+    },
+    {
+      "id": "g09",
+      "category": "route-constants",
+      "kind": "edge",
+      "fromRoute": "/pricing",
+      "toRoute": "/account",
+      "minimum": "may",
+      "description": "navigate(ROUTES.account) where ROUTES is an imported as-const literal map"
+    },
+    {
+      "id": "g10",
+      "category": "dynamic-key",
+      "kind": "edge",
+      "fromRoute": "/pricing",
+      "toRoute": null,
+      "minimum": "honest",
+      "description": "navigate(PLANS[plan]) with plan from component state \u2014 statically unresolvable"
+    },
+    {
+      "id": "g11",
+      "category": "props-data",
+      "kind": "edge",
+      "fromRoute": "/products/:productId",
+      "toRoute": null,
+      "minimum": "honest",
+      "description": "navigate(props.returnTo) \u2014 target flows in through props from query-param data"
+    },
+    {
+      "id": "g12a",
+      "category": "guarded-nav",
+      "kind": "edge",
+      "fromRoute": "/pricing",
+      "toRoute": "/login",
+      "minimum": "may",
+      "description": "guard branch: if (!loggedIn) navigate('/login')"
+    },
+    {
+      "id": "g12b",
+      "category": "guarded-nav",
+      "kind": "edge",
+      "fromRoute": "/pricing",
+      "toRoute": "/checkout",
+      "minimum": "may",
+      "description": "fall-through branch of the guarded handler: navigate('/checkout')"
+    },
+    {
+      "id": "g13",
+      "category": "conditional-render-guard",
+      "kind": "edge",
+      "fromRoute": "/account",
+      "toRoute": "/login",
+      "minimum": "may",
+      "description": "JSX {loggedIn ? <AccountPanel/> : <Navigate to=\"/login\"/>}"
+    },
+    {
+      "id": "g14",
+      "category": "state-driven-effect",
+      "kind": "edge",
+      "fromRoute": "/login",
+      "toRoute": "/account",
+      "minimum": "honest",
+      "description": "useEffect(() => { if (user) navigate('/account') }, [user]) \u2014 fires on store change, not a click"
+    },
+    {
+      "id": "g15",
+      "category": "dispatch-driven",
+      "kind": "edge",
+      "fromRoute": "/account",
+      "toRoute": "/",
+      "minimum": "honest",
+      "description": "button only dispatches {type:'LOGOUT'}; a store subscription in an effect performs navigate('/')"
+    },
+    {
+      "id": "g16",
+      "category": "timer-redirect",
+      "kind": "edge",
+      "fromRoute": "/checkout",
+      "toRoute": "/pricing",
+      "minimum": "honest",
+      "description": "setTimeout(() => navigate('/pricing'), 3000) inside an effect gated on success state"
+    },
+    {
+      "id": "g17a",
+      "category": "window-location-external",
+      "kind": "edge",
+      "fromRoute": "/checkout",
+      "toRoute": null,
+      "minimum": "honest",
+      "description": "window.location.href = 'https://external.example.com' \u2014 external, leaves the app"
+    },
+    {
+      "id": "g17b",
+      "category": "window-location-internal",
+      "kind": "edge",
+      "fromRoute": "/checkout",
+      "toRoute": "/help",
+      "minimum": "honest",
+      "description": "window.location.assign('/help') \u2014 internal target that bypasses the router"
+    },
+    {
+      "id": "g18a",
+      "category": "plain-anchor-internal",
+      "kind": "edge",
+      "fromRoute": "/",
+      "toRoute": "/pricing",
+      "minimum": "honest",
+      "description": "<a href=\"/pricing\"> non-router anchor causing a full reload"
+    },
+    {
+      "id": "g18b",
+      "category": "plain-anchor-external",
+      "kind": "edge",
+      "fromRoute": "/",
+      "toRoute": null,
+      "minimum": "honest",
+      "description": "<a href=\"https://github.com/x\" target=\"_blank\"> external anchor"
+    },
+    {
+      "id": "g19",
+      "category": "form-submit-async",
+      "kind": "edge",
+      "fromRoute": "/products/:productId",
+      "toRoute": "/checkout",
+      "minimum": "must",
+      "description": "onSubmit awaits fetch('/api/checkout', POST) then navigate('/checkout') \u2014 literal target after an await"
+    },
+    {
+      "id": "g20",
+      "category": "keyboard-nav",
+      "kind": "edge",
+      "fromRoute": "/",
+      "toRoute": "/products",
+      "minimum": "may",
+      "description": "onKeyDown handler: Enter \u2192 navigate('/products')"
+    },
+    {
+      "id": "g21",
+      "category": "modal-confirm",
+      "kind": "edge",
+      "fromRoute": "/products",
+      "toRoute": "/checkout",
+      "minimum": "may",
+      "description": "confirm button inside a useState-toggled dialog navigates \u2014 may by design: nav gated behind modal open-state is never a phantom must"
+    },
+    {
+      "id": "g22",
+      "category": "history-back",
+      "kind": "edge",
+      "fromRoute": "/products/:productId",
+      "toRoute": null,
+      "minimum": "honest",
+      "description": "navigate(-1) \u2014 target depends on history, unknowable statically"
+    },
+    {
+      "id": "g23",
+      "category": "object-form-navigate",
+      "kind": "edge",
+      "fromRoute": "/products",
+      "toRoute": "/products",
+      "minimum": "must",
+      "description": "navigate({ pathname: '/products', search: '?sort=price' }) \u2014 literal pathname in object form"
+    },
+    {
+      "id": "g24",
+      "category": "template-prefix",
+      "kind": "edge",
+      "fromRoute": "/products",
+      "toRoute": "/products/:productId",
+      "minimum": "may",
+      "description": "navigate(`/products/${id}`) with id from state \u2014 prefix matches the param route"
+    },
+    {
+      "id": "g25",
+      "category": "protected-route-wrapper",
+      "kind": "edge",
+      "fromRoute": "/account",
+      "toRoute": "/login",
+      "minimum": "may",
+      "description": "ProtectedRoute children pattern: {user ? children : <Navigate to=\"/login\"/>} wrapping /account"
+    }
   ]
 }

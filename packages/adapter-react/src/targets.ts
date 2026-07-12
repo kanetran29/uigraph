@@ -212,7 +212,19 @@ export function collectInlineRouteTargets(roots: Node[], sf: SourceFile): RawTar
   return out
 }
 
-/** Sweep a source file for every navigation target: Link/NavLink/Navigate/Redirect JSX plus navigate/history/router/redirect calls. */
+/**
+ * True when an expression denotes the browser location object: `window.location`
+ * or a bare `location` identifier. Used to catch router-bypassing navigation
+ * (`window.location.href = …`, `location.assign/replace(…)`) — a real
+ * transition that causes a full page load, emitted with effect
+ * `navigate:full-reload` so it is never silently missed.
+ */
+function isWindowLocation(node: Node): boolean {
+  if (Node.isPropertyAccessExpression(node)) return node.getName() === 'location' && Node.isIdentifier(node.getExpression()) && node.getExpression().getText() === 'window'
+  return Node.isIdentifier(node) && node.getText() === 'location'
+}
+
+/** Sweep a source file for every navigation target: Link/NavLink/Navigate/Redirect JSX plus navigate/history/router/redirect calls, and window.location full-reload navigations. */
 export function collectTargets(sf: SourceFile): RawTarget[] {
   const out: RawTarget[] = []
   for (const el of allJsxElements(sf)) {
@@ -254,10 +266,21 @@ export function collectTargets(sf: SourceFile): RawTarget[] {
         // react-router v5 HOC: withRouter injects `history` as a prop, navigated via
         // this.props.history.push/replace inside class-method event handlers.
         effect = `history.${member}`
+      } else if ((member === 'assign' || member === 'replace') && isWindowLocation(obj)) {
+        effect = 'navigate:full-reload'
       }
     }
     if (effect === null) continue
     out.push({ ti: classifyTarget(call.getArguments()[0], sf), event: 'navigate', effect, node: call, guard: getGuard(call) ?? extraConditionGuard(call) })
+  }
+
+  for (const bin of sf.getDescendantsOfKind(SyntaxKind.BinaryExpression)) {
+    if (bin.getOperatorToken().getKind() !== SyntaxKind.EqualsToken) continue
+    const lhs = bin.getLeft()
+    const isHrefAssign = Node.isPropertyAccessExpression(lhs) && lhs.getName() === 'href' && isWindowLocation(lhs.getExpression())
+    const isLocationAssign = isWindowLocation(lhs)
+    if (!isHrefAssign && !isLocationAssign) continue
+    out.push({ ti: classifyTarget(bin.getRight(), sf), event: 'navigate', effect: 'navigate:full-reload', node: bin, guard: getGuard(bin) ?? extraConditionGuard(bin) })
   }
   return out
 }
