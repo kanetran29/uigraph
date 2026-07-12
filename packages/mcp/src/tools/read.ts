@@ -7,8 +7,9 @@
 import type { CoverageReport, EdgeWithTier, GraphEdge, GraphNode, GroundedEdge, Grounding, Modality, Proposal, ProposalGraph, ProposalGraphEdge, ProposalStatus, ScreenGrounding, Source, StalenessReport, TrustTier, UiGraph } from '@uigraph/core'
 import { buildCoverage, buildFrontier, buildGrounding, classifyEffectRisk, projectTrustTier } from '@uigraph/core'
 import { loadMergedGraph, TIER_ORDER, tierAtLeast, withStore, type ToolContext } from './context'
+import { getFreshness } from './diff'
 
-/** The merged graph plus node/edge counts, the payload returned by get_graph. */
+/** The merged graph plus node/edge counts and source freshness, the payload returned by get_graph. */
 export interface GetGraphResult {
   version: 0
   meta: UiGraph['meta']
@@ -16,13 +17,29 @@ export interface GetGraphResult {
   edges: EdgeWithTier[]
   nodeCount: number
   edgeCount: number
+  freshness: 'fresh' | 'stale' | 'unknown'
+}
+
+/**
+ * A one-line honesty caveat for negative answers ("no path", "no such screen"):
+ * how much of the graph is accounted for and whether the map is even current, so
+ * an agent can tell an extraction blind spot from a proven absence. Served with
+ * every negative instead of a bare error — the red-team failure mode was an
+ * authoritative-sounding "no" from a half-blind graph.
+ */
+export function blindSpotCaveat(ctx: ToolContext): string {
+  const cov = withStore(ctx, (store) => buildCoverage(loadMergedGraph(ctx), store.getParkedEdges()))
+  const fresh = getFreshness(ctx).state
+  return `the graph may be partial (accounted ${Math.round(cov.accountedRatio * 100)}% of ${cov.total} edges, freshness: ${fresh}) — a missing screen or path can be an extraction blind spot, not proof of absence; check get_coverage and the soundiness report before trusting this negative`
 }
 
 /**
  * Serve the merged (base + overlay) graph to the agent as plain JSON, including
  * node and edge counts so a consumer need not recount. Each edge is enriched on
  * read with its projected trust tier (spec §3) so the agent knows how far to lean
- * on each case; the projection is derived, never stored on the IR.
+ * on each case; the projection is derived, never stored on the IR. `freshness`
+ * reports whether the map still matches the source (recomputed per call — never
+ * serve a stale graph silently).
  */
 export function getGraph(ctx: ToolContext): GetGraphResult {
   const g = loadMergedGraph(ctx)
@@ -34,6 +51,7 @@ export function getGraph(ctx: ToolContext): GetGraphResult {
     edges,
     nodeCount: g.nodes.length,
     edgeCount: edges.length,
+    freshness: getFreshness(ctx).state,
   }
 }
 
@@ -117,10 +135,10 @@ export type KnownEdgeWithTier = GroundedEdge & { trustTier: TrustTier }
 /** A screen's proposed edge enriched on read with its (always 'proposed') trust tier. */
 export type ProposedEdgeWithTier = ProposalGraph['edges'][number] & { trustTier: TrustTier }
 
-/** describe_screen result: a screen's controls + proven AND proposed actions, or an error. */
+/** describe_screen result: a screen's controls + proven AND proposed actions, or an error with a blind-spot caveat. */
 export type ScreenDescription =
   | (Omit<ScreenGrounding, 'knownEdges'> & { knownEdges: KnownEdgeWithTier[]; proposedEdges: ProposedEdgeWithTier[] })
-  | { error: string }
+  | { error: string; caveat: string }
 
 /**
  * Project a trust tier from a grounded edge's `source` + `modality` strings. A
@@ -146,7 +164,7 @@ function tierOfGroundedEdge(e: GroundedEdge): TrustTier {
 export function describeScreen(ctx: ToolContext, args: DescribeScreenArgs): ScreenDescription {
   const grounding = buildGrounding(loadMergedGraph(ctx))
   const screen = grounding.screens.find((s) => s.screen === args.screen)
-  if (screen === undefined) return { error: `no screen "${args.screen}" in the graph` }
+  if (screen === undefined) return { error: `no screen "${args.screen}" in the graph`, caveat: blindSpotCaveat(ctx) }
   const knownEdges = screen.knownEdges.map((e) => ({ ...e, trustTier: tierOfGroundedEdge(e) }))
   const proposedEdges = getProposalGraph(ctx).edges
     .filter((e) => e.from === args.screen)

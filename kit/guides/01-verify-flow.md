@@ -8,10 +8,19 @@ The confirm path — how an uncertain transition becomes a witnessed `runtime` e
 2. For each target, **plan_path**(from, to) then **gen_spec**(from, to, baseUrl) to
    get the per-leg actions, OR drive the app directly with Playwright.
 3. Drive the running app and observe the outcome.
-4. **report_observation** `{from, to, event, outcome, proposalId?, screenshot?}`:
-   - `confirmed` → the core folds a `runtime` `must` edge into the graph (visible on
-     the next `get_graph`) AND reconciles the linked proposal to `confirmed`.
-   - `refuted` → no edge is added; a linked proposal reconciles to `rejected`.
+4. **report_observation** `{from, to, event, outcome, evidence, reportedBy, proposalId?}`:
+   - `confirmed` REQUIRES proof — pass what you actually saw as `evidence`
+     (`url-change` with the real start/landed URLs, `url-assert`, `dialog`, or a
+     `screenshot` path that exists) and `reportedBy:'agent'`. A confirmation
+     without valid proof is REJECTED (`{error}`) and records nothing: never
+     report confirmed unless you drove the transition and watched it happen.
+   - an accepted `confirmed` → the core folds a `runtime` edge into the graph
+     (guarded edges keep their guard AND modality — one run proves existence,
+     not unconditionality) AND reconciles the linked proposal to `confirmed`.
+   - `refuted` → no proof needed; no edge is added; a linked proposal reconciles
+     to `rejected`.
+   - after a re-map, previously-witnessed edges become `witnessStale` (tier drops
+     to `asserted`) and re-enter next_to_verify — re-confirm them.
 
 ## Running it via the CLI
 

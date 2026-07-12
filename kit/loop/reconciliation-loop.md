@@ -22,7 +22,7 @@ loop:
         continue
     gen_spec(target.from, target.to, baseUrl)   # or drive Playwright directly
     drive the running app; observe the real outcome
-    report_observation(from, to, event, outcome, proposalId, screenshot)
+    report_observation(from, to, event, outcome, proposalId, evidence, reportedBy: 'agent')
     #   confirmed -> core folds a runtime edge AND archives the proposal 'confirmed'
     #   refuted   -> core withdraws the proposal 'rejected' (no edge added)
     progressed = true

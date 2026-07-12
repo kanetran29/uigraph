@@ -30,10 +30,13 @@ import {
   unparkEdge,
   planPathTool,
   readObservations,
+  propose,
   reconcileProposalsTool,
   reportObservation,
   updateGraph,
   withdrawProposal,
+  type ReportObservationArgs,
+  type ReportObservationResult,
   type ToolContext,
 } from './tools'
 
@@ -49,6 +52,17 @@ function edge(id: string, from: string, to: string): GraphEdge {
 
 function graph(nodes: GraphNode[], edges: GraphEdge[]): UiGraph {
   return { version: 0, meta: { adapter: '@uigraph/test', adapterVersion: '0.0.0', rulesetVersion: 'test' }, nodes, edges }
+}
+
+
+/** Valid default proof so pre-gate tests keep exercising their own concern, not the gate. */
+const PROOF = { reportedBy: 'agent', evidence: { kind: 'url-change', startUrl: 'http://app/from', landedUrl: 'http://app/to' } } as const
+
+/** Call report_observation with default proof attached and unwrap the non-error result. */
+function reportOk(ctx: ToolContext, args: ReportObservationArgs): ReportObservationResult {
+  const res = reportObservation(ctx, { ...PROOF, ...args })
+  if ('error' in res) throw new Error(`unexpected proof-gate rejection: ${res.error}`)
+  return res
 }
 
 function newWorkspace(g: UiGraph): ToolContext {
@@ -97,7 +111,7 @@ describe('Tier-3 fold: confirmed observation enters the graph', () => {
   it('a confirmed report_observation becomes a witnessed runtime edge in get_graph', () => {
     const ctx = chainWorkspace()
     expect(getGraph(ctx).edges.find((e) => e.from === 'a' && e.to === 'c')).toBeUndefined()
-    reportObservation(ctx, { from: 'a', to: 'c', event: 'click', outcome: 'confirmed' })
+    reportOk(ctx, { from: 'a', to: 'c', event: 'click', outcome: 'confirmed' })
     const e = getGraph(ctx).edges.find((x) => x.from === 'a' && x.to === 'c')
     expect(e?.source).toBe('runtime')
     expect(e?.witness?.source).toBe('runtime')
@@ -105,7 +119,7 @@ describe('Tier-3 fold: confirmed observation enters the graph', () => {
 
   it('a refuted observation does not add an edge', () => {
     const ctx = chainWorkspace()
-    reportObservation(ctx, { from: 'a', to: 'c', event: 'click', outcome: 'refuted' })
+    reportOk(ctx, { from: 'a', to: 'c', event: 'click', outcome: 'refuted' })
     expect(getGraph(ctx).edges.find((x) => x.from === 'a' && x.to === 'c')).toBeUndefined()
   })
 })
@@ -315,7 +329,7 @@ describe('updateGraph', () => {
 describe('reportObservation', () => {
   it('records an observation in the store and returns the entry', () => {
     const ctx = chainWorkspace()
-    const entry = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed' })
+    const entry = reportOk(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed' })
     expect(entry.from).toBe('a')
     expect(entry.outcome).toBe('confirmed')
     expect(typeof entry.ts).toBe('string')
@@ -327,7 +341,7 @@ describe('reportObservation', () => {
     expect(logged[0]).toEqual(stored)
     expect(Array.isArray(entry.reconciled)).toBe(true)
 
-    reportObservation(ctx, { from: 'b', to: 'c', event: 'submit', outcome: 'refuted' })
+    reportOk(ctx, { from: 'b', to: 'c', event: 'submit', outcome: 'refuted' })
     expect(readObservations(ctx)).toHaveLength(2)
   })
 })
@@ -360,7 +374,7 @@ describe('proposal reconciliation loop', () => {
 
   it('report_observation(confirmed, proposalId) archives the proposal AND mints the runtime edge (two derivations, one witness)', () => {
     const ctx = loopWorkspace()
-    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', proposalId: 'p1' })
+    const res = reportOk(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', proposalId: 'p1' })
     expect(res.reconciled).toEqual([{ id: 'p1', status: 'confirmed' }])
     expect(getProposals(ctx, { status: 'confirmed' }).proposals.map((p) => p.id)).toEqual(['p1'])
     const e = getGraph(ctx).edges.find((x) => x.from === 'a' && x.to === 'b')
@@ -369,7 +383,7 @@ describe('proposal reconciliation loop', () => {
 
   it('report_observation(refuted, proposalId) rejects the proposal and adds NO proven edge (phantom-must check)', () => {
     const ctx = loopWorkspace()
-    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'refuted', proposalId: 'p1' })
+    const res = reportOk(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'refuted', proposalId: 'p1' })
     expect(res.reconciled).toEqual([{ id: 'p1', status: 'rejected' }])
     expect(getGraph(ctx).edges).toHaveLength(0)
     expect(getProposalGraph(ctx).edges).toHaveLength(0)
@@ -396,7 +410,7 @@ describe('proposal reconciliation loop', () => {
   it('get_loop_status.loopDone flips true only once worklist is empty AND no proposed remain', () => {
     const ctx = loopWorkspace()
     expect(getLoopStatus(ctx).loopDone).toBe(false)
-    reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', proposalId: 'p1' })
+    reportOk(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', proposalId: 'p1' })
     const s = getLoopStatus(ctx)
     expect(s.loopDone).toBe(true)
     expect(s.resolution.openCount).toBe(0)
@@ -450,7 +464,7 @@ describe('honest 100% accounted-for (edge resolution + park)', () => {
   it('resolves a dynamic sink by minting a concrete runtime edge (the u_ edge leaves open; no fake)', () => {
     const ctx = ws()
     // drive the dynamic dispatch out of a, observe the real landing b
-    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'navigate', outcome: 'confirmed' })
+    const res = reportOk(ctx, { from: 'a', to: 'b', event: 'navigate', outcome: 'confirmed' })
     expect(res.dropped).toBe(false)
     const cov = getCoverage(ctx)
     // a concrete runtime edge a->b now exists (witnessed); the u_ edge is resolved (out of open)
@@ -462,7 +476,7 @@ describe('honest 100% accounted-for (edge resolution + park)', () => {
 
   it('flags a dropped observation when the landing node is not in the graph', () => {
     const ctx = ws()
-    const res = reportObservation(ctx, { from: 'a', to: 'n_ghost', event: 'navigate', outcome: 'confirmed' })
+    const res = reportOk(ctx, { from: 'a', to: 'n_ghost', event: 'navigate', outcome: 'confirmed' })
     expect(res.dropped).toBe(true)
     expect(getGraph(ctx).edges.some((e) => e.to === 'n_ghost')).toBe(false)
   })
@@ -683,10 +697,100 @@ describe('MCP surface: risk, verified-vs-accounted, staleness (red-team)', () =>
   it('get_coverage staleness surfaces a dangling observation (ghost landing) — never silently fresh', () => {
     const ctx = chainWorkspace()
     // a confirmed landing on a node not in the graph is dropped; staleness must SAY so
-    reportObservation(ctx, { from: 'a', to: 'n_ghost', event: 'click', outcome: 'confirmed' })
+    reportOk(ctx, { from: 'a', to: 'n_ghost', event: 'click', outcome: 'confirmed' })
     const cov = getCoverage(ctx)
     expect(cov.staleness.ok).toBe(false)
     expect(cov.staleness.droppedObservationIds.length).toBe(1)
     expect(cov.staleness.issues.some((i) => i.code === 'OBSERVATION_DANGLING')).toBe(true)
+  })
+})
+
+describe('report_observation proof gate', () => {
+  it('rejects a confirmation with no evidence — nothing is recorded', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed' })
+    expect('error' in res && res.error).toMatch(/requires evidence/)
+    expect(readObservations(ctx)).toHaveLength(0)
+  })
+
+  it('rejects a confirmation without reportedBy provenance', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', evidence: { kind: 'url-change', startUrl: '/a', landedUrl: '/b' } })
+    expect('error' in res && res.error).toMatch(/reportedBy/)
+  })
+
+  it('rejects semantically-empty proof (url did not change)', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', reportedBy: 'agent', evidence: { kind: 'url-change', startUrl: '/same', landedUrl: '/same' } })
+    expect('error' in res && res.error).toMatch(/actual change/)
+  })
+
+  it('rejects screenshot evidence pointing at a nonexistent file', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed', reportedBy: 'agent', evidence: { kind: 'screenshot', path: '/definitely/not/here.png' } })
+    expect('error' in res && res.error).toMatch(/does not exist/)
+  })
+
+  it('accepts a refutation with no evidence (refuting mints nothing)', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    const res = reportObservation(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'refuted' })
+    expect('error' in res).toBe(false)
+    expect(readObservations(ctx)).toHaveLength(1)
+  })
+
+  it('stamps the base hash + provenance on an accepted confirmation', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    const res = reportOk(ctx, { from: 'a', to: 'b', event: 'click', outcome: 'confirmed' })
+    expect(typeof res.base).toBe('string')
+    expect(res.reportedBy).toBe('agent')
+    const [logged] = readObservations(ctx)
+    expect(logged?.base).toBe(res.base)
+    expect(logged?.evidence?.kind).toBe('url-change')
+  })
+})
+
+describe('propose', () => {
+  it('stores valid proposals quarantined and puts them on the verify worklist', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    const res = propose(ctx, {
+      proposals: [
+        { kind: 'edge', category: 'disclosure', screen: 'a', title: 'expand bio', rationale: 'read-more button in Bio.tsx', confidence: 0.8, event: 'click read-more', to: 'b' },
+      ],
+    })
+    expect(res.accepted).toHaveLength(1)
+    expect(res.rejected).toHaveLength(0)
+    const stored = getProposals(ctx)
+    expect(stored.total).toBe(1)
+    expect(stored.proposals[0]?.source).toBe('proposal')
+    expect(stored.proposals[0]?.status).toBe('proposed')
+    expect(nextToVerifyTool(ctx).some((t) => t.kind === 'proposal')).toBe(true)
+    expect(getGraph(ctx).edges.some((e) => e.source === 'proposal' as string)).toBe(false)
+  })
+
+  it('rejects proposals with ghost screens, bad confidence, or event-less edges — with reasons', () => {
+    const ctx = newWorkspace(graph([node('a')], []))
+    const res = propose(ctx, {
+      proposals: [
+        { kind: 'edge', category: 'nav', screen: 'ghost', title: 'x', rationale: 'r', confidence: 0.5, event: 'click' },
+        { kind: 'edge', category: 'nav', screen: 'a', title: 'y', rationale: 'r', confidence: 2, event: 'click' },
+        { kind: 'edge', category: 'nav', screen: 'a', title: 'z', rationale: 'r', confidence: 0.5 },
+      ],
+    })
+    expect(res.accepted).toHaveLength(0)
+    expect(res.rejected.map((r) => r.reason)).toEqual([
+      expect.stringContaining('not a node'),
+      expect.stringContaining('[0,1]'),
+      expect.stringContaining('event'),
+    ])
+  })
+
+  it('appends across batches, dedupes resubmissions, and keeps existing statuses', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b')], []))
+    const one = { kind: 'edge' as const, category: 'nav', screen: 'a', title: 'go b', rationale: 'r', confidence: 0.5, event: 'click', to: 'b' }
+    expect(propose(ctx, { proposals: [one] }).accepted).toHaveLength(1)
+    const again = propose(ctx, { proposals: [one, { ...one, title: 'go b differently' }] })
+    expect(again.accepted).toHaveLength(1)
+    expect(again.rejected[0]?.reason).toMatch(/duplicate/)
+    expect(again.totalStored).toBe(2)
   })
 })

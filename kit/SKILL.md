@@ -27,7 +27,7 @@ You never write a proven edge. The observation enters the graph, not your guess.
 Full reference: [guides/00-tools.md](guides/00-tools.md). Grouped:
 - **Read** — get_graph, get_proposals, get_grounding, get_proposal_graph, describe_screen, get_coverage, next_to_verify, get_loop_status
 - **Plan** — plan_path, gen_spec, list_scenarios, set_scenario
-- **Mutate** — update_graph, report_observation, reconcile_proposals, withdraw_proposal, mark_unverifiable
+- **Mutate** — update_graph, propose (Tier-2: submit greedy quarantined hypotheses), report_observation (Tier-3: confirmed requires evidence + reportedBy), reconcile_proposals, withdraw_proposal, mark_unverifiable
 - **Compare** — diff
 
 ## The job you are usually here to do

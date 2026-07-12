@@ -6,7 +6,7 @@
 import type { Modality, TrustTier, VerifyTarget } from '@uigraph/core'
 import { buildSpecPlan, getTierLabel, nextToVerify, planPath, projectTrustTier, renderPlaywrightSpec } from '@uigraph/core'
 import { loadMergedGraph, tierAtLeast, withStore, type ToolContext } from './context'
-import { getProposalGraph } from './read'
+import { blindSpotCaveat, getProposalGraph } from './read'
 
 /** Arguments for next_to_verify: an optional cap on the returned worklist size. */
 export interface NextToVerifyArgs {
@@ -74,7 +74,9 @@ export interface PlanPathStep {
 /**
  * plan_path result: either an ordered list of steps or a clear "no path" signal.
  * `tierWarnings` lists any hop whose projected trust tier is below the requested
- * `minTier` floor — present only when a `minTier` was given and some hop fell short.
+ * `minTier` floor — present only when a `minTier` was given and some hop fell
+ * short. `caveat` accompanies every negative (found:false): how partial/stale the
+ * graph is, so "no path" is never mistaken for proof of absence.
  */
 export interface PlanPathResult {
   found: boolean
@@ -82,6 +84,7 @@ export interface PlanPathResult {
   to: string
   steps: PlanPathStep[]
   tierWarnings?: string[]
+  caveat?: string
 }
 
 /**
@@ -95,7 +98,7 @@ export interface PlanPathResult {
 export function planPathTool(ctx: ToolContext, args: PlanPathArgs): PlanPathResult {
   const g = loadMergedGraph(ctx)
   const path = planPath(g, args.from, args.to, args.allow !== undefined ? { allow: args.allow } : {})
-  if (path === null) return { found: false, from: args.from, to: args.to, steps: [] }
+  if (path === null) return { found: false, from: args.from, to: args.to, steps: [], caveat: blindSpotCaveat(ctx) }
   const steps: PlanPathStep[] = path.map((s) => ({
     edgeId: s.edge.id,
     from: s.from.id,
