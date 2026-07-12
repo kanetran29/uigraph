@@ -118,6 +118,57 @@ function resolveRelative(sf: SourceFile, specifier: string): SourceFile | undefi
   return tryBases(project, bases)
 }
 
+/**
+ * The source file a direct `() => import('…')` arrow loads, or undefined for any
+ * other shape (async bodies, `.then` chains, non-literal specifiers) — used for
+ * React.lazy components and data-router route-level `lazy` entries.
+ */
+export function dynamicImportTarget(sf: SourceFile, fn: Node): SourceFile | undefined {
+  if (!Node.isArrowFunction(fn)) return undefined
+  const body = fn.getBody()
+  if (!Node.isCallExpression(body)) return undefined
+  if (body.getExpression().getKind() !== SyntaxKind.ImportKeyword) return undefined
+  const arg = body.getArguments()[0]
+  if (!arg || !Node.isStringLiteral(arg)) return undefined
+  return resolveRelative(sf, arg.getLiteralValue())
+}
+
+/**
+ * Resolve a `const X = lazy(() => import('./file'))` (also `React.lazy(...)`)
+ * declaration in `sf` to the lazily imported source file, so a lazy route
+ * component's file is still scanned for navigation. Returns undefined when `name`
+ * is not such a declaration or the import is not a direct literal `import()`.
+ */
+export function resolveLazyComponentFile(sf: SourceFile, name: string): SourceFile | undefined {
+  for (const vd of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    if (vd.getNameNode().getText() !== name) continue
+    const init = vd.getInitializer()
+    if (!init || !Node.isCallExpression(init)) return undefined
+    const callee = init.getExpression()
+    const isLazy = (Node.isIdentifier(callee) && callee.getText() === 'lazy') || (Node.isPropertyAccessExpression(callee) && callee.getName() === 'lazy')
+    if (!isLazy) return undefined
+    const arg = init.getArguments()[0]
+    return arg ? dynamicImportTarget(sf, arg) : undefined
+  }
+  return undefined
+}
+
+/**
+ * Whether a component function receives a `children` prop (destructured parameter
+ * or `props.children` read) — the children-forwarding wrapper pattern
+ * (`<ProtectedRoute><Account/></ProtectedRoute>`) whose rendered content at a route
+ * is the wrapped child, not the wrapper itself.
+ */
+export function usesChildrenProp(fn: Node): boolean {
+  for (const id of fn.getDescendantsOfKind(SyntaxKind.Identifier)) {
+    if (id.getText() !== 'children') continue
+    const p = id.getParent()
+    if (Node.isBindingElement(p) || Node.isParameterDeclaration(p)) return true
+    if (Node.isPropertyAccessExpression(p) && p.getNameNode() === id) return true
+  }
+  return false
+}
+
 /** Resolve a route's component identifier to its backing source file. */
 export function resolveComponentFile(sf: SourceFile, name: string): SourceFile | undefined {
   for (const imp of sf.getImportDeclarations()) {

@@ -26,6 +26,10 @@ export interface RouteInfo {
    *  read guards) and `roots` are the lowercase JSX element subtree(s) to walk for
    *  inline Link/Navigate/useNavigate targets. */
   inlineElement?: { file: string; loc: { line: number; col: number }; tag: string; exprNode: Node; roots: Node[] }
+  /** The call-site route-wrapper component's file when the route element wraps its
+   *  page (`element: <ProtectedRoute><Account/></ProtectedRoute>`): scanned per
+   *  wrapped route for the wrapper's own redirect/nav targets, capped to `may`. */
+  wrapperFile?: SourceFile
 }
 
 /** A raw navigation target collected from a JSX element or programmatic call, before route resolution. */

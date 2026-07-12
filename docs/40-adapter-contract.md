@@ -86,6 +86,7 @@ cheaply available).
 | Construct | IR element |
 |---|---|
 | `<Route path component\|render\|element>` (`<Switch>` / `<Routes>`) | node + declared route |
+| `createBrowserRouter\|createHashRouter\|createMemoryRouter([...])` object table (`path` / `index` / `children` / `element` / `Component` / `lazy`) | node + declared route (incl. nesting) |
 | `useHistory().push` / `useNavigate()` literal arg | `must`-edge |
 | `useHistory().push` / `useNavigate()` non-literal arg | `may`/`unknown` over route set |
 | `<Redirect>` / `<Navigate>` | `must`-edge |
@@ -120,14 +121,15 @@ is distinguishable from a clean one.
 
 **Supported**
 - `<Route path component|render|element>` inside `<Switch>` / `<Routes>`, including nested route trees → route nodes.
+- **Data-router object config** (the only mode in react-router v7): `createBrowserRouter([...])` / `createHashRouter` / `createMemoryRouter` static route tables → route nodes, deduped by path against JSX-declared routes. Covers: nested `children` (relative paths joined under the parent, leading-slash children absolute); `index: true` children resolving to the parent path (the index element owns the screen; a layout element owns the path only when no index child exists); `element:` / `Component:`; `element: <Navigate to>` redirect entries → node **plus** a `must` redirect edge; children-forwarding wrapper elements (`element: <Protected><Page/></Protected>`) unwrapped to the wrapped page, with the wrapper file scanned per wrapped route for its own redirects (capped to `may`); `React.lazy(() => import('…'))` element components and route-level `lazy: () => import('…')` resolved to their files so lazy screens are still scanned; `createRoutesFromElements(<Route>…)` read by the JSX walker.
 - `<Link>` / `<NavLink>` `to`, `<Navigate>` / `<Redirect>` → `must`/`may` nav edges.
-- `useNavigate()` / `useHistory().push|replace` with a **literal** target → `must`-edge; non-literal (template prefix, const route-map, branch) → `may`-edges fanned over the declared route set.
+- `useNavigate()` / `useHistory().push|replace` with a **literal** target → `must`-edge — including object-form `navigate({ pathname: '…' })` and a named property of a (possibly imported, possibly `as const`) route-constants map; non-literal (template prefix, computed const route-map key, branch) → `may`-edges fanned over the declared route set.
 - `withRouter`-injected `history.push` (the older HOC pattern).
 - Guards / conditional renders captured as **symbolic text** → at most a `may`-edge.
 - Controls (buttons / inputs / links) and their nav handlers when run with `--controls`.
 
 **Not yet supported (soundiness note, no edge invented)**
-- **Data-router object config**: `createBrowserRouter([...])` / `createRoutesFromElements` + `RouterProvider`. Only JSX `<Route>` declarations are read today.
+- **Dynamic data-router config**: a spread / variable / call in the route array, a non-literal `path`, or a route-level `lazy` that is not a direct `() => import('…')` (e.g. an async body returning `{ Component }`) — recorded as a `dynamic-route-config` note.
 - **Inline-JSX route elements**: `element={<div>…}` with no component file to scan — emitted as an `inline-jsx-route` note.
 - **Dispatch / state-driven navigation**: a handler that `dispatch()`es a store action whose reducer/effect navigates — recorded as a `dispatch-driven-nav` note. Needs runtime verify or a future dispatch-aware adapter.
 - **Aliased / indirected router hooks** and **fully dynamic targets** computed at runtime — `dynamic-target` / `over-approximation` notes; never a single guessed `must`.
