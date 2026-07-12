@@ -34,7 +34,7 @@ a test.)
 - **mark_unverifiable** `{id, reason}` — park a plausible-but-undrivable lead `unverifiable` (out of the worklist, kept for a human).
 - **park_edge** `{id, reason}` — park a may/unknown EDGE out of the worklist with an auditable reason. Becomes **accounted-for but NEVER runtime-verified** (accounted ≠ verified) and never edits the edge. The honest path to a fully *accounted-for* known edge set — which is not the same as the app being fully mapped or fully verified.
 - **unpark_edge** `{id}` — return a parked edge to the worklist.
-- **update_graph** — apply a manual overlay edit (addNode/editNode/addEdge/editEdge/remove). Edits are `manual`, modality ≤ `may`.
+- **update_graph** — apply a manual overlay edit (addNode/editNode/addEdge/editEdge/remove). THE door for behavior the extractor cannot catch: when you (or the user) KNOW a screen/transition exists but no adapter can see it, add it here. Edits are quarantined to the overlay (never the base), forced `source:'manual'`, modality capped at `may`, witness stripped — an assertion is a lead, not proof. The added edge lands on the verify worklist; confirm it with report_observation (with evidence) to promote it to `witnessed`. Rule of thumb: unsure → `propose` (hypothesis); certain-but-unextractable → `update_graph` (assertion); either way only a proven observation makes it trusted.
 
 ## Compare
 
