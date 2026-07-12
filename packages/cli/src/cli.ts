@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // The `uigraph` CLI entry point (milestone M4): a commander program tying the
 // whole workspace together — map (extract via an adapter), diff, serve (the local
 // API), dash (serve + dashboard instructions), and mcp (the stdio MCP server).

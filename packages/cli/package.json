@@ -13,6 +13,7 @@
     "uigraph": "./src/cli.ts"
   },
   "scripts": {
+    "build": "tsup",
     "uigraph": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
@@ -34,5 +35,19 @@
     "vitest": "catalog:",
     "tsx": "catalog:",
     "@types/node": "catalog:"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "bin": {
+      "uigraph": "./dist/cli.js"
+    }
   }
 }

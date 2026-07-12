@@ -7,12 +7,14 @@
     "check": "node scripts/check.mjs",
     "typecheck": "pnpm -r --if-present run typecheck",
     "test": "pnpm -r --if-present run test",
+    "build": "pnpm -r --if-present run build",
     "lint": "eslint ."
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "eslint": "^10.5.0",
     "playwright-core": "^1.60.0",
+    "tsup": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "^8.61.0",
