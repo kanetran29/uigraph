@@ -8,7 +8,7 @@ the core never knows a framework.
 
 Status: **v1**, validated end-to-end on bundled sample apps and the real
 refapp.example frontend. See [docs/](docs/README.md) and the source dossier
-[`ui-graph-dossier-final-en.md`](ui-graph-dossier-final-en.md).
+[`docs/ui-graph-dossier-final-en.md`](docs/ui-graph-dossier-final-en.md).
 
 ## What's here
 
@@ -30,7 +30,7 @@ The core is **model-free** — the connecting agent brings the LLM (BYOA).
 
 ```bash
 pnpm install
-pnpm check                       # full self-heal gate: typecheck + 88 tests + lint
+pnpm check                       # full self-heal gate: typecheck + tests + lint
 
 # extract a graph from an app
 pnpm --filter @uigraph/cli run uigraph -- \
@@ -72,7 +72,7 @@ This is an early static-extraction spine. What is actually true today:
 - The **`must`-tier soundness holes are closed**: a programmatic navigation after an early-return, or inside a loop / switch / catch / array-iteration callback, is a `may`-edge; an ambiguous param literal fans out to `may`, never a single wrong `must`; the served base+overlay is re-validated and stale overlays are rejected.
 
 **Not yet true (do not rely on these):**
-- **No proof the graph beats an agent grepping the repo.** The dossier's #1 kill-switch — a one-day agent+repo vs agent+repo+graph ablation — has not been run. Adopt with that caveat.
+- **No proof the graph beats an agent grepping the repo at scale.** The dossier's #1 kill-switch ablation was run on the 8-route sample ([docs/validation/premise-ablation.md](docs/validation/premise-ablation.md)) and found **zero accuracy delta** — capable agents answer small apps perfectly from source. The premise is predicted to pay off only past ~100 routes, and that large-app test is not yet wired up. So the graph's correctness advantage is unvalidated; adopt for cost/amortization, not accuracy.
 - **The Tier-2 "reviewer" is a session workflow, not shipped code.** `proposals.json` is currently a hand/agent-authored sidecar format; the tool ships no `uigraph review` generator yet.
 - **Tier-3 is open**: `report_observation` only appends a log; no observation is folded into a confirmed edge, so a proposal is never promoted by runtime.
 - **The artifact is a static snapshot + manual overlay**, not an event-sourced "lockfile" (no reducer/fold, no composite extractor/ruleset/obs-log hash).
