@@ -4,10 +4,10 @@
 // @uigraph/mcp's updateGraph so the CLI and the MCP server cannot drift apart.
 
 import { createServer as createHttpServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, readFileSync, statSync } from 'node:fs'
+import { extname, join, normalize, resolve, sep } from 'node:path'
 import type { ToolContext, ListCasesArgs, UpdateGraphArgs } from '@uigraph/mcp'
-import { dbPath, getCoverage, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
+import { dbPath, getCoverage, getFreshness, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
 import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@uigraph/core/node'
 import type { TrustTier } from '@uigraph/core'
 import { diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
@@ -72,6 +72,9 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
     }
     if (req.method === 'GET' && req.path === '/api/coverage') {
       return { status: 200, body: getCoverage(ctx) }
+    }
+    if (req.method === 'GET' && req.path === '/api/freshness') {
+      return { status: 200, body: getFreshness(ctx) }
     }
     if (req.method === 'GET' && req.path === '/api/plan') {
       return { status: 200, body: { spec: readPlan(ctx) } }
@@ -187,19 +190,48 @@ export function registryConfig(): ServeConfig {
   }
 }
 
-export function createApiServer(dir: string): Server {
-  return createConfiguredServer(singleConfig(dir))
+export function createApiServer(dir: string, staticDir?: string): Server {
+  return createConfiguredServer(singleConfig(dir), staticDir)
 }
 
-/** Build the node:http server from a ServeConfig (single or registry mode). */
-export function createConfiguredServer(config: ServeConfig): Server {
+/** MIME types for the static dashboard assets the server may deliver. */
+const MIME: Record<string, string> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+  '.map': 'application/json',
+  '.woff2': 'font/woff2',
+}
+
+/**
+ * Resolve a non-API GET path to a file inside the static dir (the built
+ * dashboard), falling back to index.html for SPA routes. Returns null when no
+ * static dir is configured or the resolved path escapes it (traversal-safe).
+ */
+export function resolveStaticPath(staticDir: string | undefined, reqPath: string): string | null {
+  if (staticDir === undefined) return null
+  const root = resolve(staticDir)
+  const rel = normalize(decodeURIComponent(reqPath)).replace(/^([/\\])+/, '')
+  const candidate = resolve(root, rel === '' ? 'index.html' : rel)
+  if (candidate !== root && !candidate.startsWith(root + sep)) return null
+  if (existsSync(candidate) && statSync(candidate).isFile()) return candidate
+  const index = join(root, 'index.html')
+  return existsSync(index) ? index : null
+}
+
+/** Build the node:http server from a ServeConfig (single or registry mode), optionally serving a built dashboard. */
+export function createConfiguredServer(config: ServeConfig, staticDir?: string): Server {
   return createHttpServer((req: IncomingMessage, res: ServerResponse) => {
-    void handle(config, req, res)
+    void handle(config, req, res, staticDir)
   })
 }
 
-/** Serve one HTTP request: apply CORS, resolve the workspace, route, and write JSON. */
-async function handle(config: ServeConfig, req: IncomingMessage, res: ServerResponse): Promise<void> {
+/** Serve one HTTP request: apply CORS, resolve the workspace, route, and write JSON (or a static dashboard file). */
+async function handle(config: ServeConfig, req: IncomingMessage, res: ServerResponse, staticDir?: string): Promise<void> {
   for (const [k, v] of Object.entries(CORS_HEADERS)) res.setHeader(k, v)
 
   if (req.method === 'OPTIONS') {
@@ -210,6 +242,15 @@ async function handle(config: ServeConfig, req: IncomingMessage, res: ServerResp
 
   const url = new URL(req.url ?? '/', 'http://localhost')
   const path = url.pathname
+
+  if (req.method === 'GET' && !path.startsWith('/api/')) {
+    const file = resolveStaticPath(staticDir, path)
+    if (file !== null) {
+      res.writeHead(200, { 'Content-Type': MIME[extname(file)] ?? 'application/octet-stream' })
+      res.end(readFileSync(file))
+      return
+    }
+  }
 
   // The switcher list — client-safe summaries (dirs omitted), independent of any workspace.
   if (req.method === 'GET' && path === '/api/workspaces') {
@@ -261,6 +302,7 @@ async function handle(config: ServeConfig, req: IncomingMessage, res: ServerResp
 export interface StartApiServerOptions {
   dir?: string
   port: number
+  staticDir?: string
 }
 
 /**
@@ -269,7 +311,7 @@ export interface StartApiServerOptions {
  * tests use to avoid collisions. With `dir` → single-workspace; without → registry mode.
  */
 export function startApiServer(opts: StartApiServerOptions): Promise<{ server: Server; url: string }> {
-  const server = opts.dir !== undefined ? createApiServer(opts.dir) : createConfiguredServer(registryConfig())
+  const server = opts.dir !== undefined ? createApiServer(opts.dir, opts.staticDir) : createConfiguredServer(registryConfig(), opts.staticDir)
   return new Promise((resolve) => {
     server.listen(opts.port, () => {
       const address = server.address()

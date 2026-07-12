@@ -5,6 +5,9 @@
 // Command bodies live in commands.ts / server.ts so they stay directly testable;
 // this file is only the commander wiring and is run via tsx.
 
+import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
@@ -12,6 +15,30 @@ import { startServer } from '@uigraph/mcp'
 import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, formatWorkspaceList, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runVerify, runVerifyUntilDone } from './runner'
+
+/**
+ * Locate the built dashboard (apps/dashboard/dist) relative to this module, for
+ * both the tsx-run source layout (packages/cli/src) and the built layout
+ * (packages/cli/dist). Returns null when no build exists yet.
+ */
+function findDashboardDist(): string | null {
+  const here = dirname(fileURLToPath(import.meta.url))
+  for (const rel of ['../../../apps/dashboard/dist', '../../../../apps/dashboard/dist']) {
+    const candidate = resolve(here, rel)
+    if (existsSync(resolve(candidate, 'index.html'))) return candidate
+  }
+  return null
+}
+
+/** Open a URL in the platform default browser, detached; failures are silent (the URL is printed anyway). */
+function openInBrowser(url: string): void {
+  const [cmd, args] = process.platform === 'darwin' ? ['open', [url]] : process.platform === 'win32' ? ['cmd', ['/c', 'start', '', url]] : ['xdg-open', [url]]
+  try {
+    spawn(cmd, args as string[], { stdio: 'ignore', detached: true }).unref()
+  } catch {
+    return
+  }
+}
 
 /** Build the commander program with every uigraph subcommand registered. */
 export function buildProgram(): Command {
@@ -161,14 +188,21 @@ export function buildProgram(): Command {
 
   program
     .command('dash')
-    .description('Start the API server and print instructions to run the dashboard against it.')
+    .description('Serve the workspace API AND the built dashboard on one port, then open the browser.')
     .argument('<dir>', 'workspace directory holding ui-graph.json')
-    .option('--port <port>', 'API port to listen on', '4317')
-    .action(async (dir: string, opts: { port: string }) => {
-      const { url } = await startApiServer({ dir, port: Number(opts.port) })
-      console.log(`uigraph API serving ${dir} at ${url}`)
-      console.log('To view the dashboard, run its dev server and point it at this API URL:')
-      console.log(`  UIGRAPH_API=${url} pnpm --filter @uigraph/dashboard dev`)
+    .option('--port <port>', 'port to listen on', '4317')
+    .option('--no-open', 'do not open the browser automatically')
+    .action(async (dir: string, opts: { port: string; open: boolean }) => {
+      const staticDir = findDashboardDist()
+      const { url } = await startApiServer({ dir, port: Number(opts.port), ...(staticDir !== null ? { staticDir } : {}) })
+      if (staticDir === null) {
+        console.log(`uigraph API serving ${dir} at ${url} (API only)`)
+        console.log('No built dashboard found. Build it once, then re-run dash:')
+        console.log('  pnpm --filter @uigraph/dashboard build')
+        return
+      }
+      console.log(`uigraph dashboard + API serving ${dir} at ${url}`)
+      if (opts.open) openInBrowser(url)
     })
 
   const kit = program.command('kit').description('The shippable LLM agent kit: skill + rules + guides + the reconciliation-loop playbook.')
