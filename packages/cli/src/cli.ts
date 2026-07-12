@@ -188,20 +188,26 @@ export function buildProgram(): Command {
 
   program
     .command('dash')
-    .description('Serve the workspace API AND the built dashboard on one port, then open the browser.')
-    .argument('<dir>', 'workspace directory holding ui-graph.json')
+    .description('Serve the built dashboard + API on one port and open the browser. With <dir>: one workspace. Without: every registered workspace, switchable in the dashboard.')
+    .argument('[dir]', 'workspace directory (omit to serve all registered workspaces)')
     .option('--port <port>', 'port to listen on', '4317')
     .option('--no-open', 'do not open the browser automatically')
-    .action(async (dir: string, opts: { port: string; open: boolean }) => {
+    .action(async (dir: string | undefined, opts: { port: string; open: boolean }) => {
+      if (dir === undefined && runWorkspaceList().entries.length === 0) {
+        console.error('No workspaces registered. Run `uigraph map <dir> --adapter <name>` first, or `uigraph dash <dir>`.')
+        process.exitCode = 1
+        return
+      }
       const staticDir = findDashboardDist()
       const { url } = await startApiServer({ dir, port: Number(opts.port), ...(staticDir !== null ? { staticDir } : {}) })
+      const what = dir ?? 'all registered workspaces'
       if (staticDir === null) {
-        console.log(`uigraph API serving ${dir} at ${url} (API only)`)
+        console.log(`uigraph API serving ${what} at ${url} (API only)`)
         console.log('No built dashboard found. Build it once, then re-run dash:')
         console.log('  pnpm --filter @uigraph/dashboard build')
         return
       }
-      console.log(`uigraph dashboard + API serving ${dir} at ${url}`)
+      console.log(`uigraph dashboard + API serving ${what} at ${url}`)
       if (opts.open) openInBrowser(url)
     })
 

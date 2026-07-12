@@ -13,6 +13,7 @@ import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
 import { openStore, saveGraph } from '@uigraph/core/node'
 import type { Server } from 'node:http'
 import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
+import { buildProgram } from './cli'
 import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
 import { readRegistry, summarize } from '@uigraph/core/node'
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -551,6 +552,34 @@ describe('multi-workspace serve (registry routing + security boundary)', () => {
     expect(ga.nodes).toHaveLength(2)
     expect(gb.nodes).toHaveLength(1)
     expect(gDefault.nodes).toHaveLength(2)
+  })
+
+  it('serves the built dashboard (static index + SPA fallback) alongside the ?ws-routed API', async () => {
+    const { config } = twoWorkspaceConfig()
+    const staticDir = tempDir('uigraph-static-')
+    writeFileSync(join(staticDir, 'index.html'), '<!doctype html><title>uigraph dashboard</title>')
+    const server = createConfiguredServer(config, staticDir)
+    openServers.push(server)
+    const { port } = await new Promise<{ port: number }>((resolve) =>
+      server.listen(0, () => resolve({ port: (server.address() as { port: number }).port })),
+    )
+    const base = `http://localhost:${port}`
+
+    const index = await fetch(base)
+    expect(index.status).toBe(200)
+    expect(await index.text()).toContain('uigraph dashboard')
+    const spa = await fetch(`${base}/some/spa/route`)
+    expect(await spa.text()).toContain('uigraph dashboard')
+    const ws = (await (await fetch(`${base}/api/workspaces`)).json()) as unknown[]
+    expect(ws).toHaveLength(2)
+    const gb = (await (await fetch(`${base}/api/graph?ws=b`)).json()) as UiGraph
+    expect(gb.nodes).toHaveLength(1)
+  })
+
+  it('dash serves multiple projects: its <dir> argument is optional (registry mode)', () => {
+    const dash = buildProgram().commands.find((c) => c.name() === 'dash')
+    expect(dash).toBeDefined()
+    expect(dash?.registeredArguments[0]?.required).toBe(false)
   })
 
   it('GET /api/workspaces returns client-safe summaries with NO absolute dir', async () => {
