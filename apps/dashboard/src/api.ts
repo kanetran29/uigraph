@@ -82,6 +82,38 @@ export async function fetchProposals(wsId?: string | null): Promise<Proposals> {
   }
 }
 
+/** Graph freshness vs the current source, mirroring the CLI's `uigraph status` shape:
+ *  'fresh' (nothing changed since the map), 'stale' (re-map needed), 'unknown' (no map /
+ *  cannot recompute / endpoint not served). File lists are present only when stale. */
+export interface FreshnessState {
+  state: 'fresh' | 'stale' | 'unknown'
+  mappedAt?: string
+  changed?: string[]
+  added?: string[]
+  removed?: string[]
+  detail?: string
+}
+
+/** The offline / not-served fallback: freshness cannot be determined. */
+export const UNKNOWN_FRESHNESS: FreshnessState = { state: 'unknown' }
+
+/**
+ * Fetch graph freshness from the serve API. Resolves to UNKNOWN_FRESHNESS on any
+ * failure (offline, 404, bad JSON) so the banner degrades to the honest "unknown".
+ * TODO(serve-api): the serve API does not expose GET /api/freshness yet — the CLI
+ * computes this in runStatus (packages/cli/src/commands.ts) but never serves it.
+ * When the route lands (StatusResult shape), this starts returning fresh/stale for free.
+ */
+export async function fetchFreshness(wsId?: string | null): Promise<FreshnessState> {
+  try {
+    const res = await fetch(withWs('/api/freshness', wsId))
+    if (!res.ok) return UNKNOWN_FRESHNESS
+    return (await res.json()) as FreshnessState
+  } catch {
+    return UNKNOWN_FRESHNESS
+  }
+}
+
 /** The temporal "since last map" diff for the active workspace (same shape the CLI/MCP return). */
 export type ChangesState = SinceLastDiff
 

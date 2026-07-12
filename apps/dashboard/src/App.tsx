@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import type { CoverageReport, GraphEdge, GraphNode, Proposals, UiGraph } from '@uigraph/core'
-import { EMPTY_CHANGES, EMPTY_PROPOSALS, fetchChanges, fetchCoverage, fetchGraph, fetchProposals, fetchScenarios, fetchWorkspaces, postOverlay, postScenario, type ChangesState, type ScenariosState, type UpdateOp, type WorkspaceSummary } from './api'
+import { EMPTY_CHANGES, EMPTY_PROPOSALS, UNKNOWN_FRESHNESS, fetchChanges, fetchCoverage, fetchFreshness, fetchGraph, fetchProposals, fetchScenarios, fetchWorkspaces, postOverlay, postScenario, type ChangesState, type FreshnessState, type ScenariosState, type UpdateOp, type WorkspaceSummary } from './api'
 import { readStored, writeStored } from './storage'
 import { searchMatchIds } from './search'
 import { GraphCanvas, type DiffHighlight, type Selection } from './GraphCanvas'
@@ -21,6 +21,7 @@ import { Plan } from './Plan'
 import { Inspector } from './Inspector'
 import { ProposalsPanel } from './Proposals'
 import { Steps } from './Steps'
+import { VerifyPanel } from './Verify'
 
 /** Build a stable manual edge id from its endpoints so repeated adds are idempotent-ish. */
 function manualEdgeId(from: string, to: string): string {
@@ -53,6 +54,7 @@ export function App(): JSX.Element {
   const [coverage, setCoverage] = useState<CoverageReport | null>(null)
   const [scenarios, setScenarios] = useState<ScenariosState>({ active: 'default', names: ['default'] })
   const [changes, setChanges] = useState<ChangesState>(EMPTY_CHANGES)
+  const [freshness, setFreshness] = useState<FreshnessState>(UNKNOWN_FRESHNESS)
   const [live, setLive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selection, setSelection] = useState<Selection>(null)
@@ -102,13 +104,14 @@ export function App(): JSX.Element {
   }, [])
 
   const load = useCallback(async (ws: string | null) => {
-    const [{ graph: g, live: isLive }, props, cov, scen, chg] = await Promise.all([fetchGraph(ws), fetchProposals(ws), fetchCoverage(ws), fetchScenarios(ws), fetchChanges(ws)])
+    const [{ graph: g, live: isLive }, props, cov, scen, chg, fresh] = await Promise.all([fetchGraph(ws), fetchProposals(ws), fetchCoverage(ws), fetchScenarios(ws), fetchChanges(ws), fetchFreshness(ws)])
     setGraph(g)
     setLive(isLive)
     setProposals(props)
     setCoverage(cov)
     setScenarios(scen)
     setChanges(chg)
+    setFreshness(fresh)
     setLoading(false)
   }, [])
 
@@ -278,7 +281,9 @@ export function App(): JSX.Element {
           Serve API unreachable — showing a bundled sample graph. Edits are not persisted. Run{' '}
           <code>uigraph serve</code> to connect a live project.
         </div>
-      ) : null}
+      ) : (
+        <FreshnessBanner freshness={freshness} mappedAt={changes.currentMappedAt} />
+      )}
       <div className="body">
         <main className="canvas">
           {isEmpty ? (
@@ -304,6 +309,7 @@ export function App(): JSX.Element {
           <Inspector selection={selection} onEditEdge={handleEditEdge} onEditNode={handleEditNode} onDelete={handleDelete} />
           <Plan live={live} scenarios={scenarios} onAddScreen={handleAddScreen} onExport={handleExport} onSwitchScenario={handleSwitchScenario} />
           <Steps graph={graph} onPathChange={handlePathChange} />
+          <VerifyPanel graph={graph} proposals={proposals} coverage={coverage} onSelect={setSelection} />
           {coverage ? <Coverage coverage={coverage} graph={graph} onSelect={setSelection} /> : null}
           <ProposalsPanel
             proposals={proposals}
@@ -351,16 +357,43 @@ function LoadingSkeleton(): JSX.Element {
   )
 }
 
+/**
+ * The non-blocking staleness warning under the topbar. Shown only when live and the
+ * graph is NOT known-fresh: 'stale' names how many source files drifted; 'unknown'
+ * is honest about not knowing (today's serve API has no freshness route — see the
+ * TODO in api.ts). Either way the fix is the same: re-run `uigraph map`.
+ */
+function FreshnessBanner(props: { freshness: FreshnessState; mappedAt: string | null }): JSX.Element | null {
+  const { freshness, mappedAt } = props
+  if (freshness.state === 'fresh') return null
+  const drifted = (freshness.changed?.length ?? 0) + (freshness.added?.length ?? 0) + (freshness.removed?.length ?? 0)
+  const when = freshness.mappedAt ?? mappedAt
+  return (
+    <div className="banner stale" role="status">
+      {freshness.state === 'stale'
+        ? `Graph is out of date — ${drifted} source file${drifted === 1 ? '' : 's'} changed since the last map`
+        : 'Graph freshness is unknown — it may be out of date'}
+      {when ? ` (last mapped ${new Date(when).toLocaleString()})` : ''}. Re-run <code>uigraph map</code> to refresh.
+    </div>
+  )
+}
+
 /** Shown when the loaded graph has zero nodes: explains the likely cause per connection state. */
 function EmptyState(props: { live: boolean }): JSX.Element {
   return (
     <div className="empty-state">
       <h2>No nodes in this graph</h2>
-      <p className="muted">
-        {props.live
-          ? 'The serve API returned an empty graph. Extract a project (e.g. uigraph extract) so there is something to show.'
-          : 'The bundled sample is empty. Connect a live project with uigraph serve to load a real graph.'}
-      </p>
+      {props.live ? (
+        <p className="muted">
+          The serve API returned an empty graph. Map a project first —{' '}
+          <code className="inline-code">uigraph map &lt;dir&gt; --adapter &lt;name&gt;</code> — then reload.
+        </p>
+      ) : (
+        <p className="muted">
+          The bundled sample is empty. Run <code className="inline-code">uigraph map &lt;dir&gt; --adapter &lt;name&gt;</code>{' '}
+          and then <code className="inline-code">uigraph serve</code> to load a real graph.
+        </p>
+      )}
     </div>
   )
 }

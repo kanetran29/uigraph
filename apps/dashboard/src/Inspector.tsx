@@ -201,6 +201,7 @@ export function Inspector(props: InspectorProps): JSX.Element {
     title = (
       <>
         Edge <Badge text={e.modality} tone="#334155" /> <Badge text={e.source} tone={sourceTone(e.source)} />
+        {e.witnessStale === true ? <Badge text="stale witness" tone="#b45309" /> : null}
       </>
     )
     body = (

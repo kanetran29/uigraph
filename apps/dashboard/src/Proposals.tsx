@@ -1,8 +1,10 @@
 // The proposals panel: renders the quarantined Tier-2 proposals sidecar as a
 // read-only, AI-and-human navigable list. Proposals are grouped by screen (using
 // the graph node label when available, 'app' shown as "Global") and then by
-// category. Each row carries a category chip, an evidenced/speculative badge, a
-// confidence bar, and an expand-to-read rationale with the compact event/effect/to.
+// category. Each row carries a category chip, a lifecycle status badge (proposed/
+// confirmed/rejected/unverifiable — counted in the status filter chips), an
+// evidenced/speculative badge, a confidence bar, and an expand-to-read rationale
+// with the compact event/effect/to.
 // When a graph node is selected the panel filters to that screen plus 'app' so the
 // proposals stay in lock-step with the canvas selection.
 
@@ -56,6 +58,12 @@ function EvidenceBadge(props: { evidenced: boolean }): JSX.Element {
       {props.evidenced ? 'evidenced' : 'speculative'}
     </span>
   )
+}
+
+/** The proposal lifecycle badge: proposed (violet), confirmed (green), rejected (red),
+ *  unverifiable (amber) — the verify loop's per-row outcome at a glance. */
+function StatusBadge(props: { status: ProposalStatus }): JSX.Element {
+  return <span className={`prop-badge st-${props.status}`}>{props.status}</span>
 }
 
 /** A tiny confidence bar plus percent, filled in proportion to the proposal's confidence. */
@@ -118,6 +126,7 @@ function ProposalRow(props: { proposal: Proposal; labels: Map<string, string> })
         <span className="prop-caret">{open ? '▾' : '▸'}</span>
         <CategoryChip category={proposal.category} />
         <span className="prop-title">{proposal.title}</span>
+        <StatusBadge status={proposal.status} />
         <EvidenceBadge evidenced={proposal.evidenced} />
       </button>
       <ConfidenceBar confidence={proposal.confidence} />
@@ -191,6 +200,13 @@ export function ProposalsPanel(props: ProposalsPanelProps): JSX.Element {
   const [evidenced, setEvidenced] = useState<'all' | 'evidenced' | 'speculative'>('all')
   const presentStatuses = useMemo(() => [...new Set(proposals.proposals.map((p) => p.status))].sort(), [proposals.proposals])
   const presentCategories = useMemo(() => [...new Set(proposals.proposals.map((p) => p.category))].sort(), [proposals.proposals])
+  // Per-status totals over the WHOLE sidecar (not the filtered view), so the chip
+  // counts read as "what state is the verify loop in" regardless of active filters.
+  const statusCounts = useMemo(() => {
+    const m = new Map<ProposalStatus, number>()
+    for (const p of proposals.proposals) m.set(p.status, (m.get(p.status) ?? 0) + 1)
+    return m
+  }, [proposals.proposals])
 
   const visible = useMemo(() => {
     const screened = filterScreen === null ? proposals.proposals : proposals.proposals.filter((p) => p.screen === filterScreen || p.screen === GLOBAL_SCREEN)
@@ -207,7 +223,7 @@ export function ProposalsPanel(props: ProposalsPanelProps): JSX.Element {
       </div>
       <div className="filter-chips" role="group" aria-label="Filter proposals by status">
         {presentStatuses.map((s) => (
-          <FilterChip key={s} label={s} active={statuses.has(s)} onClick={() => setStatuses((p) => toggled(p, s))} />
+          <FilterChip key={s} label={`${s} ${statusCounts.get(s) ?? 0}`} active={statuses.has(s)} onClick={() => setStatuses((p) => toggled(p, s))} />
         ))}
         <FilterChip label="evidenced" active={evidenced === 'evidenced'} onClick={() => setEvidenced((v) => (v === 'evidenced' ? 'all' : 'evidenced'))} />
         <FilterChip label="speculative" active={evidenced === 'speculative'} onClick={() => setEvidenced((v) => (v === 'speculative' ? 'all' : 'speculative'))} />

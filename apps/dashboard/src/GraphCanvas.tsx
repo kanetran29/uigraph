@@ -4,7 +4,8 @@
 // positions are OWNED by ReactFlow (useNodesState) so drags persist; the dagre
 // layout is recomputed only when the graph STRUCTURE or the expanded-set changes.
 // Edges are styled by modality (must=solid, may=dashed, unknown=dotted) and tinted
-// by source (static=slate, manual=violet, runtime=emerald). Selecting a node
+// by source (static=slate, manual=violet, runtime=emerald); a runtime edge whose
+// witness predates the last re-map (witnessStale) turns amber + dashed. Selecting a node
 // emphasizes its incident edges and neighbours and dims the rest; labels show only
 // for highlighted edges to keep the canvas readable.
 
@@ -138,9 +139,11 @@ function strokeDash(modality: Modality): string | undefined {
   return undefined
 }
 
-/** Edge stroke colour: highlighted accent wins, otherwise the provenance source colour. */
+/** Edge stroke colour: highlighted accent wins, then the stale-witness warning tint,
+ *  otherwise the provenance source colour. */
 function strokeColor(edge: GraphEdge, highlighted: boolean): string {
   if (highlighted) return HIGHLIGHT_COLOR
+  if (edge.witnessStale === true) return 'var(--edge-stale)'
   return SOURCE_COLOR[edge.source] ?? SOURCE_COLOR.static
 }
 
@@ -585,7 +588,7 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
         stroke: color,
         strokeWidth: width,
         strokeOpacity: opacity,
-        strokeDasharray: strokeDash(e.modality),
+        strokeDasharray: e.witnessStale === true ? '6 4' : strokeDash(e.modality),
         strokeLinecap: 'round',
         strokeLinejoin: 'round',
       },
@@ -763,6 +766,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   // Quarantined proposal edges to a real on-canvas target (the formerly-orphan
   // modals/overlays) — overlaid only when the user opts in.
   const proposedEdges = useMemo(() => proposedScreenEdges(graph, proposals.proposals), [graph, proposals])
+
+  // Whether any runtime edge carries a stale witness — gates the extra legend row.
+  const hasStaleWitness = useMemo(() => graph.edges.some((e) => e.witnessStale === true), [graph])
 
   const expanded = useMemo(() => {
     const withChildren = new Set<string>()
@@ -1124,6 +1130,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <LegendRow swatch={swatch('var(--edge)')} label="static" />
             <LegendRow swatch={swatch('var(--edge-manual)')} label="manual" />
             <LegendRow swatch={swatch('var(--edge-runtime)')} label="runtime (witnessed)" />
+            {hasStaleWitness ? <LegendRow swatch={swatch('var(--edge-stale)', '6 4')} label="witness stale (re-verify)" /> : null}
             {showProposed ? <LegendRow swatch={swatch(GHOST_COLOR, '2 5')} label="proposed (LLM)" /> : null}
           </div>
           {diffActive ? (

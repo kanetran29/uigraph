@@ -36,6 +36,7 @@
   --edge: #475569;
   --edge-manual: #7c3aed;
   --edge-runtime: #047857;
+  --edge-stale: #b45309;
   --edge-highlight: #15803d;
 }
 
@@ -73,6 +74,7 @@
     --edge: #8b98ac;
     --edge-manual: #b794f6;
     --edge-runtime: #34d399;
+    --edge-stale: #f59e0b;
     --edge-highlight: #4ade80;
   }
 }
@@ -105,6 +107,7 @@
   --edge: #8b98ac;
   --edge-manual: #b794f6;
   --edge-runtime: #34d399;
+  --edge-stale: #f59e0b;
   --edge-highlight: #4ade80;
 }
 :root[data-theme='light'] {
@@ -376,6 +379,12 @@ select:focus-visible,
   color: var(--status-offline-fg);
 }
 
+/* Freshness warning: the graph is stale (or of unknown freshness) — re-run uigraph map. */
+.banner.stale {
+  background: var(--status-offline-bg);
+  color: var(--status-offline-fg);
+}
+
 .banner code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   background: color-mix(in srgb, var(--text) 12%, transparent);
@@ -432,6 +441,7 @@ select:focus-visible,
 .proposals,
 .coverage,
 .changes,
+.verify,
 .plan,
 .prop-row,
 .prop-screen,
@@ -504,7 +514,8 @@ select:focus-visible,
 }
 
 .coverage,
-.changes {
+.changes,
+.verify {
   padding: 16px 18px;
   border-bottom: 1px solid var(--border);
 }
@@ -1032,6 +1043,27 @@ button.danger {
 }
 
 .prop-badge.speculative {
+  background: var(--status-offline-bg);
+  color: var(--status-offline-fg);
+}
+
+/* Proposal lifecycle status badges (the verify loop's per-row outcome). */
+.prop-badge.st-proposed {
+  background: var(--node-manual-bg);
+  color: var(--accent);
+}
+
+.prop-badge.st-confirmed {
+  background: var(--status-live-bg);
+  color: var(--status-live-fg);
+}
+
+.prop-badge.st-rejected {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+
+.prop-badge.st-unverifiable {
   background: var(--status-offline-bg);
   color: var(--status-offline-fg);
 }
