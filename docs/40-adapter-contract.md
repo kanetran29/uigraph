@@ -127,6 +127,7 @@ is distinguishable from a clean one.
 - `withRouter`-injected `history.push` (the older HOC pattern).
 - Guards / conditional renders captured as **symbolic text** → at most a `may`-edge.
 - Controls (buttons / inputs / links) and their nav handlers when run with `--controls`.
+- **Router-bypassing navigation**: `window.location.href = …` / `window.location.assign|replace(…)` (and bare `location.…`) → an edge with effect `navigate:full-reload` when the target is a literal internal path; an external/unresolvable target degrades to the usual soundiness note, never a silent miss.
 
 **Not yet supported (soundiness note, no edge invented)**
 - **Dynamic data-router config**: a spread / variable / call in the route array, a non-literal `path`, or a route-level `lazy` that is not a direct `() => import('…')` (e.g. an async body returning `{ Component }`) — recorded as a `dynamic-route-config` note.
