@@ -171,6 +171,27 @@ describe('buildCoverage — tier distribution + frontier (additive)', () => {
   })
 })
 
+describe('buildCoverage — stale witnesses', () => {
+  it('counts a stale-witnessed edge as neither runtime-verified nor accounted', () => {
+    const g4 = graph([node('a'), node('b')], [edge('r1', 'a', 'b', { source: 'runtime', modality: 'must', witnessStale: true })])
+    const cov = buildCoverage(g4)
+    expect(cov.runtimeVerified).toBe(0)
+    expect(cov.staleWitnessCount).toBe(1)
+    expect(cov.accounted).toBe(0)
+    expect(cov.open.map((e) => e.id)).toEqual(['r1'])
+    expect(cov.open[0]?.status).toBe('stale-witness')
+  })
+
+  it('a stale runtime out-edge does not resolve its source’s dynamic sink', () => {
+    const g5 = graph(
+      [node('a'), node('b'), node('u_a', { kind: 'unknown' })],
+      [edge('r1', 'a', 'b', { source: 'runtime', modality: 'must', witnessStale: true }), edge('d1', 'a', 'u_a', { source: 'static', modality: 'unknown' })],
+    )
+    const cov = buildCoverage(g5)
+    expect(cov.open.map((e) => e.id).sort()).toEqual(['d1', 'r1'])
+  })
+})
+
 describe('nextToVerify', () => {
   it('ranks unknown > may > proposal; skips runtime, proven must, AND a resolved dynamic source', () => {
     // e3 (a->u_a) is skipped because a already has a concrete runtime out-edge (e1)
@@ -191,6 +212,13 @@ describe('nextToVerify', () => {
 
   it('honours the limit', () => {
     expect(nextToVerify(g(), pg, 1)).toHaveLength(1)
+  })
+
+  it('re-queues a stale-witnessed runtime edge for re-verification', () => {
+    const g3 = graph([node('a'), node('b')], [edge('r1', 'a', 'b', { source: 'runtime', modality: 'must', witnessStale: true })])
+    const targets = nextToVerify(g3, { nodes: [], edges: [] })
+    expect(targets.map((t) => t.id)).toEqual(['r1'])
+    expect(targets[0]?.reason).toMatch(/stale witness/)
   })
 
   it('never ranks a rejected proposal alongside proposed ones (only proposed reach the worklist)', () => {

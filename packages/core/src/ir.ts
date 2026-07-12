@@ -89,7 +89,10 @@ export interface Witness {
  * destructive/non-undoable effect (delete, pay, submit-order, logout, reset) so
  * an agent can require confirmation before traversing it. It is additive and
  * defaults `undefined`; callers that want a value can derive one from the effect
- * string via `classifyEffectRisk` in risk.ts.
+ * string via `classifyEffectRisk` in risk.ts. `witnessStale` (set by the
+ * observation fold) means the runtime witness was recorded against a different
+ * base graph — the code changed since verification, so the edge needs
+ * re-confirmation and must not be trusted at the witnessed tier.
  */
 export interface GraphEdge {
   id: string
@@ -103,6 +106,7 @@ export interface GraphEdge {
   confidence: number
   witness?: Witness
   irreversible?: boolean
+  witnessStale?: boolean
 }
 
 /** Provenance metadata for a whole graph (content-addressing inputs). */

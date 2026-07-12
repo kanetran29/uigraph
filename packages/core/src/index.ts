@@ -30,7 +30,7 @@ export type {
 } from './adapter'
 
 export { stableStringify, fnv1a, hashValue, canonicalEdgeTag } from './hash'
-export { confirmedEdges, applyObservations, runtimeEdgeId, type Observation } from './runtime'
+export { confirmedEdges, applyObservations, runtimeEdgeId, validateEvidence, type Observation, type Evidence, type ObservationReporter, type ApplyObservationsOptions } from './runtime'
 export {
   validateGraphShape,
   validateOverlayShape,

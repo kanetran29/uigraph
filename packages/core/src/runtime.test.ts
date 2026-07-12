@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { applyObservations, confirmedEdges, runtimeEdgeId, type Observation } from './runtime'
+import { applyObservations, confirmedEdges, runtimeEdgeId, validateEvidence, type Observation } from './runtime'
 import { edge, graph, node } from './fixtures'
 
 function obs(over: Partial<Observation> = {}): Observation {
@@ -58,14 +58,76 @@ describe('applyObservations', () => {
   })
 
   it('upgrades an existing edge in place instead of adding a duplicate twin', () => {
-    const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'static', modality: 'may', guard: 'isAuth' })])
-    const merged = applyObservations(g, [obs({ from: 'a', to: 'b' })])
+    const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'static', modality: 'may', guard: null, event: 'click' })])
+    const merged = applyObservations(g, [obs({ from: 'a', to: 'b', event: 'click' })])
     expect(merged.edges).toHaveLength(1)
     const e = merged.edges[0]
     expect(e?.id).toBe('e1')
     expect(e?.source).toBe('runtime')
     expect(e?.modality).toBe('must')
-    expect(e?.guard).toBe('isAuth')
     expect(e?.witness?.source).toBe('runtime')
+  })
+
+  it('matches by the full (from,to,event) triple — a different event never steals the witness', () => {
+    const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'static', modality: 'may', event: 'click confirm' })])
+    const merged = applyObservations(g, [obs({ event: 'submit form' })])
+    expect(merged.edges).toHaveLength(2)
+    const original = merged.edges.find((e) => e.id === 'e1')
+    expect(original?.source).toBe('static')
+    expect(original?.witness?.observationId).toBeUndefined()
+    const minted = merged.edges.find((e) => e.id !== 'e1')
+    expect(minted?.event).toBe('submit form')
+    expect(minted?.source).toBe('runtime')
+  })
+
+  it('keeps the guard AND modality when upgrading a guarded edge (existence proof is not unconditionality)', () => {
+    const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'static', modality: 'may', guard: 'isAuth', event: 'click' })])
+    const merged = applyObservations(g, [obs({ event: 'click' })])
+    expect(merged.edges).toHaveLength(1)
+    const e = merged.edges[0]
+    expect(e?.modality).toBe('may')
+    expect(e?.guard).toBe('isAuth')
+    expect(e?.source).toBe('runtime')
+    expect(e?.confidence).toBe(1)
+    expect(e?.witness?.observationId).toBe('o1')
+  })
+
+  it('folds every confirmed observation on a pair — no first-per-pair shortcut', () => {
+    const g = graph([node('a'), node('b')], [])
+    const merged = applyObservations(g, [obs({ id: 'o1', event: 'click' }), obs({ id: 'o2', event: 'keydown:Enter' })])
+    expect(merged.edges).toHaveLength(2)
+  })
+
+  it('flags witnessStale when the observation was recorded against a different base', () => {
+    const g = graph([node('a'), node('b')], [])
+    const merged = applyObservations(g, [obs({ base: 'oldhash' })], { baseHash: 'newhash' })
+    expect(merged.edges[0]?.witnessStale).toBe(true)
+  })
+
+  it('does NOT flag witnessStale when the bases match or the observation predates base stamping', () => {
+    const g = graph([node('a'), node('b')], [])
+    const matching = applyObservations(g, [obs({ base: 'h1' })], { baseHash: 'h1' })
+    expect(matching.edges[0]?.witnessStale).toBeUndefined()
+    const unstamped = applyObservations(g, [obs()], { baseHash: 'h1' })
+    expect(unstamped.edges[0]?.witnessStale).toBeUndefined()
+  })
+})
+
+describe('validateEvidence', () => {
+  it('accepts a real url change and rejects a non-change', () => {
+    expect(validateEvidence({ kind: 'url-change', startUrl: '/a', landedUrl: '/b' })).toBeNull()
+    expect(validateEvidence({ kind: 'url-change', startUrl: '/a', landedUrl: '/a' })).toMatch(/actual change/)
+    expect(validateEvidence({ kind: 'url-change', startUrl: '', landedUrl: '/b' })).toMatch(/non-empty/)
+  })
+
+  it('requires a non-empty url-assert url and screenshot path', () => {
+    expect(validateEvidence({ kind: 'url-assert', url: '/checkout' })).toBeNull()
+    expect(validateEvidence({ kind: 'url-assert', url: '' })).toMatch(/non-empty/)
+    expect(validateEvidence({ kind: 'screenshot', path: '' })).toMatch(/non-empty/)
+    expect(validateEvidence({ kind: 'screenshot', path: '/tmp/s.png' })).toBeNull()
+  })
+
+  it('accepts dialog evidence as-is', () => {
+    expect(validateEvidence({ kind: 'dialog' })).toBeNull()
   })
 })
