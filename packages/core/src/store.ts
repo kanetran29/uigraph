@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS proposals_meta (key TEXT PRIMARY KEY, value TEXT NOT 
 CREATE TABLE IF NOT EXISTS observations (
   seq INTEGER PRIMARY KEY AUTOINCREMENT,
   id TEXT, "from" TEXT, "to" TEXT, event TEXT, effect TEXT,
-  outcome TEXT, proposal_id TEXT, screenshot TEXT, ts TEXT
+  outcome TEXT, proposal_id TEXT, screenshot TEXT, ts TEXT,
+  evidence TEXT, reported_by TEXT, base TEXT
 );
 CREATE TABLE IF NOT EXISTS proposals (
   id TEXT PRIMARY KEY, kind TEXT, category TEXT, screen TEXT, title TEXT,
@@ -94,6 +95,14 @@ export class Store {
       this.db.exec('ALTER TABLE proposals ADD COLUMN reason TEXT')
     } catch {
       // column already exists
+    }
+    // Older workspaces predate the observation proof columns; add them if missing.
+    for (const col of ['evidence TEXT', 'reported_by TEXT', 'base TEXT']) {
+      try {
+        this.db.exec(`ALTER TABLE observations ADD COLUMN ${col}`)
+      } catch {
+        // column already exists
+      }
     }
   }
 
@@ -200,8 +209,11 @@ export class Store {
   /** Append one runtime observation; returns the stored entry. */
   appendObservation(o: Observation): Observation {
     this.db
-      .prepare('INSERT INTO observations(id, "from", "to", event, effect, outcome, proposal_id, screenshot, ts) VALUES(?,?,?,?,?,?,?,?,?)')
-      .run(o.id, o.from, o.to, o.event, o.effect ?? null, o.outcome, o.proposalId ?? null, o.screenshot ?? null, o.ts ?? null)
+      .prepare('INSERT INTO observations(id, "from", "to", event, effect, outcome, proposal_id, screenshot, ts, evidence, reported_by, base) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
+      .run(
+        o.id, o.from, o.to, o.event, o.effect ?? null, o.outcome, o.proposalId ?? null, o.screenshot ?? null, o.ts ?? null,
+        o.evidence !== undefined ? JSON.stringify(o.evidence) : null, o.reportedBy ?? null, o.base ?? null,
+      )
     return o
   }
 
@@ -213,6 +225,9 @@ export class Store {
       if (r['proposal_id'] !== null) o['proposalId'] = r['proposal_id']
       if (r['screenshot'] !== null) o['screenshot'] = r['screenshot']
       if (r['ts'] !== null) o['ts'] = r['ts']
+      if (r['evidence'] !== null && r['evidence'] !== undefined) o['evidence'] = JSON.parse(r['evidence'] as string)
+      if (r['reported_by'] !== null && r['reported_by'] !== undefined) o['reportedBy'] = r['reported_by']
+      if (r['base'] !== null && r['base'] !== undefined) o['base'] = r['base']
       return o as unknown as Observation
     })
   }

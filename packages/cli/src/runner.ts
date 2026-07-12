@@ -9,16 +9,17 @@
 // browser; the default driver lazy-loads `playwright-core` (optional dep — install
 // it to actually drive) and uses the system/cached Chromium.
 
-import type { SpecPlan } from '@uigraph/core'
+import type { Evidence, SpecPlan } from '@uigraph/core'
 import { buildSpecPlan, fnv1a, nextToVerify, nodeForUrl, planPath } from '@uigraph/core'
 import { openStore } from '@uigraph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@uigraph/mcp'
 
-/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets). */
+/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets); `evidence` is the structured proof the proof-gated report_observation requires for a confirmation. */
 export interface VerifyResult {
   confirmed: boolean
   screenshot?: string
   landedUrl?: string
+  evidence?: Evidence
 }
 
 /** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. */
@@ -115,7 +116,20 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
         realNode = newId
         discoveredNodes++
       }
-      const res = reportObservation(ctx, { from: t.from, to: realNode, event: t.event, outcome: 'confirmed', effect: 'navigate', ...(result.screenshot ? { screenshot: result.screenshot } : {}) })
+      const res = reportObservation(ctx, {
+        from: t.from,
+        to: realNode,
+        event: t.event,
+        outcome: 'confirmed',
+        effect: 'navigate',
+        reportedBy: 'runner',
+        ...(result.evidence ? { evidence: result.evidence } : {}),
+        ...(result.screenshot ? { screenshot: result.screenshot } : {}),
+      })
+      if ('error' in res) {
+        park(`confirmation rejected by the proof gate: ${res.error}`)
+        continue
+      }
       if (res.dropped) {
         park('observed landing could not be attributed (dropped)')
         continue
@@ -137,7 +151,9 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       to: t.to,
       event: t.event,
       outcome: result.confirmed ? 'confirmed' : 'refuted',
+      reportedBy: 'runner',
       ...(t.proposalIds && t.proposalIds.length > 0 ? { proposalId: t.proposalIds[0] } : {}),
+      ...(result.evidence ? { evidence: result.evidence } : {}),
       ...(result.screenshot ? { screenshot: result.screenshot } : {}),
     })
     if (result.confirmed) confirmed++
@@ -294,7 +310,8 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       if (next === landedUrl) break
       landedUrl = next
     }
-    return { confirmed: landedUrl !== startUrl, landedUrl }
+    const moved = landedUrl !== startUrl
+    return { confirmed: moved, landedUrl, ...(moved ? { evidence: { kind: 'url-change', startUrl, landedUrl } as Evidence } : {}) }
   }
 
   let lastUrlAssertion: string | undefined
@@ -315,10 +332,14 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     }
   }
   if (parked) return { confirmed: false }
+  // a drive that asserted NOTHING cannot witness anything — never mint an evidence-free confirmation
+  if (lastUrlAssertion === undefined && !expectDialog) return { confirmed: false }
   let confirmed = true
   if (lastUrlAssertion !== undefined) confirmed = page.url() === lastUrlAssertion
   if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
-  return { confirmed }
+  if (!confirmed) return { confirmed: false }
+  const evidence: Evidence = lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: 'dialog visible after drive' }
+  return { confirmed: true, evidence }
 }
 
 /** A driver paired with the teardown for the browser it owns. dispose is idempotent and a no-op if no browser was ever launched. */

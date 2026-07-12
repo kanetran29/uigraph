@@ -4,17 +4,21 @@
 // mark_unverifiable), and the deterministic DONE signal (get_loop_status). Pure
 // over a ToolContext; the observation write path is behavior-critical.
 
-import type { CoverageReport, ProposalStatus, ResolutionReport } from '@uigraph/core'
-import { buildCoverage, buildResolution, hashValue, nextToVerify } from '@uigraph/core'
+import { existsSync } from 'node:fs'
+import type { CoverageReport, Evidence, ObservationReporter, ProposalStatus, ResolutionReport } from '@uigraph/core'
+import { buildCoverage, buildResolution, hashValue, nextToVerify, validateEvidence } from '@uigraph/core'
 import { loadMergedGraph, withStore, type ObservationEntry, type ToolContext } from './context'
 import { getProposalGraph } from './read'
 
 /**
  * Arguments for report_observation: the result of actually attempting a
  * transition at runtime (e.g. via Playwright). `outcome:'confirmed'` means the
- * transition was observed to happen — it becomes a witnessed runtime edge;
- * `'refuted'` means it did not, and produces no edge. `proposalId` links the
- * observation back to the Tier-2 proposal it verifies.
+ * transition was observed to happen — it becomes a witnessed runtime edge, and
+ * REQUIRES `evidence` (structured proof) plus `reportedBy` provenance; a
+ * confirmation without valid proof is rejected, nothing is recorded. `'refuted'`
+ * means it did not happen — no proof needed, it produces no edge. `proposalId`
+ * links the observation back to the Tier-2 proposal it verifies. The legacy
+ * `screenshot` field doubles as screenshot evidence when `evidence` is absent.
  */
 export interface ReportObservationArgs {
   from: string
@@ -24,6 +28,30 @@ export interface ReportObservationArgs {
   effect?: string
   proposalId?: string
   screenshot?: string
+  evidence?: Evidence
+  reportedBy?: ObservationReporter
+}
+
+/**
+ * The proof gate for a confirmed observation: returns a rejection message when
+ * the claim carries no acceptable evidence, or null when it may be recorded.
+ * Checks provenance is declared, the evidence payload is semantically valid
+ * (via core validateEvidence), and — because this layer has filesystem access —
+ * that screenshot evidence points at a file that actually exists.
+ */
+function proofProblem(args: ReportObservationArgs): string | null {
+  if (args.outcome !== 'confirmed') return null
+  const evidence: Evidence | undefined = args.evidence ?? (args.screenshot !== undefined ? { kind: 'screenshot', path: args.screenshot } : undefined)
+  if (evidence === undefined) {
+    return 'a confirmed observation requires evidence: url-change {startUrl,landedUrl}, url-assert {url}, dialog, or screenshot {path} — drive the transition and report what you saw, or report outcome:"refuted"'
+  }
+  if (args.reportedBy === undefined) return 'a confirmed observation requires reportedBy ("runner" or "agent") so the witness is auditable'
+  const semantic = validateEvidence(evidence)
+  if (semantic !== null) return semantic
+  if (evidence.kind === 'screenshot' && !existsSync(evidence.path)) {
+    return `screenshot evidence points at a file that does not exist: ${evidence.path}`
+  }
+  return null
 }
 
 /**
@@ -39,11 +67,18 @@ export type ReportObservationResult = ObservationEntry & { reconciled: { id: str
  * Append a runtime observation to the workspace store (append-only observations
  * table), reconcile any proposal it witnesses (confirmed→archived, refuted→
  * withdrawn), and return the entry plus the reconciled proposals. A confirmed
- * observation is independently folded into the served graph by loadMergedGraph
- * (Tier-3): the observation — not the original guess — enters the graph as a
- * witnessed edge. Two derivations from one witness; no proposal ever becomes an edge.
+ * observation must pass the proof gate (evidence + provenance) — a hallucinated
+ * confirmation is rejected with an explanation and nothing is recorded. The
+ * current base-graph hash is stamped onto the entry so a later re-map demotes
+ * this witness to stale instead of trusting it forever. A confirmed observation
+ * is independently folded into the served graph by loadMergedGraph (Tier-3):
+ * the observation — not the original guess — enters the graph as a witnessed
+ * edge. Two derivations from one witness; no proposal ever becomes an edge.
  */
-export function reportObservation(ctx: ToolContext, args: ReportObservationArgs): ReportObservationResult {
+export function reportObservation(ctx: ToolContext, args: ReportObservationArgs): ReportObservationResult | { error: string } {
+  const problem = proofProblem(args)
+  if (problem !== null) return { error: `confirmation rejected — ${problem}` }
+  const evidence: Evidence | undefined = args.evidence ?? (args.screenshot !== undefined ? { kind: 'screenshot', path: args.screenshot } : undefined)
   const ts = new Date().toISOString()
   const entry: ObservationEntry = {
     id: `o_${hashValue({ from: args.from, to: args.to, event: args.event, ts }).slice(0, 10)}`,
@@ -55,10 +90,13 @@ export function reportObservation(ctx: ToolContext, args: ReportObservationArgs)
     ...(args.effect ? { effect: args.effect } : {}),
     ...(args.proposalId ? { proposalId: args.proposalId } : {}),
     ...(args.screenshot ? { screenshot: args.screenshot } : {}),
+    ...(evidence !== undefined ? { evidence } : {}),
+    ...(args.reportedBy !== undefined ? { reportedBy: args.reportedBy } : {}),
   }
   const { reconciled, dropped } = withStore(ctx, (store) => {
-    store.appendObservation(entry)
     const base = store.getBaseGraph()
+    if (base !== null) entry.base = hashValue(base)
+    store.appendObservation(entry)
     // a confirmed landing on a node not in the graph mints no edge (applyObservations skips it)
     const droppedFlag = args.outcome === 'confirmed' && base !== null && !base.nodes.some((n) => n.id === args.to)
     return { reconciled: store.reconcileFromObservations(), dropped: droppedFlag }

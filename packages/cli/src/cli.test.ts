@@ -352,7 +352,7 @@ describe('runVerify (Tier-3 runner)', () => {
     // a -> b is a may edge (uncertain) -> a verify target.
     const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), source: 'static', modality: 'may', guard: 'x' }])
     const dir = seedWorkspace(tempDir('uigraph-cli-verify-'), g)
-    const summary = await runVerify({ dir, appUrl: 'http://x', limit: 10, driver: async () => ({ confirmed: true, screenshot: 'shots/e.png' }) })
+    const summary = await runVerify({ dir, appUrl: 'http://x', limit: 10, driver: async () => ({ confirmed: true, screenshot: 'shots/e.png', evidence: { kind: 'url-assert', url: 'http://x/b' } as const }) })
     expect(summary.attempted).toBe(1)
     expect(summary.confirmed).toBe(1)
     // the observation was recorded + (confirmed) folds into a runtime edge on read
@@ -717,7 +717,7 @@ describe('runVerify — dynamic-sink resolution (capture mode)', () => {
     )
     const dir = seedWorkspace(tempDir('uigraph-cli-dyn-'), g)
     // capture driver lands on /b (node 'b')
-    const summary = await runVerify({ dir, appUrl: 'http://x', driver: async (_p, appUrl, opts) => (opts?.capture ? { confirmed: true, landedUrl: `${appUrl}/b` } : { confirmed: false }) })
+    const summary = await runVerify({ dir, appUrl: 'http://x', driver: async (_p, appUrl, opts) => (opts?.capture ? { confirmed: true, landedUrl: `${appUrl}/b`, evidence: { kind: 'url-change', startUrl: `${appUrl}/a`, landedUrl: `${appUrl}/b` } as const } : { confirmed: false }) })
     expect(summary.resolvedDynamic).toBe(1)
 
     const store = openStore(dbPathFor(dir))
@@ -746,7 +746,7 @@ describe('runVerify — dynamic-sink resolution (capture mode)', () => {
     const { runVerify } = await import('./runner')
     const g = graph([node('a'), uNode('u_a')], [{ ...edge('e_au', 'a', 'u_a'), modality: 'unknown', source: 'static' }])
     const dir = seedWorkspace(tempDir('uigraph-cli-dyn3-'), g)
-    const summary = await runVerify({ dir, appUrl: 'http://x', driver: async (_p, appUrl, opts) => (opts?.capture ? { confirmed: true, landedUrl: `${appUrl}/surprise` } : { confirmed: false }) })
+    const summary = await runVerify({ dir, appUrl: 'http://x', driver: async (_p, appUrl, opts) => (opts?.capture ? { confirmed: true, landedUrl: `${appUrl}/surprise`, evidence: { kind: 'url-change', startUrl: `${appUrl}/a`, landedUrl: `${appUrl}/surprise` } as const } : { confirmed: false }) })
     expect(summary.discoveredNodes).toBe(1)
     const merged = (await import('@uigraph/mcp')).loadMergedGraph({ dir })
     expect(merged.nodes.some((n) => n.route === '/surprise')).toBe(true)

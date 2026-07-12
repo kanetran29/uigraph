@@ -28,6 +28,7 @@ import {
   planPathTool,
   setScenario,
   reportObservation,
+  propose,
   reconcileProposalsTool,
   withdrawProposal,
   markUnverifiable,
@@ -48,6 +49,7 @@ import {
   type NextToVerifyArgs,
   type PlanPathArgs,
   type ReportObservationArgs,
+  type ProposeArgs,
   type ResolveProposalArgs,
   type ParkEdgeArgs,
   type UpdateGraphArgs,
@@ -206,7 +208,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'report_observation',
     description:
-      'Record the result of attempting a transition at runtime (e.g. via Playwright). A confirmed observation is folded into the served graph as a witnessed runtime edge; a refuted one produces no edge. Attach a screenshot path as evidence and a proposalId to confirm a Tier-2 proposal.',
+      'Record the result of attempting a transition at runtime (e.g. via Playwright). A CONFIRMED observation REQUIRES proof — evidence {kind: url-change|url-assert|dialog|screenshot} plus reportedBy — or it is rejected and nothing is recorded; when accepted it folds into the served graph as a witnessed runtime edge. A refuted observation needs no proof and produces no edge. Attach a proposalId to confirm a Tier-2 proposal.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -216,9 +218,58 @@ export const TOOLS: Tool[] = [
         outcome: { type: 'string', enum: ['confirmed', 'refuted'] },
         effect: { type: 'string' },
         proposalId: { type: 'string', description: 'the Tier-2 proposal this verifies, if any' },
-        screenshot: { type: 'string', description: 'path to a screenshot captured as evidence' },
+        screenshot: { type: 'string', description: 'path to a screenshot captured as evidence (doubles as evidence when the evidence field is absent)' },
+        evidence: {
+          type: 'object',
+          description:
+            'structured proof, REQUIRED for outcome:"confirmed": {kind:"url-change", startUrl, landedUrl} | {kind:"url-assert", url} | {kind:"dialog", detail?} | {kind:"screenshot", path} (path must exist on disk)',
+          properties: {
+            kind: { type: 'string', enum: ['url-change', 'url-assert', 'dialog', 'screenshot'] },
+            startUrl: { type: 'string' },
+            landedUrl: { type: 'string' },
+            url: { type: 'string' },
+            detail: { type: 'string' },
+            path: { type: 'string' },
+          },
+          required: ['kind'],
+        },
+        reportedBy: { type: 'string', enum: ['runner', 'agent'], description: 'who drove the verification — REQUIRED for outcome:"confirmed"' },
       },
       required: ['from', 'to', 'event', 'outcome'],
+    },
+  },
+  {
+    name: 'propose',
+    description:
+      'Submit a batch of Tier-2 proposals — quarantined hypotheses about behavior the static extractor cannot see (modals, disclosure, infinite scroll, keyboard, error/empty states, state-driven nav…). Be greedy: propose every plausible node/edge so the verify loop can cover all cases; a wrong proposal costs nothing (it can NEVER enter the proven graph — only a runtime observation with proof mints an edge). Each proposal needs a screen (existing node id), kind (edge|node|interaction), category, title, rationale, confidence; edge proposals need an event and may target a node id or "<modal>".',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        proposals: {
+          type: 'array',
+          description: 'the batch of proposals to store',
+          items: {
+            type: 'object',
+            properties: {
+              kind: { type: 'string', enum: ['edge', 'node', 'interaction'] },
+              category: { type: 'string', description: 'long-tail group, e.g. disclosure | infinite-scroll | keyboard | async-state | modal | error-state' },
+              screen: { type: 'string', description: 'the node id this hypothesis lives on' },
+              title: { type: 'string', description: 'short human title' },
+              rationale: { type: 'string', description: 'the code/UX signal this was reasoned from' },
+              confidence: { type: 'number', description: '0..1' },
+              evidenced: { type: 'boolean', description: 'true when grounded in concrete source, false for a plausible guess' },
+              event: { type: 'string', description: 'what a user does to trigger it (required for kind:edge)' },
+              control: { type: 'string' },
+              from: { type: 'string' },
+              to: { type: 'string', description: 'target node id or "<modal>"' },
+              guard: { type: 'string' },
+              effect: { type: 'string' },
+            },
+            required: ['kind', 'category', 'screen', 'title', 'rationale', 'confidence'],
+          },
+        },
+      },
+      required: ['proposals'],
     },
   },
   {
@@ -346,6 +397,8 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(updateGraph(ctx, args as unknown as UpdateGraphArgs))
       case 'report_observation':
         return jsonResult(reportObservation(ctx, args as unknown as ReportObservationArgs))
+      case 'propose':
+        return jsonResult(propose(ctx, args as unknown as ProposeArgs))
       case 'get_loop_status':
         return jsonResult(getLoopStatus(ctx))
       case 'get_freshness':

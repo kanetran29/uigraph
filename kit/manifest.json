@@ -30,6 +30,7 @@
     "plan_path",
     "update_graph",
     "report_observation",
+    "propose",
     "diff",
     "diff_since_last",
     "get_loop_status",
