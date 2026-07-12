@@ -18,4 +18,4 @@ Read them in order: start with the [overview](./00-overview.md) for the problem 
 
 ## Source of truth
 
-The research dossier [`../ui-graph-dossier-final-en.md`](../ui-graph-dossier-final-en.md) is the source-of-truth research dossier behind these docs; when a doc and the dossier disagree, the dossier wins.
+The research dossier [`ui-graph-dossier-final-en.md`](ui-graph-dossier-final-en.md) is the source-of-truth research dossier behind these docs; when a doc and the dossier disagree, the dossier wins.
