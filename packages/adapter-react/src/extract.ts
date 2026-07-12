@@ -21,7 +21,7 @@ import { collectInlineRouteTargets, collectTargets, navIdentifiers } from './tar
 import { resolveComponentFile, screenSourceFiles } from './resolve'
 import { collectInteractions, controlMetaFor } from './controls'
 import { detectDynamicWidget, gatedOverlayVar, modalGateVar } from './effects'
-import { collectRoutes, ruleIdFor } from './routes'
+import { collectDataRoutes, collectRoutes, ruleIdFor } from './routes'
 
 export { buildProject } from './resolve'
 
@@ -71,9 +71,20 @@ function collectShellNavFiles(project: Project): Set<SourceFile> {
   return out
 }
 
-/** Extract a graph from an already-built ts-morph project (testable in memory). */
+/**
+ * Extract a graph from an already-built ts-morph project (testable in memory).
+ * Routes come from BOTH declaration styles — JSX <Route> trees and data-router
+ * object config (createBrowserRouter/createHashRouter/createMemoryRouter) —
+ * deduped by route path (JSX wins a conflict, preserving prior behaviour); the
+ * data collector's dynamic-config notes pass through relativized.
+ */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
-  return extractGraphFromRoutes(project, projectDir, collectRoutes(project), opts)
+  const dataRoutes = collectDataRoutes(project)
+  const byNodeId = new Map<string, RouteInfo>()
+  for (const r of [...collectRoutes(project), ...dataRoutes.routes]) if (!byNodeId.has(r.nodeId)) byNodeId.set(r.nodeId, r)
+  const result = extractGraphFromRoutes(project, projectDir, [...byNodeId.values()], opts)
+  for (const n of dataRoutes.soundiness) result.soundiness.push(n.file !== undefined ? { ...n, file: relative(projectDir, n.file) } : n)
+  return result
 }
 
 /**
@@ -194,6 +205,14 @@ export function extractGraphFromRoutes(
   }
 
   for (const route of routes) {
+    // A call-site route wrapper (<Protected><Page/></Protected>) renders its own
+    // guard/redirect JSX around this route's page: scan the wrapper's file once per
+    // wrapped route, capped to `may` (a wrapper's render outcome is conditional by
+    // construction, so its redirect is never a must).
+    if (route.wrapperFile) {
+      const file = relative(projectDir, route.wrapperFile.getFilePath())
+      for (const t of collectTargets(route.wrapperFile)) resolveAndPushTarget(route.nodeId, t, file, true)
+    }
     if (!route.componentFile) {
       if (route.inlineElement) {
         const ie = route.inlineElement

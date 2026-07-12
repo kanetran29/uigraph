@@ -8,6 +8,7 @@ import type { JsxAttribute, SourceFile } from 'ts-morph'
 import type { RawTarget, TargetInfo } from './types'
 import { allJsxElements, findAttr, isJsxEl, jsxTag } from './jsx'
 import { extraConditionGuard, getGuard } from './guards'
+import { resolveComponentFile } from './resolve'
 
 /** A literal/template/dynamic classification of a navigation target expression. */
 export function classifyTarget(expr: Node | undefined, sf?: SourceFile): TargetInfo {
@@ -15,11 +16,24 @@ export function classifyTarget(expr: Node | undefined, sf?: SourceFile): TargetI
   if (Node.isStringLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isNoSubstitutionTemplateLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isTemplateExpression(expr)) return { kind: 'template', staticPrefix: expr.getHead().getLiteralText() }
-  // A computed lookup into a const route-map, e.g. push(subviewPaths[sv]) — over-
-  // approximate to the map's literal string values (the real possible destinations).
+  // react-router To object form: navigate({ pathname: '/x', search: '…' }) — a
+  // literal pathname is as static as a string literal; the other members (search,
+  // hash, state) never change the destination route.
+  if (Node.isObjectLiteralExpression(expr)) {
+    const v = literalPropertyValue(expr, 'pathname')
+    if (v !== undefined) return { kind: 'literal', value: v }
+  }
+  // A lookup into a const route-map, e.g. push(subviewPaths[sv]) or navigate(ROUTES.account):
+  // a NAMED property resolves to its exact literal value; a computed key over-approximates
+  // to the map's literal string values (the real possible destinations).
   if (sf && (Node.isElementAccessExpression(expr) || Node.isPropertyAccessExpression(expr))) {
     const obj = expr.getExpression()
     if (Node.isIdentifier(obj)) {
+      if (Node.isPropertyAccessExpression(expr)) {
+        const init = constInitializer(obj.getText(), sf)
+        const v = init !== undefined && Node.isObjectLiteralExpression(init) ? literalPropertyValue(init, expr.getName()) : undefined
+        if (v !== undefined) return { kind: 'literal', value: v }
+      }
       const values = resolveConstStringValues(obj.getText(), sf)
       if (values.length > 0) return { kind: 'enum', values }
     }
@@ -27,9 +41,32 @@ export function classifyTarget(expr: Node | undefined, sf?: SourceFile): TargetI
   return { kind: 'dynamic', expr: expr.getText() }
 }
 
+/** The literal string value of an object literal's named property, or undefined. */
+function literalPropertyValue(obj: Node, name: string): string | undefined {
+  if (!Node.isObjectLiteralExpression(obj)) return undefined
+  const p = obj.getProperty(name)
+  if (!p || !Node.isPropertyAssignment(p)) return undefined
+  const v = p.getInitializer()
+  return v && (Node.isStringLiteral(v) || Node.isNoSubstitutionTemplateLiteral(v)) ? v.getLiteralValue() : undefined
+}
+
+/**
+ * The initializer of a module-level `const NAME = …`, stripped of `as const` /
+ * `satisfies` / parens, following a named/default import to its declaring module
+ * when NAME is not declared locally — so an app-wide route-constants module
+ * (`import { ROUTES } from './routes'`) still resolves.
+ */
+function constInitializer(name: string, sf: SourceFile): Node | undefined {
+  let decl = sf.getVariableDeclaration(name)
+  if (!decl) decl = resolveComponentFile(sf, name)?.getVariableDeclaration(name)
+  let init: Node | undefined = decl?.getInitializer()
+  while (init !== undefined && (Node.isAsExpression(init) || Node.isSatisfiesExpression(init) || Node.isParenthesizedExpression(init))) init = init.getExpression()
+  return init
+}
+
 /** The literal string values of a module-level `const X = {…}` / `const X = […]`, for const route-maps. */
 function resolveConstStringValues(name: string, sf: SourceFile): string[] {
-  const init = sf.getVariableDeclaration(name)?.getInitializer()
+  const init = constInitializer(name, sf)
   const out: string[] = []
   if (init && Node.isObjectLiteralExpression(init)) {
     for (const p of init.getProperties()) {

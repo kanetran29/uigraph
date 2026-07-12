@@ -40,7 +40,7 @@ export function within(container: Node, node: Node): boolean {
 }
 
 /** The top-level JSX element root(s) of an element expression: the element itself, or the JSX branches of an enclosing ternary/&&. */
-function jsxRootsOf(expr: Node): Node[] {
+export function jsxRootsOf(expr: Node): Node[] {
   if (isJsxEl(expr)) return [expr]
   if (Node.isParenthesizedExpression(expr)) {
     const inner = expr.getExpression()
@@ -110,10 +110,17 @@ export function inlineElementTag(el: Node): { tag: string; exprNode: Node; roots
   if (!init || !Node.isJsxExpression(init)) return null
   const inner = init.getExpression()
   if (!inner) return null
-  // The lowercase JSX root(s) the element renders. A bare `element={<div>…}` has one;
-  // a `cond ? <section/> : <Navigate/>` or `cond && <section/>` has its branch root(s).
-  // A single capitalized element (element={<X/>}) is a component reference, not inline
-  // markup — left to the component-file scan (returns null here).
+  return inlineExprInfo(inner)
+}
+
+/**
+ * Classify an element-valued expression as inline markup: the lowercase JSX root(s)
+ * it renders. A bare `<div>…` has one; a `cond ? <section/> : <Navigate/>` or
+ * `cond && <section/>` has its branch root(s). A single capitalized element (`<X/>`)
+ * is a component reference, not inline markup — returns null. Shared by the JSX
+ * `element={…}` attr reader and the data-router `element:` property reader.
+ */
+export function inlineExprInfo(inner: Node): { tag: string; exprNode: Node; roots: Node[] } | null {
   const roots = jsxRootsOf(inner)
   const lowercaseRoot = roots.find((r) => /^[a-z]/.test(jsxTag(r)))
   if (!lowercaseRoot) return null
