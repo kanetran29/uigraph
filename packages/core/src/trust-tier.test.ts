@@ -31,6 +31,11 @@ describe('projectTrustTier', () => {
     expect(projectTrustTier(edge({ source: 'runtime', modality: 'may' }), 'proposed')).toBe('witnessed')
   })
 
+  it('stale witness demotes to asserted — the code changed since verification', () => {
+    expect(projectTrustTier(edge({ source: 'runtime', modality: 'must', witnessStale: true }))).toBe('asserted')
+    expect(projectTrustTier(edge({ source: 'runtime', modality: 'may', witnessStale: true }), 'proposed')).toBe('asserted')
+  })
+
   it('proven tier — source:static|manual + modality:must + witness → proven', () => {
     const w = { source: 'static' as const, file: 'f.ts', loc: { line: 1, col: 1 } }
     expect(projectTrustTier(edge({ source: 'static', modality: 'must', witness: w }))).toBe('proven')

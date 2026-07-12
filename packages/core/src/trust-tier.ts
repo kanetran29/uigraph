@@ -42,17 +42,21 @@ const TIER_LABELS: Record<TrustTier, string> = {
  * Project the trust tier from an edge's source + modality + an optional final
  * proposal status. Pure: returns a label, never mutates the input edge.
  *
- * Precedence (spec §3): a runtime witness wins outright (`witnessed`) — this also
- * covers a confirmed proposal, whose edge is already source:runtime via the
- * observation fold. Otherwise `unverifiable` marks an LLM-plausible-but-undrivable
- * case (`llm-verified`), while a `proposed` OR `rejected` status keeps the case a
- * weak `proposed` hypothesis — a rejected proposal must NOT be promoted to
- * `asserted` (that tier means "exists in real code"); a disproven lead stays a
- * lead and never enters the proven graph. With no proposal status, source+modality
- * decide: static|manual must → `proven`, may → `asserted`, unknown → `unknown`.
+ * Precedence (spec §3): a FRESH runtime witness wins outright (`witnessed`) — this
+ * also covers a confirmed proposal, whose edge is already source:runtime via the
+ * observation fold. A STALE runtime witness (recorded against a different base —
+ * the code changed since verification) demotes to `asserted`: the transition was
+ * once real, but the current code has not been exercised, so an agent must
+ * re-verify before relying on it. Otherwise `unverifiable` marks an
+ * LLM-plausible-but-undrivable case (`llm-verified`), while a `proposed` OR
+ * `rejected` status keeps the case a weak `proposed` hypothesis — a rejected
+ * proposal must NOT be promoted to `asserted` (that tier means "exists in real
+ * code"); a disproven lead stays a lead and never enters the proven graph. With no
+ * proposal status, source+modality decide: static|manual must → `proven`, may →
+ * `asserted`, unknown → `unknown`.
  */
 export function projectTrustTier(edge: GraphEdge, proposalStatus?: ProposalStatus): TrustTier {
-  if (edge.source === 'runtime') return 'witnessed'
+  if (edge.source === 'runtime') return edge.witnessStale === true ? 'asserted' : 'witnessed'
   if (proposalStatus === 'unverifiable') return 'llm-verified'
   if (proposalStatus === 'proposed' || proposalStatus === 'rejected') return 'proposed'
   if (edge.modality === 'must') return 'proven'

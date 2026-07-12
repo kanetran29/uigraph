@@ -56,7 +56,7 @@ export function loadMergedGraph(ctx: ToolContext): UiGraph {
       }
       merged = mergeOverlay(base, overlay)
     }
-    merged = applyObservations(merged, store.getObservations())
+    merged = applyObservations(merged, store.getObservations(), { baseHash: hashValue(base) })
     const errs = validateMerged(merged)
     if (errs.length > 0) throw new Error(`merged graph is invalid:\n  ${errs.map((e) => e.message).join('\n  ')}`)
     return merged

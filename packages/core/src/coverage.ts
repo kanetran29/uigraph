@@ -23,7 +23,7 @@ export interface ParkedEdge {
   by?: 'agent' | 'runner'
 }
 
-/** How one edge is accounted for. `verified` (= runtime) kept for back-compat. */
+/** How one edge is accounted for. `verified` (= FRESH runtime witness) kept for back-compat. */
 export interface EdgeCoverage {
   id: string
   from: string
@@ -33,7 +33,7 @@ export interface EdgeCoverage {
   source: string
   verified: boolean
   accounted: boolean
-  status: 'runtime' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'open'
+  status: 'runtime' | 'stale-witness' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'open'
   reason?: string
 }
 
@@ -56,6 +56,7 @@ export interface CoverageReport {
   accounted: number
   accountedRatio: number
   parkedCount: number
+  staleWitnessCount: number
   byModality: Record<string, number>
   bySource: Record<string, number>
   unverified: EdgeCoverage[]
@@ -71,24 +72,28 @@ interface EdgeContext {
   resolvedFroms: Set<string>
 }
 
-/** Build the accounting context: a `from` is "resolved" once it has a concrete (non-sink) runtime out-edge. */
+/** Build the accounting context: a `from` is "resolved" once it has a concrete (non-sink) FRESH runtime out-edge — a stale witness credits nothing. */
 function edgeContext(graph: UiGraph): EdgeContext {
   const nodeKind = new Map(graph.nodes.map((n) => [n.id, n.kind]))
   const resolvedFroms = new Set<string>()
-  for (const e of graph.edges) if (e.source === 'runtime' && nodeKind.get(e.to) !== 'unknown') resolvedFroms.add(e.from)
+  for (const e of graph.edges) if (e.source === 'runtime' && e.witnessStale !== true && nodeKind.get(e.to) !== 'unknown') resolvedFroms.add(e.from)
   return { nodeKind, resolvedFroms }
 }
 
 /**
- * Classify one edge. Precedence is LOAD-BEARING (first match wins): runtime →
- * parked (before static, so a parked edge is credited by its audit note not a
- * witness) → dynamic sink (never credited by its own witness; resolved only via a
- * concrete runtime out-edge from the same source) → must-static witness → open.
- * A `may` edge is OPEN even with a static witness (the witness proves the call
- * site, not that the transition fires).
+ * Classify one edge. Precedence is LOAD-BEARING (first match wins): fresh runtime →
+ * stale runtime witness (code changed since verification: NOT accounted — it goes
+ * back on the worklist for re-confirmation) → parked (before static, so a parked
+ * edge is credited by its audit note not a witness) → dynamic sink (never credited
+ * by its own witness; resolved only via a concrete runtime out-edge from the same
+ * source) → must-static witness → open. A `may` edge is OPEN even with a static
+ * witness (the witness proves the call site, not that the transition fires).
  */
 function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: Map<string, ParkedEdge>): { status: EdgeCoverage['status']; accounted: boolean; reason?: string } {
-  if (edge.source === 'runtime') return { status: 'runtime', accounted: true }
+  if (edge.source === 'runtime') {
+    if (edge.witnessStale === true) return { status: 'stale-witness', accounted: false, reason: 'runtime witness predates the current base graph — re-verify' }
+    return { status: 'runtime', accounted: true }
+  }
   const parked = parkedById.get(edge.id)
   if (parked) return { status: 'parked', accounted: true, reason: parked.reason }
   if (ctx.nodeKind.get(edge.to) === 'unknown') {
@@ -115,7 +120,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
   const parkedById = new Map(parked.map((p) => [p.edgeId, p]))
   const rows: EdgeCoverage[] = graph.edges.map((e) => {
     const c = classify(e, ctx, parkedById)
-    return { id: e.id, from: e.from, to: e.to, event: e.event, modality: e.modality, source: e.source, verified: e.source === 'runtime', accounted: c.accounted, status: c.status, ...(c.reason !== undefined ? { reason: c.reason } : {}) }
+    return { id: e.id, from: e.from, to: e.to, event: e.event, modality: e.modality, source: e.source, verified: c.status === 'runtime', accounted: c.accounted, status: c.status, ...(c.reason !== undefined ? { reason: c.reason } : {}) }
   })
   const byModality: Record<string, number> = {}
   const bySource: Record<string, number> = {}
@@ -126,6 +131,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
   const runtimeVerified = rows.filter((r) => r.verified).length
   const verifiedCount = rows.filter((r) => r.status === 'runtime' || r.status === 'static').length
   const parkedCount = rows.filter((r) => r.status === 'parked').length
+  const staleWitnessCount = rows.filter((r) => r.status === 'stale-witness').length
   const accounted = rows.filter((r) => r.accounted).length
   const total = rows.length
   return {
@@ -139,6 +145,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
     accounted,
     accountedRatio: total > 0 ? accounted / total : 1,
     parkedCount,
+    staleWitnessCount,
     byModality,
     bySource,
     unverified: rows.filter((r) => !r.verified),
@@ -193,24 +200,31 @@ export interface VerifyTarget {
 }
 
 /**
- * Rank what to verify next: `unknown` (dynamic-target) edges first, then `may`
- * (conditional) edges, then proposed transitions — each minus anything already
- * runtime-witnessed, parked, or (for a dynamic sink) resolved by a concrete
- * runtime out-edge from its source. Proven `must` static edges are skipped
- * (already witnessed). The open set shrinks monotonically as edges are confirmed
- * or parked. Returns the top `limit`.
+ * Rank what to verify next: `unknown` (dynamic-target) edges first, then
+ * stale-witnessed runtime edges (verified against an older base — the code
+ * changed, re-confirm), then `may` (conditional) edges, then proposed
+ * transitions — each minus anything already fresh-runtime-witnessed, parked, or
+ * (for a dynamic sink) resolved by a concrete runtime out-edge from its source.
+ * Proven `must` static edges are skipped (already witnessed). The open set
+ * shrinks monotonically as edges are confirmed or parked. Returns the top `limit`.
  */
 export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit = 20, parkedIds: Set<string> = new Set()): VerifyTarget[] {
   const labelOf = new Map(graph.nodes.map((n) => [n.id, n.label]))
   const ctx = edgeContext(graph)
-  const runtimePairs = new Set(graph.edges.filter((e) => e.source === 'runtime').map((e) => `${e.from}->${e.to}`))
+  const runtimePairs = new Set(graph.edges.filter((e) => e.source === 'runtime' && e.witnessStale !== true).map((e) => `${e.from}->${e.to}`))
   const out: VerifyTarget[] = []
 
   for (const e of graph.edges) {
-    if (e.source === 'runtime') continue
+    if (e.source === 'runtime' && e.witnessStale !== true) continue
     if (parkedIds.has(e.id)) continue
     let priority = 0
     let reason = ''
+    if (e.source === 'runtime') {
+      priority = 2
+      reason = 'stale witness — the base graph changed since this was verified; re-confirm'
+      out.push({ kind: 'edge', id: e.id, from: e.from, to: e.to, toLabel: labelOf.get(e.to) ?? e.to, event: e.event, reason, priority })
+      continue
+    }
     if (e.modality === 'unknown') {
       if (ctx.resolvedFroms.has(e.from)) continue
       priority = 3

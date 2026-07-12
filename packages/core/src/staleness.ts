@@ -16,6 +16,7 @@ import { hashValue } from './hash'
 export interface StalenessIssue {
   code:
     | 'OBSERVATION_DANGLING'
+    | 'OBSERVATION_STALE_BASE'
     | 'OVERLAY_EDGE_DANGLING'
     | 'OVERLAY_EDITED_NODE_DANGLING'
     | 'OVERLAY_REMOVED_DANGLING'
@@ -76,6 +77,10 @@ export function validateRefs(input: ValidateRefsInput): StalenessReport {
     if (missing !== undefined) {
       droppedObservationIds.push(o.id)
       issues.push({ code: 'OBSERVATION_DANGLING', message: `observation "${o.id}" references unknown node "${missing}" — dropped, no edge minted`, id: o.id })
+      continue
+    }
+    if (o.base !== undefined && o.base !== baseHash) {
+      issues.push({ code: 'OBSERVATION_STALE_BASE', message: `observation "${o.id}" was recorded against base ${o.base}, not the current ${baseHash} — its edge folds as witnessStale and needs re-verification`, id: o.id })
     }
   }
 
