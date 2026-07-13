@@ -19,7 +19,7 @@ A runnable, end-to-end slice:
 - **`apps/dashboard`** — a React + Vite + React Flow editable graph view.
 - **`examples/sample-react-app`** and **`examples/sample-angular-app`** — golden fixtures with known routes/guards/navigations.
 
-It runs end-to-end on the bundled sample apps; the real refapp.example frontend (react-router v5) is the validation target *after* the samples pass.
+It runs end-to-end on the bundled sample apps; a large real-world react-router v5 production app is the validation target *after* the samples pass.
 
 ## Core vs adapter
 

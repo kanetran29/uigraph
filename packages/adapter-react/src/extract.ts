@@ -329,7 +329,7 @@ export function extractGraphFromRoutes(
           // Link each modal-opening effect to the SPECIFIC modal it shows (matched by the
           // state var setShowX -> showX -> the modal gated by showX). The precise gate-var
           // match is deterministic and allowed for ANY control — including one nested inside
-          // another overlay (refapp opens its login modal from controls deep in the buy/sell
+          // another overlay (production apps open login modals from controls deep in checkout
           // flow). The sole-modal FALLBACK is a guess, so only screen-level controls
           // (linkModals) may use it — a nested control could mislink across unrelated overlays.
           for (const eff of inter.effects) {

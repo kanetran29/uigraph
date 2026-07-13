@@ -26,7 +26,7 @@ Write the **minimal** code that makes the failing tests pass (green) — nothing
 
 ## 5. SELF-HEAL
 
-Run the check gate: `node scripts/check.mjs`, which runs across the whole workspace (a) `tsc --noEmit` via `pnpm -r run typecheck`, then (b) `vitest run` via `pnpm -r run test`, then (c) `eslint .`. The gate always runs all three steps so you see the full picture, then prints `CHECK GREEN` or `CHECK RED: <failed steps>`. Fix every signaled error, re-running the gate after each fix, for a **maximum of 3 heal iterations**; if it is still red after the third, **STOP and escalate** with the remaining error rather than continuing. Never claim a feature done on a red gate or a skipped/short-circuited one — this mirrors the self-healing-refapp pattern.
+Run the check gate: `node scripts/check.mjs`, which runs across the whole workspace (a) `tsc --noEmit` via `pnpm -r run typecheck`, then (b) `vitest run` via `pnpm -r run test`, then (c) `eslint .`. The gate always runs all three steps so you see the full picture, then prints `CHECK GREEN` or `CHECK RED: <failed steps>`. Fix every signaled error, re-running the gate after each fix, for a **maximum of 3 heal iterations**; if it is still red after the third, **STOP and escalate** with the remaining error rather than continuing. Never claim a feature done on a red gate or a skipped/short-circuited one — this is the self-healing gate pattern.
 
 ## 6. SELF-CHECK
 
