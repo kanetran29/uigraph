@@ -85,6 +85,8 @@ exactly which conditional edges to confirm next — with the reminder that a con
 
 ## Under the hood
 
+<p align="center"><img src="docs/assets/architecture.svg" width="960" alt="UI-graph layered architecture: consumers, interface layer, model-free core, adapters and the verification loop, the SQLite workspace, and external systems"/></p>
+
 Three tiers, one invariant — **no edge enters the base graph without a deterministic witness**:
 
 | Tier | Who | What enters the graph |

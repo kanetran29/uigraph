@@ -1,0 +1,155 @@
+<svg width="1520" height="1060" viewBox="0 0 1520 1060" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;">
+  <title>UI-graph architecture</title>
+  <desc>Layered architecture: consumers on top (CLI, dashboard, AI agents), interface layer (MCP server, serve API, agent kit), the model-free core, framework adapters and the verification loop side by side, the SQLite workspace below, external systems, and the design principles footer.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect width="1520" height="1060" fill="#FFFFFF"/>
+
+  <!-- L1 consumers -->
+  <rect x="40" y="28" width="1440" height="122" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="66" y="60" fill="#1d4ed8" font-size="18" font-weight="600">L1&#160;&#160;Consumers</text>
+  <rect x="250" y="52" width="340" height="74" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="420" y="84" text-anchor="middle" font-size="16" font-weight="600" fill="#111827">CLI&#160;&#160;<tspan font-weight="400" fill="#4b5563">(uigraph)</tspan></text>
+  <text x="420" y="107" text-anchor="middle" font-size="13" fill="#4b5563">map | verify --all | login | dash | gen | diff</text>
+  <rect x="620" y="52" width="380" height="74" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="810" y="84" text-anchor="middle" font-size="16" font-weight="600" fill="#111827">Dashboard&#160;&#160;<tspan font-weight="400" fill="#4b5563">(React viewer)</tspan></text>
+  <text x="810" y="107" text-anchor="middle" font-size="13" fill="#4b5563">graph | coverage | freshness | verify worklist</text>
+  <rect x="1030" y="52" width="420" height="74" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="1240" y="84" text-anchor="middle" font-size="16" font-weight="600" fill="#111827">AI agents&#160;&#160;<tspan font-weight="400" fill="#4b5563">(BYOA over MCP)</tspan></text>
+  <text x="1240" y="107" text-anchor="middle" font-size="13" fill="#4b5563">Claude Code | Cursor | Copilot | any MCP client</text>
+
+  <!-- L2 interfaces -->
+  <rect x="40" y="172" width="1440" height="118" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.4"/>
+  <text x="66" y="204" fill="#b45309" font-size="18" font-weight="600">L2&#160;&#160;Interface layer</text>
+  <rect x="280" y="196" width="380" height="72" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="470" y="226" text-anchor="middle" font-size="16" font-weight="600" fill="#111827">MCP server&#160;&#160;<tspan font-weight="400" fill="#4b5563">(stdio, model-free)</tspan></text>
+  <text x="470" y="249" text-anchor="middle" font-size="13" fill="#4b5563">27 tools: get_graph &#183; plan_path &#183; propose &#183; report_observation&#8230;</text>
+  <rect x="690" y="196" width="330" height="72" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="855" y="226" text-anchor="middle" font-size="16" font-weight="600" fill="#111827">Serve API&#160;&#160;<tspan font-weight="400" fill="#4b5563">(node:http)</tspan></text>
+  <text x="855" y="249" text-anchor="middle" font-size="13" fill="#4b5563">REST + static dashboard &#183; multi-workspace ?ws</text>
+  <rect x="1050" y="196" width="360" height="72" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="1230" y="226" text-anchor="middle" font-size="16" font-weight="600" fill="#111827">Agent kit</text>
+  <text x="1230" y="249" text-anchor="middle" font-size="13" fill="#4b5563">rules &#183; guides &#183; reconciliation-loop playbook</text>
+
+  <!-- L3 core -->
+  <rect x="40" y="312" width="1440" height="256" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.4"/>
+  <text x="66" y="344" fill="#6d28d9" font-size="18" font-weight="600">L3&#160;&#160;Core&#160;&#160;<tspan font-weight="400" font-size="15" fill="#6b7280">(@uigraph/core — framework-agnostic, never calls an LLM)</tspan></text>
+  <rect x="70" y="364" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="235" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">IR: guarded labeled LTS</text>
+  <text x="235" y="419" text-anchor="middle" font-size="13" fill="#4b5563">screens + (event, guard, effect) edges &#183; must/may/unknown</text>
+  <rect x="430" y="364" width="310" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="585" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Trust tiers&#160;&#160;<tspan font-weight="400" fill="#4b5563">(on read)</tspan></text>
+  <text x="585" y="419" text-anchor="middle" font-size="13" fill="#4b5563">witnessed &#8250; proven &#8250; asserted &#8250; proposed</text>
+  <rect x="770" y="364" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="935" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Honest coverage</text>
+  <text x="935" y="419" text-anchor="middle" font-size="13" fill="#4b5563">runtime &#8838; verified &#8838; accounted &#183; parked with reasons</text>
+  <rect x="1130" y="364" width="320" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="1290" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Graph ops</text>
+  <text x="1290" y="419" text-anchor="middle" font-size="13" fill="#4b5563">validate &#183; overlay merge &#183; diff &#183; plan_path (BFS)</text>
+  <rect x="70" y="464" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="235" y="496" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Golden invariant</text>
+  <text x="235" y="519" text-anchor="middle" font-size="13" fill="#4b5563">no base edge without a deterministic witness</text>
+  <rect x="430" y="464" width="310" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="585" y="496" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Observation fold</text>
+  <text x="585" y="519" text-anchor="middle" font-size="13" fill="#4b5563">(from, to, event) triple &#183; stale-witness demotion</text>
+  <rect x="770" y="464" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="935" y="496" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Codegen&#160;&#160;<tspan font-weight="400" fill="#4b5563">(Playwright)</tspan></text>
+  <text x="935" y="519" text-anchor="middle" font-size="13" fill="#4b5563">plan &#8594; legs &#8594; spec &#183; param-pattern asserts</text>
+  <rect x="1130" y="464" width="320" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="1290" y="496" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">SQLite store</text>
+  <text x="1290" y="519" text-anchor="middle" font-size="13" fill="#4b5563">node:sqlite &#183; no native deps &#183; one uigraph.db</text>
+
+  <!-- L4 adapters / L5 verification -->
+  <rect x="40" y="590" width="700" height="180" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="66" y="622" fill="#15803d" font-size="18" font-weight="600">L4&#160;&#160;Adapters&#160;&#160;<tspan font-weight="400" font-size="15" fill="#6b7280">(ts-morph static extraction &#183; Tier 1)</tspan></text>
+  <rect x="70" y="642" width="310" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="225" y="674" text-anchor="middle" font-size="14" fill="#111827"><tspan font-weight="600">React</tspan> v5 &#183; v6 &#183; data-router</text>
+  <rect x="400" y="642" width="150" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="475" y="674" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Vue</text>
+  <rect x="70" y="706" width="150" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="145" y="738" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Angular</text>
+  <rect x="240" y="706" width="150" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="315" y="738" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Next.js</text>
+  <rect x="410" y="706" width="300" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="560" y="731" text-anchor="middle" font-size="13" fill="#4b5563">degrade loudly: soundiness notes,</text>
+  <text x="560" y="748" text-anchor="middle" font-size="13" fill="#4b5563">may fan-out &#183; never a guessed must</text>
+
+  <rect x="770" y="590" width="710" height="180" rx="10" fill="#fff1eb" stroke="#D97757" stroke-width="1.4"/>
+  <text x="796" y="622" fill="#c2410c" font-size="18" font-weight="600">L5&#160;&#160;Verification loop&#160;&#160;<tspan font-weight="400" font-size="15" fill="#6b7280">(Tiers 2 + 3)</tspan></text>
+  <rect x="800" y="642" width="310" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="955" y="668" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Tier 2 &#183; propose&#160;&#160;<tspan font-weight="400" fill="#4b5563">(LLM, quarantined)</tspan></text>
+  <text x="955" y="687" text-anchor="middle" font-size="13" fill="#4b5563">hypotheses only — never edges</text>
+  <rect x="1130" y="642" width="330" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="1295" y="668" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Tier 3 &#183; runner&#160;&#160;<tspan font-weight="400" fill="#4b5563">(Playwright)</tspan></text>
+  <text x="1295" y="687" text-anchor="middle" font-size="13" fill="#4b5563">drive &#183; probe &#183; press &#183; storageState auth</text>
+  <rect x="800" y="706" width="660" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="1130" y="731" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Proof gate&#160;&#160;<tspan font-weight="400" fill="#4b5563">report_observation(confirmed) requires evidence + provenance</tspan></text>
+  <text x="1130" y="748" text-anchor="middle" font-size="13" fill="#4b5563">url-change | url-assert | dialog | screenshot-on-disk &#183; refuted mints nothing &#183; undrivable is never refuted</text>
+
+  <!-- L6 workspace + external -->
+  <rect x="40" y="792" width="880" height="130" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="1.4"/>
+  <text x="66" y="824" fill="#b91c1c" font-size="18" font-weight="600">L6&#160;&#160;Workspace</text>
+  <rect x="70" y="842" width="520" height="62" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="330" y="868" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">uigraph.db&#160;&#160;<tspan font-weight="400" fill="#4b5563">(committable team memory)</tspan></text>
+  <text x="330" y="890" text-anchor="middle" font-size="13" fill="#4b5563">base graph &#183; overlay &#183; observations &#183; proposals &#183; parked &#183; fingerprint</text>
+  <rect x="610" y="842" width="290" height="62" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
+  <text x="755" y="868" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Registry&#160;&#160;<tspan font-weight="400" fill="#4b5563">(~/.uigraph)</tspan></text>
+  <text x="755" y="890" text-anchor="middle" font-size="13" fill="#4b5563">multi-project switcher, opaque ids</text>
+
+  <rect x="950" y="792" width="530" height="130" rx="10" fill="#f9fafb" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="976" y="824" fill="#374151" font-size="18" font-weight="600">External systems</text>
+  <rect x="976" y="842" width="150" height="62" rx="8" fill="#FFFFFF" stroke="#9ca3af" stroke-width="1.2"/>
+  <text x="1051" y="868" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">App source</text>
+  <text x="1051" y="890" text-anchor="middle" font-size="13" fill="#4b5563">read-only AST</text>
+  <rect x="1146" y="842" width="150" height="62" rx="8" fill="#FFFFFF" stroke="#9ca3af" stroke-width="1.2"/>
+  <text x="1221" y="868" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Running app</text>
+  <text x="1221" y="890" text-anchor="middle" font-size="13" fill="#4b5563">driven, observed</text>
+  <rect x="1316" y="842" width="144" height="62" rx="8" fill="#FFFFFF" stroke="#9ca3af" stroke-width="1.2"/>
+  <text x="1388" y="868" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Agent&#8217;s LLM</text>
+  <text x="1388" y="890" text-anchor="middle" font-size="13" fill="#4b5563">BYOA — no API key</text>
+
+  <!-- arrows -->
+  <g stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+    <line x1="420" y1="126" x2="420" y2="168"/>
+    <line x1="810" y1="126" x2="810" y2="192"/>
+    <line x1="1240" y1="126" x2="1240" y2="192"/>
+    <line x1="470" y1="268" x2="470" y2="308"/>
+    <line x1="855" y1="268" x2="855" y2="308"/>
+    <line x1="390" y1="572" x2="390" y2="586"/>
+    <line x1="235" y1="770" x2="235" y2="788"/>
+  </g>
+  <g stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5 4" fill="none" marker-end="url(#arr)">
+    <line x1="225" y1="700" x2="225" y2="704" opacity="0"/>
+    <path d="M560 758 C 620 800, 800 830, 972 850"/>
+    <line x1="1295" y1="758" x2="1231" y2="838"/>
+    <line x1="1240" y1="268" x2="1385" y2="838" opacity="0.55"/>
+  </g>
+  <g stroke="#D97757" stroke-width="1.8" stroke-dasharray="6 4" fill="none" marker-end="url(#arr)">
+    <path d="M1125 570 C 1122 596, 1120 610, 1118 636"/>
+    <path d="M900 772 C 760 810, 660 826, 596 852"/>
+  </g>
+
+  <!-- legend -->
+  <rect x="950" y="530" width="240 " height="0" fill="none"/>
+  <g>
+    <rect x="1210" y="308" width="0" height="0" fill="none"/>
+  </g>
+  <rect x="40" y="944" width="430" height="44" rx="8" fill="#FFFFFF" stroke="#d1d5db" stroke-width="1.2"/>
+  <text x="60" y="972" font-size="13" fill="#374151">Legend</text>
+  <line x1="130" y1="967" x2="170" y2="967" stroke="#374151" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="178" y="972" font-size="13" fill="#4b5563">call</text>
+  <line x1="220" y1="967" x2="260" y2="967" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+  <text x="268" y="972" font-size="13" fill="#4b5563">data / drive</text>
+  <line x1="352" y1="967" x2="392" y2="967" stroke="#D97757" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+  <text x="400" y="972" font-size="13" fill="#4b5563">proof</text>
+
+  <!-- principles -->
+  <rect x="490" y="944" width="990" height="44" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.4"/>
+  <text x="516" y="972" font-size="14" font-weight="600" fill="#b45309">Design principles</text>
+  <text x="660" y="972" font-size="13.5" fill="#374151">Golden invariant&#160;&#160;|&#160;&#160;Model-free (BYOA)&#160;&#160;|&#160;&#160;LLM output quarantined&#160;&#160;|&#160;&#160;Degrade loudly, never silently&#160;&#160;|&#160;&#160;Honest coverage</text>
+
+  <text x="760" y="1032" text-anchor="middle" font-size="13" fill="#9ca3af">UI-graph — layered architecture (OSS engine)</text>
+</svg>
