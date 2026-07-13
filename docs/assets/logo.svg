@@ -1,5 +1,5 @@
 <svg width="460" height="130" viewBox="0 0 460 130" role="img" xmlns="http://www.w3.org/2000/svg">
-  <title>uigraph</title>
+  <title>UI-graph</title>
   <desc>uigraph logo: three small screens connected by solid and dashed transition edges, with the uigraph wordmark in terracotta and warm ink on a cream card.</desc>
   <rect x="0" y="0" width="460" height="130" rx="16" fill="#F0EEE6"/>
   <g>
@@ -16,5 +16,5 @@
     <path d="M45 62 C 47 70, 51 75, 56 80" fill="none" stroke="#3D3929" stroke-width="2" stroke-linecap="round"/>
     <path d="M52.6 78.9 L 58.6 82.3 L 55.5 76.2 Z" fill="#3D3929"/>
   </g>
-  <text x="140" y="82" style="font-family: Georgia, 'Times New Roman', serif; font-size: 44px; letter-spacing: -0.5px;"><tspan fill="#D97757">ui</tspan><tspan fill="#3D3929">graph</tspan></text>
+  <text x="140" y="82" style="font-family: Georgia, 'Times New Roman', serif; font-size: 44px; letter-spacing: -0.5px;"><tspan fill="#D97757">UI</tspan><tspan fill="#3D3929">-graph</tspan></text>
 </svg>
