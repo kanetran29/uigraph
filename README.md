@@ -117,6 +117,16 @@ This repository is the complete, MIT-licensed trust engine — nothing epistemic
 3. Extraction changes must keep the gauntlet at 35/35 (`pnpm exec tsx scripts/gauntlet-report.ts`); new patterns welcome — add the case *and* its golden expectation.
 4. Follow the dev cycle in [docs/20-development-cycle.md](docs/20-development-cycle.md).
 
+## Star history
+
+<a href="https://star-history.com/#kanetran29/uigraph&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kanetran29/uigraph&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=kanetran29/uigraph&type=Date" />
+    <img alt="Star history chart for kanetran29/uigraph" src="https://api.star-history.com/svg?repos=kanetran29/uigraph&type=Date" width="640" />
+  </picture>
+</a>
+
 ## License
 
 MIT © Kane Tran — see [LICENSE](LICENSE). The research dossier behind the design lives in [docs/ui-graph-dossier-final-en.md](docs/ui-graph-dossier-final-en.md).
