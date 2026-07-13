@@ -10,17 +10,25 @@ Status: **v1**, validated end-to-end on bundled sample apps and the real
 refapp.example frontend. See [docs/](docs/README.md) and the source dossier
 [`docs/ui-graph-dossier-final-en.md`](docs/ui-graph-dossier-final-en.md).
 
+![The dashboard on the adversarial gauntlet sample: green edges are runtime-witnessed, the coverage panel keeps verified / runtime-verified / parked honestly distinct](docs/assets/dashboard-graph.png)
+
+*The bundled gauntlet sample after a verify run: 65% of transitions runtime-witnessed
+(green), 100% accounted — every remaining edge either proven or parked with a
+written reason. The numbers never conflate.*
+
 ## What's here
 
 | Package | Role |
 | --- | --- |
-| `@uigraph/core` | framework-agnostic IR + pure ops (validate, overlay/merge, diff, plan_path) + the adapter contract |
-| `@uigraph/adapter-react` | react-router **v5 + v6** static extraction (ts-morph) |
+| `@uigraph/core` | framework-agnostic IR + pure ops (validate, overlay/merge, diff, plan_path, codegen, coverage, trust tiers) + the adapter contract |
+| `@uigraph/adapter-react` | react-router **v5 + v6 + data-router (`createBrowserRouter`)** static extraction (ts-morph) |
+| `@uigraph/adapter-vue` | vue-router (SFC template + script, nested routes, guards) |
 | `@uigraph/adapter-angular` | Angular `Routes` / `routerLink` / `canActivate` extraction |
-| `@uigraph/mcp` | model-free **stdio MCP server** (`get_graph`, `plan_path`, `update_graph`, `report_observation`, `diff`) |
-| `@uigraph/cli` | `uigraph map` / `diff` / `serve` (single or multi-project) / `workspace` / `mcp` |
-| `apps/dashboard` | **React Flow** editable graph view (the "Obsidian for the UI graph") |
-| `examples/sample-*-app` | golden fixtures (known graphs) |
+| `@uigraph/adapter-next` | Next.js filesystem routes (App + Pages router) on the shared react engine |
+| `@uigraph/mcp` | model-free **stdio MCP server**, 27 tools (`get_graph`, `plan_path`, `propose`, `report_observation` — proof-gated, `update_graph`, `diff`, …) |
+| `@uigraph/cli` | `uigraph map` / `verify` (`--all`, `--until-done`) / `login` / `dash` / `gen` / `diff` / `serve` / `workspace` / `mcp` |
+| `apps/dashboard` | **React Flow** viewer: graph, coverage, freshness, verify worklist (read-only; editing lives in studio) |
+| `examples/sample-*` | golden fixtures, incl. the adversarial **gauntlet** (35 graded extraction expectations) |
 
 The **golden invariant**: no edge enters the base graph without a deterministic
 witness (static proof). Manual edits live in a sidecar **overlay**, never the base.
@@ -60,6 +68,12 @@ uigraph workspace list                      # ● available · ○ needs re-map
 The dashboard selects a project via an **opaque** `?ws=<id>` — that id resolves
 only to a registered absolute dir on the server, never builds a path, and the
 `/api/workspaces` list omits absolute dirs. `map --no-register` opts out.
+
+![Multi-project switcher with the freshness banner: the Vue RealWorld graph is out of date and says so, and the verify worklist names exactly what to confirm next](docs/assets/dashboard-freshness.png)
+
+*Freshness is never silent: a stale graph gets a banner, and the verify worklist
+ranks exactly which conditional edges to confirm next — with the reminder that a
+confirmation needs proof.*
 
 ## Status & honest limitations (post red-team)
 
