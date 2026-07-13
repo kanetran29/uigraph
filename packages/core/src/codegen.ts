@@ -15,10 +15,11 @@ import type { PlanStep } from './algorithms'
  * bare goto+URL-assert, so it stays asserted/llm-verified until truly driven.
  */
 export interface SpecAction {
-  kind: 'click' | 'fill' | 'goto' | 'available' | 'parked'
+  kind: 'click' | 'fill' | 'press' | 'goto' | 'available' | 'parked'
   locator?: string
   value?: string
   url?: string
+  key?: string
 }
 
 /** A single assertion to run after a leg's action. */
@@ -158,11 +159,18 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     if (fromNode.kind === 'control' && fromNode.control?.selector) {
       const locator = locatorFor(fromNode.control.selector)
       const ct = fromNode.control.controlType
-      action = ct === 'input' || ct === 'richtext' ? { kind: 'fill', locator, value: fillValue(ct, fromNode.control.input) } : { kind: 'click', locator }
+      if (e.event.startsWith('key')) {
+        action = { kind: 'press', locator, key: 'Enter' }
+      } else {
+        action = ct === 'input' || ct === 'richtext' ? { kind: 'fill', locator, value: fillValue(ct, fromNode.control.input) } : { kind: 'click', locator }
+      }
     } else if (e.effect === 'contains') {
       action = { kind: 'available' }
+    } else if (directNav && toNode.route !== null && !toNode.route.includes(':')) {
+      action = { kind: 'goto', url: toNode.route }
     } else if (directNav) {
-      action = { kind: 'goto', url: toNode.route && !toNode.route.includes(':') ? toNode.route : (toNode.route ?? '/') }
+      action = { kind: 'parked' }
+      parkedReason = `target route ${toNode.route ?? '(none)'} is parameterized/unknown — a bare goto needs a concrete param value; drive a real in-app link instead`
     } else {
       action = { kind: 'parked' }
       parkedReason = `${e.event}${e.guard ? ` [guard:${e.guard}]` : ''} is interaction-triggered/guarded with no drivable control — cannot be witnessed by goto+URL-assert`
@@ -197,6 +205,7 @@ export function renderPlaywrightSpec(plan: SpecPlan): string {
     lines.push('', `  // ${leg.description}`)
     const a = leg.action
     if (a.kind === 'click' && a.locator) lines.push(`  await ${a.locator}.click()`)
+    else if (a.kind === 'press' && a.locator) lines.push(`  await ${a.locator}.press(${q(a.key ?? 'Enter')})`)
     else if (a.kind === 'fill' && a.locator) lines.push(`  await ${a.locator}.fill(${q(a.value ?? '')})`)
     else if (a.kind === 'goto' && a.url !== undefined) lines.push(`  await page.goto(${url(a.url)})`)
     else if (a.kind === 'available') lines.push(`  // (control available on this screen — no navigation)`)

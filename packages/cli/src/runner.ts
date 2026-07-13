@@ -14,12 +14,13 @@ import { buildSpecPlan, fnv1a, nextToVerify, nodeForUrl, planPath } from '@uigra
 import { openStore } from '@uigraph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@uigraph/mcp'
 
-/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets); `evidence` is the structured proof the proof-gated report_observation requires for a confirmation. */
+/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets); `evidence` is the structured proof the proof-gated report_observation requires for a confirmation. `undrivable` means the plan had no drivable action (a parked leg) — the transition was NEVER attempted, so it must not be recorded as refuted. */
 export interface VerifyResult {
   confirmed: boolean
   screenshot?: string
   landedUrl?: string
   evidence?: Evidence
+  undrivable?: boolean
 }
 
 /** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. */
@@ -146,6 +147,8 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     } catch {
       result = { confirmed: false }
     }
+    // an undrivable plan was never attempted: refuting it would be a false negative
+    if (result.undrivable === true) continue
     reportObservation(ctx, {
       from: t.from,
       to: t.to,
@@ -206,13 +209,16 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
 
   for (; rounds < maxRounds; rounds++) {
     if (getLoopStatus(ctx).loopDone) break
+    const attempted = attemptedThisRound(ctx, opts.limit)
     const pass = await runVerify(opts)
     confirmed += pass.confirmed
-    // bump attempts for everything still open; park targets that exhausted their tries
+    // bump attempts ONLY for targets this round could actually try (the ranked
+    // worklist slice under the limit); park targets that exhausted their tries
     const status = getLoopStatus(ctx)
     const store = openStore(dbPath(ctx))
     try {
       for (const e of status.openEdges) {
+        if (!attempted.has(e.id)) continue
         const n = (tries.get(e.id) ?? 0) + 1
         tries.set(e.id, n)
         if (n >= parkTries) {
@@ -264,6 +270,23 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
     exitReason,
     runtimeRatio: final.coverage.runtimeRatio,
     accountedRatio: final.coverage.accountedRatio,
+  }
+}
+
+/**
+ * The ids the next verify pass will actually attempt: the same ranked worklist
+ * slice runVerify pulls (same ranking function, same limit), so the until-done
+ * loop's retry accounting can never claim an attempt for a target the limit
+ * excluded.
+ */
+function attemptedThisRound(ctx: { dir: string }, limit: number | undefined): Set<string> {
+  const graph = loadMergedGraph(ctx)
+  const store = openStore(dbPath(ctx))
+  try {
+    const targets = nextToVerify(graph, store.getProposalGraph(), limit, new Set(store.getParkedEdges().map((p) => p.edgeId)))
+    return new Set(targets.map((t) => t.id))
+  } finally {
+    store.close()
   }
 }
 
@@ -358,6 +381,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       const a = leg.action
       // H1: never goto the synthetic sink; only run real interaction legs as the trigger.
       if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
+      else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
       else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
     }
     // H3: wait long enough to observe a timer/async redirect (>5s); H4: then settle to a stable URL.
@@ -384,15 +408,16 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     if (a.kind === 'parked') parked = true
     else if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
     else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
+    else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
     else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
     for (const as of leg.assertions) {
       if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
       if (as.kind === 'dialog') expectDialog = true
     }
   }
-  if (parked) return { confirmed: false }
+  if (parked) return { confirmed: false, undrivable: true }
   // a drive that asserted NOTHING cannot witness anything — never mint an evidence-free confirmation
-  if (lastUrlAssertion === undefined && !expectDialog) return { confirmed: false }
+  if (lastUrlAssertion === undefined && !expectDialog) return { confirmed: false, undrivable: true }
   let confirmed = true
   if (lastUrlAssertion !== undefined) confirmed = page.url() === lastUrlAssertion
   if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
@@ -456,6 +481,7 @@ interface PwContext {
 interface PwLocator {
   click: (o?: unknown) => Promise<void>
   fill: (v: string, o?: unknown) => Promise<void>
+  press: (key: string, o?: unknown) => Promise<void>
   count: () => Promise<number>
 }
 interface PwPage {
@@ -467,10 +493,11 @@ interface PwPage {
   close: () => Promise<void>
 }
 
-/** Evaluate a `page.getBy…`-style locator snippet against the page, then click/fill it. */
-async function runLocator(page: PwPage, locator: string, action: 'click' | 'fill', value = ''): Promise<void> {
+/** Evaluate a `page.getBy…`-style locator snippet against the page, then click/fill/press it. */
+async function runLocator(page: PwPage, locator: string, action: 'click' | 'fill' | 'press', value = ''): Promise<void> {
   const expr = locator.replace(/^page\./, '')
   const loc = new Function('page', `return page.${expr}`)(page) as PwLocator
   if (action === 'click') await loc.click({ timeout: 5000 })
+  else if (action === 'press') await loc.press(value, { timeout: 5000 })
   else await loc.fill(value, { timeout: 5000 })
 }
