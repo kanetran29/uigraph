@@ -35,6 +35,7 @@ import '@xyflow/react/dist/style.css'
 import { toPng } from 'html-to-image'
 import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@ui-graph/core'
 import { layoutGraph, proposedScreenEdges, structuralKey, type GraphLayout, type ProposedEdge } from './layout'
+import { groupKeyOfId, isGroupId, levelView, screenGroups, type RouteView } from './routeView'
 import { pngFilename } from './exportPng'
 import { applySaved, layoutStorageKey, parsePositions, serializePositions } from './layoutStore'
 import { readStored, removeStored, writeStored } from './storage'
@@ -79,6 +80,9 @@ const DIFF_REMOVED_COLOR = '#dc2626'
 const GHOST_COLOR = '#a855f7'
 /** Stable empty id set, so an absent searchMatchIds prop doesn't churn memo deps. */
 const EMPTY_IDS: Set<string> = new Set()
+/** Stable empty group-meta maps, so toFlowNodes' defaults don't churn on small graphs. */
+const EMPTY_COUNTS: ReadonlyMap<string, number> = new Map()
+const EMPTY_WITNESSED: ReadonlyMap<string, boolean> = new Map()
 
 /** Edge stroke colour per provenance source: static slate, manual violet, runtime emerald. */
 const SOURCE_COLOR: Record<Source, string> = {
@@ -296,6 +300,29 @@ function screenStyle(manual: boolean, size: { width: number; height: number }, e
   }
 }
 
+/** Box style for a collapsed route-group super-node: a heavier, tinted container that
+ *  reads as a folder of screens, with an emerald border when it hides a witnessed edge. */
+function groupStyle(size: { width: number; height: number }, witnessed: boolean): CSSProperties {
+  return {
+    whiteSpace: 'pre-line',
+    borderRadius: 'var(--radius)',
+    border: `2.5px solid ${witnessed ? 'var(--edge-runtime)' : 'var(--edge-highlight)'}`,
+    background: 'var(--node-subtle-bg)',
+    color: 'var(--text)',
+    fontSize: 13,
+    fontWeight: 600,
+    lineHeight: 1.35,
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    width: size.width,
+    height: size.height,
+  }
+}
+
 /** Fixed box size for a removed-node ghost (explicit so ReactFlow doesn't have to measure it). */
 const GHOST_W = 176
 const GHOST_H = 52
@@ -361,6 +388,8 @@ function toFlowNodes(
   expanded: ReadonlySet<string>,
   proposalCount: ReadonlyMap<string, number>,
   diffNames: ReadonlyMap<string, { before: string; after: string }>,
+  groupCount: ReadonlyMap<string, number> = EMPTY_COUNTS,
+  groupHasWitnessed: ReadonlyMap<string, boolean> = EMPTY_WITNESSED,
 ): Node[] {
   const { positions, sizes, bands } = layout
 
@@ -393,6 +422,18 @@ function toFlowNodes(
         data: { label: n.label },
         selectable: false,
         style: ghostStateStyle(),
+      })
+    } else if (n.id.startsWith('grp_')) {
+      // A collapsed route-group super-node: its route label + a member count, and a
+      // green border + badge when a witnessed transition hides inside it.
+      const members = groupCount.get(n.id) ?? 0
+      const witnessed = groupHasWitnessed.get(n.id) === true
+      const badge = witnessed ? '\n✓ witnessed inside' : ''
+      screens.push({
+        id: n.id,
+        position: pos,
+        data: { label: `▤ ${n.label}\n${members} screens${badge}` },
+        style: groupStyle(size, witnessed),
       })
     } else {
       const count = childCount.get(n.id) ?? 0
@@ -557,14 +598,18 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     const diffDim = diffActive && !emphasized && !diffLit
     const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded) || searchDim || diffDim
     const color = diffLit && !emphasized ? (diffAdded ? DIFF_ADDED_COLOR : DIFF_CHANGED_COLOR) : strokeColor(e, onPath || selected)
+    // An aggregated `may` super-edge (grouped view) is the low-signal global-nav noise:
+    // fade it into the background and drop its ×N label unless it's emphasized, so the
+    // group boxes + the must/witnessed backbone read clearly. Everything stays present.
+    const weakSuper = e.id.startsWith('sg_') && e.modality === 'may' && e.source === 'static' && !emphasized
     const baseWidth = e.source === 'manual' ? 2 : 1.4
-    const width = onPath ? 3 : selected ? 2.8 : emphasized || (diffLit && !dimmed) ? 2.4 : baseWidth
-    const opacity = dimmed ? 0.12 : emphasized || diffLit ? 1 : 0.85
+    const width = onPath ? 3 : selected ? 2.8 : emphasized || (diffLit && !dimmed) ? 2.4 : weakSuper ? 1 : baseWidth
+    const opacity = dimmed ? 0.12 : emphasized || diffLit ? 1 : weakSuper ? 0.16 : 0.85
     // Screen→screen edges are the route skeleton: render as floating beziers and
     // keep their label visible (unless dimmed by a focus). Control edges keep their
     // label only when emphasized, to avoid clutter when a screen is expanded.
     const screenEdge = !isControlEdge
-    const showLabel = (screenEdge && !dimmed) || emphasized ? edgeLabel(e) : undefined
+    const showLabel = ((screenEdge && !dimmed && !weakSuper) || emphasized) ? edgeLabel(e) : undefined
 
     out.push({
       id: e.id,
@@ -723,7 +768,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     : 0
   // Hide the synthetic `u_<screen>` dynamic-target sinks (kind 'unknown') + any edge
   // touching them from the canvas. View-only: they stay in the IR + coverage worklist.
-  const graph = useMemo<UiGraph>(() => {
+  const baseGraph = useMemo<UiGraph>(() => {
     const hidden = new Set(rawGraph.nodes.filter((n) => n.kind === 'unknown').map((n) => n.id))
     if (hidden.size === 0) return rawGraph
     return {
@@ -737,6 +782,24 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [showProposed, setShowProposed] = useState(false)
   const [diffMode, setDiffMode] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
+
+  // Route-group level-of-detail: on a large graph, collapse screens into route groups
+  // (one super-node each) so the default view is a legible handful of nodes; a group in
+  // `expandedGroups` reveals its members in place. `view.graph` is a synthetic UiGraph
+  // fed to the UNCHANGED layout + render pipeline; below the threshold it is the real
+  // graph verbatim, so small apps behave exactly as before. `expandAllGroups` opens
+  // every group at once (the analog of "expand all controls").
+  const [expandedGroups, setExpandedGroups] = useState<ReadonlySet<string>>(new Set())
+  const [expandAllGroups, setExpandAllGroups] = useState(false)
+  // Every boxable group key (multi-member) — the target set of "expand all groups".
+  const allGroupKeys = useMemo(() => {
+    const keys = new Set<string>()
+    for (const [key, members] of screenGroups(baseGraph)) if (members.length >= 2) keys.add(key)
+    return keys
+  }, [baseGraph])
+  const effectiveGroups = expandAllGroups ? allGroupKeys : expandedGroups
+  const view = useMemo<RouteView>(() => levelView(baseGraph, effectiveGroups), [baseGraph, effectiveGroups])
+  const graph = view.graph
 
   // Diff-highlight is live only when there is a delta AND the toggle is on. Added nodes (green
   // ring) plus the endpoints of added/changed edges stay lit; everything else dims so the
@@ -858,7 +921,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     if (lastKey.current === key) return
     const firstLayout = lastKey.current === null
     lastKey.current = key
-    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames)
+    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames, view.groupCount, view.groupHasWitnessed)
     // Keep the user's dragged positions ONLY when the node SET is unchanged (a pure
     // re-style). When nodes are added or removed (expand collapse), take a FULL fresh
     // layout so every node is placed by one consistent radial pass.
@@ -967,6 +1030,17 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
 
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_evt, node) => {
+      // A group super-node toggles its expansion instead of selecting — the drill gesture.
+      if (isGroupId(node.id)) {
+        const key = groupKeyOfId(node.id)
+        setExpandedGroups((prev) => {
+          const next = new Set(prev)
+          if (next.has(key)) next.delete(key)
+          else next.add(key)
+          return next
+        })
+        return
+      }
       const found = graph.nodes.find((n) => n.id === node.id)
       if (found) onSelect({ kind: 'node', node: found })
     },
@@ -1029,7 +1103,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   // Drop the saved layout + re-seed a fresh dagre layout, then fit it into view.
   const handleResetLayout = useCallback(() => {
     removeStored(layoutStorageKey(graph))
-    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames)
+    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames, view.groupCount, view.groupHasWitnessed)
     if (diffActive && diffHighlight) {
       const realPos = new Map(laid.filter((n) => n.parentId === undefined).map((n) => [n.id, n.position]))
       setNodes([...laid, ...ghostNodesFor(realPos, diffHighlight, new Map())])
@@ -1085,6 +1159,12 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <input type="checkbox" checked={expandAll} onChange={(e) => setExpandAll(e.target.checked)} />
             expand all controls
           </label>
+          {allGroupKeys.size > 0 ? (
+            <label className="edge-toggle">
+              <input type="checkbox" checked={expandAllGroups} onChange={(e) => setExpandAllGroups(e.target.checked)} />
+              expand all groups · {allGroupKeys.size}
+            </label>
+          ) : null}
           <label className="edge-toggle">
             <input type="checkbox" checked={highlightFlow} onChange={(e) => setHighlightFlow(e.target.checked)} />
             highlight flow on select
