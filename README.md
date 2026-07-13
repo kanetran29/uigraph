@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/assets/logo.svg" width="440" alt="uigraph"></p>
+
 # uigraph
 
 Your app generates its own **behavioral map** at build time. A framework-agnostic
