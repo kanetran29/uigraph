@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/LLM-model--free_(BYOA)-3D3929" alt="model-free, bring your own agent"/>
 </p>
 
-<p align="center"><img src="docs/assets/hero.svg" width="920" alt="UI-graph: a tangle of unknown screens flows through map, propose, and verify into organized, trust-tiered graphs"/></p>
+<p align="center"><img src="docs/assets/hero.jpg" width="920" alt="UI-graph: from drafts, guesses, and rotting tests to a drafted graph, a triaged proposal queue, and witnessed Playwright suites"/></p>
 
 ---
 
