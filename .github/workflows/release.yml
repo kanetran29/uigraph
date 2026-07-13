@@ -1,0 +1,33 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: gate (typecheck + tests + lint)
+        run: pnpm check
+      - name: extraction gauntlet (35 golden expectations)
+        run: pnpm exec tsx scripts/gauntlet-report.ts --strict
+      - name: build all libraries
+        run: pnpm -r --if-present run build
+      - name: authenticate to npm
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: publish @ui-graph/* (topological order, workspace:* rewritten)
+        run: pnpm -r publish --access public --no-git-checks --registry https://registry.npmjs.org/
