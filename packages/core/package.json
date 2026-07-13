@@ -37,5 +37,31 @@
         "default": "./dist/node.js"
       }
     }
+  },
+  "description": "Framework-agnostic UI transition graph IR + pure ops (validate, overlay, diff, plan_path, coverage, trust tiers).",
+  "keywords": [
+    "ui-graph",
+    "ui-transition-graph",
+    "static-analysis",
+    "mcp",
+    "ai-agents",
+    "playwright",
+    "e2e-testing",
+    "test-generation",
+    "typescript",
+    "ir",
+    "graph",
+    "coverage"
+  ],
+  "author": "Kane Tran",
+  "license": "MIT",
+  "homepage": "https://github.com/kanetran29/uigraph#readme",
+  "bugs": {
+    "url": "https://github.com/kanetran29/uigraph/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kanetran29/uigraph.git",
+    "directory": "packages/core"
   }
 }

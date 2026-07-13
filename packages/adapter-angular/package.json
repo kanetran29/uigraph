@@ -33,5 +33,29 @@
         "default": "./dist/index.js"
       }
     }
+  },
+  "description": "Angular (Routes/routerLink/canActivate) static extraction for UI-graph.",
+  "keywords": [
+    "ui-graph",
+    "ui-transition-graph",
+    "static-analysis",
+    "mcp",
+    "ai-agents",
+    "playwright",
+    "e2e-testing",
+    "test-generation",
+    "typescript",
+    "angular"
+  ],
+  "author": "Kane Tran",
+  "license": "MIT",
+  "homepage": "https://github.com/kanetran29/uigraph#readme",
+  "bugs": {
+    "url": "https://github.com/kanetran29/uigraph/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kanetran29/uigraph.git",
+    "directory": "packages/adapter-angular"
   }
 }
