@@ -2,6 +2,15 @@
 
 All `@ui-graph/*` packages are versioned in lockstep.
 
+## 0.1.2
+
+Fixes a packaging bug that made 0.1.1 fail on install: the tsup build stripped
+the `node:` prefix from `node:sqlite` (an experimental builtin that resolves
+ONLY under the prefix), so `@ui-graph/core/dist/node.js` threw
+`ERR_MODULE_NOT_FOUND: sqlite` when run from an npm install. The build now pins
+the prefix back and targets Node 22; all packages declare `engines: node >=22.5.0`
+(required for `node:sqlite`). Verified end-to-end: `npm i @ui-graph/cli` runs.
+
 ## 0.1.1
 
 First public release on npm (0.1.0 never went live — it stayed in npm staging
