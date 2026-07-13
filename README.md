@@ -101,15 +101,6 @@ Extraction quality is enforced by an adversarial **gauntlet**: a data-router Rea
 | `@uigraph/cli` | `map` / `verify` / `login` / `dash` / `gen` / `diff` / `serve` / `workspace` / `mcp` |
 | `apps/dashboard` | React Flow viewer: graph, coverage, freshness, verify worklist |
 
-## Honest limitations
-
-What is deliberately **not** claimed (full list + per-adapter coverage matrices in [docs/40-adapter-contract.md](docs/40-adapter-contract.md)):
-
-- **No proof yet that the graph beats an agent grepping the repo at scale.** The kill-switch ablation ran at 8 routes with zero accuracy delta ([docs/validation/premise-ablation.md](docs/validation/premise-ablation.md)); the premise is predicted to pay off past ~100 routes and that test is not yet wired up. Adopt for cost/amortization and verification, not raw accuracy.
-- **Coverage numbers are never completeness claims** — the denominator (all real behaviors) is unknowable. `accounted 100%` means "nothing in limbo", not "fully mapped".
-- Adapters resolve a partial route set on some real apps; dispatch-driven and fully dynamic navigation degrade to soundiness notes and proposals, not edges.
-- `unknown` modality exists in the IR but no adapter emits it yet; OpenAPI binding is core-only.
-
 ## Open core
 
 This repository is the complete, MIT-licensed trust engine — nothing epistemic is paywalled. The commercial layer, **UI-graph studio** (separate private repo), adds the interactive workflow on top: scenario/feature drafting, overlay editing and proposals triage in the UI, and Playwright e2e **suite** generation from the verified graph. The single-path `uigraph gen` primitive stays here.
