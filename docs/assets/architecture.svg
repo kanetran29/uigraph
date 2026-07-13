@@ -26,7 +26,7 @@
   <text x="66" y="204" fill="#b45309" font-size="18" font-weight="600">L2&#160;&#160;Interface layer</text>
   <rect x="280" y="196" width="380" height="72" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="470" y="226" text-anchor="middle" font-size="16" font-weight="600" fill="#111827">MCP server&#160;&#160;<tspan font-weight="400" fill="#4b5563">(stdio, model-free)</tspan></text>
-  <text x="470" y="249" text-anchor="middle" font-size="13" fill="#4b5563">27 tools: get_graph &#183; plan_path &#183; propose &#183; report_observation&#8230;</text>
+  <text x="470" y="249" text-anchor="middle" font-size="13" fill="#4b5563">27 tools: get_graph &#183; propose &#183; report_observation&#8230;</text>
   <rect x="690" y="196" width="330" height="72" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="855" y="226" text-anchor="middle" font-size="16" font-weight="600" fill="#111827">Serve API&#160;&#160;<tspan font-weight="400" fill="#4b5563">(node:http)</tspan></text>
   <text x="855" y="249" text-anchor="middle" font-size="13" fill="#4b5563">REST + static dashboard &#183; multi-workspace ?ws</text>
@@ -39,22 +39,22 @@
   <text x="66" y="344" fill="#6d28d9" font-size="18" font-weight="600">L3&#160;&#160;Core&#160;&#160;<tspan font-weight="400" font-size="15" fill="#6b7280">(@uigraph/core — framework-agnostic, never calls an LLM)</tspan></text>
   <rect x="70" y="364" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="235" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">IR: guarded labeled LTS</text>
-  <text x="235" y="419" text-anchor="middle" font-size="13" fill="#4b5563">screens + (event, guard, effect) edges &#183; must/may/unknown</text>
+  <text x="235" y="419" text-anchor="middle" font-size="13" fill="#4b5563">screens + guarded edges &#183; must / may / unknown</text>
   <rect x="430" y="364" width="310" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="585" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Trust tiers&#160;&#160;<tspan font-weight="400" fill="#4b5563">(on read)</tspan></text>
   <text x="585" y="419" text-anchor="middle" font-size="13" fill="#4b5563">witnessed &#8250; proven &#8250; asserted &#8250; proposed</text>
   <rect x="770" y="364" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="935" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Honest coverage</text>
-  <text x="935" y="419" text-anchor="middle" font-size="13" fill="#4b5563">runtime &#8838; verified &#8838; accounted &#183; parked with reasons</text>
+  <text x="935" y="419" text-anchor="middle" font-size="13" fill="#4b5563">runtime &#8838; verified &#8838; accounted &#183; parked</text>
   <rect x="1130" y="364" width="320" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="1290" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Graph ops</text>
-  <text x="1290" y="419" text-anchor="middle" font-size="13" fill="#4b5563">validate &#183; overlay merge &#183; diff &#183; plan_path (BFS)</text>
+  <text x="1290" y="419" text-anchor="middle" font-size="13" fill="#4b5563">validate &#183; merge &#183; diff &#183; plan_path (BFS)</text>
   <rect x="70" y="464" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="235" y="496" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Golden invariant</text>
   <text x="235" y="519" text-anchor="middle" font-size="13" fill="#4b5563">no base edge without a deterministic witness</text>
   <rect x="430" y="464" width="310" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="585" y="496" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Observation fold</text>
-  <text x="585" y="519" text-anchor="middle" font-size="13" fill="#4b5563">(from, to, event) triple &#183; stale-witness demotion</text>
+  <text x="585" y="519" text-anchor="middle" font-size="13" fill="#4b5563">(from,to,event) match &#183; stale demotion</text>
   <rect x="770" y="464" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="935" y="496" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">Codegen&#160;&#160;<tspan font-weight="400" fill="#4b5563">(Playwright)</tspan></text>
   <text x="935" y="519" text-anchor="middle" font-size="13" fill="#4b5563">plan &#8594; legs &#8594; spec &#183; param-pattern asserts</text>
@@ -86,8 +86,8 @@
   <text x="1295" y="668" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Tier 3 &#183; runner&#160;&#160;<tspan font-weight="400" fill="#4b5563">(Playwright)</tspan></text>
   <text x="1295" y="687" text-anchor="middle" font-size="13" fill="#4b5563">drive &#183; probe &#183; press &#183; storageState auth</text>
   <rect x="800" y="706" width="660" height="52" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
-  <text x="1130" y="731" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Proof gate&#160;&#160;<tspan font-weight="400" fill="#4b5563">report_observation(confirmed) requires evidence + provenance</tspan></text>
-  <text x="1130" y="748" text-anchor="middle" font-size="13" fill="#4b5563">url-change | url-assert | dialog | screenshot-on-disk &#183; refuted mints nothing &#183; undrivable is never refuted</text>
+  <text x="1130" y="731" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">Proof gate&#160;&#160;<tspan font-weight="400" fill="#4b5563">confirmed requires evidence + provenance</tspan></text>
+  <text x="1130" y="748" text-anchor="middle" font-size="13" fill="#4b5563">url-change | url-assert | dialog | screenshot &#183; refuted mints nothing</text>
 
   <!-- L6 workspace + external -->
   <rect x="40" y="792" width="880" height="130" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="1.4"/>
