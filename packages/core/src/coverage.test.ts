@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildCoverage, nextToVerify, nodeForUrl } from './coverage'
+import { buildCoverage, dedupWorklist, nextToVerify, nodeForUrl, patternKey, type VerifyTarget } from './coverage'
 import { buildFrontier } from './frontier'
 import type { TrustTier } from './trust-tier'
 import { edge, graph, node } from './fixtures'
@@ -250,5 +250,63 @@ describe('nextToVerify', () => {
     ])
     const ids = nextToVerify(pg2, proposalGraph).filter((t) => t.kind === 'proposal').map((t) => t.id)
     expect(ids).toEqual(['pe_a->b'])
+  })
+})
+
+describe('patternKey + dedupWorklist (over-approximation fan-out collapse)', () => {
+  const W = (file: string, line: number, col: number) => ({ source: 'static' as const, file, loc: { line, col }, ruleId: 'rr.link' })
+  // Three screens whose SHARED nav component (nav.tsx:5:1) fans out to different targets,
+  // plus one edge from a different source location, a proven must-edge, and a dynamic sink.
+  const g = graph(
+    [
+      node('n_a'), node('n_b'), node('n_c'),
+      node('n_settings'), node('n_privacy'), node('n_help'),
+      node('u_sink', { kind: 'unknown', route: null }),
+    ],
+    [
+      edge('e1', 'n_a', 'n_settings', { modality: 'may', witness: W('nav.tsx', 5, 1) }),
+      edge('e2', 'n_b', 'n_settings', { modality: 'may', witness: W('nav.tsx', 5, 1) }),
+      edge('e3', 'n_c', 'n_privacy', { modality: 'may', witness: W('nav.tsx', 5, 1) }),
+      edge('e4', 'n_a', 'n_help', { modality: 'may', witness: W('other.tsx', 9, 2) }),
+      edge('e5', 'n_a', 'n_settings', { modality: 'must', witness: W('page.tsx', 1, 1) }),
+      edge('e6', 'n_b', 'u_sink', { modality: 'unknown', witness: W('dyn.tsx', 3, 3) }),
+    ],
+  )
+  const target = (id: string, from: string, to: string, over: Partial<VerifyTarget> = {}): VerifyTarget => ({
+    kind: 'edge', id, from, to, toLabel: to, event: 'click:Link', reason: '', priority: 2, ...over,
+  })
+
+  it('keys may-edges by their witness file:line:col — same source nav collapses across screens', () => {
+    expect(patternKey(g, target('e1', 'n_a', 'n_settings'))).toBe('nav.tsx:5:1')
+    expect(patternKey(g, target('e2', 'n_b', 'n_settings'))).toBe('nav.tsx:5:1')
+    expect(patternKey(g, target('e3', 'n_c', 'n_privacy'))).toBe('nav.tsx:5:1')
+    expect(patternKey(g, target('e4', 'n_a', 'n_help'))).toBe('other.tsx:9:2')
+  })
+
+  it('returns null (always individually driven) for proven, dynamic-sink, and proposal targets', () => {
+    expect(patternKey(g, target('e5', 'n_a', 'n_settings', { proven: true }))).toBeNull()
+    expect(patternKey(g, target('e6', 'n_b', 'u_sink'))).toBeNull()
+    expect(patternKey(g, { kind: 'proposal', id: 'pe_x', from: 'n_a', to: 'n_b', toLabel: 'n_b', event: 'e', reason: '', priority: 1 })).toBeNull()
+  })
+
+  it('dedupWorklist keeps `sample` representatives per pattern, rest become duplicates', () => {
+    const targets = [
+      target('e1', 'n_a', 'n_settings'),
+      target('e2', 'n_b', 'n_settings'),
+      target('e3', 'n_c', 'n_privacy'),
+      target('e4', 'n_a', 'n_help'),
+    ]
+    const { representatives, duplicates } = dedupWorklist(g, targets, 1)
+    // one rep for nav.tsx:5:1 (deterministic first by from-id → e1/n_a), one for other.tsx:9:2 (e4)
+    expect(representatives.map((t) => t.id).sort()).toEqual(['e1', 'e4'])
+    expect(duplicates.get('nav.tsx:5:1')?.map((t) => t.id).sort()).toEqual(['e2', 'e3'])
+    expect(duplicates.has('other.tsx:9:2')).toBe(false)
+  })
+
+  it('un-keyable targets are always their own representative (never deduped)', () => {
+    const targets = [target('e5', 'n_a', 'n_settings', { proven: true }), target('e6', 'n_b', 'u_sink')]
+    const { representatives, duplicates } = dedupWorklist(g, targets, 1)
+    expect(representatives.map((t) => t.id).sort()).toEqual(['e5', 'e6'])
+    expect(duplicates.size).toBe(0)
   })
 })

@@ -98,14 +98,18 @@ export function buildProgram(): Command {
     .option('--all', 'verify-all sweep: also drive must-static proofs to upgrade them to runtime-witnessed')
     .option('--until-done', 'loop rounds until 100% accounted-for: drive, then park the undrivable remainder with reasons')
     .option('--max-rounds <n>', 'cap for --until-done', '10')
-    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string; all?: boolean; untilDone?: boolean; maxRounds: string }) => {
+    .option('--concurrency <n>', 'parallel browser pages driving targets at once (1-16)', '8')
+    .option('--pattern-sample <n>', 'representatives driven per over-approximation nav pattern before the rest are accounted by pattern', '1')
+    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string; all?: boolean; untilDone?: boolean; maxRounds: string; concurrency: string; patternSample: string }) => {
+      const concurrency = Number(opts.concurrency)
+      const patternSample = Number(opts.patternSample)
       if (opts.all === true && opts.untilDone === true) {
         console.error('--all is a single-pass sweep; run it without --until-done (the loop would park unproven statics it could not drive)')
         process.exitCode = 1
         return
       }
       if (opts.untilDone === true) {
-        const s = await runVerifyUntilDone({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, maxRounds: Number(opts.maxRounds) })
+        const s = await runVerifyUntilDone({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, maxRounds: Number(opts.maxRounds), concurrency, patternSample })
         console.log(
           `verify --until-done: ${s.rounds} round(s), ${s.confirmed} confirmed, ${s.parkedEdges} edge(s) + ${s.parkedProposals} proposal(s) parked\n` +
             `  loopDone: ${s.loopDone} (${s.exitReason})\n` +
@@ -113,8 +117,9 @@ export function buildProgram(): Command {
         )
         return
       }
-      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, includeProven: opts.all === true })
-      console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)`)
+      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, includeProven: opts.all === true, concurrency, patternSample })
+      const pat = s.patternParked > 0 ? ` · ${s.patternParked} accounted by pattern` : ''
+      console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)${pat}`)
       if (s.refutedProven > 0) {
         console.error(`WARNING: ${s.refutedProven} must-static edge(s) REFUTED at runtime — the extraction and the running app disagree; inspect these edges (diff, soundiness) before trusting the graph`)
         process.exitCode = 1
