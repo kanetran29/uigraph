@@ -81,9 +81,9 @@ cross-contamination.
   boundary.
 - **Proves it:** full `pnpm check` green across core + both adapters in one run.
 
-## RUNG 5 — Real-world: React adapter on the refapp.example frontend
+## RUNG 5 — Real-world: React adapter on a production frontend
 
-Target: `/Users/kanetran29/refapp/refapp-frontend` (react-router-dom **v5**, the
+Target: a large closed-source production SPA (react-router-dom **v5**, the
 real-world v5 case). Here we have **no exact golden**, so we drop equality and measure
 coverage and sanity instead.
 
@@ -107,7 +107,7 @@ coverage and sanity instead.
 
 ```
 RUNG 1 core  →  RUNG 2 react/sample  →  RUNG 3 angular/sample
-            →  RUNG 4 both green     →  RUNG 5 real refapp frontend
+            →  RUNG 4 both green     →  RUNG 5 real production frontend
 ```
 
 Climb in order. v1 is "working" when rungs 1–4 are green on exact goldens and rung 5

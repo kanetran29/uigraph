@@ -23,11 +23,11 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F0.1 | pnpm workspace monorepo scaffold | infra | — | planned | [F0.1](./features/F0.1-monorepo-scaffold.md) |
-| F0.2 | Shared TypeScript, vitest, and eslint toolchain | infra | F0.1 | planned | [F0.2](./features/F0.2-toolchain-ts-vitest-eslint.md) |
-| F0.3 | Self-healing check gate (scripts/check.mjs) | infra | F0.2 | planned | [F0.3](./features/F0.3-self-healing-check-gate.md) |
-| F0.4 | Framework-agnostic IR types (guarded modal LTS) | L0 | F0.3 | planned | [F0.4](./features/F0.4-core-ir-types.md) |
-| F0.5 | Adapter contract interface (extract/register/stamp) | L0 | F0.4 | planned | [F0.5](./features/F0.5-adapter-contract-interface.md) |
+| F0.1 | pnpm workspace monorepo scaffold | infra | — | planned | [F0.1](./features/foundation/F0.1-monorepo-scaffold.md) |
+| F0.2 | Shared TypeScript, vitest, and eslint toolchain | infra | F0.1 | planned | [F0.2](./features/foundation/F0.2-toolchain-ts-vitest-eslint.md) |
+| F0.3 | Self-healing check gate (scripts/check.mjs) | infra | F0.2 | planned | [F0.3](./features/foundation/F0.3-self-healing-check-gate.md) |
+| F0.4 | Framework-agnostic IR types (guarded modal LTS) | L0 | F0.3 | planned | [F0.4](./features/foundation/F0.4-core-ir-types.md) |
+| F0.5 | Adapter contract interface (extract/register/stamp) | L0 | F0.4 | planned | [F0.5](./features/foundation/F0.5-adapter-contract-interface.md) |
 
 ## M1 — Core ops
 
@@ -35,12 +35,12 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F1.1 | UiGraph JSON schema | L0 | F0.4 | planned | [F1.1](./features/F1.1-graph-json-schema.md) |
-| F1.2 | Pure load/save graph ops | L1 | F1.1 | planned | [F1.2](./features/F1.2-load-save-ops.md) |
-| F1.3 | Invariant validation (golden witness invariant) | L1 | F1.2 | planned | [F1.3](./features/F1.3-validate-invariants.md) |
-| F1.4 | Sidecar overlay model and merge(base, overlay) | L1 | F1.3 | planned | [F1.4](./features/F1.4-overlay-merge-model.md) |
-| F1.5 | diff(a, b) over two graphs | L1 | F1.4 | planned | [F1.5](./features/F1.5-diff-graphs.md) |
-| F1.6 | Graph algorithms: reachability and plan_path BFS | L1 | F1.5 | planned | [F1.6](./features/F1.6-graph-algorithms-reachability-bfs.md) |
+| F1.1 | UiGraph JSON schema | L0 | F0.4 | planned | [F1.1](./features/core/F1.1-graph-json-schema.md) |
+| F1.2 | Pure load/save graph ops | L1 | F1.1 | planned | [F1.2](./features/core/F1.2-load-save-ops.md) |
+| F1.3 | Invariant validation (golden witness invariant) | L1 | F1.2 | planned | [F1.3](./features/core/F1.3-validate-invariants.md) |
+| F1.4 | Sidecar overlay model and merge(base, overlay) | L1 | F1.3 | planned | [F1.4](./features/core/F1.4-overlay-merge-model.md) |
+| F1.5 | diff(a, b) over two graphs | L1 | F1.4 | planned | [F1.5](./features/core/F1.5-diff-graphs.md) |
+| F1.6 | Graph algorithms: reachability and plan_path BFS | L1 | F1.5 | planned | [F1.6](./features/core/F1.6-graph-algorithms-reachability-bfs.md) |
 
 ## M2 — React adapter + sample-react-app
 
@@ -48,13 +48,13 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F2.1 | Scaffold sample-react-app golden fixture | L0 | F0.5 | planned | [F2.1](./features/F2.1-sample-react-app-fixture.md) |
-| F2.2 | React route-node extraction (v5 + v6) | L1 | F2.1, F1.6 | planned | [F2.2](./features/F2.2-react-route-node-extraction.md) |
-| F2.3 | React literal navigation-edge extraction | L1 | F2.2 | planned | [F2.3](./features/F2.3-react-literal-navigation-edges.md) |
-| F2.4 | Over-approximation for non-literal React targets | L2 | F2.3 | planned | [F2.4](./features/F2.4-react-over-approximation-edges.md) |
-| F2.5 | React guard capture as symbolic guard text | L2 | F2.4 | planned | [F2.5](./features/F2.5-react-guard-capture.md) |
-| F2.6 | React adapter soundiness report | L2 | F2.5 | planned | [F2.6](./features/F2.6-react-soundiness-report.md) |
-| F2.7 | Validate React adapter against sample golden graph | L2 | F2.6 | planned | [F2.7](./features/F2.7-react-adapter-golden-validation.md) |
+| F2.1 | Scaffold sample-react-app golden fixture | L0 | F0.5 | planned | [F2.1](./features/adapters/react/F2.1-sample-react-app-fixture.md) |
+| F2.2 | React route-node extraction (v5 + v6) | L1 | F2.1, F1.6 | planned | [F2.2](./features/adapters/react/F2.2-react-route-node-extraction.md) |
+| F2.3 | React literal navigation-edge extraction | L1 | F2.2 | planned | [F2.3](./features/adapters/react/F2.3-react-literal-navigation-edges.md) |
+| F2.4 | Over-approximation for non-literal React targets | L2 | F2.3 | planned | [F2.4](./features/adapters/react/F2.4-react-over-approximation-edges.md) |
+| F2.5 | React guard capture as symbolic guard text | L2 | F2.4 | planned | [F2.5](./features/adapters/react/F2.5-react-guard-capture.md) |
+| F2.6 | React adapter soundiness report | L2 | F2.5 | planned | [F2.6](./features/adapters/react/F2.6-react-soundiness-report.md) |
+| F2.7 | Validate React adapter against sample golden graph | L2 | F2.6 | planned | [F2.7](./features/adapters/react/F2.7-react-adapter-golden-validation.md) |
 
 ## M3 — Angular adapter + sample-angular-app
 
@@ -62,11 +62,11 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F3.1 | Scaffold sample-angular-app golden fixture | L0 | F0.5 | planned | [F3.1](./features/F3.1-sample-angular-app-fixture.md) |
-| F3.2 | Angular RouterModule/Routes extraction | L1 | F3.1, F1.6 | planned | [F3.2](./features/F3.2-angular-route-extraction.md) |
-| F3.3 | Angular navigate/navigateByUrl/routerLink edges | L1 | F3.2 | planned | [F3.3](./features/F3.3-angular-navigation-edges.md) |
-| F3.4 | Angular canActivate guard capture to may-edges | L2 | F3.3 | planned | [F3.4](./features/F3.4-angular-canactivate-guards.md) |
-| F3.5 | Validate Angular adapter against sample golden graph | L2 | F3.4 | planned | [F3.5](./features/F3.5-angular-adapter-golden-validation.md) |
+| F3.1 | Scaffold sample-angular-app golden fixture | L0 | F0.5 | planned | [F3.1](./features/adapters/angular/F3.1-sample-angular-app-fixture.md) |
+| F3.2 | Angular RouterModule/Routes extraction | L1 | F3.1, F1.6 | planned | [F3.2](./features/adapters/angular/F3.2-angular-route-extraction.md) |
+| F3.3 | Angular navigate/navigateByUrl/routerLink edges | L1 | F3.2 | planned | [F3.3](./features/adapters/angular/F3.3-angular-navigation-edges.md) |
+| F3.4 | Angular canActivate guard capture to may-edges | L2 | F3.3 | planned | [F3.4](./features/adapters/angular/F3.4-angular-canactivate-guards.md) |
+| F3.5 | Validate Angular adapter against sample golden graph | L2 | F3.4 | planned | [F3.5](./features/adapters/angular/F3.5-angular-adapter-golden-validation.md) |
 
 ## M4 — CLI
 
@@ -74,11 +74,11 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F4.1 | uigraph CLI scaffold and command dispatch | L1 | F1.6, F2.7, F3.5 | planned | [F4.1](./features/F4.1-cli-scaffold.md) |
-| F4.2 | CLI map --adapter command | L1 | F4.1 | planned | [F4.2](./features/F4.2-cli-map-command.md) |
-| F4.3 | CLI diff command | L1 | F4.2 | planned | [F4.3](./features/F4.3-cli-diff-command.md) |
-| F4.4 | Local API server feeding the dashboard | L1 | F4.2 | planned | [F4.4](./features/F4.4-local-api-server.md) |
-| F4.5 | CLI dash and mcp launchers | L1 | F4.4, F5.1 | planned | [F4.5](./features/F4.5-cli-dash-mcp-launchers.md) |
+| F4.1 | uigraph CLI scaffold and command dispatch | L1 | F1.6, F2.7, F3.5 | planned | [F4.1](./features/cli/F4.1-cli-scaffold.md) |
+| F4.2 | CLI map --adapter command | L1 | F4.1 | planned | [F4.2](./features/cli/F4.2-cli-map-command.md) |
+| F4.3 | CLI diff command | L1 | F4.2 | planned | [F4.3](./features/cli/F4.3-cli-diff-command.md) |
+| F4.4 | Local API server feeding the dashboard | L1 | F4.2 | planned | [F4.4](./features/cli/F4.4-local-api-server.md) |
+| F4.5 | CLI dash and mcp launchers | L1 | F4.4, F5.1 | planned | F4.5 |
 
 ## M5 — MCP server
 
@@ -86,11 +86,11 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F5.1 | Stdio MCP server scaffold | L1 | F1.6 | planned | [F5.1](./features/F5.1-mcp-stdio-scaffold.md) |
-| F5.2 | MCP get_graph tool | L1 | F5.1 | planned | [F5.2](./features/F5.2-mcp-get-graph.md) |
-| F5.3 | MCP plan_path tool | L1 | F5.2 | planned | [F5.3](./features/F5.3-mcp-plan-path.md) |
-| F5.4 | MCP update_graph tool (writes to overlay) | L1 | F5.3 | planned | [F5.4](./features/F5.4-mcp-update-graph-overlay.md) |
-| F5.5 | MCP report_observation (append-only log) and diff tools | L1 | F5.4 | planned | [F5.5](./features/F5.5-mcp-report-observation-and-diff.md) |
+| F5.1 | Stdio MCP server scaffold | L1 | F1.6 | planned | F5.1 |
+| F5.2 | MCP get_graph tool | L1 | F5.1 | planned | F5.2 |
+| F5.3 | MCP plan_path tool | L1 | F5.2 | planned | F5.3 |
+| F5.4 | MCP update_graph tool (writes to overlay) | L1 | F5.3 | planned | F5.4 |
+| F5.5 | MCP report_observation (append-only log) and diff tools | L1 | F5.4 | planned | F5.5 |
 
 ## M6 — Dashboard
 
@@ -98,20 +98,20 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F6.1 | Vite + React + React Flow dashboard scaffold | L1 | F4.4 | planned | [F6.1](./features/F6.1-dashboard-scaffold.md) |
-| F6.2 | Graph canvas styled by modality and source | L1 | F6.1 | planned | [F6.2](./features/F6.2-dashboard-graph-canvas.md) |
-| F6.3 | Inspector panel for nodes and edges | L1 | F6.2 | planned | [F6.3](./features/F6.3-dashboard-inspector-panel.md) |
-| F6.4 | Manual edit to overlay persistence | L2 | F6.3 | planned | [F6.4](./features/F6.4-dashboard-manual-edit-overlay.md) |
-| F6.5 | Steps view (plan_path walk) | L2 | F6.4 | planned | [F6.5](./features/F6.5-dashboard-steps-view.md) |
+| F6.1 | Vite + React + React Flow dashboard scaffold | L1 | F4.4 | planned | F6.1 |
+| F6.2 | Graph canvas styled by modality and source | L1 | F6.1 | planned | F6.2 |
+| F6.3 | Inspector panel for nodes and edges | L1 | F6.2 | planned | F6.3 |
+| F6.4 | Manual edit to overlay persistence | L2 | F6.3 | planned | F6.4 |
+| F6.5 | Steps view (plan_path walk) | L2 | F6.4 | planned | F6.5 |
 
 ## M7 — Real-world validation
 
-**Goal:** Run the React adapter on the real refapp.example react-router v5 frontend and produce a coverage/sanity and soundiness-gap report.
+**Goal:** Run the React adapter on a real react-router v5 production frontend and produce a coverage/sanity and soundiness-gap report.
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F7.1 | Run React adapter on the refapp.example frontend | L2 | F2.7, F4.2 | planned | [F7.1](./features/F7.1-refapp-frontend-extraction-run.md) |
-| F7.2 | Coverage/sanity and soundiness-gap report for refapp frontend | L2 | F7.1 | planned | [F7.2](./features/F7.2-refapp-coverage-soundiness-report.md) |
+| F7.1 | Run React adapter on a production frontend | L2 | F2.7, F4.2 | done | — |
+| F7.2 | Coverage/sanity and soundiness-gap report for the production frontend | L2 | F7.1 | done | — |
 
 ## M8 — Multi-framework control parity
 
@@ -119,8 +119,8 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F8.1 | Angular control + selector extraction (parity with React) | L2 | F3.5, F-control-identity-selectors | done | [F-angular-controls](./features/F-angular-controls.md) |
-| F8.2 | Vue Router adapter + sample-vue-app + CLI wiring | L2 | F8.1 | done | [F-vue-adapter](./features/F-vue-adapter.md) |
+| F8.1 | Angular control + selector extraction (parity with React) | L2 | F3.5, F-control-identity-selectors | done | [F-angular-controls](./features/adapters/angular/F-angular-controls.md) |
+| F8.2 | Vue Router adapter + sample-vue-app + CLI wiring | L2 | F8.1 | done | [F-vue-adapter](./features/adapters/vue/F-vue-adapter.md) |
 
 ## M9 — Self-healing proposal loop + agent kit
 
@@ -128,8 +128,8 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F9.1 | Proposal reconciliation loop (status fold, loop-done metric, MCP tools) | L2 | F5.5, F-coverage-tier3 | done | [F-proposal-loop](./features/F-proposal-loop.md) |
-| F9.2 | Shippable LLM agent kit (skill + rules + guides + loop), MCP resource + `uigraph kit` | L2 | F9.1 | done | [F-agent-kit](./features/F-agent-kit.md) |
+| F9.1 | Proposal reconciliation loop (status fold, loop-done metric, MCP tools) | L2 | F5.5, F-coverage-tier3 | done | [F-proposal-loop](./features/loop/F-proposal-loop.md) |
+| F9.2 | Shippable LLM agent kit (skill + rules + guides + loop), MCP resource + `uigraph kit` | L2 | F9.1 | done | [F-agent-kit](./features/mcp/F-agent-kit.md) |
 
 ## M10 — Modal & deep-view control reach
 
@@ -137,5 +137,5 @@ This roadmap enumerates every feature of v1, grouped by milestone. The **feature
 
 | ID | Title | Level | Depends on | Status | Doc |
 |----|-------|-------|------------|--------|-----|
-| F10.1 | Modal-control descent (imported modals → controls under the modal node) | L2 | F-control-identity-selectors, F2.9 | done | [F-modal-controls](./features/F-modal-controls.md) |
-| F10.2 | Deep overlay-view reach (*Visible-gated sub-views; e.g. ProfileView) | L2 | F10.1 | done | [F-deep-view-controls](./features/F-deep-view-controls.md) |
+| F10.1 | Modal-control descent (imported modals → controls under the modal node) | L2 | F-control-identity-selectors, F2.9 | done | [F-modal-controls](./features/core/F-modal-controls.md) |
+| F10.2 | Deep overlay-view reach (*Visible-gated sub-views; e.g. ProfileView) | L2 | F10.1 | done | [F-deep-view-controls](./features/core/F-deep-view-controls.md) |

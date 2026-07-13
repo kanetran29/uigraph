@@ -12,7 +12,7 @@ and when it meets a `*Modal`/`*Dialog`/`*Drawer`/`*Sheet`/`*Popover` tag it crea
 single `kind:'modal'` node — but it **never resolves or descends into the modal's own
 component file**. Everything rendered *inside* the modal is invisible.
 
-Verified against refapp: `AppContent` (the `/` screen, depth 0) renders `<LandingPage/>`
+Verified against the reference production app: `AppContent` (the `/` screen, depth 0) renders `<LandingPage/>`
 (depth 1) which renders `<SignupLoginModal/>`, `<LandingPageCouldBuyOrCouldSellModal/>`,
 `<ProfileView/>` (all **depth 2**). So the modal *nodes* exist (their tags are seen at
 depth 1) but their contents — the Google/Facebook OAuth buttons + email `<form>` inside
@@ -35,12 +35,12 @@ safe. The one exception: an imported modal rendered at depth ≤1 by a *represen
 route (e.g. `ClaimListingPage` rendering `<SignupLoginModal/>` directly) *was* swept and
 its controls *were* screen-parented. Those are **re-homed** to the modal node — a
 one-time, more-correct id change (modal contents belong under the modal regardless of
-where it is rendered). Verified on refapp: exactly 2 such controls moved, and **zero**
+where it is rendered). Verified on the reference production app: exactly 2 such controls moved, and **zero**
 proposals/observations were bound to their old ids, so nothing was orphaned. This is the
 intended, tested behaviour (a route component directly rendering an imported modal →
 modal-parented controls), not a silent surprise.
 
-refapp's modals are all imported separate files, so v1 covers the real target.
+the reference app's modals are all imported separate files, so v1 covers the real target.
 
 ## Design
 
@@ -75,7 +75,7 @@ once per modal (`modalId`, `true`). Each call keeps its **own** `nthBySig` map �
   identity-verify→Stripe): **DEFERRED.** Needs *selective* path-gated descent (gate the
   extra hop on a `currentPath.startsWith('/profile')` predicate) to avoid funnelling every
   deep shell component onto the single `n_root` representative. Tracked as follow-up.
-- **Angular/Vue parity:** deferred (YAGNI — refapp is React; no non-React app needs modal
+- **Angular/Vue parity:** deferred (YAGNI — the validation target is React; no non-React app needs modal
   descent yet).
 
 ## Golden-invariant & stability guarantees

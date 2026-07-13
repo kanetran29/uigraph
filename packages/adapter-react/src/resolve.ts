@@ -184,7 +184,7 @@ export function resolveComponentFile(sf: SourceFile, name: string): SourceFile |
 /**
  * The set of source files that make up a route's screen: the route component plus
  * the same-project child components it renders in JSX, breadth-first to maxDepth.
- * refapp-style SPAs render most real navigation one or more component-hops below
+ * Real-world SPAs render most real navigation one or more component-hops below
  * the route (a button in a nested <LandingPage>), so a route component scanned
  * alone misses them. Bounded by maxDepth + a visited set; node_modules + framework
  * wrappers are skipped. Returns each file with its descent depth (0 = the route

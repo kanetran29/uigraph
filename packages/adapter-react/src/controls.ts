@@ -22,7 +22,7 @@ function humanize(raw: string): string | undefined {
  * The i18n key from a `{t('key')}` / `{t("key", …)}` hook call used as the element's
  * LABEL — searched only in the element's JSX CHILDREN (text position), never its
  * attributes, so a `t()` inside an onClick/error handler can't be mistaken for the label.
- * refapp labels most controls this way (the hook form), distinct from `<Trans i18nKey>`.
+ * i18n-heavy production apps label most controls this way (the hook form), distinct from `<Trans i18nKey>`.
  */
 function i18nCallKey(el: Node): string | undefined {
   if (!Node.isJsxElement(el)) return undefined
@@ -61,7 +61,7 @@ function attrCallKey(el: Node, name: string): string | undefined {
 
 /**
  * A human label from a control attribute (placeholder / aria-label) that is either a
- * string literal OR a `{t('key')}` expression — refapp labels its inputs this way, which
+ * string literal OR a `{t('key')}` expression — i18n-heavy apps label inputs this way, which
  * the text/icon/className inference cannot see. For an i18n key a trailing
  * "Placeholder"/"Label" token is dropped so `emailPlaceholder` reads "Email".
  */
@@ -76,7 +76,7 @@ function attrLabel(el: Node, name: string): string | undefined {
 
 /**
  * Derive a control's name from STATIC signals when it has no visible text/aria —
- * refapp-style apps label via `<Trans i18nKey="…">`, a `{t('key')}` hook call, an icon
+ * i18n-heavy apps label via `<Trans i18nKey="…">`, a `{t('key')}` hook call, an icon
  * component (`<SellIcon/>`), or a BEM className modifier (`--could-sell`). The name is in
  * the source, just not as literal text; reading it deterministically beats leaving the
  * control unnamed (and upgrades its selector from structural to role+name).
@@ -88,7 +88,7 @@ function inferredName(el: Node): string | undefined {
     if (key != null && key.length > 0) return humanize(key)
   }
   // The actual label text via the i18n hook — more accurate than the icon/className
-  // fallbacks below, which on refapp's design-system buttons leak the variant ("Danger").
+  // fallbacks below, which on design-system buttons leak the variant ("Danger").
   const callKey = i18nCallKey(el)
   if (callKey != null) return humanize(callKey)
   for (const d of kids) {
@@ -192,7 +192,7 @@ export function controlMetaFor(el: Node): ControlInfo | null {
   else if (/^[a-z]/.test(tag) && hasEventHandler(el)) controlType = 'element'
   else return null
   const textLabel = controlType === 'button' || controlType === 'element' ? getJsxText(el) : undefined
-  // refapp inputs (and icon buttons) carry their label in placeholder / aria-label / title
+  // real-world inputs (and icon buttons) carry their label in placeholder / aria-label / title
   // (the tooltip), often as a {t('key')} expression — the authoritative name when there is
   // no visible text, so it slots ahead of the weaker i18n-key/icon/className inference.
   const attrName = attrLabel(el, 'placeholder') ?? attrLabel(el, 'aria-label') ?? attrLabel(el, 'title')

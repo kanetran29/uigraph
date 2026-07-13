@@ -184,7 +184,7 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(sell?.control?.selector?.strategy).toBe('role-name')
   })
 
-  it("names a control from a {t('key')} i18n hook-call label (refapp's form, not <Trans>)", () => {
+  it("names a control from a {t('key')} i18n hook-call label (the hook form, not <Trans>)", () => {
     const { graph } = extractGraph(
       inMemory({
         '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
@@ -596,7 +596,7 @@ describe('extractGraph — interprocedural call-graph reachability (F2.8)', () =
   })
 })
 
-describe('extractGraph — shared-component SPA shells (refapp-driven)', () => {
+describe('extractGraph — shared-component SPA shells (production-driven)', () => {
   // Two routes render the same shell component; a third has its own component.
   const sharedShell = (controls = false) =>
     extractGraph(
@@ -682,7 +682,7 @@ describe('extractGraph — control selectors + stable identity (F1)', () => {
   })
 })
 
-describe('extractGraph — dynamic navigation targets surfaced (refapp-driven)', () => {
+describe('extractGraph — dynamic navigation targets surfaced (production-driven)', () => {
   it('emits a fully-dynamic navigate(var) as an unknown-modality edge to a dynamic sink', () => {
     const { graph } = extractGraph(
       inMemory({
@@ -838,7 +838,7 @@ describe('extractGraph — modal-control descent (F-modal-controls)', () => {
 })
 
 describe('extractGraph — gated overlay-view control descent (F-deep-view-controls)', () => {
-  // refapp's ProfileView shape: a deep imported view gated by a *Visible state var
+  // a real-world shape: a deep imported view gated by a *Visible state var
   // (not a *Modal tag), holding a verify CTA + phone input + a NotificationSettings subview.
   const profileApp = {
     '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
@@ -945,7 +945,7 @@ describe('extractGraph — gated overlay-view control descent (F-deep-view-contr
         '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
         // The screen renders an imported FlowModal (descended) and gates a LoginModal by
         // loginModalVisible. A control INSIDE FlowModal opens the login modal via the same
-        // setter — exactly refapp's BuildingModal -> setLoginModalVisible(true) shape.
+        // setter — exactly the production modal -> setLoginModalVisible(true) shape.
         '/H.tsx': `import { useState } from 'react'\nimport FlowModal from './FlowModal'\nimport LoginModal from './LoginModal'\nexport default function H(){ const [loginModalVisible,setLoginModalVisible]=useState(false); return <div><FlowModal setLoginModalVisible={setLoginModalVisible}/>{loginModalVisible && <LoginModal isOpen={loginModalVisible}/>}</div> }`,
         '/FlowModal.tsx': `export default function FlowModal({setLoginModalVisible}){ return <button onClick={()=>setLoginModalVisible(true)}>Sign in to continue</button> }`,
         '/LoginModal.tsx': `export default function LoginModal(){ return <button onClick={()=>{}}>Google</button> }`,

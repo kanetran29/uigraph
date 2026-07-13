@@ -6,7 +6,7 @@
 
 ## Problem
 
-F10.1 surfaced controls inside `*Modal`/`*Dialog`-tagged overlays. But refapp has
+F10.1 surfaced controls inside `*Modal`/`*Dialog`-tagged overlays. But real production apps have
 overlay surfaces that are **not** tagged as modals — most importantly `ProfileView`
 (notification settings, add-phone, identity-verify→Stripe). It is rendered deep under the
 SPA shell and gated by a **state variable**, not a tag suffix:
