@@ -214,6 +214,23 @@ describe('nextToVerify', () => {
     expect(nextToVerify(g(), pg, 1)).toHaveLength(1)
   })
 
+  it('includeProven ranks must-static proofs last, for the verify-all sweep', () => {
+    const g6 = graph(
+      [node('a'), node('b'), node('c')],
+      [
+        edge('m1', 'a', 'b', { source: 'static', modality: 'must' }),
+        edge('y1', 'b', 'c', { source: 'static', modality: 'may', guard: 'x' }),
+        edge('r1', 'a', 'c', { source: 'runtime', modality: 'must', event: 'click2' }),
+      ],
+    )
+    const plain = nextToVerify(g6, { nodes: [], edges: [] })
+    expect(plain.map((t) => t.id)).toEqual(['y1'])
+    const sweep = nextToVerify(g6, { nodes: [], edges: [] }, 20, new Set(), { includeProven: true })
+    expect(sweep.map((t) => t.id)).toEqual(['y1', 'm1'])
+    expect(sweep[1]?.proven).toBe(true)
+    expect(sweep.some((t) => t.id === 'r1')).toBe(false)
+  })
+
   it('re-queues a stale-witnessed runtime edge for re-verification', () => {
     const g3 = graph([node('a'), node('b')], [edge('r1', 'a', 'b', { source: 'runtime', modality: 'must', witnessStale: true })])
     const targets = nextToVerify(g3, { nodes: [], edges: [] })

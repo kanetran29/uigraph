@@ -22,6 +22,13 @@ The confirm path — how an uncertain transition becomes a witnessed `runtime` e
    - after a re-map, previously-witnessed edges become `witnessStale` (tier drops
      to `asserted`) and re-enter next_to_verify — re-confirm them.
 
+## The verify-all sweep
+
+`next_to_verify {includeProven: true}` (or `uigraph verify --all`) also ranks
+must-static proofs so runtime drives upgrade them to `witnessed`. A REFUTED
+must is the loudest signal the system produces: the extraction and the running
+app disagree — investigate before trusting the graph (the CLI exits non-zero).
+
 ## Running it via the CLI
 
 ```
