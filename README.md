@@ -127,13 +127,9 @@ This repository is the complete, MIT-licensed trust engine — nothing epistemic
 
 ## Star history
 
-<a href="https://star-history.com/#kanetran29/uigraph&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kanetran29/uigraph&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=kanetran29/uigraph&type=Date" />
-    <img alt="Star history chart for kanetran29/uigraph" src="https://api.star-history.com/svg?repos=kanetran29/uigraph&type=Date" width="640" />
-  </picture>
-</a>
+[![GitHub stars](https://img.shields.io/github/stars/kanetran29/uigraph?style=social)](https://star-history.com/#kanetran29/uigraph&Date)
+
+[View the star-history chart &#8594;](https://star-history.com/#kanetran29/uigraph&Date)
 
 ## License
 
