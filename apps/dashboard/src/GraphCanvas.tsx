@@ -703,10 +703,6 @@ function swatch(color: string, dash?: string): CSSProperties {
   return { borderTop: `2px ${dash ? 'dashed' : 'solid'} ${color}` }
 }
 
-// Above this many screen→screen `may` edges, the graph defaults to hiding them (toggle to
-// reveal). Chosen so the sample apps show their full fan-out while real apps stay responsive.
-const SCREEN_MAY_BUDGET = 300
-
 /**
  * Render the interactive graph. Node positions are owned by ReactFlow so drags
  * persist; the dagre layout only re-seeds positions when the structural key (node
@@ -727,7 +723,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     : 0
   // Hide the synthetic `u_<screen>` dynamic-target sinks (kind 'unknown') + any edge
   // touching them from the canvas. View-only: they stay in the IR + coverage worklist.
-  const baseGraph = useMemo<UiGraph>(() => {
+  const graph = useMemo<UiGraph>(() => {
     const hidden = new Set(rawGraph.nodes.filter((n) => n.kind === 'unknown').map((n) => n.id))
     if (hidden.size === 0) return rawGraph
     return {
@@ -741,29 +737,6 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [showProposed, setShowProposed] = useState(false)
   const [diffMode, setDiffMode] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
-
-  // Screen→screen `may` edges are the `--controls` fan-out: on a real app they number in
-  // the thousands (every Link on every page), swamping the layout + canvas into a laggy
-  // hairball. Count them, and on a large graph default them hidden so the proven skeleton
-  // (must / witnessed / manual) reads clearly; the toggle below reveals the full fan-out.
-  const screenMayCount = useMemo(() => {
-    const control = new Set(baseGraph.nodes.filter((n) => n.kind === 'control').map((n) => n.id))
-    return baseGraph.edges.filter((e) => e.modality === 'may' && !control.has(e.from) && !control.has(e.to)).length
-  }, [baseGraph])
-  const [showMay, setShowMay] = useState(screenMayCount <= SCREEN_MAY_BUDGET)
-  // The render graph: on a big graph with the toggle off, drop `may` edges from BOTH the
-  // layout and the canvas. Witnessed (runtime) and manual edges are always kept — hiding a
-  // proven transition would be a lie — as are the sole edges that connect a modal.
-  const graph = useMemo<UiGraph>(() => {
-    if (showMay) return baseGraph
-    const modalIds = new Set(baseGraph.nodes.filter((n) => n.kind === 'modal').map((n) => n.id))
-    return {
-      ...baseGraph,
-      edges: baseGraph.edges.filter(
-        (e) => e.modality !== 'may' || e.source === 'runtime' || e.source === 'manual' || modalIds.has(e.to),
-      ),
-    }
-  }, [baseGraph, showMay])
 
   // Diff-highlight is live only when there is a delta AND the toggle is on. Added nodes (green
   // ring) plus the endpoints of added/changed edges stay lit; everything else dims so the
@@ -1120,12 +1093,6 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <input type="checkbox" checked={showProposed} onChange={(e) => setShowProposed(e.target.checked)} />
             show proposed (LLM){proposedEdges.length > 0 ? ` · ${proposedEdges.length}` : ''}
           </label>
-          {screenMayCount > 0 ? (
-            <label className="edge-toggle">
-              <input type="checkbox" checked={showMay} onChange={(e) => setShowMay(e.target.checked)} />
-              show may-edges · {screenMayCount}
-            </label>
-          ) : null}
           {diffCount > 0 ? (
             <label className="edge-toggle">
               <input type="checkbox" checked={diffMode} onChange={(e) => setDiffMode(e.target.checked)} />
