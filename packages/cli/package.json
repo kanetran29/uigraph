@@ -1,6 +1,6 @@
 {
   "name": "@ui-graph/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "exports": {
@@ -50,7 +50,7 @@
       "uigraph": "./dist/cli.js"
     }
   },
-  "description": "UI-graph CLI: map, verify, login, dash, gen, diff, serve, mcp \u2014 extract and verify your app's UI transition graph.",
+  "description": "UI-graph CLI: map, verify, login, dash, gen, diff, serve, mcp — extract and verify your app's UI transition graph.",
   "keywords": [
     "ui-graph",
     "ui-transition-graph",

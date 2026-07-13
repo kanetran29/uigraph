@@ -38,11 +38,11 @@
 
 ## Quick start
 
-1. **Install and map your app** (adapter auto-detected from `package.json`):
+1. **Install the CLI and map your app** (adapter auto-detected from `package.json`):
 
    ```bash
-   pnpm install && pnpm check
-   pnpm --filter @ui-graph/cli run uigraph -- map ~/work/your-app --controls
+   npm i -g @ui-graph/cli          # or: pnpm add -g @ui-graph/cli
+   uigraph map ~/work/your-app --controls
    ```
 
 2. **Open the dashboard** — one command, serves UI + API and opens your browser:
@@ -67,7 +67,15 @@
    uigraph kit install --claude       # rules + guides + the reconciliation-loop playbook
    ```
 
+   In your MCP client config (e.g. Claude Code / Cursor):
+
+   ```json
+   { "mcpServers": { "uigraph": { "command": "uigraph", "args": ["mcp", "/abs/path/to/your-app"] } } }
+   ```
+
 > Every workspace is a single `uigraph.db` (SQLite, no native deps) you can commit — teammates and CI read the same verified graph without re-deriving it.
+>
+> Building from source? Clone the repo, then `pnpm install && pnpm check`; run the CLI in-tree with `pnpm --filter @ui-graph/cli run uigraph -- <command>`.
 
 <p align="center"><img src="docs/assets/dashboard-graph.png" width="820" alt="The dashboard on the gauntlet sample: green edges are runtime-witnessed; the coverage panel keeps verified, runtime-verified, and parked honestly distinct"/></p>
 
