@@ -8,6 +8,7 @@
 <p align="center">Tests, docs, agents, and impact analysis are all views over one graph — and every edge says how much you can trust it.</p>
 
 <p align="center">
+  <img src="https://github.com/kanetran29/uigraph/actions/workflows/ci.yml/badge.svg" alt="CI"/>
   <img src="https://img.shields.io/badge/license-MIT-D97757" alt="MIT license"/>
   <img src="https://img.shields.io/badge/extraction_gauntlet-35%2F35-2f9e44" alt="gauntlet 35/35"/>
   <img src="https://img.shields.io/badge/MCP_tools-27-3D3929" alt="27 MCP tools"/>
