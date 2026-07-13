@@ -9,7 +9,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { buildSpecPlan } from '@ui-graph/core'
 import { planPath } from '@ui-graph/core'
 import type { GraphEdge, GraphNode, SpecPlan, UiGraph, Witness } from '@ui-graph/core'
-import { drivePlan, makePlaywrightDriver } from './runner'
+import { drivePlan, makePlaywrightDriver, mapPool } from './runner'
 
 const staticWitness: Witness = { source: 'static', file: 'x.tsx', loc: { line: 1, col: 1 }, ruleId: 'test' }
 
@@ -195,5 +195,46 @@ describe('makePlaywrightDriver: one browser per run, page per edge', () => {
     const owned = makePlaywrightDriver()
     await owned.dispose()
     expect(launches.count).toBe(0)
+  })
+
+  it('CONCURRENT first-calls (the worker pool) still launch Chromium exactly once', async () => {
+    launches.count = 0
+    contexts.count = 0
+    const gg = graph([node('n_a', { route: '/a' }), node('n_b', { route: '/b' })], [edge('e', 'n_a', 'n_b', { event: 'click:Link', guard: null })])
+    const plan: SpecPlan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+    const owned = makePlaywrightDriver()
+    // fire 8 drives at once BEFORE any has initialized the browser — the memoized init
+    // must serialize them onto a single launch, not one per racing first-call.
+    await Promise.all(Array.from({ length: 8 }, () => owned.driver(plan, 'http://app')))
+    await owned.dispose()
+    expect(launches.count).toBe(1)
+    expect(contexts.count).toBe(1)
+  })
+})
+
+describe('mapPool: bounded concurrency, results by input index', () => {
+  it('preserves input order even when later items finish first', async () => {
+    const order: number[] = []
+    const out = await mapPool([30, 5, 20, 1], 2, async (ms, i) => {
+      await new Promise((r) => setTimeout(r, ms))
+      order.push(i)
+      return ms * 10
+    })
+    // results are index-aligned regardless of completion order
+    expect(out).toEqual([300, 50, 200, 10])
+    // and completion order is NOT input order (fast items finished first) — proves real concurrency
+    expect(order).not.toEqual([0, 1, 2, 3])
+  })
+
+  it('never runs more than `concurrency` workers at once', async () => {
+    let inFlight = 0
+    let peak = 0
+    await mapPool(Array.from({ length: 12 }, (_, i) => i), 3, async () => {
+      inFlight++
+      peak = Math.max(peak, inFlight)
+      await new Promise((r) => setTimeout(r, 5))
+      inFlight--
+    })
+    expect(peak).toBeLessThanOrEqual(3)
   })
 })

@@ -336,6 +336,24 @@ export class Store {
     return entry
   }
 
+  /**
+   * Batch-park many edges in a SINGLE doc write (upsert, deduped by edge id) — the
+   * pattern-dedup path parks thousands of duplicate fan-out edges at once, so looping
+   * parkEdge (each a full read+rewrite of the sidecar) would be O(n²). Every reason
+   * must be non-empty. Returns how many distinct edges were parked.
+   */
+  parkEdges(entries: readonly { edgeId: string; reason: string }[], by: 'agent' | 'runner' = 'agent'): number {
+    if (entries.length === 0) return 0
+    for (const e of entries) if (e.reason.trim().length === 0) throw new Error('parkEdges requires a non-empty reason')
+    const ts = new Date().toISOString()
+    const incoming = new Map<string, ParkedEdge>()
+    for (const e of entries) incoming.set(e.edgeId, { edgeId: e.edgeId, reason: e.reason, by, ts })
+    const merged = this.getParkedEdges().filter((p) => !incoming.has(p.edgeId))
+    for (const v of incoming.values()) merged.push(v)
+    this.setDoc('parked_edges', merged)
+    return incoming.size
+  }
+
   /** Un-park an edge (return it to the worklist); returns whether one was removed. */
   unparkEdge(edgeId: string): boolean {
     const current = this.getParkedEdges()

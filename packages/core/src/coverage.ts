@@ -278,3 +278,62 @@ export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit
 
   return out.sort((a, b) => b.priority - a.priority).slice(0, limit)
 }
+
+/**
+ * The de-dup pattern key for a verify target: the SOURCE navigation call it fires,
+ * identified by its static witness `file:line:col`. A shared nav component's `<Link>`
+ * (sidebar/header) renders on every screen and, when its target is dynamic, the
+ * extractor over-approximates it into a fan-out of `may` edges — ALL sharing that one
+ * witness location. So one source call = one pattern: drive a representative, account
+ * the rest by pattern instead of re-driving the same call from every screen.
+ *
+ * Returns null (NEVER deduped — always individually driven) for: must-static/proven
+ * edges (the verify-all sweep must witness each), dynamic-sink targets (kind
+ * 'unknown', resolved by capture not pattern), proposals, and any edge whose witness
+ * lacks a file:line (nothing stable to key on).
+ */
+export function patternKey(graph: UiGraph, t: VerifyTarget): string | null {
+  if (t.kind !== 'edge' || t.proven === true) return null
+  if (graph.nodes.find((n) => n.id === t.to)?.kind === 'unknown') return null
+  const w = graph.edges.find((e) => e.id === t.id)?.witness
+  if (w?.file === undefined || w.loc === undefined) return null
+  return `${w.file}:${w.loc.line}:${w.loc.col}`
+}
+
+/** A worklist split into the targets actually driven (one representative per pattern +
+ *  every un-keyable target) and the duplicates held aside, grouped by their pattern key. */
+export interface DedupedWorklist {
+  representatives: VerifyTarget[]
+  duplicates: Map<string, VerifyTarget[]>
+}
+
+/**
+ * Collapse a worklist by pattern: keep the first `sample` representative(s) per pattern
+ * key (deterministic, ordered by `from` id) plus every un-keyable target (patternKey
+ * null → always its own representative); the remaining same-key targets become
+ * duplicates the runner never drives. The runner parks a pattern's duplicates ONLY
+ * after its representative is runtime-confirmed, so a duplicate is never credited as
+ * driven — the win is purely NOT re-driving the same source call from every screen.
+ */
+export function dedupWorklist(graph: UiGraph, targets: VerifyTarget[], sample = 1): DedupedWorklist {
+  const byKey = new Map<string, VerifyTarget[]>()
+  const representatives: VerifyTarget[] = []
+  for (const t of targets) {
+    const key = patternKey(graph, t)
+    if (key === null) {
+      representatives.push(t)
+      continue
+    }
+    const bucket = byKey.get(key)
+    if (bucket === undefined) byKey.set(key, [t])
+    else bucket.push(t)
+  }
+  const duplicates = new Map<string, VerifyTarget[]>()
+  for (const [key, bucket] of byKey) {
+    bucket.sort((a, b) => a.from.localeCompare(b.from))
+    representatives.push(...bucket.slice(0, sample))
+    const rest = bucket.slice(sample)
+    if (rest.length > 0) duplicates.set(key, rest)
+  }
+  return { representatives, duplicates }
+}

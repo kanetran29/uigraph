@@ -71,10 +71,13 @@ export {
 export {
   buildCoverage,
   nextToVerify,
+  patternKey,
+  dedupWorklist,
   type CoverageReport,
   type EdgeCoverage,
   type VerifyTarget,
   type ParkedEdge,
+  type DedupedWorklist,
 } from './coverage'
 export { nodeForUrl } from './coverage'
 export { buildFrontier, type Frontier } from './frontier'

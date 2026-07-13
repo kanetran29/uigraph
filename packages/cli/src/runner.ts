@@ -10,7 +10,7 @@
 // it to actually drive) and uses the system/cached Chromium.
 
 import type { Evidence, SpecPlan, UiGraph, VerifyTarget } from '@ui-graph/core'
-import { buildSpecPlan, fnv1a, locatorFor, nextToVerify, nodeForUrl, planPath } from '@ui-graph/core'
+import { buildSpecPlan, dedupWorklist, fnv1a, locatorFor, nextToVerify, nodeForUrl, patternKey, planPath } from '@ui-graph/core'
 import { openStore } from '@ui-graph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@ui-graph/mcp'
 
@@ -40,7 +40,7 @@ export interface ProbeSpec {
 /** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan. */
 export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec }) => Promise<VerifyResult>
 
-/** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). */
+/** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). `concurrency` is the parallel-driver pool width (default 8, capped 16); `patternSample` is how many representatives to drive per over-approximation pattern (default 1). */
 export interface RunVerifyOptions {
   dir: string
   appUrl: string
@@ -48,6 +48,8 @@ export interface RunVerifyOptions {
   driver?: VerifyDriver
   storageState?: string
   includeProven?: boolean
+  concurrency?: number
+  patternSample?: number
 }
 
 /** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution; refutedProven counts refutations of must-static edges — each one means the extraction and the running app DISAGREE and must be investigated. */
@@ -59,6 +61,7 @@ export interface VerifySummary {
   resolvedDynamic: number
   discoveredNodes: number
   parkedDynamic: number
+  patternParked: number
 }
 
 /**
@@ -74,28 +77,74 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   const parkedIds = new Set(store.getParkedEdges().map((p) => p.edgeId))
   store.close()
 
-  const targets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds, { includeProven: opts.includeProven === true })
+  const allTargets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds, { includeProven: opts.includeProven === true })
+  // Collapse the over-approximation fan-out: drive one representative per source-nav
+  // pattern; the duplicates are never driven (they are parked after the representative
+  // is confirmed). This is the big-app speedup — 7000+ may-edges become a few hundred.
+  const { representatives, duplicates } = dedupWorklist(graph, allTargets, opts.patternSample ?? 1)
+
   // When we build the default driver we own its browser and must dispose it after
   // the run; an injected driver brings its own lifecycle, so there is nothing to close.
   const owned = opts.driver === undefined ? makePlaywrightDriver(opts.storageState) : null
   const driver = opts.driver ?? owned!.driver
   const authed = opts.storageState !== undefined
+  const concurrency = Math.max(1, Math.min(opts.concurrency ?? 8, 16))
   let confirmed = 0
   let refuted = 0
   let refutedProven = 0
   let resolvedDynamic = 0
   let discoveredNodes = 0
   let parkedDynamic = 0
+  // Pattern keys whose representative confirmed (→ its duplicates may be parked) or
+  // refuted/undrivable (→ its duplicates stay OPEN, never falsely credited).
+  const confirmedKeys = new Map<string, string>()
+  const refutedKeys = new Set<string>()
+
+  // Dynamic-sink targets mutate the graph (addNode) and must stay serial; every other
+  // target is a pure drive that parallelizes.
+  const isDynamic = (t: VerifyTarget): boolean => graph.nodes.find((n) => n.id === t.to)?.kind === 'unknown'
+  const simple = representatives.filter((t) => !isDynamic(t))
+  const dynamic = representatives.filter(isDynamic)
 
   try {
-  for (const t of targets) {
-    const steps = planPath(graph, t.from, t.to)
-    if (steps === null) continue
-    const plan = buildSpecPlan(graph, steps, { baseUrl: opts.appUrl, title: `verify ${t.from} → ${t.to}` })
-    const toKind = graph.nodes.find((n) => n.id === t.to)?.kind
+    // STAGE 1 — drive the simple targets CONCURRENTLY. Pure: no DB writes, reads only the
+    // frozen graph snapshot; results are collected by input index for a deterministic fold.
+    const results = await mapPool(simple, concurrency, (t) => attemptSimple(driver, graph, t, opts.appUrl))
 
-    // Dynamic-sink target (u_<screen>): CAPTURE the real landing instead of asserting a URL.
-    if (toKind === 'unknown') {
+    // STAGE 2 — fold the results SERIALLY (the only SQLite writer), in worklist-rank order.
+    for (let i = 0; i < simple.length; i++) {
+      const t = simple[i]!
+      const result = results[i]
+      if (result === null || result === undefined) continue
+      // an undrivable plan was never attempted: refuting it would be a false negative
+      if (result.undrivable === true) continue
+      reportObservation(ctx, {
+        from: t.from,
+        to: t.to,
+        event: t.event,
+        outcome: result.confirmed ? 'confirmed' : 'refuted',
+        reportedBy: 'runner',
+        ...(t.proposalIds && t.proposalIds.length > 0 ? { proposalId: t.proposalIds[0] } : {}),
+        ...(result.evidence ? { evidence: result.evidence } : {}),
+        ...(result.screenshot ? { screenshot: result.screenshot } : {}),
+      })
+      const k = patternKey(graph, t)
+      if (result.confirmed) {
+        confirmed++
+        if (k !== null) confirmedKeys.set(k, `${t.from}->${t.to}`)
+      } else {
+        refuted++
+        if (t.proven === true) refutedProven++
+        if (k !== null) refutedKeys.add(k)
+      }
+    }
+
+    // STAGE 3 — dynamic-sink targets SERIALLY (each may updateGraph + reload, order-sensitive).
+    for (const t of dynamic) {
+      const steps = planPath(graph, t.from, t.to)
+      if (steps === null) continue
+      const plan = buildSpecPlan(graph, steps, { baseUrl: opts.appUrl, title: `verify ${t.from} → ${t.to}` })
+      // Dynamic-sink target (u_<screen>): CAPTURE the real landing instead of asserting a URL.
       let result: VerifyResult
       try {
         result = await driver(plan, opts.appUrl, { capture: true })
@@ -154,53 +203,82 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       }
       resolvedDynamic++
       confirmed++
-      continue
     }
-
-    // Normal assert-mode target (may edge / proposal).
-    let result: VerifyResult
-    try {
-      result = await driver(plan, opts.appUrl)
-    } catch {
-      result = { confirmed: false }
-    }
-    // Direct drive failed or was undrivable: try the exploratory probe before judging.
-    if (!result.confirmed) {
-      const probe = buildProbeSpec(graph, t)
-      if (probe !== null) {
-        let probed: VerifyResult
-        try {
-          probed = await driver(plan, opts.appUrl, { probe })
-        } catch {
-          probed = { confirmed: false }
-        }
-        if (probed.confirmed) result = probed
-        else if (result.undrivable !== true && probed.undrivable === true) result = probed
-      }
-    }
-    // an undrivable plan was never attempted: refuting it would be a false negative
-    if (result.undrivable === true) continue
-    reportObservation(ctx, {
-      from: t.from,
-      to: t.to,
-      event: t.event,
-      outcome: result.confirmed ? 'confirmed' : 'refuted',
-      reportedBy: 'runner',
-      ...(t.proposalIds && t.proposalIds.length > 0 ? { proposalId: t.proposalIds[0] } : {}),
-      ...(result.evidence ? { evidence: result.evidence } : {}),
-      ...(result.screenshot ? { screenshot: result.screenshot } : {}),
-    })
-    if (result.confirmed) confirmed++
-    else {
-      refuted++
-      if (t.proven === true) refutedProven++
-    }
-  }
   } finally {
     if (owned !== null) await owned.dispose()
   }
 
-  return { attempted: targets.length, confirmed, refuted, refutedProven, resolvedDynamic, discoveredNodes, parkedDynamic }
+  // STAGE 4 — park the duplicates of every CONFIRMED (and not-also-refuted) pattern, in a
+  // single batch write. A duplicate is parked (accounted), never minted as runtime — the
+  // reason points at the real runtime-witnessed representative so it stays auditable.
+  let patternParked = 0
+  const toPark: { edgeId: string; reason: string }[] = []
+  for (const [key, dups] of duplicates) {
+    if (!confirmedKeys.has(key) || refutedKeys.has(key)) continue
+    const rep = confirmedKeys.get(key) as string
+    for (const d of dups) {
+      toPark.push({ edgeId: d.id, reason: `over-approximation fan-out of the nav call at ${key} — representative ${rep} runtime-witnessed; this target not individually driven` })
+    }
+  }
+  if (toPark.length > 0) {
+    const s = openStore(dbPath(ctx))
+    try {
+      patternParked = s.parkEdges(toPark, 'runner')
+    } finally {
+      s.close()
+    }
+  }
+
+  return { attempted: representatives.length, confirmed, refuted, refutedProven, resolvedDynamic, discoveredNodes, parkedDynamic, patternParked }
+}
+
+/** A bounded-concurrency pool: run `worker` over `items` with at most `concurrency`
+ *  in flight, writing each result into its INPUT index so the caller can fold results
+ *  in worklist order regardless of which worker finished first. */
+async function mapPool<T, R>(items: readonly T[], concurrency: number, worker: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length)
+  let next = 0
+  const run = async (): Promise<void> => {
+    for (;;) {
+      const i = next++
+      if (i >= items.length) return
+      results[i] = await worker(items[i] as T, i)
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => run()))
+  return results
+}
+
+/**
+ * Drive ONE non-dynamic target and return its result — no DB access, so it is safe to
+ * run concurrently. Plans the path, drives the plan, and on failure runs the exploratory
+ * probe before judging (an undrivable-after-probe result is still undrivable). Returns
+ * null when there is no path to plan (nothing to fold).
+ */
+async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string): Promise<VerifyResult | null> {
+  const steps = planPath(graph, t.from, t.to)
+  if (steps === null) return null
+  const plan = buildSpecPlan(graph, steps, { baseUrl: appUrl, title: `verify ${t.from} → ${t.to}` })
+  let result: VerifyResult
+  try {
+    result = await driver(plan, appUrl)
+  } catch {
+    result = { confirmed: false }
+  }
+  if (!result.confirmed) {
+    const probe = buildProbeSpec(graph, t)
+    if (probe !== null) {
+      let probed: VerifyResult
+      try {
+        probed = await driver(plan, appUrl, { probe })
+      } catch {
+        probed = { confirmed: false }
+      }
+      if (probed.confirmed) result = probed
+      else if (result.undrivable !== true && probed.undrivable === true) result = probed
+    }
+  }
+  return result
 }
 
 /** Options for the autonomous until-done loop. */
@@ -578,13 +656,17 @@ export interface OwnedDriver {
 function makePlaywrightDriver(storageState?: string): OwnedDriver {
   let browser: PwBrowser | null = null
   let context: PwContext | null = null
-  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }): Promise<VerifyResult> => {
-    if (context === null) {
+  // Memoize the launch so N concurrent first-calls (the worker pool) share ONE browser
+  // instead of each racing to launch its own on the `context === null` check.
+  let ready: Promise<void> | null = null
+  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec }): Promise<VerifyResult> => {
+    ready ??= (async (): Promise<void> => {
       const { chromium } = await loadPlaywright()
       browser = (await chromium.launch()) as PwBrowser
       context = await browser.newContext(storageState !== undefined ? { storageState } : {})
-    }
-    const page = await context.newPage()
+    })()
+    await ready
+    const page = await (context as PwContext).newPage()
     try {
       return await drivePlan(page, plan, appUrl, opts)
     } finally {
@@ -596,12 +678,13 @@ function makePlaywrightDriver(storageState?: string): OwnedDriver {
       await browser.close()
       browser = null
       context = null
+      ready = null
     }
   }
   return { driver, dispose }
 }
 
-export { drivePlan, makePlaywrightDriver }
+export { drivePlan, makePlaywrightDriver, mapPool }
 
 /** The slice of the Playwright Browser/Context API the driver uses (typed loosely; playwright-core is optional). */
 interface PwBrowser {
