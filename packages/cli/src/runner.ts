@@ -268,12 +268,71 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
 }
 
 /** The optional playwright-core module, loaded via a variable specifier so a missing package is a runtime error, not a compile error. */
-async function loadPlaywright(): Promise<{ chromium: { launch: () => Promise<unknown> } }> {
+async function loadPlaywright(): Promise<{ chromium: { launch: (opts?: unknown) => Promise<unknown> } }> {
   const moduleName = 'playwright-core'
   try {
-    return (await import(moduleName)) as { chromium: { launch: () => Promise<unknown> } }
+    return (await import(moduleName)) as { chromium: { launch: (opts?: unknown) => Promise<unknown> } }
   } catch {
     throw new Error('Tier-3 runner needs playwright-core: `pnpm add -w playwright-core` (a Chromium is already cached).')
+  }
+}
+
+/** The slice of the browser API the manual-login flow uses (kept separate from the driver slices). */
+export interface LoginBrowser {
+  newContext: () => Promise<LoginContext>
+  close: () => Promise<void>
+}
+
+/** The slice of the context API the manual-login flow uses: open a page, persist the session. */
+export interface LoginContext {
+  newPage: () => Promise<{ goto: (url: string) => Promise<unknown> }>
+  storageState: (opts: { path: string }) => Promise<unknown>
+}
+
+/** Options for runLogin: app URL, output path, and injectable browser/prompt so the flow is testable without a real browser. */
+export interface RunLoginOptions {
+  appUrl: string
+  out: string
+  launcher?: () => Promise<LoginBrowser>
+  waitForUser?: () => Promise<void>
+}
+
+/** Block until the user presses Enter on stdin (the "I have finished logging in" signal). */
+function waitForEnter(message: string): Promise<void> {
+  return new Promise((resolve) => {
+    process.stdout.write(message)
+    process.stdin.resume()
+    process.stdin.once('data', () => {
+      process.stdin.pause()
+      resolve()
+    })
+  })
+}
+
+/**
+ * Manual login capture: open a HEADED browser at the app, let the user log in
+ * like a human (any auth scheme — password, OAuth, SSO, MFA — works, because a
+ * human drives it), then persist the session as a Playwright storageState file
+ * for authenticated `uigraph verify --storage-state` runs. The browser always
+ * closes, even when saving fails.
+ */
+export async function runLogin(opts: RunLoginOptions): Promise<void> {
+  const launch =
+    opts.launcher ??
+    (async (): Promise<LoginBrowser> => {
+      const { chromium } = await loadPlaywright()
+      return (await chromium.launch({ headless: false })) as LoginBrowser
+    })
+  const wait = opts.waitForUser ?? ((): Promise<void> => waitForEnter('Log in in the opened browser, then press Enter here to save the session… '))
+  const browser = await launch()
+  try {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await page.goto(opts.appUrl)
+    await wait()
+    await context.storageState({ path: opts.out })
+  } finally {
+    await browser.close()
   }
 }
 
