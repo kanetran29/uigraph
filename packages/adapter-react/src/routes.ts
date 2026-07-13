@@ -4,11 +4,12 @@
 // call-site path to an inner <Route>.
 
 import { Node, SyntaxKind } from 'ts-morph'
-import type { ArrayLiteralExpression, ObjectLiteralExpression, Project, SourceFile } from 'ts-morph'
+import type { ArrayLiteralExpression, ObjectLiteralExpression, Project, SourceFile, TemplateExpression } from 'ts-morph'
 import type { SoundinessNote } from '@uigraph/core'
 import type { RouteInfo } from './types'
-import { allJsxElements, ancestorRoutePaths, inlineElementTag, inlineExprInfo, isJsxEl, jsxRootsOf, jsxTag, stringAttr } from './jsx'
-import { callSiteComponentFile, dynamicImportTarget, isRouteWrapperComponent, resolveComponentFile, resolveExportedComponent, resolveLazyComponentFile, usesChildrenProp } from './resolve'
+import { allJsxElements, findAttr, inlineElementTag, inlineExprInfo, isJsxEl, jsxRootsOf, jsxTag, stringAttr } from './jsx'
+import { callSiteComponentFile, dynamicImportTarget, fnParams, isRouteWrapperComponent, resolveComponentFile, resolveExportedComponent, resolveLazyComponentFile, usesChildrenProp } from './resolve'
+import { constInitializer } from './targets'
 import { routeToNodeId } from './ids'
 
 /** Join an element's ancestor <Route> paths with its own path into a full absolute route path. */
@@ -17,6 +18,135 @@ function joinPath(ancestors: string[], own: string): string {
   if (own.startsWith('/')) return own === '/' ? '/' : own.replace(/\/+$/, '') || '/'
   const segs = [...ancestors, own].join('/').split('/').filter(Boolean)
   return '/' + segs.join('/')
+}
+
+/** Strip path-to-regexp custom regex groups from a resolved path (":slug([0-9]+)" -> ":slug"). */
+function stripParamRegex(path: string): string {
+  // ponytail: no nested-paren support — extend if a real app nests groups inside a param regex
+  return path.replace(/(:[A-Za-z0-9_]+)\([^)]*\)/g, '$1')
+}
+
+/**
+ * The single returned expression of a path-helper function: an arrow's expression
+ * body, or the sole `return` of a one-statement block body. Anything longer is not
+ * a trivially resolvable helper and yields undefined.
+ */
+function singleReturnExpr(fn: Node): Node | undefined {
+  if (Node.isArrowFunction(fn) && !Node.isBlock(fn.getBody())) return fn.getBody()
+  if (!Node.isArrowFunction(fn) && !Node.isFunctionDeclaration(fn) && !Node.isFunctionExpression(fn)) return undefined
+  const body = fn.getBody()
+  if (body === undefined || !Node.isBlock(body)) return undefined
+  const stmts = body.getStatements()
+  const ret = stmts.length === 1 ? stmts[0] : undefined
+  return ret !== undefined && Node.isReturnStatement(ret) ? ret.getExpression() : undefined
+}
+
+const EMPTY_PARAMS: ReadonlySet<string> = new Set()
+
+/**
+ * Resolve a template-literal route path piecewise: each `${…}` span resolves as a
+ * nested path expression; a span that is one of the enclosing helper's own params
+ * maps to the react-router `:param` form, but ONLY when it occupies a whole path
+ * segment (preceded by '/' and followed by '/' or end-of-path). Anything else makes
+ * the whole template unresolvable (null) rather than a guessed path.
+ */
+function resolveTemplatePath(t: TemplateExpression, sf: SourceFile, depth: number, params: ReadonlySet<string>): string | null {
+  let out = t.getHead().getLiteralText()
+  for (const span of t.getTemplateSpans()) {
+    const expr = span.getExpression()
+    const tail = span.getLiteral().getLiteralText()
+    const resolved = resolvePathExpr(expr, sf, depth + 1)
+    if (resolved !== null) {
+      out += resolved + tail
+      continue
+    }
+    const wholeSegment = out.endsWith('/') && (tail === '' || tail.startsWith('/'))
+    if (Node.isIdentifier(expr) && params.has(expr.getText()) && wholeSegment) {
+      out += ':' + expr.getText() + tail
+      continue
+    }
+    return null
+  }
+  return out
+}
+
+/**
+ * Recursively resolve a route `path` expression to its static string value:
+ * string/template literals, module-level const identifiers (same-file or imported,
+ * alias-aware), template literals over resolvable parts, and calls to helpers whose
+ * body is a single return of a resolvable expression (a returned template may map
+ * the helper's own params to `:param` segments). Returns null — never a guess —
+ * for anything else; the caller must degrade loudly with a soundiness note.
+ */
+function resolvePathExpr(expr: Node, sf: SourceFile, depth: number): string | null {
+  if (depth > 5) return null
+  if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return expr.getLiteralValue()
+  if (Node.isParenthesizedExpression(expr)) {
+    const inner = expr.getExpression()
+    return inner !== undefined ? resolvePathExpr(inner, sf, depth + 1) : null
+  }
+  if (Node.isIdentifier(expr)) {
+    const init = constInitializer(expr.getText(), sf)
+    return init !== undefined ? resolvePathExpr(init, init.getSourceFile(), depth + 1) : null
+  }
+  if (Node.isTemplateExpression(expr)) return resolveTemplatePath(expr, sf, depth, EMPTY_PARAMS)
+  if (Node.isCallExpression(expr)) {
+    const callee = expr.getExpression()
+    if (!Node.isIdentifier(callee)) return null
+    const fn = resolveExportedComponent(sf, callee.getText())
+    if (fn === undefined) return null
+    const ret = singleReturnExpr(fn)
+    if (ret === undefined) return null
+    if (Node.isTemplateExpression(ret)) return resolveTemplatePath(ret, fn.getSourceFile(), depth, new Set(fnParams(fn)))
+    return resolvePathExpr(ret, fn.getSourceFile(), depth + 1)
+  }
+  return null
+}
+
+/**
+ * Resolve a non-literal route `path` expression (helper call, imported const,
+ * template literal) to its static path with param-regex groups normalized away,
+ * or null when it is not statically resolvable.
+ */
+export function resolveRoutePath(expr: Node, sf: SourceFile): string | null {
+  const v = resolvePathExpr(expr, sf, 0)
+  return v !== null ? stripParamRegex(v) : null
+}
+
+/**
+ * A <Route>-like element's `path` attribute value: a string literal (kept verbatim,
+ * the pre-existing behaviour), else the resolved non-literal expression, else null.
+ */
+function routePathAttrValue(el: Node, sf: SourceFile): string | null {
+  const lit = stringAttr(el, 'path')
+  if (lit !== null) return lit
+  const init = findAttr(el, 'path')?.getInitializer()
+  if (init !== undefined && Node.isJsxExpression(init)) {
+    const inner = init.getExpression()
+    if (inner !== undefined) return resolveRoutePath(inner, sf)
+  }
+  return null
+}
+
+/**
+ * The chain of ancestor <Route> path values above an element, outermost first,
+ * resolving non-literal paths the same way as the element's own path. Returns null
+ * when any ancestor carries a `path` attribute that cannot be resolved — joining
+ * under it would invent a wrong path, and that ancestor emits its own note when
+ * the route walk visits it.
+ */
+function resolvedAncestorPaths(el: Node, sf: SourceFile): string[] | null {
+  const paths: string[] = []
+  let cur = el.getParent()
+  while (cur !== undefined) {
+    if (isJsxEl(cur) && jsxTag(cur) === 'Route' && findAttr(cur, 'path') !== undefined) {
+      const p = routePathAttrValue(cur, sf)
+      if (p === null) return null
+      paths.unshift(p)
+    }
+    cur = cur.getParent()
+  }
+  return paths
 }
 
 /** The ruleset id identifying which navigation rule produced an edge, from its event/effect. */
@@ -35,10 +165,13 @@ export function ruleIdFor(event: string, effect: string): string {
  * route-wrapper usages (a capitalized component carrying a `path` whose definition
  * forwards it to an inner <Route>). Wrapper usages contribute the same RouteInfo as a
  * plain <Route> — call-site path + call-site component file — so downstream extraction
- * (controls, navs, labels) is identical for both.
+ * (controls, navs, labels) is identical for both. Non-literal `path` values resolve
+ * through resolveRoutePath; a path that stays unresolvable is skipped LOUDLY with a
+ * `dynamic-route-path` note (file:line + expression text), never silently.
  */
-export function collectRoutes(project: Project): RouteInfo[] {
+export function collectRoutes(project: Project): RouteCollection {
   const byNodeId = new Map<string, RouteInfo>()
+  const soundiness: SoundinessNote[] = []
   const wrapperCache = new Map<string, boolean>()
   const isWrapperUsage = (sf: SourceFile, el: Node): boolean => {
     const tag = jsxTag(el)
@@ -57,9 +190,18 @@ export function collectRoutes(project: Project): RouteInfo[] {
     for (const el of allJsxElements(sf)) {
       const isPlainRoute = jsxTag(el) === 'Route'
       if (!isPlainRoute && !isWrapperUsage(sf, el)) continue
-      const ownPath = stringAttr(el, 'path')
-      if (ownPath === null) continue
-      const fullPath = joinPath(ancestorRoutePaths(el), ownPath)
+      const pathAttr = findAttr(el, 'path')
+      if (pathAttr === undefined) continue
+      const ownPath = routePathAttrValue(el, sf)
+      if (ownPath === null) {
+        const lc = sf.getLineAndColumnAtPos(pathAttr.getStart())
+        const exprText = pathAttr.getInitializer()?.getText() ?? pathAttr.getText()
+        soundiness.push({ kind: 'dynamic-route-path', file: sf.getFilePath(), loc: { line: lc.line, col: lc.column }, detail: `route \`path\` is not statically resolvable: ${exprText}` })
+        continue
+      }
+      const ancestors = resolvedAncestorPaths(el, sf)
+      if (ancestors === null) continue
+      const fullPath = joinPath(ancestors, ownPath)
       const nodeId = routeToNodeId(fullPath)
       if (byNodeId.has(nodeId)) continue
       const { name: componentName, file: componentFile } = callSiteComponentFile(sf, el)
@@ -72,7 +214,7 @@ export function collectRoutes(project: Project): RouteInfo[] {
       byNodeId.set(nodeId, { fullPath, nodeId, componentName, componentFile, inlineElement })
     }
   }
-  return [...byNodeId.values()]
+  return { routes: [...byNodeId.values()], soundiness }
 }
 
 /** The react-router data-router factory names (the only mode react-router v7 supports). */
@@ -81,8 +223,8 @@ const DATA_ROUTER_FACTORY = /^create(Browser|Hash|Memory)Router$/
 /** Framework pass-through wrappers whose single JSX child is the real route content. */
 const PASSTHROUGH_WRAPPER = /(Fragment|Suspense|StrictMode|ErrorBoundary)$/
 
-/** Data-router discovery result: the route seeds plus honest notes for every dynamic piece skipped. */
-export interface DataRouteCollection {
+/** Route discovery result: the route seeds plus honest notes for every dynamic piece skipped. */
+export interface RouteCollection {
   routes: RouteInfo[]
   /** Notes carry ABSOLUTE file paths; the caller relativizes against projectDir. */
   soundiness: SoundinessNote[]
@@ -103,14 +245,14 @@ export interface DataRouteCollection {
  * needs nothing here: its JSX <Route> elements are already collected by
  * `collectRoutes`'s project-wide JSX walk.
  */
-export function collectDataRoutes(project: Project): DataRouteCollection {
+export function collectDataRoutes(project: Project): RouteCollection {
   const byNodeId = new Map<string, RouteInfo>()
   const soundiness: SoundinessNote[] = []
 
   /** Record an honest note for a dynamic/unanalyzable piece of route config. */
-  const note = (sf: SourceFile, node: Node, detail: string): void => {
+  const note = (sf: SourceFile, node: Node, detail: string, kind = 'dynamic-route-config'): void => {
     const lc = sf.getLineAndColumnAtPos(node.getStart())
-    soundiness.push({ kind: 'dynamic-route-config', file: sf.getFilePath(), loc: { line: lc.line, col: lc.column }, detail })
+    soundiness.push({ kind, file: sf.getFilePath(), loc: { line: lc.line, col: lc.column }, detail })
   }
 
   /** The initializer of an object literal's named property assignment, or undefined. */
@@ -193,8 +335,11 @@ export function collectDataRoutes(project: Project): DataRouteCollection {
       if (init !== undefined && (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init))) {
         ownPath = init.getLiteralValue()
       } else {
-        note(sf, pathProp, 'route `path` is not a string literal; this route subtree is not statically extractable')
-        return
+        ownPath = init !== undefined ? resolveRoutePath(init, sf) : null
+        if (ownPath === null) {
+          note(sf, pathProp, `route \`path\` is not statically resolvable: ${(init ?? pathProp).getText()}; this route subtree is not extractable`, 'dynamic-route-path')
+          return
+        }
       }
     }
     const isIndex = propInit(obj, 'index')?.getKind() === SyntaxKind.TrueKeyword

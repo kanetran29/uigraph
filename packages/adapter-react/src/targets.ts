@@ -50,15 +50,25 @@ function literalPropertyValue(obj: Node, name: string): string | undefined {
   return v && (Node.isStringLiteral(v) || Node.isNoSubstitutionTemplateLiteral(v)) ? v.getLiteralValue() : undefined
 }
 
+/** The original exported name behind a possibly-aliased named import of `name` in `sf`, or `name` itself. */
+function importedOriginalName(name: string, sf: SourceFile): string {
+  for (const imp of sf.getImportDeclarations()) {
+    for (const ni of imp.getNamedImports()) {
+      if (ni.getAliasNode()?.getText() === name) return ni.getName()
+    }
+  }
+  return name
+}
+
 /**
  * The initializer of a module-level `const NAME = …`, stripped of `as const` /
- * `satisfies` / parens, following a named/default import to its declaring module
- * when NAME is not declared locally — so an app-wide route-constants module
- * (`import { ROUTES } from './routes'`) still resolves.
+ * `satisfies` / parens, following a named/default import (alias-aware) to its
+ * declaring module when NAME is not declared locally — so an app-wide route-constants
+ * module (`import { ROUTES } from './routes'`, aliased or not) still resolves.
  */
-function constInitializer(name: string, sf: SourceFile): Node | undefined {
+export function constInitializer(name: string, sf: SourceFile): Node | undefined {
   let decl = sf.getVariableDeclaration(name)
-  if (!decl) decl = resolveComponentFile(sf, name)?.getVariableDeclaration(name)
+  if (!decl) decl = resolveComponentFile(sf, name)?.getVariableDeclaration(importedOriginalName(name, sf))
   let init: Node | undefined = decl?.getInitializer()
   while (init !== undefined && (Node.isAsExpression(init) || Node.isSatisfiesExpression(init) || Node.isParenthesizedExpression(init))) init = init.getExpression()
   return init
