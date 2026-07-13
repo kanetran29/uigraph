@@ -1,6 +1,6 @@
 {
   "name": "@ui-graph/adapter-angular",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "type": "module",
   "exports": {
@@ -57,5 +57,8 @@
     "type": "git",
     "url": "git+https://github.com/kanetran29/uigraph.git",
     "directory": "packages/adapter-angular"
+  },
+  "engines": {
+    "node": ">=22.5.0"
   }
 }

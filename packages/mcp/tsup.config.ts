@@ -7,5 +7,6 @@ export default defineConfig({
   format: ['esm'],
   dts: true,
   clean: true,
-  target: 'node18',
+  target: 'node22',
+  external: [/^node:/],
 })
