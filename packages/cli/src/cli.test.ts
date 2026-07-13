@@ -365,6 +365,37 @@ describe('runVerify (Tier-3 runner)', () => {
     expect(obs[0]?.screenshot).toBe('shots/e.png')
   })
 
+  it('records NOTHING for an undrivable plan — never a false refutation', async () => {
+    const { runVerify } = await import('./runner')
+    const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), source: 'static', modality: 'may', guard: 'x' }])
+    const dir = seedWorkspace(tempDir('uigraph-cli-undrivable-'), g)
+    const summary = await runVerify({ dir, appUrl: 'http://x', limit: 10, driver: async () => ({ confirmed: false, undrivable: true }) })
+    expect(summary.confirmed).toBe(0)
+    expect(summary.refuted).toBe(0)
+    const store = openStore(dbPathFor(dir))
+    expect(store.getObservations()).toHaveLength(0)
+    store.close()
+  })
+
+  it('until-done never parks a target the limit excluded from attempts', async () => {
+    const { runVerifyUntilDone } = await import('./runner')
+    const g = graph(
+      [node('a'), node('b'), node('c'), node('d')],
+      [
+        { ...edge('e_ab', 'a', 'b'), source: 'static' as const, modality: 'may' as const, guard: 'x' },
+        { ...edge('e_ac', 'a', 'c'), source: 'static' as const, modality: 'may' as const, guard: 'y' },
+        { ...edge('e_ad', 'a', 'd'), source: 'static' as const, modality: 'may' as const, guard: 'z' },
+      ],
+    )
+    const dir = seedWorkspace(tempDir('uigraph-cli-limitpark-'), g)
+    // limit 1: only the top-ranked target is attempted each round; driver never confirms
+    await runVerifyUntilDone({ dir, appUrl: 'http://x', limit: 1, maxRounds: 1, parkTries: 1, driver: async () => ({ confirmed: false }) })
+    const store = openStore(dbPathFor(dir))
+    const parkedInRound = store.getParkedEdges().filter((p) => p.reason.includes('attempts'))
+    store.close()
+    expect(parkedInRound.length).toBeLessThanOrEqual(1)
+  })
+
   it('records a refuted observation when the driver does not confirm', async () => {
     const { runVerify } = await import('./runner')
     const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), source: 'static', modality: 'may', guard: 'x' }])
