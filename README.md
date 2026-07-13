@@ -15,10 +15,7 @@
   <img src="https://img.shields.io/badge/LLM-model--free_(BYOA)-3D3929" alt="model-free, bring your own agent"/>
 </p>
 
-<p align="center"><img src="docs/assets/dashboard-graph.png" width="820" alt="The dashboard on the gauntlet sample: green edges are runtime-witnessed; the coverage panel keeps verified, runtime-verified, and parked honestly distinct"/></p>
-
-<p align="center"><i>The bundled gauntlet sample after a verify run: 65% of transitions runtime-witnessed (green),
-100% accounted — every remaining edge either proven or parked with a written reason.</i></p>
+<p align="center"><img src="docs/assets/hero.svg" width="920" alt="UI-graph: a tangle of unknown screens flows through map, propose, and verify into organized, trust-tiered graphs"/></p>
 
 ---
 
@@ -70,6 +67,11 @@
    ```
 
 > Every workspace is a single `uigraph.db` (SQLite, no native deps) you can commit — teammates and CI read the same verified graph without re-deriving it.
+
+<p align="center"><img src="docs/assets/dashboard-graph.png" width="820" alt="The dashboard on the gauntlet sample: green edges are runtime-witnessed; the coverage panel keeps verified, runtime-verified, and parked honestly distinct"/></p>
+
+<p align="center"><i>The bundled gauntlet sample after a verify run: 65% of transitions runtime-witnessed (green),
+100% accounted — every remaining edge either proven or parked with a written reason.</i></p>
 
 ## Multiple projects
 

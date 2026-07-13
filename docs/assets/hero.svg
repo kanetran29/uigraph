@@ -1,0 +1,140 @@
+<svg width="1660" height="840" viewBox="0 0 1660 840" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>UI-graph — we don't just map your app, we verify it</title>
+  <desc>A dark hero banner: a tangle of unknown screens on the left flows through three glowing pipeline steps — map, propose, verify — past a terracotta starburst, into organized, trust-tiered graphs on the right.</desc>
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <filter id="glowBig" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <rect width="1660" height="840" rx="24" fill="#161210"/>
+
+  <text x="150" y="64" fill="#8a8378" style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 19px; letter-spacing: 3px;">YOUR APP</text>
+  <text x="1510" y="64" fill="#D97757" text-anchor="end" style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 19px; letter-spacing: 3px;">YOUR VERIFIED GRAPH</text>
+
+  <text x="830" y="106" text-anchor="middle" fill="#F0EEE6" style="font-family: Georgia, 'Times New Roman', serif; font-size: 78px;"><tspan fill="#D97757">UI</tspan>-graph</text>
+  <text x="830" y="152" text-anchor="middle" fill="#E8E2D5" style="font-family: Georgia, 'Times New Roman', serif; font-size: 30px;">We don&#8217;t just map your app. We verify it.</text>
+
+  <g stroke="#4a443c" stroke-width="1.6" fill="none" opacity="0.85">
+    <path d="M130 260 C 220 180, 320 320, 250 400"/>
+    <path d="M250 400 C 150 470, 300 560, 220 640"/>
+    <path d="M160 520 C 260 440, 120 360, 230 300"/>
+    <path d="M300 220 C 380 300, 260 380, 360 440"/>
+    <path d="M360 440 C 430 520, 300 600, 390 660"/>
+    <path d="M200 700 C 300 640, 400 720, 350 580"/>
+    <path d="M120 380 C 200 340, 180 500, 290 520"/>
+    <path d="M330 300 C 420 260, 440 400, 380 340"/>
+    <path d="M240 180 C 320 160, 360 240, 300 260"/>
+    <path d="M410 560 C 460 480, 420 380, 470 420"/>
+  </g>
+  <g fill="none" stroke="#7a7266" stroke-width="1.8">
+    <rect x="110" y="230" width="52" height="36" rx="6" transform="rotate(-8 136 248)"/>
+    <rect x="230" y="170" width="52" height="36" rx="6" transform="rotate(6 256 188)"/>
+    <rect x="330" y="250" width="52" height="36" rx="6" transform="rotate(-5 356 268)"/>
+    <rect x="180" y="330" width="52" height="36" rx="6" transform="rotate(4 206 348)"/>
+    <rect x="300" y="400" width="52" height="36" rx="6" transform="rotate(-7 326 418)"/>
+    <rect x="130" y="470" width="52" height="36" rx="6" transform="rotate(7 156 488)"/>
+    <rect x="250" y="540" width="52" height="36" rx="6" transform="rotate(-4 276 558)"/>
+    <rect x="360" y="500" width="52" height="36" rx="6" transform="rotate(6 386 518)"/>
+    <rect x="170" y="620" width="52" height="36" rx="6" transform="rotate(-6 196 638)"/>
+    <rect x="310" y="640" width="52" height="36" rx="6" transform="rotate(5 336 658)"/>
+    <rect x="420" y="380" width="52" height="36" rx="6" transform="rotate(-3 446 398)"/>
+  </g>
+  <g fill="#8a8378" style="font-family: Georgia, serif; font-size: 30px;">
+    <text x="215" y="290">?</text>
+    <text x="395" y="470">?</text>
+    <text x="290" y="615">?</text>
+  </g>
+
+  <g filter="url(#glow)" stroke="#D97757" stroke-width="5" fill="none" opacity="0.55">
+    <path d="M470 430 C 560 420, 610 418, 668 414"/>
+    <path d="M712 412 C 790 406, 830 404, 908 400"/>
+    <path d="M952 398 C 1030 394, 1070 392, 1148 390"/>
+    <path d="M1192 388 C 1240 380, 1260 330, 1290 250"/>
+    <path d="M1192 390 C 1250 392, 1280 400, 1310 430"/>
+    <path d="M1192 392 C 1240 410, 1260 500, 1300 600"/>
+  </g>
+  <g stroke="#E8956D" stroke-width="2.4" fill="none">
+    <path d="M470 430 C 560 420, 610 418, 668 414"/>
+    <path d="M712 412 C 790 406, 830 404, 908 400"/>
+    <path d="M952 398 C 1030 394, 1070 392, 1148 390"/>
+    <path d="M1192 388 C 1240 380, 1260 330, 1290 250"/>
+    <path d="M1192 390 C 1250 392, 1280 400, 1310 430"/>
+    <path d="M1192 392 C 1240 410, 1260 500, 1300 600"/>
+  </g>
+
+  <g style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 21px; letter-spacing: 2px;">
+    <circle cx="690" cy="413" r="22" fill="#161210" stroke="#E8956D" stroke-width="2.4"/>
+    <text x="690" y="421" text-anchor="middle" fill="#F0EEE6" style="font-size: 22px;">1</text>
+    <text x="690" y="366" text-anchor="middle" fill="#E8E2D5">1 &#183; MAP</text>
+    <circle cx="930" cy="399" r="22" fill="#161210" stroke="#E8956D" stroke-width="2.4"/>
+    <text x="930" y="407" text-anchor="middle" fill="#F0EEE6" style="font-size: 22px;">2</text>
+    <text x="930" y="352" text-anchor="middle" fill="#E8E2D5">2 &#183; PROPOSE</text>
+    <circle cx="1170" cy="389" r="22" fill="#161210" stroke="#E8956D" stroke-width="2.4"/>
+    <text x="1170" y="397" text-anchor="middle" fill="#F0EEE6" style="font-size: 22px;">3</text>
+    <text x="1170" y="342" text-anchor="middle" fill="#E8E2D5">3 &#183; VERIFY</text>
+  </g>
+
+  <g filter="url(#glowBig)" stroke="#D97757" stroke-width="9" stroke-linecap="round" opacity="0.5">
+    <line x1="930" y1="530" x2="930" y2="666"/>
+    <line x1="862" y1="598" x2="998" y2="598"/>
+    <line x1="882" y1="550" x2="978" y2="646"/>
+    <line x1="978" y1="550" x2="882" y2="646"/>
+  </g>
+  <g stroke="#E8956D" stroke-width="7" stroke-linecap="round">
+    <line x1="930" y1="536" x2="930" y2="660"/>
+    <line x1="868" y1="598" x2="992" y2="598"/>
+    <line x1="886" y1="554" x2="974" y2="642"/>
+    <line x1="974" y1="554" x2="886" y2="642"/>
+  </g>
+  <line x1="930" y1="536" x2="936" y2="424" stroke="#E8956D" stroke-width="2.4" stroke-dasharray="2 6" stroke-linecap="round"/>
+
+  <g filter="url(#glow)" opacity="0.5" stroke="#D97757" stroke-width="4" fill="none">
+    <path d="M1330 220 L 1420 180 M1330 220 L 1420 250 M1420 180 L 1510 160 M1420 180 L 1510 205 M1420 250 L 1510 250"/>
+  </g>
+  <g stroke="#E8956D" stroke-width="2" fill="#2a221c">
+    <rect x="1306" y="204" width="46" height="32" rx="5"/>
+    <rect x="1398" y="164" width="46" height="32" rx="5"/>
+    <rect x="1398" y="234" width="46" height="32" rx="5"/>
+    <rect x="1488" y="144" width="46" height="32" rx="5"/>
+    <rect x="1488" y="189" width="46" height="32" rx="5"/>
+    <rect x="1488" y="234" width="46" height="32" rx="5"/>
+  </g>
+  <text x="1420" y="308" text-anchor="middle" fill="#b8b0a2" style="font-family: ui-monospace, Menlo, monospace; font-size: 17px; letter-spacing: 2px;">SCREENS &#38; TRANSITIONS</text>
+
+  <g filter="url(#glow)" opacity="0.5" stroke="#84c88a" stroke-width="4" fill="none">
+    <path d="M1330 442 L 1412 442 M1456 442 L 1538 442"/>
+  </g>
+  <g stroke="#84c88a" stroke-width="2.2" fill="none">
+    <path d="M1330 442 L 1412 442 M1456 442 L 1538 442"/>
+    <circle cx="1330" cy="442" r="13"/>
+    <circle cx="1434" cy="442" r="13"/>
+    <circle cx="1538" cy="442" r="13"/>
+  </g>
+  <text x="1434" y="490" text-anchor="middle" fill="#b8b0a2" style="font-family: ui-monospace, Menlo, monospace; font-size: 17px; letter-spacing: 2px;">RUNTIME-WITNESSED</text>
+
+  <g stroke="#E8956D" stroke-width="2" fill="none">
+    <rect x="1316" y="580" width="200" height="66" rx="8"/>
+    <path d="M1336 600 h118 M1336 616 h160 M1336 632 h96" stroke-width="2.4" opacity="0.8"/>
+  </g>
+  <text x="1416" y="686" text-anchor="middle" fill="#b8b0a2" style="font-family: ui-monospace, Menlo, monospace; font-size: 17px; letter-spacing: 2px;">E2E SPECS FROM PROOF</text>
+
+  <g style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 19px;" text-anchor="middle">
+    <rect x="360" y="726" width="176" height="42" rx="9" fill="none" stroke="#D97757" stroke-width="1.6"/>
+    <text x="448" y="753" fill="#F0EEE6">Proof-gated</text>
+    <text x="566" y="753" fill="#D97757">&#183;</text>
+    <rect x="596" y="726" width="164" height="42" rx="9" fill="none" stroke="#D97757" stroke-width="1.6"/>
+    <text x="678" y="753" fill="#F0EEE6">Trust tiers</text>
+    <text x="790" y="753" fill="#D97757">&#183;</text>
+    <rect x="820" y="726" width="222" height="42" rx="9" fill="none" stroke="#D97757" stroke-width="1.6"/>
+    <text x="931" y="753" fill="#F0EEE6">Honest coverage</text>
+    <text x="1072" y="753" fill="#D97757">&#183;</text>
+    <rect x="1102" y="726" width="252" height="42" rx="9" fill="none" stroke="#D97757" stroke-width="1.6"/>
+    <text x="1228" y="753" fill="#F0EEE6">Playwright codegen</text>
+  </g>
+
+  <text x="830" y="812" text-anchor="middle" fill="#8a8378" style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 19px; letter-spacing: 1px;">Works with  Claude Code &#183; Cursor &#183; Copilot &#183; Gemini CLI &#183; any MCP agent</text>
+</svg>
