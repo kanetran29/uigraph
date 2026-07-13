@@ -27,7 +27,7 @@ jobs:
       - name: extraction gauntlet (35 golden expectations)
         run: pnpm exec tsx scripts/gauntlet-report.ts --strict
       - name: build all libraries
-        run: pnpm -r --if-present run build
+        run: pnpm --filter "./packages/*" run build
       - name: authenticate to npm
         run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
         env:
