@@ -9,6 +9,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -42,5 +45,5 @@ jobs:
               continue
             fi
             echo "+ publishing $name@$ver"
-            ( cd "$dir" && pnpm publish --access public --no-git-checks --registry https://registry.npmjs.org/ )
+            ( cd "$dir" && pnpm publish --access public --provenance --no-git-checks --registry https://registry.npmjs.org/ )
           done
