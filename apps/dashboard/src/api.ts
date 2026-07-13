@@ -1,9 +1,9 @@
-// Browser-side API client + shared types for the dashboard. Talks to the CLI
-// serve API: GET /api/graph returns the merged UiGraph, POST /api/overlay applies
-// a single manual overlay edit. The overlay op shape mirrors @uigraph/mcp's
-// UpdateGraphArgs so the dashboard and the server cannot drift apart.
+// Browser-side API client + shared types for the dashboard. Read-only: it talks
+// to the CLI serve API's GET routes (graph, proposals, coverage, changes,
+// freshness, workspaces) — the write routes (/api/overlay, /api/scenario) are for
+// agents and uigraph studio, never this viewer.
 
-import type { CoverageReport, GraphEdge, GraphNode, Proposals, SinceLastDiff, UiGraph } from '@uigraph/core'
+import type { CoverageReport, Proposals, SinceLastDiff, UiGraph } from '@uigraph/core'
 import { buildCoverage } from '@uigraph/core'
 import sampleGraph from './sample-graph.json'
 
@@ -34,18 +34,6 @@ export async function fetchWorkspaces(): Promise<WorkspaceSummary[]> {
     return []
   }
 }
-
-/**
- * A single manual overlay edit, the discriminated op the serve API accepts under
- * `{ op }`. Identical to @uigraph/mcp's UpdateOp so the POST body is type-checked
- * against the same contract the server applies.
- */
-export type UpdateOp =
-  | { kind: 'addNode'; node: GraphNode }
-  | { kind: 'editNode'; node: GraphNode }
-  | { kind: 'addEdge'; edge: GraphEdge }
-  | { kind: 'editEdge'; edge: GraphEdge }
-  | { kind: 'remove'; id: string }
 
 /**
  * Fetch the merged (base + overlay) graph from the serve API. On any failure
@@ -135,34 +123,6 @@ export async function fetchChanges(wsId?: string | null): Promise<ChangesState> 
   }
 }
 
-/** The named planning scenarios and the active one. */
-export interface ScenariosState {
-  active: string
-  names: string[]
-}
-
-/** Fetch the planning scenarios; falls back to a single default when offline. */
-export async function fetchScenarios(wsId?: string | null): Promise<ScenariosState> {
-  try {
-    const res = await fetch(withWs('/api/scenarios', wsId))
-    if (!res.ok) return { active: 'default', names: ['default'] }
-    return (await res.json()) as ScenariosState
-  } catch {
-    return { active: 'default', names: ['default'] }
-  }
-}
-
-/** Switch (or create) the active planning scenario; returns the new state. */
-export async function postScenario(name: string, wsId?: string | null): Promise<ScenariosState> {
-  const res = await fetch(withWs('/api/scenario', wsId), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
-  })
-  if (!res.ok) throw new Error(`scenario switch failed (${res.status})`)
-  return (await res.json()) as ScenariosState
-}
-
 /**
  * Fetch runtime-verification coverage from the serve API. On any failure, fall back
  * to computing coverage over the bundled sample graph so the panel still renders.
@@ -174,28 +134,5 @@ export async function fetchCoverage(wsId?: string | null): Promise<CoverageRepor
     return (await res.json()) as CoverageReport
   } catch {
     return buildCoverage(SAMPLE_GRAPH)
-  }
-}
-
-/**
- * POST a single overlay edit to the serve API. Throws on a non-OK response with
- * the server's error message so the caller can surface it. Only meaningful when
- * the live API is reachable; manual edits against the sample fallback are local.
- */
-export async function postOverlay(op: UpdateOp, wsId?: string | null): Promise<void> {
-  const res = await fetch(withWs('/api/overlay', wsId), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ op }),
-  })
-  if (!res.ok) {
-    let message = `overlay POST failed (${res.status})`
-    try {
-      const body = (await res.json()) as { error?: string }
-      if (body.error) message = body.error
-    } catch {
-      // keep the status-based message
-    }
-    throw new Error(message)
   }
 }

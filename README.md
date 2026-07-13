@@ -85,6 +85,19 @@ Per-adapter **supported / not-yet-supported** matrices (the honest coverage per 
 
 The honest near-term priority is **validating the premise** (the ablation) before adding more surface area.
 
+## Open core
+
+This repository is the complete, MIT-licensed trust engine: extraction,
+proof-gated verification, the runner, the MCP server, the CLI, and a
+viewer-grade dashboard (graph, coverage, freshness, verify worklist — read
+only). Nothing epistemic is paywalled.
+
+The commercial layer, **uigraph studio** (separate private repository), adds
+the interactive workflow on top: scenario/feature drafting, overlay editing
+and proposals triage in the UI, and Playwright e2e **suite** generation from
+the verified graph (per-role auth, regeneration on re-map). The single-path
+`uigraph gen` primitive stays here.
+
 ## Development
 
 Each feature is built through the cycle in

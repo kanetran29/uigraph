@@ -1,47 +1,15 @@
-// The inspector panel: shows every field of the selected node or edge (route,
-// componentPath, event, guard, effect, modality, source, confidence, witness) and
-// exposes the manual-edit controls. Editing an edge's label/guard or deleting an
-// element raises a request the parent turns into an overlay POST.
+// The inspector panel: a read-only display of every field of the selected node or
+// edge (route, componentPath, event, guard, effect, modality, source, confidence,
+// witness). Editing lives in uigraph studio.
 
-import { useEffect, useState, type ReactNode } from 'react'
-import type { GraphEdge, GraphNode } from '@uigraph/core'
+import type { ReactNode } from 'react'
 import { CollapsibleSection } from './CollapsibleSection'
 import { useT } from './i18n'
 import type { Selection } from './GraphCanvas'
 
-/** Props for the inspector: the current selection plus edit/delete callbacks. */
+/** Props for the inspector: the current selection. */
 export interface InspectorProps {
   selection: Selection
-  onEditEdge: (edge: GraphEdge, event: string, guard: string | null) => void
-  onEditNode: (node: GraphNode) => void
-  onDelete: (id: string) => void
-}
-
-/** Inline editor for a screen node's label + route; Save raises an editNode overlay op. */
-function NodeEditor(props: { node: GraphNode; onEditNode: (node: GraphNode) => void }): JSX.Element {
-  const { node, onEditNode } = props
-  const [label, setLabel] = useState(node.label)
-  const [route, setRoute] = useState(node.route ?? '')
-  useEffect(() => {
-    setLabel(node.label)
-    setRoute(node.route ?? '')
-  }, [node.id, node.label, node.route])
-  const dirty = label.trim() !== node.label || route.trim() !== (node.route ?? '')
-  return (
-    <div className="node-editor">
-      <label className="field-edit">
-        <span>label</span>
-        <input value={label} onChange={(e) => setLabel(e.target.value)} />
-      </label>
-      <label className="field-edit">
-        <span>route</span>
-        <input value={route} placeholder="(none)" onChange={(e) => setRoute(e.target.value)} />
-      </label>
-      <button className="plan-add" disabled={!dirty || label.trim().length === 0} onClick={() => onEditNode({ ...node, label: label.trim(), route: route.trim().length > 0 ? route.trim() : null })}>
-        Save changes
-      </button>
-    </div>
-  )
 }
 
 /** A single label/value row in the inspector's field list. */
@@ -71,51 +39,12 @@ function sourceTone(source: string): string {
 }
 
 /**
- * The edge editor: editable event + guard fields with a save button, plus delete.
- * Local state is seeded from the edge and re-seeded when a different edge is
- * selected, so switching selection never shows a stale draft.
- */
-function EdgeEditor(props: {
-  edge: GraphEdge
-  onEditEdge: InspectorProps['onEditEdge']
-  onDelete: InspectorProps['onDelete']
-}): JSX.Element {
-  const { edge, onEditEdge, onDelete } = props
-  const [event, setEvent] = useState(edge.event)
-  const [guard, setGuard] = useState(edge.guard ?? '')
-
-  useEffect(() => {
-    setEvent(edge.event)
-    setGuard(edge.guard ?? '')
-  }, [edge.id, edge.event, edge.guard])
-
-  return (
-    <div className="editor">
-      <label className="edit-row">
-        <span>event</span>
-        <input value={event} onChange={(e) => setEvent(e.target.value)} />
-      </label>
-      <label className="edit-row">
-        <span>guard</span>
-        <input value={guard} onChange={(e) => setGuard(e.target.value)} placeholder="(none)" />
-      </label>
-      <div className="editor-actions">
-        <button onClick={() => onEditEdge(edge, event, guard.trim() === '' ? null : guard.trim())}>Save edit</button>
-        <button className="danger" onClick={() => onDelete(edge.id)}>
-          Delete
-        </button>
-      </div>
-    </div>
-  )
-}
-
-/**
  * Render the inspector for the current selection. Shows a placeholder when
  * nothing is selected, the node's fields for a node, and the full edge fields
- * plus the manual editor for an edge.
+ * for an edge.
  */
 export function Inspector(props: InspectorProps): JSX.Element {
-  const { selection, onEditEdge, onEditNode, onDelete } = props
+  const { selection } = props
   const { t } = useT()
   let title: ReactNode = t('panel.inspector')
   let body: ReactNode = <p className="muted">Select a node or edge to inspect it.</p>
@@ -170,11 +99,6 @@ export function Inspector(props: InspectorProps): JSX.Element {
           ) : (
             <p className="muted">No effects.</p>
           )}
-          <div className="editor-actions">
-            <button className="danger" onClick={() => onDelete(n.id)}>
-              Delete
-            </button>
-          </div>
         </>
       )
     } else {
@@ -186,12 +110,6 @@ export function Inspector(props: InspectorProps): JSX.Element {
           <Field label="route" value={n.route ?? '—'} />
           <Field label="componentPath" value={n.componentPath ?? '—'} />
           <Field label="kind" value={n.kind} />
-          {n.kind === 'screen' ? <NodeEditor node={n} onEditNode={onEditNode} /> : null}
-          <div className="editor-actions">
-            <button className="danger" onClick={() => onDelete(n.id)}>
-              Delete
-            </button>
-          </div>
         </>
       )
     }
@@ -218,8 +136,6 @@ export function Inspector(props: InspectorProps): JSX.Element {
           label="witness"
           value={w ? `${w.source}${w.file ? ` ${w.file}` : ''}${w.loc ? `:${w.loc.line}:${w.loc.col}` : ''}${w.ruleId ? ` (${w.ruleId})` : ''}` : '—'}
         />
-        <h3>Manual edit</h3>
-        <EdgeEditor edge={e} onEditEdge={onEditEdge} onDelete={onDelete} />
       </>
     )
   }

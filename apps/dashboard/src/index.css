@@ -435,6 +435,13 @@ select:focus-visible,
   flex-direction: column;
 }
 
+/* The rail's closing hint: where the write workflows (editing, scenarios, suites) live. */
+.side-footnote {
+  margin: auto 0 0;
+  padding: 12px 18px;
+  font-size: 11px;
+}
+
 /* Let every section shrink to the rail width so nothing forces a horizontal scrollbar. */
 .inspector,
 .steps,
@@ -442,75 +449,11 @@ select:focus-visible,
 .coverage,
 .changes,
 .verify,
-.plan,
 .prop-row,
 .prop-screen,
 .prop-category {
   min-width: 0;
   max-width: 100%;
-}
-
-.plan {
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--border);
-}
-.plan-form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.plan-input {
-  font-size: 12px;
-  padding: 5px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--panel-subtle);
-  color: var(--text);
-}
-.plan-add,
-.plan-export {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--panel-subtle);
-  color: var(--text);
-  cursor: pointer;
-}
-.plan-export {
-  margin-top: 8px;
-}
-
-.node-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 10px;
-}
-.field-edit {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 11px;
-  color: var(--muted);
-}
-.field-edit input,
-.field-edit select {
-  font-size: 12px;
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--panel-subtle);
-  color: var(--text);
-}
-.plan-add:hover:not(:disabled),
-.plan-export:hover {
-  background: var(--border);
-}
-.plan-add:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 .coverage,
@@ -736,21 +679,6 @@ select:focus-visible,
   margin-left: 4px;
 }
 
-.editor {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.edit-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.edit-row input,
 .steps-controls select {
   padding: 6px 8px;
   border: 1px solid var(--border-strong);
@@ -758,12 +686,6 @@ select:focus-visible,
   font-size: 13px;
   background: var(--panel);
   color: var(--text);
-}
-
-.editor-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
 }
 
 button {
@@ -779,12 +701,6 @@ button {
 
 button:hover {
   filter: brightness(1.06);
-}
-
-button.danger {
-  background: var(--danger);
-  color: var(--danger-contrast);
-  border-color: var(--danger);
 }
 
 .steps-controls {
