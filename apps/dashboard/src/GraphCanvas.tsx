@@ -521,6 +521,7 @@ interface EdgeContext {
   addedEdgeIds: Set<string>
   changedEdgeIds: Set<string>
   groupedView: boolean
+  hoverIncidentEdgeIds: Set<string>
 }
 
 /**
@@ -552,7 +553,7 @@ function toProposedFlowEdges(edges: readonly ProposedEdge[]): Edge[] {
 }
 
 function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
-  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds, diffActive, addedEdgeIds, changedEdgeIds, groupedView } = ctx
+  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds, diffActive, addedEdgeIds, changedEdgeIds, groupedView, hoverIncidentEdgeIds } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
   const hasNodeSelection = selection?.kind === 'node'
   const controlParent = new Map<string, string | undefined>()
@@ -599,20 +600,23 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     const diffDim = diffActive && !emphasized && !diffLit
     const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded) || searchDim || diffDim
     const color = diffLit && !emphasized ? (diffAdded ? DIFF_ADDED_COLOR : DIFF_CHANGED_COLOR) : strokeColor(e, onPath || selected)
-    // In a grouped (large) graph the `may` edges are the low-signal global-nav noise —
-    // whether aggregated super-edges (collapsed) or the real member edges (expanded):
-    // fade them into the background and drop their labels unless emphasized, so the nodes
-    // + the must/witnessed backbone read clearly. Everything stays present; hover/select
-    // re-lights them. Small graphs (not grouped) keep every may-edge at full strength.
-    const weakSuper = (groupedView || e.id.startsWith('sg_')) && e.modality === 'may' && e.source === 'static' && !emphasized
+    // In a grouped (large) graph the `may` edges are the low-signal global-nav noise: a
+    // near-complete web that no amount of node spacing declutters (wider nodes just mean
+    // longer arrows). HIDE them by default — the grid of screens + the must/witnessed
+    // backbone read clearly — and reveal a screen's `may` arrows only when it is selected,
+    // hovered, or on a planned path (its `emphasized` state). Small graphs (not grouped)
+    // render every edge as before.
+    const hoverReveal = hoverIncidentEdgeIds.has(e.id)
+    const hiddenMay = (groupedView || e.id.startsWith('sg_')) && e.modality === 'may' && e.source === 'static' && !emphasized && !hoverReveal
+    if (hiddenMay) continue
     const baseWidth = e.source === 'manual' ? 2 : 1.4
-    const width = onPath ? 3 : selected ? 2.8 : emphasized || (diffLit && !dimmed) ? 2.4 : weakSuper ? 1 : baseWidth
-    const opacity = dimmed ? 0.12 : emphasized || diffLit ? 1 : weakSuper ? 0.16 : 0.85
+    const width = onPath ? 3 : selected ? 2.8 : emphasized || (diffLit && !dimmed) ? 2.4 : baseWidth
+    const opacity = dimmed ? 0.12 : emphasized || diffLit ? 1 : 0.85
     // Screen→screen edges are the route skeleton: render as floating beziers and
     // keep their label visible (unless dimmed by a focus). Control edges keep their
     // label only when emphasized, to avoid clutter when a screen is expanded.
     const screenEdge = !isControlEdge
-    const showLabel = ((screenEdge && !dimmed && !weakSuper) || emphasized) ? edgeLabel(e) : undefined
+    const showLabel = ((screenEdge && !dimmed) || emphasized) ? edgeLabel(e) : undefined
 
     out.push({
       id: e.id,
@@ -785,6 +789,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [showProposed, setShowProposed] = useState(false)
   const [diffMode, setDiffMode] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
+  // Hovering a screen reveals its (otherwise hidden) `may` arrows in the grouped view, so
+  // the grid can be explored without clicking each node.
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
 
   // Route-group level-of-detail: on a large graph, collapse screens into route groups
   // (one super-node each) so the default view is a legible handful of nodes; a group in
@@ -913,6 +920,12 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     if (selectedEdge) return new Set<string>([selectedEdge.from, selectedEdge.to])
     return new Set<string>()
   }, [graph, selectedNodeId, selectedEdge])
+  // Edges incident to the hovered screen — revealed (but NOT emphasized/dimming) so hover
+  // surfaces a node's hidden `may` arrows without recolouring the rest of the canvas.
+  const hoverIncidentEdgeIds = useMemo(
+    () => (hoveredNodeId !== null ? incidentEdges(graph, hoveredNodeId) : EMPTY_IDS),
+    [graph, hoveredNodeId],
+  )
 
   // A planned path focuses the graph just like a selection: its edges + the nodes
   // they touch are highlighted and everything else is dimmed.
@@ -1030,8 +1043,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       addedEdgeIds: diffHighlight?.addedEdgeIds ?? EMPTY_IDS,
       changedEdgeIds: diffHighlight?.changedEdgeIds ?? EMPTY_IDS,
       groupedView,
+      hoverIncidentEdgeIds,
     }),
-    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds, diffActive, diffHighlight, groupedView],
+    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds, diffActive, diffHighlight, groupedView, hoverIncidentEdgeIds],
   )
   // Real edges, plus the red dashed ghost edges for removed transitions when the diff view is
   // on (their endpoints — a survivor or a removed-node ghost — are all present in the node state).
@@ -1074,6 +1088,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   )
   const handleEdgeEnter: EdgeMouseHandler = useCallback((_evt, edge) => setHoveredEdgeId(edge.id), [])
   const handleEdgeLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), [])
+  const handleNodeEnter: NodeMouseHandler = useCallback((_evt, node) => setHoveredNodeId(node.id), [])
+  const handleNodeLeave: NodeMouseHandler = useCallback(() => setHoveredNodeId(null), [])
 
   // Export the FULL graph (not just the viewport) as a PNG: fit every node's bounds into a
   // fixed image, snapshot the viewport clone with html-to-image, and download. The clone is
@@ -1148,6 +1164,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onNodeClick={handleNodeClick}
+      onNodeMouseEnter={handleNodeEnter}
+      onNodeMouseLeave={handleNodeLeave}
       onEdgeClick={handleEdgeClick}
       onEdgeMouseEnter={handleEdgeEnter}
       onEdgeMouseLeave={handleEdgeLeave}
