@@ -8,7 +8,16 @@ export interface StoreState {
 /** Actions understood by the store. */
 export type StoreAction = { type: 'LOGIN'; user: string } | { type: 'LOGOUT' }
 
-let state: StoreState = { user: null }
+/** Rehydrate the session like a real website: auth persists across page loads. */
+function initialState(): StoreState {
+  try {
+    return { user: window.localStorage.getItem('gauntlet.user') }
+  } catch {
+    return { user: null }
+  }
+}
+
+let state: StoreState = initialState()
 
 const listeners = new Set<(action: StoreAction) => void>()
 
@@ -17,9 +26,15 @@ export function getState(): StoreState {
   return state
 }
 
-/** Applies an action to the state and notifies all listeners. */
+/** Applies an action to the state, persists the session, and notifies all listeners. */
 export function dispatch(action: StoreAction) {
   state = action.type === 'LOGIN' ? { user: action.user } : { user: null }
+  try {
+    if (state.user !== null) window.localStorage.setItem('gauntlet.user', state.user)
+    else window.localStorage.removeItem('gauntlet.user')
+  } catch {
+    void 0
+  }
   listeners.forEach((listener) => listener(action))
 }
 
