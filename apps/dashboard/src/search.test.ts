@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { EdgeCoverage, GraphNode, Proposal } from '@uigraph/core'
+import type { EdgeCoverage, GraphNode, Proposal } from '@ui-graph/core'
 import { matchCoverageRow, matchProposal, matchesNode, searchMatchIds } from './search'
 
 function node(over: Partial<GraphNode> & { id: string }): GraphNode {

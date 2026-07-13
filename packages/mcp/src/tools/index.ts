@@ -1,6 +1,6 @@
-// Barrel for the model-free @uigraph/mcp tool logic (milestone M5). Every tool is
+// Barrel for the model-free @ui-graph/mcp tool logic (milestone M5). Every tool is
 // a PURE function over a small ToolContext { dir } plus its args, built on
-// @uigraph/core + @uigraph/core/node. No LLM is ever called and no MCP transport
+// @ui-graph/core + @ui-graph/core/node. No LLM is ever called and no MCP transport
 // is touched, so these are directly unit-testable without a server. src/server.ts
 // wires these to the SDK; the bulk of the value lives in the sibling modules.
 //

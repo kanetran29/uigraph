@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { validateGraph } from '@uigraph/core'
+import { validateGraph } from '@ui-graph/core'
 import { buildProjectFromSources, extractGraph } from './extract'
-import type { ExtractOptions } from '@uigraph/core'
+import type { ExtractOptions } from '@ui-graph/core'
 
 /** Extract from an in-memory file map. */
 function build(files: Record<string, string>, opts: ExtractOptions = {}) {

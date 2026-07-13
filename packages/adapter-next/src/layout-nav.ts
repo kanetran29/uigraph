@@ -14,8 +14,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { Node, SyntaxKind } from 'ts-morph'
 import type { Project, SourceFile } from 'ts-morph'
-import type { GraphEdge, Modality } from '@uigraph/core'
-import { edgeId, matchLiteralAll, matchPrefix, type RouteSeed } from '@uigraph/adapter-react'
+import type { GraphEdge, Modality } from '@ui-graph/core'
+import { edgeId, matchLiteralAll, matchPrefix, type RouteSeed } from '@ui-graph/adapter-react'
 
 const LAYOUT_RE = /(^|\/)layout\.(tsx|ts|jsx|js)$/
 const RESOLVE_EXTS = ['.tsx', '.ts', '.jsx', '.js', '/index.tsx', '/index.ts', '/index.jsx', '/index.js']

@@ -5,7 +5,7 @@
 // guard.
 
 import type { GuardInfo } from './guards'
-import type { SoundinessNote } from '@uigraph/core'
+import type { SoundinessNote } from '@ui-graph/core'
 
 /** The reachability gate a target route's `canActivate` guards impose on an incoming edge. */
 export interface Gate {

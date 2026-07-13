@@ -6,7 +6,7 @@ the concrete IR shape, see [`30-ir-spec-v0.md`](./30-ir-spec-v0.md).
 
 ## 1. Core vs. adapters: a framework-agnostic core
 
-The central architectural decision is that **`@uigraph/core` is framework-agnostic**. The
+The central architectural decision is that **`@ui-graph/core` is framework-agnostic**. The
 core defines three things and nothing else:
 
 - the **IR** (the intermediate representation that every graph is expressed in),
@@ -18,8 +18,8 @@ The core never imports React, Angular, or any other framework. It does not know 
 "route" or a "router" is in any specific framework's vocabulary; it only knows nodes,
 edges, modal labels, sources, and confidence.
 
-Framework knowledge lives **only** in adapter packages. `@uigraph/adapter-react`
-understands React Router; `@uigraph/adapter-angular` understands Angular Router. Each
+Framework knowledge lives **only** in adapter packages. `@ui-graph/adapter-react`
+understands React Router; `@ui-graph/adapter-angular` understands Angular Router. Each
 adapter's job is to read one framework's source and emit the shared IR. **Adding a
 framework is adding an adapter; the core never changes.** This is enforced by the
 dependency direction: adapters depend on core, never the reverse (see §5).
@@ -86,11 +86,11 @@ the core**; the core depends on nothing in the workspace.
 
 | Package | Responsibility | Depends on |
 |---|---|---|
-| `@uigraph/core` | Framework-agnostic IR types + pure ops (load/save/merge/diff/validate) + adapter contract + graph algorithms (reachability, plan_path/BFS). | — |
-| `@uigraph/adapter-react` | React Router → IR via ts-morph / TS compiler API. Supports react-router **v5** (`<Switch>`, `<Route component\|render>`, `useHistory().push`, `<Redirect>`) **and v6** (`<Routes>`, `<Route element>`, `useNavigate()`, `<Navigate>`). | core |
-| `@uigraph/adapter-angular` | Angular Router → IR via TS compiler API: `RouterModule`/`Routes` config, `Router.navigate`/`navigateByUrl`, `routerLink`. `canActivate` class names captured as symbolic guard text → may-edges. | core |
-| `@uigraph/mcp` | stdio MCP server exposing `get_graph`, `plan_path`, `update_graph`, `report_observation`, `diff`. Consumes core IR only; framework-agnostic. | core |
-| `@uigraph/cli` (bin `uigraph`) | Subcommands `map --adapter react\|angular <dir>`, `diff <a> <b>`, `dash`, `mcp`. | core, adapters |
+| `@ui-graph/core` | Framework-agnostic IR types + pure ops (load/save/merge/diff/validate) + adapter contract + graph algorithms (reachability, plan_path/BFS). | — |
+| `@ui-graph/adapter-react` | React Router → IR via ts-morph / TS compiler API. Supports react-router **v5** (`<Switch>`, `<Route component\|render>`, `useHistory().push`, `<Redirect>`) **and v6** (`<Routes>`, `<Route element>`, `useNavigate()`, `<Navigate>`). | core |
+| `@ui-graph/adapter-angular` | Angular Router → IR via TS compiler API: `RouterModule`/`Routes` config, `Router.navigate`/`navigateByUrl`, `routerLink`. `canActivate` class names captured as symbolic guard text → may-edges. | core |
+| `@ui-graph/mcp` | stdio MCP server exposing `get_graph`, `plan_path`, `update_graph`, `report_observation`, `diff`. Consumes core IR only; framework-agnostic. | core |
+| `@ui-graph/cli` (bin `uigraph`) | Subcommands `map --adapter react\|angular <dir>`, `diff <a> <b>`, `dash`, `mcp`. | core, adapters |
 | `apps/dashboard` | React + Vite + React Flow editable graph view. Visualizes graph + steps; manual edits write to the overlay. | core |
 | `examples/sample-react-app` | Hand-authored React app with a known set of routes/guards/navigations. Golden fixture + integration target. | — |
 | `examples/sample-angular-app` | Hand-authored Angular app with a known set of routes/guards/navigations. Golden fixture + integration target. | — |
@@ -120,15 +120,15 @@ flow in through the agent and remain quarantined per §2.
 ## 8. Diagram
 
 ```
-  React source ──▶ @uigraph/adapter-react ─┐
+  React source ──▶ @ui-graph/adapter-react ─┐
                                            │
-  Angular source ▶ @uigraph/adapter-angular┼──▶ @uigraph/core (IR)
+  Angular source ▶ @ui-graph/adapter-angular┼──▶ @ui-graph/core (IR)
                                            │     • pure ops: load/save/merge/diff/validate
   runtime agent ─▶ observations ───────────┘     • graph algos: reachability, plan_path/BFS
                                                           │
                             ┌─────────────────────────────┼─────────────────────────────┐
                             ▼                             ▼                             ▼
-                      @uigraph/mcp                  @uigraph/cli                  apps/dashboard
+                      @ui-graph/mcp                  @ui-graph/cli                  apps/dashboard
                   (get_graph, plan_path,        (map, diff, dash, mcp)         (React Flow view;
                    update_graph,                                                manual edits ─▶ overlay)
                    report_observation, diff)

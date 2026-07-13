@@ -1,7 +1,7 @@
 # sample-angular-app — known UI graph (golden fixture)
 
 This standalone-components Angular app is parsed **statically** by
-`@uigraph/adapter-angular`. It is not built or run; ts-morph reads the `Routes`
+`@ui-graph/adapter-angular`. It is not built or run; ts-morph reads the `Routes`
 array in `src/app.routes.ts` and the inline `@Component` templates / `Router`
 calls in each component file. The graph below is the adapter's expected output
 and is asserted in `packages/adapter-angular/src/extract.test.ts`.

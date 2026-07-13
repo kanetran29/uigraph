@@ -39,7 +39,7 @@ next_to_verify (heart): merged = loadMergedGraph(ctx); then withStore for queryP
 
 server.ts: 3 Tool entries with JSON-Schema inputSchema (describe_screen requires screen; others all-optional) + descriptions stressing 'unproven candidate' semantics and next_to_verify -> report_observation. 3 dispatch cases using the cast-from-wire pattern at server.ts:140-153.
 
-cli/src/server.ts: KISS — exact-match GETs /api/proposal-graph -> getProposalGraph(ctx) and /api/next-to-verify -> nextToVerify(ctx), mirroring /api/proposals (server.ts:52-54). describe_screen stays MCP-only (path-param routing would force a router rewrite; YAGNI). Import new fns from @uigraph/mcp (CLI already imports updateGraph/loadMergedGraph there, server.ts:9-10).
+cli/src/server.ts: KISS — exact-match GETs /api/proposal-graph -> getProposalGraph(ctx) and /api/next-to-verify -> nextToVerify(ctx), mirroring /api/proposals (server.ts:52-54). describe_screen stays MCP-only (path-param routing would force a router rewrite; YAGNI). Import new fns from @ui-graph/mcp (CLI already imports updateGraph/loadMergedGraph there, server.ts:9-10).
 
 Soundiness: golden invariant preserved — tools are read-only/advisory. (1) None call setBaseGraph/setOverlay/setProposals/appendObservation. (2) get_proposal_graph keeps the quarantined pe_*/ps_* id space separate from the proven graph; proposal edges are 'may'|'unknown' only. (3) describe_screen tags every action proven:boolean + source; proposals are proven:false; dynamicTarget flags over-approximated sinks. (4) next_to_verify only ranks + emits a suggestedObservation; proof flows solely through report_observation -> applyObservations (runtime.ts:65). The drop-already-confirmed filter uses confirmed observations, so the queue cannot re-surface a proven transition. (5) Determinism: additive priority + explicit stable sort -> byte-identical JSON; no clock/randomness (next_to_verify never timestamps; only report_observation does).
 
@@ -72,8 +72,8 @@ cli router: GET /api/proposal-graph -> 200 {nodes,edges,...} (empty-safe); GET /
 
 ## Dependencies
 
-- @uigraph/core store.getProposalGraph + materializeProposalGraph (store.ts:183, proposals.ts:156) - ALREADY IMPLEMENTED; this feature only exposes it. No core change.
-- @uigraph/core buildGrounding / ScreenGrounding / GroundedControl / GroundedEdge (grounding.ts) - reused as describe_screen's substrate. ALREADY IMPLEMENTED.
-- @uigraph/core runtime.applyObservations/getObservations + tools.reportObservation/ReportObservationArgs (runtime.ts, tools.ts:279) - next_to_verify reads confirmed observations to prune and reuses ReportObservationArgs. ALREADY IMPLEMENTED; unchanged.
-- @uigraph/mcp existing plumbing: ToolContext, withStore, loadMergedGraph, dispatch/TOOLS (tools.ts, server.ts) - extended in place.
+- @ui-graph/core store.getProposalGraph + materializeProposalGraph (store.ts:183, proposals.ts:156) - ALREADY IMPLEMENTED; this feature only exposes it. No core change.
+- @ui-graph/core buildGrounding / ScreenGrounding / GroundedControl / GroundedEdge (grounding.ts) - reused as describe_screen's substrate. ALREADY IMPLEMENTED.
+- @ui-graph/core runtime.applyObservations/getObservations + tools.reportObservation/ReportObservationArgs (runtime.ts, tools.ts:279) - next_to_verify reads confirmed observations to prune and reuses ReportObservationArgs. ALREADY IMPLEMENTED; unchanged.
+- @ui-graph/mcp existing plumbing: ToolContext, withStore, loadMergedGraph, dispatch/TOOLS (tools.ts, server.ts) - extended in place.
 - OPTIONAL downstream (NOT required to land): apps/dashboard (api.ts, GraphCanvas.tsx) to visualize the proposal graph + verify list - a separate UI feature consuming /api/proposal-graph and /api/next-to-verify.

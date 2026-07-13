@@ -11,7 +11,7 @@ Turn the dashboard from an edge-only annotator into a real planning surface. Tod
 
 Two boundaries, both additive — no existing signature changes, so the golden invariant code paths (validateGraph/validateOverlay/validateMerged/mergeOverlay/loadMergedGraph stale-hash) are untouched.
 
-CORE (@uigraph/core), framework-agnostic, pure, browser-safe (no node:fs):
+CORE (@ui-graph/core), framework-agnostic, pure, browser-safe (no node:fs):
 1. ir.ts — extend Overlay with two OPTIONAL fields so old overlays still parse:
    `name?: string` and `editedNodes?: GraphNode[]`. Default semantics: absent name => the legacy default scenario; absent editedNodes => `[]`.
 2. overlay.ts — extend mergeOverlay to apply editedNodes (replace base node by id, like editedEdges replaces base edge by id). New pure helpers:
@@ -20,7 +20,7 @@ CORE (@uigraph/core), framework-agnostic, pure, browser-safe (no node:fs):
 3. validate.ts — extend validateOverlay to also validate editedNodes via the existing node shape check + manual-purity for any edges; keep it base-free (the can't-edit-a-non-base-node rule lives in applyNodeOp where base is in hand).
 4. schema.ts — validateOverlayShape: accept optional `name` (string) and optional `editedNodes` (array of node shape).
 
-STORE (@uigraph/core/store.ts) — named scenarios = named overlays, reusing the docs table with namespaced keys (`overlay:<name>`, `overlay_active`):
+STORE (@ui-graph/core/store.ts) — named scenarios = named overlays, reusing the docs table with namespaced keys (`overlay:<name>`, `overlay_active`):
    - `listOverlays(): { name: string }[]`
    - `getOverlayByName(name: string): Overlay | null`
    - `setOverlayByName(name: string, overlay: Overlay): void` (validates via validateOverlay before write, like setOverlay)
@@ -28,12 +28,12 @@ STORE (@uigraph/core/store.ts) — named scenarios = named overlays, reusing the
    - `getActiveOverlayName(): string | null` / `setActiveOverlayName(name: string): void`
    Backward compat: existing `getOverlay()/setOverlay()` resolve through the active name with a legacy `overlay`-key fallback, so loadMergedGraph, updateGraph and the serve API are unchanged.
 
-MCP (@uigraph/mcp/tools.ts) — extend UpdateOp with two node ops + scenario arg (all back-compat):
+MCP (@ui-graph/mcp/tools.ts) — extend UpdateOp with two node ops + scenario arg (all back-compat):
    - UpdateOp gains `{ kind: 'editNode'; node }` and `{ kind: 'attachControl'; parent; control; label? }` (addNode already typed).
    - UpdateGraphArgs gains optional `scenario?: string`; absent => active/default. New pure tools `listScenarios(ctx)` and `exportPlan(ctx, { scenario? })`.
    - register `export_plan` + `list_scenarios` in server.ts TOOLS + dispatch.
 
-CLI serve API (@uigraph/cli/server.ts) — additive routes reusing MCP logic:
+CLI serve API (@ui-graph/cli/server.ts) — additive routes reusing MCP logic:
    - `GET /api/scenarios` -> `{ active, scenarios:[{name}] }`; `POST /api/scenarios/active` `{ name }`; `GET /api/plan?scenario=` -> `{ scenario, markdown }`; `POST /api/overlay` body grows optional `{ op, scenario? }`.
 
 DASHBOARD (apps/dashboard) — api.ts mirrors the new UpdateOp + scenario; App.tsx gains node add/edit + attach-control handlers, a scenario switcher, and an Export-plan action.

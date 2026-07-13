@@ -6,8 +6,8 @@
 // Clicking a row selects the edge (or, for a proposal, its source screen).
 
 import { useMemo } from 'react'
-import type { CoverageReport, GraphEdge, Proposals, UiGraph, VerifyTarget } from '@uigraph/core'
-import { materializeProposalGraph, nextToVerify } from '@uigraph/core'
+import type { CoverageReport, GraphEdge, Proposals, UiGraph, VerifyTarget } from '@ui-graph/core'
+import { materializeProposalGraph, nextToVerify } from '@ui-graph/core'
 import { CollapsibleSection } from './CollapsibleSection'
 import { useT } from './i18n'
 import type { Selection } from './GraphCanvas'

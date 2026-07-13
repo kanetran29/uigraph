@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { fileURLToPath } from 'node:url'
 import { Project, ts } from 'ts-morph'
-import { validateGraph } from '@uigraph/core'
+import { validateGraph } from '@ui-graph/core'
 import { buildProject, extractGraph } from './extract'
 
 function inMemory(files: Record<string, string>): Project {

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { fileURLToPath } from 'node:url'
-import { validateGraph } from '@uigraph/core'
+import { validateGraph } from '@ui-graph/core'
 import { buildProject, buildProjectFromSources, extractGraph } from './extract'
-import type { ExtractOptions } from '@uigraph/core'
+import type { ExtractOptions } from '@ui-graph/core'
 
 /** Extract from an in-memory file map (the Vue analogue of the Angular inMemory helper). */
 function build(files: Record<string, string>, opts: ExtractOptions = {}) {

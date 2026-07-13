@@ -2,7 +2,7 @@
 // getNodesBounds + getViewportForBounds) stays inline in GraphCanvas where the live
 // React Flow nodes + instance are in scope; only the filename is pure + tested here.
 
-import type { UiGraph } from '@uigraph/core'
+import type { UiGraph } from '@ui-graph/core'
 
 /** Lowercase to a filename-safe slug: runs of non-alphanumerics collapse to a single '-'. */
 function slugify(s: string): string {

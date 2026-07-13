@@ -11,7 +11,7 @@ import { dirname, resolve } from 'node:path'
 import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
-import { startServer } from '@uigraph/mcp'
+import { startServer } from '@ui-graph/mcp'
 import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, formatWorkspaceList, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runLogin, runVerify, runVerifyUntilDone } from './runner'
@@ -226,7 +226,7 @@ export function buildProgram(): Command {
       if (staticDir === null) {
         console.log(`uigraph API serving ${what} at ${url} (API only)`)
         console.log('No built dashboard found. Build it once, then re-run dash:')
-        console.log('  pnpm --filter @uigraph/dashboard build')
+        console.log('  pnpm --filter @ui-graph/dashboard build')
         return
       }
       console.log(`uigraph dashboard + API serving ${what} at ${url}`)
@@ -265,7 +265,7 @@ export function buildProgram(): Command {
 /**
  * Drop the leading `--` separator that `pnpm run <script> -- <args>` injects
  * between the [node, script] prefix and the user's arguments, so the documented
- * `pnpm --filter @uigraph/cli run uigraph -- map ...` invocation reaches commander
+ * `pnpm --filter @ui-graph/cli run uigraph -- map ...` invocation reaches commander
  * as if `--` were absent. A `--` anywhere else is left for commander to handle.
  */
 function stripPnpmSeparator(argv: string[]): string[] {

@@ -3,8 +3,8 @@
 // freshness, workspaces) — the write routes (/api/overlay, /api/scenario) are for
 // agents and uigraph studio, never this viewer.
 
-import type { CoverageReport, Proposals, SinceLastDiff, UiGraph } from '@uigraph/core'
-import { buildCoverage } from '@uigraph/core'
+import type { CoverageReport, Proposals, SinceLastDiff, UiGraph } from '@ui-graph/core'
+import { buildCoverage } from '@ui-graph/core'
 import sampleGraph from './sample-graph.json'
 
 /** The bundled fallback graph, used when the serve API is unreachable (static open). */

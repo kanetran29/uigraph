@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { UiGraph } from '@uigraph/core'
+import type { UiGraph } from '@ui-graph/core'
 import { pngFilename } from './exportPng'
 
 function graph(adapter: string): UiGraph {

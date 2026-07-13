@@ -1,7 +1,7 @@
 {
-  "name": "@uigraph/adapter-next",
+  "name": "@ui-graph/adapter-next",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "exports": {
     ".": {
@@ -15,8 +15,8 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@uigraph/core": "workspace:*",
-    "@uigraph/adapter-react": "workspace:*",
+    "@ui-graph/core": "workspace:*",
+    "@ui-graph/adapter-react": "workspace:*",
     "ts-morph": "catalog:"
   },
   "devDependencies": {

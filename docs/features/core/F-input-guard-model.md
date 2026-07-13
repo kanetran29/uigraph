@@ -85,7 +85,7 @@ CLI: RunMapOptions gains openapi?: string; MapSummary gains boundControls: numbe
 
 DASHBOARD UI:
 - Inspector.tsx control branch (lines 103-143): after the effects list add <h3>inputs</h3> listing each c.inputs entry as `name : type` with a required chip (reuse Badge) and example/pattern as muted subtext; empty-state <p className="muted">No input contract.</p> matching the existing 'No effects.' pattern. Optional-chaining throughout (sample-graph.json may lack inputs — risk 7).
-- Steps.tsx: after computing path (lines 86-89), const preconditions = useMemo(() => path ? summarizePreconditions(path) : [], [path]); render a banner above the steps list when non-empty: "Preconditions: isAuthenticated (before step 2), …" so a user sees what must hold before the route is feasible. Import summarizePreconditions from @uigraph/core (browser-safe).
+- Steps.tsx: after computing path (lines 86-89), const preconditions = useMemo(() => path ? summarizePreconditions(path) : [], [path]); render a banner above the steps list when non-empty: "Preconditions: isAuthenticated (before step 2), …" so a user sees what must hold before the route is feasible. Import summarizePreconditions from @ui-graph/core (browser-safe).
 
 index.ts re-exports: add InputConstraint (ir.ts), summarizePreconditions + Precondition (algorithms.ts), and bindInputs (openapi.ts).
 
@@ -178,6 +178,6 @@ Run gate: repo vitest green across packages plus tsc --noEmit on touched package
 
 5. SCHEMA/SHAPE CHECK. validateGraphShape (schema.ts) might reject the new ControlMeta field. Mitigation: read schema.ts before coding; inputs is optional/additive; test 17 asserts validateGraph stays green. Existing optional events?/effects? already pass, so an extra optional array should too — verify, do not assume.
 
-6. DASHBOARD TYPE FLOW / BROWSER-SAFETY. Adding inputs to ControlMeta and Precondition+summarizePreconditions to algorithms must stay browser-safe (no node:fs). Mitigation: both live in already-browser-safe modules (ir.ts, algorithms.ts) re-exported from index.ts; Steps.tsx already imports from @uigraph/core.
+6. DASHBOARD TYPE FLOW / BROWSER-SAFETY. Adding inputs to ControlMeta and Precondition+summarizePreconditions to algorithms must stay browser-safe (no node:fs). Mitigation: both live in already-browser-safe modules (ir.ts, algorithms.ts) re-exported from index.ts; Steps.tsx already imports from @ui-graph/core.
 
 7. BUNDLED SAMPLE GRAPH. apps/dashboard/src/sample-graph.json likely lacks inputs; Inspector/Steps must render gracefully when inputs/preconditions are absent. Mitigation: optional-chaining + empty-state copy matching the existing 'No effects.' pattern.

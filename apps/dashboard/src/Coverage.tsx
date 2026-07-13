@@ -3,7 +3,7 @@
 // unverified edge selects it on the canvas so the user can see what to confirm.
 
 import { useMemo, useState } from 'react'
-import type { CoverageReport, EdgeCoverage, GraphEdge, UiGraph } from '@uigraph/core'
+import type { CoverageReport, EdgeCoverage, GraphEdge, UiGraph } from '@ui-graph/core'
 import { matchCoverageRow } from './search'
 import { FilterChip, toggled } from './Chips'
 import { CollapsibleSection } from './CollapsibleSection'

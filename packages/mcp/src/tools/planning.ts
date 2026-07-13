@@ -1,10 +1,10 @@
-// Planning tools for the @uigraph/mcp server: what to verify next
+// Planning tools for the @ui-graph/mcp server: what to verify next
 // (next_to_verify), Playwright spec generation for a route (gen_spec), and route
 // planning over the merged graph with trust-tier warnings (plan_path). Pure over
 // a ToolContext, built on core's nextToVerify / planPath / spec renderer.
 
-import type { Modality, TrustTier, VerifyTarget } from '@uigraph/core'
-import { buildSpecPlan, getTierLabel, nextToVerify, planPath, projectTrustTier, renderPlaywrightSpec } from '@uigraph/core'
+import type { Modality, TrustTier, VerifyTarget } from '@ui-graph/core'
+import { buildSpecPlan, getTierLabel, nextToVerify, planPath, projectTrustTier, renderPlaywrightSpec } from '@ui-graph/core'
 import { loadMergedGraph, tierAtLeast, withStore, type ToolContext } from './context'
 import { blindSpotCaveat, getProposalGraph } from './read'
 

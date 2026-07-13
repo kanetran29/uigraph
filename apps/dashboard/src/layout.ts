@@ -7,7 +7,7 @@
 // Control nodes are laid out as a vertical stack inside their parent screen at
 // parent-relative positions, so @xyflow/react renders them nested.
 
-import type { GraphNode, Proposal, UiGraph } from '@uigraph/core'
+import type { GraphNode, Proposal, UiGraph } from '@ui-graph/core'
 
 /** A proposed (quarantined) screen-level edge to overlay on the canvas, deduped per pair. */
 export interface ProposedEdge {

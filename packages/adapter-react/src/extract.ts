@@ -10,8 +10,8 @@
 
 import type { Node, Project, SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
-import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@uigraph/core'
-import type { Proposal } from '@uigraph/core'
+import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, SoundinessNote } from '@ui-graph/core'
+import type { Proposal } from '@ui-graph/core'
 import type { ControlInfo, RawTarget, RouteInfo } from './types'
 import { edgeId, controlNodeId } from './ids'
 import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
@@ -99,7 +99,7 @@ export function extractGraphFromRoutes(
   projectDir: string,
   routes: RouteSeed[],
   opts: ExtractOptions = {},
-  adapterName = '@uigraph/adapter-react',
+  adapterName = '@ui-graph/adapter-react',
 ): ExtractResult {
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
 

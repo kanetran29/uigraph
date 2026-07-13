@@ -1,6 +1,6 @@
 // Node-only IO helpers (feature F1.2). Separated from the browser-safe index so
-// the dashboard can import @uigraph/core without pulling in node:fs. The CLI and
-// MCP server import these from "@uigraph/core/node".
+// the dashboard can import @ui-graph/core without pulling in node:fs. The CLI and
+// MCP server import these from "@ui-graph/core/node".
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'

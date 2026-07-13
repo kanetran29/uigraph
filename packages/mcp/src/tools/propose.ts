@@ -6,8 +6,8 @@
 // is recall: propose as many plausible nodes/edges as the code and UX suggest;
 // the verify loop sorts truth from guess.
 
-import type { Proposal, ProposalKind } from '@uigraph/core'
-import { emptyProposals, hashValue } from '@uigraph/core'
+import type { Proposal, ProposalKind } from '@ui-graph/core'
+import { emptyProposals, hashValue } from '@ui-graph/core'
 import { loadMergedGraph, withStore, type ToolContext } from './context'
 
 /** One proposal as submitted by the agent — everything but the server-minted id/source/status. */

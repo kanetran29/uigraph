@@ -3,7 +3,7 @@
 // round-trip, so only nodes without a parent are stored. Pure + unit-tested; the React
 // Flow wiring (read live nodes, re-seed) lives in GraphCanvas.
 
-import type { UiGraph } from '@uigraph/core'
+import type { UiGraph } from '@ui-graph/core'
 
 export interface XY {
   x: number

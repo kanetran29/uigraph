@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { GraphEdge, GraphNode, Proposal, UiGraph } from '@uigraph/core'
+import type { GraphEdge, GraphNode, Proposal, UiGraph } from '@ui-graph/core'
 import { componentGroups, componentLabel, layoutGraph, proposedScreenEdges, structuralKey } from './layout'
 
 function screen(id: string, componentPath: string | null): GraphNode {

@@ -9,7 +9,7 @@
 // proposals stay in lock-step with the canvas selection.
 
 import { useMemo, useState } from 'react'
-import type { Proposal, Proposals, ProposalStatus, UiGraph } from '@uigraph/core'
+import type { Proposal, Proposals, ProposalStatus, UiGraph } from '@ui-graph/core'
 import { matchProposal } from './search'
 import { FilterChip, toggled } from './Chips'
 import { CollapsibleSection } from './CollapsibleSection'

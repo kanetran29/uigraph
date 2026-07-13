@@ -17,7 +17,7 @@
 import { Node, SyntaxKind } from 'ts-morph'
 import type { Project, SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
-import type { SoundinessNote } from '@uigraph/core'
+import type { SoundinessNote } from '@ui-graph/core'
 
 /** A route whose component inputs we want to check for param/data bindings. */
 export interface InputBindingRoute {

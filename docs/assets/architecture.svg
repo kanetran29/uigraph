@@ -36,7 +36,7 @@
 
   <!-- L3 core -->
   <rect x="40" y="312" width="1440" height="256" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.4"/>
-  <text x="66" y="344" fill="#6d28d9" font-size="18" font-weight="600">L3&#160;&#160;Core&#160;&#160;<tspan font-weight="400" font-size="15" fill="#6b7280">(@uigraph/core — framework-agnostic, never calls an LLM)</tspan></text>
+  <text x="66" y="344" fill="#6d28d9" font-size="18" font-weight="600">L3&#160;&#160;Core&#160;&#160;<tspan font-weight="400" font-size="15" fill="#6b7280">(@ui-graph/core — framework-agnostic, never calls an LLM)</tspan></text>
   <rect x="70" y="364" width="330" height="80" rx="8" fill="#FFFFFF" stroke="#1f2937" stroke-width="1.2"/>
   <text x="235" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">IR: guarded labeled LTS</text>
   <text x="235" y="419" text-anchor="middle" font-size="13" fill="#4b5563">screens + guarded edges &#183; must / may / unknown</text>

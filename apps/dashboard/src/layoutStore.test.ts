@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { GraphNode, UiGraph } from '@uigraph/core'
+import type { GraphNode, UiGraph } from '@ui-graph/core'
 import { applySaved, layoutStorageKey, parsePositions, serializePositions } from './layoutStore'
 
 function node(id: string, kind: GraphNode['kind'] = 'screen'): GraphNode {

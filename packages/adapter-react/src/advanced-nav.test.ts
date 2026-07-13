@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { Project, ts } from 'ts-morph'
-import { validateGraph } from '@uigraph/core'
+import { validateGraph } from '@ui-graph/core'
 import { extractGraph } from './extract'
 
 function inMemory(files: Record<string, string>): Project {

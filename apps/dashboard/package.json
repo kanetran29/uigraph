@@ -1,5 +1,5 @@
 {
-  "name": "@uigraph/dashboard",
+  "name": "@ui-graph/dashboard",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@uigraph/core": "workspace:*",
+    "@ui-graph/core": "workspace:*",
     "@dagrejs/dagre": "^3.0.0",
     "@xyflow/react": "^12.3.0",
     "html-to-image": "^1.11.13",

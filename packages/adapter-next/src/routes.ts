@@ -8,8 +8,8 @@
 
 import { relative } from 'node:path'
 import type { Project } from 'ts-morph'
-import type { NodeKind } from '@uigraph/core'
-import { routeToNodeId, type RouteSeed } from '@uigraph/adapter-react'
+import type { NodeKind } from '@ui-graph/core'
+import { routeToNodeId, type RouteSeed } from '@ui-graph/adapter-react'
 
 const APP_PAGE_RE = /(^|\/)page\.(tsx|ts|jsx|js)$/
 const APP_DEFAULT_RE = /(^|\/)default\.(tsx|ts|jsx|js)$/

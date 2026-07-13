@@ -1,11 +1,11 @@
-// @uigraph/adapter-vue — the Vue Router adapter. Implements the core Adapter
+// @ui-graph/adapter-vue — the Vue Router adapter. Implements the core Adapter
 // contract: detect a Vue project and extract the shared IR from its source (a
 // `createRouter({ routes })` array of components defined as .vue SFCs). No
 // framework code leaks into the core.
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@uigraph/core'
+import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@ui-graph/core'
 import { buildProject, extractGraph } from './extract'
 
 /** Does any source file under a directory reference 'vue-router' / createRouter? */

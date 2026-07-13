@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
-import type { CoverageReport, Proposals, UiGraph } from '@uigraph/core'
+import type { CoverageReport, Proposals, UiGraph } from '@ui-graph/core'
 import { EMPTY_CHANGES, EMPTY_PROPOSALS, UNKNOWN_FRESHNESS, fetchChanges, fetchCoverage, fetchFreshness, fetchGraph, fetchProposals, fetchWorkspaces, type ChangesState, type FreshnessState, type WorkspaceSummary } from './api'
 import { readStored, writeStored } from './storage'
 import { searchMatchIds } from './search'

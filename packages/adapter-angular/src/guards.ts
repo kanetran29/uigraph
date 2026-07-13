@@ -10,7 +10,7 @@
 
 import { Node } from 'ts-morph'
 import type { Expression, SourceFile } from 'ts-morph'
-import { fnv1a } from '@uigraph/core'
+import { fnv1a } from '@ui-graph/core'
 
 /**
  * One analyzed `canActivate` guard. `text` is the symbolic guard string put on

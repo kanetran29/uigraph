@@ -1,10 +1,10 @@
-// Mutation tools for the @uigraph/mcp server: the overlay write path
+// Mutation tools for the @ui-graph/mcp server: the overlay write path
 // (update_graph) and the named-scenario controls (list_scenarios / set_scenario).
 // Edits touch the OVERLAY only — never the proven base — and are validated before
 // persist. Pure over a ToolContext.
 
-import type { GraphEdge, GraphNode, Overlay } from '@uigraph/core'
-import { emptyOverlay, hashValue, validateOverlay } from '@uigraph/core'
+import type { GraphEdge, GraphNode, Overlay } from '@ui-graph/core'
+import { emptyOverlay, hashValue, validateOverlay } from '@ui-graph/core'
 import { dbPath, withStore, type ToolContext } from './context'
 
 /** A manual edit applied to the overlay only; one of five discriminated ops. */

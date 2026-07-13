@@ -1,4 +1,4 @@
-// MCP SDK wiring for the @uigraph/mcp server (milestone M5). This is the thin
+// MCP SDK wiring for the @ui-graph/mcp server (milestone M5). This is the thin
 // transport layer: it maps tools/list and tools/call onto the pure functions in
 // tools.ts. It uses the low-level Server with JSON-Schema tool declarations (no
 // zod), so no LLM is ever invoked and the model-free guarantee is preserved.
@@ -436,7 +436,7 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
 export function createServer(dir: string): Server {
   const ctx: ToolContext = { dir }
   const server = new Server(
-    { name: '@uigraph/mcp', version: '0.1.0' },
+    { name: '@ui-graph/mcp', version: '0.1.0' },
     { capabilities: { tools: {}, resources: {} } },
   )
 

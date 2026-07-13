@@ -1,16 +1,16 @@
 // The local API server behind `uigraph serve` (milestone M4). It serves the merged
 // graph + overlay over plain node:http (no extra dep) for the dashboard, and
 // accepts overlay edits via POST. The overlay-write logic is REUSED from
-// @uigraph/mcp's updateGraph so the CLI and the MCP server cannot drift apart.
+// @ui-graph/mcp's updateGraph so the CLI and the MCP server cannot drift apart.
 
 import { createServer as createHttpServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, normalize, resolve, sep } from 'node:path'
-import type { ToolContext, ListCasesArgs, UpdateGraphArgs } from '@uigraph/mcp'
-import { dbPath, getCoverage, getFreshness, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@uigraph/mcp'
-import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@uigraph/core/node'
-import type { TrustTier } from '@uigraph/core'
-import { diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@uigraph/core'
+import type { ToolContext, ListCasesArgs, UpdateGraphArgs } from '@ui-graph/mcp'
+import { dbPath, getCoverage, getFreshness, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@ui-graph/mcp'
+import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@ui-graph/core/node'
+import type { TrustTier } from '@ui-graph/core'
+import { diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@ui-graph/core'
 
 /** Render the workspace overlay as a markdown "planned changes" spec. */
 function readPlan(ctx: ToolContext): string {

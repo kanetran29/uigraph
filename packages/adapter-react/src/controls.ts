@@ -5,7 +5,7 @@
 
 import { Node, SyntaxKind } from 'ts-morph'
 import type { JsxAttribute, SourceFile } from 'ts-morph'
-import type { ControlInput, ControlSelector } from '@uigraph/core'
+import type { ControlInput, ControlSelector } from '@ui-graph/core'
 import type { BranchContext, ControlInfo, TargetInfo } from './types'
 import { findAttr, getJsxText, jsxAttrs, jsxTag, stringAttr } from './jsx'
 import { resolveFunctionNode } from './resolve'

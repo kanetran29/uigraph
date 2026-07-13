@@ -12,8 +12,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Project, ts } from 'ts-morph'
-import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@uigraph/core'
-import { extractGraphFromRoutes } from '@uigraph/adapter-react'
+import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@ui-graph/core'
+import { extractGraphFromRoutes } from '@ui-graph/adapter-react'
 import { discoverRoutes } from './routes'
 import { addLayoutAndWrapperEdges } from './layout-nav'
 
@@ -56,7 +56,7 @@ export function detectNext(projectDir: string): boolean {
 export function extractNextGraph(projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const project = buildNextProject(projectDir)
   const { seeds, kindById, collisions } = discoverRoutes(project, projectDir)
-  const result = extractGraphFromRoutes(project, projectDir, seeds, { ...opts, rulesetVersion: opts.rulesetVersion ?? 'next-app-pages-2026.06' }, '@uigraph/adapter-next')
+  const result = extractGraphFromRoutes(project, projectDir, seeds, { ...opts, rulesetVersion: opts.rulesetVersion ?? 'next-app-pages-2026.06' }, '@ui-graph/adapter-next')
   for (const node of result.graph.nodes) {
     const kind = kindById.get(node.id)
     if (kind && kind !== 'screen') node.kind = kind

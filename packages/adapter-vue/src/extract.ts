@@ -15,7 +15,7 @@ import { Project, ts } from 'ts-morph'
 import type { SourceFile } from 'ts-morph'
 import { readFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
-import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@uigraph/core'
+import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
 import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
 import { splitSfc, type Sfc } from './sfc'
@@ -220,7 +220,7 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
   const graph = {
     version: 0 as const,
     meta: {
-      adapter: '@uigraph/adapter-vue',
+      adapter: '@ui-graph/adapter-vue',
       adapterVersion: ADAPTER_VERSION,
       rulesetVersion: opts.rulesetVersion ?? DEFAULT_RULESET,
       ...(opts.commit ? { commit: opts.commit } : {}),

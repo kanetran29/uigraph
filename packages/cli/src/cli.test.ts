@@ -9,13 +9,13 @@ import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import type { GraphEdge, GraphNode, UiGraph, Witness } from '@uigraph/core'
-import { openStore, saveGraph } from '@uigraph/core/node'
+import type { GraphEdge, GraphNode, UiGraph, Witness } from '@ui-graph/core'
+import { openStore, saveGraph } from '@ui-graph/core/node'
 import type { Server } from 'node:http'
 import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
 import { buildProgram } from './cli'
 import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
-import { readRegistry, summarize } from '@uigraph/core/node'
+import { readRegistry, summarize } from '@ui-graph/core/node'
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 
 /** Seed a workspace dir's SQLite store with a base graph; returns the dir. */
@@ -52,7 +52,7 @@ function edge(id: string, from: string, to: string): GraphEdge {
 function graph(nodes: GraphNode[], edges: GraphEdge[]): UiGraph {
   return {
     version: 0,
-    meta: { adapter: '@uigraph/test', adapterVersion: '0.0.0', rulesetVersion: 'test' },
+    meta: { adapter: '@ui-graph/test', adapterVersion: '0.0.0', rulesetVersion: 'test' },
     nodes,
     edges,
   }
@@ -825,7 +825,7 @@ describe('runVerify — dynamic-sink resolution (capture mode)', () => {
 
     const store = openStore(dbPathFor(dir))
     const obs = store.getObservations()
-    const merged = (await import('@uigraph/mcp')).loadMergedGraph({ dir })
+    const merged = (await import('@ui-graph/mcp')).loadMergedGraph({ dir })
     store.close()
     // a CONCRETE runtime edge a->b was minted; NO observation ever targeted the u_ sink
     expect(merged.edges.some((e) => e.from === 'a' && e.to === 'b' && e.source === 'runtime')).toBe(true)
@@ -851,7 +851,7 @@ describe('runVerify — dynamic-sink resolution (capture mode)', () => {
     const dir = seedWorkspace(tempDir('uigraph-cli-dyn3-'), g)
     const summary = await runVerify({ dir, appUrl: 'http://x', driver: async (_p, appUrl, opts) => (opts?.capture ? { confirmed: true, landedUrl: `${appUrl}/surprise`, evidence: { kind: 'url-change', startUrl: `${appUrl}/a`, landedUrl: `${appUrl}/surprise` } as const } : { confirmed: false }) })
     expect(summary.discoveredNodes).toBe(1)
-    const merged = (await import('@uigraph/mcp')).loadMergedGraph({ dir })
+    const merged = (await import('@ui-graph/mcp')).loadMergedGraph({ dir })
     expect(merged.nodes.some((n) => n.route === '/surprise')).toBe(true)
     expect(merged.edges.some((e) => e.from === 'a' && e.source === 'runtime')).toBe(true)
   })
