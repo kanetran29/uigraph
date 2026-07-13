@@ -91,6 +91,49 @@ const BAND_INSET = 8
 // its nodes and the spokes between rings have room for edge labels.
 const RING = 520
 
+// Minimum gap added to each node's arc-width slice when allocating angular space on a
+// ring, so neighbours on the same ring never touch.
+const NODE_ARC_GAP = 96
+
+// Above this many screens the radial layout wastes space (nodes strung around huge ring
+// perimeters with an empty interior); switch to a compact grid instead.
+const GRID_THRESHOLD = 40
+const GRID_GAP_X = 96
+const GRID_GAP_Y = 72
+
+/**
+ * Compact grid positions for many screens, keyed by node id (centre coords). A large app's
+ * navigation is a near-complete global-nav graph — no hierarchical or radial layout packs
+ * it without exploding into a huge ring or a tall column — so pack the screens into an
+ * aspect-balanced grid, sorted by route so same-group screens sit together, and let the
+ * (faded) edges draw over it. Uniform cells sized to the widest/tallest box guarantee no
+ * overlap; the result is maximally compact, readable, and framed at a sane zoom.
+ */
+function gridCenters(
+  screens: GraphNode[],
+  widthOf: (id: string) => number,
+  heightOf: (id: string) => number,
+): Map<string, NodePosition> {
+  const sorted = [...screens].sort((a, b) => (a.route ?? a.id).localeCompare(b.route ?? b.id))
+  let cellW = 0
+  let cellH = 0
+  for (const s of screens) {
+    cellW = Math.max(cellW, widthOf(s.id))
+    cellH = Math.max(cellH, heightOf(s.id))
+  }
+  cellW += GRID_GAP_X
+  cellH += GRID_GAP_Y
+  // Column count that keeps the grid roughly square in pixels (accounts for cell aspect).
+  const cols = Math.max(1, Math.round(Math.sqrt((sorted.length * cellH) / cellW)))
+  const centers = new Map<string, NodePosition>()
+  sorted.forEach((s, i) => {
+    const col = i % cols
+    const row = Math.floor(i / cols)
+    centers.set(s.id, { x: col * cellW + cellW / 2, y: row * cellH + cellH / 2 })
+  })
+  return centers
+}
+
 /** Column count for an expanded screen's controls: wrap into a grid (max 3 cols) so a
  * control-heavy screen grows wide rather than into an unreadable tall column. */
 function gridCols(count: number): number {
@@ -306,20 +349,6 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
     else list.push(s.id)
   }
 
-  const angle = new Map<string, number>()
-  const maxDepth = Math.max(0, ...byDepth.keys())
-  for (let d = 0; d <= maxDepth; d++) {
-    const ids = byDepth.get(d) ?? []
-    if (d === 0) {
-      for (const id of ids) angle.set(id, 0)
-      continue
-    }
-    // Keep children near their parent: order this ring by the parent's angle.
-    ids.sort((a, b) => (angle.get(parent.get(a) ?? '') ?? 0) - (angle.get(parent.get(b) ?? '') ?? 0))
-    const n = ids.length
-    ids.forEach((id, i) => angle.set(id, (i / Math.max(1, n)) * Math.PI * 2))
-  }
-
   const positions = new Map<string, NodePosition>()
   const sizes = new Map<string, NodeSize>()
 
@@ -335,6 +364,34 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
         }))
   const ringStep = RING + expandedExtent
 
+  // Per-ring angle + radius, allocated by node WIDTH so nothing overlaps: each node on a
+  // ring takes an angular slice proportional to its box width, and the ring radius grows
+  // so the full circumference holds every slice — a crowded ring pushes outward instead
+  // of packing its nodes on top of each other. Rings stay monotonic (each at least
+  // `ringStep` beyond the previous), and each ring is ordered by parent angle so children
+  // sit near their parent.
+  const angle = new Map<string, number>()
+  const radiusAt: number[] = [0]
+  const maxDepth = Math.max(0, ...byDepth.keys())
+  for (const id of byDepth.get(0) ?? []) angle.set(id, 0)
+  for (let d = 1; d <= maxDepth; d++) {
+    const ids = (byDepth.get(d) ?? []).slice()
+    ids.sort((a, b) => (angle.get(parent.get(a) ?? '') ?? 0) - (angle.get(parent.get(b) ?? '') ?? 0))
+    const spans = ids.map((id) => widthOf(id) + NODE_ARC_GAP)
+    const total = Math.max(1, spans.reduce((s, x) => s + x, 0))
+    radiusAt[d] = Math.max((radiusAt[d - 1] ?? 0) + ringStep, total / (2 * Math.PI))
+    let cursor = 0
+    ids.forEach((id, i) => {
+      const span = spans[i] ?? 0
+      angle.set(id, ((cursor + span / 2) / total) * Math.PI * 2)
+      cursor += span
+    })
+  }
+
+  // Large graph → the compact grid packing; small graph → the radial rings above.
+  const gridCenter = screens.length > GRID_THRESHOLD ? gridCenters(screens, widthOf, heightOf) : null
+  const useGrid = gridCenter !== null && gridCenter.size > 0
+
   const bands: Band[] = []
   for (const node of screens) {
     const width = widthOf(node.id)
@@ -347,10 +404,18 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
     // slightly rotated) so it reads as "this screen's dialog" rather than a full
     // ring away; other nodes sit on their ring.
     const owned = node.kind === 'modal' && typeof parent.get(node.id) === 'string'
-    const r = owned ? (d - 0.45) * ringStep : d * ringStep
-    const ang = owned ? a + 0.18 : a
-    const cx = d === 0 ? 0 : Math.cos(ang) * r
-    const cy = d === 0 ? 0 : Math.sin(ang) * r
+    let cx: number
+    let cy: number
+    if (useGrid && gridCenter) {
+      const c = gridCenter.get(node.id) ?? { x: 0, y: 0 }
+      cx = c.x
+      cy = c.y
+    } else {
+      const r = owned ? Math.max(0, (radiusAt[d] ?? 0) - 0.45 * ringStep) : (radiusAt[d] ?? 0)
+      const ang = owned ? a + 0.18 : a
+      cx = d === 0 ? 0 : Math.cos(ang) * r
+      cy = d === 0 ? 0 : Math.sin(ang) * r
+    }
     positions.set(node.id, { x: cx - width / 2, y: cy - height / 2 })
 
     // Place this screen's controls + component bands from its banded inner layout.
