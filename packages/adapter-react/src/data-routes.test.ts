@@ -156,7 +156,7 @@ export default function Help(){ return <Link to="/">home</Link> }`,
     expect(soundiness.some((s) => s.kind === 'dynamic-route-config' && s.detail.includes('/broken'))).toBe(true)
   })
 
-  it('notes (never guesses) dynamic route config: variable arg, spread entry, non-literal path', () => {
+  it('notes (never guesses) dynamic route config: variable arg, spread entry, computed path — but resolves an imported-const path', () => {
     const { graph, soundiness } = extractGraph(
       inMemory({
         '/router.tsx': `import { createBrowserRouter } from 'react-router-dom'
@@ -167,15 +167,18 @@ export const b = createBrowserRouter([
   { path: '/', element: <Home /> },
   ...extra,
   { path: dyn, element: <Home /> },
+  { path: routeConfig.get('y'), element: <Home /> },
 ])`,
         '/Home.tsx': `export default function Home(){ return null }`,
         '/extra.ts': `export const extra = []; export const dyn = '/x'`,
       }),
       '/',
     )
-    expect(graph.nodes.map((n) => n.id)).toEqual(['n_root'])
-    const notes = soundiness.filter((s) => s.kind === 'dynamic-route-config')
-    expect(notes.length).toBe(3)
+    expect(new Set(graph.nodes.map((n) => n.id))).toEqual(new Set(['n_root', 'n_x']))
+    expect(soundiness.filter((s) => s.kind === 'dynamic-route-config').length).toBe(2)
+    const pathNote = soundiness.find((s) => s.kind === 'dynamic-route-path')
+    expect(pathNote?.detail).toContain("routeConfig.get('y')")
+    expect(pathNote?.loc?.line).toBeGreaterThan(0)
   })
 
   it('reads createRoutesFromElements(<Route>…) through the existing JSX walker, nesting included', () => {

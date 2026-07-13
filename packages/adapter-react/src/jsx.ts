@@ -127,20 +127,6 @@ export function inlineExprInfo(inner: Node): { tag: string; exprNode: Node; root
   return { tag: jsxTag(lowercaseRoot), exprNode: inner, roots }
 }
 
-/** The chain of ancestor <Route> path attributes above an element, outermost-first. */
-export function ancestorRoutePaths(el: Node): string[] {
-  const paths: string[] = []
-  let cur = el.getParent()
-  while (cur) {
-    if (isJsxEl(cur) && jsxTag(cur) === 'Route') {
-      const p = stringAttr(cur, 'path')
-      if (p !== null) paths.unshift(p)
-    }
-    cur = cur.getParent()
-  }
-  return paths
-}
-
 /** The string value of a JSX attribute (literal or a literal inside a JSX expression), or null. */
 export function stringAttr(el: Node, name: string): string | null {
   const attr = findAttr(el, name)
