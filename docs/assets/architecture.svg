@@ -122,13 +122,11 @@
     <line x1="235" y1="770" x2="235" y2="788"/>
   </g>
   <g stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5 4" fill="none" marker-end="url(#arr)">
-    <line x1="1360" y1="774" x2="1246" y2="838"/>
+    <path d="M1360 772 L1360 781 L1221 781 L1221 788"/>
   </g>
   <g stroke="#D97757" stroke-width="1.8" stroke-dasharray="6 4" fill="none" marker-end="url(#arr)">
-    <path d="M840 774 C 740 800, 620 816, 520 838"/>
+    <path d="M810 772 L810 781 L330 781 L330 788"/>
   </g>
-  <text x="1330" y="800" font-size="12" fill="#6b7280">drives</text>
-  <text x="660" y="806" font-size="12" fill="#c2410c">evidence</text>
 
   <!-- legend -->
   <rect x="40" y="944" width="430" height="44" rx="8" fill="#FFFFFF" stroke="#d1d5db" stroke-width="1.2"/>
