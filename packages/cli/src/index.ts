@@ -1,4 +1,4 @@
-// Public entry point for @uigraph/cli (milestone M4). The runnable program lives
+// Public entry point for @ui-graph/cli (milestone M4). The runnable program lives
 // in cli.ts (run via tsx); this module re-exports the directly-testable command
 // handlers and the local API server so other tooling can drive them as functions.
 

@@ -2,7 +2,7 @@
 
 The Intermediate Representation (IR) is uigraph's single shared data structure: a
 **guarded labeled transition system** with modal edge labels. It lives in
-`@uigraph/core` and is **framework-agnostic** — the core knows nothing about
+`@ui-graph/core` and is **framework-agnostic** — the core knows nothing about
 React, Angular, or any other framework. React and Angular support live in
 *adapter* packages that import the core, read one framework's source, and emit
 this IR. Adding a framework means adding an adapter; the IR never changes
@@ -65,7 +65,7 @@ export interface GraphEdge {
 export interface UiGraph {
   version: 0;
   meta: {
-    adapter: string;        // e.g. "@uigraph/adapter-react"
+    adapter: string;        // e.g. "@ui-graph/adapter-react"
     adapterVersion: string; // adapter package version
     rulesetVersion: string; // extraction ruleset version
     commit?: string;        // repo commit the graph was extracted from
@@ -95,7 +95,7 @@ Dashboard` is a guarded `may`-edge whose guard is stored as readable text.
 {
   "version": 0,
   "meta": {
-    "adapter": "@uigraph/adapter-react",
+    "adapter": "@ui-graph/adapter-react",
     "adapterVersion": "0.1.0",
     "rulesetVersion": "rr-v5-2026.06",
     "commit": "a1b2c3d"
@@ -185,6 +185,6 @@ This IR is identical regardless of which adapter produced it. The React adapter
 (react-router v5/v6) and the Angular adapter (`RouterModule`/`Routes`,
 `canActivate`) differ only in **how they populate** the same fields — which
 source constructs map to nodes, events, guards, and witnesses. Every downstream
-consumer — `@uigraph/core` ops, the `@uigraph/mcp` server, the CLI, and the
+consumer — `@ui-graph/core` ops, the `@ui-graph/mcp` server, the CLI, and the
 dashboard — sees one shape and never branches on framework. That is the whole
 point of the framework-agnostic core plus adapter-layer architecture.

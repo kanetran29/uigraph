@@ -33,7 +33,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { toPng } from 'html-to-image'
-import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@uigraph/core'
+import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@ui-graph/core'
 import { layoutGraph, proposedScreenEdges, structuralKey, type GraphLayout, type ProposedEdge } from './layout'
 import { pngFilename } from './exportPng'
 import { applySaved, layoutStorageKey, parsePositions, serializePositions } from './layoutStore'

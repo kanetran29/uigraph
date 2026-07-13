@@ -1,4 +1,4 @@
-// Shared foundation for the @uigraph/mcp tool modules: the ToolContext, the
+// Shared foundation for the @ui-graph/mcp tool modules: the ToolContext, the
 // workspace SQLite path helpers, the store-lifecycle wrapper, the merged-graph
 // loader, and the trust-tier ordering — the bits every tool module leans on. No
 // LLM is ever called and no MCP transport is touched, so these stay pure and
@@ -6,9 +6,9 @@
 // import from here; the barrel re-exports only the public names.
 
 import { join } from 'node:path'
-import type { Observation, TrustTier, UiGraph } from '@uigraph/core'
-import { applyObservations, hashValue, mergeOverlay, validateMerged } from '@uigraph/core'
-import { openStore, type Store } from '@uigraph/core/node'
+import type { Observation, TrustTier, UiGraph } from '@ui-graph/core'
+import { applyObservations, hashValue, mergeOverlay, validateMerged } from '@ui-graph/core'
+import { openStore, type Store } from '@ui-graph/core/node'
 
 /**
  * Where a server instance is rooted: a workspace directory holding

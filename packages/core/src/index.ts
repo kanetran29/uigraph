@@ -1,4 +1,4 @@
-// Public entry point for @uigraph/core: the framework-agnostic IR, the adapter
+// Public entry point for @ui-graph/core: the framework-agnostic IR, the adapter
 // contract, and the pure graph operations. Browser-safe — no node:fs here; the
 // node-only IO helpers live in the "./node" subpath export.
 

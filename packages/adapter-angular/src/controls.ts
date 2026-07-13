@@ -5,7 +5,7 @@
 // constraints. Nav wiring from a control's handler lives in extract.ts.
 
 import type { SourceFile } from 'ts-morph'
-import type { ControlInput, ControlSelector } from '@uigraph/core'
+import type { ControlInput, ControlSelector } from '@ui-graph/core'
 import { inlineTemplate } from './templates'
 
 /** A control parsed out of an Angular template. */

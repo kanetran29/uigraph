@@ -1,10 +1,10 @@
-// @uigraph/adapter-react — the React Router adapter. Implements the core Adapter
+// @ui-graph/adapter-react — the React Router adapter. Implements the core Adapter
 // contract: detect a react-router project and extract the shared IR from its
 // source. Supports react-router v5 and v6. No framework code leaks into the core.
 
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@uigraph/core'
+import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@ui-graph/core'
 import { buildProject, extractGraph } from './extract'
 
 /** Cheap heuristic: does the project declare a react-router dependency? */

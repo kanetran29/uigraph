@@ -4,7 +4,7 @@
 // the sibling extractor modules so they stay decoupled.
 
 import type { Node, SourceFile } from 'ts-morph'
-import type { ControlInput, ControlSelector } from '@uigraph/core'
+import type { ControlInput, ControlSelector } from '@ui-graph/core'
 
 /** A literal/template/enum/dynamic classification of a navigation target expression. */
 export type TargetInfo =

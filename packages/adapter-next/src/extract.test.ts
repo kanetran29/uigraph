@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { fileURLToPath } from 'node:url'
-import { validateGraph } from '@uigraph/core'
+import { validateGraph } from '@ui-graph/core'
 import { extractNextGraph } from './index'
 
 const dir = fileURLToPath(new URL('../../../examples/sample-next-app', import.meta.url))
@@ -21,7 +21,7 @@ describe('extractNext — sample-next-app golden', () => {
   })
 
   it('stamps the next adapter in meta', () => {
-    expect(graph.meta.adapter).toBe('@uigraph/adapter-next')
+    expect(graph.meta.adapter).toBe('@ui-graph/adapter-next')
   })
 
   it('emits a literal <Link href> as a must edge (next.link-href)', () => {

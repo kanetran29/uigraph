@@ -2,7 +2,7 @@
 // control type, ARIA role, a stable selector, input constraints and event handlers
 // (parity with the React/Angular adapters).
 
-import type { ControlInput, ControlSelector } from '@uigraph/core'
+import type { ControlInput, ControlSelector } from '@ui-graph/core'
 import { eventHandlers, parseTemplateElements, type TemplateEl } from './sfc'
 import type { VueComponent } from './extract'
 

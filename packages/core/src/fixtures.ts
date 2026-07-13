@@ -32,7 +32,7 @@ export function edge(id: string, from: string, to: string, over: Partial<GraphEd
 export function graph(nodes: GraphNode[], edges: GraphEdge[], over: Partial<UiGraph['meta']> = {}): UiGraph {
   return {
     version: 0,
-    meta: { adapter: '@uigraph/test', adapterVersion: '0.0.0', rulesetVersion: 'test', ...over },
+    meta: { adapter: '@ui-graph/test', adapterVersion: '0.0.0', rulesetVersion: 'test', ...over },
     nodes,
     edges,
   }

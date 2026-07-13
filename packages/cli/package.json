@@ -1,7 +1,7 @@
 {
-  "name": "@uigraph/cli",
+  "name": "@ui-graph/cli",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "exports": {
     ".": {
@@ -19,12 +19,12 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@uigraph/core": "workspace:*",
-    "@uigraph/adapter-react": "workspace:*",
-    "@uigraph/adapter-angular": "workspace:*",
-    "@uigraph/adapter-vue": "workspace:*",
-    "@uigraph/adapter-next": "workspace:*",
-    "@uigraph/mcp": "workspace:*",
+    "@ui-graph/core": "workspace:*",
+    "@ui-graph/adapter-react": "workspace:*",
+    "@ui-graph/adapter-angular": "workspace:*",
+    "@ui-graph/adapter-vue": "workspace:*",
+    "@ui-graph/adapter-next": "workspace:*",
+    "@ui-graph/mcp": "workspace:*",
     "commander": "catalog:"
   },
   "optionalDependencies": {

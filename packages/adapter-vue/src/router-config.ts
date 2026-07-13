@@ -8,7 +8,7 @@
 
 import { Node, SyntaxKind } from 'ts-morph'
 import type { ArrayLiteralExpression, ObjectLiteralExpression, Project, SourceFile } from 'ts-morph'
-import type { SoundinessNote } from '@uigraph/core'
+import type { SoundinessNote } from '@ui-graph/core'
 import { routeToNodeId } from './ids'
 import { resolveVueComponent } from './project'
 import { stringProp } from './targets'

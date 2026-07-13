@@ -1,4 +1,4 @@
-// Public entry point for @uigraph/mcp (milestone M5): a model-free stdio MCP
+// Public entry point for @ui-graph/mcp (milestone M5): a model-free stdio MCP
 // server exposing the merged UI graph to an agent. It NEVER calls an LLM. The
 // pure, directly-testable tool functions are exported alongside the server so
 // consumers (and tests) can call them without a transport.

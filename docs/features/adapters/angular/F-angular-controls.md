@@ -38,7 +38,7 @@ TDD, tests-first, in packages/adapter-angular/src/extract.test.ts (extend) — m
 ## Dependencies
 
 - No new runtime/dev dependencies — uses existing ts-morph (already a dep of adapter-angular) for class/method/decorator access, and a hand-rolled regex/tokenizer for the inline template HTML (KISS: no parse5, no @angular/compiler, no jsdom).
-- Reuses @uigraph/core exports already present: fnv1a (index.ts:32), and types ControlSelector/ControlInput/ControlMeta/SelectorStrategy/GraphNode (ir.ts).
+- Reuses @ui-graph/core exports already present: fnv1a (index.ts:32), and types ControlSelector/ControlInput/ControlMeta/SelectorStrategy/GraphNode (ir.ts).
 - Reuses existing in-adapter helpers in extract.ts: inlineTemplate (line 173), classifyTarget (158), routerCallTargets logic (231) to be generalized, matchLiteral/matchPrefix (matcher.ts), pushEdge + guardsByNodeId machinery (extractGraph), and routeToNodeId/edgeId (ids.ts).
 - controlNodeId must be ADDED to adapter-angular/src/ids.ts (only React's ids.ts has it today) and exported from adapter-angular/src/index.ts alongside the existing routeToNodeId/edgeId exports.
 

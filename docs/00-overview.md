@@ -12,10 +12,10 @@ The framing is **"LSP for app behavior."** Language servers didn't make jump-to-
 
 A runnable, end-to-end slice:
 
-- **`@uigraph/core`** — the framework-agnostic IR and pure operations, plus the adapter contract.
-- **`@uigraph/adapter-react`** and **`@uigraph/adapter-angular`** — plugins that turn one framework's router source into the shared IR (React Router v5 *and* v6; Angular `RouterModule`/`Routes`, navigation calls, `routerLink`, guards).
-- **`@uigraph/mcp`** — a stdio MCP server (`get_graph`, `plan_path`, `update_graph`, `report_observation`, `diff`) so the connecting agent brings the model.
-- **`@uigraph/cli`** (`uigraph map | diff | dash | mcp`).
+- **`@ui-graph/core`** — the framework-agnostic IR and pure operations, plus the adapter contract.
+- **`@ui-graph/adapter-react`** and **`@ui-graph/adapter-angular`** — plugins that turn one framework's router source into the shared IR (React Router v5 *and* v6; Angular `RouterModule`/`Routes`, navigation calls, `routerLink`, guards).
+- **`@ui-graph/mcp`** — a stdio MCP server (`get_graph`, `plan_path`, `update_graph`, `report_observation`, `diff`) so the connecting agent brings the model.
+- **`@ui-graph/cli`** (`uigraph map | diff | dash | mcp`).
 - **`apps/dashboard`** — a React + Vite + React Flow editable graph view.
 - **`examples/sample-react-app`** and **`examples/sample-angular-app`** — golden fixtures with known routes/guards/navigations.
 

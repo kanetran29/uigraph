@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { fileURLToPath } from 'node:url'
-import { validateGraph } from '@uigraph/core'
+import { validateGraph } from '@ui-graph/core'
 import { extractNextGraph } from './index'
 
 const layoutApp = fileURLToPath(new URL('../test-fixtures/layout-app', import.meta.url))

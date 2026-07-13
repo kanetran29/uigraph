@@ -38,7 +38,7 @@ The core never sees a framework. We prove the IR ops and graph algorithms in iso
   (`static|manual|runtime`), `confidence`, and modality.
 - **PASS criterion:** all core unit + property tests green; golden IR fixtures
   load/save/round-trip byte-stable; `validate` fails closed on a witness-less edge.
-- **Proves it:** vitest output for `@uigraph/core`.
+- **Proves it:** vitest output for `@ui-graph/core`.
 
 ## RUNG 2 — React adapter on `examples/sample-react-app`
 

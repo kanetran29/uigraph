@@ -1,13 +1,13 @@
 // The steps panel: pick a from-node and a to-node among NAVIGABLE targets
 // (screen / route / modal — never control leaves), run the core planPath over the
-// loaded graph (browser-safe — imported from @uigraph/core, never @uigraph/core/node),
+// loaded graph (browser-safe — imported from @ui-graph/core, never @ui-graph/core/node),
 // and list the ordered legs. The default `to` is the farthest screen actually
 // reachable from `from`, so the panel opens on a real, non-empty route. Reporting
 // the path's edge ids upward lets the canvas highlight the route.
 
 import { useEffect, useMemo, useState } from 'react'
-import { planPath, type PlanStep } from '@uigraph/core'
-import type { GraphNode, UiGraph } from '@uigraph/core'
+import { planPath, type PlanStep } from '@ui-graph/core'
+import type { GraphNode, UiGraph } from '@ui-graph/core'
 import { CollapsibleSection } from './CollapsibleSection'
 import { useT } from './i18n'
 

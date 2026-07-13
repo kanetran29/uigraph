@@ -1,19 +1,19 @@
 // Command handler bodies for the uigraph CLI (milestone M4), factored out of the
 // commander wiring in cli.ts so each one is a plain, directly-testable function.
-// These tie the workspace together: adapters produce the IR, @uigraph/core/node
-// persists it, and @uigraph/core diffs it. No commander or process state leaks in.
+// These tie the workspace together: adapters produce the IR, @ui-graph/core/node
+// persists it, and @ui-graph/core diffs it. No commander or process state leaks in.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import type { AdapterContext, Logger, SoundinessNote, UiGraph, Proposal } from '@uigraph/core'
-import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue } from '@uigraph/core'
-import type { GraphDiff, SinceLastDiff } from '@uigraph/core'
-import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@uigraph/core/node'
-import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@uigraph/mcp'
-import { reactAdapter } from '@uigraph/adapter-react'
-import { angularAdapter } from '@uigraph/adapter-angular'
-import { vueAdapter } from '@uigraph/adapter-vue'
-import { nextAdapter } from '@uigraph/adapter-next'
+import type { AdapterContext, Logger, SoundinessNote, UiGraph, Proposal } from '@ui-graph/core'
+import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue } from '@ui-graph/core'
+import type { GraphDiff, SinceLastDiff } from '@ui-graph/core'
+import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@ui-graph/core/node'
+import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@ui-graph/mcp'
+import { reactAdapter } from '@ui-graph/adapter-react'
+import { angularAdapter } from '@ui-graph/adapter-angular'
+import { vueAdapter } from '@ui-graph/adapter-vue'
+import { nextAdapter } from '@ui-graph/adapter-next'
 
 /** The SQLite database file that is a workspace's canonical store. */
 export const DB_FILE = 'uigraph.db'

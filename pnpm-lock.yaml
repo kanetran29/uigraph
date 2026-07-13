@@ -65,7 +65,7 @@ importers:
       '@dagrejs/dagre':
         specifier: ^3.0.0
         version: 3.0.0
-      '@uigraph/core':
+      '@ui-graph/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@xyflow/react':
@@ -226,7 +226,7 @@ importers:
 
   packages/adapter-angular:
     dependencies:
-      '@uigraph/core':
+      '@ui-graph/core':
         specifier: workspace:*
         version: link:../core
       ts-morph:
@@ -245,10 +245,10 @@ importers:
 
   packages/adapter-next:
     dependencies:
-      '@uigraph/adapter-react':
+      '@ui-graph/adapter-react':
         specifier: workspace:*
         version: link:../adapter-react
-      '@uigraph/core':
+      '@ui-graph/core':
         specifier: workspace:*
         version: link:../core
       ts-morph:
@@ -267,7 +267,7 @@ importers:
 
   packages/adapter-react:
     dependencies:
-      '@uigraph/core':
+      '@ui-graph/core':
         specifier: workspace:*
         version: link:../core
       ts-morph:
@@ -286,7 +286,7 @@ importers:
 
   packages/adapter-vue:
     dependencies:
-      '@uigraph/core':
+      '@ui-graph/core':
         specifier: workspace:*
         version: link:../core
       ts-morph:
@@ -305,22 +305,22 @@ importers:
 
   packages/cli:
     dependencies:
-      '@uigraph/adapter-angular':
+      '@ui-graph/adapter-angular':
         specifier: workspace:*
         version: link:../adapter-angular
-      '@uigraph/adapter-next':
+      '@ui-graph/adapter-next':
         specifier: workspace:*
         version: link:../adapter-next
-      '@uigraph/adapter-react':
+      '@ui-graph/adapter-react':
         specifier: workspace:*
         version: link:../adapter-react
-      '@uigraph/adapter-vue':
+      '@ui-graph/adapter-vue':
         specifier: workspace:*
         version: link:../adapter-vue
-      '@uigraph/core':
+      '@ui-graph/core':
         specifier: workspace:*
         version: link:../core
-      '@uigraph/mcp':
+      '@ui-graph/mcp':
         specifier: workspace:*
         version: link:../mcp
       commander:
@@ -361,7 +361,7 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
         version: 1.29.0(zod@4.4.3)
-      '@uigraph/core':
+      '@ui-graph/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:

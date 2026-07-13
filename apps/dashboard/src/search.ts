@@ -2,7 +2,7 @@
 // they are unit-tested directly (mirrors layout.ts). The canvas search only DIMS matches
 // (selection always wins); the Coverage/Proposals panels filter their own lists locally.
 
-import type { EdgeCoverage, GraphNode, Proposal, ProposalStatus } from '@uigraph/core'
+import type { EdgeCoverage, GraphNode, Proposal, ProposalStatus } from '@ui-graph/core'
 
 /**
  * Whether a node matches a free-text query: case-insensitive trimmed substring over the

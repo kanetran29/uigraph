@@ -1,11 +1,11 @@
-// Read-side tools for the @uigraph/mcp server: the agent-facing views over the
+// Read-side tools for the @ui-graph/mcp server: the agent-facing views over the
 // merged graph — the graph itself, proposals, grounding, per-screen action
 // surfaces, coverage, and the trust-tiered case set (get_state / list_cases /
 // get_frontier). All pure over a ToolContext; the case-projection helpers live
 // here because only the read tools render cases.
 
-import type { CoverageReport, EdgeWithTier, GraphEdge, GraphNode, GroundedEdge, Grounding, Modality, Proposal, ProposalGraph, ProposalGraphEdge, ProposalStatus, ScreenGrounding, Source, StalenessReport, TrustTier, UiGraph } from '@uigraph/core'
-import { buildCoverage, buildFrontier, buildGrounding, classifyEffectRisk, projectTrustTier } from '@uigraph/core'
+import type { CoverageReport, EdgeWithTier, GraphEdge, GraphNode, GroundedEdge, Grounding, Modality, Proposal, ProposalGraph, ProposalGraphEdge, ProposalStatus, ScreenGrounding, Source, StalenessReport, TrustTier, UiGraph } from '@ui-graph/core'
+import { buildCoverage, buildFrontier, buildGrounding, classifyEffectRisk, projectTrustTier } from '@ui-graph/core'
 import { loadMergedGraph, TIER_ORDER, tierAtLeast, withStore, type ToolContext } from './context'
 import { getFreshness } from './diff'
 

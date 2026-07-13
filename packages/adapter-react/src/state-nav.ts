@@ -18,7 +18,7 @@
 import { Node, SyntaxKind } from 'ts-morph'
 import type { Project, SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
-import type { Proposal, SoundinessNote } from '@uigraph/core'
+import type { Proposal, SoundinessNote } from '@ui-graph/core'
 
 /** A reducer assignment to an enum-state var, classified as a literal member or a payload field. */
 interface EnumAssignment {

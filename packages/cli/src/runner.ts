@@ -9,10 +9,10 @@
 // browser; the default driver lazy-loads `playwright-core` (optional dep — install
 // it to actually drive) and uses the system/cached Chromium.
 
-import type { Evidence, SpecPlan, UiGraph, VerifyTarget } from '@uigraph/core'
-import { buildSpecPlan, fnv1a, locatorFor, nextToVerify, nodeForUrl, planPath } from '@uigraph/core'
-import { openStore } from '@uigraph/core/node'
-import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@uigraph/mcp'
+import type { Evidence, SpecPlan, UiGraph, VerifyTarget } from '@ui-graph/core'
+import { buildSpecPlan, fnv1a, locatorFor, nextToVerify, nodeForUrl, planPath } from '@ui-graph/core'
+import { openStore } from '@ui-graph/core/node'
+import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@ui-graph/mcp'
 
 /** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets); `evidence` is the structured proof the proof-gated report_observation requires for a confirmation. `undrivable` means the plan had no drivable action (a parked leg) — the transition was NEVER attempted, so it must not be recorded as refuted. */
 export interface VerifyResult {

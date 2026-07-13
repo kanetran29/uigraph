@@ -1,7 +1,7 @@
 {
   "version": 0,
   "meta": {
-    "adapter": "@uigraph/adapter-react",
+    "adapter": "@ui-graph/adapter-react",
     "adapterVersion": "0.1.0",
     "rulesetVersion": "rr-v6-2026.06",
     "commit": "sample"

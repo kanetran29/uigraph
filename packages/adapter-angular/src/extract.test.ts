@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { fileURLToPath } from 'node:url'
 import { Project } from 'ts-morph'
-import { validateGraph } from '@uigraph/core'
+import { validateGraph } from '@ui-graph/core'
 import { buildProject, extractGraph } from './extract'
 import { routeToNodeId as routeId } from './ids'
 

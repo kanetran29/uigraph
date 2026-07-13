@@ -1,11 +1,11 @@
-// @uigraph/adapter-angular — the Angular Router adapter. Implements the core
+// @ui-graph/adapter-angular — the Angular Router adapter. Implements the core
 // Adapter contract: detect an Angular project and extract the shared IR from its
 // source (a `Routes` array of standalone components with inline templates). No
 // framework code leaks into the core.
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@uigraph/core'
+import type { Adapter, AdapterContext, ExtractOptions, ExtractResult } from '@ui-graph/core'
 import { buildProject, extractGraph } from './extract'
 
 /** Does any source file under a directory reference '@angular/router' or a Routes array? */

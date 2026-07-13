@@ -4,7 +4,7 @@
 // are not in the rendered graph, so they show dimmed and non-navigable. Base-graph only —
 // never overlay/proposals. It reads the same SinceLastDiff the CLI and MCP tool return.
 
-import type { GraphEdge, GraphNode, UiGraph } from '@uigraph/core'
+import type { GraphEdge, GraphNode, UiGraph } from '@ui-graph/core'
 import { CollapsibleSection } from './CollapsibleSection'
 import { useT } from './i18n'
 import type { Selection } from './GraphCanvas'

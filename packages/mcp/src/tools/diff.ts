@@ -1,12 +1,12 @@
-// Diff / freshness tools for the @uigraph/mcp server: whether the stored graph is
+// Diff / freshness tools for the @ui-graph/mcp server: whether the stored graph is
 // still current with its source (get_freshness), a structural diff of two graph
 // files (diff), and the temporal "since last map" diff for the bound workspace
 // (diff_since_last). Pure over a ToolContext, built on core's fingerprint + diff.
 
 import { existsSync } from 'node:fs'
-import type { GraphDiff, SinceLastDiff } from '@uigraph/core'
-import { diffGraphs, diffSinceLast } from '@uigraph/core'
-import { compareFingerprint, fingerprintSources, loadGraph } from '@uigraph/core/node'
+import type { GraphDiff, SinceLastDiff } from '@ui-graph/core'
+import { diffGraphs, diffSinceLast } from '@ui-graph/core'
+import { compareFingerprint, fingerprintSources, loadGraph } from '@ui-graph/core/node'
 import { withStore, type ToolContext } from './context'
 
 /** Whether the stored graph is current with its source: fresh / stale / unknown. */

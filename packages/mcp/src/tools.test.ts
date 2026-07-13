@@ -7,9 +7,9 @@ import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import type { GraphEdge, GraphNode, Overlay, Proposals, UiGraph, Witness } from '@uigraph/core'
-import { type Proposal } from '@uigraph/core'
-import { openStore, saveGraph } from '@uigraph/core/node'
+import type { GraphEdge, GraphNode, Overlay, Proposals, UiGraph, Witness } from '@ui-graph/core'
+import { type Proposal } from '@ui-graph/core'
+import { openStore, saveGraph } from '@ui-graph/core/node'
 import {
   dbPath,
   describeScreen,
@@ -51,7 +51,7 @@ function edge(id: string, from: string, to: string): GraphEdge {
 }
 
 function graph(nodes: GraphNode[], edges: GraphEdge[]): UiGraph {
-  return { version: 0, meta: { adapter: '@uigraph/test', adapterVersion: '0.0.0', rulesetVersion: 'test' }, nodes, edges }
+  return { version: 0, meta: { adapter: '@ui-graph/test', adapterVersion: '0.0.0', rulesetVersion: 'test' }, nodes, edges }
 }
 
 
@@ -134,7 +134,7 @@ describe('loadMergedGraph integrity (red-team)', () => {
 
   it('rejects a merged graph made invalid by the overlay (dangling ref)', async () => {
     const { loadMergedGraph } = await import('./tools')
-    const { hashValue } = await import('@uigraph/core')
+    const { hashValue } = await import('@ui-graph/core')
     const ctx = chainWorkspace()
     const base = getGraph(ctx)
     const baseEdges = base.edges.map(({ trustTier: _trustTier, ...e }) => e)

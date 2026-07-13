@@ -42,7 +42,7 @@
 
    ```bash
    pnpm install && pnpm check
-   pnpm --filter @uigraph/cli run uigraph -- map ~/work/your-app --controls
+   pnpm --filter @ui-graph/cli run uigraph -- map ~/work/your-app --controls
    ```
 
 2. **Open the dashboard** — one command, serves UI + API and opens your browser:
@@ -99,11 +99,11 @@ Extraction quality is enforced by an adversarial **gauntlet**: a data-router Rea
 
 | Package | Role |
 | --- | --- |
-| `@uigraph/core` | framework-agnostic IR + pure ops (validate, overlay/merge, diff, plan_path, codegen, coverage, trust tiers) |
-| `@uigraph/adapter-react` | react-router **v5 + v6 + data-router** extraction |
-| `@uigraph/adapter-vue` · `-angular` · `-next` | vue-router, Angular Routes, Next.js App+Pages router |
-| `@uigraph/mcp` | model-free stdio MCP server, 27 tools |
-| `@uigraph/cli` | `map` / `verify` / `login` / `dash` / `gen` / `diff` / `serve` / `workspace` / `mcp` |
+| `@ui-graph/core` | framework-agnostic IR + pure ops (validate, overlay/merge, diff, plan_path, codegen, coverage, trust tiers) |
+| `@ui-graph/adapter-react` | react-router **v5 + v6 + data-router** extraction |
+| `@ui-graph/adapter-vue` · `-angular` · `-next` | vue-router, Angular Routes, Next.js App+Pages router |
+| `@ui-graph/mcp` | model-free stdio MCP server, 27 tools |
+| `@ui-graph/cli` | `map` / `verify` / `login` / `dash` / `gen` / `diff` / `serve` / `workspace` / `mcp` |
 | `apps/dashboard` | React Flow viewer: graph, coverage, freshness, verify worklist |
 
 ## Open core

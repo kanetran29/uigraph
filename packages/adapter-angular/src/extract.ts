@@ -11,7 +11,7 @@
 import { Project, ts } from 'ts-morph'
 import type { Node } from 'ts-morph'
 import { relative } from 'node:path'
-import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@uigraph/core'
+import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
@@ -202,7 +202,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const graph = {
     version: 0 as const,
     meta: {
-      adapter: '@uigraph/adapter-angular',
+      adapter: '@ui-graph/adapter-angular',
       adapterVersion: ADAPTER_VERSION,
       rulesetVersion: opts.rulesetVersion ?? DEFAULT_RULESET,
       ...(opts.commit ? { commit: opts.commit } : {}),

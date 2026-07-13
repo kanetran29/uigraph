@@ -1,7 +1,7 @@
 {
-  "name": "@uigraph/adapter-react",
+  "name": "@ui-graph/adapter-react",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "exports": {
     ".": {
@@ -15,7 +15,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@uigraph/core": "workspace:*",
+    "@ui-graph/core": "workspace:*",
     "ts-morph": "catalog:"
   },
   "devDependencies": {

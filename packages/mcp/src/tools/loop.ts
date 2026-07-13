@@ -1,12 +1,12 @@
-// Reconciliation-loop tools for the @uigraph/mcp server: recording runtime
+// Reconciliation-loop tools for the @ui-graph/mcp server: recording runtime
 // observations (report_observation), re-deriving proposal statuses
 // (reconcile_proposals), resolving proposals/edges (withdraw / park / unpark /
 // mark_unverifiable), and the deterministic DONE signal (get_loop_status). Pure
 // over a ToolContext; the observation write path is behavior-critical.
 
 import { existsSync } from 'node:fs'
-import type { CoverageReport, Evidence, ObservationReporter, ProposalStatus, ResolutionReport } from '@uigraph/core'
-import { buildCoverage, buildResolution, hashValue, nextToVerify, validateEvidence } from '@uigraph/core'
+import type { CoverageReport, Evidence, ObservationReporter, ProposalStatus, ResolutionReport } from '@ui-graph/core'
+import { buildCoverage, buildResolution, hashValue, nextToVerify, validateEvidence } from '@ui-graph/core'
 import { loadMergedGraph, withStore, type ObservationEntry, type ToolContext } from './context'
 import { getProposalGraph } from './read'
 

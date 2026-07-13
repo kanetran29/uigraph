@@ -5,7 +5,7 @@
 
 import { Node, SyntaxKind } from 'ts-morph'
 import type { ArrayLiteralExpression, ObjectLiteralExpression, Project, SourceFile, TemplateExpression } from 'ts-morph'
-import type { SoundinessNote } from '@uigraph/core'
+import type { SoundinessNote } from '@ui-graph/core'
 import type { RouteInfo } from './types'
 import { allJsxElements, findAttr, inlineElementTag, inlineExprInfo, isJsxEl, jsxRootsOf, jsxTag, stringAttr } from './jsx'
 import { callSiteComponentFile, dynamicImportTarget, fnParams, isRouteWrapperComponent, resolveComponentFile, resolveExportedComponent, resolveLazyComponentFile, usesChildrenProp } from './resolve'

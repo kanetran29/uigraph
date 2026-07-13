@@ -1,6 +1,6 @@
 # uigraph — Adapter Contract
 
-This is the boundary every framework adapter implements so `@uigraph/core` stays
+This is the boundary every framework adapter implements so `@ui-graph/core` stays
 framework-agnostic. The core defines the IR (a guarded labeled transition system
 with modal `must|may|unknown` labels, per-edge `source` and `confidence`), the
 pure ops, the graph-algorithms layer, and *this contract*. It knows nothing about
@@ -81,7 +81,7 @@ cheaply available).
 
 ## 4. Framework constructs → IR
 
-**React** (`@uigraph/adapter-react`, via ts-morph / TS compiler API; v5 **and** v6):
+**React** (`@ui-graph/adapter-react`, via ts-morph / TS compiler API; v5 **and** v6):
 
 | Construct | IR element |
 |---|---|
@@ -92,7 +92,7 @@ cheaply available).
 | `<Redirect>` / `<Navigate>` | `must`-edge |
 | guard wrapper / conditional render | symbolic guard text → `may`-edge |
 
-**Angular** (`@uigraph/adapter-angular`, via TS compiler API):
+**Angular** (`@ui-graph/adapter-angular`, via TS compiler API):
 
 | Construct | IR element |
 |---|---|
@@ -117,7 +117,7 @@ returns a soundiness report (§2) listing the unresolved cases it
 over-approximated, and `uigraph map` prints a per-kind summary, so a partial map
 is distinguishable from a clean one.
 
-### React (`@uigraph/adapter-react`, react-router v5 + v6)
+### React (`@ui-graph/adapter-react`, react-router v5 + v6)
 
 **Supported**
 - `<Route path component|render|element>` inside `<Switch>` / `<Routes>`, including nested route trees → route nodes.
@@ -135,7 +135,7 @@ is distinguishable from a clean one.
 - **Dispatch / state-driven navigation**: a handler that `dispatch()`es a store action whose reducer/effect navigates — recorded as a `dispatch-driven-nav` note. Needs runtime verify or a future dispatch-aware adapter.
 - **Aliased / indirected router hooks** and **fully dynamic targets** computed at runtime — `dynamic-target` / `over-approximation` notes; never a single guessed `must`.
 
-### Next.js (`@uigraph/adapter-next`, App Router + Pages Router)
+### Next.js (`@ui-graph/adapter-next`, App Router + Pages Router)
 
 **Supported**
 - File-system routes: `app/**/page.*` (App Router) and `pages/**/*` (Pages Router) → route nodes.
@@ -148,7 +148,7 @@ is distinguishable from a clean one.
 - `next.config` **redirects / rewrites** (config-level, not in source).
 - The same dispatch/state-driven and fully-dynamic-target gaps as React (shared engine).
 
-### Vue (`@uigraph/adapter-vue`, vue-router)
+### Vue (`@ui-graph/adapter-vue`, vue-router)
 
 **Supported**
 - `Routes` array (`path` / `name` / `component`, incl. nesting) → route nodes; lazy `() => import('…')` components resolved.
@@ -160,7 +160,7 @@ is distinguishable from a clean one.
 - **Fully dynamic / computed targets** and non-`useRouter` navigation indirections — `dynamic-target` / `over-approximation` notes.
 - Programmatic navigation routed through a store action (Pinia/Vuex) — same dispatch-driven gap; needs runtime verify.
 
-### Angular (`@uigraph/adapter-angular`)
+### Angular (`@ui-graph/adapter-angular`)
 
 **Supported**
 - `Routes` array (`path` / `component` / `loadComponent` / nested `children`) → route nodes; `loadChildren: () => import('./x.routes')` followed into the imported module under its parent prefix.
@@ -187,7 +187,7 @@ inventing an edge.
 
 A new framework (say Vue or SolidStart) is added entirely outside the core:
 
-1. Create `@uigraph/adapter-<framework>`, depending on `@uigraph/core` for the IR
+1. Create `@ui-graph/adapter-<framework>`, depending on `@ui-graph/core` for the IR
    types and the `Adapter` interface — nothing else.
 2. Implement `detect` and `extract`, using the `AdapterContext` for file reads and
    the TS project. Map the framework's router constructs onto IR per §2's rules.
@@ -199,7 +199,7 @@ every other adapter's output.
 
 ## 7. The one hard rule
 
-**No framework import may appear in `@uigraph/core`.** No `react`,
+**No framework import may appear in `@ui-graph/core`.** No `react`,
 `react-router`, `@angular/*`, ts-morph, or framework-specific AST type may be
 imported, referenced, or re-exported from the core package. The core depends only
 on its own IR; adapters depend on the core. Any framework knowledge living in the

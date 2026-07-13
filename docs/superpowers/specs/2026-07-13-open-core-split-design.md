@@ -21,7 +21,7 @@ studio consumes OSS via git (submodule) first, npm later; private
 **Commercial `uigraph-studio` (private) — the workflow product:**
 - full interactive dashboard (scenario/feature drafting, overlay editing,
   proposals triage, verify orchestration, exports)
-- e2e suite product (`@uigraph-studio/suitegen`): batch-generate Playwright
+- e2e suite product (`@ui-graph-studio/suitegen`): batch-generate Playwright
   suites from the graph (witnessed/proven paths), per-role auth choreography
   via storageState, regeneration on re-map (self-healing selectors come from
   the graph, not guesses), CI-friendly output

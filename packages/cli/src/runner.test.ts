@@ -6,9 +6,9 @@
 // and capture-mode is unaffected (it drives interactions and observes the landing).
 
 import { describe, it, expect, vi } from 'vitest'
-import { buildSpecPlan } from '@uigraph/core'
-import { planPath } from '@uigraph/core'
-import type { GraphEdge, GraphNode, SpecPlan, UiGraph, Witness } from '@uigraph/core'
+import { buildSpecPlan } from '@ui-graph/core'
+import { planPath } from '@ui-graph/core'
+import type { GraphEdge, GraphNode, SpecPlan, UiGraph, Witness } from '@ui-graph/core'
 import { drivePlan, makePlaywrightDriver } from './runner'
 
 const staticWitness: Witness = { source: 'static', file: 'x.tsx', loc: { line: 1, col: 1 }, ruleId: 'test' }

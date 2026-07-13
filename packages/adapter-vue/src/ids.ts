@@ -1,8 +1,8 @@
 // Deterministic id schemes for nodes and edges. Pure string functions so the
 // same source always yields the same ids (content-addressable graphs).
 
-import { fnv1a, canonicalEdgeTag } from '@uigraph/core'
-import type { ControlSelector } from '@uigraph/core'
+import { fnv1a, canonicalEdgeTag } from '@ui-graph/core'
+import type { ControlSelector } from '@ui-graph/core'
 
 /**
  * Stable control node id, content-addressed from the parent screen + the control's
