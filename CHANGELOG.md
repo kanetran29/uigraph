@@ -2,6 +2,15 @@
 
 All `@ui-graph/*` packages are versioned in lockstep.
 
+## 0.1.3
+
+Fixes the CLI silently doing nothing when installed (0.1.2 published but the bin
+no-opped). The entry-point guard compared `process.argv[1]` against the module
+path by raw string — but the installed bin is a symlink (`.bin/uigraph`), and
+macOS aliases `/var` to `/private/var`, so the compare failed and the program
+never parsed. Both paths are now resolved with `realpathSync`. Verified: install
+the packed tarballs and run via the `.bin` symlink — help + commands work.
+
 ## 0.1.2
 
 Fixes a packaging bug that made 0.1.1 fail on install: the tsup build stripped

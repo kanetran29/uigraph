@@ -6,7 +6,7 @@
 // this file is only the commander wiring and is run via tsx.
 
 import { spawn } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -288,11 +288,22 @@ export async function main(argv: string[] = processArgv): Promise<void> {
   await buildProgram().parseAsync(stripDebugFlag(stripPnpmSeparator(argv)))
 }
 
-/** True when this module is the process entry point (run via tsx), not imported. */
+/**
+ * True when this module is the process entry point, not imported. Both paths are
+ * resolved with realpathSync because `process.argv[1]` is frequently a symlink —
+ * npm/pnpm install the bin as `.bin/uigraph -> …/dist/cli.js`, and macOS aliases
+ * `/var -> /private/var` — so a raw string compare against the real module path
+ * fails and the CLI silently no-ops. Resolving both to their canonical path fixes
+ * the installed-bin and temp-dir cases.
+ */
 function isEntryPoint(): boolean {
   const entry = processArgv[1]
   if (entry === undefined) return false
-  return fileURLToPath(import.meta.url) === entry
+  try {
+    return realpathSync(entry) === realpathSync(fileURLToPath(import.meta.url))
+  } catch {
+    return false
+  }
 }
 
 /**
