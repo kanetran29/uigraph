@@ -34,8 +34,15 @@ read `get_loop_status`, which reflects the fold).
 
 ## Authenticated runs
 
-Most real apps gate routes behind login. Capture a Playwright `storageState` once
-(log in, save cookies/origins to a JSON file) and pass it:
+Most real apps gate routes behind login. Capture the session once with the
+built-in manual-login flow — a headed browser opens, the USER logs in like a
+human (password, OAuth, SSO, MFA all work), Enter saves it:
+
+```
+uigraph login http://localhost:3000/login --out auth.json
+```
+
+Then pass it to every verify run:
 
 ```
 uigraph verify <dir> --app-url http://app.local:3000 --storage-state auth.json --limit 34

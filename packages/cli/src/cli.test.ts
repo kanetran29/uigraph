@@ -843,3 +843,49 @@ describe('crash-safety: input validation + actionable errors (no raw stacks)', (
     expect(() => runKitInstall({ dir: fileParent })).toThrow(/cannot create output directory/)
   })
 })
+
+describe('runLogin (manual session capture)', () => {
+  /** A scripted LoginBrowser that records the call sequence. */
+  function fakeBrowser(calls: string[], failSave = false) {
+    return {
+      newContext: async () => ({
+        newPage: async () => ({
+          goto: async (url: string) => {
+            calls.push(`goto:${url}`)
+          },
+        }),
+        storageState: async (opts: { path: string }) => {
+          calls.push(`save:${opts.path}`)
+          if (failSave) throw new Error('disk full')
+          return {}
+        },
+      }),
+      close: async () => {
+        calls.push('close')
+      },
+    }
+  }
+
+  it('opens the app, waits for the user, then saves the session and closes', async () => {
+    const { runLogin } = await import('./runner')
+    const calls: string[] = []
+    await runLogin({
+      appUrl: 'http://x/login',
+      out: 'auth.json',
+      launcher: async () => fakeBrowser(calls),
+      waitForUser: async () => {
+        calls.push('user-logged-in')
+      },
+    })
+    expect(calls).toEqual(['goto:http://x/login', 'user-logged-in', 'save:auth.json', 'close'])
+  })
+
+  it('always closes the browser, even when saving fails', async () => {
+    const { runLogin } = await import('./runner')
+    const calls: string[] = []
+    await expect(
+      runLogin({ appUrl: 'http://x', out: 'a.json', launcher: async () => fakeBrowser(calls, true), waitForUser: async () => {} }),
+    ).rejects.toThrow('disk full')
+    expect(calls[calls.length - 1]).toBe('close')
+  })
+})

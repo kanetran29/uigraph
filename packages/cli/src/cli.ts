@@ -14,7 +14,7 @@ import { Command } from 'commander'
 import { startServer } from '@uigraph/mcp'
 import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, formatWorkspaceList, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
-import { runVerify, runVerifyUntilDone } from './runner'
+import { runLogin, runVerify, runVerifyUntilDone } from './runner'
 
 /**
  * Locate the built dashboard (apps/dashboard/dist) relative to this module, for
@@ -109,6 +109,18 @@ export function buildProgram(): Command {
       }
       const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState })
       console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)`)
+    })
+
+  program
+    .command('login')
+    .description('Open a headed browser to log in manually (any auth scheme), then save the session for authenticated verify runs.')
+    .argument('<app-url>', 'URL of the running app (e.g. http://localhost:3000/login)')
+    .option('--out <file>', 'where to save the Playwright storageState JSON', 'auth.json')
+    .action(async (appUrl: string, opts: { out: string }) => {
+      await runLogin({ appUrl, out: opts.out })
+      console.log(`session saved to ${opts.out}`)
+      console.log(`authenticated verify: uigraph verify <dir> --app-url ${appUrl} --storage-state ${opts.out}`)
+      process.exit(0)
     })
 
   program
