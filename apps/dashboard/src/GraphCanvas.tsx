@@ -24,7 +24,6 @@ import {
   useInternalNode,
   useNodesState,
   useReactFlow,
-  type Connection,
   type Edge,
   type EdgeMouseHandler,
   type EdgeProps,
@@ -66,7 +65,6 @@ export interface GraphCanvasProps {
   selection: Selection
   pathEdgeIds: Set<string>
   onSelect: (selection: Selection) => void
-  onConnect: (from: string, to: string) => void
   searchMatchIds?: Set<string>
   diffHighlight?: DiffHighlight | null
   colorMode?: 'light' | 'dark' | 'system'
@@ -713,7 +711,7 @@ function swatch(color: string, dash?: string): CSSProperties {
  * documents the modality (dash) and source (colour) encodings.
  */
 export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
-  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, onConnect, searchMatchIds = EMPTY_IDS, diffHighlight = null, colorMode = 'system' } = props
+  const { graph: rawGraph, proposals, selection, pathEdgeIds, onSelect, searchMatchIds = EMPTY_IDS, diffHighlight = null, colorMode = 'system' } = props
   const searchActive = searchMatchIds.size > 0
   const diffCount = diffHighlight
     ? diffHighlight.addedNodeIds.size +
@@ -981,12 +979,6 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     },
     [graph, onSelect],
   )
-  const handleConnect = useCallback(
-    (conn: Connection) => {
-      if (conn.source && conn.target) onConnect(conn.source, conn.target)
-    },
-    [onConnect],
-  )
   const handleEdgeEnter: EdgeMouseHandler = useCallback((_evt, edge) => setHoveredEdgeId(edge.id), [])
   const handleEdgeLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), [])
 
@@ -1060,7 +1052,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       onEdgeClick={handleEdgeClick}
       onEdgeMouseEnter={handleEdgeEnter}
       onEdgeMouseLeave={handleEdgeLeave}
-      onConnect={handleConnect}
+      nodesConnectable={false}
       onPaneClick={() => onSelect(null)}
       colorMode={colorMode}
       fitView
