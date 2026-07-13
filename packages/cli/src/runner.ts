@@ -9,8 +9,8 @@
 // browser; the default driver lazy-loads `playwright-core` (optional dep — install
 // it to actually drive) and uses the system/cached Chromium.
 
-import type { Evidence, SpecPlan } from '@uigraph/core'
-import { buildSpecPlan, fnv1a, nextToVerify, nodeForUrl, planPath } from '@uigraph/core'
+import type { Evidence, SpecPlan, UiGraph, VerifyTarget } from '@uigraph/core'
+import { buildSpecPlan, fnv1a, locatorFor, nextToVerify, nodeForUrl, planPath } from '@uigraph/core'
 import { openStore } from '@uigraph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@uigraph/mcp'
 
@@ -23,8 +23,22 @@ export interface VerifyResult {
   undrivable?: boolean
 }
 
-/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. */
-export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }) => Promise<VerifyResult>
+/**
+ * An exploratory probe: when the direct plan cannot drive a transition, load the
+ * source screen and try to reveal + trigger it — click the target control if it
+ * has one (clicking sibling controls first to open modals/disclosures that hide
+ * it), or click each sibling watching for the expected landing (state-driven
+ * navs whose trigger control the extractor could not link).
+ */
+export interface ProbeSpec {
+  startUrl: string
+  expectedRoute: string
+  targetLocator?: string
+  siblingLocators: string[]
+}
+
+/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan. */
+export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec }) => Promise<VerifyResult>
 
 /** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). */
 export interface RunVerifyOptions {
@@ -149,6 +163,20 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       result = await driver(plan, opts.appUrl)
     } catch {
       result = { confirmed: false }
+    }
+    // Direct drive failed or was undrivable: try the exploratory probe before judging.
+    if (!result.confirmed) {
+      const probe = buildProbeSpec(graph, t)
+      if (probe !== null) {
+        let probed: VerifyResult
+        try {
+          probed = await driver(plan, opts.appUrl, { probe })
+        } catch {
+          probed = { confirmed: false }
+        }
+        if (probed.confirmed) result = probed
+        else if (result.undrivable !== true && probed.undrivable === true) result = probed
+      }
     }
     // an undrivable plan was never attempted: refuting it would be a false negative
     if (result.undrivable === true) continue
@@ -280,6 +308,30 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
 }
 
 /**
+ * Build the exploratory probe for a target, or null when the probe has nothing
+ * to work with: the source screen (the control's parent, or the from node
+ * itself) must have a concrete loadable route and the target a route to watch
+ * for. Sibling locators are the screen's other extracted controls (bounded) —
+ * the probe clicks them to reveal modals/disclosures or to fire state-driven
+ * navigations the extractor saw but could not link to a control.
+ */
+function buildProbeSpec(graph: UiGraph, t: VerifyTarget): ProbeSpec | null {
+  const from = graph.nodes.find((n) => n.id === t.from)
+  if (from === undefined) return null
+  const screen = from.kind === 'control' && from.parent !== undefined ? graph.nodes.find((n) => n.id === from.parent) : from
+  if (screen === undefined || screen.route === null || screen.route.includes(':') || screen.route.includes('*')) return null
+  const to = graph.nodes.find((n) => n.id === t.to)
+  if (to === undefined || to.route === null || to.route.includes('*')) return null
+  const targetLocator = from.kind === 'control' && from.control?.selector ? locatorFor(from.control.selector) : undefined
+  const siblingLocators = graph.nodes
+    .filter((n) => n.kind === 'control' && n.parent === screen.id && n.id !== from.id && n.control?.selector !== undefined)
+    .map((n) => locatorFor(n.control!.selector!))
+    .slice(0, 8)
+  if (targetLocator === undefined && siblingLocators.length === 0) return null
+  return { startUrl: screen.route, expectedRoute: to.route, ...(targetLocator !== undefined ? { targetLocator } : {}), siblingLocators }
+}
+
+/**
  * The ids the next verify pass will actually attempt: the same ranked worklist
  * slice runVerify pulls (same ranking function, same limit), so the until-done
  * loop's retry accounting can never claim an attempt for a target the limit
@@ -376,7 +428,55 @@ export async function runLogin(opts: RunLoginOptions): Promise<void> {
  * (clicks/fills) as the trigger, then wait for the URL to change (beating
  * page-load/timer redirects) and settle, and report where it landed.
  */
-async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }): Promise<VerifyResult> {
+/**
+ * Run an exploratory probe on an open page: load the source screen, then (a) try
+ * the target control directly, (b) click sibling controls to REVEAL it (modal /
+ * disclosure) and retry, or (c) with no target control, click each sibling and
+ * watch for the expected landing. Confirmation requires the URL to actually
+ * reach the expected route — the evidence is the observed url-change.
+ */
+async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise<VerifyResult> {
+  const start = appUrl + spec.startUrl
+  const expected = appUrl + spec.expectedRoute
+
+  const landedAfter = async (fn: () => Promise<void>): Promise<string | null> => {
+    await page.goto(start)
+    await page.waitForLoadState('networkidle').catch(() => {})
+    try {
+      await fn()
+    } catch {
+      // the interaction failed — but a redirect-on-load may already have carried
+      // us to the expected route (guard bounce), which is itself the transition
+      const bounced = page.url()
+      return samePath(bounced, expected) ? bounced : null
+    }
+    await page.waitForURL((u) => samePath(u.toString(), expected), { timeout: 2500 }).catch(() => {})
+    const landed = page.url()
+    return samePath(landed, expected) ? landed : null
+  }
+
+  if (spec.targetLocator !== undefined) {
+    const direct = await landedAfter(async () => runLocator(page, spec.targetLocator as string, 'click'))
+    if (direct !== null) return { confirmed: true, landedUrl: direct, evidence: { kind: 'url-change', startUrl: start, landedUrl: direct } }
+    for (const sib of spec.siblingLocators) {
+      const revealed = await landedAfter(async () => {
+        await runLocator(page, sib, 'click').catch(() => {})
+        await runLocator(page, spec.targetLocator as string, 'click')
+      })
+      if (revealed !== null) return { confirmed: true, landedUrl: revealed, evidence: { kind: 'url-change', startUrl: start, landedUrl: revealed } }
+    }
+    return { confirmed: false }
+  }
+
+  for (const sib of spec.siblingLocators) {
+    const landed = await landedAfter(async () => runLocator(page, sib, 'click'))
+    if (landed !== null) return { confirmed: true, landedUrl: landed, evidence: { kind: 'url-change', startUrl: start, landedUrl: landed } }
+  }
+  return { confirmed: false }
+}
+
+async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec }): Promise<VerifyResult> {
+  if (opts?.probe !== undefined) return probePlan(page, opts.probe, appUrl)
   await page.goto(plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl)
 
   if (opts?.capture === true) {
@@ -441,7 +541,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
   return { confirmed: true, evidence }
 }
 
-/** True when two URLs share origin+pathname (query string and hash ignored). Tolerates bare-path inputs. */
+/** True when two URLs share origin+pathname (query string and hash ignored); `:param` segments in the expected path match any concrete segment. Tolerates bare-path inputs. */
 function samePath(actual: string, expected: string): boolean {
   const parse = (u: string): string => {
     try {
@@ -451,7 +551,14 @@ function samePath(actual: string, expected: string): boolean {
       return u.split('?')[0]?.split('#')[0]?.replace(/\/$/, '') ?? u
     }
   }
-  return parse(actual) === parse(expected)
+  const a = parse(actual)
+  const e = parse(expected)
+  if (!e.includes(':')) return a === e
+  const stripOrigin = (u: string): string => u.replace(/^https?:\/\/[^/]+/, '')
+  const as = stripOrigin(a).split('/').filter((x) => x.length > 0)
+  const es = stripOrigin(e).split('/').filter((x) => x.length > 0)
+  if (as.length !== es.length) return false
+  return es.every((seg, i) => seg.startsWith(':') || seg === as[i])
 }
 
 /** A driver paired with the teardown for the browser it owns. dispose is idempotent and a no-op if no browser was ever launched. */

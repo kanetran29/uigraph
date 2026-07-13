@@ -192,7 +192,14 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     const assertions: SpecAssertion[] = []
     // Safety: a literal URL assert is sound ONLY for control-driven or direct-nav legs;
     // a bare URL match would falsely witness a guarded/interaction-triggered screen→screen edge.
-    if (toNode.route && isConcreteRoute(toNode.route) && action.kind !== 'parked') assertions.push({ kind: 'url', value: toNode.route })
+    // A parameterized route still asserts for INTERACTION legs (click/press/fill): the driver
+    // matches `:param` segments as wildcards, so clicking a real product link can witness
+    // /products/:productId without knowing the id up front. goto legs need a concrete URL.
+    if (toNode.route && action.kind !== 'parked') {
+      const interaction = action.kind === 'click' || action.kind === 'press' || action.kind === 'fill'
+      if (isConcreteRoute(toNode.route)) assertions.push({ kind: 'url', value: toNode.route })
+      else if (interaction && !toNode.route.includes('*')) assertions.push({ kind: 'url', value: toNode.route })
+    }
     if (e.effect === 'open:modal') assertions.push({ kind: 'dialog', value: toNode.label })
     if (e.effect && e.effect.startsWith('api:')) assertions.push({ kind: 'request', value: e.effect.slice(4) })
 
