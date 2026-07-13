@@ -49,5 +49,29 @@
     "bin": {
       "uigraph": "./dist/cli.js"
     }
+  },
+  "description": "UI-graph CLI: map, verify, login, dash, gen, diff, serve, mcp \u2014 extract and verify your app's UI transition graph.",
+  "keywords": [
+    "ui-graph",
+    "ui-transition-graph",
+    "static-analysis",
+    "mcp",
+    "ai-agents",
+    "playwright",
+    "e2e-testing",
+    "test-generation",
+    "typescript",
+    "cli"
+  ],
+  "author": "Kane Tran",
+  "license": "MIT",
+  "homepage": "https://github.com/kanetran29/uigraph#readme",
+  "bugs": {
+    "url": "https://github.com/kanetran29/uigraph/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kanetran29/uigraph.git",
+    "directory": "packages/cli"
   }
 }

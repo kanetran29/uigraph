@@ -29,5 +29,18 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: publish @ui-graph/* (topological order, workspace:* rewritten)
-        run: pnpm -r publish --access public --no-git-checks --registry https://registry.npmjs.org/
+      - name: publish @ui-graph/* (topological, idempotent — skips already-published versions)
+        run: |
+          set -e
+          for dir in packages/core packages/mcp packages/adapter-react packages/adapter-vue packages/adapter-angular packages/adapter-next packages/cli; do
+            name=$(node -p "require('./$dir/package.json').name")
+            ver=$(node -p "require('./$dir/package.json').version")
+            priv=$(node -p "require('./$dir/package.json').private === true")
+            if [ "$priv" = "true" ]; then continue; fi
+            if npm view "$name@$ver" version >/dev/null 2>&1; then
+              echo "= $name@$ver already published, skipping"
+              continue
+            fi
+            echo "+ publishing $name@$ver"
+            ( cd "$dir" && pnpm publish --access public --no-git-checks --registry https://registry.npmjs.org/ )
+          done
