@@ -520,6 +520,7 @@ interface EdgeContext {
   diffActive: boolean
   addedEdgeIds: Set<string>
   changedEdgeIds: Set<string>
+  groupedView: boolean
 }
 
 /**
@@ -551,7 +552,7 @@ function toProposedFlowEdges(edges: readonly ProposedEdge[]): Edge[] {
 }
 
 function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
-  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds, diffActive, addedEdgeIds, changedEdgeIds } = ctx
+  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds, diffActive, addedEdgeIds, changedEdgeIds, groupedView } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
   const hasNodeSelection = selection?.kind === 'node'
   const controlParent = new Map<string, string | undefined>()
@@ -598,10 +599,12 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     const diffDim = diffActive && !emphasized && !diffLit
     const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded) || searchDim || diffDim
     const color = diffLit && !emphasized ? (diffAdded ? DIFF_ADDED_COLOR : DIFF_CHANGED_COLOR) : strokeColor(e, onPath || selected)
-    // An aggregated `may` super-edge (grouped view) is the low-signal global-nav noise:
-    // fade it into the background and drop its ×N label unless it's emphasized, so the
-    // group boxes + the must/witnessed backbone read clearly. Everything stays present.
-    const weakSuper = e.id.startsWith('sg_') && e.modality === 'may' && e.source === 'static' && !emphasized
+    // In a grouped (large) graph the `may` edges are the low-signal global-nav noise —
+    // whether aggregated super-edges (collapsed) or the real member edges (expanded):
+    // fade them into the background and drop their labels unless emphasized, so the nodes
+    // + the must/witnessed backbone read clearly. Everything stays present; hover/select
+    // re-lights them. Small graphs (not grouped) keep every may-edge at full strength.
+    const weakSuper = (groupedView || e.id.startsWith('sg_')) && e.modality === 'may' && e.source === 'static' && !emphasized
     const baseWidth = e.source === 'manual' ? 2 : 1.4
     const width = onPath ? 3 : selected ? 2.8 : emphasized || (diffLit && !dimmed) ? 2.4 : weakSuper ? 1 : baseWidth
     const opacity = dimmed ? 0.12 : emphasized || diffLit ? 1 : weakSuper ? 0.16 : 0.85
@@ -800,6 +803,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const effectiveGroups = expandAllGroups ? allGroupKeys : expandedGroups
   const view = useMemo<RouteView>(() => levelView(baseGraph, effectiveGroups), [baseGraph, effectiveGroups])
   const graph = view.graph
+  // levelView returns the SAME object when the graph is small enough to skip grouping;
+  // a different object means we're in grouped (large-graph) mode, where may-edges fade.
+  const groupedView = graph !== baseGraph
 
   // Diff-highlight is live only when there is a delta AND the toggle is on. Added nodes (green
   // ring) plus the endpoints of added/changed edges stay lit; everything else dims so the
@@ -863,6 +869,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [exportError, setExportError] = useState<string | null>(null)
+  // While exporting we must render EVERY node (not just the viewport) so the full-graph
+  // PNG isn't clipped — virtualization is turned off for the duration of the capture.
+  const [exporting, setExporting] = useState(false)
   const rf = useReactFlow()
 
   // Selecting a screen that owns controls expands them; zoom to that screen + its
@@ -879,6 +888,15 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     }, 80)
     return () => clearTimeout(t)
   }, [selection, graph, rf])
+
+  // Expanding/collapsing a route group changes the graph's extent dramatically (an
+  // expanded group's members fan out across the rings); re-fit the viewport so the new
+  // layout is framed instead of leaving the user zoomed into empty space. Runs only on a
+  // deliberate group toggle, after the node re-seed above has laid the new set out.
+  useEffect(() => {
+    const t = setTimeout(() => void rf.fitView({ padding: 0.15, duration: 400 }), 80)
+    return () => clearTimeout(t)
+  }, [expandedGroups, expandAllGroups, rf])
 
   // A node selection focuses on the selected node's flow; an edge selection focuses
   // on the selected edge's flow. Both are gated by the "highlight flow on select"
@@ -1011,8 +1029,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       diffActive,
       addedEdgeIds: diffHighlight?.addedEdgeIds ?? EMPTY_IDS,
       changedEdgeIds: diffHighlight?.changedEdgeIds ?? EMPTY_IDS,
+      groupedView,
     }),
-    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds, diffActive, diffHighlight],
+    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds, diffActive, diffHighlight, groupedView],
   )
   // Real edges, plus the red dashed ghost edges for removed transitions when the diff view is
   // on (their endpoints — a survivor or a removed-node ghost — are all present in the node state).
@@ -1065,6 +1084,10 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     setExportError(null)
     const viewport = document.querySelector<HTMLElement>('.react-flow__viewport')
     if (viewport === null || nodes.length === 0) return
+    // Render all nodes (disable viewport virtualization), then wait two frames for React
+    // to commit + the browser to paint before snapshotting.
+    setExporting(true)
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
     const bounds = getNodesBounds(nodes)
     const { x, y, zoom } = getViewportForBounds(bounds, IMAGE_W, IMAGE_H, 0.2, 2, 0.1)
     const flow = document.querySelector('.react-flow')
@@ -1088,6 +1111,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       a.click()
     } catch (err) {
       setExportError(err instanceof Error ? err.message : 'PNG export failed')
+    } finally {
+      setExporting(false)
     }
   }, [nodes, rawGraph])
 
@@ -1132,6 +1157,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       fitView
       minZoom={0.05}
       maxZoom={8}
+      onlyRenderVisibleElements={!exporting}
     >
       <Background />
       <Controls />
