@@ -174,8 +174,11 @@ select:focus-visible,
   letter-spacing: -0.02em;
 }
 .logo-word b {
-  color: var(--accent);
+  color: var(--text);
   font-weight: 700;
+}
+.logo-ui {
+  color: #D97757;
 }
 
 .status {
