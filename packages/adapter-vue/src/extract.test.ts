@@ -90,6 +90,85 @@ describe('routes (F-vue-adapter)', () => {
   })
 })
 
+describe('runtime-registered route arrays (F-vue-adapter, addRoutes)', () => {
+  const CONSTANT_ROUTER = (extra: string) => `import { createRouter, createWebHistory } from 'vue-router'
+export const constantRoutes = [{ path: '/', component: () => import('./Home.vue') }]
+${extra}
+export const router = createRouter({ history: createWebHistory(), routes: constantRoutes })`
+
+  it('collects an exported route array not passed to the constructor, with nested children paths, and flags it', () => {
+    const { graph, soundiness } = build({
+      '/src/router.ts': CONSTANT_ROUTER(
+        `export const asyncRoutes = [{ path: '/admin', component: () => import('./Admin.vue'), children: [{ path: 'users', component: () => import('./Users.vue') }] }]`,
+      ),
+      '/src/Home.vue': `<template><p>h</p></template>`,
+      '/src/Admin.vue': `<template><p>a</p></template>`,
+      '/src/Users.vue': `<template><p>u</p></template>`,
+    })
+    expect(new Set(graph.nodes.map((n) => n.id))).toEqual(new Set(['n_root', 'n_admin', 'n_admin_users']))
+    const notes = soundiness.filter((s) => s.kind === 'runtime-registered-routes')
+    expect(notes).toHaveLength(1)
+    expect(notes[0]?.detail).toContain('asyncRoutes')
+    expect(notes[0]?.detail).toContain('2 route record(s)')
+    expect(notes[0]?.file).toBe('src/router.ts')
+  })
+
+  it('dedupes runtime-registered routes against constructor routes by full path', () => {
+    const { graph } = build({
+      '/src/router.ts': CONSTANT_ROUTER(`export const asyncRoutes = [{ path: '/', component: () => import('./Other.vue') }]`),
+      '/src/Home.vue': `<template><p>h</p></template>`,
+      '/src/Other.vue': `<template><p>o</p></template>`,
+    })
+    const roots = graph.nodes.filter((n) => n.id === 'n_root')
+    expect(roots).toHaveLength(1)
+    expect(roots[0]?.componentPath).toBe('src/Home.vue')
+  })
+
+  it('follows an identifier element to a route module file via its default export', () => {
+    const { graph } = build({
+      '/src/router/index.js': `import Router from 'vue-router'
+import chartsRouter from './modules/charts'
+export const constantRoutes = [{ path: '/', component: () => import('../Home.vue') }]
+export const asyncRoutes = [chartsRouter]
+const router = new Router({ routes: constantRoutes })
+export default router`,
+      '/src/router/modules/charts.js': `const chartsRouter = { path: '/charts', component: () => import('../../Charts.vue'), children: [{ path: 'line', component: () => import('../../Line.vue') }] }
+export default chartsRouter`,
+      '/src/Home.vue': `<template><p>h</p></template>`,
+      '/src/Charts.vue': `<template><p>c</p></template>`,
+      '/src/Line.vue': `<template><p>l</p></template>`,
+    })
+    expect(new Set(graph.nodes.map((n) => n.id))).toEqual(new Set(['n_root', 'n_charts', 'n_charts_line']))
+    expect(graph.nodes.find((n) => n.id === 'n_charts_line')?.componentPath).toBe('src/Line.vue')
+  })
+
+  it('flags an addRoutes() argument it cannot statically resolve — never silent', () => {
+    const { graph, soundiness } = build({
+      '/src/router.ts': CONSTANT_ROUTER(''),
+      '/src/permission.ts': `import { router } from './router'
+export async function setup(store: { dispatch(a: string): Promise<unknown[]> }) {
+  const accessRoutes = await store.dispatch('permission/generateRoutes')
+  router.addRoutes(accessRoutes)
+}`,
+      '/src/Home.vue': `<template><p>h</p></template>`,
+    })
+    expect(graph.nodes.map((n) => n.id)).toEqual(['n_root'])
+    const notes = soundiness.filter((s) => s.kind === 'runtime-registered-routes')
+    expect(notes).toHaveLength(1)
+    expect(notes[0]?.detail).toContain('accessRoutes')
+    expect(notes[0]?.file).toBe('src/permission.ts')
+  })
+
+  it('does not flag the addRoutes() of an already-collected exported array', () => {
+    const { soundiness } = build({
+      '/src/router.ts': CONSTANT_ROUTER(`export const asyncRoutes = [{ path: '/a', component: () => import('./Home.vue') }]`),
+      '/src/permission.ts': `import { router, asyncRoutes } from './router'\nrouter.addRoutes(asyncRoutes)`,
+      '/src/Home.vue': `<template><p>h</p></template>`,
+    })
+    expect(soundiness.filter((s) => s.kind === 'runtime-registered-routes')).toHaveLength(1)
+  })
+})
+
 describe('navigation edges (F-vue-adapter)', () => {
   const two = (aTemplate: string, aScript = '') => ({
     '/src/router.ts': ROUTER(`[{ path: '/a', component: A }, { path: '/b', component: B }]`, `import A from './A.vue'\nimport B from './B.vue'`),

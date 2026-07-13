@@ -1,6 +1,8 @@
 // Vue Router static extraction. Splits each `.vue` SFC into template + script,
 // turns a `createRouter({ routes: [...] })` array (path/component/name/children/
-// beforeEnter, incl. nested paths) into screen nodes, and turns each component's
+// beforeEnter, incl. nested paths) — plus exported route arrays registered at
+// runtime via addRoutes()/addRoute(), flagged with soundiness notes — into
+// screen nodes, and turns each component's
 // <router-link to|:to> and `router.push/replace` calls into edges. With
 // opts.controls, the template's interactive elements become control nodes whose
 // @event handlers are traced to router.push sinks. Non-literal targets are
@@ -80,7 +82,7 @@ export function buildProject(projectDir: string): VueProject {
 
 /** Extract a graph from a built VueProject (testable in memory). */
 export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
-  const routes = collectRoutes(vp)
+  const { routes, notes: routeNotes } = collectRoutes(vp)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const nameToPath = new Map(routes.filter((r) => r.name).map((r) => [r.name as string, r.fullPath]))
@@ -95,7 +97,7 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
   }))
 
   const edges: GraphEdge[] = []
-  const soundiness: SoundinessNote[] = []
+  const soundiness: SoundinessNote[] = routeNotes.map((n) => (n.file ? { ...n, file: relative(projectDir, n.file) } : n))
   const byBehavior = new Map<string, number>()
 
   function pushEdge(from: string, to: string, t: RawTarget, modality: 'must' | 'may', confidence: number, guard: string | null, file: string): void {
