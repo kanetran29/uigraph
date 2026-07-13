@@ -33,7 +33,7 @@ export interface EdgeCoverage {
   source: string
   verified: boolean
   accounted: boolean
-  status: 'runtime' | 'stale-witness' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'open'
+  status: 'runtime' | 'stale-witness' | 'twin-witnessed' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'open'
   reason?: string
 }
 
@@ -66,18 +66,26 @@ export interface CoverageReport {
   frontierCount: number
 }
 
-/** Graph-derived context for edge accounting: node kinds + sources whose dynamic dispatch is witnessed. */
+/** Graph-derived context for edge accounting: node kinds, resolved dynamic sources, and screen->target pairs witnessed via a control child (twins). */
 interface EdgeContext {
   nodeKind: Map<string, string>
   resolvedFroms: Set<string>
+  twinWitnessed: Set<string>
 }
 
-/** Build the accounting context: a `from` is "resolved" once it has a concrete (non-sink) FRESH runtime out-edge — a stale witness credits nothing. */
+/** Build the accounting context: a `from` is "resolved" once it has a concrete (non-sink) FRESH runtime out-edge — a stale witness credits nothing. `twinWitnessed` holds `screen=>to` pairs proven through a control child of that screen: the same user transition, witnessed at its drivable representation. */
 function edgeContext(graph: UiGraph): EdgeContext {
   const nodeKind = new Map(graph.nodes.map((n) => [n.id, n.kind]))
+  const parentOf = new Map(graph.nodes.map((n) => [n.id, n.parent]))
   const resolvedFroms = new Set<string>()
-  for (const e of graph.edges) if (e.source === 'runtime' && e.witnessStale !== true && nodeKind.get(e.to) !== 'unknown') resolvedFroms.add(e.from)
-  return { nodeKind, resolvedFroms }
+  const twinWitnessed = new Set<string>()
+  for (const e of graph.edges) {
+    if (e.source !== 'runtime' || e.witnessStale === true) continue
+    if (nodeKind.get(e.to) !== 'unknown') resolvedFroms.add(e.from)
+    const parent = parentOf.get(e.from)
+    if (nodeKind.get(e.from) === 'control' && parent !== undefined) twinWitnessed.add(`${parent}=>${e.to}`)
+  }
+  return { nodeKind, resolvedFroms, twinWitnessed }
 }
 
 /**
@@ -96,6 +104,9 @@ function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: 
   }
   const parked = parkedById.get(edge.id)
   if (parked) return { status: 'parked', accounted: true, reason: parked.reason }
+  if (ctx.nodeKind.get(edge.from) !== 'control' && ctx.twinWitnessed.has(`${edge.from}=>${edge.to}`)) {
+    return { status: 'twin-witnessed', accounted: true, reason: 'the same transition is runtime-witnessed via a control on this screen' }
+  }
   if (ctx.nodeKind.get(edge.to) === 'unknown') {
     return ctx.resolvedFroms.has(edge.from) ? { status: 'dynamic-resolved', accounted: true } : { status: 'dynamic-open', accounted: false }
   }
@@ -223,6 +234,7 @@ export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit
   for (const e of graph.edges) {
     if (e.source === 'runtime' && e.witnessStale !== true) continue
     if (parkedIds.has(e.id)) continue
+    if (ctx.nodeKind.get(e.from) !== 'control' && ctx.twinWitnessed.has(`${e.from}=>${e.to}`)) continue
     let priority = 0
     let reason = ''
     if (e.source === 'runtime') {

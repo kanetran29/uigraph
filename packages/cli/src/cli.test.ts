@@ -379,6 +379,35 @@ describe('runVerify (Tier-3 runner)', () => {
     expect(ok.refutedProven).toBe(0)
   })
 
+  it('falls back to the exploratory probe when the direct drive fails, and records its evidence', async () => {
+    const { runVerify } = await import('./runner')
+    const screen = { ...node('a'), route: '/a' }
+    const target = { ...node('b'), route: '/b' }
+    const ctrl = { ...node('c_a_1'), kind: 'control' as const, parent: 'a', route: null, control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name' as const, value: 'button|Go' } } }
+    const g = graph([screen, target, ctrl], [{ ...edge('e_cb', 'c_a_1', 'b'), source: 'static' as const, modality: 'may' as const, guard: 'x', event: 'click' }])
+    const dir = seedWorkspace(tempDir('uigraph-cli-probe-'), g)
+    const probes: unknown[] = []
+    const summary = await runVerify({
+      dir,
+      appUrl: 'http://x',
+      driver: async (_plan, _appUrl, opts) => {
+        if (opts?.probe) {
+          probes.push(opts.probe)
+          return { confirmed: true, evidence: { kind: 'url-change', startUrl: 'http://x/a', landedUrl: 'http://x/b' } as const }
+        }
+        return { confirmed: false }
+      },
+    })
+    expect(summary.confirmed).toBe(1)
+    expect(probes).toHaveLength(1)
+    expect(probes[0]).toMatchObject({ startUrl: '/a', expectedRoute: '/b', targetLocator: expect.stringContaining('Go') })
+    const store = openStore(dbPathFor(dir))
+    const obs = store.getObservations()
+    store.close()
+    expect(obs[0]?.outcome).toBe('confirmed')
+    expect(obs[0]?.evidence?.kind).toBe('url-change')
+  })
+
   it('records NOTHING for an undrivable plan — never a false refutation', async () => {
     const { runVerify } = await import('./runner')
     const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), source: 'static', modality: 'may', guard: 'x' }])
