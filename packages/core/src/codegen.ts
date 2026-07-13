@@ -5,7 +5,7 @@
 // the CLI/MCP supply the planned path. Input values + guards are coarse here and
 // refined by the input/guard feature.
 
-import type { ControlMeta, ControlSelector, GraphEdge, UiGraph } from './ir'
+import type { GraphNode, ControlMeta, ControlSelector, GraphEdge, UiGraph } from './ir'
 import type { PlanStep } from './algorithms'
 
 /**
@@ -141,10 +141,23 @@ export function isDirectNavEdge(edge: GraphEdge): boolean {
  * guarded/interaction edge is never falsely confirmed by URL match); open:modal ->
  * dialog visible; api:* -> a request note.
  */
+/** True when a route is a concrete, directly-loadable URL: no `:param` placeholder, no `*` wildcard. */
+function isConcreteRoute(route: string): boolean {
+  return !route.includes(':') && !route.includes('*')
+}
+
+/** The screen route a node lives on: its own route, or its parent screen's route for a control/modal child. */
+function screenRouteOf(graph: UiGraph, n: GraphNode): string | null {
+  if (n.route !== null) return n.route
+  if (n.parent !== undefined) return graph.nodes.find((x) => x.id === n.parent)?.route ?? null
+  return null
+}
+
 export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl?: string; title?: string } = {}): SpecPlan {
   const baseUrl = opts.baseUrl ?? ''
   const start = steps[0]?.from
-  const startUrl = start?.route && !start.route.includes(':') ? start.route : '/'
+  const anchorRoute = start !== undefined ? screenRouteOf(graph, start) : null
+  const startUrl = anchorRoute !== null && isConcreteRoute(anchorRoute) ? anchorRoute : '/'
 
   const legs: SpecLeg[] = steps.map((s) => {
     const fromNode = s.from
@@ -166,7 +179,7 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
       }
     } else if (e.effect === 'contains') {
       action = { kind: 'available' }
-    } else if (directNav && toNode.route !== null && !toNode.route.includes(':')) {
+    } else if (directNav && toNode.route !== null && isConcreteRoute(toNode.route)) {
       action = { kind: 'goto', url: toNode.route }
     } else if (directNav) {
       action = { kind: 'parked' }
@@ -179,12 +192,27 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     const assertions: SpecAssertion[] = []
     // Safety: a literal URL assert is sound ONLY for control-driven or direct-nav legs;
     // a bare URL match would falsely witness a guarded/interaction-triggered screen→screen edge.
-    if (toNode.route && !toNode.route.includes(':') && action.kind !== 'parked') assertions.push({ kind: 'url', value: toNode.route })
+    if (toNode.route && isConcreteRoute(toNode.route) && action.kind !== 'parked') assertions.push({ kind: 'url', value: toNode.route })
     if (e.effect === 'open:modal') assertions.push({ kind: 'dialog', value: toNode.label })
     if (e.effect && e.effect.startsWith('api:')) assertions.push({ kind: 'request', value: e.effect.slice(4) })
 
     return { from: fromNode.id, to: toNode.id, event: e.event, description, action, assertions, ...(parkedReason ? { parkedReason } : {}) }
   })
+
+  // A start screen whose route is parameterized/wildcard cannot be loaded by a bare
+  // goto — the whole plan is undrivable without a concrete URL; a parked setup leg
+  // tells the driver so it reports undrivable instead of a false refutation.
+  if (anchorRoute !== null && !isConcreteRoute(anchorRoute) && legs.length > 0) {
+    legs.unshift({
+      from: steps[0]?.from.id ?? '',
+      to: steps[0]?.from.id ?? '',
+      event: 'setup',
+      description: `load start screen ${anchorRoute}`,
+      action: { kind: 'parked' },
+      assertions: [],
+      parkedReason: `start screen route ${anchorRoute} is parameterized — the drive needs a concrete URL/param value`,
+    })
+  }
 
   // Guard-aware: distinct symbolic guards along the path are the preconditions the
   // test must satisfy first (e.g. isAuthenticated -> log in). Surfaced, never

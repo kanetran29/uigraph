@@ -186,7 +186,7 @@ export function nodeForUrl(graph: UiGraph, observedUrl: string, appUrl: string):
   return candidates.length === 1 ? (candidates[0]?.id ?? null) : null
 }
 
-/** A thing a Tier-3 runner should confirm next: an uncertain edge or a proposed transition. */
+/** A thing a Tier-3 runner should confirm next: an uncertain edge or a proposed transition. `proven` marks a must-static edge included by the verify-all sweep — already statically proven, driven to upgrade it to runtime-witnessed (a refutation here means the extraction lied or code and runtime diverge). */
 export interface VerifyTarget {
   kind: 'edge' | 'proposal'
   id: string
@@ -197,6 +197,12 @@ export interface VerifyTarget {
   reason: string
   priority: number
   proposalIds?: string[]
+  proven?: boolean
+}
+
+/** Options for nextToVerify. `includeProven` adds must-static edges (the verify-all sweep). */
+export interface NextToVerifyOptions {
+  includeProven?: boolean
 }
 
 /**
@@ -208,7 +214,7 @@ export interface VerifyTarget {
  * Proven `must` static edges are skipped (already witnessed). The open set
  * shrinks monotonically as edges are confirmed or parked. Returns the top `limit`.
  */
-export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit = 20, parkedIds: Set<string> = new Set()): VerifyTarget[] {
+export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit = 20, parkedIds: Set<string> = new Set(), opts: NextToVerifyOptions = {}): VerifyTarget[] {
   const labelOf = new Map(graph.nodes.map((n) => [n.id, n.label]))
   const ctx = edgeContext(graph)
   const runtimePairs = new Set(graph.edges.filter((e) => e.source === 'runtime' && e.witnessStale !== true).map((e) => `${e.from}->${e.to}`))
@@ -232,6 +238,11 @@ export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit
     } else if (e.modality === 'may') {
       priority = 2
       reason = 'conditional (may) edge — confirm it actually fires'
+    } else if (opts.includeProven === true && e.modality === 'must') {
+      priority = 0.5
+      reason = 'static proof — drive it to upgrade to runtime-witnessed (verify-all); a refutation means extraction and runtime disagree'
+      out.push({ kind: 'edge', id: e.id, from: e.from, to: e.to, toLabel: labelOf.get(e.to) ?? e.to, event: e.event, reason, priority, proven: true })
+      continue
     } else {
       continue
     }

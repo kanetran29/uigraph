@@ -365,6 +365,20 @@ describe('runVerify (Tier-3 runner)', () => {
     expect(obs[0]?.screenshot).toBe('shots/e.png')
   })
 
+  it('verify --all drives must-static proofs and flags a refuted proven edge', async () => {
+    const { runVerify } = await import('./runner')
+    const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), source: 'static' as const, modality: 'must' as const }])
+    const dir = seedWorkspace(tempDir('uigraph-cli-all-'), g)
+    const none = await runVerify({ dir, appUrl: 'http://x', driver: async () => ({ confirmed: false }) })
+    expect(none.attempted).toBe(0)
+    const sweep = await runVerify({ dir, appUrl: 'http://x', includeProven: true, driver: async () => ({ confirmed: false }) })
+    expect(sweep.attempted).toBe(1)
+    expect(sweep.refutedProven).toBe(1)
+    const ok = await runVerify({ dir, appUrl: 'http://x', includeProven: true, driver: async () => ({ confirmed: true, evidence: { kind: 'url-assert', url: 'http://x/b' } as const }) })
+    expect(ok.confirmed).toBe(1)
+    expect(ok.refutedProven).toBe(0)
+  })
+
   it('records NOTHING for an undrivable plan — never a false refutation', async () => {
     const { runVerify } = await import('./runner')
     const g = graph([node('a'), node('b')], [{ ...edge('e_ab', 'a', 'b'), source: 'static', modality: 'may', guard: 'x' }])

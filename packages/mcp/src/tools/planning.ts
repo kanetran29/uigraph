@@ -10,6 +10,7 @@ import { blindSpotCaveat, getProposalGraph } from './read'
 
 /** Arguments for next_to_verify: an optional cap on the returned worklist size. */
 export interface NextToVerifyArgs {
+  includeProven?: boolean
   limit?: number
 }
 
@@ -20,7 +21,7 @@ export interface NextToVerifyArgs {
  */
 export function nextToVerifyTool(ctx: ToolContext, args: NextToVerifyArgs = {}): VerifyTarget[] {
   const parkedIds = new Set(withStore(ctx, (store) => store.getParkedEdges()).map((p) => p.edgeId))
-  return nextToVerify(loadMergedGraph(ctx), getProposalGraph(ctx), args.limit, parkedIds)
+  return nextToVerify(loadMergedGraph(ctx), getProposalGraph(ctx), args.limit, parkedIds, { includeProven: args.includeProven === true })
 }
 
 /** Arguments for gen_spec: the from/to node ids and an optional base URL. */

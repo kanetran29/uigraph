@@ -121,7 +121,10 @@ export const TOOLS: Tool[] = [
     description: 'Ranked worklist of transitions to confirm at runtime next: dynamic-target (unknown) edges, then may edges, then proposed transitions, minus anything already runtime-witnessed. Drives a Tier-3 runner / report_observation.',
     inputSchema: {
       type: 'object',
-      properties: { limit: { type: 'number', description: 'max targets to return (default 20)' } },
+      properties: {
+        limit: { type: 'number', description: 'max targets to return (default 20)' },
+        includeProven: { type: 'boolean', description: 'verify-all sweep: also rank must-static proofs so runtime drives can upgrade them to witnessed' },
+      },
     },
   },
   {

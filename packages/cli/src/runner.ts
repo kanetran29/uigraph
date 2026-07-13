@@ -26,20 +26,22 @@ export interface VerifyResult {
 /** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. */
 export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean }) => Promise<VerifyResult>
 
-/** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, and an optional saved auth session. */
+/** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). */
 export interface RunVerifyOptions {
   dir: string
   appUrl: string
   limit?: number
   driver?: VerifyDriver
   storageState?: string
+  includeProven?: boolean
 }
 
-/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution. */
+/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution; refutedProven counts refutations of must-static edges — each one means the extraction and the running app DISAGREE and must be investigated. */
 export interface VerifySummary {
   attempted: number
   confirmed: number
   refuted: number
+  refutedProven: number
   resolvedDynamic: number
   discoveredNodes: number
   parkedDynamic: number
@@ -58,7 +60,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   const parkedIds = new Set(store.getParkedEdges().map((p) => p.edgeId))
   store.close()
 
-  const targets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds)
+  const targets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds, { includeProven: opts.includeProven === true })
   // When we build the default driver we own its browser and must dispose it after
   // the run; an injected driver brings its own lifecycle, so there is nothing to close.
   const owned = opts.driver === undefined ? makePlaywrightDriver(opts.storageState) : null
@@ -66,6 +68,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   const authed = opts.storageState !== undefined
   let confirmed = 0
   let refuted = 0
+  let refutedProven = 0
   let resolvedDynamic = 0
   let discoveredNodes = 0
   let parkedDynamic = 0
@@ -160,13 +163,16 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       ...(result.screenshot ? { screenshot: result.screenshot } : {}),
     })
     if (result.confirmed) confirmed++
-    else refuted++
+    else {
+      refuted++
+      if (t.proven === true) refutedProven++
+    }
   }
   } finally {
     if (owned !== null) await owned.dispose()
   }
 
-  return { attempted: targets.length, confirmed, refuted, resolvedDynamic, discoveredNodes, parkedDynamic }
+  return { attempted: targets.length, confirmed, refuted, refutedProven, resolvedDynamic, discoveredNodes, parkedDynamic }
 }
 
 /** Options for the autonomous until-done loop. */
@@ -379,6 +385,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     const startUrl = page.url()
     for (const leg of plan.legs) {
       const a = leg.action
+      if (a.kind === 'parked') return { confirmed: false, undrivable: true }
       // H1: never goto the synthetic sink; only run real interaction legs as the trigger.
       if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
       else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
@@ -402,10 +409,11 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
   // Soundness: a parked leg is an interaction-triggered/guarded screen→screen nav
   // with no drivable control — codegen refuses to emit goto+URL-assert for it, so
   // the driver must NOT witness it; it stays asserted/llm-verified until truly driven.
-  let parked = false
   for (const leg of plan.legs) {
     const a = leg.action
-    if (a.kind === 'parked') parked = true
+    // a parked leg means the rest of the plan cannot be legitimately driven —
+    // bail before clicking controls on whatever page we happen to be on
+    if (a.kind === 'parked') return { confirmed: false, undrivable: true }
     else if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
     else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
     else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
@@ -415,15 +423,35 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       if (as.kind === 'dialog') expectDialog = true
     }
   }
-  if (parked) return { confirmed: false, undrivable: true }
   // a drive that asserted NOTHING cannot witness anything — never mint an evidence-free confirmation
   if (lastUrlAssertion === undefined && !expectDialog) return { confirmed: false, undrivable: true }
   let confirmed = true
-  if (lastUrlAssertion !== undefined) confirmed = page.url() === lastUrlAssertion
+  if (lastUrlAssertion !== undefined) {
+    // SPA navigations and post-await handlers land asynchronously: wait for the
+    // expected URL (bounded) before judging, and compare PATHS — a landing that
+    // differs only by query/hash (e.g. /products?sort=price) still satisfies an
+    // asserted route of /products. Exact-string compare here caused false refutes.
+    const expected = lastUrlAssertion
+    await page.waitForURL((u) => samePath(u.toString(), expected), { timeout: 4000 }).catch(() => {})
+    confirmed = samePath(page.url(), expected)
+  }
   if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
   if (!confirmed) return { confirmed: false }
   const evidence: Evidence = lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: 'dialog visible after drive' }
   return { confirmed: true, evidence }
+}
+
+/** True when two URLs share origin+pathname (query string and hash ignored). Tolerates bare-path inputs. */
+function samePath(actual: string, expected: string): boolean {
+  const parse = (u: string): string => {
+    try {
+      const p = new URL(u)
+      return p.origin + p.pathname.replace(/\/$/, '')
+    } catch {
+      return u.split('?')[0]?.split('#')[0]?.replace(/\/$/, '') ?? u
+    }
+  }
+  return parse(actual) === parse(expected)
 }
 
 /** A driver paired with the teardown for the browser it owns. dispose is idempotent and a no-op if no browser was ever launched. */
