@@ -159,26 +159,11 @@ select:focus-visible,
 }
 
 .logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.logo-mark {
-  width: 24px;
-  height: 24px;
+  height: 26px;
+  width: auto;
+  display: block;
   flex-shrink: 0;
-}
-.logo-word {
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: -0.02em;
-}
-.logo-word b {
   color: var(--text);
-  font-weight: 700;
-}
-.logo-ui {
-  color: #D97757;
 }
 
 .status {
