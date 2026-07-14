@@ -33,7 +33,7 @@ export interface EdgeCoverage {
   source: string
   verified: boolean
   accounted: boolean
-  status: 'runtime' | 'stale-witness' | 'twin-witnessed' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'open'
+  status: 'runtime' | 'stale-witness' | 'twin-witnessed' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'pattern-covered' | 'open'
   reason?: string
 }
 
@@ -103,7 +103,14 @@ function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: 
     return { status: 'runtime', accounted: true }
   }
   const parked = parkedById.get(edge.id)
-  if (parked) return { status: 'parked', accounted: true, reason: parked.reason }
+  if (parked) {
+    // A pattern-dedup park is backed by a runtime witness on a sibling representative of the
+    // same nav call ("accounted because we drove a representative"); an 'autonomous: …' park
+    // is a witness-less give-up ("accounted because we could not drive it"). Same accounting,
+    // different trust — split the status so a reader can tell them apart.
+    const status: EdgeCoverage['status'] = parked.reason.startsWith('over-approximation fan-out of the nav call at ') ? 'pattern-covered' : 'parked'
+    return { status, accounted: true, reason: parked.reason }
+  }
   if (ctx.nodeKind.get(edge.from) !== 'control' && ctx.twinWitnessed.has(`${edge.from}=>${edge.to}`)) {
     return { status: 'twin-witnessed', accounted: true, reason: 'the same transition is runtime-witnessed via a control on this screen' }
   }
@@ -141,7 +148,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
   }
   const runtimeVerified = rows.filter((r) => r.verified).length
   const verifiedCount = rows.filter((r) => r.status === 'runtime' || r.status === 'static').length
-  const parkedCount = rows.filter((r) => r.status === 'parked').length
+  const parkedCount = rows.filter((r) => r.status === 'parked' || r.status === 'pattern-covered').length
   const staleWitnessCount = rows.filter((r) => r.status === 'stale-witness').length
   const accounted = rows.filter((r) => r.accounted).length
   const total = rows.length
@@ -161,7 +168,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
     bySource,
     unverified: rows.filter((r) => !r.verified),
     open: rows.filter((r) => !r.accounted),
-    parked: rows.filter((r) => r.status === 'parked'),
+    parked: rows.filter((r) => r.status === 'parked' || r.status === 'pattern-covered'),
     tierDistribution: tierDistribution(graph),
     frontierCount: buildFrontier(graph).unknownCount,
   }
