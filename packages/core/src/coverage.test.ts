@@ -116,6 +116,19 @@ describe('buildCoverage — two metrics', () => {
     expect(cov.runtimeVerified).toBe(1)
   })
 
+  it('splits a pattern-dedup park into pattern-covered (sibling witnessed), distinct from a give-up park, with identical math', () => {
+    const patternReason = 'over-approximation fan-out of the nav call at src/Nav.tsx:10:4 — representative a->b runtime-witnessed; this target not individually driven'
+    const cov = buildCoverage(g(), [{ edgeId: 'e2', reason: patternReason, by: 'runner' }])
+    expect(cov.unverified.find((r) => r.id === 'e2')?.status).toBe('pattern-covered')
+    // still lives in the parked bucket (verify worklist stays excluded), just discriminable by status
+    expect(cov.parked.map((e) => e.id)).toEqual(['e2'])
+    expect(cov.parkedCount).toBe(1)
+    // accounted because a sibling representative was witnessed — but NOT verified; math identical to a plain park
+    expect(cov.accountedRatio).toBe(1)
+    expect(cov.open).toHaveLength(0)
+    expect(cov.runtimeVerified).toBe(1)
+  })
+
   it('accountedRatio is 1 only when the open set is empty', () => {
     expect(buildCoverage(graph([node('x'), node('y')], [edge('m', 'x', 'y', { source: 'static', modality: 'may' })])).accountedRatio).toBe(0)
     expect(buildCoverage(graph([], [])).accountedRatio).toBe(1)
