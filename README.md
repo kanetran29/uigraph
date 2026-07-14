@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/logo.svg" width="440" alt="UI-graph"></p>
+<p align="center"><img src="docs/assets/logo.svg" width="300" alt="UI-graph"></p>
 
 <h1 align="center">UI-graph</h1>
 
