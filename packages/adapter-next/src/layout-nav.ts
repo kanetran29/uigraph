@@ -15,7 +15,7 @@ import { dirname, join, relative, resolve } from 'node:path'
 import { Node, SyntaxKind } from 'ts-morph'
 import type { Project, SourceFile } from 'ts-morph'
 import type { GraphEdge, Modality } from '@ui-graph/core'
-import { edgeId, matchLiteralAll, matchPrefix, type RouteSeed } from '@ui-graph/adapter-react'
+import { edgeId, matchLiteralAll, matchTemplate, parseTemplate, type RouteSeed, type TemplateShape } from '@ui-graph/adapter-react'
 
 const LAYOUT_RE = /(^|\/)layout\.(tsx|ts|jsx|js)$/
 const RESOLVE_EXTS = ['.tsx', '.ts', '.jsx', '.js', '/index.tsx', '/index.ts', '/index.jsx', '/index.js']
@@ -23,7 +23,7 @@ const FRAMEWORK_TAG_RE = /(Provider|Consumer|Context|Suspense|ErrorBoundary|Frag
 const MAX_DESCENT = 4
 
 /** A literal/template href classification limited to what yields a sound internal edge. */
-type HrefTarget = { kind: 'literal'; value: string } | { kind: 'template'; staticPrefix: string } | null
+type HrefTarget = { kind: 'literal'; value: string } | { kind: 'template'; staticPrefix: string; shape: TemplateShape } | null
 
 /** A tsconfig `compilerOptions.paths` alias: a prefix to strip and the absolute base(s) to try. */
 interface AliasEntry {
@@ -122,7 +122,10 @@ function hrefTarget(el: Node): HrefTarget {
   const expr = init.getExpression()
   if (!expr) return null
   if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
-  if (Node.isTemplateExpression(expr)) return { kind: 'template', staticPrefix: expr.getHead().getLiteralText() }
+  if (Node.isTemplateExpression(expr)) {
+    const head = expr.getHead().getLiteralText()
+    return { kind: 'template', staticPrefix: head, shape: parseTemplate(head, expr.getTemplateSpans().map((s) => s.getLiteral().getLiteralText())) }
+  }
   return null
 }
 
@@ -228,7 +231,7 @@ export function addLayoutAndWrapperEdges(project: Project, projectDir: string, s
       else for (const c of candidates) emit(from, c.nodeId, file, el)
     } else {
       if (!isInternalHref(t.staticPrefix)) return
-      for (const c of matchPrefix(t.staticPrefix, routeLikes)) emit(from, c.nodeId, file, el)
+      for (const c of matchTemplate(t.shape, routeLikes)) emit(from, c.nodeId, file, el)
     }
   }
 

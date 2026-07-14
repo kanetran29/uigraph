@@ -4,18 +4,26 @@
 // a source file (or an inline-route subtree) into the raw targets the engine resolves.
 
 import { Node, SyntaxKind } from 'ts-morph'
-import type { JsxAttribute, SourceFile } from 'ts-morph'
+import type { JsxAttribute, SourceFile, TemplateExpression } from 'ts-morph'
 import type { RawTarget, TargetInfo } from './types'
 import { allJsxElements, findAttr, isJsxEl, jsxTag } from './jsx'
 import { extraConditionGuard, getGuard } from './guards'
 import { resolveComponentFile } from './resolve'
+import { parseTemplate } from './matcher'
+
+/** Parse a ts-morph template literal into its full head+spans segment structure. */
+function templateShape(expr: TemplateExpression): TargetInfo & { kind: 'template' } {
+  const head = expr.getHead().getLiteralText()
+  const spanLiterals = expr.getTemplateSpans().map((s) => s.getLiteral().getLiteralText())
+  return { kind: 'template', staticPrefix: head, shape: parseTemplate(head, spanLiterals) }
+}
 
 /** A literal/template/dynamic classification of a navigation target expression. */
 export function classifyTarget(expr: Node | undefined, sf?: SourceFile): TargetInfo {
   if (!expr) return { kind: 'dynamic' }
   if (Node.isStringLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isNoSubstitutionTemplateLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
-  if (Node.isTemplateExpression(expr)) return { kind: 'template', staticPrefix: expr.getHead().getLiteralText() }
+  if (Node.isTemplateExpression(expr)) return templateShape(expr)
   // react-router To object form: navigate({ pathname: '/x', search: '…' }) — a
   // literal pathname is as static as a string literal; the other members (search,
   // hash, state) never change the destination route.
