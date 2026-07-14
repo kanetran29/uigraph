@@ -24,6 +24,7 @@ import {
   useInternalNode,
   useNodesState,
   useReactFlow,
+  useStore,
   type Edge,
   type EdgeMouseHandler,
   type EdgeProps,
@@ -191,6 +192,72 @@ function edgeSign(id: string): number {
   let h = 0
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0
   return h % 2 === 0 ? 1 : -1
+}
+
+/**
+ * Whether the segment (ax,ay)->(bx,by) intersects the axis-aligned rect [x0,x1]x[y0,y1]
+ * (Liang-Barsky clip). Keeps a long edge whose two nodes are both off-screen but whose
+ * chord still crosses the viewport.
+ */
+function segHitsRect(ax: number, ay: number, bx: number, by: number, x0: number, y0: number, x1: number, y1: number): boolean {
+  const dx = bx - ax
+  const dy = by - ay
+  const p = [-dx, dx, -dy, dy]
+  const q = [ax - x0, x1 - ax, ay - y0, y1 - ay]
+  let t0 = 0
+  let t1 = 1
+  for (let i = 0; i < 4; i++) {
+    const pi = p[i] as number
+    const qi = q[i] as number
+    if (pi === 0) {
+      if (qi < 0) return false
+    } else {
+      const r = qi / pi
+      if (pi < 0) {
+        if (r > t1) return false
+        if (r > t0) t0 = r
+      } else {
+        if (r < t0) return false
+        if (r < t1) t1 = r
+      }
+    }
+  }
+  return true
+}
+
+/**
+ * Drop edges whose BOTH endpoint nodes lie outside the (margin-inflated) viewport AND
+ * whose straight chord does not cross it. React Flow's onlyRenderVisibleElements keeps an
+ * edge whenever its bounding box intersects the viewport, so a floating edge spanning the
+ * screen stays mounted even when both its nodes are far off-screen — on a large graph that
+ * leaves thousands of off-screen edges in the DOM. Pure render filter: every edge stays in
+ * state, only the mounted subset shrinks. An edge whose endpoint isn't measured yet is
+ * kept, so nothing is wrongly hidden before measurement.
+ */
+function cullOffscreenEdges(flowEdges: Edge[], nodeLookup: Map<string, InternalNode>, transform: [number, number, number], vpW: number, vpH: number): Edge[] {
+  const [tx, ty, zoom] = transform
+  // Max floating-edge bow is min(dist*0.16, 120); 130 ≥ that, so a bowed edge grazing the
+  // viewport is never wrongly culled.
+  const MARGIN = 130
+  const rx0 = -tx / zoom - MARGIN
+  const ry0 = -ty / zoom - MARGIN
+  const rx1 = (vpW - tx) / zoom + MARGIN
+  const ry1 = (vpH - ty) / zoom + MARGIN
+  const out: Edge[] = []
+  for (const e of flowEdges) {
+    const s = nodeLookup.get(e.source)
+    const t = nodeLookup.get(e.target)
+    if (!s || !t) {
+      out.push(e)
+      continue
+    }
+    const a = nodeCenter(s)
+    const b = nodeCenter(t)
+    const sIn = a.x + a.w / 2 >= rx0 && a.x - a.w / 2 <= rx1 && a.y + a.h / 2 >= ry0 && a.y - a.h / 2 <= ry1
+    const tIn = b.x + b.w / 2 >= rx0 && b.x - b.w / 2 <= rx1 && b.y + b.h / 2 >= ry0 && b.y - b.h / 2 <= ry1
+    if (sIn || tIn || segHitsRect(a.x, a.y, b.x, b.y, rx0, ry0, rx1, ry1)) out.push(e)
+  }
+  return out
 }
 
 /**
@@ -1061,6 +1128,20 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     setEdges([...withProposed, ...ghostEdgesFor(diffHighlight, present)])
   }, [graph, edgeCtx, setEdges, showProposed, proposedEdges, diffActive, diffHighlight])
 
+  // Viewport-cull the mounted edges: a long floating edge whose bbox crosses the viewport
+  // but whose BOTH nodes are off-screen is dropped from the DOM (React Flow's own
+  // onlyRenderVisibleElements keeps it). Recomputes on pan/zoom (transform) + node moves
+  // (nodeLookup). Disabled during PNG export (needs every edge) and before the pane is
+  // measured (width/height 0).
+  const transform = useStore((s) => s.transform)
+  const vpW = useStore((s) => s.width)
+  const vpH = useStore((s) => s.height)
+  const nodeLookup = useStore((s) => s.nodeLookup)
+  const renderedEdges = useMemo(
+    () => (exporting || vpW === 0 || vpH === 0 ? edges : cullOffscreenEdges(edges, nodeLookup as Map<string, InternalNode>, transform, vpW, vpH)),
+    [edges, nodeLookup, transform, vpW, vpH, exporting],
+  )
+
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_evt, node) => {
       // A group super-node toggles its expansion instead of selecting — the drill gesture.
@@ -1159,7 +1240,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   return (
     <ReactFlow
       nodes={nodes}
-      edges={edges}
+      edges={renderedEdges}
       edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
