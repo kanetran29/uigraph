@@ -14,7 +14,7 @@ import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, Modality, Sou
 import type { Proposal } from '@ui-graph/core'
 import type { ControlInfo, RawTarget, RouteInfo } from './types'
 import { edgeId, controlNodeId } from './ids'
-import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
+import { matchLiteralAll, matchPrefix, matchTemplate, type RouteLike, type TemplateShape } from './matcher'
 import { analyzeStateNav } from './state-nav'
 import { allJsxElements, jsxTag, stringAttr, within } from './jsx'
 import { collectInlineRouteTargets, collectTargets, navIdentifiers } from './targets'
@@ -24,6 +24,13 @@ import { detectDynamicWidget, gatedOverlayVar, modalGateVar } from './effects'
 import { collectDataRoutes, collectRoutes, ruleIdFor } from './routes'
 
 export { buildProject } from './resolve'
+
+/** Candidate routes for a template target: the precise structural segment match when the
+ *  full template shape is captured, else the legacy prefix over-approximation. This is the
+ *  precision fix — `/ws/${id}/reviews` resolves to `/ws/:id/reviews`, not all of `/ws/*`. */
+function matchTemplateTarget(ti: { staticPrefix: string; shape?: TemplateShape }, routes: RouteLike[]): RouteLike[] {
+  return ti.shape !== undefined ? matchTemplate(ti.shape, routes) : matchPrefix(ti.staticPrefix, routes)
+}
 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'rr-v5v6-2026.06'
@@ -190,7 +197,7 @@ export function extractGraphFromRoutes(
         soundiness.push({ kind: 'unresolved-target', file, loc, detail: `literal target "${t.ti.value}" matches no declared route` })
       }
     } else if (t.ti.kind === 'template') {
-      const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
+      const cands = matchTemplateTarget(t.ti, routeLikes)
       soundiness.push({ kind: 'over-approximation', file, loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
       for (const cand of cands) pushEdge(fromId, cand.nodeId, t, 'may', 0.5, file, loc)
     } else if (t.ti.kind === 'enum') {
@@ -310,7 +317,7 @@ export function extractGraphFromRoutes(
                   pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard: guard ?? 'ambiguous', ruleId }, 'may', 0.5, file, loc)
               }
             } else if (nav.ti.kind === 'template') {
-              for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes))
+              for (const cand of matchTemplateTarget(nav.ti, routeLikes))
                 pushEdge(cId, cand.nodeId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, 'may', Math.min(confidence, 0.5), file, loc)
             } else {
               pushDynamicEdge(cId, { ti: nav.ti, event: nav.event, effect: 'navigate', node: nav.node, guard, ruleId }, file, loc)
@@ -474,7 +481,7 @@ export function extractGraphFromRoutes(
             if (exact) targets.push(exact)
             else targets.push(...candidates)
           } else if (t.ti.kind === 'template') {
-            targets.push(...matchPrefix(t.ti.staticPrefix, routeLikes))
+            targets.push(...matchTemplateTarget(t.ti, routeLikes))
           } else if (t.ti.kind === 'enum') {
             for (const v of t.ti.values) {
               const { exact } = matchLiteralAll(v, routeLikes)
@@ -517,7 +524,7 @@ export function extractGraphFromRoutes(
           if (exact) hits.push(exact)
         }
       } else if (t.ti.kind === 'template') {
-        hits.push(...matchPrefix(t.ti.staticPrefix, routeLikes))
+        hits.push(...matchTemplateTarget(t.ti, routeLikes))
       }
       for (const hit of hits) {
         const parent = parentRouteOf(hit.fullPath, routeLikes)

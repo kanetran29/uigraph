@@ -5,11 +5,14 @@
 
 import type { Node, SourceFile } from 'ts-morph'
 import type { ControlInput, ControlSelector } from '@ui-graph/core'
+import type { TemplateShape } from './matcher'
 
-/** A literal/template/enum/dynamic classification of a navigation target expression. */
+/** A literal/template/enum/dynamic classification of a navigation target expression.
+ *  `shape` carries a template's full segment structure (for the precise structural match);
+ *  `staticPrefix` is retained for soundiness reporting + the prefix fallback. */
 export type TargetInfo =
   | { kind: 'literal'; value: string }
-  | { kind: 'template'; staticPrefix: string }
+  | { kind: 'template'; staticPrefix: string; shape?: TemplateShape }
   | { kind: 'enum'; values: string[] }
   | { kind: 'dynamic'; expr?: string }
 

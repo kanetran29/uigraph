@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { matchLiteralAll, matchPrefix, type RouteLike } from './matcher'
+import { matchLiteralAll, matchPrefix, matchTemplate, parseTemplate, type RouteLike } from './matcher'
 
 const routes: RouteLike[] = [
   { fullPath: '/', nodeId: 'n_root' },
@@ -49,5 +49,47 @@ describe('matchPrefix', () => {
 
   it('returns nothing when no route extends the prefix', () => {
     expect(matchPrefix('/orders/', routes)).toEqual([])
+  })
+})
+
+describe('parseTemplate + matchTemplate (structural over-approximation)', () => {
+  const routes: RouteLike[] = [
+    { fullPath: '/admin/:tenantSlug', nodeId: 'n_admin_t' },
+    { fullPath: '/admin/api-keys', nodeId: 'n_admin_keys' },
+    { fullPath: '/admin/notifications', nodeId: 'n_admin_notif' },
+    { fullPath: '/admin/:tenantSlug/analytics', nodeId: 'n_admin_an' },
+    { fullPath: '/ws/:workspaceId/reviews', nodeId: 'n_ws_reviews' },
+    { fullPath: '/ws/:workspaceId/settings', nodeId: 'n_ws_settings' },
+    { fullPath: '/ws/:workspaceId', nodeId: 'n_ws' },
+    { fullPath: '/tenant/:t/view/*', nodeId: 'n_view' },
+  ]
+
+  it('parseTemplate splits head + spans into literal/dynamic segments', () => {
+    // `/ws/${id}/reviews` -> head "/ws/", one span with literal "/reviews"
+    expect(parseTemplate('/ws/', ['/reviews'])).toEqual({ segs: [{ kind: 'lit', value: 'ws' }, { kind: 'dyn' }, { kind: 'lit', value: 'reviews' }], endsOpen: false })
+    // `/admin/${slug}` -> head "/admin/", one span with empty trailing literal
+    expect(parseTemplate('/admin/', [''])).toEqual({ segs: [{ kind: 'lit', value: 'admin' }, { kind: 'dyn' }], endsOpen: true })
+  })
+
+  it('`/ws/${id}/reviews` resolves to the ONE /ws/:id/reviews route, not the whole /ws subtree', () => {
+    const hits = matchTemplate(parseTemplate('/ws/', ['/reviews']), routes).map((r) => r.nodeId)
+    expect(hits).toEqual(['n_ws_reviews'])
+  })
+
+  it('`/admin/${slug}` matches only the 2-segment /admin routes, not the whole subtree', () => {
+    const hits = matchTemplate(parseTemplate('/admin/', ['']), routes).map((r) => r.nodeId).sort()
+    // /admin/:tenantSlug, /admin/api-keys, /admin/notifications — NOT /admin/:tenantSlug/analytics
+    expect(hits).toEqual(['n_admin_keys', 'n_admin_notif', 'n_admin_t'])
+  })
+
+  it('a trailing open interpolation also matches a catch-all route', () => {
+    const hits = matchTemplate(parseTemplate('/tenant/', ['/view/']), routes).map((r) => r.nodeId)
+    expect(hits).toContain('n_view')
+  })
+
+  it('is strictly tighter than matchPrefix for the same template', () => {
+    const prefixHits = matchPrefix('/admin/', routes).length
+    const tmplHits = matchTemplate(parseTemplate('/admin/', ['']), routes).length
+    expect(tmplHits).toBeLessThan(prefixHits)
   })
 })
