@@ -9,8 +9,6 @@
   --radius-sm: 6px;
 
   --bg: #f1f5f9;
-  --logo-bg: #191919;
-  --logo-fg: #faf9f5;
   --panel: #fbfcfe;
   --panel-subtle: #f1f5f9;
   --border: #d8dee9;
@@ -84,8 +82,6 @@
 }
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --logo-bg: #faf9f5;
-  --logo-fg: #191919;
   --bg: #0d1117;
   --panel: #161b22;
   --panel-subtle: #1c2230;
