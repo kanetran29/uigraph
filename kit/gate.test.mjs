@@ -62,4 +62,6 @@ test('globToRegExp: ** crosses slashes, * does not', () => {
   assert.equal(globToRegExp('examples/**').test('examples/a/b.ts'), true)
   assert.equal(globToRegExp('examples/*.ts').test('examples/a/b.ts'), false)
   assert.equal(globToRegExp('examples/*.ts').test('examples/a.ts'), true)
+  assert.equal(globToRegExp('file?.ts').test('file?.ts'), true)
+  assert.equal(globToRegExp('abc?.ts').test('ab.ts'), false)
 })

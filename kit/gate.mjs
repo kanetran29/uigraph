@@ -4,7 +4,7 @@
 
 /** Convert a minimal glob (only ** and *) to an anchored RegExp. */
 export function globToRegExp(glob) {
-  const escaped = glob.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+  const escaped = glob.replace(/[.+^${}()|[\]\\?]/g, '\\$&')
   const body = escaped.replace(/\*\*/g, '\x00').replace(/\*/g, '[^/]*').replace(/\x00/g, '.*')
   return new RegExp(`^${body}$`)
 }
