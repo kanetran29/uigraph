@@ -12,7 +12,9 @@ function build(files: Record<string, string>, opts: ExtractOptions = {}) {
 const ROUTER = (routes: string, imports = '') => `import { createRouter, createWebHistory } from 'vue-router'\n${imports}\nexport const router = createRouter({ history: createWebHistory(), routes: ${routes} })`
 
 describe('extractGraph — sample-vue-app golden (F-vue-adapter)', () => {
-  const dir = fileURLToPath(new URL('../../../examples/sample-vue-app', import.meta.url))
+  // Snapshotted from examples/sample-vue-app (src/** + package.json) so this golden
+  // stays pinned to a known graph shape — examples/sample-vue-app is free to evolve.
+  const dir = fileURLToPath(new URL('../test-fixtures/sample-vue-app', import.meta.url))
   const { graph } = extractGraph(buildProject(dir), dir)
 
   it('satisfies the core invariants', () => {
