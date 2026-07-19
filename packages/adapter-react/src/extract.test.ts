@@ -11,7 +11,9 @@ function inMemory(files: Record<string, string>): Project {
 }
 
 describe('extractGraph — sample-react-app golden (F2.7)', () => {
-  const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+  // Snapshotted from examples/sample-react-app (package.json + src/**) so this golden
+  // stays pinned to a known graph shape — examples/sample-react-app is free to evolve.
+  const dir = fileURLToPath(new URL('../test-fixtures/sample-react-app', import.meta.url))
   const { graph, soundiness } = extractGraph(buildProject(dir), dir)
 
   it('produces a graph that satisfies the core invariants', () => {
@@ -262,7 +264,7 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
   })
 
   it('extracts nested controls when opts.controls is set', () => {
-    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const dir = fileURLToPath(new URL('../test-fixtures/sample-react-app', import.meta.url))
     const { graph, soundiness } = extractGraph(buildProject(dir), dir, { controls: true })
 
     expect(validateGraph(graph)).toEqual([])
@@ -345,7 +347,7 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
   })
 
   it('keeps the route graph identical without opts.controls', () => {
-    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const dir = fileURLToPath(new URL('../test-fixtures/sample-react-app', import.meta.url))
     const { graph } = extractGraph(buildProject(dir), dir)
     expect(graph.nodes.every((n) => n.kind === 'screen')).toBe(true)
     expect(graph.nodes).toHaveLength(9)
@@ -659,14 +661,14 @@ describe('extractGraph — control selectors + stable identity (F1)', () => {
   })
 
   it('every extracted control carries a non-empty selector', () => {
-    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const dir = fileURLToPath(new URL('../test-fixtures/sample-react-app', import.meta.url))
     const controls = extractGraph(buildProject(dir), dir, { controls: true }).graph.nodes.filter((n) => n.kind === 'control')
     expect(controls.length).toBeGreaterThan(0)
     expect(controls.every((c) => (c.control?.selector?.value ?? '').length > 0)).toBe(true)
   })
 
   it('extracts input constraints (type/required) from field controls', () => {
-    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const dir = fileURLToPath(new URL('../test-fixtures/sample-react-app', import.meta.url))
     const controls = extractGraph(buildProject(dir), dir, { controls: true }).graph.nodes.filter((n) => n.kind === 'control')
     const email = controls.find((c) => c.control?.input?.type === 'email')
     expect(email?.control?.input?.required).toBe(true)
@@ -830,7 +832,7 @@ describe('extractGraph — modal-control descent (F-modal-controls)', () => {
   })
 
   it('sample-app golden is byte-identical (no-controls: 9 nodes / 15 edges)', () => {
-    const dir = fileURLToPath(new URL('../../../examples/sample-react-app', import.meta.url))
+    const dir = fileURLToPath(new URL('../test-fixtures/sample-react-app', import.meta.url))
     const { graph } = extractGraph(buildProject(dir), dir)
     expect(graph.nodes).toHaveLength(9)
     expect(graph.edges).toHaveLength(15)

@@ -29,8 +29,9 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number }
   page: Parameters<typeof drivePlan>[0]
   clicks: number
   fills: number
+  evaluates: number
 } {
-  const rec = { clicks: 0, fills: 0, current: opts.startUrl }
+  const rec = { clicks: 0, fills: 0, evaluates: 0, current: opts.startUrl }
   const ctrl = {
     click: async () => {
       rec.clicks++
@@ -41,6 +42,10 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number }
       if (opts.landUrl !== undefined) rec.current = opts.landUrl
     },
     count: async () => opts.dialogs ?? 0,
+    evaluate: async () => {
+      rec.evaluates++
+      if (opts.landUrl !== undefined) rec.current = opts.landUrl
+    },
   }
   const page = {
     goto: async (url: string) => {
@@ -63,6 +68,9 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number }
     },
     get fills() {
       return rec.fills
+    },
+    get evaluates() {
+      return rec.evaluates
     },
   }
 }
@@ -117,6 +125,27 @@ describe('drivePlan: goto-fallback soundness (assert mode)', () => {
     const res = await drivePlan(f.page, plan, 'http://app', { capture: true })
     expect(f.clicks).toBeGreaterThan(0)
     expect(res.landedUrl).toBe('http://app/landed')
+    expect(res.confirmed).toBe(true)
+  })
+
+  it('drives a form-level "submit" event leg via requestSubmit, not a bounding-box click', async () => {
+    // The extractor models a form's onSubmit as a control on the <form> element
+    // itself (selector "form"); a blind click on that locator can land on dead
+    // space beside the form's fields, so a `submit` event must dispatch via
+    // requestSubmit() instead — this is the regression this test guards.
+    const formControl: GraphNode = {
+      id: 'cc_form', route: null, componentPath: null, label: 'form', kind: 'control', parent: 'n_form',
+      control: { element: 'form', controlType: 'form', selector: { strategy: 'structural', value: 'form' } },
+    }
+    const gg = graph(
+      [node('n_form', { route: '/form' }), node('n_done', { route: '/done' }), formControl],
+      [edge('e', 'cc_form', 'n_done', { event: 'submit', modality: 'may' })],
+    )
+    const plan = buildSpecPlan(gg, planPath(gg, 'n_form', 'n_done')!, { baseUrl: 'http://app' })
+    const f = fakePage({ startUrl: 'http://app/form', landUrl: 'http://app/done' })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(f.evaluates).toBeGreaterThan(0)
+    expect(f.clicks).toBe(0)
     expect(res.confirmed).toBe(true)
   })
 })

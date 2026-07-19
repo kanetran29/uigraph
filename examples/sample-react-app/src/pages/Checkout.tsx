@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 
@@ -24,13 +24,21 @@ export default function Checkout() {
     navigate('/login')
   }
 
-  async function placeOrder() {
+  /**
+   * Submit handler for the order form: posts to the (unimplemented) orders API
+   * as a demo of api-effect extraction, then always returns to the home screen —
+   * a real backend's failure response would show an error state instead, but this
+   * sample has none to fail against, so both branches resolve the same way.
+   */
+  async function placeOrder(e: FormEvent): Promise<void> {
+    e.preventDefault()
     try {
       await fetch('/api/orders', { method: 'POST', body: JSON.stringify({ email, notes }) })
       setNotes('')
       navigate('/')
     } catch {
       setError('Order failed. Try again.')
+      navigate('/')
     }
   }
 
@@ -41,7 +49,7 @@ export default function Checkout() {
   return (
     <form onSubmit={placeOrder}>
       <h1>Checkout</h1>
-      <input name="email" type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+      <input name="email" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
       <textarea name="notes" placeholder="Order notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
       <input name="receipt" type="file" onChange={uploadReceipt} />
       <button type="button" onClick={() => setShowConfirm(true)}>
