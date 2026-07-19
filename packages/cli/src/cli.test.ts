@@ -740,19 +740,24 @@ describe('workspace registry CLI (UIGRAPH_HOME isolated)', () => {
 })
 
 describe('runKit (agent kit)', () => {
-  it('print emits the kit including the golden invariant and tool names', () => {
+  it('print emits the kit including the golden invariant and tool names, but not the gate.mjs script body', () => {
     const out = runKitPrint()
     expect(out).toContain('Golden invariant')
     expect(out).toContain('reconciliation loop')
     expect(out).toContain('report_observation')
+    // The verification-gate guide legitimately mentions gate.mjs by name in prose;
+    // what must be absent is the manifest marker (and body) for the script entry.
+    expect(out).not.toContain('<!-- gate.mjs -->')
+    expect(out).not.toContain("import { spawnSync } from 'node:child_process'")
   })
 
-  it('install copies the kit files under .uigraph/kit/', () => {
+  it('install copies the kit files under .uigraph/kit/, including script kit files', () => {
     const dir = tempDir('uigraph-cli-kit-')
     const { written } = runKitInstall({ dir })
     expect(written.length).toBeGreaterThan(0)
     expect(written.every((p) => existsSync(p))).toBe(true)
     expect(existsSync(join(dir, '.uigraph', 'kit', 'SKILL.md'))).toBe(true)
+    expect(existsSync(join(dir, '.uigraph', 'kit', 'gate.mjs'))).toBe(true)
   })
 
   it('install --claude drops a single SKILL.md skill', () => {

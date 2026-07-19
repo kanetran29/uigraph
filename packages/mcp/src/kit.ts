@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 export interface KitFile {
   path: string
   title: string
-  kind: 'skill' | 'rule' | 'guide' | 'loop'
+  kind: 'skill' | 'rule' | 'guide' | 'loop' | 'script'
 }
 
 /** The kit manifest: a machine-readable index + the tool names the kit documents. */
@@ -54,9 +54,14 @@ export function readKitFile(relPath: string): string {
   return readFileSync(full, 'utf8')
 }
 
-/** The whole kit concatenated in manifest order — one read bootstraps a consumer agent. */
+/**
+ * The whole kit concatenated in manifest order — one read bootstraps a consumer
+ * agent's prompt. Excludes 'script' entries (e.g. gate.mjs): they're installed
+ * as files to run, not prose to inline, and would just be prompt bloat here.
+ */
 export function readKitAll(): string {
   return listKit()
+    .filter((f) => f.kind !== 'script')
     .map((f) => `<!-- ${f.path} -->\n${readKitFile(f.path)}`)
     .join('\n\n---\n\n')
 }
