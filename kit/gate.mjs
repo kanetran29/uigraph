@@ -95,7 +95,7 @@ export function matchContract(contract, diff) {
 }
 
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import { pathToFileURL } from 'node:url'
@@ -153,9 +153,148 @@ export function writeReport(dir, ctx) {
   writeFileSync(join(out, 'report.md'), renderReport(ctx))
 }
 
-/** Placeholder until Task 3 wires the verdict pipeline. */
-async function cmdCheck() {
-  throw new GateInfraError('check pipeline not implemented yet (Task 3)')
+/** Split an "astGrep" contract string into rule-file vs inline-pattern form. */
+export function parseAstGrepSpec(s) {
+  const type = s.startsWith('rule: ') ? 'rule' : 'pattern'
+  return { type, value: s.slice(type.length + 2) }
+}
+
+/** Repo-root-relative changed files that no impactAllow glob covers. */
+export function containmentViolations(changed, allow) {
+  const regs = allow.map(globToRegExp)
+  return changed.filter((f) => !regs.some((r) => r.test(f)))
+}
+
+/** Verdict 1: the host's deterministic check command (typecheck+test+lint). */
+function stepCheckCmd(repoRoot, checkCmd) {
+  const r = sh(checkCmd, { cwd: repoRoot })
+  const tail = (r.stdout + r.stderr).split('\n').slice(-15).join('\n')
+  return { name: 'check-cmd', status: r.status === 0 ? 'green' : 'red', detail: r.status === 0 ? 'exit 0' : tail }
+}
+
+/** Verdict 2: ast-grep must/forbid patterns from the contract. */
+function stepAstGrep(dir, patterns) {
+  if (!patterns || patterns.length === 0) return { name: 'ast-grep', status: 'green', detail: 'no patterns declared' }
+  const failures = []
+  for (const p of patterns) {
+    const spec = parseAstGrepSpec(p.astGrep)
+    const argv = spec.type === 'rule'
+      ? ['ast-grep', 'scan', '-r', resolve(dir, spec.value), '--json=compact', dir]
+      : ['ast-grep', 'run', '-p', spec.value, '--json=compact', dir]
+    const r = sh(argv)
+    let matches
+    try {
+      matches = JSON.parse(r.stdout || '[]')
+    } catch {
+      throw new GateInfraError(`ast-grep output not JSON for: ${p.astGrep}`)
+    }
+    if (p.mode === 'must' && matches.length === 0) failures.push(`must-pattern absent: ${p.astGrep}`)
+    if (p.mode === 'forbid' && matches.length > 0)
+      failures.push(`forbidden pattern present (${matches.length}×): ${p.astGrep} @ ${matches[0].file}`)
+  }
+  return { name: 'ast-grep', status: failures.length === 0 ? 'green' : 'red', detail: failures.join('; ') || `${patterns.length} pattern(s) ok` }
+}
+
+/** Verdict 3: change-surface containment vs impactAllow; codegraph affected list attached as evidence when available. */
+function stepImpact(repoRoot, baselineSha, impactAllow) {
+  if (!impactAllow || impactAllow.length === 0) return { name: 'impact', status: 'green', detail: 'no impactAllow declared' }
+  const tracked = sh(['git', 'diff', '--name-only', baselineSha], { cwd: repoRoot }).stdout.trim()
+  const untracked = sh(['git', 'ls-files', '--others', '--exclude-standard'], { cwd: repoRoot }).stdout.trim()
+  const changed = [...new Set([...tracked.split('\n'), ...untracked.split('\n')])].filter(Boolean)
+  const leaks = containmentViolations(changed, impactAllow)
+  let evidence = ''
+  try {
+    const aff = sh(['codegraph', 'affected', '-p', repoRoot, '-j', ...changed], { cwd: repoRoot })
+    if (aff.status === 0) evidence = ` | codegraph affected: ${aff.stdout.trim().slice(0, 200)}`
+  } catch {
+    evidence = ' | codegraph unavailable (evidence skipped)'
+  }
+  return {
+    name: 'impact',
+    status: leaks.length === 0 ? 'green' : 'red',
+    detail: (leaks.length === 0 ? `${changed.length} changed file(s) contained` : `leak outside impactAllow: ${leaks.join(', ')}`) + evidence,
+  }
+}
+
+/** Verdict 4: graph structure matches the approved contract (diff vs pinned baseline). */
+async function stepGraphMatch(dir, contract) {
+  const map = sh([...UIGRAPH, 'map', dir, '--controls'])
+  if (map.status !== 0) throw new GateInfraError(`uigraph map failed:\n${map.stderr || map.stdout}`)
+  const baselinePath = join(dir, '.uigraph-gate', 'baseline.json')
+  let baseline
+  try {
+    baseline = JSON.parse(readFileSync(baselinePath, 'utf8'))
+  } catch {
+    throw new GateInfraError(`no baseline at ${baselinePath} — run: gate.mjs baseline <dir>`)
+  }
+  const { graph } = await readWorkspaceGraph(dir)
+  if (!graph) throw new GateInfraError('map produced no graph')
+  const { diffGraphs } = await import('@ui-graph/core')
+  const match = matchContract(contract, diffGraphs(baseline.graph, graph))
+  const misses = match.results.filter((r) => r.matched === null).map((r) => `${r.kind}:${JSON.stringify(r.spec)}`)
+  const detail = match.pass
+    ? `all ${match.results.length} expectation(s) matched; uncovered: ${match.uncovered.nodes.length}n/${match.uncovered.edges.length}e`
+    : [misses.length ? `unmatched: ${misses.join(' ')}` : '', match.removalViolations.length ? `removals: ${match.removalViolations.join(',')}` : '']
+        .filter(Boolean).join('; ')
+  return { name: 'graph-match', status: match.pass ? 'green' : 'red', detail, baselineSha: baseline.sha }
+}
+
+/** Verdict 5: uigraph verify drives new/uncertain transitions in a real browser. */
+function stepVerify(dir, appUrl, limit) {
+  if (!appUrl) throw new GateInfraError('--app-url required for browser verdicts (or pass --no-browser)')
+  const r = sh([...UIGRAPH, 'verify', dir, '--app-url', appUrl, '--limit', limit])
+  const tail = (r.stdout + r.stderr).split('\n').slice(-10).join('\n')
+  return { name: 'verify', status: r.status === 0 ? 'green' : 'red', detail: r.status === 0 ? 'no refuted transitions' : tail }
+}
+
+/** Verdict 6: behavioral Playwright specs from the contract; one retry for flake. */
+function stepSpecs(dir, behavioral, appUrl) {
+  if (!behavioral || behavioral.length === 0) return { name: 'specs', status: 'green', detail: 'no behavioral ACs declared' }
+  const specs = behavioral.map((b) => b.spec)
+  const run = () => sh(['pnpm', 'exec', 'playwright', 'test', ...specs], { cwd: dir, env: { ...process.env, APP_URL: appUrl } })
+  let r = run()
+  if (r.status !== 0) r = run()
+  const tail = (r.stdout + r.stderr).split('\n').slice(-15).join('\n')
+  return { name: 'specs', status: r.status === 0 ? 'green' : 'red', detail: r.status === 0 ? `${specs.length} spec file(s) green` : tail }
+}
+
+/** `gate check <dir>`: run all six verdicts fail-fast, write the report, set the exit code. */
+async function cmdCheck(dir, values) {
+  let contract
+  try {
+    contract = JSON.parse(readFileSync(resolve(values.contract ?? ''), 'utf8'))
+  } catch {
+    throw new GateInfraError(`cannot read contract: ${values.contract}`)
+  }
+  const contractErrors = validateContract(contract)
+  if (contractErrors.length > 0) throw new GateInfraError(`invalid contract:\n${contractErrors.join('\n')}`)
+  const repoRoot = sh(['git', 'rev-parse', '--show-toplevel'], { cwd: dir }).stdout.trim()
+  const verdicts = []
+  const ordered = [
+    () => stepCheckCmd(repoRoot, values['check-cmd']),
+    () => stepAstGrep(dir, contract.code?.patterns),
+    async () => {
+      const baseline = JSON.parse(readFileSync(join(dir, '.uigraph-gate', 'baseline.json'), 'utf8'))
+      return stepImpact(repoRoot, baseline.sha, contract.code?.impactAllow)
+    },
+    () => stepGraphMatch(dir, contract),
+    () => (values['no-browser'] ? { name: 'verify', status: 'skip', detail: '--no-browser' } : stepVerify(dir, values['app-url'], values['verify-limit'])),
+    () => (values['no-browser'] ? { name: 'specs', status: 'skip', detail: '--no-browser' } : stepSpecs(dir, contract.behavioral, values['app-url'])),
+  ]
+  let failed = false
+  for (const step of ordered) {
+    if (failed) {
+      verdicts.push({ name: 'skipped', status: 'skip', detail: 'fail-fast' })
+      continue
+    }
+    const v = await step()
+    verdicts.push({ name: v.name, status: v.status, detail: v.detail })
+    if (v.status === 'red') failed = true
+  }
+  const ctx = { ticket: contract.ticket, verdicts }
+  writeReport(dir, ctx)
+  console.log(renderReport(ctx))
+  process.exit(failed ? 1 : 0)
 }
 
 /** CLI entry: `baseline <dir>` | `check <dir> --contract <file> [--app-url u] [--check-cmd c] [--no-browser] [--max-rounds n]`. */
