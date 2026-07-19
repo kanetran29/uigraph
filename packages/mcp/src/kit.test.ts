@@ -18,10 +18,20 @@ describe('agent kit', () => {
     for (const f of listKit()) expect(readKitFile(f.path).length).toBeGreaterThan(0)
   })
 
-  it('readKitAll concatenates every file in manifest order', () => {
+  it('readKitAll concatenates every non-script file in manifest order', () => {
     const all = readKitAll()
-    for (const f of listKit()) expect(all).toContain(`<!-- ${f.path} -->`)
+    for (const f of listKit()) {
+      if (f.kind === 'script') continue
+      expect(all).toContain(`<!-- ${f.path} -->`)
+    }
     expect(all).toContain('Golden invariant')
+  })
+
+  it('readKitAll excludes script kit files (prompt bloat, install-only)', () => {
+    const all = readKitAll()
+    const scripts = listKit().filter((f) => f.kind === 'script')
+    expect(scripts.length).toBeGreaterThan(0)
+    for (const f of scripts) expect(all).not.toContain(`<!-- ${f.path} -->`)
   })
 
   it('refuses a path that escapes the kit directory', () => {
