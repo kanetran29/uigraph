@@ -19,7 +19,7 @@
     ],
     "patterns": [
       { "mode": "must", "astGrep": "pattern: setId('')" },
-      { "mode": "forbid", "astGrep": "pattern: dangerouslySetInnerHTML=$_" }
+      { "mode": "forbid", "astGrep": "pattern: <$TAG dangerouslySetInnerHTML={$_} />" }
     ]
   },
   "behavioral": [
