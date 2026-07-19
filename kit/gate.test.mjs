@@ -112,10 +112,10 @@ test('renderReport: one line per verdict with status and PASS/FAIL banner', () =
 import { parseAstGrepSpec, containmentViolations, findVueFiles } from './gate.mjs'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 
 test('findVueFiles: finds nested .vue files, skips node_modules/dist', () => {
-  const scratchpad = '/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/be42f18d-1188-4292-8d0c-a70a8d0848bf/scratchpad'
-  const root = mkdtempSync(join(scratchpad, 'gate-vue-test-'))
+  const root = mkdtempSync(join(tmpdir(), 'gate-vue-test-'))
   try {
     mkdirSync(join(root, 'src/pages'), { recursive: true })
     mkdirSync(join(root, 'node_modules/some-pkg'), { recursive: true })

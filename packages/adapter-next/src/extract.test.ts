@@ -3,7 +3,9 @@ import { fileURLToPath } from 'node:url'
 import { validateGraph } from '@ui-graph/core'
 import { extractNextGraph } from './index'
 
-const dir = fileURLToPath(new URL('../../../examples/sample-next-app', import.meta.url))
+// Snapshotted from examples/sample-next-app (app/ + pages/ + package.json + next.config.js) so
+// this golden stays pinned to a known graph shape — examples/sample-next-app is free to evolve.
+const dir = fileURLToPath(new URL('../test-fixtures/sample-next-app', import.meta.url))
 
 describe('extractNext — sample-next-app golden', () => {
   const { graph, soundiness } = extractNextGraph(dir)
