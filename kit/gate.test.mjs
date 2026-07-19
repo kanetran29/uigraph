@@ -82,3 +82,16 @@ test('renderReport: one line per verdict with status and PASS/FAIL banner', () =
   assert.ok(md.includes('graph-match'))
   assert.ok(md.includes('skip'))
 })
+
+import { parseAstGrepSpec, containmentViolations } from './gate.mjs'
+
+test('parseAstGrepSpec: rule vs pattern prefixes', () => {
+  assert.deepEqual(parseAstGrepSpec('rule: rules/x.yml'), { type: 'rule', value: 'rules/x.yml' })
+  assert.deepEqual(parseAstGrepSpec('pattern: setId($_)'), { type: 'pattern', value: 'setId($_)' })
+})
+
+test('containmentViolations: files outside every allow glob leak', () => {
+  const allow = ['examples/sample-gauntlet-react/**']
+  assert.deepEqual(containmentViolations(['examples/sample-gauntlet-react/src/a.tsx'], allow), [])
+  assert.deepEqual(containmentViolations(['packages/core/src/ir.ts'], allow), ['packages/core/src/ir.ts'])
+})
