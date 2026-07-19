@@ -9,6 +9,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/.vite/**',
       'examples/**',
+      '**/test-fixtures/**',
       'apps/dashboard/**',
       '**/.claude/**',
     ],
