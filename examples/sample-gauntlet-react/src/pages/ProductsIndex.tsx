@@ -16,6 +16,7 @@ export default function ProductsIndex() {
 
       {/* gauntlet g24: template-prefix target with id from state */}
       <button onClick={() => navigate(`/products/${id}`)}>Open product</button>
+      <button onClick={() => setId('')}>Clear filter</button>
 
       {/* gauntlet g23: object-form navigate with pathname + search */}
       <button onClick={() => navigate({ pathname: '/products', search: '?sort=price' })}>

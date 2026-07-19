@@ -16,3 +16,5 @@ arrows-*.jpeg
 arrows-*.png
 uigraph.db
 .uigraph-gate/
+.codegraph/
+test-results/

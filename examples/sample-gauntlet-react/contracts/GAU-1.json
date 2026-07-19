@@ -1,0 +1,29 @@
+{
+  "ticket": "GAU-1",
+  "requirement": "ProductsIndex: add a 'Clear filter' button that resets the product id input to empty",
+  "expect": {
+    "addedNodes": [
+      { "kind": "control", "label~": "clear filter", "parent~": "products",
+        "control": { "controlType": "button" } }
+    ],
+    "addedEdges": [],
+    "forbidRemovals": true
+  },
+  "code": {
+    "impactAllow": [
+      "examples/sample-gauntlet-react/**",
+      "kit/**",
+      "docs/**",
+      ".gitignore",
+      "pnpm-lock.yaml"
+    ],
+    "patterns": [
+      { "mode": "must", "astGrep": "pattern: setId('')" },
+      { "mode": "forbid", "astGrep": "pattern: dangerouslySetInnerHTML=$_" }
+    ]
+  },
+  "behavioral": [
+    { "id": "AC2", "text": "clicking Clear filter empties the product id input",
+      "spec": "specs/gau-1.spec.ts" }
+  ]
+}
