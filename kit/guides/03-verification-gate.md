@@ -27,3 +27,17 @@ plain field = exact; `~`-suffixed field = case-insensitive substring;
 `strict: true` fails on additions the contract does not cover.
 `code.impactAllow` globs are repo-root-relative; `behavioral[].spec` and
 ast-grep rule files resolve against the workspace dir.
+
+## Watch-outs
+
+- **forbid-mode patterns fail OPEN on a typo.** ast-grep silently matches
+  nothing for a malformed pattern, so a `mode: "forbid"` rule with a typo
+  never fires and the verdict stays green — it looks like proof of absence
+  but proves nothing. Smoke-test each forbid pattern once against a scratch
+  file that SHOULD match before trusting it in a contract.
+- **`verify` reds on pre-existing graph damage, not just this ticket.** The
+  verdict drives the workspace's shared next-to-verify worklist, so an
+  unrelated unverified/refutable transition elsewhere in the graph can red
+  the gate even though your change is correct. Keep the workspace's graph
+  healthy (or scope `--verify-limit`/expectations deliberately) rather than
+  treating every red `verify` as your ticket's fault.
