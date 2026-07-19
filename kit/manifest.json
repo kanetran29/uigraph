@@ -13,7 +13,8 @@
     { "path": "guides/02-reading-state.md", "title": "Deciding what to do next", "kind": "guide" },
     { "path": "loop/reconciliation-loop.md", "title": "The proposal reconciliation loop", "kind": "loop" },
     { "path": "guides/03-verification-gate.md", "title": "Verification gate — loop protocol", "kind": "guide" },
-    { "path": "gate.mjs", "title": "Verification gate CLI", "kind": "script" }
+    { "path": "gate.mjs", "title": "Verification gate CLI", "kind": "script" },
+    { "path": "gate-skill.md", "title": "Verification gate skill (Claude Code)", "kind": "skill" }
   ],
   "tools": [
     "get_graph",
