@@ -35,6 +35,17 @@ ast-grep rule files resolve against the workspace dir.
   never fires and the verdict stays green — it looks like proof of absence
   but proves nothing. Smoke-test each forbid pattern once against a scratch
   file that SHOULD match before trusting it in a contract.
+- **ast-grep 0.42 cannot see inside `.vue` SFCs at all**, as invoked here (no
+  `--lang`, no `sgconfig.yml`) — it skips `.vue` files entirely while walking
+  a directory, even with `--lang typescript` forced on one directly. If the
+  workspace has any `.vue` files, `ast-grep` verdict goes red on a
+  `forbid`-mode pattern instead of silently trusting a clean 0-match run
+  (fail-open would otherwise look like proof of absence). `must`-mode
+  patterns still run and fail loud on their own, but get a one-line note
+  since an "absent" verdict there could equally be the blind spot. Opt a
+  pattern out — when you're certain it only concerns non-`.vue` code — with
+  the `[ts-only]` tag: `"pattern[ts-only]: setId($_)"` or
+  `"rule[ts-only]: rules/x.yml"`.
 - **`verify` reds on pre-existing graph damage, not just this ticket.** The
   verdict drives the workspace's shared next-to-verify worklist, so an
   unrelated unverified/refutable transition elsewhere in the graph can red

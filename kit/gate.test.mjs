@@ -68,6 +68,11 @@ test('validateContract: catches missing fields and bad pattern mode', () => {
   assert.ok(validateContract(bad).some((e) => e.includes('mode')))
 })
 
+test('validateContract: accepts the "[ts-only]" astGrep prefix variant', () => {
+  const ok = { ticket: 'T', requirement: 'r', expect: {}, code: { patterns: [{ mode: 'forbid', astGrep: 'pattern[ts-only]: x' }] } }
+  assert.deepEqual(validateContract(ok), [])
+})
+
 test('validateContract: unknown top-level or expect/code keys are flagged as typos, absent keys are not', () => {
   const okExpect = { ticket: 'T', requirement: 'r', expect: { forbidRemovals: true } }
   assert.deepEqual(validateContract(okExpect), [])
@@ -104,11 +109,35 @@ test('renderReport: one line per verdict with status and PASS/FAIL banner', () =
   assert.ok(md.includes('skip'))
 })
 
-import { parseAstGrepSpec, containmentViolations } from './gate.mjs'
+import { parseAstGrepSpec, containmentViolations, findVueFiles } from './gate.mjs'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { join } from 'node:path'
+
+test('findVueFiles: finds nested .vue files, skips node_modules/dist', () => {
+  const scratchpad = '/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/be42f18d-1188-4292-8d0c-a70a8d0848bf/scratchpad'
+  const root = mkdtempSync(join(scratchpad, 'gate-vue-test-'))
+  try {
+    mkdirSync(join(root, 'src/pages'), { recursive: true })
+    mkdirSync(join(root, 'node_modules/some-pkg'), { recursive: true })
+    mkdirSync(join(root, 'dist'), { recursive: true })
+    writeFileSync(join(root, 'src/pages/Dashboard.vue'), '<template></template>')
+    writeFileSync(join(root, 'src/main.ts'), 'export {}')
+    writeFileSync(join(root, 'node_modules/some-pkg/Ignored.vue'), '<template></template>')
+    writeFileSync(join(root, 'dist/Ignored.vue'), '<template></template>')
+    assert.deepEqual(findVueFiles(root), [join(root, 'src/pages/Dashboard.vue')])
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
 
 test('parseAstGrepSpec: rule vs pattern prefixes', () => {
-  assert.deepEqual(parseAstGrepSpec('rule: rules/x.yml'), { type: 'rule', value: 'rules/x.yml' })
-  assert.deepEqual(parseAstGrepSpec('pattern: setId($_)'), { type: 'pattern', value: 'setId($_)' })
+  assert.deepEqual(parseAstGrepSpec('rule: rules/x.yml'), { type: 'rule', value: 'rules/x.yml', tsOnly: false })
+  assert.deepEqual(parseAstGrepSpec('pattern: setId($_)'), { type: 'pattern', value: 'setId($_)', tsOnly: false })
+})
+
+test('parseAstGrepSpec: [ts-only] tag opts a pattern out of the .vue blind-spot loud-fail', () => {
+  assert.deepEqual(parseAstGrepSpec('pattern[ts-only]: setId($_)'), { type: 'pattern', value: 'setId($_)', tsOnly: true })
+  assert.deepEqual(parseAstGrepSpec('rule[ts-only]: rules/x.yml'), { type: 'rule', value: 'rules/x.yml', tsOnly: true })
 })
 
 test('containmentViolations: files outside every allow glob leak', () => {

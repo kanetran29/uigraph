@@ -3,7 +3,7 @@
 // Spec: docs/superpowers/specs/2026-07-19-uigraph-verification-gate-design.md
 
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import { pathToFileURL } from 'node:url'
@@ -65,8 +65,8 @@ export function validateContract(contract) {
     if (!Array.isArray(patterns)) errors.push('code.patterns: must be an array')
     else patterns.forEach((p, i) => {
       if (p.mode !== 'must' && p.mode !== 'forbid') errors.push(`code.patterns[${i}].mode: must be "must" or "forbid"`)
-      if (typeof p.astGrep !== 'string' || !/^(rule|pattern): /.test(p.astGrep))
-        errors.push(`code.patterns[${i}].astGrep: must start with "rule: " or "pattern: "`)
+      if (typeof p.astGrep !== 'string' || !/^(rule|pattern)(\[ts-only\])?: /.test(p.astGrep))
+        errors.push(`code.patterns[${i}].astGrep: must start with "rule: " or "pattern: " (optionally "[ts-only]")`)
     })
   }
   const impactAllow = contract?.code?.impactAllow
@@ -168,10 +168,13 @@ export function writeReport(dir, ctx) {
   writeFileSync(join(out, 'report.md'), renderReport(ctx))
 }
 
-/** Split an "astGrep" contract string into rule-file vs inline-pattern form. */
+/** Split an "astGrep" contract string into rule-file vs inline-pattern form. An optional
+ *  "[ts-only]" tag on the type (e.g. "pattern[ts-only]: ") asserts the pattern only concerns
+ *  non-.vue code, opting it out of stepAstGrep's .vue-blind-spot loud-fail. */
 export function parseAstGrepSpec(s) {
-  const type = s.startsWith('rule: ') ? 'rule' : 'pattern'
-  return { type, value: s.slice(type.length + 2) }
+  const m = s.match(/^(rule|pattern)(\[ts-only\])?: /)
+  const prefixLen = m ? m[0].length : 'pattern: '.length
+  return { type: m ? m[1] : 'pattern', value: s.slice(prefixLen), tsOnly: Boolean(m && m[2]) }
 }
 
 /** Repo-root-relative changed files that no impactAllow glob covers. */
@@ -187,10 +190,38 @@ function stepCheckCmd(repoRoot, checkCmd) {
   return { name: 'check-cmd', status: r.status === 0 ? 'green' : 'red', detail: r.status === 0 ? 'exit 0' : tail }
 }
 
-/** Verdict 2: ast-grep must/forbid patterns from the contract. */
+/** Recursively list .vue files under `dir` (skipping node_modules/dist) — ast-grep 0.42 as
+ *  invoked here (no --lang, no sgconfig.yml) never even walks into .vue SFCs, so their
+ *  presence means a forbid-mode pattern's "0 matches" can't be trusted as proof of absence. */
+export function findVueFiles(dir) {
+  const results = []
+  const walk = (d) => {
+    let entries
+    try {
+      entries = readdirSync(d, { withFileTypes: true })
+    } catch {
+      return
+    }
+    for (const e of entries) {
+      if (e.name === 'node_modules' || e.name === 'dist') continue
+      const p = join(d, e.name)
+      if (e.isDirectory()) walk(p)
+      else if (e.name.endsWith('.vue')) results.push(p)
+    }
+  }
+  walk(dir)
+  return results
+}
+
+/** Verdict 2: ast-grep must/forbid patterns from the contract. .vue SFCs are invisible to
+ *  ast-grep here, so a forbid pattern's clean run is loud-failed unless it opts out via
+ *  "[ts-only]" (see parseAstGrepSpec); a must pattern still fails loud on its own but gets
+ *  a one-line note since its "absent" verdict could equally be a .vue blind spot. */
 function stepAstGrep(dir, patterns) {
   if (!patterns || patterns.length === 0) return { name: 'ast-grep', status: 'green', detail: 'no patterns declared' }
+  const vueFiles = findVueFiles(dir)
   const failures = []
+  let mustSawVue = false
   for (const p of patterns) {
     const spec = parseAstGrepSpec(p.astGrep)
     const argv = spec.type === 'rule'
@@ -203,11 +234,19 @@ function stepAstGrep(dir, patterns) {
     } catch {
       throw new GateInfraError(`ast-grep output not JSON for: ${p.astGrep}`)
     }
-    if (p.mode === 'must' && matches.length === 0) failures.push(`must-pattern absent: ${p.astGrep}`)
-    if (p.mode === 'forbid' && matches.length > 0)
-      failures.push(`forbidden pattern present (${matches.length}×): ${p.astGrep} @ ${matches[0].file}`)
+    if (p.mode === 'must') {
+      if (matches.length === 0) failures.push(`must-pattern absent: ${p.astGrep}`)
+      if (vueFiles.length > 0) mustSawVue = true
+    }
+    if (p.mode === 'forbid') {
+      if (matches.length > 0) failures.push(`forbidden pattern present (${matches.length}×): ${p.astGrep} @ ${matches[0].file}`)
+      else if (vueFiles.length > 0 && !spec.tsOnly)
+        failures.push(`forbid pattern cannot be trusted: ${vueFiles.length} .vue file(s) are invisible to ast-grep (fail-open): ${p.astGrep}`)
+    }
   }
-  return { name: 'ast-grep', status: failures.length === 0 ? 'green' : 'red', detail: failures.join('; ') || `${patterns.length} pattern(s) ok` }
+  let detail = failures.join('; ') || `${patterns.length} pattern(s) ok`
+  if (mustSawVue) detail += ` (note: ${vueFiles.length} .vue file(s) invisible to ast-grep — must-pattern absence may be a false negative, not a real gap)`
+  return { name: 'ast-grep', status: failures.length === 0 ? 'green' : 'red', detail }
 }
 
 /** Verdict 3: change-surface containment vs impactAllow; codegraph affected list attached as evidence when available. */
