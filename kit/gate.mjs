@@ -2,6 +2,12 @@
 // contract. Pure matcher functions here; CLI + pipeline added by later tasks.
 // Spec: docs/superpowers/specs/2026-07-19-uigraph-verification-gate-design.md
 
+import { spawnSync } from 'node:child_process'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { parseArgs } from 'node:util'
+import { pathToFileURL } from 'node:url'
+
 /** Convert a minimal glob (only ** and *) to an anchored RegExp. */
 export function globToRegExp(glob) {
   const escaped = glob.replace(/[.+^${}()|[\]\\?]/g, '\\$&')
@@ -31,9 +37,22 @@ export function itemMatches(spec, actual) {
   return true
 }
 
+/** Push "<path><key>: unknown key (typo?)" for each key of `obj` absent from `known`; no-op when `obj` isn't a plain object (absence is not an error). */
+function checkUnknownKeys(errors, obj, known, path) {
+  if (typeof obj !== 'object' || obj === null) return
+  for (const k of Object.keys(obj)) if (!known.has(k)) errors.push(`${path}${k}: unknown key (typo?)`)
+}
+
+const KNOWN_TOP_KEYS = new Set(['ticket', 'requirement', 'expect', 'code', 'behavioral'])
+const KNOWN_EXPECT_KEYS = new Set(['addedNodes', 'addedEdges', 'changedNodes', 'forbidRemovals', 'strict'])
+const KNOWN_CODE_KEYS = new Set(['impactAllow', 'patterns'])
+
 /** Structural check of a contract object; returns "<path>: <problem>" strings, empty when valid. */
 export function validateContract(contract) {
   const errors = []
+  checkUnknownKeys(errors, contract, KNOWN_TOP_KEYS, '')
+  checkUnknownKeys(errors, contract?.expect, KNOWN_EXPECT_KEYS, 'expect.')
+  checkUnknownKeys(errors, contract?.code, KNOWN_CODE_KEYS, 'code.')
   if (typeof contract?.ticket !== 'string' || contract.ticket === '') errors.push('ticket: required non-empty string')
   if (typeof contract?.requirement !== 'string' || contract.requirement === '') errors.push('requirement: required non-empty string')
   if (typeof contract?.expect !== 'object' || contract.expect === null) errors.push('expect: required object')
@@ -95,12 +114,6 @@ export function matchContract(contract, diff) {
   const strictFail = expect.strict === true && (uncovered.nodes.length > 0 || uncovered.edges.length > 0)
   return { pass: !unmatched && removalViolations.length === 0 && !strictFail, results, removalViolations, uncovered }
 }
-
-import { spawnSync } from 'node:child_process'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
-import { parseArgs } from 'node:util'
-import { pathToFileURL } from 'node:url'
 
 /** Raised for environment problems (missing tool/baseline/app) — mapped to exit 2, never exit 1. */
 export class GateInfraError extends Error {}
@@ -277,8 +290,7 @@ async function cmdCheck(dir, values) {
   }
   const contractErrors = validateContract(contract)
   if (contractErrors.length > 0) throw new GateInfraError(`invalid contract:\n${contractErrors.join('\n')}`)
-  // Fail fast on an unreachable app before the slow verdicts (check-cmd runs the host's full
-  // test suite) — an unreachable app is an environment problem, not an AC failure.
+  // Fail fast on an unreachable app before the slow verdicts — an environment problem, not an AC failure.
   if (!values['no-browser']) {
     if (!values['app-url']) throw new GateInfraError('--app-url required for browser verdicts (or pass --no-browser)')
     try {
@@ -320,22 +332,30 @@ async function cmdCheck(dir, values) {
   process.exit(failed ? 1 : 0)
 }
 
-/** CLI entry: `baseline <dir>` | `check <dir> --contract <file> [--app-url u] [--check-cmd c] [--no-browser] [--max-rounds n]`. */
+const USAGE = 'usage: gate.mjs baseline <dir> | gate.mjs check <dir> --contract <file> [...]'
+
+/** CLI entry: `baseline <dir>` | `check <dir> --contract <file> [--app-url u] [--check-cmd c] [--no-browser]`. */
 async function main() {
-  const { positionals, values } = parseArgs({
-    allowPositionals: true,
-    options: {
-      contract: { type: 'string' },
-      'app-url': { type: 'string' },
-      'check-cmd': { type: 'string', default: 'pnpm check' },
-      'no-browser': { type: 'boolean', default: false },
-      'max-rounds': { type: 'string', default: '3' },
-      'verify-limit': { type: 'string', default: '10' },
-    },
-  })
+  let positionals, values
+  try {
+    // parseArgs throws on an unrecognized flag; surface the usage line instead of a raw stack.
+    ({ positionals, values } = parseArgs({
+      allowPositionals: true,
+      options: {
+        contract: { type: 'string' },
+        'app-url': { type: 'string' },
+        'check-cmd': { type: 'string', default: 'pnpm check' },
+        'no-browser': { type: 'boolean', default: false },
+        'verify-limit': { type: 'string', default: '10' },
+      },
+    }))
+  } catch {
+    console.error(USAGE)
+    process.exit(2)
+  }
   const [cmd, dirArg] = positionals
   if (!cmd || !dirArg) {
-    console.error('usage: gate.mjs baseline <dir> | gate.mjs check <dir> --contract <file> [...]')
+    console.error(USAGE)
     process.exit(2)
   }
   const dir = resolve(dirArg)

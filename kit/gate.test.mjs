@@ -68,6 +68,17 @@ test('validateContract: catches missing fields and bad pattern mode', () => {
   assert.ok(validateContract(bad).some((e) => e.includes('mode')))
 })
 
+test('validateContract: unknown top-level or expect/code keys are flagged as typos, absent keys are not', () => {
+  const okExpect = { ticket: 'T', requirement: 'r', expect: { forbidRemovals: true } }
+  assert.deepEqual(validateContract(okExpect), [])
+  const typoExpect = { ticket: 'T', requirement: 'r', expect: { forbidRemoval: true } }
+  assert.ok(validateContract(typoExpect).some((e) => e === 'expect.forbidRemoval: unknown key (typo?)'))
+  const typoTop = { ticket: 'T', requirement: 'r', expect: {}, bogus: 1 }
+  assert.ok(validateContract(typoTop).some((e) => e === 'bogus: unknown key (typo?)'))
+  const typoCode = { ticket: 'T', requirement: 'r', expect: {}, code: { impactAllows: [] } }
+  assert.ok(validateContract(typoCode).some((e) => e === 'code.impactAllows: unknown key (typo?)'))
+})
+
 test('globToRegExp: ** crosses slashes, * does not', () => {
   assert.equal(globToRegExp('examples/**').test('examples/a/b.ts'), true)
   assert.equal(globToRegExp('examples/*.ts').test('examples/a/b.ts'), false)
