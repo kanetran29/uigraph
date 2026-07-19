@@ -51,6 +51,16 @@ test('matchContract: uncovered additions warn, fail only under strict', () => {
   assert.equal(strict.pass, false)
 })
 
+test('matchContract: an already-claimed node cannot satisfy a second expectation', () => {
+  const spec = { 'label~': 'clear' }
+  const contract = { ticket: 'T', requirement: 'r', expect: { addedNodes: [spec, spec] } }
+  const oneMatch = matchContract(contract, { ...emptyDiff(), addedNodes: [node()] })
+  assert.equal(oneMatch.pass, false)
+  assert.equal(oneMatch.results[1].matched, null)
+  const twoMatches = matchContract(contract, { ...emptyDiff(), addedNodes: [node(), node({ id: 'c_products_clear_1' })] })
+  assert.equal(twoMatches.pass, true)
+})
+
 test('validateContract: catches missing fields and bad pattern mode', () => {
   assert.deepEqual(validateContract({ ticket: 'T', requirement: 'r', expect: {} }), [])
   assert.ok(validateContract({}).some((e) => e.startsWith('ticket')))

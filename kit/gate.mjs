@@ -63,24 +63,26 @@ export function validateContract(contract) {
   return errors
 }
 
-/** Match an approved contract against a GraphDiff; the machine verdict for the structure layer. */
+/** Match an approved contract against a GraphDiff; the machine verdict for the structure layer.
+ *  Each candidate can satisfy at most one expectation — already-claimed ids are skipped so two
+ *  specs that both match the same single real change don't both report a false pass. */
 export function matchContract(contract, diff) {
   const expect = contract.expect ?? {}
   const results = []
   const claimedNodes = new Set()
   const claimedEdges = new Set()
   for (const spec of expect.addedNodes ?? []) {
-    const hit = diff.addedNodes.find((n) => itemMatches(spec, n)) ?? null
+    const hit = diff.addedNodes.find((n) => !claimedNodes.has(n.id) && itemMatches(spec, n)) ?? null
     if (hit) claimedNodes.add(hit.id)
     results.push({ kind: 'addedNodes', spec, matched: hit ? hit.id : null })
   }
   for (const spec of expect.addedEdges ?? []) {
-    const hit = diff.addedEdges.find((e) => itemMatches(spec, e)) ?? null
+    const hit = diff.addedEdges.find((e) => !claimedEdges.has(e.id) && itemMatches(spec, e)) ?? null
     if (hit) claimedEdges.add(hit.id)
     results.push({ kind: 'addedEdges', spec, matched: hit ? hit.id : null })
   }
   for (const spec of expect.changedNodes ?? []) {
-    const hit = diff.changedNodes.find((ch) => itemMatches(spec, ch.after)) ?? null
+    const hit = diff.changedNodes.find((ch) => !claimedNodes.has(ch.id) && itemMatches(spec, ch.after)) ?? null
     if (hit) claimedNodes.add(hit.id)
     results.push({ kind: 'changedNodes', spec, matched: hit ? hit.id : null })
   }
@@ -130,7 +132,7 @@ async function cmdBaseline(dir) {
   if (map.status !== 0) throw new GateInfraError(`uigraph map failed:\n${map.stderr || map.stdout}`)
   const { graph, mappedAt } = await readWorkspaceGraph(dir)
   if (!graph) throw new GateInfraError('map produced no graph')
-  const sha = sh(['git', 'rev-parse', 'HEAD']).stdout.trim()
+  const sha = sh(['git', 'rev-parse', 'HEAD'], { cwd: dir }).stdout.trim()
   const out = join(dir, '.uigraph-gate')
   mkdirSync(out, { recursive: true })
   writeFileSync(join(out, 'baseline.json'), JSON.stringify({ sha, mappedAt, graph }, null, 2))
@@ -198,9 +200,11 @@ function stepAstGrep(dir, patterns) {
 /** Verdict 3: change-surface containment vs impactAllow; codegraph affected list attached as evidence when available. */
 function stepImpact(repoRoot, baselineSha, impactAllow) {
   if (!impactAllow || impactAllow.length === 0) return { name: 'impact', status: 'green', detail: 'no impactAllow declared' }
-  const tracked = sh(['git', 'diff', '--name-only', baselineSha], { cwd: repoRoot }).stdout.trim()
-  const untracked = sh(['git', 'ls-files', '--others', '--exclude-standard'], { cwd: repoRoot }).stdout.trim()
-  const changed = [...new Set([...tracked.split('\n'), ...untracked.split('\n')])].filter(Boolean)
+  const trackedRun = sh(['git', 'diff', '--name-only', baselineSha], { cwd: repoRoot })
+  if (trackedRun.status !== 0) throw new GateInfraError(`git diff failed:\n${trackedRun.stderr}`)
+  const untrackedRun = sh(['git', 'ls-files', '--others', '--exclude-standard'], { cwd: repoRoot })
+  if (untrackedRun.status !== 0) throw new GateInfraError(`git ls-files failed:\n${untrackedRun.stderr}`)
+  const changed = [...new Set([...trackedRun.stdout.trim().split('\n'), ...untrackedRun.stdout.trim().split('\n')])].filter(Boolean)
   const leaks = containmentViolations(changed, impactAllow)
   let evidence = ''
   try {
@@ -225,18 +229,29 @@ async function stepGraphMatch(dir, contract, baseline) {
   const { diffGraphs } = await import('@ui-graph/core')
   const match = matchContract(contract, diffGraphs(baseline.graph, graph))
   const misses = match.results.filter((r) => r.matched === null).map((r) => `${r.kind}:${JSON.stringify(r.spec)}`)
+  const pairs = match.results.map((r) => `${r.kind}→${r.matched}`).join(', ')
   const detail = match.pass
-    ? `all ${match.results.length} expectation(s) matched; uncovered: ${match.uncovered.nodes.length}n/${match.uncovered.edges.length}e`
+    ? `matched: ${pairs} — uncovered: ${match.uncovered.nodes.length}n/${match.uncovered.edges.length}e`
     : [misses.length ? `unmatched: ${misses.join(' ')}` : '', match.removalViolations.length ? `removals: ${match.removalViolations.join(',')}` : '']
         .filter(Boolean).join('; ')
   return { name: 'graph-match', status: match.pass ? 'green' : 'red', detail, baselineSha: baseline.sha }
 }
 
-/** Verdict 5: uigraph verify drives new/uncertain transitions in a real browser. */
+/** Verdict 5: uigraph verify drives new/uncertain transitions in a real browser. The CLI's exit
+ *  code alone is unreliable — it only goes nonzero for refuted must-static proofs, so a refuted
+ *  new/uncertain transition still exits 0 — so this parses the printed summary line
+ *  ("verify: N confirmed / M refuted of K target(s)") for the refuted count and reds on any
+ *  refutation; if that line can't be found, it falls back to the exit code (never infra-fails
+ *  on a parse miss). */
 function stepVerify(dir, appUrl, limit) {
   if (!appUrl) throw new GateInfraError('--app-url required for browser verdicts (or pass --no-browser)')
   const r = sh([...UIGRAPH, 'verify', dir, '--app-url', appUrl, '--limit', limit])
   const tail = (r.stdout + r.stderr).split('\n').slice(-10).join('\n')
+  const summary = r.stdout.match(/^verify: \d+ confirmed \/ (\d+) refuted of \d+ target\(s\).*$/m)
+  if (summary) {
+    const refuted = Number(summary[1])
+    return { name: 'verify', status: refuted > 0 ? 'red' : 'green', detail: refuted > 0 ? `refuted transition(s) — "${summary[0]}"` : summary[0] }
+  }
   return { name: 'verify', status: r.status === 0 ? 'green' : 'red', detail: r.status === 0 ? 'no refuted transitions' : tail }
 }
 
@@ -262,6 +277,16 @@ async function cmdCheck(dir, values) {
   }
   const contractErrors = validateContract(contract)
   if (contractErrors.length > 0) throw new GateInfraError(`invalid contract:\n${contractErrors.join('\n')}`)
+  // Fail fast on an unreachable app before the slow verdicts (check-cmd runs the host's full
+  // test suite) — an unreachable app is an environment problem, not an AC failure.
+  if (!values['no-browser']) {
+    if (!values['app-url']) throw new GateInfraError('--app-url required for browser verdicts (or pass --no-browser)')
+    try {
+      await fetch(values['app-url'])
+    } catch {
+      throw new GateInfraError(`app-url unreachable: ${values['app-url']}`)
+    }
+  }
   const repoRoot = sh(['git', 'rev-parse', '--show-toplevel'], { cwd: dir }).stdout.trim()
   const baselinePath = join(dir, '.uigraph-gate', 'baseline.json')
   let baseline
