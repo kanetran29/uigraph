@@ -1,25 +1,32 @@
-// The app logo: a coral 8px-radius squircle holding the white "UI" node-and-edge monogram,
-// then an "UI-graph" wordmark in Space Grotesk where "UI" is currentColor (inherits the theme
-// text colour, so it flips light/dark) and "-graph" is the coral brand tint. No pill, no chrome
-// — the mark and one accent carry it. The favicon lives in public/logo.svg (the square knob mark).
+// The app logo: a violet gradient tile holding a minimal ui-graph — a root node branching
+// to two children, one over a solid "must" edge (verified, filled node) and one over a
+// dashed "may" edge (open, outlined node) — the dashboard's edge legend as a mark. The wordmark
+// is Space Grotesk SemiBold drawn as outline paths (no webfont needed): "UI" is
+// currentColor so it flips with the theme, "-graph" takes the accent. The favicon lives
+// in public/logo.svg (the tile mark alone); docs/assets mirror both.
 
 /** The UI-graph logo lockup, for the topbar and loading skeleton. */
 export function Logo(): JSX.Element {
   return (
-    <svg className="logo" viewBox="0 0 156 32" fill="none" role="img" aria-label="UI-graph">
-      <rect x="0" y="0" width="32" height="32" rx="8" fill="#D97757" />
-      <g transform="translate(16 16) scale(0.2) translate(-58 -44)">
-        <path d="M16 22 V54 C16 89, 68 89, 68 54 V22" stroke="#fff" strokeWidth="8" strokeLinecap="round" fill="none" />
-        <circle cx="16" cy="16" r="9" fill="none" stroke="#fff" strokeWidth="7" />
-        <circle cx="68" cy="16" r="9" fill="#fff" />
-        <path d="M100 22 V66" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
-        <circle cx="100" cy="16" r="9" fill="#fff" />
-        <circle cx="100" cy="72" r="9" fill="none" stroke="#fff" strokeWidth="7" />
+    <svg className="logo" viewBox="0 0 122 32" fill="none" role="img" aria-label="UI-graph">
+      <defs>
+        <linearGradient id="logo-tile" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#7C3AED" />
+          <stop offset="1" stopColor="#6D28D9" />
+        </linearGradient>
+      </defs>
+      <g transform="scale(0.25)">
+        <rect width="128" height="128" rx="32" fill="url(#logo-tile)" />
+        <path d="M56.9 50.2 L44.6 74.8" stroke="#fff" strokeWidth="8" strokeLinecap="round" fill="none" />
+        <path d="M82.2 72.3 L71.1 50.2" stroke="#fff" strokeWidth="8" fill="none" strokeDasharray="5 4.9" />
+        <circle cx="64" cy="36" r="12.5" fill="#fff" />
+        <circle cx="36" cy="92" r="12.5" fill="#fff" />
+        <circle cx="92" cy="92" r="12.5" fill="none" stroke="#fff" strokeWidth="7.5" />
       </g>
-      <text x="42" y="22" fontFamily="'Space Grotesk', ui-sans-serif, system-ui, sans-serif" fontSize="19" fontWeight="600" letterSpacing="-0.4">
-        <tspan fill="currentColor">UI</tspan>
-        <tspan fill="#D97757">-graph</tspan>
-      </text>
+      <g transform="translate(42 22.6)">
+        <path d="M6.37 0.27Q4.77 0.27 3.62 -0.31Q2.47 -0.89 1.85 -1.99Q1.23 -3.1 1.23 -4.62L1.23 -13.3L3.52 -13.3L3.52 -4.56Q3.52 -3.23 4.26 -2.51Q5 -1.79 6.37 -1.79Q7.75 -1.79 8.48 -2.51Q9.22 -3.23 9.22 -4.56L9.22 -13.3L11.5 -13.3L11.5 -4.62Q11.5 -3.1 10.89 -1.99Q10.28 -0.89 9.12 -0.31Q7.96 0.27 6.37 0.27ZM13.65 0L13.65 -13.3L15.95 -13.3L15.95 0Z" fill="currentColor" />
+        <path d="M18.21 -3.88L18.21 -5.83L23.84 -5.83L23.84 -3.88ZM25.71 -4.65L25.71 -4.94Q25.71 -6.42 26.3 -7.48Q26.89 -8.53 27.88 -9.09Q28.86 -9.65 30.04 -9.65Q31.37 -9.65 32.07 -9.18Q32.76 -8.7 33.08 -8.15L33.4 -8.15L33.4 -9.39L35.53 -9.39L35.53 1.79Q35.53 2.72 35 3.26Q34.47 3.8 33.56 3.8L27.25 3.8L27.25 1.9L32.82 1.9Q33.37 1.9 33.37 1.33L33.37 -1.39L33.04 -1.39Q32.83 -1.06 32.47 -0.73Q32.11 -0.4 31.52 -0.17Q30.93 0.06 30.04 0.06Q28.86 0.06 27.88 -0.5Q26.89 -1.06 26.3 -2.12Q25.71 -3.17 25.71 -4.65ZM30.65 -1.86Q31.83 -1.86 32.61 -2.61Q33.39 -3.36 33.39 -4.71L33.39 -4.9Q33.39 -6.27 32.62 -7.01Q31.85 -7.75 30.65 -7.75Q29.47 -7.75 28.68 -7.01Q27.89 -6.27 27.89 -4.9L27.89 -4.71Q27.89 -3.36 28.68 -2.61Q29.47 -1.86 30.65 -1.86ZM37.91 0L37.91 -9.39L40.05 -9.39L40.05 -8.3L40.38 -8.3Q40.59 -8.89 41.08 -9.16Q41.57 -9.42 42.26 -9.42L43.4 -9.42L43.4 -7.49L42.22 -7.49Q41.27 -7.49 40.68 -6.98Q40.09 -6.48 40.09 -5.43L40.09 0ZM47.6 0.27Q46.61 0.27 45.81 -0.09Q45.01 -0.44 44.55 -1.1Q44.08 -1.77 44.08 -2.74Q44.08 -3.69 44.55 -4.33Q45.01 -4.98 45.83 -5.31Q46.65 -5.64 47.69 -5.64L50.41 -5.64L50.41 -6.21Q50.41 -6.95 49.95 -7.42Q49.5 -7.88 48.53 -7.88Q47.58 -7.88 47.09 -7.44Q46.61 -6.99 46.46 -6.29L44.44 -6.95Q44.67 -7.69 45.18 -8.3Q45.68 -8.91 46.51 -9.28Q47.35 -9.65 48.57 -9.65Q50.41 -9.65 51.46 -8.73Q52.52 -7.81 52.52 -6.06L52.52 -2.37Q52.52 -1.8 53.05 -1.8L53.85 -1.8L53.85 0L52.31 0Q51.63 0 51.19 -0.34Q50.75 -0.68 50.75 -1.27L50.75 -1.31L50.43 -1.31Q50.31 -1.04 50.03 -0.66Q49.74 -0.28 49.17 -0.01Q48.59 0.27 47.6 0.27ZM47.96 -1.52Q49.04 -1.52 49.73 -2.14Q50.41 -2.75 50.41 -3.8L50.41 -3.99L47.83 -3.99Q47.12 -3.99 46.69 -3.69Q46.25 -3.38 46.25 -2.79Q46.25 -2.22 46.7 -1.87Q47.16 -1.52 47.96 -1.52ZM55.26 3.8L55.26 -9.39L57.41 -9.39L57.41 -8.15L57.73 -8.15Q58.05 -8.74 58.76 -9.2Q59.48 -9.65 60.81 -9.65Q61.95 -9.65 62.93 -9.09Q63.9 -8.53 64.49 -7.45Q65.08 -6.36 65.08 -4.84L65.08 -4.54Q65.08 -3.02 64.49 -1.94Q63.9 -0.85 62.94 -0.29Q61.97 0.27 60.81 0.27Q59.91 0.27 59.32 0.06Q58.72 -0.15 58.35 -0.49Q57.98 -0.84 57.77 -1.18L57.44 -1.18L57.44 3.8ZM60.16 -1.63Q61.36 -1.63 62.13 -2.4Q62.9 -3.17 62.9 -4.6L62.9 -4.79Q62.9 -6.23 62.12 -6.99Q61.34 -7.75 60.16 -7.75Q58.98 -7.75 58.19 -6.99Q57.41 -6.23 57.41 -4.79L57.41 -4.6Q57.41 -3.17 58.19 -2.4Q58.98 -1.63 60.16 -1.63ZM67.01 0L67.01 -13.3L69.19 -13.3L69.19 -8.15L69.52 -8.15Q69.67 -8.47 70.01 -8.8Q70.35 -9.12 70.91 -9.33Q71.47 -9.54 72.33 -9.54Q73.41 -9.54 74.25 -9.05Q75.08 -8.57 75.55 -7.69Q76.01 -6.82 76.01 -5.62L76.01 0L73.83 0L73.83 -5.45Q73.83 -6.59 73.27 -7.15Q72.71 -7.71 71.68 -7.71Q70.52 -7.71 69.86 -6.94Q69.19 -6.17 69.19 -4.75L69.19 0Z" fill="var(--accent, #6d28d9)" />
+      </g>
     </svg>
   )
 }
