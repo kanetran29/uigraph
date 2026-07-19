@@ -217,16 +217,9 @@ function stepImpact(repoRoot, baselineSha, impactAllow) {
 }
 
 /** Verdict 4: graph structure matches the approved contract (diff vs pinned baseline). */
-async function stepGraphMatch(dir, contract) {
+async function stepGraphMatch(dir, contract, baseline) {
   const map = sh([...UIGRAPH, 'map', dir, '--controls'])
   if (map.status !== 0) throw new GateInfraError(`uigraph map failed:\n${map.stderr || map.stdout}`)
-  const baselinePath = join(dir, '.uigraph-gate', 'baseline.json')
-  let baseline
-  try {
-    baseline = JSON.parse(readFileSync(baselinePath, 'utf8'))
-  } catch {
-    throw new GateInfraError(`no baseline at ${baselinePath} — run: gate.mjs baseline <dir>`)
-  }
   const { graph } = await readWorkspaceGraph(dir)
   if (!graph) throw new GateInfraError('map produced no graph')
   const { diffGraphs } = await import('@ui-graph/core')
@@ -250,6 +243,7 @@ function stepVerify(dir, appUrl, limit) {
 /** Verdict 6: behavioral Playwright specs from the contract; one retry for flake. */
 function stepSpecs(dir, behavioral, appUrl) {
   if (!behavioral || behavioral.length === 0) return { name: 'specs', status: 'green', detail: 'no behavioral ACs declared' }
+  if (!appUrl) throw new GateInfraError('--app-url required for behavioral specs (or pass --no-browser)')
   const specs = behavioral.map((b) => b.spec)
   const run = () => sh(['pnpm', 'exec', 'playwright', 'test', ...specs], { cwd: dir, env: { ...process.env, APP_URL: appUrl } })
   let r = run()
@@ -269,25 +263,29 @@ async function cmdCheck(dir, values) {
   const contractErrors = validateContract(contract)
   if (contractErrors.length > 0) throw new GateInfraError(`invalid contract:\n${contractErrors.join('\n')}`)
   const repoRoot = sh(['git', 'rev-parse', '--show-toplevel'], { cwd: dir }).stdout.trim()
+  const baselinePath = join(dir, '.uigraph-gate', 'baseline.json')
+  let baseline
+  try {
+    baseline = JSON.parse(readFileSync(baselinePath, 'utf8'))
+  } catch {
+    throw new GateInfraError(`no baseline at ${baselinePath} — run: gate.mjs baseline <dir>`)
+  }
   const verdicts = []
   const ordered = [
-    () => stepCheckCmd(repoRoot, values['check-cmd']),
-    () => stepAstGrep(dir, contract.code?.patterns),
-    async () => {
-      const baseline = JSON.parse(readFileSync(join(dir, '.uigraph-gate', 'baseline.json'), 'utf8'))
-      return stepImpact(repoRoot, baseline.sha, contract.code?.impactAllow)
-    },
-    () => stepGraphMatch(dir, contract),
-    () => (values['no-browser'] ? { name: 'verify', status: 'skip', detail: '--no-browser' } : stepVerify(dir, values['app-url'], values['verify-limit'])),
-    () => (values['no-browser'] ? { name: 'specs', status: 'skip', detail: '--no-browser' } : stepSpecs(dir, contract.behavioral, values['app-url'])),
+    { name: 'check-cmd', run: () => stepCheckCmd(repoRoot, values['check-cmd']) },
+    { name: 'ast-grep', run: () => stepAstGrep(dir, contract.code?.patterns) },
+    { name: 'impact', run: () => stepImpact(repoRoot, baseline.sha, contract.code?.impactAllow) },
+    { name: 'graph-match', run: () => stepGraphMatch(dir, contract, baseline) },
+    { name: 'verify', run: () => (values['no-browser'] ? { name: 'verify', status: 'skip', detail: '--no-browser' } : stepVerify(dir, values['app-url'], values['verify-limit'])) },
+    { name: 'specs', run: () => (values['no-browser'] ? { name: 'specs', status: 'skip', detail: '--no-browser' } : stepSpecs(dir, contract.behavioral, values['app-url'])) },
   ]
   let failed = false
-  for (const step of ordered) {
+  for (const entry of ordered) {
     if (failed) {
-      verdicts.push({ name: 'skipped', status: 'skip', detail: 'fail-fast' })
+      verdicts.push({ name: entry.name, status: 'skip', detail: 'fail-fast' })
       continue
     }
-    const v = await step()
+    const v = await entry.run()
     verdicts.push({ name: v.name, status: v.status, detail: v.detail })
     if (v.status === 'red') failed = true
   }
