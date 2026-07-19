@@ -95,7 +95,7 @@ export function matchContract(contract, diff) {
 }
 
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import { pathToFileURL } from 'node:url'
@@ -146,7 +146,7 @@ export function renderReport(ctx) {
 }
 
 /** Write report.md + report.json into <dir>/.uigraph-gate/. */
-function writeReport(dir, ctx) {
+export function writeReport(dir, ctx) {
   const out = join(dir, '.uigraph-gate')
   mkdirSync(out, { recursive: true })
   writeFileSync(join(out, 'report.json'), JSON.stringify(ctx, null, 2))
