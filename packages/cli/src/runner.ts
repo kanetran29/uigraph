@@ -565,7 +565,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       const a = leg.action
       if (a.kind === 'parked') return { confirmed: false, undrivable: true }
       // H1: never goto the synthetic sink; only run real interaction legs as the trigger.
-      if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
+      if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
       else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
       else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
     }
@@ -593,7 +593,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // bail before clicking controls on whatever page we happen to be on
     if (a.kind === 'parked') return { confirmed: false, undrivable: true }
     else if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
-    else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, 'click')
+    else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
     else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
     else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
     for (const as of leg.assertions) {
@@ -701,6 +701,12 @@ interface PwLocator {
   fill: (v: string, o?: unknown) => Promise<void>
   press: (key: string, o?: unknown) => Promise<void>
   count: () => Promise<number>
+  evaluate: (fn: (el: FormLike) => unknown) => Promise<unknown>
+}
+
+/** The form-submission slice of a DOM element `evaluate` runs against in-page (no `lib.dom` dependency in this Node package). */
+interface FormLike {
+  requestSubmit: () => void
 }
 interface PwPage {
   goto: (url: string) => Promise<unknown>
@@ -711,11 +717,21 @@ interface PwPage {
   close: () => Promise<void>
 }
 
-/** Evaluate a `page.getBy…`-style locator snippet against the page, then click/fill/press it. */
-async function runLocator(page: PwPage, locator: string, action: 'click' | 'fill' | 'press', value = ''): Promise<void> {
+/**
+ * Evaluate a `page.getBy…`-style locator snippet against the page, then
+ * click/fill/press/submit it. `submit` is distinct from `click`: the extractor
+ * models a form's `onSubmit` handler as a control on the `<form>` element itself
+ * (selector `"form"`), and a bounding-box click on a block-level form frequently
+ * lands on dead space beside its (inline, left-aligned) fields rather than on
+ * any element that would actually fire the browser's submit — so a `submit`
+ * event is driven via `requestSubmit()`, which dispatches the real submit event
+ * React's handler is listening for, the same as clicking the submit button.
+ */
+async function runLocator(page: PwPage, locator: string, action: 'click' | 'fill' | 'press' | 'submit', value = ''): Promise<void> {
   const expr = locator.replace(/^page\./, '')
   const loc = new Function('page', `return page.${expr}`)(page) as PwLocator
   if (action === 'click') await loc.click({ timeout: 5000 })
+  else if (action === 'submit') await loc.evaluate((el) => el.requestSubmit())
   else if (action === 'press') await loc.press(value, { timeout: 5000 })
   else await loc.fill(value, { timeout: 5000 })
 }

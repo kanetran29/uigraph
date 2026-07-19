@@ -10,12 +10,15 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { login } from '../auth'
 
 const router = useRouter()
 
 function onEmail(_event: Event): void {}
 
+/** Sign-in handler: records the session token, then enters the dashboard. */
 function submit(): void {
+  login()
   router.push('/dashboard')
 }
 </script>
