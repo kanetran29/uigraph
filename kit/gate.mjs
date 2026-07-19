@@ -93,3 +93,101 @@ export function matchContract(contract, diff) {
   const strictFail = expect.strict === true && (uncovered.nodes.length > 0 || uncovered.edges.length > 0)
   return { pass: !unmatched && removalViolations.length === 0 && !strictFail, results, removalViolations, uncovered }
 }
+
+import { spawnSync } from 'node:child_process'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { parseArgs } from 'node:util'
+import { pathToFileURL } from 'node:url'
+
+/** Raised for environment problems (missing tool/baseline/app) — mapped to exit 2, never exit 1. */
+export class GateInfraError extends Error {}
+
+/** Run a command (string split on spaces, or argv array); never throws, returns status+output. */
+export function sh(cmdline, opts = {}) {
+  const argv = Array.isArray(cmdline) ? cmdline : cmdline.split(' ')
+  const r = spawnSync(argv[0], argv.slice(1), { encoding: 'utf8', ...opts })
+  if (r.error && r.error.code === 'ENOENT') throw new GateInfraError(`command not found: ${argv[0]}`)
+  return { status: r.status ?? 2, stdout: r.stdout ?? '', stderr: r.stderr ?? '' }
+}
+
+const UIGRAPH = (process.env.UIGRAPH_BIN ?? 'uigraph').split(' ')
+
+/** Read base graph + mappedAt from a workspace's uigraph.db via @ui-graph/core/node. */
+async function readWorkspaceGraph(dir) {
+  const { openStore } = await import('@ui-graph/core/node')
+  const store = openStore(join(dir, 'uigraph.db'))
+  try {
+    return { graph: store.getBaseGraph(), mappedAt: store.getFingerprint()?.mappedAt ?? null }
+  } finally {
+    store.close()
+  }
+}
+
+/** `gate baseline <dir>`: map now, snapshot graph + git sha as the pre-code reference. */
+async function cmdBaseline(dir) {
+  const map = sh([...UIGRAPH, 'map', dir, '--controls'])
+  if (map.status !== 0) throw new GateInfraError(`uigraph map failed:\n${map.stderr || map.stdout}`)
+  const { graph, mappedAt } = await readWorkspaceGraph(dir)
+  if (!graph) throw new GateInfraError('map produced no graph')
+  const sha = sh(['git', 'rev-parse', 'HEAD']).stdout.trim()
+  const out = join(dir, '.uigraph-gate')
+  mkdirSync(out, { recursive: true })
+  writeFileSync(join(out, 'baseline.json'), JSON.stringify({ sha, mappedAt, graph }, null, 2))
+  console.log(`baseline pinned: ${graph.nodes.length} nodes, ${graph.edges.length} edges @ ${sha.slice(0, 7)}`)
+}
+
+/** Render the aggregated gate report as markdown. */
+export function renderReport(ctx) {
+  const overall = ctx.verdicts.some((v) => v.status === 'red') ? 'RED' : 'GREEN'
+  const lines = [`# Gate report — ${ctx.ticket}`, '', `**Overall: ${overall}**`, '']
+  for (const v of ctx.verdicts) lines.push(`- [${v.status}] **${v.name}** — ${v.detail}`)
+  return lines.join('\n') + '\n'
+}
+
+/** Write report.md + report.json into <dir>/.uigraph-gate/. */
+function writeReport(dir, ctx) {
+  const out = join(dir, '.uigraph-gate')
+  mkdirSync(out, { recursive: true })
+  writeFileSync(join(out, 'report.json'), JSON.stringify(ctx, null, 2))
+  writeFileSync(join(out, 'report.md'), renderReport(ctx))
+}
+
+/** Placeholder until Task 3 wires the verdict pipeline. */
+async function cmdCheck() {
+  throw new GateInfraError('check pipeline not implemented yet (Task 3)')
+}
+
+/** CLI entry: `baseline <dir>` | `check <dir> --contract <file> [--app-url u] [--check-cmd c] [--no-browser] [--max-rounds n]`. */
+async function main() {
+  const { positionals, values } = parseArgs({
+    allowPositionals: true,
+    options: {
+      contract: { type: 'string' },
+      'app-url': { type: 'string' },
+      'check-cmd': { type: 'string', default: 'pnpm check' },
+      'no-browser': { type: 'boolean', default: false },
+      'max-rounds': { type: 'string', default: '3' },
+      'verify-limit': { type: 'string', default: '10' },
+    },
+  })
+  const [cmd, dirArg] = positionals
+  if (!cmd || !dirArg) {
+    console.error('usage: gate.mjs baseline <dir> | gate.mjs check <dir> --contract <file> [...]')
+    process.exit(2)
+  }
+  const dir = resolve(dirArg)
+  try {
+    if (cmd === 'baseline') await cmdBaseline(dir)
+    else if (cmd === 'check') await cmdCheck(dir, values)
+    else throw new GateInfraError(`unknown command: ${cmd}`)
+  } catch (err) {
+    if (err instanceof GateInfraError) {
+      console.error(`[gate:infra] ${err.message}`)
+      process.exit(2)
+    }
+    throw err
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main()

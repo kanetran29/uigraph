@@ -65,3 +65,20 @@ test('globToRegExp: ** crosses slashes, * does not', () => {
   assert.equal(globToRegExp('file?.ts').test('file?.ts'), true)
   assert.equal(globToRegExp('abc?.ts').test('ab.ts'), false)
 })
+
+import { renderReport } from './gate.mjs'
+
+test('renderReport: one line per verdict with status and PASS/FAIL banner', () => {
+  const md = renderReport({
+    ticket: 'GAU-1',
+    verdicts: [
+      { name: 'check-cmd', status: 'green', detail: 'exit 0' },
+      { name: 'graph-match', status: 'red', detail: '1 expected node unmatched' },
+      { name: 'verify', status: 'skip', detail: 'fail-fast' },
+    ],
+  })
+  assert.ok(md.includes('# Gate report — GAU-1'))
+  assert.ok(md.includes('RED'))
+  assert.ok(md.includes('graph-match'))
+  assert.ok(md.includes('skip'))
+})

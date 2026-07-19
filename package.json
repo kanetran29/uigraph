@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@ui-graph/core": "workspace:*",
     "eslint": "^10.5.0",
     "playwright-core": "^1.60.0",
     "tsup": "catalog:",

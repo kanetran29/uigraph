@@ -38,6 +38,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2
+      '@ui-graph/core':
+        specifier: workspace:*
+        version: link:packages/core
       eslint:
         specifier: ^10.5.0
         version: 10.5.0
