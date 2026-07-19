@@ -1,0 +1,65 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { validateContract, matchContract, itemMatches, globToRegExp } from './gate.mjs'
+
+const node = (over = {}) => ({
+  id: 'c_products_clear_0', route: null, componentPath: 'src/pages/ProductsIndex.tsx',
+  label: 'Clear filter', kind: 'control', parent: 'n_products_index',
+  control: { element: 'button', controlType: 'button' }, ...over,
+})
+const emptyDiff = () => ({
+  addedNodes: [], removedNodes: [], changedNodes: [], addedEdges: [], removedEdges: [], changedEdges: [],
+})
+
+test('itemMatches: exact, substring (~), nested control', () => {
+  const spec = { kind: 'control', 'label~': 'clear filter', 'parent~': 'products', control: { controlType: 'button' } }
+  assert.equal(itemMatches(spec, node()), true)
+  assert.equal(itemMatches(spec, node({ label: 'Reset' })), false)
+  assert.equal(itemMatches({ ...spec, control: { controlType: 'input' } }, node()), false)
+})
+
+test('matchContract: pass when every expected item matches', () => {
+  const contract = { ticket: 'T', requirement: 'r', expect: { addedNodes: [{ 'label~': 'clear' }], forbidRemovals: true } }
+  const diff = { ...emptyDiff(), addedNodes: [node()] }
+  const res = matchContract(contract, diff)
+  assert.equal(res.pass, true)
+  assert.equal(res.results[0].matched, 'c_products_clear_0')
+})
+
+test('matchContract: fail when an expected node is absent', () => {
+  const contract = { ticket: 'T', requirement: 'r', expect: { addedNodes: [{ 'label~': 'clear' }] } }
+  const res = matchContract(contract, emptyDiff())
+  assert.equal(res.pass, false)
+  assert.equal(res.results[0].matched, null)
+})
+
+test('matchContract: forbidRemovals flags any removal', () => {
+  const contract = { ticket: 'T', requirement: 'r', expect: { forbidRemovals: true } }
+  const diff = { ...emptyDiff(), removedNodes: [node({ id: 'n_gone' })] }
+  const res = matchContract(contract, diff)
+  assert.equal(res.pass, false)
+  assert.deepEqual(res.removalViolations, ['n_gone'])
+})
+
+test('matchContract: uncovered additions warn, fail only under strict', () => {
+  const extra = node({ id: 'c_surprise', label: 'Surprise' })
+  const diff = { ...emptyDiff(), addedNodes: [extra] }
+  const loose = matchContract({ ticket: 'T', requirement: 'r', expect: {} }, diff)
+  assert.equal(loose.pass, true)
+  assert.deepEqual(loose.uncovered.nodes, ['c_surprise'])
+  const strict = matchContract({ ticket: 'T', requirement: 'r', expect: { strict: true } }, diff)
+  assert.equal(strict.pass, false)
+})
+
+test('validateContract: catches missing fields and bad pattern mode', () => {
+  assert.deepEqual(validateContract({ ticket: 'T', requirement: 'r', expect: {} }), [])
+  assert.ok(validateContract({}).some((e) => e.startsWith('ticket')))
+  const bad = { ticket: 'T', requirement: 'r', expect: {}, code: { patterns: [{ mode: 'maybe', astGrep: 'pattern: x' }] } }
+  assert.ok(validateContract(bad).some((e) => e.includes('mode')))
+})
+
+test('globToRegExp: ** crosses slashes, * does not', () => {
+  assert.equal(globToRegExp('examples/**').test('examples/a/b.ts'), true)
+  assert.equal(globToRegExp('examples/*.ts').test('examples/a/b.ts'), false)
+  assert.equal(globToRegExp('examples/*.ts').test('examples/a.ts'), true)
+})
