@@ -760,11 +760,21 @@ describe('runKit (agent kit)', () => {
     expect(existsSync(join(dir, '.uigraph', 'kit', 'gate.mjs'))).toBe(true)
   })
 
-  it('install --claude drops a single SKILL.md skill', () => {
+  it('install --claude drops both the uigraph skill and the verification-gate skill', () => {
     const dir = tempDir('uigraph-cli-kit-claude-')
     const { written } = runKitInstall({ dir, claude: true })
-    expect(written).toEqual([join(dir, '.claude', 'skills', 'uigraph', 'SKILL.md')])
-    expect(existsSync(written[0]!)).toBe(true)
+    expect(written).toEqual([
+      join(dir, '.claude', 'skills', 'uigraph', 'SKILL.md'),
+      join(dir, '.claude', 'skills', 'uigraph-gate', 'SKILL.md'),
+    ])
+    expect(written.every((p) => existsSync(p))).toBe(true)
+  })
+
+  it('default install writes the gate skill markdown under .uigraph/kit/', () => {
+    const dir = tempDir('uigraph-cli-kit-default-')
+    const { written } = runKitInstall({ dir })
+    expect(existsSync(join(dir, '.uigraph', 'kit', 'gate-skill.md'))).toBe(true)
+    expect(written).toContain(join(dir, '.uigraph', 'kit', 'gate-skill.md'))
   })
 })
 

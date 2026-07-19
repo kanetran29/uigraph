@@ -586,16 +586,20 @@ export interface RunKitInstallOptions {
 /**
  * Install the agent kit into a target. By default copies every kit file under
  * `<dir>/.uigraph/kit/` (preserving the manifest paths); with `--claude`, instead
- * drops SKILL.md at `<dir>/.claude/skills/uigraph/SKILL.md` for Claude Code. Returns
- * the list of written file paths.
+ * drops two Claude Code skills — SKILL.md at `<dir>/.claude/skills/uigraph/SKILL.md`
+ * and the verification-gate protocol at `<dir>/.claude/skills/uigraph-gate/SKILL.md`.
+ * Returns the list of written file paths.
  */
 export function runKitInstall(opts: RunKitInstallOptions = {}): { written: string[] } {
   const root = opts.dir ?? process.cwd()
   if (opts.claude === true) {
-    const out = join(root, '.claude', 'skills', 'uigraph', 'SKILL.md')
-    ensureDir(dirname(out), out)
-    writeFileSync(out, readKitFile('SKILL.md'))
-    return { written: [out] }
+    const skillOut = join(root, '.claude', 'skills', 'uigraph', 'SKILL.md')
+    ensureDir(dirname(skillOut), skillOut)
+    writeFileSync(skillOut, readKitFile('SKILL.md'))
+    const gateOut = join(root, '.claude', 'skills', 'uigraph-gate', 'SKILL.md')
+    ensureDir(dirname(gateOut), gateOut)
+    writeFileSync(gateOut, readKitFile('gate-skill.md'))
+    return { written: [skillOut, gateOut] }
   }
   const base = join(root, '.uigraph', 'kit')
   const written: string[] = []
