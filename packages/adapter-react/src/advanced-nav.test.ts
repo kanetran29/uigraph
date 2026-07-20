@@ -170,3 +170,123 @@ export default function H(){
     expect(idsA.length).toBeGreaterThanOrEqual(1)
   })
 })
+
+describe('self-loop effect edges (feature A)', () => {
+  it('mints a control->parent-screen edge for a control whose only effect is an api call', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){
+  return <button onClick={() => fetch('/api/orders', { method: 'POST' })}>Buy</button>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    expect(control).toBeDefined()
+    const e = graph.edges.find((x) => x.from === control?.id)
+    expect(e).toBeDefined()
+    expect(e?.to).toBe('n_root')
+    expect(e?.effect).toBe('api:POST /api/orders')
+    expect(e?.modality).toBe('must')
+    expect(e?.source).toBe('static')
+    expect(e?.witness?.source).toBe('static')
+    expect(validateGraph(graph)).toEqual([])
+  })
+
+  it('mints a control->parent-screen edge for a control whose only effect is a state setter', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'
+export default function H(){
+  const [cart, setCart] = useState([])
+  return <button onClick={() => setCart([])}>Clear</button>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    const e = graph.edges.find((x) => x.from === control?.id)
+    expect(e).toBeDefined()
+    expect(e?.to).toBe('n_root')
+    expect(e?.effect).toBe('state:setCart')
+  })
+
+  it('joins multiple effects on the handler onto ONE self-loop edge, not one per effect', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'
+export default function H(){
+  const [cart, setCart] = useState([])
+  return <button onClick={() => { fetch('/api/orders', { method: 'POST' }); setCart([]) }}>Buy</button>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    const selfLoopEdges = graph.edges.filter((x) => x.from === control?.id)
+    expect(selfLoopEdges.length).toBe(1)
+    expect(selfLoopEdges[0]?.effect).toBe('api:POST /api/orders, state:setCart')
+  })
+
+  it('does NOT mint a self-loop when the control already navigates (nav edge untouched)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /><Route path="/done" element={<section>done</section>} /></Routes>)`,
+        '/H.tsx': `import { useNavigate } from 'react-router-dom'
+export default function H(){
+  const navigate = useNavigate()
+  return <button onClick={() => { fetch('/api/x'); navigate('/done') }}>Go</button>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    const fromControl = graph.edges.filter((x) => x.from === control?.id)
+    expect(fromControl.length).toBe(1)
+    expect(fromControl[0]?.to).toBe('n_done')
+    expect(fromControl[0]?.effect).toBe('navigate')
+  })
+
+  it('does NOT mint a self-loop for a control with only a close:modal effect (already edged)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'
+export default function H(){
+  const [showModal, setShowModal] = useState(false)
+  return <div>{showModal && <button onClick={() => setShowModal(false)}>Cancel</button>}</div>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    const fromControl = graph.edges.filter((x) => x.from === control?.id)
+    expect(fromControl.length).toBe(1)
+    expect(fromControl[0]?.effect).toBe('close:modal')
+  })
+
+  it('keeps self-loop edge ids stable across re-extraction', () => {
+    const files = {
+      '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+      '/H.tsx': `export default function H(){
+  return <button onClick={() => fetch('/api/orders', { method: 'POST' })}>Buy</button>
+}`,
+    }
+    const a = extractGraph(inMemory(files), '/', { controls: true })
+    const b = extractGraph(inMemory(files), '/', { controls: true })
+    const controlA = a.graph.nodes.find((n) => n.kind === 'control')
+    const controlB = b.graph.nodes.find((n) => n.kind === 'control')
+    const idA = a.graph.edges.find((e) => e.from === controlA?.id)?.id
+    const idB = b.graph.edges.find((e) => e.from === controlB?.id)?.id
+    expect(idA).toBeDefined()
+    expect(idA).toEqual(idB)
+  })
+})

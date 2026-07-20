@@ -49,6 +49,8 @@ this table.
 | g23 | `navigate({ pathname: '/products', search: '?sort=price' })` | `ProductsIndex.tsx` | must-edge `/products` -> `/products` (self, new search) | must | Object form with a literal pathname is as static as a string literal. |
 | g24 | ``navigate(`/products/${id}`)``, `id` from state | `ProductsIndex.tsx` | may-edge `/products` -> `/products/:productId` via prefix matching | may | The template prefix uniquely matches the param route; the suffix is dynamic. |
 | g25 | `ProtectedRoute` children pattern wrapping `/account` | `src/ProtectedRoute.tsx`, `src/router.tsx` | may-edge `/account` -> `/login`, and `/account` still resolves to the `Account` page through the wrapper | may | Literal Navigate inside a reusable guard component; requires seeing through one wrapper layer. |
+| g26 | plan `<select onChange={(e) => setPlan(e.target.value)}>` — no nav, no modal | `Pricing.tsx` | must-edge `/pricing` -> `/pricing` (self-loop) carrying `effect: "state:setPlan"` | must | Feature A: a control whose only effects are api:\*/state:\* mints ONE self-loop edge back to its own screen, so a pure state mutation is graph-visible instead of a control with `effects` but zero edges. |
+| g27 | `<button onClick={() => dispatch({type:'LOGOUT'})}>` — no nav, no modal | `Account.tsx` | must-edge `/account` -> `/account` (self-loop) carrying `effect: "state:dispatch"` | must | Same feature, distinct from g15: g15 is about the store-subscription's OWN honest degrade to `/`; g27 is the button's OWN click handler, which previously had zero outgoing edges despite dispatching. |
 
 ## Notes for graders
 

@@ -304,6 +304,24 @@
       "toRoute": "/login",
       "minimum": "may",
       "description": "ProtectedRoute children pattern: {user ? children : <Navigate to=\"/login\"/>} wrapping /account"
+    },
+    {
+      "id": "g26",
+      "category": "effect-only-control",
+      "kind": "edge",
+      "fromRoute": "/pricing",
+      "toRoute": "/pricing",
+      "minimum": "must",
+      "description": "the plan <select onChange> only calls setPlan(e.target.value) — no nav, no modal; self-loop edge back to its own screen so the pure state effect is graph-visible instead of a zero-edge control"
+    },
+    {
+      "id": "g27",
+      "category": "effect-only-control",
+      "kind": "edge",
+      "fromRoute": "/account",
+      "toRoute": "/account",
+      "minimum": "must",
+      "description": "'Log out' button's own click handler only dispatches {type:'LOGOUT'} — distinct from g15 (the store-subscription-driven nav elsewhere): the button itself now gets a self-loop edge instead of zero outgoing edges"
     }
   ]
 }

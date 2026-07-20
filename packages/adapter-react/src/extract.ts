@@ -278,6 +278,22 @@ export function extractGraphFromRoutes(
       // `may` (a modal's contents are conditionally rendered, never guaranteed to
       // mount). linkModals wires open:modal effects to the screen's modals — done only
       // for screen-level controls, since nested-modal targets aren't modelled in v1.
+      //
+      // A control whose only effects are api:*/state:*/error: calls (no nav, no modal
+      // edge) otherwise nodes `effects` but mints ZERO edges — invisible to
+      // coverage/verify. Such a control gets ONE self-loop edge back to the route's OWN
+      // screen (route.nodeId, not ownerId — a modal's effect-only control still returns
+      // to the screen, same as close:modal), keyed on a single representative event
+      // (inter.events[0] ?? 'click') with ALL its effects joined onto that one edge —
+      // edgeId keys on (from,to,event,guard), not effect, so one edge per effect would
+      // collide on the same tuple and silently drop all but the first. modality 'must' +
+      // source 'static' matches coverage.ts's classify(): a must-static-witnessed edge is
+      // accounted for free, so normal verify/coverage never try to drive it. The
+      // --verify-all sweep (includeProven) can still select it, and because the edge's
+      // `to` IS the control's own parent screen, a drivePlan run could trivially
+      // "confirm" via URL match before the click even fires — drivePlan lacks probePlan's
+      // same-path guard (2841fc9). That's a pre-existing runner gap this edge's shape
+      // cannot itself avoid; flagged, not fixed here.
       const emitControls = (ownerId: string, items: ControlItem[], forceMay: boolean, linkModals: boolean): void => {
         const nthBySig = new Map<string, number>()
         for (const { meta } of items) {
@@ -301,6 +317,7 @@ export function extractGraphFromRoutes(
           if (inter.effects.includes('state:dispatch')) {
             soundiness.push({ kind: 'dispatch-driven-nav', file, loc, detail: `${meta.name ?? meta.element} dispatches a store action; any resulting navigation is not statically extractable` })
           }
+          const edgeCountBeforeControl = edges.length
           for (const nav of inter.navs) {
             const ctxGuard = nav.ctx === 'success' ? 'onSuccess' : nav.ctx === 'error' ? 'onError' : null
             const guard = nav.guard ?? ctxGuard
@@ -348,6 +365,23 @@ export function extractGraphFromRoutes(
             if (modalTarget === undefined || modalTarget === ownerId) continue
             const ev = inter.events[0] ?? 'click'
             pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, isDescended ? 'may' : 'must', isDescended ? 0.5 : 1, file, loc)
+          }
+
+          // Effect-only control (no nav/modal edge minted above): self-loop to the parent screen.
+          if (edges.length === edgeCountBeforeControl) {
+            const effectKinds = nodeEffects.filter((eff) => eff.startsWith('api:') || eff.startsWith('state:') || eff.startsWith('error:'))
+            if (effectKinds.length > 0) {
+              const ev = inter.events[0] ?? 'click'
+              pushEdge(
+                cId,
+                route.nodeId,
+                { ti: { kind: 'literal', value: route.nodeId }, event: ev, effect: effectKinds.join(', '), node: el, guard: null, ruleId: 'rr.effect-self-loop' },
+                isDescended ? 'may' : 'must',
+                isDescended ? 0.6 : 1,
+                file,
+                loc,
+              )
+            }
           }
 
           nodes.push({
