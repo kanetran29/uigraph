@@ -576,9 +576,15 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       const a = leg.action
       if (a.kind === 'parked') return { confirmed: false, undrivable: true }
       // H1: never goto the synthetic sink; only run real interaction legs as the trigger.
-      if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
-      else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
-      else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+      // A locator that cannot resolve means the control is not rendered in this app
+      // state — the interaction never happened, so the target is undrivable.
+      try {
+        if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
+        else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
+        else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+      } catch {
+        return { confirmed: false, undrivable: true }
+      }
     }
     // H3: wait long enough to observe a timer/async redirect (>5s); H4: then settle to a stable URL.
     await page.waitForURL((u) => u.toString() !== startUrl, { timeout: 6500 }).catch(() => {})
@@ -604,9 +610,18 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // bail before clicking controls on whatever page we happen to be on
     if (a.kind === 'parked') return { confirmed: false, undrivable: true }
     else if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
-    else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
-    else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
-    else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+    else if (a.kind === 'click' || a.kind === 'press' || a.kind === 'fill') {
+      if (a.locator === undefined) continue
+      // Locator-miss = the control is not rendered in this app state; the
+      // interaction never ran, so this target is undrivable — never refuted.
+      try {
+        if (a.kind === 'click') await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
+        else if (a.kind === 'press') await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
+        else await runLocator(page, a.locator, 'fill', a.value ?? '')
+      } catch {
+        return { confirmed: false, undrivable: true }
+      }
+    }
     for (const as of leg.assertions) {
       if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
       if (as.kind === 'dialog') expectDialog = true

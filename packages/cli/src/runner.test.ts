@@ -25,7 +25,7 @@ const graph = (nodes: GraphNode[], edges: GraphEdge[]): UiGraph => ({ version: 0
 // mode an interaction (click/fill) advances it to `landUrl` so the driver observes a
 // real landing. In assert mode `landUrl` is left undefined and url() reflects the
 // last goto, so the URL-assert decision can be exercised without a browser.
-function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number }): {
+function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; clickError?: boolean }): {
   page: Parameters<typeof drivePlan>[0]
   clicks: number
   fills: number
@@ -34,6 +34,7 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number }
   const rec = { clicks: 0, fills: 0, evaluates: 0, current: opts.startUrl }
   const ctrl = {
     click: async () => {
+      if (opts.clickError === true) throw new Error('locator not found')
       rec.clicks++
       if (opts.landUrl !== undefined) rec.current = opts.landUrl
     },
@@ -313,5 +314,26 @@ describe('runVerify: proof-gate rejections are not counted as confirmed', () => 
     const check = openStore(join(dir, 'uigraph.db'))
     expect(check.getObservations().length).toBe(0)
     check.close()
+  })
+})
+
+// Regression: a locator that cannot be resolved (control not rendered in the
+// current app state, e.g. a Sign-in button while authenticated) means the
+// interaction was NEVER performed — that is undrivable, not a refutation.
+describe('drivePlan: absent control is undrivable, not refuted', () => {
+  it('returns undrivable when an interaction leg locator throws', async () => {
+    const signIn: GraphNode = {
+      id: 'cc_signin', route: null, componentPath: null, label: 'Sign in', kind: 'control', parent: 'n_root',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Sign in' } },
+    }
+    const gg = graph(
+      [node('n_root', { route: '/' }), { id: 'm_login', route: null, componentPath: null, label: 'LoginModal', kind: 'modal' }, signIn],
+      [edge('e', 'cc_signin', 'm_login', { event: 'click', modality: 'may', effect: 'open:modal' })],
+    )
+    const plan = buildSpecPlan(gg, planPath(gg, 'n_root', 'm_login')!, { baseUrl: 'http://app' })
+    const f = fakePage({ startUrl: 'http://app/', clickError: true })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
   })
 })
