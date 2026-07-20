@@ -10,11 +10,11 @@ import { gradeGauntlet } from '../../../scripts/gauntlet'
 
 const appDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'examples', 'sample-gauntlet-react')
 
-describe('gauntlet regression (35 common-website patterns)', () => {
+describe('gauntlet regression (37 common-website patterns)', () => {
   it('extracts every gauntlet case at or above its golden minimum — zero silent misses', () => {
     const grade = gradeGauntlet(appDir)
     const failed = grade.rows.filter((r) => !r.pass)
     expect(failed.map((r) => `${r.id} min=${r.minimum} got=${r.achieved}`)).toEqual([])
-    expect(grade.rows).toHaveLength(35)
+    expect(grade.rows).toHaveLength(37)
   })
 })
