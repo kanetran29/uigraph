@@ -610,6 +610,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
 
   let lastUrlAssertion: string | undefined
   let expectDialog = false
+  let requestEvidence: Evidence | undefined
   // Soundness: a parked leg is an interaction-triggered/guarded screen→screen nav
   // with no drivable control — codegen refuses to emit goto+URL-assert for it, so
   // the driver must NOT witness it; it stays asserted/llm-verified until truly driven.
@@ -618,7 +619,11 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // a parked leg means the rest of the plan cannot be legitimately driven —
     // bail before clicking controls on whatever page we happen to be on
     if (a.kind === 'parked') return { confirmed: false, undrivable: true }
-    else if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
+    // Arm each leg's request wait BEFORE firing its action — a fast response can land
+    // before an await on the action returns, so the wait must already be listening.
+    const reqAssertions = leg.assertions.filter((as): as is { kind: 'request'; value: string } => as.kind === 'request')
+    const requestWaits = reqAssertions.map((as) => armRequestWait(page, as.value))
+    if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
     else if (a.kind === 'click' || a.kind === 'press' || a.kind === 'fill') {
       if (a.locator === undefined) continue
       // Locator-miss = the control is not rendered in this app state; the
@@ -631,13 +636,21 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
         return { confirmed: false, undrivable: true }
       }
     }
+    if (reqAssertions.length > 0) {
+      const responses = await Promise.all(requestWaits)
+      // A miss (no matching call) or an error status is real disagreement — the
+      // action fired but the effect it claims did not soundly happen — never undrivable.
+      if (responses.some((r) => r === null || r.status < 200 || r.status >= 400)) return { confirmed: false }
+      const last = responses[responses.length - 1] as { method: string; url: string; status: number }
+      requestEvidence = { kind: 'request', ...last }
+    }
     for (const as of leg.assertions) {
       if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
       if (as.kind === 'dialog') expectDialog = true
     }
   }
   // a drive that asserted NOTHING cannot witness anything — never mint an evidence-free confirmation
-  if (lastUrlAssertion === undefined && !expectDialog) return { confirmed: false, undrivable: true }
+  if (lastUrlAssertion === undefined && !expectDialog && requestEvidence === undefined) return { confirmed: false, undrivable: true }
   let confirmed = true
   if (lastUrlAssertion !== undefined) {
     // SPA navigations and post-await handlers land asynchronously: wait for the
@@ -647,13 +660,32 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     const expected = lastUrlAssertion
     await page.waitForURL((u) => samePath(u.toString(), expected), { timeout: 4000 }).catch(() => {})
     confirmed = samePath(page.url(), expected)
-    // A same-path match is never positive evidence (see the doc comment above) — only an unexpected departure is.
-    if (confirmed && samePath(anchorUrl, expected) && !expectDialog) return { confirmed: false, undrivable: true }
+    // A same-path match is never positive evidence on its own — UNLESS a request
+    // assertion already proved the effect fired (the carved exception: same-path
+    // plans WITH a request assertion are drivable via the network call, not the URL).
+    if (confirmed && samePath(anchorUrl, expected) && !expectDialog && requestEvidence === undefined) return { confirmed: false, undrivable: true }
   }
   if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
   if (!confirmed) return { confirmed: false }
-  const evidence: Evidence = lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: 'dialog visible after drive' }
+  const evidence: Evidence = requestEvidence ?? (lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: 'dialog visible after drive' })
   return { confirmed: true, evidence }
+}
+
+/**
+ * Arm a wait for the network response an `api:*` effect's request assertion names
+ * (`"METHOD url"`, codegen's format). Returns null on any miss/timeout (no matching
+ * call arrived) instead of throwing, so the caller can treat a miss as plain
+ * disagreement rather than a crashed drive.
+ */
+async function armRequestWait(page: PwPage, value: string): Promise<{ method: string; url: string; status: number } | null> {
+  const [method, ...rest] = value.split(' ')
+  const path = rest.join(' ')
+  try {
+    const r = await page.waitForResponse((res) => res.request().method() === method && res.url().includes(path), { timeout: 5000 })
+    return { method: r.request().method(), url: r.url(), status: r.status() }
+  } catch {
+    return null
+  }
 }
 
 /** True when two URLs share origin+pathname (query string and hash ignored); `:param` segments in the expected path match any concrete segment. Tolerates bare-path inputs. */
@@ -745,12 +777,20 @@ interface PwLocator {
 interface FormLike {
   requestSubmit: () => void
 }
+
+/** The slice of a Playwright Response the request-evidence wait reads (method+url+status). */
+interface PwResponse {
+  url: () => string
+  status: () => number
+  request: () => { method: () => string }
+}
 interface PwPage {
   goto: (url: string) => Promise<unknown>
   url: () => string
   getByRole: (role: string) => PwLocator
   waitForLoadState: (state: string) => Promise<void>
   waitForURL: (predicate: (url: URL) => boolean, opts?: unknown) => Promise<void>
+  waitForResponse: (predicate: (r: PwResponse) => boolean, opts?: unknown) => Promise<PwResponse>
   close: () => Promise<void>
 }
 

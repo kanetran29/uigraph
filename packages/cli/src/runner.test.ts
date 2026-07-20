@@ -25,7 +25,13 @@ const graph = (nodes: GraphNode[], edges: GraphEdge[]): UiGraph => ({ version: 0
 // mode an interaction (click/fill) advances it to `landUrl` so the driver observes a
 // real landing. In assert mode `landUrl` is left undefined and url() reflects the
 // last goto, so the URL-assert decision can be exercised without a browser.
-function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; clickError?: boolean }): {
+// A canned network response the fake page's waitForResponse resolves with when it
+// matches the driver's predicate — 'never' means no matching response ever arrives
+// (the real driver's waitForResponse would time out; here it just rejects so the
+// driver's own `.catch(() => null)` sees a miss without the test waiting 5s).
+type FakeResponse = { method: string; url: string; status: number } | 'never'
+
+function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; clickError?: boolean; response?: FakeResponse }): {
   page: Parameters<typeof drivePlan>[0]
   clicks: number
   fills: number
@@ -61,6 +67,13 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; 
     locator: (_v: string) => ctrl,
     waitForLoadState: async () => {},
     waitForURL: async () => {},
+    waitForResponse: async (predicate: (r: { url: () => string; status: () => number; request: () => { method: () => string } }) => boolean) => {
+      if (opts.response === undefined || opts.response === 'never') throw new Error('no matching response arrived')
+      const canned = opts.response
+      const r = { url: () => canned.url, status: () => canned.status, request: () => ({ method: () => canned.method }) }
+      if (!predicate(r)) throw new Error('response did not match the predicate')
+      return r
+    },
   }
   return {
     page: page as unknown as Parameters<typeof drivePlan>[0],
@@ -315,6 +328,45 @@ describe('drivePlan: same-path assert soundness (self-loop edges)', () => {
   it('still refutes when the click unexpectedly navigates elsewhere (real static/runtime disagreement)', async () => {
     const plan = selfLoopPlan()
     const f = fakePage({ startUrl: 'http://app/a', landUrl: 'http://app/elsewhere' })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBeUndefined()
+  })
+
+  // The api-effect self-loop shape (a2720f6): a control click whose ONLY effect is a
+  // network call back to its own parent screen. A same-path plan carries no URL
+  // evidence, so a request assertion is the ONLY thing that can make it drivable —
+  // carved exactly there, per the request-evidence task.
+  const selfLoopPlanWithRequest = (): SpecPlan => {
+    const control: GraphNode = {
+      id: 'cc_save', route: null, componentPath: null, label: 'Save', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Save' } },
+    }
+    const gg = graph([node('n_a', { route: '/a' }), control], [edge('e', 'cc_save', 'n_a', { event: 'click', effect: 'api:POST /api/orders' })])
+    return buildSpecPlan(gg, planPath(gg, 'cc_save', 'n_a')!, { baseUrl: 'http://app' })
+  }
+
+  it('confirms a same-path effect self-loop when its request assertion fires with an acceptable status', async () => {
+    const plan = selfLoopPlanWithRequest()
+    const f = fakePage({ startUrl: 'http://app/a', response: { method: 'POST', url: 'http://app/api/orders', status: 201 } })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(f.clicks).toBeGreaterThan(0)
+    expect(res.confirmed).toBe(true)
+    expect(res.undrivable).toBeUndefined()
+    expect(res.evidence).toEqual({ kind: 'request', method: 'POST', url: 'http://app/api/orders', status: 201 })
+  })
+
+  it('does NOT confirm a same-path effect self-loop when no matching request ever arrives (real disagreement, not undrivable)', async () => {
+    const plan = selfLoopPlanWithRequest()
+    const f = fakePage({ startUrl: 'http://app/a', response: 'never' })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBeUndefined()
+  })
+
+  it('does NOT confirm a same-path effect self-loop when the matching request comes back with an error status', async () => {
+    const plan = selfLoopPlanWithRequest()
+    const f = fakePage({ startUrl: 'http://app/a', response: { method: 'POST', url: 'http://app/api/orders', status: 500 } })
     const res = await drivePlan(f.page, plan, 'http://app')
     expect(res.confirmed).toBe(false)
     expect(res.undrivable).toBeUndefined()

@@ -21,13 +21,17 @@ import { fnv1a } from './hash'
  * records that the browser's URL equalled the expected route after the drive;
  * `dialog` records an asserted visible dialog; `screenshot` points at a captured
  * artifact on disk (existence is checked by the recording layer, not here — the
- * core stays pure/browser-safe).
+ * core stays pure/browser-safe); `request` records a real network call the
+ * driver watched fire (method+url+status) — proof for an `api:*` effect edge
+ * that no URL change or dialog would otherwise witness (e.g. an effect-only
+ * self-loop).
  */
 export type Evidence =
   | { kind: 'url-change'; startUrl: string; landedUrl: string }
   | { kind: 'url-assert'; url: string }
   | { kind: 'dialog'; detail?: string }
   | { kind: 'screenshot'; path: string }
+  | { kind: 'request'; method: string; url: string; status: number }
 
 /** Who produced an observation: the shipped Playwright runner or an agent driving via MCP. */
 export type ObservationReporter = 'runner' | 'agent'
@@ -67,6 +71,10 @@ export function validateEvidence(evidence: Evidence): string | null {
       return null
     case 'screenshot':
       return evidence.path === '' ? 'screenshot evidence needs a non-empty path' : null
+    case 'request':
+      if (evidence.method === '' || evidence.url === '') return 'request evidence needs a non-empty method and url'
+      if (evidence.status < 200 || evidence.status >= 400) return `request evidence status ${evidence.status} is not a successful/redirect response (2xx/3xx)`
+      return null
   }
 }
 
