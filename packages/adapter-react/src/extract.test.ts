@@ -1194,6 +1194,40 @@ describe('extractGraph — naming chain: i18n resolution + img/svg/aria-labelled
     expect(graph.nodes.find((n) => n.kind === 'control')?.control?.name).toBe('Close')
   })
 
+  it('skips a non-exported namespace const declared before the real export (source-order alone is not enough)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ const t=(k)=>k; return <button aria-label={t('form.title')} onClick={()=>{}} /> }`,
+        // `common` sits first in source order and is itself an object literal, but it
+        // is never exported — the real resource map is `en`, merged from `common` plus
+        // its own keys. Grabbing the first object literal in source order would resolve
+        // against `common` (missing `form.title`) instead of `en`.
+        '/locales/en/translation.ts': `const common = { shared: 'Shared' }\nexport const en = { ...common, form: { title: 'Application form' } }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    expect(graph.nodes.find((n) => n.kind === 'control')?.control?.name).toBe('Application form')
+  })
+
+  it("keeps a control's id stable across a translation-copy-only edit (the locale VALUE changes, the i18n KEY and component do not)", () => {
+    const files = (label: string): Record<string, string> => ({
+      '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+      '/H.tsx': `export default function H(){ const t=(k)=>k; return <button aria-label={t('header.openMenuAria')} onClick={()=>{}} /> }`,
+      '/locales/en/translation.ts': `export const en = { header: { openMenuAria: '${label}' } }`,
+    })
+    const before = extractGraph(inMemory(files('Open menu')), '/', { controls: true }).graph
+    const after = extractGraph(inMemory(files('Open navigation')), '/', { controls: true }).graph
+    const idBefore = before.nodes.find((n) => n.kind === 'control')?.id
+    const idAfter = after.nodes.find((n) => n.kind === 'control')?.id
+    expect(idBefore).toBeDefined()
+    // the resolved name did change (proves the translated value really was picked up)…
+    expect(after.nodes.find((n) => n.kind === 'control')?.control?.name).toBe('Open navigation')
+    // …but the id, hashed on the i18n key rather than the translated string, did not.
+    expect(idAfter).toBe(idBefore)
+  })
+
   it('never throws and falls back to humanize when no locale file exists at all', () => {
     const { graph } = extractGraph(
       inMemory({

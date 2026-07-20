@@ -33,6 +33,15 @@ export interface ControlSelector {
   strategy: SelectorStrategy
   value: string
   nth?: number
+  /**
+   * An identity basis to content-address the control's id on INSTEAD of `value`,
+   * when `value` is not itself stable — e.g. an i18n-resolved accessible name/text,
+   * which can shift on a translation-copy-only edit that never touches the
+   * component. Absent whenever `value` is already stable on its own (testid,
+   * a literal attribute/label, structural tag, on-page DOM text). `value` still
+   * carries the real runtime automation string; `idKey` is used ONLY for hashing.
+   */
+  idKey?: string
 }
 
 /** Input constraints on a field control (input/textarea/select), for codegen fill values + validation probes. */

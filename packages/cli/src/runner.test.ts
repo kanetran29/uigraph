@@ -289,6 +289,38 @@ describe('probe same-path soundness', () => {
   })
 })
 
+// Regression: an effect-only self-loop edge (control -> its own parent screen) plans
+// to a start URL that already equals the asserted target — the same vulnerable shape
+// probePlan already guards against, now reachable via drivePlan's normal (non-probe)
+// path too, since feature A mints this edge for every effect-only control.
+describe('drivePlan: same-path assert soundness (self-loop edges)', () => {
+  const selfLoopPlan = (): SpecPlan => {
+    const control: GraphNode = {
+      id: 'cc_x', route: null, componentPath: null, label: 'Clear', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Clear' } },
+    }
+    const gg = graph([node('n_a', { route: '/a' }), control], [edge('e', 'cc_x', 'n_a', { event: 'click', effect: 'state:setX' })])
+    return buildSpecPlan(gg, planPath(gg, 'cc_x', 'n_a')!, { baseUrl: 'http://app' })
+  }
+
+  it('does NOT confirm a click that fires but does nothing (the page never had to move)', async () => {
+    const plan = selfLoopPlan()
+    const f = fakePage({ startUrl: 'http://app/a' })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(f.clicks).toBeGreaterThan(0)
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+  })
+
+  it('still refutes when the click unexpectedly navigates elsewhere (real static/runtime disagreement)', async () => {
+    const plan = selfLoopPlan()
+    const f = fakePage({ startUrl: 'http://app/a', landUrl: 'http://app/elsewhere' })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBeUndefined()
+  })
+})
+
 describe('runVerify: proof-gate rejections are not counted as confirmed', () => {
   it('rejected confirmation → confirmed 0, rejected 1, nothing persisted', async () => {
     const { mkdtempSync } = await import('node:fs')

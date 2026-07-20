@@ -273,6 +273,42 @@ export default function H(){
     expect(fromControl[0]?.effect).toBe('close:modal')
   })
 
+  it('does NOT mint a self-loop for a control whose only effect is a store dispatch (empirically unprovable)', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){
+  return <button onClick={() => dispatch({ type: 'LOGOUT' })}>Log out</button>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    expect(control).toBeDefined()
+    expect(graph.edges.some((x) => x.from === control?.id)).toBe(false)
+    expect(soundiness.some((s) => s.kind === 'dispatch-driven-nav')).toBe(true)
+  })
+
+  it('still self-loops the non-dispatch effects on a handler that ALSO dispatches', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'
+export default function H(){
+  const [cart, setCart] = useState([])
+  return <button onClick={() => { setCart([]); dispatch({ type: 'X' }) }}>Go</button>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    const selfLoopEdges = graph.edges.filter((x) => x.from === control?.id)
+    expect(selfLoopEdges.length).toBe(1)
+    expect(selfLoopEdges[0]?.effect).toBe('state:setCart')
+  })
+
   it('keeps self-loop edge ids stable across re-extraction', () => {
     const files = {
       '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,

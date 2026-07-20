@@ -49,12 +49,15 @@ function evalObjectLiteral(node: Node): unknown {
   return out
 }
 
-/** The first top-level exported object literal in a locale module: `export const en =
- *  {...}` (react-i18next's usual resources shape) or `export default {...}`. */
+/** The first top-level EXPORTED object literal in a locale module: `export const en =
+ *  {...}` (react-i18next's usual resources shape) or `export default {...}`. A
+ *  non-exported helper object declared earlier in the file (e.g. `const common =
+ *  {...}` spread into the real export) is skipped via `isExported()` — it is not
+ *  the module's resource map no matter how early it sits in source order. */
 function exportedObjectLiteral(sf: SourceFile): Node | undefined {
   for (const vd of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
     const init = vd.getInitializer()
-    if (init && Node.isObjectLiteralExpression(init)) return init
+    if (init && Node.isObjectLiteralExpression(init) && vd.isExported()) return init
   }
   const exportAssignment = sf.getDescendantsOfKind(SyntaxKind.ExportAssignment)[0]
   const expr = exportAssignment?.getExpression()

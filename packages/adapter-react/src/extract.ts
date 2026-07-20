@@ -290,14 +290,16 @@ export function extractGraphFromRoutes(
       // to the screen, same as close:modal), keyed on a single representative event
       // (inter.events[0] ?? 'click') with ALL its effects joined onto that one edge —
       // edgeId keys on (from,to,event,guard), not effect, so one edge per effect would
-      // collide on the same tuple and silently drop all but the first. modality 'must' +
-      // source 'static' matches coverage.ts's classify(): a must-static-witnessed edge is
-      // accounted for free, so normal verify/coverage never try to drive it. The
-      // --verify-all sweep (includeProven) can still select it, and because the edge's
-      // `to` IS the control's own parent screen, a drivePlan run could trivially
-      // "confirm" via URL match before the click even fires — drivePlan lacks probePlan's
-      // same-path guard (2841fc9). That's a pre-existing runner gap this edge's shape
-      // cannot itself avoid; flagged, not fixed here.
+      // collide on the same tuple and silently drop all but the first. state:dispatch is
+      // excluded from the trigger set: a store dispatch's resulting navigation (if any)
+      // happens off the static AST (the dispatch-driven-nav note above already records
+      // that honestly), so asserting a must self-loop for it would claim the opposite —
+      // that the control provably stays put. A local state:setX setter has no such escape
+      // hatch and still qualifies. modality 'must' + source 'static' matches coverage.ts's
+      // classify(): a must-static-witnessed edge is accounted for free, so normal
+      // verify/coverage never try to drive it. The --verify-all sweep (includeProven) can
+      // still select it; drivePlan's same-path guard (runner.ts) stops that drive from
+      // trivially "confirming" via URL match before the click even fires.
       const emitControls = (ownerId: string, items: ControlItem[], forceMay: boolean, linkModals: boolean): void => {
         const nthBySig = new Map<string, number>()
         for (const { meta } of items) {
@@ -372,8 +374,9 @@ export function extractGraphFromRoutes(
           }
 
           // Effect-only control (no nav/modal edge minted above): self-loop to the parent screen.
+          // state:dispatch is excluded from the trigger set (see emitControls' doc comment).
           if (edges.length === edgeCountBeforeControl) {
-            const effectKinds = nodeEffects.filter((eff) => eff.startsWith('api:') || eff.startsWith('state:') || eff.startsWith('error:'))
+            const effectKinds = nodeEffects.filter((eff) => (eff.startsWith('api:') || eff.startsWith('state:') || eff.startsWith('error:')) && eff !== 'state:dispatch')
             if (effectKinds.length > 0) {
               const ev = inter.events[0] ?? 'click'
               pushEdge(

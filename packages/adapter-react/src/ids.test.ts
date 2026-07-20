@@ -23,6 +23,18 @@ describe('controlNodeId', () => {
     expect(controlNodeId('n_a', sel)).not.toBe(controlNodeId('n_b', sel))
   })
 
+  it('hashes idKey over value when present (an i18n-resolved name stays stable under a translation-copy edit)', () => {
+    const before = { strategy: 'role-name' as const, value: 'button|Open menu', idKey: 'button|header.openMenuAria' }
+    const afterCopyEdit = { strategy: 'role-name' as const, value: 'button|Ouvrir le menu', idKey: 'button|header.openMenuAria' }
+    expect(controlNodeId('n_a', before)).toBe(controlNodeId('n_a', afterCopyEdit))
+  })
+
+  it('a genuinely different idKey still yields a different id (not vacuously stable)', () => {
+    const a = { strategy: 'role-name' as const, value: 'button|Open menu', idKey: 'button|header.openMenuAria' }
+    const b = { strategy: 'role-name' as const, value: 'button|Close menu', idKey: 'button|header.closeMenuAria' }
+    expect(controlNodeId('n_a', a)).not.toBe(controlNodeId('n_a', b))
+  })
+
   it('routeToNodeId still maps route patterns to stable ids', () => {
     expect(routeToNodeId('/products/:id')).toBe('n_products_id')
   })
