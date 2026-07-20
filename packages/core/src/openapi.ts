@@ -7,7 +7,7 @@
 //
 // Effects with no matching operation are reported as drift (code ↔ docs mismatch).
 
-import type { UiGraph } from './ir'
+import { effectTokens, type UiGraph } from './ir'
 
 /** A top-level request-body field recovered from an operation's JSON schema. */
 export interface ApiField {
@@ -161,7 +161,10 @@ export function summarizeApiEffect(spec: Json, effect: string): ApiOperationSumm
 /** Collect every distinct "api:..." effect referenced by a graph's edges and controls. */
 export function collectApiEffects(graph: UiGraph): string[] {
   const set = new Set<string>()
-  for (const e of graph.edges) if (e.effect && e.effect.startsWith('api:')) set.add(e.effect)
+  // An effect self-loop edge joins several kinds onto one `effect` string (see
+  // `effectTokens`); split before filtering so a joined 'api:POST /x, state:setY'
+  // contributes its clean 'api:POST /x' token, not the whole unparseable blob.
+  for (const e of graph.edges) for (const token of effectTokens(e.effect)) if (token.startsWith('api:')) set.add(token)
   for (const n of graph.nodes) {
     for (const eff of n.control?.effects ?? []) if (eff.startsWith('api:')) set.add(eff)
   }

@@ -371,6 +371,57 @@ describe('drivePlan: same-path assert soundness (self-loop edges)', () => {
     expect(res.confirmed).toBe(false)
     expect(res.undrivable).toBeUndefined()
   })
+
+  // Regression: armRequestWait used to match via `res.url().includes(path)` — a raw
+  // substring test. An unrelated request whose URL merely CONTAINS the expected path
+  // (e.g. a different, longer endpoint sharing the same prefix) must NOT satisfy it;
+  // only an exact pathname match may.
+  it('does NOT confirm via an unrelated request whose URL merely contains the expected path as a substring', async () => {
+    const plan = selfLoopPlanWithRequest()
+    const f = fakePage({ startUrl: 'http://app/a', response: { method: 'POST', url: 'http://app/api/orders/history', status: 200 } })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBeUndefined()
+  })
+})
+
+// Regression: lastUrlAssertion/expectDialog/requestEvidence used to be plan-wide
+// mutable state, not per-leg. A multi-leg plan whose FINAL leg is a same-path
+// assert with no request evidence of its own must not ride on an EARLIER, unrelated
+// leg's request proof — drivePlan is exported and general-purpose even though today's
+// callers (planPath between an edge's own endpoints) only ever produce single-leg
+// plans, so this shape is latent, not yet reachable, but must judge soundly if reached.
+describe('drivePlan: per-leg evidence scoping (multi-leg plans)', () => {
+  it('does NOT let an earlier leg\'s request evidence justify a later same-path leg with none of its own', async () => {
+    const plan: SpecPlan = {
+      title: 't',
+      baseUrl: 'http://app',
+      startUrl: '/a',
+      preconditions: [],
+      legs: [
+        {
+          from: 'cc_step1',
+          to: 'n_mid',
+          event: 'click',
+          description: 'leg1: an unrelated earlier request-backed leg',
+          action: { kind: 'click', locator: 'page.getByRole("button", { name: "Step1" })' },
+          assertions: [{ kind: 'request', value: 'POST /api/step1' }],
+        },
+        {
+          from: 'cc_save',
+          to: 'n_a',
+          event: 'click',
+          description: 'leg2: the same-path leg actually being judged — no request assertion of its own',
+          action: { kind: 'click', locator: 'page.getByRole("button", { name: "Save" })' },
+          assertions: [{ kind: 'url', value: '/a' }],
+        },
+      ],
+    }
+    const f = fakePage({ startUrl: 'http://app/a', response: { method: 'POST', url: 'http://app/api/step1', status: 200 } })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+  })
 })
 
 describe('runVerify: proof-gate rejections are not counted as confirmed', () => {

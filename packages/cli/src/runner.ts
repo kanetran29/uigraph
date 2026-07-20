@@ -619,6 +619,13 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // a parked leg means the rest of the plan cannot be legitimately driven —
     // bail before clicking controls on whatever page we happen to be on
     if (a.kind === 'parked') return { confirmed: false, undrivable: true }
+    // Soundness: reset per-leg before this leg sets its own — the final judgment
+    // must reflect ONLY the last leg driven, never an earlier leg's leftover
+    // evidence (a multi-leg plan whose final leg carries no request assertion
+    // must not ride on an earlier, unrelated leg's request proof).
+    lastUrlAssertion = undefined
+    expectDialog = false
+    requestEvidence = undefined
     // Arm each leg's request wait BEFORE firing its action — a fast response can land
     // before an await on the action returns, so the wait must already be listening.
     const reqAssertions = leg.assertions.filter((as): as is { kind: 'request'; value: string } => as.kind === 'request')
@@ -673,18 +680,35 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
 
 /**
  * Arm a wait for the network response an `api:*` effect's request assertion names
- * (`"METHOD url"`, codegen's format). Returns null on any miss/timeout (no matching
- * call arrived) instead of throwing, so the caller can treat a miss as plain
- * disagreement rather than a crashed drive.
+ * (`"METHOD url"`, codegen's format — already stripped of any unresolvable/joined
+ * garbage by `parseApiEffect`). Returns null on any miss/timeout (no matching call
+ * arrived) instead of throwing, so the caller can treat a miss as plain disagreement
+ * rather than a crashed drive. Matches on exact pathname, never substring: an
+ * `.includes()` match would let an unrelated request whose URL merely CONTAINS the
+ * expected path (e.g. a query string, or another endpoint sharing a prefix) falsely
+ * confirm an edge whose click actually fired nothing.
  */
 async function armRequestWait(page: PwPage, value: string): Promise<{ method: string; url: string; status: number } | null> {
   const [method, ...rest] = value.split(' ')
   const path = rest.join(' ')
+  // An empty/unresolved path can never be matched to one specific request without
+  // risking a false positive on any same-method call — never arm a wait for it.
+  if (path.length === 0) return null
+  const expected = requestPath(path)
   try {
-    const r = await page.waitForResponse((res) => res.request().method() === method && res.url().includes(path), { timeout: 5000 })
+    const r = await page.waitForResponse((res) => res.request().method() === method && requestPath(res.url()) === expected, { timeout: 5000 })
     return { method: r.request().method(), url: r.url(), status: r.status() }
   } catch {
     return null
+  }
+}
+
+/** The pathname portion of a request URL (or bare path), query/hash/trailing-slash stripped, for exact request-assertion matching. */
+function requestPath(u: string): string {
+  try {
+    return new URL(u).pathname.replace(/\/$/, '')
+  } catch {
+    return (u.split('?')[0]?.split('#')[0] ?? u).replace(/\/$/, '')
   }
 }
 

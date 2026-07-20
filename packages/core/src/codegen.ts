@@ -6,7 +6,9 @@
 // refined by the input/guard feature.
 
 import type { GraphNode, ControlMeta, ControlSelector, GraphEdge, UiGraph } from './ir'
+import { effectTokens } from './ir'
 import type { PlanStep } from './algorithms'
+import { parseApiEffect } from './openapi'
 
 /**
  * A single Playwright action for one leg. `parked` marks a transition that cannot
@@ -201,7 +203,17 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
       else if (interaction && !toNode.route.includes('*')) assertions.push({ kind: 'url', value: toNode.route })
     }
     if (e.effect === 'open:modal') assertions.push({ kind: 'dialog', value: toNode.label })
-    if (e.effect && e.effect.startsWith('api:')) assertions.push({ kind: 'request', value: e.effect.slice(4) })
+    // A self-loop's effect may join several kinds onto one edge (see `effectTokens`);
+    // parse each token on its own so a joined 'api:POST /x, state:setY' still yields a
+    // sound 'POST /x' assertion instead of a garbage path bleeding in the next token.
+    // parseApiEffect also rejects an unresolved '?' literal (empty path -> null), so a
+    // control whose API URL couldn't be statically resolved gets NO request assertion
+    // at all — it falls through to the "asserted nothing" undrivable guard instead of
+    // a request-wait an unrelated same-method call could falsely satisfy.
+    for (const token of effectTokens(e.effect)) {
+      const parsed = parseApiEffect(token)
+      if (parsed) assertions.push({ kind: 'request', value: `${parsed.method} ${parsed.path}` })
+    }
 
     return { from: fromNode.id, to: toNode.id, event: e.event, description, action, assertions, ...(parkedReason ? { parkedReason } : {}) }
   })

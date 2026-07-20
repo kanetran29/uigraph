@@ -72,4 +72,14 @@ describe('buildApiBindings', () => {
     expect(b.bindings.map((x) => x.effect)).toEqual(['api:POST /api/orders'])
     expect(b.unmatched).toEqual(['api:POST /api/ghost'])
   })
+
+  // Regression: an effect self-loop edge's `effect` field joins several kinds with
+  // ', ' (extract.ts's rr.effect-self-loop). Collecting the whole joined string as
+  // one "api effect" would produce an unparseable path and false-flag real drift.
+  it('binds an effect self-loop edge whose effect is joined with a non-api kind', () => {
+    const g = graph([node('a')], [edge('e1', 'a', 'a', { effect: 'api:POST /api/orders, state:setCart' })])
+    const b = buildApiBindings(g, spec, 'h')
+    expect(b.bindings.map((x) => x.effect)).toEqual(['api:POST /api/orders'])
+    expect(b.unmatched).toEqual([])
+  })
 })

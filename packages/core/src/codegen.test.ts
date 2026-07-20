@@ -129,3 +129,38 @@ describe('goto-fallback soundness: buildSpecPlan', () => {
     expect(plan.legs[0]!.action.kind).toBe('parked')
   })
 })
+
+// Regression: an effect self-loop edge's `effect` field may join several
+// api:/state:/error: kinds with ', ' (extract.ts's rr.effect-self-loop). The
+// request assertion built from it must parse each kind on its own — a naive
+// slice(4) on the whole joined string bleeds the next token into the path.
+describe('buildSpecPlan: request assertion from an effect self-loop edge', () => {
+  const selfLoopControl: GraphNode = {
+    id: 'cc_save', route: null, componentPath: null, label: 'Save', kind: 'control', parent: 'n_a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Save' } },
+  }
+
+  it('emits a clean request assertion for a single api effect', () => {
+    const gg = graph([node('n_a', { route: '/a' }), selfLoopControl], [edge('e', 'cc_save', 'n_a', { event: 'click', effect: 'api:POST /api/orders' })])
+    const plan = buildSpecPlan(gg, planPath(gg, 'cc_save', 'n_a')!, {})
+    expect(plan.legs[0]!.assertions.filter((a) => a.kind === 'request')).toEqual([{ kind: 'request', value: 'POST /api/orders' }])
+  })
+
+  it('emits ONLY the api token\'s request assertion when joined with a state effect — no comma bleed', () => {
+    const gg = graph([node('n_a', { route: '/a' }), selfLoopControl], [edge('e', 'cc_save', 'n_a', { event: 'click', effect: 'api:POST /api/orders, state:setCart' })])
+    const plan = buildSpecPlan(gg, planPath(gg, 'cc_save', 'n_a')!, {})
+    expect(plan.legs[0]!.assertions.filter((a) => a.kind === 'request')).toEqual([{ kind: 'request', value: 'POST /api/orders' }])
+  })
+
+  it('emits ONLY the api token even when it is NOT the first joined kind', () => {
+    const gg = graph([node('n_a', { route: '/a' }), selfLoopControl], [edge('e', 'cc_save', 'n_a', { event: 'click', effect: 'state:setLoading, api:POST /api/orders' })])
+    const plan = buildSpecPlan(gg, planPath(gg, 'cc_save', 'n_a')!, {})
+    expect(plan.legs[0]!.assertions.filter((a) => a.kind === 'request')).toEqual([{ kind: 'request', value: 'POST /api/orders' }])
+  })
+
+  it('emits NO request assertion when the URL could not be statically resolved (literalOf\'s "?")', () => {
+    const gg = graph([node('n_a', { route: '/a' }), selfLoopControl], [edge('e', 'cc_save', 'n_a', { event: 'click', effect: 'api:POST ?' })])
+    const plan = buildSpecPlan(gg, planPath(gg, 'cc_save', 'n_a')!, {})
+    expect(plan.legs[0]!.assertions.filter((a) => a.kind === 'request')).toEqual([])
+  })
+})

@@ -35,7 +35,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import { toPng } from 'html-to-image'
 import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@ui-graph/core'
-import { effectClass, layoutGraph, proposedScreenEdges, structuralKey, type EffectClass, type GraphLayout, type ProposedEdge } from './layout'
+import { effectClass, layoutGraph, proposedScreenEdges, structuralKey, type GraphLayout, type ProposedEdge } from './layout'
 import { groupKeyOfId, isGroupId, levelView, screenGroups, type RouteView } from './routeView'
 import { pngFilename } from './exportPng'
 import { applySaved, layoutStorageKey, parsePositions, serializePositions } from './layoutStore'
@@ -96,12 +96,11 @@ const SOURCE_COLOR: Record<Source, string> = {
 const HIGHLIGHT_COLOR = 'var(--edge-highlight)'
 
 /** Edge stroke colour per effect class, raw hex like `controlTone` (not a CSS var — these
- *  four are new, theme-neutral accents distinct from the source/diff/manual palettes).
- *  Only ever applied to control edges (self-loop api/state effects + close:modal), so it
- *  never repaints the screen-level navigate/open:modal edges the source palette already owns. */
-const EFFECT_COLOR: Record<EffectClass, string> = {
-  navigate: '#2563eb',
-  modal: '#c026d3',
+ *  are new, theme-neutral accents distinct from the source/diff/manual palettes). Only
+ *  ever applied to effect self-loop edges (api call / state-error mutation) — navigate
+ *  and modal open/close control edges keep their source-based (static/manual/runtime
+ *  witness) colour untouched, so no entry exists here for those two classes. */
+const EFFECT_COLOR: Record<'api' | 'state-error', string> = {
   api: '#ea580c',
   'state-error': '#b91c1c',
 }
@@ -154,8 +153,8 @@ function strokeDash(modality: Modality): string | undefined {
 }
 
 /** Edge stroke colour: highlighted accent wins, then the stale-witness warning tint,
- *  then an effect-class tint (control edges only — see `EFFECT_COLOR`), otherwise the
- *  provenance source colour. */
+ *  then an effect-class tint (effect self-loop edges only — see `EFFECT_COLOR`),
+ *  otherwise the provenance source colour. */
 function strokeColor(edge: GraphEdge, highlighted: boolean, effectColor: string | null): string {
   if (highlighted) return HIGHLIGHT_COLOR
   if (edge.witnessStale === true) return 'var(--edge-stale)'
@@ -588,7 +587,7 @@ function bandStyle(size: { width: number; height: number }): CSSProperties {
 }
 
 /** The set of edge styling inputs that decide emphasis, dimming, and label visibility. */
-interface EdgeContext {
+export interface EdgeContext {
   selection: Selection
   pathEdgeIds: Set<string>
   expanded: ReadonlySet<string>
@@ -633,7 +632,7 @@ function toProposedFlowEdges(edges: readonly ProposedEdge[]): Edge[] {
   }))
 }
 
-function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
+export function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
   const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds, diffActive, addedEdgeIds, changedEdgeIds, groupedView, hoverIncidentEdgeIds, showEffects } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
   const hasNodeSelection = selection?.kind === 'node'
@@ -657,9 +656,16 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     const opensModal = modalIds.has(e.to) && controlParent.has(e.from)
     const renderFrom = opensModal ? controlParent.get(e.from) ?? e.from : e.from
     const isControlEdge = (controlParent.has(e.from) || controlParent.has(e.to)) && !opensModal
-    // Effect-class colouring is scoped to control edges only, so the screen-level
-    // navigate/open:modal edges the source palette already colours are untouched.
-    const cls = isControlEdge ? effectClass(e.effect) : null
+    // Effect-class colouring is scoped to the effect SELF-LOOP edges only (api/
+    // state-error) — NOT every control edge. `effectClass` also classifies plain
+    // 'navigate' and 'open:modal'/'close:modal' control edges (isControlEdge is
+    // true for those too — a navigate edge's `from` is a control same as a
+    // self-loop's), but those already own their source-based (static/manual/
+    // runtime witness) colour and must stay untouched, so only 'api'/'state-error'
+    // survive here. Without this, a runtime-witnessed navigate control edge would
+    // repaint flat EFFECT_COLOR.navigate and mask its emerald witness colour.
+    const rawCls = isControlEdge ? effectClass(e.effect) : null
+    const cls = rawCls === 'api' || rawCls === 'state-error' ? rawCls : null
     const onPath = pathEdgeIds.has(e.id)
     const selected = e.id === selectedEdgeId
     const incident = incidentEdgeIds.has(e.id)
@@ -1369,8 +1375,6 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
           {effectEdgeCount > 0 ? (
             <div className="legend-group">
               <div className="legend-title">effects</div>
-              <LegendRow swatch={swatch(EFFECT_COLOR.navigate)} label="navigate" />
-              <LegendRow swatch={swatch(EFFECT_COLOR.modal)} label="modal open/close" />
               <LegendRow swatch={swatch(EFFECT_COLOR.api)} label="api call" />
               <LegendRow swatch={swatch(EFFECT_COLOR['state-error'])} label="state / error" />
             </div>

@@ -118,6 +118,20 @@ export interface GraphEdge {
   witnessStale?: boolean
 }
 
+/**
+ * Split a `GraphEdge.effect` string into its constituent effect tokens. Most edges
+ * carry a single effect (e.g. 'navigate'); an effect self-loop edge
+ * (adapter-react/extract.ts's `rr.effect-self-loop`) joins several api:/state:/
+ * error: kinds onto ONE edge with ', ' (edges key on (from,to,event,guard), not
+ * effect, so one edge per kind would collide on the same tuple and silently drop
+ * all but the first). This is the single place that undoes that join, so every
+ * consumer (codegen's request assertions, openapi's effect collection) sees clean
+ * per-kind tokens instead of parsing the raw joined string itself.
+ */
+export function effectTokens(effect: string | null): string[] {
+  return effect ? effect.split(', ') : []
+}
+
 /** Provenance metadata for a whole graph (content-addressing inputs). */
 export interface UiGraphMeta {
   adapter: string
