@@ -9,7 +9,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { buildSpecPlan } from '@ui-graph/core'
 import { planPath } from '@ui-graph/core'
 import type { GraphEdge, GraphNode, SpecPlan, UiGraph, Witness } from '@ui-graph/core'
-import { drivePlan, makePlaywrightDriver, mapPool } from './runner'
+import { drivePlan, makePlaywrightDriver, mapPool, runVerify } from './runner'
 
 const staticWitness: Witness = { source: 'static', file: 'x.tsx', loc: { line: 1, col: 1 }, ruleId: 'test' }
 
@@ -265,5 +265,53 @@ describe('mapPool: bounded concurrency, results by input index', () => {
       inFlight--
     })
     expect(peak).toBeLessThanOrEqual(3)
+  })
+})
+
+// Regression tests for the silent-confirmation bug found on a real app (jaakko):
+// (1) a probe whose expected route equals the start route can never produce URL
+// evidence — the bounce branch must not vacuously confirm; (2) a confirmation the
+// proof gate rejects must not be counted in the verify summary (it was counted
+// while nothing was persisted).
+describe('probe same-path soundness', () => {
+  it('does NOT confirm a probe whose expected route equals the start route', async () => {
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e', 'n_a', 'n_b', { event: 'click', modality: 'may' })],
+    )
+    const plan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+    const probe = { startUrl: '/', expectedRoute: '/', targetLocator: "getByRole('button', { name: 'Open' })", siblingLocators: [] }
+    const f = fakePage({ startUrl: 'http://app/' })
+    const res = await drivePlan(f.page, plan, 'http://app', { probe })
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+  })
+})
+
+describe('runVerify: proof-gate rejections are not counted as confirmed', () => {
+  it('rejected confirmation → confirmed 0, rejected 1, nothing persisted', async () => {
+    const { mkdtempSync } = await import('node:fs')
+    const { tmpdir } = await import('node:os')
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const dir = mkdtempSync(join(tmpdir(), 'uigraph-verify-'))
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e', 'n_a', 'n_b', { event: 'click', modality: 'may' })],
+    )
+    const store = openStore(join(dir, 'uigraph.db'))
+    store.setBaseGraph(gg)
+    store.close()
+    // driver claims confirmed but with invalid url-change evidence (start === landed)
+    const driver = async (): Promise<{ confirmed: boolean; evidence: { kind: 'url-change'; startUrl: string; landedUrl: string } }> => ({
+      confirmed: true,
+      evidence: { kind: 'url-change', startUrl: 'http://app/x', landedUrl: 'http://app/x' },
+    })
+    const summary = await runVerify({ dir, appUrl: 'http://app', limit: 5, driver })
+    expect(summary.confirmed).toBe(0)
+    expect(summary.rejected).toBe(1)
+    const check = openStore(join(dir, 'uigraph.db'))
+    expect(check.getObservations().length).toBe(0)
+    check.close()
   })
 })
