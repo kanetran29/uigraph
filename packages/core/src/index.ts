@@ -73,6 +73,7 @@ export {
   nextToVerify,
   patternKey,
   dedupWorklist,
+  PATTERN_PARK_REASON_PREFIX,
   type CoverageReport,
   type EdgeCoverage,
   type VerifyTarget,

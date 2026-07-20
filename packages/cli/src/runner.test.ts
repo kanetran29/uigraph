@@ -9,7 +9,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { buildSpecPlan } from '@ui-graph/core'
 import { planPath } from '@ui-graph/core'
 import type { GraphEdge, GraphNode, SpecPlan, UiGraph, Witness } from '@ui-graph/core'
-import { drivePlan, makePlaywrightDriver, mapPool, runVerify } from './runner'
+import { drivePlan, makePlaywrightDriver, mapPool, runVerify, runVerifyUntilDone } from './runner'
+import type { VerifyResult } from './runner'
 
 const staticWitness: Witness = { source: 'static', file: 'x.tsx', loc: { line: 1, col: 1 }, ruleId: 'test' }
 
@@ -424,20 +425,38 @@ describe('drivePlan: per-leg evidence scoping (multi-leg plans)', () => {
   })
 })
 
+/** Seed a temp workspace with the given base graph and return its dir. */
+async function seedDir(prefix: string, gg: UiGraph): Promise<string> {
+  const { mkdtempSync } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const { join } = await import('node:path')
+  const { openStore } = await import('@ui-graph/core/node')
+  const dir = mkdtempSync(join(tmpdir(), prefix))
+  const store = openStore(join(dir, 'uigraph.db'))
+  store.setBaseGraph(gg)
+  store.close()
+  return dir
+}
+
+/** Read back a temp workspace's parked-edge sidecar. */
+async function readParked(dir: string) {
+  const { openStore } = await import('@ui-graph/core/node')
+  const { join } = await import('node:path')
+  const store = openStore(join(dir, 'uigraph.db'))
+  const parked = store.getParkedEdges()
+  store.close()
+  return parked
+}
+
 describe('runVerify: proof-gate rejections are not counted as confirmed', () => {
-  it('rejected confirmation → confirmed 0, rejected 1, nothing persisted', async () => {
-    const { mkdtempSync } = await import('node:fs')
-    const { tmpdir } = await import('node:os')
+  it('rejected confirmation → confirmed 0, rejected 1, outcome "rejected", nothing persisted', async () => {
     const { join } = await import('node:path')
     const { openStore } = await import('@ui-graph/core/node')
-    const dir = mkdtempSync(join(tmpdir(), 'uigraph-verify-'))
     const gg = graph(
       [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
       [edge('e', 'n_a', 'n_b', { event: 'click', modality: 'may' })],
     )
-    const store = openStore(join(dir, 'uigraph.db'))
-    store.setBaseGraph(gg)
-    store.close()
+    const dir = await seedDir('uigraph-verify-', gg)
     // driver claims confirmed but with invalid url-change evidence (start === landed)
     const driver = async (): Promise<{ confirmed: boolean; evidence: { kind: 'url-change'; startUrl: string; landedUrl: string } }> => ({
       confirmed: true,
@@ -446,9 +465,66 @@ describe('runVerify: proof-gate rejections are not counted as confirmed', () => 
     const summary = await runVerify({ dir, appUrl: 'http://app', limit: 5, driver })
     expect(summary.confirmed).toBe(0)
     expect(summary.rejected).toBe(1)
+    expect(summary.outcomes).toEqual({ e: 'rejected' })
     const check = openStore(join(dir, 'uigraph.db'))
     expect(check.getObservations().length).toBe(0)
     check.close()
+  })
+})
+
+// Diagnosable round-cap parks: runVerify must report each processed target's outcome
+// (confirmed / refuted / undrivable) so runVerifyUntilDone can park an exhausted
+// target with a reason that carries the diagnosis — "never drivable" and "driven but
+// refuted" are very different failures for a human to triage.
+describe('runVerify: per-target outcomes', () => {
+  // distinct witness locs so pattern-dedup keeps every edge as its own representative
+  const w = (line: number): Witness => ({ ...staticWitness, loc: { line, col: 1 } })
+
+
+  const threeWayGraph = (): UiGraph =>
+    graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), node('n_c', { route: '/c' }), node('n_d', { route: '/d' })],
+      [
+        edge('e_ab', 'n_a', 'n_b', { modality: 'may', witness: w(1) }),
+        edge('e_ac', 'n_a', 'n_c', { modality: 'may', witness: w(2) }),
+        edge('e_ad', 'n_a', 'n_d', { modality: 'may', witness: w(3) }),
+      ],
+    )
+
+  it('populates outcomes for confirmed, refuted, and undrivable targets', async () => {
+    const dir = await seedDir('uigraph-outcomes-', threeWayGraph())
+    const driver = async (plan: Parameters<typeof drivePlan>[1]): Promise<VerifyResult> => {
+      const s = JSON.stringify(plan)
+      if (s.includes('/b')) return { confirmed: true, evidence: { kind: 'url-change', startUrl: 'http://app/a', landedUrl: 'http://app/b' } }
+      if (s.includes('/d')) return { confirmed: false, undrivable: true }
+      return { confirmed: false }
+    }
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes).toEqual({ e_ab: 'confirmed', e_ac: 'refuted', e_ad: 'undrivable' })
+  })
+
+  const oneEdgeGraph = (): UiGraph =>
+    graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e_ab', 'n_a', 'n_b', { modality: 'may', witness: w(1) })],
+    )
+
+  it('runVerifyUntilDone parks with the undrivable-flavored reason when every attempt is undrivable', async () => {
+    const dir = await seedDir('uigraph-park-undrivable-', oneEdgeGraph())
+    const s = await runVerifyUntilDone({ dir, appUrl: 'http://app', maxRounds: 4, parkTries: 2, driver: async () => ({ confirmed: false, undrivable: true }) })
+    expect(s.parkedEdges).toBe(1)
+    const parked = await readParked(dir)
+    expect(parked[0]?.edgeId).toBe('e_ab')
+    expect(parked[0]?.reason).toBe('autonomous: undrivable after 2 attempts — no drivable control/plan reached it')
+  })
+
+  it('runVerifyUntilDone parks with the unstable-flavored reason when every attempt is refuted', async () => {
+    const dir = await seedDir('uigraph-park-unstable-', oneEdgeGraph())
+    const s = await runVerifyUntilDone({ dir, appUrl: 'http://app', maxRounds: 4, parkTries: 2, driver: async () => ({ confirmed: false }) })
+    expect(s.parkedEdges).toBe(1)
+    const parked = await readParked(dir)
+    expect(parked[0]?.edgeId).toBe('e_ab')
+    expect(parked[0]?.reason).toBe('autonomous: unstable after 2 attempts — driven but refuted (did not land)')
   })
 })
 

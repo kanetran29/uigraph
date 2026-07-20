@@ -12,7 +12,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@ui-graph/mcp'
-import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatStatus, formatWorkspaceList, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runStatus, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
+import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatParked, formatStatus, formatWorkspaceList, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runParked, runStatus, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runLogin, runVerify, runVerifyUntilDone } from './runner'
 
@@ -138,6 +138,26 @@ export function buildProgram(): Command {
       console.log(`session saved to ${opts.out}`)
       console.log(`authenticated verify: uigraph verify <dir> --app-url ${appUrl} --storage-state ${opts.out}`)
       process.exit(0)
+    })
+
+  program
+    .command('parked')
+    .description('List parked edges grouped for triage: pattern (fan-out dedup), autonomous (runner give-ups), manual.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .option('--all', 'also list every pattern-class entry (count-only by default)')
+    .action((dir: string, opts: { all?: boolean }) => {
+      console.log(formatParked(runParked(dir), opts.all ?? false))
+    })
+
+  program
+    .command('unpark')
+    .description('Return parked edges to the verify worklist, by id or by sweeping a class.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .argument('[edgeId...]', 'edge ids to unpark')
+    .option('--autonomous', "unpark every autonomous-class park (reason starts with 'autonomous:')")
+    .option('--runner', "unpark every park recorded by the runner (by === 'runner')")
+    .action((dir: string, edgeIds: string[], opts: { autonomous?: boolean; runner?: boolean }) => {
+      console.log(`unparked ${runUnpark({ dir, edgeIds, autonomous: opts.autonomous, runner: opts.runner })} edge(s)`)
     })
 
   program

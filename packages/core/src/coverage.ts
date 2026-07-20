@@ -15,6 +15,14 @@ import type { ProposalGraph } from './proposals'
 import { buildFrontier } from './frontier'
 import { projectTrustTier, type TrustTier } from './trust-tier'
 
+/**
+ * The reason prefix identifying a pattern-dedup park (a fan-out duplicate accounted
+ * by its driven representative). Load-bearing: classify() keys 'pattern-covered' off
+ * it, the runner GENERATES park reasons from it, and the parked CLI groups by it —
+ * one exported constant so a wording tweak can never split generator from classifier.
+ */
+export const PATTERN_PARK_REASON_PREFIX = 'over-approximation fan-out of the nav call at '
+
 /** A may/unknown edge an agent has parked out of the worklist with an auditable reason. Never edits the edge. */
 export interface ParkedEdge {
   edgeId: string
@@ -116,7 +124,7 @@ function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: 
     // same nav call ("accounted because we drove a representative"); an 'autonomous: …' park
     // is a witness-less give-up ("accounted because we could not drive it"). Same accounting,
     // different trust — split the status so a reader can tell them apart.
-    const status: EdgeCoverage['status'] = parked.reason.startsWith('over-approximation fan-out of the nav call at ') ? 'pattern-covered' : 'parked'
+    const status: EdgeCoverage['status'] = parked.reason.startsWith(PATTERN_PARK_REASON_PREFIX) ? 'pattern-covered' : 'parked'
     return { status, accounted: true, reason: parked.reason }
   }
   if (ctx.nodeKind.get(edge.from) !== 'control' && ctx.twinWitnessed.has(`${edge.from}=>${edge.to}`)) {

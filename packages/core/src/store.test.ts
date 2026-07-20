@@ -144,6 +144,34 @@ describe('Store (SQLite)', () => {
     s.close()
   })
 
+  it('re-map with a changed graph drops runner parks but keeps agent parks (era-bound)', () => {
+    const s = openStore(':memory:')
+    s.setBaseGraph(g())
+    s.parkEdge('e_ab', 'undrivable now', 'runner')
+    s.parkEdge('e_other', 'human judgment', 'agent')
+    s.setBaseGraph(graph([node('a'), node('b'), node('c')], [edge('e_ab', 'a', 'b')]))
+    expect(s.getParkedEdges().map((p) => p.edgeId)).toEqual(['e_other'])
+    s.close()
+  })
+
+  it('re-map with an identical graph keeps all parks', () => {
+    const s = openStore(':memory:')
+    s.setBaseGraph(g())
+    s.parkEdge('e_ab', 'undrivable now', 'runner')
+    s.parkEdge('e_other', 'human judgment', 'agent')
+    s.setBaseGraph(g())
+    expect(s.getParkedEdges().map((p) => p.edgeId)).toEqual(['e_ab', 'e_other'])
+    s.close()
+  })
+
+  it('first-ever setBaseGraph (no prior graph) keeps existing parks', () => {
+    const s = openStore(':memory:')
+    s.parkEdge('e_ab', 'parked before first map', 'runner')
+    s.setBaseGraph(g())
+    expect(s.getParkedEdges().map((p) => p.edgeId)).toEqual(['e_ab'])
+    s.close()
+  })
+
   it('filters proposals by status', () => {
     const s = openStore(':memory:')
     s.setProposals(sidecar())
