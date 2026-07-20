@@ -9,33 +9,36 @@
 
 import type { GraphNode, Proposal, UiGraph } from '@ui-graph/core'
 
-/** A proposed (quarantined) screen-level edge to overlay on the canvas, deduped per pair. */
+/** A proposal-lifecycle screen-level edge to overlay on the canvas, deduped per pair+status. */
 export interface ProposedEdge {
   id: string
   from: string
   to: string
   count: number
+  status: 'proposed' | 'unverifiable'
 }
 
 /**
- * The proposed edges worth drawing on the canvas: one per (screen → to) pair among
- * 'proposed' proposals whose target is a REAL non-control node already on the canvas
- * (the formerly-orphan modals/overlays). Proposals without such a target (e.g. an
- * external Stripe redirect, or a synthetic state sink) stay panel-only. Deterministic
- * + deduped so the dashed overlay mirrors the materialized proposal graph.
+ * The proposal edges worth drawing on the canvas: one per (screen → to, status) pair
+ * among OPEN ('proposed') and dead-end ('unverifiable') proposals whose target is a
+ * REAL non-control node already on the canvas. Confirmed proposals are excluded —
+ * they graduated into real runtime-witnessed edges; rejected ones were withdrawn.
+ * Unverifiable ones render so the toggle tells the whole lifecycle story instead of
+ * going blank the moment a loop resolves everything. Proposals without a mappable
+ * target (external redirect, synthetic sink) stay panel-only.
  */
 export function proposedScreenEdges(graph: UiGraph, proposals: readonly Proposal[]): ProposedEdge[] {
   const byId = new Map(graph.nodes.map((n) => [n.id, n]))
   const byPair = new Map<string, ProposedEdge>()
   for (const p of proposals) {
-    if (p.status !== 'proposed' || p.to === undefined) continue
+    if ((p.status !== 'proposed' && p.status !== 'unverifiable') || p.to === undefined) continue
     if (!byId.has(p.screen)) continue
     const target = byId.get(p.to)
     if (target === undefined || target.kind === 'control') continue
-    const key = `${p.screen}->${p.to}`
+    const key = `${p.screen}->${p.to}::${p.status}`
     const existing = byPair.get(key)
     if (existing) existing.count++
-    else byPair.set(key, { id: `pe_${key}`, from: p.screen, to: p.to, count: 1 })
+    else byPair.set(key, { id: `pe_${key}`, from: p.screen, to: p.to, count: 1, status: p.status })
   }
   return [...byPair.values()]
 }
