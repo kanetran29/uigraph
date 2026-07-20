@@ -195,6 +195,20 @@ describe('buildCoverage — stale witnesses', () => {
     expect(cov.open[0]?.status).toBe('stale-witness')
   })
 
+  it('a stale screen-level edge whose pair is freshly twin-witnessed via a control is accounted (not stuck stale)', () => {
+    const g6 = graph(
+      [node('a'), node('b'), node('c_a', { kind: 'control', route: null, parent: 'a' })],
+      [
+        edge('r1', 'a', 'b', { source: 'runtime', modality: 'must', witnessStale: true }),
+        edge('r2', 'c_a', 'b', { source: 'runtime', modality: 'must' }),
+      ],
+    )
+    const cov = buildCoverage(g6)
+    expect(cov.staleWitnessCount).toBe(0)
+    expect(cov.open.map((e) => e.id)).toEqual([])
+    expect(cov.accounted).toBe(2)
+  })
+
   it('a stale runtime out-edge does not resolve its source’s dynamic sink', () => {
     const g5 = graph(
       [node('a'), node('b'), node('u_a', { kind: 'unknown' })],

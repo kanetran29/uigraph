@@ -99,7 +99,15 @@ function edgeContext(graph: UiGraph): EdgeContext {
  */
 function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: Map<string, ParkedEdge>): { status: EdgeCoverage['status']; accounted: boolean; reason?: string } {
   if (edge.source === 'runtime') {
-    if (edge.witnessStale === true) return { status: 'stale-witness', accounted: false, reason: 'runtime witness predates the current base graph — re-verify' }
+    if (edge.witnessStale === true) {
+      // nextToVerify skips a screen-level edge whose pair is freshly witnessed via a
+      // control twin — classifying it stale here would leave it stuck forever
+      // (worklist says done, coverage says re-verify). The fresh twin IS the re-proof.
+      if (ctx.nodeKind.get(edge.from) !== 'control' && ctx.twinWitnessed.has(`${edge.from}=>${edge.to}`)) {
+        return { status: 'twin-witnessed', accounted: true, reason: 'stale witness superseded — the same transition is freshly runtime-witnessed via a control on this screen' }
+      }
+      return { status: 'stale-witness', accounted: false, reason: 'runtime witness predates the current base graph — re-verify' }
+    }
     return { status: 'runtime', accounted: true }
   }
   const parked = parkedById.get(edge.id)
