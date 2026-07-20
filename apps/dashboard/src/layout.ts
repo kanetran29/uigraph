@@ -174,6 +174,29 @@ function controlsByParent(graph: UiGraph): Map<string, string[]> {
   return byParent
 }
 
+/** The effect-class buckets an edge's `effect` field derives to, for canvas colouring +
+ *  the legend: a pure navigation, a modal open/close, a network call, or a state/error
+ *  mutation. See packages/adapter-react/src/extract.ts:337,357,373,379-390 for the
+ *  producing vocabulary this mirrors. */
+export type EffectClass = 'navigate' | 'modal' | 'api' | 'state-error'
+
+/**
+ * Classify a GraphEdge's `effect` string into one of the four effect classes, or null
+ * when the effect is absent or outside the known vocabulary (e.g. a legacy 'redirect').
+ * A self-loop edge's effect is a comma-joined list of `api:*`/`state:*`/`error:*` kinds
+ * (extract.ts's `effectKinds.join(', ')`); `api` wins over `state-error` when a joined
+ * effect carries both, since a network call is the more significant signal to surface.
+ */
+export function effectClass(effect: string | null): EffectClass | null {
+  if (effect === null) return null
+  if (effect === 'navigate') return 'navigate'
+  if (effect === 'open:modal' || effect === 'close:modal') return 'modal'
+  const kinds = effect.split(', ')
+  if (kinds.some((k) => k.startsWith('api:'))) return 'api'
+  if (kinds.some((k) => k.startsWith('state:') || k.startsWith('error:'))) return 'state-error'
+  return null
+}
+
 /** A readable component name from a control's componentPath ("components/Header/index.tsx" -> "Header"). */
 export function componentLabel(path: string | null): string {
   if (path === null || path.length === 0) return '(page)'
