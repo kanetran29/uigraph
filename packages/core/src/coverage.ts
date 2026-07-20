@@ -216,6 +216,7 @@ export interface VerifyTarget {
   priority: number
   proposalIds?: string[]
   proven?: boolean
+  stale?: boolean
 }
 
 /** Options for nextToVerify. `includeProven` adds must-static edges (the verify-all sweep). */
@@ -245,9 +246,13 @@ export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit
     let priority = 0
     let reason = ''
     if (e.source === 'runtime') {
-      priority = 2
+      // A stale witness was ALREADY proven drivable once — re-confirming it is the
+      // cheapest coverage win there is, so it outranks exploring unknowns/mays.
+      // Sharing priority 2 with the (often huge) may pool buried these behind the
+      // limit cutoff and left them permanently unaccounted after every re-map.
+      priority = 3.5
       reason = 'stale witness — the base graph changed since this was verified; re-confirm'
-      out.push({ kind: 'edge', id: e.id, from: e.from, to: e.to, toLabel: labelOf.get(e.to) ?? e.to, event: e.event, reason, priority })
+      out.push({ kind: 'edge', id: e.id, from: e.from, to: e.to, toLabel: labelOf.get(e.to) ?? e.to, event: e.event, reason, priority, stale: true })
       continue
     }
     if (e.modality === 'unknown') {
@@ -327,7 +332,9 @@ export function dedupWorklist(graph: UiGraph, targets: VerifyTarget[], sample = 
   const representatives: VerifyTarget[] = []
   for (const t of targets) {
     const key = patternKey(graph, t)
-    if (key === null) {
+    // A stale target was individually witnessed before — a pattern-mate confirming
+    // in its place would NOT refresh this edge's own witness, so it never folds.
+    if (key === null || t.stale === true) {
       representatives.push(t)
       continue
     }

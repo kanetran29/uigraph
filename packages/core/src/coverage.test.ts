@@ -323,3 +323,30 @@ describe('patternKey + dedupWorklist (over-approximation fan-out collapse)', () 
     expect(duplicates.size).toBe(0)
   })
 })
+
+describe('nextToVerify — stale witnesses outrank everything drivable', () => {
+  const g = (edges: Parameters<typeof graph>[1]) => graph(
+    [node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), node('n_c', { route: '/c' })],
+    edges,
+  )
+
+  it('a stale runtime edge ranks above unknown/may targets and carries stale:true', () => {
+    const gg = g([
+      edge('e_stale', 'n_a', 'n_b', { source: 'runtime', modality: 'must', witnessStale: true, witness: { source: 'runtime', observationId: 'o1' } }),
+      edge('e_may', 'n_a', 'n_c', { modality: 'may' }),
+    ])
+    const targets = nextToVerify(gg, materializeProposalGraph(graph([], []), []), 20)
+    expect(targets[0]).toMatchObject({ id: 'e_stale', stale: true })
+    expect(targets[0]!.priority).toBeGreaterThan(targets[1]!.priority)
+  })
+
+  it('dedupWorklist never folds a stale target into a pattern bucket', () => {
+    const gg = g([
+      edge('e_stale', 'n_a', 'n_b', { source: 'runtime', modality: 'may', witnessStale: true, witness: { source: 'runtime', observationId: 'o1' } }),
+      edge('e_may', 'n_a', 'n_b', { modality: 'may' }),
+    ])
+    const targets = nextToVerify(gg, materializeProposalGraph(graph([], []), []), 20)
+    const { representatives } = dedupWorklist(gg, targets, 1)
+    expect(representatives.some((t) => t.id === 'e_stale')).toBe(true)
+  })
+})
