@@ -31,6 +31,30 @@ function Badge(props: { text: string; tone: string }): JSX.Element {
   )
 }
 
+/**
+ * The edge's `effect` field: a plain Field row for a single value, or — for a self-loop's
+ * comma-joined multi-kind string (e.g. "api:GET /orders, state:setLoading") — a wrapped
+ * chip per kind, so a long joined effect doesn't cram into one right-aligned line.
+ */
+function EffectField(props: { effect: string | null }): JSX.Element {
+  const { effect } = props
+  if (effect === null) return <Field label="effect" value="—" />
+  const parts = effect.split(', ')
+  if (parts.length === 1) return <Field label="effect" value={effect} />
+  return (
+    <div className="field effect-field">
+      <span className="field-label">effect</span>
+      <div className="effect-chips">
+        {parts.map((p) => (
+          <span key={p} className="effect-chip">
+            {p}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /** A background colour per source provenance, matching the canvas legend (manual violet, runtime emerald, static slate). */
 function sourceTone(source: string): string {
   if (source === 'manual') return '#7c3aed'
@@ -128,7 +152,7 @@ export function Inspector(props: InspectorProps): JSX.Element {
         <Field label="from → to" value={`${e.from} → ${e.to}`} />
         <Field label="event" value={e.event} />
         <Field label="guard" value={e.guard ?? '—'} />
-        <Field label="effect" value={e.effect ?? '—'} />
+        <EffectField effect={e.effect} />
         <Field label="modality" value={e.modality} />
         <Field label="source" value={e.source} />
         <Field label="confidence" value={e.confidence.toFixed(2)} />

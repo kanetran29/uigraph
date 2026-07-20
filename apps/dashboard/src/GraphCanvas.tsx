@@ -35,7 +35,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import { toPng } from 'html-to-image'
 import type { ControlMeta, GraphEdge, GraphNode, Modality, Proposals, Source, UiGraph } from '@ui-graph/core'
-import { layoutGraph, proposedScreenEdges, structuralKey, type GraphLayout, type ProposedEdge } from './layout'
+import { effectClass, layoutGraph, proposedScreenEdges, structuralKey, type EffectClass, type GraphLayout, type ProposedEdge } from './layout'
 import { groupKeyOfId, isGroupId, levelView, screenGroups, type RouteView } from './routeView'
 import { pngFilename } from './exportPng'
 import { applySaved, layoutStorageKey, parsePositions, serializePositions } from './layoutStore'
@@ -95,6 +95,17 @@ const SOURCE_COLOR: Record<Source, string> = {
 /** The accent colour for highlighted edges (planned path / selection focus). */
 const HIGHLIGHT_COLOR = 'var(--edge-highlight)'
 
+/** Edge stroke colour per effect class, raw hex like `controlTone` (not a CSS var — these
+ *  four are new, theme-neutral accents distinct from the source/diff/manual palettes).
+ *  Only ever applied to control edges (self-loop api/state effects + close:modal), so it
+ *  never repaints the screen-level navigate/open:modal edges the source palette already owns. */
+const EFFECT_COLOR: Record<EffectClass, string> = {
+  navigate: '#2563eb',
+  modal: '#c026d3',
+  api: '#ea580c',
+  'state-error': '#b91c1c',
+}
+
 /** A glyph prefix per control type, so each chip reads as its kind at a glance. */
 function controlGlyph(controlType: string): string {
   switch (controlType) {
@@ -143,10 +154,12 @@ function strokeDash(modality: Modality): string | undefined {
 }
 
 /** Edge stroke colour: highlighted accent wins, then the stale-witness warning tint,
- *  otherwise the provenance source colour. */
-function strokeColor(edge: GraphEdge, highlighted: boolean): string {
+ *  then an effect-class tint (control edges only — see `EFFECT_COLOR`), otherwise the
+ *  provenance source colour. */
+function strokeColor(edge: GraphEdge, highlighted: boolean, effectColor: string | null): string {
   if (highlighted) return HIGHLIGHT_COLOR
   if (edge.witnessStale === true) return 'var(--edge-stale)'
+  if (effectColor !== null) return effectColor
   return SOURCE_COLOR[edge.source] ?? SOURCE_COLOR.static
 }
 
@@ -589,6 +602,7 @@ interface EdgeContext {
   changedEdgeIds: Set<string>
   groupedView: boolean
   hoverIncidentEdgeIds: Set<string>
+  showEffects: boolean
 }
 
 /**
@@ -620,7 +634,7 @@ function toProposedFlowEdges(edges: readonly ProposedEdge[]): Edge[] {
 }
 
 function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
-  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds, diffActive, addedEdgeIds, changedEdgeIds, groupedView, hoverIncidentEdgeIds } = ctx
+  const { selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, focusEdgeActive, searchActive, searchMatchIds, diffActive, addedEdgeIds, changedEdgeIds, groupedView, hoverIncidentEdgeIds, showEffects } = ctx
   const selectedEdgeId = selection?.kind === 'edge' ? selection.edge.id : null
   const hasNodeSelection = selection?.kind === 'node'
   const controlParent = new Map<string, string | undefined>()
@@ -643,6 +657,9 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     const opensModal = modalIds.has(e.to) && controlParent.has(e.from)
     const renderFrom = opensModal ? controlParent.get(e.from) ?? e.from : e.from
     const isControlEdge = (controlParent.has(e.from) || controlParent.has(e.to)) && !opensModal
+    // Effect-class colouring is scoped to control edges only, so the screen-level
+    // navigate/open:modal edges the source palette already colours are untouched.
+    const cls = isControlEdge ? effectClass(e.effect) : null
     const onPath = pathEdgeIds.has(e.id)
     const selected = e.id === selectedEdgeId
     const incident = incidentEdgeIds.has(e.id)
@@ -666,7 +683,8 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     const diffLit = diffAdded || diffChanged
     const diffDim = diffActive && !emphasized && !diffLit
     const dimmed = ((hasNodeSelection || focusEdgeActive) && !incident && !selected && !onPath) || (isControlEdge && !emphasized && !parentExpanded) || searchDim || diffDim
-    const color = diffLit && !emphasized ? (diffAdded ? DIFF_ADDED_COLOR : DIFF_CHANGED_COLOR) : strokeColor(e, onPath || selected)
+    const effectColor = cls !== null ? EFFECT_COLOR[cls] : null
+    const color = diffLit && !emphasized ? (diffAdded ? DIFF_ADDED_COLOR : DIFF_CHANGED_COLOR) : strokeColor(e, onPath || selected, effectColor)
     // In a grouped (large) graph the `may` edges are the low-signal global-nav noise: a
     // near-complete web that no amount of node spacing declutters (wider nodes just mean
     // longer arrows). HIDE them by default — the grid of screens + the must/witnessed
@@ -675,7 +693,12 @@ function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {
     // render every edge as before.
     const hoverReveal = hoverIncidentEdgeIds.has(e.id)
     const hiddenMay = (groupedView || e.id.startsWith('sg_')) && e.modality === 'may' && e.source === 'static' && !emphasized && !hoverReveal
-    if (hiddenMay) continue
+    // The effect self-loop edges (api/state-error) are opt-in noise, same rationale as
+    // `hiddenMay`: they are already accounted-for/witnessed so hiding them by default
+    // loses no signal. close:modal and navigate control edges are NOT gated here — they
+    // keep their existing isControlEdge-only visibility, unaffected by this toggle.
+    const hiddenEffect = (cls === 'api' || cls === 'state-error') && !showEffects && !emphasized
+    if (hiddenMay || hiddenEffect) continue
     const baseWidth = e.source === 'manual' ? 2 : 1.4
     const width = onPath ? 3 : selected ? 2.8 : emphasized || (diffLit && !dimmed) ? 2.4 : baseWidth
     const opacity = dimmed ? 0.12 : emphasized || diffLit ? 1 : 0.85
@@ -854,6 +877,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [expandAll, setExpandAll] = useState(false)
   const [highlightFlow, setHighlightFlow] = useState(true)
   const [showProposed, setShowProposed] = useState(false)
+  const [showEffects, setShowEffects] = useState(false)
   const [diffMode, setDiffMode] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
   // Hovering a screen reveals its (otherwise hidden) `may` arrows in the grouped view, so
@@ -910,6 +934,13 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
 
   // Whether any runtime edge carries a stale witness — gates the extra legend row.
   const hasStaleWitness = useMemo(() => graph.edges.some((e) => e.witnessStale === true), [graph])
+
+  // The effect self-loop edges (api:*/state:*/error:* control->screen) — gates the
+  // "show effects" toggle's live count + the effects legend group.
+  const effectEdgeCount = useMemo(
+    () => graph.edges.filter((e) => { const c = effectClass(e.effect); return c === 'api' || c === 'state-error' }).length,
+    [graph],
+  )
 
   const expanded = useMemo(() => {
     const withChildren = new Set<string>()
@@ -1111,8 +1142,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       changedEdgeIds: diffHighlight?.changedEdgeIds ?? EMPTY_IDS,
       groupedView,
       hoverIncidentEdgeIds,
+      showEffects,
     }),
-    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds, diffActive, diffHighlight, groupedView, hoverIncidentEdgeIds],
+    [selection, pathEdgeIds, expanded, hoveredEdgeId, incidentEdgeIds, selectedEdge, pathActive, searchActive, searchMatchIds, diffActive, diffHighlight, groupedView, hoverIncidentEdgeIds, showEffects],
   )
   // Real edges, plus the red dashed ghost edges for removed transitions when the diff view is
   // on (their endpoints — a survivor or a removed-node ghost — are all present in the node state).
@@ -1298,6 +1330,10 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <input type="checkbox" checked={showProposed} onChange={(e) => setShowProposed(e.target.checked)} />
             show proposed (LLM){proposedEdges.length > 0 ? ` · ${proposedEdges.length}` : ''}
           </label>
+          <label className="edge-toggle">
+            <input type="checkbox" checked={showEffects} onChange={(e) => setShowEffects(e.target.checked)} />
+            show effects{effectEdgeCount > 0 ? ` · ${effectEdgeCount}` : ''}
+          </label>
           {diffCount > 0 ? (
             <label className="edge-toggle">
               <input type="checkbox" checked={diffMode} onChange={(e) => setDiffMode(e.target.checked)} />
@@ -1330,6 +1366,15 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             {hasStaleWitness ? <LegendRow swatch={swatch('var(--edge-stale)', '6 4')} label="witness stale (re-verify)" /> : null}
             {showProposed ? <LegendRow swatch={swatch(GHOST_COLOR, '2 5')} label="proposed (LLM)" /> : null}
           </div>
+          {effectEdgeCount > 0 ? (
+            <div className="legend-group">
+              <div className="legend-title">effects</div>
+              <LegendRow swatch={swatch(EFFECT_COLOR.navigate)} label="navigate" />
+              <LegendRow swatch={swatch(EFFECT_COLOR.modal)} label="modal open/close" />
+              <LegendRow swatch={swatch(EFFECT_COLOR.api)} label="api call" />
+              <LegendRow swatch={swatch(EFFECT_COLOR['state-error'])} label="state / error" />
+            </div>
+          ) : null}
           {diffActive ? (
             <div className="legend-group">
               <div className="legend-title">since last map</div>

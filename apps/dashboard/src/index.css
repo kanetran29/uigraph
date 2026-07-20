@@ -660,6 +660,27 @@ select:focus-visible,
   word-break: break-all;
 }
 
+.effect-field {
+  align-items: flex-start;
+}
+
+.effect-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.effect-chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-subtle);
+  word-break: break-all;
+}
+
 .badge {
   color: #ffffff;
   font-size: 10px;

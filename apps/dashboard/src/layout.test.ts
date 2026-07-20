@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { GraphEdge, GraphNode, Proposal, UiGraph } from '@ui-graph/core'
-import { componentGroups, componentLabel, layoutGraph, proposedScreenEdges, structuralKey } from './layout'
+import { componentGroups, componentLabel, effectClass, layoutGraph, proposedScreenEdges, structuralKey } from './layout'
 
 function screen(id: string, componentPath: string | null): GraphNode {
   return { id, route: `/${id}`, componentPath, label: id, kind: 'screen' }
@@ -51,6 +51,29 @@ describe('componentGroups', () => {
   it('produces NO band labeled like the page for page-root controls', () => {
     const groups = componentGroups(g, 's')
     expect(groups.filter((x) => x.isBand).map((x) => x.label)).not.toContain('Checkout')
+  })
+})
+
+describe('effectClass', () => {
+  it('classifies plain navigate and modal open/close effects', () => {
+    expect(effectClass('navigate')).toBe('navigate')
+    expect(effectClass('open:modal')).toBe('modal')
+    expect(effectClass('close:modal')).toBe('modal')
+  })
+
+  it('classifies a joined api effect, even mixed with state kinds', () => {
+    expect(effectClass('api:GET /orders')).toBe('api')
+    expect(effectClass('api:POST /cart, state:setLoading')).toBe('api')
+  })
+
+  it('classifies a joined state/error effect with no api kind present', () => {
+    expect(effectClass('state:setCart')).toBe('state-error')
+    expect(effectClass('error:setFailed, state:setDone')).toBe('state-error')
+  })
+
+  it('returns null for no effect or an unrecognized effect string', () => {
+    expect(effectClass(null)).toBeNull()
+    expect(effectClass('redirect')).toBeNull()
   })
 })
 
