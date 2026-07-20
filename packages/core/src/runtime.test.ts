@@ -130,4 +130,13 @@ describe('validateEvidence', () => {
   it('accepts dialog evidence as-is', () => {
     expect(validateEvidence({ kind: 'dialog' })).toBeNull()
   })
+
+  it('accepts a successful/redirect request and rejects an error status or empty method/url', () => {
+    expect(validateEvidence({ kind: 'request', method: 'POST', url: '/api/orders', status: 200 })).toBeNull()
+    expect(validateEvidence({ kind: 'request', method: 'GET', url: '/api/orders', status: 302 })).toBeNull()
+    expect(validateEvidence({ kind: 'request', method: 'POST', url: '/api/orders', status: 500 })).toMatch(/not a successful\/redirect/)
+    expect(validateEvidence({ kind: 'request', method: 'POST', url: '/api/orders', status: 404 })).toMatch(/not a successful\/redirect/)
+    expect(validateEvidence({ kind: 'request', method: '', url: '/api/orders', status: 200 })).toMatch(/non-empty/)
+    expect(validateEvidence({ kind: 'request', method: 'POST', url: '', status: 200 })).toMatch(/non-empty/)
+  })
 })
