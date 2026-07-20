@@ -140,3 +140,19 @@ describe('validateEvidence', () => {
     expect(validateEvidence({ kind: 'request', method: 'POST', url: '', status: 200 })).toMatch(/non-empty/)
   })
 })
+
+describe('applyObservations — newest observation per triple wins', () => {
+  it('a fresh re-confirmation supersedes an older stale-base observation of the same triple', () => {
+    const g = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e1', 'n_a', 'n_b', { modality: 'may' })],
+    )
+    const old = { id: 'o_old', ts: '2026-01-01T00:00:00Z', from: 'n_a', to: 'n_b', event: 'navigate', outcome: 'confirmed', base: 'OLDHASH' } as Observation
+    const fresh = { id: 'o_new', ts: '2026-02-01T00:00:00Z', from: 'n_a', to: 'n_b', event: 'navigate', outcome: 'confirmed', base: 'CURRENT' } as Observation
+    const out = applyObservations(g, [old, fresh], { baseHash: 'CURRENT' })
+    const e = out.edges.find((x) => x.from === 'n_a' && x.to === 'n_b')!
+    expect(e.source).toBe('runtime')
+    expect(e.witnessStale).toBeUndefined()
+    expect(e.witness?.observationId).toBe('o_new')
+  })
+})

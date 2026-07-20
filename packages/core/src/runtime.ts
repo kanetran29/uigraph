@@ -163,7 +163,11 @@ export function applyObservations(graph: UiGraph, observations: Observation[], o
 
   let changed = false
   const seen = new Set<string>()
-  for (const o of observations) {
+  // Newest observation per triple wins: the log is append-only (oldest first), so
+  // iterating it forward let an old stale-base confirmation shadow a fresh
+  // re-confirmation of the same transition — the edge stayed witnessStale forever
+  // no matter how many times it was re-driven. Walk newest-first instead.
+  for (const o of [...observations].reverse()) {
     if (o.outcome !== 'confirmed' || !nodeIds.has(o.from) || !nodeIds.has(o.to)) continue
     const triple = `${o.from}->${o.to}::${o.event}`
     if (seen.has(triple)) continue
