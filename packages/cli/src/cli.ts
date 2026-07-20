@@ -119,7 +119,8 @@ export function buildProgram(): Command {
       }
       const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, includeProven: opts.all === true, concurrency, patternSample })
       const pat = s.patternParked > 0 ? ` · ${s.patternParked} accounted by pattern` : ''
-      console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)${pat}`)
+      const rej = s.rejected > 0 ? ` · ${s.rejected} rejected by the proof gate (not persisted)` : ''
+      console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)${pat}${rej}`)
       if (s.refutedProven > 0) {
         console.error(`WARNING: ${s.refutedProven} must-static edge(s) REFUTED at runtime — the extraction and the running app disagree; inspect these edges (diff, soundiness) before trusting the graph`)
         process.exitCode = 1

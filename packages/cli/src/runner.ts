@@ -58,6 +58,7 @@ export interface VerifySummary {
   confirmed: number
   refuted: number
   refutedProven: number
+  rejected: number
   resolvedDynamic: number
   discoveredNodes: number
   parkedDynamic: number
@@ -92,6 +93,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   let confirmed = 0
   let refuted = 0
   let refutedProven = 0
+  let rejected = 0
   let resolvedDynamic = 0
   let discoveredNodes = 0
   let parkedDynamic = 0
@@ -118,7 +120,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       if (result === null || result === undefined) continue
       // an undrivable plan was never attempted: refuting it would be a false negative
       if (result.undrivable === true) continue
-      reportObservation(ctx, {
+      const res = reportObservation(ctx, {
         from: t.from,
         to: t.to,
         event: t.event,
@@ -128,6 +130,12 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
         ...(result.evidence ? { evidence: result.evidence } : {}),
         ...(result.screenshot ? { screenshot: result.screenshot } : {}),
       })
+      // A proof-gate rejection persisted NOTHING — counting it as confirmed would
+      // report progress that has no witness. Surface it as rejected instead.
+      if ('error' in res) {
+        rejected++
+        continue
+      }
       const k = patternKey(graph, t)
       if (result.confirmed) {
         confirmed++
@@ -229,7 +237,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     }
   }
 
-  return { attempted: representatives.length, confirmed, refuted, refutedProven, resolvedDynamic, discoveredNodes, parkedDynamic, patternParked }
+  return { attempted: representatives.length, confirmed, refuted, refutedProven, rejected, resolvedDynamic, discoveredNodes, parkedDynamic, patternParked }
 }
 
 /** A bounded-concurrency pool: run `worker` over `items` with at most `concurrency`
@@ -516,6 +524,9 @@ export async function runLogin(opts: RunLoginOptions): Promise<void> {
 async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise<VerifyResult> {
   const start = appUrl + spec.startUrl
   const expected = appUrl + spec.expectedRoute
+  // Same-path target: URL evidence is impossible (any landing "matches" before the
+  // interaction even runs), so the probe cannot legitimately confirm — undrivable.
+  if (samePath(start, expected)) return { confirmed: false, undrivable: true }
 
   const landedAfter = async (fn: () => Promise<void>): Promise<string | null> => {
     await page.goto(start)
