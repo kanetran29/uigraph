@@ -26,6 +26,11 @@ export interface ExtractOptions {
   rulesetVersion?: string
   /** When true, also extract interactive controls (buttons/inputs/etc.) as nested nodes. */
   controls?: boolean
+  /** Path to the app's locale/translation resource file (e.g. src/locales/en/translation.ts),
+   *  for resolving t()/i18nKey control labels to their real translated text instead of a
+   *  humanized key. Omit to auto-detect a conventional locale path; adapters that support no
+   *  i18n resolution ignore this. */
+  i18nFile?: string
 }
 
 /** One declared-but-unresolved case an adapter deliberately over-approximated. */

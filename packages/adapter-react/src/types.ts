@@ -50,6 +50,10 @@ export interface ControlInfo {
   element: string
   controlType: string
   name?: string
+  /** Whether `name` came from static INFERENCE (i18n key / icon tag / BEM class / img
+   *  alt / svg title) rather than an EXPLICIT signal (name/id attr, visible text,
+   *  literal aria-label/placeholder/title, aria-labelledby target text). */
+  nameInferred?: boolean
   selector: ControlSelector
   input?: ControlInput
 }

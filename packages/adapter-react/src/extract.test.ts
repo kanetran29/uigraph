@@ -155,13 +155,17 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
       '/',
       { controls: true },
     )
-    const names = graph.nodes.filter((n) => n.kind === 'control').map((n) => n.control?.name)
+    const controls = graph.nodes.filter((n) => n.kind === 'control')
+    const names = controls.map((n) => n.control?.name)
     expect(names).toContain('Could sell')   // from <Trans i18nKey="…couldSell">
     expect(names).toContain('Could buy')    // from <CouldBuyIcon/>
     expect(names).toContain('Contact us')   // from BEM modifier --contact-us
     // and the i18n-named control gets a role+name selector, not structural
     const sell = graph.nodes.find((n) => n.kind === 'control' && n.control?.name === 'Could sell')
     expect(sell?.control?.selector?.strategy).toBe('role-name')
+    // every one of these names came from inference (i18nKey/icon-tag/BEM), not an
+    // explicit name/id/text/aria signal
+    expect(controls.every((c) => c.control?.nameInferred === true)).toBe(true)
   })
 
   it('names an otherwise-textless control from its i18n key / icon / className', () => {
@@ -1144,5 +1148,115 @@ describe('extractGraph — soundiness: navigation intent not statically extracta
     )
     expect(soundiness.some((s) => s.kind === 'dispatch-driven-nav')).toBe(true)
     expect(soundiness.some((s) => s.kind === 'inline-jsx-route')).toBe(true)
+  })
+})
+
+describe('extractGraph — naming chain: i18n resolution + img/svg/aria-labelledby + nameInferred', () => {
+  it('resolves a t() key to its real translated value from an auto-discovered locale file (not the humanized key)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ const t=(k)=>k; return <button aria-label={t('header.openMenuAria')} onClick={()=>{}} /> }`,
+        '/locales/en/translation.ts': `export const en = { header: { openMenuAria: 'Open menu' } }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const btn = graph.nodes.find((n) => n.kind === 'control')
+    expect(btn?.control?.name).toBe('Open menu')
+    expect(btn?.control?.name).not.toBe('Open menu aria') // the old humanize(key)-only result
+    expect(btn?.control?.nameInferred).toBe(true)
+  })
+
+  it('falls back to humanize(key) when the key is missing from the locale map', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ const t=(k)=>k; return <button aria-label={t('header.missingAria')} onClick={()=>{}} /> }`,
+        '/locales/en/translation.ts': `export const en = { header: { openMenuAria: 'Open menu' } }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    expect(graph.nodes.find((n) => n.kind === 'control')?.control?.name).toBe('Missing aria')
+  })
+
+  it('resolves via an explicit i18nFile override at a non-conventional path', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ const t=(k)=>k; return <button aria-label={t('nav.close')} onClick={()=>{}} /> }`,
+        '/translations/custom-en.ts': `export const en = { nav: { close: 'Close' } }`,
+      }),
+      '/',
+      { controls: true, i18nFile: '/translations/custom-en.ts' },
+    )
+    expect(graph.nodes.find((n) => n.kind === 'control')?.control?.name).toBe('Close')
+  })
+
+  it('never throws and falls back to humanize when no locale file exists at all', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ const t=(k)=>k; return <button aria-label={t('nav.closeAria')} onClick={()=>{}} /> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    expect(graph.nodes.find((n) => n.kind === 'control')?.control?.name).toBe('Close aria')
+  })
+
+  it('names an icon-only control from <img alt> or <svg><title>, marked as inferred', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ return <div>
+          <button onClick={()=>{}}><img src="/close.svg" alt="Close"/></button>
+          <button onClick={()=>{}}><svg><title>Search</title></svg></button>
+        </div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const controls = graph.nodes.filter((n) => n.kind === 'control')
+    const names = controls.map((n) => n.control?.name)
+    expect(names).toContain('Close')
+    expect(names).toContain('Search')
+    expect(controls.every((c) => c.control?.nameInferred === true)).toBe(true)
+  })
+
+  it('names a control from its aria-labelledby target text — explicit ARIA wiring, so NOT flagged inferred', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ return <div>
+          <span id="dlgTitle">Delete listing</span>
+          <button aria-labelledby="dlgTitle" onClick={()=>{}} />
+        </div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const btn = graph.nodes.find((n) => n.kind === 'control')
+    expect(btn?.control?.name).toBe('Delete listing')
+    expect(btn?.control?.nameInferred).toBeUndefined()
+  })
+
+  it('does not flag nameInferred for explicit signals (name attr, visible text, literal aria-label)', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `export default function H(){ return <div>
+          <button name="submitBtn" onClick={()=>{}} />
+          <button onClick={()=>{}}>Save</button>
+          <button aria-label="Close dialog" onClick={()=>{}} />
+        </div> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const controls = graph.nodes.filter((n) => n.kind === 'control')
+    expect(controls.length).toBe(3)
+    expect(controls.every((c) => c.control?.nameInferred === undefined)).toBe(true)
   })
 })
