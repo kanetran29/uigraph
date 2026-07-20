@@ -22,6 +22,7 @@ import { resolveComponentFile, screenSourceFiles } from './resolve'
 import { collectInteractions, controlMetaFor } from './controls'
 import { detectDynamicWidget, gatedOverlayVar, modalGateVar } from './effects'
 import { collectDataRoutes, collectRoutes, ruleIdFor } from './routes'
+import { buildI18nMap } from './i18n'
 
 export { buildProject } from './resolve'
 
@@ -248,6 +249,9 @@ export function extractGraphFromRoutes(
   }
 
   if (opts.controls) {
+    // Built once for the whole extraction: every control's t()/i18nKey label resolves
+    // against the same locale map (auto-discovered, or opts.i18nFile override).
+    const i18nMap = buildI18nMap(project, projectDir, opts.i18nFile)
     let midx = 0
     let vidx = 0
     for (const route of routes) {
@@ -398,6 +402,7 @@ export function extractGraphFromRoutes(
               loc,
               ...(meta.input ? { input: meta.input } : {}),
               ...(meta.name ? { name: meta.name } : {}),
+              ...(meta.nameInferred ? { nameInferred: true } : {}),
               ...(inter.events.length > 0 ? { events: inter.events } : {}),
               ...(nodeEffects.length > 0 ? { effects: nodeEffects } : {}),
             },
@@ -417,7 +422,7 @@ export function extractGraphFromRoutes(
             soundiness.push({ kind: 'dynamic-widget', file, detail: 'interactive map/canvas widget: gestures (zoom/pan/drag) are runtime-only and not statically modelable' })
           }
           for (const el of allJsxElements(cf)) {
-            const meta = controlMetaFor(el)
+            const meta = controlMetaFor(el, i18nMap)
             if (meta) out.push({ el, meta, cf, navInfo, file, descended: depth > 0 })
           }
         }

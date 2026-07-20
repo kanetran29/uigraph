@@ -141,11 +141,26 @@ export function stringAttr(el: Node, name: string): string | null {
   return null
 }
 
-/** Visible text inside a JSX element (e.g. a button's label), or undefined. */
+/** Whether `node` sits inside a nested `<svg>` strictly between it and `boundary` — an
+ *  SVG `<title>`/`<desc>` is invisible accessibility metadata (rendered as a tooltip,
+ *  like an HTML `title` attr), never on-page copy, so its text must not count as an
+ *  ANCESTOR element's visible label. Stops at `boundary` so asking for the `<svg>`'s (or
+ *  its `<title>`'s) OWN text still works — only a text node's outer elements are checked. */
+function withinNestedSvg(node: Node, boundary: Node): boolean {
+  for (let p = node.getParent(); p !== undefined && p !== boundary; p = p.getParent()) {
+    if (isJsxEl(p) && jsxTag(p).toLowerCase() === 'svg') return true
+  }
+  return false
+}
+
+/** Visible text inside a JSX element (e.g. a button's label), or undefined. Excludes
+ *  text nested inside a CHILD `<svg>` (its `<title>`/`<desc>` are accessibility
+ *  metadata, not visible copy — see `svgTitleText` in controls.ts for that signal). */
 export function getJsxText(el: Node): string | undefined {
   if (!Node.isJsxElement(el)) return undefined
   const txt = el
     .getDescendantsOfKind(SyntaxKind.JsxText)
+    .filter((t) => !withinNestedSvg(t, el))
     .map((t) => t.getText())
     .join(' ')
     .replace(/\s+/g, ' ')
