@@ -614,22 +614,30 @@ export interface EdgeContext {
  * screen↔screen edges with a dagre route render as the custom 'dagre' edge type so
  * arrows follow the spaced, de-crossed polyline; control/ghost edges stay smoothstep.
  */
+/** Muted grey for unverifiable proposal ghosts — visibly "dead end", distinct from the open-proposal violet. */
+const UNVERIFIABLE_COLOR = '#6b7280'
+
 /**
- * Render the opt-in proposed (quarantined LLM) edges as dashed violet floating edges —
- * the same ghost tint as proposed state nodes — so a formerly-orphan modal/overlay shows
- * its proposed incoming connection without polluting the proven IR (default off).
+ * Render the opt-in proposal-lifecycle edges as dashed floating edges (default off):
+ * open proposals in the ghost violet, unverifiable ones in a muted grey — so the
+ * toggle always shows where hypotheses live or died instead of going blank once a
+ * reconciliation loop resolves everything. Confirmed proposals never render here;
+ * they became real witnessed edges.
  */
 function toProposedFlowEdges(edges: readonly ProposedEdge[]): Edge[] {
-  return edges.map((e) => ({
-    id: e.id,
-    source: e.from,
-    target: e.to,
-    type: 'floating',
-    data: { label: e.count > 1 ? `proposed ×${e.count}` : 'proposed' },
-    zIndex: 0,
-    markerEnd: { type: MarkerType.ArrowClosed, color: GHOST_COLOR, width: 12, height: 12 },
-    style: { stroke: GHOST_COLOR, strokeWidth: 1.6, strokeOpacity: 0.75, strokeDasharray: '2 5', strokeLinecap: 'round' },
-  }))
+  return edges.map((e) => {
+    const color = e.status === 'unverifiable' ? UNVERIFIABLE_COLOR : GHOST_COLOR
+    return {
+      id: e.id,
+      source: e.from,
+      target: e.to,
+      type: 'floating',
+      data: { label: e.count > 1 ? `${e.status} ×${e.count}` : e.status },
+      zIndex: 0,
+      markerEnd: { type: MarkerType.ArrowClosed, color, width: 12, height: 12 },
+      style: { stroke: color, strokeWidth: 1.6, strokeOpacity: 0.75, strokeDasharray: '2 5', strokeLinecap: 'round' },
+    }
+  })
 }
 
 export function toFlowEdges(graph: UiGraph, ctx: EdgeContext): Edge[] {

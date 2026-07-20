@@ -91,15 +91,29 @@ describe('proposedScreenEdges', () => {
   it('emits a deduped screen->target edge for a proposed proposal whose target is a real non-control node', () => {
     const edges = proposedScreenEdges(g, [prop({ id: 'a', to: 'm_x' }), prop({ id: 'b', to: 'm_x' })])
     expect(edges).toHaveLength(1)
-    expect(edges[0]).toMatchObject({ from: 'n_root', to: 'm_x', count: 2, id: 'pe_n_root->m_x' })
+    expect(edges[0]).toMatchObject({ from: 'n_root', to: 'm_x', count: 2, status: 'proposed', id: 'pe_n_root->m_x::proposed' })
   })
 
-  it('skips proposals with no target, an external target, a control target, or a non-proposed status', () => {
+  it('renders unverifiable proposals as their own status-keyed edge (lifecycle stays visible after a loop resolves)', () => {
+    const edges = proposedScreenEdges(g, [
+      prop({ id: 'open1', to: 'm_x' }),
+      prop({ id: 'dead1', to: 'm_x', status: 'unverifiable' }),
+      prop({ id: 'dead2', to: 'm_x', status: 'unverifiable' }),
+    ])
+    expect(edges).toHaveLength(2)
+    expect(edges).toEqual(expect.arrayContaining([
+      expect.objectContaining({ status: 'proposed', count: 1 }),
+      expect.objectContaining({ status: 'unverifiable', count: 2, id: 'pe_n_root->m_x::unverifiable' }),
+    ]))
+  })
+
+  it('skips proposals with no target, an external target, a control target, or a resolved-into-graph status', () => {
     const edges = proposedScreenEdges(g, [
       prop({ id: 'noTo' }),
       prop({ id: 'ext', to: 'stripe-external' }),
       prop({ id: 'ctrl', to: 'c1' }),
       prop({ id: 'done', to: 'm_x', status: 'confirmed' }),
+      prop({ id: 'gone', to: 'm_x', status: 'rejected' }),
     ])
     expect(edges).toEqual([])
   })
