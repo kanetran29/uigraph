@@ -513,6 +513,14 @@ export async function runLogin(opts: RunLoginOptions): Promise<void> {
  * synthetic sink. Capture the pre-trigger URL, run only the real interaction legs
  * (clicks/fills) as the trigger, then wait for the URL to change (beating
  * page-load/timer redirects) and settle, and report where it landed.
+ *
+ * Same-path assert (the plan's start screen IS the asserted target — an effect-only
+ * self-loop, or any edge that returns to the screen it left from): the page never
+ * has to move for the assertion to hold, so a broken click that fires without
+ * triggering anything looks identical to one that correctly stayed put. Such a
+ * match is therefore never confirmed — only undrivable (mirrors probePlan's own
+ * same-path guard below) — while an unexpected departure still refutes normally,
+ * since that IS real disagreement between the static claim and the running app.
  */
 /**
  * Run an exploratory probe on an open page: load the source screen, then (a) try
@@ -566,7 +574,8 @@ async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise
 
 async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec }): Promise<VerifyResult> {
   if (opts?.probe !== undefined) return probePlan(page, opts.probe, appUrl)
-  await page.goto(plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl)
+  const anchorUrl = plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl
+  await page.goto(anchorUrl)
 
   if (opts?.capture === true) {
     await page.waitForLoadState('networkidle').catch(() => {})
@@ -638,6 +647,8 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     const expected = lastUrlAssertion
     await page.waitForURL((u) => samePath(u.toString(), expected), { timeout: 4000 }).catch(() => {})
     confirmed = samePath(page.url(), expected)
+    // A same-path match is never positive evidence (see the doc comment above) — only an unexpected departure is.
+    if (confirmed && samePath(anchorUrl, expected) && !expectDialog) return { confirmed: false, undrivable: true }
   }
   if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
   if (!confirmed) return { confirmed: false }

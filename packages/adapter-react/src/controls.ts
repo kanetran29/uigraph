@@ -16,10 +16,14 @@ import { analyzeHandler } from './analyze'
  *  signal the author put directly on the control (name/id attr, visible text, a
  *  literal aria-label/placeholder/title, or an aria-labelledby target's text). Threads
  *  through the naming chain so controlMetaFor can set ControlMeta.nameInferred without
- *  re-deriving provenance from the final string. */
+ *  re-deriving provenance from the final string. `idKey`, when set, is the raw i18n
+ *  key `name` was resolved from — the stable identity basis for the control's
+ *  selector, since the translated `name` itself can change on a copy-only edit to
+ *  the locale file that never touches the component. */
 interface Named {
   name: string
   inferred: boolean
+  idKey?: string
 }
 
 /** Humanize an i18n key / camel / kebab / BEM token into a readable name ("building.offMarket.couldSell" -> "Could sell"). */
@@ -92,10 +96,10 @@ function attrLabel(el: Node, name: string, i18nMap?: Map<string, string>): Named
   const key = attrCallKey(el, name)
   if (key == null) return undefined
   const hit = i18nMap?.get(key)
-  if (hit != null && hit.length > 0) return { name: hit, inferred: true }
+  if (hit != null && hit.length > 0) return { name: hit, inferred: true, idKey: key }
   const cleaned = key.replace(/(placeholder|label)$/i, '')
   const h = humanize(cleaned.length > 0 ? cleaned : key)
-  return h != null ? { name: h, inferred: true } : undefined
+  return h != null ? { name: h, inferred: true, idKey: key } : undefined
 }
 
 /** The visible text of the element an `aria-labelledby` id reference points to — an
@@ -139,14 +143,14 @@ function inferredName(el: Node, i18nMap?: Map<string, string>): Named | undefine
     const key = stringAttr(d, 'i18nKey')
     if (key == null || key.length === 0) continue
     const v = resolveKey(key, i18nMap)
-    if (v != null) return { name: v, inferred: true }
+    if (v != null) return { name: v, inferred: true, idKey: key }
   }
   // The actual label text via the i18n hook — more accurate than the icon/className
   // fallbacks below, which on design-system buttons leak the variant ("Danger").
   const callKey = i18nCallKey(el)
   if (callKey != null) {
     const v = resolveKey(callKey, i18nMap)
-    if (v != null) return { name: v, inferred: true }
+    if (v != null) return { name: v, inferred: true, idKey: callKey }
   }
   for (const d of kids) {
     if (jsxTag(d).toLowerCase() !== 'img') continue
@@ -219,16 +223,23 @@ function ariaRole(el: Node, tag: string, controlType: string): string | undefine
  * role + accessible name, a label (id/name attr), visible text, or a structural
  * tag fallback. `nth` (assigned later, per screen) disambiguates identical
  * selectors. This is the basis for the control's id and a real automation handle.
+ * `idKey` (set only when `text` is itself i18n-resolved) becomes the returned
+ * selector's `idKey` whenever `text` is what fed `value` — the id then hashes the
+ * static i18n key instead of the live translated string.
  */
-function controlSelector(el: Node, tag: string, controlType: string, text: string | undefined): ControlSelector {
+function controlSelector(el: Node, tag: string, controlType: string, text: string | undefined, idKey?: string): ControlSelector {
   const testid = stringAttr(el, 'data-testid') ?? stringAttr(el, 'data-test-id')
   if (testid != null) return { strategy: 'testid', value: testid }
   const role = ariaRole(el, tag, controlType)
-  const accName = stringAttr(el, 'aria-label') ?? stringAttr(el, 'name') ?? stringAttr(el, 'placeholder') ?? text ?? stringAttr(el, 'id')
-  if (role != null && accName != null) return { strategy: 'role-name', value: `${role}|${accName}` }
+  const literalAcc = stringAttr(el, 'aria-label') ?? stringAttr(el, 'name') ?? stringAttr(el, 'placeholder')
+  const accName = literalAcc ?? text ?? stringAttr(el, 'id')
+  if (role != null && accName != null) {
+    const stableKey = literalAcc == null && idKey !== undefined ? `${role}|${idKey}` : undefined
+    return { strategy: 'role-name', value: `${role}|${accName}`, ...(stableKey !== undefined ? { idKey: stableKey } : {}) }
+  }
   const label = stringAttr(el, 'id') ?? stringAttr(el, 'name')
   if (label != null) return { strategy: 'label', value: label }
-  if (text != null) return { strategy: 'text', value: text }
+  if (text != null) return { strategy: 'text', value: text, ...(idKey !== undefined ? { idKey } : {}) }
   return { strategy: 'structural', value: tag.toLowerCase() }
 }
 
@@ -277,7 +288,7 @@ export function controlMetaFor(el: Node, i18nMap?: Map<string, string>): Control
   const explicitName = stringAttr(el, 'name') ?? stringAttr(el, 'id')
   const name = explicitName ?? resolved?.name
   const nameInferred = explicitName === null && resolved?.inferred === true
-  const selector = controlSelector(el, tag, controlType, resolved?.name)
+  const selector = controlSelector(el, tag, controlType, resolved?.name, resolved?.idKey)
   const input = inputConstraints(el, controlType)
   return { element: tag, controlType, selector, ...(input ? { input } : {}), ...(name ? { name } : {}), ...(nameInferred ? { nameInferred: true } : {}) }
 }
