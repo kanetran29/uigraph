@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@ui-graph/core'
 import { openStore, saveGraph } from '@ui-graph/core/node'
 import type { Server } from 'node:http'
-import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
+import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, formatParked, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runParked, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
 import { buildProgram } from './cli'
 import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
 import { readRegistry, summarize } from '@ui-graph/core/node'
@@ -930,6 +930,78 @@ describe('crash-safety: input validation + actionable errors (no raw stacks)', (
     writeFileSync(fileParent, 'x')
     expect(() => runKitInstall({ dir: fileParent })).toThrow(CliError)
     expect(() => runKitInstall({ dir: fileParent })).toThrow(/cannot create output directory/)
+  })
+})
+
+describe('runParked / runUnpark (parked-edge triage)', () => {
+  /** A workspace with one park of each class: pattern (fan-out dedup), autonomous (runner give-up), manual. */
+  function parkedWorkspace(): string {
+    const dir = seedWorkspace(
+      tempDir('uigraph-cli-parked-'),
+      graph([node('a'), node('b'), node('c'), node('d')], [edge('e_ab', 'a', 'b'), edge('e_ac', 'a', 'c'), edge('e_ad', 'a', 'd')]),
+    )
+    const store = openStore(dbPathFor(dir))
+    store.parkEdge('e_ab', 'over-approximation fan-out of the nav call at src/App.tsx:10', 'runner')
+    store.parkEdge('e_ac', 'autonomous: unreachable/undrivable after 3 attempts', 'runner')
+    store.parkEdge('e_ad', 'needs a seeded admin account', 'agent')
+    store.close()
+    return dir
+  }
+
+  it('groups parks into pattern / autonomous / manual; pattern is count-only unless --all', () => {
+    const s = runParked(parkedWorkspace())
+    expect(s.pattern.map((p) => p.edgeId)).toEqual(['e_ab'])
+    expect(s.autonomous.map((p) => p.edgeId)).toEqual(['e_ac'])
+    expect(s.manual.map((p) => p.edgeId)).toEqual(['e_ad'])
+    const out = formatParked(s, false)
+    expect(out).toContain('pattern: 1')
+    expect(out).toContain('autonomous: 1')
+    expect(out).toContain('manual: 1')
+    // autonomous + manual entries list edgeId + reason + ts; pattern entries stay hidden
+    expect(out).toContain('e_ac')
+    expect(out).toContain('unreachable/undrivable after 3 attempts')
+    expect(out).toContain('e_ad')
+    expect(out).toContain('needs a seeded admin account')
+    expect(out).not.toContain('e_ab')
+    expect(formatParked(s, true)).toContain('e_ab')
+  })
+
+  it('prints a clear empty-state line when nothing is parked', () => {
+    const dir = seedWorkspace(tempDir('uigraph-cli-parked-empty-'), graph([node('a')], []))
+    expect(formatParked(runParked(dir))).toContain('no parked edges')
+  })
+
+  it('unparks named edge ids and reports the count', () => {
+    const dir = parkedWorkspace()
+    expect(runUnpark({ dir, edgeIds: ['e_ad', 'e_nope'] })).toBe(1)
+    const store = openStore(dbPathFor(dir))
+    const left = store.getParkedEdges().map((p) => p.edgeId)
+    store.close()
+    expect(left.sort()).toEqual(['e_ab', 'e_ac'])
+  })
+
+  it('--autonomous sweeps only autonomous-class parks', () => {
+    const dir = parkedWorkspace()
+    expect(runUnpark({ dir, autonomous: true })).toBe(1)
+    const store = openStore(dbPathFor(dir))
+    const left = store.getParkedEdges().map((p) => p.edgeId)
+    store.close()
+    expect(left.sort()).toEqual(['e_ab', 'e_ad'])
+  })
+
+  it('--runner sweeps every park recorded by the runner', () => {
+    const dir = parkedWorkspace()
+    expect(runUnpark({ dir, runner: true })).toBe(2)
+    const store = openStore(dbPathFor(dir))
+    const left = store.getParkedEdges().map((p) => p.edgeId)
+    store.close()
+    expect(left).toEqual(['e_ad'])
+  })
+
+  it('refuses with a CliError when given neither edge ids nor a sweep flag', () => {
+    const dir = parkedWorkspace()
+    expect(() => runUnpark({ dir })).toThrow(CliError)
+    expect(() => runUnpark({ dir, edgeIds: [] })).toThrow(/--autonomous|--runner/)
   })
 })
 

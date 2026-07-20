@@ -10,7 +10,7 @@
 // it to actually drive) and uses the system/cached Chromium.
 
 import type { Evidence, SpecPlan, UiGraph, VerifyTarget } from '@ui-graph/core'
-import { buildSpecPlan, dedupWorklist, fnv1a, locatorFor, nextToVerify, nodeForUrl, patternKey, planPath } from '@ui-graph/core'
+import { buildSpecPlan, dedupWorklist, fnv1a, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planPath } from '@ui-graph/core'
 import { openStore } from '@ui-graph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@ui-graph/mcp'
 
@@ -52,7 +52,10 @@ export interface RunVerifyOptions {
   patternSample?: number
 }
 
-/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution; refutedProven counts refutations of must-static edges — each one means the extraction and the running app DISAGREE and must be investigated. */
+/** How one worklist target ended this pass: confirmed (drove and landed), refuted (drove, did not land), undrivable (no drivable control/plan ever reached it — never attempted), or rejected (drove and landed but the proof gate refused the evidence — nothing persisted). */
+export type TargetOutcome = 'confirmed' | 'refuted' | 'undrivable' | 'rejected'
+
+/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution; refutedProven counts refutations of must-static edges — each one means the extraction and the running app DISAGREE and must be investigated. `outcomes` is the per-target diagnosis (keyed by target id) so the until-done loop can park an exhausted target with a reason that says WHY it never closed. */
 export interface VerifySummary {
   attempted: number
   confirmed: number
@@ -63,6 +66,7 @@ export interface VerifySummary {
   discoveredNodes: number
   parkedDynamic: number
   patternParked: number
+  outcomes: Record<string, TargetOutcome>
 }
 
 /**
@@ -97,6 +101,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   let resolvedDynamic = 0
   let discoveredNodes = 0
   let parkedDynamic = 0
+  const outcomes: Record<string, TargetOutcome> = {}
   // Pattern keys whose representative confirmed (→ its duplicates may be parked) or
   // refuted/undrivable (→ its duplicates stay OPEN, never falsely credited).
   const confirmedKeys = new Map<string, string>()
@@ -117,9 +122,16 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     for (let i = 0; i < simple.length; i++) {
       const t = simple[i]!
       const result = results[i]
-      if (result === null || result === undefined) continue
+      // no plannable path is the same diagnosis as an undrivable plan: nothing ever reached it
+      if (result === null || result === undefined) {
+        outcomes[t.id] = 'undrivable'
+        continue
+      }
       // an undrivable plan was never attempted: refuting it would be a false negative
-      if (result.undrivable === true) continue
+      if (result.undrivable === true) {
+        outcomes[t.id] = 'undrivable'
+        continue
+      }
       const res = reportObservation(ctx, {
         from: t.from,
         to: t.to,
@@ -134,14 +146,17 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       // report progress that has no witness. Surface it as rejected instead.
       if ('error' in res) {
         rejected++
+        outcomes[t.id] = 'rejected'
         continue
       }
       const k = patternKey(graph, t)
       if (result.confirmed) {
         confirmed++
+        outcomes[t.id] = 'confirmed'
         if (k !== null) confirmedKeys.set(k, `${t.from}->${t.to}`)
       } else {
         refuted++
+        outcomes[t.id] = 'refuted'
         if (t.proven === true) refutedProven++
         if (k !== null) refutedKeys.add(k)
       }
@@ -150,7 +165,10 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     // STAGE 3 — dynamic-sink targets SERIALLY (each may updateGraph + reload, order-sensitive).
     for (const t of dynamic) {
       const steps = planPath(graph, t.from, t.to)
-      if (steps === null) continue
+      if (steps === null) {
+        outcomes[t.id] = 'undrivable'
+        continue
+      }
       const plan = buildSpecPlan(graph, steps, { baseUrl: opts.appUrl, title: `verify ${t.from} → ${t.to}` })
       // Dynamic-sink target (u_<screen>): CAPTURE the real landing instead of asserting a URL.
       let result: VerifyResult
@@ -167,6 +185,8 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
           s.close()
         }
         parkedDynamic++
+        // a parked dynamic sink was never resolved to a real landing — undrivable diagnosis
+        outcomes[t.id] = 'undrivable'
       }
       if (!result.confirmed || result.landedUrl === undefined) {
         park('dynamic nav did not fire on drive (no URL change) — needs runtime state/precondition')
@@ -211,6 +231,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       }
       resolvedDynamic++
       confirmed++
+      outcomes[t.id] = 'confirmed'
     }
   } finally {
     if (owned !== null) await owned.dispose()
@@ -225,7 +246,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     if (!confirmedKeys.has(key) || refutedKeys.has(key)) continue
     const rep = confirmedKeys.get(key) as string
     for (const d of dups) {
-      toPark.push({ edgeId: d.id, reason: `over-approximation fan-out of the nav call at ${key} — representative ${rep} runtime-witnessed; this target not individually driven` })
+      toPark.push({ edgeId: d.id, reason: `${PATTERN_PARK_REASON_PREFIX}${key} — representative ${rep} runtime-witnessed; this target not individually driven` })
     }
   }
   if (toPark.length > 0) {
@@ -237,7 +258,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     }
   }
 
-  return { attempted: representatives.length, confirmed, refuted, refutedProven, rejected, resolvedDynamic, discoveredNodes, parkedDynamic, patternParked }
+  return { attempted: representatives.length, confirmed, refuted, refutedProven, rejected, resolvedDynamic, discoveredNodes, parkedDynamic, patternParked, outcomes }
 }
 
 /** A bounded-concurrency pool: run `worker` over `items` with at most `concurrency`
@@ -322,6 +343,8 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
   const maxRounds = opts.maxRounds ?? 10
   const parkTries = opts.parkTries ?? 2
   const tries = new Map<string, number>()
+  // each target's LAST per-pass diagnosis, so a round-cap park can say WHY it never closed
+  const lastOutcome = new Map<string, TargetOutcome>()
   let rounds = 0
   let confirmed = 0
   let parkedEdges = 0
@@ -332,6 +355,7 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
     const attempted = attemptedThisRound(ctx, opts.limit)
     const pass = await runVerify(opts)
     confirmed += pass.confirmed
+    for (const [id, o] of Object.entries(pass.outcomes)) lastOutcome.set(id, o)
     // bump attempts ONLY for targets this round could actually try (the ranked
     // worklist slice under the limit); park targets that exhausted their tries
     const status = getLoopStatus(ctx)
@@ -342,7 +366,7 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
         const n = (tries.get(e.id) ?? 0) + 1
         tries.set(e.id, n)
         if (n >= parkTries) {
-          store.parkEdge(e.id, `autonomous: unreachable/undrivable after ${n} attempts`, 'runner')
+          store.parkEdge(e.id, capParkReason(lastOutcome.get(e.id), n), 'runner')
           parkedEdges++
         }
       }
@@ -368,7 +392,8 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
     const store = openStore(dbPath(ctx))
     try {
       for (const e of before.openEdges) {
-        store.parkEdge(e.id, 'autonomous: parked at round cap for human review', 'runner')
+        const last = lastOutcome.get(e.id)
+        store.parkEdge(e.id, `autonomous: parked at round cap for human review${last !== undefined ? ` — last outcome: ${last}` : ''}`, 'runner')
         parkedEdges++
       }
       for (const p of store.queryProposals({ status: 'proposed' })) {
@@ -391,6 +416,22 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
     runtimeRatio: final.coverage.runtimeRatio,
     accountedRatio: final.coverage.accountedRatio,
   }
+}
+
+/**
+ * The auditable reason for a park at the attempt cap, carrying the target's last
+ * observed diagnosis: undrivable (nothing ever reached it) reads very differently
+ * from refuted (driven but did not land) or rejected (landed but the proof gate
+ * refused the evidence) to the human triaging the parked list. Coverage's classify
+ * keys pattern parks off PATTERN_PARK_REASON_PREFIX only; the parked CLI groups
+ * runner give-ups by the recorded `by` field — nothing parses these strings, they
+ * exist for the human. A target never in a processed slice keeps the generic wording.
+ */
+function capParkReason(last: TargetOutcome | undefined, n: number): string {
+  if (last === 'undrivable') return `autonomous: undrivable after ${n} attempts — no drivable control/plan reached it`
+  if (last === 'refuted') return `autonomous: unstable after ${n} attempts — driven but refuted (did not land)`
+  if (last === 'rejected') return `autonomous: proof-rejected after ${n} attempts — driven and landed but the confirmation lacked admissible evidence`
+  return `autonomous: unreachable/undrivable after ${n} attempts`
 }
 
 /**

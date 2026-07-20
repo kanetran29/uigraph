@@ -121,10 +121,20 @@ export class Store {
       .run(key, JSON.stringify(value))
   }
 
-  /** Persist the extracted base graph (validated) and its soundiness report. */
+  /**
+   * Persist the extracted base graph (validated) and its soundiness report. Era-bound
+   * runner parks: when the incoming graph's hash differs from the stored one, every
+   * park with by === 'runner' is dropped in the same operation — a runner park is a
+   * claim about the OLD base ("undrivable now") that a re-map may have invalidated.
+   * Agent parks persist (human/agent judgment is not era-bound).
+   */
   setBaseGraph(graph: UiGraph, soundiness: SoundinessNote[] = []): void {
     const errs = validateGraph(graph)
     if (errs.length > 0) throw new Error(`refusing to store invalid graph:\n  ${errs.map((e) => e.message).join('\n  ')}`)
+    const current = this.getBaseGraph()
+    if (current !== null && hashValue(current) !== hashValue(graph)) {
+      this.setDoc('parked_edges', this.getParkedEdges().filter((p) => p.by !== 'runner'))
+    }
     this.setDoc('graph', graph)
     this.setDoc('soundiness', soundiness)
     this.rebuildProposalGraph()
@@ -325,7 +335,8 @@ export class Store {
    * Park a may/unknown edge out of the verify worklist with an auditable reason
    * (upsert, deduped by edge id). Pure sidecar metadata in the docs table — never
    * edits the edge, its modality, witness, or source, so the proven graph is
-   * untouched. A reason is mandatory.
+   * untouched. A reason is mandatory. Runner parks are era-bound: a re-map that
+   * changes the base graph drops them (see setBaseGraph); agent parks persist.
    */
   parkEdge(edgeId: string, reason: string, by: 'agent' | 'runner' = 'agent'): ParkedEdge {
     if (reason.trim().length === 0) throw new Error('parkEdge requires a non-empty reason')
@@ -340,7 +351,8 @@ export class Store {
    * Batch-park many edges in a SINGLE doc write (upsert, deduped by edge id) — the
    * pattern-dedup path parks thousands of duplicate fan-out edges at once, so looping
    * parkEdge (each a full read+rewrite of the sidecar) would be O(n²). Every reason
-   * must be non-empty. Returns how many distinct edges were parked.
+   * must be non-empty. Returns how many distinct edges were parked. Runner parks are
+   * era-bound: a re-map that changes the base graph drops them (see setBaseGraph).
    */
   parkEdges(entries: readonly { edgeId: string; reason: string }[], by: 'agent' | 'runner' = 'agent'): number {
     if (entries.length === 0) return 0

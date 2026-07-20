@@ -5,8 +5,8 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import type { AdapterContext, Logger, SoundinessNote, UiGraph, Proposal } from '@ui-graph/core'
-import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue } from '@ui-graph/core'
+import type { AdapterContext, Logger, ParkedEdge, SoundinessNote, UiGraph, Proposal } from '@ui-graph/core'
+import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue, PATTERN_PARK_REASON_PREFIX } from '@ui-graph/core'
 import type { GraphDiff, SinceLastDiff } from '@ui-graph/core'
 import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@ui-graph/core/node'
 import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@ui-graph/mcp'
@@ -569,6 +569,98 @@ export function readSoundiness(dir: string): SoundinessNote[] {
   const store = openStoreSafe(dbPathFor(dir))
   try {
     return store.getSoundiness()
+  } finally {
+    store.close()
+  }
+}
+
+/** A workspace's parked edges split into the three triage classes. */
+export interface ParkedSummary {
+  /** Fan-out dedup parks — accounted by a driven sibling representative. */
+  pattern: ParkedEdge[]
+  /** Witness-less runner give-ups — any runner-recorded park that is not pattern-dedup (attempt-cap, round-cap, dynamic-sink no-fire, proof-gate rejection). */
+  autonomous: ParkedEdge[]
+  /** Human/agent parks with a bespoke reason. */
+  manual: ParkedEdge[]
+}
+
+/** True for a runner give-up park: recorded by the runner but NOT backed by a driven pattern representative. The `by` field is the classifier — reason wording is for humans and free to change. */
+function isRunnerGiveUp(p: ParkedEdge): boolean {
+  return p.by === 'runner' && !p.reason.startsWith(PATTERN_PARK_REASON_PREFIX)
+}
+
+/**
+ * Read a workspace's parked-edge sidecar and group it into the three triage
+ * classes, so `uigraph parked` can show give-ups (worth human attention)
+ * separately from the bulk pattern-dedup parks and from human judgment calls.
+ */
+export function runParked(dir: string): ParkedSummary {
+  const store = openStoreSafe(dbPathFor(dir))
+  try {
+    const out: ParkedSummary = { pattern: [], autonomous: [], manual: [] }
+    for (const p of store.getParkedEdges()) {
+      if (p.reason.startsWith(PATTERN_PARK_REASON_PREFIX)) out.pattern.push(p)
+      else if (isRunnerGiveUp(p)) out.autonomous.push(p)
+      else out.manual.push(p)
+    }
+    return out
+  } finally {
+    store.close()
+  }
+}
+
+/**
+ * Format a ParkedSummary for the `parked` command: a per-class counts headline,
+ * then every autonomous + manual entry (edgeId, reason, ts). The pattern class is
+ * count-only unless `all` — those parks are bulk dedup noise, not triage targets.
+ */
+export function formatParked(s: ParkedSummary, all = false): string {
+  const total = s.pattern.length + s.autonomous.length + s.manual.length
+  if (total === 0) return 'no parked edges'
+  const entry = (p: ParkedEdge) => `  ${p.edgeId}  ${p.reason}${p.ts !== undefined ? `  (${p.ts})` : ''}`
+  const lines = [`${total} parked edge(s) — pattern: ${s.pattern.length} · autonomous: ${s.autonomous.length} · manual: ${s.manual.length}`]
+  if (s.pattern.length > 0) {
+    lines.push('', `pattern (${s.pattern.length}) — accounted by a driven representative${all ? ':' : '; re-run with --all to list'}`)
+    if (all) lines.push(...s.pattern.map(entry))
+  }
+  if (s.autonomous.length > 0) lines.push('', `autonomous (${s.autonomous.length}) — runner give-ups:`, ...s.autonomous.map(entry))
+  if (s.manual.length > 0) lines.push('', `manual (${s.manual.length}):`, ...s.manual.map(entry))
+  return lines.join('\n')
+}
+
+/** Options for `runUnpark`: explicit edge ids and/or the two sweep flags. */
+export interface RunUnparkOptions {
+  dir: string
+  edgeIds?: string[]
+  /** Sweep every runner give-up park (runner-recorded, not pattern-dedup). */
+  autonomous?: boolean
+  /** Sweep every park recorded with by === 'runner'. */
+  runner?: boolean
+}
+
+/**
+ * Return parked edges to the verify worklist: the named ids, plus the sweeps the
+ * flags select. Throws a CliError when given nothing to do — a bare `unpark <dir>`
+ * is always a mistake, never a silent no-op. Returns how many were unparked.
+ */
+export function runUnpark(opts: RunUnparkOptions): number {
+  const ids = opts.edgeIds ?? []
+  if (ids.length === 0 && opts.autonomous !== true && opts.runner !== true) {
+    throw new CliError('nothing to unpark: pass edge ids, or --autonomous / --runner to sweep a class\n  see `uigraph parked <dir>` for what is parked')
+  }
+  const store = openStoreSafe(dbPathFor(opts.dir))
+  try {
+    const targets = new Set(ids)
+    if (opts.autonomous === true || opts.runner === true) {
+      for (const p of store.getParkedEdges()) {
+        if (opts.autonomous === true && isRunnerGiveUp(p)) targets.add(p.edgeId)
+        if (opts.runner === true && p.by === 'runner') targets.add(p.edgeId)
+      }
+    }
+    // ponytail: per-id unpark re-reads/rewrites the sidecar (O(n²)); add a batch unpark in the store if --runner sweeps of thousands of pattern parks get slow
+    let unparked = 0
+    for (const id of targets) if (store.unparkEdge(id)) unparked++
+    return unparked
   } finally {
     store.close()
   }
