@@ -302,6 +302,11 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
     result = { confirmed: false }
   }
   if (!result.confirmed) {
+    // A dialog-close target is same-path by construction: the probe's URL evidence
+    // cannot apply, and its same-path guard would launder an honest refutation
+    // into undrivable. The drive's own verdict stands.
+    const finalLeg = plan.legs[plan.legs.length - 1]
+    if (finalLeg?.assertions.some((as) => as.kind === 'dialog-close')) return result
     const probe = buildProbeSpec(graph, t)
     if (probe !== null) {
       let probed: VerifyResult
@@ -578,6 +583,21 @@ async function countVisibleModals(page: PwPage, selector: string): Promise<numbe
 }
 
 /**
+ * Poll a modal count until it drops below `baseline` or the deadline passes.
+ * Modals with exit animations unmount 150-300ms after the closing click — judging
+ * the count synchronously would refute every animated close. Bounded so a modal
+ * that genuinely stays open still refutes within ~2s.
+ */
+async function pollForDrop(count: () => Promise<number>, baseline: number, deadlineMs = 2000, stepMs = 100): Promise<boolean> {
+  const start = Date.now()
+  for (;;) {
+    if ((await count()) < baseline) return true
+    if (Date.now() - start >= deadlineMs) return false
+    await new Promise((r) => setTimeout(r, stepMs))
+  }
+}
+
+/**
  * Run the driver's plan against an already-open page and judge the outcome. Split
  * out from makePlaywrightDriver so the soundness-critical confirmation logic can be
  * unit-tested with a fake page (no real browser): a parked leg never confirms, and
@@ -608,6 +628,16 @@ async function countVisibleModals(page: PwPage, selector: string): Promise<numbe
  *      appeared but cannot be witnessed deterministically).
  *   4. nothing rose → honest refutation.
  * All three baselines are snapshotted together, before the asserted leg's action.
+ *
+ * Dialog-CLOSE-asserted legs (a modal-inner control returning to the modal's host
+ * screen — same-path, so URL evidence is impossible) are judged by the INVERTED
+ * ladder on the same pre-action baselines: role=dialog count dropped → confirmed;
+ * declared modalSelector count dropped → confirmed; both relevant baselines 0 →
+ * undrivable (nothing was open to close — the opener prefix failed silently);
+ * role baseline 0 with no declared selector → undrivable (a role-less modal's
+ * closing cannot be witnessed); open-but-never-dropped → honest refutation. Such
+ * a leg is exempt from the same-path undrivable escape: the drop IS the positive
+ * evidence the URL cannot provide.
  */
 /**
  * Run an exploratory probe on an open page: load the source screen, then (a) try
@@ -708,6 +738,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
 
   let lastUrlAssertion: string | undefined
   let expectDialog = false
+  let expectDialogClose = false
   let dialogBaseline = 0
   let configModalBaseline = 0
   let heuristicBaseline = 0
@@ -728,14 +759,16 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // must not ride on an earlier, unrelated leg's request proof).
     lastUrlAssertion = undefined
     expectDialog = false
+    expectDialogClose = false
     requestEvidence = undefined
-    // Dialog proof is a DELTA: snapshot the ladder baselines (role, plus config
-    // selector OR heuristic) BEFORE the action so a pre-existing dialog/overlay
-    // (cookie/consent banner) can never confirm an opener on any rung. Counts are
-    // visible-only to match getByRole's semantics. An invalid config selector
-    // fails LOUD as undrivable — swallowed, it would mass-false-refute every
-    // dialog-asserted target.
-    if (leg.assertions.some((as) => as.kind === 'dialog')) {
+    // Dialog proof is a DELTA — for open AND close legs alike: snapshot the
+    // ladder baselines (role, plus config selector OR heuristic) BEFORE the
+    // action so a pre-existing dialog/overlay (cookie/consent banner) can never
+    // confirm an opener, and a close leg has the open-count its drop is judged
+    // against. Counts are visible-only to match getByRole's semantics. An
+    // invalid config selector fails LOUD as undrivable — swallowed, it would
+    // mass-false-refute every dialog-asserted target.
+    if (leg.assertions.some((as) => as.kind === 'dialog' || as.kind === 'dialog-close')) {
       dialogBaseline = await page.getByRole('dialog').count()
       if (opts?.modalSelector !== undefined) {
         try {
@@ -780,10 +813,11 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     for (const as of leg.assertions) {
       if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
       if (as.kind === 'dialog') expectDialog = true
+      if (as.kind === 'dialog-close') expectDialogClose = true
     }
   }
   // a drive that asserted NOTHING cannot witness anything — never mint an evidence-free confirmation
-  if (lastUrlAssertion === undefined && !expectDialog && requestEvidence === undefined) return { confirmed: false, undrivable: true }
+  if (lastUrlAssertion === undefined && !expectDialog && !expectDialogClose && requestEvidence === undefined) return { confirmed: false, undrivable: true }
   let confirmed = true
   if (lastUrlAssertion !== undefined) {
     // SPA navigations and post-await handlers land asynchronously: wait for the
@@ -795,8 +829,10 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     confirmed = samePath(page.url(), expected)
     // A same-path match is never positive evidence on its own — UNLESS a request
     // assertion already proved the effect fired (the carved exception: same-path
-    // plans WITH a request assertion are drivable via the network call, not the URL).
-    if (confirmed && samePath(anchorUrl, expected) && !expectDialog && requestEvidence === undefined) return { confirmed: false, undrivable: true }
+    // plans WITH a request assertion are drivable via the network call, not the
+    // URL) or the leg asserts a dialog delta (open OR close — a close leg is
+    // same-path BY CONSTRUCTION and the modal-count drop is its positive evidence).
+    if (confirmed && samePath(anchorUrl, expected) && !expectDialog && !expectDialogClose && requestEvidence === undefined) return { confirmed: false, undrivable: true }
   }
   let dialogDetail = 'dialog visible after drive'
   if (expectDialog && confirmed) {
@@ -820,8 +856,36 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       }
     }
   }
+  if (expectDialogClose && confirmed) {
+    // The INVERTED ladder (see the doc comment above). When a modalSelector is
+    // DECLARED it is the SOLE close witness: the app's modals are role-less by the
+    // owner's own declaration, so any role=dialog drop is an unrelated dialog (a
+    // consent banner dismissing on interaction) and must never confirm this close.
+    // Exit animations unmount modals 150-300ms after the click, so each rung
+    // POLLS for the drop (bounded) before falling through to refutation.
+    if (opts?.modalSelector !== undefined) {
+      const sel = opts.modalSelector
+      if (await pollForDrop(() => countVisibleModals(page, sel), configModalBaseline)) {
+        dialogDetail = `config modal selector ${sel} dropped the modal count (modal closed)`
+      } else if (configModalBaseline === 0) {
+        return { confirmed: false, undrivable: true, undrivableReason: 'modal was not open before the close interaction — opener prefix did not deliver the precondition' }
+      } else {
+        confirmed = false
+      }
+    } else if (dialogBaseline === 0) {
+      return { confirmed: false, undrivable: true, undrivableReason: 'no open modal was witnessable before the close interaction — either the opener prefix failed to open it, or the modal exposes no role=dialog (declare modalSelector in the workspace config to witness role-less closes)' }
+    } else if (await pollForDrop(() => page.getByRole('dialog').count(), dialogBaseline)) {
+      dialogDetail = 'dialog count dropped after drive (modal closed)'
+    } else {
+      confirmed = false
+    }
+  }
   if (!confirmed) return { confirmed: false }
-  const evidence: Evidence = requestEvidence ?? (lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: dialogDetail })
+  // A close leg's URL match is vacuous (same-path by construction) — its dialog
+  // drop is the real proof, so it must never be reported as url-assert evidence.
+  const evidence: Evidence =
+    requestEvidence ??
+    (!expectDialogClose && lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: dialogDetail })
   return { confirmed: true, evidence }
 }
 

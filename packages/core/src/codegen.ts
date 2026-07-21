@@ -1,7 +1,7 @@
 // E2E codegen: turn a planned path (PlanStep[]) into a runnable Playwright spec.
 // Each leg becomes a locator action (from the control's stable selector — F1) plus
 // assertions derived from the edge (target route -> toHaveURL, open:modal -> dialog
-// visible, api:* -> a request note). Pure + browser-safe (string building only);
+// visible, modal-close leg -> dialog-close count-drop, api:* -> a request note). Pure + browser-safe (string building only);
 // the CLI/MCP supply the planned path. Input values + guards are coarse here and
 // refined by the input/guard feature.
 
@@ -25,9 +25,14 @@ export interface SpecAction {
   key?: string
 }
 
-/** A single assertion to run after a leg's action. */
+/**
+ * A single assertion to run after a leg's action. `dialog-close` is the inverse
+ * of `dialog`: the visible modal count must DROP across the action — the proof
+ * for a modal-inner control that closes its modal back to the host screen, where
+ * the same-path URL can never be evidence. `value` is the modal's label.
+ */
 export interface SpecAssertion {
-  kind: 'url' | 'dialog' | 'request'
+  kind: 'url' | 'dialog' | 'dialog-close' | 'request'
   value: string
 }
 
@@ -142,7 +147,10 @@ export function isDirectNavEdge(edge: GraphEdge): boolean {
  * not be witnessed by a bare goto+URL-assert (the Tier-3 soundness fix).
  * Assertions: a literal target route -> toHaveURL (ONLY for direct-nav legs, so a
  * guarded/interaction edge is never falsely confirmed by URL match); open:modal
- * effect or a modal-kind target node -> dialog visible; api:* -> a request note.
+ * effect or a modal-kind target node -> dialog visible; a modal-inner control leg
+ * returning to the modal's HOST screen -> 'dialog-close' (the modal count must
+ * DROP — the same-path URL cannot witness the close, the drop can) and never the
+ * open dialog assertion; api:* -> a request note.
  */
 /** The screen route a node lives on: its own route, or its parent screen's route for a control/modal child. */
 function screenRouteOf(graph: UiGraph, n: GraphNode): string | null {
@@ -164,6 +172,10 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     const description = `${fromNode.label} → ${toNode.label} (${e.event})`
 
     const directNav = isDirectNavEdge(e)
+    // The modal a control lives in (undefined for screen-parented controls) —
+    // drives both locator scoping and the dialog-close assertion below.
+    const parentNode = fromNode.kind === 'control' && fromNode.parent !== undefined ? graph.nodes.find((n) => n.id === fromNode.parent) : undefined
+    const modalParent = parentNode?.kind === 'modal' ? parentNode : undefined
 
     let action: SpecAction
     let parkedReason: string | undefined
@@ -175,9 +187,8 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
       // apps whose modals are role-less bare divs (getByRole('dialog') would land
       // on an unrelated dialog like a consent banner there).
       const raw = locatorFor(fromNode.control.selector)
-      const parentKind = fromNode.parent !== undefined ? graph.nodes.find((n) => n.id === fromNode.parent)?.kind : undefined
       const scopePrefix = opts.modalSelector !== undefined ? `page.locator(${q(opts.modalSelector)}).` : `page.getByRole('dialog').`
-      const locator = parentKind === 'modal' ? raw.replace(/^page\./, scopePrefix) : raw
+      const locator = modalParent !== undefined ? raw.replace(/^page\./, scopePrefix) : raw
       const ct = fromNode.control.controlType
       if (e.event.startsWith('key')) {
         action = { kind: 'press', locator, key: 'Enter' }
@@ -207,10 +218,18 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
       if (isConcreteRoute(toNode.route)) assertions.push({ kind: 'url', value: toNode.route })
       else if (interaction && !toNode.route.includes('*')) assertions.push({ kind: 'url', value: toNode.route })
     }
+    // A modal-inner control leg back to the modal's ROUTED host screen CLOSES the
+    // modal: host = the modal's declared parent, or a target whose route equals
+    // the control's screen route — the same-path shape where URL evidence is
+    // impossible. The modal-count DROP is the proof, so assert dialog-close and
+    // never the open dialog assertion. A route-null host gets NO close assertion:
+    // without a URL there would be no witness of where the click landed at all.
+    const closesModal = modalParent !== undefined && toNode.route !== null && (modalParent.parent === toNode.id || toNode.route === screenRouteOf(graph, fromNode))
+    if (closesModal) assertions.push({ kind: 'dialog-close', value: modalParent.label })
     // Node-kind fallback: a leg landing on a modal NODE asserts the dialog even when the
     // effect string is not 'open:modal' — otherwise a plain click edge into a modal asserts
     // nothing and the driver reports it undrivable via the asserted-nothing guard.
-    if (e.effect === 'open:modal' || toNode.kind === 'modal') assertions.push({ kind: 'dialog', value: toNode.label })
+    else if (e.effect === 'open:modal' || toNode.kind === 'modal') assertions.push({ kind: 'dialog', value: toNode.label })
     // A self-loop's effect may join several kinds onto one edge (see `effectTokens`);
     // parse each token on its own so a joined 'api:POST /x, state:setY' still yields a
     // sound 'POST /x' assertion instead of a garbage path bleeding in the next token.
@@ -259,6 +278,11 @@ export function renderPlaywrightSpec(plan: SpecPlan): string {
   for (const leg of plan.legs) {
     lines.push('', `  // ${leg.description}`)
     const a = leg.action
+    // A dialog-close assertion is a COUNT DELTA: snapshot before the action —
+    // toBeHidden() would pass vacuously on a role-less-modal app (zero matches).
+    if (leg.assertions.some((as) => as.kind === 'dialog-close')) {
+      lines.push(`  const dialogCountBefore = await page.getByRole('dialog').count()`)
+    }
     if (a.kind === 'click' && a.locator) lines.push(`  await ${a.locator}.click()`)
     else if (a.kind === 'press' && a.locator) lines.push(`  await ${a.locator}.press(${q(a.key ?? 'Enter')})`)
     else if (a.kind === 'fill' && a.locator) lines.push(`  await ${a.locator}.fill(${q(a.value ?? '')})`)
@@ -268,6 +292,7 @@ export function renderPlaywrightSpec(plan: SpecPlan): string {
     for (const as of leg.assertions) {
       if (as.kind === 'url') lines.push(`  await expect(page).toHaveURL(${url(as.value)})`)
       else if (as.kind === 'dialog') lines.push(`  await expect(page.getByRole('dialog')).toBeVisible()`)
+      else if (as.kind === 'dialog-close') lines.push(`  await expect.poll(() => page.getByRole('dialog').count()).toBeLessThan(dialogCountBefore)`)
       else if (as.kind === 'request') lines.push(`  // expect a ${as.value} request`)
     }
   }

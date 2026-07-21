@@ -189,6 +189,56 @@ describe('buildSpecPlan: request assertion from an effect self-loop edge', () =>
   })
 })
 
+// A modal-inner control that CLOSES its modal returns to the screen the modal
+// opened from — the same-path shape where URL evidence is impossible (anchor URL
+// equals asserted URL). The deterministic proof is the modal count DROPPING, so
+// such a leg must assert 'dialog-close' and never the open 'dialog' assertion.
+describe('buildSpecPlan: dialog-close assertion for a modal-close leg', () => {
+  const opener: GraphNode = {
+    id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_host',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+  }
+  const closer: GraphNode = {
+    id: 'c_close', route: null, componentPath: null, label: 'Go back', kind: 'control', parent: 'm0',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go back' } },
+  }
+
+  it('emits dialog-close (and NOT dialog) when the to node is the modal\'s host screen via modal.parent', () => {
+    const modal: GraphNode = { id: 'm0', route: null, componentPath: null, label: 'LoginModal', kind: 'modal', parent: 'n_host' }
+    const gg = graph(
+      [node('n_host', { route: '/' }), modal, opener, closer],
+      [edge('e1', 'c_open', 'm0', { event: 'click' }), edge('e2', 'c_close', 'n_host', { event: 'click' })],
+    )
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_close', 'n_host')!, {})
+    const leg = plan.legs.find((l) => l.from === 'c_close')!
+    expect(leg.assertions.filter((a) => a.kind === 'dialog-close')).toEqual([{ kind: 'dialog-close', value: 'LoginModal' }])
+    expect(leg.assertions.find((a) => a.kind === 'dialog')).toBeUndefined()
+  })
+
+  it('falls back to the route match when the modal has no parent but carries the host route', () => {
+    const modal: GraphNode = { id: 'm0', route: '/', componentPath: null, label: 'LoginModal', kind: 'modal' }
+    const gg = graph(
+      [node('n_host', { route: '/' }), modal, opener, closer],
+      [edge('e1', 'c_open', 'm0', { event: 'click' }), edge('e2', 'c_close', 'n_host', { event: 'click' })],
+    )
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_close', 'n_host')!, {})
+    const leg = plan.legs.find((l) => l.from === 'c_close')!
+    expect(leg.assertions.filter((a) => a.kind === 'dialog-close')).toEqual([{ kind: 'dialog-close', value: 'LoginModal' }])
+  })
+
+  it('keeps current behavior for an inner control leg to a DIFFERENT screen (url assert, no dialog-close)', () => {
+    const modal: GraphNode = { id: 'm0', route: null, componentPath: null, label: 'LoginModal', kind: 'modal', parent: 'n_host' }
+    const gg = graph(
+      [node('n_host', { route: '/' }), node('n_other', { route: '/other' }), modal, opener, closer],
+      [edge('e1', 'c_open', 'm0', { event: 'click' }), edge('e2', 'c_close', 'n_other', { event: 'click' })],
+    )
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_close', 'n_other')!, {})
+    const leg = plan.legs.find((l) => l.from === 'c_close')!
+    expect(leg.assertions.find((a) => a.kind === 'dialog-close')).toBeUndefined()
+    expect(leg.assertions.find((a) => a.kind === 'url')?.value).toBe('/other')
+  })
+})
+
 describe('buildSpecPlan — modal-inner locators are dialog-scoped', () => {
   it('scopes a modal-parented control leg inside getByRole(dialog)', () => {
     const opener: GraphNode = {

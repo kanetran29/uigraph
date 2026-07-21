@@ -129,7 +129,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'gen_spec',
-    description: 'Generate a Playwright e2e spec for the route from one node to another: plan the path, then render each leg to a locator action (from the control selector) + assertions (target URL, dialog, request).',
+    description: 'Generate a Playwright e2e spec for the route from one node to another: plan the path, then render each leg to a locator action (from the control selector) + assertions (target URL, dialog, dialog-close, request).',
     inputSchema: {
       type: 'object',
       properties: {
