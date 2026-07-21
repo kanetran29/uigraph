@@ -151,7 +151,7 @@ function screenRouteOf(graph: UiGraph, n: GraphNode): string | null {
   return null
 }
 
-export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl?: string; title?: string } = {}): SpecPlan {
+export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl?: string; title?: string; modalSelector?: string } = {}): SpecPlan {
   const baseUrl = opts.baseUrl ?? ''
   const start = steps[0]?.from
   const anchorRoute = start !== undefined ? screenRouteOf(graph, start) : null
@@ -168,12 +168,16 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     let action: SpecAction
     let parkedReason: string | undefined
     if (fromNode.kind === 'control' && fromNode.control?.selector) {
-      // A modal-parented control's locator is scoped inside the open dialog: a
+      // A modal-parented control's locator is scoped inside the open modal: a
       // page-global locator could hit a same-named background control when the
       // modal failed to open (false witness) or trip strict-mode when both exist.
+      // Scope container = role=dialog, or the workspace-declared modalSelector for
+      // apps whose modals are role-less bare divs (getByRole('dialog') would land
+      // on an unrelated dialog like a consent banner there).
       const raw = locatorFor(fromNode.control.selector)
       const parentKind = fromNode.parent !== undefined ? graph.nodes.find((n) => n.id === fromNode.parent)?.kind : undefined
-      const locator = parentKind === 'modal' ? raw.replace(/^page\./, `page.getByRole('dialog').`) : raw
+      const scopePrefix = opts.modalSelector !== undefined ? `page.locator(${q(opts.modalSelector)}).` : `page.getByRole('dialog').`
+      const locator = parentKind === 'modal' ? raw.replace(/^page\./, scopePrefix) : raw
       const ct = fromNode.control.controlType
       if (e.event.startsWith('key')) {
         action = { kind: 'press', locator, key: 'Enter' }

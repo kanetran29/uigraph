@@ -174,7 +174,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
         outcomes[t.id] = 'undrivable'
         continue
       }
-      const plan = buildSpecPlan(graph, steps, { baseUrl: opts.appUrl, title: `verify ${t.from} → ${t.to}` })
+      const plan = buildSpecPlan(graph, steps, { baseUrl: opts.appUrl, modalSelector: opts.modalSelector, title: `verify ${t.from} → ${t.to}` })
       // Dynamic-sink target (u_<screen>): CAPTURE the real landing instead of asserting a URL.
       let result: VerifyResult
       try {
@@ -294,7 +294,7 @@ async function mapPool<T, R>(items: readonly T[], concurrency: number, worker: (
 async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string, modalSelector?: string): Promise<VerifyResult | null> {
   const steps = planForTarget(graph, t.from, t.to)
   if (steps === null) return null
-  const plan = buildSpecPlan(graph, steps, { baseUrl: appUrl, title: `verify ${t.from} → ${t.to}` })
+  const plan = buildSpecPlan(graph, steps, { baseUrl: appUrl, modalSelector, title: `verify ${t.from} → ${t.to}` })
   let result: VerifyResult
   try {
     result = await driver(plan, appUrl, { modalSelector })
