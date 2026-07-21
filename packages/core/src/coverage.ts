@@ -41,7 +41,7 @@ export interface EdgeCoverage {
   source: string
   verified: boolean
   accounted: boolean
-  status: 'runtime' | 'stale-witness' | 'twin-witnessed' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'pattern-covered' | 'unanchorable' | 'open'
+  status: 'runtime' | 'stale-witness' | 'twin-witnessed' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'pattern-covered' | 'unanchorable' | 'refuted' | 'open'
   reason?: string
 }
 
@@ -51,7 +51,10 @@ export interface EdgeCoverage {
 // PLUS resolved-dynamic PLUS explicitly parked, i.e. "nothing left in limbo").
 // accounted=100% does NOT mean "all verified" — parked + dynamic-resolved edges are
 // accounted without being verified, so verifiedRatio/parkedCount are what a reader
-// must consult to tell a fully-proven map from a fully-triaged one.
+// must consult to tell a fully-proven map from a fully-triaged one. `total` always
+// counts EVERY edge, refuted ones included: shrinking the denominator would hide
+// information, so refutedCount is reported separately (the accounted ratio already
+// improves because a refuted edge carries a delivered verdict).
 /** Coverage of the proven graph under the strict, verified, and accounted-for metrics. */
 export interface CoverageReport {
   total: number
@@ -66,6 +69,7 @@ export interface CoverageReport {
   parkedCount: number
   staleWitnessCount: number
   unanchorableCount: number
+  refutedCount: number
   byModality: Record<string, number>
   bySource: Record<string, number>
   unverified: EdgeCoverage[]
@@ -103,10 +107,15 @@ function edgeContext(graph: UiGraph): EdgeContext {
 /** The auditable reason attached to every 'unanchorable' classification. */
 const UNANCHORABLE_REASON = 'source is a synthetic routeless screen with no in-edges (over-approximated shared nav helper) — no runtime path can ever anchor a drive; accounted, not witnessed'
 
+/** The auditable reason attached to every 'refuted' classification (names the fold's observation threshold). */
+const REFUTED_REASON = 'disproven at runtime — 2+ refuted observations on the current base, zero confirmations ever; the transition does not fire (verdict delivered, edge kept for audit)'
+
 /**
  * Classify one edge. Precedence is LOAD-BEARING (first match wins): fresh runtime →
  * stale runtime witness (code changed since verification: NOT accounted — it goes
- * back on the worklist for re-confirmation) → parked (before static, so a parked
+ * back on the worklist for re-confirmation) → refuted (the fold's falsification
+ * verdict beats any park — including a stale 'unstable' park — so a disproven
+ * hypothesis never masquerades as parked or open) → parked (before static, so a parked
  * edge is credited by its audit note not a witness) → dynamic sink (never credited
  * by its own witness; resolved only via a concrete runtime out-edge from the same
  * source) → must-static witness → unanchorable source → open. A `may` edge is OPEN
@@ -130,6 +139,7 @@ function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: 
     }
     return { status: 'runtime', accounted: true }
   }
+  if (edge.refuted === true) return { status: 'refuted', accounted: true, reason: REFUTED_REASON }
   const parked = parkedById.get(edge.id)
   if (parked) {
     // A pattern-dedup park is backed by a runtime witness on a sibling representative of the
@@ -182,6 +192,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
   const parkedCount = rows.filter((r) => r.status === 'parked' || r.status === 'pattern-covered').length
   const staleWitnessCount = rows.filter((r) => r.status === 'stale-witness').length
   const unanchorableCount = rows.filter((r) => r.status === 'unanchorable').length
+  const refutedCount = rows.filter((r) => r.status === 'refuted').length
   const accounted = rows.filter((r) => r.accounted).length
   const total = rows.length
   return {
@@ -197,6 +208,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
     parkedCount,
     staleWitnessCount,
     unanchorableCount,
+    refutedCount,
     byModality,
     bySource,
     unverified: rows.filter((r) => !r.verified),
@@ -255,6 +267,8 @@ export interface VerifyTarget {
 /** Options for nextToVerify. `includeProven` adds must-static edges (the verify-all sweep). */
 export interface NextToVerifyOptions {
   includeProven?: boolean
+  /** Re-litigate falsified edges: refuted may-edges re-enter the worklist (high priority) so a later app fix or corrected run config can clear the verdict — the unrefute lever. */
+  includeRefuted?: boolean
 }
 
 /**
@@ -266,9 +280,11 @@ export interface NextToVerifyOptions {
  * Proven `must` static edges are skipped (already witnessed). Non-runtime edges
  * from an UNANCHORABLE source (synthetic routeless screen, no in-edges) are
  * skipped too: planForTarget can never anchor a drive there, so worklisting them
- * only burns attempts — classify() accounts them as 'unanchorable' instead. The
- * open set shrinks monotonically as edges are confirmed or parked. Returns the
- * top `limit`.
+ * only burns attempts — classify() accounts them as 'unanchorable' instead.
+ * Refuted edges (fold-disproven may-hypotheses) are skipped: the verdict is
+ * delivered, re-driving a closed hypothesis only burns attempts. The open set
+ * shrinks monotonically as edges are confirmed or parked. Returns the top
+ * `limit`.
  */
 export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit = 20, parkedIds: Set<string> = new Set(), opts: NextToVerifyOptions = {}): VerifyTarget[] {
   const labelOf = new Map(graph.nodes.map((n) => [n.id, n.label]))
@@ -278,7 +294,12 @@ export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit
 
   for (const e of graph.edges) {
     if (e.source === 'runtime' && e.witnessStale !== true) continue
+    if (e.refuted === true && opts.includeRefuted !== true) continue
     if (parkedIds.has(e.id)) continue
+    if (e.refuted === true) {
+      out.push({ kind: 'edge', id: e.id, from: e.from, to: e.to, toLabel: labelOf.get(e.to) ?? e.to, event: e.event, reason: 're-litigating a falsified edge — a confirmation clears the refuted verdict', priority: 3.6 })
+      continue
+    }
     if (ctx.nodeKind.get(e.from) !== 'control' && ctx.twinWitnessed.has(`${e.from}=>${e.to}`)) continue
     let priority = 0
     let reason = ''

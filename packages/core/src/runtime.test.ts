@@ -149,6 +149,48 @@ describe('validateEvidence', () => {
   })
 })
 
+describe('applyObservations — repeated refutation demotes a may-edge (falsification)', () => {
+  const mayGraph = () => graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'static', modality: 'may', event: 'click' })])
+  const refute = (id: string, over: Partial<Observation> = {}): Observation => obs({ id, outcome: 'refuted', base: 'CUR', ...over })
+
+  it('2 current-base refutes + 0 confirms mark the may-edge refuted (kept in the graph, not deleted)', () => {
+    const out = applyObservations(mayGraph(), [refute('o1'), refute('o2')], { baseHash: 'CUR' })
+    expect(out.edges).toHaveLength(1)
+    expect(out.edges[0]?.refuted).toBe(true)
+    expect(out.edges[0]?.source).toBe('static')
+    expect(out.edges[0]?.modality).toBe('may')
+  })
+
+  it('a single refute is a data point, not a disproof — no flag', () => {
+    const out = applyObservations(mayGraph(), [refute('o1')], { baseHash: 'CUR' })
+    expect(out.edges[0]?.refuted).toBeUndefined()
+  })
+
+  it('any confirmation beats any number of refutes — the flag is never set', () => {
+    const out = applyObservations(mayGraph(), [refute('o1'), refute('o2'), obs({ id: 'o3', event: 'click', base: 'CUR' })], { baseHash: 'CUR' })
+    expect(out.edges[0]?.refuted).toBeUndefined()
+    expect(out.edges[0]?.source).toBe('runtime')
+  })
+
+  it('a later confirmation clears a previously persisted refuted flag (confirm wins)', () => {
+    const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'static', modality: 'may', event: 'click', refuted: true })])
+    const out = applyObservations(g, [obs({ id: 'o9', event: 'click', base: 'CUR' })], { baseHash: 'CUR' })
+    expect(out.edges[0]?.refuted).toBeUndefined()
+    expect(out.edges[0]?.source).toBe('runtime')
+  })
+
+  it('a must-edge is NEVER demoted, no matter how many refutes (that is a fire alarm, not a demotion)', () => {
+    const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { source: 'static', modality: 'must', event: 'click' })])
+    const out = applyObservations(g, [refute('o1'), refute('o2'), refute('o3'), refute('o4'), refute('o5')], { baseHash: 'CUR' })
+    expect(out.edges[0]?.refuted).toBeUndefined()
+  })
+
+  it('refutes recorded against an OLD base do not count toward the threshold (the app may have changed)', () => {
+    const out = applyObservations(mayGraph(), [refute('o1', { base: 'OLDHASH' }), refute('o2', { base: 'OLDHASH' })], { baseHash: 'CUR' })
+    expect(out.edges[0]?.refuted).toBeUndefined()
+  })
+})
+
 describe('applyObservations — newest observation per triple wins', () => {
   it('a fresh re-confirmation supersedes an older stale-base observation of the same triple', () => {
     const g = graph(
