@@ -300,6 +300,13 @@ export function extractGraphFromRoutes(
       // verify/coverage never try to drive it. The --verify-all sweep (includeProven) can
       // still select it; drivePlan's same-path guard (runner.ts) stops that drive from
       // trivially "confirming" via URL match before the click even fires.
+      //
+      // The self-loop is minted ONLY at depth 0 (a screen-level control, must/1). A
+      // descended or modal-inner effect-only control would mint a MAY self-loop — an
+      // unfalsifiable "stays put" hypothesis the runner can never confirm (on the pilot
+      // app: 59 such edges, 0 ever confirmed, 28 of 32 refutations landed exactly here).
+      // Those emit an `effect-only-control` soundiness note instead; the effects remain
+      // on the control node, so nothing is silently dropped.
       const emitControls = (ownerId: string, items: ControlItem[], forceMay: boolean, linkModals: boolean): void => {
         const nthBySig = new Map<string, number>()
         for (const { meta } of items) {
@@ -377,21 +384,26 @@ export function extractGraphFromRoutes(
             pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, isDescended || capOpener ? 'may' : 'must', isDescended || capOpener ? 0.5 : 1, file, loc)
           }
 
-          // Effect-only control (no nav/modal edge minted above): self-loop to the parent screen.
-          // state:dispatch is excluded from the trigger set (see emitControls' doc comment).
+          // Effect-only control (no nav/modal edge minted above): self-loop to the parent
+          // screen at depth 0 only; descended/modal-inner controls get a soundiness note
+          // instead of an unverifiable may edge (see emitControls' doc comment).
           if (edges.length === edgeCountBeforeControl) {
             const effectKinds = nodeEffects.filter((eff) => (eff.startsWith('api:') || eff.startsWith('state:') || eff.startsWith('error:')) && eff !== 'state:dispatch')
             if (effectKinds.length > 0) {
-              const ev = inter.events[0] ?? 'click'
-              pushEdge(
-                cId,
-                route.nodeId,
-                { ti: { kind: 'literal', value: route.nodeId }, event: ev, effect: effectKinds.join(', '), node: el, guard: null, ruleId: 'rr.effect-self-loop' },
-                isDescended ? 'may' : 'must',
-                isDescended ? 0.6 : 1,
-                file,
-                loc,
-              )
+              if (isDescended) {
+                soundiness.push({ kind: 'effect-only-control', file, loc, detail: `${meta.name ?? meta.element} (conditionally-rendered subtree) has effect-only interactions (${effectKinds.join(', ')}); no may self-loop minted — effects stay on the control node` })
+              } else {
+                const ev = inter.events[0] ?? 'click'
+                pushEdge(
+                  cId,
+                  route.nodeId,
+                  { ti: { kind: 'literal', value: route.nodeId }, event: ev, effect: effectKinds.join(', '), node: el, guard: null, ruleId: 'rr.effect-self-loop' },
+                  'must',
+                  1,
+                  file,
+                  loc,
+                )
+              }
             }
           }
 

@@ -149,10 +149,21 @@ describe('Store (SQLite)', () => {
     s.setBaseGraph(g())
     s.parkEdge('e_ab', 'undrivable now', 'runner')
     s.parkEdge('e_other', 'human judgment', 'agent')
-    s.setBaseGraph(graph([node('a'), node('b'), node('c')], [edge('e_ab', 'a', 'b')]))
+    s.setBaseGraph(graph([node('a'), node('b'), node('c')], [edge('e_ab', 'a', 'b'), edge('e_other', 'a', 'c')]))
     expect(s.getParkedEdges().map((p) => p.edgeId)).toEqual(['e_other'])
     s.close()
   })
+  it('a re-map prunes agent parks whose edge no longer exists in the incoming graph', () => {
+    const store = openStore(':memory:')
+    const g1 = graph([node('a'), node('b'), node('c')], [edge('e1', 'a', 'b'), edge('e2', 'a', 'c')])
+    store.setBaseGraph(g1)
+    store.parkEdge('e2', 'needs a seeded account', 'agent')
+    const g2 = graph([node('a'), node('b')], [edge('e1', 'a', 'b')])
+    store.setBaseGraph(g2)
+    expect(store.getParkedEdges()).toEqual([])
+    store.close()
+  })
+
 
   it('re-map with an identical graph keeps all parks', () => {
     const s = openStore(':memory:')
