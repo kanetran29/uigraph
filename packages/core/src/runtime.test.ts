@@ -131,6 +131,14 @@ describe('validateEvidence', () => {
     expect(validateEvidence({ kind: 'dialog' })).toBeNull()
   })
 
+  it('dom-delta: accepts a real attribute change and rejects empty locator/attr or a no-change delta', () => {
+    expect(validateEvidence({ kind: 'dom-delta', locator: 'page.getByRole("button", { name: "FAQ" })', attr: 'aria-expanded', before: 'false', after: 'true' })).toBeNull()
+    expect(validateEvidence({ kind: 'dom-delta', locator: 'page.getByTestId("acc")', attr: 'class', before: '', after: 'open' })).toBeNull()
+    expect(validateEvidence({ kind: 'dom-delta', locator: '', attr: 'aria-expanded', before: 'false', after: 'true' })).toMatch(/non-empty/)
+    expect(validateEvidence({ kind: 'dom-delta', locator: 'page.getByTestId("acc")', attr: '', before: 'false', after: 'true' })).toMatch(/non-empty/)
+    expect(validateEvidence({ kind: 'dom-delta', locator: 'page.getByTestId("acc")', attr: 'class', before: 'open', after: 'open' })).toMatch(/actual change/)
+  })
+
   it('accepts a successful/redirect request and rejects an error status or empty method/url', () => {
     expect(validateEvidence({ kind: 'request', method: 'POST', url: '/api/orders', status: 200 })).toBeNull()
     expect(validateEvidence({ kind: 'request', method: 'GET', url: '/api/orders', status: 302 })).toBeNull()

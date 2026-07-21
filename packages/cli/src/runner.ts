@@ -10,7 +10,7 @@
 // it to actually drive) and uses the system/cached Chromium.
 
 import type { Evidence, SpecPlan, UiGraph, VerifyTarget } from '@ui-graph/core'
-import { buildSpecPlan, dedupWorklist, fnv1a, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planForTarget } from '@ui-graph/core'
+import { buildSpecPlan, dedupWorklist, DOM_DELTA_WATCHED_ATTRS, fnv1a, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planForTarget } from '@ui-graph/core'
 import { openStore } from '@ui-graph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@ui-graph/mcp'
 
@@ -57,7 +57,7 @@ export interface RunVerifyOptions {
 /** How one worklist target ended this pass: confirmed (drove and landed), refuted (drove, did not land), undrivable (no drivable control/plan ever reached it — never attempted), or rejected (drove and landed but the proof gate refused the evidence — nothing persisted). */
 export type TargetOutcome = 'confirmed' | 'refuted' | 'undrivable' | 'rejected'
 
-/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution; refutedProven counts refutations of must-static edges — each one means the extraction and the running app DISAGREE and must be investigated. `outcomes` is the per-target diagnosis (keyed by target id) so the until-done loop can park an exhausted target with a reason that says WHY it never closed; `diagnoses` carries the driver's undrivableReason per target (same key) when it had one, so the park reason can name the app-side fix. */
+/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution; refutedProven counts refutations of must-static edges — each one means the extraction and the running app DISAGREE and must be investigated. `outcomes` is the per-target diagnosis (keyed by target id) so the until-done loop can park an exhausted target with a reason that says WHY it never closed; `diagnoses` carries per-target detail (same key): the driver's undrivableReason when it had one, else the fold's own nth-hidden-sibling diagnosis, so the park reason can name the app-side fix. */
 export interface VerifySummary {
   attempted: number
   confirmed: number
@@ -134,7 +134,8 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       // an undrivable plan was never attempted: refuting it would be a false negative
       if (result.undrivable === true) {
         outcomes[t.id] = 'undrivable'
-        if (result.undrivableReason !== undefined) diagnoses[t.id] = result.undrivableReason
+        const diag = result.undrivableReason ?? nthHiddenSiblingDiagnosis(graph, t, outcomes)
+        if (diag !== undefined) diagnoses[t.id] = diag
         continue
       }
       const res = reportObservation(ctx, {
@@ -305,11 +306,11 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
     result = { confirmed: false, undrivable: true, undrivableReason: 'drive crashed before observing the app (navigation/browser error) — check the app server' }
   }
   if (!result.confirmed) {
-    // A dialog-close target is same-path by construction: the probe's URL evidence
-    // cannot apply, and its same-path guard would launder an honest refutation
-    // into undrivable. The drive's own verdict stands.
+    // A dialog-close or dom-delta target is same-path by construction: the probe's
+    // URL evidence cannot apply, and its same-path guard would launder an honest
+    // close refutation into undrivable. The drive's own verdict stands.
     const finalLeg = plan.legs[plan.legs.length - 1]
-    if (finalLeg?.assertions.some((as) => as.kind === 'dialog-close')) return result
+    if (finalLeg?.assertions.some((as) => as.kind === 'dialog-close' || as.kind === 'dom-delta')) return result
     const probe = buildProbeSpec(graph, t)
     if (probe !== null) {
       let probed: VerifyResult
@@ -463,12 +464,46 @@ function capParkReason(last: TargetOutcome | undefined, n: number, detail?: stri
 }
 
 /**
+ * Diagnose an undrivable target whose plan-final locator is nth-indexed (the
+ * extractor disambiguated duplicate same-name siblings on one screen with
+ * `.nth(k)`): the k-th instance exists in the DOM count but is not interactable
+ * in the driven app state — typically the mobile-menu twin of a desktop control.
+ * When a same-selector sibling on the same screen IS runtime-witnessed for the
+ * same target (fresh in the graph, or confirmed earlier in this pass), the
+ * diagnosis says so: the transition has a witness, only this rendered instance
+ * does not. These siblings come from DISTINCT call sites, so patternKey /
+ * dedupWorklist can never fold them — this diagnosis is where their kinship
+ * surfaces instead. Returns undefined for nth-free targets (generic wording
+ * stands) — and never claims sibling coverage without an actual witness.
+ */
+function nthHiddenSiblingDiagnosis(graph: UiGraph, t: VerifyTarget, outcomes: Record<string, TargetOutcome>): string | undefined {
+  const fromNode = graph.nodes.find((n) => n.id === t.from)
+  const sel = fromNode?.control?.selector
+  if (fromNode === undefined || sel?.nth === undefined || sel.nth <= 0) return undefined
+  const witnessed = graph.edges.find((e) => {
+    if (e.to !== t.to || e.from === t.from) return false
+    const sib = graph.nodes.find((n) => n.id === e.from)
+    const s2 = sib?.control?.selector
+    if (sib?.parent !== fromNode.parent || s2 === undefined || s2.strategy !== sel.strategy || s2.value !== sel.value) return false
+    return (e.source === 'runtime' && e.witnessStale !== true) || outcomes[e.id] === 'confirmed'
+  })
+  const head = `nth-indexed sibling instance (.nth(${sel.nth})) not interactable in this app state`
+  return witnessed !== undefined
+    ? `${head} — pattern covered by its driven sibling ${witnessed.from}->${witnessed.to}`
+    : `${head} — no sibling instance runtime-witnessed; needs the app state that renders it`
+}
+
+/**
  * Build the exploratory probe for a target, or null when the probe has nothing
  * to work with: the source screen (the control's parent, or the from node
  * itself) must have a concrete loadable route and the target a route to watch
  * for. Sibling locators are the screen's other extracted controls (bounded) —
  * the probe clicks them to reveal modals/disclosures or to fire state-driven
- * navigations the extractor saw but could not link to a control.
+ * navigations the extractor saw but could not link to a control. Siblings whose
+ * edges carry a state:* SELF-LOOP effect (a disclosure/reveal toggle, e.g. the
+ * "Start exploring" click that expands the hidden map UI) rank AHEAD of
+ * positional siblings: on a control-heavy screen the bounded sweep otherwise
+ * never reaches the one control that can reveal a hidden target.
  */
 function buildProbeSpec(graph: UiGraph, t: VerifyTarget): ProbeSpec | null {
   const from = graph.nodes.find((n) => n.id === t.from)
@@ -478,8 +513,9 @@ function buildProbeSpec(graph: UiGraph, t: VerifyTarget): ProbeSpec | null {
   const to = graph.nodes.find((n) => n.id === t.to)
   if (to === undefined || to.route === null || to.route.includes('*')) return null
   const targetLocator = from.kind === 'control' && from.control?.selector ? locatorFor(from.control.selector) : undefined
-  const siblingLocators = graph.nodes
-    .filter((n) => n.kind === 'control' && n.parent === screen.id && n.id !== from.id && n.control?.selector !== undefined)
+  const revealish = new Set(graph.edges.filter((e) => e.to === screen.id && e.effect !== null && e.effect.includes('state:')).map((e) => e.from))
+  const siblings = graph.nodes.filter((n) => n.kind === 'control' && n.parent === screen.id && n.id !== from.id && n.control?.selector !== undefined)
+  const siblingLocators = [...siblings.filter((n) => revealish.has(n.id)), ...siblings.filter((n) => !revealish.has(n.id))]
     .map((n) => locatorFor(n.control!.selector!))
     .slice(0, 8)
   if (targetLocator === undefined && siblingLocators.length === 0) return null
@@ -601,6 +637,45 @@ async function pollForDrop(count: () => Promise<number>, baseline: number, deadl
 }
 
 /**
+ * Read the dom-delta watched attributes of a locator, in DOM_DELTA_WATCHED_ATTRS
+ * order, with an absent attribute encoded as '' so snapshots compare as plain
+ * strings (and a null→'' "change" can never mint invalid before===after evidence).
+ */
+async function readWatchedAttrs(loc: PwLocator): Promise<string[]> {
+  const out: string[] = []
+  for (const attr of DOM_DELTA_WATCHED_ATTRS) out.push((await loc.getAttribute(attr, { timeout: 5000 })) ?? '')
+  return out
+}
+
+/**
+ * Poll the clicked control's watched attrs until ANY differs from the pre-click
+ * baseline or the deadline passes (state flips can land a frame or an animation
+ * after the click — a synchronous read would miss every animated accordion).
+ * Returns the FIRST differing attr (in watched order) with its before/after
+ * values, or null when nothing changed within the bound. A read that throws
+ * (element detached mid-poll) counts as no delta seen yet, never a crash.
+ */
+async function pollForAttrDelta(page: PwPage, locator: string, baseline: string[]): Promise<{ attr: string; before: string; after: string } | null> {
+  const deadlineMs = 2000
+  const stepMs = 100
+  const start = Date.now()
+  for (;;) {
+    let now: string[] | null = null
+    try {
+      now = await readWatchedAttrs(resolveLocator(page, locator))
+    } catch {
+      now = null
+    }
+    if (now !== null) {
+      const i = now.findIndex((v, j) => v !== baseline[j])
+      if (i !== -1) return { attr: DOM_DELTA_WATCHED_ATTRS[i] as string, before: baseline[i] as string, after: now[i] as string }
+    }
+    if (Date.now() - start >= deadlineMs) return null
+    await new Promise((r) => setTimeout(r, stepMs))
+  }
+}
+
+/**
  * Run the driver's plan against an already-open page and judge the outcome. Split
  * out from makePlaywrightDriver so the soundness-critical confirmation logic can be
  * unit-tested with a fake page (no real browser): a parked leg never confirms, and
@@ -641,6 +716,15 @@ async function pollForDrop(count: () => Promise<number>, baseline: number, deadl
  * closing cannot be witnessed); open-but-never-dropped → honest refutation. Such
  * a leg is exempt from the same-path undrivable escape: the drop IS the positive
  * evidence the URL cannot provide.
+ *
+ * DOM-DELTA-asserted legs (same-screen state self-loops — accordions, tab
+ * switches, expanders — where neither URL nor dialog evidence exists): snapshot
+ * the watched attrs (DOM_DELTA_WATCHED_ATTRS) of the clicked control BEFORE the
+ * click, then poll (bounded) for ANY of them to differ. A delta confirms with
+ * dom-delta evidence carrying the changed attr and its before/after values; no
+ * delta is undrivable with a diagnosis, NEVER a refutation — the click may have
+ * changed state the watched set cannot see. Exempt from the asserted-nothing
+ * guard and the same-path escape, like dialog-close.
  */
 /**
  * Run an exploratory probe on an open page: load the source screen, then (a) try
@@ -676,10 +760,20 @@ async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise
     const direct = await landedAfter(async () => runLocator(page, spec.targetLocator as string, 'click'))
     if (direct !== null) return { confirmed: true, landedUrl: direct, evidence: { kind: 'url-change', startUrl: start, landedUrl: direct } }
     for (const sib of spec.siblingLocators) {
+      // The reveal sibling must never itself deliver the landing: if its click
+      // already put us on the expected route, the subsequent target-click throw
+      // would let the guard-bounce catch credit the TARGET edge with the
+      // SIBLING's navigation — a false witness. Flag and skip instead.
+      let sibNavigated = false
       const revealed = await landedAfter(async () => {
         await runLocator(page, sib, 'click').catch(() => {})
+        if (samePath(page.url(), expected)) {
+          sibNavigated = true
+          throw new Error('reveal sibling navigated — target attribution impossible')
+        }
         await runLocator(page, spec.targetLocator as string, 'click')
       })
+      if (sibNavigated) continue
       if (revealed !== null) return { confirmed: true, landedUrl: revealed, evidence: { kind: 'url-change', startUrl: start, landedUrl: revealed } }
     }
     return { confirmed: false }
@@ -742,6 +836,9 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
   let lastUrlAssertion: string | undefined
   let expectDialog = false
   let expectDialogClose = false
+  let expectDomDelta = false
+  let domDeltaLocator: string | undefined
+  let domDeltaBefore: string[] | undefined
   let dialogBaseline = 0
   let configModalBaseline = 0
   let heuristicBaseline = 0
@@ -763,6 +860,9 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     lastUrlAssertion = undefined
     expectDialog = false
     expectDialogClose = false
+    expectDomDelta = false
+    domDeltaLocator = undefined
+    domDeltaBefore = undefined
     requestEvidence = undefined
     // Dialog proof is a DELTA — for open AND close legs alike: snapshot the
     // ladder baselines (role, plus config selector OR heuristic) BEFORE the
@@ -781,6 +881,18 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
         }
       } else {
         heuristicBaseline = await countVisibleModals(page, MODAL_HEURISTIC_SELECTOR)
+      }
+    }
+    // DOM-delta proof is a DELTA too: snapshot the watched attrs of the clicked
+    // control BEFORE the action so the post-click poll has a baseline. A read that
+    // throws means the control is not rendered — the interaction never ran, so the
+    // target is undrivable, never refuted (same rule as a locator-miss click).
+    if (a.locator !== undefined && leg.assertions.some((as) => as.kind === 'dom-delta')) {
+      try {
+        domDeltaLocator = a.locator
+        domDeltaBefore = await readWatchedAttrs(resolveLocator(page, a.locator))
+      } catch {
+        return { confirmed: false, undrivable: true }
       }
     }
     // Arm each leg's request wait BEFORE firing its action — a fast response can land
@@ -817,10 +929,11 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       if (as.kind === 'url') lastUrlAssertion = appUrl + as.value
       if (as.kind === 'dialog') expectDialog = true
       if (as.kind === 'dialog-close') expectDialogClose = true
+      if (as.kind === 'dom-delta') expectDomDelta = true
     }
   }
   // a drive that asserted NOTHING cannot witness anything — never mint an evidence-free confirmation
-  if (lastUrlAssertion === undefined && !expectDialog && !expectDialogClose && requestEvidence === undefined) return { confirmed: false, undrivable: true }
+  if (lastUrlAssertion === undefined && !expectDialog && !expectDialogClose && !expectDomDelta && requestEvidence === undefined) return { confirmed: false, undrivable: true }
   let confirmed = true
   if (lastUrlAssertion !== undefined) {
     // SPA navigations and post-await handlers land asynchronously: wait for the
@@ -835,7 +948,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // plans WITH a request assertion are drivable via the network call, not the
     // URL) or the leg asserts a dialog delta (open OR close — a close leg is
     // same-path BY CONSTRUCTION and the modal-count drop is its positive evidence).
-    if (confirmed && samePath(anchorUrl, expected) && !expectDialog && !expectDialogClose && requestEvidence === undefined) return { confirmed: false, undrivable: true }
+    if (confirmed && samePath(anchorUrl, expected) && !expectDialog && !expectDialogClose && !expectDomDelta && requestEvidence === undefined) return { confirmed: false, undrivable: true }
   }
   let dialogDetail = 'dialog visible after drive'
   if (expectDialog && confirmed) {
@@ -882,6 +995,25 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     } else {
       confirmed = false
     }
+  }
+  // DOM-delta judgment (same-screen state self-loops): poll (bounded) for ANY
+  // watched attribute of the clicked control to differ from its pre-click
+  // snapshot. A delta is deterministic proof the click changed the control's own
+  // state; no delta is UNDRIVABLE with a diagnosis, NEVER a refutation — the
+  // click may well have changed state the watched attribute set cannot see.
+  if (expectDomDelta) {
+    if (domDeltaLocator === undefined || domDeltaBefore === undefined) return { confirmed: false, undrivable: true }
+    const delta = await pollForAttrDelta(page, domDeltaLocator, domDeltaBefore)
+    if (delta === null) {
+      return { confirmed: false, undrivable: true, undrivableReason: 'no observable attribute change on the clicked control — state may live elsewhere; cannot witness deterministically' }
+    }
+    // Only ARIA state attrs are causal proof. `class` flips on hover/focus as a
+    // side effect of the click itself (framework styling), so a class-only delta
+    // is a diagnosis, never a witness.
+    if (delta.attr === 'class') {
+      return { confirmed: false, undrivable: true, undrivableReason: 'only the class attribute changed — styling churn is not state proof (app a11y gap: expose aria-expanded/pressed/checked on this control)' }
+    }
+    return { confirmed: true, evidence: { kind: 'dom-delta', locator: domDeltaLocator, ...delta } }
   }
   if (!confirmed) return { confirmed: false }
   // A close leg's URL match is vacuous (same-path by construction) — its dialog
@@ -1012,6 +1144,7 @@ interface PwLocator {
   count: () => Promise<number>
   filter: (o: { visible: boolean }) => PwLocator
   evaluate: (fn: (el: FormLike) => unknown) => Promise<unknown>
+  getAttribute: (name: string, o?: unknown) => Promise<string | null>
 }
 
 /** The form-submission slice of a DOM element `evaluate` runs against in-page (no `lib.dom` dependency in this Node package). */
@@ -1059,10 +1192,15 @@ async function runCaptureLegAction(page: PwPage, leg: SpecPlan['legs'][number]):
  * React's handler is listening for, the same as clicking the submit button.
  */
 async function runLocator(page: PwPage, locator: string, action: 'click' | 'fill' | 'press' | 'submit', value = ''): Promise<void> {
-  const expr = locator.replace(/^page\./, '')
-  const loc = new Function('page', `return page.${expr}`)(page) as PwLocator
+  const loc = resolveLocator(page, locator)
   if (action === 'click') await loc.click({ timeout: 5000 })
   else if (action === 'submit') await loc.evaluate((el) => el.requestSubmit())
   else if (action === 'press') await loc.press(value, { timeout: 5000 })
   else await loc.fill(value, { timeout: 5000 })
+}
+
+/** Evaluate a `page.getBy…`-style locator snippet against the page into a live locator (shared by runLocator and the dom-delta attr reads). */
+function resolveLocator(page: PwPage, locator: string): PwLocator {
+  const expr = locator.replace(/^page\./, '')
+  return new Function('page', `return page.${expr}`)(page) as PwLocator
 }

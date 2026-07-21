@@ -41,7 +41,7 @@ export interface EdgeCoverage {
   source: string
   verified: boolean
   accounted: boolean
-  status: 'runtime' | 'stale-witness' | 'twin-witnessed' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'pattern-covered' | 'open'
+  status: 'runtime' | 'stale-witness' | 'twin-witnessed' | 'static' | 'dynamic-open' | 'dynamic-resolved' | 'parked' | 'pattern-covered' | 'unanchorable' | 'open'
   reason?: string
 }
 
@@ -65,6 +65,7 @@ export interface CoverageReport {
   accountedRatio: number
   parkedCount: number
   staleWitnessCount: number
+  unanchorableCount: number
   byModality: Record<string, number>
   bySource: Record<string, number>
   unverified: EdgeCoverage[]
@@ -74,14 +75,15 @@ export interface CoverageReport {
   frontierCount: number
 }
 
-/** Graph-derived context for edge accounting: node kinds, resolved dynamic sources, and screen->target pairs witnessed via a control child (twins). */
+/** Graph-derived context for edge accounting: node kinds, resolved dynamic sources, screen->target pairs witnessed via a control child (twins), and unanchorable source nodes. */
 interface EdgeContext {
   nodeKind: Map<string, string>
   resolvedFroms: Set<string>
   twinWitnessed: Set<string>
+  unanchorableFroms: Set<string>
 }
 
-/** Build the accounting context: a `from` is "resolved" once it has a concrete (non-sink) FRESH runtime out-edge — a stale witness credits nothing. `twinWitnessed` holds `screen=>to` pairs proven through a control child of that screen: the same user transition, witnessed at its drivable representation. */
+/** Build the accounting context: a `from` is "resolved" once it has a concrete (non-sink) FRESH runtime out-edge — a stale witness credits nothing. `twinWitnessed` holds `screen=>to` pairs proven through a control child of that screen: the same user transition, witnessed at its drivable representation. `unanchorableFroms` holds synthetic pseudo-screens (routeless, parentless, ZERO in-edges — e.g. a shared nav helper the extractor over-approximated into a node): no drive can ever be anchored there, so their out-edges get their own honest accounting class instead of cycling open forever. */
 function edgeContext(graph: UiGraph): EdgeContext {
   const nodeKind = new Map(graph.nodes.map((n) => [n.id, n.kind]))
   const parentOf = new Map(graph.nodes.map((n) => [n.id, n.parent]))
@@ -93,8 +95,13 @@ function edgeContext(graph: UiGraph): EdgeContext {
     const parent = parentOf.get(e.from)
     if (nodeKind.get(e.from) === 'control' && parent !== undefined) twinWitnessed.add(`${parent}=>${e.to}`)
   }
-  return { nodeKind, resolvedFroms, twinWitnessed }
+  const hasInEdge = new Set(graph.edges.map((e) => e.to))
+  const unanchorableFroms = new Set(graph.nodes.filter((n) => n.route === null && n.parent === undefined && n.kind !== 'unknown' && !hasInEdge.has(n.id)).map((n) => n.id))
+  return { nodeKind, resolvedFroms, twinWitnessed, unanchorableFroms }
 }
+
+/** The auditable reason attached to every 'unanchorable' classification. */
+const UNANCHORABLE_REASON = 'source is a synthetic routeless screen with no in-edges (over-approximated shared nav helper) — no runtime path can ever anchor a drive; accounted, not witnessed'
 
 /**
  * Classify one edge. Precedence is LOAD-BEARING (first match wins): fresh runtime →
@@ -102,8 +109,13 @@ function edgeContext(graph: UiGraph): EdgeContext {
  * back on the worklist for re-confirmation) → parked (before static, so a parked
  * edge is credited by its audit note not a witness) → dynamic sink (never credited
  * by its own witness; resolved only via a concrete runtime out-edge from the same
- * source) → must-static witness → open. A `may` edge is OPEN even with a static
- * witness (the witness proves the call site, not that the transition fires).
+ * source) → must-static witness → unanchorable source → open. A `may` edge is OPEN
+ * even with a static witness (the witness proves the call site, not that the
+ * transition fires). Unanchorable ranks LAST among the accounted classes: a fresh
+ * runtime witness (an agent CAN drive it manually), a bespoke park, and a real
+ * must-static proof all say something stronger than "the runner can never get
+ * there", so they win; only an edge that would otherwise cycle open forever
+ * (dynamic-open / open) falls through to the unanchorable accounting.
  */
 function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: Map<string, ParkedEdge>): { status: EdgeCoverage['status']; accounted: boolean; reason?: string } {
   if (edge.source === 'runtime') {
@@ -131,9 +143,12 @@ function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: 
     return { status: 'twin-witnessed', accounted: true, reason: 'the same transition is runtime-witnessed via a control on this screen' }
   }
   if (ctx.nodeKind.get(edge.to) === 'unknown') {
-    return ctx.resolvedFroms.has(edge.from) ? { status: 'dynamic-resolved', accounted: true } : { status: 'dynamic-open', accounted: false }
+    if (ctx.resolvedFroms.has(edge.from)) return { status: 'dynamic-resolved', accounted: true }
+    if (ctx.unanchorableFroms.has(edge.from)) return { status: 'unanchorable', accounted: true, reason: UNANCHORABLE_REASON }
+    return { status: 'dynamic-open', accounted: false }
   }
   if ((edge.source === 'static' || edge.source === 'manual') && edge.modality === 'must' && edge.witness !== undefined) return { status: 'static', accounted: true }
+  if (ctx.unanchorableFroms.has(edge.from)) return { status: 'unanchorable', accounted: true, reason: UNANCHORABLE_REASON }
   return { status: 'open', accounted: false }
 }
 
@@ -166,6 +181,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
   const verifiedCount = rows.filter((r) => r.status === 'runtime' || r.status === 'static').length
   const parkedCount = rows.filter((r) => r.status === 'parked' || r.status === 'pattern-covered').length
   const staleWitnessCount = rows.filter((r) => r.status === 'stale-witness').length
+  const unanchorableCount = rows.filter((r) => r.status === 'unanchorable').length
   const accounted = rows.filter((r) => r.accounted).length
   const total = rows.length
   return {
@@ -180,6 +196,7 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
     accountedRatio: total > 0 ? accounted / total : 1,
     parkedCount,
     staleWitnessCount,
+    unanchorableCount,
     byModality,
     bySource,
     unverified: rows.filter((r) => !r.verified),
@@ -246,8 +263,12 @@ export interface NextToVerifyOptions {
  * changed, re-confirm), then `may` (conditional) edges, then proposed
  * transitions — each minus anything already fresh-runtime-witnessed, parked, or
  * (for a dynamic sink) resolved by a concrete runtime out-edge from its source.
- * Proven `must` static edges are skipped (already witnessed). The open set
- * shrinks monotonically as edges are confirmed or parked. Returns the top `limit`.
+ * Proven `must` static edges are skipped (already witnessed). Non-runtime edges
+ * from an UNANCHORABLE source (synthetic routeless screen, no in-edges) are
+ * skipped too: planForTarget can never anchor a drive there, so worklisting them
+ * only burns attempts — classify() accounts them as 'unanchorable' instead. The
+ * open set shrinks monotonically as edges are confirmed or parked. Returns the
+ * top `limit`.
  */
 export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit = 20, parkedIds: Set<string> = new Set(), opts: NextToVerifyOptions = {}): VerifyTarget[] {
   const labelOf = new Map(graph.nodes.map((n) => [n.id, n.label]))
@@ -271,6 +292,7 @@ export function nextToVerify(graph: UiGraph, proposalGraph: ProposalGraph, limit
       out.push({ kind: 'edge', id: e.id, from: e.from, to: e.to, toLabel: labelOf.get(e.to) ?? e.to, event: e.event, reason, priority, stale: true })
       continue
     }
+    if (ctx.unanchorableFroms.has(e.from)) continue
     if (e.modality === 'unknown') {
       if (ctx.resolvedFroms.has(e.from)) continue
       priority = 3

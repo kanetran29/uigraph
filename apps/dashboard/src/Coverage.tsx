@@ -42,6 +42,9 @@ export function Coverage(props: CoverageProps): JSX.Element {
   const runtimePct = Math.round(coverage.runtimeRatio * 100)
   const allOpen = coverage.open ?? coverage.unverified
   const allParked = coverage.parked ?? []
+  // Unanchorable edges are accounted but neither open nor parked — without their
+  // own list the honest bucket would be invisible in every panel.
+  const unanchorable = useMemo(() => (coverage.unverified ?? []).filter((r) => r.status === 'unanchorable'), [coverage])
   const edgeById = new Map(graph.edges.map((e) => [e.id, e]))
   const selectEdge = (id: string): void => {
     const e: GraphEdge | undefined = edgeById.get(id)
@@ -61,7 +64,7 @@ export function Coverage(props: CoverageProps): JSX.Element {
 
   return (
     <CollapsibleSection id="coverage" className="coverage" title={t('panel.coverage')}>
-      <div className="cov-headline" title={`${coverage.accounted} of ${coverage.total} edges accounted-for (witnessed or parked)`}>
+      <div className="cov-headline" title={`${coverage.accounted} of ${coverage.total} edges accounted-for (witnessed, parked, or unanchorable)`}>
         <div className="cov-bar">
           <div className="cov-bar-fill" style={{ width: `${accountedPct}%` }} />
         </div>
@@ -111,7 +114,24 @@ export function Coverage(props: CoverageProps): JSX.Element {
           ))}
         </ul>
       ) : (
-        <p className="muted">100% accounted-for — every edge is witnessed or parked.</p>
+        <p className="muted">100% accounted-for — every edge is witnessed, parked, or honestly unanchorable.</p>
+      )}
+
+      {unanchorable.length > 0 && (
+        <>
+          <h3>unanchorable ({unanchorable.length})</h3>
+          <ul className="cov-list">
+            {unanchorable.map((e) => (
+              <li key={e.id}>
+                <button className="cov-row" onClick={() => selectEdge(e.id)} title={e.reason ?? 'unanchorable'}>
+                  <span className="cov-modality">unanchorable</span>
+                  <span className="cov-edge">{e.from} → {e.to}</span>
+                  <span className="cov-event">{e.event}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       {parked.length > 0 && (

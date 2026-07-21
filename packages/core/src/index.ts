@@ -89,6 +89,7 @@ export {
   locatorFor,
   isInteractionTriggeredEvent,
   isDirectNavEdge,
+  DOM_DELTA_WATCHED_ATTRS,
   type SpecPlan,
   type SpecLeg,
   type SpecAction,
