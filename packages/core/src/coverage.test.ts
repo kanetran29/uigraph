@@ -420,6 +420,51 @@ describe('unanchorable source (synthetic routeless screen, no in-edges)', () => 
   })
 })
 
+// A may-edge the runtime fold marked `refuted` (>=2 current-base refutes, zero
+// confirms): a DISPROVEN hypothesis. The verdict is delivered — the transition
+// does not fire — so it is accounted in its own bucket, never open, never parked,
+// and never re-queued for driving. The denominator stays untouched: refutedCount
+// is reported separately instead of silently shrinking total.
+describe('refuted edges (falsified may-hypotheses)', () => {
+  const gr = () =>
+    graph(
+      [node('a'), node('b'), node('c')],
+      [
+        edge('e_r', 'a', 'b', { source: 'static', modality: 'may', refuted: true }),
+        edge('e_may', 'b', 'c', { source: 'static', modality: 'may' }),
+      ],
+    )
+
+  it('a refuted edge is accounted with its own status and a reason naming the refutation evidence', () => {
+    const cov = buildCoverage(gr())
+    const row = cov.unverified.find((r) => r.id === 'e_r')
+    expect(row?.status).toBe('refuted')
+    expect(row?.accounted).toBe(true)
+    expect(row?.reason).toMatch(/refut/)
+  })
+
+  it('is absent from open AND parked, counted in refutedCount, with total NOT shrunk', () => {
+    const cov = buildCoverage(gr())
+    expect(cov.open.map((r) => r.id)).toEqual(['e_may'])
+    expect(cov.parked).toHaveLength(0)
+    expect(cov.refutedCount).toBe(1)
+    expect(cov.total).toBe(2)
+    expect(cov.accounted).toBe(1)
+  })
+
+  it('a refuted verdict beats a stale park (e.g. an old "unstable" park) — never listed as parked', () => {
+    const cov = buildCoverage(gr(), [{ edgeId: 'e_r', reason: 'autonomous: unstable after 2 attempts', by: 'runner' }])
+    expect(cov.unverified.find((r) => r.id === 'e_r')?.status).toBe('refuted')
+    expect(cov.parkedCount).toBe(0)
+    expect(cov.parked).toHaveLength(0)
+  })
+
+  it('nextToVerify skips refuted edges — the hypothesis is closed, not worth re-driving', () => {
+    const targets = nextToVerify(gr(), { nodes: [], edges: [] })
+    expect(targets.map((t) => t.id)).toEqual(['e_may'])
+  })
+})
+
 describe('nextToVerify — stale witnesses outrank everything drivable', () => {
   const g = (edges: Parameters<typeof graph>[1]) => graph(
     [node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), node('n_c', { route: '/c' })],

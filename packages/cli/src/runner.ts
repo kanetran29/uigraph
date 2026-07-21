@@ -29,17 +29,22 @@ export interface VerifyResult {
  * source screen and try to reveal + trigger it — click the target control if it
  * has one (clicking sibling controls first to open modals/disclosures that hide
  * it), or click each sibling watching for the expected landing (state-driven
- * navs whose trigger control the extractor could not link).
+ * navs whose trigger control the extractor could not link). `domDelta` marks a
+ * dom-delta-asserted target (a same-screen state control, often CSS-hidden until
+ * a sibling toggle reveals it): the probe judges by an attribute delta on the
+ * target control instead of by URL — `expectedRoute` is then the start route,
+ * which every click must stay on for an attempt to count.
  */
 export interface ProbeSpec {
   startUrl: string
   expectedRoute: string
   targetLocator?: string
   siblingLocators: string[]
+  domDelta?: boolean
 }
 
 /** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan. `modalSelector` is the app owner's declared modal CSS selector (rung 2 of the dialog evidence ladder). */
-export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string }) => Promise<VerifyResult>
+export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string; authed?: boolean }) => Promise<VerifyResult>
 
 /** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). `concurrency` is the parallel-driver pool width (default 8, capped 16); `patternSample` is how many representatives to drive per over-approximation pattern (default 1); `modalSelector` is the workspace-declared CSS selector for apps that render modals without role=dialog (rung 2 of the dialog evidence ladder). */
 export interface RunVerifyOptions {
@@ -49,6 +54,7 @@ export interface RunVerifyOptions {
   driver?: VerifyDriver
   storageState?: string
   includeProven?: boolean
+  includeRefuted?: boolean
   concurrency?: number
   patternSample?: number
   modalSelector?: string
@@ -85,7 +91,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   const parkedIds = new Set(store.getParkedEdges().map((p) => p.edgeId))
   store.close()
 
-  const allTargets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds, { includeProven: opts.includeProven === true })
+  const allTargets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds, { includeProven: opts.includeProven === true, includeRefuted: opts.includeRefuted === true })
   // Collapse the over-approximation fan-out: drive one representative per source-nav
   // pattern; the duplicates are never driven (they are parked after the representative
   // is confirmed). This is the big-app speedup — 7000+ may-edges become a few hundred.
@@ -120,7 +126,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   try {
     // STAGE 1 — drive the simple targets CONCURRENTLY. Pure: no DB writes, reads only the
     // frozen graph snapshot; results are collected by input index for a deterministic fold.
-    const results = await mapPool(simple, concurrency, (t) => attemptSimple(driver, graph, t, opts.appUrl, opts.modalSelector))
+    const results = await mapPool(simple, concurrency, (t) => attemptSimple(driver, graph, t, opts.appUrl, opts.modalSelector, authed))
 
     // STAGE 2 — fold the results SERIALLY (the only SQLite writer), in worklist-rank order.
     for (let i = 0; i < simple.length; i++) {
@@ -179,7 +185,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       // Dynamic-sink target (u_<screen>): CAPTURE the real landing instead of asserting a URL.
       let result: VerifyResult
       try {
-        result = await driver(plan, opts.appUrl, { capture: true, modalSelector: opts.modalSelector })
+        result = await driver(plan, opts.appUrl, { capture: true, modalSelector: opts.modalSelector, authed })
       } catch {
         result = { confirmed: false }
       }
@@ -292,13 +298,13 @@ async function mapPool<T, R>(items: readonly T[], concurrency: number, worker: (
  * and on failure runs the exploratory probe before judging (an undrivable-after-probe
  * result is still undrivable). Returns null when there is no path to plan (nothing to fold).
  */
-async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string, modalSelector?: string): Promise<VerifyResult | null> {
+async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string, modalSelector?: string, authed?: boolean): Promise<VerifyResult | null> {
   const steps = planForTarget(graph, t.from, t.to)
   if (steps === null) return null
   const plan = buildSpecPlan(graph, steps, { baseUrl: appUrl, modalSelector, title: `verify ${t.from} → ${t.to}` })
   let result: VerifyResult
   try {
-    result = await driver(plan, appUrl, { modalSelector })
+    result = await driver(plan, appUrl, { modalSelector, authed })
   } catch {
     // A drive that THREW observed nothing — page.goto refused (server down),
     // browser crash, protocol error. Refuting would poison the log with
@@ -306,21 +312,27 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
     result = { confirmed: false, undrivable: true, undrivableReason: 'drive crashed before observing the app (navigation/browser error) — check the app server' }
   }
   if (!result.confirmed) {
-    // A dialog-close or dom-delta target is same-path by construction: the probe's
-    // URL evidence cannot apply, and its same-path guard would launder an honest
-    // close refutation into undrivable. The drive's own verdict stands.
+    // A dialog-close target is same-path by construction: the probe's URL evidence
+    // cannot apply, and its same-path guard would launder an honest close
+    // refutation into undrivable. The drive's own verdict stands. A dom-delta
+    // final IS probeable: the probe judges it by attribute delta, not by URL.
     const finalLeg = plan.legs[plan.legs.length - 1]
-    if (finalLeg?.assertions.some((as) => as.kind === 'dialog-close' || as.kind === 'dom-delta')) return result
-    const probe = buildProbeSpec(graph, t)
+    if (finalLeg?.assertions.some((as) => as.kind === 'dialog-close')) return result
+    const domDelta = finalLeg?.assertions.some((as) => as.kind === 'dom-delta') === true
+    const probe = buildProbeSpec(graph, t, domDelta)
     if (probe !== null) {
       let probed: VerifyResult
       try {
-        probed = await driver(plan, appUrl, { probe, modalSelector })
+        probed = await driver(plan, appUrl, { probe, modalSelector, authed })
       } catch {
         probed = { confirmed: false }
       }
       if (probed.confirmed) result = probed
-      else if (result.undrivable !== true && probed.undrivable === true) result = probed
+      // When BOTH are undrivable, keep the one carrying a diagnosis. A drive
+      // REFUTATION is a real verdict — the probe may never overwrite it with a
+      // shrug (the locator-miss=undrivable rule in drivePlan already covers the
+      // absent-control case this override once existed for).
+      else if (probed.undrivable === true && result.undrivable === true && result.undrivableReason === undefined && probed.undrivableReason !== undefined) result = probed
     }
   }
   return result
@@ -504,22 +516,34 @@ function nthHiddenSiblingDiagnosis(graph: UiGraph, t: VerifyTarget, outcomes: Re
  * "Start exploring" click that expands the hidden map UI) rank AHEAD of
  * positional siblings: on a control-heavy screen the bounded sweep otherwise
  * never reaches the one control that can reveal a hidden target.
+ *
+ * `domDelta` (the target leg carries a dom-delta assertion — a same-screen state
+ * control, often CSS-hidden until a sibling toggle reveals it) changes the
+ * requirements: the target's locator is mandatory (it is what gets clicked and
+ * watched), the target needs no route (judgment is the attribute delta, so
+ * expectedRoute is the start route the URL must stay on), and the sibling list
+ * is the same reveal-prioritized ranking.
  */
-function buildProbeSpec(graph: UiGraph, t: VerifyTarget): ProbeSpec | null {
+function buildProbeSpec(graph: UiGraph, t: VerifyTarget, domDelta: boolean): ProbeSpec | null {
   const from = graph.nodes.find((n) => n.id === t.from)
   if (from === undefined) return null
   const screen = from.kind === 'control' && from.parent !== undefined ? graph.nodes.find((n) => n.id === from.parent) : from
   if (screen === undefined || screen.route === null || screen.route.includes(':') || screen.route.includes('*')) return null
-  const to = graph.nodes.find((n) => n.id === t.to)
-  if (to === undefined || to.route === null || to.route.includes('*')) return null
   const targetLocator = from.kind === 'control' && from.control?.selector ? locatorFor(from.control.selector) : undefined
+  if (domDelta && targetLocator === undefined) return null
+  let expectedRoute = screen.route
+  if (!domDelta) {
+    const to = graph.nodes.find((n) => n.id === t.to)
+    if (to === undefined || to.route === null || to.route.includes('*')) return null
+    expectedRoute = to.route
+  }
   const revealish = new Set(graph.edges.filter((e) => e.to === screen.id && e.effect !== null && e.effect.includes('state:')).map((e) => e.from))
   const siblings = graph.nodes.filter((n) => n.kind === 'control' && n.parent === screen.id && n.id !== from.id && n.control?.selector !== undefined)
   const siblingLocators = [...siblings.filter((n) => revealish.has(n.id)), ...siblings.filter((n) => !revealish.has(n.id))]
     .map((n) => locatorFor(n.control!.selector!))
     .slice(0, 8)
   if (targetLocator === undefined && siblingLocators.length === 0) return null
-  return { startUrl: screen.route, expectedRoute: to.route, ...(targetLocator !== undefined ? { targetLocator } : {}), siblingLocators }
+  return { startUrl: screen.route, expectedRoute, ...(targetLocator !== undefined ? { targetLocator } : {}), siblingLocators, ...(domDelta ? { domDelta: true } : {}) }
 }
 
 /**
@@ -726,15 +750,76 @@ async function pollForAttrDelta(page: PwPage, locator: string, baseline: string[
  * changed state the watched set cannot see. Exempt from the asserted-nothing
  * guard and the same-path escape, like dialog-close.
  */
+/** The class-only dom-delta diagnosis, shared by the direct drive and the probe: styling churn is never state proof. */
+const CLASS_ONLY_DELTA_REASON = 'only the class attribute changed — styling churn is not state proof (app a11y gap: expose aria-expanded/pressed/checked on this control)'
+
+/**
+ * Probe a dom-delta target: a same-screen state control (menu item, accordion)
+ * that is often CSS-hidden until a sibling toggle (hamburger) reveals it — the
+ * direct drive read it as a locator miss. For the direct try and each
+ * reveal→retry, snapshot the TARGET control's watched attrs immediately before
+ * clicking IT (never before the sibling click — the reveal must not pollute the
+ * baseline), click, and poll for a delta. A non-class delta confirms with
+ * dom-delta evidence; a class-only delta is undrivable with the a11y diagnosis;
+ * no delta moves on to the next sibling; an exhausted sweep is undrivable. The
+ * URL must stay on the start path throughout — an attempt where any click
+ * navigated away is VOID: never a witness (the polled delta could be another
+ * page's element) and never a refutation (a dom-delta judgment cannot refute).
+ */
+async function probeDomDelta(page: PwPage, spec: ProbeSpec, start: string): Promise<VerifyResult> {
+  const target = spec.targetLocator
+  if (target === undefined) return { confirmed: false, undrivable: true }
+  // 'continue' = this attempt observed nothing; 'void' = a click left the start path.
+  const attempt = async (sib?: string): Promise<VerifyResult | 'continue' | 'void'> => {
+    await page.goto(start)
+    await page.waitForLoadState('networkidle').catch(() => {})
+    if (sib !== undefined) {
+      await runLocator(page, sib, 'click').catch(() => {})
+      // Settle before the baseline read: a reveal that mutates the TARGET's attrs
+      // asynchronously (transition-end setState) must land BEFORE the snapshot,
+      // or its effect would be attributed to the target click.
+      await page.waitForLoadState('networkidle').catch(() => {})
+      if (!samePath(page.url(), start)) return 'void'
+    }
+    let before: string[]
+    try {
+      before = await readWatchedAttrs(resolveLocator(page, target))
+      await runLocator(page, target, 'click')
+    } catch {
+      // the target is (still) not rendered — it was never interacted with
+      return 'continue'
+    }
+    const delta = await pollForAttrDelta(page, target, before)
+    // Settle then RE-check the URL: a click that flips an attr synchronously while
+    // a slower navigation is in flight would otherwise mint a false same-screen
+    // witness for a control that actually departed.
+    await page.waitForLoadState('networkidle').catch(() => {})
+    if (!samePath(page.url(), start)) return 'void'
+    if (delta === null) return 'continue'
+    if (delta.attr === 'class') return { confirmed: false, undrivable: true, undrivableReason: CLASS_ONLY_DELTA_REASON }
+    return { confirmed: true, evidence: { kind: 'dom-delta', locator: target, ...delta } }
+  }
+  const direct = await attempt()
+  if (direct !== 'continue' && direct !== 'void') return direct
+  for (const sib of spec.siblingLocators) {
+    const r = await attempt(sib)
+    if (r !== 'continue' && r !== 'void') return r
+  }
+  return { confirmed: false, undrivable: true }
+}
+
 /**
  * Run an exploratory probe on an open page: load the source screen, then (a) try
  * the target control directly, (b) click sibling controls to REVEAL it (modal /
  * disclosure) and retry, or (c) with no target control, click each sibling and
  * watch for the expected landing. Confirmation requires the URL to actually
- * reach the expected route — the evidence is the observed url-change.
+ * reach the expected route — the evidence is the observed url-change. A
+ * `domDelta` spec is judged by probeDomDelta instead: attribute delta on the
+ * target control, with the URL required to STAY on the start path.
  */
 async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise<VerifyResult> {
   const start = appUrl + spec.startUrl
+  if (spec.domDelta === true) return probeDomDelta(page, spec, start)
   const expected = appUrl + spec.expectedRoute
   // Same-path target: URL evidence is impossible (any landing "matches" before the
   // interaction even runs), so the probe cannot legitimately confirm — undrivable.
@@ -786,7 +871,7 @@ async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise
   return { confirmed: false }
 }
 
-async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string }): Promise<VerifyResult> {
+async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string; authed?: boolean }): Promise<VerifyResult> {
   if (opts?.probe !== undefined) return probePlan(page, opts.probe, appUrl)
   const anchorUrl = plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl
   await page.goto(anchorUrl)
@@ -943,6 +1028,12 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     const expected = lastUrlAssertion
     await page.waitForURL((u) => samePath(u.toString(), expected), { timeout: 4000 }).catch(() => {})
     confirmed = samePath(page.url(), expected)
+    // H5 for the assert path: an unauthenticated bounce to a login/auth route is a
+    // guard bounce, not the app disagreeing — refuting it would let a misconfigured
+    // anon run falsify (and demote) healthy authed edges.
+    if (!confirmed && opts?.authed !== true && /login|signin|sign-in|auth/i.test(page.url())) {
+      return { confirmed: false, undrivable: true, undrivableReason: 'landed on an auth route while unauthenticated — guard bounce, needs an authenticated session' }
+    }
     // A same-path match is never positive evidence on its own — UNLESS a request
     // assertion already proved the effect fired (the carved exception: same-path
     // plans WITH a request assertion are drivable via the network call, not the
@@ -1004,6 +1095,13 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
   if (expectDomDelta) {
     if (domDeltaLocator === undefined || domDeltaBefore === undefined) return { confirmed: false, undrivable: true }
     const delta = await pollForAttrDelta(page, domDeltaLocator, domDeltaBefore)
+    // URL-stay guard: the witnessed state change must have happened ON this
+    // screen — an in-flight navigation after a synchronous attr flip would
+    // otherwise mint a same-screen witness for a departing control.
+    await page.waitForLoadState('networkidle').catch(() => {})
+    if (!samePath(page.url(), anchorUrl)) {
+      return { confirmed: false, undrivable: true, undrivableReason: 'the control navigated away during the state-click — not a same-screen transition; cannot witness as dom-delta' }
+    }
     if (delta === null) {
       return { confirmed: false, undrivable: true, undrivableReason: 'no observable attribute change on the clicked control — state may live elsewhere; cannot witness deterministically' }
     }
@@ -1011,7 +1109,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // side effect of the click itself (framework styling), so a class-only delta
     // is a diagnosis, never a witness.
     if (delta.attr === 'class') {
-      return { confirmed: false, undrivable: true, undrivableReason: 'only the class attribute changed — styling churn is not state proof (app a11y gap: expose aria-expanded/pressed/checked on this control)' }
+      return { confirmed: false, undrivable: true, undrivableReason: CLASS_ONLY_DELTA_REASON }
     }
     return { confirmed: true, evidence: { kind: 'dom-delta', locator: domDeltaLocator, ...delta } }
   }

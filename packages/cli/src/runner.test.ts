@@ -621,13 +621,15 @@ describe('runVerify: per-target outcomes', () => {
     expect(parked[0]?.reason).toBe('autonomous: undrivable after 2 attempts — no drivable control/plan reached it')
   })
 
-  it('runVerifyUntilDone parks with the unstable-flavored reason when every attempt is refuted', async () => {
+  it('runVerifyUntilDone: repeated refutations DEMOTE the may-edge (falsification verdict) instead of parking it', async () => {
     const dir = await seedDir('uigraph-park-unstable-', oneEdgeGraph())
     const s = await runVerifyUntilDone({ dir, appUrl: 'http://app', maxRounds: 4, parkTries: 2, driver: async () => ({ confirmed: false }) })
-    expect(s.parkedEdges).toBe(1)
-    const parked = await readParked(dir)
-    expect(parked[0]?.edgeId).toBe('e_ab')
-    expect(parked[0]?.reason).toBe('autonomous: unstable after 2 attempts — driven but refuted (did not land)')
+    expect(s.parkedEdges).toBe(0)
+    const { openStore } = await import('@ui-graph/core/node')
+    const { loadMergedGraph } = await import('@ui-graph/mcp')
+    const g: any = loadMergedGraph({ dir })
+    const e = g.edges.find((x: any) => x.id === 'e_ab')
+    expect(e?.refuted).toBe(true)
   })
 })
 
@@ -1207,5 +1209,123 @@ describe('runVerify: probe reveal-priority (state-effect siblings first)', () =>
     const summary = await runVerify({ dir, appUrl: 'http://app', driver })
     expect(summary.outcomes).toEqual({ e_t: 'undrivable' })
     expect(summary.confirmed).toBe(0)
+  })
+})
+
+// The dom-delta probe: a same-screen state control (menu item, accordion) is
+// often CSS-hidden until a sibling toggle (hamburger) is clicked — its single
+// dom-delta leg misses the locator, so the class was permanently undrivable:
+// attemptSimple skipped the probe for dom-delta finals because probePlan could
+// only judge by URL. The probe now judges dom-delta targets by ATTRIBUTE DELTA:
+// reveal via a sibling, snapshot the TARGET's watched attrs immediately before
+// clicking IT (never before the sibling click — the reveal must not pollute the
+// baseline), click, poll for the delta. The URL must stay on the start path
+// throughout — an attempt where any click navigated away is VOID: never a
+// witness, never a refutation.
+describe('runVerify: dom-delta probe (CSS-hidden state controls)', () => {
+  /** A role-name button control on screen n_a. */
+  const control = (id: string, name: string): GraphNode => ({
+    id, route: null, componentPath: null, label: name, kind: 'control', parent: 'n_a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: `button|${name}` } },
+  })
+
+  /** /a hosts the hidden Menu target (a state:* self-loop → a single dom-delta leg) plus one named sibling. 'Toggle'/'Away' carry a must-static state:* self-loop edge so the target edge is the sole worklist entry and the sibling ranks reveal-first; 'Dud' gets no edge (a plain positional sibling). */
+  const hiddenMenuGraph = (sibling: 'Toggle' | 'Away' | 'Dud'): UiGraph => {
+    const nodes: GraphNode[] = [node('n_a', { route: '/a' }), control('c_menu', 'Menu'), control('c_sib', sibling)]
+    const edges: GraphEdge[] = [edge('e_menu', 'c_menu', 'n_a', { event: 'click', effect: 'state:setMenuOpen', modality: 'may' })]
+    if (sibling !== 'Dud') edges.push(edge('e_sib', 'c_sib', 'n_a', { event: 'click', effect: 'state:setNavOpen', modality: 'must' }))
+    return graph(nodes, edges)
+  }
+
+  /** Fake page for the CSS-hidden menu: 'Menu' is a locator miss until 'Toggle'
+   *  (or 'Away') was clicked since the last goto — a reload collapses the nav,
+   *  like reality. Clicking Menu flips its watched attr per `attrMode`; in aria
+   *  mode the attr also goes null→'false' on the reveal itself, so a baseline
+   *  wrongly snapshotted BEFORE the sibling click surfaces as wrong before/after
+   *  evidence. 'Away' reveals AND navigates — only the URL void-check stops a
+   *  false witness. 'Dud' does nothing. Records the click order. */
+  const hiddenMenuPage = (attrMode: 'aria' | 'class'): { page: Parameters<typeof drivePlan>[0]; clicked: string[] } => {
+    let current = ''
+    let revealed = false
+    let open = false
+    const clicked: string[] = []
+    const button = (name: string) => ({
+      click: async () => {
+        clicked.push(name)
+        if (name === 'Toggle') revealed = true
+        else if (name === 'Away') {
+          revealed = true
+          current = 'http://app/away'
+        } else if (name === 'Menu') {
+          if (!revealed) throw new Error('locator not found (nav collapsed)')
+          open = true
+        }
+      },
+      getAttribute: async (attr: string) => {
+        if (attrMode === 'aria' && attr === 'aria-expanded') return revealed ? (open ? 'true' : 'false') : null
+        if (attrMode === 'class' && attr === 'class') return open ? 'menu open' : 'menu'
+        return null
+      },
+      count: async () => 0,
+    })
+    const page = {
+      goto: async (url: string) => {
+        current = url
+        revealed = false
+        open = false
+      },
+      url: () => current,
+      getByRole: (_role: string, o?: { name?: string }) => button(o?.name ?? ''),
+      waitForLoadState: async () => {},
+      waitForURL: async () => {},
+    }
+    return { page: page as unknown as Parameters<typeof drivePlan>[0], clicked }
+  }
+
+  /** Seed the graph, run one verify pass over the fake page, and return the summary plus the page's click log and workspace dir. */
+  const run = async (gg: UiGraph, attrMode: 'aria' | 'class'): Promise<{ summary: Awaited<ReturnType<typeof runVerify>>; clicked: string[]; dir: string }> => {
+    const dir = await seedDir('uigraph-domdelta-probe-', gg)
+    const { page, clicked } = hiddenMenuPage(attrMode)
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    return { summary, clicked, dir }
+  }
+
+  it('(a) confirms the CSS-hidden target after the reveal sibling, with exact dom-delta evidence and reveal-before-target click order', async () => {
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const { summary, clicked, dir } = await run(hiddenMenuGraph('Toggle'), 'aria')
+    expect(summary.outcomes).toEqual({ e_menu: 'confirmed' })
+    expect(summary.confirmed).toBe(1)
+    expect(clicked.slice(-2)).toEqual(['Toggle', 'Menu'])
+    const check = openStore(join(dir, 'uigraph.db'))
+    const obs = check.getObservations()
+    check.close()
+    expect(obs.length).toBe(1)
+    expect(obs[0]?.evidence).toEqual({ kind: 'dom-delta', locator: 'page.getByRole("button", { name: "Menu" })', attr: 'aria-expanded', before: 'false', after: 'true' })
+  })
+
+  it('(b) a reveal sibling that NAVIGATES away voids the attempt: undrivable, never refuted, never credited', async () => {
+    const { summary, clicked } = await run(hiddenMenuGraph('Away'), 'aria')
+    expect(summary.outcomes).toEqual({ e_menu: 'undrivable' })
+    expect(summary.confirmed).toBe(0)
+    expect(summary.refuted).toBe(0)
+    // the void attempt must stop BEFORE the target click — a post-navigation delta is never this target's witness
+    expect(clicked[clicked.length - 1]).toBe('Away')
+  })
+
+  it('(c) no reveal sibling works → undrivable (the target stays a locator miss)', async () => {
+    const { summary } = await run(hiddenMenuGraph('Dud'), 'aria')
+    expect(summary.outcomes).toEqual({ e_menu: 'undrivable' })
+    expect(summary.confirmed).toBe(0)
+    expect(summary.refuted).toBe(0)
+  })
+
+  it('(d) a class-only delta after the reveal is undrivable with the class diagnosis, never a witness', async () => {
+    const { summary } = await run(hiddenMenuGraph('Toggle'), 'class')
+    expect(summary.outcomes).toEqual({ e_menu: 'undrivable' })
+    expect(summary.confirmed).toBe(0)
+    expect(summary.refuted).toBe(0)
+    expect(summary.diagnoses['e_menu']).toContain('only the class attribute changed')
   })
 })

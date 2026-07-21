@@ -42,9 +42,10 @@ export function Coverage(props: CoverageProps): JSX.Element {
   const runtimePct = Math.round(coverage.runtimeRatio * 100)
   const allOpen = coverage.open ?? coverage.unverified
   const allParked = coverage.parked ?? []
-  // Unanchorable edges are accounted but neither open nor parked — without their
-  // own list the honest bucket would be invisible in every panel.
+  // Unanchorable and refuted edges are accounted but neither open nor parked —
+  // without their own lists these honest buckets would be invisible in every panel.
   const unanchorable = useMemo(() => (coverage.unverified ?? []).filter((r) => r.status === 'unanchorable'), [coverage])
+  const refuted = useMemo(() => (coverage.unverified ?? []).filter((r) => r.status === 'refuted'), [coverage])
   const edgeById = new Map(graph.edges.map((e) => [e.id, e]))
   const selectEdge = (id: string): void => {
     const e: GraphEdge | undefined = edgeById.get(id)
@@ -64,7 +65,7 @@ export function Coverage(props: CoverageProps): JSX.Element {
 
   return (
     <CollapsibleSection id="coverage" className="coverage" title={t('panel.coverage')}>
-      <div className="cov-headline" title={`${coverage.accounted} of ${coverage.total} edges accounted-for (witnessed, parked, or unanchorable)`}>
+      <div className="cov-headline" title={`${coverage.accounted} of ${coverage.total} edges accounted-for (witnessed, parked, refuted, or unanchorable)`}>
         <div className="cov-bar">
           <div className="cov-bar-fill" style={{ width: `${accountedPct}%` }} />
         </div>
@@ -73,7 +74,7 @@ export function Coverage(props: CoverageProps): JSX.Element {
         </span>
       </div>
       <p className="muted cov-sub">
-        verified {verifiedPct}% ({coverage.verifiedCount ?? coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · runtime-verified {runtimePct}% ({coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · parked {coverage.parkedCount ?? allParked.length}
+        verified {verifiedPct}% ({coverage.verifiedCount ?? coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · runtime-verified {runtimePct}% ({coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · parked {coverage.parkedCount ?? allParked.length} · refuted {coverage.refutedCount ?? refuted.length}
       </p>
 
       <div className="cov-chips">
@@ -114,7 +115,27 @@ export function Coverage(props: CoverageProps): JSX.Element {
           ))}
         </ul>
       ) : (
-        <p className="muted">100% accounted-for — every edge is witnessed, parked, or honestly unanchorable.</p>
+        <p className="muted">100% accounted-for — every edge is witnessed, parked, refuted, or honestly unanchorable.</p>
+      )}
+
+      {refuted.length > 0 && (
+        <>
+          <h3>refuted ({refuted.length})</h3>
+          <ul className="cov-list">
+            {refuted.map((e) => (
+              <li key={e.id}>
+                <button className="cov-row cov-row--stacked" onClick={() => selectEdge(e.id)} title={e.reason ?? 'refuted'}>
+                  <span className="cov-row-head">
+                    <span className="cov-modality">refuted</span>
+                    <span className="cov-edge">{e.from} → {e.to}</span>
+                    <span className="cov-event">{e.event}</span>
+                  </span>
+                  {e.reason ? <span className="cov-reason">{e.reason}</span> : null}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       {unanchorable.length > 0 && (

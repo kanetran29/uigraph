@@ -101,7 +101,11 @@ export interface Witness {
  * string via `classifyEffectRisk` in risk.ts. `witnessStale` (set by the
  * observation fold) means the runtime witness was recorded against a different
  * base graph — the code changed since verification, so the edge needs
- * re-confirmation and must not be trusted at the witnessed tier.
+ * re-confirmation and must not be trusted at the witnessed tier. `refuted`
+ * (also set by the fold, on `may` edges only) means the hypothesis was
+ * DISPROVEN at runtime — repeatedly refuted on the current base and never once
+ * confirmed; the edge is kept (the hypothesis and its history stay auditable)
+ * but coverage accounts it as a delivered verdict and the worklist skips it.
  */
 export interface GraphEdge {
   id: string
@@ -116,6 +120,7 @@ export interface GraphEdge {
   witness?: Witness
   irreversible?: boolean
   witnessStale?: boolean
+  refuted?: true
 }
 
 /**
