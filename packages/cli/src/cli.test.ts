@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@ui-graph/core'
 import { openStore, saveGraph } from '@ui-graph/core/node'
 import type { Server } from 'node:http'
-import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, formatParked, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runParked, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
+import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, formatParked, loadWorkspaceConfig, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runParked, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
 import { buildProgram } from './cli'
 import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
 import { readRegistry, summarize } from '@ui-graph/core/node'
@@ -180,6 +180,35 @@ describe('resolveAdapter (explicit vs auto-detect, actionable errors)', () => {
     const dir = tempDir('uigraph-detect-none-')
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ dependencies: { lodash: '4.0.0' } }))
     expect(() => resolveAdapter(dir)).toThrow(/could not detect/)
+  })
+})
+
+describe('loadWorkspaceConfig (.uigraph/config.json)', () => {
+  it('returns {} when the workspace has no config file', () => {
+    expect(loadWorkspaceConfig(tempDir('uigraph-cfg-none-'))).toEqual({})
+  })
+
+  it('reads modalSelector from the config file, ignoring unknown keys', () => {
+    const dir = tempDir('uigraph-cfg-')
+    mkdirSync(join(dir, '.uigraph'), { recursive: true })
+    writeFileSync(join(dir, '.uigraph', 'config.json'), JSON.stringify({ modalSelector: '.app-modal', someFutureKey: true }))
+    expect(loadWorkspaceConfig(dir)).toEqual({ modalSelector: '.app-modal' })
+  })
+
+  it('throws a CliError naming the path on invalid JSON instead of silently falling back', () => {
+    const dir = tempDir('uigraph-cfg-bad-')
+    mkdirSync(join(dir, '.uigraph'), { recursive: true })
+    const path = join(dir, '.uigraph', 'config.json')
+    writeFileSync(path, '{ modalSelector: ')
+    expect(() => loadWorkspaceConfig(dir)).toThrow(CliError)
+    expect(() => loadWorkspaceConfig(dir)).toThrow(path)
+  })
+
+  it('throws a CliError on a non-string modalSelector — a typo\'d config must not silently disable rung 2', () => {
+    const dir = tempDir('uigraph-cfg-nonstring-')
+    mkdirSync(join(dir, '.uigraph'), { recursive: true })
+    writeFileSync(join(dir, '.uigraph', 'config.json'), JSON.stringify({ modalSelector: true }))
+    expect(() => loadWorkspaceConfig(dir)).toThrow(/invalid modalSelector/)
   })
 })
 

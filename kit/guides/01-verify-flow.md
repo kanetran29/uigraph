@@ -58,3 +58,11 @@ uigraph verify <dir> --app-url http://app.local:3000 --storage-state auth.json -
 The runner opens the browser context from that session, so it can reach
 profile/dashboard/checkout routes. Without it, only public routes confirm and
 coverage stalls low.
+
+Apps that render modals WITHOUT `role="dialog"` (bare-div overlays) cannot be
+witnessed by the standard dialog evidence. Declare the app's modal selector once
+per workspace in `<dir>/.uigraph/config.json` — `{ "modalSelector": "[class*='modal-overlay']" }` —
+or pass `--modal-selector` on the verify command (flag wins). The confirmation
+evidence records that it came from the declared selector; when the app later adds
+real `role="dialog"` markup, remove the config and evidence upgrades to the
+standard rung automatically.

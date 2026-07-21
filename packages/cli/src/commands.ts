@@ -67,6 +67,40 @@ export function openStoreSafe(dbPath: string) {
 }
 
 /**
+ * Read the per-workspace CLI config from <dir>/.uigraph/config.json. uigraph
+ * serves many host repos and cannot require app-side code changes, so app
+ * owners declare app-specific facts (e.g. modalSelector, the CSS selector the
+ * app renders modals with) once per workspace; .uigraph/ is workspace-local
+ * state that host repos typically git-exclude. A missing file is simply no
+ * config ({}); an unreadable or unparseable file throws a CliError naming the
+ * path and the problem, because a silent fallback would hide a typo'd config.
+ * Unknown keys are ignored.
+ */
+export function loadWorkspaceConfig(dir: string): { modalSelector?: string } {
+  const path = join(dir, '.uigraph', 'config.json')
+  let raw: string
+  try {
+    raw = readFileSync(path, 'utf8')
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return {}
+    const reason = err instanceof Error ? err.message : String(err)
+    throw new CliError(`cannot read workspace config: ${path}\n  ${reason}`)
+  }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err)
+    throw new CliError(`invalid JSON in workspace config: ${path}\n  ${reason}\n  fix the file (or delete it to run with defaults)`)
+  }
+  const modalSelector = (parsed as { modalSelector?: unknown } | null)?.modalSelector
+  if (modalSelector !== undefined && (typeof modalSelector !== 'string' || modalSelector.trim().length === 0)) {
+    throw new CliError(`invalid modalSelector in workspace config: ${path}\n  expected a non-empty CSS selector string, got ${JSON.stringify(modalSelector)}\n  fix the value (or remove the key to run with defaults)`)
+  }
+  return typeof modalSelector === 'string' ? { modalSelector } : {}
+}
+
+/**
  * Create a directory (recursively) for an output file, turning a permission/path
  * failure into an actionable CliError naming the path instead of a raw stack.
  */
