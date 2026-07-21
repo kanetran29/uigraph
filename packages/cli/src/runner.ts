@@ -970,16 +970,6 @@ interface PwPage {
 }
 
 /**
- * Evaluate a `page.getBy…`-style locator snippet against the page, then
- * click/fill/press/submit it. `submit` is distinct from `click`: the extractor
- * models a form's `onSubmit` handler as a control on the `<form>` element itself
- * (selector `"form"`), and a bounding-box click on a block-level form frequently
- * lands on dead space beside its (inline, left-aligned) fields rather than on
- * any element that would actually fire the browser's submit — so a `submit`
- * event is driven via `requestSubmit()`, which dispatches the real submit event
- * React's handler is listening for, the same as clicking the submit button.
- */
-/**
  * Run one leg's interaction in capture mode: click/press/fill only. Goto legs are
  * skipped (H1 — never goto toward the synthetic sink) and `available` legs are
  * no-ops. Throws on a locator miss so the caller reports undrivable.
@@ -991,6 +981,16 @@ async function runCaptureLegAction(page: PwPage, leg: SpecPlan['legs'][number]):
   else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
 }
 
+/**
+ * Evaluate a `page.getBy…`-style locator snippet against the page, then
+ * click/fill/press/submit it. `submit` is distinct from `click`: the extractor
+ * models a form's `onSubmit` handler as a control on the `<form>` element itself
+ * (selector `"form"`), and a bounding-box click on a block-level form frequently
+ * lands on dead space beside its (inline, left-aligned) fields rather than on
+ * any element that would actually fire the browser's submit — so a `submit`
+ * event is driven via `requestSubmit()`, which dispatches the real submit event
+ * React's handler is listening for, the same as clicking the submit button.
+ */
 async function runLocator(page: PwPage, locator: string, action: 'click' | 'fill' | 'press' | 'submit', value = ''): Promise<void> {
   const expr = locator.replace(/^page\./, '')
   const loc = new Function('page', `return page.${expr}`)(page) as PwLocator
