@@ -663,6 +663,10 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
   if (opts?.probe !== undefined) return probePlan(page, opts.probe, appUrl)
   const anchorUrl = plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl
   await page.goto(anchorUrl)
+  // Settle before the first interaction (SPA boot, async geolocation/consent UI):
+  // clicking into a half-booted app reads as a locator miss and false-undrivables
+  // the whole plan. Capture mode already settles; assert mode must too.
+  await page.waitForLoadState('networkidle').catch(() => {})
 
   if (opts?.capture === true) {
     await page.waitForLoadState('networkidle').catch(() => {})
