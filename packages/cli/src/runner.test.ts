@@ -41,7 +41,10 @@ type FakeResponse = { method: string; url: string; status: number } | 'never'
 // `selectorCounts` maps a page.locator() selector -> count as a function of clicks
 // so far, so the evidence-ladder rungs (config modal selector / overlay heuristic)
 // can rise independently of the role=dialog count; unmapped selectors count 0.
-function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; dialogsAfterClick?: boolean; lockedName?: string; clickError?: boolean; response?: FakeResponse; clickUrls?: (string | undefined)[]; selectorCounts?: Record<string, (clicks: number) => number> }): {
+// `dialogCounts` maps clicks-so-far -> role=dialog count (overrides dialogs/
+// dialogsAfterClick), so a close flow can express rise-then-drop: 0 before the
+// opener click, 1 after it, 0 again after the closer click.
+function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; dialogsAfterClick?: boolean; dialogCounts?: (clicks: number) => number; lockedName?: string; clickError?: boolean; response?: FakeResponse; clickUrls?: (string | undefined)[]; selectorCounts?: Record<string, (clicks: number) => number> }): {
   page: Parameters<typeof drivePlan>[0]
   clicks: number
   fills: number
@@ -60,7 +63,7 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; 
       rec.fills++
       if (opts.landUrl !== undefined) rec.current = opts.landUrl
     },
-    count: async () => (opts.dialogsAfterClick === true && rec.clicks > 0 ? 1 : (opts.dialogs ?? 0)),
+    count: async () => (opts.dialogCounts !== undefined ? opts.dialogCounts(rec.clicks) : opts.dialogsAfterClick === true && rec.clicks > 0 ? 1 : (opts.dialogs ?? 0)),
     filter: () => ctrl,
     evaluate: async () => {
       rec.evaluates++
@@ -90,7 +93,7 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; 
     locator: (v: string) => {
       const fn = opts.selectorCounts?.[v]
       const base = fn !== undefined ? { ...ctrl, count: async () => fn(rec.clicks) } : ctrl
-      return { ...base, filter: () => base }
+      return { ...base, filter: () => base, getByRole: page.getByRole }
     },
     waitForLoadState: async () => {},
     waitForURL: async () => {},
@@ -819,5 +822,142 @@ describe('drivePlan: evidence-ladder hardening', () => {
     const res = await drivePlan(f.page, plan, 'http://app', { modalSelector: '[bad' })
     expect(res.undrivable).toBe(true)
     expect(res.undrivableReason).toContain('not a valid CSS selector')
+  })
+})
+
+// Dialog-CLOSE delta evidence: a modal-inner control that CLOSES its modal
+// navigates back to the host screen the modal opened from — same-path, so URL
+// evidence is impossible and the same-path guard used to make the whole
+// modal-close edge class permanently undrivable. The deterministic proof that
+// DOES exist: the visible modal count DROPS across the click. The ladder mirrors
+// (inverted) the open ladder: role=dialog drop confirms, declared-modalSelector
+// drop confirms, nothing-open-to-close is undrivable (the opener prefix failed
+// silently), open-but-never-dropped is an honest refutation.
+describe('drivePlan: dialog-close delta evidence', () => {
+  /** host /a → opener control → modal (parent n_a) → closer control → host /a; only the close edge is uncertain (may). */
+  const closeGraph = (): UiGraph => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const closer: GraphNode = {
+      id: 'c_close', route: null, componentPath: null, label: 'Go back', kind: 'control', parent: 'm_1',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go back' } },
+    }
+    return graph(
+      [node('n_a', { route: '/a' }), { id: 'm_1', route: null, componentPath: null, label: 'LoginModal', kind: 'modal', parent: 'n_a' }, opener, closer],
+      [edge('e_open', 'c_open', 'm_1', { event: 'click', effect: null }), edge('e_close', 'c_close', 'n_a', { event: 'click', modality: 'may' })],
+    )
+  }
+
+  const closePlan = async (modalSelector?: string): Promise<SpecPlan> => {
+    const gg = closeGraph()
+    const { planForTarget } = await import('@ui-graph/core')
+    return buildSpecPlan(gg, planForTarget(gg, 'c_close', 'n_a')!, { baseUrl: 'http://app', ...(modalSelector !== undefined ? { modalSelector } : {}) })
+  }
+
+  it('(a) e2e via runVerify: role-based close confirms — the count rises on the opener click and drops on the close click', async () => {
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const dir = await seedDir('uigraph-close-', closeGraph())
+    const f = fakePage({ startUrl: 'http://app/a', dialogCounts: (clicks) => (clicks === 1 ? 1 : 0), lockedName: 'Go back' })
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(f.page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes).toEqual({ e_close: 'confirmed' })
+    // opener + closer: the prefix actually drove the modal open before the close
+    expect(f.clicks).toBe(2)
+    const check = openStore(join(dir, 'uigraph.db'))
+    const obs = check.getObservations()
+    check.close()
+    expect(obs.length).toBe(1)
+  })
+
+  it('role rung: the role=dialog count dropping below its pre-click baseline confirms with the close evidence', async () => {
+    const plan = await closePlan()
+    const f = fakePage({ startUrl: 'http://app/a', dialogCounts: (clicks) => (clicks === 1 ? 1 : 0) })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(true)
+    expect(res.evidence).toEqual({ kind: 'dialog', detail: 'dialog count dropped after drive (modal closed)' })
+  })
+
+  it('(b) declared-selector close confirms when role=dialog is always 0 and the selector count rises then drops', async () => {
+    const plan = await closePlan('.app-modal')
+    const f = fakePage({ startUrl: 'http://app/a', selectorCounts: { '.app-modal': (clicks) => (clicks === 1 ? 1 : 0) } })
+    const res = await drivePlan(f.page, plan, 'http://app', { modalSelector: '.app-modal' })
+    expect(res.confirmed).toBe(true)
+    expect(res.evidence).toEqual({ kind: 'dialog', detail: 'config modal selector .app-modal dropped the modal count (modal closed)' })
+  })
+
+  it('(c) nothing was open before the close click → undrivable with the opener-precondition reason', async () => {
+    const plan = await closePlan('.app-modal')
+    const f = fakePage({ startUrl: 'http://app/a', selectorCounts: { '.app-modal': () => 0 } })
+    const res = await drivePlan(f.page, plan, 'http://app', { modalSelector: '.app-modal' })
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+    expect(res.undrivableReason).toBe('modal was not open before the close interaction — opener prefix did not deliver the precondition')
+  })
+
+  it('no role=dialog and no declared selector → nothing can witness the drop: undrivable with the a11y-gap diagnosis', async () => {
+    const plan = await closePlan()
+    const f = fakePage({ startUrl: 'http://app/a' })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+    expect(res.undrivableReason).toContain('modalSelector')
+  })
+
+  it('(d) modal open but the count never drops → honest refutation (the close did not fire)', async () => {
+    const plan = await closePlan()
+    const f = fakePage({ startUrl: 'http://app/a', dialogCounts: (clicks) => (clicks >= 1 ? 1 : 0) })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBeUndefined()
+    expect(res.undrivableReason).toBeUndefined()
+  })
+})
+
+// Review round-2 hardening: with a DECLARED selector the role=dialog count is an
+// unrelated dialog by definition (consent banner) — its drop must never confirm a
+// close; and an honest close refutation must survive the probe fallback.
+describe('drivePlan: close ladder hardening', () => {
+  const closeGraph = (): UiGraph => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const closer: GraphNode = {
+      id: 'c_close', route: null, componentPath: null, label: 'Back', kind: 'control', parent: 'm_1',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Back' } },
+    }
+    return graph(
+      [node('n_a', { route: '/a' }), { id: 'm_1', route: null, componentPath: null, label: 'Dialog', kind: 'modal', parent: 'n_a' }, opener, closer],
+      [edge('e_open', 'c_open', 'm_1', { event: 'click', effect: null }), edge('e_close', 'c_close', 'n_a', { event: 'click', modality: 'may' })],
+    )
+  }
+
+  it('a role=dialog drop (banner dismissal) must NOT confirm a close when the declared selector stays flat', async () => {
+    const gg = closeGraph()
+    const { planForTarget } = await import('@ui-graph/core')
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_close', 'n_a')!, { baseUrl: 'http://app', modalSelector: '.app-modal' })
+    const f = fakePage({
+      startUrl: 'http://app/a',
+      dialogCounts: (clicks) => (clicks >= 2 ? 0 : 1),
+      selectorCounts: { '.app-modal': (clicks) => (clicks >= 1 ? 1 : 0) },
+    })
+    const res = await drivePlan(f.page, plan, 'http://app', { modalSelector: '.app-modal' })
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBeUndefined()
+  })
+
+  it('an honest close refutation is NOT laundered to undrivable by the probe fallback', async () => {
+    const gg = closeGraph()
+    const dir = await seedDir('uigraph-close-refute-', gg)
+    const f = fakePage({
+      startUrl: 'http://app/a',
+      dialogCounts: (clicks) => (clicks >= 1 ? 1 : 0),
+    })
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(f.page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes['e_close']).toBe('refuted')
   })
 })

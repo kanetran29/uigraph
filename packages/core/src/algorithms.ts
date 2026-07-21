@@ -112,10 +112,12 @@ export function isConcreteRoute(route: string): boolean {
 /**
  * Whether a node is anchored: its own route, or its parent's route, is a
  * non-null concrete route, so a plan starting there can goto a real URL.
- * Mirrors codegen's screenRouteOf semantics.
+ * Mirrors codegen's screenRouteOf semantics — EXCEPT a modal, which is never
+ * anchored via its parent: goto-ing the host screen's route does not open the
+ * modal, so a plan starting there still needs the opener prefix driven.
  */
 function isAnchored(nodeById: Map<string, GraphNode>, n: GraphNode): boolean {
-  const route = n.route ?? (n.parent !== undefined ? (nodeById.get(n.parent)?.route ?? null) : null)
+  const route = n.route ?? (n.kind !== 'modal' && n.parent !== undefined ? (nodeById.get(n.parent)?.route ?? null) : null)
   return route !== null && isConcreteRoute(route)
 }
 

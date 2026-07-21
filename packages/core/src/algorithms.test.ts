@@ -84,6 +84,23 @@ describe('planForTarget', () => {
     expect(planForTarget(gu, 'c_in', 's2')).toBeNull()
   })
 
+  it('still prefixes the opener when the modal declares its host parent (a parented modal is not goto-anchored)', () => {
+    // Same shape as modalGraph but m carries parent 's' (the host-screen link the
+    // dialog-close assertion keys on). A goto of the host route does NOT open the
+    // modal, so the reverse BFS must not stop at m — the opener prefix is required.
+    const gp = graph(
+      [
+        node('s', { route: '/' }),
+        node('c_open', { route: null, kind: 'control', parent: 's' }),
+        node('m', { route: null, kind: 'modal', parent: 's' }),
+        node('c_in', { route: null, kind: 'control', parent: 'm' }),
+        node('s2', { route: '/x' }),
+      ],
+      [edge('e_open', 'c_open', 'm', { event: 'click', effect: 'open:modal' }), edge('e_in', 'c_in', 's2', { event: 'click' })],
+    )
+    expect(planForTarget(gp, 'c_in', 's2')?.map((s) => s.edge.id)).toEqual(['e_open', 'contains_m__c_in', 'e_in'])
+  })
+
   it('keeps the modal-opening click edge when explicit contains edges exist', () => {
     const gc = graph(
       [...modalGraph.nodes],
