@@ -109,6 +109,7 @@ export {
   buildAdjacency,
   reachableFrom,
   planPath,
+  planForTarget,
   type PlanStep,
   type PlanPathOptions,
 } from './algorithms'

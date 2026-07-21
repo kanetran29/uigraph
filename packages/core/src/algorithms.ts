@@ -99,3 +99,80 @@ export function planPath(graph: UiGraph, fromId: string, toId: string, opts: Pla
   steps.reverse()
   return steps
 }
+
+/**
+ * True when a route is a concrete, directly-loadable URL: no `:param`, no `*`
+ * wildcard. Lives here (not codegen) because codegen already imports from
+ * algorithms — this is the single shared copy.
+ */
+export function isConcreteRoute(route: string): boolean {
+  return !route.includes(':') && !route.includes('*')
+}
+
+/**
+ * Whether a node is anchored: its own route, or its parent's route, is a
+ * non-null concrete route, so a plan starting there can goto a real URL.
+ * Mirrors codegen's screenRouteOf semantics.
+ */
+function isAnchored(nodeById: Map<string, GraphNode>, n: GraphNode): boolean {
+  const route = n.route ?? (n.parent !== undefined ? (nodeById.get(n.parent)?.route ?? null) : null)
+  return route !== null && isConcreteRoute(route)
+}
+
+/**
+ * planPath for a verify target, guaranteed to start from a routed anchor. A
+ * target whose from-node is a control inside a MODAL (route null) would plan a
+ * single step clicking a locator inside a CLOSED modal — always a miss. When
+ * fromId is not anchored, reverse-BFS over reversed edges finds the nearest
+ * anchored node and the plan is prefixed with the forward path from it (i.e. the
+ * steps that DRIVE the modal open), reconstructed from the BFS parent pointers.
+ * Returns null when no path exists or no anchored node reaches fromId.
+ */
+export function planForTarget(graph: UiGraph, fromId: string, toId: string, opts: PlanPathOptions = {}): PlanStep[] | null {
+  const base = planPath(graph, fromId, toId, opts)
+  if (base === null) return null
+
+  const nodeById = new Map(graph.nodes.map((n) => [n.id, n]))
+  const fromNode = nodeById.get(fromId)
+  if (fromNode === undefined || isAnchored(nodeById, fromNode)) return base
+
+  const allow = new Set<Modality>(opts.allow ?? ['must', 'may', 'unknown'])
+  const radj = new Map<string, GraphEdge[]>()
+  for (const list of buildAdjacency(graph).values()) {
+    for (const e of list) {
+      const rl = radj.get(e.to)
+      if (rl === undefined) radj.set(e.to, [e])
+      else rl.push(e)
+    }
+  }
+
+  // next: for each visited node, the edge leading forward from it toward fromId
+  const next = new Map<string, GraphEdge>()
+  const seen = new Set<string>([fromId])
+  const queue: string[] = [fromId]
+  while (queue.length > 0) {
+    const cur = queue.shift() as string
+    for (const e of radj.get(cur) ?? []) {
+      if (!allow.has(e.modality) || seen.has(e.from)) continue
+      seen.add(e.from)
+      next.set(e.from, e)
+      const n = nodeById.get(e.from)
+      if (n !== undefined && isAnchored(nodeById, n)) {
+        const prefix: PlanStep[] = []
+        let cursor = e.from
+        while (cursor !== fromId) {
+          const step = next.get(cursor)
+          if (step === undefined) return null
+          const from = nodeById.get(step.from)
+          const to = nodeById.get(step.to)
+          if (from === undefined || to === undefined) return null
+          prefix.push({ edge: step, from, to })
+          cursor = step.to
+        }
+        return [...prefix, ...base]
+      }
+      queue.push(e.from)
+    }
+  }
+  return null
+}
