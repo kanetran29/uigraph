@@ -370,7 +370,11 @@ export function extractGraphFromRoutes(
             // A control never "opens" the overlay it already lives in.
             if (modalTarget === undefined || modalTarget === ownerId) continue
             const ev = inter.events[0] ?? 'click'
-            pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, isDescended ? 'may' : 'must', isDescended ? 0.5 : 1, file, loc)
+            // A capitalized-component opener is an indirect click surface (the
+            // component may gate or swallow the callback) — its open is a MAY
+            // claim even at depth 0, never must/confidence-1.
+            const capOpener = /^[A-Z]/.test(jsxTag(el))
+            pushEdge(cId, modalTarget, { ti: { kind: 'dynamic' }, event: ev, effect: 'open:modal', node: el, guard: null }, isDescended || capOpener ? 'may' : 'must', isDescended || capOpener ? 0.5 : 1, file, loc)
           }
 
           // Effect-only control (no nav/modal edge minted above): self-loop to the parent screen.
