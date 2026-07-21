@@ -32,7 +32,13 @@ const graph = (nodes: GraphNode[], edges: GraphEdge[]): UiGraph => ({ version: 0
 // driver's own `.catch(() => null)` sees a miss without the test waiting 5s).
 type FakeResponse = { method: string; url: string; status: number } | 'never'
 
-function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; clickError?: boolean; response?: FakeResponse }): {
+// Modal gating: `dialogsAfterClick` makes the dialog count 1 once any click landed
+// (the opener opened the modal); `lockedName` names a getByRole control whose click
+// throws until then — an inner-modal control is a locator miss while the dialog is
+// closed, so a plan that skips the opener prefix reads as undrivable, like reality.
+// `clickUrls` maps click ordinal -> URL the page moves to on that click (unset
+// ordinals leave the URL alone), for capture-mode prefix/trigger discrimination.
+function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; dialogsAfterClick?: boolean; lockedName?: string; clickError?: boolean; response?: FakeResponse; clickUrls?: (string | undefined)[] }): {
   page: Parameters<typeof drivePlan>[0]
   clicks: number
   fills: number
@@ -42,17 +48,26 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; 
   const ctrl = {
     click: async () => {
       if (opts.clickError === true) throw new Error('locator not found')
+      const u = opts.clickUrls?.[rec.clicks]
       rec.clicks++
-      if (opts.landUrl !== undefined) rec.current = opts.landUrl
+      if (u !== undefined) rec.current = u
+      else if (opts.clickUrls === undefined && opts.landUrl !== undefined) rec.current = opts.landUrl
     },
     fill: async () => {
       rec.fills++
       if (opts.landUrl !== undefined) rec.current = opts.landUrl
     },
-    count: async () => opts.dialogs ?? 0,
+    count: async () => (opts.dialogsAfterClick === true && rec.clicks > 0 ? 1 : (opts.dialogs ?? 0)),
     evaluate: async () => {
       rec.evaluates++
       if (opts.landUrl !== undefined) rec.current = opts.landUrl
+    },
+  }
+  const locked = {
+    ...ctrl,
+    click: async () => {
+      if (rec.clicks === 0) throw new Error('locator not found (modal closed)')
+      await ctrl.click()
     },
   }
   const page = {
@@ -61,7 +76,10 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; 
       return undefined
     },
     url: () => rec.current,
-    getByRole: (_role: string) => ctrl,
+    getByRole: (_role: string, byOpts?: { name?: string }) => {
+      const base = opts.lockedName !== undefined && byOpts?.name === opts.lockedName ? locked : ctrl
+      return { ...base, getByRole: page.getByRole }
+    },
     getByTestId: (_v: string) => ctrl,
     getByLabel: (_v: string) => ctrl,
     getByText: (_v: string) => ctrl,
@@ -546,5 +564,132 @@ describe('drivePlan: absent control is undrivable, not refuted', () => {
     const res = await drivePlan(f.page, plan, 'http://app')
     expect(res.confirmed).toBe(false)
     expect(res.undrivable).toBe(true)
+  })
+})
+
+// A target whose FROM is a control inside a modal (route null) used to plan a single
+// step clicking a locator inside a CLOSED modal — always a miss, always undrivable.
+// runVerify now plans via planForTarget, which prefixes the steps that DRIVE the
+// modal open (click the opener from the anchored parent screen), so the inner
+// control's transition becomes confirmable end-to-end.
+describe('runVerify: modal-inner-control target (planForTarget wiring)', () => {
+  /** screen /a → opener control → modal → inner control → screen /b; only the inner edge is uncertain (may). */
+  const modalGraph = (): UiGraph => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const inner: GraphNode = {
+      id: 'c_in', route: null, componentPath: null, label: 'Go', kind: 'control', parent: 'm_1',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go' } },
+    }
+    return graph(
+      [node('n_a', { route: '/a' }), { id: 'm_1', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }, node('n_b', { route: '/b' }), opener, inner],
+      [
+        edge('e_open', 'c_open', 'm_1', { event: 'click', effect: null }),
+        edge('e_in', 'c_in', 'n_b', { event: 'click', modality: 'may' }),
+      ],
+    )
+  }
+
+  it('confirms the inner edge by driving the opener prefix first, and persists the observation', async () => {
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const dir = await seedDir('uigraph-modal-', modalGraph())
+    const f = fakePage({ startUrl: 'http://app/a', landUrl: 'http://app/b', dialogsAfterClick: true, lockedName: 'Go' })
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(f.page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes).toEqual({ e_in: 'confirmed' })
+    // opener + inner: the prefix actually drove the modal open
+    expect(f.clicks).toBe(2)
+    const check = openStore(join(dir, 'uigraph.db'))
+    const obs = check.getObservations()
+    check.close()
+    expect(obs.length).toBe(1)
+  })
+
+  it('reports undrivable, NOT refuted, when the opener locator always throws (absent-control rule holds through the prefix)', async () => {
+    const dir = await seedDir('uigraph-modal-undrivable-', modalGraph())
+    const f = fakePage({ startUrl: 'http://app/a', landUrl: 'http://app/b', dialogsAfterClick: true, lockedName: 'Go', clickError: true })
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(f.page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes).toEqual({ e_in: 'undrivable' })
+    expect(summary.refuted).toBe(0)
+  })
+})
+
+// Soundness fixes from the modal-drive review: dialog proof must be a DELTA (a
+// pre-existing dialog like a cookie banner must not confirm an opener), a prefix
+// leg's request-assert failure is undrivable (the target was never attempted),
+// and capture mode re-anchors after the prefix so its URL side-effects never
+// count as the dynamic nav.
+describe('drivePlan: modal-drive soundness', () => {
+  const modalPlanGraph = (openerEffect: string | null = null): UiGraph => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const inner: GraphNode = {
+      id: 'c_in', route: null, componentPath: null, label: 'Go', kind: 'control', parent: 'm_1',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go' } },
+    }
+    return graph(
+      [node('n_a', { route: '/a' }), { id: 'm_1', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }, node('n_b', { route: '/b' }), opener, inner],
+      [
+        edge('e_open', 'c_open', 'm_1', { event: 'click', effect: openerEffect }),
+        edge('e_in', 'c_in', 'n_b', { event: 'click', modality: 'may' }),
+      ],
+    )
+  }
+
+  it('does NOT confirm a modal-open edge when a dialog pre-existed and the click opens nothing', async () => {
+    const gg = modalPlanGraph()
+    const { planForTarget } = await import('@ui-graph/core')
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_open', 'm_1')!, { baseUrl: 'http://app' })
+    const f = fakePage({ startUrl: 'http://app/a', dialogs: 1 })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+  })
+
+  it('confirms a modal-open edge when the click raises the dialog count', async () => {
+    const gg = modalPlanGraph()
+    const { planForTarget } = await import('@ui-graph/core')
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_open', 'm_1')!, { baseUrl: 'http://app' })
+    const f = fakePage({ startUrl: 'http://app/a', dialogsAfterClick: true })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(true)
+  })
+
+  it('a request-assert miss on a PREFIX leg is undrivable, never a refutation of the target', async () => {
+    const gg = modalPlanGraph('api:GET /items')
+    const { planForTarget } = await import('@ui-graph/core')
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_in', 'n_b')!, { baseUrl: 'http://app' })
+    const f = fakePage({ startUrl: 'http://app/a', landUrl: 'http://app/b', dialogsAfterClick: true, response: 'never' })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.undrivable).toBe(true)
+  })
+
+  it('capture mode re-anchors after the prefix: an opener URL side-effect never counts as the dynamic nav', async () => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const inner: GraphNode = {
+      id: 'c_in', route: null, componentPath: null, label: 'Go', kind: 'control', parent: 'm_1',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go' } },
+    }
+    const gg = graph(
+      [node('n_a', { route: '/a' }), { id: 'm_1', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }, { id: 'u_dyn', route: null, componentPath: null, label: 'dyn', kind: 'unknown' }, opener, inner],
+      [
+        edge('e_open', 'c_open', 'm_1', { event: 'click', effect: null }),
+        edge('e_dyn', 'c_in', 'u_dyn', { event: 'click', modality: 'may' }),
+      ],
+    )
+    const { planForTarget } = await import('@ui-graph/core')
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_in', 'u_dyn')!, { baseUrl: 'http://app' })
+    // opener click moves to ?modal=1; the trigger click moves nowhere
+    const f = fakePage({ startUrl: 'http://app/a', clickUrls: ['http://app/a?modal=1'] })
+    const res = await drivePlan(f.page, plan, 'http://app', { capture: true })
+    expect(res.confirmed).toBe(false)
   })
 })

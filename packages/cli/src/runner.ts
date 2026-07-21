@@ -10,7 +10,7 @@
 // it to actually drive) and uses the system/cached Chromium.
 
 import type { Evidence, SpecPlan, UiGraph, VerifyTarget } from '@ui-graph/core'
-import { buildSpecPlan, dedupWorklist, fnv1a, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planPath } from '@ui-graph/core'
+import { buildSpecPlan, dedupWorklist, fnv1a, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planForTarget } from '@ui-graph/core'
 import { openStore } from '@ui-graph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@ui-graph/mcp'
 
@@ -164,7 +164,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
 
     // STAGE 3 — dynamic-sink targets SERIALLY (each may updateGraph + reload, order-sensitive).
     for (const t of dynamic) {
-      const steps = planPath(graph, t.from, t.to)
+      const steps = planForTarget(graph, t.from, t.to)
       if (steps === null) {
         outcomes[t.id] = 'undrivable'
         continue
@@ -280,12 +280,14 @@ async function mapPool<T, R>(items: readonly T[], concurrency: number, worker: (
 
 /**
  * Drive ONE non-dynamic target and return its result — no DB access, so it is safe to
- * run concurrently. Plans the path, drives the plan, and on failure runs the exploratory
- * probe before judging (an undrivable-after-probe result is still undrivable). Returns
- * null when there is no path to plan (nothing to fold).
+ * run concurrently. Plans the path via planForTarget (anchored start: an un-routed from,
+ * e.g. a control inside a modal, gets the opener prefix that drives the modal open),
+ * drives the plan, and on failure runs the exploratory probe before judging (an
+ * undrivable-after-probe result is still undrivable). Returns null when there is no
+ * path to plan (nothing to fold).
  */
 async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string): Promise<VerifyResult | null> {
-  const steps = planPath(graph, t.from, t.to)
+  const steps = planForTarget(graph, t.from, t.to)
   if (steps === null) return null
   const plan = buildSpecPlan(graph, steps, { baseUrl: appUrl, title: `verify ${t.from} → ${t.to}` })
   let result: VerifyResult
@@ -620,24 +622,31 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
 
   if (opts?.capture === true) {
     await page.waitForLoadState('networkidle').catch(() => {})
-    // H9: anchor the start URL immediately before the trigger, after the screen settled.
-    const startUrl = page.url()
-    for (const leg of plan.legs) {
-      const a = leg.action
-      if (a.kind === 'parked') return { confirmed: false, undrivable: true }
-      // H1: never goto the synthetic sink; only run real interaction legs as the trigger.
-      // A locator that cannot resolve means the control is not rendered in this app
-      // state — the interaction never happened, so the target is undrivable.
+    // Drive the PREFIX legs (modal openers etc.) first, then re-anchor: a prefix
+    // URL side-effect (?modal=1, #modal, a route-based modal) must never count as
+    // the dynamic nav — H9 anchors the start URL immediately before the trigger.
+    const trigger = plan.legs[plan.legs.length - 1]
+    if (trigger === undefined) return { confirmed: false, undrivable: true }
+    for (const leg of plan.legs.slice(0, -1)) {
+      if (leg.action.kind === 'parked') return { confirmed: false, undrivable: true }
       try {
-        if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
-        else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
-        else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+        await runCaptureLegAction(page, leg)
       } catch {
         return { confirmed: false, undrivable: true }
       }
     }
-    // H3: wait long enough to observe a timer/async redirect (>5s); H4: then settle to a stable URL.
-    await page.waitForURL((u) => u.toString() !== startUrl, { timeout: 6500 }).catch(() => {})
+    await page.waitForLoadState('networkidle').catch(() => {})
+    const startUrl = page.url()
+    if (trigger.action.kind === 'parked') return { confirmed: false, undrivable: true }
+    try {
+      await runCaptureLegAction(page, trigger)
+    } catch {
+      return { confirmed: false, undrivable: true }
+    }
+    // H3: wait long enough to observe a timer/async redirect (>5s); H4: then settle to
+    // a stable URL. Moved = a real PATH change — a query/hash delta is modal state,
+    // not a navigation.
+    await page.waitForURL((u) => !samePath(u.toString(), startUrl), { timeout: 6500 }).catch(() => {})
     let landedUrl = page.url()
     for (let i = 0; i < 5; i++) {
       await page.waitForLoadState('networkidle').catch(() => {})
@@ -645,17 +654,20 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       if (next === landedUrl) break
       landedUrl = next
     }
-    const moved = landedUrl !== startUrl
+    const moved = !samePath(landedUrl, startUrl)
     return { confirmed: moved, landedUrl, ...(moved ? { evidence: { kind: 'url-change', startUrl, landedUrl } as Evidence } : {}) }
   }
 
   let lastUrlAssertion: string | undefined
   let expectDialog = false
+  let dialogBaseline = 0
   let requestEvidence: Evidence | undefined
   // Soundness: a parked leg is an interaction-triggered/guarded screen→screen nav
   // with no drivable control — codegen refuses to emit goto+URL-assert for it, so
   // the driver must NOT witness it; it stays asserted/llm-verified until truly driven.
-  for (const leg of plan.legs) {
+  for (let i = 0; i < plan.legs.length; i++) {
+    const leg = plan.legs[i]!
+    const finalLeg = i === plan.legs.length - 1
     const a = leg.action
     // a parked leg means the rest of the plan cannot be legitimately driven —
     // bail before clicking controls on whatever page we happen to be on
@@ -667,6 +679,9 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     lastUrlAssertion = undefined
     expectDialog = false
     requestEvidence = undefined
+    // Dialog proof is a DELTA: snapshot the count BEFORE the action so a
+    // pre-existing dialog (cookie/consent banner) can never confirm an opener.
+    if (leg.assertions.some((as) => as.kind === 'dialog')) dialogBaseline = await page.getByRole('dialog').count()
     // Arm each leg's request wait BEFORE firing its action — a fast response can land
     // before an await on the action returns, so the wait must already be listening.
     const reqAssertions = leg.assertions.filter((as): as is { kind: 'request'; value: string } => as.kind === 'request')
@@ -686,9 +701,14 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     }
     if (reqAssertions.length > 0) {
       const responses = await Promise.all(requestWaits)
-      // A miss (no matching call) or an error status is real disagreement — the
-      // action fired but the effect it claims did not soundly happen — never undrivable.
-      if (responses.some((r) => r === null || r.status < 200 || r.status >= 400)) return { confirmed: false }
+      // A miss (no matching call) or an error status on the FINAL leg is real
+      // disagreement — the action fired but its claimed effect did not soundly
+      // happen. On a PREFIX leg it means the plan never delivered the target's
+      // precondition: the target edge was never attempted, so undrivable, never
+      // a refutation of an untried transition.
+      if (responses.some((r) => r === null || r.status < 200 || r.status >= 400)) {
+        return finalLeg ? { confirmed: false } : { confirmed: false, undrivable: true }
+      }
       const last = responses[responses.length - 1] as { method: string; url: string; status: number }
       requestEvidence = { kind: 'request', ...last }
     }
@@ -713,7 +733,7 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // plans WITH a request assertion are drivable via the network call, not the URL).
     if (confirmed && samePath(anchorUrl, expected) && !expectDialog && requestEvidence === undefined) return { confirmed: false, undrivable: true }
   }
-  if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > 0
+  if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > dialogBaseline
   if (!confirmed) return { confirmed: false }
   const evidence: Evidence = requestEvidence ?? (lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: 'dialog visible after drive' })
   return { confirmed: true, evidence }
@@ -869,6 +889,18 @@ interface PwPage {
  * event is driven via `requestSubmit()`, which dispatches the real submit event
  * React's handler is listening for, the same as clicking the submit button.
  */
+/**
+ * Run one leg's interaction in capture mode: click/press/fill only. Goto legs are
+ * skipped (H1 — never goto toward the synthetic sink) and `available` legs are
+ * no-ops. Throws on a locator miss so the caller reports undrivable.
+ */
+async function runCaptureLegAction(page: PwPage, leg: SpecPlan['legs'][number]): Promise<void> {
+  const a = leg.action
+  if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
+  else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
+  else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+}
+
 async function runLocator(page: PwPage, locator: string, action: 'click' | 'fill' | 'press' | 'submit', value = ''): Promise<void> {
   const expr = locator.replace(/^page\./, '')
   const loc = new Function('page', `return page.${expr}`)(page) as PwLocator

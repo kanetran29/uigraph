@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildSpecPlan, renderPlaywrightSpec, locatorFor, isInteractionTriggeredEvent, isDirectNavEdge } from './codegen'
-import { planPath } from './algorithms'
+import { planForTarget, planPath } from './algorithms'
 import { edge, graph, node } from './fixtures'
 import type { GraphNode } from './ir'
 
@@ -130,6 +130,30 @@ describe('goto-fallback soundness: buildSpecPlan', () => {
   })
 })
 
+// A modal is a modal by its node KIND, not by its edge's effect string: a plain
+// click edge into a modal node used to assert nothing (only effect 'open:modal'
+// triggered the dialog assertion), so the driver reported it undrivable via the
+// asserted-nothing guard. The node-kind fallback must assert the dialog.
+describe('buildSpecPlan: dialog assertion from the target node kind', () => {
+  const opener: GraphNode = {
+    id: 'cc_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+  }
+  const modal: GraphNode = { id: 'm_1', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }
+
+  it('asserts the dialog for a click edge into a modal node whose effect is NOT open:modal', () => {
+    const gg = graph([node('n_a', { route: '/a' }), opener, modal], [edge('e', 'cc_open', 'm_1', { event: 'click', effect: null })])
+    const plan = buildSpecPlan(gg, planPath(gg, 'cc_open', 'm_1')!, {})
+    expect(plan.legs[0]!.assertions).toEqual([{ kind: 'dialog', value: 'Dialog' }])
+  })
+
+  it('does not double-assert when the effect IS open:modal', () => {
+    const gg = graph([node('n_a', { route: '/a' }), opener, modal], [edge('e', 'cc_open', 'm_1', { event: 'click', effect: 'open:modal' })])
+    const plan = buildSpecPlan(gg, planPath(gg, 'cc_open', 'm_1')!, {})
+    expect(plan.legs[0]!.assertions.filter((a) => a.kind === 'dialog')).toEqual([{ kind: 'dialog', value: 'Dialog' }])
+  })
+})
+
 // Regression: an effect self-loop edge's `effect` field may join several
 // api:/state:/error: kinds with ', ' (extract.ts's rr.effect-self-loop). The
 // request assertion built from it must parse each kind on its own — a naive
@@ -162,5 +186,28 @@ describe('buildSpecPlan: request assertion from an effect self-loop edge', () =>
     const gg = graph([node('n_a', { route: '/a' }), selfLoopControl], [edge('e', 'cc_save', 'n_a', { event: 'click', effect: 'api:POST ?' })])
     const plan = buildSpecPlan(gg, planPath(gg, 'cc_save', 'n_a')!, {})
     expect(plan.legs[0]!.assertions.filter((a) => a.kind === 'request')).toEqual([])
+  })
+})
+
+describe('buildSpecPlan — modal-inner locators are dialog-scoped', () => {
+  it('scopes a modal-parented control leg inside getByRole(dialog)', () => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 's',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const inner: GraphNode = {
+      id: 'c_in', route: null, componentPath: null, label: 'Go', kind: 'control', parent: 'm0',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go' } },
+    }
+    const g = graph(
+      [node('s', { route: '/' }), { id: 'm0', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }, node('t', { route: '/t' }), opener, inner],
+      [edge('e1', 'c_open', 'm0', { event: 'click' }), edge('e2', 'c_in', 't', { event: 'click' })],
+    )
+    const plan = buildSpecPlan(g, planForTarget(g, 'c_in', 't')!, { baseUrl: 'http://app' })
+    const innerLeg = plan.legs.find((l) => l.from === 'c_in')!
+    expect(innerLeg.action.kind).toBe('click')
+    expect((innerLeg.action as { locator?: string }).locator).toBe(`page.getByRole('dialog').getByRole("button", { name: "Go" })`)
+    const openerLeg = plan.legs.find((l) => l.from === 'c_open')!
+    expect((openerLeg.action as { locator?: string }).locator).toBe(`page.getByRole("button", { name: "Open" })`)
   })
 })

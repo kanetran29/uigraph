@@ -8,6 +8,7 @@
 import type { GraphNode, ControlMeta, ControlSelector, GraphEdge, UiGraph } from './ir'
 import { effectTokens } from './ir'
 import type { PlanStep } from './algorithms'
+import { isConcreteRoute } from './algorithms'
 import { parseApiEffect } from './openapi'
 
 /**
@@ -140,14 +141,9 @@ export function isDirectNavEdge(edge: GraphEdge): boolean {
  * (interaction-triggered or guarded, with no drivable control) is PARKED — it must
  * not be witnessed by a bare goto+URL-assert (the Tier-3 soundness fix).
  * Assertions: a literal target route -> toHaveURL (ONLY for direct-nav legs, so a
- * guarded/interaction edge is never falsely confirmed by URL match); open:modal ->
- * dialog visible; api:* -> a request note.
+ * guarded/interaction edge is never falsely confirmed by URL match); open:modal
+ * effect or a modal-kind target node -> dialog visible; api:* -> a request note.
  */
-/** True when a route is a concrete, directly-loadable URL: no `:param` placeholder, no `*` wildcard. */
-function isConcreteRoute(route: string): boolean {
-  return !route.includes(':') && !route.includes('*')
-}
-
 /** The screen route a node lives on: its own route, or its parent screen's route for a control/modal child. */
 function screenRouteOf(graph: UiGraph, n: GraphNode): string | null {
   if (n.route !== null) return n.route
@@ -172,7 +168,12 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     let action: SpecAction
     let parkedReason: string | undefined
     if (fromNode.kind === 'control' && fromNode.control?.selector) {
-      const locator = locatorFor(fromNode.control.selector)
+      // A modal-parented control's locator is scoped inside the open dialog: a
+      // page-global locator could hit a same-named background control when the
+      // modal failed to open (false witness) or trip strict-mode when both exist.
+      const raw = locatorFor(fromNode.control.selector)
+      const parentKind = fromNode.parent !== undefined ? graph.nodes.find((n) => n.id === fromNode.parent)?.kind : undefined
+      const locator = parentKind === 'modal' ? raw.replace(/^page\./, `page.getByRole('dialog').`) : raw
       const ct = fromNode.control.controlType
       if (e.event.startsWith('key')) {
         action = { kind: 'press', locator, key: 'Enter' }
@@ -202,7 +203,10 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
       if (isConcreteRoute(toNode.route)) assertions.push({ kind: 'url', value: toNode.route })
       else if (interaction && !toNode.route.includes('*')) assertions.push({ kind: 'url', value: toNode.route })
     }
-    if (e.effect === 'open:modal') assertions.push({ kind: 'dialog', value: toNode.label })
+    // Node-kind fallback: a leg landing on a modal NODE asserts the dialog even when the
+    // effect string is not 'open:modal' — otherwise a plain click edge into a modal asserts
+    // nothing and the driver reports it undrivable via the asserted-nothing guard.
+    if (e.effect === 'open:modal' || toNode.kind === 'modal') assertions.push({ kind: 'dialog', value: toNode.label })
     // A self-loop's effect may join several kinds onto one edge (see `effectTokens`);
     // parse each token on its own so a joined 'api:POST /x, state:setY' still yields a
     // sound 'POST /x' assertion instead of a garbage path bleeding in the next token.
