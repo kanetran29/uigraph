@@ -133,6 +133,9 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     const modals = graph.nodes.filter((n) => n.kind === 'modal')
     const sellModal = modals.find((m) => m.label === 'CouldSellModal')
     const loginModal = modals.find((m) => m.label === 'SignupLoginModal')
+    // every modal declares its HOST screen as parent — codegen's dialog-close
+    // detection and planForTarget anchoring both key off it
+    for (const m of modals) expect(m.parent).toBeDefined()
     const openEdges = graph.edges.filter((e) => e.effect === 'open:modal')
     // both modals receive an open edge (not just the first), each from its own button
     expect(openEdges.some((e) => e.to === sellModal?.id)).toBe(true)
