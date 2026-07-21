@@ -10,7 +10,7 @@ reports `loopDone`. The core guarantees soundness; you supply the driving.
 ```
 loop:
   s = get_loop_status()
-  if s.loopDone: STOP            # all KNOWN work done: every known uncertain edge resolved (witnessed or parked), every proposal resolved — NOT "app fully mapped"
+  if s.loopDone: STOP            # all KNOWN work done: every known uncertain edge resolved (witnessed, parked, or honestly unanchorable), every proposal resolved — NOT "app fully mapped"
   work = next_to_verify(limit = N)
   progressed = false
   for target in work:

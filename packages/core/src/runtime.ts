@@ -24,7 +24,10 @@ import { fnv1a } from './hash'
  * core stays pure/browser-safe); `request` records a real network call the
  * driver watched fire (method+url+status) — proof for an `api:*` effect edge
  * that no URL change or dialog would otherwise witness (e.g. an effect-only
- * self-loop).
+ * self-loop); `dom-delta` records a watched attribute of the clicked control
+ * changing across the interaction (before → after) — proof for a same-screen
+ * state:* self-loop (accordion/tab/expander) that no URL, dialog, or request
+ * could otherwise witness.
  */
 export type Evidence =
   | { kind: 'url-change'; startUrl: string; landedUrl: string }
@@ -32,6 +35,7 @@ export type Evidence =
   | { kind: 'dialog'; detail?: string }
   | { kind: 'screenshot'; path: string }
   | { kind: 'request'; method: string; url: string; status: number }
+  | { kind: 'dom-delta'; locator: string; attr: string; before: string; after: string }
 
 /** Who produced an observation: the shipped Playwright runner or an agent driving via MCP. */
 export type ObservationReporter = 'runner' | 'agent'
@@ -57,7 +61,8 @@ export interface Observation {
  * access; the MCP layer additionally checks that a screenshot path exists).
  * Returns null when the evidence is acceptable proof, or a human-readable
  * problem. A url-change must actually change the URL; url-assert/screenshot
- * must carry non-empty values.
+ * must carry non-empty values; a dom-delta must show an actual attribute change
+ * (a no-change delta proves nothing).
  */
 export function validateEvidence(evidence: Evidence): string | null {
   switch (evidence.kind) {
@@ -74,6 +79,10 @@ export function validateEvidence(evidence: Evidence): string | null {
     case 'request':
       if (evidence.method === '' || evidence.url === '') return 'request evidence needs a non-empty method and url'
       if (evidence.status < 200 || evidence.status >= 400) return `request evidence status ${evidence.status} is not a successful/redirect response (2xx/3xx)`
+      return null
+    case 'dom-delta':
+      if (evidence.locator === '' || evidence.attr === '') return 'dom-delta evidence needs a non-empty locator and attr'
+      if (evidence.before === evidence.after) return 'dom-delta evidence must show an actual change (before equals after)'
       return null
   }
 }

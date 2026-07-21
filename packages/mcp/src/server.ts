@@ -113,7 +113,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_coverage',
-    description: 'Coverage of the proven graph under THREE honest ratios — runtimeRatio (actually witnessed in a browser) ≤ verifiedRatio (witnessed OR a deterministic must-static proof) ≤ accountedRatio (verified + resolved-dynamic + parkedCount) — plus the unverified/open/parked lists and a `staleness` summary (dangling refs / stale-hash sidecars) so coverage is never read as fresh when the base or its sidecars are stale.',
+    description: 'Coverage of the proven graph under THREE honest ratios — runtimeRatio (actually witnessed in a browser) ≤ verifiedRatio (witnessed OR a deterministic must-static proof) ≤ accountedRatio (verified + resolved-dynamic + parked + twin-witnessed + unanchorable) — plus the unverified/open/parked lists and a `staleness` summary (dangling refs / stale-hash sidecars) so coverage is never read as fresh when the base or its sidecars are stale.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
@@ -129,7 +129,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'gen_spec',
-    description: 'Generate a Playwright e2e spec for the route from one node to another: plan the path, then render each leg to a locator action (from the control selector) + assertions (target URL, dialog, dialog-close, request).',
+    description: 'Generate a Playwright e2e spec for the route from one node to another: plan the path, then render each leg to a locator action (from the control selector) + assertions (target URL, dialog, dialog-close, request, dom-delta).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -211,7 +211,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'report_observation',
     description:
-      'Record the result of attempting a transition at runtime (e.g. via Playwright). A CONFIRMED observation REQUIRES proof — evidence {kind: url-change|url-assert|dialog|screenshot} plus reportedBy — or it is rejected and nothing is recorded; when accepted it folds into the served graph as a witnessed runtime edge. A refuted observation needs no proof and produces no edge. Attach a proposalId to confirm a Tier-2 proposal.',
+      'Record the result of attempting a transition at runtime (e.g. via Playwright). A CONFIRMED observation REQUIRES proof — evidence {kind: url-change|url-assert|dialog|screenshot|request|dom-delta} plus reportedBy — or it is rejected and nothing is recorded; when accepted it folds into the served graph as a witnessed runtime edge. A refuted observation needs no proof and produces no edge. Attach a proposalId to confirm a Tier-2 proposal.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -225,14 +225,20 @@ export const TOOLS: Tool[] = [
         evidence: {
           type: 'object',
           description:
-            'structured proof, REQUIRED for outcome:"confirmed": {kind:"url-change", startUrl, landedUrl} | {kind:"url-assert", url} | {kind:"dialog", detail?} | {kind:"screenshot", path} (path must exist on disk)',
+            'structured proof, REQUIRED for outcome:"confirmed": {kind:"url-change", startUrl, landedUrl} | {kind:"url-assert", url} | {kind:"dialog", detail?} | {kind:"screenshot", path} (path must exist on disk) | {kind:"request", method, url, status} | {kind:"dom-delta", locator, attr, before, after}',
           properties: {
-            kind: { type: 'string', enum: ['url-change', 'url-assert', 'dialog', 'screenshot'] },
+            kind: { type: 'string', enum: ['url-change', 'url-assert', 'dialog', 'screenshot', 'request', 'dom-delta'] },
             startUrl: { type: 'string' },
             landedUrl: { type: 'string' },
             url: { type: 'string' },
             detail: { type: 'string' },
             path: { type: 'string' },
+            method: { type: 'string' },
+            status: { type: 'number' },
+            locator: { type: 'string' },
+            attr: { type: 'string' },
+            before: { type: 'string' },
+            after: { type: 'string' },
           },
           required: ['kind'],
         },

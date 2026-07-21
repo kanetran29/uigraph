@@ -3,7 +3,7 @@
 Three reads tell you the whole state and the next action.
 
 - **get_loop_status** — start here. `loopDone` true ⇒ stop: every *known* uncertain
-  edge is resolved (runtime-witnessed or parked) AND every proposal is resolved. This
+  edge is resolved (runtime-witnessed, parked, or honestly unanchorable) AND every proposal is resolved. This
   is **all known work done, not "the app fully mapped"** — undiscovered cases and the
   frontier of known-unknowns are outside this signal. Otherwise `worklistSize` and
   `resolution.openCount` tell you how much is left.

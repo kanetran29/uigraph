@@ -30,11 +30,24 @@ export interface SpecAction {
  * of `dialog`: the visible modal count must DROP across the action — the proof
  * for a modal-inner control that closes its modal back to the host screen, where
  * the same-path URL can never be evidence. `value` is the modal's label.
+ * `dom-delta` asserts that a watched attribute of the acted-on control changes
+ * across the action — the proof for a same-screen state self-loop (accordion/
+ * tab/expander) where neither URL nor dialog evidence exists. `value` is the
+ * leg's own locator string.
  */
 export interface SpecAssertion {
-  kind: 'url' | 'dialog' | 'dialog-close' | 'request'
+  kind: 'url' | 'dialog' | 'dialog-close' | 'request' | 'dom-delta'
   value: string
 }
+
+/**
+ * The attribute set a dom-delta assertion watches on the clicked control, in
+ * reporting priority order: the ARIA state attrs a well-built toggle flips, then
+ * `class` as the deterministic fallback for apps that express open/active state
+ * in class names only. Shared by the spec renderer and the Tier-3 driver so both
+ * witness exactly the same set.
+ */
+export const DOM_DELTA_WATCHED_ATTRS = ['aria-expanded', 'aria-pressed', 'aria-checked', 'aria-selected', 'class'] as const
 
 /**
  * One step of the spec: the transition, its action, and its assertions.
@@ -150,7 +163,9 @@ export function isDirectNavEdge(edge: GraphEdge): boolean {
  * effect or a modal-kind target node -> dialog visible; a modal-inner control leg
  * returning to the modal's HOST screen -> 'dialog-close' (the modal count must
  * DROP — the same-path URL cannot witness the close, the drop can) and never the
- * open dialog assertion; api:* -> a request note.
+ * open dialog assertion; api:* -> a request note; a same-screen state:*
+ * (or error:*) self-loop with no api token -> 'dom-delta' (a watched attribute
+ * of the clicked control must change) and no url/dialog assertions at all.
  */
 /** The screen route a node lives on: its own route, or its parent screen's route for a control/modal child. */
 function screenRouteOf(graph: UiGraph, n: GraphNode): string | null {
@@ -208,28 +223,49 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     }
 
     const assertions: SpecAssertion[] = []
-    // Safety: a literal URL assert is sound ONLY for control-driven or direct-nav legs;
-    // a bare URL match would falsely witness a guarded/interaction-triggered screen→screen edge.
-    // A parameterized route still asserts for INTERACTION legs (click/press/fill): the driver
-    // matches `:param` segments as wildcards, so clicking a real product link can witness
-    // /products/:productId without knowing the id up front. goto legs need a concrete URL.
-    if (toNode.route && action.kind !== 'parked') {
-      const interaction = action.kind === 'click' || action.kind === 'press' || action.kind === 'fill'
-      if (isConcreteRoute(toNode.route)) assertions.push({ kind: 'url', value: toNode.route })
-      else if (interaction && !toNode.route.includes('*')) assertions.push({ kind: 'url', value: toNode.route })
+    const tokens = effectTokens(e.effect)
+    // A same-screen state self-loop (a control whose interaction only flips a
+    // state:*/error:* effect on its own screen — accordion, tab switch, expander)
+    // changes no URL and opens/closes no modal: none of the assertions below could
+    // ever witness it, so the class was permanently parked. The deterministic proof
+    // that DOES exist is an attribute of the clicked element changing across the
+    // click, so the leg asserts 'dom-delta' on its own locator INSTEAD of any
+    // url/dialog assertion (never alongside them). An api:* token disqualifies —
+    // its request assertion is the stronger witness — as does any modal shape
+    // (modal-parented control or modal target).
+    const stateSelfLoop =
+      action.locator !== undefined &&
+      modalParent === undefined &&
+      toNode.kind !== 'modal' &&
+      (toNode.id === fromNode.parent || (toNode.route !== null && toNode.route === screenRouteOf(graph, fromNode))) &&
+      tokens.some((t) => t.startsWith('state:') || t.startsWith('error:')) &&
+      !tokens.some((t) => t.startsWith('api:'))
+    if (stateSelfLoop) {
+      assertions.push({ kind: 'dom-delta', value: action.locator as string })
+    } else {
+      // Safety: a literal URL assert is sound ONLY for control-driven or direct-nav legs;
+      // a bare URL match would falsely witness a guarded/interaction-triggered screen→screen edge.
+      // A parameterized route still asserts for INTERACTION legs (click/press/fill): the driver
+      // matches `:param` segments as wildcards, so clicking a real product link can witness
+      // /products/:productId without knowing the id up front. goto legs need a concrete URL.
+      if (toNode.route && action.kind !== 'parked') {
+        const interaction = action.kind === 'click' || action.kind === 'press' || action.kind === 'fill'
+        if (isConcreteRoute(toNode.route)) assertions.push({ kind: 'url', value: toNode.route })
+        else if (interaction && !toNode.route.includes('*')) assertions.push({ kind: 'url', value: toNode.route })
+      }
+      // A modal-inner control leg back to the modal's ROUTED host screen CLOSES the
+      // modal: host = the modal's declared parent, or a target whose route equals
+      // the control's screen route — the same-path shape where URL evidence is
+      // impossible. The modal-count DROP is the proof, so assert dialog-close and
+      // never the open dialog assertion. A route-null host gets NO close assertion:
+      // without a URL there would be no witness of where the click landed at all.
+      const closesModal = modalParent !== undefined && toNode.route !== null && (modalParent.parent === toNode.id || toNode.route === screenRouteOf(graph, fromNode))
+      if (closesModal) assertions.push({ kind: 'dialog-close', value: modalParent.label })
+      // Node-kind fallback: a leg landing on a modal NODE asserts the dialog even when the
+      // effect string is not 'open:modal' — otherwise a plain click edge into a modal asserts
+      // nothing and the driver reports it undrivable via the asserted-nothing guard.
+      else if (e.effect === 'open:modal' || toNode.kind === 'modal') assertions.push({ kind: 'dialog', value: toNode.label })
     }
-    // A modal-inner control leg back to the modal's ROUTED host screen CLOSES the
-    // modal: host = the modal's declared parent, or a target whose route equals
-    // the control's screen route — the same-path shape where URL evidence is
-    // impossible. The modal-count DROP is the proof, so assert dialog-close and
-    // never the open dialog assertion. A route-null host gets NO close assertion:
-    // without a URL there would be no witness of where the click landed at all.
-    const closesModal = modalParent !== undefined && toNode.route !== null && (modalParent.parent === toNode.id || toNode.route === screenRouteOf(graph, fromNode))
-    if (closesModal) assertions.push({ kind: 'dialog-close', value: modalParent.label })
-    // Node-kind fallback: a leg landing on a modal NODE asserts the dialog even when the
-    // effect string is not 'open:modal' — otherwise a plain click edge into a modal asserts
-    // nothing and the driver reports it undrivable via the asserted-nothing guard.
-    else if (e.effect === 'open:modal' || toNode.kind === 'modal') assertions.push({ kind: 'dialog', value: toNode.label })
     // A self-loop's effect may join several kinds onto one edge (see `effectTokens`);
     // parse each token on its own so a joined 'api:POST /x, state:setY' still yields a
     // sound 'POST /x' assertion instead of a garbage path bleeding in the next token.
@@ -237,7 +273,7 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
     // control whose API URL couldn't be statically resolved gets NO request assertion
     // at all — it falls through to the "asserted nothing" undrivable guard instead of
     // a request-wait an unrelated same-method call could falsely satisfy.
-    for (const token of effectTokens(e.effect)) {
+    for (const token of tokens) {
       const parsed = parseApiEffect(token)
       if (parsed) assertions.push({ kind: 'request', value: `${parsed.method} ${parsed.path}` })
     }
@@ -270,6 +306,9 @@ export function buildSpecPlan(graph: UiGraph, steps: PlanStep[], opts: { baseUrl
 /** Render a SpecPlan as a Playwright spec source file. */
 export function renderPlaywrightSpec(plan: SpecPlan): string {
   const url = (path: string): string => q(plan.baseUrl + path)
+  // The in-page expression reading a locator's watched attrs as one comparable string (dom-delta legs).
+  const attrsRead = (loc: string): string =>
+    `${loc}.evaluate((el, attrs) => JSON.stringify(attrs.map((a) => el.getAttribute(a))), [${DOM_DELTA_WATCHED_ATTRS.map((a) => q(a)).join(', ')}])`
   const lines: string[] = ["import { test, expect } from '@playwright/test'", '', `test(${q(plan.title)}, async ({ page }) => {`]
   if (plan.preconditions.length > 0) {
     lines.push(`  // Preconditions to satisfy first: ${plan.preconditions.join(', ')}`)
@@ -283,6 +322,12 @@ export function renderPlaywrightSpec(plan: SpecPlan): string {
     if (leg.assertions.some((as) => as.kind === 'dialog-close')) {
       lines.push(`  const dialogCountBefore = await page.getByRole('dialog').count()`)
     }
+    // A dom-delta assertion is likewise a DELTA: snapshot the watched attrs of the
+    // control BEFORE acting so the poll below has a baseline to differ from.
+    const domDelta = leg.assertions.find((as) => as.kind === 'dom-delta')
+    if (domDelta !== undefined) {
+      lines.push(`  const attrsBefore = await ${attrsRead(domDelta.value)}`)
+    }
     if (a.kind === 'click' && a.locator) lines.push(`  await ${a.locator}.click()`)
     else if (a.kind === 'press' && a.locator) lines.push(`  await ${a.locator}.press(${q(a.key ?? 'Enter')})`)
     else if (a.kind === 'fill' && a.locator) lines.push(`  await ${a.locator}.fill(${q(a.value ?? '')})`)
@@ -293,6 +338,7 @@ export function renderPlaywrightSpec(plan: SpecPlan): string {
       if (as.kind === 'url') lines.push(`  await expect(page).toHaveURL(${url(as.value)})`)
       else if (as.kind === 'dialog') lines.push(`  await expect(page.getByRole('dialog')).toBeVisible()`)
       else if (as.kind === 'dialog-close') lines.push(`  await expect.poll(() => page.getByRole('dialog').count()).toBeLessThan(dialogCountBefore)`)
+      else if (as.kind === 'dom-delta') lines.push(`  await expect.poll(() => ${attrsRead(as.value)}).not.toBe(attrsBefore)`)
       else if (as.kind === 'request') lines.push(`  // expect a ${as.value} request`)
     }
   }

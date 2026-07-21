@@ -43,7 +43,7 @@ function proofProblem(args: ReportObservationArgs): string | null {
   if (args.outcome !== 'confirmed') return null
   const evidence: Evidence | undefined = args.evidence ?? (args.screenshot !== undefined ? { kind: 'screenshot', path: args.screenshot } : undefined)
   if (evidence === undefined) {
-    return 'a confirmed observation requires evidence: url-change {startUrl,landedUrl}, url-assert {url}, dialog, or screenshot {path} — drive the transition and report what you saw, or report outcome:"refuted"'
+    return 'a confirmed observation requires evidence: url-change {startUrl,landedUrl}, url-assert {url}, dialog, screenshot {path}, request {method,url,status}, or dom-delta {locator,attr,before,after} — drive the transition and report what you saw, or report outcome:"refuted"'
   }
   if (args.reportedBy === undefined) return 'a confirmed observation requires reportedBy ("runner" or "agent") so the witness is auditable'
   const semantic = validateEvidence(evidence)

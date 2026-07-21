@@ -239,6 +239,84 @@ describe('buildSpecPlan: dialog-close assertion for a modal-close leg', () => {
   })
 })
 
+// A same-screen state self-loop (a control whose click only flips state:*/error:*
+// on its own screen — accordion, tab switch, expander) changes no URL and opens no
+// modal: url/dialog/request assertions can never witness it, so the class was
+// permanently parked. The deterministic proof that DOES exist: an attribute of the
+// clicked element changes across the click. Such a leg asserts 'dom-delta' on its
+// own locator and NEVER a url/dialog/dialog-close assertion.
+describe('buildSpecPlan: dom-delta assertion for same-screen state self-loops', () => {
+  const acc: GraphNode = {
+    id: 'c_acc', route: null, componentPath: null, label: 'FAQ', kind: 'control', parent: 'n_a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|FAQ' } },
+  }
+
+  it('emits dom-delta (and no url assert) for a state:* self-loop back to the parent screen', () => {
+    const gg = graph([node('n_a', { route: '/a' }), acc], [edge('e', 'c_acc', 'n_a', { event: 'click', effect: 'state:setOpen' })])
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_acc', 'n_a')!, {})
+    expect(plan.legs[0]!.assertions).toEqual([{ kind: 'dom-delta', value: 'page.getByRole("button", { name: "FAQ" })' }])
+  })
+
+  it('emits dom-delta for an error:* self-loop too', () => {
+    const gg = graph([node('n_a', { route: '/a' }), acc], [edge('e', 'c_acc', 'n_a', { event: 'click', effect: 'error:setError' })])
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_acc', 'n_a')!, {})
+    expect(plan.legs[0]!.assertions).toEqual([{ kind: 'dom-delta', value: 'page.getByRole("button", { name: "FAQ" })' }])
+  })
+
+  it('emits dom-delta when the target IS the parent screen with a null route (previously asserted nothing)', () => {
+    const gg = graph([node('n_a', { route: null }), acc], [edge('e', 'c_acc', 'n_a', { event: 'click', effect: 'state:setOpen' })])
+    const plan = buildSpecPlan(gg, planPath(gg, 'c_acc', 'n_a')!, {})
+    expect(plan.legs[0]!.assertions).toEqual([{ kind: 'dom-delta', value: 'page.getByRole("button", { name: "FAQ" })' }])
+  })
+
+  it('does NOT emit dom-delta when an api:* token joins the state token (the request assertion is the stronger witness)', () => {
+    const gg = graph([node('n_a', { route: '/a' }), acc], [edge('e', 'c_acc', 'n_a', { event: 'click', effect: 'api:POST /api/x, state:setOpen' })])
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_acc', 'n_a')!, {})
+    expect(plan.legs[0]!.assertions.find((a) => a.kind === 'dom-delta')).toBeUndefined()
+    expect(plan.legs[0]!.assertions.filter((a) => a.kind === 'request')).toEqual([{ kind: 'request', value: 'POST /api/x' }])
+  })
+
+  it('does NOT emit dom-delta for a control nav leg to a DIFFERENT screen (url assert as before)', () => {
+    const gg = graph([node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), acc], [edge('e', 'c_acc', 'n_b', { event: 'click', effect: 'state:setOpen' })])
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_acc', 'n_b')!, {})
+    expect(plan.legs[0]!.assertions.find((a) => a.kind === 'dom-delta')).toBeUndefined()
+    expect(plan.legs[0]!.assertions.find((a) => a.kind === 'url')?.value).toBe('/b')
+  })
+
+  it('does NOT emit dom-delta for a modal-open leg even when a state token rides along (dialog assert wins)', () => {
+    const modal: GraphNode = { id: 'm_1', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }
+    const gg = graph([node('n_a', { route: '/a' }), acc, modal], [edge('e', 'c_acc', 'm_1', { event: 'click', effect: 'state:setShowModal' })])
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_acc', 'm_1')!, {})
+    expect(plan.legs[0]!.assertions.find((a) => a.kind === 'dom-delta')).toBeUndefined()
+    expect(plan.legs[0]!.assertions).toEqual([{ kind: 'dialog', value: 'Dialog' }])
+  })
+
+  it('does NOT emit dom-delta for a modal-close leg even when a state token rides along (dialog-close wins)', () => {
+    const modal: GraphNode = { id: 'm_1', route: null, componentPath: null, label: 'LoginModal', kind: 'modal', parent: 'n_a' }
+    const closer: GraphNode = {
+      id: 'c_close', route: null, componentPath: null, label: 'Back', kind: 'control', parent: 'm_1',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Back' } },
+    }
+    const gg = graph(
+      [node('n_a', { route: '/a' }), acc, modal, closer],
+      [edge('e_open', 'c_acc', 'm_1', { event: 'click', effect: null }), edge('e_close', 'c_close', 'n_a', { event: 'click', effect: 'state:setShowModal' })],
+    )
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_close', 'n_a')!, {})
+    const leg = plan.legs.find((l) => l.from === 'c_close')!
+    expect(leg.assertions.find((a) => a.kind === 'dom-delta')).toBeUndefined()
+    expect(leg.assertions.filter((a) => a.kind === 'dialog-close')).toEqual([{ kind: 'dialog-close', value: 'LoginModal' }])
+  })
+
+  it('renderPlaywrightSpec renders a before-snapshot and an expect.poll inequality on the watched attr set', () => {
+    const gg = graph([node('n_a', { route: '/a' }), acc], [edge('e', 'c_acc', 'n_a', { event: 'click', effect: 'state:setOpen' })])
+    const spec = renderPlaywrightSpec(buildSpecPlan(gg, planForTarget(gg, 'c_acc', 'n_a')!, { baseUrl: 'http://app' }))
+    expect(spec).toContain('const attrsBefore = await page.getByRole("button", { name: "FAQ" }).evaluate(')
+    expect(spec).toContain('"aria-expanded"')
+    expect(spec).toContain('.not.toBe(attrsBefore)')
+    expect(spec).toContain('await expect.poll(')
+  })
+})
+
 describe('buildSpecPlan — modal-inner locators are dialog-scoped', () => {
   it('scopes a modal-parented control leg inside getByRole(dialog)', () => {
     const opener: GraphNode = {

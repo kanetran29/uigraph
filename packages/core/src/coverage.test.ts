@@ -338,6 +338,88 @@ describe('patternKey + dedupWorklist (over-approximation fan-out collapse)', () 
   })
 })
 
+// A synthetic pseudo-screen (a shared nav helper the extractor over-approximated
+// into a node): routeless, parentless, ZERO in-edges — no drive can ever be anchored
+// there, so its out-edges must be accounted as 'unanchorable' (with a reason), never
+// left cycling open. No witness is added: this is accounting, not verification.
+describe('unanchorable source (synthetic routeless screen, no in-edges)', () => {
+  const synth = () => node('app_nav', { route: null })
+  const g = () =>
+    graph(
+      [synth(), node('n_profile'), node('n_settings')],
+      [
+        edge('e_nav1', 'app_nav', 'n_profile', { modality: 'may', event: 'navigate' }),
+        edge('e_nav2', 'app_nav', 'n_settings', { modality: 'may', event: 'navigate' }),
+      ],
+    )
+
+  it('classifies a may edge from a synthetic routeless no-in-edge node as unanchorable, accounted, with a reason', () => {
+    const cov = buildCoverage(g())
+    const rows = new Map(cov.unverified.map((r) => [r.id, r]))
+    expect(rows.get('e_nav1')?.status).toBe('unanchorable')
+    expect(rows.get('e_nav1')?.accounted).toBe(true)
+    expect(rows.get('e_nav1')?.reason).toMatch(/routeless.*no in-edges|unanchorable/)
+    expect(cov.open).toHaveLength(0)
+    expect(cov.accountedRatio).toBe(1)
+    expect(cov.unanchorableCount).toBe(2)
+  })
+
+  it('is NOT verified and NOT parked — its own honest bucket', () => {
+    const cov = buildCoverage(g())
+    expect(cov.runtimeVerified).toBe(0)
+    expect(cov.verifiedCount).toBe(0)
+    expect(cov.parkedCount).toBe(0)
+    expect(cov.parked).toHaveLength(0)
+  })
+
+  it('a routeless parentless node WITH an in-edge is anchorable — its out-edge stays open', () => {
+    const gg = graph(
+      [node('n_a'), synth(), node('n_b')],
+      [
+        edge('e_in', 'n_a', 'app_nav', { modality: 'must' }),
+        edge('e_out', 'app_nav', 'n_b', { modality: 'may' }),
+      ],
+    )
+    const cov = buildCoverage(gg)
+    expect(cov.open.map((r) => r.id)).toEqual(['e_out'])
+    expect(cov.unanchorableCount).toBe(0)
+  })
+
+  it('a fresh runtime witness still wins over unanchorable (an agent CAN witness it manually)', () => {
+    const gg = graph([synth(), node('n_profile')], [edge('e_r', 'app_nav', 'n_profile', { source: 'runtime', modality: 'must' })])
+    const cov = buildCoverage(gg)
+    expect(cov.unverified).toHaveLength(0)
+    expect(cov.unanchorableCount).toBe(0)
+  })
+
+  it('an explicit park on the edge wins over unanchorable (the bespoke reason is more specific)', () => {
+    const cov = buildCoverage(g(), [{ edgeId: 'e_nav1', reason: 'target needs a concrete :id', by: 'agent' }])
+    const rows = new Map(cov.unverified.map((r) => [r.id, r]))
+    expect(rows.get('e_nav1')?.status).toBe('parked')
+    expect(cov.unanchorableCount).toBe(1)
+  })
+
+  it('a must-static witnessed edge from the synthetic node keeps its static proof (verifiedCount unchanged)', () => {
+    const gg = graph([synth(), node('n_profile')], [edge('e_m', 'app_nav', 'n_profile', { modality: 'must' })])
+    const cov = buildCoverage(gg)
+    expect(cov.unverified[0]?.status).toBe('static')
+    expect(cov.verifiedCount).toBe(1)
+    expect(cov.unanchorableCount).toBe(0)
+  })
+
+  it('an unresolved dynamic sink from an unanchorable source is unanchorable, not perpetually dynamic-open', () => {
+    const gg = graph([synth(), node('u_app_nav', { kind: 'unknown', route: null })], [edge('e_d', 'app_nav', 'u_app_nav', { modality: 'unknown' })])
+    const cov = buildCoverage(gg)
+    expect(cov.unverified[0]?.status).toBe('unanchorable')
+    expect(cov.open).toHaveLength(0)
+  })
+
+  it('nextToVerify skips unanchorable-source edges — the runner can never drive them', () => {
+    const targets = nextToVerify(g(), { nodes: [], edges: [] })
+    expect(targets).toHaveLength(0)
+  })
+})
+
 describe('nextToVerify — stale witnesses outrank everything drivable', () => {
   const g = (edges: Parameters<typeof graph>[1]) => graph(
     [node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), node('n_c', { route: '/c' })],

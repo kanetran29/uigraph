@@ -37,7 +37,7 @@ export type GenSpecResult = { spec: string; legs: number } | { error: string }
 /**
  * Generate a Playwright e2e spec for the route from one node to another: plan the
  * path over the merged graph, then render each leg to a locator action (from the
- * control's stable selector) + assertions (target URL, dialog, dialog-close, request).
+ * control's stable selector) + assertions (target URL, dialog, dialog-close, request, dom-delta).
  */
 export function genSpec(ctx: ToolContext, args: GenSpecArgs): GenSpecResult {
   const graph = loadMergedGraph(ctx)

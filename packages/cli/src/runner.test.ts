@@ -44,7 +44,10 @@ type FakeResponse = { method: string; url: string; status: number } | 'never'
 // `dialogCounts` maps clicks-so-far -> role=dialog count (overrides dialogs/
 // dialogsAfterClick), so a close flow can express rise-then-drop: 0 before the
 // opener click, 1 after it, 0 again after the closer click.
-function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; dialogsAfterClick?: boolean; dialogCounts?: (clicks: number) => number; lockedName?: string; clickError?: boolean; response?: FakeResponse; clickUrls?: (string | undefined)[]; selectorCounts?: Record<string, (clicks: number) => number> }): {
+// `attrs` maps (attribute name, clicks so far) -> the value getAttribute returns
+// (null = absent), so a dom-delta drive can express an aria/class flip across a
+// click; unset means every attribute reads as absent.
+function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; dialogsAfterClick?: boolean; dialogCounts?: (clicks: number) => number; lockedName?: string; clickError?: boolean; response?: FakeResponse; clickUrls?: (string | undefined)[]; selectorCounts?: Record<string, (clicks: number) => number>; attrs?: (name: string, clicks: number) => string | null }): {
   page: Parameters<typeof drivePlan>[0]
   clicks: number
   fills: number
@@ -64,6 +67,7 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; 
       if (opts.landUrl !== undefined) rec.current = opts.landUrl
     },
     count: async () => (opts.dialogCounts !== undefined ? opts.dialogCounts(rec.clicks) : opts.dialogsAfterClick === true && rec.clicks > 0 ? 1 : (opts.dialogs ?? 0)),
+    getAttribute: async (name: string) => (opts.attrs !== undefined ? opts.attrs(name, rec.clicks) : null),
     filter: () => ctrl,
     evaluate: async () => {
       rec.evaluates++
@@ -335,14 +339,16 @@ describe('probe same-path soundness', () => {
 // Regression: an effect-only self-loop edge (control -> its own parent screen) plans
 // to a start URL that already equals the asserted target — the same vulnerable shape
 // probePlan already guards against, now reachable via drivePlan's normal (non-probe)
-// path too, since feature A mints this edge for every effect-only control.
+// path too, since feature A mints this edge for every effect-only control. A state:*
+// self-loop now takes the dom-delta path instead (tested in its own describe below),
+// so these use a plain navigate-effect self-loop to keep the url-assert guard covered.
 describe('drivePlan: same-path assert soundness (self-loop edges)', () => {
   const selfLoopPlan = (): SpecPlan => {
     const control: GraphNode = {
       id: 'cc_x', route: null, componentPath: null, label: 'Clear', kind: 'control', parent: 'n_a',
       control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Clear' } },
     }
-    const gg = graph([node('n_a', { route: '/a' }), control], [edge('e', 'cc_x', 'n_a', { event: 'click', effect: 'state:setX' })])
+    const gg = graph([node('n_a', { route: '/a' }), control], [edge('e', 'cc_x', 'n_a', { event: 'click', effect: 'navigate' })])
     return buildSpecPlan(gg, planPath(gg, 'cc_x', 'n_a')!, { baseUrl: 'http://app' })
   }
 
@@ -412,6 +418,74 @@ describe('drivePlan: same-path assert soundness (self-loop edges)', () => {
     const res = await drivePlan(f.page, plan, 'http://app')
     expect(res.confirmed).toBe(false)
     expect(res.undrivable).toBeUndefined()
+  })
+})
+
+// DOM-delta evidence for same-screen state self-loops (accordions, tab switches,
+// expanders): the click changes no URL and opens no modal, so the only
+// deterministic witness is an attribute of the clicked control changing across
+// the click. A delta confirms with dom-delta evidence carrying attr/before/after;
+// no delta is UNDRIVABLE with a diagnosis, NEVER a refutation — the click may have
+// changed state the watched attribute set cannot see.
+describe('drivePlan: dom-delta evidence (state self-loops)', () => {
+  const accGraph = (): UiGraph => {
+    const acc: GraphNode = {
+      id: 'c_acc', route: null, componentPath: null, label: 'FAQ', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|FAQ' } },
+    }
+    return graph([node('n_a', { route: '/a' }), acc], [edge('e_acc', 'c_acc', 'n_a', { event: 'click', effect: 'state:setOpen', modality: 'may' })])
+  }
+  const accPlan = (): SpecPlan => {
+    const gg = accGraph()
+    return buildSpecPlan(gg, planPath(gg, 'c_acc', 'n_a')!, { baseUrl: 'http://app' })
+  }
+
+  it('confirms with exact attr/before/after evidence when a watched attribute flips across the click', async () => {
+    const f = fakePage({ startUrl: 'http://app/a', attrs: (name, clicks) => (name === 'aria-expanded' ? (clicks > 0 ? 'true' : 'false') : null) })
+    const res = await drivePlan(f.page, accPlan(), 'http://app')
+    expect(f.clicks).toBeGreaterThan(0)
+    expect(res.confirmed).toBe(true)
+    expect(res.undrivable).toBeUndefined()
+    expect(res.evidence).toEqual({ kind: 'dom-delta', locator: 'page.getByRole("button", { name: "FAQ" })', attr: 'aria-expanded', before: 'false', after: 'true' })
+  })
+
+  it('a class-only delta NEVER confirms — styling churn (hover/focus) is not state proof', async () => {
+    const f = fakePage({ startUrl: 'http://app/a', attrs: (name, clicks) => (name === 'class' ? (clicks > 0 ? 'acc open' : 'acc') : null) })
+    const res = await drivePlan(f.page, accPlan(), 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+    expect(res.undrivableReason).toContain('only the class attribute changed')
+  })
+
+  it('no watched attribute changes → undrivable with the state-elsewhere diagnosis, never a refutation', async () => {
+    const f = fakePage({ startUrl: 'http://app/a' })
+    const res = await drivePlan(f.page, accPlan(), 'http://app')
+    expect(f.clicks).toBeGreaterThan(0)
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+    expect(res.undrivableReason).toContain('no observable attribute change')
+  })
+
+  it('an unexpected departure with no attr delta is ALSO undrivable — a dom-delta leg never refutes', async () => {
+    const f = fakePage({ startUrl: 'http://app/a', landUrl: 'http://app/elsewhere' })
+    const res = await drivePlan(f.page, accPlan(), 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+  })
+
+  it('e2e via runVerify: the dom-delta confirmation persists as an observation with its evidence', async () => {
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const dir = await seedDir('uigraph-domdelta-', accGraph())
+    const f = fakePage({ startUrl: 'http://app/a', attrs: (name, clicks) => (name === 'aria-expanded' ? (clicks > 0 ? 'true' : 'false') : null) })
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(f.page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes).toEqual({ e_acc: 'confirmed' })
+    const check = openStore(join(dir, 'uigraph.db'))
+    const obs = check.getObservations()
+    check.close()
+    expect(obs.length).toBe(1)
+    expect(obs[0]?.evidence).toEqual({ kind: 'dom-delta', locator: 'page.getByRole("button", { name: "FAQ" })', attr: 'aria-expanded', before: 'false', after: 'true' })
   })
 })
 
@@ -780,6 +854,91 @@ describe('runVerifyUntilDone: rung-3 diagnosis reaches the park reason', () => {
   })
 })
 
+// Duplicate fan-out siblings: the extractor renders the same role/name control at
+// TWO call sites (desktop header + mobile menu) and disambiguates the second with
+// .nth(k). The call sites differ, so patternKey does NOT fold them — each is its own
+// representative — and the nth instance is hidden in the driven app state (a locator
+// miss → undrivable). The stage-2 fold must diagnose that precisely, so the eventual
+// autonomous park reason names the driven sibling instead of the generic wording.
+describe('runVerify: nth-hidden sibling diagnosis in the stage-2 fold', () => {
+  const w = (line: number): Witness => ({ ...staticWitness, loc: { line, col: 1 } })
+  const ctl = (id: string, nth?: number): GraphNode => ({
+    id, route: null, componentPath: null, label: 'Open profile', kind: 'control', parent: 'n_a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open profile', ...(nth !== undefined ? { nth } : {}) } },
+  })
+  const siblingGraph = (): UiGraph =>
+    graph(
+      [node('n_a', { route: '/a' }), node('n_profile', { route: '/profile' }), ctl('c0'), ctl('c1', 1)],
+      [
+        edge('e_c0', 'c0', 'n_profile', { event: 'click', modality: 'may', witness: w(2143) }),
+        edge('e_c1', 'c1', 'n_profile', { event: 'click', modality: 'may', witness: w(2186) }),
+      ],
+    )
+
+  /** Confirms any plan whose final locator is nth-free; the .nth() instance is a locator miss (undrivable, no driver reason). */
+  const nthHiddenDriver = async (plan: SpecPlan): Promise<VerifyResult> => {
+    if (JSON.stringify(plan).includes('.nth(')) return { confirmed: false, undrivable: true }
+    return { confirmed: true, evidence: { kind: 'url-change', startUrl: 'http://app/a', landedUrl: 'http://app/profile' } }
+  }
+
+  it('diagnoses an undrivable .nth() target, naming the sibling driven in the SAME pass', async () => {
+    const dir = await seedDir('uigraph-nth-', siblingGraph())
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver: nthHiddenDriver })
+    expect(summary.outcomes).toEqual({ e_c0: 'confirmed', e_c1: 'undrivable' })
+    expect(summary.diagnoses['e_c1']).toContain('nth-indexed sibling instance')
+    expect(summary.diagnoses['e_c1']).toContain('pattern covered by its driven sibling c0->n_profile')
+  })
+
+  it('diagnoses against a sibling already runtime-witnessed in the graph', async () => {
+    const gg = siblingGraph()
+    gg.edges = [edge('e_c0', 'c0', 'n_profile', { event: 'click', modality: 'may', source: 'runtime', witness: { source: 'runtime', observationId: 'o1' } }), gg.edges[1]!]
+    const dir = await seedDir('uigraph-nth-pre-', gg)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver: async () => ({ confirmed: false, undrivable: true }) })
+    expect(summary.diagnoses['e_c1']).toContain('pattern covered by its driven sibling c0->n_profile')
+  })
+
+  it('does NOT claim sibling coverage when no sibling instance is witnessed', async () => {
+    const gg = siblingGraph()
+    const dir = await seedDir('uigraph-nth-none-', gg)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver: async () => ({ confirmed: false, undrivable: true }) })
+    expect(summary.diagnoses['e_c1']).toContain('nth-indexed sibling instance')
+    expect(summary.diagnoses['e_c1']).not.toContain('pattern covered')
+    expect(summary.diagnoses['e_c1']).toContain('no sibling instance runtime-witnessed')
+  })
+
+  it('a driver-supplied undrivableReason is never overwritten by the nth diagnosis', async () => {
+    const dir = await seedDir('uigraph-nth-keep-', siblingGraph())
+    const driver = async (plan: SpecPlan): Promise<VerifyResult> => {
+      if (JSON.stringify(plan).includes('.nth(')) return { confirmed: false, undrivable: true, undrivableReason: 'drive crashed before observing the app (navigation/browser error) — check the app server' }
+      return { confirmed: true, evidence: { kind: 'url-change', startUrl: 'http://app/a', landedUrl: 'http://app/profile' } }
+    }
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.diagnoses['e_c1']).toContain('drive crashed')
+    expect(summary.diagnoses['e_c1']).not.toContain('nth-indexed')
+  })
+
+  it('an nth-free undrivable target gets no nth diagnosis (generic wording stands)', async () => {
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e_ab', 'n_a', 'n_b', { modality: 'may', witness: w(1) })],
+    )
+    const dir = await seedDir('uigraph-nth-absent-', gg)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver: async () => ({ confirmed: false, undrivable: true }) })
+    expect(summary.diagnoses['e_ab']).toBeUndefined()
+  })
+
+  it('runVerifyUntilDone parks the nth-hidden sibling with the precise diagnosis appended', async () => {
+    const dir = await seedDir('uigraph-nth-park-', siblingGraph())
+    const s = await runVerifyUntilDone({ dir, appUrl: 'http://app', maxRounds: 4, parkTries: 2, driver: nthHiddenDriver })
+    expect(s.parkedEdges).toBe(1)
+    const parked = await readParked(dir)
+    expect(parked[0]?.edgeId).toBe('e_c1')
+    expect(parked[0]?.reason).toContain('autonomous: undrivable after 2 attempts')
+    expect(parked[0]?.reason).toContain('nth-indexed sibling instance')
+    expect(parked[0]?.reason).toContain('pattern covered by its driven sibling c0->n_profile')
+  })
+})
+
 // Review hardening of the evidence ladder: a DECLARED selector that stays flat is
 // affirmative refutation (the heuristic must not mask it), and an invalid declared
 // selector fails loud as undrivable instead of mass-false-refuting.
@@ -973,5 +1132,80 @@ describe('attemptSimple: a crashed drive never refutes', () => {
     const summary = await runVerify({ dir, appUrl: 'http://app', driver })
     expect(summary.outcomes['e']).toBe('undrivable')
     expect(summary.refuted).toBe(0)
+  })
+})
+
+// Probe reveal-priority: a landing screen can hide the target control behind a
+// reveal click ("Start exploring" expands the map UI on the real host app). On a
+// control-heavy screen the positional sibling sweep (capped at 8) never reached
+// the reveal control, so the probe gave up on every hidden-behind-reveal target.
+// buildProbeSpec must rank siblings whose edges carry state:* self-loop effects
+// (reveal-ish disclosures) AHEAD of positional siblings — same cap, same
+// reveal→retry sequence, same URL-evidence judgment.
+describe('runVerify: probe reveal-priority (state-effect siblings first)', () => {
+  /** A role-name button control on screen n_a. */
+  const control = (id: string, name: string): GraphNode => ({
+    id, route: null, componentPath: null, label: name, kind: 'control', parent: 'n_a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: `button|${name}` } },
+  })
+
+  /** /a hosts a hidden target (→ /b), 8 dud siblings declared FIRST, and optionally a reveal sibling declared LAST (beyond the positional cap) whose only edge is a state:* self-loop. The reveal edge is must-static so the target edge is the sole worklist entry. */
+  const revealGraph = (withReveal: boolean): UiGraph => {
+    const duds = Array.from({ length: 8 }, (_, i) => control(`c_dud${i}`, `Dud ${i}`))
+    const nodes: GraphNode[] = [node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), control('c_hidden', 'Hidden'), ...duds]
+    const edges: GraphEdge[] = [edge('e_t', 'c_hidden', 'n_b', { event: 'click', modality: 'may' })]
+    if (withReveal) {
+      nodes.push(control('c_reveal', 'Start exploring'))
+      edges.push(edge('e_reveal', 'c_reveal', 'n_a', { event: 'click', effect: 'state:setIsMapExpanded', modality: 'must' }))
+    }
+    return graph(nodes, edges)
+  }
+
+  /** Fake page where the Hidden control's click misses until Start exploring was clicked since the last goto — a reload resets the app's reveal state, like reality. Dud clicks succeed but do nothing. */
+  const revealPage = (): Parameters<typeof drivePlan>[0] => {
+    let current = ''
+    let revealed = false
+    const button = (name: string) => ({
+      click: async () => {
+        if (name === 'Start exploring') {
+          revealed = true
+          return
+        }
+        if (name === 'Hidden') {
+          if (!revealed) throw new Error('locator not found (map collapsed)')
+          current = 'http://app/b'
+        }
+      },
+      count: async () => 0,
+    })
+    const page = {
+      goto: async (url: string) => {
+        current = url
+        revealed = false
+      },
+      url: () => current,
+      getByRole: (_role: string, o?: { name?: string }) => button(o?.name ?? ''),
+      waitForLoadState: async () => {},
+      waitForURL: async () => {},
+    }
+    return page as unknown as Parameters<typeof drivePlan>[0]
+  }
+
+  it('confirms the hidden target after clicking the reveal sibling ranked beyond the positional cap', async () => {
+    const dir = await seedDir('uigraph-reveal-', revealGraph(true))
+    const page = revealPage()
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes).toEqual({ e_t: 'confirmed' })
+    expect(summary.confirmed).toBe(1)
+  })
+
+  it('stays undrivable when no reveal sibling exists (the bounded dud sweep cannot land)', async () => {
+    const dir = await seedDir('uigraph-noreveal-', revealGraph(false))
+    const page = revealPage()
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes).toEqual({ e_t: 'undrivable' })
+    expect(summary.confirmed).toBe(0)
   })
 })
