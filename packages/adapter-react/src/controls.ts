@@ -10,6 +10,7 @@ import type { BranchContext, ControlInfo, TargetInfo } from './types'
 import { allJsxElements, findAttr, getJsxText, jsxAttrs, jsxTag, stringAttr } from './jsx'
 import { resolveFunctionNode } from './resolve'
 import { analyzeHandler } from './analyze'
+import { detectModalOpen } from './effects'
 
 /** A resolved control label plus whether it came from static INFERENCE (an i18n key,
  *  an icon tag/BEM class guess, an <img alt>/<svg><title>) rather than an EXPLICIT
@@ -195,6 +196,34 @@ function hasEventHandler(el: Node): boolean {
   return jsxAttrs(el).some((a) => /^on[A-Z]/.test(a.getNameNode().getText()))
 }
 
+/**
+ * Whether any `on*` handler on this element DIRECTLY witnesses a modal OPEN — a
+ * setter call detectModalOpen recognizes (setShowX(true)), in an inline arrow or a
+ * resolvable same-file handler function. This qualifies a CAPITALIZED design-system
+ * component (<Nav.Link/>, <Button/>) as a control: unlike a lowercase DOM tag, an
+ * arbitrary component with a handler prop is not necessarily interactive, but one
+ * whose handler provably opens a modal is an opener the graph cannot soundly omit
+ * (the modal would have no in-edge and its inner controls would be permanently
+ * unreachable). Close-only handlers deliberately do NOT qualify: an onClose prop on
+ * a big composite component would coarsely promote the whole component to a control.
+ */
+// ponytail: direct handler-body scan only; route through analyzeHandler if a real app opens modals via imported helpers
+function handlerOpensModal(el: Node): boolean {
+  const sf = el.getSourceFile()
+  for (const attr of jsxAttrs(el)) {
+    // GESTURE props only: a lifecycle/data callback (onSuccess, onUploadComplete)
+    // that opens a modal is not a user-drivable opener — qualifying it would mint
+    // an open edge no click can ever witness.
+    if (!/^on(Click|DoubleClick|Mouse|Touch|Pointer|Key|Press|Submit|Select)/.test(attr.getNameNode().getText())) continue
+    const fn = handlerFnFromAttr(attr, sf)
+    if (!fn) continue
+    for (const call of fn.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      if (detectModalOpen(call) !== null) return true
+    }
+  }
+  return false
+}
+
 /** The ARIA role a control exposes, from an explicit role attr or its tag/type. */
 function ariaRole(el: Node, tag: string, controlType: string): string | undefined {
   const explicit = stringAttr(el, 'role')
@@ -260,8 +289,11 @@ function inputConstraints(el: Node, controlType: string): ControlInput | undefin
 /**
  * Classify an interactive JSX element as a control, or null if it is not one. A
  * control is a native form element (button/input/textarea/select/form),
- * contentEditable, or ANY lowercase DOM element carrying an `on*` handler (so a
- * `<div onMouseEnter>` or `<li onKeyDown>` counts too). Carries a stable selector.
+ * contentEditable, ANY lowercase DOM element carrying an `on*` handler (so a
+ * `<div onMouseEnter>` or `<li onKeyDown>` counts too), or a capitalized component
+ * whose handler provably opens a modal (a <Nav.Link/> opener) — modal-suffixed tags
+ * themselves excluded, so a modal surface whose handler prop opens a sibling modal
+ * never self-classifies as a control. Carries a stable selector.
  * `i18nMap` (built once per extraction from the app's locale file) resolves t()/i18nKey
  * labels to their real translated text; omit it to fall back to key-humanizing.
  */
@@ -276,6 +308,7 @@ export function controlMetaFor(el: Node, i18nMap?: Map<string, string>): Control
   else if (lower === 'form') controlType = 'form'
   else if (findAttr(el, 'contentEditable') || findAttr(el, 'contenteditable')) controlType = 'richtext'
   else if (/^[a-z]/.test(tag) && hasEventHandler(el)) controlType = 'element'
+  else if (/^[A-Z]/.test(tag) && !/(Modal|Dialog|Drawer|Sheet|Popover)$/.test(tag) && handlerOpensModal(el)) controlType = 'element'
   else return null
   const textLabel = controlType === 'button' || controlType === 'element' ? getJsxText(el) : undefined
   const textNamed: Named | undefined = textLabel !== undefined ? { name: textLabel, inferred: false } : undefined
@@ -289,6 +322,10 @@ export function controlMetaFor(el: Node, i18nMap?: Map<string, string>): Control
   const name = explicitName ?? resolved?.name
   const nameInferred = explicitName === null && resolved?.inferred === true
   const selector = controlSelector(el, tag, controlType, resolved?.name, resolved?.idKey)
+  // A capitalized component with only a structural fallback selector would render
+  // as page.locator('nav.link'.toLowerCase()) — a locator that can never match a
+  // real DOM element. No usable handle -> not a control.
+  if (/^[A-Z]/.test(tag) && selector.strategy === 'structural') return null
   const input = inputConstraints(el, controlType)
   return { element: tag, controlType, selector, ...(input ? { input } : {}), ...(name ? { name } : {}), ...(nameInferred ? { nameInferred: true } : {}) }
 }

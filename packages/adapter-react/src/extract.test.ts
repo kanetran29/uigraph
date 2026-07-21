@@ -145,6 +145,41 @@ describe('extractGraph — in-memory units (F2.4/F2.5)', () => {
     expect(fromSet.size).toBeGreaterThanOrEqual(2)
   })
 
+  it('mints a control + open edge when the opener is a CAPITALIZED component (Nav.Link -> FeedbackModal)', () => {
+    // The jaakko MainMenu shape: the modal opener is a design-system component
+    // (<Nav.Link onClick={() => setShowFeedbackModal(true)}>), not a lowercase DOM
+    // tag, and the gated <FeedbackModal isOpen={showX}/> lives in a shared child
+    // component of the screen. Without capitalized-opener support the modal has no
+    // in-edge and its inner controls are permanently unreachable.
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import F from './F'\nexport default () => (<Routes><Route path="/faq" element={<F/>} /></Routes>)`,
+        '/F.tsx': `import MainMenu from './MainMenu'\nexport default function F(){ return <MainMenu/> }`,
+        '/MainMenu.tsx': `import { useState } from 'react'\nimport FeedbackModal from './FeedbackModal'\nexport default function MainMenu(){
+          const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+          const handleCloseClick = () => {}
+          return <div>
+            <Nav.Link onClick={() => { handleCloseClick(); setShowFeedbackModal(true) }}>Feedback</Nav.Link>
+            <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)}/>
+          </div>
+        }`,
+        '/FeedbackModal.tsx': `export default function FeedbackModal({ isOpen, onClose }){ return <Modal show={isOpen}><button onClick={onClose}>Cancel</button></Modal> }`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const modal = graph.nodes.find((n) => n.kind === 'modal' && n.label === 'FeedbackModal')
+    expect(modal).toBeDefined()
+    const opener = graph.nodes.find((n) => n.kind === 'control' && n.label === 'Feedback')
+    expect(opener).toBeDefined()
+    const open = graph.edges.find((e) => e.effect === 'open:modal' && e.to === modal?.id)
+    expect(open?.from).toBe(opener?.id)
+    // the opener lives in a descended child component -> capped to may
+    expect(open?.modality).toBe('may')
+    // the modal ELEMENT itself (its onClose closes the modal) must NOT become a control
+    expect(graph.nodes.some((n) => n.kind === 'control' && n.control?.element === 'FeedbackModal')).toBe(false)
+  })
+
   it('names an otherwise-textless control from its i18n key / icon / className', () => {
     const { graph } = extractGraph(
       inMemory({
@@ -1295,5 +1330,48 @@ describe('extractGraph — naming chain: i18n resolution + img/svg/aria-labelled
     const controls = graph.nodes.filter((n) => n.kind === 'control')
     expect(controls.length).toBe(3)
     expect(controls.every((c) => c.control?.nameInferred === undefined)).toBe(true)
+  })
+})
+
+describe('capitalized-component openers — review hardening', () => {
+  const PAGE = `import { useState } from 'react'
+import { FeedbackModal } from './FeedbackModal'
+import { NavLink } from './NavLink'
+export default function Page() {
+  const [showFeedback, setShowFeedback] = useState(false)
+  return (
+    <div>
+      <NavLink onClick={() => setShowFeedback(true)}>Feedback</NavLink>
+      <FeedbackModal isOpen={showFeedback} />
+    </div>
+  )
+}`
+  const FILES = {
+    '/App.tsx': `import Page from './Page'\nexport default () => (<Routes><Route path="/" element={<Page/>} /></Routes>)`,
+    '/Page.tsx': PAGE,
+    '/FeedbackModal.tsx': `export function FeedbackModal({ isOpen }: { isOpen: boolean }) { return isOpen ? <div>fb</div> : null }`,
+    '/NavLink.tsx': `export function NavLink(props: any) { return <a {...props} /> }`,
+  }
+
+  it('a depth-0 capitalized opener mints a MAY open edge, never must/confidence-1', () => {
+    const { graph } = extractGraph(inMemory(FILES), '/', { controls: true })
+    const modal = graph.nodes.find((n) => n.kind === 'modal')!
+    const open = graph.edges.find((e) => e.to === modal.id && e.effect === 'open:modal')!
+    expect(open.modality).toBe('may')
+    expect(open.confidence).toBeLessThan(1)
+  })
+
+  it('a lifecycle callback (onSuccess) opening a modal does NOT qualify as an opener control', () => {
+    const files = { ...FILES, '/Page.tsx': PAGE.replace('onClick=', 'onSuccess=') }
+    const { graph } = extractGraph(inMemory(files), '/', { controls: true })
+    const modal = graph.nodes.find((n) => n.kind === 'modal')!
+    expect(graph.edges.some((e) => e.to === modal.id && e.effect === 'open:modal')).toBe(false)
+  })
+
+  it('a text-less capitalized opener (structural selector only) is not minted as a control', () => {
+    const files = { ...FILES, '/Page.tsx': PAGE.replace('>Feedback</NavLink>', ' />') }
+    const { graph } = extractGraph(inMemory(files), '/', { controls: true })
+    const structural = graph.nodes.filter((n) => n.kind === 'control' && n.control?.selector?.strategy === 'structural' && /^[A-Z]/.test(n.control.element ?? ''))
+    expect(structural).toEqual([])
   })
 })
