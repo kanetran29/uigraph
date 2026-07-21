@@ -961,3 +961,17 @@ describe('drivePlan: close ladder hardening', () => {
     expect(summary.outcomes['e_close']).toBe('refuted')
   })
 })
+
+describe('attemptSimple: a crashed drive never refutes', () => {
+  it('a driver that throws (server down) records undrivable, not refuted', async () => {
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e', 'n_a', 'n_b', { event: 'click:Link', modality: 'may' })],
+    )
+    const dir = await seedDir('uigraph-crash-', gg)
+    const driver = async (): Promise<VerifyResult> => { throw new Error('net::ERR_CONNECTION_REFUSED') }
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes['e']).toBe('undrivable')
+    expect(summary.refuted).toBe(0)
+  })
+})

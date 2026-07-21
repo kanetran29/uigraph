@@ -299,7 +299,10 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
   try {
     result = await driver(plan, appUrl, { modalSelector })
   } catch {
-    result = { confirmed: false }
+    // A drive that THREW observed nothing — page.goto refused (server down),
+    // browser crash, protocol error. Refuting would poison the log with
+    // disagreements the app never expressed; the target was never attempted.
+    result = { confirmed: false, undrivable: true, undrivableReason: 'drive crashed before observing the app (navigation/browser error) — check the app server' }
   }
   if (!result.confirmed) {
     // A dialog-close target is same-path by construction: the probe's URL evidence
