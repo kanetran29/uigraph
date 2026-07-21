@@ -447,7 +447,7 @@ export function extractGraphFromRoutes(
             mId = `m_${route.nodeId}_${midx++}`
             modalIdByTag.set(tag, mId)
             modalIds.push(mId)
-            nodes.push({ id: mId, route: null, componentPath: file, label: stringAttr(el, 'title') ?? tag, kind: 'modal' })
+            nodes.push({ id: mId, route: null, componentPath: file, label: stringAttr(el, 'title') ?? tag, kind: 'modal', parent: route.nodeId })
             const base = tag.split('.')[0] ?? tag
             const mFile = resolveComponentFile(cf, base)
             if (mFile && mFile.getFilePath() !== cf.getFilePath()) {
@@ -481,7 +481,7 @@ export function extractGraphFromRoutes(
           if (modalFilePaths.has(vFile.getFilePath()) || viewIdByTag.has(tag)) continue
           const vId = `mv_${route.nodeId}_${vidx++}`
           viewIdByTag.set(tag, vId)
-          nodes.push({ id: vId, route: null, componentPath: file, label: tag, kind: 'modal' })
+          nodes.push({ id: vId, route: null, componentPath: file, label: tag, kind: 'modal', parent: route.nodeId })
           modalDescend.set(vId, vFile)
           modalFilePaths.add(vFile.getFilePath())
         }
