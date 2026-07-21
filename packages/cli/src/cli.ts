@@ -12,7 +12,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@ui-graph/mcp'
-import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatParked, formatStatus, formatWorkspaceList, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runParked, runStatus, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
+import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatParked, formatStatus, formatWorkspaceList, loadWorkspaceConfig, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runParked, runStatus, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runLogin, runVerify, runVerifyUntilDone } from './runner'
 
@@ -101,16 +101,18 @@ export function buildProgram(): Command {
     .option('--max-rounds <n>', 'cap for --until-done', '10')
     .option('--concurrency <n>', 'parallel browser pages driving targets at once (1-16)', '8')
     .option('--pattern-sample <n>', 'representatives driven per over-approximation nav pattern before the rest are accounted by pattern', '1')
-    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string; all?: boolean; untilDone?: boolean; maxRounds: string; concurrency: string; patternSample: string }) => {
+    .option('--modal-selector <selector>', 'CSS selector the app renders modals with (no role=dialog) — overrides .uigraph/config.json modalSelector')
+    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string; all?: boolean; untilDone?: boolean; maxRounds: string; concurrency: string; patternSample: string; modalSelector?: string }) => {
       const concurrency = Number(opts.concurrency)
       const patternSample = Number(opts.patternSample)
+      const modalSelector = opts.modalSelector ?? loadWorkspaceConfig(dir).modalSelector
       if (opts.all === true && opts.untilDone === true) {
         console.error('--all is a single-pass sweep; run it without --until-done (the loop would park unproven statics it could not drive)')
         process.exitCode = 1
         return
       }
       if (opts.untilDone === true) {
-        const s = await runVerifyUntilDone({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, maxRounds: Number(opts.maxRounds), concurrency, patternSample })
+        const s = await runVerifyUntilDone({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, maxRounds: Number(opts.maxRounds), concurrency, patternSample, modalSelector })
         console.log(
           `verify --until-done: ${s.rounds} round(s), ${s.confirmed} confirmed, ${s.parkedEdges} edge(s) + ${s.parkedProposals} proposal(s) parked\n` +
             `  loopDone: ${s.loopDone} (${s.exitReason})\n` +
@@ -118,7 +120,7 @@ export function buildProgram(): Command {
         )
         return
       }
-      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, includeProven: opts.all === true, concurrency, patternSample })
+      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, includeProven: opts.all === true, concurrency, patternSample, modalSelector })
       const pat = s.patternParked > 0 ? ` · ${s.patternParked} accounted by pattern` : ''
       const rej = s.rejected > 0 ? ` · ${s.rejected} rejected by the proof gate (not persisted)` : ''
       console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)${pat}${rej}`)

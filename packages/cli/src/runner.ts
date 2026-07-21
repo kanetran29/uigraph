@@ -14,13 +14,14 @@ import { buildSpecPlan, dedupWorklist, fnv1a, locatorFor, nextToVerify, nodeForU
 import { openStore } from '@ui-graph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@ui-graph/mcp'
 
-/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets); `evidence` is the structured proof the proof-gated report_observation requires for a confirmation. `undrivable` means the plan had no drivable action (a parked leg) — the transition was NEVER attempted, so it must not be recorded as refuted. */
+/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets); `evidence` is the structured proof the proof-gated report_observation requires for a confirmation. `undrivable` means the plan had no drivable action (a parked leg) — the transition was NEVER attempted, so it must not be recorded as refuted. `undrivableReason` is the driver's diagnosis of WHY, when it has one (e.g. a modal-like element appeared but exposes no role=dialog) — folded into VerifySummary.diagnoses and appended to autonomous park reasons so the human triaging sees the app-side fix. */
 export interface VerifyResult {
   confirmed: boolean
   screenshot?: string
   landedUrl?: string
   evidence?: Evidence
   undrivable?: boolean
+  undrivableReason?: string
 }
 
 /**
@@ -37,10 +38,10 @@ export interface ProbeSpec {
   siblingLocators: string[]
 }
 
-/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan. */
-export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec }) => Promise<VerifyResult>
+/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan. `modalSelector` is the app owner's declared modal CSS selector (rung 2 of the dialog evidence ladder). */
+export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string }) => Promise<VerifyResult>
 
-/** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). `concurrency` is the parallel-driver pool width (default 8, capped 16); `patternSample` is how many representatives to drive per over-approximation pattern (default 1). */
+/** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). `concurrency` is the parallel-driver pool width (default 8, capped 16); `patternSample` is how many representatives to drive per over-approximation pattern (default 1); `modalSelector` is the workspace-declared CSS selector for apps that render modals without role=dialog (rung 2 of the dialog evidence ladder). */
 export interface RunVerifyOptions {
   dir: string
   appUrl: string
@@ -50,12 +51,13 @@ export interface RunVerifyOptions {
   includeProven?: boolean
   concurrency?: number
   patternSample?: number
+  modalSelector?: string
 }
 
 /** How one worklist target ended this pass: confirmed (drove and landed), refuted (drove, did not land), undrivable (no drivable control/plan ever reached it — never attempted), or rejected (drove and landed but the proof gate refused the evidence — nothing persisted). */
 export type TargetOutcome = 'confirmed' | 'refuted' | 'undrivable' | 'rejected'
 
-/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution; refutedProven counts refutations of must-static edges — each one means the extraction and the running app DISAGREE and must be investigated. `outcomes` is the per-target diagnosis (keyed by target id) so the until-done loop can park an exhausted target with a reason that says WHY it never closed. */
+/** What a verification run did. resolvedDynamic/discoveredNodes/parkedDynamic break out the dynamic-sink resolution; refutedProven counts refutations of must-static edges — each one means the extraction and the running app DISAGREE and must be investigated. `outcomes` is the per-target diagnosis (keyed by target id) so the until-done loop can park an exhausted target with a reason that says WHY it never closed; `diagnoses` carries the driver's undrivableReason per target (same key) when it had one, so the park reason can name the app-side fix. */
 export interface VerifySummary {
   attempted: number
   confirmed: number
@@ -67,6 +69,7 @@ export interface VerifySummary {
   parkedDynamic: number
   patternParked: number
   outcomes: Record<string, TargetOutcome>
+  diagnoses: Record<string, string>
 }
 
 /**
@@ -90,7 +93,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
 
   // When we build the default driver we own its browser and must dispose it after
   // the run; an injected driver brings its own lifecycle, so there is nothing to close.
-  const owned = opts.driver === undefined ? makePlaywrightDriver(opts.storageState) : null
+  const owned = opts.driver === undefined ? makePlaywrightDriver(opts.storageState, opts.modalSelector) : null
   const driver = opts.driver ?? owned!.driver
   const authed = opts.storageState !== undefined
   const concurrency = Math.max(1, Math.min(opts.concurrency ?? 8, 16))
@@ -102,6 +105,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   let discoveredNodes = 0
   let parkedDynamic = 0
   const outcomes: Record<string, TargetOutcome> = {}
+  const diagnoses: Record<string, string> = {}
   // Pattern keys whose representative confirmed (→ its duplicates may be parked) or
   // refuted/undrivable (→ its duplicates stay OPEN, never falsely credited).
   const confirmedKeys = new Map<string, string>()
@@ -116,7 +120,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   try {
     // STAGE 1 — drive the simple targets CONCURRENTLY. Pure: no DB writes, reads only the
     // frozen graph snapshot; results are collected by input index for a deterministic fold.
-    const results = await mapPool(simple, concurrency, (t) => attemptSimple(driver, graph, t, opts.appUrl))
+    const results = await mapPool(simple, concurrency, (t) => attemptSimple(driver, graph, t, opts.appUrl, opts.modalSelector))
 
     // STAGE 2 — fold the results SERIALLY (the only SQLite writer), in worklist-rank order.
     for (let i = 0; i < simple.length; i++) {
@@ -130,6 +134,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       // an undrivable plan was never attempted: refuting it would be a false negative
       if (result.undrivable === true) {
         outcomes[t.id] = 'undrivable'
+        if (result.undrivableReason !== undefined) diagnoses[t.id] = result.undrivableReason
         continue
       }
       const res = reportObservation(ctx, {
@@ -173,7 +178,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       // Dynamic-sink target (u_<screen>): CAPTURE the real landing instead of asserting a URL.
       let result: VerifyResult
       try {
-        result = await driver(plan, opts.appUrl, { capture: true })
+        result = await driver(plan, opts.appUrl, { capture: true, modalSelector: opts.modalSelector })
       } catch {
         result = { confirmed: false }
       }
@@ -258,7 +263,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
     }
   }
 
-  return { attempted: representatives.length, confirmed, refuted, refutedProven, rejected, resolvedDynamic, discoveredNodes, parkedDynamic, patternParked, outcomes }
+  return { attempted: representatives.length, confirmed, refuted, refutedProven, rejected, resolvedDynamic, discoveredNodes, parkedDynamic, patternParked, outcomes, diagnoses }
 }
 
 /** A bounded-concurrency pool: run `worker` over `items` with at most `concurrency`
@@ -282,17 +287,17 @@ async function mapPool<T, R>(items: readonly T[], concurrency: number, worker: (
  * Drive ONE non-dynamic target and return its result — no DB access, so it is safe to
  * run concurrently. Plans the path via planForTarget (anchored start: an un-routed from,
  * e.g. a control inside a modal, gets the opener prefix that drives the modal open),
- * drives the plan, and on failure runs the exploratory probe before judging (an
- * undrivable-after-probe result is still undrivable). Returns null when there is no
- * path to plan (nothing to fold).
+ * drives the plan (with the workspace `modalSelector` for the dialog evidence ladder),
+ * and on failure runs the exploratory probe before judging (an undrivable-after-probe
+ * result is still undrivable). Returns null when there is no path to plan (nothing to fold).
  */
-async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string): Promise<VerifyResult | null> {
+async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string, modalSelector?: string): Promise<VerifyResult | null> {
   const steps = planForTarget(graph, t.from, t.to)
   if (steps === null) return null
   const plan = buildSpecPlan(graph, steps, { baseUrl: appUrl, title: `verify ${t.from} → ${t.to}` })
   let result: VerifyResult
   try {
-    result = await driver(plan, appUrl)
+    result = await driver(plan, appUrl, { modalSelector })
   } catch {
     result = { confirmed: false }
   }
@@ -301,7 +306,7 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
     if (probe !== null) {
       let probed: VerifyResult
       try {
-        probed = await driver(plan, appUrl, { probe })
+        probed = await driver(plan, appUrl, { probe, modalSelector })
       } catch {
         probed = { confirmed: false }
       }
@@ -347,6 +352,7 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
   const tries = new Map<string, number>()
   // each target's LAST per-pass diagnosis, so a round-cap park can say WHY it never closed
   const lastOutcome = new Map<string, TargetOutcome>()
+  const lastDiagnosis = new Map<string, string>()
   let rounds = 0
   let confirmed = 0
   let parkedEdges = 0
@@ -357,7 +363,14 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
     const attempted = attemptedThisRound(ctx, opts.limit)
     const pass = await runVerify(opts)
     confirmed += pass.confirmed
-    for (const [id, o] of Object.entries(pass.outcomes)) lastOutcome.set(id, o)
+    // A later diagnosis-free outcome must CLEAR a stale diagnosis — appending a
+    // round-1 a11y hint to a round-2 honest refutation would be self-contradictory.
+    for (const [id, o] of Object.entries(pass.outcomes)) {
+      lastOutcome.set(id, o)
+      const d = pass.diagnoses[id]
+      if (d !== undefined) lastDiagnosis.set(id, d)
+      else lastDiagnosis.delete(id)
+    }
     // bump attempts ONLY for targets this round could actually try (the ranked
     // worklist slice under the limit); park targets that exhausted their tries
     const status = getLoopStatus(ctx)
@@ -368,7 +381,7 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
         const n = (tries.get(e.id) ?? 0) + 1
         tries.set(e.id, n)
         if (n >= parkTries) {
-          store.parkEdge(e.id, capParkReason(lastOutcome.get(e.id), n), 'runner')
+          store.parkEdge(e.id, capParkReason(lastOutcome.get(e.id), n, lastDiagnosis.get(e.id)), 'runner')
           parkedEdges++
         }
       }
@@ -395,7 +408,8 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
     try {
       for (const e of before.openEdges) {
         const last = lastOutcome.get(e.id)
-        store.parkEdge(e.id, `autonomous: parked at round cap for human review${last !== undefined ? ` — last outcome: ${last}` : ''}`, 'runner')
+        const diag = lastDiagnosis.get(e.id)
+        store.parkEdge(e.id, `autonomous: parked at round cap for human review${last !== undefined ? ` — last outcome: ${last}` : ''}${diag !== undefined ? ` — ${diag}` : ''}`, 'runner')
         parkedEdges++
       }
       for (const p of store.queryProposals({ status: 'proposed' })) {
@@ -428,12 +442,16 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
  * keys pattern parks off PATTERN_PARK_REASON_PREFIX only; the parked CLI groups
  * runner give-ups by the recorded `by` field — nothing parses these strings, they
  * exist for the human. A target never in a processed slice keeps the generic wording.
+ * `detail` is the driver's own diagnosis (VerifyResult.undrivableReason, e.g. the
+ * dialog ladder's a11y-gap finding) — appended so the park reason names the app-side fix.
  */
-function capParkReason(last: TargetOutcome | undefined, n: number): string {
-  if (last === 'undrivable') return `autonomous: undrivable after ${n} attempts — no drivable control/plan reached it`
-  if (last === 'refuted') return `autonomous: unstable after ${n} attempts — driven but refuted (did not land)`
-  if (last === 'rejected') return `autonomous: proof-rejected after ${n} attempts — driven and landed but the confirmation lacked admissible evidence`
-  return `autonomous: unreachable/undrivable after ${n} attempts`
+function capParkReason(last: TargetOutcome | undefined, n: number, detail?: string): string {
+  const base =
+    last === 'undrivable' ? `autonomous: undrivable after ${n} attempts — no drivable control/plan reached it`
+    : last === 'refuted' ? `autonomous: unstable after ${n} attempts — driven but refuted (did not land)`
+    : last === 'rejected' ? `autonomous: proof-rejected after ${n} attempts — driven and landed but the confirmation lacked admissible evidence`
+    : `autonomous: unreachable/undrivable after ${n} attempts`
+  return detail !== undefined ? `${base} — ${detail}` : base
 }
 
 /**
@@ -546,6 +564,19 @@ export async function runLogin(opts: RunLoginOptions): Promise<void> {
   }
 }
 
+/** Rung-3 heuristic: elements whose class NAMES them a modal/overlay. A delta on this can never confirm (class names are not a11y semantics) — it only distinguishes "something modal-like appeared" (undrivable, app a11y gap) from "nothing happened" (honest refutation). */
+const MODAL_HEURISTIC_SELECTOR = '[class*="modal" i], [class*="overlay" i]'
+
+/**
+ * Count VISIBLE elements matching a CSS selector. Rungs 2/3 of the dialog ladder
+ * must match rung 1's visibility semantics (getByRole excludes hidden elements):
+ * a mounted-but-hidden modal (display:none toggle pattern) must neither confirm
+ * rung 2 nor trip the rung-3 heuristic — only what the user can see counts.
+ */
+async function countVisibleModals(page: PwPage, selector: string): Promise<number> {
+  return page.locator(selector).filter({ visible: true }).count()
+}
+
 /**
  * Run the driver's plan against an already-open page and judge the outcome. Split
  * out from makePlaywrightDriver so the soundness-critical confirmation logic can be
@@ -564,6 +595,19 @@ export async function runLogin(opts: RunLoginOptions): Promise<void> {
  * match is therefore never confirmed — only undrivable (mirrors probePlan's own
  * same-path guard below) — while an unexpected departure still refutes normally,
  * since that IS real disagreement between the static claim and the running app.
+ *
+ * Dialog-asserted legs are judged by a 3-rung evidence ladder (first hit wins),
+ * because many real apps render modals as bare divs with NO role=dialog and a
+ * role-count-only proof falsely refutes a transition that visibly happened:
+ *   1. role=dialog count delta > 0 → confirmed (deterministic a11y proof).
+ *   2. the workspace-declared `modalSelector` count delta > 0 → confirmed — the
+ *      app owner DECLARED what a modal is, so the delta is deterministic and the
+ *      evidence detail names the selector for the audit trail.
+ *   3. a generic modal/overlay class-heuristic count delta > 0 → NOT confirmed and
+ *      NOT refuted: undrivable with an a11y-gap diagnosis (something modal-like
+ *      appeared but cannot be witnessed deterministically).
+ *   4. nothing rose → honest refutation.
+ * All three baselines are snapshotted together, before the asserted leg's action.
  */
 /**
  * Run an exploratory probe on an open page: load the source screen, then (a) try
@@ -615,7 +659,7 @@ async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise
   return { confirmed: false }
 }
 
-async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec }): Promise<VerifyResult> {
+async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string }): Promise<VerifyResult> {
   if (opts?.probe !== undefined) return probePlan(page, opts.probe, appUrl)
   const anchorUrl = plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl
   await page.goto(anchorUrl)
@@ -661,6 +705,8 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
   let lastUrlAssertion: string | undefined
   let expectDialog = false
   let dialogBaseline = 0
+  let configModalBaseline = 0
+  let heuristicBaseline = 0
   let requestEvidence: Evidence | undefined
   // Soundness: a parked leg is an interaction-triggered/guarded screen→screen nav
   // with no drivable control — codegen refuses to emit goto+URL-assert for it, so
@@ -679,9 +725,24 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     lastUrlAssertion = undefined
     expectDialog = false
     requestEvidence = undefined
-    // Dialog proof is a DELTA: snapshot the count BEFORE the action so a
-    // pre-existing dialog (cookie/consent banner) can never confirm an opener.
-    if (leg.assertions.some((as) => as.kind === 'dialog')) dialogBaseline = await page.getByRole('dialog').count()
+    // Dialog proof is a DELTA: snapshot the ladder baselines (role, plus config
+    // selector OR heuristic) BEFORE the action so a pre-existing dialog/overlay
+    // (cookie/consent banner) can never confirm an opener on any rung. Counts are
+    // visible-only to match getByRole's semantics. An invalid config selector
+    // fails LOUD as undrivable — swallowed, it would mass-false-refute every
+    // dialog-asserted target.
+    if (leg.assertions.some((as) => as.kind === 'dialog')) {
+      dialogBaseline = await page.getByRole('dialog').count()
+      if (opts?.modalSelector !== undefined) {
+        try {
+          configModalBaseline = await countVisibleModals(page, opts.modalSelector)
+        } catch {
+          return { confirmed: false, undrivable: true, undrivableReason: `modalSelector ${opts.modalSelector} is not a valid CSS selector — fix .uigraph/config.json or the --modal-selector flag` }
+        }
+      } else {
+        heuristicBaseline = await countVisibleModals(page, MODAL_HEURISTIC_SELECTOR)
+      }
+    }
     // Arm each leg's request wait BEFORE firing its action — a fast response can land
     // before an await on the action returns, so the wait must already be listening.
     const reqAssertions = leg.assertions.filter((as): as is { kind: 'request'; value: string } => as.kind === 'request')
@@ -733,9 +794,30 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // plans WITH a request assertion are drivable via the network call, not the URL).
     if (confirmed && samePath(anchorUrl, expected) && !expectDialog && requestEvidence === undefined) return { confirmed: false, undrivable: true }
   }
-  if (expectDialog) confirmed = confirmed && (await page.getByRole('dialog').count()) > dialogBaseline
+  let dialogDetail = 'dialog visible after drive'
+  if (expectDialog && confirmed) {
+    // The 3-rung evidence ladder (see the doc comment above): role delta, then the
+    // declared modalSelector delta, then — ONLY when no selector is declared — the
+    // heuristic delta (undrivable), else refute.
+    if ((await page.getByRole('dialog').count()) <= dialogBaseline) {
+      if (opts?.modalSelector !== undefined) {
+        // A flat declared selector is AFFIRMATIVE evidence the modal did not appear
+        // (the owner defined what a modal is) — refute; the heuristic must never
+        // mask it (a spinner/toast overlay is not the declared modal).
+        if ((await countVisibleModals(page, opts.modalSelector)) > configModalBaseline) {
+          dialogDetail = `config modal selector ${opts.modalSelector} raised the modal count`
+        } else {
+          confirmed = false
+        }
+      } else if ((await countVisibleModals(page, MODAL_HEURISTIC_SELECTOR)) > heuristicBaseline) {
+        return { confirmed: false, undrivable: true, undrivableReason: 'a modal-like element appeared but exposes no role=dialog — cannot witness deterministically (app a11y gap: add role="dialog"/aria-modal, or declare modalSelector in the workspace config)' }
+      } else {
+        confirmed = false
+      }
+    }
+  }
   if (!confirmed) return { confirmed: false }
-  const evidence: Evidence = requestEvidence ?? (lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: 'dialog visible after drive' })
+  const evidence: Evidence = requestEvidence ?? (lastUrlAssertion !== undefined ? { kind: 'url-assert', url: lastUrlAssertion } : { kind: 'dialog', detail: dialogDetail })
   return { confirmed: true, evidence }
 }
 
@@ -805,15 +887,17 @@ export interface OwnedDriver {
  * is logged in), both reused across every planned edge to avoid a per-edge launch
  * cost. The browser/context are created lazily on the first driver call; each call
  * opens a fresh page, drives the plan via drivePlan, and closes that page. The caller
- * must invoke `dispose` after the run to close the shared browser.
+ * must invoke `dispose` after the run to close the shared browser. `modalSelector`
+ * is the workspace-declared modal selector, threaded into every drivePlan call for
+ * the dialog evidence ladder (per-call opts win when they carry their own).
  */
-function makePlaywrightDriver(storageState?: string): OwnedDriver {
+function makePlaywrightDriver(storageState?: string, modalSelector?: string): OwnedDriver {
   let browser: PwBrowser | null = null
   let context: PwContext | null = null
   // Memoize the launch so N concurrent first-calls (the worker pool) share ONE browser
   // instead of each racing to launch its own on the `context === null` check.
   let ready: Promise<void> | null = null
-  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec }): Promise<VerifyResult> => {
+  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string }): Promise<VerifyResult> => {
     ready ??= (async (): Promise<void> => {
       const { chromium } = await loadPlaywright()
       browser = (await chromium.launch()) as PwBrowser
@@ -822,7 +906,7 @@ function makePlaywrightDriver(storageState?: string): OwnedDriver {
     await ready
     const page = await (context as PwContext).newPage()
     try {
-      return await drivePlan(page, plan, appUrl, opts)
+      return await drivePlan(page, plan, appUrl, { ...opts, modalSelector: opts?.modalSelector ?? modalSelector })
     } finally {
       await page.close()
     }
@@ -855,6 +939,7 @@ interface PwLocator {
   fill: (v: string, o?: unknown) => Promise<void>
   press: (key: string, o?: unknown) => Promise<void>
   count: () => Promise<number>
+  filter: (o: { visible: boolean }) => PwLocator
   evaluate: (fn: (el: FormLike) => unknown) => Promise<unknown>
 }
 
@@ -873,6 +958,7 @@ interface PwPage {
   goto: (url: string) => Promise<unknown>
   url: () => string
   getByRole: (role: string) => PwLocator
+  locator: (selector: string) => PwLocator
   waitForLoadState: (state: string) => Promise<void>
   waitForURL: (predicate: (url: URL) => boolean, opts?: unknown) => Promise<void>
   waitForResponse: (predicate: (r: PwResponse) => boolean, opts?: unknown) => Promise<PwResponse>

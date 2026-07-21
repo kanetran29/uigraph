@@ -38,7 +38,10 @@ type FakeResponse = { method: string; url: string; status: number } | 'never'
 // closed, so a plan that skips the opener prefix reads as undrivable, like reality.
 // `clickUrls` maps click ordinal -> URL the page moves to on that click (unset
 // ordinals leave the URL alone), for capture-mode prefix/trigger discrimination.
-function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; dialogsAfterClick?: boolean; lockedName?: string; clickError?: boolean; response?: FakeResponse; clickUrls?: (string | undefined)[] }): {
+// `selectorCounts` maps a page.locator() selector -> count as a function of clicks
+// so far, so the evidence-ladder rungs (config modal selector / overlay heuristic)
+// can rise independently of the role=dialog count; unmapped selectors count 0.
+function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; dialogsAfterClick?: boolean; lockedName?: string; clickError?: boolean; response?: FakeResponse; clickUrls?: (string | undefined)[]; selectorCounts?: Record<string, (clicks: number) => number> }): {
   page: Parameters<typeof drivePlan>[0]
   clicks: number
   fills: number
@@ -58,6 +61,7 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; 
       if (opts.landUrl !== undefined) rec.current = opts.landUrl
     },
     count: async () => (opts.dialogsAfterClick === true && rec.clicks > 0 ? 1 : (opts.dialogs ?? 0)),
+    filter: () => ctrl,
     evaluate: async () => {
       rec.evaluates++
       if (opts.landUrl !== undefined) rec.current = opts.landUrl
@@ -83,7 +87,11 @@ function fakePage(opts: { startUrl: string; landUrl?: string; dialogs?: number; 
     getByTestId: (_v: string) => ctrl,
     getByLabel: (_v: string) => ctrl,
     getByText: (_v: string) => ctrl,
-    locator: (_v: string) => ctrl,
+    locator: (v: string) => {
+      const fn = opts.selectorCounts?.[v]
+      const base = fn !== undefined ? { ...ctrl, count: async () => fn(rec.clicks) } : ctrl
+      return { ...base, filter: () => base }
+    },
     waitForLoadState: async () => {},
     waitForURL: async () => {},
     waitForResponse: async (predicate: (r: { url: () => string; status: () => number; request: () => { method: () => string } }) => boolean) => {
@@ -691,5 +699,125 @@ describe('drivePlan: modal-drive soundness', () => {
     const f = fakePage({ startUrl: 'http://app/a', clickUrls: ['http://app/a?modal=1'] })
     const res = await drivePlan(f.page, plan, 'http://app', { capture: true })
     expect(res.confirmed).toBe(false)
+  })
+})
+
+// The 3-rung evidence ladder for dialog-asserted legs. Real apps render modals as
+// bare divs with NO role=dialog (verified on a real host app: the modal visibly
+// opens, the role count stays flat) — rung 1 alone falsely REFUTES a transition
+// that happened. Rung 2: the app owner DECLARED what a modal is (modalSelector) —
+// a count delta on it is deterministic, auditable proof. Rung 3: a generic
+// modal/overlay class heuristic rising means SOMETHING modal-like appeared that we
+// cannot witness deterministically — undrivable with an a11y-gap diagnosis, never
+// a refutation. Rung 4: nothing rose — honest refutation.
+describe('drivePlan: dialog evidence ladder', () => {
+  const HEURISTIC = '[class*="modal" i], [class*="overlay" i]'
+
+  /** screen /a with an opener control whose click claims to open modal m_1 (a dialog-asserted leg). */
+  const openerPlan = async (): Promise<SpecPlan> => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const gg = graph(
+      [node('n_a', { route: '/a' }), { id: 'm_1', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }, opener],
+      [edge('e_open', 'c_open', 'm_1', { event: 'click', effect: null })],
+    )
+    const { planForTarget } = await import('@ui-graph/core')
+    return buildSpecPlan(gg, planForTarget(gg, 'c_open', 'm_1')!, { baseUrl: 'http://app' })
+  }
+
+  it('rung 2: confirms via the configured modalSelector when role=dialog stays flat, evidence names the selector', async () => {
+    const plan = await openerPlan()
+    const f = fakePage({ startUrl: 'http://app/a', selectorCounts: { '.signup-login-modal-overlay': (clicks) => (clicks > 0 ? 1 : 0) } })
+    const res = await drivePlan(f.page, plan, 'http://app', { modalSelector: '.signup-login-modal-overlay' })
+    expect(f.clicks).toBeGreaterThan(0)
+    expect(res.confirmed).toBe(true)
+    expect(res.evidence).toEqual({ kind: 'dialog', detail: 'config modal selector .signup-login-modal-overlay raised the modal count' })
+  })
+
+  it('rung 3: heuristic overlay rise with no config and flat role=dialog is undrivable with the a11y-gap diagnosis', async () => {
+    const plan = await openerPlan()
+    const f = fakePage({ startUrl: 'http://app/a', selectorCounts: { [HEURISTIC]: (clicks) => (clicks > 0 ? 1 : 0) } })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBe(true)
+    expect(res.undrivableReason).toContain('role="dialog"')
+    expect(res.undrivableReason).toContain('modalSelector')
+  })
+
+  it('rung 4: nothing rises → honest refutation (confirmed false, undrivable undefined)', async () => {
+    const plan = await openerPlan()
+    const f = fakePage({ startUrl: 'http://app/a' })
+    const res = await drivePlan(f.page, plan, 'http://app')
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBeUndefined()
+    expect(res.undrivableReason).toBeUndefined()
+  })
+})
+
+// A rung-3 diagnosis must survive the fold: runVerify collects it into
+// summary.diagnoses, runVerifyUntilDone carries it into the autonomous park
+// reason so the human triaging the parked list sees the app-side fix.
+describe('runVerifyUntilDone: rung-3 diagnosis reaches the park reason', () => {
+  it('an always-rung-3 driver parks with the a11y-gap diagnosis appended', async () => {
+    const w = (line: number): Witness => ({ ...staticWitness, loc: { line, col: 1 } })
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' })],
+      [edge('e_ab', 'n_a', 'n_b', { modality: 'may', witness: w(1) })],
+    )
+    const dir = await seedDir('uigraph-park-a11y-', gg)
+    const reason = 'a modal-like element appeared but exposes no role=dialog — cannot witness deterministically (app a11y gap: add role="dialog"/aria-modal, or declare modalSelector in the workspace config)'
+    const s = await runVerifyUntilDone({ dir, appUrl: 'http://app', maxRounds: 4, parkTries: 2, driver: async () => ({ confirmed: false, undrivable: true, undrivableReason: reason }) })
+    expect(s.parkedEdges).toBe(1)
+    const parked = await readParked(dir)
+    expect(parked[0]?.edgeId).toBe('e_ab')
+    expect(parked[0]?.reason).toContain('autonomous: undrivable after 2 attempts')
+    expect(parked[0]?.reason).toContain('app a11y gap')
+  })
+})
+
+// Review hardening of the evidence ladder: a DECLARED selector that stays flat is
+// affirmative refutation (the heuristic must not mask it), and an invalid declared
+// selector fails loud as undrivable instead of mass-false-refuting.
+describe('drivePlan: evidence-ladder hardening', () => {
+  const openModalGraph = (): UiGraph => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    return graph(
+      [node('n_a', { route: '/a' }), { id: 'm_1', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }, opener],
+      [edge('e_open', 'c_open', 'm_1', { event: 'click', effect: null })],
+    )
+  }
+
+  it('a declared selector that stays flat REFUTES even when an unrelated overlay rises', async () => {
+    const gg = openModalGraph()
+    const { planForTarget } = await import('@ui-graph/core')
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_open', 'm_1')!, { baseUrl: 'http://app' })
+    const f = fakePage({
+      startUrl: 'http://app/a',
+      selectorCounts: {
+        '.declared-modal': () => 0,
+        '[class*="modal" i], [class*="overlay" i]': (clicks) => (clicks > 0 ? 1 : 0),
+      },
+    })
+    const res = await drivePlan(f.page, plan, 'http://app', { modalSelector: '.declared-modal' })
+    expect(res.confirmed).toBe(false)
+    expect(res.undrivable).toBeUndefined()
+  })
+
+  it('an invalid declared selector is undrivable with a loud reason, never a refutation', async () => {
+    const gg = openModalGraph()
+    const { planForTarget } = await import('@ui-graph/core')
+    const plan = buildSpecPlan(gg, planForTarget(gg, 'c_open', 'm_1')!, { baseUrl: 'http://app' })
+    const f = fakePage({
+      startUrl: 'http://app/a',
+      selectorCounts: { '[bad': () => { throw new Error('SyntaxError: not a valid selector') } },
+    })
+    const res = await drivePlan(f.page, plan, 'http://app', { modalSelector: '[bad' })
+    expect(res.undrivable).toBe(true)
+    expect(res.undrivableReason).toContain('not a valid CSS selector')
   })
 })
