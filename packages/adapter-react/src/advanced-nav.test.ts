@@ -325,4 +325,75 @@ export default function H(){
     expect(idA).toBeDefined()
     expect(idA).toEqual(idB)
   })
+
+  it('does NOT mint a may self-loop for an effect-only control inside an imported modal — soundiness note instead', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'
+import LoginModal from './LoginModal'
+export default function H(){
+  const [showLogin, setShowLogin] = useState(false)
+  return <div><button onClick={() => setShowLogin(true)}>Log in</button>{showLogin && <LoginModal/>}</div>
+}`,
+        '/LoginModal.tsx': `import { useState } from 'react'
+export default function LoginModal(){
+  const [email, setEmail] = useState('')
+  return <input aria-label="Email" onChange={(e) => setEmail(e.target.value)} />
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const modal = graph.nodes.find((n) => n.kind === 'modal')
+    expect(modal).toBeDefined()
+    const inner = graph.nodes.find((n) => n.kind === 'control' && n.parent === modal?.id)
+    expect(inner).toBeDefined()
+    // The effect stays recorded on the control node; no unverifiable may edge is minted.
+    expect(inner?.control?.effects).toContain('state:setEmail')
+    expect(graph.edges.some((e) => e.from === inner?.id)).toBe(false)
+    expect(soundiness.some((s) => s.kind === 'effect-only-control' && s.detail.includes('state:setEmail'))).toBe(true)
+    expect(validateGraph(graph)).toEqual([])
+  })
+
+  it('does NOT mint a may self-loop for an effect-only control in a descended child component — soundiness note instead', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import Panel from './Panel'\nexport default function H(){ return <Panel/> }`,
+        '/Panel.tsx': `import { useState } from 'react'
+export default function Panel(){
+  const [tab, setTab] = useState('a')
+  return <button onClick={() => setTab('b')}>Toggle</button>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    expect(control).toBeDefined()
+    expect(control?.control?.effects).toContain('state:setTab')
+    expect(graph.edges.some((e) => e.from === control?.id)).toBe(false)
+    expect(soundiness.some((s) => s.kind === 'effect-only-control')).toBe(true)
+  })
+
+  it('still mints the must self-loop for a depth-0 effect-only screen control (narrowing leaves proven class alone)', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/App.tsx': `import H from './H'\nexport default () => (<Routes><Route path="/" element={<H/>} /></Routes>)`,
+        '/H.tsx': `import { useState } from 'react'
+export default function H(){
+  const [plan, setPlan] = useState('')
+  return <button onClick={() => setPlan('pro')}>Pro</button>
+}`,
+      }),
+      '/',
+      { controls: true },
+    )
+    const control = graph.nodes.find((n) => n.kind === 'control')
+    const e = graph.edges.find((x) => x.from === control?.id)
+    expect(e?.modality).toBe('must')
+    expect(e?.effect).toBe('state:setPlan')
+    expect(soundiness.some((s) => s.kind === 'effect-only-control')).toBe(false)
+  })
 })

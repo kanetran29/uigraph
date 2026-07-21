@@ -126,14 +126,18 @@ export class Store {
    * runner parks: when the incoming graph's hash differs from the stored one, every
    * park with by === 'runner' is dropped in the same operation — a runner park is a
    * claim about the OLD base ("undrivable now") that a re-map may have invalidated.
-   * Agent parks persist (human/agent judgment is not era-bound).
+   * Agent parks persist (human/agent judgment is not era-bound) — EXCEPT parks whose
+   * edgeId no longer exists in the incoming graph: a park referencing a dead edge is
+   * moot, would list nonexistent edges in `uigraph parked`, and unpark on it restores
+   * nothing.
    */
   setBaseGraph(graph: UiGraph, soundiness: SoundinessNote[] = []): void {
     const errs = validateGraph(graph)
     if (errs.length > 0) throw new Error(`refusing to store invalid graph:\n  ${errs.map((e) => e.message).join('\n  ')}`)
     const current = this.getBaseGraph()
     if (current !== null && hashValue(current) !== hashValue(graph)) {
-      this.setDoc('parked_edges', this.getParkedEdges().filter((p) => p.by !== 'runner'))
+      const liveIds = new Set(graph.edges.map((e) => e.id))
+      this.setDoc('parked_edges', this.getParkedEdges().filter((p) => p.by !== 'runner' && liveIds.has(p.edgeId)))
     }
     this.setDoc('graph', graph)
     this.setDoc('soundiness', soundiness)
