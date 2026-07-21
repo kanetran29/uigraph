@@ -210,4 +210,22 @@ describe('buildSpecPlan — modal-inner locators are dialog-scoped', () => {
     const openerLeg = plan.legs.find((l) => l.from === 'c_open')!
     expect((openerLeg.action as { locator?: string }).locator).toBe(`page.getByRole("button", { name: "Open" })`)
   })
+
+  it('scopes by the declared modalSelector instead when configured (role-less modal apps)', () => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 's',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const inner: GraphNode = {
+      id: 'c_in', route: null, componentPath: null, label: 'Go', kind: 'control', parent: 'm0',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go' } },
+    }
+    const g = graph(
+      [node('s', { route: '/' }), { id: 'm0', route: null, componentPath: null, label: 'Dialog', kind: 'modal' }, node('t', { route: '/t' }), opener, inner],
+      [edge('e1', 'c_open', 'm0', { event: 'click' }), edge('e2', 'c_in', 't', { event: 'click' })],
+    )
+    const plan = buildSpecPlan(g, planForTarget(g, 'c_in', 't')!, { baseUrl: 'http://app', modalSelector: '.app-modal' })
+    const innerLeg = plan.legs.find((l) => l.from === 'c_in')!
+    expect((innerLeg.action as { locator?: string }).locator).toBe(`page.locator(".app-modal").getByRole("button", { name: "Go" })`)
+  })
 })
