@@ -10,7 +10,7 @@ import type { ToolContext, ListCasesArgs, UpdateGraphArgs } from '@ui-graph/mcp'
 import { dbPath, getCoverage, getFreshness, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@ui-graph/mcp'
 import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@ui-graph/core/node'
 import type { TrustTier } from '@ui-graph/core'
-import { diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@ui-graph/core'
+import { buildCoverage, diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue, renderStateChartMermaid } from '@ui-graph/core'
 
 /** Render the workspace overlay as a markdown "planned changes" spec. */
 function readPlan(ctx: ToolContext): string {
@@ -72,6 +72,18 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
     }
     if (req.method === 'GET' && req.path === '/api/coverage') {
       return { status: 200, body: getCoverage(ctx) }
+    }
+    if (req.method === 'GET' && req.path === '/api/uml') {
+      const graph = loadMergedGraph(ctx)
+      const store = openStore(dbPath(ctx))
+      try {
+        const parked = store.getParkedEdges()
+        const cov = buildCoverage(graph, parked)
+        const mermaid = renderStateChartMermaid(graph, { parked, kpi: { verifiedOfReached: cov.verifiedOfReached, reached: cov.reachedCount } })
+        return { status: 200, body: { mermaid } }
+      } finally {
+        store.close()
+      }
     }
     if (req.method === 'GET' && req.path === '/api/freshness') {
       return { status: 200, body: getFreshness(ctx) }
