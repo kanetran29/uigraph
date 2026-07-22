@@ -912,9 +912,56 @@ button:hover {
   min-height: 0;
   overflow: auto;
   padding: 16px;
+  cursor: grab;
+}
+.uml-diagram.uml-grabbing {
+  cursor: grabbing;
+}
+.uml-svg {
+  display: inline-block;
+  user-select: none;
 }
 .uml-svg svg {
   max-width: none;
+  display: block;
+}
+.uml-screen-picker {
+  margin-left: 8px;
+  padding: 2px 6px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface, transparent);
+  color: var(--text);
+  cursor: pointer;
+  max-width: 260px;
+}
+.uml-zoombar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+.uml-zoombar button {
+  min-width: 26px;
+  padding: 2px 6px;
+  font-size: 13px;
+  line-height: 1;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface, transparent);
+  color: var(--text);
+  cursor: pointer;
+}
+.uml-zoombar button:hover {
+  border-color: var(--muted);
+}
+.uml-zoompct {
+  min-width: 40px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 12px;
 }
 .uml-source {
   margin: 0;
