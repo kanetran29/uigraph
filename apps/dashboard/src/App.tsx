@@ -4,7 +4,7 @@
 // lays out the canvas, inspector, and read panels — editing, scenarios, and e2e
 // suite generation live in uigraph studio.
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import type { CoverageReport, Proposals, UiGraph } from '@ui-graph/core'
 import { EMPTY_CHANGES, EMPTY_PROPOSALS, UNKNOWN_FRESHNESS, fetchChanges, fetchCoverage, fetchFreshness, fetchGraph, fetchProposals, fetchWorkspaces, type ChangesState, type FreshnessState, type WorkspaceSummary } from './api'
@@ -21,6 +21,8 @@ import { Inspector } from './Inspector'
 import { ProposalsPanel } from './Proposals'
 import { Steps } from './Steps'
 import { VerifyPanel } from './Verify'
+// mermaid (~700kB) is code-split out of the default Graph view; only loaded when UML is opened.
+const UmlView = lazy(() => import('./UmlView').then((m) => ({ default: m.UmlView })))
 
 /** The whole dashboard, wired to the serve API with a sample fallback. */
 export function App(): JSX.Element {
@@ -32,6 +34,7 @@ export function App(): JSX.Element {
   const [live, setLive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selection, setSelection] = useState<Selection>(null)
+  const [view, setView] = useState<'graph' | 'uml'>('graph')
   const [pathEdgeIds, setPathEdgeIds] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
   const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([])
@@ -166,18 +169,48 @@ export function App(): JSX.Element {
           {isEmpty ? (
             <EmptyState live={live} />
           ) : (
-            <ReactFlowProvider>
-              <GraphCanvas
-                graph={graph}
-                proposals={proposals}
-                selection={selection}
-                pathEdgeIds={pathEdgeIds}
-                onSelect={setSelection}
-                searchMatchIds={matchIds}
-                diffHighlight={diffHighlight}
-                colorMode={resolved}
-              />
-            </ReactFlowProvider>
+            <>
+              <div className="view-toggle" role="tablist" aria-label="Canvas view">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={view === 'graph'}
+                  className={view === 'graph' ? 'active' : ''}
+                  onClick={() => setView('graph')}
+                >
+                  Graph
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={view === 'uml'}
+                  className={view === 'uml' ? 'active' : ''}
+                  onClick={() => setView('uml')}
+                >
+                  UML
+                </button>
+              </div>
+              <div className="canvas-body">
+                {view === 'graph' ? (
+                  <ReactFlowProvider>
+                    <GraphCanvas
+                      graph={graph}
+                      proposals={proposals}
+                      selection={selection}
+                      pathEdgeIds={pathEdgeIds}
+                      onSelect={setSelection}
+                      searchMatchIds={matchIds}
+                      diffHighlight={diffHighlight}
+                      colorMode={resolved}
+                    />
+                  </ReactFlowProvider>
+                ) : (
+                  <Suspense fallback={<div className="uml-loading">Loading diagram…</div>}>
+                    <UmlView wsId={activeWs} theme={resolved} coverage={coverage} />
+                  </Suspense>
+                )}
+              </div>
+            </>
           )}
         </main>
         <div className="side">

@@ -496,6 +496,15 @@ describe('handleApiRequest (pure router)', () => {
     expect(res.body).toEqual([])
   })
 
+  it('GET /api/uml returns the Mermaid statechart source', () => {
+    const dir = workspace()
+    const res = handleApiRequest({ dir }, { method: 'GET', path: '/api/uml', body: undefined })
+    expect(res.status).toBe(200)
+    const body = res.body as { mermaid: string }
+    expect(body.mermaid).toContain('stateDiagram-v2')
+    expect(body.mermaid).toContain('a --> b')
+  })
+
   it('POST /api/overlay applies an overlay edit and surfaces it in /api/graph', () => {
     const dir = workspace()
     const post = handleApiRequest(
