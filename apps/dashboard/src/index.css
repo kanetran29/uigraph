@@ -910,15 +910,18 @@ button:hover {
 .uml-diagram {
   flex: 1;
   min-height: 0;
-  overflow: auto;
-  padding: 16px;
+  overflow: hidden;
+  position: relative;
   cursor: grab;
+  touch-action: none;
 }
 .uml-diagram.uml-grabbing {
   cursor: grabbing;
 }
 .uml-svg {
-  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
   user-select: none;
 }
 .uml-svg svg {
