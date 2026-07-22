@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { AdapterContext, Logger, ParkedEdge, SoundinessNote, UiGraph, Proposal } from '@ui-graph/core'
-import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue, PATTERN_PARK_REASON_PREFIX } from '@ui-graph/core'
+import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, renderStateChart, buildCoverage, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue, PATTERN_PARK_REASON_PREFIX } from '@ui-graph/core'
 import type { GraphDiff, SinceLastDiff } from '@ui-graph/core'
 import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@ui-graph/core/node'
 import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@ui-graph/mcp'
@@ -508,6 +508,42 @@ export function runGen(opts: RunGenOptions): GenSummary {
     writeFileSync(opts.out, spec, 'utf8')
   }
   return { from: opts.from, to: opts.to, legs: plan.legs.length, out: opts.out, spec }
+}
+
+/** Options for `runUml`: the workspace dir, chart scope, an optional drill screen, and an output path. */
+export interface RunUmlOptions {
+  scope?: 'overview' | 'screen'
+  screenId?: string
+  out?: string
+}
+
+/**
+ * Render the workspace graph as a PlantUML state machine diagram. Loads the merged
+ * graph, reads parked edges + coverage for the KPI/park notes, then calls the pure
+ * renderStateChart. Writes to `--out` when given, else returns it for printing.
+ * Throws a CliError when a screen drill is requested without a screen id.
+ */
+export function runUml(dir: string, opts: RunUmlOptions = {}): string {
+  const scope = opts.scope ?? 'overview'
+  if (scope === 'screen' && (opts.screenId === undefined || opts.screenId.length === 0)) {
+    throw new CliError('uml --scope screen requires --screen <id>\n  pass the screen node id to drill into (see the overview for ids)')
+  }
+  const graph = loadMergedGraph({ dir })
+  const store = openStoreSafe(dbPathFor(dir))
+  let coverage
+  let parked
+  try {
+    parked = store.getParkedEdges()
+    coverage = buildCoverage(graph, parked)
+  } finally {
+    store.close()
+  }
+  const uml = renderStateChart(graph, { scope, screenId: opts.screenId, parked, kpi: { verifiedOfReached: coverage.verifiedOfReached, reached: coverage.reachedCount } })
+  if (opts.out !== undefined) {
+    ensureDir(dirname(opts.out), opts.out)
+    writeFileSync(opts.out, uml, 'utf8')
+  }
+  return uml
 }
 
 /** Format a GenSummary for the `gen` command (header + the spec when not written to a file). */
