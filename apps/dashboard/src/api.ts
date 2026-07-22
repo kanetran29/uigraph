@@ -142,12 +142,13 @@ export async function fetchCoverage(wsId?: string | null): Promise<CoverageRepor
  * 404, bad JSON) it falls back to rendering the bundled sample so the UML view still
  * shows something in a static build — mirroring fetchCoverage's sample fallback.
  */
-export async function fetchUml(wsId?: string | null): Promise<string> {
+export async function fetchUml(wsId?: string | null, screenId?: string | null): Promise<string> {
+  const base = screenId ? `/api/uml?scope=screen&screen=${encodeURIComponent(screenId)}` : '/api/uml'
   try {
-    const res = await fetch(withWs('/api/uml', wsId))
-    if (!res.ok) return renderStateChartMermaid(SAMPLE_GRAPH)
+    const res = await fetch(withWs(base, wsId))
+    if (!res.ok) return renderStateChartMermaid(SAMPLE_GRAPH, screenId ? { scope: 'screen', screenId } : {})
     return ((await res.json()) as { mermaid: string }).mermaid
   } catch {
-    return renderStateChartMermaid(SAMPLE_GRAPH)
+    return renderStateChartMermaid(SAMPLE_GRAPH, screenId ? { scope: 'screen', screenId } : {})
   }
 }
