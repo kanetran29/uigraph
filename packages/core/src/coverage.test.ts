@@ -492,6 +492,19 @@ describe('nextToVerify — stale witnesses outrank everything drivable', () => {
   })
 })
 
+
+  it('a STALE witness whose source is unanchorable classifies unanchorable — re-confirmation is impossible by construction', () => {
+    const synth = { id: 'app_nav', route: null, componentPath: null, label: 'nav', kind: 'screen' as const }
+    const gg = graph(
+      [synth, node('b')],
+      [edge('e_s', 'app_nav', 'b', { source: 'runtime', modality: 'must', witnessStale: true })],
+    )
+    const cov = buildCoverage(gg)
+    expect(cov.staleWitnessCount).toBe(0)
+    expect(cov.unanchorableCount).toBe(1)
+    expect(cov.open).toHaveLength(0)
+  })
+
 describe('verifiedOfReached — the product KPI', () => {
   it('excludes refuted, unanchorable, and condition-gated parks from reached; counts runtime + static proofs as verified', () => {
     const gg = graph(
