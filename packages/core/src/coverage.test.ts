@@ -510,4 +510,16 @@ describe('verifiedOfReached — the product KPI', () => {
     expect(cov.reachedCount).toBe(3)
     expect(cov.verifiedOfReached).toBeCloseTo(2 / 3)
   })
+
+  it('counts a twin-witnessed edge as verified for the KPI — the same transition IS runtime-witnessed, at its drivable control', () => {
+    const gg = graph(
+      [node('a'), node('b'), node('c_a', { kind: 'control', route: null, parent: 'a' })],
+      [
+        edge('e_screen', 'a', 'b', { source: 'static', modality: 'may' }),
+        edge('e_ctrl', 'c_a', 'b', { source: 'runtime', modality: 'must' }),
+      ],
+    )
+    const cov = buildCoverage(gg)
+    expect(cov.verifiedOfReached).toBe(1)
+  })
 })

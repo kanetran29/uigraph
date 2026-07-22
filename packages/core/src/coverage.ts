@@ -207,7 +207,9 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
   // wording in park reasons must keep matching it.
   const conditionGated = rows.filter((r) => (r.status === 'parked' || r.status === 'pattern-covered') && r.reason !== undefined && /state\/precondition|Stripe|token|parameterized|estimation|admin|authenticated session|auth route|round cap|undrivable after|unreachable\/undrivable|no drivable/.test(r.reason)).length
   const reachedCount = total - refutedCount - unanchorableCount - conditionGated
-  const verifiedForKpi = rows.filter((r) => r.verified || r.status === 'static').length
+  // twin-witnessed counts as verified here: the SAME user transition is
+  // runtime-witnessed, at its drivable control representation.
+  const verifiedForKpi = rows.filter((r) => r.verified || r.status === 'static' || r.status === 'twin-witnessed').length
   const verifiedOfReached = reachedCount > 0 ? verifiedForKpi / reachedCount : 1
   return {
     total,
