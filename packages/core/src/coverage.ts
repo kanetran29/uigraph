@@ -138,6 +138,11 @@ function classify(edge: UiGraph['edges'][number], ctx: EdgeContext, parkedById: 
       if (ctx.nodeKind.get(edge.from) !== 'control' && ctx.twinWitnessed.has(`${edge.from}=>${edge.to}`)) {
         return { status: 'twin-witnessed', accounted: true, reason: 'stale witness superseded — the same transition is freshly runtime-witnessed via a control on this screen' }
       }
+      // A stale witness from an UNANCHORABLE source can never be re-confirmed (no
+      // drive can start there) — every era shift would strand it stale forever.
+      if (ctx.unanchorableFroms.has(edge.from)) {
+        return { status: 'unanchorable', accounted: true, reason: UNANCHORABLE_REASON }
+      }
       return { status: 'stale-witness', accounted: false, reason: 'runtime witness predates the current base graph — re-verify' }
     }
     return { status: 'runtime', accounted: true }
