@@ -1328,3 +1328,37 @@ describe('runVerify: dom-delta probe (CSS-hidden state controls)', () => {
     expect(summary.diagnoses['e_menu']).toContain('only the class attribute changed')
   })
 })
+
+describe('buildProbeSpec reveal ranking survives fan-out narrowing', () => {
+  it('ranks a toggle sibling FIRST from control.effects alone (no self-loop edge minted)', async () => {
+    const mk = (id: string, name: string, effects?: string[]): GraphNode => ({
+      id, route: null, componentPath: null, label: name, kind: 'control', parent: 'n_s',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: `button|${name}` }, ...(effects ? { effects } : {}) },
+    })
+    const many = Array.from({ length: 8 }, (_, i) => mk(`c_f${i}`, `F${i}`))
+    const toggle = mk('c_toggle', 'Toggle', ['state:setMenu'])
+    const target = mk('c_target', 'Menu', undefined)
+    const gg = graph(
+      [node('n_s', { route: '/s' }), ...many, toggle, target],
+      [edge('e_t', 'c_target', 'n_s', { event: 'click', effect: 'state:setMenu', modality: 'may' })],
+    )
+    const dir = await seedDir('uigraph-reveal-rank-', gg)
+    const clicked: string[] = []
+    const f = fakePage({
+      startUrl: 'http://app/s',
+      lockedName: 'Menu',
+      attrs: (name, clicks) => (name === 'aria-expanded' ? (clicks >= 2 ? 'true' : clicks >= 1 ? 'false' : null) : null),
+    })
+    const page = f.page as unknown as { getByRole: (r: string, o?: { name?: string }) => unknown }
+    const orig = page.getByRole.bind(page)
+    page.getByRole = (r: string, o?: { name?: string }) => {
+      if (o?.name) clicked.push(o.name)
+      return orig(r, o)
+    }
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(f.page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes['e_t']).toBe('confirmed')
+    const toggleIdx = clicked.indexOf('Toggle')
+    expect(toggleIdx).toBeGreaterThan(-1)
+  })
+})

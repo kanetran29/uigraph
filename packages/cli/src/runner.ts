@@ -537,8 +537,16 @@ function buildProbeSpec(graph: UiGraph, t: VerifyTarget, domDelta: boolean): Pro
     if (to === undefined || to.route === null || to.route.includes('*')) return null
     expectedRoute = to.route
   }
-  const revealish = new Set(graph.edges.filter((e) => e.to === screen.id && e.effect !== null && e.effect.includes('state:')).map((e) => e.from))
   const siblings = graph.nodes.filter((n) => n.kind === 'control' && n.parent === screen.id && n.id !== from.id && n.control?.selector !== undefined)
+  // Reveal-ish = a sibling whose click flips screen-level state (a menu/disclosure
+  // toggle). Read from BOTH self-loop state edges AND the control's own effects —
+  // fan-out narrowing intentionally stopped minting self-loop edges for descended
+  // effect-only controls, so the edge signal alone would rank the toggle last and
+  // the sibling cap would cut it.
+  const revealish = new Set([
+    ...graph.edges.filter((e) => e.to === screen.id && e.effect !== null && e.effect.includes('state:')).map((e) => e.from),
+    ...siblings.filter((n) => (n.control?.effects ?? []).some((x) => x.startsWith('state:'))).map((n) => n.id),
+  ])
   const siblingLocators = [...siblings.filter((n) => revealish.has(n.id)), ...siblings.filter((n) => !revealish.has(n.id))]
     .map((n) => locatorFor(n.control!.selector!))
     .slice(0, 8)
