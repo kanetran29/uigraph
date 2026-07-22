@@ -43,8 +43,8 @@ export interface ProbeSpec {
   domDelta?: boolean
 }
 
-/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan. `modalSelector` is the app owner's declared modal CSS selector (rung 2 of the dialog evidence ladder). */
-export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string; authed?: boolean }) => Promise<VerifyResult>
+/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan; with `modalFlow`, runs the multi-step modal-flow probe (open the modal via the plan's prefix, explore in-modal steps until the target renders, judge the target with the final leg's own evidence). `modalSelector` is the app owner's declared modal CSS selector (rung 2 of the dialog evidence ladder). */
+export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean }) => Promise<VerifyResult>
 
 /** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). `concurrency` is the parallel-driver pool width (default 8, capped 16); `patternSample` is how many representatives to drive per over-approximation pattern (default 1); `modalSelector` is the workspace-declared CSS selector for apps that render modals without role=dialog (rung 2 of the dialog evidence ladder). */
 export interface RunVerifyOptions {
@@ -312,27 +312,52 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
     result = { confirmed: false, undrivable: true, undrivableReason: 'drive crashed before observing the app (navigation/browser error) — check the app server' }
   }
   if (!result.confirmed) {
-    // A dialog-close target is same-path by construction: the probe's URL evidence
-    // cannot apply, and its same-path guard would launder an honest close
-    // refutation into undrivable. The drive's own verdict stands. A dom-delta
-    // final IS probeable: the probe judges it by attribute delta, not by URL.
+    // A dialog-close target is same-path by construction: the in-screen probe's
+    // URL evidence cannot apply, and its same-path guard would launder an honest
+    // close refutation into undrivable — the close class skips that probe (the
+    // modal-FLOW probe below is its fallback instead). A dom-delta final IS
+    // probeable: the probe judges it by attribute delta, not by URL.
     const finalLeg = plan.legs[plan.legs.length - 1]
-    if (finalLeg?.assertions.some((as) => as.kind === 'dialog-close')) return result
-    const domDelta = finalLeg?.assertions.some((as) => as.kind === 'dom-delta') === true
-    const probe = buildProbeSpec(graph, t, domDelta)
-    if (probe !== null) {
-      let probed: VerifyResult
-      try {
-        probed = await driver(plan, appUrl, { probe, modalSelector, authed })
-      } catch {
-        probed = { confirmed: false }
+    const closeTarget = finalLeg?.assertions.some((as) => as.kind === 'dialog-close') === true
+    if (!closeTarget) {
+      const domDelta = finalLeg?.assertions.some((as) => as.kind === 'dom-delta') === true
+      const probe = buildProbeSpec(graph, t, domDelta)
+      if (probe !== null) {
+        let probed: VerifyResult
+        try {
+          probed = await driver(plan, appUrl, { probe, modalSelector, authed })
+        } catch {
+          probed = { confirmed: false }
+        }
+        if (probed.confirmed) result = probed
+        // When BOTH are undrivable, keep the one carrying a diagnosis. A drive
+        // REFUTATION is a real verdict — the probe may never overwrite it with a
+        // shrug (the locator-miss=undrivable rule in drivePlan already covers the
+        // absent-control case this override once existed for).
+        else if (probed.undrivable === true && result.undrivable === true && result.undrivableReason === undefined && probed.undrivableReason !== undefined) result = probed
       }
-      if (probed.confirmed) result = probed
-      // When BOTH are undrivable, keep the one carrying a diagnosis. A drive
-      // REFUTATION is a real verdict — the probe may never overwrite it with a
-      // shrug (the locator-miss=undrivable rule in drivePlan already covers the
-      // absent-control case this override once existed for).
-      else if (probed.undrivable === true && result.undrivable === true && result.undrivableReason === undefined && probed.undrivableReason !== undefined) result = probed
+    }
+    // Modal-FLOW fallback: a modal-parented target still undrivable — multi-step
+    // modals render later-step controls only after in-modal interactions, so the
+    // locator miss says nothing about the edge. Runs ONLY on undrivable: an honest
+    // refutation (the target was driven and its assertion failed) is a real
+    // verdict the flow probe must never launder.
+    const fromNode = graph.nodes.find((n) => n.id === t.from)
+    const parentNode = fromNode?.kind === 'control' && fromNode.parent !== undefined ? graph.nodes.find((n) => n.id === fromNode.parent) : undefined
+    if (!result.confirmed && result.undrivable === true && parentNode?.kind === 'modal') {
+      let flowed: VerifyResult
+      try {
+        flowed = await driver(plan, appUrl, { modalFlow: true, modalSelector, authed })
+      } catch {
+        flowed = { confirmed: false, undrivable: true }
+      }
+      // Take the flow's verdict when it confirmed, or when it carries a diagnosis
+      // the direct drive lacks (same guard as the in-screen probe above: a sharper
+      // direct-drive diagnosis — roleless-close, invalid modalSelector — survives).
+      // The flow NEVER refutes: it resolves the target by role+name in whatever
+      // view exploration reached, so its failed assertions come back as
+      // undrivable-with-diagnosis and a plain refutation is never adopted.
+      if (flowed.confirmed || (flowed.undrivableReason !== undefined && result.undrivableReason === undefined)) result = flowed
     }
   }
   return result
@@ -775,6 +800,271 @@ async function pollForAttrDelta(page: PwPage, locator: string, baseline: string[
 /** The class-only dom-delta diagnosis, shared by the direct drive and the probe: styling churn is never state proof. */
 const CLASS_ONLY_DELTA_REASON = 'only the class attribute changed — styling churn is not state proof (app a11y gap: expose aria-expanded/pressed/checked on this control)'
 
+/** The opener-precondition diagnosis, shared by the close ladder and the modal-flow probe: the modal was never witnessably open. */
+const MODAL_PRECONDITION_REASON = 'modal was not open before the close interaction — opener prefix did not deliver the precondition'
+
+/** The role-less close diagnosis: with no role=dialog and no declared selector, a modal's closing cannot be witnessed. */
+const ROLELESS_CLOSE_REASON = 'no open modal was witnessable before the close interaction — either the opener prefix failed to open it, or the modal exposes no role=dialog (declare modalSelector in the workspace config to witness role-less closes)'
+
+/** The submit-target park diagnosis: a submit is side-effectful and is never auto-driven, neither as an exploration step nor as a witnessed target. */
+const SUBMIT_TARGET_REASON = 'side-effectful submit — needs manual/flow verification'
+
+/** The modal-flow ambiguous-identity diagnosis: the flow resolves its target by role+name in whatever view exploration reached, so a failed assertion there can never soundly refute this edge's own control. */
+const MODAL_FLOW_IDENTITY_REASON = "modal-flow assertion failed on a role+name match — multi-view modals reuse names, so the flow cannot prove it drove this edge's own control; needs manual verification"
+
+/** The modal-flow exploration budget: at most this many in-modal exploration clicks per target. */
+const MODAL_FLOW_CLICK_BUDGET = 6
+
+/**
+ * True when clicking the resolved element would fire a real form submit. The
+ * type ATTRIBUTE alone cannot decide: a <button> with NO type attribute inside
+ * a <form> is implicitly type=submit (getAttribute returns null), so this also
+ * reads the element's resolved `type` property gated on form association — a
+ * typeless button OUTSIDE any form also resolves to 'submit' but submits
+ * nothing and must stay drivable. An unresolvable element reads as not-a-submit;
+ * the caller's own click/judgment handles the miss.
+ */
+async function isSubmitControl(loc: PwLocator): Promise<boolean> {
+  try {
+    return (await loc.evaluate((el) => el.getAttribute?.('type') === 'submit' || (el.type === 'submit' && el.form != null))) === true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Probe a multi-step modal FLOW (the SignupLoginModal shape: an email-first view,
+ * then Login/Signup/ForgotPassword views): the target control renders only after
+ * in-modal interactions, so the direct drive read it as a locator miss inside the
+ * open modal. Open the modal via the plan's opener prefix (verified as a
+ * modal-count RISE vs the pre-open baseline — not open is undrivable with the
+ * opener-precondition reason), then explore: click in-modal candidates
+ * (buttons/links/tabs STRICTLY scoped inside the LAST visible modal container —
+ * the newest role=dialog / declared-modalSelector match, i.e. the modal the
+ * prefix opened, never an unrelated dialog like a consent banner), bounded by
+ * MODAL_FLOW_CLICK_BUDGET with no revisits, re-trying the target locator after
+ * each click. Submit controls — explicit type=submit OR an implicit submit (a
+ * typeless form-associated button, see isSubmitControl) — are NEVER clicked: not
+ * as stepping stones (skipped candidates) and not as the target (parked with
+ * SUBMIT_TARGET_REASON): firing one could mutate real backend state. An
+ * exploration click that leaves the start path or kills the modal voids that
+ * branch — the modal is re-opened and exploration continues on the remaining
+ * candidates. When the target resolves, judgeModalFlowTarget runs the final leg's
+ * own judgment; an exhausted budget or candidate sweep is undrivable, never a
+ * refutation (the target itself was never driven).
+ */
+async function probeModalFlow(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { modalSelector?: string; authed?: boolean }): Promise<VerifyResult> {
+  const finalLeg = plan.legs[plan.legs.length - 1]
+  const targetLocator = finalLeg?.action.locator
+  if (finalLeg === undefined || targetLocator === undefined) return { confirmed: false, undrivable: true }
+  if (finalLeg.event === 'submit') return { confirmed: false, undrivable: true, undrivableReason: SUBMIT_TARGET_REASON }
+  const sel = opts?.modalSelector
+  const startAbs = appUrl + plan.startUrl
+  const openCount = (): Promise<number> => (sel !== undefined ? countVisibleModals(page, sel) : page.getByRole('dialog').count())
+
+  let gotoBaseline = 0
+  // load the start screen, drive the prefix legs, and require the modal-count rise
+  const openModal = async (): Promise<boolean> => {
+    await page.goto(startAbs)
+    await page.waitForLoadState('networkidle').catch(() => {})
+    try {
+      gotoBaseline = await openCount()
+    } catch {
+      return false
+    }
+    for (const leg of plan.legs.slice(0, -1)) {
+      const a = leg.action
+      if (a.kind === 'parked') return false
+      try {
+        if (a.kind === 'goto' && a.url !== undefined) await page.goto(appUrl + a.url)
+        else if (a.kind === 'click' && a.locator !== undefined) await runLocator(page, a.locator, leg.event === 'submit' ? 'submit' : 'click')
+        else if (a.kind === 'press' && a.locator !== undefined) await runLocator(page, a.locator, 'press', a.key ?? 'Enter')
+        else if (a.kind === 'fill' && a.locator !== undefined) await runLocator(page, a.locator, 'fill', a.value ?? '')
+      } catch {
+        return false
+      }
+    }
+    return pollForRise(openCount, gotoBaseline)
+  }
+  if (!(await openModal())) return { confirmed: false, undrivable: true, undrivableReason: MODAL_PRECONDITION_REASON }
+
+  // ponytail: .last() pins scope to the newest visible container — portals append
+  // the just-opened modal at the end of <body>, so exploration never spans a
+  // consent-banner dialog or page-wide matches of a broad declared selector.
+  const scope = (): PwLocator => (sel !== undefined ? page.locator(sel).filter({ visible: true }).last() : page.getByRole('dialog').filter({ visible: true }).last())
+  // the target's accessible name (from its locator string) so exploration never clicks the target itself
+  const nameMatch = /\{ name: ("(?:[^"\\]|\\.)*") \}/.exec(targetLocator)
+  const targetName = nameMatch !== null ? (JSON.parse(nameMatch[1] as string) as string) : null
+  const targetVisible = async (): Promise<boolean> => {
+    try {
+      return (await resolveLocator(page, targetLocator).filter({ visible: true }).count()) > 0
+    } catch {
+      return false
+    }
+  }
+
+  const visited = new Set<string>()
+  // the first unexplored, non-submit, non-target button/link/tab inside the modal container
+  const nextCandidate = async (): Promise<{ key: string; loc: PwLocator } | null> => {
+    for (const role of ['button', 'link', 'tab']) {
+      let list: PwLocator
+      let n = 0
+      try {
+        list = scope().getByRole(role).filter({ visible: true })
+        n = await list.count()
+      } catch {
+        continue
+      }
+      for (let i = 0; i < n; i++) {
+        const cand = list.nth(i)
+        let name: string
+        try {
+          name = ((await cand.textContent()) ?? '').trim()
+        } catch {
+          continue
+        }
+        const key = `${role}:${name}`
+        if (visited.has(key) || (targetName !== null && name === targetName)) continue
+        if (await isSubmitControl(cand)) {
+          visited.add(key)
+          continue
+        }
+        return { key, loc: cand }
+      }
+    }
+    return null
+  }
+
+  let clicks = 0
+  for (;;) {
+    if (await targetVisible()) return judgeModalFlowTarget(page, finalLeg, appUrl, startAbs, opts)
+    if (clicks >= MODAL_FLOW_CLICK_BUDGET) {
+      return { confirmed: false, undrivable: true, undrivableReason: `modal-flow exploration budget exhausted (${MODAL_FLOW_CLICK_BUDGET} clicks) — the target never rendered inside the modal` }
+    }
+    const cand = await nextCandidate()
+    if (cand === null) {
+      return { confirmed: false, undrivable: true, undrivableReason: 'modal-flow exploration exhausted every in-modal candidate — the target never rendered inside the modal' }
+    }
+    visited.add(cand.key)
+    try {
+      await cand.loc.click({ timeout: 5000 })
+    } catch {
+      continue
+    }
+    clicks++
+    await page.waitForLoadState('networkidle').catch(() => {})
+    let openNow = false
+    try {
+      openNow = (await openCount()) > gotoBaseline
+    } catch {}
+    // a departed URL or a killed modal voids this branch: re-open and keep exploring
+    if (!samePath(page.url(), startAbs) || !openNow) {
+      if (!(await openModal())) return { confirmed: false, undrivable: true, undrivableReason: MODAL_PRECONDITION_REASON }
+    }
+  }
+}
+
+/**
+ * Judge the modal-flow TARGET exactly as drivePlan judges its final leg —
+ * dialog-close delta for close targets, dom-delta for state targets, url-assert
+ * for nav targets — with every baseline snapshotted immediately BEFORE the target
+ * click, so the evidence witnesses the target's own effect and never an
+ * exploration click's. A submit target — explicit type=submit or an implicit
+ * submit (typeless form-associated button) — is parked without ever being
+ * clicked. A locator miss at click time is undrivable (the target was never
+ * driven); an assertion that fails AFTER the click is undrivable with the
+ * identity diagnosis, NEVER a refutation — the flow resolves the target by
+ * role+name in whatever view exploration reached, and multi-view modals reuse
+ * generic names, so a same-named impostor's failure must not falsify the edge.
+ */
+async function judgeModalFlowTarget(page: PwPage, leg: SpecPlan['legs'][number], appUrl: string, startAbs: string, opts?: { modalSelector?: string; authed?: boolean }): Promise<VerifyResult> {
+  const a = leg.action
+  const locator = a.locator as string
+  let submitTarget = false
+  try {
+    submitTarget = await isSubmitControl(resolveLocator(page, locator))
+  } catch {}
+  if (submitTarget) return { confirmed: false, undrivable: true, undrivableReason: SUBMIT_TARGET_REASON }
+
+  const wantsClose = leg.assertions.some((as) => as.kind === 'dialog-close')
+  const wantsDomDelta = leg.assertions.some((as) => as.kind === 'dom-delta')
+  const urlAssertion = leg.assertions.find((as) => as.kind === 'url')
+  const sel = opts?.modalSelector
+
+  let dialogBaseline = 0
+  let selBaseline = 0
+  if (wantsClose) {
+    if (sel !== undefined) {
+      try {
+        selBaseline = await countVisibleModals(page, sel)
+      } catch {
+        return { confirmed: false, undrivable: true, undrivableReason: `modalSelector ${sel} is not a valid CSS selector — fix .uigraph/config.json or the --modal-selector flag` }
+      }
+    } else {
+      dialogBaseline = await page.getByRole('dialog').count()
+    }
+  }
+  let attrsBefore: string[] | undefined
+  if (wantsDomDelta) {
+    try {
+      attrsBefore = await readWatchedAttrs(resolveLocator(page, locator))
+    } catch {
+      return { confirmed: false, undrivable: true }
+    }
+  }
+
+  try {
+    if (a.kind === 'press') await runLocator(page, locator, 'press', a.key ?? 'Enter')
+    else if (a.kind === 'fill') await runLocator(page, locator, 'fill', a.value ?? '')
+    else await runLocator(page, locator, 'click')
+  } catch {
+    return { confirmed: false, undrivable: true }
+  }
+
+  if (wantsClose) {
+    if (sel !== undefined) {
+      if (await pollForDrop(() => countVisibleModals(page, sel), selBaseline)) {
+        return { confirmed: true, evidence: { kind: 'dialog', detail: `config modal selector ${sel} dropped the modal count (modal closed)` } }
+      }
+      if (selBaseline === 0) return { confirmed: false, undrivable: true, undrivableReason: MODAL_PRECONDITION_REASON }
+      return { confirmed: false, undrivable: true, undrivableReason: MODAL_FLOW_IDENTITY_REASON }
+    }
+    if (dialogBaseline === 0) return { confirmed: false, undrivable: true, undrivableReason: ROLELESS_CLOSE_REASON }
+    if (await pollForDrop(() => page.getByRole('dialog').count(), dialogBaseline)) {
+      return { confirmed: true, evidence: { kind: 'dialog', detail: 'dialog count dropped after drive (modal closed)' } }
+    }
+    return { confirmed: false, undrivable: true, undrivableReason: MODAL_FLOW_IDENTITY_REASON }
+  }
+
+  if (wantsDomDelta) {
+    const delta = await pollForAttrDelta(page, locator, attrsBefore as string[])
+    await page.waitForLoadState('networkidle').catch(() => {})
+    if (!samePath(page.url(), startAbs)) {
+      return { confirmed: false, undrivable: true, undrivableReason: 'the control navigated away during the state-click — not a same-screen transition; cannot witness as dom-delta' }
+    }
+    if (delta === null) {
+      return { confirmed: false, undrivable: true, undrivableReason: 'no observable attribute change on the clicked control — state may live elsewhere; cannot witness deterministically' }
+    }
+    if (delta.attr === 'class') return { confirmed: false, undrivable: true, undrivableReason: CLASS_ONLY_DELTA_REASON }
+    return { confirmed: true, evidence: { kind: 'dom-delta', locator, ...delta } }
+  }
+
+  if (urlAssertion !== undefined) {
+    const expected = appUrl + urlAssertion.value
+    // a same-path URL match is vacuous — it can never witness the target (mirrors drivePlan)
+    if (samePath(startAbs, expected)) return { confirmed: false, undrivable: true }
+    await page.waitForURL((u) => samePath(u.toString(), expected), { timeout: 4000 }).catch(() => {})
+    if (samePath(page.url(), expected)) return { confirmed: true, evidence: { kind: 'url-assert', url: expected } }
+    if (opts?.authed !== true && /login|signin|sign-in|auth/i.test(page.url())) {
+      return { confirmed: false, undrivable: true, undrivableReason: 'landed on an auth route while unauthenticated — guard bounce, needs an authenticated session' }
+    }
+    return { confirmed: false, undrivable: true, undrivableReason: MODAL_FLOW_IDENTITY_REASON }
+  }
+
+  // the leg asserts nothing the flow can witness (e.g. a nested modal open) — never an evidence-free confirmation
+  return { confirmed: false, undrivable: true }
+}
+
 /**
  * Probe a dom-delta target: a same-screen state control (menu item, accordion)
  * that is often CSS-hidden until a sibling toggle (hamburger) reveals it — the
@@ -893,8 +1183,9 @@ async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise
   return { confirmed: false }
 }
 
-async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string; authed?: boolean }): Promise<VerifyResult> {
+async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean }): Promise<VerifyResult> {
   if (opts?.probe !== undefined) return probePlan(page, opts.probe, appUrl)
+  if (opts?.modalFlow === true) return probeModalFlow(page, plan, appUrl, opts)
   const anchorUrl = plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl
   await page.goto(anchorUrl)
   // Settle before the first interaction (SPA boot, async geolocation/consent UI):
@@ -1098,12 +1389,12 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
       if (await pollForDrop(() => countVisibleModals(page, sel), configModalBaseline)) {
         dialogDetail = `config modal selector ${sel} dropped the modal count (modal closed)`
       } else if (configModalBaseline === 0) {
-        return { confirmed: false, undrivable: true, undrivableReason: 'modal was not open before the close interaction — opener prefix did not deliver the precondition' }
+        return { confirmed: false, undrivable: true, undrivableReason: MODAL_PRECONDITION_REASON }
       } else {
         confirmed = false
       }
     } else if (dialogBaseline === 0) {
-      return { confirmed: false, undrivable: true, undrivableReason: 'no open modal was witnessable before the close interaction — either the opener prefix failed to open it, or the modal exposes no role=dialog (declare modalSelector in the workspace config to witness role-less closes)' }
+      return { confirmed: false, undrivable: true, undrivableReason: ROLELESS_CLOSE_REASON }
     } else if (await pollForDrop(() => page.getByRole('dialog').count(), dialogBaseline)) {
       dialogDetail = 'dialog count dropped after drive (modal closed)'
     } else {
@@ -1221,7 +1512,7 @@ function makePlaywrightDriver(storageState?: string, modalSelector?: string): Ow
   // Memoize the launch so N concurrent first-calls (the worker pool) share ONE browser
   // instead of each racing to launch its own on the `context === null` check.
   let ready: Promise<void> | null = null
-  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalSelector?: string }): Promise<VerifyResult> => {
+  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean }): Promise<VerifyResult> => {
     ready ??= (async (): Promise<void> => {
       const { chromium } = await loadPlaywright()
       browser = (await chromium.launch()) as PwBrowser
@@ -1264,13 +1555,20 @@ interface PwLocator {
   press: (key: string, o?: unknown) => Promise<void>
   count: () => Promise<number>
   filter: (o: { visible: boolean }) => PwLocator
+  last: () => PwLocator
   evaluate: (fn: (el: FormLike) => unknown) => Promise<unknown>
   getAttribute: (name: string, o?: unknown) => Promise<string | null>
+  nth: (i: number) => PwLocator
+  getByRole: (role: string, o?: { name?: string }) => PwLocator
+  textContent: () => Promise<string | null>
 }
 
-/** The form-submission slice of a DOM element `evaluate` runs against in-page (no `lib.dom` dependency in this Node package). */
+/** The DOM-element slice `evaluate` runs against in-page (no `lib.dom` dependency in this Node package): form submission plus the submit-detection fields isSubmitControl reads. */
 interface FormLike {
   requestSubmit: () => void
+  type?: string
+  form?: unknown
+  getAttribute?: (name: string) => string | null
 }
 
 /** The slice of a Playwright Response the request-evidence wait reads (method+url+status). */
