@@ -654,6 +654,20 @@ async function countVisibleModals(page: PwPage, selector: string): Promise<numbe
 }
 
 /**
+ * Poll a modal count until it RISES above `baseline` or the deadline passes.
+ * Modal entrances animate/mount asynchronously just like exits — a single
+ * synchronous read right after the opener click refutes every animated modal.
+ */
+async function pollForRise(count: () => Promise<number>, baseline: number, deadlineMs = 2000, stepMs = 100): Promise<boolean> {
+  const start = Date.now()
+  for (;;) {
+    if ((await count()) > baseline) return true
+    if (Date.now() - start >= deadlineMs) return false
+    await new Promise((r) => setTimeout(r, stepMs))
+  }
+}
+
+/**
  * Poll a modal count until it drops below `baseline` or the deadline passes.
  * Modals with exit animations unmount 150-300ms after the closing click — judging
  * the count synchronously would refute every animated close. Bounded so a modal
@@ -1054,12 +1068,13 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
     // The 3-rung evidence ladder (see the doc comment above): role delta, then the
     // declared modalSelector delta, then — ONLY when no selector is declared — the
     // heuristic delta (undrivable), else refute.
-    if ((await page.getByRole('dialog').count()) <= dialogBaseline) {
+    if (!(await pollForRise(() => page.getByRole('dialog').count(), dialogBaseline))) {
       if (opts?.modalSelector !== undefined) {
-        // A flat declared selector is AFFIRMATIVE evidence the modal did not appear
-        // (the owner defined what a modal is) — refute; the heuristic must never
-        // mask it (a spinner/toast overlay is not the declared modal).
-        if ((await countVisibleModals(page, opts.modalSelector)) > configModalBaseline) {
+        // A flat declared selector AFTER the bounded wait is AFFIRMATIVE evidence
+        // the modal did not appear — refute; the heuristic must never mask it.
+        // Mixed apps stay sound: a role=dialog RISE already confirmed above, the
+        // declared selector is consulted only when the role count stayed flat.
+        if (await pollForRise(() => countVisibleModals(page, opts.modalSelector as string), configModalBaseline)) {
           dialogDetail = `config modal selector ${opts.modalSelector} raised the modal count`
         } else {
           confirmed = false
