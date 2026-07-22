@@ -44,7 +44,7 @@ export interface ProbeSpec {
 }
 
 /** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan; with `modalFlow`, runs the multi-step modal-flow probe (open the modal via the plan's prefix, explore in-modal steps until the target renders, judge the target with the final leg's own evidence). `modalSelector` is the app owner's declared modal CSS selector (rung 2 of the dialog evidence ladder). */
-export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean }) => Promise<VerifyResult>
+export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean; allowSubmits?: boolean }) => Promise<VerifyResult>
 
 /** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). `concurrency` is the parallel-driver pool width (default 8, capped 16); `patternSample` is how many representatives to drive per over-approximation pattern (default 1); `modalSelector` is the workspace-declared CSS selector for apps that render modals without role=dialog (rung 2 of the dialog evidence ladder). */
 export interface RunVerifyOptions {
@@ -58,6 +58,8 @@ export interface RunVerifyOptions {
   concurrency?: number
   patternSample?: number
   modalSelector?: string
+  /** DEV-ONLY opt-in: modal-flow exploration may fill visible empty inputs with fake test data and click submit controls. Off by default — submits can mutate backend state; enable only against a disposable dev/QA environment. */
+  allowSubmits?: boolean
 }
 
 /** How one worklist target ended this pass: confirmed (drove and landed), refuted (drove, did not land), undrivable (no drivable control/plan ever reached it — never attempted), or rejected (drove and landed but the proof gate refused the evidence — nothing persisted). */
@@ -126,7 +128,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   try {
     // STAGE 1 — drive the simple targets CONCURRENTLY. Pure: no DB writes, reads only the
     // frozen graph snapshot; results are collected by input index for a deterministic fold.
-    const results = await mapPool(simple, concurrency, (t) => attemptSimple(driver, graph, t, opts.appUrl, opts.modalSelector, authed))
+    const results = await mapPool(simple, concurrency, (t) => attemptSimple(driver, graph, t, opts.appUrl, opts.modalSelector, authed, opts.allowSubmits === true))
 
     // STAGE 2 — fold the results SERIALLY (the only SQLite writer), in worklist-rank order.
     for (let i = 0; i < simple.length; i++) {
@@ -298,7 +300,7 @@ async function mapPool<T, R>(items: readonly T[], concurrency: number, worker: (
  * and on failure runs the exploratory probe before judging (an undrivable-after-probe
  * result is still undrivable). Returns null when there is no path to plan (nothing to fold).
  */
-async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string, modalSelector?: string, authed?: boolean): Promise<VerifyResult | null> {
+async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarget, appUrl: string, modalSelector?: string, authed?: boolean, allowSubmits?: boolean): Promise<VerifyResult | null> {
   const steps = planForTarget(graph, t.from, t.to)
   if (steps === null) return null
   const plan = buildSpecPlan(graph, steps, { baseUrl: appUrl, modalSelector, title: `verify ${t.from} → ${t.to}` })
@@ -347,7 +349,7 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
     if (!result.confirmed && result.undrivable === true && parentNode?.kind === 'modal') {
       let flowed: VerifyResult
       try {
-        flowed = await driver(plan, appUrl, { modalFlow: true, modalSelector, authed })
+        flowed = await driver(plan, appUrl, { modalFlow: true, allowSubmits, modalSelector, authed })
       } catch {
         flowed = { confirmed: false, undrivable: true }
       }
@@ -833,6 +835,31 @@ async function isSubmitControl(loc: PwLocator): Promise<boolean> {
 }
 
 /**
+ * DEV-ONLY (allowSubmits): fill every visible EMPTY text-like input inside the
+ * modal container with fake test data (email/password/text vocabulary matching
+ * codegen's fillValue), so an opted-in submit exploration step has a plausible
+ * form to fire. Never touches prefilled inputs; errors are swallowed — a fill
+ * miss just leaves the submit to fail honestly.
+ */
+async function fillModalInputs(page: PwPage, sel?: string): Promise<void> {
+  const container = sel !== undefined ? `${sel} input` : `[role="dialog"] input`
+  const inputs = page.locator(container).filter({ visible: true })
+  const n = await inputs.count()
+  for (let i = 0; i < Math.min(n, 6); i++) {
+    const inp = inputs.nth(i)
+    try {
+      const val = (await inp.evaluate((el) => (el as unknown as { value?: string }).value)) as string | undefined
+      if (val !== undefined && val !== '') continue
+      const type = ((await inp.getAttribute('type')) ?? 'text').toLowerCase()
+      const fake = type === 'email' ? 'test@example.com' : type === 'password' ? 'Passw0rd!' : type === 'tel' ? '0401234567' : type === 'number' ? '42' : 'test'
+      await inp.fill(fake, { timeout: 2000 })
+    } catch {
+      continue
+    }
+  }
+}
+
+/**
  * Probe a multi-step modal FLOW (the SignupLoginModal shape: an email-first view,
  * then Login/Signup/ForgotPassword views): the target control renders only after
  * in-modal interactions, so the direct drive read it as a locator miss inside the
@@ -853,11 +880,11 @@ async function isSubmitControl(loc: PwLocator): Promise<boolean> {
  * own judgment; an exhausted budget or candidate sweep is undrivable, never a
  * refutation (the target itself was never driven).
  */
-async function probeModalFlow(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { modalSelector?: string; authed?: boolean }): Promise<VerifyResult> {
+async function probeModalFlow(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { modalSelector?: string; authed?: boolean; allowSubmits?: boolean }): Promise<VerifyResult> {
   const finalLeg = plan.legs[plan.legs.length - 1]
   const targetLocator = finalLeg?.action.locator
   if (finalLeg === undefined || targetLocator === undefined) return { confirmed: false, undrivable: true }
-  if (finalLeg.event === 'submit') return { confirmed: false, undrivable: true, undrivableReason: SUBMIT_TARGET_REASON }
+  if (finalLeg.event === 'submit' && opts?.allowSubmits !== true) return { confirmed: false, undrivable: true, undrivableReason: SUBMIT_TARGET_REASON }
   const sel = opts?.modalSelector
   const startAbs = appUrl + plan.startUrl
   const openCount = (): Promise<number> => (sel !== undefined ? countVisibleModals(page, sel) : page.getByRole('dialog').count())
@@ -926,6 +953,13 @@ async function probeModalFlow(page: PwPage, plan: SpecPlan, appUrl: string, opts
         const key = `${role}:${name}`
         if (visited.has(key) || (targetName !== null && name === targetName)) continue
         if (await isSubmitControl(cand)) {
+          // DEV-ONLY opt-in: with allowSubmits the submit becomes a legitimate
+          // stepping stone AFTER the modal's visible empty inputs are filled
+          // with fake test data (the codegen fill vocabulary); default = skip.
+          if (opts?.allowSubmits === true) {
+            await fillModalInputs(page, sel).catch(() => {})
+            return { key, loc: cand }
+          }
           visited.add(key)
           continue
         }
@@ -977,14 +1011,15 @@ async function probeModalFlow(page: PwPage, plan: SpecPlan, appUrl: string, opts
  * role+name in whatever view exploration reached, and multi-view modals reuse
  * generic names, so a same-named impostor's failure must not falsify the edge.
  */
-async function judgeModalFlowTarget(page: PwPage, leg: SpecPlan['legs'][number], appUrl: string, startAbs: string, opts?: { modalSelector?: string; authed?: boolean }): Promise<VerifyResult> {
+async function judgeModalFlowTarget(page: PwPage, leg: SpecPlan['legs'][number], appUrl: string, startAbs: string, opts?: { modalSelector?: string; authed?: boolean; allowSubmits?: boolean }): Promise<VerifyResult> {
   const a = leg.action
   const locator = a.locator as string
   let submitTarget = false
   try {
     submitTarget = await isSubmitControl(resolveLocator(page, locator))
   } catch {}
-  if (submitTarget) return { confirmed: false, undrivable: true, undrivableReason: SUBMIT_TARGET_REASON }
+  if (submitTarget && opts?.allowSubmits !== true) return { confirmed: false, undrivable: true, undrivableReason: SUBMIT_TARGET_REASON }
+  if (submitTarget) await fillModalInputs(page, opts?.modalSelector).catch(() => {})
 
   const wantsClose = leg.assertions.some((as) => as.kind === 'dialog-close')
   const wantsDomDelta = leg.assertions.some((as) => as.kind === 'dom-delta')
@@ -1183,7 +1218,7 @@ async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise
   return { confirmed: false }
 }
 
-async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean }): Promise<VerifyResult> {
+async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean; allowSubmits?: boolean }): Promise<VerifyResult> {
   if (opts?.probe !== undefined) return probePlan(page, opts.probe, appUrl)
   if (opts?.modalFlow === true) return probeModalFlow(page, plan, appUrl, opts)
   const anchorUrl = plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl
@@ -1512,7 +1547,7 @@ function makePlaywrightDriver(storageState?: string, modalSelector?: string): Ow
   // Memoize the launch so N concurrent first-calls (the worker pool) share ONE browser
   // instead of each racing to launch its own on the `context === null` check.
   let ready: Promise<void> | null = null
-  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean }): Promise<VerifyResult> => {
+  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean; allowSubmits?: boolean }): Promise<VerifyResult> => {
     ready ??= (async (): Promise<void> => {
       const { chromium } = await loadPlaywright()
       browser = (await chromium.launch()) as PwBrowser

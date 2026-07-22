@@ -98,12 +98,13 @@ export function buildProgram(): Command {
     .option('--storage-state <file>', 'Playwright storageState JSON for an authenticated session (drives the app logged in)')
     .option('--all', 'verify-all sweep: also drive must-static proofs to upgrade them to runtime-witnessed')
     .option('--retry-refuted', 'put falsified (refuted) edges back on the worklist — a confirmation clears the verdict')
+    .option('--allow-submits', 'DEV-ONLY: modal-flow may fill fake test data and click submit controls — only against a disposable dev/QA environment')
     .option('--until-done', 'loop rounds until 100% accounted-for: drive, then park the undrivable remainder with reasons')
     .option('--max-rounds <n>', 'cap for --until-done', '10')
     .option('--concurrency <n>', 'parallel browser pages driving targets at once (1-16)', '8')
     .option('--pattern-sample <n>', 'representatives driven per over-approximation nav pattern before the rest are accounted by pattern', '1')
     .option('--modal-selector <selector>', 'CSS selector the app renders modals with (no role=dialog) — overrides .uigraph/config.json modalSelector')
-    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string; all?: boolean; untilDone?: boolean; retryRefuted?: boolean; maxRounds: string; concurrency: string; patternSample: string; modalSelector?: string }) => {
+    .action(async (dir: string, opts: { appUrl: string; limit: string; storageState?: string; all?: boolean; untilDone?: boolean; retryRefuted?: boolean; allowSubmits?: boolean; maxRounds: string; concurrency: string; patternSample: string; modalSelector?: string }) => {
       const concurrency = Number(opts.concurrency)
       const patternSample = Number(opts.patternSample)
       const modalSelector = opts.modalSelector ?? loadWorkspaceConfig(dir).modalSelector
@@ -113,7 +114,7 @@ export function buildProgram(): Command {
         return
       }
       if (opts.untilDone === true) {
-        const s = await runVerifyUntilDone({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, maxRounds: Number(opts.maxRounds), concurrency, patternSample, modalSelector, includeRefuted: opts.retryRefuted === true })
+        const s = await runVerifyUntilDone({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, maxRounds: Number(opts.maxRounds), concurrency, patternSample, modalSelector, includeRefuted: opts.retryRefuted === true, allowSubmits: opts.allowSubmits === true })
         console.log(
           `verify --until-done: ${s.rounds} round(s), ${s.confirmed} confirmed, ${s.parkedEdges} edge(s) + ${s.parkedProposals} proposal(s) parked\n` +
             `  loopDone: ${s.loopDone} (${s.exitReason})\n` +
@@ -121,7 +122,7 @@ export function buildProgram(): Command {
         )
         return
       }
-      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, includeProven: opts.all === true, includeRefuted: opts.retryRefuted === true, concurrency, patternSample, modalSelector })
+      const s = await runVerify({ dir, appUrl: opts.appUrl, limit: Number(opts.limit), storageState: opts.storageState, includeProven: opts.all === true, includeRefuted: opts.retryRefuted === true, allowSubmits: opts.allowSubmits === true, concurrency, patternSample, modalSelector })
       const pat = s.patternParked > 0 ? ` · ${s.patternParked} accounted by pattern` : ''
       const rej = s.rejected > 0 ? ` · ${s.rejected} rejected by the proof gate (not persisted)` : ''
       console.log(`verify: ${s.confirmed} confirmed / ${s.refuted} refuted of ${s.attempted} target(s)${pat}${rej}`)
