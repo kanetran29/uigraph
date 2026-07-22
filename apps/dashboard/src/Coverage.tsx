@@ -71,6 +71,9 @@ export function Coverage(props: CoverageProps): JSX.Element {
         </div>
         <span className="cov-pct">
           {accountedPct}% accounted-for <span className="muted">({coverage.accounted ?? coverage.verified}/{coverage.total})</span>
+          {coverage.verifiedOfReached !== undefined && (
+            <span className="cov-kpi"> · KPI {Math.round(coverage.verifiedOfReached * 100)}% verified/reached <span className="muted">({coverage.reachedCount} reached)</span></span>
+          )}
         </span>
       </div>
       <p className="muted cov-sub">

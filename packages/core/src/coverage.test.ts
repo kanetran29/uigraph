@@ -491,3 +491,23 @@ describe('nextToVerify — stale witnesses outrank everything drivable', () => {
     expect(representatives.some((t) => t.id === 'e_stale')).toBe(true)
   })
 })
+
+describe('verifiedOfReached — the product KPI', () => {
+  it('excludes refuted, unanchorable, and condition-gated parks from reached; counts runtime + static proofs as verified', () => {
+    const gg = graph(
+      [node('a'), node('b'), node('c'), node('d'), node('e'), node('f')],
+      [
+        edge('e_rt', 'a', 'b', { source: 'runtime', modality: 'must' }),
+        edge('e_must', 'a', 'c', { source: 'static', modality: 'must' }),
+        edge('e_ref', 'a', 'd', { source: 'static', modality: 'may', refuted: true }),
+        edge('e_gated', 'a', 'e', { source: 'static', modality: 'may', witness: undefined }),
+        edge('e_open', 'a', 'f', { source: 'static', modality: 'may' }),
+      ],
+    )
+    const cov = buildCoverage(gg, [{ edgeId: 'e_gated', reason: 'dynamic nav did not fire on drive (no URL change) — needs runtime state/precondition' }])
+    expect(cov.refutedCount).toBe(1)
+    expect(cov.conditionGatedCount).toBe(1)
+    expect(cov.reachedCount).toBe(3)
+    expect(cov.verifiedOfReached).toBeCloseTo(2 / 3)
+  })
+})

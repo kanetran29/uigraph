@@ -69,6 +69,9 @@ export interface CoverageReport {
   parkedCount: number
   staleWitnessCount: number
   unanchorableCount: number
+  conditionGatedCount: number
+  reachedCount: number
+  verifiedOfReached: number
   refutedCount: number
   byModality: Record<string, number>
   bySource: Record<string, number>
@@ -195,6 +198,17 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
   const refutedCount = rows.filter((r) => r.status === 'refuted').length
   const accounted = rows.filter((r) => r.accounted).length
   const total = rows.length
+  // The product KPI: verified / reached. `reached` excludes verdicts that remove an
+  // edge from the user-tappable universe (refuted hypotheses, unanchorable
+  // synthetics) and edges whose park reason names a precondition EXTERNAL to the
+  // run conditions (payment-return state, tokens, admin sessions, guard states) —
+  // those re-enter the denominator the moment the condition is supplied and the
+  // park lifts. The regex is the single classifier for "external condition";
+  // wording in park reasons must keep matching it.
+  const conditionGated = rows.filter((r) => (r.status === 'parked' || r.status === 'pattern-covered') && r.reason !== undefined && /state\/precondition|Stripe|token|parameterized|estimation|admin|authenticated session|auth route|round cap|undrivable after|unreachable\/undrivable|no drivable/.test(r.reason)).length
+  const reachedCount = total - refutedCount - unanchorableCount - conditionGated
+  const verifiedForKpi = rows.filter((r) => r.verified || r.status === 'static').length
+  const verifiedOfReached = reachedCount > 0 ? verifiedForKpi / reachedCount : 1
   return {
     total,
     verified: runtimeVerified,
@@ -208,6 +222,9 @@ export function buildCoverage(graph: UiGraph, parked: ParkedEdge[] = []): Covera
     parkedCount,
     staleWitnessCount,
     unanchorableCount,
+    conditionGatedCount: conditionGated,
+    reachedCount,
+    verifiedOfReached,
     refutedCount,
     byModality,
     bySource,
