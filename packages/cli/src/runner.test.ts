@@ -1329,6 +1329,244 @@ describe('runVerify: dom-delta probe (CSS-hidden state controls)', () => {
   })
 })
 
+// Modal-FLOW probing: multi-step modals (the SignupLoginModal shape — an
+// email-first view, then Login/Signup/ForgotPassword views) render their
+// later-step controls only after in-modal interactions, so a later-step target is
+// a locator miss on the direct drive and the class was permanently undrivable.
+// probeModalFlow re-opens the modal via the plan's opener prefix, then explores
+// IN-MODAL candidates (bounded, no revisits, submits never clicked) until the
+// target resolves, and judges the target with drivePlan's own final-leg evidence
+// — baselines snapshotted immediately before the TARGET click so the evidence
+// witnesses the target's effect, never an exploration click's.
+describe('runVerify: modal-flow probing (step-gated modal controls)', () => {
+  /** One scripted in-modal control: visible only while its step is current; `type` is the type ATTRIBUTE (null when absent, like the DOM); `form` marks form-association (a typeless form button is an implicit submit); `onClick` is what clicking it does. */
+  interface StepControl {
+    name: string
+    type?: string
+    form?: boolean
+    onClick?: 'advance' | 'close' | 'navigate'
+  }
+
+  /**
+   * Fake page for a multi-step modal: 'Open' on the host screen opens the modal
+   * at step 0; each in-modal control resolves only while the modal is open AND
+   * its step is current, so a later-step target is a locator miss until the
+   * right in-modal click advanced the step — like reality. goto resets
+   * everything (a reload closes the modal). Records every control click and
+   * every role=dialog count read in `events` so tests can assert exploration
+   * order and evidence-baseline attribution.
+   */
+  const stepModalPage = (steps: StepControl[][], o?: { banner?: StepControl[]; roleless?: boolean }): { page: Parameters<typeof drivePlan>[0]; events: string[] } => {
+    let current = ''
+    let open = false
+    let step = 0
+    const events: string[] = []
+    const banner = o?.banner ?? []
+    const controlsNow = (): StepControl[] => (open ? (steps[step] ?? []) : [])
+    const act = (c: StepControl): void => {
+      events.push(`click:${c.name}`)
+      if (c.onClick === 'advance') step++
+      else if (c.onClick === 'close') open = false
+      else if (c.onClick === 'navigate') {
+        open = false
+        current = 'http://app/away'
+      }
+    }
+    const controlLoc = (c: StepControl | undefined) => {
+      const loc = {
+        count: async () => (c !== undefined ? 1 : 0),
+        click: async () => {
+          if (c === undefined) throw new Error('locator not found (wrong step)')
+          act(c)
+        },
+        getAttribute: async (name: string) => (c !== undefined && name === 'type' ? (c.type ?? null) : null),
+        // model the DOM: a typeless button RESOLVES to type=submit; form-association decides whether clicking it submits anything
+        evaluate: async (fn: (el: { type?: string; form?: unknown; getAttribute?: (n: string) => string | null }) => unknown) =>
+          fn({ type: c?.type ?? 'submit', form: c?.form === true ? {} : null, getAttribute: (n: string) => (n === 'type' ? (c?.type ?? null) : null) }),
+        textContent: async () => c?.name ?? null,
+        filter: () => loc,
+      }
+      return loc
+    }
+    const collection = (role: string, list: () => StepControl[]) => {
+      const col = {
+        count: async () => (role === 'button' ? list().length : 0),
+        nth: (i: number) => controlLoc(role === 'button' ? list()[i] : undefined),
+        filter: () => col,
+      }
+      return col
+    }
+    // page.getByRole('dialog') spans EVERY open dialog (banner + step modal), like
+    // Playwright; .last() narrows to the newest container — the step modal while open.
+    const dialogsNow = (): number => (o?.roleless === true ? 0 : (banner.length > 0 ? 1 : 0) + (open ? 1 : 0))
+    const scopeFor = (list: () => StepControl[]): unknown => {
+      const s = {
+        count: async () => {
+          events.push('count:dialog')
+          return dialogsNow()
+        },
+        filter: () => s,
+        last: () => scopeFor(() => (open ? controlsNow() : banner)),
+        getByRole: (role: string, oo?: { name?: string }) => (oo?.name !== undefined ? controlLoc(list().find((c) => c.name === oo.name)) : collection(role, list)),
+      }
+      return s
+    }
+    const dialogScope = scopeFor(() => [...banner, ...controlsNow()]) as { count: () => Promise<number> }
+    const opener = {
+      count: async () => 1,
+      click: async () => {
+        events.push('click:Open')
+        open = true
+        step = 0
+      },
+      getAttribute: async () => null,
+      textContent: async () => 'Open',
+      filter: () => opener,
+    }
+    const zero = {
+      count: async () => 0,
+      filter: () => zero,
+      last: () => zero,
+    }
+    const page = {
+      goto: async (url: string) => {
+        current = url
+        open = false
+        step = 0
+      },
+      url: () => current,
+      getByRole: (role: string, o?: { name?: string }) => {
+        if (role === 'dialog') return dialogScope
+        return o?.name === 'Open' ? opener : controlLoc(undefined)
+      },
+      locator: (_sel: string) => zero,
+      waitForLoadState: async () => {},
+      waitForURL: async () => {},
+    }
+    return { page: page as unknown as Parameters<typeof drivePlan>[0], events }
+  }
+
+  /** host /a → 'Open' opener → modal m_1 (parent n_a); the target control lives inside the modal, its edge (may) is the sole worklist entry. */
+  const modalFlowGraph = (targetName: string, targetTo: string): UiGraph => {
+    const opener: GraphNode = {
+      id: 'c_open', route: null, componentPath: null, label: 'Open', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Open' } },
+    }
+    const target: GraphNode = {
+      id: 'c_t', route: null, componentPath: null, label: targetName, kind: 'control', parent: 'm_1',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: `button|${targetName}` } },
+    }
+    return graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), { id: 'm_1', route: null, componentPath: null, label: 'SignupLoginModal', kind: 'modal', parent: 'n_a' }, opener, target],
+      [edge('e_open', 'c_open', 'm_1', { event: 'click', effect: null }), edge('e_t', 'c_t', targetTo, { event: 'click', modality: 'may' })],
+    )
+  }
+
+  /** Seed the graph, run one verify pass over the fake page, and return summary + event log + workspace dir. */
+  const run = async (gg: UiGraph, steps: StepControl[][], pageOpts?: { banner?: StepControl[]; roleless?: boolean }): Promise<{ summary: Awaited<ReturnType<typeof runVerify>>; events: string[]; dir: string }> => {
+    const dir = await seedDir('uigraph-modalflow-', gg)
+    const { page, events } = stepModalPage(steps, pageOpts)
+    const driver = async (plan: SpecPlan, appUrl: string, o?: Parameters<typeof drivePlan>[3]): Promise<VerifyResult> => drivePlan(page, plan, appUrl, o)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    return { summary, events, dir }
+  }
+
+  const twoStepClose: StepControl[][] = [[{ name: 'Continue', onClick: 'advance' }], [{ name: 'Go back', onClick: 'close' }]]
+
+  it('(a) confirms a step-2 close target with dialog-close evidence, the step-1 click preceding the target click', async () => {
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const { summary, events, dir } = await run(modalFlowGraph('Go back', 'n_a'), twoStepClose)
+    expect(summary.outcomes).toEqual({ e_t: 'confirmed' })
+    expect(summary.confirmed).toBe(1)
+    const clicks = events.filter((e) => e.startsWith('click:'))
+    expect(clicks.slice(-2)).toEqual(['click:Continue', 'click:Go back'])
+    const check = openStore(join(dir, 'uigraph.db'))
+    const obs = check.getObservations()
+    check.close()
+    expect(obs.length).toBe(1)
+    expect(obs[0]?.evidence).toEqual({ kind: 'dialog', detail: 'dialog count dropped after drive (modal closed)' })
+  })
+
+  it('(b) an exploration click that navigates away voids the branch: undrivable, never refuted, never credited', async () => {
+    const { summary, events } = await run(modalFlowGraph('Go back', 'n_a'), [[{ name: 'Away', onClick: 'navigate' }], [{ name: 'Go back', onClick: 'close' }]])
+    expect(summary.outcomes).toEqual({ e_t: 'undrivable' })
+    expect(summary.confirmed).toBe(0)
+    expect(summary.refuted).toBe(0)
+    expect(events).not.toContain('click:Go back')
+  })
+
+  it('(c) a submit target is parked with the side-effectful diagnosis and ZERO clicks on it — and a submit is never a stepping stone', async () => {
+    const { summary, events } = await run(modalFlowGraph('Sign up', 'n_b'), [
+      [{ name: 'Continue with email', type: 'submit' }, { name: 'Continue', onClick: 'advance' }],
+      [{ name: 'Sign up', type: 'submit' }],
+    ])
+    expect(summary.outcomes).toEqual({ e_t: 'undrivable' })
+    expect(summary.refuted).toBe(0)
+    expect(summary.diagnoses['e_t']).toBe('side-effectful submit — needs manual/flow verification')
+    expect(events).not.toContain('click:Sign up')
+    expect(events).not.toContain('click:Continue with email')
+  })
+
+  it('(d) exploration budget exhausted → undrivable with the budget diagnosis, exactly 6 exploration clicks', async () => {
+    const duds: StepControl[] = Array.from({ length: 7 }, (_, i) => ({ name: `Dud ${i}` }))
+    const { summary, events } = await run(modalFlowGraph('Go back', 'n_a'), [duds, [{ name: 'Go back', onClick: 'close' }]])
+    expect(summary.outcomes).toEqual({ e_t: 'undrivable' })
+    expect(summary.refuted).toBe(0)
+    expect(summary.diagnoses['e_t']).toContain('exploration budget exhausted')
+    expect(events.filter((e) => e.startsWith('click:Dud')).length).toBe(6)
+  })
+
+  it('(e) the dialog-close baseline is read AFTER the last exploration click and BEFORE the target click', async () => {
+    const { summary, events } = await run(modalFlowGraph('Go back', 'n_a'), twoStepClose)
+    expect(summary.outcomes).toEqual({ e_t: 'confirmed' })
+    const lastExploration = events.lastIndexOf('click:Continue')
+    const targetClick = events.indexOf('click:Go back')
+    expect(lastExploration).toBeGreaterThan(-1)
+    expect(targetClick).toBeGreaterThan(lastExploration)
+    // the drop that confirmed was judged against a baseline read in THIS window —
+    // a pre-exploration baseline (modal closed, count 0) could never witness a drop
+    expect(events.slice(lastExploration + 1, targetClick)).toContain('count:dialog')
+  })
+
+  it('(f) an IMPLICIT submit (typeless button in a form) is parked and never clicked — as target and as stepping stone', async () => {
+    const { summary, events } = await run(modalFlowGraph('Log in', 'n_b'), [
+      [{ name: 'Continue', form: true }, { name: 'Advance', onClick: 'advance' }],
+      [{ name: 'Log in', form: true }],
+    ])
+    expect(summary.outcomes).toEqual({ e_t: 'undrivable' })
+    expect(summary.refuted).toBe(0)
+    expect(summary.diagnoses['e_t']).toBe('side-effectful submit — needs manual/flow verification')
+    expect(events).not.toContain('click:Log in')
+    expect(events).not.toContain('click:Continue')
+  })
+
+  it('(g) a same-named impostor reached mid-flow never refutes: undrivable with the identity diagnosis, refuted stays 0', async () => {
+    // step-1 'Go back' is an impostor dud (clicking it closes nothing); the real close control lives at step 2
+    const { summary } = await run(modalFlowGraph('Go back', 'n_a'), [
+      [{ name: 'Continue', onClick: 'advance' }],
+      [{ name: 'Go back' }],
+      [{ name: 'Go back', onClick: 'close' }],
+    ])
+    expect(summary.outcomes).toEqual({ e_t: 'undrivable' })
+    expect(summary.refuted).toBe(0)
+    expect(summary.diagnoses['e_t']).toContain('cannot prove it drove')
+  })
+
+  it("(h) exploration is scoped to the modal the prefix opened: a consent-banner dialog's buttons are never candidates", async () => {
+    const { summary, events } = await run(modalFlowGraph('Go back', 'n_a'), twoStepClose, { banner: [{ name: 'Accept all' }] })
+    expect(summary.outcomes).toEqual({ e_t: 'confirmed' })
+    expect(events).not.toContain('click:Accept all')
+  })
+
+  it('(i) the flow never stomps a sharper direct-drive diagnosis: a role-less close keeps ROLELESS_CLOSE_REASON', async () => {
+    const { summary } = await run(modalFlowGraph('Go back', 'n_a'), [[{ name: 'Go back', onClick: 'close' }]], { roleless: true })
+    expect(summary.outcomes).toEqual({ e_t: 'undrivable' })
+    expect(summary.refuted).toBe(0)
+    expect(summary.diagnoses['e_t']).toContain('declare modalSelector')
+  })
+})
+
 describe('buildProbeSpec reveal ranking survives fan-out narrowing', () => {
   it('ranks a toggle sibling FIRST from control.effects alone (no self-loop edge minted)', async () => {
     const mk = (id: string, name: string, effects?: string[]): GraphNode => ({
