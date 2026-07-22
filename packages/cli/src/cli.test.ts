@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import type { GraphEdge, GraphNode, UiGraph, Witness } from '@ui-graph/core'
+import type { GraphEdge, GraphNode, StateModel, UiGraph, Witness } from '@ui-graph/core'
 import { openStore, saveGraph } from '@ui-graph/core/node'
 import type { Server } from 'node:http'
 import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, formatParked, loadWorkspaceConfig, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runParked, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
@@ -496,13 +496,13 @@ describe('handleApiRequest (pure router)', () => {
     expect(res.body).toEqual([])
   })
 
-  it('GET /api/uml returns the Mermaid statechart source', () => {
+  it('GET /api/uml returns the state model (states + transitions)', () => {
     const dir = workspace()
     const res = handleApiRequest({ dir }, { method: 'GET', path: '/api/uml', body: undefined })
     expect(res.status).toBe(200)
-    const body = res.body as { mermaid: string }
-    expect(body.mermaid).toContain('stateDiagram-v2')
-    expect(body.mermaid).toContain('a --> b')
+    const body = res.body as { model: StateModel }
+    expect(body.model.states.map((s) => s.id)).toEqual(expect.arrayContaining(['a', 'b']))
+    expect(body.model.transitions).toContainEqual(expect.objectContaining({ fromId: 'a', toId: 'b' }))
   })
 
   it('POST /api/overlay applies an overlay edit and surfaces it in /api/graph', () => {

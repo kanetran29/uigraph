@@ -3,8 +3,8 @@
 // freshness, workspaces) — the write routes (/api/overlay, /api/scenario) are for
 // agents and uigraph studio, never this viewer.
 
-import type { CoverageReport, Proposals, SinceLastDiff, UiGraph } from '@ui-graph/core'
-import { buildCoverage, renderStateChartMermaid } from '@ui-graph/core'
+import type { CoverageReport, Proposals, SinceLastDiff, StateModel, UiGraph } from '@ui-graph/core'
+import { buildCoverage, buildStateModel } from '@ui-graph/core'
 import sampleGraph from './sample-graph.json'
 
 /** The bundled fallback graph, used when the serve API is unreachable (static open). */
@@ -138,17 +138,25 @@ export async function fetchCoverage(wsId?: string | null): Promise<CoverageRepor
 }
 
 /**
- * Fetch the Mermaid statechart source from the serve API. On any failure (offline,
- * 404, bad JSON) it falls back to rendering the bundled sample so the UML view still
- * shows something in a static build — mirroring fetchCoverage's sample fallback.
+ * Fetch the statechart StateModel from the serve API — the format-neutral mapping the
+ * StatechartCanvas renders in React Flow. On any failure (offline, 404, bad JSON) it
+ * falls back to building the model over the bundled sample so the UML view still shows
+ * something in a static build — mirroring fetchCoverage's sample fallback.
  */
-export async function fetchUml(wsId?: string | null, screenId?: string | null): Promise<string> {
+export async function fetchUmlModel(wsId?: string | null, screenId?: string | null): Promise<StateModel> {
   const base = screenId ? `/api/uml?scope=screen&screen=${encodeURIComponent(screenId)}` : '/api/uml'
+  // The offline sample rarely contains the live screen id being drilled; a screen
+  // scope on an absent id THROWS, so fall back to the sample OVERVIEW instead of
+  // hanging the view.
+  const fallback = (): StateModel => {
+    const inSample = screenId !== undefined && screenId !== null && SAMPLE_GRAPH.nodes.some((n) => n.id === screenId)
+    return buildStateModel(SAMPLE_GRAPH, inSample ? { scope: 'screen', screenId } : {})
+  }
   try {
     const res = await fetch(withWs(base, wsId))
-    if (!res.ok) return renderStateChartMermaid(SAMPLE_GRAPH, screenId ? { scope: 'screen', screenId } : {})
-    return ((await res.json()) as { mermaid: string }).mermaid
+    if (!res.ok) return fallback()
+    return ((await res.json()) as { model: StateModel }).model
   } catch {
-    return renderStateChartMermaid(SAMPLE_GRAPH, screenId ? { scope: 'screen', screenId } : {})
+    return fallback()
   }
 }

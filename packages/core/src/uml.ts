@@ -3,7 +3,7 @@
 //
 // buildStateModel decides the mapping ONCE (host resolution, trust tier, refuted/parked
 // status, root, KPI, modal nesting); emitPlantuml (CLI export) and emitMermaid (the
-// offline dashboard, which renders Mermaid client-side — PlantUML cannot render in-browser)
+// consumers that render Mermaid natively (GitHub, mermaid.live) — a second emit format)
 // are pure syntax/escaping over that shared model, so the mapping can never diverge.
 //
 // The design ruling (locked): screens are states; a modal is a NESTED composite
@@ -321,17 +321,17 @@ export function emitPlantuml(model: StateModel): string {
   return lines.join('\n')
 }
 
-/** The four trust levels a state/transition reads at, strongest first. */
-type TrustLevel = 'verified' | 'refuted' | 'gated' | 'open'
+/** The four trust levels a state/transition reads at, strongest first. Exported so the React-Flow dashboard canvas classifies transitions identically to the mermaid/plantuml emitters (no drift). */
+export type TrustLevel = 'verified' | 'refuted' | 'gated' | 'open'
 
 /** Trust precedence for a state's class from its incident transitions (index = strength, lower = stronger). REFUTED wins over verified: a disproven transition is an alarm that must never be masked by a sibling green edge. */
-const LEVEL_ORDER: TrustLevel[] = ['refuted', 'verified', 'gated', 'open']
+export const TRUST_LEVEL_ORDER: TrustLevel[] = ['refuted', 'verified', 'gated', 'open']
 
 /** The Mermaid glyph prefixed to a transition label so per-edge trust stays legible when the arrow itself cannot be coloured. */
-const LEVEL_GLYPH: Record<TrustLevel, string> = { verified: '✓', refuted: '✗', gated: '⋯', open: '?' }
+export const TRUST_GLYPH: Record<TrustLevel, string> = { verified: '✓', refuted: '✗', gated: '⋯', open: '?' }
 
 /** The trust level of one transition: refuted/parked overrides win, else witnessed|proven read as verified, everything else open. */
-function transitionLevel(t: StateModelTransition): TrustLevel {
+export function transitionTrustLevel(t: StateModelTransition): TrustLevel {
   if (t.refuted) return 'refuted'
   if (t.parked) return 'gated'
   if (t.tier === 'witnessed' || t.tier === 'proven') return 'verified'
@@ -339,7 +339,7 @@ function transitionLevel(t: StateModelTransition): TrustLevel {
 }
 
 /**
- * Emit the state model as a Mermaid `stateDiagram-v2` — the dashboard renders Mermaid
+ * Emit the state model as a Mermaid `stateDiagram-v2` — the CLI `uml --format mermaid`
  * client-side offline (PlantUML cannot). Mermaid cannot colour individual arrows, so trust
  * becomes state-level colour via classDef (the strongest level among a state's incident
  * transitions, refuted > verified > gated > open) PLUS a per-label glyph so per-edge trust
@@ -356,10 +356,10 @@ export function emitMermaid(model: StateModel): string {
 
   const strongest = new Map<string, TrustLevel>()
   for (const t of transitions) {
-    const lvl = transitionLevel(t)
+    const lvl = transitionTrustLevel(t)
     for (const id of [t.fromId, t.toId]) {
       const cur = strongest.get(id)
-      if (cur === undefined || LEVEL_ORDER.indexOf(lvl) < LEVEL_ORDER.indexOf(cur)) strongest.set(id, lvl)
+      if (cur === undefined || TRUST_LEVEL_ORDER.indexOf(lvl) < TRUST_LEVEL_ORDER.indexOf(cur)) strongest.set(id, lvl)
     }
   }
 
@@ -378,7 +378,7 @@ export function emitMermaid(model: StateModel): string {
 
   for (const t of transitions) {
     const label = mermaidEsc(t.label)
-    const glyph = LEVEL_GLYPH[transitionLevel(t)]
+    const glyph = TRUST_GLYPH[transitionTrustLevel(t)]
     lines.push(`  ${aliasOf(t.fromId)} --> ${aliasOf(t.toId)} : ${glyph}${label.length > 0 ? ` ${label}` : ''}`)
   }
 
@@ -400,7 +400,7 @@ export function renderStateChart(graph: UiGraph, opts: StateChartOptions = {}): 
   return emitPlantuml(buildStateModel(graph, opts))
 }
 
-/** Render a UiGraph as a Mermaid `stateDiagram-v2` (for the offline dashboard). Shorthand for emitMermaid(buildStateModel(...)). */
+/** Render a UiGraph as a Mermaid `stateDiagram-v2` (the CLI `uml --format mermaid` path). Shorthand for emitMermaid(buildStateModel(...)). */
 export function renderStateChartMermaid(graph: UiGraph, opts: StateChartOptions = {}): string {
   return emitMermaid(buildStateModel(graph, opts))
 }

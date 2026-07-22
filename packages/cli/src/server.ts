@@ -10,7 +10,7 @@ import type { ToolContext, ListCasesArgs, UpdateGraphArgs } from '@ui-graph/mcp'
 import { dbPath, getCoverage, getFreshness, getFrontier, getState, listCases, listScenarios, loadMergedGraph, setScenario, updateGraph } from '@ui-graph/mcp'
 import { openStore, readRegistry, findWorkspace, summarize, type WorkspaceSummary } from '@ui-graph/core/node'
 import type { TrustTier } from '@ui-graph/core'
-import { buildCoverage, diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue, renderStateChartMermaid } from '@ui-graph/core'
+import { buildCoverage, buildStateModel, diffSinceLast, emptyOverlay, exportOverlaySpec, hashValue } from '@ui-graph/core'
 
 /** Render the workspace overlay as a markdown "planned changes" spec. */
 function readPlan(ctx: ToolContext): string {
@@ -84,8 +84,8 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
         // default overview is a wide hub map, a single screen is the readable unit.
         const screen = req.query?.get('screen')
         const opts = req.query?.get('scope') === 'screen' && screen ? { scope: 'screen' as const, screenId: screen, parked, kpi } : { parked, kpi }
-        const mermaid = renderStateChartMermaid(graph, opts)
-        return { status: 200, body: { mermaid } }
+        const model = buildStateModel(graph, opts)
+        return { status: 200, body: { model } }
       } finally {
         store.close()
       }

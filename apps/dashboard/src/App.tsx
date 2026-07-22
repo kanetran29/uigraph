@@ -21,7 +21,7 @@ import { Inspector } from './Inspector'
 import { ProposalsPanel } from './Proposals'
 import { Steps } from './Steps'
 import { VerifyPanel } from './Verify'
-// mermaid (~700kB) is code-split out of the default Graph view; only loaded when UML is opened.
+// The UML statechart view is code-split out of the default Graph view; loaded only when opened.
 const UmlView = lazy(() => import('./UmlView').then((m) => ({ default: m.UmlView })))
 
 /** The whole dashboard, wired to the serve API with a sample fallback. */
