@@ -162,14 +162,16 @@ export interface ApplyObservationsOptions {
  * referencing unknown nodes are skipped. Returns a new graph; the input is not
  * mutated.
  *
- * Falsification: a `may` edge whose triple has >= 2 refuted observations on the
- * CURRENT base and ZERO confirmed observations (any base) is a DISPROVEN
- * hypothesis — it gets `refuted: true` (kept in the graph, never deleted, so
- * the hypothesis and its history stay auditable). Refutations recorded against
- * an OLD base hash never count toward the threshold: the app may have changed
- * since, so only current-base refutations demote (an unstamped refute predates
- * base stamping and counts, mirroring how unstamped confirms are treated as
- * fresh). Any confirmation — even a stale-base one — clears/blocks the flag
+ * Falsification: a `may` edge whose triple has >= 2 refuted observations —
+ * across ANY era — and ZERO confirmed observations (any base) is a DISPROVEN
+ * hypothesis: it gets `refuted: true` (kept in the graph, never deleted, so
+ * the hypothesis and its history stay auditable). Refutes count era-free
+ * because the edge's deterministic id (from/to/event) IS its identity across
+ * re-maps, and every graph mutation (a dynamic capture adding one node) would
+ * otherwise reset the tally — the base-hash guard made falsification
+ * unreachable in practice. Poisoned-refute protection lives upstream instead:
+ * crashed drives and unauthenticated auth-bounces record undrivable, never
+ * refuted. Any confirmation — even a stale-base one — clears/blocks the flag
  * (confirm beats refute). A `must` edge is NEVER demoted: a refuted must-static
  * proof means extraction and runtime disagree, a fire alarm handled by the
  * runner's refutedProven path, not a quiet demotion.
@@ -225,14 +227,14 @@ export function applyObservations(graph: UiGraph, observations: Observation[], o
     changed = true
   }
 
-  // Falsification pass (see doc comment): tally current-base refutes and any-base
+  // Falsification pass (see doc comment): tally era-free refutes and any-base
   // confirms per triple, then flag/clear `refuted` on non-runtime may-edges.
   const refuteCounts = new Map<string, number>()
   const confirmedTriples = new Set<string>()
   for (const o of observations) {
     const triple = `${o.from}->${o.to}::${o.event}`
     if (o.outcome === 'confirmed') confirmedTriples.add(triple)
-    else if (!isStale(o, opts.baseHash)) refuteCounts.set(triple, (refuteCounts.get(triple) ?? 0) + 1)
+    else refuteCounts.set(triple, (refuteCounts.get(triple) ?? 0) + 1)
   }
   edges.forEach((e, i) => {
     const triple = `${e.from}->${e.to}::${e.event}`

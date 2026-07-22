@@ -185,9 +185,11 @@ describe('applyObservations — repeated refutation demotes a may-edge (falsific
     expect(out.edges[0]?.refuted).toBeUndefined()
   })
 
-  it('refutes recorded against an OLD base do not count toward the threshold (the app may have changed)', () => {
+  it('refutes count ERA-FREE — old-base refutes still demote while the edge exists and no confirm ever landed', () => {
+    // The deterministic edge id is the identity across re-maps; a base-hash guard
+    // here made falsification unreachable (every dynamic capture reset the tally).
     const out = applyObservations(mayGraph(), [refute('o1', { base: 'OLDHASH' }), refute('o2', { base: 'OLDHASH' })], { baseHash: 'CUR' })
-    expect(out.edges[0]?.refuted).toBeUndefined()
+    expect(out.edges[0]?.refuted).toBe(true)
   })
 })
 
