@@ -201,6 +201,23 @@ describe('extractGraph — control extraction parity (F-angular-controls)', () =
   })
 })
 
+describe('extractGraph — screen labels (route-first when one component serves several routes)', () => {
+  it('labels routes sharing a component route-first, and a single-route component by its name', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Auth } from './auth.component'\nimport { Home } from './home.component'\nexport const routes: Routes = [{ path: '', component: Home }, { path: 'login', component: Auth }, { path: 'register', component: Auth }]`,
+        '/auth.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>auth</p>' })\nexport class Auth {}`,
+        '/home.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>home</p>' })\nexport class Home {}`,
+      }),
+      '/',
+    )
+    const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label
+    expect(label('n_login')).toBe('/login · Auth')
+    expect(label('n_register')).toBe('/register · Auth')
+    expect(label('n_root')).toBe('Home')
+  })
+})
+
 describe('extractGraph — modern Angular routing (lazy + nested + array links)', () => {
   it('ng-lazy-load-component: resolves loadComponent and emits edges from its (external) template', () => {
     const { graph } = extractGraph(
