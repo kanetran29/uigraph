@@ -66,17 +66,23 @@ function findRouteArrays(sf: SourceFile): ArrayLiteralExpression[] {
 
 /**
  * Recursively walk a route array literal, emitting one RouteInfo per route
- * object that declares a `path`. Inline `children` are visited with the parent
- * path prefixed; `loadChildren: () => import('./x.routes')` is followed into the
- * imported module's route array; `component` and `loadComponent` both resolve to
- * a backing component file. Deduplicates by node id (first declaration wins).
+ * object that declares a `path` AND a component (`component` / `loadComponent`).
+ * A componentless route (`{ path: 'x', children }`, `{ path: 'x', loadChildren }`,
+ * a redirect) renders nothing itself — it only prefixes its children's paths and
+ * applies its `canActivate` to their activation — so it is not a screen; minting
+ * it would fabricate a state no user can land on and, worse, shadow a `path: ''`
+ * child that shares its full path (first declaration wins). Inline `children`
+ * are visited with the parent path prefixed and the parent's guards inherited;
+ * `loadChildren: () => import('./x.routes')` is followed into the imported
+ * module's route array. Deduplicates by node id (first declaration wins).
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>): void {
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = []): void {
   for (const el of arr.getElements()) {
     if (!Node.isObjectLiteralExpression(el)) continue
     const ownPath = stringProp(el, 'path')
     if (ownPath === null) continue
     const fullPath = joinRoutePath(parentPath, ownPath)
+    const guards = [...inheritedGuards, ...canActivateGuards(sf, el)]
     const componentName = identifierProp(el, 'component')
     let componentFile = componentName ? resolveImportedFile(sf, componentName) : undefined
     let resolvedName = componentName
@@ -87,21 +93,22 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
         if (componentFile) resolvedName = componentClassName(componentFile)
       }
     }
+    const isScreen = el.getProperty('component') !== undefined || el.getProperty('loadComponent') !== undefined
     const nodeId = routeToNodeId(fullPath)
-    if (!out.has(nodeId)) {
-      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards: canActivateGuards(sf, el), routeObj: el })
+    if (isScreen && !out.has(nodeId)) {
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: el })
     }
     const childrenProp = el.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
-      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles)
+      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards)
     }
     const childSpec = lazyImportSpecifier(el, 'loadChildren')
     if (childSpec) {
       const childModule = resolveRelative(sf, childSpec)
       if (childModule) {
         loadedChildFiles.add(childModule.getFilePath())
-        for (const childArr of findRouteArrays(childModule)) walkRouteArray(childArr, childModule, fullPath, out, loadedChildFiles)
+        for (const childArr of findRouteArrays(childModule)) walkRouteArray(childArr, childModule, fullPath, out, loadedChildFiles, guards)
       }
     }
   }
