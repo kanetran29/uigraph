@@ -12,7 +12,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@ui-graph/mcp'
-import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatParked, formatStatus, formatWorkspaceList, loadWorkspaceConfig, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runParked, runStatus, runUml, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
+import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatParked, formatStatus, formatWorkspaceList, loadWorkspaceConfig, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runParked, runStatus, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runLogin, runVerify, runVerifyUntilDone } from './runner'
 
@@ -79,18 +79,6 @@ export function buildProgram(): Command {
     .option('--base-url <url>', 'base URL prepended to routes', '')
     .action((dir: string, from: string, to: string, opts: { framework: string; out?: string; baseUrl: string }) => {
       console.log(formatGenSummary(runGen({ dir, from, to, framework: opts.framework, out: opts.out, baseUrl: opts.baseUrl })))
-    })
-
-  program
-    .command('uml')
-    .description('Export the UI graph as a UML state machine diagram (PlantUML statechart): screens as states, modals nested, controls as transition labels.')
-    .argument('<dir>', 'workspace directory holding uigraph.db')
-    .option('--scope <scope>', 'overview (all screens) | screen (drill one screen)', 'overview')
-    .option('--screen <id>', 'screen node id to drill into (required for --scope screen)')
-    .option('--out <file>', 'write the diagram to a file instead of stdout')
-    .action((dir: string, opts: { scope?: string; screen?: string; out?: string }) => {
-      const uml = runUml(dir, { scope: opts.scope as 'overview' | 'screen' | undefined, screenId: opts.screen, out: opts.out })
-      console.log(opts.out !== undefined ? `Wrote ${opts.out}` : uml)
     })
 
   program

@@ -121,4 +121,3 @@ export {
   type TrustTier,
   type EdgeWithTier,
 } from './trust-tier'
-export { renderStateChart, type StateChartScope, type StateChartOptions } from './uml'
