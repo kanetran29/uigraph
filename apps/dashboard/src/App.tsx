@@ -45,7 +45,6 @@ export function App(): JSX.Element {
   // Node ids matching the canvas search — dims everything else (selection still wins).
   // Memoized on [graph, search] so it isn't recomputed on unrelated re-renders.
   const matchIds = useMemo(() => (graph ? searchMatchIds(graph.nodes, search) : new Set<string>()), [graph, search])
-  const umlScreens = useMemo(() => (graph ? graph.nodes.filter((n) => n.kind === 'screen').map((n) => ({ id: n.id, label: n.route ?? n.label ?? n.id })) : []), [graph])
 
   // The since-last-map delta projected onto the current graph (added/changed only — removed
   // elements aren't on the canvas). Null unless there is a real delta, so the canvas toggle hides.
@@ -207,7 +206,7 @@ export function App(): JSX.Element {
                   </ReactFlowProvider>
                 ) : (
                   <Suspense fallback={<div className="uml-loading">Loading diagram…</div>}>
-                    <UmlView wsId={activeWs} theme={resolved} coverage={coverage} screens={umlScreens} />
+                    <UmlView wsId={activeWs} theme={resolved} coverage={coverage} />
                   </Suspense>
                 )}
               </div>

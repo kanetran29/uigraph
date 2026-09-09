@@ -79,12 +79,7 @@ export function handleApiRequest(ctx: ToolContext, req: ApiRequest): ApiResponse
       try {
         const parked = store.getParkedEdges()
         const cov = buildCoverage(graph, parked)
-        const kpi = { verifiedOfReached: cov.verifiedOfReached, reached: cov.reachedCount }
-        // ?scope=screen&screen=<id> drills into one screen's focused statechart; the
-        // default overview is a wide hub map, a single screen is the readable unit.
-        const screen = req.query?.get('screen')
-        const opts = req.query?.get('scope') === 'screen' && screen ? { scope: 'screen' as const, screenId: screen, parked, kpi } : { parked, kpi }
-        const mermaid = renderStateChartMermaid(graph, opts)
+        const mermaid = renderStateChartMermaid(graph, { parked, kpi: { verifiedOfReached: cov.verifiedOfReached, reached: cov.reachedCount } })
         return { status: 200, body: { mermaid } }
       } finally {
         store.close()
