@@ -87,10 +87,9 @@ export function buildProgram(): Command {
     .argument('<dir>', 'workspace directory holding uigraph.db')
     .option('--scope <scope>', 'overview (all screens) | screen (drill one screen)', 'overview')
     .option('--screen <id>', 'screen node id to drill into (required for --scope screen)')
-    .option('--format <fmt>', 'plantuml (default) | mermaid', 'plantuml')
     .option('--out <file>', 'write the diagram to a file instead of stdout')
-    .action((dir: string, opts: { scope?: string; screen?: string; format?: string; out?: string }) => {
-      const uml = runUml(dir, { scope: opts.scope as 'overview' | 'screen' | undefined, screenId: opts.screen, format: opts.format as 'plantuml' | 'mermaid' | undefined, out: opts.out })
+    .action((dir: string, opts: { scope?: string; screen?: string; out?: string }) => {
+      const uml = runUml(dir, { scope: opts.scope as 'overview' | 'screen' | undefined, screenId: opts.screen, out: opts.out })
       console.log(opts.out !== undefined ? `Wrote ${opts.out}` : uml)
     })
 

@@ -133,8 +133,4 @@ export {
   type StateModelState,
   type StateModelModal,
   type StateModelTransition,
-  transitionTrustLevel,
-  TRUST_LEVEL_ORDER,
-  TRUST_GLYPH,
-  type TrustLevel,
 } from './uml'
