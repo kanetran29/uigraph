@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { AdapterContext, Logger, ParkedEdge, SoundinessNote, UiGraph, Proposal } from '@ui-graph/core'
-import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderStateChartMermaid, renderPlaywrightSpec, renderStateChart, buildCoverage, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue, PATTERN_PARK_REASON_PREFIX } from '@ui-graph/core'
+import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, renderStateChart, buildCoverage, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue, PATTERN_PARK_REASON_PREFIX } from '@ui-graph/core'
 import type { GraphDiff, SinceLastDiff } from '@ui-graph/core'
 import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@ui-graph/core/node'
 import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@ui-graph/mcp'
@@ -514,17 +514,14 @@ export function runGen(opts: RunGenOptions): GenSummary {
 export interface RunUmlOptions {
   scope?: 'overview' | 'screen'
   screenId?: string
-  format?: 'plantuml' | 'mermaid'
   out?: string
 }
 
 /**
- * Render the workspace graph as a UML state machine diagram — PlantUML (default,
- * per-arrow trust colour + guards, for docs/sharing) or Mermaid (--format mermaid,
- * for tools that render mermaid natively). Loads the merged graph, reads parked
- * edges + coverage for the KPI/park notes, then calls the pure renderer. Writes to
- * `--out` when given, else returns it. Throws a CliError when a screen drill is
- * requested without a screen id.
+ * Render the workspace graph as a PlantUML state machine diagram. Loads the merged
+ * graph, reads parked edges + coverage for the KPI/park notes, then calls the pure
+ * renderStateChart. Writes to `--out` when given, else returns it for printing.
+ * Throws a CliError when a screen drill is requested without a screen id.
  */
 export function runUml(dir: string, opts: RunUmlOptions = {}): string {
   const scope = opts.scope ?? 'overview'
@@ -541,8 +538,7 @@ export function runUml(dir: string, opts: RunUmlOptions = {}): string {
   } finally {
     store.close()
   }
-  const chartOpts = { scope, screenId: opts.screenId, parked, kpi: { verifiedOfReached: coverage.verifiedOfReached, reached: coverage.reachedCount } }
-  const uml = opts.format === 'mermaid' ? renderStateChartMermaid(graph, chartOpts) : renderStateChart(graph, chartOpts)
+  const uml = renderStateChart(graph, { scope, screenId: opts.screenId, parked, kpi: { verifiedOfReached: coverage.verifiedOfReached, reached: coverage.reachedCount } })
   if (opts.out !== undefined) {
     ensureDir(dirname(opts.out), opts.out)
     writeFileSync(opts.out, uml, 'utf8')
