@@ -4,7 +4,7 @@
 // agents and uigraph studio, never this viewer.
 
 import type { CoverageReport, Proposals, SinceLastDiff, UiGraph } from '@ui-graph/core'
-import { buildCoverage, renderStateChartMermaid } from '@ui-graph/core'
+import { buildCoverage } from '@ui-graph/core'
 import sampleGraph from './sample-graph.json'
 
 /** The bundled fallback graph, used when the serve API is unreachable (static open). */
@@ -134,20 +134,5 @@ export async function fetchCoverage(wsId?: string | null): Promise<CoverageRepor
     return (await res.json()) as CoverageReport
   } catch {
     return buildCoverage(SAMPLE_GRAPH)
-  }
-}
-
-/**
- * Fetch the Mermaid statechart source from the serve API. On any failure (offline,
- * 404, bad JSON) it falls back to rendering the bundled sample so the UML view still
- * shows something in a static build — mirroring fetchCoverage's sample fallback.
- */
-export async function fetchUml(wsId?: string | null): Promise<string> {
-  try {
-    const res = await fetch(withWs('/api/uml', wsId))
-    if (!res.ok) return renderStateChartMermaid(SAMPLE_GRAPH)
-    return ((await res.json()) as { mermaid: string }).mermaid
-  } catch {
-    return renderStateChartMermaid(SAMPLE_GRAPH)
   }
 }

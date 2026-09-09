@@ -121,16 +121,4 @@ export {
   type TrustTier,
   type EdgeWithTier,
 } from './trust-tier'
-export {
-  renderStateChart,
-  renderStateChartMermaid,
-  buildStateModel,
-  emitPlantuml,
-  emitMermaid,
-  type StateChartScope,
-  type StateChartOptions,
-  type StateModel,
-  type StateModelState,
-  type StateModelModal,
-  type StateModelTransition,
-} from './uml'
+export { renderStateChart, type StateChartScope, type StateChartOptions } from './uml'
