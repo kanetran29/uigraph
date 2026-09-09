@@ -60,6 +60,8 @@ export interface RunVerifyOptions {
   modalSelector?: string
   /** DEV-ONLY opt-in: modal-flow exploration may fill visible empty inputs with fake test data and click submit controls. Off by default — submits can mutate backend state; enable only against a disposable dev/QA environment. */
   allowSubmits?: boolean
+  /** Target ids driven in earlier rounds (until-done loop): pattern dedup rotates the representative to an untried pattern-mate. */
+  triedIds?: ReadonlySet<string>
 }
 
 /** How one worklist target ended this pass: confirmed (drove and landed), refuted (drove, did not land), undrivable (no drivable control/plan ever reached it — never attempted), or rejected (drove and landed but the proof gate refused the evidence — nothing persisted). */
@@ -97,7 +99,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   // Collapse the over-approximation fan-out: drive one representative per source-nav
   // pattern; the duplicates are never driven (they are parked after the representative
   // is confirmed). This is the big-app speedup — 7000+ may-edges become a few hundred.
-  const { representatives, duplicates } = dedupWorklist(graph, allTargets, opts.patternSample ?? 1)
+  const { representatives, duplicates } = dedupWorklist(graph, allTargets, opts.patternSample ?? 1, opts.triedIds)
 
   // When we build the default driver we own its browser and must dispose it after
   // the run; an injected driver brings its own lifecycle, so there is nothing to close.
@@ -409,7 +411,7 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
   for (; rounds < maxRounds; rounds++) {
     if (getLoopStatus(ctx).loopDone) break
     const attempted = attemptedThisRound(ctx, opts.limit)
-    const pass = await runVerify(opts)
+    const pass = await runVerify({ ...opts, triedIds: new Set(tries.keys()) })
     confirmed += pass.confirmed
     // A later diagnosis-free outcome must CLEAR a stale diagnosis — appending a
     // round-1 a11y hint to a round-2 honest refutation would be self-contradictory.
@@ -419,13 +421,15 @@ export async function runVerifyUntilDone(opts: RunVerifyUntilDoneOptions): Promi
       if (d !== undefined) lastDiagnosis.set(id, d)
       else lastDiagnosis.delete(id)
     }
-    // bump attempts ONLY for targets this round could actually try (the ranked
-    // worklist slice under the limit); park targets that exhausted their tries
+    // bump attempts ONLY for targets this round actually drove (in the ranked
+    // worklist slice under the limit AND not held aside as a pattern duplicate —
+    // a duplicate never reached the browser, so it has not spent a try); park
+    // targets that exhausted their tries
     const status = getLoopStatus(ctx)
     const store = openStore(dbPath(ctx))
     try {
       for (const e of status.openEdges) {
-        if (!attempted.has(e.id)) continue
+        if (!attempted.has(e.id) || !(e.id in pass.outcomes)) continue
         const n = (tries.get(e.id) ?? 0) + 1
         tries.set(e.id, n)
         if (n >= parkTries) {
@@ -1591,6 +1595,7 @@ interface PwLocator {
   count: () => Promise<number>
   filter: (o: { visible: boolean }) => PwLocator
   last: () => PwLocator
+  first: () => PwLocator
   evaluate: (fn: (el: FormLike) => unknown) => Promise<unknown>
   getAttribute: (name: string, o?: unknown) => Promise<string | null>
   nth: (i: number) => PwLocator
@@ -1646,11 +1651,23 @@ async function runCaptureLegAction(page: PwPage, leg: SpecPlan['legs'][number]):
  * React's handler is listening for, the same as clicking the submit button.
  */
 async function runLocator(page: PwPage, locator: string, action: 'click' | 'fill' | 'press' | 'submit', value = ''): Promise<void> {
+  const act = async (loc: PwLocator): Promise<void> => {
+    if (action === 'click') await loc.click({ timeout: 5000 })
+    else if (action === 'submit') await loc.evaluate((el) => el.requestSubmit())
+    else if (action === 'press') await loc.press(value, { timeout: 5000 })
+    else await loc.fill(value, { timeout: 5000 })
+  }
   const loc = resolveLocator(page, locator)
-  if (action === 'click') await loc.click({ timeout: 5000 })
-  else if (action === 'submit') await loc.evaluate((el) => el.requestSubmit())
-  else if (action === 'press') await loc.press(value, { timeout: 5000 })
-  else await loc.fill(value, { timeout: 5000 })
+  try {
+    await act(loc)
+  } catch (err) {
+    // A loop-rendered control (@for / .map) matches N elements at runtime while its
+    // static selector names ONE template element — Playwright refuses (strict mode)
+    // rather than guess. The first instance is the deterministic representative; an
+    // explicit .nth() never gets here (nth disables strictness).
+    if (!(err instanceof Error && /strict mode violation/.test(err.message))) throw err
+    await act(loc.first())
+  }
 }
 
 /** Evaluate a `page.getBy…`-style locator snippet against the page into a live locator (shared by runLocator and the dom-delta attr reads). */

@@ -834,7 +834,11 @@ describe('runVerifyUntilDone (autonomous 100%-accounted loop)', () => {
       appUrl: 'http://x',
       maxRounds: 5,
       parkTries: 2,
-      driver: async (plan) => ({ confirmed: plan.legs.some((l) => l.action.kind === 'goto') && JSON.stringify(plan).includes('/b') }),
+      // mirrors drivePlan: a parked leg is never attempted (undrivable, not refuted)
+      driver: async (plan) =>
+        plan.legs.some((l) => l.action.kind === 'parked')
+          ? { confirmed: false, undrivable: true }
+          : { confirmed: plan.legs.some((l) => l.action.kind === 'goto') && JSON.stringify(plan).includes('/b') },
     })
     expect(s.loopDone).toBe(true)
     expect(s.accountedRatio).toBe(1)

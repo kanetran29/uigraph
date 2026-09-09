@@ -330,6 +330,13 @@ describe('patternKey + dedupWorklist (over-approximation fan-out collapse)', () 
     expect(duplicates.has('other.tsx:9:2')).toBe(false)
   })
 
+  it('rotates the representative to an untried pattern-mate once the first was driven (one template, several routes)', () => {
+    const targets = [target('e1', 'n_a', 'n_settings'), target('e2', 'n_b', 'n_settings'), target('e3', 'n_c', 'n_privacy')]
+    const { representatives, duplicates } = dedupWorklist(g, targets, 1, new Set(['e1']))
+    expect(representatives.map((t) => t.id)).toEqual(['e2'])
+    expect(duplicates.get('nav.tsx:5:1')?.map((t) => t.id).sort()).toEqual(['e1', 'e3'])
+  })
+
   it('un-keyable targets are always their own representative (never deduped)', () => {
     const targets = [target('e5', 'n_a', 'n_settings', { proven: true }), target('e6', 'n_b', 'u_sink')]
     const { representatives, duplicates } = dedupWorklist(g, targets, 1)
