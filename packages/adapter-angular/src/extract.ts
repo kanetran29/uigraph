@@ -51,11 +51,16 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
 
+  // A screen is a ROUTE, not a component: one component serving several routes
+  // (/login and /register on one AuthComponent) is several states. Label those
+  // route-first so the duplicate component name does not read as a duplicate node.
+  const routesPerComponent = new Map<string, number>()
+  for (const r of routes) if (r.componentName !== null) routesPerComponent.set(r.componentName, (routesPerComponent.get(r.componentName) ?? 0) + 1)
   const nodes: GraphNode[] = routes.map((r) => ({
     id: r.nodeId,
     route: r.fullPath,
     componentPath: r.componentFile ? relative(projectDir, r.componentFile.getFilePath()) : null,
-    label: r.componentName ?? r.fullPath,
+    label: r.componentName === null ? r.fullPath : (routesPerComponent.get(r.componentName) ?? 0) > 1 ? `${r.fullPath} · ${r.componentName}` : r.componentName,
     kind: 'screen',
   }))
 
