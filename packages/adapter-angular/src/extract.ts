@@ -16,7 +16,7 @@ import { edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
 import { collectRoutes } from './routes'
-import { templateTargets, routerCallTargets, methodNavTargets, type RawTarget } from './nav'
+import { templateTargets, routerCallTargets, methodNavTargets, templateLoc, linkAttrTarget, type RawTarget } from './nav'
 import { parseControls } from './controls'
 import { inlineTemplate } from './templates'
 import { gateFromGuards, noteGuards } from './gates'
@@ -88,7 +88,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       continue
     }
     const file = relative(projectDir, route.componentFile.getFilePath())
-    const targets = [...templateTargets(route.componentFile, projectDir), ...routerCallTargets(route.componentFile)]
+    // In controls mode every template routerLink is anchored to the link control that
+    // fires it (below), so the screen-level copy would be an undrivable duplicate.
+    const targets = [...(opts.controls ? [] : templateTargets(route.componentFile, projectDir)), ...routerCallTargets(route.componentFile)]
     for (const t of targets) {
       if (t.ti.kind === 'literal') {
         const target = matchLiteral(t.ti.value, routeLikes)
@@ -131,41 +133,55 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         if (nth > 0) c.selector.nth = nth
       }
 
+      const tpl = inlineTemplate(sf)
+      const tplFile = tpl?.externalFile !== undefined ? relative(projectDir, tpl.externalFile) : undefined
       for (const c of controls) {
         const cId = controlNodeId(route.nodeId, c.selector)
-        const lc = sf.getLineAndColumnAtPos(inlineTemplate(sf)?.start ?? 0)
+        const loc = tpl ? templateLoc(sf, tpl, c.index) : { line: 1, col: 1 }
         const navEffects = new Set<string>()
+        /**
+         * Wire one navigation this control fires — from a traced (click) handler or
+         * its own routerLink — to the declared route(s): a literal target is must/may
+         * per the target's guards, a static-prefix template over-approximates to a may
+         * edge per matching route, a dynamic target is a soundiness note. `guard` is a
+         * handler-level condition joined with the route gate; `what` names the source
+         * in notes.
+         */
+        const wireControlNav = (t: RawTarget, guard: string | null, what: string): void => {
+          if (t.ti.kind === 'literal') {
+            const target = matchLiteral(t.ti.value, routeLikes)
+            if (!target) {
+              soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `${what} target "${t.ti.value}" matches no declared route` })
+              return
+            }
+            const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
+            noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
+            const guards = [guard, ...gate.guardTexts].filter((g): g is string => g != null)
+            const guarded = guards.length > 0
+            const confidence = gate.guarded ? gate.confidence : guard != null ? 0.6 : 1
+            pushEdge(cId, target.nodeId, t, guarded ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
+            navEffects.add('navigate')
+          } else if (t.ti.kind === 'template') {
+            for (const cand of matchPrefix(t.ti.staticPrefix, routeLikes)) {
+              const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
+              noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
+              const guards = [guard, ...gate.guardTexts].filter((g): g is string => g != null)
+              pushEdge(cId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guards.length > 0 ? guards.join(',') : null, file)
+              navEffects.add('navigate')
+            }
+          } else {
+            soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `${what} navigates to a fully dynamic target` })
+          }
+        }
         for (const handler of c.handlers) {
           const methodName = /([a-zA-Z_$][\w$]*)\s*\(/.exec(handler)?.[1]
           if (methodName === undefined) continue
           for (const nav of methodNavTargets(sf, methodName)) {
-            const t: RawTarget = { ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc: { line: lc.line, col: lc.column } }
-            if (nav.ti.kind === 'literal') {
-              const target = matchLiteral(nav.ti.value, routeLikes)
-              if (!target) {
-                soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `control nav target "${nav.ti.value}" matches no declared route` })
-                continue
-              }
-              const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
-              noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
-              const guards = [nav.guard, ...gate.guardTexts].filter((g): g is string => g != null)
-              const guarded = guards.length > 0
-              const confidence = gate.guarded ? gate.confidence : nav.guard != null ? 0.6 : 1
-              pushEdge(cId, target.nodeId, t, guarded ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
-              navEffects.add('navigate')
-            } else if (nav.ti.kind === 'template') {
-              for (const cand of matchPrefix(nav.ti.staticPrefix, routeLikes)) {
-                const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
-                noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
-                const guards = [nav.guard, ...gate.guardTexts].filter((g): g is string => g != null)
-                pushEdge(cId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guards.length > 0 ? guards.join(',') : null, file)
-                navEffects.add('navigate')
-              }
-            } else {
-              soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `control handler ${methodName}() navigates to a fully dynamic target` })
-            }
+            wireControlNav({ ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc, file: tplFile }, nav.guard, `control handler ${methodName}()`)
           }
         }
+        const link = linkAttrTarget(c.attrs)
+        if (link !== null) wireControlNav({ ti: link, event: 'click', effect: 'navigate', ruleId: 'ng.control.router-link', loc, file: tplFile }, null, 'control routerLink')
 
         const name = c.text ?? c.attrs.get('aria-label') ?? c.attrs.get('placeholder') ?? c.attrs.get('name')
         nodes.push({

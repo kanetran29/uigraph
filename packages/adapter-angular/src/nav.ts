@@ -62,13 +62,29 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
 }
 
 /** Witness loc for a position inside a template: a line within an external html file, or the .ts offset for inline templates. */
-function templateLoc(sf: SourceFile, tpl: ComponentTemplate, index: number): { line: number; col: number } {
+export function templateLoc(sf: SourceFile, tpl: ComponentTemplate, index: number): { line: number; col: number } {
   if (tpl.externalFile) {
     const line = tpl.text.slice(0, index).split('\n').length
     return { line, col: 1 }
   }
   const lc = sf.getLineAndColumnAtPos(tpl.start)
   return { line: lc.line, col: lc.column }
+}
+
+/**
+ * The navigation target declared by a control's own `routerLink` / `[routerLink]`
+ * attribute, or null when the element carries neither. A static `routerLink="/x"`
+ * is a literal; a bound `[routerLink]` goes through classifyBoundLink. This is how
+ * control-mode extraction anchors a template link to the element that fires it
+ * (parity with the React adapter's <Link>), so the runtime driver has a selector
+ * to click instead of a screen-level edge it cannot drive.
+ */
+export function linkAttrTarget(attrs: Map<string, string>): TargetInfo | null {
+  const literal = attrs.get('routerLink')
+  if (literal !== undefined) return { kind: 'literal', value: literal }
+  const bound = attrs.get('[routerLink]')
+  if (bound !== undefined) return classifyBoundLink(bound)
+  return null
 }
 
 /**
