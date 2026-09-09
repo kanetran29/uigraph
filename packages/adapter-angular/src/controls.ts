@@ -93,7 +93,7 @@ function ngRole(tag: string, attrs: Map<string, string>, controlType: string): s
   }
 }
 
-/** Stable selector: data-testid -> role+name -> formControlName/id/name -> text -> structural. */
+/** Stable selector: data-testid -> role+name -> formControlName/id/name -> text -> structural (tag plus its static classes, a CSS locator). */
 function ngSelector(tag: string, attrs: Map<string, string>, controlType: string, text: string | undefined): ControlSelector {
   const testid = attrs.get('data-testid') ?? attrs.get('data-test-id')
   if (testid !== undefined) return { strategy: 'testid', value: testid }
@@ -103,7 +103,8 @@ function ngSelector(tag: string, attrs: Map<string, string>, controlType: string
   const label = attrs.get('formControlName') ?? attrs.get('id') ?? attrs.get('name')
   if (label !== undefined) return { strategy: 'label', value: label }
   if (text !== undefined && text.length > 0) return { strategy: 'text', value: text }
-  return { strategy: 'structural', value: tag.toLowerCase() }
+  const classes = (attrs.get('class') ?? '').split(/\s+/).filter((c) => c.length > 0 && !c.includes('{{'))
+  return { strategy: 'structural', value: [tag.toLowerCase(), ...classes].join('.') }
 }
 
 /** Input constraints (type/required/pattern) for a field control. */
@@ -134,7 +135,10 @@ export function parseControls(sf: SourceFile): NgControl[] {
       const close = html.indexOf(`</${tag}`, OPEN.lastIndex)
       if (close !== -1) {
         const inner = html.slice(OPEN.lastIndex, close).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-        if (inner.length > 0) text = inner
+        // An interpolated name ({{ tag }}) is not a static accessible name — a
+        // locator built from it can never match; leave it undefined (React parity:
+        // JSX expression children are not text either) so the selector falls through.
+        if (inner.length > 0 && !inner.includes('{{')) text = inner
       }
     }
     out.push({ tag, controlType, index: m.index, attrs, text, events: ngEvents(attrs), handlers: ngHandlers(attrs), selector: ngSelector(tag, attrs, controlType, text), input: ngInput(attrs, controlType) })

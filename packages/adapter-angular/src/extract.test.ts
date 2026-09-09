@@ -319,6 +319,13 @@ describe('control units (F-angular-controls)', () => {
     expect(navTo('n_b')?.modality).toBe('must')
   })
 
+  it('an interpolated link name is not a selector: falls to a structural tag.class locator', () => {
+    const { controls } = controlsOf(`<a [routerLink]="['/b']" class="tag-pill tag-default">{{ tag }}</a>`)
+    const link = controls.find((c) => c.control?.controlType === 'link')
+    expect(link?.control?.selector).toEqual({ strategy: 'structural', value: 'a.tag-pill.tag-default' })
+    expect(link?.control?.name).toBeUndefined()
+  })
+
   it('a bound [routerLink] with a dynamic first segment is a link control with a dynamic-target note, no edge', () => {
     const { controls, navTo, soundiness } = controlsOf(`<a [routerLink]="[dest]">X</a>`)
     expect(controls.find((c) => c.control?.controlType === 'link')).toBeDefined()
