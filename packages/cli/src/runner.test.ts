@@ -621,6 +621,35 @@ describe('runVerify: per-target outcomes', () => {
     expect(parked[0]?.reason).toBe('autonomous: undrivable after 2 attempts — no drivable control/plan reached it')
   })
 
+  // One template serving two routes mints the SAME witness position on both screens;
+  // the pattern representative (first by from-id) can be a phantom on its screen
+  // while the mate is the real control. The loop must rotate to the mate instead of
+  // parking it as "unreachable" without ever driving it.
+  it('runVerifyUntilDone: rotates the pattern representative to an untried mate instead of parking the mate undriven', async () => {
+    const twoScreens = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), node('n_c', { route: '/c' })],
+      [edge('e_ac', 'n_a', 'n_c', { modality: 'may', witness: w(1) }), edge('e_bc', 'n_b', 'n_c', { modality: 'may', witness: w(1) })],
+    )
+    const dir = await seedDir('uigraph-rotate-rep-', twoScreens)
+    const driven: string[] = []
+    const s = await runVerifyUntilDone({
+      dir,
+      appUrl: 'http://app',
+      maxRounds: 4,
+      parkTries: 2,
+      driver: async (plan) => {
+        const p = JSON.stringify(plan)
+        driven.push(p.includes('/b') ? 'e_bc' : 'e_ac')
+        return p.includes('/b') ? { confirmed: true, evidence: { kind: 'url-change', startUrl: 'http://app/b', landedUrl: 'http://app/c' } } : { confirmed: false, undrivable: true }
+      },
+    })
+    expect(driven).toEqual(['e_ac', 'e_bc'])
+    expect(s.confirmed).toBe(1)
+    const parked = await readParked(dir)
+    expect(parked.map((x) => x.edgeId)).toEqual(['e_ac'])
+    expect(parked[0]?.reason).toContain('over-approximation fan-out')
+  })
+
   it('runVerifyUntilDone: repeated refutations DEMOTE the may-edge (falsification verdict) instead of parking it', async () => {
     const dir = await seedDir('uigraph-park-unstable-', oneEdgeGraph())
     const s = await runVerifyUntilDone({ dir, appUrl: 'http://app', maxRounds: 4, parkTries: 2, driver: async () => ({ confirmed: false }) })

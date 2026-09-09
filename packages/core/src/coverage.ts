@@ -409,8 +409,9 @@ export interface DedupedWorklist {
  * duplicates the runner never drives. The runner parks a pattern's duplicates ONLY
  * after its representative is runtime-confirmed, so a duplicate is never credited as
  * driven — the win is purely NOT re-driving the same source call from every screen.
+ * `tried` (target ids already driven in earlier rounds) rotates the representative to an untried pattern-mate.
  */
-export function dedupWorklist(graph: UiGraph, targets: VerifyTarget[], sample = 1): DedupedWorklist {
+export function dedupWorklist(graph: UiGraph, targets: VerifyTarget[], sample = 1, tried: ReadonlySet<string> = new Set()): DedupedWorklist {
   const byKey = new Map<string, VerifyTarget[]>()
   const representatives: VerifyTarget[] = []
   for (const t of targets) {
@@ -427,7 +428,11 @@ export function dedupWorklist(graph: UiGraph, targets: VerifyTarget[], sample = 
   }
   const duplicates = new Map<string, VerifyTarget[]>()
   for (const [key, bucket] of byKey) {
-    bucket.sort((a, b) => a.from.localeCompare(b.from))
+    // Rotate: a pattern-mate that was already driven (and did not confirm — else the
+    // bucket would be pattern-parked) yields the representative slot to an untried
+    // mate. One template can serve several routes, so the same witness position can
+    // be a phantom on one screen and the real control on another.
+    bucket.sort((a, b) => Number(tried.has(a.id)) - Number(tried.has(b.id)) || a.from.localeCompare(b.from))
     representatives.push(...bucket.slice(0, sample))
     const rest = bucket.slice(sample)
     if (rest.length > 0) duplicates.set(key, rest)
