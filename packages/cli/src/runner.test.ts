@@ -1978,6 +1978,26 @@ describe('runShotsSweep: picture screens only when the browser provably lands on
     expect(shots['n_article']).toBeUndefined()
   })
 
+  it('walks an ALREADY-PICTURED page as a stepping stone: /editor/<slug> is linked from nowhere but the article, and is not re-pictured', async () => {
+    const { openStore } = await import('@ui-graph/core/node')
+    const { join } = await import('node:path')
+    const gg = graph([node('n_home', { route: '/' }), node('n_article', { route: '/article/:slug' }), node('n_editor_slug', { route: '/editor/:slug' })], [])
+    const dir = await seedDir('uigraph-sweep-stone-', gg)
+    const seed = openStore(join(dir, 'uigraph.db'))
+    seed.setScreenShot('n_article', { path: 'shots/n_article.jpg', ts: '2020-01-01T00:00:00.000Z', base: hashValue(gg), source: 'landing', url: 'http://app/article/old' })
+    seed.close()
+    const visits: string[] = []
+    const browser = sweepBrowser({ links: { '/': ['http://app/article/a1'], '/article/a1': ['http://app/editor/a1'] } }, visits)
+    const s = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => browser })
+    expect(s.captured.map((c) => [c.nodeId, c.url])).toEqual([
+      ['n_home', 'http://app/'],
+      ['n_editor_slug', 'http://app/editor/a1'],
+    ])
+    expect(visits).toEqual(['/', '/article/a1', '/editor/a1'])
+    const shots = await readShots(dir)
+    expect(shots['n_article']).toMatchObject({ source: 'landing', url: 'http://app/article/old' })
+  })
+
   it('two-hop discovery: /profile/<u>/favorites is found from the /profile/<u> page it links from; one capture per target', async () => {
     const dir = await seedDir('uigraph-sweep-2hop-', conduit())
     const visits: string[] = []
