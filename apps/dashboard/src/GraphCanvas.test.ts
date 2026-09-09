@@ -83,6 +83,19 @@ describe('screenshots on the canvas', () => {
     expect(canvasHtml(noShot)).not.toContain('show screenshots')
   })
 
+  it('hides the toggles that would change nothing on this graph (no proposals, no effect edges, no route grouping)', () => {
+    const html = canvasHtml(noShot)
+    expect(html).not.toContain('show proposed')
+    expect(html).not.toContain('show effects')
+    expect(html).not.toContain('expand all groups')
+    expect(html).toContain('expand all controls')
+  })
+
+  it('offers "show effects" with its count once an effect self-loop exists', () => {
+    const withEffect = graph([screen('s'), { ...screen('c'), kind: 'control', parent: 's' }], [{ id: 'e1', from: 'c', to: 's', event: 'click', guard: null, effect: 'api:GET /x', modality: 'must', source: 'static', confidence: 1, witness: { source: 'static' } }])
+    expect(canvasHtml(withEffect)).toContain('show effects · 1')
+  })
+
   it('draws the thumbnail inside the screen node only when the toggle is on', () => {
     expect(screenLabel(withShot, false)).not.toContain('<img')
     expect(screenLabel(withShot, true)).toContain('<img class="node-shot" src="/api/shots/s.jpg"')

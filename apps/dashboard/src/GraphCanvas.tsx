@@ -1342,12 +1342,13 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
         </div>
       </Panel>
       <Panel position="top-left">
+        {/* A toggle appears only when it has something to act on — a switch that changes nothing reads as broken. */}
         <div className="canvas-toggles">
           <label className="edge-toggle">
             <input type="checkbox" checked={expandAll} onChange={(e) => setExpandAll(e.target.checked)} />
             expand all controls
           </label>
-          {allGroupKeys.size > 0 ? (
+          {groupedView && allGroupKeys.size > 0 ? (
             <label className="edge-toggle">
               <input type="checkbox" checked={expandAllGroups} onChange={(e) => setExpandAllGroups(e.target.checked)} />
               expand all groups · {allGroupKeys.size}
@@ -1357,14 +1358,18 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <input type="checkbox" checked={highlightFlow} onChange={(e) => setHighlightFlow(e.target.checked)} />
             highlight flow on select
           </label>
-          <label className="edge-toggle">
-            <input type="checkbox" checked={showProposed} onChange={(e) => setShowProposed(e.target.checked)} />
-            show proposed (LLM){proposedEdges.length > 0 ? ` · ${proposedEdges.length}` : ''}
-          </label>
-          <label className="edge-toggle">
-            <input type="checkbox" checked={showEffects} onChange={(e) => setShowEffects(e.target.checked)} />
-            show effects{effectEdgeCount > 0 ? ` · ${effectEdgeCount}` : ''}
-          </label>
+          {proposedEdges.length > 0 ? (
+            <label className="edge-toggle">
+              <input type="checkbox" checked={showProposed} onChange={(e) => setShowProposed(e.target.checked)} />
+              show proposed (LLM) · {proposedEdges.length}
+            </label>
+          ) : null}
+          {effectEdgeCount > 0 ? (
+            <label className="edge-toggle">
+              <input type="checkbox" checked={showEffects} onChange={(e) => setShowEffects(e.target.checked)} />
+              show effects · {effectEdgeCount}
+            </label>
+          ) : null}
           {shotCount > 0 ? (
             <label className="edge-toggle">
               <input type="checkbox" checked={showShots} onChange={(e) => setShowShots(e.target.checked)} />
