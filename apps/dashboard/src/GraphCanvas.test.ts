@@ -102,6 +102,16 @@ describe('screenshots on the canvas', () => {
     expect(screenLabel(noShot, true)).not.toContain('<img')
   })
 
+  it('keeps the thumbnail on an EXPANDED screen and shifts its control grid clear of it', () => {
+    const withChild = graph([{ ...screen('s'), screenshot: 'shots/s.jpg' }, { ...screen('c'), kind: 'control', parent: 's', control: { element: 'button', controlType: 'button', selector: { strategy: 'text', value: 'c' } } }], [])
+    const exp = new Set(['s'])
+    expect(renderToStaticMarkup(toFlowNodes(withChild, layoutGraph(withChild, exp, true), exp, new Map(), new Map(), undefined, undefined, true)[0]?.data.label as ReactNode)).toContain('<img class="node-shot"')
+    const plain = layoutGraph(withChild, exp, false)
+    const shot = layoutGraph(withChild, exp, true)
+    expect((shot.sizes.get('s')?.height ?? 0) - (plain.sizes.get('s')?.height ?? 0)).toBe(70)
+    expect((shot.positions.get('c')?.y ?? 0) - (plain.positions.get('c')?.y ?? 0)).toBe(70)
+  })
+
   it('grows the screen box by the thumbnail strip so the layout has room for it', () => {
     const base = layoutGraph(withShot, none).sizes.get('s')?.height ?? 0
     expect(layoutGraph(withShot, none, true).sizes.get('s')?.height).toBe(base + 70)

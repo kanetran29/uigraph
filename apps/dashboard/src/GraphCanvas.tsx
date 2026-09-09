@@ -542,7 +542,7 @@ export function toFlowNodes(
       )
       // draggable=false so a node drag never starts the browser's native image drag.
       const label =
-        showShots && n.screenshot !== undefined && !expanded.has(n.id) ? (
+        showShots && n.screenshot !== undefined ? (
           <>
             <img className="node-shot" src={`/api/${n.screenshot}`} alt="" draggable={false} />
             {text}

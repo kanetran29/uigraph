@@ -306,8 +306,8 @@ export function structuralKey(graph: UiGraph, expanded: ReadonlySet<string>): st
 /**
  * Compute the full canvas layout. Screens are placed radially around the root by
  * BFS depth (root centred); only screens in `expanded` are grown to contain their
- * control grid, and — when `showShots` is on — a collapsed screen with a screenshot is
- * grown by the thumbnail strip. Returns empty edge points — edges route as floating
+ * control grid, and — when `showShots` is on — a screen with a screenshot is grown by
+ * the thumbnail strip (an expanded one has its inner grid shifted down to clear it). Returns empty edge points — edges route as floating
  * curves at render.
  */
 export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>, showShots = false): GraphLayout {
@@ -321,8 +321,9 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>, showS
   for (const s of screens) {
     if (expanded.has(s.id) && childN(s.id) > 0) expLayout.set(s.id, layoutExpanded(s.id, componentGroups(graph, s.id)))
   }
-  // Same rule as toFlowNodes: the thumb is drawn only on a COLLAPSED screen, never over its control grid.
-  const shotIds = new Set(showShots ? screens.filter((s) => s.screenshot !== undefined && !expanded.has(s.id)).map((s) => s.id) : [])
+  // Same rule as toFlowNodes: every screen with a picture gets the strip, expanded or not
+  // — an expanded screen's control grid is shifted down to make room for it.
+  const shotIds = new Set(showShots ? screens.filter((s) => s.screenshot !== undefined).map((s) => s.id) : [])
   const widthOf = (id: string): number =>
     isGhost(id) ? GHOST_WIDTH : expLayout.get(id)?.size.width ?? (expanded.has(id) ? expandedSize(childN(id)).width : SCREEN_WIDTH)
   const heightOf = (id: string): number =>
@@ -455,7 +456,8 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>, showS
     // Place this screen's controls + component bands from its banded inner layout.
     const e = expLayout.get(node.id)
     if (e === undefined) continue
-    for (const [id, p] of e.positions) positions.set(id, p)
+    const shotOffset = shotIds.has(node.id) ? SHOT_HEIGHT : 0
+    for (const [id, p] of e.positions) positions.set(id, { x: p.x, y: p.y + shotOffset })
     for (const [id, sz] of e.sizes) sizes.set(id, sz)
     bands.push(...e.bands)
   }
