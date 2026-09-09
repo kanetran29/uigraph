@@ -189,11 +189,14 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         if (link !== null) wireControlNav({ ti: link, event: 'click', effect: 'navigate', ruleId: 'ng.control.router-link', loc, file: tplFile }, null, 'control routerLink')
 
         const name = c.text ?? c.attrs.get('aria-label') ?? c.attrs.get('placeholder') ?? c.attrs.get('name')
+        // A nameless generic element is usually a child component with an @Output
+        // binding (<app-follow-button (toggle)>): its tag is the only readable handle.
+        const fallbackLabel = c.controlType === 'element' ? c.tag.toLowerCase() : c.controlType
         nodes.push({
           id: cId,
           route: null,
           componentPath: file,
-          label: name ?? c.controlType,
+          label: name ?? fallbackLabel,
           kind: 'control',
           parent: route.nodeId,
           control: {
