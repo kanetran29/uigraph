@@ -12,6 +12,8 @@ import { inlineTemplate } from './templates'
 export interface NgControl {
   tag: string
   controlType: string
+  /** Offset of the element's open tag within the template text — the witness position of anything the element itself declares (its routerLink). */
+  index: number
   attrs: Map<string, string>
   text: string | undefined
   events: string[]
@@ -46,6 +48,7 @@ function ngControlType(tag: string, attrs: Map<string, string>): string | null {
   if (lower === 'textarea') return 'richtext'
   if (lower === 'select') return 'select'
   if (lower === 'form') return 'form'
+  if (attrs.has('routerLink') || attrs.has('[routerLink]')) return 'link'
   for (const k of attrs.keys()) if (/^\([a-zA-Z]+\)$/.test(k)) return 'element'
   return null
 }
@@ -113,7 +116,7 @@ function ngInput(attrs: Map<string, string>, controlType: string): ControlInput 
   return { ...(type !== undefined ? { type } : {}), ...(required ? { required: true } : {}), ...(pattern !== undefined ? { pattern } : {}) }
 }
 
-/** Parse interactive controls out of a component's inline template HTML. */
+/** Parse interactive controls out of a component's template HTML (inline or templateUrl). An element carrying routerLink/[routerLink] is a 'link' control even without an (event) binding. */
 export function parseControls(sf: SourceFile): NgControl[] {
   const tpl = inlineTemplate(sf)
   if (!tpl) return []
@@ -134,7 +137,7 @@ export function parseControls(sf: SourceFile): NgControl[] {
         if (inner.length > 0) text = inner
       }
     }
-    out.push({ tag, controlType, attrs, text, events: ngEvents(attrs), handlers: ngHandlers(attrs), selector: ngSelector(tag, attrs, controlType, text), input: ngInput(attrs, controlType) })
+    out.push({ tag, controlType, index: m.index, attrs, text, events: ngEvents(attrs), handlers: ngHandlers(attrs), selector: ngSelector(tag, attrs, controlType, text), input: ngInput(attrs, controlType) })
   }
   return out
 }

@@ -190,6 +190,14 @@ describe('extractGraph — control extraction parity (F-angular-controls)', () =
       const submit = controls.find((c) => c.control?.selector?.strategy === 'testid')
       expect(submit?.control?.selector?.value).toBe('login-submit')
     })
+
+    it('anchors every template routerLink to a link control — no undrivable screen-sourced routerLink edge remains', () => {
+      expect(graph.edges.filter((e) => byId.get(e.from)?.kind === 'screen' && e.event === 'click:routerLink')).toHaveLength(0)
+      const e = ctrlEdge('n_root', 'n_login')
+      expect(e?.modality).toBe('must')
+      expect(e?.witness?.ruleId).toBe('ng.control.router-link')
+      expect(byId.get(e?.from as string)?.control?.controlType).toBe('link')
+    })
   })
 })
 
@@ -291,8 +299,32 @@ describe('control units (F-angular-controls)', () => {
     const controls = graph.nodes.filter((n) => n.kind === 'control' && n.parent === 'n_a')
     const byId = new Map(graph.nodes.map((n) => [n.id, n]))
     const navTo = (to: string) => graph.edges.find((e) => e.to === to && byId.get(e.from)?.kind === 'control')
-    return { controls, navTo, soundiness }
+    return { controls, navTo, soundiness, edges: graph.edges }
   }
+
+  it('anchors a static routerLink to a link control with a role-name selector (must, ng.control.router-link, no duplicate)', () => {
+    const { controls, navTo, edges } = controlsOf(`<a routerLink="/b">Go to B</a>`)
+    const link = controls.find((c) => c.control?.controlType === 'link')
+    expect(link?.control?.selector).toEqual({ strategy: 'role-name', value: 'link|Go to B' })
+    const e = navTo('n_b')
+    expect(e?.from).toBe(link?.id)
+    expect(e?.modality).toBe('must')
+    expect(e?.witness?.ruleId).toBe('ng.control.router-link')
+    expect(edges.filter((x) => x.to === 'n_b')).toHaveLength(1)
+  })
+
+  it('anchors a bound single-element array [routerLink] to its link control as a literal must-edge', () => {
+    const { controls, navTo } = controlsOf(`<a [routerLink]="['/b']">B</a>`)
+    expect(navTo('n_b')?.from).toBe(controls.find((c) => c.control?.controlType === 'link')?.id)
+    expect(navTo('n_b')?.modality).toBe('must')
+  })
+
+  it('a bound [routerLink] with a dynamic first segment is a link control with a dynamic-target note, no edge', () => {
+    const { controls, navTo, soundiness } = controlsOf(`<a [routerLink]="[dest]">X</a>`)
+    expect(controls.find((c) => c.control?.controlType === 'link')).toBeDefined()
+    expect(navTo('n_b')).toBeUndefined()
+    expect(soundiness.some((n) => n.kind === 'dynamic-target' && n.detail.includes('routerLink'))).toBe(true)
+  })
 
   it('selector precedence: testid > role-name > label > text > structural', () => {
     expect(controlsOf('<button data-testid="x" (click)="g()">Save</button>').controls[0]?.control?.selector).toMatchObject({ strategy: 'testid', value: 'x' })

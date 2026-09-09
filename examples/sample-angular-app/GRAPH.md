@@ -52,6 +52,11 @@ An over-approximated (bound, non-literal) target is **may**.
 
 Totals: **8 nodes, 11 edges (6 must, 5 may)**.
 
+With `--controls` the same routerLink navigations are anchored to the `link`
+control that fires them (`ng.control.router-link`, event `click`) instead of
+the screen, so the runtime driver has a selector to click; the screen-level
+copies above are not emitted in that mode (no undrivable duplicates).
+
 ## Soundiness
 
 The bound link `[routerLink]="'/products/' + id"` is a non-literal target. The
