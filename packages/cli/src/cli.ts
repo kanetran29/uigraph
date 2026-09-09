@@ -12,9 +12,9 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@ui-graph/mcp'
-import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatNameless, formatParked, formatShots, formatStatus, formatWorkspaceList, loadWorkspaceConfig, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runName, runNameless, runParked, runShots, runStatus, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
+import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatNameless, formatParked, formatShots, formatShotsSweep, formatStatus, formatWorkspaceList, loadWorkspaceConfig, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runName, runNameless, runParked, runShots, runStatus, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
-import { runLogin, runVerify, runVerifyUntilDone } from './runner'
+import { runLogin, runShotsSweep, runVerify, runVerifyUntilDone } from './runner'
 
 /**
  * Locate the built dashboard (apps/dashboard/dist) relative to this module, for
@@ -191,9 +191,17 @@ export function buildProgram(): Command {
 
   program
     .command('shots')
-    .description('List screen/modal nodes with and without a captured screenshot.')
+    .description('List screen/modal nodes with and without a captured screenshot; with --app-url, first visit the running app and picture the unpictured screens (only when the browser provably lands on them).')
     .argument('<dir>', 'workspace directory holding uigraph.db')
-    .action((dir: string) => {
+    .option('--app-url <url>', 'capture mode: base URL of the running app — goto each screen, follow rendered links to parameterized ones')
+    .option('--storage-state <file>', 'Playwright storageState JSON for an authenticated session (same as verify)')
+    .option('--max-pages <n>', 'capture mode: max browser visits', '30')
+    .option('--refresh', 'capture mode: re-picture screens that already have a shot (default: only missing ones)')
+    .action(async (dir: string, opts: { appUrl?: string; storageState?: string; maxPages: string; refresh?: boolean }) => {
+      if (opts.appUrl !== undefined) {
+        const s = await runShotsSweep({ dir, appUrl: opts.appUrl, storageState: opts.storageState, maxPages: Number(opts.maxPages), refresh: opts.refresh === true })
+        console.log(formatShotsSweep(s, runShots(dir)) + '\n')
+      }
       console.log(formatShots(runShots(dir)))
     })
 

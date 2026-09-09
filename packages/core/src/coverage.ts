@@ -250,15 +250,22 @@ function pathSegments(p: string): string[] {
 
 /**
  * Map an observed browser URL to a declared screen node id, or null when it maps to
- * none (undeclared / external / ambiguous). Strips the app origin + query/hash,
- * normalizes a trailing slash, then matches the path against declared non-wildcard
- * routes: an exact route wins; else the SOLE parameterized candidate (e.g. observed
- * `/products/42` → the only `/products/:id` node); zero or >1 candidates → null.
- * Used by the Tier-3 runner to resolve a dynamic landing into a concrete edge.
+ * none (undeclared / external / ambiguous). The URL must continue the app origin at
+ * a path/query/hash boundary — `http://app` is a string prefix of `http://apple/…`
+ * and `http://app.evil/…`, neither of which is the app — and a hash-routed URL
+ * (`#/…`, `#!/…`) is never mapped: its screen lives in the fragment this path-based
+ * match is blind to. Strips the app origin + query/hash, normalizes a trailing slash,
+ * then matches the path against declared non-wildcard routes: an exact route wins;
+ * else the SOLE parameterized candidate (e.g. observed `/products/42` → the only
+ * `/products/:id` node); zero or >1 candidates → null. Used by the Tier-3 runner to
+ * resolve a dynamic landing into a concrete edge, and by the shots sweep as its gate.
  */
 export function nodeForUrl(graph: UiGraph, observedUrl: string, appUrl: string): string | null {
   if (!observedUrl.startsWith(appUrl)) return null
-  let path = observedUrl.slice(appUrl.length).split('?')[0]?.split('#')[0] ?? ''
+  const rest = observedUrl.slice(appUrl.length)
+  if (rest !== '' && !appUrl.endsWith('/') && !/^[/?#]/.test(rest)) return null
+  if (/#!?\//.test(rest)) return null
+  let path = rest.split('?')[0]?.split('#')[0] ?? ''
   if (!path.startsWith('/')) path = '/' + path
   if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1)
   const exact = graph.nodes.find((n) => n.kind !== 'unknown' && n.route === path)

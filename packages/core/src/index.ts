@@ -113,6 +113,7 @@ export {
   reachableFrom,
   planPath,
   planForTarget,
+  isConcreteRoute,
   type PlanStep,
   type PlanPathOptions,
 } from './algorithms'

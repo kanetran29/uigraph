@@ -9,8 +9,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { buildSpecPlan, hashValue } from '@ui-graph/core'
 import { planPath } from '@ui-graph/core'
 import type { GraphEdge, GraphNode, SpecPlan, UiGraph, Witness } from '@ui-graph/core'
-import { drivePlan, makePlaywrightDriver, mapPool, runVerify, runVerifyUntilDone } from './runner'
-import type { VerifyResult } from './runner'
+import { drivePlan, makePlaywrightDriver, mapPool, runShotsSweep, runVerify, runVerifyUntilDone } from './runner'
+import type { SweepBrowser, VerifyResult } from './runner'
 
 const staticWitness: Witness = { source: 'static', file: 'x.tsx', loc: { line: 1, col: 1 }, ruleId: 'test' }
 
@@ -1862,5 +1862,251 @@ describe('screenshots: capture in drivePlan + persistence in runVerify', () => {
     } finally {
       warn.mockRestore()
     }
+  })
+})
+
+describe('runShotsSweep: picture screens only when the browser provably lands on them', () => {
+  /**
+   * A fake browser for the sweep: `redirects` maps a goto path to the path the
+   * page settles on (an auth guard bounce, a redirect elsewhere); `links` maps a
+   * settled path to the absolute hrefs its DOM renders. Every goto is recorded
+   * in `visits`; the screenshot is canned bytes.
+   */
+  function sweepBrowser(spec: { redirects?: Record<string, string>; links?: Record<string, string[]>; contexts?: unknown[] }, visits: string[]): SweepBrowser {
+    const path = (u: string): string => new URL(u).pathname
+    let current = 'about:blank'
+    return {
+      newContext: async (opts?: unknown) => {
+        spec.contexts?.push(opts)
+        return {
+          newPage: async () => ({
+            goto: async (url: string) => {
+              visits.push(path(url))
+              const to = spec.redirects?.[path(url)]
+              current = to === undefined ? url : new URL(url).origin + to
+            },
+            url: () => current,
+            waitForLoadState: async () => {},
+            evaluate: async () => spec.links?.[path(current)] ?? [],
+            screenshot: async () => Buffer.from('jpegbytes'),
+          }),
+        }
+      },
+      close: async () => {},
+    }
+  }
+
+  /** Read back the shots sidecar of a temp workspace. */
+  async function readShots(dir: string) {
+    const { openStore } = await import('@ui-graph/core/node')
+    const { join } = await import('node:path')
+    const store = openStore(join(dir, 'uigraph.db'))
+    const shots = store.getScreenShots()
+    store.close()
+    return shots
+  }
+
+  const conduit = (): UiGraph =>
+    graph(
+      [node('n_home', { route: '/' }), node('n_settings', { route: '/settings' }), node('n_profile', { route: '/profile/:username' }), node('n_article', { route: '/article/:slug' }), node('n_fav', { route: '/profile/:username/favorites' })],
+      [],
+    )
+
+  it('a concrete route is captured with the URL it was pictured at; the file, the sidecar and the summary agree', async () => {
+    const { existsSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const gg = graph([node('n_home', { route: '/' }), node('n_login', { route: '/login' })], [])
+    const dir = await seedDir('uigraph-sweep-concrete-', gg)
+    const visits: string[] = []
+    const s = await runShotsSweep({ dir, appUrl: 'http://app/', launcher: async () => sweepBrowser({}, visits) })
+    expect(s.captured).toEqual([
+      { nodeId: 'n_home', url: 'http://app/', source: 'goto' },
+      { nodeId: 'n_login', url: 'http://app/login', source: 'goto' },
+    ])
+    expect(s.skipped).toEqual([])
+    expect(s.visited).toBe(2)
+    expect(visits).toEqual(['/', '/login'])
+    const shots = await readShots(dir)
+    expect(shots['n_home']).toMatchObject({ path: 'shots/n_home.jpg', source: 'goto', url: 'http://app/', base: hashValue(gg) })
+    expect(shots['n_login']).toMatchObject({ path: 'shots/n_login.jpg', source: 'goto', url: 'http://app/login' })
+    expect(existsSync(join(dir, 'shots', 'n_home.jpg'))).toBe(true)
+  })
+
+  it('an auth bounce is skipped with a reason naming --storage-state — nothing written for that screen', async () => {
+    const { existsSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const dir = await seedDir('uigraph-sweep-bounce-', graph([node('n_settings', { route: '/settings' }), node('n_login', { route: '/login' })], []))
+    const s = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => sweepBrowser({ redirects: { '/settings': '/login' } }, []) })
+    expect(s.captured.map((c) => c.nodeId)).toEqual(['n_login'])
+    expect(s.skipped).toEqual([{ nodeId: 'n_settings', reason: 'auth bounce to /login — pass --storage-state' }])
+    expect(Object.keys(await readShots(dir))).toEqual(['n_login'])
+    expect(existsSync(join(dir, 'shots', 'n_settings.jpg'))).toBe(false)
+  })
+
+  it('--storage-state hydrates the browser context, like verify', async () => {
+    const dir = await seedDir('uigraph-sweep-auth-', graph([node('n_home', { route: '/' })], []))
+    const contexts: unknown[] = []
+    await runShotsSweep({ dir, appUrl: 'http://app', storageState: '/tmp/auth.json', launcher: async () => sweepBrowser({ contexts }, []) })
+    expect(contexts).toEqual([{ storageState: '/tmp/auth.json' }])
+  })
+
+  it('a parameterized screen is pictured from a DOM-discovered href, only when the settled URL maps to it (a redirect elsewhere is a skip)', async () => {
+    const dir = await seedDir('uigraph-sweep-param-', conduit())
+    const visits: string[] = []
+    const browser = sweepBrowser(
+      {
+        links: { '/': ['http://app/profile/jo?tab=1#top', 'http://app/article/hello', 'https://elsewhere.example/x'] },
+        redirects: { '/settings': '/login', '/article/hello': '/' },
+      },
+      visits,
+    )
+    const s = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => browser })
+    expect(s.captured).toEqual([
+      { nodeId: 'n_home', url: 'http://app/', source: 'goto' },
+      { nodeId: 'n_profile', url: 'http://app/profile/jo', source: 'goto' },
+    ])
+    expect(s.skipped).toEqual(
+      expect.arrayContaining([
+        { nodeId: 'n_settings', reason: 'auth bounce to /login — pass --storage-state' },
+        { nodeId: 'n_article', reason: 'bounced to /' },
+        { nodeId: 'n_fav', reason: 'no concrete URL discovered in the visited pages' },
+      ]),
+    )
+    expect(visits).toEqual(['/', '/settings', '/profile/jo', '/article/hello'])
+    const shots = await readShots(dir)
+    expect(shots['n_profile']).toMatchObject({ source: 'goto', url: 'http://app/profile/jo' })
+    expect(shots['n_article']).toBeUndefined()
+  })
+
+  it('two-hop discovery: /profile/<u>/favorites is found from the /profile/<u> page it links from; one capture per target', async () => {
+    const dir = await seedDir('uigraph-sweep-2hop-', conduit())
+    const visits: string[] = []
+    const browser = sweepBrowser(
+      {
+        links: {
+          '/': ['http://app/profile/jo', 'http://app/profile/ann', 'http://app/article/a1', 'http://app/article/a2'],
+          '/profile/jo': ['http://app/profile/jo/favorites', 'http://app/'],
+        },
+      },
+      visits,
+    )
+    const s = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => browser })
+    expect(s.captured.map((c) => [c.nodeId, c.url])).toEqual([
+      ['n_home', 'http://app/'],
+      ['n_settings', 'http://app/settings'],
+      ['n_profile', 'http://app/profile/jo'],
+      ['n_article', 'http://app/article/a1'],
+      ['n_fav', 'http://app/profile/jo/favorites'],
+    ])
+    expect(s.skipped).toEqual([])
+    expect(visits).toEqual(['/', '/settings', '/profile/jo', '/article/a1', '/profile/jo/favorites'])
+  })
+
+  it('an existing landing shot is NOT overwritten without --refresh, and IS with it (as a goto shot with url)', async () => {
+    const { openStore } = await import('@ui-graph/core/node')
+    const { join } = await import('node:path')
+    const gg = graph([node('n_home', { route: '/' }), node('n_b', { route: '/b' })], [])
+    const dir = await seedDir('uigraph-sweep-refresh-', gg)
+    const landing = { path: 'shots/n_home.jpg', ts: '2026-01-01T00:00:00.000Z', base: 'old', source: 'landing' as const }
+    const store = openStore(join(dir, 'uigraph.db'))
+    store.setScreenShot('n_home', landing)
+    store.close()
+    const visits: string[] = []
+    const s1 = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => sweepBrowser({}, visits) })
+    expect(s1.captured.map((c) => c.nodeId)).toEqual(['n_b'])
+    expect(visits).toEqual(['/b'])
+    expect((await readShots(dir))['n_home']).toEqual(landing)
+    const s2 = await runShotsSweep({ dir, appUrl: 'http://app', refresh: true, launcher: async () => sweepBrowser({}, []) })
+    expect(s2.captured.map((c) => c.nodeId).sort()).toEqual(['n_b', 'n_home'])
+    expect((await readShots(dir))['n_home']).toMatchObject({ path: 'shots/n_home.jpg', source: 'goto', url: 'http://app/', base: hashValue(gg) })
+  })
+
+  it('--max-pages caps the browser visits; the unvisited targets are skipped with the cap as the reason', async () => {
+    const dir = await seedDir('uigraph-sweep-cap-', graph([node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), node('n_c', { route: '/c' })], []))
+    const warn = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const visits: string[] = []
+      const s = await runShotsSweep({ dir, appUrl: 'http://app', maxPages: 2, launcher: async () => sweepBrowser({}, visits) })
+      expect(visits).toEqual(['/a', '/b'])
+      expect(s.visited).toBe(2)
+      expect(s.captured.map((c) => c.nodeId)).toEqual(['n_a', 'n_b'])
+      expect(s.skipped).toEqual([{ nodeId: 'n_c', reason: 'page cap reached (--max-pages 2) before it was visited' }])
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('page cap reached'))
+    } finally {
+      warn.mockRestore()
+    }
+  })
+
+  it('modal nodes are reported as skipped (a goto never opens one) and never visited', async () => {
+    const dir = await seedDir('uigraph-sweep-modal-', graph([node('n_home', { route: '/' }), node('m_confirm', { route: null, kind: 'modal', parent: 'n_home' })], []))
+    const visits: string[] = []
+    const s = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => sweepBrowser({}, visits) })
+    expect(visits).toEqual(['/'])
+    expect(s.captured.map((c) => c.nodeId)).toEqual(['n_home'])
+    expect(s.skipped).toEqual([{ nodeId: 'm_confirm', reason: expect.stringMatching(/^modal — needs a drive/) }])
+  })
+
+  it('a failed capture is logged and skipped; the sweep goes on and the browser is closed', async () => {
+    const dir = await seedDir('uigraph-sweep-fail-', graph([node('n_a', { route: '/a' }), node('n_b', { route: '/b' })], []))
+    const warn = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      let closed = false
+      const base = sweepBrowser({}, [])
+      const browser: SweepBrowser = {
+        newContext: async () => {
+          const ctx = await base.newContext()
+          return {
+            newPage: async () => {
+              const page = await ctx.newPage()
+              return { ...page, screenshot: async () => { if (page.url().endsWith('/a')) throw new Error('page crashed'); return Buffer.from('ok') } }
+            },
+          }
+        },
+        close: async () => {
+          closed = true
+        },
+      }
+      const s = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => browser })
+      expect(s.captured.map((c) => c.nodeId)).toEqual(['n_b'])
+      expect(s.skipped).toEqual([{ nodeId: 'n_a', reason: 'screenshot failed (see warning)' }])
+      expect(closed).toBe(true)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('page crashed'))
+    } finally {
+      warn.mockRestore()
+    }
+  })
+
+  it('a rendered href on a string-prefix origin (http://site.com.evil.io) is never followed nor pictured as an app screen', async () => {
+    const dir = await seedDir('uigraph-sweep-prefix-origin-', graph([node('n_home', { route: '/' }), node('n_lang_login', { route: '/:lang/login' })], []))
+    const visits: string[] = []
+    const browser = sweepBrowser({ links: { '/': ['http://site.com.evil.io/login', 'http://site.com:8080/en/login'] } }, visits)
+    const s = await runShotsSweep({ dir, appUrl: 'http://site.com', launcher: async () => browser })
+    expect(visits).toEqual(['/'])
+    expect(s.captured.map((c) => c.nodeId)).toEqual(['n_home'])
+    expect(s.skipped).toEqual([{ nodeId: 'n_lang_login', reason: 'no concrete URL discovered in the visited pages' }])
+  })
+
+  it('a hash-routed landing (/#/login, /login#/) is skipped with a hash-routing reason — the path map cannot place it, so nothing is pictured', async () => {
+    const { existsSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const dir = await seedDir('uigraph-sweep-hash-', graph([node('n_home', { route: '/' }), node('n_login', { route: '/login' })], []))
+    const browser = sweepBrowser({ redirects: { '/': '/#/login', '/login': '/login#/' } }, [])
+    const s = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => browser })
+    expect(s.captured).toEqual([])
+    expect(s.skipped).toEqual([
+      { nodeId: 'n_home', reason: 'hash-routed landing /#/login — the path-based screen map cannot place it' },
+      { nodeId: 'n_login', reason: 'hash-routed landing /login#/ — the path-based screen map cannot place it' },
+    ])
+    expect(await readShots(dir)).toEqual({})
+    expect(existsSync(join(dir, 'shots', 'n_home.jpg'))).toBe(false)
+  })
+
+  it('the recorded url is origin + path only: a URL-borne token in the query/hash never reaches the sidecar or the summary', async () => {
+    const dir = await seedDir('uigraph-sweep-token-', graph([node('n_home', { route: '/' })], []))
+    const browser = sweepBrowser({ redirects: { '/': '/?access_token=SECRET#state=1' } }, [])
+    const s = await runShotsSweep({ dir, appUrl: 'http://app', launcher: async () => browser })
+    expect(s.captured).toEqual([{ nodeId: 'n_home', url: 'http://app/', source: 'goto' }])
+    expect((await readShots(dir))['n_home']).toMatchObject({ url: 'http://app/' })
+    expect(JSON.stringify(s)).not.toContain('SECRET')
   })
 })

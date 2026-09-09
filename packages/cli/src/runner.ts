@@ -12,9 +12,12 @@
 import { mkdirSync, renameSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { Evidence, GraphNode, SpecPlan, UiGraph, VerifyTarget } from '@ui-graph/core'
-import { buildSpecPlan, dedupWorklist, DOM_DELTA_WATCHED_ATTRS, fnv1a, hashValue, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planForTarget } from '@ui-graph/core'
+import { buildSpecPlan, dedupWorklist, DOM_DELTA_WATCHED_ATTRS, fnv1a, hashValue, isConcreteRoute, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planForTarget } from '@ui-graph/core'
 import { openStore } from '@ui-graph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@ui-graph/mcp'
+
+/** A route/path that is an auth screen: landing on one from elsewhere while unauthenticated is a guard bounce, never the screen we asked for. */
+const AUTH_ROUTE_RE = /login|signin|sign-in|auth/i
 
 /** One screenshot the driver took: the node whose screen the browser was PROVABLY on, the workspace-relative file ('shots/<id>.jpg'), and how it got there — 'goto' = the plan's start URL settled on that screen, 'landing' = the final leg confirmed onto it. */
 export interface CapturedShot {
@@ -242,14 +245,14 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       }
       let realNode = nodeForUrl(graph, result.landedUrl, opts.appUrl)
       // H5: an unauthenticated bounce to a login/auth route is NOT the dynamic target.
-      if (realNode !== null && !authed && /login|signin|sign-in|auth/i.test(graph.nodes.find((n) => n.id === realNode)?.route ?? '')) {
+      if (realNode !== null && !authed && AUTH_ROUTE_RE.test(graph.nodes.find((n) => n.id === realNode)?.route ?? '')) {
         park('landed on an auth route while unauthenticated — likely a guard bounce, not the dynamic target')
         continue
       }
       // H8: an undeclared same-origin landing is a real screen the static pass missed — add it honestly, then mint.
       if (realNode === null) {
         const path = result.landedUrl.startsWith(opts.appUrl) ? (result.landedUrl.slice(opts.appUrl.length).split('?')[0]?.split('#')[0] ?? '') : ''
-        if (path === '' || /login|signin|sign-in|auth|error|404/i.test(path)) {
+        if (path === '' || AUTH_ROUTE_RE.test(path) || /error|404/i.test(path)) {
           park(`landed on an unattributable/external/auth URL (${result.landedUrl}) — not minting`)
           continue
         }
@@ -731,6 +734,197 @@ export async function runLogin(opts: RunLoginOptions): Promise<void> {
   } finally {
     await browser.close()
   }
+}
+
+/** The slice of the Playwright Page API the shots sweep uses — goto + settle, the settled URL, in-page href collection, screenshot. A fake page in tests needs only these. */
+export interface SweepPage {
+  goto: (url: string) => Promise<unknown>
+  url: () => string
+  waitForLoadState: (state: string) => Promise<void>
+  evaluate: (expression: string) => Promise<unknown>
+  screenshot: PwPage['screenshot']
+}
+
+/** The slice of the browser API the shots sweep uses: one context (optionally hydrated from a saved session) with one page, then close. */
+export interface SweepBrowser {
+  newContext: (opts?: unknown) => Promise<{ newPage: () => Promise<SweepPage> }>
+  close: () => Promise<void>
+}
+
+/** Options for runShotsSweep: workspace dir, the app's base URL, an optional saved auth session (same semantics as verify), the browser-visit cap (default 30), `refresh` to re-picture screens that already have a shot (default: only missing ones — a landing shot is never overwritten by a goto shot unless asked), and an injectable launcher so tests use a fake browser. */
+export interface RunShotsSweepOptions {
+  dir: string
+  appUrl: string
+  storageState?: string
+  maxPages?: number
+  refresh?: boolean
+  launcher?: () => Promise<SweepBrowser>
+}
+
+/** What a shots sweep did: the screens pictured (with the concrete URL each was pictured at), the ones it could not picture and why, and how many browser visits it spent. */
+export interface ShotsSweepSummary {
+  captured: { nodeId: string; url: string; source: 'goto' }[]
+  skipped: { nodeId: string; reason: string }[]
+  visited: number
+}
+
+/** The in-page expression that lists every anchor's absolute href (a string expression: this package has no lib.dom, so a typed callback cannot name `document`). */
+const HREFS_EXPR = 'Array.from(document.querySelectorAll("a[href]")).map((a) => a.href)'
+
+/**
+ * Picture the workspace's screens without driving anything: goto each concrete
+ * route, and reach parameterized screens (/profile/:username) through the links
+ * the visited pages actually render. A screenshot is recorded ONLY when the
+ * settled URL maps back to the target node (nodeForUrl) — a bounce to an auth
+ * route, a redirect elsewhere, or an unmapped landing is a skip with a reason,
+ * never a picture. Visits are FIFO with target-bearing visits (a seed that is
+ * itself unpictured, or a discovered href that maps to an unpictured parameterized
+ * screen) ahead of discovery-only visits, so a small --max-pages still spends its
+ * budget on captures. Every visited page is mined for same-origin hrefs, which is
+ * how /profile/<u>/favorites is found from /profile/<u>. One capture per target;
+ * capture/persist failures are logged and skipped, never abort the sweep.
+ */
+export async function runShotsSweep(opts: RunShotsSweepOptions): Promise<ShotsSweepSummary> {
+  const appUrl = opts.appUrl.replace(/\/$/, '')
+  const maxPages = Math.max(1, Math.floor(opts.maxPages ?? 30)) || 30
+  const ctx = { dir: opts.dir }
+  const graph = loadMergedGraph(ctx)
+  const store = openStore(dbPath(ctx))
+  const existing = store.getScreenShots()
+  const base = store.getBaseGraph()
+  store.close()
+  const baseHash = base === null ? '' : hashValue(base)
+  const shotsDir = resolve(opts.dir, 'shots')
+  const wanted = (id: string): boolean => opts.refresh === true || existing[id] === undefined
+
+  const captured: ShotsSweepSummary['captured'] = []
+  const skips = new Map<string, string>()
+  const pending = new Set<string>()
+  const routeOf = new Map<string, string>()
+  const targeted: { url: string; target: string }[] = []
+  const explore: string[] = []
+  for (const n of graph.nodes) {
+    if (n.kind === 'modal' && wanted(n.id)) skips.set(n.id, 'modal — needs a drive to open it (captured when a verify lands on it)')
+    if (n.kind !== 'screen') continue
+    if (n.route === null) {
+      if (wanted(n.id)) skips.set(n.id, 'no route — cannot be reached by URL')
+      continue
+    }
+    routeOf.set(n.id, n.route)
+    if (wanted(n.id)) pending.add(n.id)
+    if (!isConcreteRoute(n.route)) continue
+    if (wanted(n.id)) targeted.push({ url: appUrl + n.route, target: n.id })
+    else explore.push(appUrl + n.route)
+  }
+  const pendingParam = (): boolean => [...pending].some((id) => !isConcreteRoute(routeOf.get(id) as string))
+
+  const launch =
+    opts.launcher ??
+    (async (): Promise<SweepBrowser> => {
+      const { chromium } = await loadPlaywright()
+      return (await chromium.launch()) as SweepBrowser
+    })
+  let visited = 0
+  let capped = false
+  const browser = await launch()
+  try {
+    const context = await browser.newContext(opts.storageState !== undefined ? { storageState: opts.storageState } : {})
+    const page = await context.newPage()
+    const seenHrefs = new Set<string>()
+    for (;;) {
+      if (pending.size === 0) break
+      const next = targeted.shift() ?? (pendingParam() ? explore.shift() : undefined)
+      if (next === undefined) break
+      const visit = typeof next === 'string' ? { url: next, target: null } : next
+      // a second href for a target already pictured from the first: nothing left to do there
+      if (visit.target !== null && !pending.has(visit.target)) continue
+      if (visited >= maxPages) {
+        capped = true
+        console.error(`[warn] shots sweep: page cap reached (--max-pages ${maxPages}) with ${pending.size} target(s) unpictured`)
+        break
+      }
+      visited++
+      let settled: string
+      try {
+        await page.goto(visit.url)
+        await page.waitForLoadState('networkidle').catch(() => {})
+        settled = page.url()
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error(`[warn] shots sweep: ${visit.url} failed to load: ${msg}`)
+        if (visit.target !== null) skips.set(visit.target, `navigation failed: ${msg}`)
+        continue
+      }
+      if (visit.target !== null) {
+        const landed = nodeForUrl(graph, settled, appUrl)
+        if (landed === visit.target) {
+          const shot = await captureShot(page, shotsDir, visit.target, 'goto')
+          if (shot === null) skips.set(visit.target, 'screenshot failed (see warning)')
+          else {
+            const at = screenAddress(settled) ?? settled
+            const s = openStore(dbPath(ctx))
+            try {
+              s.setScreenShot(visit.target, { path: shot.path, ts: new Date().toISOString(), base: baseHash, source: 'goto', url: at })
+            } finally {
+              s.close()
+            }
+            captured.push({ nodeId: visit.target, url: at, source: 'goto' })
+            pending.delete(visit.target)
+            skips.delete(visit.target)
+          }
+        } else skips.set(visit.target, bounceReason(settled, appUrl))
+      }
+      // mine the page for links into still-unpictured parameterized screens
+      for (const href of await sameOriginHrefs(page, appUrl)) {
+        if (seenHrefs.has(href)) continue
+        seenHrefs.add(href)
+        const id = nodeForUrl(graph, href, appUrl)
+        if (id === null || !pending.has(id) || isConcreteRoute(routeOf.get(id) as string)) continue
+        targeted.push({ url: href, target: id })
+      }
+    }
+  } finally {
+    await browser.close()
+  }
+  for (const id of pending) {
+    if (skips.has(id)) continue
+    skips.set(id, capped ? `page cap reached (--max-pages ${maxPages}) before it was visited` : 'no concrete URL discovered in the visited pages')
+  }
+  return { captured, skipped: [...skips].map(([nodeId, reason]) => ({ nodeId, reason })), visited }
+}
+
+/** Why a settled URL is not the target: a hash-routed landing (`#/…`) cannot be placed by the path map (no --storage-state will fix that), an auth route names the fix (--storage-state), anything else is reported as the path the browser ended up on (query dropped, hash kept so the report shows what nodeForUrl saw). */
+function bounceReason(settled: string, appUrl: string): string {
+  const path = settled.startsWith(appUrl) ? settled.slice(appUrl.length).split('?')[0] || '/' : settled
+  if (/#!?\//.test(path)) return `hash-routed landing ${path} — the path-based screen map cannot place it`
+  return AUTH_ROUTE_RE.test(path) ? `auth bounce to ${path} — pass --storage-state` : `bounced to ${path}`
+}
+
+/** A URL reduced to origin + pathname — the address a screen lives at. Query and hash are what nodeForUrl ignores, and a URL-borne token (`?access_token=`, `#state=`) must never reach the sidecar or the terminal. Null when unparseable. */
+function screenAddress(u: string): string | null {
+  try {
+    const p = new URL(u)
+    return p.origin + p.pathname
+  } catch {
+    return null
+  }
+}
+
+/** The page's same-origin anchor hrefs as screen addresses (origin + path), deduped; an evaluate failure (page gone) is an empty list. The origin prefilter is loose — nodeForUrl is the boundary-exact gate before any href is followed. */
+async function sameOriginHrefs(page: SweepPage, appUrl: string): Promise<string[]> {
+  let raw: unknown
+  try {
+    raw = await page.evaluate(HREFS_EXPR)
+  } catch {
+    return []
+  }
+  const out = new Set<string>()
+  for (const h of Array.isArray(raw) ? raw : []) {
+    if (typeof h !== 'string' || !h.startsWith(appUrl)) continue
+    const a = screenAddress(h)
+    if (a !== null) out.add(a)
+  }
+  return [...out]
 }
 
 /** Rung-3 heuristic: elements whose class NAMES them a modal/overlay. A delta on this can never confirm (class names are not a11y semantics) — it only distinguishes "something modal-like appeared" (undrivable, app a11y gap) from "nothing happened" (honest refutation). */
@@ -1300,7 +1494,7 @@ function safeShotId(nodeId: string): boolean {
  * when anything fails. A picture is a by-product of a drive and must never touch
  * its verdict, so every failure is logged and swallowed here.
  */
-async function captureShot(page: PwPage, shotsDir: string, nodeId: string, source: CapturedShot['source']): Promise<CapturedShot | null> {
+async function captureShot(page: Pick<PwPage, 'screenshot'>, shotsDir: string, nodeId: string, source: CapturedShot['source']): Promise<CapturedShot | null> {
   if (!safeShotId(nodeId)) {
     console.error(`[warn] screenshot of ${nodeId} skipped: unsafe file name`)
     return null

@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@ui-graph/core'
 import { openStore, saveGraph } from '@ui-graph/core/node'
 import type { Server } from 'node:http'
-import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, formatNameless, formatParked, formatShots, loadWorkspaceConfig, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runName, runNameless, runParked, runShots, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
+import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, formatNameless, formatParked, formatShots, formatShotsSweep, loadWorkspaceConfig, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runName, runNameless, runParked, runShots, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
 import { buildProgram } from './cli'
 import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
 import { readRegistry, summarize } from '@ui-graph/core/node'
@@ -1162,6 +1162,15 @@ describe('runNameless / runName / runShots (control naming + screenshot roster)'
     expect(out).toContain('1 of 2 screen/modal node(s) have a screenshot')
     expect(out).toContain('shots/a.jpg')
     expect(out).toContain('  b  /b  B')
+  })
+
+  it('shots registers the capture-mode options, and formatShotsSweep prints captured (node, route, url) and skipped (reason)', () => {
+    const cmd = buildProgram().commands.find((x) => x.name() === 'shots')
+    expect(cmd?.options.map((o) => o.long)).toEqual(expect.arrayContaining(['--app-url', '--storage-state', '--max-pages', '--refresh']))
+    const out = formatShotsSweep({ captured: [{ nodeId: 'a', url: 'http://app/a', source: 'goto' }], skipped: [{ nodeId: 'b', reason: 'bounced to /login' }], visited: 2 }, runShots(namingWorkspace()))
+    expect(out).toContain('shots sweep: 1 captured, 1 skipped, 2 page(s) visited')
+    expect(out).toContain('  a  /a  http://app/a')
+    expect(out).toContain('  b  /b  bounced to /login')
   })
 
   it('the CLI registers nameless / name / shots, and `name` without a name or --clear is a usage error', async () => {
