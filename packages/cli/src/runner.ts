@@ -780,8 +780,10 @@ const HREFS_EXPR = 'Array.from(document.querySelectorAll("a[href]")).map((a) => 
  * never a picture. Visits are FIFO with target-bearing visits (a seed that is
  * itself unpictured, or a discovered href that maps to an unpictured parameterized
  * screen) ahead of discovery-only visits, so a small --max-pages still spends its
- * budget on captures. Every visited page is mined for same-origin hrefs, which is
- * how /profile/<u>/favorites is found from /profile/<u>. One capture per target;
+ * budget on captures. Every visited page is mined for same-origin hrefs and pages
+ * that are already pictured are still walked as stepping stones, which is how
+ * /profile/<u>/favorites is found from /profile/<u> and /editor/<slug> from the
+ * article that links to it. One capture per target;
  * capture/persist failures are logged and skipped, never abort the sweep.
  */
 export async function runShotsSweep(opts: RunShotsSweepOptions): Promise<ShotsSweepSummary> {
@@ -831,6 +833,7 @@ export async function runShotsSweep(opts: RunShotsSweepOptions): Promise<ShotsSw
     const context = await browser.newContext(opts.storageState !== undefined ? { storageState: opts.storageState } : {})
     const page = await context.newPage()
     const seenHrefs = new Set<string>()
+    const seenVisits = new Set<string>()
     for (;;) {
       if (pending.size === 0) break
       const next = targeted.shift() ?? (pendingParam() ? explore.shift() : undefined)
@@ -838,6 +841,8 @@ export async function runShotsSweep(opts: RunShotsSweepOptions): Promise<ShotsSw
       const visit = typeof next === 'string' ? { url: next, target: null } : next
       // a second href for a target already pictured from the first: nothing left to do there
       if (visit.target !== null && !pending.has(visit.target)) continue
+      if (seenVisits.has(visit.url)) continue
+      seenVisits.add(visit.url)
       if (visited >= maxPages) {
         capped = true
         console.error(`[warn] shots sweep: page cap reached (--max-pages ${maxPages}) with ${pending.size} target(s) unpictured`)
@@ -879,8 +884,12 @@ export async function runShotsSweep(opts: RunShotsSweepOptions): Promise<ShotsSw
         if (seenHrefs.has(href)) continue
         seenHrefs.add(href)
         const id = nodeForUrl(graph, href, appUrl)
-        if (id === null || !pending.has(id) || isConcreteRoute(routeOf.get(id) as string)) continue
-        targeted.push({ url: href, target: id })
+        if (id === null) continue
+        if (pending.has(id) && !isConcreteRoute(routeOf.get(id) as string)) targeted.push({ url: href, target: id })
+        // An already-pictured page is still worth VISITING as a stepping stone: some
+        // screens are linked from nowhere else (an article's "Edit Article" is the only
+        // link to /editor/<slug>). It is mined, never re-pictured.
+        else explore.push(href)
       }
     }
   } finally {
