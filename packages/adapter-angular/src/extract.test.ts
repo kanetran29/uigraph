@@ -261,7 +261,8 @@ describe('extractGraph — modern Angular routing (lazy + nested + array links)'
       }),
       '/',
     )
-    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/profile', '/profile/:username'])
+    // the componentless loadChildren parent is a prefix, not a screen
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/profile/:username'])
     expect(graph.nodes.some((n) => n.route === '/:username')).toBe(false)
   })
 
@@ -299,6 +300,23 @@ describe('extractGraph — modern Angular routing (lazy + nested + array links)'
       '/',
     )
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/editor', '/editor/:slug'])
+    // the `path: ''` child is the screen at /editor — the componentless parent must not shadow it
+    expect(graph.nodes.find((n) => n.route === '/editor')?.componentPath).toBe('e.component.ts')
+  })
+
+  it('a componentless parent is a prefix, not a screen, and its canActivate gates every child', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { inject } from '@angular/core'\nimport { A } from './a.component'\nimport { B } from './b.component'\nconst requireAuth = () => inject(Object).x.pipe()\nexport const routes: Routes = [\n  { path: 'a', component: A },\n  { path: 'admin', canActivate: [requireAuth], children: [{ path: 'users', component: B }] },\n]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a routerLink="/admin/users">go</a>' })\nexport class A {}`,
+        '/b.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>b</p>' })\nexport class B {}`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/a', '/admin/users'])
+    const e = graph.edges.find((x) => x.to === routeId('/admin/users'))
+    expect(e?.modality).toBe('may')
+    expect(e?.guard).toContain('requireAuth')
   })
 })
 
