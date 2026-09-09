@@ -6,12 +6,13 @@
 
 import type { UiGraph } from './ir'
 
-/** One captured screenshot: workspace-relative path, capture time, base hash it was taken on, and how the runner got there. */
+/** One captured screenshot: workspace-relative path, capture time, base hash it was taken on, how the runner got there, and `url` — the concrete URL the picture was taken at (a parameterized screen is pictured at ONE instance, e.g. /profile/johndoe for /profile/:username; recording it keeps the picture honest). */
 export interface ScreenShot {
   path: string
   ts: string
   base: string
   source: 'landing' | 'goto'
+  url?: string
 }
 
 /** Screenshots keyed by node id. */

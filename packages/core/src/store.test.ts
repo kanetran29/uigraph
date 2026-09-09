@@ -194,6 +194,8 @@ describe('Store (SQLite)', () => {
       s.setScreenShot('b', shot('shots/b.jpg'))
       s.setScreenShot('a', shot('shots/a.jpg'))
       expect(s.getScreenShots()).toEqual({ a: shot('shots/a.jpg'), b: shot('shots/b.jpg') })
+      s.setScreenShot('p', { ...shot('shots/p.jpg', 'goto'), url: 'http://app/profile/jo' })
+      expect(s.getScreenShots()['p']).toEqual({ ...shot('shots/p.jpg', 'goto'), url: 'http://app/profile/jo' })
       s.close()
     })
 

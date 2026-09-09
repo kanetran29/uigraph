@@ -25,6 +25,18 @@ describe('nodeForUrl', () => {
     expect(nodeForUrl(g, `${A}/nope`, A)).toBeNull()
     expect(nodeForUrl(g, 'http://evil.com/profile', A)).toBeNull()
   })
+  it('a string-prefix origin is NOT the app: http://site.com.evil.io/login never maps to /:lang/login', () => {
+    const gg = graph([node('n_lang_login', { route: '/:lang/login' })], [])
+    expect(nodeForUrl(gg, 'http://site.com.evil.io/login', 'http://site.com')).toBeNull()
+    expect(nodeForUrl(gg, 'http://site.com/en/login', 'http://site.com')).toBe('n_lang_login')
+    expect(nodeForUrl(gg, 'http://site.com/en/login', 'http://site.com/')).toBe('n_lang_login')
+    expect(nodeForUrl(gg, 'http://site.com/en/login?x=1#top', 'http://site.com')).toBe('n_lang_login')
+  })
+  it('a hash-routed URL (#/…, #!/…) is never placed by the path: the screen lives in the fragment', () => {
+    expect(nodeForUrl(g, `${A}/#/profile`, A)).toBeNull()
+    expect(nodeForUrl(g, `${A}/profile#/`, A)).toBeNull()
+    expect(nodeForUrl(g, `${A}/#!/profile`, A)).toBeNull()
+  })
 })
 
 // a has a concrete runtime out-edge (e1), so the dynamic sink edge e3 out of a is

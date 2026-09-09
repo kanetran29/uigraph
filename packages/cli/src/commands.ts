@@ -10,6 +10,7 @@ import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpe
 import type { GraphDiff, SinceLastDiff } from '@ui-graph/core'
 import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@ui-graph/core/node'
 import { loadMergedGraph, listNamelessControls, nameControl, listKit, readKitFile, readKitAll } from '@ui-graph/mcp'
+import type { ShotsSweepSummary } from './runner'
 import { reactAdapter } from '@ui-graph/adapter-react'
 import { angularAdapter } from '@ui-graph/adapter-angular'
 import { vueAdapter } from '@ui-graph/adapter-vue'
@@ -788,6 +789,15 @@ export function formatShots(s: ShotsSummary): string {
   const lines = [`${s.shot.length} of ${total} screen/modal node(s) have a screenshot`]
   if (s.shot.length > 0) lines.push('', `with screenshot (${s.shot.length}):`, ...s.shot.map((n) => `  ${n.id}  ${n.route ?? '-'}  ${n.path}  (${n.source}, ${n.ts})`))
   if (s.missing.length > 0) lines.push('', `without (${s.missing.length}) — captured when a verify lands on them:`, ...s.missing.map((n) => `  ${n.id}  ${n.route ?? '-'}  ${n.label}`))
+  return lines.join('\n')
+}
+
+/** Format a capture sweep (`uigraph shots --app-url`): the pictured screens (node, route, url), the skipped ones with their reasons, and the visits spent. `roster` (runShots after the sweep) supplies each node's route. */
+export function formatShotsSweep(s: ShotsSweepSummary, roster: ShotsSummary): string {
+  const route = new Map([...roster.shot, ...roster.missing].map((n) => [n.id, n.route ?? '-']))
+  const lines = [`shots sweep: ${s.captured.length} captured, ${s.skipped.length} skipped, ${s.visited} page(s) visited`]
+  if (s.captured.length > 0) lines.push('', `captured (${s.captured.length}):`, ...s.captured.map((c) => `  ${c.nodeId}  ${route.get(c.nodeId) ?? '-'}  ${c.url}`))
+  if (s.skipped.length > 0) lines.push('', `skipped (${s.skipped.length}):`, ...s.skipped.map((k) => `  ${k.nodeId}  ${route.get(k.nodeId) ?? '-'}  ${k.reason}`))
   return lines.join('\n')
 }
 

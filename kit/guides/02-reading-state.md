@@ -24,6 +24,14 @@ was never provably reached by the runner — the shot is proof of presence, neve
 guess. `nameless_controls` lists the controls still waiting for a human name (see
 verify-flow); it is a separate, secondary worklist from `next_to_verify`.
 
+To picture screens without driving edges, `uigraph shots <dir> --app-url <url>
+[--storage-state f]` visits every concrete route and follows the links the visited
+pages actually render to reach parameterized screens (`/profile/:username` is
+pictured at one real instance, recorded as the shot's `url`). It records a picture
+ONLY when the browser's settled URL maps back to that node — an auth bounce, a
+redirect elsewhere, or a modal (which needs a drive to open) is listed as skipped
+with its reason, never guessed. Existing shots are kept unless `--refresh`.
+
 Decision rule each iteration:
 1. `get_loop_status`; if `loopDone`, stop.
 2. Take the top of `next_to_verify`.
