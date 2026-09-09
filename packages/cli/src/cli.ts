@@ -12,7 +12,7 @@ import { argv as processArgv } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { startServer } from '@ui-graph/mcp'
-import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatParked, formatStatus, formatWorkspaceList, loadWorkspaceConfig, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runParked, runStatus, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
+import { formatDiff, formatDiffSinceLast, formatGenSummary, formatMapSummary, formatMigrateSummary, formatNameless, formatParked, formatShots, formatStatus, formatWorkspaceList, loadWorkspaceConfig, runDiff, runDiffSinceLast, runExport, runGen, runKitInstall, runKitPrint, runMap, runMigrate, runName, runNameless, runParked, runShots, runStatus, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type AdapterName } from './commands'
 import { startApiServer } from './server'
 import { runLogin, runVerify, runVerifyUntilDone } from './runner'
 
@@ -162,6 +162,39 @@ export function buildProgram(): Command {
     .option('--runner', "unpark every park recorded by the runner (by === 'runner')")
     .action((dir: string, edgeIds: string[], opts: { autonomous?: boolean; runner?: boolean }) => {
       console.log(`unparked ${runUnpark({ dir, edgeIds, autonomous: opts.autonomous, runner: opts.runner })} edge(s)`)
+    })
+
+  program
+    .command('nameless')
+    .description('List controls with no human name (id, parent screen route, tag/controlType, selector, component, screenshot) so an agent or human can name them.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .action((dir: string) => {
+      console.log(formatNameless(runNameless(dir)))
+    })
+
+  program
+    .command('name')
+    .description('Give a control a durable human name (survives re-maps while its selector is unchanged); --clear removes it.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .argument('<controlId>', 'control node id (see `uigraph nameless`)')
+    .argument('[name]', 'the human name')
+    .option('--clear', 'remove the name instead of setting one')
+    .action((dir: string, controlId: string, name: string | undefined, opts: { clear?: boolean }) => {
+      if (opts.clear !== true && name === undefined) {
+        console.error('usage: uigraph name <dir> <controlId> <name>  (or: uigraph name <dir> <controlId> --clear)')
+        process.exitCode = 1
+        return
+      }
+      const label = runName(dir, controlId, opts.clear === true ? null : (name as string))
+      console.log(`${controlId}: ${label}`)
+    })
+
+  program
+    .command('shots')
+    .description('List screen/modal nodes with and without a captured screenshot.')
+    .argument('<dir>', 'workspace directory holding uigraph.db')
+    .action((dir: string) => {
+      console.log(formatShots(runShots(dir)))
     })
 
   program

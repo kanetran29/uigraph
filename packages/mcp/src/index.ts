@@ -14,6 +14,8 @@ export {
   getFrontier,
   planPathTool,
   updateGraph,
+  listNamelessControls,
+  nameControl,
   reportObservation,
   diffTool,
   diffSinceLastTool,

@@ -24,7 +24,10 @@ import {
   getState,
   listCases,
   getLoopStatus,
+  listNamelessControls,
+  loadMergedGraph,
   markUnverifiable,
+  nameControl,
   nextToVerifyTool,
   parkEdge,
   unparkEdge,
@@ -792,5 +795,96 @@ describe('propose', () => {
     expect(again.accepted).toHaveLength(1)
     expect(again.rejected[0]?.reason).toMatch(/duplicate/)
     expect(again.totalStored).toBe(2)
+  })
+})
+
+/** A nameless control on screen `a`: the adapter fell back to the tag for the label. */
+function namelessButton(): GraphNode {
+  return {
+    id: 'cc_a_btn', route: null, componentPath: 'src/A.tsx', label: 'button', kind: 'control', parent: 'a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'structural', value: '.cta' }, events: ['click'], effects: [] },
+  }
+}
+
+/** Seed a screenshot sidecar entry for a node, as the runner's fold stage does. */
+function seedShot(ctx: ToolContext, nodeId: string, path: string): void {
+  const store = openStore(dbPath(ctx))
+  store.setScreenShot(nodeId, { path, ts: '2026-01-01T00:00:00.000Z', base: 'h', source: 'landing' })
+  store.close()
+}
+
+describe('fold order: names + screenshots are visible in loadMergedGraph', () => {
+  it('attaches sidecar screenshots to nodes and applies control names; the base is untouched', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b'), namelessButton()], [edge('e_ab', 'a', 'b')]))
+    seedShot(ctx, 'a', 'shots/a.jpg')
+    nameControl(ctx, { id: 'cc_a_btn', name: 'Sign up' })
+    const g = loadMergedGraph(ctx)
+    expect(g.nodes.find((n) => n.id === 'a')?.screenshot).toBe('shots/a.jpg')
+    expect(g.nodes.find((n) => n.id === 'b')?.screenshot).toBeUndefined()
+    const btn = g.nodes.find((n) => n.id === 'cc_a_btn')
+    expect(btn?.label).toBe('Sign up')
+    expect(btn?.control?.name).toBe('Sign up')
+    expect(btn?.control?.selector).toEqual({ strategy: 'structural', value: '.cta' })
+    const store = openStore(dbPath(ctx))
+    const base = store.getBaseGraph()
+    store.close()
+    expect(base?.nodes.find((n) => n.id === 'a')?.screenshot).toBeUndefined()
+    expect(base?.nodes.find((n) => n.id === 'cc_a_btn')?.label).toBe('button')
+    expect(getGraph(ctx).nodes.find((n) => n.id === 'a')?.screenshot).toBe('shots/a.jpg')
+  })
+
+  it('names survive a re-map that keeps the selector and are pruned when the control disappears', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b'), namelessButton()], [edge('e_ab', 'a', 'b')]))
+    nameControl(ctx, { id: 'cc_a_btn', name: 'Sign up' })
+    const store = openStore(dbPath(ctx))
+    store.setBaseGraph(graph([node('a'), node('b'), node('c'), namelessButton()], [edge('e_ab', 'a', 'b')]))
+    store.close()
+    expect(loadMergedGraph(ctx).nodes.find((n) => n.id === 'cc_a_btn')?.label).toBe('Sign up')
+    const store2 = openStore(dbPath(ctx))
+    store2.setBaseGraph(graph([node('a'), node('b')], [edge('e_ab', 'a', 'b')]))
+    expect(store2.getControlNames()).toEqual({})
+    store2.close()
+  })
+})
+
+describe('nameless_controls + name_control', () => {
+  it('lists nameless controls with the parent route + screenshot, and named ones drop out', () => {
+    const ctx = newWorkspace(graph([node('a'), node('b'), namelessButton()], [edge('e_ab', 'a', 'b')]))
+    seedShot(ctx, 'a', 'shots/a.jpg')
+    expect(listNamelessControls(ctx)).toEqual({
+      total: 1,
+      controls: [{
+        id: 'cc_a_btn', parent: 'a', parentRoute: '/a', element: 'button', controlType: 'button',
+        selector: { strategy: 'structural', value: '.cta' }, componentPath: 'src/A.tsx', screenshot: 'shots/a.jpg',
+      }],
+    })
+    expect(nameControl(ctx, { id: 'cc_a_btn', name: 'Sign up' })).toEqual({ id: 'cc_a_btn', label: 'Sign up', name: 'Sign up' })
+    expect(listNamelessControls(ctx).total).toBe(0)
+  })
+
+  it('clear restores the adapter fallback label and the control is nameless again', () => {
+    const ctx = newWorkspace(graph([node('a'), namelessButton()], []))
+    nameControl(ctx, { id: 'cc_a_btn', name: 'Sign up' })
+    expect(nameControl(ctx, { id: 'cc_a_btn', clear: true })).toEqual({ id: 'cc_a_btn', label: 'button', name: null })
+    expect(listNamelessControls(ctx).total).toBe(1)
+  })
+
+  it('rejects an unknown id, a screen id, and an empty name', () => {
+    const ctx = newWorkspace(graph([node('a'), namelessButton()], []))
+    expect(() => nameControl(ctx, { id: 'nope', name: 'x' })).toThrow(/unknown node id: nope/)
+    expect(() => nameControl(ctx, { id: 'a', name: 'x' })).toThrow(/a is a screen, not a control/)
+    expect(() => nameControl(ctx, { id: 'cc_a_btn', name: '   ' })).toThrow(/non-empty/)
+    expect(() => nameControl(ctx, { id: 'cc_a_btn' })).toThrow(/non-empty/)
+    expect(listNamelessControls(ctx).total).toBe(1)
+  })
+
+  it('rejects a control without control metadata (the fold could never apply the name) and a multi-line name — nothing stored, the fold stays readable', () => {
+    const bare: GraphNode = { id: 'cc_bare', route: null, componentPath: null, label: '?', kind: 'control', parent: 'a' }
+    const ctx = newWorkspace(graph([node('a'), namelessButton(), bare], []))
+    expect(() => nameControl(ctx, { id: 'cc_bare', name: 'Save' })).toThrow(/no control metadata/)
+    expect(() => nameControl(ctx, { id: 'cc_a_btn', name: 'Sign\x01in' })).toThrow(/control characters/)
+    expect(() => nameControl(ctx, { id: 'cc_a_btn', name: 'Sign\nin' })).toThrow(/single-line/)
+    expect(loadMergedGraph(ctx).nodes.find((n) => n.id === 'cc_a_btn')?.label).toBe('button')
+    expect(listNamelessControls(ctx).total).toBe(2)
   })
 })

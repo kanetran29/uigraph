@@ -16,10 +16,13 @@ import type { Proposal, Proposals, ProposalGraph } from './proposals'
 import type { Observation } from './runtime'
 import type { Fingerprint } from './fingerprint'
 import { validateGraph } from './validate'
+import { MAX_FIELD_LEN } from './schema'
 import { validateRefs, type StalenessReport } from './staleness'
 import { validateProposals, materializeProposalGraph, type ProposalStatus } from './proposals'
 import { reconcileProposals } from './reconcile'
 import type { ParkedEdge } from './coverage'
+import type { ScreenShot, ScreenShots } from './screens'
+import type { ControlNames } from './names'
 import { hashValue } from './hash'
 
 const SCHEMA = `
@@ -129,7 +132,10 @@ export class Store {
    * Agent parks persist (human/agent judgment is not era-bound) — EXCEPT parks whose
    * edgeId no longer exists in the incoming graph: a park referencing a dead edge is
    * moot, would list nonexistent edges in `uigraph parked`, and unpark on it restores
-   * nothing.
+   * nothing. Screenshots and control names are NOT era-bound (a screen's picture
+   * stays useful; a control id is content-addressed off its selector, so a surviving
+   * id is the same control): only entries whose node id is absent from the incoming
+   * graph are pruned.
    */
   setBaseGraph(graph: UiGraph, soundiness: SoundinessNote[] = []): void {
     const errs = validateGraph(graph)
@@ -138,6 +144,9 @@ export class Store {
     if (current !== null && hashValue(current) !== hashValue(graph)) {
       const liveIds = new Set(graph.edges.map((e) => e.id))
       this.setDoc('parked_edges', this.getParkedEdges().filter((p) => p.by !== 'runner' && liveIds.has(p.edgeId)))
+      const liveNodeIds = new Set(graph.nodes.map((n) => n.id))
+      this.setDoc('screens', Object.fromEntries(Object.entries(this.getScreenShots()).filter(([id]) => liveNodeIds.has(id))))
+      this.setDoc('names', Object.fromEntries(Object.entries(this.getControlNames()).filter(([id]) => liveNodeIds.has(id))))
     }
     this.setDoc('graph', graph)
     this.setDoc('soundiness', soundiness)
@@ -382,6 +391,46 @@ export class Store {
   /** The parked-edge sidecar (empty when none). */
   getParkedEdges(): ParkedEdge[] {
     return this.getDoc<ParkedEdge[]>('parked_edges') ?? []
+  }
+
+  /** Screenshots keyed by node id (empty when none). */
+  getScreenShots(): ScreenShots {
+    return this.getDoc<ScreenShots>('screens') ?? {}
+  }
+
+  /**
+   * Record a screenshot for a node — the newest capture wins per node id. Sidecar
+   * only: the base graph is never touched; the fold attaches it (attachScreenshots).
+   */
+  setScreenShot(nodeId: string, shot: ScreenShot): void {
+    this.setDoc('screens', { ...this.getScreenShots(), [nodeId]: shot })
+  }
+
+  /** Durable control names keyed by control node id (empty when none). */
+  getControlNames(): ControlNames {
+    return this.getDoc<ControlNames>('names') ?? {}
+  }
+
+  /**
+   * Give a control a durable human name (upsert). Sidecar only — the base graph and
+   * the control's selector/id are untouched; the fold applies it (applyControlNames).
+   * A name must be non-empty, a single line free of control characters, and within
+   * the IR text cap: the fold sets it as the node label, and a value the schema
+   * rejects there would brick every later graph read (nothing could clear it, since
+   * clearing folds first). Pruned by setBaseGraph only when the id disappears.
+   */
+  setControlName(id: string, name: string): void {
+    if (name.trim().length === 0) throw new Error('setControlName requires a non-empty name')
+    if (/[\x00-\x1f\x7f]/.test(name)) throw new Error('setControlName requires a single-line name without control characters')
+    if (name.length > MAX_FIELD_LEN) throw new Error(`setControlName requires a name of at most ${MAX_FIELD_LEN} chars`)
+    this.setDoc('names', { ...this.getControlNames(), [id]: name })
+  }
+
+  /** Remove a control's durable name; a no-op when none was set. */
+  clearControlName(id: string): void {
+    const next = { ...this.getControlNames() }
+    delete next[id]
+    this.setDoc('names', next)
   }
 
   /**

@@ -56,6 +56,21 @@ describe('buildSpecPlan + renderPlaywrightSpec', () => {
     expect(spec).toContain('await page.getByLabel("email").fill("test@example.com")')
   })
 
+  it('keeps free text inside comments: a multi-line label or guard cannot break out into spec code', () => {
+      const injected = "x\n  require('node:child_process').execSync('touch /tmp/pwned')\n  //"
+      const evil: GraphNode = {
+        id: 'cc_evil', route: null, componentPath: null, label: injected, kind: 'control', parent: 'n_home',
+        control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go' } },
+      }
+      const gg = graph([node('n_home', { route: '/' }), node('n_done', { route: '/done' }), evil], [edge('e', 'cc_evil', 'n_done', { event: 'click', guard: `g */ evil` })])
+      const spec = renderPlaywrightSpec(buildSpecPlan(gg, planPath(gg, 'cc_evil', 'n_done')!, {}))
+      // the title is a JSON string literal (escaped by q); every other occurrence must sit inside a `//` comment
+      const code = spec.split('\n').filter((l) => !l.trimStart().startsWith('//') && !l.startsWith('test('))
+      expect(code.some((l) => /execSync|evil/.test(l))).toBe(false)
+      expect(spec).toContain('// Preconditions to satisfy first: g * / evil')
+      expect(spec).not.toContain('*/ evil')
+  })
+
   it('surfaces path guards as preconditions (guard-aware)', () => {
     const gg = graph(
       [node('n_home', { route: '/' }), node('n_dash', { route: '/dash' })],

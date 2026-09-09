@@ -37,7 +37,10 @@ import {
   getLoopStatus,
   getFreshness,
   updateGraph,
+  listNamelessControls,
+  nameControl,
   type DescribeScreenArgs,
+  type NameControlArgs,
   type DiffArgs,
   type GenSpecArgs,
   type SetScenarioArgs,
@@ -354,6 +357,24 @@ export const TOOLS: Tool[] = [
     description: 'Return a previously parked edge to the verify worklist.',
     inputSchema: { type: 'object', properties: { id: { type: 'string', description: 'edge id to un-park' } }, required: ['id'] },
   },
+  {
+    name: 'nameless_controls',
+    description: 'List the controls the adapters could not name (a <Button> with its label in a prop, a clickable backdrop div, a bare <form>): id, parent screen id + route, tag, controlType, selector, componentPath, and the parent screen\'s screenshot path when the runner captured one. Read the template source + the screenshot, then give each a human name with name_control.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'name_control',
+    description: 'Give a control a durable human name (label + control.name in the served graph), or clear one with clear: true. The selector — and so the id — is never touched, so the name survives every re-map that keeps the selector. The id must be a control in the graph; the name must be non-empty.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'control node id (e.g. cc_home_btn)' },
+        name: { type: 'string', description: 'the human name to set (required unless clear: true)' },
+        clear: { type: 'boolean', description: 'remove the durable name instead of setting one' },
+      },
+      required: ['id'],
+    },
+  },
 ]
 
 /** Wrap any JSON-serializable payload as a single text content block. */
@@ -422,6 +443,10 @@ function dispatch(ctx: ToolContext, name: string, args: Record<string, unknown>)
         return jsonResult(parkEdge(ctx, args as unknown as ParkEdgeArgs))
       case 'unpark_edge':
         return jsonResult(unparkEdge(ctx, args as unknown as { id: string }))
+      case 'nameless_controls':
+        return jsonResult(listNamelessControls(ctx))
+      case 'name_control':
+        return jsonResult(nameControl(ctx, args as unknown as NameControlArgs))
       case 'diff':
         return jsonResult(diffTool(args as unknown as DiffArgs))
       case 'diff_since_last':

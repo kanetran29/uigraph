@@ -39,6 +39,27 @@ drives the worklist with a Playwright driver and records observations for you. I
 appends observations out-of-band, so follow with **reconcile_proposals** (or just
 read `get_loop_status`, which reflects the fold).
 
+## Naming controls after a verify run
+
+The adapters name most controls statically; the rest (a `<Button>` whose label
+lives in a prop, a clickable backdrop div, a bare `<form>`) surface as their tag
+or controlType. Verify runs also capture a screenshot of every screen the browser
+was provably on (the start route and each confirmed landing), so you can see what
+the control looks like. After a verify run:
+
+1. **nameless_controls** → the worklist. Each row has the parent screen's
+   `parentRoute` + `screenshot` path (open it) and the control's `componentPath` +
+   `selector` (open the template).
+2. Work out what a human would call the control from the template and the picture.
+3. **name_control** `{id, name}` — the name becomes the served `label` and
+   `control.name`; `nameless_controls` shrinks. Wrong name → call it again;
+   `{id, clear: true}` restores the adapter's fallback.
+
+A name never touches the selector — the id is content-addressed off it — so names
+are durable across re-maps while the selector is unchanged; a name is dropped only
+when its control leaves the map. Name what you can SEE in the template or the
+shot; never guess from the id.
+
 ## Authenticated runs
 
 Most real apps gate routes behind login. Capture the session once with the

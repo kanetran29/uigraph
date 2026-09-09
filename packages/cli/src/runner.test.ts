@@ -6,7 +6,7 @@
 // and capture-mode is unaffected (it drives interactions and observes the landing).
 
 import { describe, it, expect, vi } from 'vitest'
-import { buildSpecPlan } from '@ui-graph/core'
+import { buildSpecPlan, hashValue } from '@ui-graph/core'
 import { planPath } from '@ui-graph/core'
 import type { GraphEdge, GraphNode, SpecPlan, UiGraph, Witness } from '@ui-graph/core'
 import { drivePlan, makePlaywrightDriver, mapPool, runVerify, runVerifyUntilDone } from './runner'
@@ -1627,5 +1627,240 @@ describe('buildProbeSpec reveal ranking survives fan-out narrowing', () => {
     expect(summary.outcomes['e_t']).toBe('confirmed')
     const toggleIdx = clicked.indexOf('Toggle')
     expect(toggleIdx).toBeGreaterThan(-1)
+  })
+})
+
+// Screenshots are a by-product of a drive, never part of its verdict. A shot is
+// taken ONLY while the browser is provably on a node's screen — the settled start
+// load (still on the start URL) or a confirmed landing — a failed capture is
+// dropped, and the fold persists goto shots whatever the verdict but landing shots
+// only for accepted confirmations (re-keyed onto the real node for a dynamic sink).
+describe('screenshots: capture in drivePlan + persistence in runVerify', () => {
+  const navGraph = (): UiGraph => graph([node('n_a', { route: '/a' }), node('n_b', { route: '/b' })], [edge('e', 'n_a', 'n_b', { event: 'click:Link', guard: null, modality: 'may' })])
+  const goCtrl: GraphNode = {
+    id: 'cc_go', route: null, componentPath: null, label: 'Go', kind: 'control', parent: 'n_a',
+    control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Go' } },
+  }
+  const clickGraph = (): UiGraph => graph([node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), goCtrl], [edge('e', 'cc_go', 'n_b', { event: 'click', modality: 'may' })])
+
+  /** A fresh empty <tmp>/shots dir for one test. */
+  async function tmpShotsDir(): Promise<string> {
+    const { mkdtempSync } = await import('node:fs')
+    const { tmpdir } = await import('node:os')
+    const { join } = await import('node:path')
+    return join(mkdtempSync(join(tmpdir(), 'uigraph-shots-')), 'shots')
+  }
+
+  it('drivePlan: the settled start load takes the goto shot and a confirmed landing the landing shot — files written, verdict untouched', async () => {
+    const { existsSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const shotsDir = await tmpShotsDir()
+    const gg = navGraph()
+    const plan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+    const f = fakePage({ startUrl: 'http://app/a' })
+    const page = { ...f.page, screenshot: async () => Buffer.from('jpegbytes') } as typeof f.page
+    const res = await drivePlan(page, plan, 'http://app', { shotsDir, startNode: 'n_a' })
+    expect(res.confirmed).toBe(true)
+    expect(res.shots).toEqual([
+      { nodeId: 'n_a', path: 'shots/n_a.jpg', source: 'goto' },
+      { nodeId: 'n_b', path: 'shots/n_b.jpg', source: 'landing' },
+    ])
+    expect(res.screenshot).toBe('shots/n_b.jpg')
+    expect(existsSync(join(shotsDir, 'n_a.jpg'))).toBe(true)
+    expect(existsSync(join(shotsDir, 'n_b.jpg'))).toBe(true)
+  })
+
+  it('drivePlan: a refuted drive keeps the start shot but takes NO landing shot', async () => {
+    const shotsDir = await tmpShotsDir()
+    const gg = clickGraph()
+    const plan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+    // the click fires but the page never moves — an honest refutation
+    const f = fakePage({ startUrl: 'http://app/a' })
+    const page = { ...f.page, screenshot: async () => Buffer.from('jpegbytes') } as typeof f.page
+    const res = await drivePlan(page, plan, 'http://app', { shotsDir, startNode: 'n_a' })
+    expect(res.confirmed).toBe(false)
+    expect(res.shots).toEqual([{ nodeId: 'n_a', path: 'shots/n_a.jpg', source: 'goto' }])
+    expect(res.screenshot).toBeUndefined()
+  })
+
+  it('drivePlan: a start load that bounced off the start URL takes NO goto shot (the browser is on some other screen)', async () => {
+    const shotsDir = await tmpShotsDir()
+    const gg = navGraph()
+    const plan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+    const f = fakePage({ startUrl: 'http://app/a' })
+    // every load redirects to the login route, like an auth guard
+    const page = { ...f.page, goto: async () => f.page.goto('http://app/login'), screenshot: async () => Buffer.from('jpegbytes') } as typeof f.page
+    const res = await drivePlan(page, plan, 'http://app', { shotsDir, startNode: 'n_a' })
+    expect(res.confirmed).toBe(false)
+    expect(res.shots).toBeUndefined()
+  })
+
+  it('drivePlan: a failing screenshot is logged and dropped — the verdict is unchanged', async () => {
+    const shotsDir = await tmpShotsDir()
+    const warn = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const gg = navGraph()
+      const plan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+      const f = fakePage({ startUrl: 'http://app/a' })
+      const page = { ...f.page, screenshot: async () => { throw new Error('page crashed') } } as typeof f.page
+      const res = await drivePlan(page, plan, 'http://app', { shotsDir, startNode: 'n_a' })
+      expect(res.confirmed).toBe(true)
+      expect(res.evidence).toEqual({ kind: 'url-assert', url: 'http://app/b' })
+      expect(res.shots).toBeUndefined()
+      expect(res.screenshot).toBeUndefined()
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('page crashed'))
+    } finally {
+      warn.mockRestore()
+    }
+  })
+
+  it('drivePlan: no shotsDir → no capture at all (the fake page has no screenshot method and is never asked)', async () => {
+    const gg = navGraph()
+    const plan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+    const res = await drivePlan(fakePage({ startUrl: 'http://app/a' }).page, plan, 'http://app', { startNode: 'n_a' })
+    expect(res.confirmed).toBe(true)
+    expect(res.shots).toBeUndefined()
+  })
+
+  it('runVerify persists goto shots whatever the verdict, landing shots only for confirmed targets', async () => {
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const w = (line: number): Witness => ({ ...staticWitness, loc: { line, col: 1 } })
+    const gg = graph(
+      [node('n_a', { route: '/a' }), node('n_b', { route: '/b' }), node('n_c', { route: '/c' })],
+      [edge('e_ab', 'n_a', 'n_b', { modality: 'may', witness: w(1) }), edge('e_ac', 'n_a', 'n_c', { modality: 'may', witness: w(2) })],
+    )
+    const dir = await seedDir('uigraph-shots-fold-', gg)
+    const driver = async (plan: SpecPlan): Promise<VerifyResult> => {
+      const to = plan.legs[plan.legs.length - 1]!.to
+      const gotoShot = { nodeId: 'n_a', path: 'shots/n_a.jpg', source: 'goto' as const }
+      if (to === 'n_b') return { confirmed: true, evidence: { kind: 'url-assert', url: 'http://app/b' }, screenshot: 'shots/n_b.jpg', shots: [gotoShot, { nodeId: 'n_b', path: 'shots/n_b.jpg', source: 'landing' }] }
+      // a driver that (wrongly) attaches a landing shot to a refutation — the fold must drop it
+      return { confirmed: false, shots: [gotoShot, { nodeId: 'n_c', path: 'shots/n_c.jpg', source: 'landing' }] }
+    }
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver })
+    expect(summary.outcomes).toEqual({ e_ab: 'confirmed', e_ac: 'refuted' })
+    const store = openStore(join(dir, 'uigraph.db'))
+    const shots = store.getScreenShots()
+    store.close()
+    expect(Object.keys(shots).sort()).toEqual(['n_a', 'n_b'])
+    expect(shots['n_a']).toMatchObject({ path: 'shots/n_a.jpg', source: 'goto', base: hashValue(gg) })
+    expect(shots['n_b']).toMatchObject({ path: 'shots/n_b.jpg', source: 'landing', base: hashValue(gg) })
+    expect(typeof shots['n_b']?.ts).toBe('string')
+  })
+
+  it('runVerify: a driver whose capture failed (no shots) still confirms — nothing stored, verdict intact', async () => {
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const dir = await seedDir('uigraph-shots-none-', navGraph())
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver: async () => ({ confirmed: true, evidence: { kind: 'url-assert', url: 'http://app/b' } }) })
+    expect(summary.outcomes).toEqual({ e: 'confirmed' })
+    const store = openStore(join(dir, 'uigraph.db'))
+    expect(store.getScreenShots()).toEqual({})
+    expect(store.getObservations()).toHaveLength(1)
+    store.close()
+  })
+
+  it('drivePlan: a node id that is not a safe file name gets NO shot (never writes outside <dir>/shots) — verdict untouched', async () => {
+    const { existsSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const shotsDir = await tmpShotsDir()
+    const warn = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const gg = navGraph()
+      const plan = buildSpecPlan(gg, planPath(gg, 'n_a', 'n_b')!, { baseUrl: 'http://app' })
+      const f = fakePage({ startUrl: 'http://app/a' })
+      const page = { ...f.page, screenshot: async () => Buffer.from('jpegbytes') } as typeof f.page
+      const res = await drivePlan(page, plan, 'http://app', { shotsDir, startNode: '../evil' })
+      expect(res.confirmed).toBe(true)
+      expect(res.shots).toEqual([{ nodeId: 'n_b', path: 'shots/n_b.jpg', source: 'landing' }])
+      expect(existsSync(join(shotsDir, '..', 'evil.jpg'))).toBe(false)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('unsafe file name'))
+    } finally {
+      warn.mockRestore()
+    }
+  })
+
+  it('drivePlan: a request-only confirmation proves the effect, not the location — NO landing shot for a route-less target', async () => {
+    const shotsDir = await tmpShotsDir()
+    const save: GraphNode = {
+      id: 'cc_save', route: null, componentPath: null, label: 'Save', kind: 'control', parent: 'n_a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Save' } },
+    }
+    const gg = graph([node('n_a', { route: '/a' }), node('n_x', { route: null }), save], [edge('e', 'cc_save', 'n_x', { event: 'click', effect: 'api:POST /api/orders' })])
+    const plan = buildSpecPlan(gg, planPath(gg, 'cc_save', 'n_x')!, { baseUrl: 'http://app' })
+    expect(plan.legs[plan.legs.length - 1]!.assertions).toEqual([{ kind: 'request', value: 'POST /api/orders' }])
+    const f = fakePage({ startUrl: 'http://app/a', response: { method: 'POST', url: 'http://app/api/orders', status: 201 } })
+    const page = { ...f.page, screenshot: async () => Buffer.from('jpegbytes') } as typeof f.page
+    const res = await drivePlan(page, plan, 'http://app', { shotsDir, startNode: 'n_a' })
+    expect(res.confirmed).toBe(true)
+    expect(res.evidence?.kind).toBe('request')
+    expect(res.shots).toEqual([{ nodeId: 'n_a', path: 'shots/n_a.jpg', source: 'goto' }])
+    expect(res.screenshot).toBeUndefined()
+  })
+
+  /** A dynamic-sink workspace: Submit on /form → u_dyn, with the driver's landing shot file already under the sink's name when `withFile`. */
+  async function dynSinkDir(withFile: boolean): Promise<string> {
+    const { mkdirSync, writeFileSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const submit: GraphNode = {
+      id: 'cc_submit', route: null, componentPath: null, label: 'Submit', kind: 'control', parent: 'n_form',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'role-name', value: 'button|Submit' } },
+    }
+    const gg = graph(
+      [node('n_form', { route: '/form' }), node('n_landed', { route: '/landed' }), { id: 'u_dyn', route: null, componentPath: null, label: 'dyn', kind: 'unknown' }, submit],
+      [edge('e', 'cc_submit', 'u_dyn', { event: 'click', modality: 'may' })],
+    )
+    const dir = await seedDir('uigraph-shots-dyn-', gg)
+    if (withFile) {
+      mkdirSync(join(dir, 'shots'), { recursive: true })
+      writeFileSync(join(dir, 'shots', 'u_dyn.jpg'), 'jpegbytes')
+    }
+    return dir
+  }
+  const dynDriver = async (): Promise<VerifyResult> => ({
+    confirmed: true,
+    landedUrl: 'http://app/landed',
+    evidence: { kind: 'url-change', startUrl: 'http://app/form', landedUrl: 'http://app/landed' },
+    screenshot: 'shots/u_dyn.jpg',
+    shots: [{ nodeId: 'n_form', path: 'shots/n_form.jpg', source: 'goto' }, { nodeId: 'u_dyn', path: 'shots/u_dyn.jpg', source: 'landing' }],
+  })
+
+  it('runVerify: a dynamic-sink landing shot is MOVED from the shared sink file to the real node (key, file and observation evidence all agree)', async () => {
+    const { existsSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const dir = await dynSinkDir(true)
+    const summary = await runVerify({ dir, appUrl: 'http://app', driver: dynDriver })
+    expect(summary.resolvedDynamic).toBe(1)
+    const store = openStore(join(dir, 'uigraph.db'))
+    const shots = store.getScreenShots()
+    const obs = store.getObservations()
+    store.close()
+    expect(Object.keys(shots).sort()).toEqual(['n_form', 'n_landed'])
+    expect(shots['n_landed']).toMatchObject({ path: 'shots/n_landed.jpg', source: 'landing' })
+    expect(obs.find((o) => o.to === 'n_landed')?.screenshot).toBe('shots/n_landed.jpg')
+    expect(existsSync(join(dir, 'shots', 'n_landed.jpg'))).toBe(true)
+    expect(existsSync(join(dir, 'shots', 'u_dyn.jpg'))).toBe(false)
+  })
+
+  it('runVerify: when the sink file cannot be moved the landing shot is dropped — the confirmation and the goto shot stand', async () => {
+    const { join } = await import('node:path')
+    const { openStore } = await import('@ui-graph/core/node')
+    const warn = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const dir = await dynSinkDir(false)
+      const summary = await runVerify({ dir, appUrl: 'http://app', driver: dynDriver })
+      expect(summary.resolvedDynamic).toBe(1)
+      const store = openStore(join(dir, 'uigraph.db'))
+      const shots = store.getScreenShots()
+      const obs = store.getObservations()
+      store.close()
+      expect(Object.keys(shots)).toEqual(['n_form'])
+      expect(obs.find((o) => o.to === 'n_landed')?.screenshot).toBeUndefined()
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('landing shot for n_landed dropped'))
+    } finally {
+      warn.mockRestore()
+    }
   })
 })

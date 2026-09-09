@@ -75,6 +75,10 @@ const SCREEN_WIDTH = 248
 // proposals badge) without clipping.
 const SCREEN_HEIGHT = 98
 
+// The screenshot strip drawn inside a collapsed screen node when "show screenshots" is
+// on: the .node-shot thumb (64px) + its gap, so the box grows to hold it.
+const SHOT_HEIGHT = 70
+
 const GHOST_WIDTH = 150
 const GHOST_HEIGHT = 40
 
@@ -302,9 +306,11 @@ export function structuralKey(graph: UiGraph, expanded: ReadonlySet<string>): st
 /**
  * Compute the full canvas layout. Screens are placed radially around the root by
  * BFS depth (root centred); only screens in `expanded` are grown to contain their
- * control grid. Returns empty edge points — edges route as floating curves at render.
+ * control grid, and — when `showShots` is on — a collapsed screen with a screenshot is
+ * grown by the thumbnail strip. Returns empty edge points — edges route as floating
+ * curves at render.
  */
-export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): GraphLayout {
+export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>, showShots = false): GraphLayout {
   const childrenOf = controlsByParent(graph)
   const screens = graph.nodes.filter((n) => !isControl(n))
   const screenIds = new Set(screens.map((n) => n.id))
@@ -315,10 +321,12 @@ export function layoutGraph(graph: UiGraph, expanded: ReadonlySet<string>): Grap
   for (const s of screens) {
     if (expanded.has(s.id) && childN(s.id) > 0) expLayout.set(s.id, layoutExpanded(s.id, componentGroups(graph, s.id)))
   }
+  // Same rule as toFlowNodes: the thumb is drawn only on a COLLAPSED screen, never over its control grid.
+  const shotIds = new Set(showShots ? screens.filter((s) => s.screenshot !== undefined && !expanded.has(s.id)).map((s) => s.id) : [])
   const widthOf = (id: string): number =>
     isGhost(id) ? GHOST_WIDTH : expLayout.get(id)?.size.width ?? (expanded.has(id) ? expandedSize(childN(id)).width : SCREEN_WIDTH)
   const heightOf = (id: string): number =>
-    isGhost(id) ? GHOST_HEIGHT : expLayout.get(id)?.size.height ?? (expanded.has(id) ? expandedSize(childN(id)).height : SCREEN_HEIGHT)
+    (isGhost(id) ? GHOST_HEIGHT : expLayout.get(id)?.size.height ?? (expanded.has(id) ? expandedSize(childN(id)).height : SCREEN_HEIGHT)) + (shotIds.has(id) ? SHOT_HEIGHT : 0)
 
   // Undirected adjacency among screen nodes (control edges are ignored for ranking).
   const adj = new Map<string, Set<string>>()

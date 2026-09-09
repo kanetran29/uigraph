@@ -4,8 +4,8 @@
 // get_frontier). All pure over a ToolContext; the case-projection helpers live
 // here because only the read tools render cases.
 
-import type { CoverageReport, EdgeWithTier, GraphEdge, GraphNode, GroundedEdge, Grounding, Modality, Proposal, ProposalGraph, ProposalGraphEdge, ProposalStatus, ScreenGrounding, Source, StalenessReport, TrustTier, UiGraph } from '@ui-graph/core'
-import { buildCoverage, buildFrontier, buildGrounding, classifyEffectRisk, projectTrustTier } from '@ui-graph/core'
+import type { ControlSelector, CoverageReport, EdgeWithTier, GraphEdge, GraphNode, GroundedEdge, Grounding, Modality, Proposal, ProposalGraph, ProposalGraphEdge, ProposalStatus, ScreenGrounding, Source, StalenessReport, TrustTier, UiGraph } from '@ui-graph/core'
+import { buildCoverage, buildFrontier, buildGrounding, classifyEffectRisk, namelessControls, projectTrustTier } from '@ui-graph/core'
 import { loadMergedGraph, TIER_ORDER, tierAtLeast, withStore, type ToolContext } from './context'
 import { getFreshness } from './diff'
 
@@ -187,6 +187,53 @@ export function getCoverage(ctx: ToolContext): GetCoverageResult {
     ...buildCoverage(loadMergedGraph(ctx), store.getParkedEdges()),
     staleness: store.stalenessReport(),
   }))
+}
+
+/**
+ * A control the adapters could not name: what an agent needs to name it — where it
+ * lives (parent screen id + route, the parent's screenshot when the runner has
+ * one), what it is (tag, controlType, selector) and where its source is.
+ */
+export interface NamelessControl {
+  id: string
+  parent: string | null
+  parentRoute: string | null
+  element: string
+  controlType: string
+  selector: ControlSelector | null
+  componentPath: string | null
+  screenshot: string | null
+}
+
+/** nameless_controls result: the nameless controls plus their count. */
+export interface NamelessControlsResult {
+  total: number
+  controls: NamelessControl[]
+}
+
+/**
+ * List the controls with no human name (core `namelessControls` over the merged
+ * graph, so a durable name given via name_control removes the control from this
+ * list). Each row carries the parent screen's route + screenshot path so the agent
+ * can look at the screen and the template before naming.
+ */
+export function listNamelessControls(ctx: ToolContext): NamelessControlsResult {
+  const g = loadMergedGraph(ctx)
+  const nodeOf = new Map(g.nodes.map((n) => [n.id, n]))
+  const controls = namelessControls(g).map((n) => {
+    const parent = n.parent === undefined ? undefined : nodeOf.get(n.parent)
+    return {
+      id: n.id,
+      parent: parent?.id ?? null,
+      parentRoute: parent?.route ?? null,
+      element: n.control?.element ?? '',
+      controlType: n.control?.controlType ?? '',
+      selector: n.control?.selector ?? null,
+      componentPath: n.componentPath,
+      screenshot: parent?.screenshot ?? null,
+    }
+  })
+  return { total: controls.length, controls }
 }
 
 /**

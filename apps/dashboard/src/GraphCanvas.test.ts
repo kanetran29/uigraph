@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest'
+import { createElement, type ReactNode } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { ReactFlowProvider } from '@xyflow/react'
 import type { GraphEdge, GraphNode, UiGraph } from '@ui-graph/core'
-import { toFlowEdges, type EdgeContext } from './GraphCanvas'
+import { GraphCanvas, toFlowEdges, toFlowNodes, type EdgeContext, type GraphCanvasProps } from './GraphCanvas'
+import { layoutGraph } from './layout'
 
 /** A screen node fixture, matching layout.test.ts's helper shape. */
 function screen(id: string): GraphNode {
@@ -52,5 +56,42 @@ describe('toFlowEdges: effect-class colouring scope', () => {
     const edge: GraphEdge = { id: 'e', from: 'c', to: 's', event: 'click', guard: null, effect: 'api:POST /orders', modality: 'must', source: 'static', confidence: 1 }
     const [flowEdge] = toFlowEdges(graph(nodes, [edge]), ctx(['s']))
     expect((flowEdge?.style as { stroke?: string } | undefined)?.stroke).toBe('#ea580c')
+  })
+})
+
+describe('screenshots on the canvas', () => {
+  const withShot = graph([{ ...screen('s'), screenshot: 'shots/s.jpg' }], [])
+  const noShot = graph([screen('s')], [])
+  const none = new Set<string>()
+
+  /** Static-render the canvas chrome (toggles panel) for a graph — React Flow renders without a DOM. */
+  function canvasHtml(g: UiGraph): string {
+    const props: GraphCanvasProps = { graph: g, proposals: { version: 0, base: '', proposals: [] }, selection: null, pathEdgeIds: none, onSelect: () => {} }
+    return renderToStaticMarkup(createElement(ReactFlowProvider, null, createElement(GraphCanvas, props)))
+  }
+  /** The static markup of the screen node's label as toFlowNodes built it. */
+  function screenLabel(g: UiGraph, showShots: boolean): string {
+    const [node] = toFlowNodes(g, layoutGraph(g, none, showShots), none, new Map(), new Map(), undefined, undefined, showShots)
+    return renderToStaticMarkup(node?.data.label as ReactNode)
+  }
+
+  it('offers a "show screenshots" toggle that is OFF by default when a node has a shot', () => {
+    expect(canvasHtml(withShot)).toContain('<input type="checkbox"/>show screenshots · 1')
+  })
+
+  it('offers no toggle when nothing has a shot (offline sample)', () => {
+    expect(canvasHtml(noShot)).not.toContain('show screenshots')
+  })
+
+  it('draws the thumbnail inside the screen node only when the toggle is on', () => {
+    expect(screenLabel(withShot, false)).not.toContain('<img')
+    expect(screenLabel(withShot, true)).toContain('<img class="node-shot" src="/api/shots/s.jpg"')
+    expect(screenLabel(noShot, true)).not.toContain('<img')
+  })
+
+  it('grows the screen box by the thumbnail strip so the layout has room for it', () => {
+    const base = layoutGraph(withShot, none).sizes.get('s')?.height ?? 0
+    expect(layoutGraph(withShot, none, true).sizes.get('s')?.height).toBe(base + 70)
+    expect(layoutGraph(noShot, none, true).sizes.get('s')?.height).toBe(base)
   })
 })

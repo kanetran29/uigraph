@@ -71,7 +71,12 @@ export interface ControlMeta {
   nameInferred?: boolean
 }
 
-/** A screen/state (or a nested control) in the app. `id` is stable and unique. */
+/**
+ * A screen/state (or a nested control) in the app. `id` is stable and unique.
+ * `screenshot` is a workspace-relative path (e.g. 'shots/n_root.jpg') to a
+ * picture captured while the browser was PROVABLY on this node's screen; it is
+ * attached by the fold (screens.ts), never stored in the base graph.
+ */
 export interface GraphNode {
   id: string
   route: string | null
@@ -80,6 +85,7 @@ export interface GraphNode {
   kind: NodeKind
   parent?: string
   control?: ControlMeta
+  screenshot?: string
 }
 
 /** A deterministic proof that an edge exists (static source loc or runtime obs). */

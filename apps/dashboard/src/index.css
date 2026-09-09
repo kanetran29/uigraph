@@ -1171,11 +1171,30 @@ button:hover {
   word-break: break-word;
 }
 
-/* Per-screen evidence screenshot, revealed with the rationale. */
-.prop-shot {
+/* Per-screen evidence screenshot: revealed with a proposal's rationale, or shown for the
+   selected screen in the inspector (the link opens it full size in a new tab). */
+.prop-shot,
+.inspector-shot {
   display: block;
   width: 100%;
   margin: 8px 0 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-subtle);
+}
+.inspector-shot-link {
+  display: block;
+}
+
+/* The small screenshot strip inside a canvas screen node ("show screenshots" toggle).
+   Its height + gap must match SHOT_HEIGHT in layout.ts, which grows the node box. */
+.node-shot {
+  display: block;
+  width: 100%;
+  height: 64px;
+  object-fit: cover;
+  object-position: top;
+  margin-bottom: 6px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--panel-subtle);

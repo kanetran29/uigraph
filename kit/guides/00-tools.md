@@ -18,6 +18,7 @@ a test.)
 - **next_to_verify** `{limit?}` — the ranked worklist: `unknown` edges, then `may`, then proposed transitions, minus anything already runtime-witnessed.
 - **get_loop_status** — the DONE signal: `{coverage, resolution, worklistSize, loopDone}`. `loopDone` = worklist empty AND no `proposed` proposals left.
 - **get_freshness** — is the stored graph current with the source? `{state: fresh|stale|unknown, mappedAt, changed[], added[], removed[]}`. Call at session start; on `stale`, notify the user + offer to re-map (see rules/04-graph-freshness.md).
+- **nameless_controls** — the controls the adapters could not name: `{id, parent, parentRoute, element, controlType, selector, componentPath, screenshot}` per control (`screenshot` = the parent screen's captured picture, when the runner has one). Your naming worklist (see guides/01-verify-flow.md).
 
 ## Plan
 
@@ -34,6 +35,7 @@ a test.)
 - **mark_unverifiable** `{id, reason}` — park a plausible-but-undrivable lead `unverifiable` (out of the worklist, kept for a human).
 - **park_edge** `{id, reason}` — park a may/unknown EDGE out of the worklist with an auditable reason. Becomes **accounted-for but NEVER runtime-verified** (accounted ≠ verified) and never edits the edge. The honest path to a fully *accounted-for* known edge set — which is not the same as the app being fully mapped or fully verified.
 - **unpark_edge** `{id}` — return a parked edge to the worklist.
+- **name_control** `{id, name}` / `{id, clear: true}` — give a control a durable human name (it becomes the served `label` + `control.name`), or clear it. Never touches the selector, so the id and the name survive every re-map that keeps the selector; a name is dropped only when its control disappears from the map. Rejects an id that is not a control and an empty name. Returns `{id, label, name}`.
 - **update_graph** — apply a manual overlay edit (addNode/editNode/addEdge/editEdge/remove). THE door for behavior the extractor cannot catch: when you (or the user) KNOW a screen/transition exists but no adapter can see it, add it here. Edits are quarantined to the overlay (never the base), forced `source:'manual'`, modality capped at `may`, witness stripped — an assertion is a lead, not proof. The added edge lands on the verify worklist; confirm it with report_observation (with evidence) to promote it to `witnessed`. Rule of thumb: unsure → `propose` (hypothesis); certain-but-unextractable → `update_graph` (assertion); either way only a proven observation makes it trusted.
 
 ## Compare
