@@ -7,7 +7,7 @@
 
 import { join } from 'node:path'
 import type { Observation, TrustTier, UiGraph } from '@ui-graph/core'
-import { applyObservations, hashValue, mergeOverlay, validateMerged } from '@ui-graph/core'
+import { applyControlNames, applyObservations, attachScreenshots, hashValue, mergeOverlay, validateMerged } from '@ui-graph/core'
 import { openStore, type Store } from '@ui-graph/core/node'
 
 /**
@@ -38,9 +38,11 @@ export function withStore<T>(ctx: ToolContext, fn: (store: Store) => T): T {
 }
 
 /**
- * Load the base graph, apply the manual overlay (if any) and fold in runtime
- * observations, returning the merged UiGraph the agent should see. The stored base
- * is never mutated. Reads from the workspace SQLite database.
+ * Load the base graph, apply the manual overlay (if any), fold in runtime
+ * observations, then the durable control names and the screen screenshots
+ * (sidecars, never in the base), returning the merged UiGraph the agent should
+ * see. THE fold: the CLI serve API and every MCP read tool go through it. The
+ * stored base is never mutated. Reads from the workspace SQLite database.
  */
 export function loadMergedGraph(ctx: ToolContext): UiGraph {
   return withStore(ctx, (store) => {
@@ -57,6 +59,8 @@ export function loadMergedGraph(ctx: ToolContext): UiGraph {
       merged = mergeOverlay(base, overlay)
     }
     merged = applyObservations(merged, store.getObservations(), { baseHash: hashValue(base) })
+    merged = applyControlNames(merged, store.getControlNames())
+    merged = attachScreenshots(merged, store.getScreenShots())
     const errs = validateMerged(merged)
     if (errs.length > 0) throw new Error(`merged graph is invalid:\n  ${errs.map((e) => e.message).join('\n  ')}`)
     return merged

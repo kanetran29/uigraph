@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { GraphEdge, GraphNode, UiGraph, Witness } from '@ui-graph/core'
 import { openStore, saveGraph } from '@ui-graph/core/node'
 import type { Server } from 'node:http'
-import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, formatParked, loadWorkspaceConfig, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runParked, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
+import { assertProjectDir, CliError, dbPathFor, detectAdapter, formatDiff, formatDiffSinceLast, formatMapSummary, formatNameless, formatParked, formatShots, loadWorkspaceConfig, openStoreSafe, readSoundiness, resolveAdapter, runDiff, runDiffSinceLast, runGen, runKitInstall, runKitPrint, runMap, runName, runNameless, runParked, runShots, runUnpark, runWorkspaceAdd, runWorkspaceList, runWorkspaceRemove, type MapSummary } from './commands'
 import { buildProgram } from './cli'
 import { createConfiguredServer, handleApiRequest, registryConfig, resolveShotPath, singleConfig, startApiServer, type ServeConfig } from './server'
 import { readRegistry, summarize } from '@ui-graph/core/node'
@@ -1081,5 +1081,103 @@ describe('runLogin (manual session capture)', () => {
       runLogin({ appUrl: 'http://x', out: 'a.json', launcher: async () => fakeBrowser(calls, true), waitForUser: async () => {} }),
     ).rejects.toThrow('disk full')
     expect(calls[calls.length - 1]).toBe('close')
+  })
+})
+
+describe('runNameless / runName / runShots (control naming + screenshot roster)', () => {
+  /** A workspace whose screen `a` holds one named control and one nameless control (a bare close button the adapter could only label by its tag), plus a second screen `b`. */
+  function namingWorkspace(): string {
+    const named: GraphNode = {
+      id: 'cc_save', route: null, componentPath: 'src/Form.tsx', label: 'Save', kind: 'control', parent: 'a',
+      control: { element: 'button', controlType: 'button', name: 'Save', selector: { strategy: 'role-name', value: 'button|Save' } },
+    }
+    const nameless: GraphNode = {
+      id: 'cc_x', route: null, componentPath: 'src/Form.tsx', label: 'button', kind: 'control', parent: 'a',
+      control: { element: 'button', controlType: 'button', selector: { strategy: 'structural', value: 'button', nth: 1 } },
+    }
+    return seedWorkspace(tempDir('uigraph-cli-names-'), graph([node('a'), node('b'), named, nameless], [edge('e_ab', 'a', 'b')]))
+  }
+
+  it('nameless lists only the controls without a control.name, with the parent screen route + component + selector', () => {
+    const rows = runNameless(namingWorkspace())
+    expect(rows).toEqual([{ id: 'cc_x', route: '/a', tag: 'button/button', selector: 'structural=button.nth(1)', componentPath: 'src/Form.tsx' }])
+    const out = formatNameless(rows)
+    expect(out).toContain('1 nameless control(s)')
+    expect(out).toContain('cc_x')
+    expect(out).toContain('/a')
+    expect(out).not.toContain('cc_save')
+  })
+
+  it('nameless carries the parent screen screenshot path when one has been captured', () => {
+    const dir = namingWorkspace()
+    const store = openStore(dbPathFor(dir))
+    store.setScreenShot('a', { path: 'shots/a.jpg', ts: '2026-09-09T00:00:00.000Z', base: 'h', source: 'goto' })
+    store.close()
+    expect(runNameless(dir)[0]?.screenshot).toBe('shots/a.jpg')
+    expect(formatNameless(runNameless(dir))).toContain('shots/a.jpg')
+  })
+
+  it('name sets a durable name: the merged graph shows it as label + control.name, the selector/id are untouched, and the control leaves the nameless list', async () => {
+    const { loadMergedGraph } = await import('@ui-graph/mcp')
+    const dir = namingWorkspace()
+    expect(runName(dir, 'cc_x', '  Close dialog ')).toBe('Close dialog')
+    const n = loadMergedGraph({ dir }).nodes.find((x) => x.id === 'cc_x')
+    expect(n?.label).toBe('Close dialog')
+    expect(n?.control?.name).toBe('Close dialog')
+    expect(n?.control?.selector).toEqual({ strategy: 'structural', value: 'button', nth: 1 })
+    expect(runNameless(dir)).toEqual([])
+    expect(formatNameless(runNameless(dir))).toContain('no nameless controls')
+  })
+
+  it('name rejects an unknown id, a non-control id, and an empty name', () => {
+    const dir = namingWorkspace()
+    expect(() => runName(dir, 'cc_nope', 'X')).toThrow(/unknown node id: cc_nope/)
+    expect(() => runName(dir, 'a', 'X')).toThrow(/not a control/)
+    expect(() => runName(dir, 'cc_x', '   ')).toThrow(/non-empty/)
+    expect(() => runName(dir, 'cc_x', '   ')).toThrow(CliError)
+    const store = openStore(dbPathFor(dir))
+    expect(store.getControlNames()).toEqual({})
+    store.close()
+  })
+
+  it('name --clear removes the name and reports the label the graph falls back to', () => {
+    const dir = namingWorkspace()
+    runName(dir, 'cc_x', 'Close dialog')
+    expect(runName(dir, 'cc_x', null)).toBe('button')
+    const store = openStore(dbPathFor(dir))
+    expect(store.getControlNames()).toEqual({})
+    store.close()
+    expect(runNameless(dir).map((r) => r.id)).toEqual(['cc_x'])
+  })
+
+  it('shots splits screen/modal nodes by captured screenshot (controls never count)', () => {
+    const dir = namingWorkspace()
+    const store = openStore(dbPathFor(dir))
+    store.setScreenShot('a', { path: 'shots/a.jpg', ts: '2026-09-09T00:00:00.000Z', base: 'h', source: 'landing' })
+    store.close()
+    const s = runShots(dir)
+    expect(s.shot).toEqual([{ id: 'a', label: 'A', route: '/a', path: 'shots/a.jpg', source: 'landing', ts: '2026-09-09T00:00:00.000Z' }])
+    expect(s.missing).toEqual([{ id: 'b', label: 'B', route: '/b' }])
+    const out = formatShots(s)
+    expect(out).toContain('1 of 2 screen/modal node(s) have a screenshot')
+    expect(out).toContain('shots/a.jpg')
+    expect(out).toContain('  b  /b  B')
+  })
+
+  it('the CLI registers nameless / name / shots, and `name` without a name or --clear is a usage error', async () => {
+    const program = buildProgram()
+    for (const c of ['nameless', 'name', 'shots']) expect(program.commands.find((x) => x.name() === c)).toBeDefined()
+    const dir = namingWorkspace()
+    const err: string[] = []
+    const orig = console.error
+    console.error = (...a: unknown[]) => err.push(a.join(' '))
+    try {
+      await program.parseAsync(['node', 'uigraph', 'name', dir, 'cc_x'])
+    } finally {
+      console.error = orig
+    }
+    expect(process.exitCode).toBe(1)
+    process.exitCode = 0
+    expect(err.join('\n')).toContain('usage: uigraph name')
   })
 })

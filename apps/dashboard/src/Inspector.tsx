@@ -1,6 +1,7 @@
 // The inspector panel: a read-only display of every field of the selected node or
 // edge (route, componentPath, event, guard, effect, modality, source, confidence,
-// witness). Editing lives in uigraph studio.
+// witness), plus the screen's captured screenshot when one exists (click opens it
+// full size). Editing and control naming live in uigraph studio / the CLI + MCP.
 
 import type { ReactNode } from 'react'
 import { CollapsibleSection } from './CollapsibleSection'
@@ -134,6 +135,11 @@ export function Inspector(props: InspectorProps): JSX.Element {
           <Field label="route" value={n.route ?? '—'} />
           <Field label="componentPath" value={n.componentPath ?? '—'} />
           <Field label="kind" value={n.kind} />
+          {n.screenshot !== undefined ? (
+            <a className="inspector-shot-link" href={`/api/${n.screenshot}`} target="_blank" rel="noreferrer" title="Open the full-size screenshot in a new tab">
+              <img className="inspector-shot" src={`/api/${n.screenshot}`} alt={`${n.label} screenshot`} loading="lazy" />
+            </a>
+          ) : null}
         </>
       )
     }

@@ -309,13 +309,15 @@ export function renderPlaywrightSpec(plan: SpecPlan): string {
   // The in-page expression reading a locator's watched attrs as one comparable string (dom-delta legs).
   const attrsRead = (loc: string): string =>
     `${loc}.evaluate((el, attrs) => JSON.stringify(attrs.map((a) => el.getAttribute(a))), [${DOM_DELTA_WATCHED_ATTRS.map((a) => q(a)).join(', ')}])`
+  // free text (labels, guards, routes) lands inside comments: collapse every JS line terminator so it cannot break out of `//` into code, and defuse `*/` for the block form
+  const comment = (s: string): string => s.replace(/[\r\n\u2028\u2029]+/g, ' ').replace(/\*\//g, '* /')
   const lines: string[] = ["import { test, expect } from '@playwright/test'", '', `test(${q(plan.title)}, async ({ page }) => {`]
   if (plan.preconditions.length > 0) {
-    lines.push(`  // Preconditions to satisfy first: ${plan.preconditions.join(', ')}`)
+    lines.push(`  // Preconditions to satisfy first: ${comment(plan.preconditions.join(', '))}`)
   }
   lines.push(`  await page.goto(${url(plan.startUrl)})`)
   for (const leg of plan.legs) {
-    lines.push('', `  // ${leg.description}`)
+    lines.push('', `  // ${comment(leg.description)}`)
     const a = leg.action
     // A dialog-close assertion is a COUNT DELTA: snapshot before the action —
     // toBeHidden() would pass vacuously on a role-less-modal app (zero matches).
@@ -333,7 +335,7 @@ export function renderPlaywrightSpec(plan: SpecPlan): string {
     else if (a.kind === 'fill' && a.locator) lines.push(`  await ${a.locator}.fill(${q(a.value ?? '')})`)
     else if (a.kind === 'goto' && a.url !== undefined) lines.push(`  await page.goto(${url(a.url)})`)
     else if (a.kind === 'available') lines.push(`  // (control available on this screen — no navigation)`)
-    else if (a.kind === 'parked') lines.push(`  /* parked: ${leg.parkedReason ?? 'not auto-confirmable — drive the triggering control or verify manually'} */`)
+    else if (a.kind === 'parked') lines.push(`  /* parked: ${comment(leg.parkedReason ?? 'not auto-confirmable — drive the triggering control or verify manually')} */`)
     for (const as of leg.assertions) {
       if (as.kind === 'url') lines.push(`  await expect(page).toHaveURL(${url(as.value)})`)
       else if (as.kind === 'dialog') lines.push(`  await expect(page.getByRole('dialog')).toBeVisible()`)

@@ -12,7 +12,8 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v)
 }
 
-const MAX_FIELD_LEN = 2000
+/** Length cap on any free-text IR field (label/event/guard/effect) — exported so a write boundary that lands text in one of them (a durable control name) can refuse before the fold rejects it. */
+export const MAX_FIELD_LEN = 2000
 
 /**
  * Whether a string carries a forbidden control character: any C0 control or DEL
@@ -53,6 +54,7 @@ function checkNode(n: unknown, i: number, errs: string[]): void {
   else checkText(n['label'], `nodes[${i}].label`, errs)
   if (typeof n['kind'] !== 'string' || !NODE_KINDS.has(n['kind'])) errs.push(`nodes[${i}].kind is invalid`)
   if (n['parent'] !== undefined && typeof n['parent'] !== 'string') errs.push(`nodes[${i}].parent must be a string`)
+  if (n['screenshot'] !== undefined && typeof n['screenshot'] !== 'string') errs.push(`nodes[${i}].screenshot must be a string`)
   if (n['control'] !== undefined) {
     const c = n['control']
     if (!isObject(c)) errs.push(`nodes[${i}].control must be an object`)

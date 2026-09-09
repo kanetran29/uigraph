@@ -183,6 +183,71 @@ describe('Store (SQLite)', () => {
     s.close()
   })
 
+  describe('screenshots + control names (sidecars keyed by node id)', () => {
+    const shot = (path: string, source: 'landing' | 'goto' = 'landing') => ({ path, ts: '2026-01-01T00:00:00Z', base: 'h', source })
+    const ctl = (id: string) => node(id, { route: null, label: 'button', kind: 'control', parent: 'a', control: { element: 'button', controlType: 'button' } })
+
+    it('round-trips shots; the newest capture wins per node id', () => {
+      const s = openStore(':memory:')
+      expect(s.getScreenShots()).toEqual({})
+      s.setScreenShot('a', shot('shots/a.jpg', 'goto'))
+      s.setScreenShot('b', shot('shots/b.jpg'))
+      s.setScreenShot('a', shot('shots/a.jpg'))
+      expect(s.getScreenShots()).toEqual({ a: shot('shots/a.jpg'), b: shot('shots/b.jpg') })
+      s.close()
+    })
+
+    it('round-trips names, upserts, clears, and rejects an empty name', () => {
+      const s = openStore(':memory:')
+      expect(s.getControlNames()).toEqual({})
+      s.setControlName('c1', 'Save')
+      s.setControlName('c1', 'Save draft')
+      s.setControlName('c2', 'Cancel')
+      expect(s.getControlNames()).toEqual({ c1: 'Save draft', c2: 'Cancel' })
+      s.clearControlName('c1')
+      s.clearControlName('missing')
+      expect(s.getControlNames()).toEqual({ c2: 'Cancel' })
+      expect(() => s.setControlName('c2', '  ')).toThrow(/name/)
+      s.close()
+    })
+
+    it('rejects a name the fold could not serve as a label (control chars, multi-line, over the text cap) — nothing stored', () => {
+      const s = openStore(':memory:')
+      expect(() => s.setControlName('c1', 'Sign\x01in')).toThrow(/control characters/)
+      expect(() => s.setControlName('c1', 'x\n  require("node:child_process")')).toThrow(/single-line/)
+      expect(() => s.setControlName('c1', 'x'.repeat(2001))).toThrow(/2000/)
+      expect(s.getControlNames()).toEqual({})
+      s.close()
+    })
+
+    it('a re-map prunes shots/names whose node id disappeared but keeps survivors across a hash change', () => {
+      const s = openStore(':memory:')
+      s.setBaseGraph(graph([node('a'), node('b'), ctl('c1'), ctl('c2')], []))
+      s.setScreenShot('a', shot('shots/a.jpg'))
+      s.setScreenShot('b', shot('shots/b.jpg'))
+      s.setControlName('c1', 'Save')
+      s.setControlName('c2', 'Cancel')
+      s.setBaseGraph(graph([node('a'), node('z'), ctl('c1')], []))
+      expect(s.getScreenShots()).toEqual({ a: shot('shots/a.jpg') })
+      expect(s.getControlNames()).toEqual({ c1: 'Save' })
+      // the proven graph never carries either sidecar
+      expect(s.getBaseGraph()?.nodes.every((n) => n.screenshot === undefined)).toBe(true)
+      expect(s.getBaseGraph()?.nodes.find((n) => n.id === 'c1')?.control?.name).toBeUndefined()
+      s.close()
+    })
+
+    it('a re-map with an identical graph keeps every shot and name', () => {
+      const s = openStore(':memory:')
+      s.setBaseGraph(g())
+      s.setScreenShot('a', shot('shots/a.jpg'))
+      s.setControlName('a', 'Home')
+      s.setBaseGraph(g())
+      expect(s.getScreenShots()).toEqual({ a: shot('shots/a.jpg') })
+      expect(s.getControlNames()).toEqual({ a: 'Home' })
+      s.close()
+    })
+  })
+
   it('filters proposals by status', () => {
     const s = openStore(':memory:')
     s.setProposals(sidecar())

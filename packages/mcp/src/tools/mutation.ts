@@ -5,7 +5,7 @@
 
 import type { GraphEdge, GraphNode, Overlay } from '@ui-graph/core'
 import { emptyOverlay, hashValue, validateOverlay } from '@ui-graph/core'
-import { dbPath, withStore, type ToolContext } from './context'
+import { dbPath, loadMergedGraph, withStore, type ToolContext } from './context'
 
 /** A manual edit applied to the overlay only; one of five discriminated ops. */
 export type UpdateOp =
@@ -82,6 +82,45 @@ export function updateGraph(ctx: ToolContext, args: UpdateGraphArgs): UpdateGrap
       removedRefs: overlay.removedRefs.length,
     }
   })
+}
+
+/** Arguments for name_control: the control id plus either a name to set or `clear: true`. */
+export interface NameControlArgs {
+  id: string
+  name?: string
+  clear?: boolean
+}
+
+/** name_control result: the control's id and its label after the fold (`name` null once cleared). */
+export interface NameControlResult {
+  id: string
+  label: string
+  name: string | null
+}
+
+/**
+ * Give a control a durable human name, or clear one. Writes the names sidecar only
+ * — the selector (and so the id) is never touched, so a name survives every re-map
+ * that keeps the selector. Validates the id is a control (with control metadata,
+ * else the fold could never apply the name) in the merged graph; the store rejects
+ * an empty, multi-line/control-char or over-long name so a value the schema would
+ * refuse as a label never reaches the sidecar. Throws otherwise. Returns the label
+ * the fold now serves.
+ */
+export function nameControl(ctx: ToolContext, args: NameControlArgs): NameControlResult {
+  const before = loadMergedGraph(ctx).nodes.find((n) => n.id === args.id)
+  if (before === undefined) throw new Error(`unknown node id: ${args.id}`)
+  if (before.kind !== 'control') throw new Error(`${args.id} is a ${before.kind}, not a control — only controls can be named`)
+  if (before.control === undefined) throw new Error(`${args.id} has no control metadata — cannot be named`)
+  if (args.clear === true) {
+    withStore(ctx, (store) => store.clearControlName(args.id))
+  } else {
+    const name = args.name?.trim() ?? ''
+    if (name.length === 0) throw new Error('a name must be non-empty')
+    withStore(ctx, (store) => store.setControlName(args.id, name))
+  }
+  const after = loadMergedGraph(ctx).nodes.find((n) => n.id === args.id) as GraphNode
+  return { id: after.id, label: after.label, name: after.control?.name ?? null }
 }
 
 /** The set of named planning scenarios (overlays) and which one is active. */

@@ -43,6 +43,15 @@ describe('validateGraphShape', () => {
     expect(validateGraphShape(g).some((m) => m.includes('exceeds'))).toBe(true)
   })
 
+  it('accepts an optional screenshot path on a node', () => {
+    expect(validateGraphShape(graph([node('a', { screenshot: 'shots/a.jpg' })], []))).toEqual([])
+  })
+
+  it('rejects a non-string screenshot on a node', () => {
+    const g = graph([node('a', { screenshot: 42 as never })], [])
+    expect(validateGraphShape(g).some((m) => m.includes('screenshot'))).toBe(true)
+  })
+
   it('allows ordinary whitespace (tab/newline) in text fields', () => {
     const g = graph([node('a'), node('b')], [edge('e1', 'a', 'b', { guard: 'isAuth\t&& hasCart\n' })])
     expect(validateGraphShape(g)).toEqual([])

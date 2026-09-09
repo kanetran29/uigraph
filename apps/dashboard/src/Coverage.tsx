@@ -4,6 +4,7 @@
 
 import { useMemo, useState } from 'react'
 import type { CoverageReport, EdgeCoverage, GraphEdge, UiGraph } from '@ui-graph/core'
+import { namelessControls } from '@ui-graph/core'
 import { matchCoverageRow } from './search'
 import { FilterChip, toggled } from './Chips'
 import { CollapsibleSection } from './CollapsibleSection'
@@ -28,11 +29,13 @@ function CountChip(props: { label: string; n: number }): JSX.Element {
 
 /**
  * Render the coverage panel: a verified/total bar, modality + source breakdowns,
- * and the unverified-edge list. An edge row selects that edge on the canvas.
+ * the nameless-control count (controls still waiting for a human name via the
+ * CLI/MCP), and the unverified-edge list. An edge row selects that edge on the canvas.
  */
 export function Coverage(props: CoverageProps): JSX.Element {
   const { coverage, graph, onSelect } = props
   const { t } = useT()
+  const nameless = useMemo(() => namelessControls(graph).length, [graph])
   // Headline is the HONEST "done" metric (accounted-for); verified% (runtime OR a
   // deterministic must-static proof) and runtime-verified% and the parked count are
   // always co-reported beside it so 100%-accounted (which credits parked + resolved-
@@ -78,6 +81,9 @@ export function Coverage(props: CoverageProps): JSX.Element {
       </div>
       <p className="muted cov-sub">
         verified {verifiedPct}% ({coverage.verifiedCount ?? coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · runtime-verified {runtimePct}% ({coverage.runtimeVerified ?? coverage.verified}/{coverage.total}) · parked {coverage.parkedCount ?? allParked.length} · refuted {coverage.refutedCount ?? refuted.length}
+      </p>
+      <p className="muted cov-sub" title="Controls whose label is only their tag/controlType. Name them with `uigraph name <dir> <id> <name>` or the MCP name_control tool; names survive re-maps.">
+        nameless controls {nameless}
       </p>
 
       <div className="cov-chips">

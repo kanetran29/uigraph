@@ -42,6 +42,8 @@
     "withdraw_proposal",
     "mark_unverifiable",
     "park_edge",
-    "unpark_edge"
+    "unpark_edge",
+    "nameless_controls",
+    "name_control"
   ]
 }

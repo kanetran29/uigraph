@@ -48,6 +48,8 @@ export {
   type ValidateRefsInput,
 } from './staleness'
 export { mergeOverlay, emptyOverlay, exportOverlaySpec } from './overlay'
+export { attachScreenshots, type ScreenShot, type ScreenShots } from './screens'
+export { applyControlNames, namelessControls, type ControlNames } from './names'
 export {
   validateProposals,
   emptyProposals,

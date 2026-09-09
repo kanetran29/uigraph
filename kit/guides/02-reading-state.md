@@ -18,6 +18,12 @@ Three reads tell you the whole state and the next action.
   dynamic targets) > `may` (2, conditional) > proposals (1). Pairs already
   runtime-witnessed and proven `must`-static edges are skipped.
 
+Screen and modal nodes in `get_graph` carry a `screenshot` path once a verify run
+has been on them (the start route, and every confirmed landing). A node without one
+was never provably reached by the runner — the shot is proof of presence, never a
+guess. `nameless_controls` lists the controls still waiting for a human name (see
+verify-flow); it is a separate, secondary worklist from `next_to_verify`.
+
 Decision rule each iteration:
 1. `get_loop_status`; if `loopDone`, stop.
 2. Take the top of `next_to_verify`.

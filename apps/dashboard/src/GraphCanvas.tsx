@@ -460,8 +460,10 @@ function controlStyle(manual: boolean, control: ControlMeta, size: { width: numb
  * position; controls get a parent-relative position plus parentId/extent so
  * @xyflow/react renders them nested and draggable within the parent. A parent must
  * precede its children in the array, so screens are emitted first and controls after.
+ * With `showShots` on, a COLLAPSED screen that has a screenshot gets a thumbnail strip
+ * above its label (the layout grew its box by the same strip — see layoutGraph).
  */
-function toFlowNodes(
+export function toFlowNodes(
   graph: UiGraph,
   layout: Pick<GraphLayout, 'positions' | 'sizes' | 'bands'>,
   expanded: ReadonlySet<string>,
@@ -469,6 +471,7 @@ function toFlowNodes(
   diffNames: ReadonlyMap<string, { before: string; after: string }>,
   groupCount: ReadonlyMap<string, number> = EMPTY_COUNTS,
   groupHasWitnessed: ReadonlyMap<string, boolean> = EMPTY_WITNESSED,
+  showShots = false,
 ): Node[] {
   const { positions, sizes, bands } = layout
 
@@ -527,7 +530,7 @@ function toFlowNodes(
       // A rename reads as a deletion of the old name + an addition of the new: old in red,
       // new in green (the same semantics as removed/added elsewhere).
       const rename = diffNames.get(n.id)
-      const label = rename ? (
+      const text = rename ? (
         <span>
           <span style={{ color: DIFF_REMOVED_COLOR, textDecoration: 'line-through' }}>{rename.before}</span>
           {' → '}
@@ -537,6 +540,16 @@ function toFlowNodes(
       ) : (
         `${n.label}${suffix}`
       )
+      // draggable=false so a node drag never starts the browser's native image drag.
+      const label =
+        showShots && n.screenshot !== undefined && !expanded.has(n.id) ? (
+          <>
+            <img className="node-shot" src={`/api/${n.screenshot}`} alt="" draggable={false} />
+            {text}
+          </>
+        ) : (
+          text
+        )
       screens.push({
         id: n.id,
         position: pos,
@@ -892,6 +905,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const [highlightFlow, setHighlightFlow] = useState(true)
   const [showProposed, setShowProposed] = useState(false)
   const [showEffects, setShowEffects] = useState(false)
+  const [showShots, setShowShots] = useState(false)
   const [diffMode, setDiffMode] = useState(true)
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
   // Hovering a screen reveals its (otherwise hidden) `may` arrows in the grouped view, so
@@ -956,6 +970,9 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
     [graph],
   )
 
+  // Nodes with a captured screenshot — gates the "show screenshots" toggle (absent when none).
+  const shotCount = useMemo(() => graph.nodes.filter((n) => n.screenshot !== undefined).length, [graph])
+
   const expanded = useMemo(() => {
     const withChildren = new Set<string>()
     for (const n of graph.nodes) if (n.kind === 'control' && n.parent !== undefined) withChildren.add(n.parent)
@@ -982,8 +999,8 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   // leaves the actual expanded contents unchanged), so memoizing on its identity would
   // relayout 200+ nodes per click. Key on the canonical structural string instead — it
   // changes only on a relayout-worthy edit (node/edge ids or the expanded screen set).
-  const layoutKey = useMemo(() => structuralKey(graph, expanded), [graph, expanded])
-  const layout = useMemo<GraphLayout>(() => layoutGraph(graph, expanded), [layoutKey])
+  const layoutKey = useMemo(() => `${structuralKey(graph, expanded)}|shots:${showShots ? 1 : 0}`, [graph, expanded, showShots])
+  const layout = useMemo<GraphLayout>(() => layoutGraph(graph, expanded, showShots), [layoutKey])
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
@@ -1056,15 +1073,15 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   const key = useMemo(
     () =>
       `${structuralKey(graph, expanded)}|p:${proposals.proposals.length}|d:${diffActive ? 1 : 0}|${[...diffNames.keys()].sort().join(',')}` +
-      `|r:${diffHighlight ? diffHighlight.removedNodes.map((n) => n.id).sort().join(',') : ''}`,
-    [graph, expanded, proposals, diffActive, diffNames, diffHighlight],
+      `|r:${diffHighlight ? diffHighlight.removedNodes.map((n) => n.id).sort().join(',') : ''}|s:${showShots ? 1 : 0}`,
+    [graph, expanded, proposals, diffActive, diffNames, diffHighlight, showShots],
   )
   const lastKey = useRef<string | null>(null)
   useEffect(() => {
     if (lastKey.current === key) return
     const firstLayout = lastKey.current === null
     lastKey.current = key
-    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames, view.groupCount, view.groupHasWitnessed)
+    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames, view.groupCount, view.groupHasWitnessed, showShots)
     // Keep the user's dragged positions ONLY when the node SET is unchanged (a pure
     // re-style). When nodes are added or removed (expand collapse), take a FULL fresh
     // layout so every node is placed by one consistent radial pass.
@@ -1094,7 +1111,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       const prevGhostPos = new Map(prev.filter(isGhostNode).map((n) => [n.id, n.position]))
       return [...real, ...ghostNodesFor(realPos, diffHighlight, prevGhostPos)]
     })
-  }, [key, graph, layout, expanded, proposalCount, diffNames, diffActive, diffHighlight, setNodes])
+  }, [key, graph, layout, expanded, proposalCount, diffNames, diffActive, diffHighlight, showShots, setNodes])
 
   // Apply selection emphasis onto the live, user-positioned nodes without resetting
   // their positions. A node selection marks the node 'rf-selected' and its neighbours
@@ -1271,7 +1288,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
   // Drop the saved layout + re-seed a fresh dagre layout, then fit it into view.
   const handleResetLayout = useCallback(() => {
     removeStored(layoutStorageKey(graph))
-    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames, view.groupCount, view.groupHasWitnessed)
+    const laid = toFlowNodes(graph, layout, expanded, proposalCount, diffNames, view.groupCount, view.groupHasWitnessed, showShots)
     if (diffActive && diffHighlight) {
       const realPos = new Map(laid.filter((n) => n.parentId === undefined).map((n) => [n.id, n.position]))
       setNodes([...laid, ...ghostNodesFor(realPos, diffHighlight, new Map())])
@@ -1279,7 +1296,7 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
       setNodes(laid)
     }
     void rf.fitView({ padding: 0.2, duration: 450 })
-  }, [graph, layout, expanded, proposalCount, diffNames, diffActive, diffHighlight, setNodes, rf])
+  }, [graph, layout, expanded, proposalCount, diffNames, diffActive, diffHighlight, showShots, setNodes, rf])
 
   const edgeTypes = useMemo(() => ({ floating: FloatingEdge }), [])
 
@@ -1348,6 +1365,12 @@ export function GraphCanvas(props: GraphCanvasProps): JSX.Element {
             <input type="checkbox" checked={showEffects} onChange={(e) => setShowEffects(e.target.checked)} />
             show effects{effectEdgeCount > 0 ? ` · ${effectEdgeCount}` : ''}
           </label>
+          {shotCount > 0 ? (
+            <label className="edge-toggle">
+              <input type="checkbox" checked={showShots} onChange={(e) => setShowShots(e.target.checked)} />
+              show screenshots · {shotCount}
+            </label>
+          ) : null}
           {diffCount > 0 ? (
             <label className="edge-toggle">
               <input type="checkbox" checked={diffMode} onChange={(e) => setDiffMode(e.target.checked)} />

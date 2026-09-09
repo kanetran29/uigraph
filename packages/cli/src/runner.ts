@@ -9,12 +9,21 @@
 // browser; the default driver lazy-loads `playwright-core` (optional dep — install
 // it to actually drive) and uses the system/cached Chromium.
 
-import type { Evidence, SpecPlan, UiGraph, VerifyTarget } from '@ui-graph/core'
-import { buildSpecPlan, dedupWorklist, DOM_DELTA_WATCHED_ATTRS, fnv1a, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planForTarget } from '@ui-graph/core'
+import { mkdirSync, renameSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import type { Evidence, GraphNode, SpecPlan, UiGraph, VerifyTarget } from '@ui-graph/core'
+import { buildSpecPlan, dedupWorklist, DOM_DELTA_WATCHED_ATTRS, fnv1a, hashValue, locatorFor, nextToVerify, nodeForUrl, patternKey, PATTERN_PARK_REASON_PREFIX, planForTarget } from '@ui-graph/core'
 import { openStore } from '@ui-graph/core/node'
 import { dbPath, loadMergedGraph, reportObservation, getLoopStatus, updateGraph } from '@ui-graph/mcp'
 
-/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets); `evidence` is the structured proof the proof-gated report_observation requires for a confirmation. `undrivable` means the plan had no drivable action (a parked leg) — the transition was NEVER attempted, so it must not be recorded as refuted. `undrivableReason` is the driver's diagnosis of WHY, when it has one (e.g. a modal-like element appeared but exposes no role=dialog) — folded into VerifySummary.diagnoses and appended to autonomous park reasons so the human triaging sees the app-side fix. */
+/** One screenshot the driver took: the node whose screen the browser was PROVABLY on, the workspace-relative file ('shots/<id>.jpg'), and how it got there — 'goto' = the plan's start URL settled on that screen, 'landing' = the final leg confirmed onto it. */
+export interface CapturedShot {
+  nodeId: string
+  path: string
+  source: 'landing' | 'goto'
+}
+
+/** The outcome of attempting one planned transition in a real browser. `landedUrl` is populated only in capture mode (dynamic-sink targets); `evidence` is the structured proof the proof-gated report_observation requires for a confirmation. `undrivable` means the plan had no drivable action (a parked leg) — the transition was NEVER attempted, so it must not be recorded as refuted. `undrivableReason` is the driver's diagnosis of WHY, when it has one (e.g. a modal-like element appeared but exposes no role=dialog) — folded into VerifySummary.diagnoses and appended to autonomous park reasons so the human triaging sees the app-side fix. `shots` are the pictures taken along the way (never part of the verdict); `screenshot` is the landing shot's path so the observation records it. */
 export interface VerifyResult {
   confirmed: boolean
   screenshot?: string
@@ -22,6 +31,7 @@ export interface VerifyResult {
   evidence?: Evidence
   undrivable?: boolean
   undrivableReason?: string
+  shots?: CapturedShot[]
 }
 
 /**
@@ -43,8 +53,20 @@ export interface ProbeSpec {
   domDelta?: boolean
 }
 
-/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan; with `modalFlow`, runs the multi-step modal-flow probe (open the modal via the plan's prefix, explore in-modal steps until the target renders, judge the target with the final leg's own evidence). `modalSelector` is the app owner's declared modal CSS selector (rung 2 of the dialog evidence ladder). */
-export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean; allowSubmits?: boolean }) => Promise<VerifyResult>
+/** Per-drive options. `capture` = dynamic-sink mode (report where the browser landed instead of asserting a URL); `probe` runs the exploratory probe instead of the plan; `modalFlow` runs the multi-step modal-flow probe; `modalSelector` is the app owner's declared modal CSS selector (rung 2 of the dialog evidence ladder); `shotsDir` (absolute) turns screenshot capture on; `startNode` is the id of the screen the plan's start URL loads — set by the caller ONLY when that route is concrete, so the settled start load may be captured as that node's picture. */
+export interface DriveOptions {
+  capture?: boolean
+  probe?: ProbeSpec
+  modalFlow?: boolean
+  modalSelector?: string
+  authed?: boolean
+  allowSubmits?: boolean
+  shotsDir?: string
+  startNode?: string
+}
+
+/** Drives one spec plan against the app. In capture mode it does not assert a URL — it drives the nav out of `from` and reports where the browser actually landed. With `probe`, runs the exploratory probe instead of the plan; with `modalFlow`, runs the multi-step modal-flow probe (open the modal via the plan's prefix, explore in-modal steps until the target renders, judge the target with the final leg's own evidence). */
+export type VerifyDriver = (plan: SpecPlan, appUrl: string, opts?: DriveOptions) => Promise<VerifyResult>
 
 /** Options for runVerify: workspace dir, the app's base URL, a cap, an optional driver, an optional saved auth session, and the verify-all sweep (drive must-static proofs too). `concurrency` is the parallel-driver pool width (default 8, capped 16); `patternSample` is how many representatives to drive per over-approximation pattern (default 1); `modalSelector` is the workspace-declared CSS selector for apps that render modals without role=dialog (rung 2 of the dialog evidence ladder). */
 export interface RunVerifyOptions {
@@ -93,7 +115,9 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   const store = openStore(dbPath(ctx))
   const proposalGraph = store.getProposalGraph()
   const parkedIds = new Set(store.getParkedEdges().map((p) => p.edgeId))
+  const base = store.getBaseGraph()
   store.close()
+  const baseHash = base === null ? '' : hashValue(base)
 
   const allTargets = nextToVerify(graph, proposalGraph, opts.limit, parkedIds, { includeProven: opts.includeProven === true, includeRefuted: opts.includeRefuted === true })
   // Collapse the over-approximation fan-out: drive one representative per source-nav
@@ -103,7 +127,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
 
   // When we build the default driver we own its browser and must dispose it after
   // the run; an injected driver brings its own lifecycle, so there is nothing to close.
-  const owned = opts.driver === undefined ? makePlaywrightDriver(opts.storageState, opts.modalSelector) : null
+  const owned = opts.driver === undefined ? makePlaywrightDriver(opts.storageState, opts.modalSelector, resolve(opts.dir, 'shots')) : null
   const driver = opts.driver ?? owned!.driver
   const authed = opts.storageState !== undefined
   const concurrency = Math.max(1, Math.min(opts.concurrency ?? 8, 16))
@@ -120,6 +144,11 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
   // refuted/undrivable (→ its duplicates stay OPEN, never falsely credited).
   const confirmedKeys = new Map<string, string>()
   const refutedKeys = new Set<string>()
+  // 'goto' shots are kept whatever the verdict, 'landing' shots only for an accepted confirmation
+  const shots: CapturedShot[] = []
+  const keepShots = (r: VerifyResult, source: CapturedShot['source']): void => {
+    for (const s of r.shots ?? []) if (s.source === source) shots.push(s)
+  }
 
   // Dynamic-sink targets mutate the graph (addNode) and must stay serial; every other
   // target is a pure drive that parallelizes.
@@ -141,6 +170,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
         outcomes[t.id] = 'undrivable'
         continue
       }
+      keepShots(result, 'goto')
       // an undrivable plan was never attempted: refuting it would be a false negative
       if (result.undrivable === true) {
         outcomes[t.id] = 'undrivable'
@@ -169,6 +199,7 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       if (result.confirmed) {
         confirmed++
         outcomes[t.id] = 'confirmed'
+        keepShots(result, 'landing')
         if (k !== null) confirmedKeys.set(k, `${t.from}->${t.to}`)
       } else {
         refuted++
@@ -189,10 +220,11 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       // Dynamic-sink target (u_<screen>): CAPTURE the real landing instead of asserting a URL.
       let result: VerifyResult
       try {
-        result = await driver(plan, opts.appUrl, { capture: true, modalSelector: opts.modalSelector, authed })
+        result = await driver(plan, opts.appUrl, { capture: true, modalSelector: opts.modalSelector, authed, startNode: startScreenId(graph, steps) })
       } catch {
         result = { confirmed: false }
       }
+      keepShots(result, 'goto')
       const park = (reason: string): void => {
         const s = openStore(dbPath(ctx))
         try {
@@ -227,6 +259,8 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
         realNode = newId
         discoveredNodes++
       }
+      // the driver pictured the landing under the shared sink's id — move it under the real node before anything records the path
+      result = rekeyLandingShot(result, opts.dir, realNode)
       const res = reportObservation(ctx, {
         from: t.from,
         to: realNode,
@@ -248,9 +282,21 @@ export async function runVerify(opts: RunVerifyOptions): Promise<VerifySummary> 
       resolvedDynamic++
       confirmed++
       outcomes[t.id] = 'confirmed'
+      keepShots(result, 'landing')
     }
   } finally {
     if (owned !== null) await owned.dispose()
+  }
+
+  // Persist the pictures (serial, the one SQLite writer). Newest wins per node id.
+  if (shots.length > 0) {
+    const s = openStore(dbPath(ctx))
+    try {
+      const ts = new Date().toISOString()
+      for (const sh of shots) s.setScreenShot(sh.nodeId, { path: sh.path, ts, base: baseHash, source: sh.source })
+    } finally {
+      s.close()
+    }
   }
 
   // STAGE 4 — park the duplicates of every CONFIRMED (and not-also-refuted) pattern, in a
@@ -308,7 +354,7 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
   const plan = buildSpecPlan(graph, steps, { baseUrl: appUrl, modalSelector, title: `verify ${t.from} → ${t.to}` })
   let result: VerifyResult
   try {
-    result = await driver(plan, appUrl, { modalSelector, authed })
+    result = await driver(plan, appUrl, { modalSelector, authed, startNode: startScreenId(graph, steps) })
   } catch {
     // A drive that THREW observed nothing — page.goto refused (server down),
     // browser crash, protocol error. Refuting would poison the log with
@@ -365,6 +411,22 @@ async function attemptSimple(driver: VerifyDriver, graph: UiGraph, t: VerifyTarg
     }
   }
   return result
+}
+
+/**
+ * The id of the node a plan's start URL loads — the first step's own node when it
+ * is routed, else its parent screen — but ONLY when that route is concrete, because
+ * that is the sole case where codegen emits a bare goto to it (buildSpecPlan's
+ * anchor: screenRouteOf + isConcreteRoute; a non-concrete anchor falls back to '/').
+ * A settled load of that URL puts the browser provably on that node's screen, which
+ * is what licenses the 'goto' screenshot. undefined = no start shot is licensed.
+ */
+function startScreenId(graph: UiGraph, steps: readonly { from: GraphNode }[]): string | undefined {
+  const from = steps[0]?.from
+  if (from === undefined) return undefined
+  const screen = from.route !== null ? from : from.parent !== undefined ? graph.nodes.find((n) => n.id === from.parent) : undefined
+  const route = screen?.route ?? null
+  return screen !== undefined && route !== null && !route.includes(':') && !route.includes('*') ? screen.id : undefined
 }
 
 /** Options for the autonomous until-done loop. */
@@ -1222,7 +1284,85 @@ async function probePlan(page: PwPage, spec: ProbeSpec, appUrl: string): Promise
   return { confirmed: false }
 }
 
-async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean; allowSubmits?: boolean }): Promise<VerifyResult> {
+/**
+ * Whether a node id is a safe shot file name: the charset the serve route accepts
+ * (resolveShotPath in server.ts). Node ids are not validated beyond `string` — an
+ * overlay can mint '../../x' — so the write side must refuse what the read side
+ * would, or a shot lands outside <dir>/shots or under a name that cannot be served.
+ */
+function safeShotId(nodeId: string): boolean {
+  return /^[A-Za-z0-9_.-]+$/.test(nodeId) && !nodeId.includes('..')
+}
+
+/**
+ * Screenshot the page into <shotsDir>/<nodeId>.jpg (overwriting; the dir is
+ * created) and return the shot record with its workspace-relative path, or null
+ * when anything fails. A picture is a by-product of a drive and must never touch
+ * its verdict, so every failure is logged and swallowed here.
+ */
+async function captureShot(page: PwPage, shotsDir: string, nodeId: string, source: CapturedShot['source']): Promise<CapturedShot | null> {
+  if (!safeShotId(nodeId)) {
+    console.error(`[warn] screenshot of ${nodeId} skipped: unsafe file name`)
+    return null
+  }
+  try {
+    mkdirSync(shotsDir, { recursive: true })
+    const bytes = await page.screenshot({ type: 'jpeg', quality: 70, fullPage: false })
+    writeFileSync(join(shotsDir, `${nodeId}.jpg`), bytes)
+    return { nodeId, path: `shots/${nodeId}.jpg`, source }
+  } catch (err) {
+    console.error(`[warn] screenshot of ${nodeId} failed: ${err instanceof Error ? err.message : String(err)}`)
+    return null
+  }
+}
+
+/**
+ * Move a dynamic-sink landing shot from the synthetic sink's file to the real
+ * node's (<dir>/shots/<realNode>.jpg) and re-point the result at it. The sink
+ * (u_<screen>) is shared by every dynamic nav out of a screen, so a shot left under
+ * its name would be overwritten by the next drive into it — including a later
+ * auth bounce — while the sidecar entry keyed by the real node still pointed
+ * there. A failed move (or an unsafe id) drops the landing shot, never the verdict.
+ */
+function rekeyLandingShot(result: VerifyResult, dir: string, realNode: string): VerifyResult {
+  const landing = result.shots?.find((s) => s.source === 'landing')
+  if (landing === undefined) return result
+  const { screenshot: _sinkPath, ...rest } = result
+  const kept = (result.shots ?? []).filter((s) => s.source !== 'landing')
+  const path = `shots/${realNode}.jpg`
+  try {
+    if (!safeShotId(realNode)) throw new Error('unsafe file name')
+    renameSync(join(dir, landing.path), join(dir, path))
+    return { ...rest, screenshot: path, shots: [...kept, { nodeId: realNode, path, source: 'landing' }] }
+  } catch (err) {
+    console.error(`[warn] landing shot for ${realNode} dropped: ${err instanceof Error ? err.message : String(err)}`)
+    return { ...rest, shots: kept }
+  }
+}
+
+/**
+ * Drive a plan (drivePlanCore judges it) and take the pictures the drive licenses:
+ * the settled start load as `opts.startNode`'s 'goto' shot (inside the core, right
+ * after the load settles), and — ONLY on a confirmed result — the final leg's `to`
+ * node as its 'landing' shot: by the confirmation's own evidence the browser is on
+ * that screen (or has that modal open; for a close/dom-delta self-loop `to` is the
+ * screen itself). The landing path is also set as `screenshot` so the observation
+ * records it. Nothing here can change the verdict — a failed shot is dropped.
+ */
+async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: DriveOptions): Promise<VerifyResult> {
+  const shots: CapturedShot[] = []
+  const result = await drivePlanCore(page, plan, appUrl, opts, shots)
+  const finalLeg = plan.legs[plan.legs.length - 1]
+  // request evidence alone proves the effect fired, not where the browser is: only a url/dialog/dom-delta-judged leg (or capture mode's observed landing) locates it
+  const located = opts?.capture === true || (finalLeg?.assertions.some((as) => as.kind !== 'request') ?? false)
+  const landing = result.confirmed && located && opts?.shotsDir !== undefined && finalLeg !== undefined ? await captureShot(page, opts.shotsDir, finalLeg.to, 'landing') : null
+  if (landing !== null) shots.push(landing)
+  if (shots.length === 0) return result
+  return { ...result, ...(landing !== null ? { screenshot: landing.path } : {}), shots }
+}
+
+/** The judgment core of drivePlan (see the evidence-ladder doc comment above): probe/modal-flow dispatch, the start load, the leg loop, and the per-assertion verdict. `shots` receives the start-screen 'goto' shot when `opts.startNode` + `opts.shotsDir` license one and the settled load is still on the start URL. */
+async function drivePlanCore(page: PwPage, plan: SpecPlan, appUrl: string, opts: DriveOptions | undefined, shots: CapturedShot[]): Promise<VerifyResult> {
   if (opts?.probe !== undefined) return probePlan(page, opts.probe, appUrl)
   if (opts?.modalFlow === true) return probeModalFlow(page, plan, appUrl, opts)
   const anchorUrl = plan.startUrl.startsWith('http') ? plan.startUrl : appUrl + plan.startUrl
@@ -1231,6 +1371,11 @@ async function drivePlan(page: PwPage, plan: SpecPlan, appUrl: string, opts?: { 
   // clicking into a half-booted app reads as a locator miss and false-undrivables
   // the whole plan. Capture mode already settles; assert mode must too.
   await page.waitForLoadState('networkidle').catch(() => {})
+  // a redirected load (auth guard bounce or otherwise) means the browser is on some other screen — no start shot
+  if (opts?.startNode !== undefined && opts.shotsDir !== undefined && samePath(page.url(), anchorUrl)) {
+    const shot = await captureShot(page, opts.shotsDir, opts.startNode, 'goto')
+    if (shot !== null) shots.push(shot)
+  }
 
   if (opts?.capture === true) {
     await page.waitForLoadState('networkidle').catch(() => {})
@@ -1542,16 +1687,17 @@ export interface OwnedDriver {
  * cost. The browser/context are created lazily on the first driver call; each call
  * opens a fresh page, drives the plan via drivePlan, and closes that page. The caller
  * must invoke `dispose` after the run to close the shared browser. `modalSelector`
- * is the workspace-declared modal selector, threaded into every drivePlan call for
- * the dialog evidence ladder (per-call opts win when they carry their own).
+ * is the workspace-declared modal selector and `shotsDir` the absolute screenshot
+ * directory (<workspace>/shots; capture is off without it), both threaded into
+ * every drivePlan call (per-call opts win when they carry their own).
  */
-function makePlaywrightDriver(storageState?: string, modalSelector?: string): OwnedDriver {
+function makePlaywrightDriver(storageState?: string, modalSelector?: string, shotsDir?: string): OwnedDriver {
   let browser: PwBrowser | null = null
   let context: PwContext | null = null
   // Memoize the launch so N concurrent first-calls (the worker pool) share ONE browser
   // instead of each racing to launch its own on the `context === null` check.
   let ready: Promise<void> | null = null
-  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: { capture?: boolean; probe?: ProbeSpec; modalFlow?: boolean; modalSelector?: string; authed?: boolean; allowSubmits?: boolean }): Promise<VerifyResult> => {
+  const driver: VerifyDriver = async (plan: SpecPlan, appUrl: string, opts?: DriveOptions): Promise<VerifyResult> => {
     ready ??= (async (): Promise<void> => {
       const { chromium } = await loadPlaywright()
       browser = (await chromium.launch()) as PwBrowser
@@ -1560,7 +1706,7 @@ function makePlaywrightDriver(storageState?: string, modalSelector?: string): Ow
     await ready
     const page = await (context as PwContext).newPage()
     try {
-      return await drivePlan(page, plan, appUrl, { ...opts, modalSelector: opts?.modalSelector ?? modalSelector })
+      return await drivePlan(page, plan, appUrl, { ...opts, modalSelector: opts?.modalSelector ?? modalSelector, shotsDir: opts?.shotsDir ?? shotsDir })
     } finally {
       await page.close()
     }
@@ -1625,6 +1771,7 @@ interface PwPage {
   waitForLoadState: (state: string) => Promise<void>
   waitForURL: (predicate: (url: URL) => boolean, opts?: unknown) => Promise<void>
   waitForResponse: (predicate: (r: PwResponse) => boolean, opts?: unknown) => Promise<PwResponse>
+  screenshot: (opts: { type: 'jpeg' | 'png'; quality?: number; fullPage?: boolean }) => Promise<Uint8Array>
   close: () => Promise<void>
 }
 

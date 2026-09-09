@@ -5,11 +5,11 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import type { AdapterContext, Logger, ParkedEdge, SoundinessNote, UiGraph, Proposal } from '@ui-graph/core'
+import type { AdapterContext, Logger, ParkedEdge, ScreenShot, SoundinessNote, UiGraph, Proposal } from '@ui-graph/core'
 import { diffGraphs, diffSinceLast, planPath, buildSpecPlan, renderPlaywrightSpec, exportOverlaySpec, emptyOverlay, emptyProposals, hashValue, PATTERN_PARK_REASON_PREFIX } from '@ui-graph/core'
 import type { GraphDiff, SinceLastDiff } from '@ui-graph/core'
 import { loadGraph, openStore, importJsonWorkspace, fingerprintSources, compareFingerprint, readRegistry, writeRegistry, upsertWorkspace, removeWorkspace, canonicalDir, defaultName, type ImportSummary, type WorkspaceEntry } from '@ui-graph/core/node'
-import { loadMergedGraph, listKit, readKitFile, readKitAll } from '@ui-graph/mcp'
+import { loadMergedGraph, listNamelessControls, nameControl, listKit, readKitFile, readKitAll } from '@ui-graph/mcp'
 import { reactAdapter } from '@ui-graph/adapter-react'
 import { angularAdapter } from '@ui-graph/adapter-angular'
 import { vueAdapter } from '@ui-graph/adapter-vue'
@@ -698,6 +698,97 @@ export function runUnpark(opts: RunUnparkOptions): number {
   } finally {
     store.close()
   }
+}
+
+/** One row of `uigraph nameless`: what an agent/human needs to name the control — where it lives (parent screen route, component file, the screen's picture when one exists), what it is (tag/controlType), and how to find it (selector). */
+export interface NamelessRow {
+  id: string
+  route: string | null
+  tag: string
+  selector: string
+  componentPath: string | null
+  screenshot?: string
+}
+
+/**
+ * List the controls the adapters could not name (no control.name), each with its
+ * parent screen's route + screenshot, so an agent can name them after reading the
+ * template and looking at the picture. The same rows the MCP `nameless_controls`
+ * tool serves (listNamelessControls), flattened for the table.
+ */
+export function runNameless(dir: string): NamelessRow[] {
+  return listNamelessControls({ dir }).controls.map((c) => ({
+    id: c.id,
+    route: c.parentRoute,
+    tag: `${c.element}/${c.controlType}`,
+    selector: c.selector === null ? '-' : `${c.selector.strategy}=${c.selector.value}${c.selector.nth !== undefined ? `.nth(${c.selector.nth})` : ''}`,
+    componentPath: c.componentPath,
+    ...(c.screenshot !== null ? { screenshot: c.screenshot } : {}),
+  }))
+}
+
+/** Format the nameless-control rows as a compact aligned table (id · route · tag · selector · component · screenshot). */
+export function formatNameless(rows: NamelessRow[]): string {
+  if (rows.length === 0) return 'no nameless controls — every control has a name'
+  const width = (pick: (r: NamelessRow) => string): number => Math.max(...rows.map((r) => pick(r).length))
+  const idW = width((r) => r.id)
+  const routeW = width((r) => r.route ?? '-')
+  const tagW = width((r) => r.tag)
+  const lines = [`${rows.length} nameless control(s) — name one with: uigraph name <dir> <id> "<name>"`]
+  for (const r of rows) {
+    lines.push(`  ${r.id.padEnd(idW)}  ${(r.route ?? '-').padEnd(routeW)}  ${r.tag.padEnd(tagW)}  ${r.selector}  ${r.componentPath ?? '-'}${r.screenshot !== undefined ? `  ${r.screenshot}` : ''}`)
+  }
+  return lines.join('\n')
+}
+
+/**
+ * Give a control a durable human name, or clear it (`name === null`), and return
+ * the label the merged graph shows for it afterwards. Same validation and write as
+ * the MCP `name_control` tool (nameControl): the id must be a control in the merged
+ * graph and a name must be non-empty; its errors surface as CliError.
+ */
+export function runName(dir: string, id: string, name: string | null): string {
+  try {
+    return nameControl({ dir }, name === null ? { id, clear: true } : { id, name }).label
+  } catch (err) {
+    throw new CliError(err instanceof Error ? err.message : String(err))
+  }
+}
+
+/** The screenshot roster for `uigraph shots`: screen/modal nodes with a picture (path + how/when it was taken) and those still without one. */
+export interface ShotsSummary {
+  shot: { id: string; label: string; route: string | null; path: string; source: ScreenShot['source']; ts: string }[]
+  missing: { id: string; label: string; route: string | null }[]
+}
+
+/** Split the workspace's screen/modal nodes by whether the runner has captured a screenshot for them (controls and unknown sinks are never pictured). */
+export function runShots(dir: string): ShotsSummary {
+  const graph = loadMergedGraph({ dir })
+  const store = openStoreSafe(dbPathFor(dir))
+  let shots
+  try {
+    shots = store.getScreenShots()
+  } finally {
+    store.close()
+  }
+  const out: ShotsSummary = { shot: [], missing: [] }
+  for (const n of graph.nodes) {
+    if (n.kind !== 'screen' && n.kind !== 'modal') continue
+    const s = shots[n.id]
+    if (s === undefined) out.missing.push({ id: n.id, label: n.label, route: n.route })
+    else out.shot.push({ id: n.id, label: n.label, route: n.route, path: s.path, source: s.source, ts: s.ts })
+  }
+  return out
+}
+
+/** Format a ShotsSummary: a counts headline, then the pictured nodes (path, source, time) and the unpictured ones. */
+export function formatShots(s: ShotsSummary): string {
+  const total = s.shot.length + s.missing.length
+  if (total === 0) return 'no screen/modal nodes in this workspace'
+  const lines = [`${s.shot.length} of ${total} screen/modal node(s) have a screenshot`]
+  if (s.shot.length > 0) lines.push('', `with screenshot (${s.shot.length}):`, ...s.shot.map((n) => `  ${n.id}  ${n.route ?? '-'}  ${n.path}  (${n.source}, ${n.ts})`))
+  if (s.missing.length > 0) lines.push('', `without (${s.missing.length}) — captured when a verify lands on them:`, ...s.missing.map((n) => `  ${n.id}  ${n.route ?? '-'}  ${n.label}`))
+  return lines.join('\n')
 }
 
 /** Print the whole agent kit (skill + rules + guides + loop) for piping into an agent prompt or CI. */
