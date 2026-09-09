@@ -413,6 +413,13 @@ describe('control units (F-angular-controls)', () => {
     expect(controls[0]?.control?.input).toMatchObject({ type: 'email', required: true })
   })
 
+  it('labels a nameless child-component element by its tag (an @Output binding is not a DOM event)', () => {
+    const { controls } = controlsOf(`<app-follow-button [profile]="p" (toggle)="onToggle($event)" />`)
+    const c = controls.find((x) => x.control?.controlType === 'element')
+    expect(c?.label).toBe('app-follow-button')
+    expect(c?.control?.events).toEqual(['toggle'])
+  })
+
   it('classifies a (submit) form as a form control', () => {
     const { controls } = controlsOf('<form (submit)="g()"><button>ok</button></form>')
     const form = controls.find((c) => c.control?.controlType === 'form')
