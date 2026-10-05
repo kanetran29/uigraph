@@ -52,10 +52,11 @@ export function buildProgram(): Command {
     .option('--adapter <name>', 'adapter to use: react | angular | vue | next (default: auto-detect from package.json)')
     .option('--out <file>', 'output database path (default <dir>/uigraph.db)')
     .option('--controls', 'also extract interactive controls (buttons/inputs/etc.) as nested nodes')
+    .option('--attribution', 'attribute navigation in shared components and the app shell to the screens they render on')
     .option('--no-register', 'do not add this workspace to the ~/.uigraph registry')
     .option('--name <name>', 'display name in the workspace registry / dashboard switcher (default the dir basename)')
-    .action(async (dir: string, opts: { adapter?: string; out?: string; controls?: boolean; register?: boolean; name?: string }) => {
-      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName | undefined, out: opts.out, controls: opts.controls ?? false, register: opts.register, name: opts.name })
+    .action(async (dir: string, opts: { adapter?: string; out?: string; controls?: boolean; attribution?: boolean; register?: boolean; name?: string }) => {
+      const summary = await runMap({ dir, adapter: opts.adapter as AdapterName | undefined, out: opts.out, controls: opts.controls ?? false, attribution: opts.attribution ?? false, register: opts.register, name: opts.name })
       console.log(formatMapSummary(summary))
     })
 

@@ -73,3 +73,5 @@ export const angularAdapter: Adapter = {
 export { buildProject, extractGraph } from './extract'
 export { routeToNodeId, edgeId, controlNodeId } from './ids'
 export { matchLiteral, matchPrefix } from './matcher'
+export { attributeScopes, subtreeAnchor, SHELL_NODE_ID } from './attribute'
+export { collectRoutes } from './routes'

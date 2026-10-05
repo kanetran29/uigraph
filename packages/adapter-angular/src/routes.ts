@@ -17,6 +17,8 @@ export interface RouteInfo {
   componentFile: SourceFile | undefined
   guards: GuardInfo[]
   routeObj: ObjectLiteralExpression
+  /** Node id of the route object this one is nested under (children or loadChildren), or null at the root. */
+  parentNodeId: string | null
 }
 
 /**
@@ -71,7 +73,7 @@ function findRouteArrays(sf: SourceFile): ArrayLiteralExpression[] {
  * imported module's route array; `component` and `loadComponent` both resolve to
  * a backing component file. Deduplicates by node id (first declaration wins).
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>): void {
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, parentNodeId: string | null = null): void {
   for (const el of arr.getElements()) {
     if (!Node.isObjectLiteralExpression(el)) continue
     const ownPath = stringProp(el, 'path')
@@ -89,19 +91,19 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     }
     const nodeId = routeToNodeId(fullPath)
     if (!out.has(nodeId)) {
-      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards: canActivateGuards(sf, el), routeObj: el })
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards: canActivateGuards(sf, el), routeObj: el, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
     }
     const childrenProp = el.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
-      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles)
+      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, nodeId)
     }
     const childSpec = lazyImportSpecifier(el, 'loadChildren')
     if (childSpec) {
       const childModule = resolveRelative(sf, childSpec)
       if (childModule) {
         loadedChildFiles.add(childModule.getFilePath())
-        for (const childArr of findRouteArrays(childModule)) walkRouteArray(childArr, childModule, fullPath, out, loadedChildFiles)
+        for (const childArr of findRouteArrays(childModule)) walkRouteArray(childArr, childModule, fullPath, out, loadedChildFiles, nodeId)
       }
     }
   }

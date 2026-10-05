@@ -67,8 +67,10 @@ function templateLoc(sf: SourceFile, tpl: ComponentTemplate, index: number): { l
     const line = tpl.text.slice(0, index).split('\n').length
     return { line, col: 1 }
   }
+  // Inline template: the construct's own line inside the .ts file, not the line where
+  // the template literal starts, so the witness points at the construct itself.
   const lc = sf.getLineAndColumnAtPos(tpl.start)
-  return { line: lc.line, col: lc.column }
+  return { line: lc.line + tpl.text.slice(0, index).split('\n').length - 1, col: lc.column }
 }
 
 /**

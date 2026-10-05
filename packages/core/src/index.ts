@@ -118,3 +118,4 @@ export {
   type TrustTier,
   type EdgeWithTier,
 } from './trust-tier'
+export { scopeMembers, edgesFrom, expandAnchoredEdges } from './scope'

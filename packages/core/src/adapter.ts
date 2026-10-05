@@ -26,6 +26,12 @@ export interface ExtractOptions {
   rulesetVersion?: string
   /** When true, also extract interactive controls (buttons/inputs/etc.) as nested nodes. */
   controls?: boolean
+  /**
+   * When true, attribute navigation sites outside route components to the screens
+   * they can fire from (scope attribution). Sites in the application shell are
+   * anchored once at a `scope` node instead of being copied to every screen.
+   */
+  attribution?: boolean
 }
 
 /** One declared-but-unresolved case an adapter deliberately over-approximated. */

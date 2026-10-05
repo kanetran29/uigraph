@@ -18,7 +18,7 @@ export type Modality = 'must' | 'may' | 'unknown'
 export type Source = 'static' | 'manual' | 'runtime'
 
 /** What a node represents in the app's state space. */
-export type NodeKind = 'screen' | 'route' | 'modal' | 'unknown' | 'control'
+export type NodeKind = 'screen' | 'route' | 'modal' | 'unknown' | 'control' | 'scope'
 
 /**
  * How a control is located, in precedence order: a test id, an ARIA role +
@@ -71,6 +71,11 @@ export interface GraphNode {
   kind: NodeKind
   parent?: string
   control?: ControlMeta
+  /**
+   * For kind 'scope': the screens an anchored edge fires from. 'top' means every
+   * screen node; 'subtree' lists the member screens explicitly (root first).
+   */
+  scope?: { kind: 'top' | 'subtree'; root?: string; members?: string[] }
 }
 
 /** A deterministic proof that an edge exists (static source loc or runtime obs). */
@@ -105,6 +110,8 @@ export interface GraphEdge {
   source: Source
   confidence: number
   witness?: Witness
+  /** Further constructs that produce this same edge (same endpoints, event and guard). */
+  mergedWitnesses?: Witness[]
   irreversible?: boolean
   witnessStale?: boolean
 }

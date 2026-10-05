@@ -9,7 +9,7 @@
 // No edge is emitted without a static witness.
 
 import { Project, ts } from 'ts-morph'
-import type { Node } from 'ts-morph'
+import type { Node, SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
@@ -20,6 +20,7 @@ import { templateTargets, routerCallTargets, methodNavTargets, type RawTarget } 
 import { parseControls } from './controls'
 import { inlineTemplate } from './templates'
 import { gateFromGuards, noteGuards } from './gates'
+import { attributeScopes, subtreeAnchor, SHELL_NODE_ID } from './attribute'
 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'ng-v0-2026.06'
@@ -62,11 +63,21 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const edges: GraphEdge[] = []
   const soundiness: SoundinessNote[] = []
   const seen = new Set<string>()
+  const edgeById = new Map<string, GraphEdge>()
   const seenAsyncGuards = new Set<string>()
 
   function pushEdge(from: string, to: string, t: RawTarget, modality: 'must' | 'may', confidence: number, guard: string | null, file: string): void {
     const id = edgeId(from, to, t.event, guard)
-    if (seen.has(id)) return
+    if (seen.has(id)) {
+      // Record the extra construct instead of dropping it, so every construct that
+      // yields an edge stays traceable. Same edge set as before; provenance only.
+      const e = edgeById.get(id)
+      const w = { source: 'static' as const, file: t.file ?? file, loc: t.loc, ruleId: t.ruleId }
+      if (e && !(e.witness?.file === w.file && e.witness?.loc?.line === w.loc.line) && !e.mergedWitnesses?.some((m) => m.file === w.file && m.loc?.line === w.loc.line)) {
+        ;(e.mergedWitnesses ??= []).push(w)
+      }
+      return
+    }
     seen.add(id)
     edges.push({
       id,
@@ -80,6 +91,35 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       confidence,
       witness: { source: 'static', file: t.file ?? file, loc: t.loc, ruleId: t.ruleId },
     })
+    edgeById.set(id, edges[edges.length - 1]!)
+  }
+
+  /** Emit the edges for one set of navigation targets fired from `from`. Notes are recorded once per site. */
+  function emitTargets(from: string, targets: RawTarget[], file: string, note: boolean, capMay = false): void {
+    for (const t of targets) {
+      if (t.ti.kind === 'literal') {
+        const target = matchLiteral(t.ti.value, routeLikes)
+        if (!target) {
+          if (note) soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${t.ti.value}" matches no declared route` })
+          continue
+        }
+        const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
+        noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
+        const guardText = gate.guarded ? gate.guardTexts.join(',') : null
+        pushEdge(from, target.nodeId, t, gate.guarded || capMay ? 'may' : 'must', gate.guarded ? gate.confidence : capMay ? 0.5 : 1, guardText, file)
+      } else if (t.ti.kind === 'template') {
+        const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
+        if (note) soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
+        for (const cand of cands) {
+          const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
+          noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
+          const guardText = gate.guarded ? gate.guardTexts.join(',') : null
+          pushEdge(from, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file)
+        }
+      } else if (note) {
+        soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
+      }
+    }
   }
 
   for (const route of routes) {
@@ -89,29 +129,72 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     }
     const file = relative(projectDir, route.componentFile.getFilePath())
     const targets = [...templateTargets(route.componentFile, projectDir), ...routerCallTargets(route.componentFile)]
-    for (const t of targets) {
-      if (t.ti.kind === 'literal') {
-        const target = matchLiteral(t.ti.value, routeLikes)
-        if (!target) {
-          soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${t.ti.value}" matches no declared route` })
-          continue
-        }
-        const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
-        noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
-        const guardText = gate.guarded ? gate.guardTexts.join(',') : null
-        pushEdge(route.nodeId, target.nodeId, t, gate.guarded ? 'may' : 'must', gate.guarded ? gate.confidence : 1, guardText, file)
-      } else if (t.ti.kind === 'template') {
-        const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
-        soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
-        for (const cand of cands) {
-          const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
-          noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
-          const guardText = gate.guarded ? gate.guardTexts.join(',') : null
-          pushEdge(route.nodeId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file)
-        }
-      } else {
-        soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
+    emitTargets(route.nodeId, targets, file, true)
+  }
+
+  if (opts.attribution) {
+    const scopes = attributeScopes(project.getSourceFiles(), routes)
+    soundiness.push(...scopes.notes)
+    const targetsOf = (sf: SourceFile): RawTarget[] => [...templateTargets(sf, projectDir), ...routerCallTargets(sf)]
+    // Anchors: a set of screens that is exactly subtree(r) gets one scope node, and the
+    // edge is stored once there instead of once per screen (expanded on query).
+    const anchors = new Map<string, string>() // root node id -> scope node id
+    const anchorNode = (root: string): string => {
+      let id = anchors.get(root)
+      if (!id) {
+        id = `n_scope_subtree__${root}`
+        anchors.set(root, id)
+        const members = [root, ...[...scopes.subtreeOf.get(root)!].filter((m) => m !== root).sort()]
+        nodes.push({ id, route: null, componentPath: null, label: `subtree of ${pathByNodeId.get(root) ?? root}`, kind: 'scope', scope: { kind: 'subtree', root, members } })
       }
+      return id
+    }
+    const emitOver = (screens: Set<string>, ts: RawTarget[], file: string): void => {
+      const root = subtreeAnchor(screens, scopes.subtreeOf)
+      if (root) { emitTargets(anchorNode(root), ts, file, false); return }
+      for (const s of [...screens].sort()) emitTargets(s, ts, file, false)
+    }
+    // A route component's template is also rendered on every descendant screen (its outlet):
+    // its scope is subtree(r).
+    for (const [f, extra] of scopes.descendantsOfRouteComponent) {
+      const sf = project.getSourceFile(f)
+      if (!sf) continue
+      const own = routes.filter((r) => r.componentFile?.getFilePath() === f).map((r) => r.nodeId)
+      emitOver(new Set([...own, ...extra]), targetsOf(sf), relative(projectDir, f))
+    }
+    // Components rendered inside screens: anchored at a subtree when their screen set is one,
+    // otherwise one edge per screen that renders them.
+    for (const [f, screens] of scopes.screensOf) {
+      const c = scopes.components.get(f)
+      if (!c) continue
+      const ts = targetsOf(c.sf)
+      if (ts.length === 0) continue
+      emitOver(screens, ts, relative(projectDir, f))
+    }
+    // The application shell: anchored once at a scope node, expanded on query.
+    let shellEdges = 0
+    for (const f of [...scopes.shell].sort()) {
+      const c = scopes.components.get(f)
+      if (!c) continue
+      const before = edges.length
+      emitTargets(SHELL_NODE_ID, targetsOf(c.sf), relative(projectDir, f), true)
+      shellEdges += edges.length - before
+    }
+    for (const f of [...scopes.indirectShell].sort()) {
+      const c = scopes.components.get(f)
+      if (!c) continue
+      const before = edges.length
+      emitTargets(SHELL_NODE_ID, targetsOf(c.sf), relative(projectDir, f), true, true)
+      shellEdges += edges.length - before
+    }
+    if (scopes.indirectShell.size) soundiness.push({ kind: 'indirect-shell', detail: `${scopes.indirectShell.size} component(s) treated as shell without a visible mounting route; their edges are capped at may` })
+    if (shellEdges > 0) nodes.push({ id: SHELL_NODE_ID, route: null, componentPath: null, label: 'application shell (every screen)', kind: 'scope', scope: { kind: 'top' } })
+    // Navigation in classes that are not components (services, guards, effects) is
+    // not attributed in this version: its scope is the join over its callers.
+    for (const sf of project.getSourceFiles()) {
+      if (scopes.components.has(sf.getFilePath()) || /\.(spec|test|stories)\.ts$/.test(sf.getFilePath())) continue
+      const n = routerCallTargets(sf).length
+      if (n > 0) soundiness.push({ kind: 'unattributed-non-component', file: relative(projectDir, sf.getFilePath()), detail: `${n} navigation call(s) outside any component; scope would be the join of the callers' scopes` })
     }
   }
 

@@ -176,6 +176,7 @@ export interface RunMapOptions {
   adapter?: AdapterName
   out?: string
   controls?: boolean
+  attribution?: boolean
   /** Auto-register this workspace in ~/.uigraph (default true; off for --out / experiments). */
   register?: boolean
   /** Display name for the registry entry (default the dir basename). */
@@ -221,7 +222,7 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   let soundiness: SoundinessNote[]
   let proposals: Proposal[] | undefined
   try {
-    ;({ graph, soundiness, proposals } = await adapter.extract(opts.dir, { controls: opts.controls ?? false }, ctx))
+    ;({ graph, soundiness, proposals } = await adapter.extract(opts.dir, { controls: opts.controls ?? false, attribution: opts.attribution ?? false }, ctx))
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err)
     throw new CliError(`failed to extract the ${adapterName} graph from ${opts.dir}\n  ${reason}`)
