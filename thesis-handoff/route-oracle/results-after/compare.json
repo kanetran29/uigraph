@@ -1,0 +1,160 @@
+{
+  "before": {
+    "harnessVersion": "1.2.0",
+    "extractor": {
+      "repo": "kanetran29/uigraph",
+      "sha": "4505fd2a580ad3a6b07fd6c02c999e43668708b4",
+      "attribution": false
+    },
+    "node": "v22.22.2",
+    "startedAt": "2026-10-05T10:20:27.250Z",
+    "finishedAt": "2026-10-05T10:21:04.226Z"
+  },
+  "after": {
+    "harnessVersion": "1.2.0",
+    "extractor": {
+      "repo": "kanetran29/uigraph",
+      "sha": "4505fd2a580ad3a6b07fd6c02c999e43668708b4",
+      "attribution": true
+    },
+    "node": "v22.22.2",
+    "startedAt": "2026-10-05T10:21:04.292Z",
+    "finishedAt": "2026-10-05T10:21:42.768Z"
+  },
+  "rows": [
+    {
+      "slug": "realworld",
+      "constructs": 40,
+      "convBefore": 0.15,
+      "convAfter": 0.375,
+      "mustBefore": [
+        6,
+        7
+      ],
+      "mustAfter": [
+        9,
+        10
+      ],
+      "edgesBefore": 21,
+      "edgesAfter": 50,
+      "attrBefore": 22,
+      "recoveredMust": 9,
+      "recoveredMay": 12,
+      "regressed": 0,
+      "stillLost": {
+        "ATTRIBUTION_SERVICE": 1
+      }
+    },
+    {
+      "slug": "alfresco",
+      "constructs": 34,
+      "convBefore": 0.0294,
+      "convAfter": 0.0294,
+      "mustBefore": [
+        1,
+        1
+      ],
+      "mustAfter": [
+        1,
+        1
+      ],
+      "edgesBefore": 1,
+      "edgesAfter": 1,
+      "attrBefore": 18,
+      "recoveredMust": 0,
+      "recoveredMay": 0,
+      "regressed": 0,
+      "stillLost": {
+        "ATTRIBUTION_SHARED": 10,
+        "ATTRIBUTION_SERVICE": 8
+      }
+    },
+    {
+      "slug": "ghostfolio",
+      "constructs": 198,
+      "convBefore": 0,
+      "convAfter": 0,
+      "mustBefore": null,
+      "mustAfter": null,
+      "edgesBefore": 0,
+      "edgesAfter": 0,
+      "attrBefore": 81,
+      "recoveredMust": 0,
+      "recoveredMay": 0,
+      "regressed": 0,
+      "stillLost": {
+        "ATTRIBUTION_SHARED": 72,
+        "ATTRIBUTION_SERVICE": 9
+      }
+    },
+    {
+      "slug": "k8sdash",
+      "constructs": 72,
+      "convBefore": 0,
+      "convAfter": 0.0417,
+      "mustBefore": null,
+      "mustAfter": [
+        3,
+        3
+      ],
+      "edgesBefore": 0,
+      "edgesAfter": 3,
+      "attrBefore": 56,
+      "recoveredMust": 2,
+      "recoveredMay": 0,
+      "regressed": 0,
+      "stillLost": {
+        "ATTRIBUTION_SHARED": 49,
+        "ATTRIBUTION_SERVICE": 5
+      }
+    },
+    {
+      "slug": "bitwarden",
+      "constructs": 132,
+      "convBefore": 0.1212,
+      "convAfter": 0.1591,
+      "mustBefore": [
+        10,
+        10
+      ],
+      "mustAfter": [
+        13,
+        13
+      ],
+      "edgesBefore": 20,
+      "edgesAfter": 24,
+      "attrBefore": 56,
+      "recoveredMust": 5,
+      "recoveredMay": 1,
+      "regressed": 0,
+      "stillLost": {
+        "ATTRIBUTION_SHARED": 35,
+        "ATTRIBUTION_SERVICE": 15
+      }
+    },
+    {
+      "slug": "mifos",
+      "constructs": 1344,
+      "convBefore": 0.0543,
+      "convAfter": 0.1004,
+      "mustBefore": [
+        69,
+        69
+      ],
+      "mustAfter": [
+        129,
+        129
+      ],
+      "edgesBefore": 246,
+      "edgesAfter": 677,
+      "attrBefore": 235,
+      "recoveredMust": 22,
+      "recoveredMay": 30,
+      "regressed": 0,
+      "stillLost": {
+        "ATTRIBUTION_SHARED": 173,
+        "ATTRIBUTION_SERVICE": 10
+      }
+    }
+  ]
+}

@@ -1,0 +1,300 @@
+\chapter{Results}
+\label{ch:results}
+% Tables are generated. Do not edit them here.
+%   generated-tables.tex       to-latex.mjs, baseline run, harness 1.2.0
+%   generated-before-after.tex compare.mjs, harness 1.2.0
+%   generated-rq4.tex          rq4-to-latex.mjs, harness 1.3.0
+% RQ1 to RQ3 figures: extractor c4f8b833 for the baseline and branch attribution-v1 for
+% the attributed run, 12 October 2026.
+% RQ4 figures (section 5.4): run 22 October 2026 on attribution-v1.patch applied to
+% c4f8b833. The patch header names commit 4505fd2a, which is not present in any clone we
+% hold, so the run used the commit the patch recreates on top of c4f8b833 rather than
+% 4505fd2a itself. Harness 1.3.0 changes mutate.mjs only, so the RQ1 to RQ3 figures from
+% 1.2.0 are unaffected; see corpus.json harnessChangelog.
+% Still to do: re-run everything on the tagged eval-1 / eval-2 versions once those tags
+% exist, and extend mutation to the remaining three applications.
+
+The figures in this chapter were produced by the harness of
+Section~\ref{sec:protocol} on the corpus of Section~\ref{sec:corpus}. Every table is
+generated from the harness's results files. The baseline is the extractor without
+scope attribution; the attributed version is the same code with the attribution pass
+enabled.
+
+\section{Baseline extraction (RQ1)}
+\label{sec:res-baseline}
+
+Table~\ref{tab:conversion} gives the conversion ratio for each application. The
+baseline recovers between 0\% and 15\% of the navigation constructs as must edges.
+Two applications, ghostfolio and k8s dashboard, yield no edges at all, and alfresco
+yields one. Edge counts must be read per tier. The 177 may edges of mifos are a single
+over-approximation from one unresolvable call site, not 177 transitions.
+
+\begin{table}[t]\small
+\caption{Construct-to-transition conversion per application, baseline. Conversion is
+the fraction of constructs witnessed by a must edge; the edge columns count edges.}
+\label{tab:conversion}
+\TabConversion
+\end{table}
+
+A transition can only start at a screen that exists in the graph, so node extraction
+was measured as well. Table~\ref{tab:coverage} and Figure~\ref{fig:coverage} compare the nodes with the screens found
+by the independent route parser. Node extraction is complete on realworld, at 10
+declared screens of 10, and nearly complete on alfresco, at 24 of 25. It is far from complete on the larger
+ones: about half of the declared screens of bitwarden and under a tenth of those of
+mifos have a node, and ghostfolio has a single node for 84 declared screens. For k8s
+dashboard the parser itself cannot follow the lazy route tables, so its 100\% covers
+only two screens and says little.
+
+\begin{table}[t]\small
+\caption{Node coverage: declared screens that have a matching node in the graph.}
+\label{tab:coverage}
+\TabCoverage
+\end{table}
+\FigCoverage
+
+
+So the baseline recovers a small fraction of the navigation, and loses it at two levels: some screens never become nodes, and most navigation sites of the screens that do are not turned into edges.
+
+\section{Defect classes (RQ2)}
+\label{sec:res-defects}
+
+Table~\ref{tab:defects} lists the defect classes and the independent methods that
+confirm each. The five classes found in the first round all have at least two
+confirmations. The quantitative breakdown below revealed a sixth candidate, a node
+that exists but is not linked to the component that renders it. It is confirmed only
+by the comparison between the route parser and the graph, so it is reported as a
+candidate until a second method confirms it.
+
+\begin{table}[t]\small
+\caption{Defect classes and the independent methods confirming each. A class is
+admitted only with two confirmations. This summary is compiled by hand from the
+evaluation methods; it is not harness output.}
+\label{tab:defects}
+\begin{tabularx}{\textwidth}{@{}lYr@{}}
+\toprule
+Class & Independent confirmations & Count \\
+\midrule
+Attribution: navigation outside route components is invisible & mutation misses;
+multi-mount edge absent; manual audit; zero-edge applications & 4 \\
+Lazy module boundary not followed & route parser; end-to-end oracle; mutation & 3 \\
+Guards unreliable in both directions & removal invisible to mutation; witness check
+finds wrong predicate and colliding identifiers & 2 \\
+Named router outlets not modelled & end-to-end oracle; source survey & 2 \\
+Constant-valued route paths not resolved & route parser; node-count collapse & 2 \\
+\addlinespace
+\emph{Candidate:} node not linked to its component & route parser against graph & 1 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Table~\ref{tab:loss} and Figure~\ref{fig:loss} assign every navigation construct to one outcome using the rules
+of Table~\ref{tab:loss-rules}. Of the 1820 constructs in the corpus, 96 are witnessed
+by must edges and 22 by may edges. Guard defects are measured separately (Section~\ref{sec:metrics}).
+
+\begin{table}[t]\small
+\caption{Outcome of every navigation construct, baseline. Columns: realworld,
+alfresco, ghostfolio, k8s dashboard, bitwarden, mifos.}
+\label{tab:loss}
+\TabLoss
+\end{table}
+\FigLoss
+
+
+Attribution is the largest class in
+four of the six applications. In realworld it accounts for 22 of 23 lost constructs,
+in k8s dashboard for 56 of 68, in bitwarden for 56 of 89 and in alfresco for 18 of
+33. Most of it comes from shared components rather than from services. 
+
+The other two applications are dominated by node defects. In ghostfolio, 107 of 191
+lost constructs sit in screens whose route path is a constant reference, which is why
+the graph collapses to one node. In mifos, 607 lost constructs sit in lazily loaded
+screens and 378 in screens whose node has no component link. Because mifos is by far
+the largest application, these two classes also dominate the corpus total, so the
+per-application view and the total give different rankings. 
+
+The classes also interact. A construct in a shared component that is only used inside screens which
+have no node is counted as attribution, but attribution alone cannot recover it. The
+468 attribution constructs, 28\% of all lost constructs, are therefore an upper bound
+on what scope attribution can recover.
+
+Table~\ref{tab:oracles} reports the witness check and the end-to-end oracle. On the must
+tier, 86 of 87 edges are clean. The one failure is a must edge whose witness navigates to
+\texttt{/profile/:username} while the edge targets \texttt{/profile}; it violates
+Claim~\ref{claim:must}.
+
+\begin{table}[t]\small
+\caption{Results of the witness check and the end-to-end oracle, baseline. Mutation is
+reported separately in Section~\ref{sec:res-mutation}, on the attributed graph. This
+summary is written by hand from the harness output rather than generated.}
+\label{tab:oracles}
+\begin{tabularx}{\textwidth}{@{}lYr@{}}
+\toprule
+Method & Result & $n$ \\
+\midrule
+Witness check, must tier & 86 of 87 clean; one wrong target in realworld. & 87 \\
+End-to-end oracle, alfresco & 9 of 14 visited URLs have a node; one negative test
+excluded. Two of the five misses are named-outlet URLs. & 14 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{After attribution (RQ3)}
+\label{sec:res-after}
+
+Table~\ref{tab:before-after} and Figure~\ref{fig:before-after} compare the extractor with and without scope attribution
+on identical inputs. The comparison is made construct by construct: a construct is
+\emph{recovered} if it was lost to attribution in the baseline and is witnessed by an
+edge after attribution.
+
+\begin{table}[t]\small
+\caption{Before and after scope attribution. Conversion in percent and the change in
+percentage points; must-tier edges that pass the witness check; constructs lost to
+attribution in the baseline and how many of them are recovered.}
+\label{tab:before-after}
+\TabBeforeAfter
+\end{table}
+\FigBeforeAfter
+
+
+Coverage rises in four of the six applications. The largest change is on realworld,
+from 15.0\% to 37.5\%, where 21 of the 22 attribution losses are recovered; the one
+left is a navigation inside a service, which this version does not handle. On mifos the
+ratio almost doubles, from 5.4\% to 10.0\%. On bitwarden and k8s dashboard it rises by
+3.8 and 4.2 percentage points. On alfresco and ghostfolio nothing changes.
+
+Precision on the must tier does not fall. After attribution, 155 of 156 must edges pass
+the witness check, and the one failure is the realworld edge that already failed in
+the baseline. No construct that was converted in the baseline is lost after
+attribution.
+
+Across the corpus, 81 of the 468 attribution losses are recovered. The upper bound of
+Section~\ref{sec:res-defects} is far from reached, and Table~\ref{tab:remaining} shows
+why. It classifies each construct that stays lost.
+
+\begin{table}[t]\small
+\caption{Why attribution losses remain after attribution.}
+\label{tab:remaining}
+\TabRemaining
+\end{table}
+
+Four reasons account for most of the gap. In 156 cases the component holding
+the navigation is never reached from any screen. A rough check of these components
+suggests three causes: about 60 are opened programmatically, most as dialogs; about 70
+are used only inside other components that are themselves unreached; and about 20 have a selector that no
+application template uses. In 132 cases the scope is found but the target
+screen has no node, so there is nothing to draw an edge to. This is the node defect of
+RQ1 seen from the other end. A further 48 constructs are in services and guards, which
+this version leaves out, and 34 have a fully dynamic target. The remaining 17 are not
+yet explained and will be inspected by hand.
+
+Scope attribution raises coverage
+without lowering must-tier precision. On realworld it recovers 21 of its 22 attribution
+losses, and realworld is the only application whose node extraction is complete and
+whose stranded navigation sites sit in components that a screen renders. Complete node
+extraction is not sufficient on its own: alfresco is at 24 declared screens of 25 and
+recovers nothing, because its 18 remaining losses are 10 sites in components that no
+screen reaches and 8 in services, and this version attributes neither. On the larger
+applications the gain is limited by defects in node extraction, which attribution does
+not address.
+
+The bottleneck these measurements identify is therefore node extraction rather than
+attribution. In ghostfolio every route path is a reference into a constant table, written
+as \texttt{path: publicRoutes.about.path} over the tables \texttt{publicRoutes} and
+\texttt{internalRoutes}. The extractor does not follow those references, so the graph
+holds a single node that matches none of the 84 declared screens, and no navigation site
+in the application has a screen to start from or to reach. In mifos two defects compound:
+607 lost constructs sit behind lazy module boundaries that the extractor does not follow,
+and a further 378 sit in screens whose node exists but carries no link to the component
+that renders it. In both applications attribution behaves as designed and still returns
+nothing, because it resolves the scope of a navigation site and then finds no target node
+to draw an edge to. This is the shape of 132 of the 387 attribution losses that survive
+attribution. An edge cannot be drawn to a screen that was never created, so the ceiling
+on what attribution can contribute to these applications is set by node extraction and
+not by attribution itself.
+
+\section{Change sensitivity (RQ4)}
+\label{sec:res-mutation}
+
+Mutation testing requires the application to be extracted again once per mutant, so this
+part of the evaluation was run on three of the six applications: realworld and alfresco,
+which carry the earlier mutation figures, and bitwarden, which has the highest guard
+density in the corpus. Every figure in this section comes from the attributed graph with
+harness 1.3.0, a fixed seed and a quota of eight mutants per operator. The corrections
+made to the mutation harness are described in Section~\ref{sec:corrections}.
+
+Table~\ref{tab:mutation-sample} shows how the sample was drawn. Over the three
+applications the harness found 249 candidate mutations and scored 48 of them. Twenty-two
+were excluded, either because the construct a mutant changes is absent from the graph, or,
+for a guard, because no edge enters the screen that guard protects. An excluded mutant
+carries no information about sensitivity, since it can only repeat a coverage gap that
+RQ1 has already counted. Where the quota capped an operator, the candidates left
+unsampled are reported rather than passed over.
+
+\begin{table}[t]\small
+\caption{Mutation sample. Candidates found, mutants sampled under the per-operator
+quota, and mutants excluded as confounded with a coverage gap.}
+\label{tab:mutation-sample}
+\TabMutationSample
+\end{table}
+
+Table~\ref{tab:mutation} gives the detection rate per operator, and Figure~\ref{fig:mutation} shows the same outcomes summed over the applications. Renaming a route path
+was detected in all 22 scored mutants of the three applications. Deleting a
+\texttt{routerLink} was detected in all six scored mutants of realworld, and in four of
+those six the change appeared in the witness set rather than the edge set, because a
+second identical link in the same template still produces the edge. That is the
+behaviour the graph should have, and it is the reason detection is judged on witnesses as
+well as edges. The operator found no candidates in alfresco, which binds
+\texttt{[routerLink]} instead of writing a literal attribute, and in bitwarden its eight
+sampled candidates were all excluded. Retargeting a \texttt{navigate} call was detected
+in seven of its eight scored mutants. The exception is in bitwarden, where the mutant
+added the expected edge to the new target but removed no edge to the old one, because the
+baseline had not resolved that call site to the old target in the first place.
+
+\begin{table}[t]\small
+\caption{Detection rate per mutation operator on the attributed graph, as detected over
+scored mutants. A dash means the operator found no candidate in that application.}
+\label{tab:mutation}
+\TabMutation
+\end{table}
+\FigMutation
+
+
+Every mutant that produced no change in the graph at all was a guard removal: one in
+realworld, two in alfresco and five in bitwarden. Six of these eight are guards declared
+on a route whose path is the empty string. A second method confirms the defect directly.
+In realworld both children of the \texttt{editor} route declare
+\texttt{canActivate: [requireAuth]}, one under the path \texttt{':slug'} and one under
+the empty path. In the graph the edge entering \texttt{/editor/:slug} carries the guard
+\texttt{requireAuth} and the edge entering \texttt{/editor} carries no guard at all.
+The defect class \emph{guards unreliable in both directions} of
+Section~\ref{sec:res-defects} therefore has a second confirmation specific to this case.
+The other two failures are guards whose enclosing route path the harness could not
+resolve, so they are reported as failures of the operator and are not attributed to this
+defect.
+
+The eight failures divide by application as follows. One is in realworld, on the
+empty-path child of the \texttt{editor} route. Two are in alfresco, both on routes whose
+path is empty. Five are in bitwarden, of which three are on empty-path routes and two are
+the unresolved cases just described. The three applications do not declare their routes
+in the same way: realworld and alfresco export route arrays, while bitwarden declares
+its routes inside NgModule routing modules through \texttt{RouterModule.forRoot} and
+\texttt{forChild}. Empty-path guard misses occur under both styles.
+
+The same mutants were also run against the baseline graph, which answers a question
+RQ3 leaves open: whether attribution changes how sensitive the graph is to source
+changes. For realworld the detection rate per scored mutant barely moves, from 92.3\% to
+95.2\%, but the number of mutants that can be scored at all rises from 13 to 21, because
+attribution puts constructs into the graph that the baseline did not contain. The
+clearest case is the link deletion operator: against the baseline graph all six of its
+candidates are excluded, since none of the links in the application shell produces a
+baseline edge, and against the attributed graph all six are scored and all six are
+detected. For alfresco and bitwarden the figures are the same on both graphs, 9 of 11 and
+10 of 16, which matches the coverage results of
+Section~\ref{sec:res-after}, where alfresco gains nothing from attribution. Attribution
+therefore does not make the graph more sensitive per construct. It widens the part of the
+source the graph is sensitive to at all.
+
+Of the 48 scored mutants, 39 were detected. The graph responds to changes in the
+constructs it represents, and the two places where it does not are the coverage gap,
+which the exclusions measure, and the representation of guards on routes with an empty
+path.

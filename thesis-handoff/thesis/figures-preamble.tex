@@ -1,0 +1,69 @@
+% Packages and styles for figures, plots, listings and algorithms.
+% Kept in one file so the preamble can be swapped for aaltothesis.cls without losing them:
+% \input{figures-preamble} after the class and font packages.
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric,backgrounds}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+
+% Colours: one accent family, readable in greyscale print.
+\definecolor{accent}{HTML}{1F5FA8}
+\definecolor{accentlight}{HTML}{D6E4F5}
+\definecolor{warm}{HTML}{C0561E}
+\definecolor{warmlight}{HTML}{F7DFD1}
+\definecolor{ink}{HTML}{2B2B2B}
+\definecolor{muted}{HTML}{8A8A8A}
+\definecolor{mutedlight}{HTML}{ECECEC}
+\definecolor{good}{HTML}{3C7D3A}
+
+\tikzset{
+  >={Stealth[length=2.2mm]},
+  screen/.style={draw=ink, rounded corners=2pt, fill=white, minimum height=7mm,
+    minimum width=18mm, font=\small\ttfamily, inner sep=2pt},
+  comp/.style={draw=ink, rounded corners=1pt, fill=mutedlight, minimum height=6mm,
+    font=\footnotesize\ttfamily, inner sep=2pt},
+  scope/.style={draw=accent, dashed, rounded corners=4pt, inner sep=4pt},
+  box/.style={draw=ink, rounded corners=2pt, fill=white, align=center,
+    font=\small, inner sep=4pt, minimum height=9mm},
+  hl/.style={fill=accentlight, draw=accent},
+  mustedge/.style={->, thick, ink},
+  mayedge/.style={->, thick, ink, dashed},
+  nestedge/.style={->, muted},
+  lbl/.style={font=\scriptsize, fill=white, inner sep=1pt},
+}
+
+% Listings for TypeScript and Angular templates.
+\lstdefinelanguage{TypeScript}{
+  keywords={import,from,export,const,class,constructor,private,readonly,return,if,new,
+    this,function,true,false,null,undefined,inject,default},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]', morestring=[b]", morestring=[b]`,
+}
+\lstdefinelanguage{AngularHTML}{
+  morestring=[b]",
+  morecomment=[s]{<!--}{-->},
+  keywords={routerLink,router-outlet,@if,@for},
+  sensitive=true,
+}
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\color{accent}\bfseries,
+  stringstyle=\color{warm},
+  commentstyle=\color{muted}\itshape,
+  numbers=left, numberstyle=\tiny\color{muted}, numbersep=6pt,
+  frame=tb, framerule=0.4pt, rulecolor=\color{muted},
+  xleftmargin=1.5em, framexleftmargin=1.5em,
+  aboveskip=0.8em, belowskip=0.4em,
+  columns=fullflexible, keepspaces=true, showstringspaces=false,
+  breaklines=true, tabsize=2,
+}
+
+\renewcommand{\lstlistingname}{Listing}

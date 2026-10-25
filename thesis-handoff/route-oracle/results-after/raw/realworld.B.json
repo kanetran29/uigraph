@@ -1,0 +1,258 @@
+{
+  "appDir": "/tmp/eval/corpus/realworld",
+  "dbPath": "/tmp/eval/corpus/realworld/uigraph.db",
+  "edges": 50,
+  "clean": 25,
+  "mustEdges": 10,
+  "mustClean": 9,
+  "tally": {
+    "TARGET_MISMATCH": 3,
+    "OVER_APPROX": 22
+  },
+  "findings": [
+    {
+      "edge": "/settings -> /profile",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/settings/settings.component.ts:72",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile//:param, edge claims /profile"
+    },
+    {
+      "edge": "/profile/:username -> /profile/:username",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/profile/pages/profile/profile.component.html:42",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/profile/:username -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/profile/pages/profile/profile.component.html:42",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/article/:slug -> /register",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/pages/article/article.component.html:114",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /login, edge claims /register"
+    },
+    {
+      "edge": "n_scope_subtree__n_profile_username -> /profile/:username",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/profile/pages/profile/profile.component.html:42",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "n_scope_subtree__n_profile_username -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/profile/pages/profile/profile.component.html:42",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/profile/:username/favorites -> /article/:slug",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-preview.component.ts:18",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 3 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/ -> /article/:slug",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-preview.component.ts:18",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 3 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/tag/:tag -> /article/:slug",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-preview.component.ts:18",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 3 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/article/:slug -> /profile/:username",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 8 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/article/:slug -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 8 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/profile/:username/favorites -> /profile/:username",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 8 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/profile/:username/favorites -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 8 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/ -> /profile/:username",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 8 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/ -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 8 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/tag/:tag -> /profile/:username",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 8 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/tag/:tag -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 8 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/article/:slug -> /register",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/article/components/favorite-button.component.ts:57",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/profile/:username/favorites -> /register",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/article/components/favorite-button.component.ts:57",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/ -> /register",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/article/components/favorite-button.component.ts:57",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/tag/:tag -> /register",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/article/components/favorite-button.component.ts:57",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/article/:slug -> /login",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/profile/components/follow-button.component.ts:59",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 3 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/profile/:username -> /login",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/profile/components/follow-button.component.ts:59",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 3 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/profile/:username/favorites -> /login",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/profile/components/follow-button.component.ts:59",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 3 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "n_scope_shell -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/core/layout/header.component.html:46",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile/:param, edge claims /profile/:username/favorites"
+    }
+  ]
+}

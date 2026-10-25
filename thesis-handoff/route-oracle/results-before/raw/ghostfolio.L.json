@@ -1,0 +1,1400 @@
+{
+  "appDir": "/tmp/eval/corpus/ghostfolio/apps/client",
+  "constructs": 198,
+  "lost": 191,
+  "tally": {
+    "ATTRIBUTION_SHARED": 72,
+    "QUERY_ONLY": 7,
+    "ATTRIBUTION_SERVICE": 9,
+    "CONSTANT_PATH": 107,
+    "NODE_MISS": 3
+  },
+  "rows": [
+    {
+      "at": "src/app/app.component.html:7",
+      "kind": "routerLink",
+      "owner": "src/app/app.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkRegister"
+    },
+    {
+      "at": "src/app/app.component.ts:244",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "systemMessage.routerLink);"
+    },
+    {
+      "at": "src/app/app.component.ts:334",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/components/access-table/access-table.component.html:70",
+      "kind": "routerLink",
+      "owner": "src/app/components/access-table/access-table.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "accessDialogRouterLinks().get(element.id)"
+    },
+    {
+      "at": "src/app/components/admin-market-data/admin-market-data.component.ts:318",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-market-data/admin-market-data.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": ""
+    },
+    {
+      "at": "src/app/components/admin-market-data/asset-profile-dialog-host/asset-profile-dialog-host.component.ts:122",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-market-data/asset-profile-dialog-host/asset-profile-dialog-host.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": ""
+    },
+    {
+      "at": "src/app/components/admin-market-data/asset-profile-dialog-host/asset-profile-dialog-host.component.ts:131",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-market-data/asset-profile-dialog-host/asset-profile-dialog-host.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": ""
+    },
+    {
+      "at": "src/app/components/admin-platform/admin-platform.component.html:7",
+      "kind": "routerLink",
+      "owner": "src/app/components/admin-platform/admin-platform.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[]"
+    },
+    {
+      "at": "src/app/components/admin-platform/admin-platform.component.ts:107",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-platform/admin-platform.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['.'], { relativeTo: this.route });"
+    },
+    {
+      "at": "src/app/components/admin-platform/admin-platform.component.ts:130",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-platform/admin-platform.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/components/admin-platform/admin-platform.component.ts:199",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-platform/admin-platform.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['.'], { relativeTo: this.route });"
+    },
+    {
+      "at": "src/app/components/admin-platform/admin-platform.component.ts:239",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-platform/admin-platform.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['.'], { relativeTo: this.route });"
+    },
+    {
+      "at": "src/app/components/admin-tag/admin-tag.component.html:7",
+      "kind": "routerLink",
+      "owner": "src/app/components/admin-tag/admin-tag.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[]"
+    },
+    {
+      "at": "src/app/components/admin-tag/admin-tag.component.ts:111",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-tag/admin-tag.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['.'], { relativeTo: this.route });"
+    },
+    {
+      "at": "src/app/components/admin-tag/admin-tag.component.ts:134",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-tag/admin-tag.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/components/admin-tag/admin-tag.component.ts:208",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-tag/admin-tag.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['.'], { relativeTo: this.route });"
+    },
+    {
+      "at": "src/app/components/admin-tag/admin-tag.component.ts:247",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-tag/admin-tag.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['.'], { relativeTo: this.route });"
+    },
+    {
+      "at": "src/app/components/admin-users/admin-users.component.ts:241",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-users/admin-users.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "this.routerLinkAdminControlUsers);"
+    },
+    {
+      "at": "src/app/components/admin-users/admin-users.component.ts:251",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-users/admin-users.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "this.routerLinkAdminControlUsers);"
+    },
+    {
+      "at": "src/app/components/admin-users/admin-users.component.ts:293",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-users/admin-users.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "this.routerLinkAdminControlUsers.concat(userId));"
+    },
+    {
+      "at": "src/app/components/admin-users/admin-users.component.ts:349",
+      "kind": "navigate",
+      "owner": "src/app/components/admin-users/admin-users.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "this.routerLinkAdminControlUsers);"
+    },
+    {
+      "at": "src/app/components/admin-users/admin-users.html:215",
+      "kind": "routerLink",
+      "owner": "src/app/components/admin-users/admin-users.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAdminControlUsers.concat(element.id)"
+    },
+    {
+      "at": "src/app/components/benchmark-comparator/benchmark-comparator.component.html:32",
+      "kind": "routerLink",
+      "owner": "src/app/components/benchmark-comparator/benchmark-comparator.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAdminControlMarketData"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:4",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/']"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:11",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkMarkets"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:14",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:20",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:23",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:27",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAboutChangelog"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:29",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:32",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkFaq"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:39",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAboutLicense"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:44",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:49",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:54",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAboutPrivacyPolicy"
+    },
+    {
+      "at": "src/app/components/footer/footer.component.html:61",
+      "kind": "routerLink",
+      "owner": "src/app/components/footer/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAboutTermsOfService"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:8",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/']"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:29",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/']"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:44",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPortfolio"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:58",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAccounts"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:74",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAdminControl"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:88",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:103",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:123",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:191",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:250",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/']"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:260",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPortfolio"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:270",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAccounts"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:279",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAccount"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:290",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAdminControl"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:300",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:311",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:326",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:341",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/']"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:360",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:373",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:386",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:407",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkMarkets"
+    },
+    {
+      "at": "src/app/components/header/header.component.html:436",
+      "kind": "routerLink",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkRegister"
+    },
+    {
+      "at": "src/app/components/header/header.component.ts:356",
+      "kind": "navigate",
+      "owner": "src/app/components/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/components/holding-detail-dialog/holding-detail-dialog.component.ts:740",
+      "kind": "navigate",
+      "owner": "src/app/components/holding-detail-dialog/holding-detail-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": ""
+    },
+    {
+      "at": "src/app/components/home-holdings/home-holdings.component.ts:147",
+      "kind": "navigate",
+      "owner": "src/app/components/home-holdings/home-holdings.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/components/home-holdings/home-holdings.html:50",
+      "kind": "routerLink",
+      "owner": "src/app/components/home-holdings/home-holdings.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPortfolioActivities"
+    },
+    {
+      "at": "src/app/components/home-overview/home-overview.html:15",
+      "kind": "routerLink",
+      "owner": "src/app/components/home-overview/home-overview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAccounts"
+    },
+    {
+      "at": "src/app/components/home-overview/home-overview.html:24",
+      "kind": "routerLink",
+      "owner": "src/app/components/home-overview/home-overview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPortfolioActivities"
+    },
+    {
+      "at": "src/app/components/home-overview/home-overview.html:33",
+      "kind": "routerLink",
+      "owner": "src/app/components/home-overview/home-overview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPortfolio"
+    },
+    {
+      "at": "src/app/components/home-overview/home-overview.html:47",
+      "kind": "routerLink",
+      "owner": "src/app/components/home-overview/home-overview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAccounts"
+    },
+    {
+      "at": "src/app/components/home-overview/home-overview.html:55",
+      "kind": "routerLink",
+      "owner": "src/app/components/home-overview/home-overview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPortfolioActivitiesCreate"
+    },
+    {
+      "at": "src/app/components/home-watchlist/watchlist-dialog-host/watchlist-dialog-host.component.ts:68",
+      "kind": "navigate",
+      "owner": "src/app/components/home-watchlist/watchlist-dialog-host/watchlist-dialog-host.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": ""
+    },
+    {
+      "at": "src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.html:67",
+      "kind": "routerLink",
+      "owner": "src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.html:107",
+      "kind": "routerLink",
+      "owner": "src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.html:150",
+      "kind": "routerLink",
+      "owner": "src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.html:190",
+      "kind": "routerLink",
+      "owner": "src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/components/user-account-access/access-dialog-host/access-dialog-host.component.ts:147",
+      "kind": "navigate",
+      "owner": "src/app/components/user-account-access/access-dialog-host/access-dialog-host.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": ""
+    },
+    {
+      "at": "src/app/components/user-account-membership/user-account-membership.html:68",
+      "kind": "routerLink",
+      "owner": "src/app/components/user-account-membership/user-account-membership.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": ""
+    },
+    {
+      "at": "src/app/core/auth.guard.ts:35",
+      "kind": "navigate",
+      "owner": "src/app/core/auth.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "publicRoutes.demo.routerLink);"
+    },
+    {
+      "at": "src/app/core/auth.guard.ts:39",
+      "kind": "navigate",
+      "owner": "src/app/core/auth.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "publicRoutes.register.routerLink);"
+    },
+    {
+      "at": "src/app/core/auth.guard.ts:55",
+      "kind": "navigate",
+      "owner": "src/app/core/auth.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "publicRoutes.start.routerLink);"
+    },
+    {
+      "at": "src/app/core/auth.guard.ts:87",
+      "kind": "navigate",
+      "owner": "src/app/core/auth.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "internalRoutes.zen.routerLink);"
+    },
+    {
+      "at": "src/app/core/auth.guard.ts:92",
+      "kind": "navigate",
+      "owner": "src/app/core/auth.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "internalRoutes.zen.routerLink);"
+    },
+    {
+      "at": "src/app/core/auth.guard.ts:94",
+      "kind": "navigate",
+      "owner": "src/app/core/auth.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "internalRoutes.home.routerLink);"
+    },
+    {
+      "at": "src/app/core/auth.guard.ts:103",
+      "kind": "navigate",
+      "owner": "src/app/core/auth.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "internalRoutes.home.routerLink);"
+    },
+    {
+      "at": "src/app/core/http-response.interceptor.ts:95",
+      "kind": "navigate",
+      "owner": "src/app/core/http-response.interceptor.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "publicRoutes.pricing.routerLink);"
+    },
+    {
+      "at": "src/app/core/http-response.interceptor.ts:139",
+      "kind": "navigate",
+      "owner": "src/app/core/http-response.interceptor.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "internalRoutes.webauthn.routerLink);"
+    },
+    {
+      "at": "src/app/pages/about/overview/about-overview-page.html:34",
+      "kind": "routerLink",
+      "owner": "src/app/pages/about/overview/about-overview-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/about/overview/about-overview-page.html:73",
+      "kind": "routerLink",
+      "owner": "src/app/pages/about/overview/about-overview-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/about/overview/about-overview-page.html:192",
+      "kind": "routerLink",
+      "owner": "src/app/pages/about/overview/about-overview-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFaq"
+    },
+    {
+      "at": "src/app/pages/about/overview/about-overview-page.html:202",
+      "kind": "routerLink",
+      "owner": "src/app/pages/about/overview/about-overview-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/accounts/account-dialog-host/account-dialog-host.component.ts:222",
+      "kind": "navigate",
+      "owner": "src/app/pages/accounts/account-dialog-host/account-dialog-host.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "internalRoutes.accounts.routerLink);"
+    },
+    {
+      "at": "src/app/pages/accounts/accounts-page.component.ts:140",
+      "kind": "navigate",
+      "owner": "src/app/pages/accounts/accounts-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": ""
+    },
+    {
+      "at": "src/app/pages/accounts/accounts-page.html:25",
+      "kind": "routerLink",
+      "owner": "src/app/pages/accounts/accounts-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "internalRoutes.accounts.subRoutes.create.routerLink"
+    },
+    {
+      "at": "src/app/pages/auth/auth-page.component.ts:42",
+      "kind": "navigate",
+      "owner": "src/app/pages/auth/auth-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.html:22",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.html:122",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.html:204",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2021/07/hello-ghostfolio/hello-ghostfolio-page.html:22",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2021/07/hello-ghostfolio/hello-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/pages/blog/2021/07/hello-ghostfolio/hello-ghostfolio-page.html:118",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2021/07/hello-ghostfolio/hello-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2021/07/hello-ghostfolio/hello-ghostfolio-page.html:184",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2021/07/hello-ghostfolio/hello-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2022/01/first-months-in-open-source/first-months-in-open-source-page.html:89",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/01/first-months-in-open-source/first-months-in-open-source-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2022/01/first-months-in-open-source/first-months-in-open-source-page.html:184",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/01/first-months-in-open-source/first-months-in-open-source-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2022/07/ghostfolio-meets-internet-identity/ghostfolio-meets-internet-identity-page.html:184",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/07/ghostfolio-meets-internet-identity/ghostfolio-meets-internet-identity-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2022/07/how-do-i-get-my-finances-in-order/how-do-i-get-my-finances-in-order-page.html:12",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/07/how-do-i-get-my-finances-in-order/how-do-i-get-my-finances-in-order-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/pages/blog/2022/07/how-do-i-get-my-finances-in-order/how-do-i-get-my-finances-in-order-page.html:209",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/07/how-do-i-get-my-finances-in-order/how-do-i-get-my-finances-in-order-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2022/08/500-stars-on-github/500-stars-on-github-page.html:74",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/08/500-stars-on-github/500-stars-on-github-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkMarkets"
+    },
+    {
+      "at": "src/app/pages/blog/2022/08/500-stars-on-github/500-stars-on-github-page.html:77",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/08/500-stars-on-github/500-stars-on-github-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2022/08/500-stars-on-github/500-stars-on-github-page.html:196",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/08/500-stars-on-github/500-stars-on-github-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2022/10/hacktoberfest-2022/hacktoberfest-2022-page.html:181",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/10/hacktoberfest-2022/hacktoberfest-2022-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2022/11/black-friday-2022/black-friday-2022-page.html:40",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/11/black-friday-2022/black-friday-2022-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/blog/2022/11/black-friday-2022/black-friday-2022-page.html:48",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/11/black-friday-2022/black-friday-2022-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2022/11/black-friday-2022/black-friday-2022-page.html:51",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/11/black-friday-2022/black-friday-2022-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2022/11/black-friday-2022/black-friday-2022-page.html:141",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/11/black-friday-2022/black-friday-2022-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2022/12/the-importance-of-tracking-your-personal-finances/the-importance-of-tracking-your-personal-finances-page.html:168",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2022/12/the-importance-of-tracking-your-personal-finances/the-importance-of-tracking-your-personal-finances-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/01/ghostfolio-auf-sackgeld-vorgestellt/ghostfolio-auf-sackgeld-vorgestellt-page.html:178",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/01/ghostfolio-auf-sackgeld-vorgestellt/ghostfolio-auf-sackgeld-vorgestellt-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/02/ghostfolio-meets-umbrel/ghostfolio-meets-umbrel-page.html:202",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/02/ghostfolio-meets-umbrel/ghostfolio-meets-umbrel-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/03/1000-stars-on-github/1000-stars-on-github-page.html:95",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/03/1000-stars-on-github/1000-stars-on-github-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2023/03/1000-stars-on-github/1000-stars-on-github-page.html:111",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/03/1000-stars-on-github/1000-stars-on-github-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/blog/2023/03/1000-stars-on-github/1000-stars-on-github-page.html:253",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/03/1000-stars-on-github/1000-stars-on-github-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.html:47",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/pages/blog/2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.html:51",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/blog/2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.html:94",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/pages/blog/2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.html:233",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/07/exploring-the-path-to-fire/exploring-the-path-to-fire-page.html:138",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/07/exploring-the-path-to-fire/exploring-the-path-to-fire-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/blog/2023/07/exploring-the-path-to-fire/exploring-the-path-to-fire-page.html:243",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/07/exploring-the-path-to-fire/exploring-the-path-to-fire-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/08/ghostfolio-joins-oss-friends/ghostfolio-joins-oss-friends-page.html:18",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/08/ghostfolio-joins-oss-friends/ghostfolio-joins-oss-friends-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAboutOssFriends"
+    },
+    {
+      "at": "src/app/pages/blog/2023/08/ghostfolio-joins-oss-friends/ghostfolio-joins-oss-friends-page.html:154",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/08/ghostfolio-joins-oss-friends/ghostfolio-joins-oss-friends-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.html:18",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.html:45",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.html:52",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAboutChangelog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.html:77",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkMarkets"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.html:273",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/ghostfolio-2/ghostfolio-2-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/hacktoberfest-2023/hacktoberfest-2023-page.html:17",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/hacktoberfest-2023/hacktoberfest-2023-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/hacktoberfest-2023/hacktoberfest-2023-page.html:51",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/hacktoberfest-2023/hacktoberfest-2023-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/hacktoberfest-2023/hacktoberfest-2023-page.html:53",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/hacktoberfest-2023/hacktoberfest-2023-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/blog/2023/09/hacktoberfest-2023/hacktoberfest-2023-page.html:183",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/09/hacktoberfest-2023/hacktoberfest-2023-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/11/black-week-2023/black-week-2023-page.html:44",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/11/black-week-2023/black-week-2023-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/blog/2023/11/black-week-2023/black-week-2023-page.html:52",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/11/black-week-2023/black-week-2023-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2023/11/black-week-2023/black-week-2023-page.html:55",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/11/black-week-2023/black-week-2023-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2023/11/black-week-2023/black-week-2023-page.html:148",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/11/black-week-2023/black-week-2023-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2023/11/hacktoberfest-2023-debriefing/hacktoberfest-2023-debriefing-page.html:48",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/11/hacktoberfest-2023-debriefing/hacktoberfest-2023-debriefing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/blog/2023/11/hacktoberfest-2023-debriefing/hacktoberfest-2023-debriefing-page.html:77",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/11/hacktoberfest-2023-debriefing/hacktoberfest-2023-debriefing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/blog/2023/11/hacktoberfest-2023-debriefing/hacktoberfest-2023-debriefing-page.html:270",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2023/11/hacktoberfest-2023-debriefing/hacktoberfest-2023-debriefing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2024/09/hacktoberfest-2024/hacktoberfest-2024-page.html:17",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2024/09/hacktoberfest-2024/hacktoberfest-2024-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/blog/2024/09/hacktoberfest-2024/hacktoberfest-2024-page.html:54",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2024/09/hacktoberfest-2024/hacktoberfest-2024-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/blog/2024/09/hacktoberfest-2024/hacktoberfest-2024-page.html:56",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2024/09/hacktoberfest-2024/hacktoberfest-2024-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/blog/2024/09/hacktoberfest-2024/hacktoberfest-2024-page.html:189",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2024/09/hacktoberfest-2024/hacktoberfest-2024-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2024/11/black-weeks-2024/black-weeks-2024-page.html:61",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2024/11/black-weeks-2024/black-weeks-2024-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2024/11/black-weeks-2024/black-weeks-2024-page.html:67",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2024/11/black-weeks-2024/black-weeks-2024-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2024/11/black-weeks-2024/black-weeks-2024-page.html:167",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2024/11/black-weeks-2024/black-weeks-2024-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2025/09/hacktoberfest-2025/hacktoberfest-2025-page.html:19",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2025/09/hacktoberfest-2025/hacktoberfest-2025-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/blog/2025/09/hacktoberfest-2025/hacktoberfest-2025-page.html:52",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2025/09/hacktoberfest-2025/hacktoberfest-2025-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/blog/2025/09/hacktoberfest-2025/hacktoberfest-2025-page.html:54",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2025/09/hacktoberfest-2025/hacktoberfest-2025-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/blog/2025/09/hacktoberfest-2025/hacktoberfest-2025-page.html:188",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2025/09/hacktoberfest-2025/hacktoberfest-2025-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2025/11/black-weeks-2025/black-weeks-2025-page.html:49",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2025/11/black-weeks-2025/black-weeks-2025-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2025/11/black-weeks-2025/black-weeks-2025-page.html:55",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2025/11/black-weeks-2025/black-weeks-2025-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkPricing"
+    },
+    {
+      "at": "src/app/pages/blog/2025/11/black-weeks-2025/black-weeks-2025-page.html:146",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2025/11/black-weeks-2025/black-weeks-2025-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.html:19",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.html:34",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.html:41",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAboutChangelog"
+    },
+    {
+      "at": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.html:70",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkMarkets"
+    },
+    {
+      "at": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.html:268",
+      "kind": "routerLink",
+      "owner": "src/app/pages/blog/2026/04/ghostfolio-3/ghostfolio-3-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkBlog"
+    },
+    {
+      "at": "src/app/pages/demo/demo-page.component.ts:38",
+      "kind": "navigate",
+      "owner": "src/app/pages/demo/demo-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/pages/faq/overview/faq-overview-page.html:40",
+      "kind": "routerLink",
+      "owner": "src/app/pages/faq/overview/faq-overview-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/faq/saas/saas-page.html:18",
+      "kind": "routerLink",
+      "owner": "src/app/pages/faq/saas/saas-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkRegister"
+    },
+    {
+      "at": "src/app/pages/faq/saas/saas-page.html:64",
+      "kind": "routerLink",
+      "owner": "src/app/pages/faq/saas/saas-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkMarkets"
+    },
+    {
+      "at": "src/app/pages/faq/saas/saas-page.html:85",
+      "kind": "routerLink",
+      "owner": "src/app/pages/faq/saas/saas-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAccountMembership"
+    },
+    {
+      "at": "src/app/pages/faq/saas/saas-page.html:161",
+      "kind": "routerLink",
+      "owner": "src/app/pages/faq/saas/saas-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAccount"
+    },
+    {
+      "at": "src/app/pages/features/features-page.html:220",
+      "kind": "routerLink",
+      "owner": "src/app/pages/features/features-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkResources"
+    },
+    {
+      "at": "src/app/pages/features/features-page.html:320",
+      "kind": "routerLink",
+      "owner": "src/app/pages/features/features-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkRegister"
+    },
+    {
+      "at": "src/app/pages/landing/landing-page.html:41",
+      "kind": "routerLink",
+      "owner": "src/app/pages/landing/landing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkRegister"
+    },
+    {
+      "at": "src/app/pages/landing/landing-page.html:49",
+      "kind": "routerLink",
+      "owner": "src/app/pages/landing/landing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkDemo"
+    },
+    {
+      "at": "src/app/pages/landing/landing-page.html:64",
+      "kind": "routerLink",
+      "owner": "src/app/pages/landing/landing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/landing/landing-page.html:83",
+      "kind": "routerLink",
+      "owner": "src/app/pages/landing/landing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/landing/landing-page.html:102",
+      "kind": "routerLink",
+      "owner": "src/app/pages/landing/landing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkOpenStartup"
+    },
+    {
+      "at": "src/app/pages/landing/landing-page.html:220",
+      "kind": "routerLink",
+      "owner": "src/app/pages/landing/landing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/landing/landing-page.html:347",
+      "kind": "routerLink",
+      "owner": "src/app/pages/landing/landing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkRegister"
+    },
+    {
+      "at": "src/app/pages/landing/landing-page.html:352",
+      "kind": "routerLink",
+      "owner": "src/app/pages/landing/landing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkDemo"
+    },
+    {
+      "at": "src/app/pages/portfolio/activities/activities-page.component.ts:124",
+      "kind": "navigate",
+      "owner": "src/app/pages/portfolio/activities/activities-page.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/pages/portfolio/activities/activities-page.component.ts:316",
+      "kind": "navigate",
+      "owner": "src/app/pages/portfolio/activities/activities-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": ""
+    },
+    {
+      "at": "src/app/pages/portfolio/activities/activity-dialog-host/activity-dialog-host.component.ts:164",
+      "kind": "navigate",
+      "owner": "src/app/pages/portfolio/activities/activity-dialog-host/activity-dialog-host.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": ""
+    },
+    {
+      "at": "src/app/pages/portfolio/allocations/allocations-page.component.ts:217",
+      "kind": "navigate",
+      "owner": "src/app/pages/portfolio/allocations/allocations-page.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/pages/portfolio/allocations/allocations-page.component.ts:227",
+      "kind": "navigate",
+      "owner": "src/app/pages/portfolio/allocations/allocations-page.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/pages/portfolio/allocations/allocations-page.component.ts:685",
+      "kind": "navigate",
+      "owner": "src/app/pages/portfolio/allocations/allocations-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "['.'], { relativeTo: this.route });"
+    },
+    {
+      "at": "src/app/pages/portfolio/analysis/analysis-page.html:296",
+      "kind": "routerLink",
+      "owner": "src/app/pages/portfolio/analysis/analysis-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[]"
+    },
+    {
+      "at": "src/app/pages/portfolio/analysis/analysis-page.html:347",
+      "kind": "routerLink",
+      "owner": "src/app/pages/portfolio/analysis/analysis-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[]"
+    },
+    {
+      "at": "src/app/pages/pricing/pricing-page.html:74",
+      "kind": "routerLink",
+      "owner": "src/app/pages/pricing/pricing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/pricing/pricing-page.html:242",
+      "kind": "routerLink",
+      "owner": "src/app/pages/pricing/pricing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/pricing/pricing-page.html:359",
+      "kind": "routerLink",
+      "owner": "src/app/pages/pricing/pricing-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkRegister"
+    },
+    {
+      "at": "src/app/pages/public/public-page.component.ts:130",
+      "kind": "navigate",
+      "owner": "src/app/pages/public/public-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/pages/register/register-page.component.ts:103",
+      "kind": "navigate",
+      "owner": "src/app/pages/register/register-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/pages/register/user-account-registration-dialog/user-account-registration-dialog.html:38",
+      "kind": "routerLink",
+      "owner": "src/app/pages/register/user-account-registration-dialog/user-account-registration-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLinkAboutTermsOfService"
+    },
+    {
+      "at": "src/app/pages/resources/glossary/resources-glossary.component.html:112",
+      "kind": "routerLink",
+      "owner": "src/app/pages/resources/glossary/resources-glossary.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkResourcesPersonalFinanceTools"
+    },
+    {
+      "at": "src/app/pages/resources/overview/resources-overview.component.html:10",
+      "kind": "routerLink",
+      "owner": "src/app/pages/resources/overview/resources-overview.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "item.routerLink"
+    },
+    {
+      "at": "src/app/pages/resources/personal-finance-tools/personal-finance-tools-page.html:11",
+      "kind": "routerLink",
+      "owner": "src/app/pages/resources/personal-finance-tools/personal-finance-tools-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/resources/personal-finance-tools/product-page.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/pages/resources/personal-finance-tools/product-page.component.ts",
+      "cls": "NODE_MISS",
+      "target": "routerLinkAbout"
+    },
+    {
+      "at": "src/app/pages/resources/personal-finance-tools/product-page.html:26",
+      "kind": "routerLink",
+      "owner": "src/app/pages/resources/personal-finance-tools/product-page.component.ts",
+      "cls": "NODE_MISS",
+      "target": "routerLinkFeatures"
+    },
+    {
+      "at": "src/app/pages/resources/personal-finance-tools/product-page.html:394",
+      "kind": "routerLink",
+      "owner": "src/app/pages/resources/personal-finance-tools/product-page.component.ts",
+      "cls": "NODE_MISS",
+      "target": "routerLinkResourcesPersonalFinanceTools"
+    },
+    {
+      "at": "src/app/pages/webauthn/webauthn-page.component.ts:44",
+      "kind": "navigate",
+      "owner": "src/app/pages/webauthn/webauthn-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/pages/webauthn/webauthn-page.component.ts:57",
+      "kind": "navigate",
+      "owner": "src/app/pages/webauthn/webauthn-page.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "['/']);"
+    }
+  ]
+}

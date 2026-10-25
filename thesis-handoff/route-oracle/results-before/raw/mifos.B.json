@@ -1,0 +1,1783 @@
+{
+  "appDir": "/tmp/eval/corpus/mifos",
+  "dbPath": "/tmp/eval/corpus/mifos/uigraph.db",
+  "edges": 246,
+  "clean": 69,
+  "mustEdges": 69,
+  "mustClean": 69,
+  "tally": {
+    "OVER_APPROX": 177
+  },
+  "findings": [
+    {
+      "edge": "/:loanId/charges -> /login",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /accounting",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /centers",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /clients",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /collections",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /groups",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /loans",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /navigation",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /notifications",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /profile",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /remittances",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /reports",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /search",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /settings",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /checker-inbox-and-tasks",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /templates",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /appusers",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /callback",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> *",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /create-standing-instructions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /make-account-transfer",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /list-standing-instructions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /account-transfers",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /account-transfers/:transferid",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:standingInstructionsId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:standingInstructionsId/view",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:standingInstructionsId/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:standingInstructionsId/list-account-transactions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:collateralId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:collateralId/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /groups/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /centers/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/configurations",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products/loan-products/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products/saving-products/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/roles-and-permissions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/roles-and-permissions/add",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/configure-mc-tasks",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products/loan-products",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products/charges",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products/saving-products",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/offices",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/offices/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/currencies",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/employees",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/employees/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/manage-funds",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /accounting/chart-of-accounts",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /accounting/journal-entries/frequent-postings",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /accounting/journal-entries",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /accounting/closing-entries",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /accounting/accounting-rules",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /accounting/accounting-rules/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/data-tables",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/data-tables/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/codes/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/manage-jobs",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/codes",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/reports/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/holidays",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/holidays/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products/charges/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /collections/collection-sheet",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products/products-mix",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /products/products-mix/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /organization/bulkloan",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /system/audit-trails",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /accounting/closing-entries/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /remittances/process",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/general",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/dashboard",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/accountdetail",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/original-schedule",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/repayment-schedule",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/balances",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/amortization-schedule",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/breach-schedule",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/breach-actions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/transactions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/transactions/export",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/payment-rates",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/deferred-income",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/delinquencytags",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/loan-reschedules",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/loan-collateral",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/term-variations",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/loan-tranche-details",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/overdue-charges",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/floating-interest-rates",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/charges",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/loan-documents",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/notes",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/standing-instruction",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/external-asset-owner",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/datatables",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/datatables/:datatableName",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/originators",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/buy-down-fees",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/transactions/:id",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/transactions/:id/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/transactions/:id/reciept",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/edit-loans-account",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/charges/:id",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/charges/:id/adjustment",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/actions/:action",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:loanId/transfer-funds",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /edit-loans-account",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /glim-account",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /glim-account/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /glim-account/:glimId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/general",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/dashboard",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transactions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transactions/export",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/charges",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/standing-instructions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/notes",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/documents",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/datatables",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/datatables/:datatableName",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transactions/:id",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transactions/:id/general",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transactions/:id/datatables",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transactions/:id/datatables/:datatableName",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transactions/:id/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transactions/:id/reciept",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/charges/:id",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/actions/:name",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:savingAccountId/transfer-funds",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /gsim-account",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /gsim-account/create",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /gsim-account/:savingAccountId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:shareAccountId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:shareAccountId/general",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:shareAccountId/transactions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:shareAccountId/charges",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:shareAccountId/dividends",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:shareAccountId/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:shareAccountId/actions/:name",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /self-service",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:id",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:id/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/general",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/interest-rate-chart",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/transactions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/charges",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/standing-instructions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/datatables",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/datatables/:datatableName",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/transactions/account-transfers",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/transactions/:id",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:fixedDepositAccountId/actions/:name",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /create-recurring-deposits-account",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/general",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/interest-rate-chart",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/transactions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/charges",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/standing-instructions-tab",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/datatables",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/datatables/:datatableName",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/edit-recurring-deposit-account",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/transactions/:id",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/transactions/:id/edit",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/actions/:name",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/transfer-funds",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /:recurringDepositAccountId/standing-instructions",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "edge": "/:loanId/charges -> /convert",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/loans/loans-view/charges-tab/charges-tab.component.ts:245",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 177 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    }
+  ]
+}

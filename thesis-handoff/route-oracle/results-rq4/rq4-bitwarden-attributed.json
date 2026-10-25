@@ -1,0 +1,572 @@
+{
+  "harnessVersion": "1.3.0",
+  "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden",
+  "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden/apps/web",
+  "attribution": true,
+  "seed": 20261021,
+  "quota": 8,
+  "baseline": {
+    "nodes": 81,
+    "edges": 24,
+    "routes": 78
+  },
+  "discovered": {
+    "CHANGE_NAV_TARGET": 34,
+    "REMOVE_GUARD": 78,
+    "DELETE_ROUTERLINK": 11,
+    "RENAME_PATH": 79
+  },
+  "sampled": {
+    "CHANGE_NAV_TARGET": 8,
+    "DELETE_ROUTERLINK": 8,
+    "REMOVE_GUARD": 8,
+    "RENAME_PATH": 8
+  },
+  "perOperator": {
+    "CHANGE_NAV_TARGET": {
+      "discovered": 34,
+      "sampled": 8,
+      "detected": 2,
+      "missed": 0,
+      "wrong": 1,
+      "excluded": 5,
+      "broke": 0,
+      "skip": 0
+    },
+    "DELETE_ROUTERLINK": {
+      "discovered": 11,
+      "sampled": 8,
+      "detected": 0,
+      "missed": 0,
+      "wrong": 0,
+      "excluded": 8,
+      "broke": 0,
+      "skip": 0
+    },
+    "REMOVE_GUARD": {
+      "discovered": 78,
+      "sampled": 8,
+      "detected": 0,
+      "missed": 5,
+      "wrong": 0,
+      "excluded": 3,
+      "broke": 0,
+      "skip": 0
+    },
+    "RENAME_PATH": {
+      "discovered": 79,
+      "sampled": 8,
+      "detected": 8,
+      "missed": 0,
+      "wrong": 0,
+      "excluded": 0,
+      "broke": 0,
+      "skip": 0
+    }
+  },
+  "detectionRate": 0.625,
+  "scored": 16,
+  "detected": 10,
+  "results": [
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
+      "line": 52,
+      "subject": "/finish-signup => /tools",
+      "predict": "the edge to /finish-signup is replaced by an edge to /tools",
+      "verdict": "WRONG",
+      "touched": 1,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/accept-families-for-enterprise -> /tools (navigate)"
+        ],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/billing/organizations/change-plan-dialog.component.ts",
+      "line": 833,
+      "subject": "/organizations => /settings/data-recovery",
+      "predict": "the edge to /organizations is replaced by an edge to /settings/data-recovery",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/billing/organizations/change-plan-dialog.component.ts:833 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
+      "line": 38,
+      "subject": "/setup/families-for-enterprise => /tools/import",
+      "predict": "the edge to /setup/families-for-enterprise is replaced by an edge to /tools/import",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/accept-families-for-enterprise -> /tools/import (navigate)"
+        ],
+        "edgesRemoved": [
+          "/accept-families-for-enterprise -> /setup/families-for-enterprise (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts",
+      "line": 112,
+      "subject": "/login => /settings/sponsored-families",
+      "predict": "the edge to /login is replaced by an edge to /settings/sponsored-families",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/auth/organization-invite/accept-org-direct-invite.component.ts:112 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/billing/members/billing-constraint/billing-constraint.service.ts",
+      "line": 155,
+      "subject": "/organizations => /events",
+      "predict": "the edge to /organizations is replaced by an edge to /events",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/billing/members/billing-constraint/billing-constraint.service.ts:155 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/auth/settings/security/password-settings/password-settings.component.ts",
+      "line": 40,
+      "subject": "/settings/security/two-factor => /request-sm-access",
+      "predict": "the edge to /settings/security/two-factor is replaced by an edge to /request-sm-access",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/auth/settings/security/password-settings/password-settings.component.ts:40 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/dirt/event-logs/components/entity-events/entity-events.component.ts",
+      "line": 169,
+      "subject": "/organizations => /lock",
+      "predict": "the edge to /organizations is replaced by an edge to /lock",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/dirt/event-logs/components/entity-events/entity-events.component.ts:169 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts",
+      "line": 80,
+      "subject": "/create-organization => /settings/export",
+      "predict": "the edge to /create-organization is replaced by an edge to /settings/export",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/request-sm-access -> /settings/export (navigate)"
+        ],
+        "edgesRemoved": [
+          "/request-sm-access -> /create-organization (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/vault/components/setup-extension/setup-extension.component.html",
+      "line": 63,
+      "subject": "/vault",
+      "predict": "the graph stops citing this line, and the edge to /vault disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/vault/components/setup-extension/setup-extension.component.html:63 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/auth/recover-two-factor.component.html",
+      "line": 35,
+      "subject": "/login",
+      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/auth/recover-two-factor.component.html:35 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/vault/individual-vault/vault-banners/vault-banners.component.html",
+      "line": 37,
+      "subject": "/settings/security/device-management",
+      "predict": "the graph stops citing this line, and the edge to /settings/security/device-management disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/vault/individual-vault/vault-banners/vault-banners.component.html:37 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/auth/recover-delete.component.html",
+      "line": 12,
+      "subject": "/login",
+      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/auth/recover-delete.component.html:12 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/layouts/header/account-menu.component.html",
+      "line": 56,
+      "subject": "/settings/account",
+      "predict": "the graph stops citing this line, and the edge to /settings/account disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/layouts/header/account-menu.component.html:56 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/tools/send/send-access/send-access-explainer.component.html",
+      "line": 13,
+      "subject": "/signup",
+      "predict": "the graph stops citing this line, and the edge to /signup disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/tools/send/send-access/send-access-explainer.component.html:13 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html",
+      "line": 24,
+      "subject": "/vault",
+      "predict": "the graph stops citing this line, and the edge to /vault disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:24 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/auth/verify-recover-delete.component.html",
+      "line": 12,
+      "subject": "/login",
+      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/auth/verify-recover-delete.component.html:12 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/oss-routing.module.ts",
+      "line": 684,
+      "subject": "path \"\"",
+      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 17,
+      "subject": "path \"\"",
+      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/vault/individual-vault/vault-routing.module.ts",
+      "line": 45,
+      "subject": "canActivate: [\n      canAccessFeature(Fe",
+      "predict": "the guard text or modality of at least one edge changes",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/oss-routing.module.ts",
+      "line": 695,
+      "subject": "path \"sends\"",
+      "predict": "the guard on edges entering the screen of path \"sends\" changes",
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters a screen with route segment \"sends\""
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
+      "line": 31,
+      "subject": "path \"payment-details\"",
+      "predict": "the guard on edges entering the screen of path \"payment-details\" changes",
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters a screen with route segment \"payment-details\""
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 85,
+      "subject": "path \"weak-passwords-report\"",
+      "predict": "the guard on edges entering the screen of path \"weak-passwords-report\" changes",
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters a screen with route segment \"weak-passwords-report\""
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/oss-routing.module.ts",
+      "line": 524,
+      "subject": "canActivate: [deepLinkGuard()],",
+      "predict": "the guard text or modality of at least one edge changes",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 32,
+      "subject": "path \"\"",
+      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 63,
+      "subject": "premium",
+      "predict": "a node route containing \"premium\" becomes \"premium-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 3,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [
+          "src/app/billing/individual/premium/cloud-hosted-premium.component.ts:210"
+        ],
+        "nodesAdded": [
+          "/premium-mutated"
+        ],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/premium-mutated -> /vault (navigate)"
+        ],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/oss-routing.module.ts",
+      "line": 728,
+      "subject": "request-sm-access",
+      "predict": "a node route containing \"request-sm-access\" becomes \"request-sm-access-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 8,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/request-sm-access-mutated"
+        ],
+        "nodesRemoved": [
+          "/request-sm-access"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/request-sm-access-mutated -> /sm-landing (click:routerLink)",
+          "/request-sm-access-mutated -> / (navigate)",
+          "/request-sm-access-mutated -> /create-organization (navigate)"
+        ],
+        "edgesRemoved": [
+          "/request-sm-access -> /sm-landing (click:routerLink)",
+          "/request-sm-access -> / (navigate)",
+          "/request-sm-access -> /create-organization (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 26,
+      "subject": "password",
+      "predict": "a node route containing \"password\" becomes \"password-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/password-mutated"
+        ],
+        "nodesRemoved": [
+          "/password"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 52,
+      "subject": "groups",
+      "predict": "a node route containing \"groups\" becomes \"groups-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/:organizationId/groups-mutated"
+        ],
+        "nodesRemoved": [
+          "/:organizationId/groups"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 36,
+      "subject": "security-keys",
+      "predict": "a node route containing \"security-keys\" becomes \"security-keys-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/security-keys-mutated"
+        ],
+        "nodesRemoved": [
+          "/security-keys"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/oss-routing.module.ts",
+      "line": 838,
+      "subject": "generator",
+      "predict": "a node route containing \"generator\" becomes \"generator-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/tools/generator-mutated"
+        ],
+        "nodesRemoved": [
+          "/tools/generator"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/oss-routing.module.ts",
+      "line": 762,
+      "subject": "domain-rules",
+      "predict": "a node route containing \"domain-rules\" becomes \"domain-rules-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/settings/domain-rules-mutated"
+        ],
+        "nodesRemoved": [
+          "/settings/domain-rules"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/admin-console/organizations/members/members-routing.module.ts",
+      "line": 22,
+      "subject": "sponsored-families",
+      "predict": "a node route containing \"sponsored-families\" becomes \"sponsored-families-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/sponsored-families-mutated"
+        ],
+        "nodesRemoved": [
+          "/sponsored-families"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+This thesis set out to measure how much of the navigation structure of an Angular
+application can be recovered from its source code without running the application, to
+explain where that recovery fails, and to repair the largest class of failure with an
+analysis that attributes a navigation site to the screens from which it can fire. The
+selection criteria for the corpus were fixed before any results were obtained. The
+protocol was corrected seven times while it was being developed, including the
+definition of the conversion ratio and of its denominator
+(Section~\ref{sec:corrections}), and the result tables of Chapter~\ref{ch:results}
+come from the harness run on pinned commits.
+
+The answer to RQ1 is that the baseline extractor witnesses between 0.0\% and 15.0\% of
+the 1820 navigation constructs of the corpus with a deterministic transition, and that
+the loss occurs at two levels, because some declared screens never become nodes at all
+and most navigation sites in the screens that do become nodes are never turned into
+edges. The answer to RQ2 is that the failures fall into five defect classes, each
+confirmed by at least two methods that do not share a mechanism, together with one
+candidate class that has a single confirmation, and that assigning every lost construct
+to exactly one class makes attribution the largest class in four of the six applications
+while node defects, unresolved constant route paths and unfollowed lazy boundaries
+dominate the other two and the corpus total. The answer to RQ3 is that scope attribution
+raises the conversion ratio in four of the six applications, from 15.0\% to 37.5\% on
+realworld and from 5.4\% to 10.0\% on mifos, recovers 81 of the 468 constructs that the
+loss rules assign to it, and costs nothing in deterministic precision, since the one
+must edge that fails the witness check after attribution is the same edge that failed
+before it. The answer to RQ4 is that the graph is sensitive to authored source changes
+in the constructs it represents, with 39 of 48 scored mutants detected, a route path
+rename detected in every scored mutant of all three mutated applications, a deleted link
+detected in every scored mutant, and a retargeted \texttt{navigate} call detected in
+seven of eight. Eight of the nine misses are a guard removal, six of those eight on
+routes whose path is the empty string, and the ninth is a retargeted \texttt{navigate}
+call whose old target the baseline had not resolved.
+
+The thesis contributes five things. Attribution is formulated as a dataflow analysis
+over the powerset lattice of screen sets, computed as a fixpoint over four input
+relations, with a soundness property for the deterministic tier that holds over the
+declared route set and is paired with an explicit list of the constructs the analysis
+does not decide (Claim~\ref{claim:must}, Section~\ref{sec:approximations}). The analysis
+is implemented in \emph{uigraph}, an open-source extractor with a framework-independent
+core and an Angular adapter that records the rule and the source location that produced
+each node and edge. Static navigation extraction is measured on a corpus of six Angular
+applications pinned to fixed commits, with four methods chosen so that they do not share
+a blind spot: a witness check that re-parses the source at each claimed location, a
+differential test against an independently written route parser, an end-to-end oracle
+taken from the applications' own passing tests, and a mutation experiment whose ground
+truth is the authored change. The failures are classified into defect classes that are
+admitted only on two independent confirmations, and every construct the extractor loses
+is assigned to exactly one class, which makes the classes comparable within an
+application and across the corpus. The corpus and the harness are reusable artefacts:
+the evaluation re-runs with one command against pinned commits of the extractor and of
+every application, and the conversion, coverage, loss, remaining-loss, before-and-after and mutation tables
+of Chapter~\ref{ch:results} are generated from the results file. The defect-class table,
+the oracle table and the inspection of the unreached components are written by hand.
+
+What the measurements establish is that a declared route table is a usable starting
+point for static navigation extraction and not a sufficient one. The two levels of loss
+bound each other, so neither node extraction nor attribution can be improved into a
+usable graph on its own, and scope attribution recovers nearly all of the attribution losses on realworld, where
+node extraction is complete, and far fewer on the larger applications, where node defects
+limit it. Where a construct is in the graph, a change
+to it is almost always visible in the graph, which is the property that change impact
+analysis and commit-time checking need; where it is not, no change to it is visible, and
+the coverage gap RQ1 measures is what the excluded mutants of RQ4 report a second time.
+
+What they leave open is also specific. Constant-path resolution and lazy-boundary
+following are defects with known repairs that the independent parser already performs,
+so what the extractor would recover with them in place is unmeasured. The call graph
+with dependency injection and the dispatch relations are specified and not implemented,
+and the remaining losses in services and guards state what the omission costs rather
+than what closing it would yield. Guards on empty-path routes are represented wrongly,
+and one defect class still waits for its second confirmation. Whether a graph of screens
+and guarded transitions, recomputed from source and carrying a witness on every edge,
+helps the consumers that motivated the work, agents that drive a user interface or a
+repository and automated test generation, is not measured here; the extractor, the
+corpus and the harness are what such a measurement would start from, and the defects
+quantified in Chapter~\ref{ch:results} are what it would have to control for.

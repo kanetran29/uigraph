@@ -18,3 +18,13 @@ uigraph.db
 .uigraph-gate/
 .codegraph/
 test-results/
+
+# LaTeX build intermediates (thesis). The built PDF is kept; these are regenerable.
+thesis-handoff/thesis/*.aux
+thesis-handoff/thesis/*.bbl
+thesis-handoff/thesis/*.blg
+thesis-handoff/thesis/*.fls
+thesis-handoff/thesis/*.fdb_latexmk
+thesis-handoff/thesis/*.out
+thesis-handoff/thesis/*.toc
+thesis-handoff/thesis/*.synctex.gz

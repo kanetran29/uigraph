@@ -1,0 +1,50 @@
+{
+  "appDir": "/tmp/eval/corpus/realworld",
+  "components": 11,
+  "screens": 11,
+  "callSites": 24,
+  "serviceSites": 8,
+  "attributable": 4,
+  "orphan": 20,
+  "edgesToday": 19,
+  "edgesMaterialised": 4,
+  "sharedSites": 0,
+  "attributed": [
+    {
+      "cls": "FollowButtonComponent",
+      "kind": "navigate",
+      "where": "src/app/features/profile/components/follow-button.component.ts:59",
+      "text": "void this.router.navigate(['/login']);",
+      "screens": [
+        "/profile/:username"
+      ]
+    },
+    {
+      "cls": "ProfileComponent",
+      "kind": "routerLink",
+      "where": "src/app/features/profile/pages/profile/profile.component.html:23",
+      "text": "<a [routerLink]=\"['/settings']\" class=\"btn btn-sm btn-outline-secondary action-btn\">",
+      "screens": [
+        "/profile/:username"
+      ]
+    },
+    {
+      "cls": "ProfileComponent",
+      "kind": "routerLink",
+      "where": "src/app/features/profile/pages/profile/profile.component.html:42",
+      "text": "[routerLink]=\"['/profile', p.username]\"",
+      "screens": [
+        "/profile/:username"
+      ]
+    },
+    {
+      "cls": "ProfileComponent",
+      "kind": "routerLink",
+      "where": "src/app/features/profile/pages/profile/profile.component.html:52",
+      "text": "[routerLink]=\"['/profile', p.username, 'favorites']\"",
+      "screens": [
+        "/profile/:username"
+      ]
+    }
+  ]
+}

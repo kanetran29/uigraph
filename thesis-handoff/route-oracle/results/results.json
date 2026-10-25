@@ -1,0 +1,54 @@
+{
+  "provenance": {
+    "harnessVersion": "1.0.0",
+    "extractor": {
+      "repo": "kanetran29/uigraph",
+      "sha": "c4f8b833bd10273d1a1ffcbf73616b5732363a42"
+    },
+    "node": "v22.22.2",
+    "startedAt": "2026-09-13T21:25:28.509Z",
+    "finishedAt": "2026-09-13T21:26:10.919Z"
+  },
+  "results": [
+    {
+      "slug": "realworld",
+      "repo": "gothinkster/angular-realworld-example-app",
+      "sha": "dd99ed2cf39c805d719f943c5d7061a5683d98a8",
+      "appDir": ".",
+      "role": "size floor; all literal paths; the only repo where every test is currently trustworthy",
+      "mapOk": true,
+      "constructs": {
+        "routerLink": 40,
+        "navigate": 11
+      },
+      "totalConstructs": 51,
+      "graph": {
+        "nodes": 11,
+        "edges": 21,
+        "must": 7,
+        "may": 14,
+        "unknown": 0
+      },
+      "conversion": 0.1373,
+      "testB": {
+        "edges": 21,
+        "clean": 18,
+        "tally": {
+          "TARGET_MISMATCH": 3
+        }
+      },
+      "testC": {
+        "declaredScreens": 12,
+        "coverage": 0.8333,
+        "blindSpots": 0
+      },
+      "testD": null,
+      "testF": {
+        "tally": {
+          "DETECTED": 4,
+          "MISSED": 3
+        }
+      }
+    }
+  ]
+}

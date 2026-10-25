@@ -1,0 +1,23 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=26mm, y=15mm, every node/.style={font=\small}]
+  \tikzset{el/.style={draw=muted, rounded corners=2pt, inner sep=3pt, fill=white},
+           named/.style={draw=accent, fill=accentlight, rounded corners=2pt, inner sep=3pt}}
+  \node[named] (bot) at (0,0) {$\varnothing = \bot$};
+  \node[named] (h) at (-1,1) {$\{h\}$};
+  \node[named] (s) at (0,1) {$\{s\}$};
+  \node[named] (p) at (1,1) {$\{p\}$};
+  \node[el, draw=warm, fill=warmlight] (hs) at (-1,2) {$\{h,s\}$};
+  \node[el] (hp) at (0,2) {$\{h,p\}$};
+  \node[named] (sp) at (1,2) {$\{s,p\} = \mathit{subtree}(s)$};
+  \node[named] (top) at (0,3) {$\{h,s,p\} = \top$};
+  \foreach \a/\b in {bot/h, bot/s, bot/p, h/hs, h/hp, s/hs, s/sp, p/hp, p/sp, hs/top, hp/top, sp/top}
+    \draw[muted] (\a) -- (\b);
+  \end{tikzpicture}
+\caption{The scope domain $\mathcal{P}(S)$ for three screens: $h$ for \texttt{/}, $s$ for
+\texttt{/settings} and its child $p$ for \texttt{/settings/profile}. Shaded elements are the
+named scopes at which edges are anchored. The join is set union: a component rendered in
+both $h$ and $s$ gets $\{h\} \sqcup \{s\} = \{h,s\}$, marked in orange, which is not a named element, so its edges are stored per
+screen. The height of the lattice is $|S|$.}
+\label{fig:lattice}
+\end{figure}

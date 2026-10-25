@@ -1,0 +1,22 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[node distance=14mm and 38mm]
+  \node[screen] (home) {/};
+  \node[screen, right=of home] (settings) {/settings};
+  \node[screen, above=of home] (login) {/login};
+  \node[screen, below=of home] (article) {/article/:slug};
+  \node[screen, right=of article] (profile) {/profile/:user};
+
+  \draw[mustedge] (home) -- node[lbl, left] {\texttt{click} $\cdot$ must} (login);
+  \draw[mayedge] (home.15) -- node[lbl, above=1mm] {\texttt{click} [\textit{requireAuth}] $\cdot$ may} (settings.165);
+  \draw[mustedge] (settings.195) -- node[lbl, below=1mm] {\texttt{navigate} $\cdot$ must} (home.345);
+  \draw[mayedge] (home) -- node[lbl, left] {\texttt{click} $\cdot$ may} (article);
+  \draw[->, thick, dotted] (article) -- node[lbl, above] {\texttt{effect} $\cdot$ unknown} (profile);
+\end{tikzpicture}
+\caption{A small UI transition graph in the model of this thesis. Each edge carries an
+event, an optional guard in brackets, and a modality. A \emph{must} edge always fires when
+its code runs, a \emph{may} edge is conditional, here on a route guard or on a target that
+is only partly known, and an \emph{unknown} edge is one whose firing condition cannot be
+determined statically, such as a navigation inside a signal effect.}
+\label{fig:utg-example}
+\end{figure}

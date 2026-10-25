@@ -1,0 +1,329 @@
+\chapter{Static navigation analysis and scope attribution}
+\label{ch:analysis}
+
+This chapter presents the analysis that is the main contribution of the thesis.
+Section~\ref{sec:model} defines the graph model and states the soundness property
+claimed for it. Section~\ref{sec:attribution} presents scope attribution, the analysis
+proposed in answer to RQ3. Section~\ref{sec:implementation} describes how both are
+implemented in the extractor. The evaluation of the analysis is described separately,
+in Chapter~\ref{ch:evaluation}.
+
+\section{Graph model and soundness}
+\label{sec:model}
+
+\begin{definition}[UI transition graph]
+A UI transition graph is a labelled transition system $(S, \Sigma, G, M, E)$ with
+\[
+  E \;\subseteq\; S \times \Sigma \times G \times M \times S .
+\]
+$S$ is the finite set of \emph{screens}, the states of the system and the nodes of the
+graph. $\Sigma$ is the finite set of \emph{events} that can be raised at a screen, one
+per navigation construct in the source, such as the activation of a \texttt{routerLink}
+or a call to \texttt{Router.navigate}. $G$ is the set of \emph{guards}, each held as the
+symbolic source text of the condition under which an edge may be taken. $M$ is the set
+of \emph{modalities}, which has exactly three elements,
+\[
+  M \;=\; \{\mathit{must}, \mathit{may}, \mathit{unknown}\},
+\]
+and whose elements are confidence labels: a modality states how firmly the extractor
+asserts an edge, and never denotes a screen, a route or a navigation target. An edge
+$(s, \sigma, g, m, s') \in E$ reads: at screen $s$, event $\sigma$ under guard $g$ leads
+to screen $s'$, asserted with confidence $m$. Both the source $s$ and the target $s'$
+are elements of $S$, namely the first and the last component of the tuple.
+\end{definition}
+
+A \emph{must} edge is claimed to fire for every input on which the enclosing code
+executes; a \emph{may} edge is possible but
+conditional; \emph{unknown} marks an edge whose modality could not be determined. Guards are stored as source text and are never evaluated by the tool. A consumer of
+the graph can read a guard, but is not expected to decide whether it holds. This keeps
+the set $G$ opaque and means that the model does not need to represent application
+state.
+
+\textbf{Screens and routes.} The set $S$ is derived from the route configuration, and
+not every route contributes a screen. Write $\mathit{Routes}$ for the set of routes the
+application declares and $\mathit{component}(r)$ for the component that route $r$
+renders. Then
+\[
+  S \;=\; \{\, \mathit{screen}(r) \;\mid\; r \in \mathit{Routes}
+  \text{ and } \mathit{component}(r) \text{ is defined} \,\},
+\]
+where $\mathit{screen}(r)$ is the node for route $r$, identified by the full path that
+concatenates the paths of $r$ and of its ancestors. A route that declares
+\texttt{children} but no \texttt{component} is only a path prefix, as
+Section~\ref{sec:angular} describes: it contributes no element of $S$, and its path is
+carried into the full paths of its children. A route whose only effect is a
+\texttt{redirectTo} renders nothing and likewise contributes no element of $S$. Because
+$\mathit{screen}(r)$ is identified by the full path, the map $\mathit{screen}(\cdot)$ is
+injective on the routes whose full paths are pairwise distinct. Angular also permits two
+component-bearing routes with the same full path, told apart at run time by
+\texttt{pathMatch} or by a \texttt{canMatch} guard. The model assumes that this does not
+occur: the extractor keeps the route declared first under a full path and drops the
+later ones. Two routes with different paths that render the same component give two
+screens, which is the case that makes the attribution of
+Section~\ref{sec:attribution} necessary.
+
+\textbf{Witnesses.} Every edge of static or runtime origin carries a witness: the file
+and line of the construct that produced it, or an observation identifier. No edge is
+added to the base graph without a witness, and edges added manually are kept in a
+separate overlay. The tool's specification states this as an invariant, and the first evaluation method checks it mechanically.
+
+\begin{claim}[Soundness of the must tier]
+\label{claim:must}
+Every must edge corresponds to a navigation that occurs, for every input on which the
+enclosing code executes, over the declared route set.
+\end{claim}
+
+This is the only soundness property claimed in the thesis, and it holds only relative
+to the declared route set. No such property is claimed for the may and unknown tiers.
+The witness of a may edge shows that the corresponding call site exists in the source,
+but it does not show that the transition is ever taken. This difference between the
+tiers matters for the evaluation. Whether the target found at a witness location agrees
+with the target of the edge is a meaningful question for must edges, and for may edges
+whose target is a literal. It is not a meaningful question for edges that the extractor
+produced by over-approximation, and treating it as one leads to spurious failures, as
+described in Section~\ref{sec:corrections}.
+
+\section{Scope attribution}
+\label{sec:attribution}
+
+This section specifies more than the prototype contains, and the division is the same
+throughout. Component nesting, router outlets, the shell rule and anchored edges are
+implemented in the extractor and are the parts evaluated in
+Chapter~\ref{ch:evaluation}. The call graph with dependency injection, the dispatch
+relations that carry NgRx effects and router event subscriptions, and guards that return
+a \texttt{UrlTree}, and navigation sites in interceptors and resolvers are part of the
+model only: they are specified here to define the analysis, but no edge in the measured
+graphs comes from them. The navigation sites they would attribute, in a service, guard,
+interceptor, resolver or effect, contribute no edge, and the evaluation counts them in
+the defect class ``Attribution, service'' of Table~\ref{tab:loss-rules}.
+Section~\ref{sec:implementation} gives the same division from the implementation side.
+
+\subsection{The defect being addressed}
+
+In the version of the extractor used for the baseline measurements, a navigation
+site is attributed to a screen only if it occurs directly in the component that the
+route for that screen renders. Navigation sites anywhere else are not attributed to any
+screen. This one cause explains three symptoms in the baseline: shared components contribute no edges, because the application shell places the header next to the router outlet and not inside the subtree of any screen; a component mounted at several routes contributes one edge instead of one per route; and applications that navigate from injected services produce no edges at all.
+
+\subsection{Scope}
+
+Every navigation site is anchored at a \emph{scope}: the set of screens from which it
+can fire. A scope is thus an element of the powerset $\mathcal{P}(S)$, and the abstract
+domain of the analysis is $\mathcal{P}(S)$ ordered by inclusion, with set union as join,
+\[
+  X \sqsubseteq Y \iff X \subseteq Y, \qquad X \sqcup Y \;=\; X \cup Y ,
+\]
+which is the powerset lattice over the screens. Its least element is the empty scope,
+\[
+  \bot \;=\; \varnothing ,
+\]
+a site that fires from no screen at all. This is the scope of unreached code: the
+navigation site exists in the source, but no screen has been found from which it can be
+reached, so it contributes no edge. The greatest element is $\top = S$, every screen.
+
+Three elements of the domain are named, because attribution anchors edges at them.
+Writing $r' \succeq r$ for the reflexive ancestor relation on routes, that is $r'$ is
+$r$ itself or an ancestor of $r$ in the route tree, they are
+\[
+  \mathit{screen}(r), \qquad
+  \mathit{subtree}(r) \;=\; \{\, \mathit{screen}(r'') \in S \;\mid\; r \succeq r'' \,\},
+  \qquad \top \;=\; S ,
+\]
+and they form the chain
+\[
+  \bot \;\sqsubseteq\; \mathit{screen}(r) \;\sqsubseteq\; \mathit{subtree}(r)
+  \;\sqsubseteq\; \top .
+\]
+The chain is stated for a route $r$ with $\mathit{component}(r)$ defined. For a prefix
+route, which has \texttt{children} but no \texttt{component}, $\mathit{screen}(r)$ is
+undefined and only $\mathit{subtree}(r)$, the set of the screens of its descendants, is
+defined. The chain then reads $\bot \sqsubseteq \mathit{subtree}(r) \sqsubseteq \top$.
+These names are a representation device for anchoring edges, not a restriction of the
+domain. The join of two scopes is their union, not the least named element above both: a
+component mounted at two unrelated routes has the scope
+$\{\mathit{screen}(r_1), \mathit{screen}(r_2)\}$, which is none of the three named
+elements. The names matter for storage, where an edge anchored at $\top$ or at
+$\mathit{subtree}(r)$ is kept once rather than once per screen.
+Table~\ref{tab:scopes} assigns a scope to each Angular construct.
+Figure~\ref{fig:scopes} shows the three kinds of scope in a small application, and
+Figure~\ref{fig:lattice} shows the domain for three of its screens.
+
+\input{figures/fig-scopes}
+\input{figures/fig-lattice}
+
+
+\begin{table}[t]\small
+\caption{Scope of each construct that can contain a navigation site.}
+\label{tab:scopes}
+\begin{tabularx}{\textwidth}{@{}YY@{}}
+\toprule
+Construct & Scope \\
+\midrule
+component above the router outlet (the shell) & $\top$ \\
+component within screen $r$'s subtree & $\mathit{screen}(r)$, joined over every screen containing it \\
+component mounted at several routes & join of those screens \\
+method of an injectable service & join of the scopes of its callers \\
+\texttt{canActivate} or \texttt{canMatch} on route $r$ & $\mathit{subtree}(r)$ \\
+HTTP interceptor & $\top$ \\
+NgRx effect for action $a$ & join of the scopes of every dispatcher of $a$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The row for services is why a simple traversal of the component tree is not enough. A service has no scope of its own. Its scope is
+the join of the scopes of the places that call it, which may themselves be services.
+Attribution is therefore computed as a fixpoint over the call graph, with
+$\mathcal{P}(S)$ as the abstract domain. This is a monotone dataflow problem in the
+sense of Kildall \cite{kildall1973unified,nielson1999principles}. It terminates because
+$\mathcal{P}(S)$ has finite height and the transfer functions are monotone: a scope only
+ever grows, and since the order is inclusion and the join is union, the height of
+$\mathcal{P}(S)$ is $|S|$, so the scope of one node can grow at most $|S|$ times before
+it reaches $\top$. A worklist solver re-examines a call-graph node once for each growth of
+one of its predecessors, which gives at most
+\[
+  O(|S| \cdot |E_{\mathit{callgraph}}|)
+\]
+transfer-function applications, where $E_{\mathit{callgraph}}$ is the set of call-graph
+edges. Each application joins scopes of at most $|S|$ screens, so with scopes stored as
+bit sets the running time is bounded by $O(|S|^2 \cdot |E_{\mathit{callgraph}}|)$.
+
+The part of the analysis that is implemented, the nesting and outlet relations, needs no
+fixpoint over a call graph. Scopes there are propagated along the component nesting
+graph from the shell and from each routed component, which is plain reachability and
+costs
+\[
+  O(|\mathit{routes}| \cdot (|\mathit{components}| + |E_{\mathit{nesting}}|)),
+\]
+one traversal of the nesting graph per route, where $E_{\mathit{nesting}}$ is the set of
+nesting edges. The fixpoint bound above applies to the full
+model, where calls through injected services and dispatched actions create the cycles
+that make a fixpoint necessary.
+
+\subsection{Input relations}
+
+Four relations, in order of increasing difficulty, provide the input to the fixpoint computation. \emph{Component nesting}: $A \to B$ when $A$'s template
+instantiates $B$'s selector, resolved within the correct import scope; matching
+selector text globally is unsound, since two components may share a selector string in
+different scopes. \emph{Router outlets}: components on the path from the root to the
+outlet form the shell and take $\top$; components below a routed component take that
+screen's scope; a named outlet carries a second mount, which makes auxiliary routes
+representable without separate treatment. \emph{Call graph with dependency injection}:
+a call links to a method only after resolving the receiver's type and its binding in
+the relevant injector. Resolution follows class hierarchy analysis
+\cite{dean1995cha}, with Angular's provider declarations as the source of bindings, as
+recommended for framework-heavy code \cite{antoniadis2020enterprise}. Where a token
+admits several implementations the analysis joins over all of them, which is one
+source of \emph{may} modality. \emph{Dispatch
+relations}: a dispatch is treated as a call-graph edge from every dispatcher to every
+handler, which admits NgRx effects and router event subscriptions under the same
+fixpoint.
+
+Algorithm~\ref{alg:attribution} gives the computation. Each scope can only grow, and it
+can grow at most $|S|$ times, so the worklist terminates after $O(|S| \cdot (|N| +
+|\mathit{CG}| + |D|))$ propagation steps.
+
+\input{figures/alg-attribution}
+
+\subsection{Guards as program points}
+
+A guard that returns a \texttt{UrlTree} is itself a navigation: a redirect edge from
+$\mathit{subtree}(r)$, typically to a login screen. Treating guards only as labels on
+inbound edges misses this edge class entirely. Further, the guard of an edge is the
+conjunction of the conditions on the containment path from screen to call site
+(structural directives) with the guards of the target route. Reporting only the
+second part gives a weaker condition than the true one. In the baseline, for example,
+a link that is rendered only inside \texttt{@if (isUser())} was labelled with the
+authentication guard of its target route. That guard is satisfied by any logged-in
+user, including users who are not the owner and who therefore never see the link.
+
+\subsection{Boundary}
+
+A navigation inside a signal effect has a firing condition that is a data dependence
+on a reactive graph. As Section~\ref{sec:angular} notes, only the read set is statically visible.
+Such edges are given the modality \emph{unknown}, and the set of signals read by the
+effect is recorded as the symbolic guard. The analysis does not try to determine when these edges fire. It marks this limit explicitly instead of giving a result that looks more precise than it is.
+
+\subsection{Anchored edges}
+
+If the result of attribution were stored explicitly, a single link in the application
+shell would produce one edge for every screen, and the size of the graph would be
+bounded by $|\mathit{screens}| \times |\mathit{sites}|$. For the largest application in
+the corpus this bound is $610 \times 1344$. Instead, each edge is stored once, anchored
+at its scope, and the set of edges leaving a particular screen is computed when it is
+requested:
+\[
+  \mathit{edgesFrom}(r) \;=\; E_\top \;\cup\; \bigcup_{r' \succeq r}
+  E_{\mathit{subtree}(r')} \;\cup\; E_{\mathit{screen}(r)},
+\]
+where $E_X$ is the set of edges anchored at scope $X$ and $r' \succeq r$ is the
+reflexive ancestor relation on routes introduced above, so that the term for
+$r' = r$ contributes $E_{\mathit{subtree}(r)}$ itself. The query is made for a screen,
+so $\mathit{component}(r)$ is defined, while $r'$ ranges over all ancestors of $r$,
+prefix routes included. An edge whose scope is some other
+screen set is stored at each of its screens and reaches $\mathit{edgesFrom}(r)$ through
+the $E_{\mathit{screen}(r)}$ term.
+Figure~\ref{fig:anchored} contrasts the two representations.
+
+\input{figures/fig-anchored}
+
+\begin{claim}[Expansion]
+\label{claim:expansion}
+The expansion of the anchored edge set equals the materialised edge set, modulo the
+declared approximation list of Section~\ref{sec:approximations}.
+\end{claim}
+
+\section{Implementation}
+\label{sec:implementation}
+
+The extractor, \emph{uigraph}, is available as open source. It consists of a core
+that is independent of any particular framework and a set of adapters, one per
+framework. The core defines the graph model, its representation on disk, and the
+operations over graphs. Each adapter maps the source constructs of one framework onto
+the shared model, following a fixed interface. The Angular adapter reads route
+configuration, templates and class code with the TypeScript compiler API, and emits
+nodes for screens and edges for \texttt{routerLink} attributes and
+\texttt{Router.navigate} calls, each with the rule identifier and source location that
+produced it as witness.
+
+Scope attribution is implemented as a separate pass in the Angular adapter, enabled
+with the option \texttt{--attribution}. With the option off, the extractor produces
+exactly the baseline edge set; this was checked on every application in the corpus.
+The pass implements two of the four input relations of Section~\ref{sec:attribution}.
+
+\textbf{Component nesting.} Every component in the application, excluding test hosts
+and stories, is read with its element selectors and its template. An edge $A \to B$
+is added when $A$'s template contains an element with $B$'s selector. When a selector
+belongs to more than one component, the candidates are narrowed to those that $A$'s
+file imports; if none is imported, the analysis joins over all of them and records a
+note. Attribute selectors are not matched.
+
+\textbf{Router outlets.} The route tree is recorded during route extraction. A route
+component's template is rendered on its own screen and on every descendant screen, so
+its navigation sites get the scope $\mathit{subtree}(r)$. A component that is not
+routed, is not referenced by any template and holds the primary
+\texttt{<router-outlet>} is the application shell, and everything it renders gets the
+scope $\top$. A component that is not routed and not referenced, but whose subtree
+contains the outlet, is most likely mounted by a route the extractor cannot see, for
+example through a helper function that wraps a route table. It is also treated as
+shell, but its edges are capped at \emph{may}, so that Claim~\ref{claim:must} is not
+put at risk by a scope that may be too large.
+
+\textbf{Anchored edges.} Edges with scope $\top$ are stored once at a node of kind
+\texttt{scope}. Edges whose screen set is exactly $\mathit{subtree}(r)$ are stored once
+at a scope node that lists the members of that subtree. Other screen sets are stored
+as one edge per screen. The core library provides the expansion query
+$\mathit{edgesFrom}(r)$ and a function that materialises all anchored edges, which is
+used to test Claim~\ref{claim:expansion}.
+
+The call graph with dependency injection and the dispatch relations are not
+implemented in this version. Navigation sites in services, guards, interceptors,
+resolvers and effects are not attributed to any screen, and the evaluation counts them
+in the defect class ``Attribution, service'' of Table~\ref{tab:loss-rules}. The pass is
+covered by unit tests for each of the cases above, including a test that the baseline
+is unchanged when the option is off.
+
+One change was made to the baseline itself. For components with an inline template,
+the witness of an edge pointed at the line where the template starts rather than at
+the construct. The witness now points at the construct's own line. This can change
+witness locations but no edge. On the corpus, the baseline graphs with and without this
+change are identical, including witnesses.

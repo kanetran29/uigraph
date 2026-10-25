@@ -1,0 +1,222 @@
+#!/usr/bin/env node
+// Test F — mutation / differential testing of the uigraph extractor.
+//
+// THE IDEA: inject a change into the source whose effect on the graph you know in
+// advance, re-extract, and check the graph moved the way it had to. Ground truth comes
+// from the delta you authored, so no external oracle is needed and nothing is circular.
+//
+// This tests the property the impact-analysis thesis depends on: that a source change
+// is visible in the graph. A mutation the extractor cannot see is a change that
+// impact analysis would silently miss.
+//
+// Verdicts:
+//   DETECTED  the graph changed, and it changed the way the mutation predicted
+//   WRONG     the graph changed, but not as predicted (over- or under-reaction)
+//   MISSED    the graph did not change at all — the extractor is blind to this edit
+//   BROKE     extraction failed on the mutated source
+//
+// Usage: node mutate.mjs <repoRoot> <appDir> [--limit N] [--json out.json]
+
+import { execSync } from 'node:child_process'
+import { DatabaseSync } from 'node:sqlite'
+import fs from 'node:fs'
+import path from 'node:path'
+
+const repoRoot = path.resolve(process.argv[2])
+const appDir = path.resolve(process.argv[3])
+const limitIdx = process.argv.indexOf('--limit')
+const LIMIT = limitIdx > -1 ? parseInt(process.argv[limitIdx + 1], 10) : 6
+const jsonIdx = process.argv.indexOf('--json')
+const jsonOut = jsonIdx > -1 ? process.argv[jsonIdx + 1] : null
+
+const CLI = '/home/claude/uigraph/packages/cli/dist/cli.js'
+const DB = path.join(appDir, 'uigraph.db')
+
+// ---------------------------------------------------------------- graph io
+
+function extract(label) {
+  try {
+    execSync(`node ${CLI} map ${appDir} --adapter angular`, { stdio: 'pipe', timeout: 600000 })
+  } catch (e) {
+    return { failed: true, error: String(e.stderr || e.message).slice(0, 300) }
+  }
+  const db = new DatabaseSync(DB)
+  const row = db.prepare("select json from docs where key='graph'").get()
+  const g = JSON.parse(row?.json || '{}')
+  db.close?.()
+  return { nodes: g.nodes || [], edges: g.edges || [], label }
+}
+
+const edgeKey = (e) => `${e.from}|${e.to}|${e.event}`
+const nodeRoutes = (g) => new Map(g.nodes.map((n) => [n.id, n.route]))
+
+function delta(base, mut) {
+  const bN = new Map(base.nodes.map((n) => [n.id, n]))
+  const mN = new Map(mut.nodes.map((n) => [n.id, n]))
+  const bE = new Map(base.edges.map((e) => [edgeKey(e), e]))
+  const mE = new Map(mut.edges.map((e) => [edgeKey(e), e]))
+  const bR = nodeRoutes(base), mR = nodeRoutes(mut)
+
+  const nodesAdded = [...mN.values()].filter((n) => !bN.has(n.id)).map((n) => n.route || n.id)
+  const nodesRemoved = [...bN.values()].filter((n) => !mN.has(n.id)).map((n) => n.route || n.id)
+  const routeChanged = [...bN.values()]
+    .filter((n) => mN.has(n.id) && mN.get(n.id).route !== n.route)
+    .map((n) => `${n.route} -> ${mN.get(n.id).route}`)
+
+  const edgesAdded = [...mE.values()].filter((e) => !bE.has(edgeKey(e)))
+    .map((e) => `${bR.get(e.from) || e.from} -> ${mR.get(e.to) || e.to} (${e.event})`)
+  const edgesRemoved = [...bE.values()].filter((e) => !mE.has(edgeKey(e)))
+    .map((e) => `${bR.get(e.from) || e.from} -> ${bR.get(e.to) || e.to} (${e.event})`)
+  const guardChanged = [...bE.values()]
+    .filter((e) => mE.has(edgeKey(e)) && (mE.get(edgeKey(e)).guard !== e.guard || mE.get(edgeKey(e)).modality !== e.modality))
+    .map((e) => {
+      const m = mE.get(edgeKey(e))
+      return `${bR.get(e.from)} -> ${bR.get(e.to)}: guard ${e.guard}->${m.guard}, modality ${e.modality}->${m.modality}`
+    })
+
+  const touched = nodesAdded.length + nodesRemoved.length + routeChanged.length +
+    edgesAdded.length + edgesRemoved.length + guardChanged.length
+  return { nodesAdded, nodesRemoved, routeChanged, edgesAdded, edgesRemoved, guardChanged, touched }
+}
+
+// ---------------------------------------------------------------- mutation discovery
+
+function tsFiles(dir) {
+  const out = []
+  const walk = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue
+      const p = path.join(d, e.name)
+      if (e.isDirectory()) walk(p)
+      else if (/\.(ts|html)$/.test(e.name) && !/\.(spec|test)\.ts$/.test(e.name)) out.push(p)
+    }
+  }
+  walk(dir)
+  return out
+}
+
+function discover() {
+  const muts = []
+  for (const f of tsFiles(appDir)) {
+    const src = fs.readFileSync(f, 'utf8')
+    const rel = path.relative(repoRoot, f)
+
+    // 1. RENAME_PATH — a literal, non-empty route path
+    for (const m of src.matchAll(/(\bpath:\s*)(['"])([a-zA-Z][\w-]*)\2/g)) {
+      muts.push({
+        kind: 'RENAME_PATH', file: f, rel,
+        find: m[0], replace: `${m[1]}${m[2]}${m[3]}-mutated${m[2]}`,
+        subject: m[3],
+        predict: `a node route containing "${m[3]}" becomes "${m[3]}-mutated"`,
+        check: (d) => d.routeChanged.some((c) => c.includes(`${m[3]}-mutated`)) ||
+                      (d.nodesAdded.some((r) => String(r).includes(`${m[3]}-mutated`)) && d.nodesRemoved.length > 0),
+      })
+    }
+
+    // 2. DELETE_ROUTERLINK — remove a static routerLink binding from a template
+    for (const m of src.matchAll(/\s(routerLink)="\/([\w/-]+)"/g)) {
+      muts.push({
+        kind: 'DELETE_ROUTERLINK', file: f, rel,
+        find: m[0], replace: ' data-removed-link="1"',
+        subject: `/${m[2]}`,
+        predict: `at least one edge targeting /${m[2]} disappears`,
+        check: (d) => d.edgesRemoved.some((e) => e.includes(`/${m[2]}`)),
+      })
+    }
+
+    // 3. CHANGE_NAV_TARGET — retarget a literal router.navigate
+    for (const m of src.matchAll(/(router\.navigate\(\[\s*)(['"])(\/[\w/-]+)\2/g)) {
+      muts.push({
+        kind: 'CHANGE_NAV_TARGET', file: f, rel,
+        find: m[0], replace: `${m[1]}${m[2]}/uigraph-mutant-target${m[2]}`,
+        subject: m[3],
+        predict: `the edge to ${m[3]} disappears or is retargeted`,
+        check: (d) => d.edgesRemoved.some((e) => e.includes(m[3])) || d.edgesAdded.length > 0,
+      })
+    }
+
+    // 4. REMOVE_GUARD — drop a canActivate property from a route
+    for (const m of src.matchAll(/\bcanActivate:\s*\[[^\]]*\],?/g)) {
+      muts.push({
+        kind: 'REMOVE_GUARD', file: f, rel,
+        find: m[0], replace: '',
+        subject: m[0].slice(0, 50),
+        predict: 'guard text or modality changes on at least one edge, or a node loses its guard',
+        check: (d) => d.guardChanged.length > 0 || d.edgesRemoved.length > 0 || d.edgesAdded.length > 0,
+      })
+    }
+  }
+  return muts
+}
+
+// ---------------------------------------------------------------- run
+
+function gitRestore() {
+  execSync(`git -C ${repoRoot} checkout -- .`, { stdio: 'pipe' })
+}
+
+console.log(`repo:    ${repoRoot}`)
+console.log(`app:     ${appDir}`)
+gitRestore()
+const baseline = extract('baseline')
+if (baseline.failed) { console.error('baseline extraction failed:', baseline.error); process.exit(1) }
+console.log(`baseline: ${baseline.nodes.length} nodes, ${baseline.edges.length} edges\n`)
+
+const all = discover()
+const byKind = {}
+for (const m of all) byKind[m.kind] = (byKind[m.kind] || 0) + 1
+console.log(`discovered ${all.length} candidate mutations ${JSON.stringify(byKind)}`)
+
+// take up to LIMIT per kind, spread across files
+const chosen = []
+for (const kind of Object.keys(byKind)) {
+  const pool = all.filter((m) => m.kind === kind)
+  const seenFiles = new Set()
+  for (const m of pool) {
+    if (chosen.filter((c) => c.kind === kind).length >= LIMIT) break
+    if (seenFiles.has(m.file) && pool.length > LIMIT) continue
+    seenFiles.add(m.file)
+    chosen.push(m)
+  }
+}
+console.log(`running ${chosen.length} mutants\n`)
+
+const results = []
+for (const [i, m] of chosen.entries()) {
+  const src = fs.readFileSync(m.file, 'utf8')
+  if (!src.includes(m.find)) { results.push({ ...m, verdict: 'SKIP', reason: 'pattern vanished' }); continue }
+  fs.writeFileSync(m.file, src.replace(m.find, m.replace))
+
+  const mut = extract(`mut${i}`)
+  let verdict, d = null
+  if (mut.failed) {
+    verdict = 'BROKE'
+  } else {
+    d = delta(baseline, mut)
+    if (d.touched === 0) verdict = 'MISSED'
+    else verdict = m.check(d) ? 'DETECTED' : 'WRONG'
+  }
+  gitRestore()
+
+  const row = {
+    kind: m.kind, file: m.rel, subject: m.subject, predict: m.predict, verdict,
+    touched: d ? d.touched : null, delta: d ? {
+      nodesAdded: d.nodesAdded, nodesRemoved: d.nodesRemoved, routeChanged: d.routeChanged,
+      edgesAdded: d.edgesAdded.slice(0, 4), edgesRemoved: d.edgesRemoved.slice(0, 4),
+      guardChanged: d.guardChanged.slice(0, 4),
+    } : null,
+    error: mut.failed ? mut.error : undefined,
+  }
+  results.push(row)
+  const mark = { DETECTED: 'ok  ', MISSED: 'MISS', WRONG: 'WRNG', BROKE: 'BRK ', SKIP: 'skip' }[verdict]
+  console.log(`[${mark}] ${m.kind.padEnd(20)} ${m.subject.toString().slice(0, 34).padEnd(35)} ${m.rel.slice(-42)}`)
+  if (verdict === 'WRONG' && d) console.log(`         predicted: ${m.predict}\n         actual:    touched ${d.touched} — ${JSON.stringify(row.delta).slice(0, 180)}`)
+}
+
+gitRestore()
+const tally = {}
+for (const r of results) tally[r.verdict] = (tally[r.verdict] || 0) + 1
+console.log(`\nTALLY ${JSON.stringify(tally)}`)
+const scored = results.filter((r) => r.verdict !== 'SKIP').length
+console.log(`detection rate: ${tally.DETECTED || 0}/${scored} = ${scored ? (((tally.DETECTED || 0) / scored) * 100).toFixed(1) : 0}%`)
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ repoRoot, appDir, baseline: { nodes: baseline.nodes.length, edges: baseline.edges.length }, tally, results }, null, 2))

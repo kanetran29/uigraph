@@ -1,0 +1,2020 @@
+{
+  "appDir": "/tmp/eval/corpus/ghostfolio/apps/client",
+  "db": "/tmp/eval/corpus/ghostfolio/apps/client/uigraph.db",
+  "filesParsed": 207,
+  "declaredRoutesTotal": 135,
+  "byKind": {
+    "PREFIX": 40,
+    "SCREEN": 93,
+    "MATCHER": 1,
+    "REDIRECT": 1
+  },
+  "uniqueScreenPaths": 84,
+  "guardedScreenPaths": 50,
+  "blindSpots": [],
+  "comparison": {
+    "declaredScreens": 84,
+    "graphNodes": 1,
+    "matched": 0,
+    "coverage": 0,
+    "missing": [
+      {
+        "path": "/publicRoutes.about.path",
+        "at": "src/app/pages/about/overview/about-overview-page.routes.ts:8",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.changelog.path",
+        "at": "src/app/pages/about/changelog/changelog-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.license.path",
+        "at": "src/app/pages/about/license/license-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.ossFriends.path",
+        "at": "src/app/pages/about/oss-friends/oss-friends-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.privacyPolicy.path",
+        "at": "src/app/pages/about/privacy-policy/privacy-policy-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.termsOfService.path",
+        "at": "src/app/pages/about/terms-of-service/terms-of-service-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.account.path",
+        "at": "src/app/pages/user-account/user-account-page.routes.ts:18",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.account.path/membership.path",
+        "at": "src/app/pages/user-account/user-account-page.routes.ts:23",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.account.path/access.path",
+        "at": "src/app/pages/user-account/user-account-page.routes.ts:28",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.account.path/access.path/access.subRoutes.create.path",
+        "at": "src/app/pages/user-account/user-account-page.routes.ts:30",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.account.path/access.path/:accessId/access.subRoutes.update.path",
+        "at": "src/app/pages/user-account/user-account-page.routes.ts:38",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.accounts.path",
+        "at": "src/app/pages/accounts/accounts-page.routes.ts:13",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.accounts.path/create.path",
+        "at": "src/app/pages/accounts/accounts-page.routes.ts:16",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.accounts.path/transferCashBalance.path",
+        "at": "src/app/pages/accounts/accounts-page.routes.ts:22",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.accounts.path/:accountId",
+        "at": "src/app/pages/accounts/accounts-page.routes.ts:30",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.accounts.path/:accountId/update.path",
+        "at": "src/app/pages/accounts/accounts-page.routes.ts:36",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.adminControl.path",
+        "at": "src/app/pages/admin/admin-page.routes.ts:42",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.jobs.path",
+        "at": "src/app/pages/admin/admin-page.routes.ts:47",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.marketData.path",
+        "at": "src/app/pages/admin/admin-page.routes.ts:52",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.marketData.path/create.path",
+        "at": "src/app/pages/admin/admin-page.routes.ts:54",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.marketData.path/:dataSource/:symbol/update.path",
+        "at": "src/app/pages/admin/admin-page.routes.ts:62",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.settings.path",
+        "at": "src/app/pages/admin/admin-page.routes.ts:76",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.api.path",
+        "at": "src/app/app.routes.ts:30",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.auth.path",
+        "at": "src/app/pages/auth/auth-page.routes.ts:8",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.auth.path/:jwt",
+        "at": "src/app/pages/auth/auth-page.routes.ts:13",
+        "guards": []
+      },
+      {
+        "path": "/publicRoutes.blog.path",
+        "at": "src/app/pages/blog/blog-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2021/07/hallo-ghostfolio",
+        "at": "src/app/pages/blog/blog-page.routes.ts:15",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2021/07/hello-ghostfolio",
+        "at": "src/app/pages/blog/blog-page.routes.ts:24",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2022/01/ghostfolio-first-months-in-open-source",
+        "at": "src/app/pages/blog/blog-page.routes.ts:33",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2022/07/ghostfolio-meets-internet-identity",
+        "at": "src/app/pages/blog/blog-page.routes.ts:42",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2022/07/how-do-i-get-my-finances-in-order",
+        "at": "src/app/pages/blog/blog-page.routes.ts:51",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2022/08/500-stars-on-github",
+        "at": "src/app/pages/blog/blog-page.routes.ts:60",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2022/10/hacktoberfest-2022",
+        "at": "src/app/pages/blog/blog-page.routes.ts:69",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2022/11/black-friday-2022",
+        "at": "src/app/pages/blog/blog-page.routes.ts:78",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2022/12/the-importance-of-tracking-your-personal-finances",
+        "at": "src/app/pages/blog/blog-page.routes.ts:87",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/01/ghostfolio-auf-sackgeld-vorgestellt",
+        "at": "src/app/pages/blog/blog-page.routes.ts:96",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/02/ghostfolio-meets-umbrel",
+        "at": "src/app/pages/blog/blog-page.routes.ts:105",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/03/ghostfolio-reaches-1000-stars-on-github",
+        "at": "src/app/pages/blog/blog-page.routes.ts:114",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/05/unlock-your-financial-potential-with-ghostfolio",
+        "at": "src/app/pages/blog/blog-page.routes.ts:123",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/07/exploring-the-path-to-fire",
+        "at": "src/app/pages/blog/blog-page.routes.ts:132",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/08/ghostfolio-joins-oss-friends",
+        "at": "src/app/pages/blog/blog-page.routes.ts:141",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/09/ghostfolio-2",
+        "at": "src/app/pages/blog/blog-page.routes.ts:150",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/09/hacktoberfest-2023",
+        "at": "src/app/pages/blog/blog-page.routes.ts:159",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/11/black-week-2023",
+        "at": "src/app/pages/blog/blog-page.routes.ts:168",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2023/11/hacktoberfest-2023-debriefing",
+        "at": "src/app/pages/blog/blog-page.routes.ts:177",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2024/09/hacktoberfest-2024",
+        "at": "src/app/pages/blog/blog-page.routes.ts:186",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2024/11/black-weeks-2024",
+        "at": "src/app/pages/blog/blog-page.routes.ts:195",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2025/09/hacktoberfest-2025",
+        "at": "src/app/pages/blog/blog-page.routes.ts:204",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2025/11/black-weeks-2025",
+        "at": "src/app/pages/blog/blog-page.routes.ts:213",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.blog.path/2026/04/ghostfolio-3",
+        "at": "src/app/pages/blog/blog-page.routes.ts:222",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.demo.path",
+        "at": "src/app/app.routes.ts:50",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.faq.path",
+        "at": "src/app/pages/faq/overview/faq-overview-page.routes.ts:8",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.faq.path/publicRoutes.faq.subRoutes.saas.path",
+        "at": "src/app/pages/faq/saas/saas-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.faq.path/publicRoutes.faq.subRoutes.selfHosting.path",
+        "at": "src/app/pages/faq/self-hosting/self-hosting-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.features.path",
+        "at": "src/app/app.routes.ts:63",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.home.path",
+        "at": "src/app/pages/home/home-page.routes.ts:18",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.holdings.path",
+        "at": "src/app/pages/home/home-page.routes.ts:22",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.summary.path",
+        "at": "src/app/pages/home/home-page.routes.ts:27",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.markets.path",
+        "at": "src/app/pages/home/home-page.routes.ts:32",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.watchlist.path",
+        "at": "src/app/pages/home/home-page.routes.ts:37",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.watchlist.path/internalRoutes.home.subRoutes.watchlist.subRoutes.create.path",
+        "at": "src/app/pages/home/home-page.routes.ts:39",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.i18n.path",
+        "at": "src/app/app.routes.ts:77",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.markets.path",
+        "at": "src/app/pages/markets/markets-page.routes.ts:12",
+        "guards": []
+      },
+      {
+        "path": "/publicRoutes.openStartup.path",
+        "at": "src/app/pages/open/open-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.portfolio.path",
+        "at": "src/app/pages/portfolio/analysis/analysis-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path",
+        "at": "src/app/pages/portfolio/activities/activities-page.routes.ts:13",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/create.path",
+        "at": "src/app/pages/portfolio/activities/activities-page.routes.ts:16",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId/clone.path",
+        "at": "src/app/pages/portfolio/activities/activities-page.routes.ts:24",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId/update.path",
+        "at": "src/app/pages/portfolio/activities/activities-page.routes.ts:30",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.allocations.path",
+        "at": "src/app/pages/portfolio/allocations/allocations-page.routes.ts:8",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.fire.path",
+        "at": "src/app/pages/portfolio/fire/fire-page.routes.ts:8",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.xRay.path",
+        "at": "src/app/pages/portfolio/x-ray/x-ray-page.routes.ts:8",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.pricing.path",
+        "at": "src/app/pages/pricing/pricing-page.routes.ts:8",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.public.path/:id",
+        "at": "src/app/pages/public/public-page.routes.ts:8",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.register.path",
+        "at": "src/app/pages/register/register-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.resources.path",
+        "at": "src/app/pages/resources/overview/resources-overview.routes.ts:6",
+        "guards": []
+      },
+      {
+        "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.glossary.path",
+        "at": "src/app/pages/resources/glossary/resources-glossary.routes.ts:8",
+        "guards": []
+      },
+      {
+        "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.guides.path",
+        "at": "src/app/pages/resources/guides/resources-guides.routes.ts:8",
+        "guards": []
+      },
+      {
+        "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.markets.path",
+        "at": "src/app/pages/resources/markets/resources-markets.routes.ts:8",
+        "guards": []
+      },
+      {
+        "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.personalFinanceTools.path",
+        "at": "src/app/pages/resources/personal-finance-tools/personal-finance-tools-page.routes.ts:10",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/publicRoutes.start.path",
+        "at": "src/app/pages/landing/landing-page.routes.ts:9",
+        "guards": [
+          "[AuthGuard]"
+        ]
+      },
+      {
+        "path": "/internalRoutes.webauthn.path",
+        "at": "src/app/app.routes.ts:126",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.zen.path",
+        "at": "src/app/pages/zen/zen-page.routes.ts:14",
+        "guards": []
+      },
+      {
+        "path": "/internalRoutes.zen.path/internalRoutes.zen.subRoutes.holdings.path",
+        "at": "src/app/pages/zen/zen-page.routes.ts:18",
+        "guards": []
+      }
+    ],
+    "extraNodes": [
+      {
+        "route": "*",
+        "id": "n_wildcard",
+        "kind": "screen"
+      }
+    ]
+  },
+  "routes": [
+    {
+      "path": "/publicRoutes.about.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 8,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.about.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/about/about-page.routes.ts",
+      "line": 9,
+      "component": "AboutPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/about/about-page.routes.ts",
+      "line": 12,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/about/overview/about-overview-page.routes.ts",
+      "line": 8,
+      "component": "GfAboutOverviewPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.changelog.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/about/about-page.routes.ts",
+      "line": 17,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.changelog.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/about/changelog/changelog-page.routes.ts",
+      "line": 9,
+      "component": "GfChangelogPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.license.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/about/about-page.routes.ts",
+      "line": 22,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.license.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/about/license/license-page.routes.ts",
+      "line": 9,
+      "component": "GfLicensePageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.ossFriends.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/about/about-page.routes.ts",
+      "line": 27,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.ossFriends.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/about/oss-friends/oss-friends-page.routes.ts",
+      "line": 9,
+      "component": "GfOpenSourceSoftwareFriendsPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.privacyPolicy.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/about/about-page.routes.ts",
+      "line": 32,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.privacyPolicy.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/about/privacy-policy/privacy-policy-page.routes.ts",
+      "line": 9,
+      "component": "GfPrivacyPolicyPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.termsOfService.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/about/about-page.routes.ts",
+      "line": 39,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.about.path/publicRoutes.about.subRoutes.termsOfService.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/about/terms-of-service/terms-of-service-page.routes.ts",
+      "line": 9,
+      "component": "GfTermsOfServicePageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.account.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 13,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.account.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/user-account/user-account-page.routes.ts",
+      "line": 15,
+      "component": "GfUserAccountPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.account.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/user-account/user-account-page.routes.ts",
+      "line": 18,
+      "component": "GfUserAccountSettingsComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.account.path/membership.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/user-account/user-account-page.routes.ts",
+      "line": 23,
+      "component": "GfUserAccountMembershipComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.account.path/access.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/user-account/user-account-page.routes.ts",
+      "line": 28,
+      "component": "GfUserAccountAccessComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.account.path/access.path/access.subRoutes.create.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/user-account/user-account-page.routes.ts",
+      "line": 30,
+      "component": "GfAccessDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.account.path/access.path/:accessId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/user-account/user-account-page.routes.ts",
+      "line": 36,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.account.path/access.path/:accessId/access.subRoutes.update.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/user-account/user-account-page.routes.ts",
+      "line": 38,
+      "component": "GfAccessDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.accounts.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 20,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.accounts.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/accounts/accounts-page.routes.ts",
+      "line": 13,
+      "component": "GfAccountsPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.accounts.path/create.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/accounts/accounts-page.routes.ts",
+      "line": 16,
+      "component": "GfAccountDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.accounts.path/transferCashBalance.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/accounts/accounts-page.routes.ts",
+      "line": 22,
+      "component": "GfAccountDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.accounts.path/:accountId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/accounts/accounts-page.routes.ts",
+      "line": 28,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.accounts.path/:accountId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/accounts/accounts-page.routes.ts",
+      "line": 30,
+      "component": "GfAccountDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.accounts.path/:accountId/update.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/accounts/accounts-page.routes.ts",
+      "line": 36,
+      "component": "GfAccountDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 25,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.adminControl.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 39,
+      "component": "AdminPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 42,
+      "component": "GfAdminOverviewComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.jobs.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 47,
+      "component": "GfAdminJobsComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.marketData.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 52,
+      "component": "GfAdminMarketDataComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.marketData.path/create.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 54,
+      "component": "GfAssetProfileDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.marketData.path/:dataSource/:symbol",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 60,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.marketData.path/:dataSource/:symbol/update.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 62,
+      "component": "GfAssetProfileDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path/internalRoutes.adminControl.subRoutes.settings.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 76,
+      "component": "GfAdminSettingsComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.adminControl.path",
+      "kind": "MATCHER",
+      "guards": [],
+      "file": "src/app/pages/admin/admin-page.routes.ts",
+      "line": 81,
+      "component": "GfAdminUsersComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.api.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 30,
+      "component": "./pages/api/api-page.component",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.auth.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 39,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.auth.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/auth/auth-page.routes.ts",
+      "line": 8,
+      "component": "GfAuthPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.auth.path/:jwt",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/auth/auth-page.routes.ts",
+      "line": 13,
+      "component": "GfAuthPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 45,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.blog.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 9,
+      "component": "GfBlogPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2021/07/hallo-ghostfolio",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 15,
+      "component": "./2021/07/hallo-ghostfolio/hallo-ghostfolio-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2021/07/hello-ghostfolio",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 24,
+      "component": "./2021/07/hello-ghostfolio/hello-ghostfolio-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2022/01/ghostfolio-first-months-in-open-source",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 33,
+      "component": "./2022/01/first-months-in-open-source/first-months-in-open-source-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2022/07/ghostfolio-meets-internet-identity",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 42,
+      "component": "./2022/07/ghostfolio-meets-internet-identity/ghostfolio-meets-internet-identity-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2022/07/how-do-i-get-my-finances-in-order",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 51,
+      "component": "./2022/07/how-do-i-get-my-finances-in-order/how-do-i-get-my-finances-in-order-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2022/08/500-stars-on-github",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 60,
+      "component": "./2022/08/500-stars-on-github/500-stars-on-github-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2022/10/hacktoberfest-2022",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 69,
+      "component": "./2022/10/hacktoberfest-2022/hacktoberfest-2022-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2022/11/black-friday-2022",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 78,
+      "component": "./2022/11/black-friday-2022/black-friday-2022-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2022/12/the-importance-of-tracking-your-personal-finances",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 87,
+      "component": "./2022/12/the-importance-of-tracking-your-personal-finances/the-importance-of-tracking-your-personal-finances-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/01/ghostfolio-auf-sackgeld-vorgestellt",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 96,
+      "component": "./2023/01/ghostfolio-auf-sackgeld-vorgestellt/ghostfolio-auf-sackgeld-vorgestellt-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/02/ghostfolio-meets-umbrel",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 105,
+      "component": "./2023/02/ghostfolio-meets-umbrel/ghostfolio-meets-umbrel-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/03/ghostfolio-reaches-1000-stars-on-github",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 114,
+      "component": "./2023/03/1000-stars-on-github/1000-stars-on-github-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/05/unlock-your-financial-potential-with-ghostfolio",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 123,
+      "component": "./2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/07/exploring-the-path-to-fire",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 132,
+      "component": "./2023/07/exploring-the-path-to-fire/exploring-the-path-to-fire-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/08/ghostfolio-joins-oss-friends",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 141,
+      "component": "./2023/08/ghostfolio-joins-oss-friends/ghostfolio-joins-oss-friends-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/09/ghostfolio-2",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 150,
+      "component": "./2023/09/ghostfolio-2/ghostfolio-2-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/09/hacktoberfest-2023",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 159,
+      "component": "./2023/09/hacktoberfest-2023/hacktoberfest-2023-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/11/black-week-2023",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 168,
+      "component": "./2023/11/black-week-2023/black-week-2023-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2023/11/hacktoberfest-2023-debriefing",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 177,
+      "component": "./2023/11/hacktoberfest-2023-debriefing/hacktoberfest-2023-debriefing-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2024/09/hacktoberfest-2024",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 186,
+      "component": "./2024/09/hacktoberfest-2024/hacktoberfest-2024-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2024/11/black-weeks-2024",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 195,
+      "component": "./2024/11/black-weeks-2024/black-weeks-2024-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2025/09/hacktoberfest-2025",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 204,
+      "component": "./2025/09/hacktoberfest-2025/hacktoberfest-2025-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2025/11/black-weeks-2025",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 213,
+      "component": "./2025/11/black-weeks-2025/black-weeks-2025-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.blog.path/2026/04/ghostfolio-3",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/blog/blog-page.routes.ts",
+      "line": 222,
+      "component": "./2026/04/ghostfolio-3/ghostfolio-3-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.demo.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 50,
+      "component": "./pages/demo/demo-page.component",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.faq.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 58,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.faq.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/faq/faq-page.routes.ts",
+      "line": 9,
+      "component": "GfFaqPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.faq.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/faq/faq-page.routes.ts",
+      "line": 12,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.faq.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/faq/overview/faq-overview-page.routes.ts",
+      "line": 8,
+      "component": "GfFaqOverviewPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.faq.path/publicRoutes.faq.subRoutes.saas.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/faq/faq-page.routes.ts",
+      "line": 17,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.faq.path/publicRoutes.faq.subRoutes.saas.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/faq/saas/saas-page.routes.ts",
+      "line": 9,
+      "component": "GfSaasPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.faq.path/publicRoutes.faq.subRoutes.selfHosting.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/faq/faq-page.routes.ts",
+      "line": 22,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.faq.path/publicRoutes.faq.subRoutes.selfHosting.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/faq/self-hosting/self-hosting-page.routes.ts",
+      "line": 9,
+      "component": "GfSelfHostingPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.features.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 63,
+      "component": "./pages/features/features-page.component",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.home.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 72,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.home.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/home/home-page.routes.ts",
+      "line": 15,
+      "component": "GfHomePageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.home.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/home/home-page.routes.ts",
+      "line": 18,
+      "component": "GfHomeOverviewComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.holdings.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/home/home-page.routes.ts",
+      "line": 22,
+      "component": "GfHomeHoldingsComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.summary.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/home/home-page.routes.ts",
+      "line": 27,
+      "component": "GfHomeSummaryComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.markets.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/home/home-page.routes.ts",
+      "line": 32,
+      "component": "GfMarketsComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.watchlist.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/home/home-page.routes.ts",
+      "line": 37,
+      "component": "GfHomeWatchlistComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.home.path/internalRoutes.home.subRoutes.watchlist.path/internalRoutes.home.subRoutes.watchlist.subRoutes.create.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/home/home-page.routes.ts",
+      "line": 39,
+      "component": "GfWatchlistDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.i18n.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 77,
+      "component": "./pages/i18n/i18n-page.component",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.markets.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 86,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.markets.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/markets/markets-page.routes.ts",
+      "line": 9,
+      "component": "GfMarketsPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.markets.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/markets/markets-page.routes.ts",
+      "line": 12,
+      "component": "./markets-page.component",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.openStartup.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 91,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.openStartup.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/open/open-page.routes.ts",
+      "line": 9,
+      "component": "GfOpenPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 96,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.portfolio.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/portfolio/portfolio-page.routes.ts",
+      "line": 9,
+      "component": "PortfolioPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/portfolio/portfolio-page.routes.ts",
+      "line": 12,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/portfolio/analysis/analysis-page.routes.ts",
+      "line": 9,
+      "component": "GfAnalysisPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/portfolio/portfolio-page.routes.ts",
+      "line": 17,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/portfolio/activities/activities-page.routes.ts",
+      "line": 13,
+      "component": "GfActivitiesPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/create.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/portfolio/activities/activities-page.routes.ts",
+      "line": 16,
+      "component": "GfActivityDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/portfolio/activities/activities-page.routes.ts",
+      "line": 22,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId/clone.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/portfolio/activities/activities-page.routes.ts",
+      "line": 24,
+      "component": "GfActivityDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId/update.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/portfolio/activities/activities-page.routes.ts",
+      "line": 30,
+      "component": "GfActivityDialogHostComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.allocations.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/portfolio/portfolio-page.routes.ts",
+      "line": 22,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.allocations.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/portfolio/allocations/allocations-page.routes.ts",
+      "line": 8,
+      "component": "GfAllocationsPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.fire.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/portfolio/portfolio-page.routes.ts",
+      "line": 27,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.fire.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/portfolio/fire/fire-page.routes.ts",
+      "line": 8,
+      "component": "GfFirePageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.xRay.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/portfolio/portfolio-page.routes.ts",
+      "line": 32,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.xRay.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/portfolio/x-ray/x-ray-page.routes.ts",
+      "line": 8,
+      "component": "GfXRayPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.pricing.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 101,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.pricing.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/pricing/pricing-page.routes.ts",
+      "line": 8,
+      "component": "GfPricingPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.public.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 106,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.public.path/:id",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/public/public-page.routes.ts",
+      "line": 8,
+      "component": "GfPublicPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.register.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 111,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.register.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/register/register-page.routes.ts",
+      "line": 9,
+      "component": "GfRegisterPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 116,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.resources.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/resources/resources-page.routes.ts",
+      "line": 9,
+      "component": "ResourcesPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/resources/resources-page.routes.ts",
+      "line": 13,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/resources/overview/resources-overview.routes.ts",
+      "line": 6,
+      "component": "ResourcesOverviewComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.glossary.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/resources/resources-page.routes.ts",
+      "line": 18,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.glossary.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/resources/glossary/resources-glossary.routes.ts",
+      "line": 8,
+      "component": "ResourcesGlossaryPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.guides.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/resources/resources-page.routes.ts",
+      "line": 23,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.guides.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/resources/guides/resources-guides.routes.ts",
+      "line": 8,
+      "component": "ResourcesGuidesComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.markets.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/resources/resources-page.routes.ts",
+      "line": 28,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.markets.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/resources/markets/resources-markets.routes.ts",
+      "line": 8,
+      "component": "ResourcesMarketsComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.personalFinanceTools.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/pages/resources/resources-page.routes.ts",
+      "line": 33,
+      "component": null,
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.resources.path/publicRoutes.resources.subRoutes.personalFinanceTools.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/resources/personal-finance-tools/personal-finance-tools-page.routes.ts",
+      "line": 10,
+      "component": "PersonalFinanceToolsPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/publicRoutes.start.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 121,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/publicRoutes.start.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/landing/landing-page.routes.ts",
+      "line": 9,
+      "component": "GfLandingPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.webauthn.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 126,
+      "component": "./pages/webauthn/webauthn-page.component",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.zen.path",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 133,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/internalRoutes.zen.path",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/pages/zen/zen-page.routes.ts",
+      "line": 11,
+      "component": "GfZenPageComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.zen.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/zen/zen-page.routes.ts",
+      "line": 14,
+      "component": "GfHomeOverviewComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/internalRoutes.zen.path/internalRoutes.zen.subRoutes.holdings.path",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/pages/zen/zen-page.routes.ts",
+      "line": 18,
+      "component": "GfHomeHoldingsComponent",
+      "constantPath": true,
+      "lazy": true
+    },
+    {
+      "path": "/**",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 138,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    }
+  ]
+}

@@ -1,0 +1,536 @@
+\chapter{Discussion}
+\label{ch:discussion}
+
+\section{Key findings}
+\label{sec:findings}
+
+Static extraction of a transition graph from Angular source fails in two different
+places, and which of the two dominates depends on the size of the application. On
+realworld and alfresco, the two smallest applications by construct count, node
+extraction reaches 100\% and 96\% of the declared screens, so nearly all the screens
+that the route configuration declares are present in the graph. What is lost there is lost at the edge: the navigation sites exist in the
+source, the screens they would connect exist in the graph, and the extractor fails to
+connect them because it cannot decide which screens a site belongs to. On ghostfolio
+and mifos, the two largest applications by construct count, the loss starts one level
+earlier. A route
+whose path is a constant reference, and a route table behind a lazy boundary that the
+extractor does not cross, produce no node at all, and every navigation site that
+belongs to such a screen is lost together with every site that points at it. In two
+applications the baseline produces no transitions at all: k8s dashboard yields 40 nodes
+with no edges between them, and ghostfolio yields a single node.
+
+The two failures cap each other, and that is the structural result of the measurement.
+Attribution cannot draw an edge into a screen that has no node, so node extraction
+bounds what attribution can achieve. Node extraction cannot place a navigation site
+that lives outside the component its route renders, so attribution bounds what better
+node extraction would yield. Neither level can be repaired into a usable graph on its
+own. An evaluation that reported only one of the two would have described a tool that
+works better than it does, which is why Chapter~\ref{ch:results} reports node coverage
+beside the conversion ratio instead of the ratio alone.
+
+The ranking of the defect classes depends on which unit the corpus is counted in.
+Attribution is the largest class in four of the six applications, and node defects
+dominate the other two and also the corpus total, because the largest application
+contributes most of the constructs and loses them at the node level. Both views are
+correct and they answer different questions. The per-application view says what a
+developer would hit on a given codebase, and the corpus view says where the engineering
+effort pays off across codebases. Reporting only the total would have hidden the
+attribution problem that four applications show, and reporting only the per-application
+ranking would have hidden that one large application can dominate everything that is
+aggregated.
+
+The answer to RQ3 has to be read against the upper bound that the loss rules define.
+Because a lost construct is assigned to the first class that applies
+(Table~\ref{tab:loss-rules}), a construct inside a shared component that only appears
+in screens without nodes is counted as an attribution loss, although attribution alone
+cannot recover it. The attribution class is therefore an upper bound on what the
+analysis can repair and not a prediction of what it will repair. Across the corpus,
+attribution recovered under a fifth of that bound, while on realworld, whose node
+extraction is complete, it recovered 21 of 22 and the one loss left is in a service.
+The gap between the bound and what was recovered is accounted for by
+Table~\ref{tab:remaining}, and three of its reasons are not attribution problems at
+all: the target screen has no node, the owning component is never reached from any
+screen, or the site sits in a service or a guard that this version does not analyse.
+Precision on the deterministic tier did not fall, and no construct that the baseline
+converted was lost, so the coverage gain was not bought by widening the must tier. The
+single must-tier violation is the same edge in both runs and predates attribution.
+
+The part of the model that Chapter~\ref{ch:analysis} specifies but does not implement
+has a measurable price. Navigation sites in services, guards, interceptors, resolvers
+and effects are counted separately, and in absolute terms they are a small class across
+the corpus, yet they are not spread evenly: in one application they are almost as large
+as the shared-component class, and in another they are the only attribution loss left
+after the implemented pass has run. The call graph with dependency injection is thus
+required for applications that navigate from services.
+
+RQ4 gives a conditional answer, and the condition is RQ1. Renaming a route path was
+detected in every scored mutant in all three applications that were mutated. Deleting
+a \texttt{routerLink} was detected in every scored mutant, and retargeting a
+\texttt{Router.navigate} call in seven of eight. Every mutant that left the graph
+unchanged was a guard removal, eight of the nine misses; the ninth is a retargeted
+\texttt{navigate} call in bitwarden whose old target the baseline had not resolved. Six
+of the eight guards are declared on a route whose path is the empty string. A second method confirms the mechanism
+independently of the mutation run: in realworld the edge entering \texttt{/editor}
+carries no guard although the route declares \texttt{canActivate}, while the edge
+entering \texttt{/editor/:slug} carries it. So a guard declared on an empty-path child
+route is not represented on the edges that enter that screen. This is a new instance of
+the class ``guards unreliable in both directions'' from Chapter~\ref{ch:results}, and
+that class now has two confirmations of its own, from two methods that do not share a
+mechanism.
+
+Detection is conditional on coverage in a second sense, which the exclusion rule makes
+visible. Twenty-two of the seventy sampled mutants were excluded, either because the
+construct they change is absent from the graph or, for a guard, because no edge enters
+the screen it protects. Those exclusions are not a sensitivity
+result; they are the coverage gap of RQ1 appearing in a different experiment. The
+defensible statement is therefore conditional: given that a construct is represented in
+the graph, a change to it is almost always visible in the graph, and the probability
+that it is represented at all is what RQ1 measures. For change impact analysis this is
+the right shape of claim, because an impact query is only ever asked about the part of
+the application that the model represents, and the graph states which part that is
+through its witnesses.
+
+Guard removals were missed in all three mutated applications, and
+Section~\ref{sec:res-mutation} records the routing style of each of them: realworld and
+alfresco declare their routes as standalone arrays and bitwarden declares them in
+NgModule routing modules. The defect appears under both, so it is not a property of one
+routing style. That is the whole of the comparison the measurements support. The corpus
+was not stratified by routing style and the other three applications were not mutated,
+so nothing more general about the two styles follows from this thesis.
+
+Two uses of the extracted graph are supported by what was measured. One is change
+impact analysis. Every edge carries the file and line of the construct that produced it,
+as an invariant of the model rather than as a convenience, so a set of changed lines can
+be mapped to the edges whose witnesses fall inside them and from there to the screens
+those edges leave and enter. This is the screen-level counterpart of what Chianti does
+with atomic changes, affected tests and methods \cite{ren2004chianti}, and it sits in
+the impact analysis tradition that Arnold and Bohner describe
+\cite{arnold1993impact,bohner1996software,lehnert2011taxonomy}. RQ4 is the evidence that
+the mapping reacts to real edits rather than only existing on paper: for the constructs
+the graph represents, an authored change in the source produces the predicted change in
+the graph.
+
+The other is checking in continuous integration at no execution cost. The graph is
+recomputed from source on each commit, the extraction is deterministic and carries no
+state between runs (Section~\ref{sec:protocol}), and nothing has to be installed,
+served, authenticated against or crawled. Properties of the navigation structure can
+then be asserted on every commit in the same way a type check is: that a screen still
+has at least one inbound deterministic transition, that a guard still labels every edge
+entering a protected subtree, that a screen that was reachable from the shell still is.
+A dynamically built model cannot be used this way at the same cost, because it needs a
+running application, test data and an exploration budget, and it has to be rebuilt for
+each version \cite{crawljax2012,feedex2013,websurvey2025}.
+
+Both uses stop at the same place, which is runtime dynamic routing. Where a navigation
+target is computed from a value, where the route table is assembled at startup from
+configuration rather than declared, and where a user interface state is an overlay that
+no route describes, the static graph is either silent or over-approximates into the may
+and unknown tiers, which carry no soundness claim. The graph is a lower bound on the
+navigation an application can perform, and it has to be consumed as one. A query that
+must not miss a transition cannot be answered from it alone, and the graph's own
+witnesses and declared approximations are what tell a consumer which queries those are.
+
+\section{Limitations and threats to validity}
+\label{sec:limitations}
+
+The results are measurements of one tool, on one corpus, with four methods, performed by
+the person who wrote the tool. Each of those four choices limits what the figures
+support.
+
+\textbf{Construct validity.} The conversion ratio divides the constructs witnessed by a
+deterministic edge by all navigation constructs that the independent parser finds in
+non-test source. That denominator over-counts in two ways that both push the ratio down.
+It contains constructs that no transition graph could convert, in particular calls that
+only change the query string of the current screen, which Chapter~\ref{ch:results}
+reports on a separate row rather than as a loss. It also contains constructs in code
+that the application never mounts, such as components whose selector no template uses,
+which the inspection of the remaining losses identified. Every reported conversion ratio
+is therefore a lower bound on the fraction of reachable navigation that the extractor
+recovers, and the true figure cannot be computed without deciding reachability for each
+construct by hand. The loss breakdown has a second construct threat. The rules assign
+each lost construct to the first class that matches, so the precedence order is part of
+the measure. A construct in a shared component that is used only inside screens with no
+node is an attribution loss under the present order and a node loss under the reverse
+order. The sizes of the classes are comparable within one application and under one
+order, which is what Chapter~\ref{ch:results} claims, but they are not independent
+quantities, and a different order would move constructs between classes without any
+change to the tool.
+
+\textbf{Internal validity.} Extraction runs on source trees whose dependencies are not
+installed, so the TypeScript compiler cannot resolve types that come from the framework
+or from third-party packages. Type-directed steps such as narrowing an injected receiver
+are weaker than they would be in a fully installed project, and the measured figures are
+properties of that configuration rather than of the analysis in principle. The mutation
+experiment has small samples per operator, in single digits for several of the operator
+and application pairs, with a seeded quota rather than exhaustive generation; one mutant
+moves a per-operator rate substantially, so the pattern of which operators are detected
+is more trustworthy than the rates themselves, and the published advice on reporting
+mutation experiments is followed for that reason \cite{papadakis2019mutation}. The
+exclusion rule that removes mutants whose construct is absent from the graph is applied
+using the graph itself, which couples the sample to the tool's own coverage; the
+excluded mutants are reported rather than dropped silently, but the sample is not
+independent of the artefact under test. The end-to-end oracle extracts URLs from test
+source text, which under-samples click-driven navigation and can collect strings that no
+test ever visits, so it measures node existence and nothing finer. The independent route
+parser cannot follow the lazy specifiers of one application, which leaves that
+application's node coverage based on two screens and effectively uninformative. That
+application is also one of the two for which the extractor produces no edges at all, so
+the weakest oracle and one of the weakest extraction results fall together.
+
+\textbf{External validity.} The corpus is six open-source Angular applications pinned to
+single commits. Proprietary applications are not measured, and they may differ in size,
+routing style and the mechanisms they use for navigation, which is the threat that
+open-source corpora are known to carry \cite{kalliamvakou2014promises,kalliamvakou2016indepth}.
+Two further limitations come from how the corpus was assembled. The selection is
+tool-driven: \texttt{SAP/spartacus} was rejected because its routing is
+configuration-driven in a way the extractor does not support
+(Section~\ref{sec:corpus}), so the corpus is biased towards applications whose routing
+the tool already handles, and a figure measured on it is likely to be optimistic with
+respect to the population of Angular applications. The candidate pool also showed an
+inverse relation between application size and end-to-end test density, so no application
+offers both a large route tree and execution-based ground truth. The consequence runs
+through the whole evaluation: the execution-grounded evidence comes from a medium-sized
+application, while the findings about scale come from applications that have no execution
+oracle at all. The results are Angular results. The graph model and the lattice
+do not mention Angular, and Section~\ref{sec:transfer} argues about other routers, but
+that argument is not a measurement.
+
+\textbf{Oracle independence.} The route parser shares no code with the extractor, which
+makes it independent and says nothing about whether it is right. Its first version did not look
+inside wrapper calls, did not follow a lazily loaded module to the routing module it
+imports, and walked lazily loaded tables without their prefix, and it therefore reported
+that every declared screen of mifos had a node; after the correction it finds a far
+larger set of declared screens of which under a tenth have a node, with the extractor
+unchanged in both runs (Section~\ref{sec:corrections}). The number that moved was the
+oracle's, not the tool's. A differential test also only shows that two implementations
+disagree, never which of them is right, and each disagreement in this study was resolved
+by reading the application source, by the same person who wrote both implementations.
+
+\textbf{Experimenter bias.} The author of the extractor is also the author of the
+evaluation, the corpus selection and the defect classification. The mitigations actually
+applied are the following. The selection criteria were fixed before any results were
+obtained, and the rejected candidates are reported with their reasons. The construct
+counts and the declared screens come from a parser that shares no code with the
+extractor. The witness check is mechanical and re-parses the source at the claimed
+location. The mutation oracle is the authored delta, so it does not consult the tool's
+output to decide what the expected change is. The corpus commits, the extractor commit
+and the harness version are pinned, the whole evaluation re-runs with one command, and
+the conversion, coverage, loss, remaining-loss, before-and-after and mutation tables of
+Chapter~\ref{ch:results} are generated from the results file instead of being entered
+by hand. The defect-class table, the oracle table and the inspection of the unreached
+components are written by hand. Determinism and the absence of accumulated state were checked
+before any measurement. Seven protocol corrections are reported in full
+(Section~\ref{sec:corrections}), including the three that made the reported figures
+worse. What
+was not done is equally relevant: there was no blinding, no second annotator for the
+loss classification and no independent audit of the residual constructs that were
+inspected by hand, and the defect classes were defined after the first observations
+rather than in advance. The requirement of two independent confirmations per defect
+class is the strongest control that was applied to that last point, and it is the
+reason one class is still reported as a candidate.
+
+\section{Declared approximations}
+\label{sec:approximations}
+
+The thesis claims soundness only for the deterministic tier and only over the declared
+route set (Claim~\ref{claim:must}). Following the soundiness position of Livshits et
+al.\ \cite{livshits2015soundiness}, the claim is paired here with an explicit list of
+the constructs the analysis does not decide, so that a consumer of the graph can tell
+which queries it may ask. The list separates constructs that are in scope, where a
+failure is a defect that Chapter~\ref{ch:results} counts, from constructs that are out
+of scope, where no completeness is claimed at all.
+
+In scope are route entries whose path is a string literal together with the component
+they render, \texttt{routerLink} bindings whose value is a literal or an array of
+literals, calls to \texttt{Router.navigate} and \texttt{Router.navigateByUrl} with a
+literal target, the nesting relation obtained from element selectors resolved within the
+importing file's scope, the primary \texttt{<router-outlet>} with the shell rule that
+follows from it, and guards named on a route as labels on the edges entering that
+route's subtree. Everything in this group is the analysis's responsibility. The failures
+measured in Chapter~\ref{ch:results} are failures inside it: route paths that are
+constant references are not resolved, route tables behind a lazy boundary are not
+followed, some nodes are not linked to the component that renders them, and a guard
+declared on an empty-path child route does not reach the edges entering its screen.
+These are bugs with known causes and they are listed in Section~\ref{sec:future}, not
+approximations to be declared away.
+
+Out of scope are the following constructs, each with the reason it is approximated and
+the effect on the graph.
+
+\begin{itemize}[nosep]
+\item \textbf{Components created programmatically, including dialogs and overlays.} An
+overlay is a user interface state that no route declares, so it has no node, and the
+component that implements it is reached from no template, so its navigation sites have
+the empty scope and contribute nothing. Both the state and everything inside it are
+absent from the graph.
+\item \textbf{Named outlets and targets of the form \texttt{\{outlets: \ldots\}}.} An
+auxiliary route adds a second active route and a second mount point, encoded in the URL
+\cite{angulardocs}. The model of Chapter~\ref{ch:analysis} represents this as a second
+mount, but the adapter does not implement it, and the end-to-end oracle shows the
+corresponding URLs among its misses.
+\item \textbf{Navigation relative to the active route (\texttt{relativeTo}).} The target
+is a function of the route that is active when the call runs, so it has no single value
+in the source. This is the one item in this list that attribution makes approachable,
+since a scope is exactly the set of screens the site can fire from, and the target can
+be resolved once per member of that scope.
+\item \textbf{Templates passed as values (\texttt{TemplateRef}) and rendered elsewhere.}
+The nesting relation can no longer be read from element names, and recovering it becomes
+a dataflow problem over the values that carry the template. This is the same obstacle
+that Section~\ref{sec:transfer} identifies for JSX.
+\item \textbf{Dispatch through NgRx effects and router event subscriptions.} The
+dispatch relation is specified in Chapter~\ref{ch:analysis} and not implemented, so a
+navigation inside an effect is attributed to no screen. The cost is concentrated in the
+applications that use the pattern and is zero in the others.
+\item \textbf{Navigation inside signal effects and observable subscriptions.} The firing
+condition is a data dependence in a graph the runtime builds, not a control-flow
+condition in the program text (Sections~\ref{sec:signals} and~\ref{sec:reactive}). Such
+edges take the modality \emph{unknown}, with the read set recorded as the symbolic guard.
+\item \textbf{Computed navigation targets.} A target built at run time from values cannot
+be enumerated statically in general. The analysis either emits no edge or over-approximates
+into the may tier, where a single unresolved call site can connect to every declared
+route, as one of the protocol corrections showed (Section~\ref{sec:corrections}).
+\item \textbf{Injection tokens with several bindings.} Where a token can resolve to more
+than one implementation, the analysis joins over all of them, and the resulting edges are
+capped at \emph{may}. Resolution is relative to an injector, so the provider hierarchy is
+part of the input (Section~\ref{sec:di}).
+\item \textbf{Configuration-driven route registration.} Where the route table is assembled
+at startup from provider configuration instead of being declared as data, neither the
+extractor nor the independent parser recovers the routes. This approximation bounds the
+corpus as well as the tool, since it is why one candidate application was rejected
+(Section~\ref{sec:corpus}).
+\item \textbf{Attribute selectors in the nesting relation.} Only element selectors are
+matched, so a component instantiated through an attribute selector does not appear in the
+nesting graph.
+\end{itemize}
+
+Table~\ref{tab:approx-counts} gives the prevalence of the approximated constructs in the
+three applications that were cloned for the mutation run. The in-scope kinds are not
+repeated, because the construct denominator of Table~\ref{tab:conversion} already
+counts them with the parser. The counts come from \texttt{approx-counts.mjs}, which is part of the
+harness and runs over the application sources with tests excluded. It counts call sites,
+which is a different procedure from the parser that produces the construct denominator of
+Chapter~\ref{ch:results}, so the two are not comparable term by term. Three of the six
+applications were counted, so no corpus-level prevalence is claimed.
+
+\begin{table}[t]\small
+\caption{Prevalence of the approximated constructs in three of the six applications,
+produced by \texttt{approx-counts.mjs} in the harness. The figures are call-site counts
+over the application sources with tests excluded, taken at the pinned corpus commits.
+They are a different unit from the construct denominator of
+Chapter~\ref{ch:results}, which comes from the route-oracle parser.}
+\label{tab:approx-counts}
+\TabApproxCounts
+\end{table}
+
+Two things follow from the counts. Set against the construct denominators of
+Table~\ref{tab:conversion}, which are 40, 34 and 132 for these three applications, the
+approximated kinds are few in realworld and bitwarden, so the approximations do not
+explain the coverage figures of Chapter~\ref{ch:results} for those two. In alfresco the
+approximated sites outnumber the 34 constructs, almost entirely through
+\texttt{createEffect}, so for that application the approximations cannot be set aside.
+The two numbers are not the same unit, since the denominator counts navigation
+constructs while the \texttt{createEffect} figure counts effect declarations, whether or
+not they navigate. The approximated kinds are also concentrated: auxiliary outlets
+appear in one application of the three, reactive effects only in that same application,
+templates passed as values mostly in another, and relative navigation everywhere but in
+small numbers. An
+approximation that costs nothing on one application can therefore be the dominant one on
+the next, which is an argument for declaring the list rather than reporting a single
+aggregate.
+
+The call-site counts also understate the structural cost of an approximation. A handful
+of \texttt{dialog.open} call sites can open many different components. The inspection
+of the owner components that attribution never reaches found about sixty components
+across the corpus that are opened programmatically, most as dialogs, whereas the grep
+finds three \texttt{dialog.open} call sites, all in alfresco, in the three applications
+it covered. The two figures cover different scopes and are not directly comparable. The
+right unit for the cost of this particular approximation is the number of
+components and navigation sites it strands, not the number of calls that strand them.
+
+\section{Transfer to other frameworks}
+\label{sec:transfer}
+
+All measurements in this thesis concern Angular. How much of the approach would carry over to React with React Router and to Vue with Vue Router \cite{reactrouterdocs,vuerouterdocs} is argued below without measurement.
+
+What follows is a qualitative theoretical analysis and not a measurement. It compares the
+documented behaviour of the three routers with the input relations that the analysis
+needs, and what it yields are hypotheses about where the work would move, at the level of
+evidence of a design argument. Nothing in it shows that the approach performs on React or
+Vue applications as it does on Angular ones. Establishing that would require a corpus for
+each framework and the methods of Chapter~\ref{ch:evaluation}.
+
+The analysis has a framework-independent part and a framework-specific part. The
+graph model, the lattice of scopes, the fixpoint, anchored edges and the expansion
+query do not mention Angular. What is specific to Angular are the four input relations
+of Section~\ref{sec:attribution}: component nesting, router outlets, the call graph
+with dependency injection, and dispatch relations. Moving to another framework means
+deriving the same four relations from that framework's constructs.
+Table~\ref{tab:transfer} lists the corresponding constructs.
+
+\begin{table}[t]\small
+\caption{Constructs that provide the input relations, by router.}
+\label{tab:transfer}
+\begin{tabularx}{\textwidth}{@{}lYYY@{}}
+\toprule
+Concept & Angular & React Router & Vue Router \\
+\midrule
+Outlet & \texttt{<router-outlet>} & \texttt{<Outlet />} & \texttt{<router-view>} \\
+Several outlets & named outlets, encoded in the URL & none & named views, not in
+the URL \\
+Declarative link & \texttt{routerLink} & \texttt{<Link to>} & \texttt{<router-link
+:to>} \\
+Imperative navigation & \texttt{Router.navigate} & \texttt{useNavigate()}; redirect
+from a loader & \texttt{router.push} \\
+Route guard & per route (\texttt{canActivate}, \ldots) & loader that throws a redirect
+& per route (\texttt{beforeEnter}) and global (\texttt{beforeEach}) \\
+Access to services & hierarchical injectors & context and hooks &
+\texttt{provide}/\texttt{inject}, composables, plain imports \\
+Reactive trigger & signal effect & \texttt{useEffect} & \texttt{watch},
+\texttt{watchEffect} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Outlets transfer directly: in all three routers a parent route renders a
+placeholder where the matched child is inserted. The components above the placeholder
+form a shell that is present on every child screen, so the scopes $\top$ and
+$\mathit{subtree}(r)$ have the same meaning. Vue's named views are simpler than
+Angular's named outlets, because they do not appear in the URL; they add a second
+mount point but no auxiliary route. React Router has no equivalent, so this class of
+defect does not arise there.
+
+The call graph is easier in React and Vue. The hardest Angular-specific step
+is resolving an injected service through the injector hierarchy. In React, a
+navigation function is usually obtained from \texttt{useNavigate()}, and a hook can only
+be called while a component renders, either directly or through other hooks. Every
+such navigation site therefore has an owning component that can be found by following
+hook calls, and no injector needs to be resolved. Vue composables behave the same way
+inside \texttt{setup}. The case that remains is code that imports the router instance
+directly, which Vue applications often do in stores and HTTP interceptors. This is the
+analogue of Angular's service case: the site has no component of its own, and its
+scope is the join over its callers. Since the link is a plain module import, it can be
+resolved with ordinary import resolution, as in the JavaScript call graphs of
+Feldthaus et al.\ \cite{feldthaus2013jscg}.
+
+Guards move to different scopes. A redirect thrown from a React Router loader
+fires when its route, or any route below it, is matched. It plays the role of
+\texttt{canActivate} and is anchored at $\mathit{subtree}(r)$. Vue's global
+\texttt{beforeEach} guard has no direct Angular counterpart. A redirect from it is
+anchored at $\top$, which the lattice already contains.
+
+Component nesting is harder in React. Angular and Vue keep templates in a
+separate language, so the nesting relation can be read from element names. In React,
+components are created in JSX, which is ordinary JavaScript. A component can be stored
+in a variable, passed as a property or as \texttt{children}, and rendered under any
+condition the language can express. Recovering the nesting relation then becomes a
+data flow problem in its own right, closer to points-to analysis than to reading a
+template. This is the main place where a React version of the analysis would need new
+work.
+
+The reactive boundary is the same. A navigation inside \texttt{useEffect} or
+a Vue watcher fires when its dependencies change, so, like a signal effect in Angular, it would be given modality \emph{unknown}.
+
+The lattice, the fixpoint and the anchored representation transfer
+unchanged. Of the input relations, outlets and guards transfer with small changes,
+the call graph becomes simpler, and component nesting becomes harder in React. These
+are expectations derived from the routers' documented behaviour. Whether they hold on
+real applications would need a corpus and the same evaluation, which is left for
+future work.
+
+\section{Future work}
+\label{sec:future}
+
+The two defects that cap the larger applications are the most urgent, because nothing else in the
+analysis can be evaluated properly while they stand. Resolving constant-valued route
+paths means following a path expression to its definition and folding it, which is a
+local analysis over the route tables and would turn the application that currently
+collapses to a single node into one with a full node set. Following lazy boundaries means
+resolving a \texttt{loadChildren} or \texttt{loadComponent} specifier to the file it
+names and continuing route extraction there, including through a routing module that a
+lazily loaded module imports. The independent route parser follows lazy boundaries after its correction
+(Section~\ref{sec:corrections}), and it finds 84 declared screens in ghostfolio, where
+every route path is a constant reference (Table~\ref{tab:coverage}), so the work is
+known to be feasible on this corpus, and the parser's output gives the expected result
+to check against. The gain is not limited to the nodes
+recovered. A large part of the attribution losses that remain after attribution are
+constructs whose scope was found but whose target screen has no node, and those are
+repaired by node extraction rather than by any change to the attribution pass.
+
+The part of the model that Chapter~\ref{ch:analysis} specifies and the prototype
+leaves out comes next: the call graph with dependency injection, and the dispatch
+relations that carry NgRx effects and router event subscriptions. The remaining losses
+in services and guards quantify what the omission costs on this corpus, which makes the
+work measurable rather than speculative. Resolution would follow class hierarchy
+analysis against Angular's provider declarations, in the style the framework-modelling
+literature recommends \cite{dean1995cha,sridharan2011f4f,antoniadis2020enterprise}, and
+the fixpoint and the complexity bound for it are already stated. Guards that return a
+\texttt{UrlTree} belong to the same group, since a redirecting guard is itself a
+navigation site and not only a label.
+
+RQ4 exposed one defect that is cheap to fix and worth fixing before the graph is used
+for anything: a guard declared on a route whose path is the empty string does not reach
+the edges entering that screen. The repair is in how the guard set of a screen is
+assembled from the route chain, and the test for it is already written in the form of
+the mutation operator that removes a guard. The wider treatment of guards in
+Chapter~\ref{ch:analysis}, where the guard of an edge is the conjunction of the
+conditions on the containment path with the guards of the target route, is the more
+substantial piece of work and would subsume it.
+
+Dialogs and overlays should become user interface states. They are the largest declared
+approximation in structural terms, they strand entire components rather than single call
+sites, and the model needs only a second kind of node together with edges that open and
+dismiss it. The route-derived definition of the screen set would have to be widened,
+which is the reason this is not a small change to the adapter.
+
+The runtime tier is the complement to the whole static approach rather than an extension
+of it. The model already admits observation identifiers as witnesses alongside source
+locations, so an observed transition can enter the graph without being confused with a
+derived one. Setting that tier against the dynamic lineage, where the state flow graph
+comes from firing events on a running application
+\cite{crawljax2012,feedex2013,fraggen2022}, would answer the question this thesis cannot:
+how much of what a crawler finds the static graph already contains, and how much of what
+the static graph contains a crawler never reaches. The Android work has the same
+structure, falling back on runtime traces exactly where static attribution of shared code
+fails \cite{yang2015wtg}.
+
+The corpus needs to grow in three directions. An automated search pipeline over a larger
+pool of repositories, with the published filters for repository quality applied
+mechanically \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, would replace a
+hand-screened set of ten candidates and would weaken the tool-driven selection bias of
+Section~\ref{sec:limitations}, provided that applications the extractor handles badly are
+kept in the corpus rather than rejected. A case study on a proprietary industrial
+application, reporting only aggregate figures, is the most direct answer to the external
+validity threat, since enterprise routing style is exactly what an open-source corpus
+cannot show. A minimum density of user interface tests should become an explicit
+selection criterion whenever execution-based ground truth is needed, since the candidate
+pool showed that this density falls as applications grow, and without such a criterion a
+study ends up with its oracle and its scale on different applications.
+
+A React or Vue adapter, evaluated with the same harness on a corpus of the same shape,
+would turn Section~\ref{sec:transfer} from an argument into a result. The predictions are
+specific enough to be falsified: outlets and guards should transfer with small changes,
+the call graph should become easier because a navigation function is obtained through a
+hook or a composable, and component nesting should become harder in React because JSX
+makes the nesting relation a dataflow problem.
+
+The defect class ``node not linked to its component'' still has one confirmation, from the
+comparison between the route parser and the graph, and the rule adopted in
+Chapter~\ref{ch:results} admits a class only with two. A second method has to reach it
+independently, and the end-to-end oracle is the natural candidate, since a screen whose
+node exists but carries no component link should still be visited by tests while
+contributing no outbound edges. Until then the class stays a candidate, and the share of
+the corpus total that it accounts for stays provisional with it.
+
+The use that motivated the thesis is still unmeasured. Agents that drive a user interface
+or a repository work without a navigation model: mobile testing agents pass the current
+screen to a model and replay the action it returns
+\cite{liu2024make,wang2024leveraging}, application-specific knowledge for them is
+obtained by dynamic exploration \cite{wen2024autodroid,wang2024software}, and coding
+agents navigate a repository through an interface whose design measurably changes their
+performance \cite{jimenez2024swebench,yang2024sweagent,zhang2023repocoder}. Whether a
+graph of screens and guarded transitions, recomputed from source and carrying a witness
+on every edge, improves either kind of agent, or improves automated test generation, is a
+controlled experiment that this thesis does not attempt. The graph and the harness are
+the artefacts such an experiment would need, and the defects quantified in
+Chapter~\ref{ch:results} are what it would have to control for, since a model that is
+missing half of an application's screens would confound the comparison.

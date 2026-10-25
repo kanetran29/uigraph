@@ -1,0 +1,37 @@
+% Chapter 5 plots. Each is a separate figure; data comes from generated-plots.tex.
+\newcommand{\FigCoverage}{%
+\begin{figure}[t]
+\centering
+\PlotCoverage
+\caption{Node coverage, baseline: the share of declared screens that have a node in the
+graph. The value for k8s dashboard rests on two screens only, because the route parser
+cannot follow its lazily loaded route tables.}
+\label{fig:coverage}
+\end{figure}}
+
+\newcommand{\FigLoss}{%
+\begin{figure}[t]
+\centering
+\PlotLoss
+\caption{What happens to the navigation constructs of each application in the baseline.
+Attribution losses dominate in four applications; node defects dominate in ghostfolio and
+mifos. The exact counts per class are in Table~\ref{tab:loss}.}
+\label{fig:loss}
+\end{figure}}
+
+\newcommand{\FigBeforeAfter}{%
+\begin{figure}[t]
+\centering
+\PlotBeforeAfter
+\caption{Conversion ratio before and after scope attribution, on identical inputs.}
+\label{fig:before-after}
+\end{figure}}
+
+\newcommand{\FigMutation}{%
+\begin{figure}[t]
+\centering
+\PlotMutation
+\caption{Mutation outcomes by operator, summed over realworld, alfresco and bitwarden.
+Excluded mutants are not shown. Every miss but one is a removed guard.}
+\label{fig:mutation}
+\end{figure}}

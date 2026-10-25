@@ -1,0 +1,644 @@
+{
+  "appDir": "/tmp/eval/corpus/alfresco/projects/aca-content",
+  "db": "/tmp/eval/corpus/alfresco/projects/aca-content/uigraph.db",
+  "filesParsed": 171,
+  "declaredRoutesTotal": 55,
+  "byKind": {
+    "SCREEN": 26,
+    "PREFIX": 23,
+    "LAZY_UNRESOLVED": 3,
+    "REDIRECT": 2,
+    "WILDCARD": 1
+  },
+  "uniqueScreenPaths": 25,
+  "guardedScreenPaths": 2,
+  "blindSpots": [
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "@alfresco/aca-content/viewer",
+      "at": "src/lib/aca-content.routes.ts:68",
+      "prefix": "/view/:nodeId"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "@alfresco/aca-content/viewer",
+      "at": "src/lib/aca-content.routes.ts:392",
+      "prefix": "/search-libraries/view/:nodeId"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "@alfresco/aca-content/folder-rules",
+      "at": "src/lib/aca-content.routes.ts:406",
+      "prefix": "/nodes/:nodeId"
+    }
+  ],
+  "comparison": {
+    "declaredScreens": 25,
+    "graphNodes": 30,
+    "matched": 24,
+    "coverage": 0.96,
+    "missing": [
+      {
+        "path": "/rules",
+        "at": "folder-rules/src/folder-rules.module.ts:34",
+        "guards": [
+          "[PluginEnabledGuard]"
+        ]
+      }
+    ],
+    "extraNodes": [
+      {
+        "route": "/view/:nodeId",
+        "id": "n_view_nodeId",
+        "kind": "screen"
+      },
+      {
+        "route": "/favorite",
+        "id": "n_favorite",
+        "kind": "screen"
+      },
+      {
+        "route": "/all",
+        "id": "n_all",
+        "kind": "screen"
+      },
+      {
+        "route": "/search-libraries/view/:nodeId",
+        "id": "n_search-libraries_view_nodeId",
+        "kind": "screen"
+      },
+      {
+        "route": "/nodes/:nodeId",
+        "id": "n_nodes_nodeId",
+        "kind": "screen"
+      },
+      {
+        "route": "*",
+        "id": "n_wildcard",
+        "kind": "screen"
+      }
+    ]
+  },
+  "routes": [
+    {
+      "path": "/rules",
+      "kind": "SCREEN",
+      "guards": [
+        "[PluginEnabledGuard]"
+      ],
+      "file": "folder-rules/src/folder-rules.module.ts",
+      "line": 34,
+      "component": "ManageRulesSmartComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/preview/s/:id",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 48,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/preview/s/:id",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 51,
+      "component": "SharedLinkViewComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/view",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 60,
+      "component": "ShellLayoutComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/view/:nodeId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 64,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/view/:nodeId",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 68,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "PREFIX",
+      "guards": [
+        "[ExtensionsDataLoaderGuard]",
+        "[AuthGuard]"
+      ],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 109,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/profile",
+      "kind": "SCREEN",
+      "guards": [
+        "[ViewProfileRuleGuard]"
+      ],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 113,
+      "component": "ViewProfileComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 118,
+      "component": "HomeComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/personal-files",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 122,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/personal-files",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 125,
+      "component": "FilesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/personal-files/details/:nodeId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 134,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/personal-files/details/:nodeId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 137,
+      "component": "DetailsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/personal-files/details/:nodeId/:activeTab",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 144,
+      "component": "DetailsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/personal-files/:folderId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 157,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/personal-files/:folderId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 160,
+      "component": "FilesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/repository",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 171,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/repository",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 174,
+      "component": "RepositoryViewComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/repository/details/:nodeId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 183,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/repository/details/:nodeId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 186,
+      "component": "DetailsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/repository/details/:nodeId/:activeTab",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 193,
+      "component": "DetailsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/repository/:folderId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 206,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/repository/:folderId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 209,
+      "component": "RepositoryViewComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/libraries",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 220,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/libraries",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 223,
+      "component": "LibrariesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/libraries/:folderId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 233,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/libraries/:folderId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 236,
+      "component": "FilesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/favorite",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 251,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/favorite",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 254,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/favorite/libraries",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 259,
+      "component": "FavoriteLibrariesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/favorite/libraries/:folderId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 269,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/favorite/libraries/:folderId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 272,
+      "component": "FilesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/all",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 283,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/all",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 286,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/all/libraries",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 291,
+      "component": "LibraryListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/favorites",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 301,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/favorites",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 307,
+      "component": "FavoritesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/recent-files",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 318,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/recent-files",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 324,
+      "component": "RecentFilesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/shared",
+      "kind": "PREFIX",
+      "guards": [
+        "[AppSharedRuleGuard]",
+        "[AppSharedRuleGuard]"
+      ],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 334,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/shared",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 337,
+      "component": "SharedFilesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/trashcan",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 350,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/trashcan",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 353,
+      "component": "TrashcanComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/search",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 363,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/search",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 366,
+      "component": "SearchResultsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/search-libraries",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 377,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/search-libraries",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 380,
+      "component": "SearchLibrariesResultsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/search-libraries/view/:nodeId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 388,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/search-libraries/view/:nodeId",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 392,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/nodes/:nodeId",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 403,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/nodes/:nodeId",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 406,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/saved-searches",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 412,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/saved-searches",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 415,
+      "component": "SavedSearchesSmartListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/**",
+      "kind": "WILDCARD",
+      "guards": [],
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 421,
+      "component": "GenericErrorComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "viewer/src/lib/viewer.module.ts",
+      "line": 31,
+      "component": "AcaViewerComponent",
+      "constantPath": false,
+      "lazy": false
+    }
+  ]
+}

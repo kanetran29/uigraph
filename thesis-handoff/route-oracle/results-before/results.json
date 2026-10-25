@@ -1,0 +1,304 @@
+{
+  "provenance": {
+    "harnessVersion": "1.2.0",
+    "extractor": {
+      "repo": "kanetran29/uigraph",
+      "sha": "4505fd2a580ad3a6b07fd6c02c999e43668708b4",
+      "attribution": false
+    },
+    "node": "v22.22.2",
+    "startedAt": "2026-10-05T10:20:27.250Z",
+    "finishedAt": "2026-10-05T10:21:04.226Z"
+  },
+  "results": [
+    {
+      "slug": "realworld",
+      "repo": "gothinkster/angular-realworld-example-app",
+      "sha": "dd99ed2cf39c805d719f943c5d7061a5683d98a8",
+      "appDir": ".",
+      "role": "size floor; all literal paths; the only repo where every test is currently trustworthy",
+      "mapOk": true,
+      "constructs": {
+        "routerLink": 31,
+        "navigate": 10
+      },
+      "totalConstructs": 40,
+      "graph": {
+        "nodes": 11,
+        "edges": 21,
+        "must": 7,
+        "may": 14,
+        "unknown": 0
+      },
+      "conversion": 0.15,
+      "edgeRatio": 0.175,
+      "testB": {
+        "edges": 21,
+        "clean": 18,
+        "mustEdges": 7,
+        "mustClean": 6,
+        "tally": {
+          "TARGET_MISMATCH": 3
+        }
+      },
+      "testC": {
+        "declaredScreens": 10,
+        "coverage": 1,
+        "blindSpots": 0
+      },
+      "testD": null,
+      "testF": null,
+      "loss": {
+        "constructs": 40,
+        "lost": 23,
+        "tally": {
+          "CONVERTED_MAY": 10,
+          "CONVERTED_MUST": 6,
+          "ATTRIBUTION_SERVICE": 1,
+          "ATTRIBUTION_SHARED": 21,
+          "OTHER": 1,
+          "QUERY_ONLY": 1
+        }
+      }
+    },
+    {
+      "slug": "alfresco",
+      "repo": "alfresco/alfresco-content-app",
+      "sha": "b88d47f4864c6f5c2889cf7323e51db8608e64a6",
+      "appDir": "projects/aca-content",
+      "role": "primary impact-analysis repo: 87 Playwright specs, dense co-change history",
+      "mapOk": true,
+      "constructs": {
+        "routerLink": 5,
+        "navigate": 29
+      },
+      "totalConstructs": 34,
+      "graph": {
+        "nodes": 30,
+        "edges": 1,
+        "must": 1,
+        "may": 0,
+        "unknown": 0
+      },
+      "conversion": 0.0294,
+      "edgeRatio": 0.0294,
+      "testB": {
+        "edges": 1,
+        "clean": 1,
+        "mustEdges": 1,
+        "mustClean": 1,
+        "tally": {}
+      },
+      "testC": {
+        "declaredScreens": 25,
+        "coverage": 0.96,
+        "blindSpots": 3
+      },
+      "testD": {
+        "urls": 14,
+        "recall": 0.6428571428571429
+      },
+      "testF": null,
+      "loss": {
+        "constructs": 34,
+        "lost": 33,
+        "tally": {
+          "ATTRIBUTION_SHARED": 10,
+          "NODE_MISS": 1,
+          "CONSTANT_TARGET": 1,
+          "COMPONENT_UNLINKED": 6,
+          "ATTRIBUTION_SERVICE": 8,
+          "CONVERTED_MUST": 1,
+          "NAMED_OUTLET": 7
+        }
+      }
+    },
+    {
+      "slug": "ghostfolio",
+      "repo": "ghostfolio/ghostfolio",
+      "sha": "9884fa0be2e7649cf004967d9d70178be119318b",
+      "appDir": "apps/client",
+      "role": "constant-valued route paths; self-hostable, candidate for the runtime tier",
+      "mapOk": true,
+      "constructs": {
+        "routerLink": 160,
+        "navigate": 45
+      },
+      "totalConstructs": 198,
+      "graph": {
+        "nodes": 1,
+        "edges": 0,
+        "must": 0,
+        "may": 0,
+        "unknown": 0
+      },
+      "conversion": 0,
+      "edgeRatio": 0,
+      "testB": null,
+      "testC": {
+        "declaredScreens": 84,
+        "coverage": 0,
+        "blindSpots": 0
+      },
+      "testD": null,
+      "testF": null,
+      "loss": {
+        "constructs": 198,
+        "lost": 191,
+        "tally": {
+          "ATTRIBUTION_SHARED": 72,
+          "QUERY_ONLY": 7,
+          "ATTRIBUTION_SERVICE": 9,
+          "CONSTANT_PATH": 107,
+          "NODE_MISS": 3
+        }
+      }
+    },
+    {
+      "slug": "k8sdash",
+      "repo": "kubernetes/dashboard",
+      "sha": "0ba796d9b85f7070dbd4a5c88354fc79f88763bb",
+      "appDir": "modules/web",
+      "role": "mid-size control; baseUrl-relative lazy module specifiers",
+      "mapOk": true,
+      "constructs": {
+        "routerLink": 55,
+        "navigate": 19
+      },
+      "totalConstructs": 72,
+      "graph": {
+        "nodes": 40,
+        "edges": 0,
+        "must": 0,
+        "may": 0,
+        "unknown": 0
+      },
+      "conversion": 0,
+      "edgeRatio": 0,
+      "testB": null,
+      "testC": {
+        "declaredScreens": 2,
+        "coverage": 1,
+        "blindSpots": 37
+      },
+      "testD": null,
+      "testF": null,
+      "loss": {
+        "constructs": 72,
+        "lost": 68,
+        "tally": {
+          "COMPONENT_UNLINKED": 2,
+          "ATTRIBUTION_SHARED": 51,
+          "QUERY_ONLY": 4,
+          "ATTRIBUTION_SERVICE": 5,
+          "NODE_MISS": 10
+        }
+      }
+    },
+    {
+      "slug": "bitwarden",
+      "repo": "bitwarden/clients",
+      "sha": "e40ce6f08ebf963db3561464e77b4defe05247e8",
+      "appDir": "apps/web",
+      "role": "highest guard density in the corpus; constant-valued paths",
+      "mapOk": true,
+      "constructs": {
+        "routerLink": 33,
+        "navigate": 100
+      },
+      "totalConstructs": 132,
+      "graph": {
+        "nodes": 78,
+        "edges": 20,
+        "must": 10,
+        "may": 10,
+        "unknown": 0
+      },
+      "conversion": 0.1212,
+      "edgeRatio": 0.0758,
+      "testB": {
+        "edges": 20,
+        "clean": 20,
+        "mustEdges": 10,
+        "mustClean": 10,
+        "tally": {}
+      },
+      "testC": {
+        "declaredScreens": 97,
+        "coverage": 0.4845,
+        "blindSpots": 5
+      },
+      "testD": null,
+      "testF": null,
+      "loss": {
+        "constructs": 132,
+        "lost": 89,
+        "tally": {
+          "QUERY_ONLY": 16,
+          "ATTRIBUTION_SHARED": 41,
+          "OTHER": 6,
+          "ATTRIBUTION_SERVICE": 15,
+          "CONVERTED_MAY": 11,
+          "CONVERTED_MUST": 16,
+          "CONSTANT_PATH": 19,
+          "CONSTANT_TARGET": 2,
+          "LAZY_BOUNDARY": 3,
+          "COMPONENT_UNLINKED": 3
+        }
+      }
+    },
+    {
+      "slug": "mifos",
+      "repo": "openMF/web-app",
+      "sha": "7f78179632c81de0653b6f14a45159c3980ab241",
+      "appDir": ".",
+      "role": "size ceiling, 674 declared routes; only repo besides realworld with must-edges",
+      "mapOk": true,
+      "constructs": {
+        "routerLink": 820,
+        "navigate": 530
+      },
+      "totalConstructs": 1344,
+      "graph": {
+        "nodes": 178,
+        "edges": 246,
+        "must": 69,
+        "may": 177,
+        "unknown": 0
+      },
+      "conversion": 0.0543,
+      "edgeRatio": 0.0513,
+      "testB": {
+        "edges": 246,
+        "clean": 69,
+        "mustEdges": 69,
+        "mustClean": 69,
+        "tally": {
+          "OVER_APPROX": 177
+        }
+      },
+      "testC": {
+        "declaredScreens": 610,
+        "coverage": 0.0951,
+        "blindSpots": 1
+      },
+      "testD": null,
+      "testF": null,
+      "loss": {
+        "constructs": 1344,
+        "lost": 1270,
+        "tally": {
+          "CONVERTED_MUST": 73,
+          "OTHER": 28,
+          "COMPONENT_UNLINKED": 378,
+          "LAZY_BOUNDARY": 607,
+          "ATTRIBUTION_SHARED": 225,
+          "ATTRIBUTION_SERVICE": 10,
+          "CONSTANT_TARGET": 16,
+          "NODE_MISS": 6,
+          "CONVERTED_MAY": 1
+        }
+      }
+    }
+  ]
+}

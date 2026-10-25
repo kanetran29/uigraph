@@ -1,0 +1,65 @@
+{
+  "harnessVersion": "1.3.0",
+  "harnessChangelog": {
+    "1.3.0": "mutate.mjs only; RQ1 to RQ3 figures from 1.2.0 are unaffected. Patches the source at the matched offset instead of by string content (a string replace always hit the first identical construct); judges detection at witness level as well as edge level; retargets CHANGE_NAV_TARGET to a declared route; excludes guard mutants on screens no edge enters; seeded stratified sampling with a fixed quota per operator; reports detection per operator with n.",
+    "1.2.0": "route parser corrections, tier-aware witness check, per-construct conversion."
+  },
+  "capturedAt": "2026-09-13",
+  "extractor": {
+    "repo": "kanetran29/uigraph",
+    "sha": "c4f8b833bd10273d1a1ffcbf73616b5732363a42",
+    "date": "2026-07-19",
+    "note": "GitHub HEAD at capture time. The working copy is ahead; re-run and re-tag after pushing.",
+    "buildPatch": "package.json exports point at ./src in the workspace, so a built dist/cli.js cannot resolve sibling packages. The runner rewrites exports/bin/main to ./dist before building. Fix upstream with publishConfig or conditional exports."
+  },
+  "repos": [
+    {
+      "slug": "realworld",
+      "repo": "gothinkster/angular-realworld-example-app",
+      "sha": "dd99ed2cf39c805d719f943c5d7061a5683d98a8",
+      "appDir": ".",
+      "e2eDir": null,
+      "role": "size floor; all literal paths; the only repo where every test is currently trustworthy"
+    },
+    {
+      "slug": "alfresco",
+      "repo": "alfresco/alfresco-content-app",
+      "sha": "b88d47f4864c6f5c2889cf7323e51db8608e64a6",
+      "appDir": "projects/aca-content",
+      "e2eDir": "e2e",
+      "role": "primary impact-analysis repo: 87 Playwright specs, dense co-change history"
+    },
+    {
+      "slug": "ghostfolio",
+      "repo": "ghostfolio/ghostfolio",
+      "sha": "9884fa0be2e7649cf004967d9d70178be119318b",
+      "appDir": "apps/client",
+      "e2eDir": null,
+      "role": "constant-valued route paths; self-hostable, candidate for the runtime tier"
+    },
+    {
+      "slug": "k8sdash",
+      "repo": "kubernetes/dashboard",
+      "sha": "0ba796d9b85f7070dbd4a5c88354fc79f88763bb",
+      "appDir": "modules/web",
+      "e2eDir": null,
+      "role": "mid-size control; baseUrl-relative lazy module specifiers"
+    },
+    {
+      "slug": "bitwarden",
+      "repo": "bitwarden/clients",
+      "sha": "e40ce6f08ebf963db3561464e77b4defe05247e8",
+      "appDir": "apps/web",
+      "e2eDir": null,
+      "role": "highest guard density in the corpus; constant-valued paths"
+    },
+    {
+      "slug": "mifos",
+      "repo": "openMF/web-app",
+      "sha": "7f78179632c81de0653b6f14a45159c3980ab241",
+      "appDir": ".",
+      "e2eDir": null,
+      "role": "size ceiling, 674 declared routes; only repo besides realworld with must-edges"
+    }
+  ]
+}

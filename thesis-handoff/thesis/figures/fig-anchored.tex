@@ -1,0 +1,33 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[node distance=5mm]
+  % materialised
+  \node[font=\small\itshape] at (0,2.4) {materialised};
+  \node[screen, minimum width=14mm] (a1) at (-1.6,1.4) {/};
+  \node[screen, minimum width=14mm] (a2) at (-1.6,0.6) {/feed};
+  \node[screen, minimum width=14mm] (a3) at (-1.6,-0.2) {/editor};
+  \node[screen, minimum width=14mm] (a4) at (-1.6,-1.0) {/profile};
+  \node[screen, minimum width=16mm] (at) at (1.6,0.2) {/settings};
+  \foreach \n in {a1,a2,a3,a4} \draw[mustedge] (\n.east) -- (at.west);
+  \node[font=\scriptsize, text=muted] at (0,-1.7) {$|S|$ edges, one per screen};
+
+  % anchored
+  \begin{scope}[xshift=70mm]
+  \node[font=\small\itshape] at (0,2.4) {anchored};
+  \node[screen, minimum width=14mm] (b1) at (-1.6,1.4) {/};
+  \node[screen, minimum width=14mm] (b2) at (-1.6,0.6) {/feed};
+  \node[screen, minimum width=14mm] (b3) at (-1.6,-0.2) {/editor};
+  \node[screen, minimum width=14mm] (b4) at (-1.6,-1.0) {/profile};
+  \node[draw=accent, fill=accentlight, rounded corners=6pt, font=\small, inner sep=3pt] (top) at (0,0.2) {$\top$};
+  \node[screen, minimum width=16mm] (bt) at (1.8,0.2) {/settings};
+  \foreach \n in {b1,b2,b3,b4} \draw[accent, densely dotted] (\n.east) -- (top);
+  \draw[mustedge] (top) -- (bt);
+  \node[font=\scriptsize, text=muted] at (0,-1.7) {one edge; members expanded on query};
+  \end{scope}
+\end{tikzpicture}
+\caption{The same header link stored two ways. Materialised, it becomes one edge per
+screen. Anchored, it is stored once at the scope node $\top$, and
+$\mathit{edgesFrom}(r)$ adds it to the edges of any screen $r$ when asked. Claim~\ref{claim:expansion}
+states that both forms describe the same transitions.}
+\label{fig:anchored}
+\end{figure}
