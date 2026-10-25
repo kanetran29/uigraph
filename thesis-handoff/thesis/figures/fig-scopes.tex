@@ -1,0 +1,42 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[node distance=9mm and 6mm]
+  % shell
+  \node[comp, minimum width=26mm] (app) {AppComponent};
+  \node[comp, right=6mm of app, fill=accentlight, draw=accent] (header) {HeaderComponent};
+  \draw[nestedge] (app) -- (header);
+  \node[comp, below=6mm of app, fill=white, font=\scriptsize\ttfamily] (outlet) {<router-outlet>};
+  \draw[nestedge] (app) -- (outlet);
+
+  % screens
+  \node[screen, below=11mm of outlet, xshift=-30mm, fill=warmlight] (home) {/};
+  \node[screen, right=of home, fill=warmlight] (feed) {/feed};
+  \node[screen, right=of feed] (settings) {/settings};
+  \node[screen, below=11mm of settings] (profile) {/settings/profile};
+  \foreach \s in {home, feed, settings} \draw[->, muted] (outlet.south) -- (\s.north);
+  \draw[->, muted] (settings) -- node[lbl, right] {\scriptsize outlet} (profile);
+
+  % shared card
+  \node[comp, below=11mm of home, xshift=12mm, fill=warmlight, draw=warm] (card) {CardComponent};
+  \draw[nestedge] (home) -- (card);
+  \draw[nestedge] (feed) -- (card);
+
+  % scopes
+  \begin{scope}[on background layer]
+    \node[scope, fit=(settings)(profile), inner sep=5pt, label={[font=\scriptsize, text=accent]right:$\mathit{subtree}(\text{/settings})$}] (sub) {};
+    \node[draw=accent, rounded corners=6pt, densely dotted, fit=(home)(feed)(settings)(profile)(card)(sub), inner sep=7pt,
+      label={[font=\scriptsize, text=accent, anchor=south west]north west:$\top$ = every screen}] (topbox) {};
+  \end{scope}
+
+  % legend notes
+  \node[font=\scriptsize, align=left, anchor=west] at ($(header.east)+(4mm,0)$) {links here: scope $\top$,\\stored once};
+  \node[font=\scriptsize, align=center, anchor=north, text=warm] at ($(card.south)+(0,-6mm)$) {links here: scope $\{\text{/}, \text{/feed}\}$,\\one edge per screen};
+  \node[font=\scriptsize, align=left, anchor=west, text=accent] at ($(profile.east)+(3mm,-6mm)$) {links in the settings\\template: anchored at the\\subtree, stored once};
+\end{tikzpicture}
+\caption{Scopes in a small application. The header is rendered next to the outlet, so its
+links fire from every screen. The card is rendered inside two unrelated screens, so its
+scope is the union of the two, which is none of the named elements. The settings template
+is rendered on its own screen and on its child screen, which is exactly
+$\mathit{subtree}(\text{/settings})$. Grey arrows show component nesting and outlets.}
+\label{fig:scopes}
+\end{figure}

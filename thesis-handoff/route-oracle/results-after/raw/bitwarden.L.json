@@ -1,0 +1,943 @@
+{
+  "appDir": "/tmp/eval/corpus/bitwarden/apps/web",
+  "constructs": 132,
+  "lost": 83,
+  "tally": {
+    "QUERY_ONLY": 16,
+    "ATTRIBUTION_SHARED": 35,
+    "COMPONENT_UNLINKED": 4,
+    "ATTRIBUTION_SERVICE": 15,
+    "CONVERTED_MAY": 12,
+    "CONVERTED_MUST": 21,
+    "CONSTANT_PATH": 19,
+    "CONSTANT_TARGET": 2,
+    "OTHER": 5,
+    "LAZY_BOUNDARY": 3
+  },
+  "rows": [
+    {
+      "at": "src/app/admin-console/organizations/collections/services/vault-collection-actions.service.ts:152",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/services/vault-collection-actions.service.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/collections/services/vault-collection-actions.service.ts:197",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/services/vault-collection-actions.service.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/collections/vault-header/vault-header.component.ts:187",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/vault-header/vault-header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/organizations\", org.id, \"billing\", \"subscription\"], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/collections/vault.component.ts:443",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/collections/vault.component.ts:486",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/collections/vault.component.ts:509",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/collections/vault.component.ts:538",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/collections/vault.component.ts:569",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/vault.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": ""
+    },
+    {
+      "at": "src/app/admin-console/organizations/collections/vault.component.ts:732",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/collections/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/guards/is-enterprise-org.guard.ts:63",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/guards/is-enterprise-org.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[\"organizations\", org.id, \"billing\", \"subscription\"], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/guards/is-paid-org.guard.ts:62",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/guards/is-paid-org.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[\"organizations\", org.id, \"billing\", \"subscription\"], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.html:27",
+      "kind": "routerLink",
+      "owner": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts:43",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts:58",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/admin-console/organizations/policies/policy-edit-definitions/auto-confirm-policy.component.ts:200",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/policies/policy-edit-definitions/auto-confirm-policy.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/browser-extension-prompt\"], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/settings/account.component.ts:260",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/settings/account.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts:38",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/setup/families-for-enterprise\"], { queryParams: qParams });"
+    },
+    {
+      "at": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts:43",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"/login\"], { queryParams: { email: qParams.email } });"
+    },
+    {
+      "at": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts:52",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"/finish-signup\"], {"
+    },
+    {
+      "at": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:86",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:112",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:187",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:214",
+      "kind": "navigate",
+      "owner": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/app.component.ts:110",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/app.component.ts:122",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/app.component.ts:143",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "["
+    },
+    {
+      "at": "src/app/app.component.ts:172",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"/remove-password\"]);"
+    },
+    {
+      "at": "src/app/app.component.ts:268",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/core/services/login/web-login-component.service.ts:90",
+      "kind": "navigate",
+      "owner": "src/app/auth/core/services/login/web-login-component.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[\"/sso\"], {"
+    },
+    {
+      "at": "src/app/auth/core/services/login/web-login-component.service.ts:166",
+      "kind": "navigate",
+      "owner": "src/app/auth/core/services/login/web-login-component.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[SsoLoginFailedRoute], {"
+    },
+    {
+      "at": "src/app/auth/emergency-access/accept/accept-emergency.component.html:22",
+      "kind": "routerLink",
+      "owner": "src/app/auth/emergency-access/accept/accept-emergency.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/auth/emergency-access/accept/accept-emergency.component.ts:61",
+      "kind": "navigate",
+      "owner": "src/app/auth/emergency-access/accept/accept-emergency.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/vault\"]);"
+    },
+    {
+      "at": "src/app/auth/emergency-access/accept/accept-emergency.component.ts:83",
+      "kind": "navigate",
+      "owner": "src/app/auth/emergency-access/accept/accept-emergency.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/finish-signup\"], {"
+    },
+    {
+      "at": "src/app/auth/emergency-access/accept/accept-emergency.component.ts:102",
+      "kind": "navigate",
+      "owner": "src/app/auth/emergency-access/accept/accept-emergency.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/guards/deep-link/deep-link.guard.ts:39",
+      "kind": "navigateByUrl",
+      "owner": "src/app/auth/guards/deep-link/deep-link.guard.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "persistedPreLoginUrl);"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts:67",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts:112",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/login\"], {"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts:123",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/sso\"], {"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts:134",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/finish-signup\"], {"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-open-invite.component.ts:115",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-open-invite.component.ts",
+      "cls": "CONSTANT_TARGET",
+      "target": "…)` or transitioned"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-open-invite.component.ts:175",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-open-invite.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"/sso\"], {"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-open-invite.component.ts:184",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-open-invite.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"/signup\"]);"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-open-invite.component.ts:217",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-open-invite.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-open-invite.component.ts:227",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-open-invite.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/organization-invite/accept-org-open-invite.component.ts:318",
+      "kind": "navigate",
+      "owner": "src/app/auth/organization-invite/accept-org-open-invite.component.ts",
+      "cls": "CONSTANT_TARGET",
+      "target": "[button.navigateTo]);"
+    },
+    {
+      "at": "src/app/auth/organization-invite/open-org-invite-link-invalid.component.html:8",
+      "kind": "routerLink",
+      "owner": "src/app/auth/organization-invite/open-org-invite-link-invalid.component.ts",
+      "cls": "OTHER",
+      "target": "returnRoute()"
+    },
+    {
+      "at": "src/app/auth/recover-delete.component.html:12",
+      "kind": "routerLink",
+      "owner": "src/app/auth/recover-delete.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/auth/recover-delete.component.ts:66",
+      "kind": "navigate",
+      "owner": "src/app/auth/recover-delete.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/recover-two-factor.component.html:35",
+      "kind": "routerLink",
+      "owner": "src/app/auth/recover-two-factor.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/auth/recover-two-factor.component.ts:132",
+      "kind": "navigate",
+      "owner": "src/app/auth/recover-two-factor.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/settings/security/two-factor\"]);"
+    },
+    {
+      "at": "src/app/auth/recover-two-factor.component.ts:155",
+      "kind": "navigate",
+      "owner": "src/app/auth/recover-two-factor.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/login\"]);"
+    },
+    {
+      "at": "src/app/auth/settings/emergency-access/emergency-access.component.html:256",
+      "kind": "routerLink",
+      "owner": "src/app/auth/settings/emergency-access/emergency-access.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "c.id"
+    },
+    {
+      "at": "src/app/auth/settings/emergency-access/view/emergency-access-view.component.ts:54",
+      "kind": "navigate",
+      "owner": "src/app/auth/settings/emergency-access/view/emergency-access-view.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"settings/emergency-access\"]);"
+    },
+    {
+      "at": "src/app/auth/settings/security/password-settings/password-settings.component.ts:40",
+      "kind": "navigate",
+      "owner": "src/app/auth/settings/security/password-settings/password-settings.component.ts",
+      "cls": "OTHER",
+      "target": "[\"/settings/security/two-factor\"]);"
+    },
+    {
+      "at": "src/app/auth/settings/two-factor/two-factor-setup.component.html:27",
+      "kind": "routerLink",
+      "owner": "src/app/auth/settings/two-factor/two-factor-setup.component.ts",
+      "cls": "OTHER",
+      "target": "../policies"
+    },
+    {
+      "at": "src/app/auth/sso/sso-login-failed.component.html:8",
+      "kind": "routerLink",
+      "owner": "src/app/auth/sso/sso-login-failed.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "'/login'"
+    },
+    {
+      "at": "src/app/auth/sso/sso-login-failed.component.ts:38",
+      "kind": "navigate",
+      "owner": "src/app/auth/sso/sso-login-failed.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"/login\"]);"
+    },
+    {
+      "at": "src/app/auth/verify-email-token.component.ts:53",
+      "kind": "navigate",
+      "owner": "src/app/auth/verify-email-token.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/verify-email-token.component.ts:66",
+      "kind": "navigate",
+      "owner": "src/app/auth/verify-email-token.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/verify-recover-delete.component.html:12",
+      "kind": "routerLink",
+      "owner": "src/app/auth/verify-recover-delete.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/auth/verify-recover-delete.component.ts:58",
+      "kind": "navigate",
+      "owner": "src/app/auth/verify-recover-delete.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/auth/verify-recover-delete.component.ts:71",
+      "kind": "navigate",
+      "owner": "src/app/auth/verify-recover-delete.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/billing/individual/billing-history-view.component.ts:37",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/billing-history-view.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/settings/subscription\"]);"
+    },
+    {
+      "at": "src/app/billing/individual/premium/cloud-hosted-premium.component.ts:208",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/premium/cloud-hosted-premium.component.ts",
+      "cls": "LAZY_BOUNDARY",
+      "target": "[\"../user-subscription\"], { relativeTo: this.activatedRoute });"
+    },
+    {
+      "at": "src/app/billing/individual/premium/cloud-hosted-premium.component.ts:210",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/premium/cloud-hosted-premium.component.ts",
+      "cls": "LAZY_BOUNDARY",
+      "target": "[\"/vault\"]);"
+    },
+    {
+      "at": "src/app/billing/individual/premium/self-hosted-premium.component.ts:132",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/premium/self-hosted-premium.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"../user-subscription\"], { relativeTo: this.activatedRoute });"
+    },
+    {
+      "at": "src/app/billing/individual/premium-checkout/premium-checkout-success.component.html:63",
+      "kind": "routerLink",
+      "owner": "src/app/billing/individual/premium-checkout/premium-checkout-success.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "managePlanRoute"
+    },
+    {
+      "at": "src/app/billing/individual/subscription/cloud-hosted-account-subscription.component.ts:109",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/subscription/cloud-hosted-account-subscription.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/settings/subscription/premium\"]);"
+    },
+    {
+      "at": "src/app/billing/individual/subscription/cloud-hosted-account-subscription.component.ts:115",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/subscription/cloud-hosted-account-subscription.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "["
+    },
+    {
+      "at": "src/app/billing/individual/subscription/cloud-hosted-account-subscription.component.ts:230",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/subscription/cloud-hosted-account-subscription.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"../billing-history\"], { relativeTo: this.activatedRoute });"
+    },
+    {
+      "at": "src/app/billing/individual/subscription/cloud-hosted-account-subscription.component.ts:253",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/subscription/cloud-hosted-account-subscription.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"../payment-details\"], { relativeTo: this.activatedRoute });"
+    },
+    {
+      "at": "src/app/billing/individual/upgrade/premium-org-upgrade-dialog/premium-org-upgrade-dialog.component.ts:191",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/upgrade/premium-org-upgrade-dialog/premium-org-upgrade-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[redirectUrl]);"
+    },
+    {
+      "at": "src/app/billing/individual/upgrade/services/upgrade-flow.service.ts:53",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/upgrade/services/upgrade-flow.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[SELF_HOST_SUBSCRIPTION_URL]);"
+    },
+    {
+      "at": "src/app/billing/individual/upgrade/services/upgrade-flow.service.ts:88",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/upgrade/services/upgrade-flow.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[`/organizations/${result.organizationId}/vault`]);"
+    },
+    {
+      "at": "src/app/billing/individual/upgrade/unified-upgrade-dialog/unified-upgrade-dialog.component.ts:187",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/upgrade/unified-upgrade-dialog/unified-upgrade-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/vault\"]);"
+    },
+    {
+      "at": "src/app/billing/individual/upgrade/unified-upgrade-dialog/unified-upgrade-dialog.component.ts:202",
+      "kind": "navigate",
+      "owner": "src/app/billing/individual/upgrade/unified-upgrade-dialog/unified-upgrade-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[redirectUrl]);"
+    },
+    {
+      "at": "src/app/billing/individual/upgrade/upgrade-payment/upgrade-payment.component.html:20",
+      "kind": "routerLink",
+      "owner": "src/app/billing/individual/upgrade/upgrade-payment/upgrade-payment.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "adminConsoleRouteForOwnedOrganization$ | async"
+    },
+    {
+      "at": "src/app/billing/members/billing-constraint/billing-constraint.service.ts:155",
+      "kind": "navigate",
+      "owner": "src/app/billing/members/billing-constraint/billing-constraint.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[\"/organizations\", organization.id, \"billing\", \"subscription\"], {"
+    },
+    {
+      "at": "src/app/billing/members/billing-constraint/billing-constraint.service.ts:202",
+      "kind": "navigate",
+      "owner": "src/app/billing/members/billing-constraint/billing-constraint.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": ""
+    },
+    {
+      "at": "src/app/billing/organizations/change-plan-dialog.component.ts:833",
+      "kind": "navigate",
+      "owner": "src/app/billing/organizations/change-plan-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/organizations/\" + orgId + \"/billing/subscription\"]);"
+    },
+    {
+      "at": "src/app/billing/organizations/organization-plans.component.ts:845",
+      "kind": "navigate",
+      "owner": "src/app/billing/organizations/organization-plans.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/organizations/\" + orgId]);"
+    },
+    {
+      "at": "src/app/billing/organizations/organization-plans.component.ts:1338",
+      "kind": "navigate",
+      "owner": "src/app/billing/organizations/organization-plans.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/organizations/\" + organizationId]);"
+    },
+    {
+      "at": "src/app/billing/organizations/organization-subscription-cloud.component.html:261",
+      "kind": "routerLink",
+      "owner": "src/app/billing/organizations/organization-subscription-cloud.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/providers', userOrg.providerId, 'billing', 'subscription']"
+    },
+    {
+      "at": "src/app/billing/organizations/warnings/services/organization-warnings.service.ts:227",
+      "kind": "navigate",
+      "owner": "src/app/billing/organizations/warnings/services/organization-warnings.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": ""
+    },
+    {
+      "at": "src/app/billing/services/web-premium-upgrade-prompt.service.ts:85",
+      "kind": "navigate",
+      "owner": "src/app/billing/services/web-premium-upgrade-prompt.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "route);"
+    },
+    {
+      "at": "src/app/billing/services/web-premium-upgrade-prompt.service.ts:99",
+      "kind": "navigate",
+      "owner": "src/app/billing/services/web-premium-upgrade-prompt.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[this.subscriptionPageRoute]);"
+    },
+    {
+      "at": "src/app/billing/settings/sponsored-families.component.ts:194",
+      "kind": "navigate",
+      "owner": "src/app/billing/settings/sponsored-families.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.html:77",
+      "kind": "routerLink",
+      "owner": "src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts",
+      "cls": "OTHER",
+      "target": "['/organizations', orgId, 'members']"
+    },
+    {
+      "at": "src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts:353",
+      "kind": "navigate",
+      "owner": "src/app/billing/trial-initiation/complete-trial-initiation/complete-trial-initiation.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"/login\"], { queryParams: { email: this.email } });"
+    },
+    {
+      "at": "src/app/common/base.accept.component.ts:74",
+      "kind": "navigate",
+      "owner": "src/app/common/base.accept.component.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/components/environment-selector/environment-selector.component.html:20",
+      "kind": "routerLink",
+      "owner": "src/app/components/environment-selector/environment-selector.component.ts",
+      "cls": "CONSTANT_PATH",
+      "target": "[]"
+    },
+    {
+      "at": "src/app/dirt/event-logs/components/entity-events/entity-events.component.ts:169",
+      "kind": "navigate",
+      "owner": "src/app/dirt/event-logs/components/entity-events/entity-events.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/organizations\", this.params.organizationId, \"members\"]);"
+    },
+    {
+      "at": "src/app/dirt/event-logs/components/entity-events/entity-events.component.ts:179",
+      "kind": "navigate",
+      "owner": "src/app/dirt/event-logs/components/entity-events/entity-events.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/dirt/event-logs/components/organization-events/events.component.ts:324",
+      "kind": "navigate",
+      "owner": "src/app/dirt/event-logs/components/organization-events/events.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/organizations\", this.organizationId, \"members\"]);"
+    },
+    {
+      "at": "src/app/dirt/reports/shared/report-card/report-card.component.html:3",
+      "kind": "routerLink",
+      "owner": "src/app/dirt/reports/shared/report-card/report-card.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "route"
+    },
+    {
+      "at": "src/app/key-management/data-recovery/data-recovery.component.html:77",
+      "kind": "routerLink",
+      "owner": "src/app/key-management/data-recovery/data-recovery.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "/vault"
+    },
+    {
+      "at": "src/app/layouts/header/account-menu.component.html:56",
+      "kind": "routerLink",
+      "owner": "src/app/layouts/header/account-menu.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/settings/account"
+    },
+    {
+      "at": "src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.html:61",
+      "kind": "routerLink",
+      "owner": "src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "product.appRoute"
+    },
+    {
+      "at": "src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.html:100",
+      "kind": "routerLink",
+      "owner": "src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "more.marketingRoute.route"
+    },
+    {
+      "at": "src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.html:163",
+      "kind": "routerLink",
+      "owner": "src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "more.marketingRoute.route"
+    },
+    {
+      "at": "src/app/layouts/product-switcher/product-switcher-content.component.html:15",
+      "kind": "routerLink",
+      "owner": "src/app/layouts/product-switcher/product-switcher-content.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "product.appRoute"
+    },
+    {
+      "at": "src/app/layouts/product-switcher/product-switcher-content.component.html:47",
+      "kind": "routerLink",
+      "owner": "src/app/layouts/product-switcher/product-switcher-content.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "product.marketingRoute.route"
+    },
+    {
+      "at": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.html:32",
+      "kind": "routerLink",
+      "owner": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "'/sm-landing'"
+    },
+    {
+      "at": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts:76",
+      "kind": "navigate",
+      "owner": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "[\"/\"]);"
+    },
+    {
+      "at": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts:80",
+      "kind": "navigate",
+      "owner": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"/create-organization\"]);"
+    },
+    {
+      "at": "src/app/secrets-manager/secrets-manager-landing/sm-landing.component.html:46",
+      "kind": "routerLink",
+      "owner": "src/app/secrets-manager/secrets-manager-landing/sm-landing.component.ts",
+      "cls": "OTHER",
+      "target": "tryItNowUrl"
+    },
+    {
+      "at": "src/app/tools/import/import-web.component.ts:42",
+      "kind": "navigate",
+      "owner": "src/app/tools/import/import-web.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "[\"vault\"]);"
+    },
+    {
+      "at": "src/app/tools/import/org-import.component.ts:111",
+      "kind": "navigate",
+      "owner": "src/app/tools/import/org-import.component.ts",
+      "cls": "LAZY_BOUNDARY",
+      "target": "[\"organizations\", organizationId, \"vault\"]);"
+    },
+    {
+      "at": "src/app/tools/send/send-access/send-access-explainer.component.html:13",
+      "kind": "routerLink",
+      "owner": "src/app/tools/send/send-access/send-access-explainer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/signup"
+    },
+    {
+      "at": "src/app/vault/components/coachmark/coachmark.service.ts:174",
+      "kind": "navigate",
+      "owner": "src/app/vault/components/coachmark/coachmark.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[step.route]);"
+    },
+    {
+      "at": "src/app/vault/components/coachmark/coachmark.service.ts:228",
+      "kind": "navigate",
+      "owner": "src/app/vault/components/coachmark/coachmark.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[\"/vault\"]);"
+    },
+    {
+      "at": "src/app/vault/components/onboarding/onboarding-task.component.html:24",
+      "kind": "routerLink",
+      "owner": "src/app/vault/components/onboarding/onboarding-task.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "route()"
+    },
+    {
+      "at": "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:24",
+      "kind": "routerLink",
+      "owner": "src/app/vault/components/setup-extension/add-extension-later-dialog.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/vault"
+    },
+    {
+      "at": "src/app/vault/components/setup-extension/setup-extension.component.html:63",
+      "kind": "routerLink",
+      "owner": "src/app/vault/components/setup-extension/setup-extension.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "/vault"
+    },
+    {
+      "at": "src/app/vault/components/setup-extension/setup-extension.component.ts:139",
+      "kind": "navigate",
+      "owner": "src/app/vault/components/setup-extension/setup-extension.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "[\"/vault\"]);"
+    },
+    {
+      "at": "src/app/vault/components/vault-items/vault-cipher-row.component.html:24",
+      "kind": "routerLink",
+      "owner": "src/app/vault/components/vault-items/vault-cipher-row.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[]"
+    },
+    {
+      "at": "src/app/vault/components/vault-items/vault-collection-row.component.html:37",
+      "kind": "routerLink",
+      "owner": "src/app/vault/components/vault-items/vault-collection-row.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[]"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault-banners/vault-banners.component.html:37",
+      "kind": "routerLink",
+      "owner": "src/app/vault/individual-vault/vault-banners/vault-banners.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/settings/security/device-management"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault-banners/vault-banners.component.ts:76",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault-banners/vault-banners.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": ""
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault-filter/shared/components/vault-filter-section.component.html:162",
+      "kind": "routerLink",
+      "owner": "src/app/vault/individual-vault/vault-filter/shared/components/vault-filter-section.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "{{ addInfo()!.route }}"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault-header/vault-header.component.ts:365",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault-header/vault-header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/organizations\", organization.id, \"billing\", \"subscription\"], {"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault.component.ts:429",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault.component.ts:555",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault.component.ts:674",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"/settings/subscription/premium\"]);"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault.component.ts:743",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault.component.ts:897",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault.component.ts:1256",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault.component.ts:1304",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/vault/individual-vault/vault.component.ts:1720",
+      "kind": "navigate",
+      "owner": "src/app/vault/individual-vault/vault.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/vault/services/vault-item-actions.service.ts:178",
+      "kind": "navigate",
+      "owner": "src/app/vault/services/vault-item-actions.service.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/vault/settings/purge-vault.component.ts:67",
+      "kind": "navigate",
+      "owner": "src/app/vault/settings/purge-vault.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"organizations\", this.organizationId, \"vault\"]);"
+    },
+    {
+      "at": "src/app/vault/settings/purge-vault.component.ts:69",
+      "kind": "navigate",
+      "owner": "src/app/vault/settings/purge-vault.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[\"vault\"]);"
+    }
+  ]
+}

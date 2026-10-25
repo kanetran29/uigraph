@@ -1,0 +1,33 @@
+\begin{algorithm}[t]
+\caption{Scope attribution as a worklist fixpoint over $\mathcal{P}(S)$. The loop marked \emph{model only} belongs to the full analysis and is not implemented in the
+prototype evaluated in Chapter~\ref{ch:results}.}
+\label{alg:attribution}
+\begin{algorithmic}[1]
+\Require routes $R$ with route tree; components $C$; nesting $N \subseteq C \times C$;
+  call graph $\mathit{CG}$; dispatch relation $D$
+\Ensure $\mathit{scope}(x) \in \mathcal{P}(S)$ for every component and callable $x$
+\ForAll{$x$} $\mathit{scope}(x) \gets \varnothing$ \EndFor
+\ForAll{$r \in R$ with $\mathit{component}(r) = c$}
+  \State $\mathit{scope}(c) \gets \mathit{scope}(c) \cup \mathit{subtree}(r)$
+  \Comment{own screen and outlet descendants}
+\EndFor
+\ForAll{non-routed $c$ holding the primary outlet, not nested in any component}
+  \State $\mathit{scope}(c) \gets S$ \Comment{application shell, $\top$}
+\EndFor
+\State $W \gets$ every $x$ with $\mathit{scope}(x) \neq \varnothing$
+\While{$W \neq \emptyset$}
+  \State take $x$ from $W$
+  \ForAll{$y$ with $(x,y) \in N$} \Comment{$x$'s template renders $y$}
+    \State \Call{Propagate}{$x, y$}
+  \EndFor
+  \ForAll{$y$ with $(x,y) \in \mathit{CG} \cup D$} \Comment{\emph{model only}: DI calls, dispatch}
+    \State \Call{Propagate}{$x, y$}
+  \EndFor
+\EndWhile
+\Procedure{Propagate}{$x, y$}
+  \If{$y$ is not a routed component \textbf{and} $\mathit{scope}(x) \not\subseteq \mathit{scope}(y)$}
+    \State $\mathit{scope}(y) \gets \mathit{scope}(y) \cup \mathit{scope}(x)$; add $y$ to $W$
+  \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

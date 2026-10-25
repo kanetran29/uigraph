@@ -1,0 +1,295 @@
+{
+  "appDir": "/tmp/eval/corpus/realworld",
+  "constructs": 40,
+  "lost": 23,
+  "tally": {
+    "CONVERTED_MAY": 10,
+    "CONVERTED_MUST": 6,
+    "ATTRIBUTION_SERVICE": 1,
+    "ATTRIBUTION_SHARED": 21,
+    "OTHER": 1,
+    "QUERY_ONLY": 1
+  },
+  "rows": [
+    {
+      "at": "src/app/core/auth/auth.component.html:8",
+      "kind": "routerLink",
+      "owner": "src/app/core/auth/auth.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/login']"
+    },
+    {
+      "at": "src/app/core/auth/auth.component.html:12",
+      "kind": "routerLink",
+      "owner": "src/app/core/auth/auth.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/register']"
+    },
+    {
+      "at": "src/app/core/auth/auth.component.ts:76",
+      "kind": "navigate",
+      "owner": "src/app/core/auth/auth.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "['/']),"
+    },
+    {
+      "at": "src/app/core/auth/services/user.service.ts:86",
+      "kind": "navigate",
+      "owner": "src/app/core/auth/services/user.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/core/layout/footer.component.html:3",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/footer.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:3",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:10",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:14",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:18",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/register"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:27",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:33",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/editor"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:39",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/settings"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:46",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/profile', currentUser.username]"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:59",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:65",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/editor"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:71",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/settings"
+    },
+    {
+      "at": "src/app/core/layout/header.component.html:88",
+      "kind": "routerLink",
+      "owner": "src/app/core/layout/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/features/article/components/article-comment.component.ts:21",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/components/article-comment.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/profile', comment.author.username]"
+    },
+    {
+      "at": "src/app/features/article/components/article-comment.component.ts:25",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/components/article-comment.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/profile', comment.author.username]"
+    },
+    {
+      "at": "src/app/features/article/components/article-list.component.ts:36",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/components/article-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/features/article/components/article-meta.component.ts:11",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/components/article-meta.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/profile', article.author.username]"
+    },
+    {
+      "at": "src/app/features/article/components/article-meta.component.ts:16",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/components/article-meta.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/profile', article.author.username]"
+    },
+    {
+      "at": "src/app/features/article/components/article-preview.component.ts:18",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/components/article-preview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/article', article().slug]"
+    },
+    {
+      "at": "src/app/features/article/components/favorite-button.component.ts:57",
+      "kind": "navigate",
+      "owner": "src/app/features/article/components/favorite-button.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/register']);"
+    },
+    {
+      "at": "src/app/features/article/pages/article/article.component.html:19",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/pages/article/article.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/editor', a.slug]"
+    },
+    {
+      "at": "src/app/features/article/pages/article/article.component.html:66",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/pages/article/article.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/editor', a.slug]"
+    },
+    {
+      "at": "src/app/features/article/pages/article/article.component.html:114",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/pages/article/article.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/login']"
+    },
+    {
+      "at": "src/app/features/article/pages/article/article.component.ts:117",
+      "kind": "navigate",
+      "owner": "src/app/features/article/pages/article/article.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/features/article/pages/editor/editor.component.ts:52",
+      "kind": "navigate",
+      "owner": "src/app/features/article/pages/editor/editor.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "['/']);"
+    },
+    {
+      "at": "src/app/features/article/pages/editor/editor.component.ts:89",
+      "kind": "navigate",
+      "owner": "src/app/features/article/pages/editor/editor.component.ts",
+      "cls": "OTHER",
+      "target": "['/article/', article.slug]),"
+    },
+    {
+      "at": "src/app/features/article/pages/home/home.component.html:23",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/pages/home/home.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "/"
+    },
+    {
+      "at": "src/app/features/article/pages/home/home.component.html:35",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/pages/home/home.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "/"
+    },
+    {
+      "at": "src/app/features/article/pages/home/home.component.html:61",
+      "kind": "routerLink",
+      "owner": "src/app/features/article/pages/home/home.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/tag', tag]"
+    },
+    {
+      "at": "src/app/features/article/pages/home/home.component.ts:53",
+      "kind": "navigate",
+      "owner": "src/app/features/article/pages/home/home.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/login']);"
+    },
+    {
+      "at": "src/app/features/article/pages/home/home.component.ts:89",
+      "kind": "navigate",
+      "owner": "src/app/features/article/pages/home/home.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/features/profile/components/follow-button.component.ts:59",
+      "kind": "navigate",
+      "owner": "src/app/features/profile/components/follow-button.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/login']);"
+    },
+    {
+      "at": "src/app/features/profile/pages/profile/profile.component.html:23",
+      "kind": "routerLink",
+      "owner": "src/app/features/profile/pages/profile/profile.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/settings']"
+    },
+    {
+      "at": "src/app/features/profile/pages/profile/profile.component.html:42",
+      "kind": "routerLink",
+      "owner": "src/app/features/profile/pages/profile/profile.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/profile', p.username]"
+    },
+    {
+      "at": "src/app/features/profile/pages/profile/profile.component.html:52",
+      "kind": "routerLink",
+      "owner": "src/app/features/profile/pages/profile/profile.component.ts",
+      "cls": "CONVERTED_MAY",
+      "target": "['/profile', p.username, 'favorites']"
+    },
+    {
+      "at": "src/app/features/settings/settings.component.ts:72",
+      "kind": "navigate",
+      "owner": "src/app/features/settings/settings.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "['/profile/', user.username]),"
+    }
+  ]
+}

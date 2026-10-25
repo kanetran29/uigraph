@@ -1,0 +1,3 @@
+{ "name": "route-oracle", "version": "1.0.0", "type": "module", "private": true,
+  "description": "Independent Angular route-config oracle for uigraph coverage evaluation",
+  "dependencies": { "ts-morph": "^28.0.0" } }

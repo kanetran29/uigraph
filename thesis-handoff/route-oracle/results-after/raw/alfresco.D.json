@@ -1,0 +1,295 @@
+{
+  "e2eDir": "/tmp/eval/corpus/alfresco/e2e",
+  "dbPath": "/tmp/eval/corpus/alfresco/projects/aca-content/uigraph.db",
+  "specs": 86,
+  "nodes": 30,
+  "recall": 0.6428571428571429,
+  "excluded": [
+    "/personal-files/nonexistentpage-:param"
+  ],
+  "rows": [
+    {
+      "url": "/personal-files/:param",
+      "specCount": 14,
+      "matchedNode": "/personal-files/:folderId",
+      "usedBy": [
+        "playwright/a11y-personal-files/src/tests/personal-files-core-a11y.e2e.ts",
+        "playwright/folder-rules/src/tests/create-rules.e2e.ts",
+        "playwright/info-drawer/src/tests/file-folder-properties.e2e.ts"
+      ]
+    },
+    {
+      "url": "/repository/:param",
+      "specCount": 6,
+      "matchedNode": "/repository/:folderId",
+      "usedBy": [
+        "playwright/copy-move-actions/src/tests/copy-move-repository.e2e.ts",
+        "playwright/delete-actions/src/tests/restore-repository.e2e.ts",
+        "playwright/info-drawer/src/tests/info-drawer-repository.e2e.ts"
+      ]
+    },
+    {
+      "url": "/:param",
+      "specCount": 1,
+      "matchedNode": null,
+      "usedBy": [
+        "playwright/create-link-actions/src/tests/link-actions.e2e.ts"
+      ]
+    },
+    {
+      "url": "/nodes/:param/rules",
+      "specCount": 2,
+      "matchedNode": null,
+      "usedBy": [
+        "playwright/folder-rules/src/tests/create-rules.e2e.ts",
+        "playwright/folder-rules/src/tests/transform-rules.e2e.ts"
+      ]
+    },
+    {
+      "url": "/libraries/:param",
+      "specCount": 3,
+      "matchedNode": "/libraries/:folderId",
+      "usedBy": [
+        "playwright/info-drawer/src/tests/comments.e2e.ts",
+        "playwright/navigation/src/tests/breadcrumb.e2e.ts",
+        "playwright/viewer/src/tests/viewer.e2e.ts"
+      ]
+    },
+    {
+      "url": "/favorites",
+      "specCount": 1,
+      "matchedNode": "/favorites",
+      "usedBy": [
+        "playwright/info-drawer/src/tests/info-drawer-repository.e2e.ts"
+      ]
+    },
+    {
+      "url": "/personal-files",
+      "specCount": 2,
+      "matchedNode": "/personal-files",
+      "usedBy": [
+        "playwright/info-drawer/src/tests/info-drawer-repository.e2e.ts",
+        "playwright/navigation/src/tests/breadcrumb.e2e.ts"
+      ]
+    },
+    {
+      "url": "/repository/details/:param",
+      "specCount": 2,
+      "matchedNode": "/repository/details/:nodeId",
+      "usedBy": [
+        "playwright/info-drawer/src/tests/info-drawer-repository.e2e.ts",
+        "playwright/smoke-test/src/tests/repository/repository-smoke.e2e.ts"
+      ]
+    },
+    {
+      "url": "/personal-files/details/:param",
+      "specCount": 1,
+      "matchedNode": "/personal-files/details/:nodeId",
+      "usedBy": [
+        "playwright/info-drawer/src/tests/info-drawer-repository.e2e.ts"
+      ]
+    },
+    {
+      "url": "/search",
+      "specCount": 1,
+      "matchedNode": "/search",
+      "usedBy": [
+        "playwright/navigation/src/tests/sidebar.e2e.ts"
+      ]
+    },
+    {
+      "url": "/repository/details/:param/permissions",
+      "specCount": 1,
+      "matchedNode": "/repository/details/:nodeId/:activeTab",
+      "usedBy": [
+        "playwright/smoke-test/src/tests/repository/repository-smoke.e2e.ts"
+      ]
+    },
+    {
+      "url": "/personal-files/:param/(viewer:view/:param)",
+      "specCount": 2,
+      "matchedNode": null,
+      "usedBy": [
+        "playwright/smoke-test/src/tests/viewer/viewer.e2e.ts",
+        "playwright/viewer/src/tests/viewer.e2e.ts"
+      ]
+    },
+    {
+      "url": "/:param/permissions",
+      "specCount": 1,
+      "matchedNode": null,
+      "usedBy": [
+        "playwright/special-permissions-actions-available/src/tests/repository-permissions.e2e.ts"
+      ]
+    },
+    {
+      "url": "/libraries/:param/(viewer:view/:param)",
+      "specCount": 1,
+      "matchedNode": null,
+      "usedBy": [
+        "playwright/viewer/src/tests/viewer.e2e.ts"
+      ]
+    }
+  ],
+  "perSpec": [
+    {
+      "spec": "playwright/a11y-personal-files/src/tests/personal-files-core-a11y.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/copy-move-actions/src/tests/copy-move-repository.e2e.ts",
+      "urls": [
+        "/repository/:param"
+      ]
+    },
+    {
+      "spec": "playwright/create-link-actions/src/tests/link-actions.e2e.ts",
+      "urls": [
+        "/:param"
+      ]
+    },
+    {
+      "spec": "playwright/delete-actions/src/tests/restore-repository.e2e.ts",
+      "urls": [
+        "/repository/:param"
+      ]
+    },
+    {
+      "spec": "playwright/folder-rules/src/tests/create-rules.e2e.ts",
+      "urls": [
+        "/nodes/:param/rules",
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/folder-rules/src/tests/transform-rules.e2e.ts",
+      "urls": [
+        "/nodes/:param/rules"
+      ]
+    },
+    {
+      "spec": "playwright/info-drawer/src/tests/comments.e2e.ts",
+      "urls": [
+        "/libraries/:param"
+      ]
+    },
+    {
+      "spec": "playwright/info-drawer/src/tests/file-folder-properties.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/info-drawer/src/tests/info-drawer-repository.e2e.ts",
+      "urls": [
+        "/repository/:param",
+        "/favorites",
+        "/personal-files",
+        "/repository/details/:param",
+        "/personal-files/details/:param"
+      ]
+    },
+    {
+      "spec": "playwright/list-views/src/tests/generic-errors.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/list-views/src/tests/personal-files.e2e.ts",
+      "urls": [
+        "/personal-files/nonexistentpage-:param",
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/navigation/src/tests/breadcrumb-admin.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/navigation/src/tests/breadcrumb.e2e.ts",
+      "urls": [
+        "/personal-files",
+        "/personal-files/:param",
+        "/libraries/:param"
+      ]
+    },
+    {
+      "spec": "playwright/navigation/src/tests/repository-breadcrumb.e2e.ts",
+      "urls": [
+        "/repository/:param"
+      ]
+    },
+    {
+      "spec": "playwright/navigation/src/tests/sidebar.e2e.ts",
+      "urls": [
+        "/search"
+      ]
+    },
+    {
+      "spec": "playwright/smoke-test/src/tests/repository/repository-smoke.e2e.ts",
+      "urls": [
+        "/repository/:param",
+        "/repository/details/:param",
+        "/repository/details/:param/permissions"
+      ]
+    },
+    {
+      "spec": "playwright/smoke-test/src/tests/viewer/viewer.e2e.ts",
+      "urls": [
+        "/personal-files/:param",
+        "/personal-files/:param/(viewer:view/:param)"
+      ]
+    },
+    {
+      "spec": "playwright/special-permissions-actions-available/src/tests/folders-actions.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/special-permissions-actions-available/src/tests/repository-permissions.e2e.ts",
+      "urls": [
+        "/repository/:param",
+        "/:param/permissions"
+      ]
+    },
+    {
+      "spec": "playwright/viewer/src/tests/viewer-protected.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/viewer/src/tests/viewer-useraction.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/viewer/src/tests/viewer-zoom-functionality.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    },
+    {
+      "spec": "playwright/viewer/src/tests/viewer.e2e.ts",
+      "urls": [
+        "/personal-files/:param",
+        "/libraries/:param",
+        "/personal-files/:param/(viewer:view/:param)",
+        "/libraries/:param/(viewer:view/:param)"
+      ]
+    },
+    {
+      "spec": "playwright/viewer-actions/src/tests/viewer-action.e2e.ts",
+      "urls": [
+        "/personal-files/:param"
+      ]
+    }
+  ]
+}

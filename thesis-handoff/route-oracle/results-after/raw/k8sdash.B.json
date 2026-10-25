@@ -1,0 +1,10 @@
+{
+  "appDir": "/tmp/eval/corpus/k8sdash/modules/web",
+  "dbPath": "/tmp/eval/corpus/k8sdash/modules/web/uigraph.db",
+  "edges": 3,
+  "clean": 3,
+  "mustEdges": 3,
+  "mustClean": 3,
+  "tally": {},
+  "findings": []
+}

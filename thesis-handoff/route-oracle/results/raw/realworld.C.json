@@ -1,0 +1,176 @@
+{
+  "appDir": "/tmp/eval/corpus/realworld",
+  "db": "/tmp/eval/corpus/realworld/uigraph.db",
+  "filesParsed": 44,
+  "declaredRoutesTotal": 18,
+  "byKind": {
+    "SCREEN": 14,
+    "PREFIX": 4
+  },
+  "uniqueScreenPaths": 12,
+  "guardedScreenPaths": 5,
+  "blindSpots": [],
+  "comparison": {
+    "declaredScreens": 12,
+    "graphNodes": 11,
+    "matched": 10,
+    "coverage": 0.8333,
+    "missing": [
+      {
+        "path": "/:username",
+        "at": "src/app/features/profile/profile.routes.ts:12",
+        "guards": []
+      },
+      {
+        "path": "/:username/favorites",
+        "at": "src/app/features/profile/profile.routes.ts:16",
+        "guards": []
+      }
+    ],
+    "extraNodes": [
+      {
+        "route": "/profile",
+        "id": "n_profile",
+        "kind": "screen"
+      }
+    ]
+  },
+  "routes": [
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 15
+    },
+    {
+      "path": "/tag/:tag",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 19
+    },
+    {
+      "path": "/login",
+      "kind": "SCREEN",
+      "guards": [
+        "[() => inject(UserService).isAuthenticated.pipe(map(isAuth => !isAuth))]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 23
+    },
+    {
+      "path": "/register",
+      "kind": "SCREEN",
+      "guards": [
+        "[() => inject(UserService).isAuthenticated.pipe(map(isAuth => !isAuth))]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 28
+    },
+    {
+      "path": "/settings",
+      "kind": "SCREEN",
+      "guards": [
+        "[requireAuth]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 33
+    },
+    {
+      "path": "/profile",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 38
+    },
+    {
+      "path": "/profile",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 5
+    },
+    {
+      "path": "/profile/:username",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 8
+    },
+    {
+      "path": "/profile/:username",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 12
+    },
+    {
+      "path": "/profile/:username/favorites",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 16
+    },
+    {
+      "path": "/editor",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 42
+    },
+    {
+      "path": "/editor",
+      "kind": "SCREEN",
+      "guards": [
+        "[requireAuth]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 45
+    },
+    {
+      "path": "/editor/:slug",
+      "kind": "SCREEN",
+      "guards": [
+        "[requireAuth]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 50
+    },
+    {
+      "path": "/article/:slug",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 57
+    },
+    {
+      "path": "/",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 5
+    },
+    {
+      "path": "/:username",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 8
+    },
+    {
+      "path": "/:username",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 12
+    },
+    {
+      "path": "/:username/favorites",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 16
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{booktabs,tabularx,array,enumitem,microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\titleformat{\section}{\sffamily\large\bfseries}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\sffamily\normalsize\bfseries}{\thesubsection}{0.8em}{}
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\begin{document}
+
+{\sffamily
+{\small Aalto University, School of Science\\
+Master's Programme in Computer, Communication and Information Sciences}\par\vspace{1.1em}
+{\Large\bfseries Master's thesis plan}\par\vspace{0.5em}
+{\large Scope Attribution for Static UI Transition Graph Extraction\\ in Single-Page Applications}\par\vspace{0.8em}
+\begin{tabular}{@{}ll}
+Student & Duy Khanh Tran, 103503394 \\
+Supervisor & Prof.\ Petri Vuorimaa \\
+Major & Computer Science \\
+Extent & 30 ECTS \\
+Language & English \\
+Date & 22 September 2026 \\
+\end{tabular}
+}
+\par\vspace{0.4em}\hrule\vspace{0.7em}
+
+\section{Topic}
+
+A UI transition graph models an application as a set of screens and the transitions
+a user can trigger between them. Static extraction of such graphs from source code is
+well established for Android but has not been studied for client-side web frameworks,
+which are modelled dynamically by crawling. The thesis measures static extraction on
+real Angular applications using an existing open-source analyser developed by the
+student, classifies where it fails, and proposes and evaluates an analysis, called
+scope attribution, that addresses the largest class of failures: navigation sites
+located in shared components, injected services and route guards, which the current
+extractor attributes to no screen.
+
+\section{Research questions}
+
+\begin{itemize}[leftmargin=2.4em]
+  \item[\textbf{RQ1}] How much of the navigation in real Angular applications can be
+        extracted statically? Measured as the fraction of navigation constructs in the
+        source that become deterministic transitions in the graph.
+  \item[\textbf{RQ2}] Where does extraction fail, and why? Answered by a defect
+        classification in which each class must be confirmed by at least two
+        independent evaluation methods.
+  \item[\textbf{RQ3}] Does scope attribution recover the largest defect class? Measured
+        as the change in the RQ1 ratio between two fixed tool versions on identical
+        inputs, with precision on the deterministic tier not decreasing.
+  \item[\textbf{RQ4}] Does the resulting graph detect source changes well enough to
+        support change impact analysis? Measured by mutation testing.
+\end{itemize}
+
+The thesis does not claim completeness, which is undecidable for dynamic navigation;
+it proves conditional soundness over a declared scope and measures recall. It makes no
+claim about the effect of the graph on coding agents, and no claim beyond Angular.
+
+\section{Material and methods}
+
+\textbf{Corpus.} Six open-source Angular applications, selected by six published
+criteria from ten candidates, pinned to exact commits, and spanning 14 to 674 declared
+routes. Threats to the validity of an open-source corpus and their mitigations are
+addressed in the thesis. An industrial case study on a proprietary Angular
+application, reporting aggregate figures only, is proposed as an extension subject to
+the supervisor's view and the employer's permission.
+
+\textbf{Evaluation.} Four independent methods, each with a declared blind spot:
+verification of every transition against its source witness (precision); comparison
+with an independently written route parser (diagnosis); the applications' own passing
+end-to-end tests as ground truth (recall); and mutation testing (sensitivity). The
+whole evaluation is reproducible from one command with full provenance.
+
+\textbf{Preliminary results.} On the current extractor, static extraction recovers
+between 0 and 14 percent of navigation constructs as deterministic transitions, and
+three of six applications yield routes but no transitions. Where deterministic
+transitions are produced they are almost always correct (75 of 76 verified against
+source). Three independent methods point to attribution as the dominant cause of loss.
+
+\section{Planned structure}
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}lYr@{}}
+\toprule
+ & Chapter & Pages \\
+\midrule
+1 & Introduction: motivation, research questions and scope, thesis structure & 4--6 \\
+2 & Background: transition graphs; static extraction for Android; navigation models for
+    web applications; dynamic models of single-page applications; Angular routing and
+    dependency injection; formal foundations & 15--20 \\
+3 & Research material and methods: corpus and validity; graph model; scope attribution;
+    implementation; evaluation protocol & 15--20 \\
+4 & Results, one section per research question & 12--15 \\
+5 & Discussion: findings, limitations, declared approximations, future work & 5--8 \\
+6 & Conclusion & 1--2 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Target length 60 to 75 pages. Chapters 1 to 3 are drafted.
+
+\section{Schedule}
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}llY@{}}
+\toprule
+Date & Milestone & Completion criterion \\
+\midrule
+28 Sep & Baseline frozen & Tool version tagged; corpus re-measured; result tables generated. \\
+5 Oct & Chapter 3 final & Corpus, model and protocol sections complete. \\
+12 Oct & Attribution implemented & Component nesting, router outlets, DI-aware call graph, guards, anchored edges. \\
+15 Oct & Checkpoint & If attribution is incomplete, RQ4 moves to future work and RQ3 reports the implemented subset. \\
+19 Oct & Second measurement & Same corpus and harness on the new tag; before and after tables. \\
+26 Oct & Chapters 2, 4, 5 drafted & \\
+2 Nov & Complete draft to supervisor & \\
+November & Thesis presentation; revisions & Date agreed with supervisor. \\
+30 Nov & Submission & PDF/A and abstract in MyStudies; graduation request in Sisu. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The student's study right ends on 31 December 2026. The schedule therefore targets
+the December meeting of the Degree Programme Committee. The study coordinator will be
+consulted on the exact date the study right must cover and on the extension
+procedure.
+
+\section{Risks}
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}YY@{}}
+\toprule
+Risk & Response \\
+\midrule
+Attribution not complete by 12 October & The empirical study (RQ1, RQ2) stands alone. RQ4 is dropped first; RQ3 reports what is implemented and declares the rest. \\
+Supervisor reading time in November & Draft date and reading window agreed in advance. \\
+Corpus applications require a backend to run & No planned method executes an application. \\
+Tool changes during measurement & Measurements are taken only against tagged versions. \\
+Study right timing & Study coordinator consulted; extension application filed if advised. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Deliverables}
+
+The thesis; the analyser with two tagged versions corresponding to before and after
+attribution; the corpus manifest and the evaluation harness; the generated results
+with provenance; a verified bibliography.
+
+\vspace{2em}
+\section*{Approval}
+
+\begin{tabular}{@{}p{7cm}p{7cm}}
+\\[1.5em]
+\rule{6.5cm}{0.4pt} & \rule{6.5cm}{0.4pt} \\
+Duy Khanh Tran, student & Prof.\ Petri Vuorimaa, supervisor \\[0.4em]
+Date: \rule{3cm}{0.4pt} & Date: \rule{3cm}{0.4pt} \\
+\end{tabular}
+
+\end{document}

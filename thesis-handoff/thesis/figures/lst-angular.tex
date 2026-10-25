@@ -1,0 +1,30 @@
+\begin{lstlisting}[language=TypeScript, caption={A route table with the constructs the analysis must handle: a guarded route, a parent route whose children render in its outlet, a lazily loaded route table and a path held in a constant.}, label={lst:routes}]
+export const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'settings', component: SettingsComponent,
+    canActivate: [requireAuth],
+    children: [{ path: 'profile', component: ProfileComponent }] },
+  { path: 'admin', loadChildren: () => import('./admin/admin.routes') },
+  { path: paths.about, component: AboutComponent },   // constant, not a literal
+];
+\end{lstlisting}
+
+\begin{lstlisting}[language=AngularHTML, caption={The root component's template. The header sits next to the outlet, so its links are present on every screen but belong to none of them.}, label={lst:shell}]
+<app-header />                 <!-- shell: rendered on every screen -->
+<router-outlet />              <!-- the active route renders here -->
+
+<!-- header.component.html -->
+<a routerLink="/settings">Settings</a>
+@if (user()) { <a [routerLink]="['/profile', user().name]">Me</a> }
+\end{lstlisting}
+
+\begin{lstlisting}[language=TypeScript, caption={Navigation from an injected service. The call site belongs to no component, so its screens can only be found through the components that call \texttt{logout}.}, label={lst:service}]
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private router = inject(Router);
+  logout(): void {
+    this.session.clear();
+    this.router.navigate(['/login']);
+  }
+}
+\end{lstlisting}

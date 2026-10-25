@@ -1,0 +1,2423 @@
+{
+  "appDir": "/tmp/eval/corpus/bitwarden/apps/web",
+  "db": "/tmp/eval/corpus/bitwarden/apps/web/uigraph.db",
+  "filesParsed": 673,
+  "declaredRoutesTotal": 175,
+  "byKind": {
+    "REDIRECT": 10,
+    "SCREEN": 121,
+    "PREFIX": 37,
+    "LAZY_UNRESOLVED": 5,
+    "WILDCARD": 2
+  },
+  "uniqueScreenPaths": 97,
+  "guardedScreenPaths": 47,
+  "blindSpots": [
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "loadChildren: () => VaultModule",
+      "at": "src/app/oss-routing.module.ts:686",
+      "prefix": "/vault"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "loadChildren: () => SecurityRoutingModule",
+      "at": "src/app/oss-routing.module.ts:752",
+      "prefix": "/settings/security"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "loadChildren: () => ReportsModule",
+      "at": "src/app/oss-routing.module.ts:844",
+      "prefix": "/reports"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "loadChildren: () => VaultModule",
+      "at": "src/app/admin-console/organizations/organization-routing.module.ts:35",
+      "prefix": "/organizations/:organizationId/vault"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/admin-console/organizations/members/index.ts",
+      "prefix": "/organizations/:organizationId/members"
+    }
+  ],
+  "comparison": {
+    "declaredScreens": 97,
+    "graphNodes": 78,
+    "matched": 47,
+    "coverage": 0.4845,
+    "missing": [
+      {
+        "path": "/AuthWebRoute.AcceptOrgDirectInvite",
+        "at": "src/app/oss-routing.module.ts:133",
+        "guards": [
+          "[deepLinkGuard()]"
+        ]
+      },
+      {
+        "path": "/AuthRoute.LoginWithPasskey",
+        "at": "src/app/oss-routing.module.ts:176",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.SignUp",
+        "at": "src/app/oss-routing.module.ts:198",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.FinishSignUp",
+        "at": "src/app/oss-routing.module.ts:216",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.Login",
+        "at": "src/app/oss-routing.module.ts:273",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.LoginWithDevice",
+        "at": "src/app/oss-routing.module.ts:294",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.AdminApprovalRequested",
+        "at": "src/app/oss-routing.module.ts:313",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.PasswordHint",
+        "at": "src/app/oss-routing.module.ts:330",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.LoginInitiated",
+        "at": "src/app/oss-routing.module.ts:343",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.SetInitialPassword",
+        "at": "src/app/oss-routing.module.ts:366",
+        "guards": [
+          "[authGuard]"
+        ]
+      },
+      {
+        "path": "/AuthWebRoute.SignUpLinkExpired",
+        "at": "src/app/oss-routing.module.ts:385",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.Sso",
+        "at": "src/app/oss-routing.module.ts:412",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.TwoFactor",
+        "at": "src/app/oss-routing.module.ts:428",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.AuthenticationTimeout",
+        "at": "src/app/oss-routing.module.ts:467",
+        "guards": []
+      },
+      {
+        "path": "/AuthWebRoute.RecoverTwoFactor",
+        "at": "src/app/oss-routing.module.ts:489",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.NewDeviceVerification",
+        "at": "src/app/oss-routing.module.ts:507",
+        "guards": []
+      },
+      {
+        "path": "/AuthWebRoute.AcceptEmergencyAccessInvite",
+        "at": "src/app/oss-routing.module.ts:534",
+        "guards": []
+      },
+      {
+        "path": "/AuthWebRoute.RecoverDeleteAccount",
+        "at": "src/app/oss-routing.module.ts:558",
+        "guards": []
+      },
+      {
+        "path": "/AuthWebRoute.VerifyRecoverDeleteAccount",
+        "at": "src/app/oss-routing.module.ts:576",
+        "guards": []
+      },
+      {
+        "path": "/AuthRoute.ChangePassword",
+        "at": "src/app/oss-routing.module.ts:657",
+        "guards": [
+          "[authGuard]"
+        ]
+      },
+      {
+        "path": "/settings/AuthWebRouteSegment.Account",
+        "at": "src/app/oss-routing.module.ts:742",
+        "guards": []
+      },
+      {
+        "path": "/settings/subscription/user-subscription",
+        "at": "src/app/billing/individual/individual-billing-routing.module.ts:38",
+        "guards": []
+      },
+      {
+        "path": "/settings/subscription/premium",
+        "at": "src/app/billing/individual/individual-billing-routing.module.ts:62",
+        "guards": []
+      },
+      {
+        "path": "/settings/subscription/payment-details",
+        "at": "src/app/billing/individual/individual-billing-routing.module.ts:67",
+        "guards": []
+      },
+      {
+        "path": "/settings/subscription/billing-history",
+        "at": "src/app/billing/individual/individual-billing-routing.module.ts:72",
+        "guards": []
+      },
+      {
+        "path": "/settings/AuthWebRouteSegment.EmergencyAccess",
+        "at": "src/app/oss-routing.module.ts:781",
+        "guards": [
+          "[organizationPolicyGuard(canAccessEmergencyAccess)]"
+        ]
+      },
+      {
+        "path": "/settings/AuthWebRouteSegment.EmergencyAccess/:id",
+        "at": "src/app/oss-routing.module.ts:787",
+        "guards": [
+          "[organizationPolicyGuard(canAccessEmergencyAccess)]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId",
+        "at": "src/app/admin-console/organizations/organization-routing.module.ts:24",
+        "guards": [
+          "[deepLinkGuard(), authGuard, organizationPermissionsGuard(canAccessOrgAdmin)]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/settings/account",
+        "at": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts:25",
+        "guards": [
+          "[organizationPermissionsGuard((o) => o.isOwner)]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/settings/two-factor",
+        "at": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts:33",
+        "guards": [
+          "[organizationPermissionsGuard((o) => o.use2fa && o.isOwner)]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/settings/policies",
+        "at": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts:41",
+        "guards": [
+          "[organizationPermissionsGuard((org) => org.canManagePolicies)]",
+          "[PoliciesDeactivateGuard]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/settings/tools/import",
+        "at": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts:53",
+        "guards": [
+          "[organizationPermissionsGuard((org) => org.canAccessImport)]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/settings/tools/export",
+        "at": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts:64",
+        "guards": [
+          "[organizationPermissionsGuard((org) => org.canAccessExport)]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/groups",
+        "at": "src/app/admin-console/organizations/organization-routing.module.ts:50",
+        "guards": [
+          "[organizationPermissionsGuard(canAccessGroupsTab)]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/reporting/reports",
+        "at": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts:39",
+        "guards": [
+          "[organizationPermissionsGuard()]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/reporting/reports/exposed-passwords-report",
+        "at": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts:47",
+        "guards": [
+          "[isPaidOrgGuard()]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/reporting/reports/inactive-two-factor-report",
+        "at": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts:55",
+        "guards": [
+          "[isPaidOrgGuard()]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/reporting/reports/reused-passwords-report",
+        "at": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts:63",
+        "guards": [
+          "[isPaidOrgGuard()]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/reporting/reports/unsecured-websites-report",
+        "at": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts:71",
+        "guards": [
+          "[isPaidOrgGuard()]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/reporting/reports/weak-passwords-report",
+        "at": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts:79",
+        "guards": [
+          "[isPaidOrgGuard()]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/reporting/reports/passkey-report",
+        "at": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts:87",
+        "guards": [
+          "[ isPaidOrgGuard(), canAccessFeature(FeatureFlag.PasskeyLoginReport, true, \"../r"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/reporting/events",
+        "at": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts:100",
+        "guards": [
+          "[organizationPermissionsGuard((org) => org.canAccessEventLogs || org.isOwner)]"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/billing/subscription",
+        "at": "src/app/billing/organizations/organization-billing-routing.module.ts:21",
+        "guards": []
+      },
+      {
+        "path": "/organizations/:organizationId/billing/payment-details",
+        "at": "src/app/billing/organizations/organization-billing-routing.module.ts:28",
+        "guards": [
+          "[ organizationPermissionsGuard((org) => org.canEditPaymentMethods), organization"
+        ]
+      },
+      {
+        "path": "/organizations/:organizationId/billing/history",
+        "at": "src/app/billing/organizations/organization-billing-routing.module.ts:39",
+        "guards": [
+          "[ organizationPermissionsGuard((org) => org.canViewBillingHistory), organization"
+        ]
+      },
+      {
+        "path": "/sm/:organizationId",
+        "at": "src/app/layouts/product-switcher/product-switcher.stories.ts:181",
+        "guards": []
+      },
+      {
+        "path": "/providers/:providerId",
+        "at": "src/app/layouts/product-switcher/product-switcher.stories.ts:185",
+        "guards": []
+      },
+      {
+        "path": "/:vaultId/${MY_ITEMS_ROUTE}",
+        "at": "src/app/vault/individual-vault/vault-routing.module.ts:42",
+        "guards": [
+          "[ canAccessFeature(FeatureFlag.VFO1Foundation, true, \"/vault\", false), vaultScop"
+        ]
+      },
+      {
+        "path": "/:vaultId/${SHARED_FOLDERS_ROUTE}",
+        "at": "src/app/vault/individual-vault/vault-routing.module.ts:52",
+        "guards": [
+          "[ canAccessFeature(FeatureFlag.VFO1Foundation, true, \"/vault\", false), organizat"
+        ]
+      },
+      {
+        "path": "/:vaultId/${SHARED_FOLDERS_ROUTE}/:collectionId",
+        "at": "src/app/vault/individual-vault/vault-routing.module.ts:64",
+        "guards": [
+          "[ canAccessFeature(FeatureFlag.VFO1Foundation, true, \"/vault\", false), vaultScop"
+        ]
+      }
+    ],
+    "extraNodes": [
+      {
+        "route": "/register",
+        "id": "n_register",
+        "kind": "screen"
+      },
+      {
+        "route": "/trial",
+        "id": "n_trial",
+        "kind": "screen"
+      },
+      {
+        "route": "/recover",
+        "id": "n_recover",
+        "kind": "screen"
+      },
+      {
+        "route": "/settings",
+        "id": "n_settings",
+        "kind": "screen"
+      },
+      {
+        "route": "/settings/security",
+        "id": "n_settings_security",
+        "kind": "screen"
+      },
+      {
+        "route": "/tools",
+        "id": "n_tools",
+        "kind": "screen"
+      },
+      {
+        "route": "/reports",
+        "id": "n_reports",
+        "kind": "screen"
+      },
+      {
+        "route": "/organizations",
+        "id": "n_organizations",
+        "kind": "screen"
+      },
+      {
+        "route": "*",
+        "id": "n_wildcard",
+        "kind": "screen"
+      },
+      {
+        "route": "/:organizationId",
+        "id": "n_organizationId",
+        "kind": "screen"
+      },
+      {
+        "route": "/:organizationId/vault",
+        "id": "n_organizationId_vault",
+        "kind": "screen"
+      },
+      {
+        "route": "/:organizationId/settings",
+        "id": "n_organizationId_settings",
+        "kind": "screen"
+      },
+      {
+        "route": "/:organizationId/members",
+        "id": "n_organizationId_members",
+        "kind": "screen"
+      },
+      {
+        "route": "/:organizationId/groups",
+        "id": "n_organizationId_groups",
+        "kind": "screen"
+      },
+      {
+        "route": "/:organizationId/reporting",
+        "id": "n_organizationId_reporting",
+        "kind": "screen"
+      },
+      {
+        "route": "/:organizationId/billing",
+        "id": "n_organizationId_billing",
+        "kind": "screen"
+      },
+      {
+        "route": "/user-subscription",
+        "id": "n_user-subscription",
+        "kind": "screen"
+      },
+      {
+        "route": "/premium",
+        "id": "n_premium",
+        "kind": "screen"
+      },
+      {
+        "route": "/payment-details",
+        "id": "n_payment-details",
+        "kind": "screen"
+      },
+      {
+        "route": "/billing-history",
+        "id": "n_billing-history",
+        "kind": "screen"
+      },
+      {
+        "route": "/subscription",
+        "id": "n_subscription",
+        "kind": "screen"
+      },
+      {
+        "route": "/history",
+        "id": "n_history",
+        "kind": "screen"
+      },
+      {
+        "route": "/reports/exposed-passwords-report",
+        "id": "n_reports_exposed-passwords-report",
+        "kind": "screen"
+      },
+      {
+        "route": "/reports/inactive-two-factor-report",
+        "id": "n_reports_inactive-two-factor-report",
+        "kind": "screen"
+      },
+      {
+        "route": "/reports/reused-passwords-report",
+        "id": "n_reports_reused-passwords-report",
+        "kind": "screen"
+      },
+      {
+        "route": "/reports/unsecured-websites-report",
+        "id": "n_reports_unsecured-websites-report",
+        "kind": "screen"
+      },
+      {
+        "route": "/reports/weak-passwords-report",
+        "id": "n_reports_weak-passwords-report",
+        "kind": "screen"
+      },
+      {
+        "route": "/reports/passkey-report",
+        "id": "n_reports_passkey-report",
+        "kind": "screen"
+      },
+      {
+        "route": "/events",
+        "id": "n_events",
+        "kind": "screen"
+      },
+      {
+        "route": "/account",
+        "id": "n_account",
+        "kind": "screen"
+      },
+      {
+        "route": "/policies",
+        "id": "n_policies",
+        "kind": "screen"
+      }
+    ]
+  },
+  "routes": [
+    {
+      "path": "/register",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 111,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/trial",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 116,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 121,
+      "component": "FrontendLayoutComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "PREFIX",
+      "guards": [
+        "[redirectGuard()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 126,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/verify-email",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 132,
+      "component": "VerifyEmailTokenComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.AcceptOrgDirectInvite",
+      "kind": "SCREEN",
+      "guards": [
+        "[deepLinkGuard()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 133,
+      "component": "AcceptOrgDirectInviteComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/accept-families-for-enterprise",
+      "kind": "SCREEN",
+      "guards": [
+        "[deepLinkGuard()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 139,
+      "component": "AcceptFamilySponsorshipComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/recover",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 148,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/verify-recover-delete-org",
+      "kind": "SCREEN",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 149,
+      "component": "VerifyRecoverDeleteOrgComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 157,
+      "component": "AnonLayoutWrapperComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.LoginWithPasskey",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 161,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.LoginWithPasskey",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 175,
+      "component": "LoginViaWebAuthnComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.LoginWithPasskey",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 176,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.SignUp",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 183,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.SignUp",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 194,
+      "component": "RegistrationStartComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.SignUp",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 198,
+      "component": "RegistrationStartSecondaryComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.FinishSignUp",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 208,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.FinishSignUp",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 216,
+      "component": "RegistrationFinishComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/join/:organizationId/:inviteLinkCode",
+      "kind": "SCREEN",
+      "guards": [
+        "[canAccessFeature(FeatureFlag.GenerateInviteLink), deepLinkGuard()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 222,
+      "component": "AcceptOrgOpenInviteComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/organization-invite-link-invalid",
+      "kind": "SCREEN",
+      "guards": [
+        "[canAccessFeature(FeatureFlag.GenerateInviteLink), unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 233,
+      "component": "OpenOrgInviteLinkInvalidComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/sso-login-failed",
+      "kind": "SCREEN",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 246,
+      "component": "SsoLoginFailedComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.Login",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 254,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.Login",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 264,
+      "component": "LoginComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.Login",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 268,
+      "component": "LoginSecondaryContentComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.Login",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 273,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.LoginWithDevice",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 280,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.LoginWithDevice",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 293,
+      "component": "LoginViaAuthRequestComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.LoginWithDevice",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 294,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.AdminApprovalRequested",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 301,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.AdminApprovalRequested",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 313,
+      "component": "LoginViaAuthRequestComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.PasswordHint",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 315,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.PasswordHint",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 329,
+      "component": "PasswordHintComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.PasswordHint",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 330,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.LoginInitiated",
+      "kind": "PREFIX",
+      "guards": [
+        "[tdeDecryptionRequiredGuard()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 337,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.LoginInitiated",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 343,
+      "component": "LoginDecryptionOptionsComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/send/:sendId/:key",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 345,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/send/:sendId/:key",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 355,
+      "component": "AccessComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/send/:sendId/:key",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 359,
+      "component": "SendAccessExplainerComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.SetInitialPassword",
+      "kind": "SCREEN",
+      "guards": [
+        "[authGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 366,
+      "component": "SetInitialPasswordComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.SignUpLinkExpired",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 375,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.SignUpLinkExpired",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 385,
+      "component": "RegistrationLinkExpiredComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.Sso",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 394,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.Sso",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 408,
+      "component": "SsoComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.Sso",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 412,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.TwoFactor",
+      "kind": "SCREEN",
+      "guards": [
+        "[unauthGuardFn(), TwoFactorAuthGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 419,
+      "component": "TwoFactorAuthComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.TwoFactor",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 424,
+      "component": "TwoFactorAuthComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.TwoFactor",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 428,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/lock",
+      "kind": "PREFIX",
+      "guards": [
+        "[deepLinkGuard(), lockGuard()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 442,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/lock",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 446,
+      "component": "LockComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.AuthenticationTimeout",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 459,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.AuthenticationTimeout",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 463,
+      "component": "AuthenticationTimeoutComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.AuthenticationTimeout",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 467,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.RecoverTwoFactor",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 481,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.RecoverTwoFactor",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 485,
+      "component": "RecoverTwoFactorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.RecoverTwoFactor",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 489,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.NewDeviceVerification",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn(), activeAuthGuard()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 503,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.NewDeviceVerification",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 507,
+      "component": "NewDeviceVerificationComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.AcceptEmergencyAccessInvite",
+      "kind": "PREFIX",
+      "guards": [
+        "[deepLinkGuard()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 522,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.AcceptEmergencyAccessInvite",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 534,
+      "component": "./auth/emergency-access/accept/accept-emergency.component",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.RecoverDeleteAccount",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 543,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.RecoverDeleteAccount",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 554,
+      "component": "RecoverDeleteComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.RecoverDeleteAccount",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 558,
+      "component": "EnvironmentSelectorComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.VerifyRecoverDeleteAccount",
+      "kind": "PREFIX",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 565,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/AuthWebRoute.VerifyRecoverDeleteAccount",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 576,
+      "component": "VerifyRecoverDeleteComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/remove-password",
+      "kind": "SCREEN",
+      "guards": [
+        "[authGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 582,
+      "component": "RemovePasswordComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/confirm-key-connector-domain",
+      "kind": "SCREEN",
+      "guards": [
+        "[]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 594,
+      "component": "ConfirmKeyConnectorDomainComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/trial-initiation",
+      "kind": "SCREEN",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 606,
+      "component": "CompleteTrialInitiationComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/secrets-manager-trial-initiation",
+      "kind": "SCREEN",
+      "guards": [
+        "[unauthGuardFn()]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 618,
+      "component": "CompleteTrialInitiationComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/browser-extension-prompt",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 630,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/browser-extension-prompt",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 636,
+      "component": "BrowserExtensionPromptComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/browser-extension-prompt",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 640,
+      "component": "BrowserExtensionPromptInstallComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/premium/checkout/success",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 647,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/premium/checkout/success",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 655,
+      "component": "PremiumCheckoutSuccessComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/AuthRoute.ChangePassword",
+      "kind": "SCREEN",
+      "guards": [
+        "[authGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 657,
+      "component": "ChangePasswordComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/setup-extension",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 665,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/setup-extension",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 673,
+      "component": "SetupExtensionComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [
+        "[deepLinkGuard(), authGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 681,
+      "component": "UserLayoutComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/vault",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[premiumInterestRedirectGuard, setupExtensionRedirectGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 686,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/sends",
+      "kind": "SCREEN",
+      "guards": [
+        "[ organizationPolicyGuard((userId, policyService, configService) => configServic",
+        "[unsavedSendEditsGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 691,
+      "component": "SendComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/folders",
+      "kind": "SCREEN",
+      "guards": [
+        "[canAccessFeature(FeatureFlag.VFO1Foundation, true, \"/vault\")]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 716,
+      "component": "MyFoldersComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/sm-landing",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 722,
+      "component": "SMLandingComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/request-sm-access",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 727,
+      "component": "RequestSMAccessComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/create-organization",
+      "kind": "SCREEN",
+      "guards": [
+        "[addPlanRedirectGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 732,
+      "component": "CreateOrganizationComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 738,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 741,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings/AuthWebRouteSegment.Account",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 742,
+      "component": "AccountComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/settings/appearance",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 747,
+      "component": "AppearanceComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings/security",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 752,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings/data-recovery",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 756,
+      "component": "DataRecoveryComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings/domain-rules",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 761,
+      "component": "DomainRulesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings/add-plan",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 766,
+      "component": "CreateOrganizationComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings/subscription",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 771,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings/subscription",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 18,
+      "component": "SubscriptionComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings/subscription",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 23,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings/subscription/user-subscription",
+      "kind": "SCREEN",
+      "guards": [
+        "[hasPremiumPersonallyGuard]",
+        "[isSelfHosted]"
+      ],
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 31,
+      "component": "SelfHostedAccountSubscriptionComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings/subscription/user-subscription",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 38,
+      "component": "CloudHostedAccountSubscriptionComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings/subscription/premium",
+      "kind": "SCREEN",
+      "guards": [
+        "[isSelfHosted]"
+      ],
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 55,
+      "component": "SelfHostedPremiumComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings/subscription/premium",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 62,
+      "component": "CloudHostedPremiumComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings/subscription/payment-details",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 67,
+      "component": "AccountPaymentDetailsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings/subscription/billing-history",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 72,
+      "component": "BillingHistoryViewComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings/AuthWebRouteSegment.EmergencyAccess",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 778,
+      "component": null,
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/settings/AuthWebRouteSegment.EmergencyAccess",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPolicyGuard(canAccessEmergencyAccess)]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 781,
+      "component": "EmergencyAccessComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/settings/AuthWebRouteSegment.EmergencyAccess/:id",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPolicyGuard(canAccessEmergencyAccess)]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 787,
+      "component": "EmergencyAccessViewComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/settings/sponsored-families",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 795,
+      "component": "SponsoredFamiliesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings/export",
+      "kind": "SCREEN",
+      "guards": [
+        "[canAccessFeature(FeatureFlag.VFO1Foundation)]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 800,
+      "component": "./tools/vault-export/export-web.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/tools",
+      "kind": "PREFIX",
+      "guards": [
+        "[authGuard]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 813,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/tools",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 817,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/tools/import",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 818,
+      "component": "./tools/import/import-web.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/tools/export",
+      "kind": "SCREEN",
+      "guards": [
+        "[vfo1ConditionalRedirect]"
+      ],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 826,
+      "component": "./tools/vault-export/export-web.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/tools/generator",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 837,
+      "component": "CredentialGeneratorComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/reports",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 844,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/setup/families-for-enterprise",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 848,
+      "component": "FamiliesForEnterpriseSetupComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/organizations",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/oss-routing.module.ts",
+      "line": 851,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/organizations/:organizationId",
+      "kind": "SCREEN",
+      "guards": [
+        "[deepLinkGuard(), authGuard, organizationPermissionsGuard(canAccessOrgAdmin)]"
+      ],
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 24,
+      "component": "OrganizationLayoutComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId",
+      "kind": "PREFIX",
+      "guards": [
+        "[organizationRedirectGuard(getOrganizationRoute)]"
+      ],
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 29,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/vault",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 35,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 39,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings",
+      "kind": "PREFIX",
+      "guards": [
+        "[organizationPermissionsGuard(canAccessSettingsTab)]"
+      ],
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 15,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings",
+      "kind": "PREFIX",
+      "guards": [
+        "[organizationRedirectGuard(getSettingsRoute)]"
+      ],
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 19,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings/account",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard((o) => o.isOwner)]"
+      ],
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 25,
+      "component": "AccountComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings/two-factor",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard((o) => o.use2fa && o.isOwner)]"
+      ],
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 33,
+      "component": "TwoFactorSetupComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings/policies",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard((org) => org.canManagePolicies)]",
+        "[PoliciesDeactivateGuard]"
+      ],
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 41,
+      "component": "PoliciesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings/tools",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 50,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings/tools/import",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard((org) => org.canAccessImport)]"
+      ],
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 53,
+      "component": "../../../tools/import/org-import.component",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/settings/tools/export",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard((org) => org.canAccessExport)]"
+      ],
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 64,
+      "component": "../../../tools/vault-export/org-vault-export.component",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/members",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 46,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/groups",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard(canAccessGroupsTab)]"
+      ],
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 50,
+      "component": "GroupsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 58,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting",
+      "kind": "PREFIX",
+      "guards": [
+        "[organizationPermissionsGuard(canAccessReportingTab)]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 29,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting",
+      "kind": "PREFIX",
+      "guards": [
+        "[organizationRedirectGuard(getReportRoute)]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 33,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting/reports",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard()]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 39,
+      "component": "ReportsHomeComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting/reports/exposed-passwords-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[isPaidOrgGuard()]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 47,
+      "component": "ExposedPasswordsReportComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting/reports/inactive-two-factor-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[isPaidOrgGuard()]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 55,
+      "component": "InactiveTwoFactorReportComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting/reports/reused-passwords-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[isPaidOrgGuard()]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 63,
+      "component": "ReusedPasswordsReportComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting/reports/unsecured-websites-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[isPaidOrgGuard()]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 71,
+      "component": "UnsecuredWebsitesReportComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting/reports/weak-passwords-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[isPaidOrgGuard()]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 79,
+      "component": "WeakPasswordsReportComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting/reports/passkey-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[ isPaidOrgGuard(), canAccessFeature(FeatureFlag.PasskeyLoginReport, true, \"../r"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 87,
+      "component": "OrgPasskeyReportComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/reporting/events",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard((org) => org.canAccessEventLogs || org.isOwner)]"
+      ],
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 100,
+      "component": "EventsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/billing",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
+      "line": 65,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/billing",
+      "kind": "PREFIX",
+      "guards": [
+        "[organizationPermissionsGuard(canAccessBillingTab)]"
+      ],
+      "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
+      "line": 16,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/billing",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
+      "line": 20,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/billing/subscription",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
+      "line": 21,
+      "component": "WebPlatformUtilsService.isSelfHost()\n          ? OrganizationSubscriptionSelfhostComponent\n          : OrganizationSubscriptionCloudComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/billing/payment-details",
+      "kind": "SCREEN",
+      "guards": [
+        "[ organizationPermissionsGuard((org) => org.canEditPaymentMethods), organization"
+      ],
+      "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
+      "line": 28,
+      "component": "OrganizationPaymentDetailsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/organizations/:organizationId/billing/history",
+      "kind": "SCREEN",
+      "guards": [
+        "[ organizationPermissionsGuard((org) => org.canViewBillingHistory), organization"
+      ],
+      "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
+      "line": 39,
+      "component": "OrgBillingHistoryViewComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/**",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/wildcard-routing.module.ts",
+      "line": 4,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [
+        "[authGuard]"
+      ],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 21,
+      "component": "ReportsLayoutComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 26,
+      "component": "ReportsHomeComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/breach-report",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 32,
+      "component": "BreachReportComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/reused-passwords-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[hasPremiumGuard()]"
+      ],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 37,
+      "component": "ReusedPasswordsReportComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/unsecured-websites-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[hasPremiumGuard()]"
+      ],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 43,
+      "component": "UnsecuredWebsitesReportComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/weak-passwords-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[hasPremiumGuard()]"
+      ],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 49,
+      "component": "WeakPasswordsReportComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/exposed-passwords-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[hasPremiumGuard()]"
+      ],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 55,
+      "component": "ExposedPasswordsReportComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/inactive-two-factor-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[hasPremiumGuard()]"
+      ],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 61,
+      "component": "InactiveTwoFactorReportComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/passkey-report",
+      "kind": "SCREEN",
+      "guards": [
+        "[ hasPremiumGuard(), canAccessFeature(FeatureFlag.PasskeyLoginReport, true, \"/re"
+      ],
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 67,
+      "component": "PasskeyReportComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/layouts/product-switcher/product-switcher.stories.ts",
+      "line": 172,
+      "component": "StoryLayoutComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/layouts/product-switcher/product-switcher.stories.ts",
+      "line": 176,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/sm/:organizationId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/layouts/product-switcher/product-switcher.stories.ts",
+      "line": 181,
+      "component": "StoryContentComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/providers/:providerId",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/layouts/product-switcher/product-switcher.stories.ts",
+      "line": 185,
+      "component": "StoryContentComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/vault",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/layouts/product-switcher/product-switcher.stories.ts",
+      "line": 189,
+      "component": "StoryContentComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/:vaultId",
+      "kind": "SCREEN",
+      "guards": [
+        "[ canAccessFeature(FeatureFlag.VFO1Foundation, true, \"/vault\", false), vaultScop"
+      ],
+      "file": "src/app/vault/individual-vault/vault-routing.module.ts",
+      "line": 31,
+      "component": "VaultNextComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/:vaultId/${MY_ITEMS_ROUTE}",
+      "kind": "SCREEN",
+      "guards": [
+        "[ canAccessFeature(FeatureFlag.VFO1Foundation, true, \"/vault\", false), vaultScop"
+      ],
+      "file": "src/app/vault/individual-vault/vault-routing.module.ts",
+      "line": 42,
+      "component": "VaultNextComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/:vaultId/${SHARED_FOLDERS_ROUTE}",
+      "kind": "SCREEN",
+      "guards": [
+        "[ canAccessFeature(FeatureFlag.VFO1Foundation, true, \"/vault\", false), organizat"
+      ],
+      "file": "src/app/vault/individual-vault/vault-routing.module.ts",
+      "line": 52,
+      "component": "SharedFoldersComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/:vaultId/${SHARED_FOLDERS_ROUTE}/:collectionId",
+      "kind": "SCREEN",
+      "guards": [
+        "[ canAccessFeature(FeatureFlag.VFO1Foundation, true, \"/vault\", false), vaultScop"
+      ],
+      "file": "src/app/vault/individual-vault/vault-routing.module.ts",
+      "line": 64,
+      "component": "VaultNextComponent",
+      "constantPath": true,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard(canAccessVaultTab)]"
+      ],
+      "file": "src/app/admin-console/organizations/collections/vault-routing.module.ts",
+      "line": 11,
+      "component": "VaultComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard(canAccessMembersTab)]"
+      ],
+      "file": "src/app/admin-console/organizations/members/members-routing.module.ts",
+      "line": 13,
+      "component": "MembersComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/sponsored-families",
+      "kind": "SCREEN",
+      "guards": [
+        "[organizationPermissionsGuard(canAccessMembersTab), canAccessSponsoredFamilies]"
+      ],
+      "file": "src/app/admin-console/organizations/members/members-routing.module.ts",
+      "line": 21,
+      "component": "FreeBitwardenFamiliesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 14,
+      "component": "SecurityComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 19,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/session-timeout",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 20,
+      "component": "SessionTimeoutComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/password",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 25,
+      "component": "PasswordSettingsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/two-factor",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 30,
+      "component": "TwoFactorSetupComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/security-keys",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 35,
+      "component": "SecurityKeysComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/device-management",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/auth/settings/security/security-routing.module.ts",
+      "line": 40,
+      "component": "DeviceManagementComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/**",
+      "kind": "WILDCARD",
+      "guards": [],
+      "file": "src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.stories.ts",
+      "line": 236,
+      "component": "StoryContentComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/**",
+      "kind": "WILDCARD",
+      "guards": [],
+      "file": "src/app/admin-console/organizations/collections/vault-header/vault-header.component.stories.ts",
+      "line": 188,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    }
+  ]
+}

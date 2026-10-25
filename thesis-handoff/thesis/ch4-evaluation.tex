@@ -1,0 +1,283 @@
+\chapter{Evaluation setup and research material}
+\label{ch:evaluation}
+
+This chapter describes how the analysis of Chapter~\ref{ch:analysis} is evaluated.
+Section~\ref{sec:corpus} presents the corpus of applications and discusses why it can
+be considered a valid basis for the measurements. Section~\ref{sec:metrics} defines the
+metrics used to answer each research question. Section~\ref{sec:protocol} describes the
+four evaluation methods, what each of them can and cannot show, and the arrangements
+that keep the results reproducible.
+
+\section{Corpus selection and validity}
+\label{sec:corpus}
+
+\subsection{Selection}
+
+Ten candidate applications were screened against six criteria. The criteria were
+applied in order of increasing cost, so that a candidate could be rejected cheaply
+before more expensive checks were made. The criteria were: (1) a real application rather than a library
+or template; (2) a nested, lazily-loaded route tree; (3) guards present, since guards
+are what produce conditional transitions; (4) an end-to-end test suite that drives a
+browser; (5) retrievable history in which tests and source change together; (6) an
+active repository. Six candidates satisfied all six criteria and were retained
+(Table~\ref{tab:corpus}). Each of them is fixed to a specific commit so that the
+measurements can be repeated on exactly the same code.
+
+\begin{table}[t]\small
+\caption{The corpus. Routes are the route entries reached by the independent route
+parser of Section~\ref{sec:protocol}. For kubernetes/dashboard the parser cannot follow
+37 lazily loaded entries, so its count is a lower bound.}
+\label{tab:corpus}
+\begin{tabularx}{\textwidth}{@{}lYrY@{}}
+\toprule
+Application & Commit & Routes & Role in the study \\
+\midrule
+gothinkster/angular-realworld-example-app & \texttt{dd99ed2c} & 14 & size floor; all literal paths \\
+alfresco/alfresco-content-app & \texttt{b88d47f4} & 55 & 87 Playwright specs including a navigation suite \\
+ghostfolio/ghostfolio & \texttt{9884fa0b} & 135 & constant-valued route paths; self-hostable \\
+kubernetes/dashboard & \texttt{0ba796d9} & $\geq$42 & mid-size control \\
+bitwarden/clients (web) & \texttt{e40ce6f0} & 175 & highest guard density \\
+openMF/web-app & \texttt{7f781796} & 921 & size ceiling \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Four candidates were rejected. They are listed here together with the reason for
+rejection, since the rejected candidates are part of the selection protocol.
+\texttt{angular/components} is a component library with no product router.
+\texttt{vendure} has 169 end-to-end specifications, all of which exercise the GraphQL
+server and none of which drive the user interface. \texttt{gravitee} declares 618
+routes but has 14 UI specifications. \texttt{SAP/spartacus} has a large Cypress suite, but its routing is
+configuration-driven in a way that the extractor does not currently support, so it was
+set aside as a possible candidate for later work.
+
+The screening also produced an observation that influenced the design of the
+evaluation. Among the candidates examined, the size of the route tree and the density
+of end-to-end tests were inversely related. The largest applications had few or no
+tests that exercise the user interface, while the application with the most extensive
+navigation-oriented test suite was of medium size. As a result, no single application
+in the corpus provides both a large route tree and execution-based ground truth. The
+evaluation therefore applies the methods that require test suites only to the
+applications that have them, and the methods that do not require tests to all six.
+
+\subsection{Validity of an open-source corpus}
+
+Open-source corpora are common in empirical software engineering, and their threats to validity have been studied. Kalliamvakou et al.\ show that a large share of GitHub repositories are
+inactive, personal or not software projects, that stars do not measure quality, and
+that forks inflate counts \cite{kalliamvakou2014promises,kalliamvakou2016indepth}.
+The remedy they recommend is to filter the candidates using explicit criteria and to
+report those criteria, which is what the selection procedure above does. The threat
+that remains is one of external validity. Open-source applications may differ from
+proprietary enterprise applications in size, in routing style and in the mechanisms
+used for navigation. In addition, the corpus was selected by the author of the
+extractor, which introduces a possible selection bias.
+
+Three measures address these threats. The selection protocol is reported in full, including the rejected candidates, and the
+criteria were fixed before any results were obtained. The corpus is also stratified
+across two orders of magnitude in the number of routes, so that any effect of application size is visible and not averaged away. Finally, the commits are fixed and the evaluation harness is publicly available. A fourth measure is planned: a case study on a proprietary Angular application from industry, reporting
+only aggregate figures; this would be the most direct response to the external validity
+threat, and it is discussed further in Chapter~\ref{ch:discussion}. There is also no standard benchmark corpus for single-page applications. The web
+testing survey confirms that evaluations in this area are carried out on collections of
+applications chosen for each study \cite{websurvey2025}. For this reason the corpus
+and its manifest are reported as one of the outputs of the thesis.
+
+\section{Metrics}
+\label{sec:metrics}
+
+Each research question is answered with one main measure. They are defined here.
+
+\textbf{Navigation construct.} A navigation construct is a \texttt{routerLink} binding
+in a template, or a call to \texttt{Router.navigate} or \texttt{Router.navigateByUrl}
+in class code, in the application source excluding tests. Constructs are found by an
+independent parser that shares no code with the extractor. Attributes such as
+\texttt{routerLinkActive} are not constructs; counting them by substring was one of the
+corrections described in Section~\ref{sec:corrections}.
+
+\textbf{Conversion ratio (RQ1).} The conversion ratio is the fraction of navigation
+constructs that are witnessed by at least one must edge. When several constructs
+produce the same edge, the extractor keeps the first as the edge's witness and records
+the others as merged witnesses, so every construct that yields an edge can be traced.
+The ratio is computed over constructs rather than edges because the number of edges
+depends on representation: the same construct can be stored as one anchored edge or
+as one edge per screen (Section~\ref{sec:attribution}). An earlier version of this
+measure divided the number of must edges by the number of constructs. It was replaced
+for that reason (Section~\ref{sec:corrections}).
+
+\textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness
+cites it. A construct with no such edge is \emph{lost}, and it is assigned to exactly
+one defect class by the first rule in Table~\ref{tab:loss-rules} that applies. Because
+the rules are ordered, the classes partition the lost constructs and their sizes can
+be compared within each application. Guard defects do not appear in this table, since
+a wrong guard mislabels an edge rather than removing it; they are measured by the
+witness check.
+
+\begin{table}[t]\small
+\caption{Rules that assign a lost construct to a defect class, in order of
+precedence.}
+\label{tab:loss-rules}
+\begin{tabularx}{\textwidth}{@{}lY@{}}
+\toprule
+Class & The construct \ldots \\
+\midrule
+Named outlet & targets an auxiliary outlet (\texttt{\{outlets: \ldots\}}) \\
+Attribution, service & is in a class that is not a component: a service, guard,
+interceptor, resolver or effect \\
+Attribution, shared & is in a component that no route renders directly \\
+Constant path & is in a route component that has no node, because its route path is a
+constant reference rather than a literal \\
+Lazy boundary & is in a route component that has no node, and its route is declared in a
+lazily loaded routes file \\
+Constant target & is in a screen that has a node, but its own target is a constant
+reference \\
+Other & matches none of the above; inspected by hand \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+A call of the form \texttt{navigate([], \{queryParams\})} changes only the query
+string of the current screen. It is not a transition between screens, so it is reported separately and not counted as a loss.
+
+\textbf{Change in coverage and must-tier precision (RQ3).} The conversion ratio and the
+loss breakdown are measured on two tagged versions of the extractor, before and after
+attribution, on identical inputs. \emph{Must-tier precision} is the fraction of must
+edges whose witness line contains a construct of the claimed kind with the claimed
+target. RQ3 is answered positively only if coverage rises and must-tier precision does
+not fall.
+
+\textbf{Node-level recall.} The fraction of distinct URLs visited by an application's
+own passing end-to-end tests that have a matching node in the graph. It is a
+cross-check on node extraction, which all edges depend on.
+
+\textbf{Detection rate (RQ4).} The fraction of injected source changes that produce the
+predicted change in the graph, reported per mutation operator with its $n$. A change
+whose construct the graph does not contain is excluded rather than counted as a miss,
+since it can only repeat a coverage gap measured under RQ1. The rate is therefore
+conditional on coverage, and the number of excluded mutants is reported alongside it.
+
+\section{Evaluation methods}
+\label{sec:protocol}
+
+Four methods are used. None establishes correctness alone, so Table~\ref{tab:methods} states what each can show and where it is blind. Figure~\ref{fig:oracles} shows which part of the graph each method checks and where its ground truth comes from.
+
+\input{figures/fig-oracles}
+
+
+\begin{table}[t]\small
+\caption{Evaluation methods, the quantity each measures, and the blind spot each has.}
+\label{tab:methods}
+\begin{tabularx}{\textwidth}{@{}lYY@{}}
+\toprule
+Method & Quantity & Blind spot \\
+\midrule
+Witness check & Must-tier precision. For every must edge, the witness file is
+re-parsed at the claimed line and the construct kind and target are compared. &
+Cannot see missing edges. Target agreement is invalid for over-approximated may
+edges, whose witness proves only that the call site exists. \\
+\addlinespace
+Differential test & Disagreements with an independently written route-configuration
+parser that shares no code with the extractor. &
+Diagnostic, not a metric. The parser is independent, not stronger: its first version
+missed whole route tables in several applications until it was corrected (Section~\ref{sec:corrections}). \\
+\addlinespace
+End-to-end oracle & Node-level recall. Every URL a passing test visits is a screen
+that provably exists; ground truth comes from execution. &
+Tested subset only. A direct \texttt{goto} is not a UI transition, so visit pairs are
+not counted as edges. Textual URL extraction under-samples click-driven navigation. \\
+\addlinespace
+Mutation test & Detection rate over four operators: rename a path, remove a guard,
+delete a \texttt{routerLink}, retarget a \texttt{navigate}. Ground truth is the
+authored delta, so nothing is circular. Detection is judged on the node and edge sets
+and on the witness set, since several constructs can produce one edge. &
+A mutant whose construct is absent from the baseline graph re-detects a coverage gap and
+is excluded, as is a guard mutant on a screen that no edge enters. Detection is
+therefore conditional on coverage. Sampling is seeded and stratified by operator. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Preconditions}
+
+Two properties of the extractor were checked before any of the measurements were
+taken. The first is determinism: two extractions from the same unchanged source
+produce identical sets of nodes and edges, when compared on identifier, route, event,
+guard and modality after sorting. Without this property the differences observed in
+mutation testing could not be distinguished from noise. The second is the absence of
+accumulated state: extracting into an existing database gives the same graph as
+extracting after the database has been deleted. Without this property the results
+for a mutant could be affected by the earlier baseline run.
+
+\subsection{Corrections made to the protocol}
+\label{sec:corrections}
+
+Seven corrections were made to the protocol while it was being developed. They are
+described here because each of them would otherwise have led to an incorrect figure
+in this thesis, and because the underlying mistakes are general ones.
+
+In the end-to-end oracle, a URL parameter observed in a test was at first allowed to match a literal segment of a route, which
+produced matches that did not correspond to real screens. After the rule was
+tightened, the recall figure for one application fell from 86.7\% to 66.7\%. A negative
+test, which visits a URL that must not exist, is now also excluded, which gives the
+64.3\% reported in Chapter~\ref{ch:results}.
+
+The first version of the witness check reported a precision
+of 44.7\% for one application. On inspection, all 177 edges it had flagged were may
+edges with a confidence of 0.5 that referred to a single source line. They were the
+result of one over-approximated call site being connected to every declared route. The
+must tier of the same run had 69 correct edges out of 69.
+
+In mutation testing, a mutant whose target does not appear in the
+baseline graph cannot show anything about the graph's sensitivity to change; it only
+repeats a coverage gap that has already been counted elsewhere. Three of the five
+mutation misses for one application were of this kind and were moved to a separate
+category.
+
+The first denominator of the conversion ratio counted
+the substring \texttt{routerLink} in templates, which also matches the attributes
+\texttt{routerLink\-Active} and \texttt{routerLink\-Active\-Options}. For alfresco this
+counted 113 constructs where the parser finds 34. Constructs are now counted by the
+parser that also produces the loss breakdown, so the ratio and the breakdown share one
+definition.
+
+The first version of the route parser used by the differential test did not look inside wrapper calls such as \texttt{Route.withShell([\ldots])}, did not
+follow a lazily loaded NgModule to the routing module it imports, and walked lazily
+loaded route tables a second time without their prefix. On mifos it therefore reported
+that every declared screen had a node. After the correction it finds 610 declared
+screens, of which 58 have a node. The extractor was the same in both runs.
+
+The conversion ratio itself was first defined as the number of
+must edges divided by the number of constructs. After attribution, this ratio rose
+from 5.1\% to 75.7\% for mifos, because a construct in a component rendered on many
+screens produced one edge per screen. So the rise came from how edges were stored. It is now computed per construct, and edges whose screen set is a whole
+subtree are stored once (Section~\ref{sec:attribution}).
+
+The mutation harness patched the source by searching for the text of the
+construct, so a mutant aimed at one of several identical constructs edited the first of
+them instead of its own. In realworld all five guard mutants removed the same guard.
+The harness also judged detection on the node and edge sets alone, which scored the
+deletion of one of two identical links in a template as a miss, although the graph had
+behaved correctly: it kept the edge, which the second link still produces, and dropped
+only the witness that pointed at the deleted line. Detection is now judged on the
+witness set as well, which is the property change impact analysis actually needs. Three
+smaller changes followed from the same review. A retargeting mutant now points at
+another declared route instead of an invented one, so that it cannot be confused with a
+missing target. A guard mutant on a screen that no edge enters is excluded, because a
+guard is represented on the edges entering the screen it guards, so such a mutant can
+only repeat the edge-coverage gap already counted under RQ1. A rename mutant counts as
+detected when the renamed route appears in the graph, without also requiring the
+original node to disappear, since the same path segment may be declared in a second
+routing module. With the offset and witness corrections in place, on the same seed and
+the same sample, the detection rate for realworld changed from 71.4\% to 95.2\%.
+Sampling is seeded and stratified with a fixed quota per operator, and the detection
+rate is reported per operator with its $n$.
+
+Since then, any result that looks unusually good or bad is checked for measurement problems before it is reported.
+
+\subsection{Reproducibility}
+
+The whole evaluation can be re-run with a single command. The command clones the
+extractor at its fixed commit, fetches each application in the corpus at its fixed
+commit rather than from a branch, runs the extraction and all four evaluation methods,
+and writes a results file together with the tables derived from it. Each figure in the
+results file is recorded together with the commit of the extractor, the commits of the
+corpus applications, the version of the harness, and the version of the runtime. The
+tables in this thesis are generated from the results file and not entered by hand.

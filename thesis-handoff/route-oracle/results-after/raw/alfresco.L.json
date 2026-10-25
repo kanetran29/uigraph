@@ -1,0 +1,254 @@
+{
+  "appDir": "/tmp/eval/corpus/alfresco/projects/aca-content",
+  "constructs": 34,
+  "lost": 33,
+  "tally": {
+    "ATTRIBUTION_SHARED": 10,
+    "NODE_MISS": 1,
+    "CONSTANT_TARGET": 1,
+    "COMPONENT_UNLINKED": 6,
+    "ATTRIBUTION_SERVICE": 8,
+    "CONVERTED_MUST": 1,
+    "NAMED_OUTLET": 7
+  },
+  "rows": [
+    {
+      "at": "about/src/about.component.html:7",
+      "kind": "routerLink",
+      "owner": "about/src/about.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "landingPage"
+    },
+    {
+      "at": "folder-rules/src/manage-rules/manage-rules.smart-component.html:98",
+      "kind": "routerLink",
+      "owner": "folder-rules/src/manage-rules/manage-rules.smart-component.ts",
+      "cls": "NODE_MISS",
+      "target": "['/nodes', (selectedRuleSet$ | async).owningFolder.id, 'rules']"
+    },
+    {
+      "at": "folder-rules/src/rule-list/rule-list/rule-list.ui-component.html:75",
+      "kind": "routerLink",
+      "owner": "folder-rules/src/rule-list/rule-list/rule-list.ui-component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/nodes', mainRuleSet.owningFolder.id, 'rules']"
+    },
+    {
+      "at": "src/lib/components/common/user-info/user-info.component.html:1",
+      "kind": "routerLink",
+      "owner": "src/lib/components/common/user-info/user-info.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/profile']"
+    },
+    {
+      "at": "src/lib/components/details/details.component.ts:147",
+      "kind": "navigateByUrl",
+      "owner": "src/lib/components/details/details.component.ts",
+      "cls": "CONSTANT_TARGET",
+      "target": "this.previousRoute);"
+    },
+    {
+      "at": "src/lib/components/files/files.component.ts:143",
+      "kind": "navigate",
+      "owner": "src/lib/components/files/files.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "[this.navigationPath, node.entry.parentId], {"
+    },
+    {
+      "at": "src/lib/components/files/files.component.ts:184",
+      "kind": "navigate",
+      "owner": "src/lib/components/files/files.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "urlToNavigate);"
+    },
+    {
+      "at": "src/lib/components/files/files.component.ts:400",
+      "kind": "navigate",
+      "owner": "src/lib/components/files/files.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "['.'], { relativeTo: this.route });"
+    },
+    {
+      "at": "src/lib/components/home/home.component.ts:39",
+      "kind": "navigateByUrl",
+      "owner": "src/lib/components/home/home.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "this.appSettings.landingPage);"
+    },
+    {
+      "at": "src/lib/components/search/search-navigation.service.ts:55",
+      "kind": "navigateByUrl",
+      "owner": "src/lib/components/search/search-navigation.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "this.previousRoute);"
+    },
+    {
+      "at": "src/lib/components/search/search-navigation.service.ts:57",
+      "kind": "navigate",
+      "owner": "src/lib/components/search/search-navigation.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "['/personal-files']);"
+    },
+    {
+      "at": "src/lib/components/search/search-navigation.service.ts:63",
+      "kind": "navigate",
+      "owner": "src/lib/components/search/search-navigation.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "['/search']);"
+    },
+    {
+      "at": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts:163",
+      "kind": "navigate",
+      "owner": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/search'], {"
+    },
+    {
+      "at": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
+      "kind": "routerLink",
+      "owner": "src/lib/components/sidenav/components/sidenav-header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "landingPage"
+    },
+    {
+      "at": "src/lib/components/sidenav/directives/action.directive.ts:51",
+      "kind": "navigate",
+      "owner": "src/lib/components/sidenav/directives/action.directive.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "this.getNavigationCommands(this.action.url), { queryParams: this.getNavigationQueryParams(this.actio"
+    },
+    {
+      "at": "src/lib/components/sidenav/directives/expansion-panel.directive.ts:50",
+      "kind": "navigate",
+      "owner": "src/lib/components/sidenav/directives/expansion-panel.directive.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "this.getNavigationCommands(firstChild.url));"
+    },
+    {
+      "at": "src/lib/components/sidenav/directives/menu-panel.directive.ts:48",
+      "kind": "navigate",
+      "owner": "src/lib/components/sidenav/directives/menu-panel.directive.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "this.getNavigationCommands(firstChild.url));"
+    },
+    {
+      "at": "src/lib/components/view-profile/view-profile.component.ts:141",
+      "kind": "navigate",
+      "owner": "src/lib/components/view-profile/view-profile.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "['/personal-files'], {"
+    },
+    {
+      "at": "src/lib/store/effects/viewer.effects.ts:79",
+      "kind": "navigate",
+      "owner": "src/lib/store/effects/viewer.effects.ts",
+      "cls": "NAMED_OUTLET",
+      "target": "[...navigation, { outlets: { viewer: ['view', action.nodeId] } }], {"
+    },
+    {
+      "at": "src/lib/store/effects/viewer.effects.ts:85",
+      "kind": "navigate",
+      "owner": "src/lib/store/effects/viewer.effects.ts",
+      "cls": "NAMED_OUTLET",
+      "target": "['view', { outlets: { viewer: [action.nodeId] } }], {"
+    },
+    {
+      "at": "src/lib/store/effects/viewer.effects.ts:90",
+      "kind": "navigate",
+      "owner": "src/lib/store/effects/viewer.effects.ts",
+      "cls": "NAMED_OUTLET",
+      "target": "['view', { outlets: { viewer: [action.nodeId] } }]);"
+    },
+    {
+      "at": "src/lib/store/effects/viewer.effects.ts:138",
+      "kind": "navigate",
+      "owner": "src/lib/store/effects/viewer.effects.ts",
+      "cls": "NAMED_OUTLET",
+      "target": "[...navigation, { outlets: { viewer: ['view', action.nodeId, action.versionId] } }], {"
+    },
+    {
+      "at": "src/lib/store/effects/viewer.effects.ts:144",
+      "kind": "navigate",
+      "owner": "src/lib/store/effects/viewer.effects.ts",
+      "cls": "NAMED_OUTLET",
+      "target": "['view', { outlets: { viewer: [action.nodeId, action.versionId] } }], {"
+    },
+    {
+      "at": "src/lib/store/effects/viewer.effects.ts:149",
+      "kind": "navigate",
+      "owner": "src/lib/store/effects/viewer.effects.ts",
+      "cls": "NAMED_OUTLET",
+      "target": "['view', { outlets: { viewer: [action.nodeId, action.versionId] } }]);"
+    },
+    {
+      "at": "src/lib/store/effects/viewer.effects.ts:161",
+      "kind": "navigate",
+      "owner": "src/lib/store/effects/viewer.effects.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "["
+    },
+    {
+      "at": "src/lib/store/effects/viewer.effects.ts:190",
+      "kind": "navigateByUrl",
+      "owner": "src/lib/store/effects/viewer.effects.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "path.join('/'));"
+    },
+    {
+      "at": "viewer/src/lib/components/preview/preview.component.ts:156",
+      "kind": "navigate",
+      "owner": "viewer/src/lib/components/preview/preview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[this.previewLocation, id]);"
+    },
+    {
+      "at": "viewer/src/lib/components/preview/preview.component.ts:159",
+      "kind": "navigate",
+      "owner": "viewer/src/lib/components/preview/preview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[this.previewLocation, id]);"
+    },
+    {
+      "at": "viewer/src/lib/components/preview/preview.component.ts:196",
+      "kind": "navigate",
+      "owner": "viewer/src/lib/components/preview/preview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "route);"
+    },
+    {
+      "at": "viewer/src/lib/components/preview/preview.component.ts:208",
+      "kind": "navigate",
+      "owner": "viewer/src/lib/components/preview/preview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "this.getPreviewPath(this.folderId, this.previousNodeId));"
+    },
+    {
+      "at": "viewer/src/lib/components/preview/preview.component.ts:219",
+      "kind": "navigate",
+      "owner": "viewer/src/lib/components/preview/preview.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "this.getPreviewPath(this.folderId, this.nextNodeId));"
+    },
+    {
+      "at": "viewer/src/lib/components/viewer/viewer.component.ts:240",
+      "kind": "navigate",
+      "owner": "viewer/src/lib/components/viewer/viewer.component.ts",
+      "cls": "NAMED_OUTLET",
+      "target": "[this.previewLocation, { outlets: { viewer: null } }]).then(() => {"
+    },
+    {
+      "at": "viewer/src/lib/components/viewer/viewer.component.ts:241",
+      "kind": "navigate",
+      "owner": "viewer/src/lib/components/viewer/viewer.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "[this.previewLocation, nodeId]);"
+    },
+    {
+      "at": "viewer/src/lib/components/viewer/viewer.component.ts:278",
+      "kind": "navigateByUrl",
+      "owner": "viewer/src/lib/components/viewer/viewer.component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "location);"
+    }
+  ]
+}

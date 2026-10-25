@@ -1,0 +1,10 @@
+{
+  "appDir": "/tmp/eval/corpus/alfresco/projects/aca-content",
+  "dbPath": "/tmp/eval/corpus/alfresco/projects/aca-content/uigraph.db",
+  "edges": 1,
+  "clean": 1,
+  "mustEdges": 1,
+  "mustClean": 1,
+  "tally": {},
+  "findings": []
+}

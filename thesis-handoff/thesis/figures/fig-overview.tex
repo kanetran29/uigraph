@@ -1,0 +1,44 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[node distance=5mm and 7mm]
+  % input
+  \node[box, minimum width=27mm, fill=mutedlight] (src) {Angular source\\[-1pt]{\footnotesize routes, templates,}\\[-3pt]{\footnotesize classes}};
+  % extractor
+  \node[box, right=12mm of src, minimum width=34mm] (cons) {construct discovery};
+  \node[box, above=3mm of cons, minimum width=34mm] (routes) {route extraction};
+  \node[box, below=3mm of cons, minimum width=34mm, hl] (attr) {scope attribution\\[-2pt]{\footnotesize (Chapter~\ref{ch:analysis})}};
+  \begin{scope}[on background layer]
+    \node[draw=muted, rounded corners=4pt, fit=(routes)(cons)(attr), inner sep=5pt,
+      label={[font=\footnotesize\itshape, text=muted]above:uigraph extractor}] (ext) {};
+  \end{scope}
+  \node[box, right=12mm of cons, minimum width=28mm] (graph) {UI transition graph\\[-2pt]{\footnotesize must / may / unknown}\\[-3pt]{\footnotesize + witnesses}};
+  \draw[->, thick] (src.east) -- (src.east -| ext.west);
+  \draw[->] (routes) -- (cons);
+  \draw[->] (cons) -- (attr);
+  \draw[->, thick] (ext.east |- graph) -- (graph.west);
+
+  % evaluation row, well below the extractor
+  \coordinate (row) at ($(ext.south)+(0,-17mm)$);
+  \node[box, minimum width=26mm, font=\footnotesize, anchor=north] (l) at (row) {loss breakdown\\[-2pt]defect classes};
+  \node[box, minimum width=26mm, font=\footnotesize, left=2mm of l] (c) {route parser\\[-2pt]node coverage};
+  \node[box, minimum width=26mm, font=\footnotesize, left=2mm of c] (b) {witness check\\[-2pt]must-tier precision};
+  \node[box, minimum width=26mm, font=\footnotesize, right=2mm of l] (f) {mutation\\[-2pt]detection rate};
+  \node[box, minimum width=16mm, font=\footnotesize, right=2mm of f] (d) {E2E\\[-2pt]oracle};
+  \node[font=\footnotesize\itshape, text=muted, anchor=south west] at ($(b.north west)+(0,8mm)$) {evaluation (Chapter~\ref{ch:evaluation})};
+  % bus from the graph down to the evaluation row
+  \coordinate (bus) at ($(row)+(0,6mm)$);
+  \draw[muted] (graph.south) |- (bus -| d.north);
+  \draw[muted] (bus -| d.north) -- (bus -| b.north);
+  \foreach \n in {b,c,l,f,d} \draw[->, muted] (bus -| \n.north) -- (\n.north);
+  % research questions
+  \node[below=1mm of b, font=\scriptsize] {RQ1, RQ3};
+  \node[below=1mm of c, font=\scriptsize] {RQ1};
+  \node[below=1mm of l, font=\scriptsize] {RQ2, RQ3};
+  \node[below=1mm of f, font=\scriptsize] {RQ4};
+  \node[below=1mm of d, font=\scriptsize] {RQ1};
+\end{tikzpicture}
+\caption{Overview of the study. The extractor turns Angular source into a UI transition
+graph; scope attribution is the analysis this thesis adds. Five measurements, each tied to
+the research questions it answers, evaluate the graph.}
+\label{fig:overview}
+\end{figure}

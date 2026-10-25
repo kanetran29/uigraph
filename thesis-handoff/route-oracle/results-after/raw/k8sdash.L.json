@@ -1,0 +1,519 @@
+{
+  "appDir": "/tmp/eval/corpus/k8sdash/modules/web",
+  "constructs": 72,
+  "lost": 65,
+  "tally": {
+    "CONVERTED_MUST": 3,
+    "ATTRIBUTION_SHARED": 49,
+    "COMPONENT_UNLINKED": 1,
+    "QUERY_ONLY": 4,
+    "ATTRIBUTION_SERVICE": 5,
+    "NODE_MISS": 10
+  },
+  "rows": [
+    {
+      "at": "src/chrome/component.ts:82",
+      "kind": "navigate",
+      "owner": "src/chrome/component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "['create'], {queryParamsHandling: 'preserve'});"
+    },
+    {
+      "at": "src/chrome/nav/item/template.html:20",
+      "kind": "routerLink",
+      "owner": "src/chrome/nav/item/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "state"
+    },
+    {
+      "at": "src/chrome/search/component.ts:45",
+      "kind": "navigate",
+      "owner": "src/chrome/search/component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "['search'], {"
+    },
+    {
+      "at": "src/chrome/template.html:30",
+      "kind": "routerLink",
+      "owner": "src/chrome/component.ts",
+      "cls": "COMPONENT_UNLINKED",
+      "target": "getWorkloadsStateName()"
+    },
+    {
+      "at": "src/common/components/actionbar/detailactions/delete/component.ts:39",
+      "kind": "navigate",
+      "owner": "src/common/components/actionbar/detailactions/delete/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['.'], {relativeTo: this.route_, queryParamsHandling: 'preserve'});"
+    },
+    {
+      "at": "src/common/components/actionbar/detailactions/exec/template.html:23",
+      "kind": "routerLink",
+      "owner": "src/common/components/actionbar/detailactions/exec/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getHref()"
+    },
+    {
+      "at": "src/common/components/actionbar/detailactions/logs/template.html:23",
+      "kind": "routerLink",
+      "owner": "src/common/components/actionbar/detailactions/logs/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getHref()"
+    },
+    {
+      "at": "src/common/components/breadcrumbs/template.html:26",
+      "kind": "routerLink",
+      "owner": "src/common/components/breadcrumbs/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "breadcrumb.stateLink"
+    },
+    {
+      "at": "src/common/components/chips/template.html:28",
+      "kind": "routerLink",
+      "owner": "src/common/components/chips/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getSerializedHref(map[key])"
+    },
+    {
+      "at": "src/common/components/container/template.html:192",
+      "kind": "routerLink",
+      "owner": "src/common/components/container/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getEnvSecretHref(env.valueFrom.secretKeyRef)"
+    },
+    {
+      "at": "src/common/components/container/template.html:227",
+      "kind": "routerLink",
+      "owner": "src/common/components/container/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getEnvConfigMapHref(env.valueFrom.configMapKeyRef)"
+    },
+    {
+      "at": "src/common/components/creator/template.html:78",
+      "kind": "routerLink",
+      "owner": "src/common/components/creator/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getHref()"
+    },
+    {
+      "at": "src/common/components/ingressrulelist/template.html:106",
+      "kind": "routerLink",
+      "owner": "src/common/components/ingressrulelist/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(ingressRuleFlat.path.backend.service.name, 'service')"
+    },
+    {
+      "at": "src/common/components/ingressrulelist/template.html:156",
+      "kind": "routerLink",
+      "owner": "src/common/components/ingressrulelist/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(ingressRuleFlat.tlsSecretName, 'secret')"
+    },
+    {
+      "at": "src/common/components/list/column/menu/template.html:21",
+      "kind": "routerLink",
+      "owner": "src/common/components/list/column/menu/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getLogsHref()"
+    },
+    {
+      "at": "src/common/components/list/column/menu/template.html:29",
+      "kind": "routerLink",
+      "owner": "src/common/components/list/column/menu/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getExecHref()"
+    },
+    {
+      "at": "src/common/components/namespace/component.ts:140",
+      "kind": "navigate",
+      "owner": "src/common/components/namespace/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[this.activatedRoute_.snapshot.url], {"
+    },
+    {
+      "at": "src/common/components/namespace/component.ts:209",
+      "kind": "navigate",
+      "owner": "src/common/components/namespace/component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/common/components/namespace/component.ts:226",
+      "kind": "navigate",
+      "owner": "src/common/components/namespace/component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "['overview'], {"
+    },
+    {
+      "at": "src/common/components/namespace/component.ts:234",
+      "kind": "navigate",
+      "owner": "src/common/components/namespace/component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/common/components/objectmeta/template.html:132",
+      "kind": "routerLink",
+      "owner": "src/common/components/objectmeta/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getOwnerHref(ownerReference.kind, ownerReference.name)"
+    },
+    {
+      "at": "src/common/components/resourcelist/clusterrole/template.html:66",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/clusterrole/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(role.objectMeta.name)"
+    },
+    {
+      "at": "src/common/components/resourcelist/clusterrolebinding/template.html:66",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/clusterrolebinding/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(roleBinding.objectMeta.name)"
+    },
+    {
+      "at": "src/common/components/resourcelist/configmap/template.html:70",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/configmap/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(cm.objectMeta.name, cm.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/crd/template.html:82",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/crd/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(crd.objectMeta.name)"
+    },
+    {
+      "at": "src/common/components/resourcelist/crdobject/template.html:64",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/crdobject/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(object.objectMeta.name, object.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/cronjob/template.html:87",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/cronjob/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(cronJob.objectMeta.name, cronJob.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/daemonset/template.html:97",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/daemonset/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(daemonSet.objectMeta.name, daemonSet.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/deployment/template.html:97",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/deployment/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(deployment.objectMeta.name, deployment.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/event/template.html:158",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/event/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getObjectHref(event.objectKind, event.objectName, event.objectNamespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/ingress/template.html:70",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/ingress/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(ingress.objectMeta.name, ingress.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/ingressclass/template.html:70",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/ingressclass/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(sc.objectMeta.name, sc.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/job/template.html:101",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/job/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(job.objectMeta.name, job.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/namespace/template.html:78",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/namespace/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(namespace.objectMeta.name)"
+    },
+    {
+      "at": "src/common/components/resourcelist/networkpolicy/template.html:65",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/networkpolicy/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(serviceAccount.objectMeta.name, serviceAccount.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/node/template.html:87",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/node/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(node.objectMeta.name)"
+    },
+    {
+      "at": "src/common/components/resourcelist/persistentvolume/template.html:81",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/persistentvolume/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(pv.objectMeta.name)"
+    },
+    {
+      "at": "src/common/components/resourcelist/persistentvolume/template.html:161",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/persistentvolume/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getClaimHref(pv.claim)"
+    },
+    {
+      "at": "src/common/components/resourcelist/persistentvolumeclaim/template.html:81",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/persistentvolumeclaim/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(pvc.objectMeta.name, pvc.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/persistentvolumeclaim/template.html:150",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/persistentvolumeclaim/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getVolumeHref(pvc.volume)"
+    },
+    {
+      "at": "src/common/components/resourcelist/pod/template.html:97",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/pod/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(pod.objectMeta.name, pod.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/replicaset/template.html:101",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/replicaset/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(replicaSet.objectMeta.name, replicaSet.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/replicationcontroller/template.html:97",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/replicationcontroller/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(rc.objectMeta.name, rc.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/role/template.html:66",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/role/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(role.objectMeta.name, role.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/rolebinding/template.html:66",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/rolebinding/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(roleBinding.objectMeta.name, roleBinding.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/secret/template.html:69",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/secret/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(secret.objectMeta.name, secret.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/service/template.html:82",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/service/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(service.objectMeta.name, service.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/serviceaccount/template.html:65",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/serviceaccount/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(serviceAccount.objectMeta.name, serviceAccount.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/statefulset/template.html:97",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/statefulset/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(ss.objectMeta.name, ss.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/resourcelist/storageclass/template.html:70",
+      "kind": "routerLink",
+      "owner": "src/common/components/resourcelist/storageclass/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDetailsHref(sc.objectMeta.name, sc.objectMeta.namespace)"
+    },
+    {
+      "at": "src/common/components/subject/template.html:56",
+      "kind": "routerLink",
+      "owner": "src/common/components/subject/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getSubjectHref(subject)"
+    },
+    {
+      "at": "src/common/components/zerostate/template.html:37",
+      "kind": "routerLink",
+      "owner": "src/common/components/zerostate/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "deploy"
+    },
+    {
+      "at": "src/common/services/global/authentication.ts:72",
+      "kind": "navigate",
+      "owner": "src/common/services/global/authentication.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "['login']);"
+    },
+    {
+      "at": "src/common/services/global/history.ts:52",
+      "kind": "navigateByUrl",
+      "owner": "src/common/services/global/history.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "this.previousStateUrl_);"
+    },
+    {
+      "at": "src/common/services/global/history.ts:55",
+      "kind": "navigate",
+      "owner": "src/common/services/global/history.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[defaultState], {queryParamsHandling: 'preserve'});"
+    },
+    {
+      "at": "src/create/from/file/component.ts:52",
+      "kind": "navigate",
+      "owner": "src/create/from/file/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['overview'], {"
+    },
+    {
+      "at": "src/create/from/form/component.ts:293",
+      "kind": "navigate",
+      "owner": "src/create/from/form/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['overview'], {"
+    },
+    {
+      "at": "src/create/from/input/component.ts:49",
+      "kind": "navigate",
+      "owner": "src/create/from/input/component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['overview'], {"
+    },
+    {
+      "at": "src/error/handler.ts:57",
+      "kind": "navigate",
+      "owner": "src/error/handler.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "['login'], {"
+    },
+    {
+      "at": "src/error/handler.ts:65",
+      "kind": "navigate",
+      "owner": "src/error/handler.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "['error'], {"
+    },
+    {
+      "at": "src/logs/component.ts:93",
+      "kind": "navigate",
+      "owner": "src/logs/component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/logs/component.ts:245",
+      "kind": "navigate",
+      "owner": "src/logs/component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/resource/cluster/clusterrolebinding/detail/template.html:44",
+      "kind": "routerLink",
+      "owner": "src/resource/cluster/clusterrolebinding/detail/component.ts",
+      "cls": "NODE_MISS",
+      "target": "getRoleHref()"
+    },
+    {
+      "at": "src/resource/cluster/namespace/detail/actionbar/component.ts:48",
+      "kind": "navigate",
+      "owner": "src/resource/cluster/namespace/detail/actionbar/component.ts",
+      "cls": "NODE_MISS",
+      "target": "['workloads'], {"
+    },
+    {
+      "at": "src/resource/cluster/persistentvolume/detail/template.html:54",
+      "kind": "routerLink",
+      "owner": "src/resource/cluster/persistentvolume/detail/component.ts",
+      "cls": "NODE_MISS",
+      "target": "getClaimHref(persistentVolume.claim)"
+    },
+    {
+      "at": "src/resource/cluster/rolebinding/detail/template.html:44",
+      "kind": "routerLink",
+      "owner": "src/resource/cluster/rolebinding/detail/component.ts",
+      "cls": "NODE_MISS",
+      "target": "getRoleHref()"
+    },
+    {
+      "at": "src/resource/config/persistentvolumeclaim/detail/template.html:61",
+      "kind": "routerLink",
+      "owner": "src/resource/config/persistentvolumeclaim/detail/component.ts",
+      "cls": "NODE_MISS",
+      "target": "getPersistentVolumeHref(persistentVolumeClaim.volume)"
+    },
+    {
+      "at": "src/resource/workloads/deployment/detail/template.html:372",
+      "kind": "routerLink",
+      "owner": "src/resource/workloads/deployment/detail/component.ts",
+      "cls": "NODE_MISS",
+      "target": "getNewReplicaSetHref()"
+    },
+    {
+      "at": "src/resource/workloads/pod/detail/template.html:72",
+      "kind": "routerLink",
+      "owner": "src/resource/workloads/pod/detail/component.ts",
+      "cls": "NODE_MISS",
+      "target": "getNodeHref(pod.nodeName)"
+    },
+    {
+      "at": "src/resource/workloads/pod/detail/template.html:127",
+      "kind": "routerLink",
+      "owner": "src/resource/workloads/pod/detail/component.ts",
+      "cls": "NODE_MISS",
+      "target": "getObjectHref('serviceaccount', pod.serviceAccountName)"
+    },
+    {
+      "at": "src/resource/workloads/pod/detail/template.html:149",
+      "kind": "routerLink",
+      "owner": "src/resource/workloads/pod/detail/component.ts",
+      "cls": "NODE_MISS",
+      "target": "getObjectHref('secret', imagePullSecret.name)"
+    },
+    {
+      "at": "src/shell/component.ts:120",
+      "kind": "navigate",
+      "owner": "src/shell/component.ts",
+      "cls": "NODE_MISS",
+      "target": "[`/shell/${this.namespace_}/${this.podName}/${podContainer}`], {"
+    }
+  ]
+}

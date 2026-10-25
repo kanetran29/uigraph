@@ -1,0 +1,22 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[node distance=9mm and 16mm]
+  \node[box, hl, minimum width=30mm, minimum height=12mm] (g) {extracted\\graph};
+  \node[box, above left=of g, minimum width=38mm, font=\footnotesize] (b) {\textbf{witness check}\\truth: the source line\\each edge cites};
+  \node[box, above right=of g, minimum width=38mm, font=\footnotesize] (c) {\textbf{differential test}\\truth: an independent\\route parser};
+  \node[box, below left=of g, minimum width=38mm, font=\footnotesize] (d) {\textbf{end-to-end oracle}\\truth: URLs visited by\\passing tests};
+  \node[box, below right=of g, minimum width=38mm, font=\footnotesize] (f) {\textbf{mutation}\\truth: the change\\that was injected};
+  \draw[<->] (b) -- node[lbl, above right, pos=0.4] {must edges} (g);
+  \draw[<->] (c) -- node[lbl, above left, pos=0.4] {nodes} (g);
+  \draw[<->] (d) -- node[lbl, below right, pos=0.4] {nodes} (g);
+  \draw[<->] (f) -- node[lbl, below left, pos=0.4] {graph delta} (g);
+  \node[font=\scriptsize, text=muted, above=0.5mm of b] {blind to missing edges};
+  \node[font=\scriptsize, text=muted, above=0.5mm of c] {independent, not stronger};
+  \node[font=\scriptsize, text=muted, below=0.5mm of d] {tested subset only};
+  \node[font=\scriptsize, text=muted, below=0.5mm of f] {needs the construct in the graph};
+\end{tikzpicture}
+\caption{The four evaluation methods, the part of the graph each one checks, and where its
+ground truth comes from. No method sees everything; the grey notes give the blind spot of
+each, as listed in Table~\ref{tab:methods}.}
+\label{fig:oracles}
+\end{figure}

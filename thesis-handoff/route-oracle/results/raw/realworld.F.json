@@ -1,0 +1,154 @@
+{
+  "repoRoot": "/tmp/eval/corpus/realworld",
+  "appDir": "/tmp/eval/corpus/realworld",
+  "baseline": {
+    "nodes": 11,
+    "edges": 21
+  },
+  "tally": {
+    "DETECTED": 4,
+    "MISSED": 3
+  },
+  "results": [
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/app.routes.ts",
+      "subject": "login",
+      "predict": "a node route containing \"login\" becomes \"login-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 11,
+      "delta": {
+        "nodesAdded": [
+          "/login-mutated"
+        ],
+        "nodesRemoved": [
+          "/login"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "n_login-mutated -> /register (click:routerLink)",
+          "n_login-mutated -> / (navigate)"
+        ],
+        "edgesRemoved": [
+          "/ -> /login (navigate)",
+          "/tag/:tag -> /login (navigate)",
+          "/login -> /login (click:routerLink)",
+          "/login -> /register (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/features/profile/profile.routes.ts",
+      "subject": "favorites",
+      "predict": "a node route containing \"favorites\" becomes \"favorites-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 4,
+      "delta": {
+        "nodesAdded": [
+          "/profile/:username/favorites-mutated"
+        ],
+        "nodesRemoved": [
+          "/profile/:username/favorites"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/profile/:username -> /profile/:username/favorites-mutated (click:routerLink)"
+        ],
+        "edgesRemoved": [
+          "/profile/:username -> /profile/:username/favorites (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/app.routes.ts",
+      "subject": "canActivate: [() => inject(UserService).isAuthenti",
+      "predict": "guard text or modality changes on at least one edge, or a node loses its guard",
+      "verdict": "DETECTED",
+      "touched": 5,
+      "delta": {
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": [
+          "/ -> /login: guard fn#ddb96242->null, modality may->must",
+          "/tag/:tag -> /login: guard fn#ddb96242->null, modality may->must",
+          "/login -> /login: guard fn#ddb96242->null, modality may->must",
+          "/register -> /login: guard fn#ddb96242->null, modality may->must"
+        ]
+      }
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/core/layout/header.component.html",
+      "subject": "/login",
+      "predict": "at least one edge targeting /login disappears",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/features/article/components/favorite-button.component.ts",
+      "subject": "/register",
+      "predict": "the edge to /register disappears or is retargeted",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/features/article/pages/editor/editor.component.ts",
+      "subject": "/article/",
+      "predict": "the edge to /article/ disappears or is retargeted",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/features/article/pages/home/home.component.ts",
+      "subject": "/login",
+      "predict": "the edge to /login disappears or is retargeted",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/ -> /login (navigate)",
+          "/tag/:tag -> /login (navigate)"
+        ],
+        "guardChanged": []
+      }
+    }
+  ]
+}

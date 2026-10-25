@@ -1,0 +1,37 @@
+{
+  "appDir": "/tmp/eval/corpus/realworld",
+  "dbPath": "/tmp/eval/corpus/realworld/uigraph.db",
+  "edges": 21,
+  "clean": 18,
+  "mustEdges": 7,
+  "mustClean": 6,
+  "tally": {
+    "TARGET_MISMATCH": 3
+  },
+  "findings": [
+    {
+      "edge": "/settings -> /profile",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "src/app/features/settings/settings.component.ts:72",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile//:param, edge claims /profile"
+    },
+    {
+      "edge": "/profile/:username -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/profile/pages/profile/profile.component.html:42",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile/:param, edge claims /profile/:username/favorites"
+    },
+    {
+      "edge": "/article/:slug -> /register",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/features/article/pages/article/article.component.html:114",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /login, edge claims /register"
+    }
+  ]
+}

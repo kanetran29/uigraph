@@ -1,0 +1,862 @@
+{
+  "appDir": "/tmp/eval/corpus/k8sdash/modules/web",
+  "db": "/tmp/eval/corpus/k8sdash/modules/web/uigraph.db",
+  "filesParsed": 366,
+  "declaredRoutesTotal": 42,
+  "byKind": {
+    "SCREEN": 2,
+    "REDIRECT": 3,
+    "LAZY_UNRESOLVED": 37
+  },
+  "uniqueScreenPaths": 2,
+  "guardedScreenPaths": 2,
+  "blindSpots": [
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "error/module",
+      "at": "src/chrome/routing.ts:27",
+      "prefix": "/error"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/module",
+      "at": "src/chrome/routing.ts:33",
+      "prefix": "/cluster"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/clusterrolebinding/module",
+      "at": "src/chrome/routing.ts:37",
+      "prefix": "/clusterrolebinding"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/clusterrole/module",
+      "at": "src/chrome/routing.ts:41",
+      "prefix": "/clusterrole"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/event/module",
+      "at": "src/chrome/routing.ts:45",
+      "prefix": "/event"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/namespace/module",
+      "at": "src/chrome/routing.ts:49",
+      "prefix": "/namespace"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/networkpolicy/module",
+      "at": "src/chrome/routing.ts:53",
+      "prefix": "/networkpolicy"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/node/module",
+      "at": "src/chrome/routing.ts:57",
+      "prefix": "/node"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/persistentvolume/module",
+      "at": "src/chrome/routing.ts:61",
+      "prefix": "/persistentvolume"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/serviceaccount/module",
+      "at": "src/chrome/routing.ts:65",
+      "prefix": "/serviceaccount"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/role/module",
+      "at": "src/chrome/routing.ts:69",
+      "prefix": "/role"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/cluster/rolebinding/module",
+      "at": "src/chrome/routing.ts:73",
+      "prefix": "/rolebinding"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "overview/module",
+      "at": "src/chrome/routing.ts:79",
+      "prefix": "/overview"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/module",
+      "at": "src/chrome/routing.ts:85",
+      "prefix": "/workloads"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/cronjob/module",
+      "at": "src/chrome/routing.ts:89",
+      "prefix": "/cronjob"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/daemonset/module",
+      "at": "src/chrome/routing.ts:93",
+      "prefix": "/daemonset"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/deployment/module",
+      "at": "src/chrome/routing.ts:97",
+      "prefix": "/deployment"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/job/module",
+      "at": "src/chrome/routing.ts:101",
+      "prefix": "/job"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/pod/module",
+      "at": "src/chrome/routing.ts:105",
+      "prefix": "/pod"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/replicaset/module",
+      "at": "src/chrome/routing.ts:109",
+      "prefix": "/replicaset"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/replicationcontroller/module",
+      "at": "src/chrome/routing.ts:113",
+      "prefix": "/replicationcontroller"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/workloads/statefulset/module",
+      "at": "src/chrome/routing.ts:118",
+      "prefix": "/statefulset"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/discovery/module",
+      "at": "src/chrome/routing.ts:124",
+      "prefix": "/discovery"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/discovery/ingress/module",
+      "at": "src/chrome/routing.ts:128",
+      "prefix": "/ingress"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/discovery/ingressclass/module",
+      "at": "src/chrome/routing.ts:132",
+      "prefix": "/ingressclass"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/discovery/service/module",
+      "at": "src/chrome/routing.ts:136",
+      "prefix": "/service"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/config/module",
+      "at": "src/chrome/routing.ts:142",
+      "prefix": "/config"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/config/configmap/module",
+      "at": "src/chrome/routing.ts:146",
+      "prefix": "/configmap"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/config/persistentvolumeclaim/module",
+      "at": "src/chrome/routing.ts:150",
+      "prefix": "/persistentvolumeclaim"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/config/secret/module",
+      "at": "src/chrome/routing.ts:155",
+      "prefix": "/secret"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "resource/config/storageclass/module",
+      "at": "src/chrome/routing.ts:159",
+      "prefix": "/storageclass"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "crd/module",
+      "at": "src/chrome/routing.ts:165",
+      "prefix": "/customresourcedefinition"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "settings/module",
+      "at": "src/chrome/routing.ts:171",
+      "prefix": "/settings"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "create/module",
+      "at": "src/chrome/routing.ts:175",
+      "prefix": "/create"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "logs/module",
+      "at": "src/chrome/routing.ts:179",
+      "prefix": "/log"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "shell/module",
+      "at": "src/chrome/routing.ts:183",
+      "prefix": "/shell"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "search/module",
+      "at": "src/chrome/routing.ts:187",
+      "prefix": "/search"
+    }
+  ],
+  "comparison": {
+    "declaredScreens": 2,
+    "graphNodes": 40,
+    "matched": 2,
+    "coverage": 1,
+    "missing": [],
+    "extraNodes": [
+      {
+        "route": "*",
+        "id": "n_wildcard",
+        "kind": "screen"
+      },
+      {
+        "route": "/error",
+        "id": "n_error",
+        "kind": "screen"
+      },
+      {
+        "route": "/cluster",
+        "id": "n_cluster",
+        "kind": "screen"
+      },
+      {
+        "route": "/clusterrolebinding",
+        "id": "n_clusterrolebinding",
+        "kind": "screen"
+      },
+      {
+        "route": "/clusterrole",
+        "id": "n_clusterrole",
+        "kind": "screen"
+      },
+      {
+        "route": "/event",
+        "id": "n_event",
+        "kind": "screen"
+      },
+      {
+        "route": "/namespace",
+        "id": "n_namespace",
+        "kind": "screen"
+      },
+      {
+        "route": "/networkpolicy",
+        "id": "n_networkpolicy",
+        "kind": "screen"
+      },
+      {
+        "route": "/node",
+        "id": "n_node",
+        "kind": "screen"
+      },
+      {
+        "route": "/persistentvolume",
+        "id": "n_persistentvolume",
+        "kind": "screen"
+      },
+      {
+        "route": "/serviceaccount",
+        "id": "n_serviceaccount",
+        "kind": "screen"
+      },
+      {
+        "route": "/role",
+        "id": "n_role",
+        "kind": "screen"
+      },
+      {
+        "route": "/rolebinding",
+        "id": "n_rolebinding",
+        "kind": "screen"
+      },
+      {
+        "route": "/overview",
+        "id": "n_overview",
+        "kind": "screen"
+      },
+      {
+        "route": "/workloads",
+        "id": "n_workloads",
+        "kind": "screen"
+      },
+      {
+        "route": "/cronjob",
+        "id": "n_cronjob",
+        "kind": "screen"
+      },
+      {
+        "route": "/daemonset",
+        "id": "n_daemonset",
+        "kind": "screen"
+      },
+      {
+        "route": "/deployment",
+        "id": "n_deployment",
+        "kind": "screen"
+      },
+      {
+        "route": "/job",
+        "id": "n_job",
+        "kind": "screen"
+      },
+      {
+        "route": "/pod",
+        "id": "n_pod",
+        "kind": "screen"
+      },
+      {
+        "route": "/replicaset",
+        "id": "n_replicaset",
+        "kind": "screen"
+      },
+      {
+        "route": "/replicationcontroller",
+        "id": "n_replicationcontroller",
+        "kind": "screen"
+      },
+      {
+        "route": "/statefulset",
+        "id": "n_statefulset",
+        "kind": "screen"
+      },
+      {
+        "route": "/discovery",
+        "id": "n_discovery",
+        "kind": "screen"
+      },
+      {
+        "route": "/ingress",
+        "id": "n_ingress",
+        "kind": "screen"
+      },
+      {
+        "route": "/ingressclass",
+        "id": "n_ingressclass",
+        "kind": "screen"
+      },
+      {
+        "route": "/service",
+        "id": "n_service",
+        "kind": "screen"
+      },
+      {
+        "route": "/config",
+        "id": "n_config",
+        "kind": "screen"
+      },
+      {
+        "route": "/configmap",
+        "id": "n_configmap",
+        "kind": "screen"
+      },
+      {
+        "route": "/persistentvolumeclaim",
+        "id": "n_persistentvolumeclaim",
+        "kind": "screen"
+      },
+      {
+        "route": "/secret",
+        "id": "n_secret",
+        "kind": "screen"
+      },
+      {
+        "route": "/storageclass",
+        "id": "n_storageclass",
+        "kind": "screen"
+      },
+      {
+        "route": "/customresourcedefinition",
+        "id": "n_customresourcedefinition",
+        "kind": "screen"
+      },
+      {
+        "route": "/settings",
+        "id": "n_settings",
+        "kind": "screen"
+      },
+      {
+        "route": "/create",
+        "id": "n_create",
+        "kind": "screen"
+      },
+      {
+        "route": "/log",
+        "id": "n_log",
+        "kind": "screen"
+      },
+      {
+        "route": "/shell",
+        "id": "n_shell",
+        "kind": "screen"
+      },
+      {
+        "route": "/search",
+        "id": "n_search",
+        "kind": "screen"
+      }
+    ]
+  },
+  "routes": [
+    {
+      "path": "/login",
+      "kind": "SCREEN",
+      "guards": [
+        "[LoginGuard]"
+      ],
+      "file": "src/index.routing.ts",
+      "line": 20,
+      "component": "LoginComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/index.routing.ts",
+      "line": 21,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/**",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/index.routing.ts",
+      "line": 22,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 21,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/chrome/routing.ts",
+      "line": 22,
+      "component": "ChromeComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/error",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 27,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/cluster",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 33,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/clusterrolebinding",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 37,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/clusterrole",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 41,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/event",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 45,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/namespace",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 49,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/networkpolicy",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 53,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/node",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 57,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/persistentvolume",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 61,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/serviceaccount",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 65,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/role",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 69,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/rolebinding",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 73,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 79,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/workloads",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 85,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/cronjob",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 89,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/daemonset",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 93,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/deployment",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 97,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/job",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 101,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/pod",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 105,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/replicaset",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 109,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/replicationcontroller",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 113,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/statefulset",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 118,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/discovery",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 124,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/ingress",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 128,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/ingressclass",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 132,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/service",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 136,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 142,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/configmap",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 146,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/persistentvolumeclaim",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 150,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/secret",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 155,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/storageclass",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 159,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/customresourcedefinition",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 165,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 171,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/create",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 175,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/log",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 179,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/shell",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 183,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/search",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/chrome/routing.ts",
+      "line": 187,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    }
+  ]
+}

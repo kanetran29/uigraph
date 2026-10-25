@@ -1,0 +1,362 @@
+{
+  "harnessVersion": "1.3.0",
+  "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco",
+  "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco/projects/aca-content",
+  "attribution": true,
+  "seed": 20261021,
+  "quota": 8,
+  "baseline": {
+    "nodes": 30,
+    "edges": 1,
+    "routes": 30
+  },
+  "discovered": {
+    "RENAME_PATH": 17,
+    "REMOVE_GUARD": 4,
+    "CHANGE_NAV_TARGET": 4
+  },
+  "sampled": {
+    "CHANGE_NAV_TARGET": 4,
+    "REMOVE_GUARD": 4,
+    "RENAME_PATH": 8
+  },
+  "perOperator": {
+    "CHANGE_NAV_TARGET": {
+      "discovered": 4,
+      "sampled": 4,
+      "detected": 1,
+      "missed": 0,
+      "wrong": 0,
+      "excluded": 3,
+      "broke": 0,
+      "skip": 0
+    },
+    "REMOVE_GUARD": {
+      "discovered": 4,
+      "sampled": 4,
+      "detected": 0,
+      "missed": 2,
+      "wrong": 0,
+      "excluded": 2,
+      "broke": 0,
+      "skip": 0
+    },
+    "RENAME_PATH": {
+      "discovered": 17,
+      "sampled": 8,
+      "detected": 8,
+      "missed": 0,
+      "wrong": 0,
+      "excluded": 0,
+      "broke": 0,
+      "skip": 0
+    }
+  },
+  "detectionRate": 0.8181818181818182,
+  "scored": 11,
+  "detected": 9,
+  "results": [
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/lib/components/view-profile/view-profile.component.ts",
+      "line": 141,
+      "subject": "/personal-files => /search",
+      "predict": "the edge to /personal-files is replaced by an edge to /search",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/profile -> /search (navigate)"
+        ],
+        "edgesRemoved": [
+          "/profile -> /personal-files (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/lib/components/search/search-navigation.service.ts",
+      "line": 57,
+      "subject": "/personal-files => /favorites",
+      "predict": "the edge to /personal-files is replaced by an edge to /favorites",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/lib/components/search/search-navigation.service.ts:57 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts",
+      "line": 163,
+      "subject": "/search => /all",
+      "predict": "the edge to /search is replaced by an edge to /all",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts:163 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/lib/components/search/search-navigation.service.ts",
+      "line": 63,
+      "subject": "/search => /",
+      "predict": "the edge to /search is replaced by an edge to /",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/lib/components/search/search-navigation.service.ts:63 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 115,
+      "subject": "path \"profile\"",
+      "predict": "the guard on edges entering the screen of path \"profile\" changes",
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters a screen with route segment \"profile\""
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "folder-rules/src/folder-rules.module.ts",
+      "line": 37,
+      "subject": "path \"rules\"",
+      "predict": "the guard on edges entering the screen of path \"rules\" changes",
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters a screen with route segment \"rules\""
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 348,
+      "subject": "path \"\"",
+      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 111,
+      "subject": "path \"\"",
+      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 413,
+      "subject": "saved-searches",
+      "predict": "a node route containing \"saved-searches\" becomes \"saved-searches-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/saved-searches-mutated"
+        ],
+        "nodesRemoved": [
+          "/saved-searches"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 335,
+      "subject": "shared",
+      "predict": "a node route containing \"shared\" becomes \"shared-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/shared-mutated"
+        ],
+        "nodesRemoved": [
+          "/shared"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 114,
+      "subject": "profile",
+      "predict": "a node route containing \"profile\" becomes \"profile-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 4,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/profile-mutated"
+        ],
+        "nodesRemoved": [
+          "/profile"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/profile-mutated -> /personal-files (navigate)"
+        ],
+        "edgesRemoved": [
+          "/profile -> /personal-files (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 61,
+      "subject": "view",
+      "predict": "a node route containing \"view\" becomes \"view-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 4,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/view-mutated",
+          "/view-mutated/:nodeId"
+        ],
+        "nodesRemoved": [
+          "/view",
+          "/view/:nodeId"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 319,
+      "subject": "recent-files",
+      "predict": "a node route containing \"recent-files\" becomes \"recent-files-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/recent-files-mutated"
+        ],
+        "nodesRemoved": [
+          "/recent-files"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 172,
+      "subject": "repository",
+      "predict": "a node route containing \"repository\" becomes \"repository-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 6,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/repository-mutated",
+          "/repository-mutated/details/:nodeId",
+          "/repository-mutated/details/:nodeId/:activeTab"
+        ],
+        "nodesRemoved": [
+          "/repository",
+          "/repository/details/:nodeId",
+          "/repository/details/:nodeId/:activeTab"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 221,
+      "subject": "libraries",
+      "predict": "a node route containing \"libraries\" becomes \"libraries-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/libraries-mutated"
+        ],
+        "nodesRemoved": [
+          "/libraries"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/lib/aca-content.routes.ts",
+      "line": 284,
+      "subject": "all",
+      "predict": "a node route containing \"all\" becomes \"all-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 4,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/all-mutated",
+          "/all-mutated/libraries"
+        ],
+        "nodesRemoved": [
+          "/all",
+          "/all/libraries"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    }
+  ]
+}

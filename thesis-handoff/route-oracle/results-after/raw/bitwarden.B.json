@@ -1,0 +1,10 @@
+{
+  "appDir": "/tmp/eval/corpus/bitwarden/apps/web",
+  "dbPath": "/tmp/eval/corpus/bitwarden/apps/web/uigraph.db",
+  "edges": 24,
+  "clean": 24,
+  "mustEdges": 13,
+  "mustClean": 13,
+  "tally": {},
+  "findings": []
+}
