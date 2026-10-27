@@ -10,7 +10,8 @@
 
 import { Project, ts } from 'ts-morph'
 import type { Node, SourceFile } from 'ts-morph'
-import { relative } from 'node:path'
+import { relative, join, dirname } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, resolveRelativeTarget, type RouteLike } from './matcher'
@@ -27,12 +28,14 @@ const DEFAULT_RULESET = 'ng-v0-2026.06'
 
 /** Build a ts-morph project from a project directory, scanning src first. */
 export function buildProject(projectDir: string): Project {
+  const ws = workspaceTsPaths(projectDir)
   const project = new Project({
     compilerOptions: {
       allowJs: true,
       target: ts.ScriptTarget.ESNext,
       module: ts.ModuleKind.ESNext,
       moduleResolution: ts.ModuleResolutionKind.Bundler,
+      ...(ws ? { baseUrl: ws.baseUrl, paths: ws.paths } : {}),
     },
     skipFileDependencyResolution: true,
     skipLoadingLibFiles: true,
@@ -42,7 +45,57 @@ export function buildProject(projectDir: string): Project {
   if (project.getSourceFiles().length === 0) {
     project.addSourceFilesAtPaths([`${projectDir}/**/*.{ts,js}`, `!${projectDir}/**/node_modules/**`])
   }
+  for (const dir of ws?.dirs ?? []) {
+    project.addSourceFilesAtPaths([`${dir}/**/*.{ts,js}`, `!${dir}/**/node_modules/**`])
+  }
   return project
+}
+
+/**
+ * The workspace's tsconfig `paths` aliases, with the directory they are resolved against.
+ * In an Nx-style monorepo the app imports shared code — including, in some apps, the table
+ * its route paths are declared in — through an alias such as `@scope/common/*`, and those
+ * files live outside the app directory. Without the alias the checker cannot follow the
+ * import, so every route that names a constant is dropped and the app extracts no screens.
+ */
+function workspaceTsPaths(projectDir: string): { baseUrl: string; paths: Record<string, string[]>; dirs: string[] } | null {
+  let dir = projectDir
+  for (let up = 0; up < 5; up++) {
+    for (const name of ['tsconfig.base.json', 'tsconfig.json']) {
+      const file = join(dir, name)
+      if (!existsSync(file)) continue
+      let opts: { baseUrl?: string; paths?: Record<string, string[]> } | undefined
+      try {
+        // tsconfig is JSON with comments and trailing commas; a tolerant strip is enough here.
+        const text = readFileSync(file, 'utf8')
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/(^|\s)\/\/.*$/gm, '$1')
+          .replace(/,(\s*[}\]])/g, '$1')
+        opts = (JSON.parse(text) as { compilerOptions?: { baseUrl?: string; paths?: Record<string, string[]> } }).compilerOptions
+      } catch {
+        continue
+      }
+      const paths = opts?.paths
+      if (!opts?.baseUrl && (!paths || Object.keys(paths).length === 0)) continue
+      // TypeScript resolves `paths` targets against baseUrl, and baseUrl against the config's
+      // own directory; a non-relative import such as `resource/cluster/module` is resolved
+      // against baseUrl alone.
+      const baseUrl = join(dir, opts?.baseUrl ?? '.')
+      const dirs = new Set<string>()
+      for (const targets of Object.values(paths ?? {})) {
+        for (const t of targets) {
+          const root = join(baseUrl, t.split('*')[0] ?? '')
+          if (root.includes('node_modules') || !existsSync(root)) continue
+          if (!projectDir.startsWith(root)) dirs.add(root)
+        }
+      }
+      return { baseUrl, paths: paths ?? {}, dirs: [...dirs] }
+    }
+    const parent = dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+  return null
 }
 
 /** Extract a graph from an already-built ts-morph project (testable in memory). */
@@ -68,11 +121,21 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const edges: GraphEdge[] = []
   const soundiness: SoundinessNote[] = []
   const seen = new Set<string>()
+  const edgeById = new Map<string, GraphEdge>()
   const seenAsyncGuards = new Set<string>()
 
   function pushEdge(from: string, to: string, t: RawTarget, modality: 'must' | 'may', confidence: number, guard: string | null, file: string): void {
     const id = edgeId(from, to, t.event, guard)
-    if (seen.has(id)) return
+    if (seen.has(id)) {
+      // Record the extra construct instead of dropping it, so every construct that yields
+      // an edge stays traceable. Same edge set as before; provenance only.
+      const e = edgeById.get(id)
+      const w = { source: 'static' as const, file: t.file ?? file, loc: t.loc, ruleId: t.ruleId }
+      if (e && !(e.witness?.file === w.file && e.witness?.loc?.line === w.loc.line) && !e.mergedWitnesses?.some((m) => m.file === w.file && m.loc?.line === w.loc.line)) {
+        ;(e.mergedWitnesses ??= []).push(w)
+      }
+      return
+    }
     seen.add(id)
     edges.push({
       id,
@@ -86,6 +149,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       confidence,
       witness: { source: 'static', file: t.file ?? file, loc: t.loc, ruleId: t.ruleId },
     })
+    edgeById.set(id, edges[edges.length - 1]!)
   }
 
   /**
@@ -108,8 +172,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const guardText = gate.guarded ? gate.guardTexts.join(',') : null
         pushEdge(from, target.nodeId, t, gate.guarded || capMay ? 'may' : 'must', gate.guarded ? gate.confidence : capMay ? 0.5 : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
-        const cands = matchPrefix(t.ti.staticPrefix, routeLikes)
-        if (note) soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${t.ti.staticPrefix}" over-approximated to ${cands.length} route(s)` })
+        const prefix = t.relative ? resolveRelativeTarget(t.ti.staticPrefix, pathByNodeId.get(from)) : t.ti.staticPrefix
+        const cands = matchPrefix(prefix, routeLikes)
+        if (note) soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${prefix}" over-approximated to ${cands.length} route(s)` })
         for (const cand of cands) {
           const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
           noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)

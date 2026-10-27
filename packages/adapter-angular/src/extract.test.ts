@@ -280,6 +280,31 @@ describe('extractGraph — modern Angular routing (lazy + nested + array links)'
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/clients/:clientId'])
   })
 
+  it('reads routes from an inline RouterModule.forChild array of named Route constants', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nexport const routes: Routes = [{ path: 'error', loadChildren: () => import('./error/module') }]`,
+        '/error/module.ts': `import { ErrorRoutingModule } from './routing'\nexport class ErrorModule {}`,
+        '/error/routing.ts': `import { Route, RouterModule, NgModule } from '@angular/router'\nimport { E } from './component'\nconst ERROR_ROUTE: Route = { path: '', component: E }\n@NgModule({ imports: [RouterModule.forChild([ERROR_ROUTE])] })\nexport class ErrorRoutingModule {}`,
+        '/error/component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>e</p>' })\nexport class E {}`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/error'])
+  })
+
+  it('reads a route path that references a shared constant table', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/routes-table.ts': `export const internalRoutes = { account: { path: 'account', subRoutes: { access: { path: 'access' } } } }`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { internalRoutes } from './routes-table'\nimport { A } from './a.component'\nexport const routes: Routes = [\n  { path: internalRoutes.account.path, component: A, children: [\n    { path: internalRoutes.account.subRoutes.access.path, component: A },\n  ] },\n]`,
+        '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>a</p>' })\nexport class A {}`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/account', '/account/access'])
+  })
+
   it('resolves a route-relative routerLink against the screen it fires from', () => {
     const { graph } = extractGraph(
       inMemory({
