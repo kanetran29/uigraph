@@ -133,11 +133,11 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
  * `loadChildren: () => import('./x.routes')` is followed into the imported
  * module's route array. Deduplicates by node id (first declaration wins).
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>): void {
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadablePaths?: { count: number }): void {
   for (const el of arr.getElements()) {
     if (Node.isCallExpression(el)) {
       for (const arg of el.getArguments()) {
-        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects)
+        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadablePaths)
       }
       continue
     }
@@ -146,14 +146,22 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     // which reads from the outside exactly like a link to a route nobody declares.
     if (Node.isSpreadElement(el)) {
       const arr = arrayLiteralOf(el.getExpression())
-      if (arr && Node.isArrayLiteralExpression(arr)) walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects)
+      if (arr && Node.isArrayLiteralExpression(arr)) walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadablePaths)
       continue
     }
     // An array may name its routes instead of spelling them out (`[ERROR_ROUTE]`).
     const obj = Node.isObjectLiteralExpression(el) ? el : objectLiteralOf(el)
     if (!obj) continue
     const ownPath = stringProp(obj, 'path')
-    if (ownPath === null) continue
+    if (ownPath === null) {
+      // A `path` the resolver could not read leaves a hole in the route set. Counting those
+      // holes is what lets a caller tell "this application declares no such route" from
+      // "this extractor could not read the route that declares it" — the two look identical
+      // from a navigation site, and treating the second as the first credits the extractor
+      // for its own blind spot.
+      if (obj.getProperty('path') !== undefined && unreadablePaths) unreadablePaths.count++
+      continue
+    }
     const fullPath = joinRoutePath(parentPath, ownPath)
     const guards = [...inheritedGuards, ...canActivateGuards(sf, obj)]
     const componentName = identifierProp(obj, 'component')
@@ -179,7 +187,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     const childrenProp = obj.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
-      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects)
+      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadablePaths)
     }
     const childSpec = lazyImportSpecifier(obj, 'loadChildren')
     if (childSpec || lazyIdentifierTarget(sf, obj, 'loadChildren')) {
@@ -188,7 +196,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
         const { owner, arrays } = lazyRouteOwner(childModule)
         loadedChildFiles.add(childModule.getFilePath())
         loadedChildFiles.add(owner.getFilePath())
-        for (const childArr of arrays) walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects)
+        for (const childArr of arrays) walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadablePaths)
       }
     }
   }
@@ -199,7 +207,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
  * reached via `loadChildren` are scanned only under their parent prefix, never
  * again at the root, so a child route array contributes a single correct path.
  */
-export function collectRoutes(project: Project, redirects?: Map<string, string>): RouteInfo[] {
+export function collectRoutes(project: Project, redirects?: Map<string, string>, unreadablePaths?: { count: number }): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
   const loadedChildFiles = collectLoadChildrenTargets(project)
   for (const sf of project.getSourceFiles()) {
@@ -207,7 +215,7 @@ export function collectRoutes(project: Project, redirects?: Map<string, string>)
     // A spec declares routes of its own to drive the router under test; they are not the
     // application's screens, and minting them puts fictional addresses in the graph.
     if (loadedChildFiles.has(f) || SPEC_FILE.test(f)) continue
-    for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles, [], null, redirects)
+    for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles, [], null, redirects, unreadablePaths)
   }
   return [...byNodeId.values()]
 }

@@ -89,6 +89,13 @@ const fileKind = (rel) => {
   return 'plain-class'
 }
 
+/** The first quoted path in a target expression, or null when it names none. */
+function literalTarget(target) {
+  const m = /'([^']*)'|"([^"]*)"/.exec(target)
+  const v = m ? (m[1] ?? m[2]) : null
+  return v && v.startsWith('/') ? v : null
+}
+
 const ACCOUNTED = /^(CONVERTED|QUERY_ONLY|ACCOUNTED|EXCLUDED)/
 const rows = []
 for (const r of loss.rows) {
@@ -106,6 +113,15 @@ for (const r of loss.rows) {
   } else if (target === '' || /^\[\s*\]/.test(target)) {
     reason = 'not-a-navigation'
     detail = 'the construct carries no commands, so it names no destination'
+  } else if (literalTarget(target) !== null && !matchesDeclared(literalTarget(target))) {
+    // Tested here rather than inherited from the extractor's note, because the thesis asserts
+    // this predicate of every site in the group: an earlier ordering let the note fire first
+    // and only a fifth of the group had ever been checked against the route set.
+    reason = 'target-names-no-declared-route'
+    detail = `the target "${literalTarget(target)}" matches no route the application declares; a dead link, or a route neither tool reads`
+  } else if (literalTarget(target) !== null && !matchesNode(literalTarget(target))) {
+    reason = 'declared-route-has-no-node'
+    detail = `the target "${literalTarget(target)}" names a declared route the extractor minted no node for`
   } else if (note) {
     reason = `extractor-note:${note.kind}`
     detail = note.detail ?? ''

@@ -42,6 +42,46 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
     expect(graph.edges.filter((e) => e.modality === 'must' && e.to === 'n_home')).toHaveLength(0)
   })
 
+  it.each([
+    ['object destructuring', '({ dest: this.dest } = cfg)'],
+    ['array destructuring', '[this.dest] = pair'],
+    ['Object.assign', 'Object.assign(this, { dest: [\'/away\'] })'],
+  ])('does not follow a field written by %s', (_name, write) => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: '', component: A }, { path: 'home', component: A }, { path: 'away', component: A }]`,
+        '/table.ts': `export const table = { home: { routerLink: ['/home'] } }`,
+        '/a.component.ts': `import { Component } from '@angular/core'\nimport { table } from './table'\nconst cfg: any = {}\nconst pair: any = []\n@Component({ standalone: true, template: '<a [routerLink]="dest">go</a>' })\nexport class A { dest = table.home.routerLink; ngOnInit() { ${write} } }`,
+      }),
+      '/',
+    )
+    expect(graph.edges.filter((e) => e.modality === 'must' && e.to === 'n_home')).toHaveLength(0)
+  })
+
+  it('keeps an escaped colon inside a localized segment out of the path', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: $localize\`:Section\\\\: about:about\`, component: A }]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/about'])
+  })
+
+  it('does not claim a wildcard redirect when the route set has an unresolved path', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/routes.ts': `export enum R { Login = 'login' }`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { opaque } from './opaque'\nexport const routes: Routes = [\n  { path: opaque.thing(), component: A },\n  { path: 'home', component: A },\n  { path: '**', redirectTo: 'home' },\n]`,
+        '/opaque.ts': `export const opaque = { thing: () => String(Math.random()) }`,
+        '/a.component.ts': C('<a routerLink="/login">in</a>'),
+      }),
+      '/',
+    )
+    expect(graph.edges.filter((e) => e.to === 'n_home')).toHaveLength(0)
+  })
+
   it('does not read createEffect out of a comment', () => {
     const { graph } = extractGraph(
       inMemory({

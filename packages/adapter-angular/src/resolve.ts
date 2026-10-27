@@ -109,7 +109,9 @@ export function constantString(expr: Node | undefined): string | null {
   // they are translated, and reading only plain literals loses the whole route.
   if (Node.isTaggedTemplateExpression(expr) && /(^|\.)\$localize$/.test(expr.getTag().getText())) {
     const tpl = expr.getTemplate()
-    if (Node.isNoSubstitutionTemplateLiteral(tpl)) return stripI18nMeta(tpl.getLiteralValue())
+    // The raw source, not getLiteralValue(): that has already turned `\\:` into `:` and the
+    // metadata block can no longer be told from the message.
+    if (Node.isNoSubstitutionTemplateLiteral(tpl)) return stripI18nMeta(tpl.getText().replace(/^`|`$/g, ''))
   }
   if (Node.isIdentifier(expr)) return constantString(declaredInitializer(expr))
   if (Node.isPropertyAccessExpression(expr)) {
@@ -130,12 +132,20 @@ export function constantString(expr: Node | undefined): string | null {
  * (`:Section: the page@@route.about:`), so the closing colon is the one after the `@@` id when
  * there is one. Taking the first colon instead left the description and the id in the path.
  */
-function stripI18nMeta(text: string): string {
-  if (!text.startsWith(':')) return text
-  const withId = /^:[^]*?@@[^:]*:/s.exec(text)
-  if (withId) return text.slice(withId[0].length)
-  const plain = /^:[^:]*:/.exec(text)
-  return plain ? text.slice(plain[0].length) : text
+function stripI18nMeta(raw: string): string {
+  const unescape = (t: string): string => t.replace(/\\:/g, ':')
+  if (!raw.startsWith(':')) return unescape(raw)
+  // The block closes at the first colon that is not escaped — except that an `@@` inside it
+  // introduces the message id, so the colon that closes the block is the first unescaped one
+  // AFTER that id. Without the exception a description containing a colon, escaped or not,
+  // takes the rest of the block into the path.
+  const at = raw.indexOf('@@')
+  const from = at === -1 ? 1 : at + 2
+  for (let i = from; i < raw.length; i++) {
+    if (raw[i] !== ':' || raw[i - 1] === '\\') continue
+    return unescape(raw.slice(i + 1))
+  }
+  return unescape(raw)
 }
 
 /** The enum an identifier names, following imports within the project, or undefined. */
@@ -255,15 +265,12 @@ export function classPropertyInitializer(sf: SourceFile, name: string): Node | u
     if (!prop || !Node.isPropertyDeclaration(prop)) continue
     const init = prop.getInitializer()
     if (!init) continue
-    // A field that is written again anywhere in the class is state, whatever its initializer
-    // looks like. Reading the initializer of `dest = table.home.routerLink` that `ngOnInit`
-    // then overwrites claims a destination the application does not go to.
-    const reassigned = cls.getDescendantsOfKind(SyntaxKind.BinaryExpression).some((b) => {
-      if (b.getOperatorToken().getText() !== '=') return false
-      const l = b.getLeft()
-      return Node.isPropertyAccessExpression(l) && l.getName() === name
-    })
-    if (reassigned) continue
+    // A field written again anywhere in the class is state, whatever its initializer looks
+    // like, and it can be written in more ways than an assignment to `this.x`: through object
+    // or array destructuring, or by `Object.assign(this, …)`. Enumerating the spellings is how
+    // the first version of this guard was got wrong, so the set of written names is collected
+    // from the whole class instead and the test is a membership check.
+    if (writtenNames(cls).has(name)) continue
     const stable = prop.isReadonly() || prop.isStatic() || Node.isIdentifier(init) || Node.isPropertyAccessExpression(init)
     if (stable) return init
   }
@@ -330,4 +337,48 @@ export function identifierProp(obj: ObjectLiteralExpression, name: string): stri
   const init = prop.getInitializer()
   if (init && Node.isIdentifier(init)) return init.getText()
   return null
+}
+
+/**
+ * Every property name a class assigns to, by any spelling: `this.x = …`, a destructuring
+ * target that contains `this.x`, and `Object.assign(this, { x })`. A name in this set is state
+ * and its initializer says nothing about what the field holds when a template reads it.
+ */
+function writtenNames(cls: Node): Set<string> {
+  const out = new Set<string>()
+  const fromTarget = (node: Node): void => {
+    if (Node.isPropertyAccessExpression(node)) {
+      if (node.getExpression().getKind() === SyntaxKind.ThisKeyword) out.add(node.getName())
+      return
+    }
+    if (Node.isObjectLiteralExpression(node)) {
+      for (const p of node.getProperties()) {
+        if (Node.isPropertyAssignment(p)) {
+          const init = p.getInitializer()
+          if (init) fromTarget(init)
+        } else if (Node.isShorthandPropertyAssignment(p)) out.add(p.getName())
+      }
+      return
+    }
+    if (Node.isArrayLiteralExpression(node)) {
+      for (const el of node.getElements()) fromTarget(el)
+    }
+  }
+  for (const b of cls.getDescendantsOfKind(SyntaxKind.BinaryExpression)) {
+    if (b.getOperatorToken().getText() !== '=') continue
+    fromTarget(b.getLeft())
+  }
+  for (const call of cls.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    if (call.getExpression().getText() !== 'Object.assign') continue
+    const [first, ...rest] = call.getArguments()
+    if (!first || first.getKind() !== SyntaxKind.ThisKeyword) continue
+    for (const arg of rest) {
+      const obj = Node.isObjectLiteralExpression(arg) ? arg : objectLiteralOf(arg)
+      if (!obj || !Node.isObjectLiteralExpression(obj)) continue
+      for (const p of obj.getProperties()) {
+        if (Node.isPropertyAssignment(p) || Node.isShorthandPropertyAssignment(p)) out.add(p.getName())
+      }
+    }
+  }
+  return out
 }
