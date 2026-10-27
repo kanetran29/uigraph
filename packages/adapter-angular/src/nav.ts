@@ -27,6 +27,17 @@ export function classifyTarget(expr: Node | undefined): TargetInfo {
       return { kind: 'template', staticPrefix: left.getLiteralValue() }
     }
   }
+  // `navigate(this.routerLinkAdminControlUsers)` names the destination instead of writing it.
+  // The field often holds a constant from a shared route table, so follow it; a field assigned
+  // at runtime resolves to nothing and stays dynamic, as it should.
+  const field = Node.isPropertyAccessExpression(expr) && expr.getExpression().getKind() === SyntaxKind.ThisKeyword ? expr.getName() : Node.isIdentifier(expr) ? expr.getText() : null
+  if (field) {
+    const init = classPropertyInitializer(expr.getSourceFile(), field) ?? (Node.isIdentifier(expr) ? expr : undefined)
+    const arr = constantStringArray(init)
+    if (arr && arr.length > 0) return { kind: 'literal', value: '/' + arr.join('/').replace(/^\/+/, '').replace(/\/+/g, '/') }
+    const str = constantString(init)
+    if (str !== null) return { kind: 'literal', value: str }
+  }
   return { kind: 'dynamic' }
 }
 
@@ -190,7 +201,9 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
       out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc })
     } else {
       const arg0 = call.getArguments()[0]
-      const first = arg0 && Node.isArrayLiteralExpression(arg0) ? arg0.getElements()[0] : undefined
+      // `navigate(x)` takes a commands array; when it is written out, the first element carries
+      // the static part, and when it is named, the name itself is the thing to resolve.
+      const first = arg0 && Node.isArrayLiteralExpression(arg0) ? arg0.getElements()[0] : arg0
       const relative = /\brelativeTo\s*:/.test(call.getArguments()[1]?.getText() ?? '')
       out.push({ ti: classifyTarget(first), event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative })
     }
