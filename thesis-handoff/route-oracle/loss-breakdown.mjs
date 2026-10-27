@@ -239,7 +239,12 @@ for (const c of constructs) {
   let hit = witnessAt.get(k)
   if (!hit && c.tplLine) hit = inlineMatch(c)
   if (hit === 'must') cls = 'CONVERTED_MUST'
-  else if (hit) cls = 'CONVERTED_MAY'
+  else if (hit === 'may') cls = 'CONVERTED_MAY'
+  // An edge into a `u_<screen>` sink carries modality unknown: the construct leaves the screen
+  // by an event the graph records, but at a destination only the run time knows. That is
+  // neither a recovered transition nor an unexplained loss, so it is counted on its own and
+  // taken out of the denominator the loss rules have to explain.
+  else if (hit === 'unknown') cls = 'ACCOUNTED_DYNAMIC'
   else if (c.kind !== 'routerLink' && /^\s*\[\s*\]/.test(c.target)) cls = 'QUERY_ONLY'
   else if (/outlets\s*:/.test(c.target)) cls = 'NAMED_OUTLET'
   else if (!c.owner || !componentFiles.has(c.owner)) cls = c.isHtml ? 'OTHER' : 'ATTRIBUTION_SERVICE'
@@ -260,12 +265,14 @@ for (const c of constructs) {
   rows.push({ at: `${rel(c.file)}:${c.line}`, kind: c.kind, owner: c.owner ? rel(c.owner) : null, cls, target: c.target })
 }
 
-const order = ['CONVERTED_MUST', 'CONVERTED_MAY', 'QUERY_ONLY', 'ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED', 'LAZY_BOUNDARY', 'CONSTANT_PATH', 'COMPONENT_UNLINKED', 'NAMED_OUTLET', 'CONSTANT_TARGET', 'NODE_MISS', 'OTHER']
-const lost = constructs.length - (tally.CONVERTED_MUST || 0) - (tally.CONVERTED_MAY || 0) - (tally.QUERY_ONLY || 0)
+const order = ['CONVERTED_MUST', 'CONVERTED_MAY', 'QUERY_ONLY', 'ACCOUNTED_DYNAMIC', 'ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED', 'LAZY_BOUNDARY', 'CONSTANT_PATH', 'COMPONENT_UNLINKED', 'NAMED_OUTLET', 'CONSTANT_TARGET', 'NODE_MISS', 'OTHER']
+const recovered = (tally.CONVERTED_MUST || 0) + (tally.CONVERTED_MAY || 0) + (tally.QUERY_ONLY || 0)
+const accounted = tally.ACCOUNTED_DYNAMIC || 0
+const lost = constructs.length - recovered - accounted
 console.log(`app:          ${appDir}`)
 console.log(`constructs:   ${constructs.length}  (routerLink ${constructs.filter((c) => c.kind === 'routerLink').length}, navigate ${constructs.filter((c) => c.kind !== 'routerLink').length})`)
 console.log(`route components found: ${routeComponent.size}, of which with a graph node: ${[...routeComponent.keys()].filter((f) => nodeComponentFiles.has(f)).length}`)
 console.log(`lost:         ${lost}`)
 for (const c of order) if (tally[c]) console.log(`  ${c.padEnd(20)} ${String(tally[c]).padStart(5)}  ${((tally[c] / constructs.length) * 100).toFixed(1)}%`)
 
-if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, constructs: constructs.length, lost, tally, rows }, null, 2))
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, constructs: constructs.length, recovered, accounted, lost, tally, rows }, null, 2))
