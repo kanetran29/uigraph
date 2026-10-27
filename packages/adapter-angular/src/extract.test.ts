@@ -280,6 +280,21 @@ describe('extractGraph — modern Angular routing (lazy + nested + array links)'
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/clients/:clientId'])
   })
 
+  it('resolves a route-relative routerLink against the screen it fires from', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { V } from './v.component'\nimport { G } from './g.component'\nimport { E } from './e.component'\nexport const routes: Routes = [\n  { path: 'clients/:clientId', component: V, children: [\n    { path: 'general', component: G },\n    { path: 'edit', component: E },\n  ] },\n]`,
+        '/v.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a [routerLink]="[\\'./general\\']">g</a>' })\nexport class V {}`,
+        '/g.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a [routerLink]="[\\'../edit\\']">e</a>' })\nexport class G {}`,
+        '/e.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>e</p>' })\nexport class E {}`,
+      }),
+      '/',
+    )
+    const has = (from: string, to: string) => graph.edges.some((e) => e.from === routeId(from) && e.to === routeId(to) && e.modality === 'must')
+    expect(has('/clients/:clientId', '/clients/:clientId/general')).toBe(true)
+    expect(has('/clients/:clientId/general', '/clients/:clientId/edit')).toBe(true)
+  })
+
   it('walks the array a route factory such as Route.withShell([...]) is given, at the same prefix', () => {
     const { graph } = extractGraph(
       inMemory({

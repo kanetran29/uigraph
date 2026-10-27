@@ -36,6 +36,13 @@ export interface RawTarget {
   ruleId: string
   loc: { line: number; col: number }
   file?: string
+  /**
+   * Whether a target without a leading slash is resolved against the screen it fires from.
+   * A template `routerLink` always is. `router.navigate([...])` is only when the call passes
+   * `relativeTo`; without it Angular resolves from the root, and `navigateByUrl` takes a URL,
+   * so both are absolute.
+   */
+  relative?: boolean
 }
 
 const STATIC_LINK_RE = /(?<!\[)\brouterLink\s*=\s*"([^"]*)"/g
@@ -53,10 +60,10 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
   const locAt = (index: number): { line: number; col: number } => templateLoc(sf, tpl, index)
   const file = tpl.externalFile ? relative(projectDir, tpl.externalFile) : undefined
   for (const m of tpl.text.matchAll(STATIC_LINK_RE)) {
-    out.push({ ti: { kind: 'literal', value: m[1] ?? '' }, event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file })
+    out.push({ ti: { kind: 'literal', value: m[1] ?? '' }, event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true })
   }
   for (const m of tpl.text.matchAll(BOUND_LINK_RE)) {
-    out.push({ ti: classifyBoundLink(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file })
+    out.push({ ti: classifyBoundLink(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true })
   }
   return out
 }
@@ -173,7 +180,8 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
     } else {
       const arg0 = call.getArguments()[0]
       const first = arg0 && Node.isArrayLiteralExpression(arg0) ? arg0.getElements()[0] : undefined
-      out.push({ ti: classifyTarget(first), event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc })
+      const relative = /\brelativeTo\s*:/.test(call.getArguments()[1]?.getText() ?? '')
+      out.push({ ti: classifyTarget(first), event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative })
     }
   }
   return out

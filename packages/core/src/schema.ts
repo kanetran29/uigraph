@@ -6,7 +6,7 @@ import type { GraphEdge, GraphNode, Overlay, UiGraph } from './ir'
 
 const MODALITIES = new Set(['must', 'may', 'unknown'])
 const SOURCES = new Set(['static', 'manual', 'runtime'])
-const NODE_KINDS = new Set(['screen', 'route', 'modal', 'unknown', 'control'])
+const NODE_KINDS = new Set(['screen', 'route', 'modal', 'unknown', 'control', 'scope'])
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v)

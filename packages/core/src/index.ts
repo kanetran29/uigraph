@@ -47,6 +47,7 @@ export {
   type StalenessIssue,
   type ValidateRefsInput,
 } from './staleness'
+export { scopeMembers, edgesFrom, expandAnchoredEdges } from './scope'
 export { mergeOverlay, emptyOverlay, exportOverlaySpec } from './overlay'
 export { attachScreenshots, type ScreenShot, type ScreenShots } from './screens'
 export { applyControlNames, namelessControls, type ControlNames } from './names'
