@@ -161,7 +161,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   function emitTargets(from: string, targets: RawTarget[], file: string, note: boolean, capMay = false): void {
     for (const t of targets) {
       if (t.ti.kind === 'literal') {
-        const value = t.relative ? resolveRelativeTarget(t.ti.value, pathByNodeId.get(from)) : t.ti.value
+        // Angular resolves a commands array against the current route only when the link is
+        // a template one or the call passes `relativeTo`; without that the base is the root.
+        // Either way a leading `.` or `..` is resolved — leaving it raw matches nothing.
+        const base = t.relative ? pathByNodeId.get(from) : '/'
+        const value = resolveRelativeTarget(t.ti.value, base)
         const target = matchLiteral(value, routeLikes)
         if (!target) {
           if (note) soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${value}" matches no declared route` })
@@ -173,7 +177,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const uncertain = gate.guarded || capMay || (t.ti.kind === 'literal' && t.ti.holes === true)
         pushEdge(from, target.nodeId, t, uncertain ? 'may' : 'must', gate.guarded ? gate.confidence : uncertain ? 0.5 : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
-        const prefix = t.relative ? resolveRelativeTarget(t.ti.staticPrefix, pathByNodeId.get(from)) : t.ti.staticPrefix
+        const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
         const cands = matchPrefix(prefix, routeLikes)
         if (note) soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${prefix}" over-approximated to ${cands.length} route(s)` })
         for (const cand of cands) {
