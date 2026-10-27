@@ -16,16 +16,18 @@ mifos & 1344 & 178 & 69 & 177 & 5.4\% \\
 \end{tabular}}
 
 \newcommand{\TabCoverage}{%
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{@{}lrrrrrr@{}}
 \toprule
-Application & Declared screens & Matched by a node & Coverage & Parser blind spots \\
+Application & Declared screens & Nodes & Matched & Coverage & Unmatched nodes & Parser blind spots \\
 \midrule
-realworld & 10 & 10 & 100.0\% & 0 \\
-alfresco & 25 & 24 & 96.0\% & 3 \\
-ghostfolio & 84 & 0 & 0.0\% & 0 \\
-k8s dashboard & 2 & 2 & 100.0\% & 37 \\
-bitwarden & 97 & 47 & 48.4\% & 5 \\
-mifos & 610 & 58 & 9.5\% & 1 \\
+realworld & 10 & 11 & 10 & 100.0\% & 1 & 0 \\
+alfresco & 25 & 30 & 24 & 96.0\% & 6 & 3 \\
+ghostfolio & 84 & 1 & 0 & 0.0\% & 1 & 0 \\
+k8s dashboard & 2 & 40 & 2 & 100.0\% & 38 & 37 \\
+bitwarden & 97 & 78 & 47 & 48.4\% & 31 & 5 \\
+mifos & 610 & 178 & 58 & 9.5\% & 120 & 1 \\
+\midrule
+All & & 338 & & & 197 & \\
 \bottomrule
 \end{tabular}}
 
