@@ -111,9 +111,22 @@ function constText(n) {
   if (k === SyntaxKind.PropertyAccessExpression) {
     const obj = objLit(n.getExpression())
     const p = obj?.getProperty(n.getName())
-    return p && p.getKind() === SyntaxKind.PropertyAssignment ? constText(p.getInitializer()) : null
+    if (p && p.getKind() === SyntaxKind.PropertyAssignment) return constText(p.getInitializer())
+    // A route table is as often an enum as an object: `path: AuthRoute.Login`.
+    const m = enumDecl(n.getExpression())?.getMember(n.getName())
+    const v = m?.getValue()
+    return typeof v === 'string' ? v : constText(m?.getInitializer())
   }
   return null
+}
+
+/** The enum an identifier names, following imports, or undefined. */
+function enumDecl(n) {
+  if (n.getKind() !== SyntaxKind.Identifier) return undefined
+  const sym = n.getSymbol()
+  const decls = sym?.getAliasedSymbol()?.getDeclarations() ?? sym?.getDeclarations() ?? []
+  for (const d of decls) if (d.getKind() === SyntaxKind.EnumDeclaration) return d
+  return undefined
 }
 
 /** The object literal an identifier or property-access chain names, or undefined. */

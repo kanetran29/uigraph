@@ -5,6 +5,7 @@
 // (and loop/branch/early-return conditions that demote a nav to `may`).
 
 import { Node, SyntaxKind } from 'ts-morph'
+import { constantString, constantStringArray, classPropertyInitializer } from './resolve'
 import type { SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
 import { inlineTemplate, type ComponentTemplate } from './templates'
@@ -63,7 +64,7 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
     out.push({ ti: { kind: 'literal', value: m[1] ?? '' }, event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true })
   }
   for (const m of tpl.text.matchAll(BOUND_LINK_RE)) {
-    out.push({ ti: classifyBoundLink(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true })
+    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true })
   }
   return out
 }
@@ -100,13 +101,23 @@ export function linkAttrTarget(attrs: Map<string, string>): TargetInfo | null {
  * "/x/"), and array forms ("['/tag', tag]" -> prefix "/tag/"; "['/about']" ->
  * literal "/about"). Anything else over-approximates to dynamic.
  */
-function classifyBoundLink(expr: string): TargetInfo {
+function classifyBoundLink(expr: string, sf?: SourceFile): TargetInfo {
   const trimmed = expr.trim()
   const literalOnly = /^'([^']*)'$/.exec(trimmed) ?? /^"([^"]*)"$/.exec(trimmed)
   if (literalOnly) return { kind: 'literal', value: literalOnly[1] ?? '' }
   const concatPrefix = /^'([^']*)'\s*\+/.exec(trimmed) ?? /^"([^"]*)"\s*\+/.exec(trimmed)
   if (concatPrefix) return { kind: 'template', staticPrefix: concatPrefix[1] ?? '' }
   if (trimmed.startsWith('[')) return classifyLinkArray(trimmed)
+  // `[routerLink]="routerLinkBlog"` binds to a field of the component, which commonly holds
+  // the link from a shared route table (`publicRoutes.blog.routerLink`). Follow the field to
+  // that constant rather than calling the whole site dynamic.
+  if (sf && /^[A-Za-z_$][\w$]*$/.test(trimmed)) {
+    const init = classPropertyInitializer(sf, trimmed)
+    const arr = constantStringArray(init)
+    if (arr && arr.length > 0) return { kind: 'literal', value: '/' + arr.join('/').replace(/^\/+/, '').replace(/\/+/g, '/') }
+    const str = constantString(init)
+    if (str !== null) return { kind: 'literal', value: str }
+  }
   return { kind: 'dynamic' }
 }
 

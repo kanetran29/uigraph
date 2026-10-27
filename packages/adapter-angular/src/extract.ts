@@ -258,14 +258,30 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       shellEdges += edges.length - before
     }
     if (scopes.indirectShell.size) soundiness.push({ kind: 'indirect-shell', detail: `${scopes.indirectShell.size} component(s) treated as shell without a visible mounting route; their edges are capped at may` })
-    if (shellEdges > 0) nodes.push({ id: SHELL_NODE_ID, route: null, componentPath: null, label: 'application shell (every screen)', kind: 'scope', scope: { kind: 'top' } })
-    // Navigation in classes that are not components (services, guards, effects) is
-    // not attributed in this version: its scope is the join over its callers.
+    // Navigation in a class that is not a component (a service, facade or store) fires on
+    // behalf of whatever injects it, so its scope is the join over those callers. The join is
+    // taken per class rather than per method, so it can be wider than the real scope and the
+    // edges are capped at may. A service nothing injects has no scope at all and is reported.
     for (const sf of project.getSourceFiles()) {
-      if (scopes.components.has(sf.getFilePath()) || /\.(spec|test|stories)\.ts$/.test(sf.getFilePath())) continue
-      const n = routerCallTargets(sf).length
-      if (n > 0) soundiness.push({ kind: 'unattributed-non-component', file: relative(projectDir, sf.getFilePath()), detail: `${n} navigation call(s) outside any component; scope would be the join of the callers' scopes` })
+      const f = sf.getFilePath()
+      if (scopes.components.has(f) || /\.(spec|test|stories)\.ts$/.test(f)) continue
+      const ts = routerCallTargets(sf)
+      if (ts.length === 0) continue
+      const file = relative(projectDir, f)
+      if (scopes.serviceShell.has(f)) {
+        const before = edges.length
+        emitTargets(SHELL_NODE_ID, ts, file, true, true)
+        shellEdges += edges.length - before
+        continue
+      }
+      const screens = scopes.serviceScreens.get(f)
+      if (!screens || screens.size === 0) {
+        soundiness.push({ kind: 'unattributed-non-component', file, detail: `${ts.length} navigation call(s) in a class nothing in the application injects; its scope is empty` })
+        continue
+      }
+      for (const s of [...screens].sort()) emitTargets(s, ts, file, false, true)
     }
+    if (shellEdges > 0) nodes.push({ id: SHELL_NODE_ID, route: null, componentPath: null, label: 'application shell (every screen)', kind: 'scope', scope: { kind: 'top' } })
   }
 
   if (opts.controls) {
