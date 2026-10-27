@@ -300,6 +300,25 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       for (const s of [...screens].sort()) emitTargets(s, ts, file, false, true)
     }
     if (shellEdges > 0) nodes.push({ id: SHELL_NODE_ID, route: null, componentPath: null, label: 'application shell (every screen)', kind: 'scope', scope: { kind: 'top' } })
+
+    // An edge needs both ends. The `u_<screen>` sink supplies a destination the run time owns;
+    // this supplies a SOURCE the analysis could not place. A component that no route renders
+    // and that nothing reaches from a routed component has no screen set, so until now its
+    // navigation left no trace at all — even when its destination was perfectly readable.
+    // Anchoring it at an unplaced origin keeps the destination, says plainly that the source
+    // is unknown, and holds the edges at may.
+    const placed = new Set<string>([...scopes.screensOf.keys(), ...scopes.shell, ...scopes.indirectShell, ...routes.flatMap((r) => (r.componentFile ? [r.componentFile.getFilePath()] : []))])
+    for (const [f, c] of scopes.components) {
+      if (placed.has(f)) continue
+      const ts = targetsOf(c.sf)
+      if (ts.length === 0) continue
+      const file = relative(projectDir, f)
+      const id = `o_${c.className ?? file.replace(/[^\w]/g, '_')}`
+      if (!nodes.some((n) => n.id === id)) {
+        nodes.push({ id, route: null, componentPath: file, label: `unplaced origin: ${c.className ?? file}`, kind: 'unknown' })
+      }
+      emitTargets(id, ts, file, true, true)
+    }
   }
 
   if (opts.controls) {

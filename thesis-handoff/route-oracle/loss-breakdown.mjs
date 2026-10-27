@@ -131,7 +131,11 @@ for (const f of files.filter((f) => f.endsWith('.ts'))) {
 const db = new DatabaseSync(dbPath)
 const graph = JSON.parse(db.prepare("select json from docs where key='graph'").get()?.json || '{}')
 const nodeComponentFiles = new Set((graph.nodes || []).filter((n) => n.componentPath).map((n) => path.resolve(appDir, n.componentPath)))
-const witnessAt = new Map() // "file:line" -> strongest modality
+const witnessAt = new Map() // "file:line" -> strongest modality, placed sources only
+// An edge whose SOURCE is an `o_`/`u_` node (kind 'unknown') carries a destination the
+// extractor did read, from a screen it could not place. That is accounted for, not recovered.
+const unknownKindNodes = new Set((graph.nodes || []).filter((n) => n.kind === 'unknown').map((n) => n.id))
+const unplacedAt = new Set()
 const inlineWitness = new Map() // "file:line" -> [{ modality, to }]
 const nodeRoute = new Map((graph.nodes || []).map((n) => [n.id, n.route]))
 const rank = { must: 3, may: 2, unknown: 1 }
@@ -144,7 +148,8 @@ for (const { e, w } of witnessList) {
   const abs = path.isAbsolute(w.file) ? w.file : path.resolve(appDir, w.file)
   for (const d of [-1, 0, 1]) {
     const k = `${abs}:${w.loc.line + d}`
-    if ((rank[e.modality] || 0) > (rank[witnessAt.get(k)] || 0)) witnessAt.set(k, e.modality)
+    if (unknownKindNodes.has(e.from)) unplacedAt.add(k)
+    else if ((rank[e.modality] || 0) > (rank[witnessAt.get(k)] || 0)) witnessAt.set(k, e.modality)
   }
   // Inline templates: the extractor cites the line of `template:` for every link inside
   // it. Keep the edge targets per template line so a construct can be matched by target.
@@ -245,6 +250,7 @@ for (const c of constructs) {
   // neither a recovered transition nor an unexplained loss, so it is counted on its own and
   // taken out of the denominator the loss rules have to explain.
   else if (hit === 'unknown') cls = 'ACCOUNTED_DYNAMIC'
+  else if (unplacedAt.has(`${c.file}:${c.line}`)) cls = 'ACCOUNTED_UNPLACED'
   else if (c.kind !== 'routerLink' && /^\s*\[\s*\]/.test(c.target)) cls = 'QUERY_ONLY'
   else if (/outlets\s*:/.test(c.target)) cls = 'NAMED_OUTLET'
   else if (!c.owner || !componentFiles.has(c.owner)) cls = c.isHtml ? 'OTHER' : 'ATTRIBUTION_SERVICE'
@@ -265,9 +271,9 @@ for (const c of constructs) {
   rows.push({ at: `${rel(c.file)}:${c.line}`, kind: c.kind, owner: c.owner ? rel(c.owner) : null, cls, target: c.target })
 }
 
-const order = ['CONVERTED_MUST', 'CONVERTED_MAY', 'QUERY_ONLY', 'ACCOUNTED_DYNAMIC', 'ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED', 'LAZY_BOUNDARY', 'CONSTANT_PATH', 'COMPONENT_UNLINKED', 'NAMED_OUTLET', 'CONSTANT_TARGET', 'NODE_MISS', 'OTHER']
+const order = ['CONVERTED_MUST', 'CONVERTED_MAY', 'QUERY_ONLY', 'ACCOUNTED_DYNAMIC', 'ACCOUNTED_UNPLACED', 'ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED', 'LAZY_BOUNDARY', 'CONSTANT_PATH', 'COMPONENT_UNLINKED', 'NAMED_OUTLET', 'CONSTANT_TARGET', 'NODE_MISS', 'OTHER']
 const recovered = (tally.CONVERTED_MUST || 0) + (tally.CONVERTED_MAY || 0) + (tally.QUERY_ONLY || 0)
-const accounted = tally.ACCOUNTED_DYNAMIC || 0
+const accounted = (tally.ACCOUNTED_DYNAMIC || 0) + (tally.ACCOUNTED_UNPLACED || 0)
 const lost = constructs.length - recovered - accounted
 console.log(`app:          ${appDir}`)
 console.log(`constructs:   ${constructs.length}  (routerLink ${constructs.filter((c) => c.kind === 'routerLink').length}, navigate ${constructs.filter((c) => c.kind !== 'routerLink').length})`)
