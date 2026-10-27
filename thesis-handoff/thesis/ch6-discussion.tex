@@ -174,7 +174,26 @@ grounds. The conversion ratio is therefore recall against an enumerable syntacti
 for an application's navigation, not against its navigation, and the completeness of that
 proxy is not itself measured. The end-to-end oracle is the only method that can see past
 it, because a URL that a passing test visits is a screen that exists whatever the source
-looks like, and it covers one application of the six. The loss breakdown has a second construct threat. The rules assign
+looks like, and it covers one application of the six.
+
+The two units also stand in a many-to-many relation, which the metrics handle unevenly.
+One construct in a component that many screens render yields one anchored edge that
+expands to many, which is why the ratio counts constructs and not edges
+(Section~\ref{sec:corrections}). In the other direction several constructs can yield one
+edge, and the extractor records the extra ones as merged witnesses so that each is
+traceable. The conversion ratio credits a construct cited by any witness of an edge,
+primary or merged, while the witness check re-opens only the primary witness of each
+edge. In the attributed graph of realworld, 28 of the witness citations are merged and 10
+of those sit on must edges, so a construct can count towards the conversion ratio on
+evidence that the precision check never examines. The ratio and the precision figure are
+therefore computed over different witness sets, and the merged citations carry no
+precision evidence at all.
+
+Merging also costs guard information. An edge holds one guard, so when several constructs
+under different conditions produce one edge, the edge can represent the condition of at
+most one of them. The graph is in that respect a weaker object than the source it came
+from, and a consumer that reads a guard off a merged edge is reading one branch of
+several. The loss breakdown has a second construct threat. The rules assign
 each lost construct to the first class that matches, so the precedence order is part of
 the measure. A construct in a shared component that is used only inside screens with no
 node is an attribution loss under the present order and a node loss under the reverse
