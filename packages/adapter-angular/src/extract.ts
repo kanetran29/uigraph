@@ -123,6 +123,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
 
   const edges: GraphEdge[] = []
   const soundiness: SoundinessNote[] = []
+  // One note per application when the declared route set is incomplete. Any claim of the
+  // form "the application declares no route at this path" is void while this note is
+  // present, so a consumer can gate on it without parsing another note's prose.
+  if (unreadablePaths.count > 0) soundiness.push({ kind: 'incomplete-route-set', detail: `${unreadablePaths.count} declared path(s) could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds` })
   const seen = new Set<string>()
   const edgeById = new Map<string, GraphEdge>()
   const seenAsyncGuards = new Set<string>()
@@ -176,16 +180,21 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // The destination is real, but the author almost certainly did not mean to go there,
         // so the edge is held at may and the note says what happened.
         let viaWildcard = false
-        // Only when the route set is believed complete. With even one unreadable path the
-        // target may well BE one of those routes, and forwarding it through the wildcard
-        // would turn the extractor's own gap into a resolved edge.
-        if (!target && redirects.has('*') && unreadablePaths.count === 0) {
+        // The wildcard edge is where Angular actually goes, so it is drawn whatever the state
+        // of the route set; what the route set changes is the CLAIM. A gate on the unreadable
+        // count was wrong twice over: one unreadable path in an unrelated module withheld a
+        // sound edge across the whole application, and it never fired for an application whose
+        // route set is complete, which is where the claim mattered most. The note carries both
+        // facts instead, once per site.
+        if (!target && redirects.has('*')) {
           target = matchLiteral(redirects.get('*')!, routeLikes)
           viaWildcard = target !== null
-          if (viaWildcard && note) soundiness.push({ kind: 'wildcard-redirect', file, loc: t.loc, detail: `literal target "${value}" matches no declared route; the wildcard route redirects it to ${redirects.get('*')}` })
-        }
-        if (!target && note && unreadablePaths.count > 0 && redirects.has('*')) {
-          soundiness.push({ kind: 'incomplete-route-set', file, loc: t.loc, detail: `literal target "${value}" matches no declared route, and ${unreadablePaths.count} declared path(s) could not be read, so it is not claimed that no such route exists` })
+          if (viaWildcard && note) {
+            const caveat = unreadablePaths.count > 0
+              ? `, though ${unreadablePaths.count} declared path(s) could not be read, so it is not claimed that no such route exists`
+              : ''
+            soundiness.push({ kind: 'wildcard-redirect', file, loc: t.loc, detail: `literal target "${value}" matches no declared route and the wildcard route redirects it to ${redirects.get('*')}${caveat}` })
+          }
         }
         if (!target) {
           if (note) soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${value}" matches no declared route` })

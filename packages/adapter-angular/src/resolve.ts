@@ -111,7 +111,12 @@ export function constantString(expr: Node | undefined): string | null {
     const tpl = expr.getTemplate()
     // The raw source, not getLiteralValue(): that has already turned `\\:` into `:` and the
     // metadata block can no longer be told from the message.
-    if (Node.isNoSubstitutionTemplateLiteral(tpl)) return stripI18nMeta(tpl.getText().replace(/^`|`$/g, ''))
+    if (Node.isNoSubstitutionTemplateLiteral(tpl)) {
+      const msg = stripI18nMeta(tpl.getText().replace(/^`|`$/g, ''))
+      // A segment holding a space, a colon or an `@@` is not a path; reading it as one would
+      // mint a screen at an address the application cannot have.
+      return /[\s:]|@@/.test(msg) ? null : msg
+    }
   }
   if (Node.isIdentifier(expr)) return constantString(declaredInitializer(expr))
   if (Node.isPropertyAccessExpression(expr)) {
@@ -135,13 +140,11 @@ export function constantString(expr: Node | undefined): string | null {
 function stripI18nMeta(raw: string): string {
   const unescape = (t: string): string => t.replace(/\\:/g, ':')
   if (!raw.startsWith(':')) return unescape(raw)
-  // The block closes at the first colon that is not escaped — except that an `@@` inside it
-  // introduces the message id, so the colon that closes the block is the first unescaped one
-  // AFTER that id. Without the exception a description containing a colon, escaped or not,
-  // takes the rest of the block into the path.
-  const at = raw.indexOf('@@')
-  const from = at === -1 ? 1 : at + 2
-  for (let i = from; i < raw.length; i++) {
+  // Angular closes the block at the first colon that is not escaped, and nothing else: an
+  // earlier version searched for `@@` anywhere in the string, found one in the MESSAGE, and
+  // carried the whole block into the path. Being faithful here means a malformed block leaves
+  // a message that is no route segment, and the caller refuses it rather than minting it.
+  for (let i = 1; i < raw.length; i++) {
     if (raw[i] !== ':' || raw[i - 1] === '\\') continue
     return unescape(raw.slice(i + 1))
   }
@@ -270,7 +273,8 @@ export function classPropertyInitializer(sf: SourceFile, name: string): Node | u
     // or array destructuring, or by `Object.assign(this, …)`. Enumerating the spellings is how
     // the first version of this guard was got wrong, so the set of written names is collected
     // from the whole class instead and the test is a membership check.
-    if (writtenNames(cls).has(name)) continue
+    const written = writtenNames(cls)
+    if (written === 'all' || written.has(name)) continue
     const stable = prop.isReadonly() || prop.isStatic() || Node.isIdentifier(init) || Node.isPropertyAccessExpression(init)
     if (stable) return init
   }
@@ -344,11 +348,19 @@ export function identifierProp(obj: ObjectLiteralExpression, name: string): stri
  * target that contains `this.x`, and `Object.assign(this, { x })`. A name in this set is state
  * and its initializer says nothing about what the field holds when a template reads it.
  */
-function writtenNames(cls: Node): Set<string> {
+function writtenNames(cls: Node): Set<string> | 'all' {
   const out = new Set<string>()
   const fromTarget = (node: Node): void => {
     if (Node.isPropertyAccessExpression(node)) {
       if (node.getExpression().getKind() === SyntaxKind.ThisKeyword) out.add(node.getName())
+      return
+    }
+    // `this['dest'] = …` writes the field as surely as `this.dest = …` does.
+    if (Node.isElementAccessExpression(node)) {
+      if (node.getExpression().getKind() !== SyntaxKind.ThisKeyword) return
+      const key = constantString(node.getArgumentExpression())
+      if (key !== null) out.add(key)
+      else out.add(UNREADABLE)
       return
     }
     if (Node.isObjectLiteralExpression(node)) {
@@ -369,16 +381,26 @@ function writtenNames(cls: Node): Set<string> {
     fromTarget(b.getLeft())
   }
   for (const call of cls.getDescendantsOfKind(SyntaxKind.CallExpression)) {
-    if (call.getExpression().getText() !== 'Object.assign') continue
+    // Any call that takes `this` as its first argument can write any field of it. Matching
+    // the literal text `Object.assign` missed an alias, and giving up quietly when the source
+    // object could not be read let the initializer be trusted again -- both of which the
+    // guard exists to prevent. An unreadable write of this shape means no field of the class
+    // can be trusted, which is the safe answer rather than the convenient one.
     const [first, ...rest] = call.getArguments()
     if (!first || first.getKind() !== SyntaxKind.ThisKeyword) continue
+    if (rest.length === 0) continue
     for (const arg of rest) {
       const obj = Node.isObjectLiteralExpression(arg) ? arg : objectLiteralOf(arg)
-      if (!obj || !Node.isObjectLiteralExpression(obj)) continue
+      if (!obj || !Node.isObjectLiteralExpression(obj)) return 'all'
       for (const p of obj.getProperties()) {
         if (Node.isPropertyAssignment(p) || Node.isShorthandPropertyAssignment(p)) out.add(p.getName())
+        else return 'all'
       }
     }
   }
+  if (out.has(UNREADABLE)) return 'all'
   return out
 }
+
+/** Stands for a write whose target name could not be read; it taints the whole class. */
+const UNREADABLE = '\u0000unreadable'
