@@ -5,7 +5,7 @@
 // (and loop/branch/early-return conditions that demote a nav to `may`).
 
 import { Node, SyntaxKind } from 'ts-morph'
-import { constantString, constantStringArray, constantForName } from './resolve'
+import { constantString, constantStringArray, constantForName, builderReturn, classPropertyInitializer } from './resolve'
 import type { SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
 import { inlineTemplate, type ComponentTemplate } from './templates'
@@ -30,6 +30,32 @@ export function classifyTarget(expr: Node | undefined, depth = 0): TargetInfo {
     const ret = name ? methodReturnExpression(expr.getSourceFile(), name) : undefined
     if (ret) {
       const ti = classifyTarget(ret, depth + 1)
+      if (ti.kind !== 'dynamic') return ti
+    }
+    // A lookup table built in a computed — `accessDialogRouterLinks().get(id)` — puts every
+    // value in through one `.set(key, value)`, so the destination is in that value, not in
+    // the lookup. Follow the container to where it is filled.
+    if (name === 'get' && Node.isPropertyAccessExpression(callee)) {
+      const owner = callee.getExpression()
+      const ownerName = Node.isCallExpression(owner)
+        ? owner.getExpression().getText().replace(/^this\./, '')
+        : Node.isPropertyAccessExpression(owner)
+          ? owner.getName()
+          : Node.isIdentifier(owner)
+            ? owner.getText()
+            : null
+      const container = ownerName ? classPropertyInitializer(expr.getSourceFile(), ownerName) : undefined
+      const value = container ? mapSetValue(container) : undefined
+      if (value) {
+        const ti = classifyTarget(value, depth + 1)
+        if (ti.kind !== 'dynamic') return ti
+      }
+    }
+    // A builder on a shared route table writes the destination out as a function of its
+    // parameter; read its return array as the pattern it is.
+    const built = builderReturn(callee)
+    if (built && Node.isArrayLiteralExpression(built)) {
+      const ti = classifyCommandParts(built.getElements().map((el) => el.getText()), built.getSourceFile())
       if (ti.kind !== 'dynamic') return ti
     }
     // A path builder takes the leading segment as its first literal argument.
@@ -396,4 +422,12 @@ function methodReturnExpression(sf: SourceFile, name: string): Node | undefined 
     return returns[0]?.getExpression()
   }
   return undefined
+}
+
+/** The value expression of the single `.set(key, value)` inside a container's initializer. */
+function mapSetValue(container: Node): Node | undefined {
+  const sets = container.getDescendantsOfKind(SyntaxKind.CallExpression).filter((c) => /\.set$/.test(c.getExpression().getText()))
+  if (sets.length !== 1) return undefined
+  const args = sets[0]?.getArguments() ?? []
+  return args[args.length - 1]
 }
