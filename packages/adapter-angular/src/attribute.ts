@@ -32,6 +32,8 @@ export interface ComponentInfo {
   file: string
   className: string | null
   selectors: string[]
+  /** Attribute selectors, for a directive: a template carrying the attribute renders it. */
+  attributes: string[]
   template: string | null
 }
 
@@ -77,7 +79,10 @@ export function subtreeAnchor(screens: Set<string>, subtreeOf: Map<string, Set<s
 function componentDecoratorArg(sf: SourceFile): { className: string | null; selectorText: string | null } | null {
   for (const cls of sf.getClasses()) {
     for (const dec of cls.getDecorators()) {
-      if (dec.getName() !== 'Component') continue
+      // A directive is rendered by the templates that carry its attribute, exactly as a
+      // component is rendered by the templates that carry its element, so it has a scope the
+      // same way. Reading only @Component left every navigating directive unplaceable.
+      if (dec.getName() !== 'Component' && dec.getName() !== 'Directive') continue
       const arg = dec.getArguments()[0]
       const text = arg?.getText() ?? ''
       const sel = /selector\s*:\s*['"`]([^'"`]+)['"`]/.exec(text)?.[1] ?? null
@@ -87,13 +92,25 @@ function componentDecoratorArg(sf: SourceFile): { className: string | null; sele
   return null
 }
 
-/** Element selectors only: `app-header`, or each element part of `a-x, a-y`. Attribute selectors are not matched. */
+/** Element selectors: `app-header`, or each element part of `a-x, a-y`. */
 function elementSelectors(selectorText: string | null): string[] {
   if (!selectorText) return []
   return selectorText
     .split(',')
     .map((s) => s.trim())
     .filter((s) => /^[a-zA-Z][\w-]*$/.test(s))
+}
+
+/** Attribute selectors: `[acaAction]`, or each attribute part of `[a], [b]`, without the brackets. */
+function attributeSelectors(selectorText: string | null): string[] {
+  if (!selectorText) return []
+  return selectorText
+    .split(',')
+    .map((s) => s.trim())
+    .flatMap((s) => {
+      const m = /^\[([a-zA-Z][\w-]*)\]$/.exec(s)
+      return m?.[1] ? [m[1]] : []
+    })
 }
 
 /** Every @Component in the project, with its element selectors and template text. */
@@ -103,7 +120,7 @@ export function collectComponents(sfs: SourceFile[]): Map<string, ComponentInfo>
     const dec = componentDecoratorArg(sf)
     if (!dec) continue
     const tpl = inlineTemplate(sf)
-    out.set(sf.getFilePath(), { sf, file: sf.getFilePath(), className: dec.className, selectors: elementSelectors(dec.selectorText), template: tpl?.text ?? null })
+    out.set(sf.getFilePath(), { sf, file: sf.getFilePath(), className: dec.className, selectors: elementSelectors(dec.selectorText), attributes: attributeSelectors(dec.selectorText), template: tpl?.text ?? null })
   }
   return out
 }
@@ -126,6 +143,12 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
     list.push(c)
     bySelector.set(s, list)
   }
+  const byAttribute = new Map<string, ComponentInfo[]>()
+  for (const c of components.values()) for (const a of c.attributes) {
+    const list = byAttribute.get(a) ?? []
+    list.push(c)
+    byAttribute.set(a, list)
+  }
   const graph = new Map<string, Set<string>>()
   for (const a of components.values()) {
     const kids = new Set<string>()
@@ -144,6 +167,23 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
         else notes.push({ kind: 'ambiguous-selector', file: a.file, detail: `<${tag}> matches ${cands.length} components and none is imported directly; joined over all` })
       }
       for (const c of chosen) if (c.file !== a.file) kids.add(c.file)
+    }
+    // A directive is applied as an attribute, so the template that carries the attribute is
+    // what renders it. Bound and plain forms both count: `acaAction`, `[acaAction]`.
+    if (byAttribute.size > 0) {
+      const attrs = new Set([...a.template.matchAll(/[\s[(]([a-zA-Z][\w-]*)[\])]?\s*(?==|\/?>|\s)/g)].map((m) => m[1] as string))
+      for (const attr of attrs) {
+        const cands = byAttribute.get(attr)
+        if (!cands) continue
+        let chosen = cands
+        if (cands.length > 1) {
+          imports ??= importedFiles(a.sf)
+          const narrowed = cands.filter((c) => imports!.has(c.file))
+          if (narrowed.length > 0) chosen = narrowed
+          else notes.push({ kind: 'ambiguous-selector', file: a.file, detail: `attribute ${attr} matches ${cands.length} directives and none is imported directly; joined over all` })
+        }
+        for (const c of chosen) if (c.file !== a.file) kids.add(c.file)
+      }
     }
   }
   return graph
