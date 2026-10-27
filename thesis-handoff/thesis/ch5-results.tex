@@ -177,6 +177,17 @@ the baseline. No construct that was converted in the baseline is lost after
 attribution: following every construct by its identifier across the two runs finds no
 construct that leaves the converted classes.
 
+The anchored representation was checked on the same graphs.
+Claim~\ref{claim:expansion} requires the expansion of the anchored edge set to equal the
+materialised edge set. On realworld the attributed graph stores 50 edges against two
+scope nodes; expanding them screen by screen through the query of
+Section~\ref{sec:attribution} yields 97 edges, materialising the whole graph yields 97,
+and the two sets are identical. On alfresco the attributed graph has no scope node, so
+the check holds trivially and says nothing. The unit tests of the attribution pass cover
+the same property on fixtures. The claim is therefore supported on one application of the
+corpus and on fixtures, not across the corpus, and the 50 against 97 is also the only
+measurement of what the anchored representation saves.
+
 Across the corpus, attribution converts 81 of the 468 constructs that the loss rules
 assign to it, 38 of them into must edges and 43 into may edges. It also converts 43
 constructs that the rules assign to node defects, 41 of those into must edges.

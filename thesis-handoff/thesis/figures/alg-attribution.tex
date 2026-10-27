@@ -25,7 +25,7 @@ prototype evaluated in Chapter~\ref{ch:results}.}
   \EndFor
 \EndWhile
 \Procedure{Propagate}{$x, y$}
-  \If{$y$ is not a routed component \textbf{and} $\mathit{scope}(x) \not\subseteq \mathit{scope}(y)$}
+  \If{$\mathit{scope}(x) \not\subseteq \mathit{scope}(y)$}
     \State $\mathit{scope}(y) \gets \mathit{scope}(y) \cup \mathit{scope}(x)$; add $y$ to $W$
   \EndIf
 \EndProcedure
