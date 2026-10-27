@@ -36,10 +36,54 @@ const jsonOut = jsonIdx > -1 ? process.argv[jsonIdx + 1] : null
 
 // ---------------------------------------------------------------- load sources
 
+/**
+ * The workspace tsconfig's `paths` aliases and the directories they point at. A monorepo app
+ * can declare its route paths in a shared table it imports through an alias, and without the
+ * alias the checker cannot follow that import, so every such path stays an unresolved
+ * expression. Harness 1.4.0; before it this oracle recorded `internalRoutes.account.path` as
+ * the route's path, which matched no graph node and scored those apps at zero.
+ */
+function workspaceTsPaths(dir0) {
+  let dir = dir0
+  for (let up = 0; up < 5; up++) {
+    for (const name of ['tsconfig.base.json', 'tsconfig.json']) {
+      const file = path.join(dir, name)
+      if (!fs.existsSync(file)) continue
+      let opts
+      try {
+        const txt = fs.readFileSync(file, 'utf8')
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/(^|\s)\/\/.*$/gm, '$1')
+          .replace(/,(\s*[}\]])/g, '$1')
+        opts = JSON.parse(txt).compilerOptions
+      } catch { continue }
+      const paths = opts?.paths
+      if (!opts?.baseUrl && (!paths || Object.keys(paths).length === 0)) continue
+      // TypeScript resolves `paths` targets against baseUrl, and baseUrl against the config's
+      // own directory; a non-relative first-party import is resolved against baseUrl alone.
+      const baseUrl = path.join(dir, opts?.baseUrl ?? '.')
+      const dirs = new Set()
+      for (const targets of Object.values(paths ?? {})) {
+        for (const t of targets) {
+          const root = path.join(baseUrl, String(t).split('*')[0] || '')
+          if (root.includes('node_modules') || !fs.existsSync(root)) continue
+          if (!dir0.startsWith(root)) dirs.add(root)
+        }
+      }
+      return { baseUrl, paths: paths ?? {}, dirs: [...dirs] }
+    }
+    const parent = path.dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+  return null
+}
+
+const ws = workspaceTsPaths(appDir)
 const project = new Project({
   skipAddingFilesFromTsConfig: true,
   skipFileDependencyResolution: true,
-  compilerOptions: { allowJs: false },
+  compilerOptions: { allowJs: false, ...(ws ? { baseUrl: ws.baseUrl, paths: ws.paths } : {}) },
 })
 project.addSourceFilesAtPaths([
   `${appDir}/**/*.ts`,
@@ -48,11 +92,52 @@ project.addSourceFilesAtPaths([
   `!${appDir}/**/*.test.ts`,
   `!${appDir}/**/dist/**`,
 ])
+for (const d of ws?.dirs ?? []) {
+  project.addSourceFilesAtPaths([`${d}/**/*.ts`, `!${d}/**/node_modules/**`, `!${d}/**/*.spec.ts`, `!${d}/**/dist/**`])
+}
 const files = project.getSourceFiles()
 
 // ---------------------------------------------------------------- helpers
 
-const text = (n) => (n ? n.getText().replace(/^['"`]|['"`]$/g, '') : null)
+const text = (n) => (n ? constText(n) ?? n.getText().replace(/^['"`]|['"`]$/g, '') : null)
+
+/** Follow an identifier or property-access chain to the string constant it names, else null. */
+function constText(n) {
+  if (!n) return null
+  const k = n.getKind()
+  if (k === SyntaxKind.StringLiteral || k === SyntaxKind.NoSubstitutionTemplateLiteral) return n.getLiteralValue()
+  if (k === SyntaxKind.AsExpression || k === SyntaxKind.ParenthesizedExpression || k === SyntaxKind.SatisfiesExpression) return constText(n.getExpression())
+  if (k === SyntaxKind.Identifier) return constText(declInit(n))
+  if (k === SyntaxKind.PropertyAccessExpression) {
+    const obj = objLit(n.getExpression())
+    const p = obj?.getProperty(n.getName())
+    return p && p.getKind() === SyntaxKind.PropertyAssignment ? constText(p.getInitializer()) : null
+  }
+  return null
+}
+
+/** The object literal an identifier or property-access chain names, or undefined. */
+function objLit(n) {
+  const k = n.getKind()
+  if (k === SyntaxKind.AsExpression || k === SyntaxKind.ParenthesizedExpression || k === SyntaxKind.SatisfiesExpression) return objLit(n.getExpression())
+  if (k === SyntaxKind.ObjectLiteralExpression) return n
+  if (k === SyntaxKind.Identifier) { const i = declInit(n); return i ? objLit(i) : undefined }
+  if (k === SyntaxKind.PropertyAccessExpression) {
+    const obj = objLit(n.getExpression())
+    const p = obj?.getProperty(n.getName())
+    const i = p && p.getKind() === SyntaxKind.PropertyAssignment ? p.getInitializer() : undefined
+    return i ? objLit(i) : undefined
+  }
+  return undefined
+}
+
+/** The initializer of the variable an identifier resolves to, following imports. */
+function declInit(id) {
+  const sym = id.getSymbol()
+  const decls = sym?.getAliasedSymbol()?.getDeclarations() ?? sym?.getDeclarations() ?? []
+  for (const d of decls) if (d.getKind() === SyntaxKind.VariableDeclaration) return d.getInitializer()
+  return undefined
+}
 
 /** Join a parent route prefix with a child path segment, Angular-style. */
 function joinPath(prefix, seg) {
@@ -106,8 +191,15 @@ function routeArraysIn(sf) {
 
 /** Resolve a loadChildren module specifier to a source file we already loaded. */
 function resolveModule(fromFile, spec) {
-  if (!spec || spec.startsWith('@') || !spec.startsWith('.')) return null
-  const base = path.resolve(path.dirname(fromFile), spec)
+  if (!spec || spec.startsWith('@')) return null
+  // A workspace that sets tsconfig `baseUrl` imports its own modules without a leading dot
+  // (`resource/cluster/module`); resolve those against baseUrl rather than discarding them.
+  const base = spec.startsWith('.')
+    ? path.resolve(path.dirname(fromFile), spec)
+    : ws?.baseUrl
+      ? path.resolve(ws.baseUrl, spec)
+      : null
+  if (!base) return null
   for (const cand of [`${base}.ts`, path.join(base, 'index.ts'), `${base}.routes.ts`]) {
     const sf = project.getSourceFile(cand)
     if (sf) return sf
@@ -137,15 +229,19 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
       for (const a of el.getArguments()) if (a.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(a, prefix, sf, depth + 1, constant, lazy)
       continue
     }
-    if (el.getKind() !== SyntaxKind.ObjectLiteralExpression) continue
-    const prop = (n) => el.getProperty(n)
+    // An array may name its routes instead of spelling them out (`[ERROR_ROUTE]`).
+    const obj = el.getKind() === SyntaxKind.ObjectLiteralExpression ? el : objLit(el)
+    if (!obj) continue
+    const prop = (n) => obj.getProperty(n)
     const pathProp = prop('path')
     const seg = pathProp ? text(pathProp.getInitializer()) : null
     const full = joinPath(prefix, seg) || '/'
     // A path that is not a string literal (e.g. internalRoutes.about.path) makes this route
     // and every route below it depend on constant resolution.
     const pathInit = pathProp?.getInitializer?.()
-    const isConstant = constant || (!!pathInit && ![SyntaxKind.StringLiteral, SyntaxKind.NoSubstitutionTemplateLiteral].includes(pathInit.getKind()))
+    // Constant only when the reference could NOT be followed to a literal: a resolved
+    // `internalRoutes.account.path` is as good an address as a written 'account'.
+    const isConstant = constant || (!!pathInit && constText(pathInit) === null)
     const compProp = prop('component') || prop('loadComponent')
     const compText = compProp?.getInitializer?.()?.getText() || null
     // loadComponent: keep the import specifier (a file); component: keep the class name.
@@ -173,7 +269,7 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
       kind,
       guards,
       file: path.relative(appDir, sf.getFilePath()),
-      line: el.getStartLineNumber(),
+      line: obj.getStartLineNumber(),
       component,
       constantPath: isConstant,
       lazy,
@@ -189,7 +285,7 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
       const m = t.match(/import\(\s*['"`]([^'"`]+)['"`]\s*\)/)
       const target = m ? resolveModule(sf.getFilePath(), m[1]) : null
       if (!target) {
-        blindSpots.push({ reason: 'loadChildren target not resolvable', spec: m ? m[1] : t.slice(0, 60), at: `${path.relative(appDir, sf.getFilePath())}:${el.getStartLineNumber()}`, prefix: full })
+        blindSpots.push({ reason: 'loadChildren target not resolvable', spec: m ? m[1] : t.slice(0, 60), at: `${path.relative(appDir, sf.getFilePath())}:${obj.getStartLineNumber()}`, prefix: full })
         routes[routes.length - 1].kind = 'LAZY_UNRESOLVED'
       } else {
         let arrays = routeArraysIn(target)

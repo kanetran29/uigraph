@@ -130,6 +130,12 @@ export interface GraphEdge {
   source: Source
   confidence: number
   witness?: Witness
+  /**
+   * Further constructs that produce this same edge (same endpoints, event and guard).
+   * One edge can be fired from several places in the source — five links to `/` in one
+   * header — and change-impact analysis needs every one of them, not just the first.
+   */
+  mergedWitnesses?: Witness[]
   irreversible?: boolean
   witnessStale?: boolean
   refuted?: true

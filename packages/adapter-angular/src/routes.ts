@@ -8,7 +8,7 @@ import { Node, Project, SyntaxKind } from 'ts-morph'
 import type { ArrayLiteralExpression, ObjectLiteralExpression, SourceFile } from 'ts-morph'
 import { routeToNodeId } from './ids'
 import { analyzeCanActivate, type GuardInfo } from './guards'
-import { resolveImportedFile, lazyImportSpecifier, resolveRelative, componentClassName, stringProp, identifierProp } from './resolve'
+import { resolveImportedFile, lazyImportSpecifier, resolveRelative, componentClassName, stringProp, identifierProp, objectLiteralOf } from './resolve'
 
 export interface RouteInfo {
   fullPath: string
@@ -68,6 +68,15 @@ function findRouteArrays(sf: SourceFile): ArrayLiteralExpression[] {
     const looksLikeRoutes = isRoutesTyped || init.getElements().some((e) => Node.isObjectLiteralExpression(e) && e.getProperty('path') !== undefined)
     if (looksLikeRoutes) out.push(init)
   }
+  // `RouterModule.forChild([...])` / `forRoot([...])` / `provideRouter([...])` take the array
+  // inline, with no variable to find it by. A module that registers its routes that way is
+  // otherwise invisible, and with it every route the array declares.
+  for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    if (!/(RouterModule\.(forRoot|forChild)|provideRouter)$/.test(call.getExpression().getText())) continue
+    for (const arg of call.getArguments()) {
+      if (Node.isArrayLiteralExpression(arg) && !out.includes(arg)) out.push(arg)
+    }
+  }
   return out
 }
 
@@ -118,33 +127,35 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
       }
       continue
     }
-    if (!Node.isObjectLiteralExpression(el)) continue
-    const ownPath = stringProp(el, 'path')
+    // An array may name its routes instead of spelling them out (`[ERROR_ROUTE]`).
+    const obj = Node.isObjectLiteralExpression(el) ? el : objectLiteralOf(el)
+    if (!obj) continue
+    const ownPath = stringProp(obj, 'path')
     if (ownPath === null) continue
     const fullPath = joinRoutePath(parentPath, ownPath)
-    const guards = [...inheritedGuards, ...canActivateGuards(sf, el)]
-    const componentName = identifierProp(el, 'component')
+    const guards = [...inheritedGuards, ...canActivateGuards(sf, obj)]
+    const componentName = identifierProp(obj, 'component')
     let componentFile = componentName ? resolveImportedFile(sf, componentName) : undefined
     let resolvedName = componentName
     if (!componentFile) {
-      const spec = lazyImportSpecifier(el, 'loadComponent')
+      const spec = lazyImportSpecifier(obj, 'loadComponent')
       if (spec) {
         componentFile = resolveRelative(sf, spec)
         if (componentFile) resolvedName = componentClassName(componentFile)
       }
     }
-    const isScreen = el.getProperty('component') !== undefined || el.getProperty('loadComponent') !== undefined
+    const isScreen = obj.getProperty('component') !== undefined || obj.getProperty('loadComponent') !== undefined
     const nodeId = routeToNodeId(fullPath)
     if (isScreen && !out.has(nodeId)) {
-      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: el, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
     }
     const childParent = isScreen ? nodeId : parentNodeId
-    const childrenProp = el.getProperty('children')
+    const childrenProp = obj.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
       if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent)
     }
-    const childSpec = lazyImportSpecifier(el, 'loadChildren')
+    const childSpec = lazyImportSpecifier(obj, 'loadChildren')
     if (childSpec) {
       const childModule = resolveRelative(sf, childSpec)
       if (childModule) {
