@@ -11,7 +11,7 @@ import { routeToNodeId } from './ids'
 /** Specs, stories and test doubles: they declare routes that are not the application's. */
 const SPEC_FILE = /\.(spec|test|stories|cy)\.[tj]s$/
 import { analyzeCanActivate, type GuardInfo } from './guards'
-import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, componentClassName, stringProp, identifierProp, objectLiteralOf } from './resolve'
+import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf } from './resolve'
 
 export interface RouteInfo {
   fullPath: string
@@ -141,6 +141,14 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
       }
       continue
     }
+    // `children: [...adminRoutes]` builds the array by spreading another one; without this the
+    // spread is skipped and every route it carries is minted at the project root instead,
+    // which reads from the outside exactly like a link to a route nobody declares.
+    if (Node.isSpreadElement(el)) {
+      const arr = arrayLiteralOf(el.getExpression())
+      if (arr && Node.isArrayLiteralExpression(arr)) walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects)
+      continue
+    }
     // An array may name its routes instead of spelling them out (`[ERROR_ROUTE]`).
     const obj = Node.isObjectLiteralExpression(el) ? el : objectLiteralOf(el)
     if (!obj) continue
@@ -214,6 +222,13 @@ function collectLoadChildrenTargets(project: Project): Set<string> {
       if (!mod) continue
       targets.add(mod.getFilePath())
       targets.add(lazyRouteOwner(mod).owner.getFilePath())
+    }
+    // An array consumed by a spread is reached under the spreading route's prefix, so it must
+    // not also be scanned at the project root, where its routes would be minted a second time
+    // without any prefix at all.
+    for (const sp of sf.getDescendantsOfKind(SyntaxKind.SpreadElement)) {
+      const arr = arrayLiteralOf(sp.getExpression())
+      if (arr && arr.getSourceFile() !== sf) targets.add(arr.getSourceFile().getFilePath())
     }
   }
   return targets

@@ -88,11 +88,12 @@ removals of a route guard.
 Finally, the thesis asks whether the losses belong to the applications or to the tool. Each
 defect class is taken to its root cause and repaired where the cause is the extractor's.
 None of the six applications turned out to express its routes in a way static analysis
-cannot follow: four of them then hold a node for every declared screen, and 94 percent of
+cannot follow: four of them then hold a node for every declared screen, and 96 percent of
 the navigation sites are accounted for, as a transition, as a destination only the run time
-knows, or as a source the analysis cannot place. Every site that remains names its reason,
-and a third of those name a route the application does not declare anywhere --- a dead link
-the graph finds without running the application. Attribution does not raise the detection rate for an individual change. It
+knows, or as a source the analysis cannot place. Every site that remains names its reason.
+Some of those reasons are dead links the graph finds without running the application, though
+the count of them is a candidate list: a route the tools fail to read is indistinguishable
+from one the application never declares. Attribution does not raise the detection rate for an individual change. It
 widens the part of the source the graph responds to at all.
 
 \vspace{1em}

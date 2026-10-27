@@ -88,8 +88,11 @@ Each research question is answered with one main measure. They are defined here.
 
 \textbf{Navigation construct.} A navigation construct is a \texttt{routerLink} binding
 in a template, or a call to \texttt{Router.navigate} or \texttt{Router.navigateByUrl}
-in class code, in the application source excluding tests. Constructs are found by an
-independent parser that shares no code with the extractor. Attributes such as
+in class code, in the application source excluding tests. Constructs are found by a
+separately written parser. It shares no code with the extractor, but Section~\ref{sec:res-round2}
+qualifies what that independence covers: for the route-path forms the second round added, the
+two now resolve the same constructs by the same rules, and three of the parser's own
+corrections were made because it disagreed with the extractor. Attributes such as
 \texttt{routerLinkActive} are not constructs; counting them by substring was one of the
 corrections described in Section~\ref{sec:corrections}.
 
@@ -195,10 +198,12 @@ re-parsed at the claimed line and the construct kind and target are compared. &
 Cannot see missing edges. Target agreement is invalid for over-approximated may
 edges, whose witness proves only that the call site exists. \\
 \addlinespace
-Differential test & Disagreements with an independently written route-configuration
-parser that shares no code with the extractor. &
+Differential test & Disagreements with a separately written route-configuration
+parser. &
 Diagnostic, not a metric. The parser is independent, not stronger: its first version
-missed whole route tables in several applications until it was corrected (Section~\ref{sec:corrections}). \\
+missed whole route tables in several applications until it was corrected (Section~\ref{sec:corrections}),
+and for the path forms added in Section~\ref{sec:res-round2} it is no longer independent of
+the extractor at all. \\
 \addlinespace
 End-to-end oracle & Node-level recall. Every URL a passing test visits is a screen
 that provably exists; ground truth comes from execution. &

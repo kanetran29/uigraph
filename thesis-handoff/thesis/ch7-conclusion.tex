@@ -73,15 +73,21 @@ follow. Every defect class resolved to a construct the extractor could read and 
 a route table reached through an NgModule, a route factory, a path named by a constant, an
 enum or an i18n segment, a workspace alias, a loader that references its module instead of
 importing it. With those repaired, four of the six applications hold a node for every
-declared screen, and 94 percent of the navigation sites in the corpus are accounted for ---
-recovered as a transition, recorded as a destination only the run time knows, or anchored
-at a source the analysis cannot place. The sites that remain each name a reason, enforced
-by a check that fails when any does not, and a third of them name a route the application
-never declares, which is a dead link the graph finds without running anything.
+declared screen, and \RoundTwoAccounted{} of the navigation sites in the corpus are
+accounted for --- recovered as a transition, recorded as a destination only the run time
+knows, or anchored at a source the analysis cannot place. Three quarters of those sites are
+mifos's, so the corpus figure is close to one application's. The sites that remain each name
+a reason, enforced by a check that fails when any does not, and some name a route the
+application never declares. What the repairs cost is reported with them: the must tier grew
+from 129 edges to over a thousand and \RoundTwoMustViolations{} of them violate the
+soundness property, and on \RoundTwoZeroMustApps{} of the six applications the must tier is
+still empty, so RQ1's own measure reads zero there.
 
-What they leave open is also specific. The call graph with dependency injection and the dispatch relations are specified and not implemented,
-and the remaining losses in services and guards state what the omission costs rather
-than what closing it would yield. Guards on empty-path routes are represented wrongly,
+What they leave open is also specific. The call graph with dependency injection and the
+dispatch relations are specified and not implemented; the approximations of
+Section~\ref{sec:res-round2} stand in for them --- a guard scoped to the routes that name
+it, a service to the join over its injectors, an effect to $\top$ --- which is coarser than
+the model and leaves a class nothing injects with no scope at all. Guards on empty-path routes are represented wrongly,
 and one defect class still waits for its second confirmation. Whether a graph of screens
 and guarded transitions, recomputed from source and carrying a witness on every edge,
 helps the consumers that motivated the work, agents that drive a user interface or a

@@ -2,14 +2,14 @@
 \newcommand{\TabRoundTwoNodes}{%
 \begin{tabular}{lrrr}
 \toprule
-Application & Before & After & Blind spots \\
+Application & Before & After & Declared & Blind spots \\
 \midrule
-realworld & 100.0\,\% (10/10) & 100.0\,\% (10/10) & 0 \\
-alfresco & 96.0\,\% (24/25) & 96.0\,\% (24/25) & 3 \\
-ghostfolio & 0.0\,\% (0/84) & 100.0\,\% (84/84) & 0 \\
-k8s dashboard & 100.0\,\% (2/2) & 100.0\,\% (67/67) & 0 \\
-bitwarden & 46.4\,\% (45/97) & 69.8\,\% (111/159) & 2 \\
-mifos & 0.3\,\% (2/610) & 100.0\,\% (610/610) & 1 \\
+realworld & 100.0\,\% (10/10) & 100.0\,\% (10/10) & 10 & 0 \\
+alfresco & 96.0\,\% (24/25) & 96.0\,\% (24/25) & 25 & 3 \\
+ghostfolio & 0.0\,\% (0/84) & 100.0\,\% (84/84) & 84 & 0 \\
+k8s dashboard & 100.0\,\% (2/2) & 100.0\,\% (67/67) & 2$\to$67 & 0 \\
+bitwarden & 46.4\,\% (45/97) & 69.8\,\% (111/159) & 97$\to$159 & 2 \\
+mifos & 0.3\,\% (2/610) & 100.0\,\% (610/610) & 610 & 1 \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoAccounting}{%
@@ -18,13 +18,13 @@ mifos & 0.3\,\% (2/610) & 100.0\,\% (610/610) & 1 \\
 Application & Sites & Excl. & In scope & Recovered & Dynamic & Unplaced \\
 \midrule
 realworld & 40 & 0 & 40 & 97.5\,\% & 2.5\,\% & 0.0\,\% \\
-alfresco & 34 & 5 & 29 & 20.7\,\% & 31.0\,\% & 13.8\,\% \\
-ghostfolio & 198 & 0 & 198 & 34.8\,\% & 43.9\,\% & 12.6\,\% \\
-k8s dashboard & 72 & 0 & 72 & 20.8\,\% & 66.7\,\% & 6.9\,\% \\
-bitwarden & 132 & 1 & 131 & 29.0\,\% & 17.6\,\% & 25.2\,\% \\
+alfresco & 34 & 5 & 29 & 17.2\,\% & 34.5\,\% & 13.8\,\% \\
+ghostfolio & 198 & 0 & 198 & 40.9\,\% & 43.9\,\% & 14.1\,\% \\
+k8s dashboard & 72 & 0 & 72 & 15.3\,\% & 73.6\,\% & 8.3\,\% \\
+bitwarden & 132 & 1 & 131 & 37.4\,\% & 17.6\,\% & 38.2\,\% \\
 mifos & 1344 & 1 & 1343 & 87.5\,\% & 8.3\,\% & 1.2\,\% \\
 \midrule
-All & 1820 & 7 & 1813 & 74.0\,\% & 15.4\,\% & 4.6\,\% \\
+All & 1820 & 7 & 1813 & 75.0\,\% & 15.7\,\% & 5.7\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoReasons}{%
@@ -32,27 +32,49 @@ All & 1820 & 7 & 1813 & 74.0\,\% & 15.4\,\% & 4.6\,\% \\
 \toprule
 Sites & Reason the site is not a transition \\
 \midrule
-40 & The target was read; no node matches it \\
-13 & The owning component has neither a node nor a scope \\
-10 & A literal target matching no declared route \\
+12 & The target was read; no node matches it \\
+10 & The owning component has neither a node nor a scope \\
 9 & The file is parsed, but nothing lands near the site \\
-9 & The screen is in the graph; nothing was parsed here \\
 8 & A plain class nothing in the application injects \\
 8 & A service nothing in the application injects \\
-5 & The target names a value no resolver could follow \\
+6 & The screen is in the graph; nothing was parsed here \\
+5 & A literal target matching no declared route \\
 5 & The edge exists, witnessed on another line \\
-1 & The route is declared; the node is missing \\
 1 & Over-approximated at the site \\
 \midrule
-109 & All, none of them without a reason \\
+64 & All, none of them without a reason \\
+\bottomrule
+\end{tabular}}
+\newcommand{\TabRoundTwoSoundness}{%
+\begin{tabular}{lrrr}
+\toprule
+Application & Must edges & Clean & Must conversion \\
+\midrule
+realworld & 9 & 9/9 & 30.0\,\% \\
+alfresco & 0 & not applicable & 0.0\,\% \\
+ghostfolio & 0 & not applicable & 0.0\,\% \\
+k8s dashboard & 0 & not applicable & 0.0\,\% \\
+bitwarden & 7 & 7/7 & 8.3\,\% \\
+mifos & 1003 & 979/1003 & 71.4\,\% \\
+\midrule
+All & 1019 & 995/1019 & 54.0\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\RoundTwoInScope}{1813}
-\newcommand{\RoundTwoRecovered}{74.0\,\%}
-\newcommand{\RoundTwoDynamic}{15.4\,\%}
-\newcommand{\RoundTwoUnplaced}{4.6\,\%}
-\newcommand{\RoundTwoAccounted}{94.0\,\%}
-\newcommand{\RoundTwoUnexplained}{109}
+\newcommand{\RoundTwoRecovered}{75.0\,\%}
+\newcommand{\RoundTwoDynamic}{15.7\,\%}
+\newcommand{\RoundTwoUnplaced}{5.7\,\%}
+\newcommand{\RoundTwoAccounted}{96.5\,\%}
+\newcommand{\RoundTwoUnexplained}{64}
 \newcommand{\RoundTwoBefore}{8.8\,\%}
 \newcommand{\RoundTwoExcluded}{7}
 \newcommand{\RoundTwoFullNodes}{4}
+\newcommand{\RoundTwoMustClean}{995/1019}
+\newcommand{\RoundTwoMustViolations}{24}
+\newcommand{\RoundTwoMustConv}{54.0\,\%}
+\newcommand{\RoundTwoZeroMustApps}{3}
+\newcommand{\RoundTwoNoMifosRecovered}{39.4\,\%}
+\newcommand{\RoundTwoNoMifosAccounted}{95.1\,\%}
+\newcommand{\RoundTwoMifosShare}{74.1\,\%}
+\newcommand{\RoundTwoTargetNoNode}{0}
+\newcommand{\RoundTwoTargetNoRoute}{17}
