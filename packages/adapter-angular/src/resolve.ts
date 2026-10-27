@@ -4,7 +4,7 @@
 // literals. Shared by routes/templates extraction.
 
 import { Node, SyntaxKind } from 'ts-morph'
-import type { ObjectLiteralExpression, SourceFile } from 'ts-morph'
+import type { EnumDeclaration, ObjectLiteralExpression, SourceFile } from 'ts-morph'
 import { dirname, join } from 'node:path'
 
 const RESOLVE_EXTS = ['.ts', '.js', '/index.ts', '/index.js']
@@ -93,9 +93,57 @@ export function constantString(expr: Node | undefined): string | null {
   if (Node.isPropertyAccessExpression(expr)) {
     const obj = objectLiteralOf(expr.getExpression())
     const prop = obj?.getProperty(expr.getName())
-    return prop && Node.isPropertyAssignment(prop) ? constantString(prop.getInitializer()) : null
+    if (prop && Node.isPropertyAssignment(prop)) return constantString(prop.getInitializer())
+    // A route table is as often an enum as an object: `path: AuthRoute.Login`.
+    const member = enumDeclarationOf(expr.getExpression())?.getMember(expr.getName())
+    const value = member?.getValue()
+    return typeof value === 'string' ? value : constantString(member?.getInitializer())
   }
   return null
+}
+
+/** The enum an identifier names, following imports within the project, or undefined. */
+function enumDeclarationOf(expr: Node): EnumDeclaration | undefined {
+  if (!Node.isIdentifier(expr)) return undefined
+  const sym = expr.getSymbol()
+  for (const decl of sym?.getAliasedSymbol()?.getDeclarations() ?? sym?.getDeclarations() ?? []) {
+    if (Node.isEnumDeclaration(decl)) return decl
+  }
+  return undefined
+}
+
+/**
+ * The string array an identifier or property-access chain ultimately names, or null. A route
+ * table commonly ships the link beside the path (`routerLink: ['/blog']`), and a component
+ * binds its template to that field, so the link is only readable through the chain.
+ */
+export function constantStringArray(expr: Node | undefined): string[] | null {
+  if (!expr) return null
+  if (Node.isAsExpression(expr) || Node.isParenthesizedExpression(expr) || Node.isSatisfiesExpression(expr)) return constantStringArray(expr.getExpression())
+  if (Node.isIdentifier(expr)) return constantStringArray(declaredInitializer(expr))
+  if (Node.isPropertyAccessExpression(expr)) {
+    const obj = objectLiteralOf(expr.getExpression())
+    const prop = obj?.getProperty(expr.getName())
+    return prop && Node.isPropertyAssignment(prop) ? constantStringArray(prop.getInitializer()) : null
+  }
+  if (!Node.isArrayLiteralExpression(expr)) return null
+  const out: string[] = []
+  for (const el of expr.getElements()) {
+    const v = constantString(el)
+    if (v === null) return null
+    out.push(v)
+  }
+  return out
+}
+
+/** The initializer of a property on the component class in `sf`, by name, or undefined. */
+export function classPropertyInitializer(sf: SourceFile, name: string): Node | undefined {
+  for (const cls of sf.getClasses()) {
+    const prop = cls.getProperty(name)
+    const init = prop && Node.isPropertyDeclaration(prop) ? prop.getInitializer() : undefined
+    if (init) return init
+  }
+  return undefined
 }
 
 /** The object literal an identifier or property-access chain ultimately names, or undefined. */

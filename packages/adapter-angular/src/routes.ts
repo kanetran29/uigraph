@@ -7,6 +7,9 @@
 import { Node, Project, SyntaxKind } from 'ts-morph'
 import type { ArrayLiteralExpression, ObjectLiteralExpression, SourceFile } from 'ts-morph'
 import { routeToNodeId } from './ids'
+
+/** Specs, stories and test doubles: they declare routes that are not the application's. */
+const SPEC_FILE = /\.(spec|test|stories|cy)\.[tj]s$/
 import { analyzeCanActivate, type GuardInfo } from './guards'
 import { resolveImportedFile, lazyImportSpecifier, resolveRelative, componentClassName, stringProp, identifierProp, objectLiteralOf } from './resolve'
 
@@ -177,7 +180,10 @@ export function collectRoutes(project: Project): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
   const loadedChildFiles = collectLoadChildrenTargets(project)
   for (const sf of project.getSourceFiles()) {
-    if (loadedChildFiles.has(sf.getFilePath())) continue
+    const f = sf.getFilePath()
+    // A spec declares routes of its own to drive the router under test; they are not the
+    // application's screens, and minting them puts fictional addresses in the graph.
+    if (loadedChildFiles.has(f) || SPEC_FILE.test(f)) continue
     for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles)
   }
   return [...byNodeId.values()]

@@ -19,6 +19,7 @@
 // transfer function. Services (scope = join of callers) are not handled in this
 // version and are reported as a soundiness note.
 
+import { SyntaxKind } from 'ts-morph'
 import type { SourceFile } from 'ts-morph'
 import type { SoundinessNote } from '@ui-graph/core'
 import { inlineTemplate } from './templates'
@@ -49,6 +50,15 @@ export interface ScopeResult {
   /** Extra screens on which a route component's own template is rendered (its descendants). */
   descendantsOfRouteComponent: Map<string, Set<string>>
   components: Map<string, ComponentInfo>
+  /**
+   * Non-component files (services, facades, stores) that navigate, with the screens their
+   * injectors are rendered on — the join over the callers, taken at class granularity. The
+   * join over every injector is at least the real scope and may be larger, so edges from it
+   * are capped at may.
+   */
+  serviceScreens: Map<string, Set<string>>
+  /** Services injected somewhere in the application shell: their scope is top. */
+  serviceShell: Set<string>
   notes: SoundinessNote[]
   /** subtree(r) for every route node id: r and all its descendants. */
   subtreeOf: Map<string, Set<string>>
@@ -223,5 +233,52 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[]): ScopeRe
 
   const subtreeOf = new Map<string, Set<string>>()
   for (const r of routes) subtreeOf.set(r.nodeId, subtree(r.nodeId))
-  return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, notes, subtreeOf }
+
+  // Services: a class a component injects navigates on that component's behalf, so its scope
+  // is the join over everything that injects it. Injection is read off constructor parameter
+  // types and `inject(X)` calls, which is how an Angular component names its dependencies.
+  const fileOfClass = new Map<string, string>()
+  for (const sf of appFiles) {
+    if (components.has(sf.getFilePath())) continue
+    for (const cls of sf.getClasses()) {
+      const name = cls.getName()
+      if (name && !fileOfClass.has(name)) fileOfClass.set(name, sf.getFilePath())
+    }
+  }
+  const serviceScreens = new Map<string, Set<string>>()
+  const serviceShell = new Set<string>()
+  for (const c of components.values()) {
+    const callerScreens = shell.has(c.file) || indirectShell.has(c.file) ? null : (routeComponentScreens.get(c.file) ?? screensOf.get(c.file))
+    if (callerScreens === undefined) continue
+    for (const name of injectedClassNames(c.sf)) {
+      const file = fileOfClass.get(name)
+      if (!file) continue
+      if (callerScreens === null) { serviceShell.add(file); continue }
+      const set = serviceScreens.get(file) ?? new Set<string>()
+      for (const s of callerScreens) set.add(s)
+      serviceScreens.set(file, set)
+    }
+  }
+  for (const f of serviceShell) serviceScreens.delete(f) // top absorbs any screen set (join)
+
+  return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf }
+}
+
+/** Class names a component declares a dependency on: constructor parameter types and `inject(X)`. */
+function injectedClassNames(sf: SourceFile): Set<string> {
+  const out = new Set<string>()
+  for (const cls of sf.getClasses()) {
+    for (const ctor of cls.getConstructors()) {
+      for (const p of ctor.getParameters()) {
+        const t = p.getTypeNode()?.getText()
+        if (t && /^[A-Z][\w$]*$/.test(t)) out.add(t)
+      }
+    }
+  }
+  for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    if (call.getExpression().getText() !== 'inject') continue
+    const arg = call.getArguments()[0]?.getText()
+    if (arg && /^[A-Z][\w$]*$/.test(arg)) out.add(arg)
+  }
+  return out
 }
