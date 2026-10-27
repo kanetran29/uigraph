@@ -8,6 +8,10 @@ coverage/
 .uigraph/
 .claude/
 
+# superseded scratch dump from an earlier session; the developed copies live in
+# thesis-handoff/
+Claude outputs/
+
 # scratch screenshots / playwright output
 .playwright-mcp/
 uigraph-*.png
