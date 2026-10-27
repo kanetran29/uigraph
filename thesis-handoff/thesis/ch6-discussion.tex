@@ -22,6 +22,13 @@ applications the baseline produces no transitions at all
 between them, and ghostfolio collapses to a graph in which none of its declared screens
 has a node (Table~\ref{tab:coverage}).
 
+Both of those are the tool's, and Section~\ref{sec:res-round2} reports what happened when
+they were repaired: the constant reference and the lazy boundary are readable, and
+ghostfolio, k8s dashboard and mifos each end with a node for every declared screen. The
+structural point survives the repair --- attribution still cannot draw an edge into a
+screen that has no node --- but the figures above measure a particular extractor, not a
+limit of the approach, and should be read that way.
+
 The two failures cap each other, and that is the structural result of the measurement.
 Attribution cannot draw an edge into a screen that has no node, so node extraction
 bounds what attribution can achieve. Node extraction cannot place a navigation site

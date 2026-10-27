@@ -126,6 +126,16 @@ changes to support change impact analysis?}
 \noindent This is measured with mutation testing. Known changes are inserted into the
 source, and the graph is checked for the expected difference.
 
+\medskip\noindent\textbf{RQ5.} \emph{Are the losses a property of the applications or of
+the tool?}
+
+\noindent A defect class names where extraction failed; it does not say whether the
+navigation was unreadable or merely unread. Each class of RQ2 is therefore taken to its
+root cause in the source of the application it appeared in, every cause that is the
+extractor's is repaired, and the corpus is measured again. A site that still yields no
+transition must then name the reason, and the script that produces those reasons fails if
+any site has none, so an unexplained remainder cannot pass silently.
+
 \medskip
 RQ1 and RQ2 are answered by measuring the extractor on a corpus of six open-source
 Angular applications. The applications are pinned to specific commits and range from
@@ -133,7 +143,10 @@ Angular applications. The applications are pinned to specific commits and range 
 not share the same blind spot. RQ3 is addressed by formulating attribution as a
 dataflow analysis over a lattice of screen sets, implementing it, and evaluating the
 result on the same corpus with the same methods. RQ4 is answered on the graph produced
-after attribution has been applied.
+after attribution has been applied. RQ5 repeats the measurement after the loss list of RQ2
+has been worked; because it uses a later commit of the extractor and a corrected harness,
+it is reported separately in Section~\ref{sec:res-round2} and revises none of the figures
+of RQ1 to RQ4.
 
 The thesis has three limits of scope. It does not claim completeness. When a navigation target is computed at run time, the full set of
 transitions cannot be determined statically in general. The thesis therefore states a
