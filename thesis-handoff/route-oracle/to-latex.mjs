@@ -25,13 +25,20 @@ for (const r of R) out += `${NAME[r.slug]} & ${r.totalConstructs} & ${r.graph?.n
 out += `\\bottomrule\n\\end{tabular}}\n\n`
 
 // ---------------------------------------------------------------- node coverage
-out += `\\newcommand{\\TabCoverage}{%\n\\begin{tabular}{@{}lrrrr@{}}\n\\toprule\n`
-out += `Application & Declared screens & Matched by a node & Coverage & Parser blind spots \\\\\n\\midrule\n`
+// The differential test disagrees in both directions. Reporting only the matched column
+// would give recall and hide precision, so the nodes the parser holds no declared screen
+// for are reported beside it.
+out += `\\newcommand{\\TabCoverage}{%\n\\begin{tabular}{@{}lrrrrrr@{}}\n\\toprule\n`
+out += `Application & Declared screens & Nodes & Matched & Coverage & Unmatched nodes & Parser blind spots \\\\\n\\midrule\n`
+let gN = 0, gX = 0
 for (const r of R) {
   const C = JSON.parse(fs.readFileSync(path.join(rawDir, `${r.slug}.C.json`), 'utf8'))
   const c = C.comparison || {}
-  out += `${NAME[r.slug]} & ${c.declaredScreens ?? '--'} & ${c.matched ?? '--'} & ${pct(c.coverage)} & ${C.blindSpots?.length ?? 0} \\\\\n`
+  const extra = c.extraNodes?.length ?? 0
+  gN += c.graphNodes ?? 0; gX += extra
+  out += `${NAME[r.slug]} & ${c.declaredScreens ?? '--'} & ${c.graphNodes ?? '--'} & ${c.matched ?? '--'} & ${pct(c.coverage)} & ${extra} & ${C.blindSpots?.length ?? 0} \\\\\n`
 }
+out += `\\midrule\nAll & & ${gN} & & & ${gX} & \\\\\n`
 out += `\\bottomrule\n\\end{tabular}}\n\n`
 
 // ---------------------------------------------------------------- loss breakdown

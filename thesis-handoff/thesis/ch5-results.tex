@@ -48,13 +48,28 @@ mifos have a node, and ghostfolio has a single node for 84 declared screens. For
 dashboard the parser itself cannot follow the lazy route tables, so its 100\% covers
 only two screens and says little.
 
-\begin{table}[t]\small
-\caption{Node coverage: declared screens that have a matching node in the graph.}
+\begin{table}[t]\footnotesize
+\caption{Node extraction against the independent parser, in both directions: declared
+screens that have a matching node, and nodes for which the parser holds no declared
+screen. The blind-spot column counts route entries the parser could not follow, which
+bounds what either direction can show.}
 \label{tab:coverage}
 \TabCoverage
 \end{table}
 \FigCoverage
 
+
+Table~\ref{tab:coverage} also reports the other direction of the same comparison, which
+the differential test produces and which an earlier version of this chapter left out. The
+parser holds no declared screen for 197 of the 338 nodes in the corpus, so node extraction
+is as inaccurate as it is incomplete. For k8s dashboard the figure is almost entirely the
+parser's own limit, 37 of its 38 unmatched nodes being the lazily loaded entries it cannot
+follow. Mifos is not explained that way: it has one blind spot and 120 unmatched nodes.
+At least one unmatched node is a route the parser classifies as a path prefix rather than
+a screen, namely \texttt{/profile} in realworld, whose route declares
+\texttt{loadChildren} and no component. Chapter~\ref{ch:analysis} excludes such a route
+from the screen set, so the implemented node set is not exactly the set the model defines,
+and a per-node audit of the 197 is outstanding.
 
 So the baseline recovers a small fraction of the navigation, and loses it at two levels: some screens never become nodes, and most navigation sites of the screens that do are not turned into edges.
 
@@ -188,10 +203,16 @@ growth follows the growth of the may tier and says nothing about the must tier.
 
 The anchored representation was checked on the same graphs.
 Claim~\ref{claim:expansion} requires the expansion of the anchored edge set to equal the
-materialised edge set. On realworld the attributed graph stores 50 edges against two
-scope nodes; expanding them screen by screen through the query of
-Section~\ref{sec:attribution} yields 97 edges, materialising the whole graph yields 97,
-and the two sets are identical. On alfresco the attributed graph has no scope node, so
+materialised edge set. The check cannot be a comparison between the
+expansion query and the library's own materialisation function, because that function is
+a loop over the query and the two can only disagree about which nodes they iterate. The
+anchored edges are therefore materialised independently, by walking the edge list and
+fanning each scope-anchored edge over the screens its anchor stands for, with its own
+deduplication. On realworld the attributed graph stores 50 edges against two scope nodes;
+the per-screen query yields 97 edges and the independent materialisation yields the same
+97, and the two sets are identical. What the check exercises is the member walk and the
+deduplication key; the definition of a scope's membership is shared by both paths and is
+not tested by it. On alfresco the attributed graph has no scope node, so
 the check holds trivially and says nothing. The unit tests of the attribution pass cover
 the same property on fixtures. The claim is therefore supported on one application of the
 corpus and on fixtures, not across the corpus, and the 50 against 97 is also the only
