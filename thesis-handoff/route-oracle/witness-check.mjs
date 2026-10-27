@@ -208,4 +208,7 @@ for (const v of order) {
   if (rows.length > 8) console.log(`   ... ${rows.length - 8} more`)
 }
 
-if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: checked, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, tally, findings }, null, 2))
+// `mustBad` is written out as well as counted: the soundness violations are the findings the
+// thesis describes one by one, and a description read off `findings` would include the may
+// and unknown tiers the lemma says nothing about.
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: checked, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, tally, mustBad, findings }, null, 2))
