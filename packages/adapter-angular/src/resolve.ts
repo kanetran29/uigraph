@@ -136,12 +136,68 @@ export function constantStringArray(expr: Node | undefined): string[] | null {
   return out
 }
 
-/** The initializer of a property on the component class in `sf`, by name, or undefined. */
+/**
+ * Resolve a dotted name as a template or a call writes it — `cancelRoute`,
+ * `publicRoutes.blog.routerLink`, `AuthRoute.Login`, `this.previewLocation` — to the constant
+ * it names, as a string or an array of segments. The head is looked for among the component's
+ * own fields, the file's module constants and its imports; each further segment is read off an
+ * object literal or an enum. Returns null for a name whose value is only known at run time.
+ */
+export function constantForName(sf: SourceFile, text: string): string[] | string | null {
+  const parts = text.replace(/^this\./, '').split('.')
+  const head = parts.shift()
+  if (!head || !/^[A-Za-z_$][\w$]*$/.test(head)) return null
+  let node = headInitializer(sf, head)
+  for (const seg of parts) {
+    if (!node) return null
+    const obj = objectLiteralOf(node)
+    const prop = obj?.getProperty(seg)
+    if (prop && Node.isPropertyAssignment(prop)) {
+      node = prop.getInitializer()
+      continue
+    }
+    const member = Node.isEnumDeclaration(node) ? node.getMember(seg) : undefined
+    if (!member) return null
+    const v = member.getValue()
+    if (typeof v === 'string') return v
+    node = member.getInitializer()
+  }
+  return constantStringArray(node) ?? constantString(node)
+}
+
+/** Where a bare name can come from: a field of the component, a module constant, or an import. */
+function headInitializer(sf: SourceFile, name: string): Node | undefined {
+  const own = classPropertyInitializer(sf, name) ?? sf.getVariableDeclaration(name)?.getInitializer()
+  if (own) return own
+  const localEnum = sf.getEnum(name)
+  if (localEnum) return localEnum
+  for (const imp of sf.getImportDeclarations()) {
+    const named = imp.getNamedImports().find((nn) => (nn.getAliasNode()?.getText() ?? nn.getName()) === name)
+    if (!named) continue
+    const dep = imp.getModuleSpecifierSourceFile() ?? resolveRelative(sf, imp.getModuleSpecifierValue())
+    if (!dep) continue
+    const real = named.getName()
+    const init = dep.getVariableDeclaration(real)?.getInitializer() ?? dep.getEnum(real)
+    if (init) return init
+  }
+  return undefined
+}
+
+/**
+ * The initializer of a property on the component class in `sf`, by name — but only when the
+ * property is one a navigation target can be read off. A field seeded with a literal
+ * (`tag = 'x'`) is mutable state, and resolving it would turn a run-time value into a
+ * must-edge. A field declared readonly or static, or one that merely points at a named
+ * constant (`routerLinkBlog = publicRoutes.blog.routerLink`), is stable enough to follow.
+ */
 export function classPropertyInitializer(sf: SourceFile, name: string): Node | undefined {
   for (const cls of sf.getClasses()) {
     const prop = cls.getProperty(name)
-    const init = prop && Node.isPropertyDeclaration(prop) ? prop.getInitializer() : undefined
-    if (init) return init
+    if (!prop || !Node.isPropertyDeclaration(prop)) continue
+    const init = prop.getInitializer()
+    if (!init) continue
+    const stable = prop.isReadonly() || prop.isStatic() || Node.isIdentifier(init) || Node.isPropertyAccessExpression(init)
+    if (stable) return init
   }
   return undefined
 }
