@@ -15,9 +15,36 @@ export type TargetInfo =
   | { kind: 'template'; staticPrefix: string }
   | { kind: 'dynamic' }
 
-/** Classify a navigation argument expression as literal / template-prefix / dynamic. */
-export function classifyTarget(expr: Node | undefined): TargetInfo {
+/**
+ * Classify a navigation argument expression as literal / template-prefix / dynamic. A call is
+ * followed one hop into the method it names, because a component that builds its links
+ * (`getLogsHref()` -> `this.state.href('log', name)`) still fixes the leading segment; what the
+ * run time supplies is only the tail, which is what the prefix tier is for. `depth` bounds that
+ * descent, so a helper calling a helper does not walk the program.
+ */
+export function classifyTarget(expr: Node | undefined, depth = 0): TargetInfo {
   if (!expr) return { kind: 'dynamic' }
+  if (depth < 2 && Node.isCallExpression(expr)) {
+    const callee = expr.getExpression()
+    const name = Node.isIdentifier(callee) ? callee.getText() : Node.isPropertyAccessExpression(callee) ? callee.getName() : null
+    const ret = name ? methodReturnExpression(expr.getSourceFile(), name) : undefined
+    if (ret) {
+      const ti = classifyTarget(ret, depth + 1)
+      if (ti.kind !== 'dynamic') return ti
+    }
+    // A path builder takes the leading segment as its first literal argument.
+    for (const arg of expr.getArguments()) {
+      const lit = constantString(arg)
+      if (lit !== null && lit !== '') return { kind: 'template', staticPrefix: lit.startsWith('/') ? lit + '/' : '/' + lit + '/' }
+    }
+    return { kind: 'dynamic' }
+  }
+  if (Node.isTemplateExpression(expr) && expr.getHead().getLiteralText() === '' ) {
+    // `` `/${stateName}` `` fixes nothing by itself; its first span may still be a constant.
+    const first = expr.getTemplateSpans()[0]?.getExpression()
+    const lit = first ? constantString(first) : null
+    if (lit !== null && lit !== '') return { kind: 'template', staticPrefix: '/' + lit.replace(/^\/+/, '') + '/' }
+  }
   if (Node.isStringLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isNoSubstitutionTemplateLiteral(expr)) return { kind: 'literal', value: expr.getLiteralValue() }
   if (Node.isTemplateExpression(expr)) return { kind: 'template', staticPrefix: expr.getHead().getLiteralText() }
@@ -127,6 +154,15 @@ function classifyBoundLink(expr: string, sf?: SourceFile): TargetInfo {
   // `[routerLink]="routerLinkBlog"` binds to a field of the component, which commonly holds
   // the link from a shared route table (`publicRoutes.blog.routerLink`). Follow the field to
   // that constant rather than calling the whole site dynamic.
+  // `[routerLink]="getLogsHref()"` names a builder on the component; read it the same way.
+  const call = sf ? /^(?:this\.)?([A-Za-z_$][\w$]*)\s*\(/.exec(trimmed) : null
+  if (call) {
+    const ret = methodReturnExpression(sf!, call[1] ?? '')
+    if (ret) {
+      const ti = classifyTarget(ret, 1)
+      if (ti.kind !== 'dynamic') return ti
+    }
+  }
   if (sf && /^(this\.)?[A-Za-z_$][\w$.]*$/.test(trimmed)) {
     const r = constantForName(sf, trimmed)
     if (Array.isArray(r) && r.length > 0) return { kind: 'literal', value: joinCommands(r) }
@@ -333,4 +369,16 @@ export function methodNavTargets(sf: SourceFile, methodName: string): { ti: Targ
     return out
   }
   return out
+}
+
+/** The expression a method of a class in `sf` returns, when it returns exactly one thing. */
+function methodReturnExpression(sf: SourceFile, name: string): Node | undefined {
+  for (const cls of sf.getClasses()) {
+    const m = cls.getMethod(name)
+    if (!m) continue
+    const returns = m.getDescendantsOfKind(SyntaxKind.ReturnStatement)
+    if (returns.length !== 1) return undefined
+    return returns[0]?.getExpression()
+  }
+  return undefined
 }
