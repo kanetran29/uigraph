@@ -37,9 +37,11 @@ and the paragraph on witnesses below says how they are traced.
 A \emph{must} edge is claimed to fire for every input on which the enclosing code
 executes; a \emph{may} edge is possible but
 conditional; \emph{unknown} marks an edge whose modality could not be determined. The
-third modality is specified but not produced: no pass implemented in this version
-assigns \emph{unknown}, every edge in the measured graphs carries \emph{must} or
-\emph{may}, and the tables of Chapter~\ref{ch:results} report those two tiers only.
+third modality carries the destinations the analysis cannot name: an edge into the
+\texttt{u\_}\,sink of Section~\ref{sec:res-round2}, which records that a screen is left by
+an event whose target only the run time knows. The pinned extractor the tables of
+Sections~\ref{sec:res-baseline} to~\ref{sec:res-mutation} measure produces no such edge, so those
+tables report the \emph{must} and \emph{may} tiers only.
 Guards are stored as source text and are never evaluated by the tool. A consumer of
 the graph can read a guard, but is not expected to decide whether it holds. This keeps
 the set $G$ opaque and means that the model does not need to represent application
@@ -335,7 +337,8 @@ and stories, is read with its element selectors and its template. An edge $A \to
 is added when $A$'s template contains an element with $B$'s selector. When a selector
 belongs to more than one component, the candidates are narrowed to those that $A$'s
 file imports; if none is imported, the analysis joins over all of them and records a
-note. Attribute selectors are not matched.
+note. An attribute selector is matched the same way: a directive is rendered by the
+templates that carry its attribute, so it has a scope exactly as a component does.
 
 \textbf{Router outlets.} The route tree is recorded during route extraction. A route
 component's template is rendered on its own screen and on every descendant screen, so
@@ -366,10 +369,17 @@ as one edge per screen. The core library provides the expansion query
 $\mathit{edgesFrom}(r)$ and a function that materialises all anchored edges, which is
 used to test Claim~\ref{claim:expansion}.
 
-The call graph with dependency injection and the dispatch relations are not
-implemented in this version. Navigation sites in services, guards, interceptors,
-resolvers and effects are not attributed to any screen, and the evaluation counts them
-in the defect class ``Attribution, service'' of Table~\ref{tab:loss-rules}. The pass is
+The call graph with dependency injection and the dispatch relations are not implemented in
+this version, so a navigation site outside a component has no scope from the model itself.
+Three approximations of one stand in, and Section~\ref{sec:res-round2} measures what they
+recover: a guard's scope is the set of routes that name it in \texttt{canActivate} or
+\texttt{canMatch}, which the route configuration states outright; a service's is the join
+over the components that inject it, read off constructor parameters and \texttt{inject}
+calls, which is the join the model specifies taken per class rather than per method and so
+can be wider than the real scope; and an effect, being registered for the lifetime of the
+application, is given $\top$. Edges from all three are capped at \emph{may}. A class
+nothing injects still has no scope, and the evaluation counts those in the defect class
+``Attribution, service'' of Table~\ref{tab:loss-rules}. The pass is
 covered by unit tests for each of the cases above, including a test that the baseline
 is unchanged when the option is off.
 

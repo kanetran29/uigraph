@@ -495,9 +495,52 @@ Of \RoundTwoInScope{} in-scope sites, \RoundTwoRecovered{} are recovered,
 \RoundTwoDynamic{} are accounted as dynamic and \RoundTwoUnplaced{} as unplaced, so
 \RoundTwoAccounted{} are accounted for in all. The comparable figure before the list was
 worked is \RoundTwoBefore{}. The reading that changes most is k8s dashboard, which recovers
-a fifth of its sites and looks like a failure until the second column is read: two thirds
-of its navigation computes the destination at run time, through one service that builds
-every link, and only four of its sites are unexplained.
+a sixth of its sites and looks like a failure until the second column is read: nearly three
+quarters of its navigation computes the destination at run time, and two of its sites are
+unexplained. The dynamic sites are not one central builder --- they are spread over 42 files,
+most of them contributing a single site --- so what the column reports is a habit of the
+codebase rather than one place to fix.
+
+Two cautions belong with the corpus total. mifos supplies \RoundTwoMifosShare{} of the
+in-scope sites on its own, so the corpus figures are close to mifos's: without it, recovered
+is \RoundTwoNoMifosRecovered{} and accounted \RoundTwoNoMifosAccounted{}. And the before
+column of Table~\ref{tab:round2nodes} is measured against a denominator that itself moved,
+because the oracle had been unable to read some of the route tables it was scoring against;
+the declared column states both numbers wherever they differ.
+
+\subsection{What it cost the soundness property}
+
+A coverage gain that quietly loosened the must tier would not be a gain, so the witness check
+of Section~\ref{sec:protocol} was run again on all six applications.
+Table~\ref{tab:round2sound} reports it beside the conversion ratio RQ1 is defined on, and
+both columns qualify the figures above.
+
+\begin{table}[t]\small
+\caption{Must-tier soundness and must conversion after the loss list was worked. ``Not
+applicable'' means the application emits no must edge, so the property cannot be tested on
+it.}
+\label{tab:round2sound}
+\TabRoundTwoSoundness
+\end{table}
+
+Across the corpus \RoundTwoMustClean{} must edges are clean, so
+\RoundTwoMustViolations{} violate the property, all of them in mifos, where the must tier
+grew from 129 edges to over a thousand. That is a worse ratio than the one edge of
+Section~\ref{sec:res-defects}, and it is reported here rather than left to be inferred from
+a coverage table. The violations are concentrated in two shapes the witness check already
+distinguishes: two links on one template line, which the check matches by line, and a prefix
+it normalises differently from the extractor. Neither has been traced construct by
+construct, so the figure stands as measured and not as explained.
+
+The second column is the more uncomfortable one. RQ1 defines conversion as the fraction of
+constructs witnessed by at least one \emph{must} edge, and by that definition
+\RoundTwoZeroMustApps{} of the six applications sit at zero after the round, because they
+emit no must edge at all: every edge they yield is a may or an unknown. The recovered column
+of Table~\ref{tab:round2acct} counts a site as recovered when any edge witnesses it,
+which is a weaker predicate than RQ1's. Both are reported because neither alone is honest:
+the weaker one measures whether the graph represents the navigation, the stricter one whether
+it commits to a destination, and on three applications the answer to the second is still
+nothing.
 
 \subsection{Nothing is left without a reason}
 
@@ -505,9 +548,8 @@ every link, and only four of its sites are unexplained.
 reason for each. The reasons are produced by a script that exits non-zero if a single site
 reaches the end of it without one, so a site the analysis cannot explain is a failing state
 rather than a silent remainder. The largest group is a target the extractor read for which
-no node matches, and that group divides further in a way that matters: eight name a route
-that is declared and has no node, which is the extractor's defect, and the rest name no
-route the application declares at all.
+no node matches: \RoundTwoTargetNoRoute{} of them name no route the application declares,
+and \RoundTwoTargetNoNode{} name a route that is declared and has no node.
 
 \begin{table}[t]\small
 \caption{Why each remaining site is not a transition. The script that produces this table
@@ -534,11 +576,26 @@ test that never opens that menu would not find it, and a crawler would find it o
 reached the screen that holds it; reading the route configuration finds it without running
 anything.
 
-Thirty-five of the forty-three unresolved targets are of this kind. The number should be
-read as a candidate count rather than a verdict: a route the extractor and the oracle both
-fail to read is indistinguishable, from the outside, from a route that does not exist, and
-alfresco in particular declares part of its navigation in an application configuration file
-rather than in TypeScript, which neither tool reads. What can be said is that for
-ghostfolio's \texttt{/admin/users} the absence was confirmed by searching the whole
-application for the path, and that a static transition graph puts every such candidate on
-one list instead of leaving it to be met at run time.
+Two corrections belong with this finding, and both came from having it attacked.
+
+A target no route declares is not a target that goes nowhere. An application with a
+\texttt{\{ path: '**', redirectTo: \ldots \}} route catches every unmatched URL and
+forwards it, so the link does reach a screen --- just not the one its text names. The
+extractor now follows that wildcard, holds the resulting edge at may, and records a note
+saying the target matched nothing and where the wildcard sent it. Before that it reported
+those sites as unresolved, which inflated this finding with ghostfolio's twelve navigations
+to \texttt{/} alone.
+
+And a route array built by a spread (\texttt{children: [\ldots adminRoutes]}) was not
+followed, so the routes it carries were minted at the project root instead and a link to
+them matched nothing. From outside, that extractor defect is indistinguishable from a dead
+link. It is now followed.
+
+What remains should be read as a candidate list rather than a verdict:
+\RoundTwoTargetNoRoute{} sites name no route their application declares, and a route that
+both the extractor and the oracle fail to read looks, from the outside, exactly like a route
+that does not exist. alfresco in particular declares part of its navigation in an application
+configuration file rather than in TypeScript, which neither tool reads. What can be said is
+that for ghostfolio's \texttt{/admin/users} the absence was confirmed by searching the whole
+application for the path, and that a static transition graph puts every such candidate on one
+list instead of leaving it to be met at run time.

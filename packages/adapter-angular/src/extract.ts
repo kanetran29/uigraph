@@ -8,7 +8,7 @@
 // Observable/Promise-returning guards lowered in confidence + a soundiness note.
 // No edge is emitted without a static witness.
 
-import { Node, Project, ts } from 'ts-morph'
+import { Node, Project, SyntaxKind, ts } from 'ts-morph'
 import type { SourceFile } from 'ts-morph'
 import { relative, join, dirname } from 'node:path'
 import { existsSync, readFileSync } from 'node:fs'
@@ -171,6 +171,15 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         let target = matchLiteral(value, routeLikes)
         // A link to a redirect reaches what the redirect forwards to; follow it one step.
         if (!target && redirects.has(value)) target = matchLiteral(redirects.get(value)!, routeLikes)
+        // A target no route declares is not nowhere: a `**` route catches it and sends it on.
+        // The destination is real, but the author almost certainly did not mean to go there,
+        // so the edge is held at may and the note says what happened.
+        let viaWildcard = false
+        if (!target && redirects.has('*')) {
+          target = matchLiteral(redirects.get('*')!, routeLikes)
+          viaWildcard = target !== null
+          if (viaWildcard && note) soundiness.push({ kind: 'wildcard-redirect', file, loc: t.loc, detail: `literal target "${value}" matches no declared route; the wildcard route redirects it to ${redirects.get('*')}` })
+        }
         if (!target) {
           if (note) soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${value}" matches no declared route` })
           continue
@@ -178,7 +187,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
         noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
         const guardText = gate.guarded ? gate.guardTexts.join(',') : null
-        const uncertain = gate.guarded || capMay || (t.ti.kind === 'literal' && t.ti.holes === true)
+        const uncertain = gate.guarded || capMay || viaWildcard || (t.ti.kind === 'literal' && t.ti.holes === true)
         pushEdge(from, target.nodeId, t, uncertain ? 'may' : 'must', gate.guarded ? gate.confidence : uncertain ? 0.5 : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
         const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
@@ -316,7 +325,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const file = relative(projectDir, f)
       // An NgRx effect is registered with the store for the lifetime of the application, so it
       // can fire on any screen: its scope is top, the same place the shell sits.
-      if (/createEffect\s*\(/.test(sf.getFullText())) {
+      // From the syntax tree, not the text: a `createEffect(` inside a comment is not an effect.
+      const isEffect = sf.getDescendantsOfKind(SyntaxKind.CallExpression).some((c) => /(^|\.)createEffect$/.test(c.getExpression().getText()))
+      if (isEffect) {
         const before = edges.length
         emitTargets(SHELL_NODE_ID, ts, file, true, true)
         shellEdges += edges.length - before

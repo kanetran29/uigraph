@@ -109,7 +109,7 @@ export function constantString(expr: Node | undefined): string | null {
   // they are translated, and reading only plain literals loses the whole route.
   if (Node.isTaggedTemplateExpression(expr) && /(^|\.)\$localize$/.test(expr.getTag().getText())) {
     const tpl = expr.getTemplate()
-    if (Node.isNoSubstitutionTemplateLiteral(tpl)) return tpl.getLiteralValue().replace(/^:.*?:/s, '')
+    if (Node.isNoSubstitutionTemplateLiteral(tpl)) return stripI18nMeta(tpl.getLiteralValue())
   }
   if (Node.isIdentifier(expr)) return constantString(declaredInitializer(expr))
   if (Node.isPropertyAccessExpression(expr)) {
@@ -122,6 +122,20 @@ export function constantString(expr: Node | undefined): string | null {
     return typeof value === 'string' ? value : constantString(member?.getInitializer())
   }
   return null
+}
+
+/**
+ * Drop Angular's i18n metadata block from a `$localize` message. The block is delimited by a
+ * leading colon and the colon that closes it, and it may itself contain colons
+ * (`:Section: the page@@route.about:`), so the closing colon is the one after the `@@` id when
+ * there is one. Taking the first colon instead left the description and the id in the path.
+ */
+function stripI18nMeta(text: string): string {
+  if (!text.startsWith(':')) return text
+  const withId = /^:[^]*?@@[^:]*:/s.exec(text)
+  if (withId) return text.slice(withId[0].length)
+  const plain = /^:[^:]*:/.exec(text)
+  return plain ? text.slice(plain[0].length) : text
 }
 
 /** The enum an identifier names, following imports within the project, or undefined. */
@@ -241,8 +255,31 @@ export function classPropertyInitializer(sf: SourceFile, name: string): Node | u
     if (!prop || !Node.isPropertyDeclaration(prop)) continue
     const init = prop.getInitializer()
     if (!init) continue
+    // A field that is written again anywhere in the class is state, whatever its initializer
+    // looks like. Reading the initializer of `dest = table.home.routerLink` that `ngOnInit`
+    // then overwrites claims a destination the application does not go to.
+    const reassigned = cls.getDescendantsOfKind(SyntaxKind.BinaryExpression).some((b) => {
+      if (b.getOperatorToken().getText() !== '=') return false
+      const l = b.getLeft()
+      return Node.isPropertyAccessExpression(l) && l.getName() === name
+    })
+    if (reassigned) continue
     const stable = prop.isReadonly() || prop.isStatic() || Node.isIdentifier(init) || Node.isPropertyAccessExpression(init)
     if (stable) return init
+  }
+  return undefined
+}
+
+/** The array literal an identifier or property-access chain ultimately names, or undefined. */
+export function arrayLiteralOf(expr: Node | undefined): Node | undefined {
+  if (!expr) return undefined
+  if (Node.isAsExpression(expr) || Node.isParenthesizedExpression(expr) || Node.isSatisfiesExpression(expr)) return arrayLiteralOf(expr.getExpression())
+  if (Node.isArrayLiteralExpression(expr)) return expr
+  if (Node.isIdentifier(expr)) return arrayLiteralOf(declaredInitializer(expr))
+  if (Node.isPropertyAccessExpression(expr)) {
+    const obj = objectLiteralOf(expr.getExpression())
+    const prop = obj?.getProperty(expr.getName())
+    return prop && Node.isPropertyAssignment(prop) ? arrayLiteralOf(prop.getInitializer()) : undefined
   }
   return undefined
 }

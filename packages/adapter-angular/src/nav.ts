@@ -58,11 +58,13 @@ export function classifyTarget(expr: Node | undefined, depth = 0): TargetInfo {
       const ti = classifyCommandParts(built.getElements().map((el) => el.getText()), built.getSourceFile())
       if (ti.kind !== 'dynamic') return ti
     }
-    // A path builder takes the leading segment as its first literal argument.
-    for (const arg of expr.getArguments()) {
-      const lit = constantString(arg)
-      if (lit !== null && lit !== '') return { kind: 'template', staticPrefix: lit.startsWith('/') ? lit + '/' : '/' + lit + '/' }
-    }
+    // A path builder of the shape `href(state, ...) { return `/${state}/...` }` fixes its
+    // leading segment to one of its own parameters, so the prefix follows from binding that
+    // parameter to the argument at the call site. Guessing it from the first string argument
+    // instead — an earlier version of this function did — invents a prefix from an argument
+    // that may mean anything, and a red-team panel reproduced a wrong edge from exactly that.
+    const bound = boundLeadingSegment(expr)
+    if (bound !== null) return { kind: 'template', staticPrefix: '/' + bound.replace(/^\/+/, '') + '/' }
     return { kind: 'dynamic' }
   }
   if (Node.isTemplateExpression(expr) && expr.getHead().getLiteralText() === '' ) {
@@ -430,4 +432,33 @@ function mapSetValue(container: Node): Node | undefined {
   if (sets.length !== 1) return undefined
   const args = sets[0]?.getArguments() ?? []
   return args[args.length - 1]
+}
+
+/**
+ * The leading path segment a builder call fixes, when the builder returns a template literal
+ * that opens with one of its parameters and the call passes a constant for it. Returns null
+ * whenever any link in that chain is missing, which is most of the time and is the point.
+ */
+function boundLeadingSegment(call: Node): string | null {
+  if (!Node.isCallExpression(call)) return null
+  const callee = call.getExpression()
+  const name = Node.isPropertyAccessExpression(callee) ? callee.getName() : Node.isIdentifier(callee) ? callee.getText() : null
+  if (!name) return null
+  const decl = call.getSourceFile().getProject().getSourceFiles()
+    .flatMap((f) => f.getClasses())
+    .flatMap((c) => {
+      const m = c.getMethod(name)
+      return m ? [m] : []
+    })[0]
+  if (!decl) return null
+  const returns = decl.getDescendantsOfKind(SyntaxKind.ReturnStatement)
+  if (returns.length !== 1) return null
+  const body = returns[0]?.getExpression()
+  if (!body || !Node.isTemplateExpression(body)) return null
+  if (body.getHead().getLiteralText() !== '/') return null
+  const first = body.getTemplateSpans()[0]?.getExpression()
+  if (!first || !Node.isIdentifier(first)) return null
+  const idx = decl.getParameters().findIndex((p) => p.getName() === first.getText())
+  if (idx < 0) return null
+  return constantString(call.getArguments()[idx])
 }

@@ -346,17 +346,22 @@ The nesting relation can no longer be read from element names, and recovering it
 a dataflow problem over the values that carry the template. This is the same obstacle
 that Section~\ref{sec:transfer} identifies for JSX.
 \item \textbf{Dispatch through NgRx effects and router event subscriptions.} The
-dispatch relation is specified in Chapter~\ref{ch:analysis} and not implemented, so a
-navigation inside an effect is attributed to no screen. The cost is concentrated in the
-applications that use the pattern and is zero in the others.
+dispatch relation is specified in Chapter~\ref{ch:analysis} and not implemented. On the
+pinned extractor a navigation inside an effect is attributed to no screen; the approximation
+of Section~\ref{sec:res-round2} gives it $\top$ instead, which is sound and coarse --- an
+effect can fire on any screen, so the edge is offered from the shell at \emph{may} rather
+than from the screen that actually dispatched the action.
 \item \textbf{Navigation inside signal effects and observable subscriptions.} The firing
 condition is a data dependence in a graph the runtime builds, not a control-flow
 condition in the program text (Sections~\ref{sec:signals} and~\ref{sec:reactive}). The
 model gives such edges the modality \emph{unknown}, with the read set recorded as the
-symbolic guard; no pass in this version emits one.
+symbolic guard. The pinned extractor emits none; after
+Section~\ref{sec:res-round2} an unknown edge is emitted, but into the \texttt{u\_}\,sink and
+without the read set, so what it records is that the screen is left, not under what
+condition.
 \item \textbf{Computed navigation targets.} A target built at run time from values cannot
-be enumerated statically in general. The analysis either emits no edge or over-approximates
-into the may tier, where a single unresolved call site can connect to every declared
+be enumerated statically in general. The analysis emits an edge into the screen's
+\texttt{u\_}\,sink, or over-approximates into the may tier, where a single unresolved call site can connect to every declared
 route, as one of the protocol corrections showed (Section~\ref{sec:corrections}).
 \item \textbf{Injection tokens with several bindings.} Where a token can resolve to more
 than one implementation, the analysis joins over all of them, and the resulting edges are
