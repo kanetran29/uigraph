@@ -177,6 +177,15 @@ the baseline. No construct that was converted in the baseline is lost after
 attribution: following every construct by its identifier across the two runs finds no
 construct that leaves the converted classes.
 
+The witness check also records the edges outside the must tier. Chapter~\ref{ch:analysis}
+excludes them from the precision claim, because target agreement is not a meaningful test
+for an edge the extractor produced by over-approximation, and the counts are given here so
+that the exclusion is visible rather than assumed. On the four applications whose per-edge
+records were kept, 179 of 201 non-must edges fail the target comparison before attribution
+and 553 of 599 after it. Mifos accounts for 177 and 529 of those, which is the single
+over-approximated call site of Section~\ref{sec:corrections} seen one edge at a time. The
+growth follows the growth of the may tier and says nothing about the must tier.
+
 The anchored representation was checked on the same graphs.
 Claim~\ref{claim:expansion} requires the expansion of the anchored edge set to equal the
 materialised edge set. On realworld the attributed graph stores 50 edges against two
@@ -294,6 +303,17 @@ scored mutants. A dash means the operator found no candidate in that application
 \end{table}
 \FigMutation
 
+
+The rename operator needs a caveat before these figures are read as change sensitivity.
+A rename mutant is excluded unless the baseline graph already holds a node for the path
+segment it renames, and it counts as detected when the renamed segment appears in the
+graph. A screen is identified by its full path (Section~\ref{sec:model}), so a literal
+path the extractor has already parsed must yield a different node once renamed, and
+detection for this operator is close to guaranteed by construction. It supplies 22 of the
+48 scored mutants and 22 of the 39 detections. What it tests is node extraction rather
+than the graph's response to a change in behaviour. The three operators that can fail are
+detected in 17 of their 26 scored mutants. On alfresco the attributed graph carries one
+edge, so its rate is a node-level result and not a statement about transitions.
 
 Every mutant that produced no change in the graph at all was a guard removal: one in
 realworld, two in alfresco and five in bitwarden. Six of these eight are guards declared

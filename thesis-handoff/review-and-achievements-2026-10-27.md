@@ -24,7 +24,12 @@ output, not from a reviewer's word.
 | 7. Section 6.1 repeats raw numbers | **fixed.** Rewritten to argue rather than recount; the only digits left are RQ labels. Eight regressions the de-numbering introduced were caught by a verifier and repaired. |
 | 9. Chapter 3 bounds and contradictions | **fixed.** One bound per computation, correctly related; termination on finite height with monotonicity argued; the acyclicity claim dropped; Sigma pulled back to event kinds; the third modality given a consistent specified-but-not-produced voice across Chapters 2, 3 and 6. |
 | Table 3.1 against Algorithm 3.1 | **fixed, against the extractor.** A first attempt removed the routed-component guard from the algorithm, which made it disagree with the code that produced Chapter 5. Algorithm 3.1 now stands as the model; the prototype's restriction (no propagation into a route-mounted component) is documented in the implementation section, carried as a side condition on Table 3.1's template row, and the least-solution claim is scoped to the model. The restriction can only lose edges, so the must-tier claim is unaffected. |
-| Parts 3 and 4 | **open.** |
+| Part 3: scope has no oracle | **declared.** 6.2 now has a "No oracle for the scope" threat explaining why the witness check and the e2e oracle both miss an over-large scope, and 6.5 proposes the hand-enumerated comparison that would give it ground truth. |
+| Part 3: may-tier failures unreported | **fixed.** 5.3 reports 179 of 201 non-must edges failing target agreement before attribution and 553 of 599 after, with mifos accounting for 177 and 529, and says why the must-tier claim excludes them. |
+| Part 3: RQ4 aggregate carried by rename | **fixed.** 5.4 states that rename detection is near-definitional once the mutant is scored, gives its share (22 of 48 scored, 22 of 39 detections), and reports the three operators that can fail at 17 of 26. Alfresco's single-edge graph is flagged. |
+| Part 3: CI use case proposes guard assertions | **fixed.** The guard assertion is removed from the list and named as the one the graph cannot yet carry, citing RQ4. |
+| Part 4: voice, orphan entry, aphorism, caption | **fixed.** One voice throughout (first person, as the abstract and Ch1 already used); `llmdroid2025` now cited; 4.3.2's closer replaced with the five corrections that were actually found by disbelieving a figure; the mutation figure caption matches Ch5's wording. |
+| Part 3: RQ2's two-method rule; Part 4: plot redundancy, page balance | **open.** |
 
 Corrections to my own earlier reporting, from redoing the diff on the stable construct
 id (`at`) instead of `file:line`: the conversions out of `LAZY_BOUNDARY` are 40 must and

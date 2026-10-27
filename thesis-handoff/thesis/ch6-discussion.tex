@@ -123,8 +123,11 @@ recomputed from source on each commit, the extraction is deterministic and carri
 state between runs (Section~\ref{sec:protocol}), and nothing has to be installed,
 served, authenticated against or crawled. Properties of the navigation structure can
 then be asserted on every commit in the same way a type check is: that a screen still
-has at least one inbound deterministic transition, that a guard still labels every edge
-entering a protected subtree, that a screen that was reachable from the shell still is.
+has at least one inbound deterministic transition, that a screen that was reachable from
+the shell still is, that a route path a test depends on has not been renamed. A guard
+assertion is the one obvious member of that list the graph cannot yet carry, because RQ4
+found guards on empty-path routes missing from the edges entering their screen, and an
+assertion is worth less than nothing if it passes for the wrong reason.
 A dynamically built model cannot be used this way at the same cost, because it needs a
 running application, test data and an exploration budget, and it has to be rebuilt for
 each version \cite{crawljax2012,feedex2013,websurvey2025}.
@@ -203,6 +206,17 @@ oracle at all. The results are Angular results. The graph model and the lattice
 do not mention Angular, and Section~\ref{sec:transfer} argues about other routers, but
 that argument is not a measurement.
 
+\textbf{No oracle for the scope.} Every method in Chapter~\ref{ch:evaluation} checks a
+node, an edge or a witness. None of them checks the screen set that attribution computes,
+which is the contribution of the thesis. A site attributed to too many screens produces
+edges that the witness check still passes, because the construct really is at that
+location and really does name that target, and the end-to-end oracle only visits URLs and
+so cannot see a source screen that should not have been there. The shell rule is capped at
+\emph{may} where the mounting route is invisible (Section~\ref{sec:implementation}),
+which limits what an over-large scope can claim, but it is a design precaution and not a
+measurement. The scope is therefore the least directly validated part of the analysis, and
+the figures for it rest on the edges it produces agreeing with the other methods.
+
 \textbf{Oracle independence.} The route parser shares no code with the extractor, which
 makes it independent and says nothing about whether it is right. Its first version did not look
 inside wrapper calls, did not follow a lazily loaded module to the routing module it
@@ -214,8 +228,8 @@ oracle's, not the tool's. A differential test also only shows that two implement
 disagree, never which of them is right, and each disagreement in this study was resolved
 by reading the application source, by the same person who wrote both implementations.
 
-\textbf{Experimenter bias.} The author of the extractor is also the author of the
-evaluation, the corpus selection and the defect classification. The mitigations actually
+\textbf{Experimenter bias.} I wrote the extractor, and I also designed the evaluation,
+selected the corpus and defined the defect classes. The mitigations actually
 applied are the following. The selection criteria were fixed before any results were
 obtained, and the rejected candidates are reported with their reasons. The construct
 counts and the declared screens come from a parser that shares no code with the
@@ -448,6 +462,15 @@ future work.
 
 \section{Future work}
 \label{sec:future}
+
+An oracle for the screen set is the cheapest addition that would strengthen the thesis
+most, because the scope is the contribution and
+Section~\ref{sec:limitations} records that no method validates it directly. On an
+application small enough to read, the screens that render each navigation site can be
+enumerated by hand and compared with the computed scope, which would give attribution the
+kind of ground truth the end-to-end oracle gives node extraction. Recording, for each
+attributed site, the relation that supplied its scope would make the same comparison
+possible per relation.
 
 The two defects that cap the larger applications are the most urgent, because nothing else in the
 analysis can be evaluated properly while they stand. Resolving constant-valued route
