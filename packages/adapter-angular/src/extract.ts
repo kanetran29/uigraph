@@ -102,7 +102,8 @@ function workspaceTsPaths(projectDir: string): { baseUrl: string; paths: Record<
 /** Extract a graph from an already-built ts-morph project (testable in memory). */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const redirects = new Map<string, string>()
-  const routes = collectRoutes(project, redirects)
+  const unreadablePaths = { count: 0 }
+  const routes = collectRoutes(project, redirects, unreadablePaths)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
@@ -175,10 +176,16 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // The destination is real, but the author almost certainly did not mean to go there,
         // so the edge is held at may and the note says what happened.
         let viaWildcard = false
-        if (!target && redirects.has('*')) {
+        // Only when the route set is believed complete. With even one unreadable path the
+        // target may well BE one of those routes, and forwarding it through the wildcard
+        // would turn the extractor's own gap into a resolved edge.
+        if (!target && redirects.has('*') && unreadablePaths.count === 0) {
           target = matchLiteral(redirects.get('*')!, routeLikes)
           viaWildcard = target !== null
           if (viaWildcard && note) soundiness.push({ kind: 'wildcard-redirect', file, loc: t.loc, detail: `literal target "${value}" matches no declared route; the wildcard route redirects it to ${redirects.get('*')}` })
+        }
+        if (!target && note && unreadablePaths.count > 0 && redirects.has('*')) {
+          soundiness.push({ kind: 'incomplete-route-set', file, loc: t.loc, detail: `literal target "${value}" matches no declared route, and ${unreadablePaths.count} declared path(s) could not be read, so it is not claimed that no such route exists` })
         }
         if (!target) {
           if (note) soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${value}" matches no declared route` })

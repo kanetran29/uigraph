@@ -525,12 +525,19 @@ it.}
 
 Across the corpus \RoundTwoMustClean{} must edges are clean, so
 \RoundTwoMustViolations{} violate the property, all of them in mifos, where the must tier
-grew from 129 edges to over a thousand. That is a worse ratio than the one edge of
+grew from 129 edges to over a thousand. Read over the whole graph rather than the must tier,
+only \RoundTwoGraphClean{} of edges are clean, because \RoundTwoOverApprox{} of them are
+over-approximations for which the check claims no target agreement by design. That figure is
+reported beside the must column because the must tier is a small and deliberately chosen
+slice of the graph, and a precision figure for the slice is not one for the graph. That is a worse ratio than the one edge of
 Section~\ref{sec:res-defects}, and it is reported here rather than left to be inferred from
-a coverage table. The violations are concentrated in two shapes the witness check already
-distinguishes: two links on one template line, which the check matches by line, and a prefix
-it normalises differently from the extractor. Neither has been traced construct by
-construct, so the figure stands as measured and not as explained.
+a coverage table. Every one of the 24 sits in a \texttt{.ts} file, and not one is in a template: 20 are a
+target mismatch and 4 a witness two lines from its construct. All 20 mismatches are a
+route-relative commands array --- \texttt{['../']}, \texttt{['../centers']},
+\texttt{['../actions', \ldots]} --- where the check resolves the relative path against a
+different base than the extractor does. An earlier draft of this paragraph blamed two links
+on one template line, which accounts for none of them; the shape above was read off the
+witness output rather than assumed.
 
 The second column is the more uncomfortable one. RQ1 defines conversion as the fraction of
 constructs witnessed by at least one \emph{must} edge, and by that definition
@@ -547,9 +554,11 @@ nothing.
 \RoundTwoUnexplained{} sites remain unexplained, and Table~\ref{tab:round2reasons} gives the
 reason for each. The reasons are produced by a script that exits non-zero if a single site
 reaches the end of it without one, so a site the analysis cannot explain is a failing state
-rather than a silent remainder. The largest group is a target the extractor read for which
-no node matches: \RoundTwoTargetNoRoute{} of them name no route the application declares,
-and \RoundTwoTargetNoNode{} name a route that is declared and has no node.
+rather than a silent remainder. Two groups concern a target the extractor read and could not place, and they are
+counted apart because they are different claims: \RoundTwoTargetNoRoute{} name no route the
+application declares, and \RoundTwoTargetNoNode{} name a route that is declared and has no
+node. Both are decided here by testing the target against the route set, not by repeating
+whatever note the extractor had left at the site.
 
 \begin{table}[t]\small
 \caption{Why each remaining site is not a transition. The script that produces this table
@@ -571,7 +580,9 @@ Its shared route table declares
 
 \noindent and a component navigates there, but the admin route configuration mounts only
 \texttt{jobs}, \texttt{marketData}, \texttt{settings} and the empty path, and no route with
-the path \texttt{users} exists anywhere in the application. The link cannot be followed. A
+the path \texttt{users} exists anywhere in the application. Nothing the author wrote answers
+that link; where the application declares a wildcard route, it lands on whatever that route
+forwards to instead of failing visibly, which is the less obvious of the two defects. A
 test that never opens that menu would not find it, and a crawler would find it only if it
 reached the screen that holds it; reading the route configuration finds it without running
 anything.
@@ -581,10 +592,18 @@ Two corrections belong with this finding, and both came from having it attacked.
 A target no route declares is not a target that goes nowhere. An application with a
 \texttt{\{ path: '**', redirectTo: \ldots \}} route catches every unmatched URL and
 forwards it, so the link does reach a screen --- just not the one its text names. The
-extractor now follows that wildcard, holds the resulting edge at may, and records a note
-saying the target matched nothing and where the wildcard sent it. Before that it reported
-those sites as unresolved, which inflated this finding with ghostfolio's twelve navigations
-to \texttt{/} alone.
+extractor follows that wildcard, holds the resulting edge at may, and records a note saying
+the target matched nothing and where the wildcard sent it.
+
+That claim is made only where the route set is believed complete. The first version of it was
+not, and the cost was precise: bitwarden declares its authentication paths through an enum the
+extractor had failed to read, so 62 targets such as \texttt{/login} matched nothing for a
+reason that was the extractor's, and the wildcard then forwarded every one of them and raised
+that application's recovered figure by eight points. The extractor now counts the paths it
+could not read and withholds the wildcard claim whenever that count is not zero, reporting
+instead that no such route was found \emph{and} that the route set has holes. Of the sites
+whose target names no declared route, \RoundTwoWildcardRescued{} are now resolved through a
+wildcard and the rest are left unresolved.
 
 And a route array built by a spread (\texttt{children: [\ldots adminRoutes]}) was not
 followed, so the routes it carries were minted at the project root instead and a link to
