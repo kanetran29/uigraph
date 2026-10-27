@@ -44,14 +44,15 @@ const RULES = {
     detect: (l) => /\[?routerLink\]?\s*=/.test(l),
     target: (l) => {
       // routerLink="/a/b"  |  [routerLink]="['/a', x]"  |  [routerLink]="['/a', x, 'b']"
-      const plain = l.match(/routerLink\s*=\s*"(\/[^"]*)"/)
+      // The leading form is kept: a link without a slash is relative to the screen, and the
+      // caller resolves it there. Forcing a slash here read every relative link as absolute.
+      const plain = l.match(/routerLink\s*=\s*"([^"]*)"/)
       if (plain) return plain[1]
       const arr = l.match(/\[routerLink\]\s*=\s*"\[([^\]]*)\]"/)
       if (!arr) return null
       const parts = [...arr[1].matchAll(/'([^']*)'|"([^"]*)"/g)].map((m) => m[1] ?? m[2])
       const dyn = arr[1].split(',').length - parts.length
-      let p = parts.join('/').replace(/\/+/g, '/')
-      if (!p.startsWith('/')) p = '/' + p
+      const p = parts.join('/').replace(/\/+/g, '/')
       return dyn > 0 ? p + '/:param'.repeat(dyn) : p
     },
   },
@@ -65,14 +66,27 @@ const RULES = {
       if (!arr) return null
       const parts = [...arr[1].matchAll(/'([^']*)'|"([^"]*)"/g)].map((m) => m[1] ?? m[2])
       const dyn = arr[1].split(',').filter((s) => s.trim()).length - parts.length
-      let p = parts.join('/').replace(/\/+/g, '/')
-      if (!p.startsWith('/')) p = '/' + p
+      const p = parts.join('/').replace(/\/+/g, '/')
       return dyn > 0 ? p + '/:param'.repeat(dyn) : p
     },
   },
 }
 
 RULES['ng.navigate-by-url'] = RULES['ng.navigate']
+
+/** Resolve a route-relative target against the path of the screen the edge fires from. */
+function resolveRelative(target, fromRoute) {
+  if (!target || !fromRoute || target.startsWith('/') || target === '*') return target
+  const out = fromRoute.split('/').filter(Boolean)
+  const rest = target.split('/').filter(Boolean)
+  let i = 0
+  for (; i < rest.length; i++) {
+    if (rest[i] === '.') continue
+    if (rest[i] === '..') { out.pop(); continue }
+    break
+  }
+  return '/' + [...out, ...rest.slice(i)].join('/')
+}
 
 // Route-pattern comparison: a declared param matches any single concrete segment.
 function targetAgrees(found, nodeRoute) {
@@ -143,8 +157,16 @@ for (const e of edges) {
     continue
   }
 
-  const found = rule.target(src[hitLine - 1])
+  const foundRaw = rule.target(src[hitLine - 1])
   const toRoute = nodes.get(e.to)?.route
+  // A routerLink without a leading slash is relative to the route the template is rendered on,
+  // so compare it as Angular resolves it, against the edge's own source screen. Harness 1.4.0;
+  // before this the oracle read every bare link as absolute and called 838 correct mifos edges
+  // soundness violations.
+  // Only a template link is route-relative; `navigate([...])` without `relativeTo` resolves
+  // from the root, so a bare target there is absolute.
+  const relativeHere = w.ruleId === 'ng.router-link' || src.slice(hitLine - 1, hitLine + 2).some((l) => /relativeTo/.test(l ?? ''))
+  const found = !foundRaw ? foundRaw : relativeHere ? resolveRelative(foundRaw, nodes.get(e.from)?.route) : foundRaw.startsWith('/') ? foundRaw : '/' + foundRaw
   const agrees = targetAgrees(found, toRoute)
   const fan = witnessFanout.get(`${w.file}:${w.loc?.line}`) || 1
 

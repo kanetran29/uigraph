@@ -5,7 +5,7 @@
 // (and loop/branch/early-return conditions that demote a nav to `may`).
 
 import { Node, SyntaxKind } from 'ts-morph'
-import { constantString, constantStringArray, classPropertyInitializer } from './resolve'
+import { constantString, constantStringArray, constantForName } from './resolve'
 import type { SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
 import { inlineTemplate, type ComponentTemplate } from './templates'
@@ -27,16 +27,17 @@ export function classifyTarget(expr: Node | undefined): TargetInfo {
       return { kind: 'template', staticPrefix: left.getLiteralValue() }
     }
   }
-  // `navigate(this.routerLinkAdminControlUsers)` names the destination instead of writing it.
-  // The field often holds a constant from a shared route table, so follow it; a field assigned
-  // at runtime resolves to nothing and stays dynamic, as it should.
-  const field = Node.isPropertyAccessExpression(expr) && expr.getExpression().getKind() === SyntaxKind.ThisKeyword ? expr.getName() : Node.isIdentifier(expr) ? expr.getText() : null
-  if (field) {
-    const init = classPropertyInitializer(expr.getSourceFile(), field) ?? (Node.isIdentifier(expr) ? expr : undefined)
-    const arr = constantStringArray(init)
-    if (arr && arr.length > 0) return { kind: 'literal', value: '/' + arr.join('/').replace(/^\/+/, '').replace(/\/+/g, '/') }
-    const str = constantString(init)
-    if (str !== null) return { kind: 'literal', value: str }
+  // `navigate(publicRoutes.demo.routerLink)` or `navigate(this.cancelRoute)` names the
+  // destination instead of writing it. Follow the chain, then the name in the component's own
+  // scope; a value assigned at run time resolves to nothing and stays dynamic, as it should.
+  const direct = constantStringArray(expr)
+  if (direct && direct.length > 0) return { kind: 'literal', value: joinCommands(direct) }
+  const directStr = constantString(expr)
+  if (directStr !== null) return { kind: 'literal', value: directStr }
+  if (Node.isIdentifier(expr) || Node.isPropertyAccessExpression(expr)) {
+    const r = constantForName(expr.getSourceFile(), expr.getText())
+    if (Array.isArray(r) && r.length > 0) return { kind: 'literal', value: joinCommands(r) }
+    if (typeof r === 'string') return { kind: 'literal', value: r }
   }
   return { kind: 'dynamic' }
 }
@@ -86,7 +87,11 @@ export function templateLoc(sf: SourceFile, tpl: ComponentTemplate, index: numbe
     const line = tpl.text.slice(0, index).split('\n').length
     return { line, col: 1 }
   }
-  const lc = sf.getLineAndColumnAtPos(tpl.start)
+  // An inline template is a string literal in the .ts file, so a match inside it is at the
+  // literal's start plus the match offset (+1 for the opening backtick). Reporting the
+  // decorator's own line instead put every link in a long inline template on one line, where
+  // nothing could tell them apart or check them against the source.
+  const lc = sf.getLineAndColumnAtPos(tpl.start + 1 + index)
   return { line: lc.line, col: lc.column }
 }
 
@@ -118,18 +123,55 @@ function classifyBoundLink(expr: string, sf?: SourceFile): TargetInfo {
   if (literalOnly) return { kind: 'literal', value: literalOnly[1] ?? '' }
   const concatPrefix = /^'([^']*)'\s*\+/.exec(trimmed) ?? /^"([^"]*)"\s*\+/.exec(trimmed)
   if (concatPrefix) return { kind: 'template', staticPrefix: concatPrefix[1] ?? '' }
-  if (trimmed.startsWith('[')) return classifyLinkArray(trimmed)
+  if (trimmed.startsWith('[')) return classifyLinkArray(trimmed, sf)
   // `[routerLink]="routerLinkBlog"` binds to a field of the component, which commonly holds
   // the link from a shared route table (`publicRoutes.blog.routerLink`). Follow the field to
   // that constant rather than calling the whole site dynamic.
-  if (sf && /^[A-Za-z_$][\w$]*$/.test(trimmed)) {
-    const init = classPropertyInitializer(sf, trimmed)
-    const arr = constantStringArray(init)
-    if (arr && arr.length > 0) return { kind: 'literal', value: '/' + arr.join('/').replace(/^\/+/, '').replace(/\/+/g, '/') }
-    const str = constantString(init)
-    if (str !== null) return { kind: 'literal', value: str }
+  if (sf && /^(this\.)?[A-Za-z_$][\w$.]*$/.test(trimmed)) {
+    const r = constantForName(sf, trimmed)
+    if (Array.isArray(r) && r.length > 0) return { kind: 'literal', value: joinCommands(r) }
+    if (typeof r === 'string') return { kind: 'literal', value: r }
   }
   return { kind: 'dynamic' }
+}
+
+
+/**
+ * Join resolved command segments as Angular joins a commands array. The leading form is kept:
+ * `['/blog']` stays absolute and `['./general']` stays relative, so relative resolution against
+ * the firing screen still has something to work with.
+ */
+function joinCommands(segs: string[]): string {
+  return segs.join('/').replace(/\/+/g, '/')
+}
+
+/**
+ * Classify a commands array from its already-separated parts, resolving any part that is a
+ * name rather than a literal. All parts static is a literal; a static head followed by a part
+ * that is not is a prefix; nothing static is dynamic.
+ */
+function classifyCommandParts(parts: string[], sf: SourceFile | undefined): TargetInfo {
+  if (parts.length === 0) return { kind: 'dynamic' }
+  const segs: string[] = []
+  let complete = true
+  for (const p of parts) {
+    const lit = /^'([^']*)'$/.exec(p) ?? /^"([^"]*)"$/.exec(p)
+    if (lit) {
+      segs.push(lit[1] ?? '')
+      continue
+    }
+    const resolved = sf && /^(this\.)?[A-Za-z_$][\w$.]*$/.test(p) ? constantForName(sf, p) : null
+    if (resolved === null) {
+      complete = false
+      break
+    }
+    if (Array.isArray(resolved)) segs.push(...resolved)
+    else segs.push(resolved)
+  }
+  if (segs.length === 0) return { kind: 'dynamic' }
+  const path = joinCommands(segs)
+  if (complete) return { kind: 'literal', value: path }
+  return { kind: 'template', staticPrefix: path.endsWith('/') ? path : path + '/' }
 }
 
 /**
@@ -138,9 +180,10 @@ function classifyBoundLink(expr: string, sf?: SourceFile): TargetInfo {
  * whose prefix is the static segments joined with trailing slash. A non-literal
  * first element is dynamic.
  */
-function classifyLinkArray(arr: string): TargetInfo {
+function classifyLinkArray(arr: string, sf?: SourceFile): TargetInfo {
   const inner = arr.slice(1, arr.lastIndexOf(']'))
   const parts = splitTopLevel(inner)
+  if (sf) return classifyCommandParts(parts, sf)
   if (parts.length === 0) return { kind: 'dynamic' }
   const lits: string[] = []
   for (const p of parts) {
@@ -201,11 +244,14 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
       out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc })
     } else {
       const arg0 = call.getArguments()[0]
-      // `navigate(x)` takes a commands array; when it is written out, the first element carries
-      // the static part, and when it is named, the name itself is the thing to resolve.
-      const first = arg0 && Node.isArrayLiteralExpression(arg0) ? arg0.getElements()[0] : arg0
+      // `navigate(x)` takes a commands array. Written out, every element counts, not only the
+      // first: `['/clients', id]` is a prefix, not the literal `/clients`.
       const relative = /\brelativeTo\s*:/.test(call.getArguments()[1]?.getText() ?? '')
-      out.push({ ti: classifyTarget(first), event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative })
+      const ti =
+        arg0 && Node.isArrayLiteralExpression(arg0)
+          ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf)
+          : classifyTarget(arg0)
+      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative })
     }
   }
   return out
