@@ -124,7 +124,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const edgeById = new Map<string, GraphEdge>()
   const seenAsyncGuards = new Set<string>()
 
-  function pushEdge(from: string, to: string, t: RawTarget, modality: 'must' | 'may', confidence: number, guard: string | null, file: string): void {
+  function pushEdge(from: string, to: string, t: RawTarget, modality: GraphEdge['modality'], confidence: number, guard: string | null, file: string): void {
     const id = edgeId(from, to, t.event, guard)
     if (seen.has(id)) {
       // Record the extra construct instead of dropping it, so every construct that yields
@@ -182,10 +182,27 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           const guardText = gate.guarded ? gate.guardTexts.join(',') : null
           pushEdge(from, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file)
         }
-      } else if (note) {
-        soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
+      } else {
+        // A target only the run time knows — a value from the backend, a history entry — still
+        // leaves a screen by an event. Record it as an edge into that screen's unknown sink
+        // rather than dropping it: the transition is then accounted for and auditable, the
+        // graph does not claim a destination it cannot know, and `verify` has somewhere to
+        // start. Core counts a `u_<screen>` sink as frontier, never as a resolved transition.
+        pushEdge(from, unknownSink(from), t, 'unknown', 0, null, file)
+        if (note) soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
       }
     }
+  }
+
+  /** The `u_<screen>` sink that holds the targets only the run time knows, minted on demand. */
+  const sinks = new Set<string>()
+  function unknownSink(from: string): string {
+    const id = `u_${from}`
+    if (!sinks.has(id)) {
+      sinks.add(id)
+      nodes.push({ id, route: null, componentPath: null, label: `dynamic target from ${pathByNodeId.get(from) ?? from}`, kind: 'unknown' })
+    }
+    return id
   }
 
   for (const route of routes) {
