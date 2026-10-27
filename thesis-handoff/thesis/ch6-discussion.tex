@@ -39,14 +39,16 @@ attribution problem that four applications show, and reporting only the per-appl
 ranking would have hidden that one large application can dominate everything that is
 aggregated.
 
-The answer to RQ3 has to be read against the upper bound that the loss rules define.
+The answer to RQ3 has to be read against what the loss rules can and cannot delimit.
 Because a lost construct is assigned to the first class that applies
 (Table~\ref{tab:loss-rules}), a construct inside a shared component that only appears
 in screens without nodes is counted as an attribution loss, although attribution alone
-cannot recover it. The attribution class is therefore an upper bound on what the
-analysis can repair and not a prediction of what it will repair. Across the corpus,
-attribution recovered under a fifth of that bound, while on realworld, whose node
-extraction is complete, it recovered 21 of 22 and the one loss left is in a service.
+cannot recover it. The measurement shows the converse as well: a majority of the
+deterministic gain came out of constructs the rules had assigned to node defects
+(Table~\ref{tab:recovery-source}). The attribution class is therefore not a bound in
+either direction, and the two levels of failure are not separable by the rules that
+classify them. On realworld, whose node extraction is complete, attribution recovered
+21 of 22 and the one loss left is in a service.
 The gap between the bound and what was recovered is accounted for by
 Table~\ref{tab:remaining}, and three of its reasons are not attribution problems at
 all: the target screen has no node, the owning component is never reached from any

@@ -127,8 +127,9 @@ work in this line changed the exploration strategy but not the source of the mod
 FeedEx uses feedback from the graph built so far to direct further exploration
 \cite{feedex2013}, and FRAGGEN abstracts states as hierarchies of DOM fragments in
 order to generate better tests \cite{fraggen2022}. The survey by Kertusha et al.\
-covers the model-based web testing tools of the past decade and finds that every one
-of them builds its model dynamically \cite{websurvey2025}.
+covers the model-based web testing tools of the past decade \cite{websurvey2025}. Of the
+tools it lists, every one whose model construction was examined for this thesis builds
+that model by executing the application.
 
 The explanation for this seems to be historical. In an Ajax application there was no
 declarative route table, and one URL could represent many states, because navigation
@@ -142,7 +143,7 @@ declared data structure in the source, a navigation is an attribute or a method 
 that names a route, and a guard is a named function attached to a route. Only one
 static analysis of such a framework was found during the literature search for this
 thesis, namely Kurant's component dependency graph for React, and it stops at the
-component rendering graph and explicitly excludes routing \cite{kurant2025}. The work
+component rendering graph without addressing routing \cite{kurant2025}. The work
 in this thesis is located between that analysis and the dynamic tools described above.
 
 \section{Formal foundations}

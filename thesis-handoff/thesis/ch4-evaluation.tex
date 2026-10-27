@@ -138,8 +138,11 @@ A call of the form \texttt{navigate([], \{queryParams\})} changes only the query
 string of the current screen. It is not a transition between screens, so it is reported separately and not counted as a loss.
 
 \textbf{Change in coverage and must-tier precision (RQ3).} The conversion ratio and the
-loss breakdown are measured on two tagged versions of the extractor, before and after
-attribution, on identical inputs. \emph{Must-tier precision} is the fraction of must
+loss breakdown are measured on one commit of the extractor, run twice on identical
+inputs with the attribution pass disabled and enabled. Measuring one commit rather than
+two rules out any difference between the runs other than the pass itself, which two
+versions could not guarantee; Section~\ref{sec:implementation} reports that with the
+pass off the extractor reproduces the baseline edge set exactly on every application. \emph{Must-tier precision} is the fraction of must
 edges whose witness line contains a construct of the claimed kind with the claimed
 target. RQ3 is answered positively only if coverage rises and must-tier precision does
 not fall.
@@ -275,7 +278,7 @@ Since then, any result that looks unusually good or bad is checked for measureme
 \subsection{Reproducibility}
 
 The whole evaluation can be re-run with a single command. The command clones the
-extractor at its fixed commit, fetches each application in the corpus at its fixed
+extractor at the commit tagged \texttt{thesis-eval}, fetches each application in the corpus at its fixed
 commit rather than from a branch, runs the extraction and all four evaluation methods,
 and writes a results file together with the tables derived from it. Each figure in the
 results file is recorded together with the commit of the extractor, the commits of the

@@ -72,8 +72,9 @@ frequently has no single owning screen: it may be located in a shared component,
 an injected service, or in a route guard. The thesis formulates attribution as a
 dataflow analysis over a lattice of screen sets, computed as a fixpoint over component
 nesting, router outlets and a call graph that takes dependency injection into account.
-It states the soundness property the analysis guarantees, implements the nesting and
-outlet parts, and evaluates them on the same corpus with the same methods. With attribution, coverage
+It states a soundness property for the deterministic tier, which it tests mechanically
+rather than proving, implements the nesting and outlet parts, and evaluates them on the
+same corpus with the same methods. With attribution, coverage
 rises in four of the six applications, from 15 to 38 percent on the smallest, and
 precision on the deterministic tier does not fall. On the larger applications the gain
 is limited by defects in node extraction, which the thesis also quantifies.
@@ -94,10 +95,11 @@ declared. An AI coding assistant was used in three ways in this work, and the au
 responsible for the whole of the result.
 
 The extractor under study and the evaluation harness were written with the help of an AI
-coding assistant. Every figure reported in this thesis is produced by running that
-harness, and the tables in Chapter~\ref{ch:results} are generated from its result files,
-except the two that are marked as compiled by hand, so that any figure can be reproduced from the pinned commits
-recorded with it.
+coding assistant. Every number reported in this thesis is produced by running that
+harness, and the result tables and plots of Chapter~\ref{ch:results} are generated from
+its result files, except the two tables marked as compiled by hand, so that any number can
+be reproduced from the commits recorded with it. The diagrams in
+Chapters~\ref{ch:introduction} to~\ref{ch:evaluation} were drawn by hand.
 
 The assistant was also used during the literature search, to locate candidate sources and
 to summarise them. No source is cited on the strength of such a summary. Every entry in
