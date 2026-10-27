@@ -99,31 +99,38 @@ So the baseline recovers a small fraction of the navigation, and loses it at two
 \section{Defect classes (RQ2)}
 \label{sec:res-defects}
 
-Table~\ref{tab:defects} lists the defect classes and the independent methods that
-confirm each. The five classes found in the first round all have at least two
+Table~\ref{tab:defects} lists the defect classes and the evidence for each, separating
+the named evaluation methods from the other observations. Three of the five accepted
+classes rest on one named method and are carried to two by an observation: attribution,
+named outlets and constant paths. The attribution class is the weakest in this respect,
+with one method and three observations, and it is the class the analysis of
+Chapter~\ref{ch:analysis} addresses. Its observations are not weak evidence in
+themselves, since two applications producing no edges at all is hard to explain any other
+way, but they are not independent instruments. The five classes found in the first round all have at least two
 confirmations. The quantitative breakdown below revealed a sixth candidate, a node
 that exists but is not linked to the component that renders it. It is confirmed only
 by the comparison between the route parser and the graph, so it is reported as a
 candidate until a second method confirms it.
 
 \begin{table}[t]\small
-\caption{Defect classes and the independent methods confirming each. A class is
-admitted only with two confirmations. This summary is compiled by hand from the
-evaluation methods; it is not harness output.}
+\caption{Defect classes and the evidence for each. A class is admitted on two
+independent lines of evidence, at least one from a named evaluation method; the methods
+column counts only those. This summary is compiled by hand; it is not harness output.}
 \label{tab:defects}
-\begin{tabularx}{\textwidth}{@{}lYr@{}}
+\begin{tabularx}{\textwidth}{@{}lYrr@{}}
 \toprule
-Class & Independent confirmations & Count \\
+Class & Evidence & Methods & All \\
 \midrule
 Attribution: navigation outside route components is invisible & mutation misses;
-multi-mount edge absent; manual audit; zero-edge applications & 4 \\
-Lazy module boundary not followed & route parser; end-to-end oracle; mutation & 3 \\
+multi-mount edge absent; manual audit; zero-edge applications & 1 & 4 \\
+Lazy module boundary not followed & route parser; end-to-end oracle; mutation & 3 & 3 \\
 Guards unreliable in both directions & removal invisible to mutation; witness check
-finds wrong predicate and colliding identifiers & 2 \\
-Named router outlets not modelled & end-to-end oracle; source survey & 2 \\
-Constant-valued route paths not resolved & route parser; node-count collapse & 2 \\
+finds wrong predicate and colliding identifiers; empty-path guard absent
+(Section~\ref{sec:res-mutation}) & 2 & 3 \\
+Named router outlets not modelled & end-to-end oracle; source survey & 1 & 2 \\
+Constant-valued route paths not resolved & route parser; node-count collapse & 1 & 2 \\
 \addlinespace
-\emph{Candidate:} node not linked to its component & route parser against graph & 1 \\
+\emph{Candidate:} node not linked to its component & route parser against graph & 1 & 1 \\
 \bottomrule
 \end{tabularx}
 \end{table}

@@ -82,8 +82,9 @@ entering \texttt{/editor} carries no guard although the route declares
 \texttt{canActivate}, while the edge entering \texttt{/editor/:slug} carries it. So a
 guard declared on an empty-path child route is not represented on the edges that enter
 that screen. This is a new instance of the class ``guards unreliable in both
-directions'' from Chapter~\ref{ch:results}, and that class now has two confirmations
-of its own, from two methods that do not share a mechanism.
+directions'' from Chapter~\ref{ch:results}, and that class is the one whose evidence is
+strongest, since this instance alone rests on two named methods that share no mechanism,
+mutation and direct inspection of the graph.
 
 Detection is conditional on coverage in a second sense, which the exclusion rule makes
 visible. Nearly a third of the sampled mutants could not be scored at all, either
@@ -282,9 +283,12 @@ worse. What
 was not done is equally relevant: there was no blinding, no second annotator for the
 loss classification and no independent audit of the residual constructs that were
 inspected by hand, and the defect classes were defined after the first observations
-rather than in advance. The requirement of two independent confirmations per defect
-class is the strongest control that was applied to that last point, and it is the
-reason one class is still reported as a candidate.
+rather than in advance. The requirement of two independent lines of evidence per
+defect class is the strongest control that was applied to that last point, and it is the
+reason one class is still reported as a candidate. It is a weaker control than it first
+appears: Table~\ref{tab:defects} shows that three of the five accepted classes are
+carried to two by an observation rather than by a second instrument, so for those three
+the control is one method plus a judgement I made myself.
 
 \section{Declared approximations}
 \label{sec:approximations}
