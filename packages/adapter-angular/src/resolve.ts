@@ -89,6 +89,13 @@ export function constantString(expr: Node | undefined): string | null {
   if (!expr) return null
   if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return expr.getLiteralValue()
   if (Node.isAsExpression(expr) || Node.isParenthesizedExpression(expr) || Node.isSatisfiesExpression(expr)) return constantString(expr.getExpression())
+  // `$localize`:kebab-case@@routes.about:about`` is a constant with a metadata block in front
+  // of it; the path is the message that follows. Angular writes route segments this way when
+  // they are translated, and reading only plain literals loses the whole route.
+  if (Node.isTaggedTemplateExpression(expr) && /(^|\.)\$localize$/.test(expr.getTag().getText())) {
+    const tpl = expr.getTemplate()
+    if (Node.isNoSubstitutionTemplateLiteral(tpl)) return tpl.getLiteralValue().replace(/^:.*?:/s, '')
+  }
   if (Node.isIdentifier(expr)) return constantString(declaredInitializer(expr))
   if (Node.isPropertyAccessExpression(expr)) {
     const obj = objectLiteralOf(expr.getExpression())

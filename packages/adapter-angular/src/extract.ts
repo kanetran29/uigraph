@@ -8,8 +8,8 @@
 // Observable/Promise-returning guards lowered in confidence + a soundiness note.
 // No edge is emitted without a static witness.
 
-import { Project, ts } from 'ts-morph'
-import type { Node, SourceFile } from 'ts-morph'
+import { Node, Project, ts } from 'ts-morph'
+import type { SourceFile } from 'ts-morph'
 import { relative, join, dirname } from 'node:path'
 import { existsSync, readFileSync } from 'node:fs'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
@@ -17,6 +17,7 @@ import { edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, resolveRelativeTarget, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
 import { collectRoutes } from './routes'
+import { resolveImportedFile } from './resolve'
 import { attributeScopes, subtreeAnchor, SHELL_NODE_ID } from './attribute'
 import { templateTargets, routerCallTargets, methodNavTargets, templateLoc, linkAttrTarget, type RawTarget } from './nav'
 import { parseControls } from './controls'
@@ -100,7 +101,8 @@ function workspaceTsPaths(projectDir: string): { baseUrl: string; paths: Record<
 
 /** Extract a graph from an already-built ts-morph project (testable in memory). */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
-  const routes = collectRoutes(project)
+  const redirects = new Map<string, string>()
+  const routes = collectRoutes(project, redirects)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
@@ -166,7 +168,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // Either way a leading `.` or `..` is resolved — leaving it raw matches nothing.
         const base = t.relative ? pathByNodeId.get(from) : '/'
         const value = resolveRelativeTarget(t.ti.value, base)
-        const target = matchLiteral(value, routeLikes)
+        let target = matchLiteral(value, routeLikes)
+        // A link to a redirect reaches what the redirect forwards to; follow it one step.
+        if (!target && redirects.has(value)) target = matchLiteral(redirects.get(value)!, routeLikes)
         if (!target) {
           if (note) soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${value}" matches no declared route` })
           continue
@@ -280,6 +284,26 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       shellEdges += edges.length - before
     }
     if (scopes.indirectShell.size) soundiness.push({ kind: 'indirect-shell', detail: `${scopes.indirectShell.size} component(s) treated as shell without a visible mounting route; their edges are capped at may` })
+    // A guard runs on exactly the routes that name it, so its scope is those screens — more
+    // precise than the join over injectors, and the route config states it outright.
+    const guardScreens = new Map<string, Set<string>>()
+    for (const r of routes) {
+      for (const name of ['canActivate', 'canActivateChild', 'canMatch', 'canDeactivate']) {
+        const prop = r.routeObj.getProperty(name)
+        if (!prop || !Node.isPropertyAssignment(prop)) continue
+        const init = prop.getInitializer()
+        if (!init || !Node.isArrayLiteralExpression(init)) continue
+        for (const el of init.getElements()) {
+          if (!Node.isIdentifier(el)) continue
+          const gf = resolveImportedFile(r.routeObj.getSourceFile(), el.getText())
+          if (!gf) continue
+          const set = guardScreens.get(gf.getFilePath()) ?? new Set<string>()
+          set.add(r.nodeId)
+          guardScreens.set(gf.getFilePath(), set)
+        }
+      }
+    }
+
     // Navigation in a class that is not a component (a service, facade or store) fires on
     // behalf of whatever injects it, so its scope is the join over those callers. The join is
     // taken per class rather than per method, so it can be wider than the real scope and the
@@ -296,8 +320,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         shellEdges += edges.length - before
         continue
       }
-      const screens = scopes.serviceScreens.get(f)
-      if (!screens || screens.size === 0) {
+      const screens = new Set([...(scopes.serviceScreens.get(f) ?? []), ...(guardScreens.get(f) ?? [])])
+      if (screens.size === 0) {
         soundiness.push({ kind: 'unattributed-non-component', file, detail: `${ts.length} navigation call(s) in a class nothing in the application injects; its scope is empty` })
         continue
       }
