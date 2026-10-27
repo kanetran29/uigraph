@@ -65,19 +65,52 @@ function findRouteArrays(sf: SourceFile): ArrayLiteralExpression[] {
 }
 
 /**
+ * Resolve a `loadChildren` target to the file that actually declares its routes.
+ * An NgModule loaded lazily normally keeps its route array in a separate
+ * `*-routing.module` that it imports rather than in the module file named by the
+ * loader, so when the target declares none, follow its relative imports one level
+ * and take the first that does. Without this the route array is never reached under
+ * its parent prefix and is instead picked up at the project root, which mints every
+ * one of its screens at its own relative path.
+ */
+function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayLiteralExpression[] } {
+  const own = findRouteArrays(target)
+  if (own.length) return { owner: target, arrays: own }
+  for (const imp of target.getImportDeclarations()) {
+    const spec = imp.getModuleSpecifierValue()
+    if (!spec.startsWith('.')) continue
+    const dep = imp.getModuleSpecifierSourceFile() ?? resolveRelative(target, spec)
+    if (!dep) continue
+    const arrays = findRouteArrays(dep)
+    if (arrays.length) return { owner: dep, arrays }
+  }
+  return { owner: target, arrays: [] }
+}
+
+/**
  * Recursively walk a route array literal, emitting one RouteInfo per route
  * object that declares a `path` AND a component (`component` / `loadComponent`).
  * A componentless route (`{ path: 'x', children }`, `{ path: 'x', loadChildren }`,
  * a redirect) renders nothing itself — it only prefixes its children's paths and
  * applies its `canActivate` to their activation — so it is not a screen; minting
  * it would fabricate a state no user can land on and, worse, shadow a `path: ''`
- * child that shares its full path (first declaration wins). Inline `children`
+ * child that shares its full path (first declaration wins). An element that is a
+ * call rather than an object literal is a route factory such as mifos's
+ * `Route.withShell([...])`, which wraps the array it is given in a `path: ''`
+ * shell route; its array arguments are walked at the same prefix, so the routes
+ * inside are reached, while whatever the factory itself adds is not seen. Inline `children`
  * are visited with the parent path prefixed and the parent's guards inherited;
  * `loadChildren: () => import('./x.routes')` is followed into the imported
  * module's route array. Deduplicates by node id (first declaration wins).
  */
 function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = []): void {
   for (const el of arr.getElements()) {
+    if (Node.isCallExpression(el)) {
+      for (const arg of el.getArguments()) {
+        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards)
+      }
+      continue
+    }
     if (!Node.isObjectLiteralExpression(el)) continue
     const ownPath = stringProp(el, 'path')
     if (ownPath === null) continue
@@ -107,8 +140,10 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     if (childSpec) {
       const childModule = resolveRelative(sf, childSpec)
       if (childModule) {
+        const { owner, arrays } = lazyRouteOwner(childModule)
         loadedChildFiles.add(childModule.getFilePath())
-        for (const childArr of findRouteArrays(childModule)) walkRouteArray(childArr, childModule, fullPath, out, loadedChildFiles, guards)
+        loadedChildFiles.add(owner.getFilePath())
+        for (const childArr of arrays) walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards)
       }
     }
   }
@@ -129,7 +164,7 @@ export function collectRoutes(project: Project): RouteInfo[] {
   return [...byNodeId.values()]
 }
 
-/** Pre-pass: resolve every `loadChildren` import target across the project so those modules are scanned only under their parent prefix. */
+/** Pre-pass: resolve every `loadChildren` import target, and the routing module it delegates its route array to, so those files are scanned only under their parent prefix. */
 function collectLoadChildrenTargets(project: Project): Set<string> {
   const targets = new Set<string>()
   for (const sf of project.getSourceFiles()) {
@@ -137,7 +172,9 @@ function collectLoadChildrenTargets(project: Project): Set<string> {
       const spec = lazyImportSpecifier(obj, 'loadChildren')
       if (!spec) continue
       const mod = resolveRelative(sf, spec)
-      if (mod) targets.add(mod.getFilePath())
+      if (!mod) continue
+      targets.add(mod.getFilePath())
+      targets.add(lazyRouteOwner(mod).owner.getFilePath())
     }
   }
   return targets

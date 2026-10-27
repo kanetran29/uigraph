@@ -266,6 +266,34 @@ describe('extractGraph — modern Angular routing (lazy + nested + array links)'
     expect(graph.nodes.some((n) => n.route === '/:username')).toBe(false)
   })
 
+  it('follows loadChildren through an NgModule to the routing module it delegates to', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app-routing.module.ts': `import type { Routes } from '@angular/router'\nconst routes: Routes = [{ path: 'clients', loadChildren: () => import('./clients/clients.module').then((m) => m.ClientsModule) }]`,
+        '/clients/clients.module.ts': `import { SharedModule } from '../shared/shared.module'\nimport { ClientsRoutingModule } from './clients-routing.module'\nexport class ClientsModule {}`,
+        '/shared/shared.module.ts': `export class SharedModule {}`,
+        '/clients/clients-routing.module.ts': `import type { Routes } from '@angular/router'\nimport { C } from './c.component'\nconst routes: Routes = [{ path: ':clientId', component: C }]`,
+        '/clients/c.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>c</p>' })\nexport class C {}`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/clients/:clientId'])
+  })
+
+  it('walks the array a route factory such as Route.withShell([...]) is given, at the same prefix', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app-routing.module.ts': `import type { Routes } from '@angular/router'\nconst routes: Routes = [{ path: 'clients', loadChildren: () => import('./clients/clients.module').then((m) => m.ClientsModule) }]`,
+        '/clients/clients.module.ts': `import { ClientsRoutingModule } from './clients-routing.module'\nexport class ClientsModule {}`,
+        '/clients/clients-routing.module.ts': `import type { Routes } from '@angular/router'\nimport { Route } from '../core/route.service'\nimport { C } from './c.component'\nconst routes: Routes = [Route.withShell([{ path: '', component: C, children: [{ path: 'edit', component: C }] }])]`,
+        '/core/route.service.ts': `export class Route { static withShell(routes: any) { return { path: '', children: routes } } }`,
+        '/clients/c.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>c</p>' })\nexport class C {}`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/clients', '/clients/edit'])
+  })
+
   it('ng-array-routerlink: array [routerLink] with a static prefix over-approximates (no dynamic drop)', () => {
     const { graph } = extractGraph(
       inMemory({
