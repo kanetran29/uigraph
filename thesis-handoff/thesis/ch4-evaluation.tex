@@ -112,27 +112,45 @@ a wrong guard mislabels an edge rather than removing it; they are measured by th
 witness check.
 
 \begin{table}[t]\small
-\caption{Rules that assign a lost construct to a defect class, in order of
-precedence.}
+\caption{Rules that assign a lost construct to a defect class, in the order the harness
+tests them. The indented rules are the nested decision taken when the construct's owning
+route component has no node.}
 \label{tab:loss-rules}
 \begin{tabularx}{\textwidth}{@{}lY@{}}
 \toprule
 Class & The construct \ldots \\
 \midrule
+Query only & changes only the query string of the current screen
+(\texttt{navigate([], \{queryParams\})}), so it is not a transition and is not counted as
+a loss \\
 Named outlet & targets an auxiliary outlet (\texttt{\{outlets: \ldots\}}) \\
-Attribution, service & is in a class that is not a component: a service, guard,
-interceptor, resolver or effect \\
+Attribution, service & has no owning component, or its owner is a class that is not a
+component: a service, guard, interceptor, resolver or effect. A site in a template whose
+owner cannot be resolved falls to \emph{other} instead \\
 Attribution, shared & is in a component that no route renders directly \\
-Constant path & is in a route component that has no node, because its route path is a
-constant reference rather than a literal \\
-Lazy boundary & is in a route component that has no node, and its route is declared in a
-lazily loaded routes file \\
-Constant target & is in a screen that has a node, but its own target is a constant
-reference \\
+\addlinespace
+\multicolumn{2}{@{}l}{\emph{Owner is a route component, but that component has no node:}} \\
+\quad Component unlinked & a node for the owner's route exists, but the extractor did not
+link it to the component \\
+\quad Constant path & every declaration of the owner's route gives its path as a constant
+reference rather than a literal \\
+\quad Other & some declaration of the owner's route does have a node \\
+\quad Lazy boundary & some declaration of the owner's route is in a lazily loaded routes
+file \\
+\quad Node missing & a declaration exists but none of the above applies, or neither parser
+found a route for the owner \\
+\addlinespace
+Constant target & owner has a node, but the construct's own target is not a literal \\
 Other & matches none of the above; inspected by hand \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+The nested branch decides a class from the state of the construct's \emph{owning} route
+component. A construct can therefore be assigned to one of the node classes and still be
+converted once attribution gives it a scope through the shell or a subtree, because the
+scope it needs is not the one its owner would have supplied.
+Section~\ref{sec:res-after} measures how often that happens.
 
 A call of the form \texttt{navigate([], \{queryParams\})} changes only the query
 string of the current screen. It is not a transition between screens, so it is reported separately and not counted as a loss.

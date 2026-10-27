@@ -7,17 +7,20 @@
 Static extraction of a transition graph from Angular source fails in two different
 places, and which of the two dominates depends on the size of the application. On
 realworld and alfresco, the two smallest applications by construct count, node
-extraction reaches 100\% and 96\% of the declared screens, so nearly all the screens
-that the route configuration declares are present in the graph. What is lost there is lost at the edge: the navigation sites exist in the
-source, the screens they would connect exist in the graph, and the extractor fails to
-connect them because it cannot decide which screens a site belongs to. On ghostfolio
+extraction recovers all or nearly all of the screens that the route configuration
+declares (Table~\ref{tab:coverage}). What is lost there is lost at the edge: the
+navigation sites exist in the source, the screens they would connect exist in the graph,
+and the extractor fails to connect them because it cannot decide which screens a site
+belongs to. On ghostfolio
 and mifos, the two largest applications by construct count, the loss starts one level
 earlier. A route
 whose path is a constant reference, and a route table behind a lazy boundary that the
 extractor does not cross, produce no node at all, and every navigation site that
 belongs to such a screen is lost together with every site that points at it. In two
-applications the baseline produces no transitions at all: k8s dashboard yields 40 nodes
-with no edges between them, and ghostfolio yields a single node.
+applications the baseline produces no transitions at all
+(Table~\ref{tab:conversion}): k8s dashboard yields dozens of nodes with no edges
+between them, and ghostfolio collapses to a graph in which none of its declared screens
+has a node (Table~\ref{tab:coverage}).
 
 The two failures cap each other, and that is the structural result of the measurement.
 Attribution cannot draw an edge into a screen that has no node, so node extraction
@@ -29,13 +32,14 @@ works better than it does, which is why Chapter~\ref{ch:results} reports node co
 beside the conversion ratio instead of the ratio alone.
 
 The ranking of the defect classes depends on which unit the corpus is counted in.
-Attribution is the largest class in four of the six applications, and node defects
-dominate the other two and also the corpus total, because the largest application
-contributes most of the constructs and loses them at the node level. Both views are
+Attribution is the largest class in most of the applications
+(Table~\ref{tab:loss}), and node defects dominate the rest and also the corpus total,
+because the largest application contributes most of the constructs and loses them at
+the node level. Both views are
 correct and they answer different questions. The per-application view says what a
 developer would hit on a given codebase, and the corpus view says where the engineering
 effort pays off across codebases. Reporting only the total would have hidden the
-attribution problem that four applications show, and reporting only the per-application
+attribution problem that most applications show, and reporting only the per-application
 ranking would have hidden that one large application can dominate everything that is
 aggregated.
 
@@ -48,14 +52,14 @@ deterministic gain came out of constructs the rules had assigned to node defects
 (Table~\ref{tab:recovery-source}). The attribution class is therefore not a bound in
 either direction, and the two levels of failure are not separable by the rules that
 classify them. On realworld, whose node extraction is complete, attribution recovered
-21 of 22 and the one loss left is in a service.
+all of its attribution losses but one, and that one is in a service.
 The gap between the bound and what was recovered is accounted for by
 Table~\ref{tab:remaining}, and three of its reasons are not attribution problems at
 all: the target screen has no node, the owning component is never reached from any
 screen, or the site sits in a service or a guard that this version does not analyse.
 Precision on the deterministic tier did not fall, and no construct that the baseline
 converted was lost, so the coverage gain was not bought by widening the must tier. The
-single must-tier violation is the same edge in both runs and predates attribution.
+must-tier violation is the same edge in both runs and predates attribution.
 
 The part of the model that Chapter~\ref{ch:analysis} specifies but does not implement
 has a measurable price. Navigation sites in services, guards, interceptors, resolvers
@@ -68,23 +72,25 @@ required for applications that navigate from services.
 RQ4 gives a conditional answer, and the condition is RQ1. Renaming a route path was
 detected in every scored mutant in all three applications that were mutated. Deleting
 a \texttt{routerLink} was detected in every scored mutant, and retargeting a
-\texttt{Router.navigate} call in seven of eight. Every mutant that left the graph
-unchanged was a guard removal, eight of the nine misses; the ninth is a retargeted
-\texttt{navigate} call in bitwarden whose old target the baseline had not resolved. Six
-of the eight guards are declared on a route whose path is the empty string. A second method confirms the mechanism
-independently of the mutation run: in realworld the edge entering \texttt{/editor}
-carries no guard although the route declares \texttt{canActivate}, while the edge
-entering \texttt{/editor/:slug} carries it. So a guard declared on an empty-path child
-route is not represented on the edges that enter that screen. This is a new instance of
-the class ``guards unreliable in both directions'' from Chapter~\ref{ch:results}, and
-that class now has two confirmations of its own, from two methods that do not share a
-mechanism.
+\texttt{Router.navigate} call in all but one of its own scored mutants. Every mutant
+that left the graph unchanged was a guard removal, and the one remaining miss is a
+retargeted \texttt{navigate} call in bitwarden whose old target the baseline had not
+resolved (Table~\ref{tab:mutation}). Most of the missed guards are declared on a route
+whose path is the empty string (Section~\ref{sec:res-mutation}). A second method
+confirms the mechanism independently of the mutation run: in realworld the edge
+entering \texttt{/editor} carries no guard although the route declares
+\texttt{canActivate}, while the edge entering \texttt{/editor/:slug} carries it. So a
+guard declared on an empty-path child route is not represented on the edges that enter
+that screen. This is a new instance of the class ``guards unreliable in both
+directions'' from Chapter~\ref{ch:results}, and that class now has two confirmations
+of its own, from two methods that do not share a mechanism.
 
 Detection is conditional on coverage in a second sense, which the exclusion rule makes
-visible. Twenty-two of the seventy sampled mutants were excluded, either because the
-construct they change is absent from the graph or, for a guard, because no edge enters
-the screen it protects. Those exclusions are not a sensitivity
-result; they are the coverage gap of RQ1 appearing in a different experiment. The
+visible. Nearly a third of the sampled mutants could not be scored at all, either
+because the construct they change is absent from the graph or, for a guard, because no
+edge enters the screen it protects (Table~\ref{tab:mutation-sample}). Those exclusions
+are not a sensitivity result; they are the coverage gap of RQ1 appearing in a different
+experiment. The
 defensible statement is therefore conditional: given that a construct is represented in
 the graph, a change to it is almost always visible in the graph, and the probability
 that it is represented at all is what RQ1 measures. For change impact analysis this is
@@ -127,7 +133,7 @@ Both uses stop at the same place, which is runtime dynamic routing. Where a navi
 target is computed from a value, where the route table is assembled at startup from
 configuration rather than declared, and where a user interface state is an overlay that
 no route describes, the static graph is either silent or over-approximates into the may
-and unknown tiers, which carry no soundness claim. The graph is a lower bound on the
+tier, which carries no soundness claim. The graph is a lower bound on the
 navigation an application can perform, and it has to be consumed as one. A query that
 must not miss a transition cannot be answered from it alone, and the graph's own
 witnesses and declared approximations are what tell a consumer which queries those are.
@@ -285,8 +291,9 @@ navigation inside an effect is attributed to no screen. The cost is concentrated
 applications that use the pattern and is zero in the others.
 \item \textbf{Navigation inside signal effects and observable subscriptions.} The firing
 condition is a data dependence in a graph the runtime builds, not a control-flow
-condition in the program text (Sections~\ref{sec:signals} and~\ref{sec:reactive}). Such
-edges take the modality \emph{unknown}, with the read set recorded as the symbolic guard.
+condition in the program text (Sections~\ref{sec:signals} and~\ref{sec:reactive}). The
+model gives such edges the modality \emph{unknown}, with the read set recorded as the
+symbolic guard; no pass in this version emits one.
 \item \textbf{Computed navigation targets.} A target built at run time from values cannot
 be enumerated statically in general. The analysis either emits no edge or over-approximates
 into the may tier, where a single unresolved call site can connect to every declared

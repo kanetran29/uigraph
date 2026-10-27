@@ -19,7 +19,12 @@ output, not from a reviewer's word.
 | 4. The 81 counts may edges | **fixed.** `TabBeforeAfter` splits must and may (38 / 43); Ch5 and Ch7 report both tiers and the 79 must-tier gain. |
 | 8. Kurant and Kertusha | **fixed.** Kurant no longer "explicitly excludes" routing, and the survey is no longer credited with a finding it does not report. |
 | AI-use statement | **fixed.** Scoped to numbers, result tables and plots; the hand-drawn diagrams are stated as such. |
-| 5, 6, 7, 9 and Parts 3 and 4 | **open.** |
+| 5. Table 4.2 against the harness | **fixed.** Rewritten to the decision chain `loss-breakdown.mjs` implements, with the nested owner-has-no-node branch and the two missing classes, `COMPONENT_UNLINKED` (389 constructs) and `NODE_MISS`. All ten classes in the generated loss table now appear. |
+| 6. Claim 3.2 has no reported result | **fixed.** 7 attribution unit tests pass, and a corpus-level check at `thesis-eval` finds 50 anchored edges expanding to 97 by the per-screen query and to the same 97 by materialising, identical sets. Reported in 5.3, scoped to one application plus fixtures. Script committed as `route-oracle/expansion-check.mts`. |
+| 7. Section 6.1 repeats raw numbers | **fixed.** Rewritten to argue rather than recount; the only digits left are RQ labels. Eight regressions the de-numbering introduced were caught by a verifier and repaired. |
+| 9. Chapter 3 bounds and contradictions | **fixed.** One bound per computation, correctly related; termination on finite height with monotonicity argued; the acyclicity claim dropped; Sigma pulled back to event kinds; the third modality given a consistent specified-but-not-produced voice across Chapters 2, 3 and 6. |
+| Table 3.1 against Algorithm 3.1 | **fixed, against the extractor.** A first attempt removed the routed-component guard from the algorithm, which made it disagree with the code that produced Chapter 5. Algorithm 3.1 now stands as the model; the prototype's restriction (no propagation into a route-mounted component) is documented in the implementation section, carried as a side condition on Table 3.1's template row, and the least-solution claim is scoped to the model. The restriction can only lose edges, so the must-tier claim is unaffected. |
+| Parts 3 and 4 | **open.** |
 
 Corrections to my own earlier reporting, from redoing the diff on the stable construct
 id (`at`) instead of `file:line`: the conversions out of `LAZY_BOUNDARY` are 40 must and

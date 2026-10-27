@@ -158,8 +158,8 @@ analysis, and dataflow analysis as the computational framework.
 The \emph{modal transition system} of Larsen and Thomsen labels each transition as
 either required (\emph{must}) or merely permitted (\emph{may})
 \cite{larsen1988modal}. The graph model in Chapter~\ref{ch:analysis} adopts this
-distinction and adds a third label, \emph{unknown}, for transitions whose target is
-known but whose modality could not be determined. The distinction has practical
+distinction and adds a third label, \emph{unknown}, for edges whose modality could not
+be determined. The distinction has practical
 consequences: the thesis makes a soundness claim about the must tier only, and the
 evaluation treats the tiers differently, since the evidence behind a may edge
 establishes less than the evidence behind a must edge.
@@ -177,7 +177,8 @@ Livshits et al.\ argue that practical static analyses are sound only with respec
 subset of the language, that this is unavoidable in practice, and that the appropriate
 response is to state explicitly which language features are approximated rather than
 to claim soundness in general \cite{livshits2015soundiness}. This thesis follows that
-recommendation: it proves soundness only over a declared scope, lists the approximated
+recommendation: it states its soundness property only over a declared scope, lists the
+approximated
 Angular constructs with their measured frequency in the corpus, and measures recall
 empirically. The literature reviewed in Sections 2.6 to 2.8 gives the specific reasons
 why a general claim is not available for this setting. Type annotations in TypeScript
@@ -537,10 +538,10 @@ at 36.4\% of the posts \cite{zimmerle2022mining}.
 An analysis that aims to recover navigation from an Angular application inherits this
 boundary. A navigation placed in an effect or in a subscription has a firing condition
 that is a data dependence in a reactive graph. The read set is visible in the source
-and the firing is not. Chapter~\ref{ch:analysis} therefore records such edges with the modality
-\emph{unknown} and keeps the read set as the symbolic guard, which is the treatment the
-soundiness position of Section~\ref{sec:formal} prescribes for a construct that cannot
-be decided.
+and the firing is not. Chapter~\ref{ch:analysis} therefore specifies the modality
+\emph{unknown} for such edges and keeps the read set as the symbolic guard, which is the
+treatment the soundiness position of Section~\ref{sec:formal} prescribes for a
+construct that cannot be decided. No pass in this version emits that modality.
 
 \section{Mutation testing}
 \label{sec:mutation}
