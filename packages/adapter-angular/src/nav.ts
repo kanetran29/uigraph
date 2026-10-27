@@ -11,7 +11,7 @@ import { relative } from 'node:path'
 import { inlineTemplate, type ComponentTemplate } from './templates'
 
 export type TargetInfo =
-  | { kind: 'literal'; value: string }
+  | { kind: 'literal'; value: string; holes?: boolean }
   | { kind: 'template'; staticPrefix: string }
   | { kind: 'dynamic' }
 
@@ -189,25 +189,40 @@ function joinCommands(segs: string[]): string {
 function classifyCommandParts(parts: string[], sf: SourceFile | undefined): TargetInfo {
   if (parts.length === 0) return { kind: 'dynamic' }
   const segs: string[] = []
-  let complete = true
+  let holes = 0
+  let known = 0
   for (const p of parts) {
     const lit = /^'([^']*)'$/.exec(p) ?? /^"([^"]*)"$/.exec(p)
     if (lit) {
       segs.push(lit[1] ?? '')
+      known++
       continue
     }
     const resolved = sf && /^(this\.)?[A-Za-z_$][\w$.]*$/.test(p) ? constantForName(sf, p) : null
     if (resolved === null) {
-      complete = false
-      break
+      // A commands array is a PATTERN, not a prefix: `['view', row.id, 'edit']` fixes the
+      // segments around the hole as firmly as the ones before it, and a declared route is a
+      // pattern too, so the two match segment by segment. Standing the hole in as `:param`
+      // keeps what comes after it instead of throwing the tail away.
+      segs.push(':param')
+      holes++
+      continue
     }
-    if (Array.isArray(resolved)) segs.push(...resolved)
-    else segs.push(resolved)
+    if (Array.isArray(resolved)) { segs.push(...resolved); known += resolved.length }
+    else { segs.push(resolved); known++ }
   }
-  if (segs.length === 0) return { kind: 'dynamic' }
+  if (known === 0) return { kind: 'dynamic' }
   const path = joinCommands(segs)
-  if (complete) return { kind: 'literal', value: path }
-  return { kind: 'template', staticPrefix: path.endsWith('/') ? path : path + '/' }
+  if (holes === 0) return { kind: 'literal', value: path }
+  // A trailing hole says nothing about what follows, so it stays a prefix; a hole in the
+  // middle leaves a pattern a single declared route can satisfy.
+  if (segs[segs.length - 1] === ':param') {
+    const head = joinCommands(segs.slice(0, segs.length - holes))
+    return { kind: 'template', staticPrefix: head.endsWith('/') ? head : head + '/' }
+  }
+  // The pattern pins the screen only if one declared route satisfies it, and the matcher does
+  // not check that it is the only one, so the edge is offered at may rather than must.
+  return { kind: 'literal', value: path, holes: true }
 }
 
 /**

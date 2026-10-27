@@ -170,7 +170,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
         noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
         const guardText = gate.guarded ? gate.guardTexts.join(',') : null
-        pushEdge(from, target.nodeId, t, gate.guarded || capMay ? 'may' : 'must', gate.guarded ? gate.confidence : capMay ? 0.5 : 1, guardText, file)
+        const uncertain = gate.guarded || capMay || (t.ti.kind === 'literal' && t.ti.holes === true)
+        pushEdge(from, target.nodeId, t, uncertain ? 'may' : 'must', gate.guarded ? gate.confidence : uncertain ? 0.5 : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
         const prefix = t.relative ? resolveRelativeTarget(t.ti.staticPrefix, pathByNodeId.get(from)) : t.ti.staticPrefix
         const cands = matchPrefix(prefix, routeLikes)
