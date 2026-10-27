@@ -165,6 +165,29 @@ export function constantForName(sf: SourceFile, text: string): string[] | string
   return constantStringArray(node) ?? constantString(node)
 }
 
+/**
+ * The expression a route-table builder returns. A table that ships the link beside the path
+ * commonly ships it as a function of the parameter —
+ * `routerLink: (id) => ['/account', 'access', id, 'update']` — so the destination is written
+ * out in full and only the parameter is unknown. Resolves `X.y.routerLink` through the
+ * constant chain to that arrow and hands back what it returns.
+ */
+export function builderReturn(expr: Node | undefined): Node | undefined {
+  if (!expr) return undefined
+  let fn: Node | undefined
+  if (Node.isIdentifier(expr)) fn = declaredInitializer(expr)
+  else if (Node.isPropertyAccessExpression(expr)) {
+    const obj = objectLiteralOf(expr.getExpression())
+    const prop = obj?.getProperty(expr.getName())
+    fn = prop && Node.isPropertyAssignment(prop) ? prop.getInitializer() : undefined
+  }
+  if (!fn || !(Node.isArrowFunction(fn) || Node.isFunctionExpression(fn))) return undefined
+  const body = fn.getBody()
+  if (!Node.isBlock(body)) return body
+  const returns = body.getDescendantsOfKind(SyntaxKind.ReturnStatement)
+  return returns.length === 1 ? returns[0]?.getExpression() : undefined
+}
+
 /** Where a bare name can come from: a field of the component, a module constant, or an import. */
 function headInitializer(sf: SourceFile, name: string): Node | undefined {
   const own = classPropertyInitializer(sf, name) ?? sf.getVariableDeclaration(name)?.getInitializer()
@@ -227,6 +250,15 @@ function declaredInitializer(id: Node): Node | undefined {
     if (Node.isExportSpecifier(decl) || Node.isImportSpecifier(decl)) {
       const nameNode = decl.getNameNode()
       if (nameNode !== id) return declaredInitializer(nameNode)
+    }
+    // `const { update } = internalRoutes.account.subRoutes` names a property of the object it
+    // destructures, so the value is that property, not the declaration's own initializer.
+    if (Node.isBindingElement(decl)) {
+      const pattern = decl.getParent()
+      const vd = pattern?.getParent()
+      const init = vd && Node.isVariableDeclaration(vd) ? vd.getInitializer() : undefined
+      const prop = init ? objectLiteralOf(init)?.getProperty(decl.getName()) : undefined
+      if (prop && Node.isPropertyAssignment(prop)) return prop.getInitializer()
     }
   }
   return undefined
