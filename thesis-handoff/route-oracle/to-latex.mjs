@@ -29,7 +29,8 @@ out += `\\bottomrule\n\\end{tabular}}\n\n`
 // would give recall and hide precision, so the nodes the parser holds no declared screen
 // for are reported beside it.
 out += `\\newcommand{\\TabCoverage}{%\n\\begin{tabular}{@{}lrrrrrr@{}}\n\\toprule\n`
-out += `Application & Declared screens & Nodes & Matched & Coverage & Unmatched nodes & Parser blind spots \\\\\n\\midrule\n`
+// headers kept short: the caption carries the full meaning of each column
+out += `Application & Declared & Nodes & Matched & Coverage & Unmatched & Blind spots \\\\\n\\midrule\n`
 let gN = 0, gX = 0
 for (const r of R) {
   const C = JSON.parse(fs.readFileSync(path.join(rawDir, `${r.slug}.C.json`), 'utf8'))
