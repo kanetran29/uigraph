@@ -158,7 +158,23 @@ that the application never mounts, such as components whose selector no template
 which the inspection of the remaining losses identified. Every reported conversion ratio
 is therefore a lower bound on the fraction of reachable navigation that the extractor
 recovers, and the true figure cannot be computed without deciding reachability for each
-construct by hand. The loss breakdown has a second construct threat. The rules assign
+construct by hand.
+
+The denominator also under-counts, and this threat is the more fundamental of the two
+because it bounds what the measurement can see at all. The parser recognises navigation
+by four syntactic patterns: a \texttt{routerLink} attribute or binding, and a call to
+\texttt{navigate} or \texttt{navigateByUrl} on a receiver whose name contains
+\emph{router}. Navigation expressed any other way is in neither the numerator nor the
+denominator, so it is not a loss and not a success; it is absent. An application that
+wraps navigation in a helper, so that its components call \texttt{this.nav.goHome()},
+contributes one construct at the wrapped call site and none at the places that invoke it.
+An assignment to \texttt{location.href}, a redirect driven by a server response, and
+navigation performed inside a third-party component are all invisible on the same
+grounds. The conversion ratio is therefore recall against an enumerable syntactic proxy
+for an application's navigation, not against its navigation, and the completeness of that
+proxy is not itself measured. The end-to-end oracle is the only method that can see past
+it, because a URL that a passing test visits is a screen that exists whatever the source
+looks like, and it covers one application of the six. The loss breakdown has a second construct threat. The rules assign
 each lost construct to the first class that matches, so the precedence order is part of
 the measure. A construct in a shared component that is used only inside screens with no
 node is an attribution loss under the present order and a node loss under the reverse
