@@ -122,11 +122,11 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
  * `loadChildren: () => import('./x.routes')` is followed into the imported
  * module's route array. Deduplicates by node id (first declaration wins).
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null): void {
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>): void {
   for (const el of arr.getElements()) {
     if (Node.isCallExpression(el)) {
       for (const arg of el.getArguments()) {
-        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId)
+        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects)
       }
       continue
     }
@@ -147,6 +147,10 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
         if (componentFile) resolvedName = componentClassName(componentFile)
       }
     }
+    // A redirect renders nothing, so it is no screen — but a link that points AT it does
+    // reach the screen it forwards to, and dropping it loses that transition entirely.
+    const redirectTo = stringProp(obj, 'redirectTo')
+    if (redirectTo !== null && redirects) redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
     const isScreen = obj.getProperty('component') !== undefined || obj.getProperty('loadComponent') !== undefined
     const nodeId = routeToNodeId(fullPath)
     if (isScreen && !out.has(nodeId)) {
@@ -156,7 +160,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     const childrenProp = obj.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
-      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent)
+      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects)
     }
     const childSpec = lazyImportSpecifier(obj, 'loadChildren')
     if (childSpec) {
@@ -165,7 +169,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
         const { owner, arrays } = lazyRouteOwner(childModule)
         loadedChildFiles.add(childModule.getFilePath())
         loadedChildFiles.add(owner.getFilePath())
-        for (const childArr of arrays) walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent)
+        for (const childArr of arrays) walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects)
       }
     }
   }
@@ -176,7 +180,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
  * reached via `loadChildren` are scanned only under their parent prefix, never
  * again at the root, so a child route array contributes a single correct path.
  */
-export function collectRoutes(project: Project): RouteInfo[] {
+export function collectRoutes(project: Project, redirects?: Map<string, string>): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
   const loadedChildFiles = collectLoadChildrenTargets(project)
   for (const sf of project.getSourceFiles()) {
@@ -184,7 +188,7 @@ export function collectRoutes(project: Project): RouteInfo[] {
     // A spec declares routes of its own to drive the router under test; they are not the
     // application's screens, and minting them puts fictional addresses in the graph.
     if (loadedChildFiles.has(f) || SPEC_FILE.test(f)) continue
-    for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles)
+    for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles, [], null, redirects)
   }
   return [...byNodeId.values()]
 }

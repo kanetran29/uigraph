@@ -107,6 +107,12 @@ function constText(n) {
   const k = n.getKind()
   if (k === SyntaxKind.StringLiteral || k === SyntaxKind.NoSubstitutionTemplateLiteral) return n.getLiteralValue()
   if (k === SyntaxKind.AsExpression || k === SyntaxKind.ParenthesizedExpression || k === SyntaxKind.SatisfiesExpression) return constText(n.getExpression())
+  // `$localize`:kebab-case@@routes.about:about`` — a constant with an i18n metadata block in
+  // front of it; the path is the message after it.
+  if (k === SyntaxKind.TaggedTemplateExpression && /(^|\.)\$localize$/.test(n.getTag().getText())) {
+    const tpl = n.getTemplate()
+    if (tpl.getKind() === SyntaxKind.NoSubstitutionTemplateLiteral) return tpl.getLiteralValue().replace(/^:.*?:/s, '')
+  }
   if (k === SyntaxKind.Identifier) return constText(declInit(n))
   if (k === SyntaxKind.PropertyAccessExpression) {
     const obj = objLit(n.getExpression())
@@ -148,7 +154,17 @@ function objLit(n) {
 function declInit(id) {
   const sym = id.getSymbol()
   const decls = sym?.getAliasedSymbol()?.getDeclarations() ?? sym?.getDeclarations() ?? []
-  for (const d of decls) if (d.getKind() === SyntaxKind.VariableDeclaration) return d.getInitializer()
+  for (const d of decls) {
+    if (d.getKind() === SyntaxKind.VariableDeclaration) return d.getInitializer()
+    // `const { create, update } = internalRoutes.accounts.subRoutes` names a property of the
+    // object it destructures, which is how a route file reaches a shared table.
+    if (d.getKind() === SyntaxKind.BindingElement) {
+      const vd = d.getParent()?.getParent()
+      const init = vd && vd.getKind() === SyntaxKind.VariableDeclaration ? vd.getInitializer() : undefined
+      const prop = init ? objLit(init)?.getProperty(d.getName()) : undefined
+      if (prop && prop.getKind() === SyntaxKind.PropertyAssignment) return prop.getInitializer()
+    }
+  }
   return undefined
 }
 
