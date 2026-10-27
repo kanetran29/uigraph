@@ -74,9 +74,19 @@ baseline \cite{zhang2023repocoder}. A graph that states which screens an applica
 has and which transitions connect them is one source of such structure, and it can be
 produced without running the application.
 
-This thesis carries out that measurement for Angular. The starting point is an
-existing open-source static analyser, \emph{uigraph}, which I developed and which
-extracts transition graphs from Angular source code. The thesis measures what the tool recovers on real applications, classifies what it misses and why, and proposes an analysis for the largest class of misses.
+This thesis carries out that measurement for Angular and proposes an analysis for the
+largest class of failures it finds. What is proposed is a method rather than a product:
+scope attribution is stated as a dataflow analysis over a lattice of screen sets, and
+nothing in its formulation depends on a particular extractor.
+
+A method of this kind cannot be assessed without being instantiated, because the
+questions asked here are empirical: how much of the navigation in real applications it
+recovers, where it fails, and whether the resulting graph responds to a change in the
+source. The instrument used is \emph{uigraph}, an open-source static analyser for Angular
+that I developed before this work began. It plays the part the subject of study plays in
+an experiment, not the part of a result: the figures reported here describe what the
+analysis recovers when realised this way, and the limits they expose are limits of the
+method and of this instantiation, which Chapter~\ref{ch:discussion} separates.
 
 \section{Research questions and scope}
 
@@ -102,8 +112,9 @@ precision of static navigation analysis?}
 
 \noindent Scope attribution is the analysis proposed in this thesis. For a navigation
 site that does not belong to any single screen, it computes the set of screens from
-which the site can be triggered. Two fixed versions of the tool, before and after
-attribution, are run on the same inputs. Coverage is the change in recovered
+which the site can be triggered. One commit of the instrument is run twice on the same
+inputs, with the attribution pass disabled and enabled, so that nothing but the pass
+differs between the two runs. Coverage is the change in recovered
 transitions. Precision is checked on the deterministic tier, which must not decrease.
 
 \medskip\noindent\textbf{RQ4.} \emph{Is the extracted graph sensitive enough to source
