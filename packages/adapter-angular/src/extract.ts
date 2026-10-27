@@ -314,6 +314,14 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const ts = routerCallTargets(sf)
       if (ts.length === 0) continue
       const file = relative(projectDir, f)
+      // An NgRx effect is registered with the store for the lifetime of the application, so it
+      // can fire on any screen: its scope is top, the same place the shell sits.
+      if (/createEffect\s*\(/.test(sf.getFullText())) {
+        const before = edges.length
+        emitTargets(SHELL_NODE_ID, ts, file, true, true)
+        shellEdges += edges.length - before
+        continue
+      }
       if (scopes.serviceShell.has(f)) {
         const before = edges.length
         emitTargets(SHELL_NODE_ID, ts, file, true, true)

@@ -252,7 +252,12 @@ for (const c of constructs) {
   else if (hit === 'unknown') cls = 'ACCOUNTED_DYNAMIC'
   else if (unplacedAt.has(`${c.file}:${c.line}`)) cls = 'ACCOUNTED_UNPLACED'
   else if (c.kind !== 'routerLink' && /^\s*\[\s*\]/.test(c.target)) cls = 'QUERY_ONLY'
-  else if (/outlets\s*:/.test(c.target)) cls = 'NAMED_OUTLET'
+  // Two kinds of construct are not transitions between screens at all, so they leave the
+  // denominator rather than counting as losses: a navigation into a secondary outlet, which
+  // the model admits no screens for, and a call that carries no commands and so names no
+  // destination. Counting them as lost blamed the extractor for the question being wrong.
+  else if (/outlets\s*:/.test(c.target)) cls = 'EXCLUDED_NAMED_OUTLET'
+  else if (String(c.target ?? '').trim() === '') cls = 'EXCLUDED_NO_COMMANDS'
   else if (!c.owner || !componentFiles.has(c.owner)) cls = c.isHtml ? 'OTHER' : 'ATTRIBUTION_SERVICE'
   else if (!routeComponent.has(c.owner)) cls = 'ATTRIBUTION_SHARED'
   else if (!nodeComponentFiles.has(c.owner)) {
@@ -271,14 +276,16 @@ for (const c of constructs) {
   rows.push({ at: `${rel(c.file)}:${c.line}`, kind: c.kind, owner: c.owner ? rel(c.owner) : null, cls, target: c.target })
 }
 
-const order = ['CONVERTED_MUST', 'CONVERTED_MAY', 'QUERY_ONLY', 'ACCOUNTED_DYNAMIC', 'ACCOUNTED_UNPLACED', 'ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED', 'LAZY_BOUNDARY', 'CONSTANT_PATH', 'COMPONENT_UNLINKED', 'NAMED_OUTLET', 'CONSTANT_TARGET', 'NODE_MISS', 'OTHER']
+const order = ['CONVERTED_MUST', 'CONVERTED_MAY', 'QUERY_ONLY', 'ACCOUNTED_DYNAMIC', 'ACCOUNTED_UNPLACED', 'EXCLUDED_NAMED_OUTLET', 'EXCLUDED_NO_COMMANDS', 'ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED', 'LAZY_BOUNDARY', 'CONSTANT_PATH', 'COMPONENT_UNLINKED', 'NAMED_OUTLET', 'CONSTANT_TARGET', 'NODE_MISS', 'OTHER']
 const recovered = (tally.CONVERTED_MUST || 0) + (tally.CONVERTED_MAY || 0) + (tally.QUERY_ONLY || 0)
 const accounted = (tally.ACCOUNTED_DYNAMIC || 0) + (tally.ACCOUNTED_UNPLACED || 0)
-const lost = constructs.length - recovered - accounted
+const excluded = (tally.EXCLUDED_NAMED_OUTLET || 0) + (tally.EXCLUDED_NO_COMMANDS || 0)
+const inScope = constructs.length - excluded
+const lost = inScope - recovered - accounted
 console.log(`app:          ${appDir}`)
 console.log(`constructs:   ${constructs.length}  (routerLink ${constructs.filter((c) => c.kind === 'routerLink').length}, navigate ${constructs.filter((c) => c.kind !== 'routerLink').length})`)
 console.log(`route components found: ${routeComponent.size}, of which with a graph node: ${[...routeComponent.keys()].filter((f) => nodeComponentFiles.has(f)).length}`)
 console.log(`lost:         ${lost}`)
 for (const c of order) if (tally[c]) console.log(`  ${c.padEnd(20)} ${String(tally[c]).padStart(5)}  ${((tally[c] / constructs.length) * 100).toFixed(1)}%`)
 
-if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, constructs: constructs.length, recovered, accounted, lost, tally, rows }, null, 2))
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, constructs: constructs.length, excluded, inScope, recovered, accounted, lost, tally, rows }, null, 2))

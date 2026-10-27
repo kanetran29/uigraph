@@ -36,6 +36,27 @@ function matchesDeclared(p) {
   return declaredSegs.some((d) => d.length === t.length && d.every((seg, i) => seg.startsWith(':') || t[i].startsWith(':') || seg === t[i]))
 }
 
+const nodeSegs = (graph.nodes || []).filter((n) => n.route).map((n) => norm(n.route).split('/').filter(Boolean))
+/** Does a target path match the route of a node that actually exists in the graph? */
+function matchesNode(p) {
+  const t = norm(p).split('/').filter(Boolean)
+  return nodeSegs.some((d) => d.length === t.length && d.every((seg, i) => seg.startsWith(':') || t[i].startsWith(':') || seg === t[i]))
+}
+
+/** Is there an edge whose witness sits in `rel` and whose target node matches path `p`? */
+function edgeFromFileTo(rel, p) {
+  const t = norm(p).split('/').filter(Boolean)
+  const nodeRoute = new Map((graph.nodes || []).map((n) => [n.id, n.route]))
+  return (graph.edges || []).some((e) => {
+    const files = [e.witness, ...(e.mergedWitnesses || [])].map((w) => w?.file)
+    if (!files.includes(rel)) return false
+    const r = nodeRoute.get(e.to)
+    if (!r) return false
+    const d = norm(r).split('/').filter(Boolean)
+    return d.length === t.length && d.every((seg, i) => seg.startsWith(':') || t[i].startsWith(':') || seg === t[i])
+  })
+}
+
 const noteAt = new Map()
 for (const n of notes) if (n.file && n.loc?.line) {
   const k = `${n.file}:${n.loc.line}`
@@ -68,7 +89,7 @@ const fileKind = (rel) => {
   return 'plain-class'
 }
 
-const ACCOUNTED = /^(CONVERTED|QUERY_ONLY|ACCOUNTED)/
+const ACCOUNTED = /^(CONVERTED|QUERY_ONLY|ACCOUNTED|EXCLUDED)/
 const rows = []
 for (const r of loss.rows) {
   if (ACCOUNTED.test(r.cls)) continue
@@ -115,9 +136,22 @@ for (const r of loss.rows) {
     if (p && !matchesDeclared(p)) {
       reason = 'unmapped-target'
       detail = `the target "${p}" matches no declared route; a dead link or a route the parser did not find`
+    } else if (p && matchesDeclared(p) && !matchesNode(p)) {
+      // The route is declared and the target names it; what is missing is the NODE. Calling
+      // this a witness-line problem, as an earlier version of this script did, pointed at the
+      // wrong end of the pipeline.
+      reason = 'declared-route-has-no-node'
+      detail = `the target "${p}" names a declared route the extractor minted no node for, so there is nothing to draw the edge to`
+    } else if (p && edgeFromFileTo(relFile, p)) {
+      // The transition IS in the graph; what is missing is the line. Several links on one
+      // screen to routes that share a pattern collapse into one edge, and the harness matches
+      // a construct to an edge by line, so the siblings read as losses. Coverage is intact;
+      // provenance is not.
+      reason = 'edge-exists-witness-on-another-line'
+      detail = `an edge to "${p}" is witnessed elsewhere in this file, so the construct is covered but not traceable to its own line`
     } else if (noteKindsInFile.get(relFile)?.size || noteKindsInFile.get(owner)?.size) {
-      reason = 'line-off-by-more-than-one'
-      detail = 'the extractor parsed this file and noted other sites, but no witness or note lands within one line of this construct'
+      reason = 'parsed-file-no-note-near-construct'
+      detail = 'the extractor parsed this file and noted other sites, but nothing lands within one line of this construct'
     } else {
       reason = 'UNKNOWN'
       detail = 'no condition explains this construct — inspect by hand'
