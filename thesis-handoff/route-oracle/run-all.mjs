@@ -149,6 +149,12 @@ for (const r of repos) {
   const testB = mapOk && graph?.edges ? runTool('witness-check.mjs', [appPath, path.join(appPath, 'uigraph.db')], raw('B')) : null
   const testD = mapOk && r.e2eDir ? runTool('e2e-oracle.mjs', [path.resolve(repoDir, r.e2eDir), path.join(appPath, 'uigraph.db')], raw('D')) : null
   const testL = mapOk ? runTool('loss-breakdown.mjs', [appPath, path.join(appPath, 'uigraph.db'), '--routes', raw('C')], raw('L')) : null
+  // The reason every unrecovered construct is unrecovered, and the extractor's own notes.
+  // These two are what the dead-link and route-set-completeness figures are counted from, so
+  // they belong in the driver: while they were run by hand the section they feed could not be
+  // reproduced from the repository at all.
+  const testWhy = testC && testL ? runTool('unexplained.mjs', [appPath, path.join(appPath, 'uigraph.db'), '--routes', raw('C'), '--loss', raw('L')], raw('why')) : null
+  const testNotes = mapOk ? runTool('notes.mjs', [path.join(appPath, 'uigraph.db')], raw('notes')) : null
   const testF = mapOk && !has('--no-mutation') ? runTool('mutate.mjs', [repoDir, appPath, '--limit', arg('--mutants', '5')], raw('F')) : null
 
   // One definition of a construct across the thesis: the loss-breakdown parser's. The grep
@@ -168,6 +174,8 @@ for (const r of repos) {
     testD: testD && { urls: testD.rows?.length, recall: testD.recall },
     testF: testF && { tally: testF.tally },
     loss: testL && { constructs: testL.constructs, lost: testL.lost, tally: testL.tally },
+    why: testWhy && { total: testWhy.total, byReason: testWhy.byReason },
+    notes: Array.isArray(testNotes) ? testNotes.length : null,
   })
   const g = graph || {}
   log(`  constructs ${totalConstructs}  ->  nodes ${g.nodes ?? '-'} edges ${g.edges ?? '-'} (must ${g.must ?? '-'})  conversion ${results.at(-1).conversion !== null ? (results.at(-1).conversion * 100).toFixed(1) + '%' : 'n/a'}`)

@@ -163,7 +163,11 @@ for (const { e, w } of witnessList) {
 const declaredByComponent = new Map() // component file -> [{ path, constantPath }]
 if (routesJson) {
   for (const r of routesJson.routes || []) {
-    if (r.kind !== 'SCREEN' || !r.component) continue
+    // `SCREEN_UNRESOLVED` is a screen whose path expression the oracle could not read. It is
+    // outside the coverage denominator there, but it is exactly the route the CONSTANT_PATH
+    // class below exists to name, so dropping it here would re-file those constructs as a
+    // missing node and hide the reason they are missing.
+    if ((r.kind !== 'SCREEN' && r.kind !== 'SCREEN_UNRESOLVED') || !r.component) continue
     const declAbs = path.resolve(appDir, r.file)
     let file = null
     if (r.component.startsWith('.')) file = resolveImport(declAbs, r.component)

@@ -89,11 +89,80 @@ const fileKind = (rel) => {
   return 'plain-class'
 }
 
-/** The first quoted path in a target expression, or null when it names none. */
+/**
+ * The top-level segments of a bracketed commands array, or null when the text does not open
+ * with one. Splitting on every comma would cut `foo(a, b)` in half and `['/x', a[0]]` at the
+ * wrong bracket, so the scan tracks quote and bracket depth and closes at the matching `]`.
+ */
+function commandsParts(target) {
+  const open = target.indexOf('[')
+  if (open === -1 || target.slice(0, open).trim() !== '') return null
+  const parts = []
+  let buf = ''
+  let depth = 0
+  let quote = null
+  for (let i = open + 1; i < target.length; i++) {
+    const ch = target[i]
+    if (quote) {
+      if (ch === '\\') { buf += ch + (target[++i] ?? ''); continue }
+      if (ch === quote) quote = null
+      buf += ch
+      continue
+    }
+    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; buf += ch; continue }
+    if (ch === '[' || ch === '(' || ch === '{') depth++
+    if (ch === ')' || ch === '}') depth--
+    if (ch === ']') {
+      if (depth === 0) { parts.push(buf); return parts.map((p) => p.trim()).filter((p) => p !== '') }
+      depth--
+    }
+    if (ch === ',' && depth === 0) { parts.push(buf); buf = ''; continue }
+    buf += ch
+  }
+  return null
+}
+
+/**
+ * The route PATTERN a target expression names: its quoted segments literal and its computed
+ * segments `:param` holes, which is the form `matchesDeclared` is built to compare against.
+ * Returns null for anything that is not an absolute commands array or an absolute string.
+ *
+ * Reading only the FIRST quoted segment, as this did before harness 1.6.0, tested
+ * `['/nodes', id, 'rules']` as the path `/nodes`. alfresco declares no route at `/nodes`
+ * while `/nodes/:nodeId/rules` is exactly what it does declare, so two live links were
+ * published as dead links. A prefix is not a target.
+ */
 function literalTarget(target) {
-  const m = /'([^']*)'|"([^"]*)"/.exec(target)
-  const v = m ? (m[1] ?? m[2]) : null
-  return v && v.startsWith('/') ? v : null
+  const parts = commandsParts(target)
+  const quoted = (s) => { const q = /^'([^']*)'$|^"([^"]*)"$|^`([^`$]*)`$/.exec(s); return q ? (q[1] ?? q[2] ?? q[3]) : null }
+  if (!parts) {
+    const m = /'([^']*)'|"([^"]*)"/.exec(target)
+    const v = m ? (m[1] ?? m[2]) : null
+    return v && v.startsWith('/') ? v : null
+  }
+  const head = quoted(parts[0])
+  if (head === null || !head.startsWith('/')) return null
+  return parts.map((p) => quoted(p) ?? ':param').join('/').replace(/\/+/g, '/')
+}
+
+/**
+ * Does this target address something inside a subtree the oracle could not read? `blindSpots`
+ * records the prefix of every route array it failed to follow, and no claim that a path is
+ * undeclared can hold inside one: the route that declares it may be in the file that was
+ * never opened. Without this test the census called a link dead on the strength of a hole the
+ * result file had already recorded one field away.
+ */
+function underBlindSpot(p) {
+  const t = norm(p).split('/').filter(Boolean)
+  return (routesJson.blindSpots || []).some((b) => {
+    if (!b.prefix) return false
+    const d = norm(b.prefix).split('/').filter(Boolean)
+    // A hole mounted at the application root would void every claim in the application, which
+    // is a suppression so broad it stops being evidence. The route set being a lower bound is
+    // reported once per application by the extractor's own note instead.
+    if (d.length === 0) return false
+    return d.length <= t.length && d.every((seg, i) => seg.startsWith(':') || t[i].startsWith(':') || seg === t[i])
+  })
 }
 
 const ACCOUNTED = /^(CONVERTED|QUERY_ONLY|ACCOUNTED|EXCLUDED)/
@@ -104,6 +173,7 @@ for (const r of loss.rows) {
   const owner = r.owner
   const [relFile, lineNo] = [r.at.replace(/:\d+$/, ''), Number(r.at.match(/:(\d+)$/)?.[1] ?? 0)]
   const note = noteAt.get(r.at) ?? noteAt.get(`${relFile}:${lineNo}`)
+  const lit = literalTarget(target)
   let reason = null
   let detail = ''
 
@@ -113,15 +183,21 @@ for (const r of loss.rows) {
   } else if (target === '' || /^\[\s*\]/.test(target)) {
     reason = 'not-a-navigation'
     detail = 'the construct carries no commands, so it names no destination'
-  } else if (literalTarget(target) !== null && !matchesDeclared(literalTarget(target))) {
+  } else if (lit !== null && !matchesDeclared(lit) && underBlindSpot(lit)) {
+    // Ordered before the dead-link test on purpose: "the application declares no such route"
+    // and "the oracle never opened the file that declares it" look identical from a
+    // navigation site, and only this branch can tell them apart.
+    reason = 'target-under-unreadable-subtree'
+    detail = `the target "${lit}" lies inside a route subtree the oracle could not read, so it is not claimed that no route declares it`
+  } else if (lit !== null && !matchesDeclared(lit)) {
     // Tested here rather than inherited from the extractor's note, because the thesis asserts
     // this predicate of every site in the group: an earlier ordering let the note fire first
     // and only a fifth of the group had ever been checked against the route set.
     reason = 'target-names-no-declared-route'
-    detail = `the target "${literalTarget(target)}" matches no route the application declares; a dead link, or a route neither tool reads`
-  } else if (literalTarget(target) !== null && !matchesNode(literalTarget(target))) {
+    detail = `the target "${lit}" matches no route the application declares; a dead link, or a route neither tool reads`
+  } else if (lit !== null && !matchesNode(lit)) {
     reason = 'declared-route-has-no-node'
-    detail = `the target "${literalTarget(target)}" names a declared route the extractor minted no node for`
+    detail = `the target "${lit}" names a declared route the extractor minted no node for`
   } else if (note) {
     reason = `extractor-note:${note.kind}`
     detail = note.detail ?? ''
@@ -149,7 +225,16 @@ for (const r of loss.rows) {
   } else {
     const lit = target.match(/'([^']*)'|"([^"]*)"/)
     const p = lit ? (lit[1] ?? lit[2]) : null
-    if (p && !matchesDeclared(p)) {
+    if (p && !p.startsWith('/')) {
+      // A relative target tested against an absolute route set can only ever fail, so
+      // counting it as a target no route declares credited the analysis's own missing base
+      // as a defect of the application. It is a separate claim and it gets a separate name.
+      reason = 'relative-target-unresolved'
+      detail = `the target "${p}" is relative and the analysis had no base to resolve it against, which is its own gap and not a dead link`
+    } else if (p && !matchesDeclared(p) && underBlindSpot(p)) {
+      reason = 'target-under-unreadable-subtree'
+      detail = `the target "${p}" lies inside a route subtree the oracle could not read, so it is not claimed that no route declares it`
+    } else if (p && !matchesDeclared(p)) {
       reason = 'unmapped-target'
       detail = `the target "${p}" matches no declared route; a dead link or a route the parser did not find`
     } else if (p && matchesDeclared(p) && !matchesNode(p)) {

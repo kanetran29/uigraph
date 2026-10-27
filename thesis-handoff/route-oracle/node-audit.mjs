@@ -46,7 +46,10 @@ for (const slug of SLUGS) {
     const kinds = byPath.get(norm(e.route))
     if (!kinds) c.noRoute++
     else if ([...kinds].every((k) => k === 'PREFIX' || k === 'REDIRECT')) c.outsideS++
-    else if (kinds.has('LAZY_UNRESOLVED')) c.blind++
+    // Both kinds are a route the oracle knows is there and cannot address: a lazy module it
+    // could not open, or a path expression it could not read. An extra node at such a path is
+    // the oracle's blind spot, not a node answering to nothing.
+    else if (kinds.has('LAZY_UNRESOLVED') || kinds.has('SCREEN_UNRESOLVED')) c.blind++
     else if (kinds.has('SCREEN')) c.screen++
     else c.noRoute++
   }

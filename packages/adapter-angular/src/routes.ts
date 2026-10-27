@@ -43,9 +43,15 @@ function canActivateGuards(sf: SourceFile, obj: ObjectLiteralExpression): GuardI
   return analyzeCanActivate(sf, init.getElements())
 }
 
-/** Join a parent route path with an own segment, normalizing to a leading-slash route. */
+/**
+ * Join a parent route path with an own segment, normalizing to a leading-slash route.
+ * A catch-all folds to the path `*`, but only at the root: a `**` inside a feature module
+ * catches only that module's unmatched URLs, and folding it to `*` too made it
+ * indistinguishable from the application's own catch-all, which then answered links from
+ * anywhere and shadowed the real one.
+ */
 function joinRoutePath(parent: string, own: string): string {
-  if (own === '**' || own === '*' || own === '/*') return '*'
+  if (own === '**' || own === '*' || own === '/*') return parent === '/' ? '*' : `${parent}/*`
   const parentSegs = parent === '/' ? [] : segments(parent)
   const ownSegs = own.split('/').filter(Boolean)
   const all = [...parentSegs, ...ownSegs]
@@ -131,7 +137,10 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
  * inside are reached, while whatever the factory itself adds is not seen. Inline `children`
  * are visited with the parent path prefixed and the parent's guards inherited;
  * `loadChildren: () => import('./x.routes')` is followed into the imported
- * module's route array. Deduplicates by node id (first declaration wins).
+ * module's route array. Deduplicates by node id (first declaration wins). A route whose
+ * address cannot be read as a string — an unresolvable `path`, or a `matcher` function — mints
+ * nothing and is tallied into `unreadablePaths`, so the caller knows the route set is a lower
+ * bound.
  */
 function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadablePaths?: { count: number }): void {
   for (const el of arr.getElements()) {
@@ -158,8 +167,14 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
       // holes is what lets a caller tell "this application declares no such route" from
       // "this extractor could not read the route that declares it" — the two look identical
       // from a navigation site, and treating the second as the first credits the extractor
-      // for its own blind spot.
-      if (obj.getProperty('path') !== undefined && unreadablePaths) unreadablePaths.count++
+      // for its own blind spot. A `matcher` route is the same hole by construction: it
+      // declares an address through a `UrlMatcher` function instead of a `path` (ghostfolio
+      // mounts /admin/users that way), so no string exists to read. It is counted, never
+      // evaluated and never minted into a screen — running the matcher is out of reach and
+      // guessing its address would claim a destination nothing proves. Angular rejects a route
+      // that carries both, so one test counts each hole exactly once.
+      const declaresAddress = obj.getProperty('path') !== undefined || obj.getProperty('matcher') !== undefined
+      if (declaresAddress && unreadablePaths) unreadablePaths.count++
       continue
     }
     const fullPath = joinRoutePath(parentPath, ownPath)
@@ -207,7 +222,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
  * reached via `loadChildren` are scanned only under their parent prefix, never
  * again at the root, so a child route array contributes a single correct path.
  */
-export function collectRoutes(project: Project, redirects?: Map<string, string>, unreadablePaths?: { count: number }): RouteInfo[] {
+export function collectRoutes(project: Project, redirects?: Map<string, string>, unreadablePaths?: { count: number }, projectDir?: string): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
   const loadedChildFiles = collectLoadChildrenTargets(project)
   for (const sf of project.getSourceFiles()) {
@@ -215,6 +230,12 @@ export function collectRoutes(project: Project, redirects?: Map<string, string>,
     // A spec declares routes of its own to drive the router under test; they are not the
     // application's screens, and minting them puts fictional addresses in the graph.
     if (loadedChildFiles.has(f) || SPEC_FILE.test(f)) continue
+    // A tsconfig `paths` alias brings a whole library directory into the project so that
+    // imports through it resolve. A route array in that library is the LIBRARY's, and
+    // walking it from the root minted its routes as this application's screens -- at
+    // confidence 1, which is a must edge to an address the application does not have.
+    // Such a file is reachable only through a `loadChildren` that names it.
+    if (projectDir && !f.startsWith(projectDir)) continue
     for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles, [], null, redirects, unreadablePaths)
   }
   return [...byNodeId.values()]
