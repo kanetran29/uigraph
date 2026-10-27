@@ -94,6 +94,39 @@ measured across them and the corpus is not stratified by them.
 
 The thesis also now carries a short statement on the use of AI tools, as Aalto asks.
 
+**After your review I ran an internal review of my own**, which found four claims the draft
+was making past its evidence. All four are corrected. I mention them because two change
+figures you will look for.
+
+The thesis said it "proves" the soundness property. It does not: the property is stated
+and mechanically tested, and one must edge in the corpus violates it. That is now said
+where the claim is made rather than only in Chapter 5.
+
+The before and after figures came from one commit of the extractor run twice with the
+attribution pass disabled and enabled, not from two tagged versions as Chapter 4 said.
+One commit is the stronger design, since it rules out every other difference, so the
+chapter now says that and claims the advantage.
+
+I had written that the 468 constructs the loss rules assign to attribution are an upper
+bound on what attribution can recover. The harness contradicts it: of the 79 constructs
+gained on the deterministic tier, 38 come from the attribution classes and 41 from the
+node classes, 40 of those from lazy boundaries. So the two levels of failure are not
+separable by the rules that classify them, and both chapters now say so.
+
+The recovery figure of 81 summed the deterministic and the may tier. The deterministic
+recovery is 38. Both are now reported separately.
+
+Two further things came out of it that you may want to look at first. The differential
+test disagrees in both directions and I had only reported one: the parser holds no
+declared screen for 197 of the 338 nodes in the corpus. Table 5.3 decomposes all 197, and
+the largest group, 143 nodes, sit at paths where the parser found no route of any kind,
+117 of them in mifos against a single blind spot. I could not resolve that with the
+methods I have, so I report the disagreement rather than explaining it away. And the rule
+that a defect class needs two independent methods turned out to be stated more strongly
+than it was applied: three of the five accepted classes rest on one method plus an
+observation, attribution among them. The rule now reads as it was applied and the table
+separates the two kinds of evidence.
+
 Open items I am aware of:
 
 - The preamble is still the report-class preview. I need aaltothesis.cls and
