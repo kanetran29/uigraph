@@ -218,6 +218,20 @@ function routeArraysIn(sf) {
   return [...new Set(found)]
 }
 
+/** The in-project file an imported identifier resolves to. */
+function importedFile(sf, name) {
+  for (const imp of sf.getImportDeclarations()) {
+    const hit = imp.getNamedImports().some((n) => (n.getAliasNode()?.getText() ?? n.getName()) === name) || imp.getDefaultImport()?.getText() === name
+    if (!hit) continue
+    const dep = imp.getModuleSpecifierSourceFile()
+    if (dep) return dep
+    const spec = imp.getModuleSpecifierValue()
+    const r = resolveModule(sf.getFilePath(), spec)
+    if (r) return r
+  }
+  return null
+}
+
 /** Resolve a loadChildren module specifier to a source file we already loaded. */
 function resolveModule(fromFile, spec) {
   if (!spec || spec.startsWith('@')) return null
@@ -312,7 +326,10 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
     if (loadChildren) {
       const t = loadChildren.getText()
       const m = t.match(/import\(\s*['"`]([^'"`]+)['"`]\s*\)/)
-      const target = m ? resolveModule(sf.getFilePath(), m[1]) : null
+      // Angular also accepts `loadChildren: () => VaultModule`, a direct reference with no
+      // dynamic import; reading only `import()` left every route behind one unreachable.
+      const direct = !m ? /^\(\s*\)\s*=>\s*([A-Za-z_$][\w$]*)\s*$/.exec(t.replace(/^loadChildren\s*:\s*/, '').trim()) : null
+      const target = m ? resolveModule(sf.getFilePath(), m[1]) : direct ? importedFile(sf, direct[1]) : null
       if (!target) {
         blindSpots.push({ reason: 'loadChildren target not resolvable', spec: m ? m[1] : t.slice(0, 60), at: `${path.relative(appDir, sf.getFilePath())}:${obj.getStartLineNumber()}`, prefix: full })
         routes[routes.length - 1].kind = 'LAZY_UNRESOLVED'
@@ -325,6 +342,17 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
           for (const imp of target.getImportDeclarations()) {
             const dep = imp.getModuleSpecifierSourceFile()
             if (!dep || !imp.getModuleSpecifierValue().startsWith('.')) continue
+            const a = routeArraysIn(dep)
+            if (a.length) { arrays = a; owner = dep; break }
+          }
+        }
+        // A barrel re-exports the routes rather than importing them.
+        if (arrays.length === 0) {
+          for (const exp of target.getExportDeclarations()) {
+            const spec = exp.getModuleSpecifierValue()
+            if (!spec || !spec.startsWith('.')) continue
+            const dep = exp.getModuleSpecifierSourceFile() ?? resolveModule(target.getFilePath(), spec)
+            if (!dep) continue
             const a = routeArraysIn(dep)
             if (a.length) { arrays = a; owner = dep; break }
           }
