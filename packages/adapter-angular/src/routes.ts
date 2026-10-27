@@ -11,7 +11,7 @@ import { routeToNodeId } from './ids'
 /** Specs, stories and test doubles: they declare routes that are not the application's. */
 const SPEC_FILE = /\.(spec|test|stories|cy)\.[tj]s$/
 import { analyzeCanActivate, type GuardInfo } from './guards'
-import { resolveImportedFile, lazyImportSpecifier, resolveRelative, componentClassName, stringProp, identifierProp, objectLiteralOf } from './resolve'
+import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, componentClassName, stringProp, identifierProp, objectLiteralOf } from './resolve'
 
 export interface RouteInfo {
   fullPath: string
@@ -103,6 +103,17 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
     const arrays = findRouteArrays(dep)
     if (arrays.length) return { owner: dep, arrays }
   }
+  // A barrel re-exports the routes rather than importing them: `export * from './x.routes'`.
+  // Without this a lazy route behind an index file is unreachable, which is how a whole
+  // feature disappears from the graph.
+  for (const exp of target.getExportDeclarations()) {
+    const spec = exp.getModuleSpecifierValue()
+    if (!spec || !spec.startsWith('.')) continue
+    const dep = exp.getModuleSpecifierSourceFile() ?? resolveRelative(target, spec)
+    if (!dep) continue
+    const arrays = findRouteArrays(dep)
+    if (arrays.length) return { owner: dep, arrays }
+  }
   return { owner: target, arrays: [] }
 }
 
@@ -163,8 +174,8 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
       if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects)
     }
     const childSpec = lazyImportSpecifier(obj, 'loadChildren')
-    if (childSpec) {
-      const childModule = resolveRelative(sf, childSpec)
+    if (childSpec || lazyIdentifierTarget(sf, obj, 'loadChildren')) {
+      const childModule = childSpec ? resolveRelative(sf, childSpec) : lazyIdentifierTarget(sf, obj, 'loadChildren')
       if (childModule) {
         const { owner, arrays } = lazyRouteOwner(childModule)
         loadedChildFiles.add(childModule.getFilePath())
@@ -199,8 +210,7 @@ function collectLoadChildrenTargets(project: Project): Set<string> {
   for (const sf of project.getSourceFiles()) {
     for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
       const spec = lazyImportSpecifier(obj, 'loadChildren')
-      if (!spec) continue
-      const mod = resolveRelative(sf, spec)
+      const mod = spec ? resolveRelative(sf, spec) : lazyIdentifierTarget(sf, obj, 'loadChildren')
       if (!mod) continue
       targets.add(mod.getFilePath())
       targets.add(lazyRouteOwner(mod).owner.getFilePath())

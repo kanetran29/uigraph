@@ -60,6 +60,21 @@ export function lazyImportSpecifier(prop: ObjectLiteralExpression, name: string)
   return null
 }
 
+/**
+ * The file a `loadChildren` arrow names WITHOUT a dynamic import — `() => VaultModule`, which
+ * Angular also accepts. Returning only `import()` specifiers left every route behind such a
+ * loader unreachable, and with it the whole subtree.
+ */
+export function lazyIdentifierTarget(sf: SourceFile, prop: ObjectLiteralExpression, name: string): SourceFile | undefined {
+  const p = prop.getProperty(name)
+  if (!p || !Node.isPropertyAssignment(p)) return undefined
+  const init = p.getInitializer()
+  if (!init || !Node.isArrowFunction(init)) return undefined
+  const body = init.getBody()
+  const id = Node.isIdentifier(body) ? body.getText() : null
+  return id ? resolveImportedFile(sf, id) : undefined
+}
+
 /** Pick the @Component-decorated class name of a source file (default export or first), or null. */
 export function componentClassName(sf: SourceFile): string | null {
   for (const cls of sf.getClasses()) {
