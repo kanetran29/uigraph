@@ -65,11 +65,34 @@ parser holds no declared screen for 197 of the 338 nodes in the corpus, so node 
 is as inaccurate as it is incomplete. For k8s dashboard the figure is almost entirely the
 parser's own limit, 37 of its 38 unmatched nodes being the lazily loaded entries it cannot
 follow. Mifos is not explained that way: it has one blind spot and 120 unmatched nodes.
-At least one unmatched node is a route the parser classifies as a path prefix rather than
-a screen, namely \texttt{/profile} in realworld, whose route declares
-\texttt{loadChildren} and no component. Chapter~\ref{ch:analysis} excludes such a route
-from the screen set, so the implemented node set is not exactly the set the model defines,
-and a per-node audit of the 197 is outstanding.
+Table~\ref{tab:node-audit} decomposes all 197 by the kinds of route the parser found at
+the node's path, joined on the parser's own normalisation.
+
+\begin{table}[t]\footnotesize
+\caption{Why each unmatched node has no declared screen. A node is placed in the first
+row that applies, and the categories are exclusive.}
+\label{tab:node-audit}
+\TabNodeAudit
+\end{table}
+
+Three groups come out of it. For 43 nodes the parser could not follow the route that would
+have declared them, so those are the oracle's limit and not the extractor's, and 37 of the
+43 are k8s dashboard. For 11 nodes the parser did find a route, but one it classifies as a
+path prefix or a redirect. Section~\ref{sec:model} admits only component-bearing routes
+into the screen set, so the implemented node set contains 11 elements the model excludes:
+one in realworld, two in alfresco, six in bitwarden and two in mifos. The clearest case is
+\texttt{/profile} in realworld, whose route declares \texttt{loadChildren} and no
+component. These nodes make $\mathit{screen}(r)$ answerable for a route the model treats
+as a path prefix only.
+
+The remaining 143 are the substantial group and have no declared route of any kind at the
+node's path. They are concentrated in mifos, which has 117 of them against a single parser
+blind spot, and in bitwarden, which has 23. Either the extractor emits nodes for paths it
+assembles differently from the parser, or the parser misses route tables it does not report
+as blind spots. The two methods disagree here without either being able to adjudicate, so
+this thesis reports the disagreement and does not resolve it. It is the largest single
+piece of unexplained behaviour the evaluation found, and it sits underneath every figure
+that counts nodes.
 
 So the baseline recovers a small fraction of the navigation, and loses it at two levels: some screens never become nodes, and most navigation sites of the screens that do are not turned into edges.
 
