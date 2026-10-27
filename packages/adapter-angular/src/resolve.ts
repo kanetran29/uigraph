@@ -3,23 +3,32 @@
 // dynamic-import loaders, and read string/identifier properties off route object
 // literals. Shared by routes/templates extraction.
 
-import { Node, SyntaxKind } from 'ts-morph'
+import { Node, SyntaxKind, VariableDeclarationKind } from 'ts-morph'
 import type { EnumDeclaration, ObjectLiteralExpression, SourceFile } from 'ts-morph'
 import { dirname, join } from 'node:path'
 
-const RESOLVE_EXTS = ['.ts', '.js', '/index.ts', '/index.js']
+// The empty candidate comes last: a `paths` target names its file with the extension
+// (`src/public-api.ts`), and trying it earlier could change what a specifier already resolves to.
+const RESOLVE_EXTS = ['.ts', '.js', '/index.ts', '/index.js', '']
 
-/** Resolve a relative import specifier to an in-project source file by trying extensions. */
+/**
+ * Resolve an import specifier to an in-project source file by trying extensions. A relative
+ * specifier is joined to the importing file; any other is a first-party alias or a path under
+ * `baseUrl`, so it is looked up in the tsconfig `paths` map first, as TypeScript does, and then
+ * against `baseUrl` itself. Without the `paths` step a scoped import of the workspace's own
+ * code (`@scope/app/feature`) names no file, and every route behind it is unreachable.
+ */
 export function resolveRelative(sf: SourceFile, specifier: string): SourceFile | undefined {
   const project = sf.getProject()
   // A workspace that sets tsconfig `baseUrl` imports its own modules without a leading dot
   // (`resource/cluster/module`). Those are first-party files, not packages, so resolve them
   // against baseUrl before giving up — otherwise every lazy route behind one is unreachable.
-  const baseUrl = project.getCompilerOptions().baseUrl
+  // `paths` targets are resolved against `baseUrl` too, which is where TypeScript puts them.
+  const { baseUrl, paths } = project.getCompilerOptions()
   const bases = specifier.startsWith('.')
     ? [join(dirname(sf.getFilePath()), specifier)]
     : baseUrl
-      ? [join(baseUrl, specifier)]
+      ? [...pathsTargets(paths, specifier).map((t) => join(baseUrl, t)), join(baseUrl, specifier)]
       : []
   for (const base of bases) {
     for (const ext of RESOLVE_EXTS) {
@@ -28,6 +37,32 @@ export function resolveRelative(sf: SourceFile, specifier: string): SourceFile |
     }
   }
   return undefined
+}
+
+/**
+ * The targets a tsconfig `paths` alias sends `specifier` to, with whatever a `*` captured
+ * substituted into each. An exact key wins; otherwise the `*` key with the longest literal
+ * prefix does, which is TypeScript's own rule, so `@scope/lib/sub` reaches its own entry rather
+ * than the `@scope/lib/*` one beside it. Returns no targets when no key matches.
+ */
+function pathsTargets(paths: Record<string, string[]> | undefined, specifier: string): string[] {
+  let best: string[] = []
+  let bestPrefix = -1
+  for (const [key, targets] of Object.entries(paths ?? {})) {
+    const star = key.indexOf('*')
+    if (star < 0) {
+      if (key === specifier) return targets
+      continue
+    }
+    const prefix = key.slice(0, star)
+    const suffix = key.slice(star + 1)
+    if (prefix.length <= bestPrefix) continue
+    if (specifier.length < prefix.length + suffix.length || !specifier.startsWith(prefix) || !specifier.endsWith(suffix)) continue
+    const captured = specifier.slice(prefix.length, specifier.length - suffix.length)
+    best = targets.map((t) => t.replace('*', () => captured))
+    bestPrefix = prefix.length
+  }
+  return best
 }
 
 /** Resolve a component/guard identifier to its backing source file via imports. */
@@ -109,10 +144,12 @@ export function constantString(expr: Node | undefined): string | null {
   // they are translated, and reading only plain literals loses the whole route.
   if (Node.isTaggedTemplateExpression(expr) && /(^|\.)\$localize$/.test(expr.getTag().getText())) {
     const tpl = expr.getTemplate()
-    // The raw source, not getLiteralValue(): that has already turned `\\:` into `:` and the
-    // metadata block can no longer be told from the message.
+    // Both forms are needed: the RAW source says where the metadata block ends, because
+    // getLiteralValue() has already turned `\\:` into `:` and the block can no longer be told
+    // from the message; the COOKED value is what the message actually is, because that is
+    // what Angular hands the translator.
     if (Node.isNoSubstitutionTemplateLiteral(tpl)) {
-      const msg = stripI18nMeta(tpl.getText().replace(/^`|`$/g, ''))
+      const msg = stripI18nMeta(tpl.getText().replace(/^`|`$/g, ''), tpl.getLiteralValue())
       // A segment holding a space, a colon or an `@@` is not a path; reading it as one would
       // mint a screen at an address the application cannot have.
       return /[\s:]|@@/.test(msg) ? null : msg
@@ -132,23 +169,29 @@ export function constantString(expr: Node | undefined): string | null {
 }
 
 /**
- * Drop Angular's i18n metadata block from a `$localize` message. The block is delimited by a
- * leading colon and the colon that closes it, and it may itself contain colons
- * (`:Section: the page@@route.about:`), so the closing colon is the one after the `@@` id when
- * there is one. Taking the first colon instead left the description and the id in the path.
+ * Drop Angular's i18n metadata block from a `$localize` message, given the raw source text. The
+ * block opens with a leading colon and closes at the first colon that is not escaped
+ * (`:kebab-case@@routes.about:about` leaves `about`); an escaped colon (`\:`) stays inside it.
+ * The scan is Angular's own `findEndOfBlock`: walk forward and, on a backslash, skip the
+ * character it escapes. Testing the previous character instead misreads the closing colon of
+ * `:meta\\:text` as escaped, because there the backslash escapes another backslash, so the scan
+ * ran past it and returned a shorter, wrong message. A block that never closes is returned
+ * whole; it holds a colon, and the caller refuses a segment that does.
  */
-function stripI18nMeta(raw: string): string {
-  const unescape = (t: string): string => t.replace(/\\:/g, ':')
-  if (!raw.startsWith(':')) return unescape(raw)
-  // Angular closes the block at the first colon that is not escaped, and nothing else: an
-  // earlier version searched for `@@` anywhere in the string, found one in the MESSAGE, and
-  // carried the whole block into the path. Being faithful here means a malformed block leaves
-  // a message that is no route segment, and the caller refuses it rather than minting it.
-  for (let i = 1; i < raw.length; i++) {
-    if (raw[i] !== ':' || raw[i - 1] === '\\') continue
-    return unescape(raw.slice(i + 1))
+function stripI18nMeta(raw: string, cooked: string): string {
+  if (!cooked.startsWith(':')) return cooked
+  // Angular's findEndOfBlock walks the cooked and raw strings in step: a backslash in RAW
+  // skips the next raw character, and the block marker is tested on COOKED. Both halves
+  // matter. Testing the raw string instead closed the block in the wrong place when an
+  // escaped backslash preceded the real closing colon; returning the raw remainder instead
+  // of the cooked one minted `/ab\\ncd` for a message that is really two lines, which the
+  // caller would have refused as a path had it been given what Angular produces.
+  for (let c = 1, r = 1; c < cooked.length; c++, r++) {
+    if (raw[r] === '\\') r++
+    else if (cooked[c] === ':') return cooked.slice(c + 1)
   }
-  return unescape(raw)
+  // No closing colon at all: the whole literal is a malformed block, not a path.
+  return cooked
 }
 
 /** The enum an identifier names, following imports within the project, or undefined. */
@@ -297,6 +340,18 @@ export function arrayLiteralOf(expr: Node | undefined): Node | undefined {
 
 /** The object literal an identifier or property-access chain ultimately names, or undefined. */
 export function objectLiteralOf(expr: Node): ObjectLiteralExpression | undefined {
+  // A shared route table is often wrapped in a one-argument call that returns it:
+  // `Object.freeze({...})`, `deepFreeze({...})`, a small clone helper. The wrapper is
+  // transparent for reading a path out of the table, and not following it was why 27 of
+  // bitwarden's declared paths read as unresolvable expressions (`AuthRoute.Login`) when the
+  // literal was one call away -- in BOTH tools, so they agreed about screens neither could see.
+  // Only a single-argument call is followed: a factory taking more than one argument is not an
+  // identity over its first, and reading it as one would invent an address.
+  if (Node.isCallExpression(expr)) {
+    const args = expr.getArguments()
+    const only = args[0]
+    return args.length === 1 && only ? objectLiteralOf(only) : undefined
+  }
   if (Node.isAsExpression(expr) || Node.isParenthesizedExpression(expr) || Node.isSatisfiesExpression(expr)) return objectLiteralOf(expr.getExpression())
   if (Node.isObjectLiteralExpression(expr)) return expr
   if (Node.isIdentifier(expr)) {
@@ -344,23 +399,49 @@ export function identifierProp(obj: ObjectLiteralExpression, name: string): stri
 }
 
 /**
- * Every property name a class assigns to, by any spelling: `this.x = …`, a destructuring
- * target that contains `this.x`, and `Object.assign(this, { x })`. A name in this set is state
- * and its initializer says nothing about what the field holds when a template reads it.
+ * Every property name a class assigns to, by any spelling: `this.x = …` and each compound form
+ * of it (`+=`, `??=`, `||=`, `&&=`), the same through a local that holds `this`
+ * (`const self = this`), a destructuring target that contains `this.x`, and
+ * `Object.assign(this, { x })` with the key written bare, quoted or as a constant computed
+ * name. A name in this set is state and its initializer says nothing about what the field holds
+ * when a template reads it. A write whose target cannot be named, such as a computed key known
+ * only at run time, taints the whole class ('all'): it writes some field and which one is
+ * unknown, so a lost edge is the price and a wrong must edge is not.
  */
 function writtenNames(cls: Node): Set<string> | 'all' {
   const out = new Set<string>()
+  const aliases = new Set<string>()
+  const aliasFields = new Set<string>()
+  /**
+   * Whether `e` is the instance itself: `this`, a parenthesised or cast `this`, a local
+   * declared as one, or a field the class assigned `this` to (`this.me = this`).
+   */
+  const isThis = (e: Node | undefined): boolean => {
+    if (!e) return false
+    if (e.getKind() === SyntaxKind.ThisKeyword) return true
+    if (Node.isParenthesizedExpression(e) || Node.isAsExpression(e) || Node.isSatisfiesExpression(e)) return isThis(e.getExpression())
+    if (Node.isPropertyAccessExpression(e)) return aliasFields.has(e.getName()) && isThis(e.getExpression())
+    return Node.isIdentifier(e) && aliases.has(e.getText())
+  }
+  /** The string a computed key or element index names, or the UNREADABLE sentinel when only run time knows it. */
+  const keyOf = (e: Node | undefined): string => {
+    // A `let` or `var` can hold a different string by the time the write runs, so only a
+    // binding that cannot be reassigned may be read as the one field this writes.
+    if (e && Node.isIdentifier(e)) {
+      const decl = e.getSymbol()?.getDeclarations()?.find((d) => Node.isVariableDeclaration(d))
+      if (decl && Node.isVariableDeclaration(decl) && decl.getVariableStatement()?.getDeclarationKind() !== VariableDeclarationKind.Const) return UNREADABLE
+    }
+    return constantString(e) ?? UNREADABLE
+  }
+  /** Record every name that an assignment or destructuring target writes on the instance. */
   const fromTarget = (node: Node): void => {
     if (Node.isPropertyAccessExpression(node)) {
-      if (node.getExpression().getKind() === SyntaxKind.ThisKeyword) out.add(node.getName())
+      if (isThis(node.getExpression())) out.add(node.getName())
       return
     }
     // `this['dest'] = …` writes the field as surely as `this.dest = …` does.
     if (Node.isElementAccessExpression(node)) {
-      if (node.getExpression().getKind() !== SyntaxKind.ThisKeyword) return
-      const key = constantString(node.getArgumentExpression())
-      if (key !== null) out.add(key)
-      else out.add(UNREADABLE)
+      if (isThis(node.getExpression())) out.add(keyOf(node.getArgumentExpression()))
       return
     }
     if (Node.isObjectLiteralExpression(node)) {
@@ -369,15 +450,39 @@ function writtenNames(cls: Node): Set<string> | 'all' {
           const init = p.getInitializer()
           if (init) fromTarget(init)
         } else if (Node.isShorthandPropertyAssignment(p)) out.add(p.getName())
+        // `({ ...this.dest } = cfg)` writes the field with whatever is left over.
+        else if (Node.isSpreadAssignment(p)) fromTarget(p.getExpression())
       }
       return
     }
     if (Node.isArrayLiteralExpression(node)) {
-      for (const el of node.getElements()) fromTarget(el)
+      for (const el of node.getElements()) fromTarget(Node.isSpreadElement(el) ? el.getExpression() : el)
+    }
+  }
+  // Matched by name and not by scope: a shadowing local of the same name only taints more, never less.
+  for (const d of cls.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    if (isThis(d.getInitializer())) aliases.add(d.getName())
+  }
+  // A field can hold the instance too (`this.me = this`), and a write through it is a write.
+  // Collected before the assignment walk below so that `this.me.dest = …` is seen as a write
+  // of `dest` rather than of nothing.
+  for (const b of cls.getDescendantsOfKind(SyntaxKind.BinaryExpression)) {
+    const left = b.getLeft()
+    if (b.getOperatorToken().getKind() !== SyntaxKind.EqualsToken) continue
+    if (Node.isPropertyAccessExpression(left) && isThis(left.getExpression()) && isThis(b.getRight())) aliasFields.add(left.getName())
+  }
+  // `for (this.dest of xs)` and `for (this.dest in o)` assign the field on every iteration
+  // without ever being an assignment expression.
+  for (const kind of [SyntaxKind.ForOfStatement, SyntaxKind.ForInStatement] as const) {
+    for (const loop of cls.getDescendantsOfKind(kind)) {
+      const init = loop.getInitializer()
+      if (!Node.isVariableDeclarationList(init)) fromTarget(init)
     }
   }
   for (const b of cls.getDescendantsOfKind(SyntaxKind.BinaryExpression)) {
-    if (b.getOperatorToken().getText() !== '=') continue
+    // Every assignment operator writes: `=`, the arithmetic forms, and the logical `??=`, `||=` and `&&=`.
+    const op = b.getOperatorToken().getKind()
+    if (op < SyntaxKind.FirstAssignment || op > SyntaxKind.LastAssignment) continue
     fromTarget(b.getLeft())
   }
   for (const call of cls.getDescendantsOfKind(SyntaxKind.CallExpression)) {
@@ -387,14 +492,19 @@ function writtenNames(cls: Node): Set<string> | 'all' {
     // guard exists to prevent. An unreadable write of this shape means no field of the class
     // can be trusted, which is the safe answer rather than the convenient one.
     const [first, ...rest] = call.getArguments()
-    if (!first || first.getKind() !== SyntaxKind.ThisKeyword) continue
+    if (!isThis(first)) continue
     if (rest.length === 0) continue
     for (const arg of rest) {
       const obj = Node.isObjectLiteralExpression(arg) ? arg : objectLiteralOf(arg)
       if (!obj || !Node.isObjectLiteralExpression(obj)) return 'all'
       for (const p of obj.getProperties()) {
-        if (Node.isPropertyAssignment(p) || Node.isShorthandPropertyAssignment(p)) out.add(p.getName())
-        else return 'all'
+        if (Node.isShorthandPropertyAssignment(p)) out.add(p.getName())
+        else if (Node.isPropertyAssignment(p)) {
+          // `getName()` keeps a quoted key's quotes and a computed key's brackets, so read the key off its name node.
+          const key = p.getNameNode()
+          if (Node.isComputedPropertyName(key)) out.add(keyOf(key.getExpression()))
+          else out.add(Node.isStringLiteral(key) ? key.getLiteralValue() : key.getText())
+        } else return 'all'
       }
     }
   }

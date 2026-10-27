@@ -420,15 +420,29 @@ Two things must be said about the figures before they are read. They are measure
 later commit of the extractor than the one the rest of this chapter uses, so they do not
 revise Table~\ref{tab:conversion}; the pinned results stand as reported, reproducible from
 the tag recorded with them. And where the oracle shared a blind spot with the extractor it
-too was corrected, which the harness records as version 1.4.0; the corrections the third
-round made to the measurement scripts themselves are version \HarnessVersion{}, which is
-what produced the figures below. Three of the oracle's corrections
-matter enough to name, because each one had been scoring the extractor against paths the
-oracle itself had failed to read: a route path written through a constant, an enum or
+too was corrected. Those corrections are versioned in the harness manifest, which records
+what each round changed and why. Every after figure in this section was produced by
+rerunning the whole measurement chain at version \HarnessVersion{}. The before figures were
+not: they were measured by the oracle as it stood when the round began, and reproducing
+them under the current one would mean rebuilding the extractor at its pre-round commit,
+which is not done here. Where the two oracles disagree about how many screens an
+application declares, the declared column of Table~\ref{tab:round2nodes} prints both
+numbers, because a ratio whose denominator moved between two columns is two measurements
+and not a difference. Several of the
+oracle's corrections matter enough to name, because each one had been scoring the extractor
+against paths the oracle itself had failed to read: a route path written through a constant, an enum or
 Angular's \texttt{\$localize}; a first-party import resolved through the workspace's
 \texttt{baseUrl}; and a route array named rather than written out. Before the last of
 these the oracle saw 2 declared screens in k8s dashboard where there are 67, and scored
-the extractor's 67 nodes as 65 unmatched.
+the extractor's 67 nodes as 65 unmatched. Three more were found in the round reported in
+Section~\ref{sec:deadlinks} and belong in the same list, all of them in the denominator
+rather than in the extractor: the oracle had been reading Storybook fixture route arrays as
+declared screens; it had been reading the route tables of a sibling application reached
+through a tsconfig alias as this application's; and it had been recording a path held in a
+route table wrapped in \texttt{Object.freeze} as an unresolvable expression, which is the
+correction that matters most, because the alternative considered first was to drop those
+routes from the denominator as unreadable. They were readable one call away, and a
+denominator that shrinks is a coverage figure that rises for no reason the extractor earned.
 
 \subsection{What the losses were}
 
@@ -462,10 +476,24 @@ must edge.
 
 \subsection{What the figures became}
 
-Table~\ref{tab:round2nodes} gives node coverage before and after. Four of the six
-applications now hold a node for every declared screen. The two that do not are alfresco,
-whose remaining blind spots are three lazy boundaries, and bitwarden, where two barrels
-still hide their route arrays one hop deeper than the walk reaches.
+Table~\ref{tab:round2nodes} gives node coverage before and after. All \RoundTwoFullNodes{} of
+the applications now hold a node for every declared screen, and one of those figures deserves
+its denominator explained rather than reported. An earlier draft of this section reported bitwarden at
+69.8\,\% of 159 declared screens. Of those 159, 81 were declared in files outside the
+application being measured --- its web app resolves imports through a tsconfig alias that reaches the browser
+extension and the shared component library, and route tables found there are those projects'
+screens, not this one's --- and 19 more were Storybook fixtures, throwaway tables such as
+\texttt{/foo} and \texttt{/item-2} that exist only to render one component in isolation.
+Both tools read those files, so their agreeing about such a path was not independent evidence
+of anything. Neither reads them now, and the oracle reports how many files it set aside.
+Against the 93 screens the application itself declares, 23 of which arrived when both tools
+learned to read a route table wrapped in \texttt{Object.freeze}, the graph holds a node for
+every one.
+
+That six of six reach every declared screen is a weaker result than it sounds, and the
+blind-spots column is why: it counts the routes a tool knows are there and cannot address,
+and reaching every screen one can see says the walk finds the route tables rather than that
+the graph is complete. What the graph does with the navigation is the accounting below.
 
 \begin{table}[t]\small
 \caption{Declared screens that have a node, before and after the loss list was worked.
@@ -482,9 +510,11 @@ backend, a history entry --- in which case the graph records the transition as a
 that screen's \texttt{u\_}\,sink, with modality unknown, rather than dropping it or
 guessing. It is \emph{unplaced} when the destination is readable but the screen it fires
 from is not, in which case the edge is anchored at an \texttt{o\_}\,origin node that says so.
-What is left is unexplained. Seven sites leave the denominator entirely, because they are
-not transitions between screens at all: five navigate a secondary outlet, which the model
-admits no screens for, and two carry no commands and so name no destination.
+What is left is unexplained. \RoundTwoExcluded{} sites leave the denominator entirely, because
+they carry no commands and so name no destination. A site that navigates a secondary outlet
+would leave it too --- the model admits only the primary outlet --- and in the round reported
+here there are none left to exclude: the five in alfresco were sites whose own screen the
+extractor could not place until its route subtree became readable.
 
 \begin{table}[t]\small
 \caption{Construct accounting after the loss list was worked. Percentages are of the
@@ -499,8 +529,8 @@ Of \RoundTwoInScope{} in-scope sites, \RoundTwoRecovered{} are recovered,
 worked is \RoundTwoBefore{}. The reading that changes most is k8s dashboard, which recovers
 a sixth of its sites and looks like a failure until the second column is read: nearly three
 quarters of its navigation computes the destination at run time, and two of its sites are
-unexplained. The dynamic sites are not one central builder --- they are spread over 42 files,
-most of them contributing a single site --- so what the column reports is a habit of the
+unexplained. The dynamic sites are not one central builder --- they are spread over \RoundTwoDynamicFiles{} files,
+\RoundTwoDynamicFilesOne{} of them contributing a single site --- so what the column reports is a habit of the
 codebase rather than one place to fix.
 
 Two cautions belong with the corpus total. mifos supplies \RoundTwoMifosShare{} of the
@@ -529,7 +559,7 @@ Across the corpus \RoundTwoMustClean{} must edges are clean, so
 \RoundTwoMustViolations{} violate the property, all of them in mifos, where the must tier
 grew from 129 edges to over a thousand. That is a worse ratio than the one edge of
 Section~\ref{sec:res-defects}, and it is reported here rather than left to be inferred from
-a coverage table. Every one of the \RoundTwoMustViolations{} sits in a \texttt{.ts} file and
+a coverage table. \RoundTwoMustInTs{} of the \RoundTwoMustViolations{} sit in a \texttt{.ts} file and
 \RoundTwoMustInTemplate{} in a template: \RoundTwoMustMismatch{} are a target mismatch and
 \RoundTwoMustOffBy{} a witness two lines from its construct. All \RoundTwoMustMismatch{}
 mismatches are a route-relative commands array, \RoundTwoMustRelUp{} of them beginning with
@@ -549,6 +579,27 @@ the check does judge --- every edge that is not an over-approximation ---
 \RoundTwoJudgedClean{} are clean. The three figures answer three different questions, and
 only the first is the soundness property.
 
+One caveat belongs with the \RoundTwoOverApprox{} figure, because ``by design'' reads as a
+property of the method and most of it is a property of one line. Of the
+\RoundTwoEdges{} edges in the corpus, \RoundTwoTopFanoutShare{} ---
+\RoundTwoTopFanoutEdges{} of them --- come from a single call site in
+\RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, which navigates to a template literal
+whose static prefix is empty:
+
+\begin{quote}
+\texttt{this.router.navigateByUrl(`\$\{accountUrl\}/actions/\$\{name\}`)}
+\end{quote}
+
+\noindent With nothing before the first hole there is no prefix to narrow on, so the site
+over-approximates to every declared route in an application that declares six hundred of
+them. mifos supplies \RoundTwoMifosEdgeShare{} of the corpus's edges on its own, and that one
+line supplies half of those. The honest reading of the whole-graph figure is therefore not
+that the method over-approximates at this rate, but that an unbounded fan-out is cheap to
+emit and expensive to report, and that an edge count is the wrong unit for anything the
+thesis claims. It is also an argument for a prefix floor: a site whose static prefix is empty
+tells the analysis nothing, and the model would lose nothing by recording it as a dynamic
+sink instead of as six hundred may edges.
+
 The second column is the more uncomfortable one. RQ1 defines conversion as the fraction of
 constructs witnessed by at least one \emph{must} edge, and by that definition
 \RoundTwoZeroMustApps{} of the six applications sit at zero after the round, because they
@@ -556,19 +607,23 @@ emit no must edge at all: every edge they yield is a may or an unknown. The reco
 of Table~\ref{tab:round2acct} counts a site as recovered when any edge witnesses it,
 which is a weaker predicate than RQ1's. Both are reported because neither alone is honest:
 the weaker one measures whether the graph represents the navigation, the stricter one whether
-it commits to a destination, and on three applications the answer to the second is still
-nothing.
+it commits to a destination, and on \RoundTwoZeroMustApps{} applications the answer to the
+second is still nothing.
 
 \subsection{Nothing is left without a reason}
 
 \RoundTwoUnexplained{} sites remain unexplained, and Table~\ref{tab:round2reasons} gives the
 reason for each. The reasons are produced by a script that exits non-zero if a single site
 reaches the end of it without one, so a site the analysis cannot explain is a failing state
-rather than a silent remainder. Two groups concern a target the extractor read and could not place, and they are
-counted apart because they are different claims: \RoundTwoTargetNoRoute{} name no route the
-application declares, and \RoundTwoTargetNoNode{} name a route that is declared and has no
-node. Both are decided here by testing the target against the route set, not by repeating
-whatever note the extractor had left at the site.
+rather than a silent remainder. One group concerns a target the extractor read and could not place: \RoundTwoTargetNoRoute{}
+sites whose target matched no route, split by what can actually be claimed of each ---
+\RoundTwoRelativeUnresolved{} a relative target with no base to resolve against,
+\RoundTwoUnderUnreadable{} inside a subtree one of the tools could not read,
+\RoundTwoNoRouteCaveated{} in an application whose route set is a lower bound, and
+\RoundTwoDeadLinkUnanswered{} that nothing accounts for but the application. Each is decided
+here by testing the target against the independent oracle's route set, pattern against
+pattern, and not by repeating whatever note the extractor had left at the site: the note says
+no node of the extractor's matched, which is a claim about the extractor.
 
 \begin{table}[t]\small
 \caption{Why each remaining site is not a transition. The script that produces this table
@@ -581,61 +636,116 @@ fails if any site has no reason.}
 \label{sec:deadlinks}
 
 A site whose target names no route the application declares anywhere is a dead link, and
-finding them is something the method gives away for free. The clearest case is ghostfolio.
-Its shared route table declares
+finding them is something the method gives away for free. The clearest case is mifos. A
+transactions tab links to a journal entry with
 
 \begin{quote}
-\texttt{users: \{ path: 'users', routerLink: ['/admin', 'users'] \}}
+\texttt{[routerLink]="['/', 'journal-entry',}\\
+\texttt{\ \ \ \ \ \ \ \ \ \ 'view', 'S' + transaction.id]"}
 \end{quote}
 
-\noindent and a component navigates there, but the admin route configuration mounts only
-\texttt{jobs}, \texttt{marketData}, \texttt{settings} and the empty path, and no route with
-the path \texttt{users} exists anywhere in the application. Nothing the author wrote answers
-that link. ghostfolio declares \texttt{\{ path: '**', redirectTo: 'home' \}}, so the link
-does not fail visibly: it lands on \texttt{/home}, which is the less obvious of the two
-defects. A
-test that never opens that menu would not find it, and a crawler would find it only if it
-reached the screen that holds it; reading the route configuration finds it without running
-anything.
+\noindent and the application does declare that screen, at
+\path{/accounting/journal-entry/view/:id}, inside the accounting module. The link omits the
+parent prefix, so the URL it builds is one no route matches. mifos declares
+\texttt{\{ path: '**', component: NotFoundComponent \}}, so the link does not fail
+invisibly: it renders the not-found screen, which is the less obvious of the two defects. The
+same shape repeats across the application. Links to \texttt{/loans-accounts/\ldots} name a
+subtree declared only under \texttt{/clients/:clientId/}, links to
+\texttt{/savings-accounts/\ldots} one declared only under \texttt{/centers/:centerId/}, and
+three calls name \texttt{/users/create}, \texttt{/system/scheduler-jobs} and
+\texttt{/system/global-configurations} where the application mounts \texttt{appusers},
+\texttt{manage-jobs} and \texttt{configurations}. One defect class accounts for all of them:
+an absolute link written against a path the application does not mount, usually the name the
+server uses rather than the one the router does. A test that never opens those tabs would not
+find them, and a crawler would find them only if it reached the screens that hold them;
+reading the route configuration finds them without running anything.
 
-Two corrections belong with this finding, and both came from having it attacked.
+Four corrections belong with this finding, and all four came from having it attacked. Three
+of them are the same mistake made in three places, which is the more useful thing to report.
 
 A target no route declares is not a target that goes nowhere. An application with a
-\texttt{\{ path: '**', redirectTo: \ldots \}} route catches every unmatched URL and
-forwards it, so the link does reach a screen --- just not the one its text names. The
-extractor follows that wildcard, holds the resulting edge at may, and records a note saying
-the target matched nothing and where the wildcard sent it.
+\texttt{**} route catches every unmatched URL, and it does so in one of two ways: a
+\texttt{redirectTo} forwards the URL to another screen, and a \texttt{component} renders one.
+The extractor follows both, holds the resulting edge at may, and records a note saying the
+target matched nothing and where the catch-all sent it. The third round followed only the
+redirecting flavour --- which is not the flavour either application the surviving count comes
+from uses, so the correction held for the one application it had been written against and
+failed for the two that needed it.
 
 Resolving the target is one claim and calling the link dead is another, and conflating them
 is how the first version of this finding went wrong. bitwarden declares its authentication
-paths through an enum the extractor had failed to read, so \RoundTwoWildcardCaveated{} targets
-such as \texttt{/login} matched nothing for a reason that was the extractor's, and the
-wildcard then forwarded every one of them and raised that application's recovered figure by
-eight points. The edge is drawn either way --- Angular really does forward those URLs --- so
+paths through an enum the extractor had failed to read, so targets such as \texttt{/login}
+matched nothing for a reason that was the extractor's, and the wildcard then forwarded every
+one of them and raised that application's recovered figure by eight points.
+That enum is read now, and so is the wrapper call that holds it, so those paths resolve
+rather than being forwarded; what remains is the mechanism.
+\RoundTwoWildcardCaveated{} of the catch-all-answered sites still carry the caveat, in the two
+applications whose route sets are a lower bound: bitwarden, where three paths are built by
+substitution into a template literal, and ghostfolio, whose one unreadable declaration is the
+matcher route described below. A single unreadable path in an application voids every claim
+of this kind across it, which is severe, and deliberately so --- the alternative is a census
+that reports an extractor's blind spot as an application's defect. The edge is drawn either way --- Angular really does forward those URLs --- so
 what had to change was the claim attached to it, not the edge. The extractor now counts the
 declared paths it could not read, records one note per application saying the route set is a
 lower bound, and writes that caveat into every wildcard note from that application. Nothing
 downstream may call a link dead while that note is present.
 
-A route array built by a spread (\texttt{children: [\ldots adminRoutes]}) was a second way
-to manufacture the same false finding: it was not followed, so the routes it carries were
-minted at the project root and a link to them matched nothing. From outside, that extractor
-defect is indistinguishable from a dead link. It is now followed.
+A route neither tool can read is indistinguishable, from a navigation site, from a route the
+application never declares --- and this thesis credited the difference to the application
+three times before the mechanism was general enough to stop it. A route array built by a
+spread (\texttt{children: [\ldots adminRoutes]}) was not followed, so the routes it carries
+were minted at the project root and links to them matched nothing. ghostfolio mounts its user
+administration screen with Angular's \texttt{matcher} property rather than \texttt{path}:
 
-What survives both corrections is small. Of the \RoundTwoWildcardRescued{} sites a wildcard
-resolves, \RoundTwoWildcardCaveated{} come from the application whose route set has holes and
-\RoundTwoWildcardRoot{} name the application root or a bare relative segment, which an
-application that declares no empty path answers through the wildcard by design rather than by
-mistake. Of the \RoundTwoTargetNoRoute{} unexplained sites whose target named no route,
-\RoundTwoRelativeUnresolved{} are a relative target the analysis had no base to resolve
-against, which is its own gap and not the application's. That leaves
-\RoundTwoDeadLinkCandidates{} dead-link candidates: \RoundTwoDeadLinkWildcarded{} that a
-wildcard silently forwards and the rest that reach nothing at all.
+\begin{quote}
+\texttt{\{ component: GfAdminUsersComponent,}\\
+\texttt{\ \ matcher: usersMatcher, \ldots \}}
+\end{quote}
 
-It is a candidate list rather than a verdict, because a route that both the extractor and the
-oracle fail to read looks, from the outside, exactly like a route that does not exist.
-alfresco in particular declares part of its navigation in an application configuration file
-rather than in TypeScript, which neither tool reads. What can be said is that for ghostfolio's
-\texttt{/admin/users} the absence was confirmed by searching the whole application for the
-path, and that a static transition graph puts every such candidate on one list instead of
-leaving it to be met at run time.
+\noindent where \texttt{usersMatcher} consumes a URL whose first segment is \texttt{users}.
+Neither tool read the \texttt{matcher} property at all, so \texttt{/admin/users} appeared in
+no route set, and the previous round of this chapter published it as the one dead link it had
+confirmed by hand --- the hand check having searched the application for \texttt{path:
+'users'}, which is not how that route is spelled. alfresco declares
+\texttt{nodes/:nodeId} and loads its children through a tsconfig \texttt{paths} alias, which
+neither tool resolved, so \texttt{/nodes/:nodeId/rules} was absent from both route sets and
+two live links to it were reported as dead. All three are now read. More to the point, both
+tools now record the holes they cannot read --- a matcher route, an unresolvable lazy
+boundary, a path expression that is not a literal --- and no claim that a path is undeclared
+is counted inside one. The discipline is what generalises; the three fixes are not.
+
+A prefix is not a target. The route-set test read only the first quoted segment of a commands
+array, so \texttt{['/nodes', id, 'rules']} was tested as the path \texttt{/nodes}, which
+alfresco declares no route at while \texttt{/nodes/:nodeId/rules} is exactly what it does
+declare. The whole array is now read as a pattern, its computed segments as holes, and
+matched against the declared routes pattern to pattern. That correction cuts both ways: it
+cleared alfresco's two candidates and it found ten more sites in mifos that the first-segment
+test had passed over.
+
+What survives all four corrections is this. Of the \RoundTwoWildcardRescued{} sites a
+catch-all route answers, \RoundTwoWildcardCaveated{} come from an application whose route set
+is a lower bound, \RoundTwoWildcardNoNode{} name a route the application does declare and the
+extractor minted no node for --- a defect, but the extractor's --- \RoundTwoWildcardBlind{}
+address a subtree the oracle could not open, \RoundTwoWildcardPattern{} are a pattern with a
+hole where the first segment should be and so name no single address, and
+\RoundTwoWildcardRoot{} are a relative target the analysis had no base to resolve;
+\RoundTwoDeadLinkWildcarded{} remain. Of the \RoundTwoTargetNoRoute{} unexplained sites whose
+target named no route, \RoundTwoRelativeUnresolved{} are again a relative target with no base,
+\RoundTwoUnderUnreadable{} address an unreadable subtree and \RoundTwoNoRouteCaveated{} come
+from an application whose route set is a lower bound at all; \RoundTwoDeadLinkUnanswered{} remain.
+Those two residuals are the dead-link candidates: \RoundTwoDeadLinkCandidates{} sites,
+\RoundTwoDeadLinkUrls{} distinct URLs, all of them in \RoundTwoDeadLinkWhere{}. The count is
+of sites rather than of defects: one wrong prefix written into a shared template is one
+mistake and several sites. Six of the seven categories above are the tools' own limits rather
+than the applications', which is the proportion worth remembering about this kind of finding.
+
+It is a candidate list rather than a verdict, because the preceding four corrections are
+evidence that the tools' blind spots are not yet all known, and a route both the extractor and
+the oracle fail to read looks, from the outside, exactly like a route that does not exist.
+What can be said is narrower than the previous round claimed. Each candidate was checked
+against the application's own route files by hand, which is how the \texttt{appusers},
+\texttt{manage-jobs} and \texttt{configurations} mismatches above are quoted; no candidate was
+checked by running the application, which is the only check that would settle it. What the
+method contributes is not the verdict but the list: a static transition graph puts every such
+candidate on one page, with a file and a line each, instead of leaving them to be met at run
+time.

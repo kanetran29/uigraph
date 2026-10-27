@@ -15,8 +15,11 @@
 //   PREFIX      no component, only children  -> must NOT appear (it is a path prefix)
 //   REDIRECT    has redirectTo               -> must NOT appear (it is not a screen)
 //   WILDCARD    path '**'                    -> policy: not counted as a screen
-//   MATCHER     custom UrlMatcher            -> path is not statically knowable
+//   MATCHER     custom UrlMatcher            -> path is not statically knowable; a blind spot
 //   LAZY_UNRESOLVED  loadChildren we could not follow -> counted as a known blind spot
+//   SCREEN_UNRESOLVED  would be a SCREEN, but its own path or a parent's is an expression
+//               we could not follow to a literal -> a blind spot, NOT scored: it has no
+//               address to look up, and its recorded path is the expression, not an address
 //
 // Coverage is reported over SCREEN routes only. Everything unresolvable is reported
 // explicitly rather than dropped, in the soundiness tradition: a number you cannot
@@ -37,11 +40,42 @@ const jsonOut = jsonIdx > -1 ? process.argv[jsonIdx + 1] : null
 // ---------------------------------------------------------------- load sources
 
 /**
+ * JSON text with its `//` and block comments removed, for a tsconfig, which TypeScript reads
+ * as JSON-with-comments. It scans rather than pattern-matches because a comment opener can sit
+ * inside a string: the key "@alfresco/aca-playwright-shared/*" holds `/*`, and a regex took
+ * it for a block comment, ate the rest of the file and left alfresco with no `paths` at all.
+ */
+function stripJsonComments(txt) {
+  let out = ''
+  for (let i = 0; i < txt.length; i++) {
+    const c = txt[i]
+    if (c === '"') {
+      let j = i + 1
+      while (j < txt.length && txt[j] !== '"') j += txt[j] === '\\' ? 2 : 1
+      out += txt.slice(i, j + 1)
+      i = j
+    } else if (c === '/' && txt[i + 1] === '/') {
+      while (i + 1 < txt.length && txt[i + 1] !== '\n') i++
+    } else if (c === '/' && txt[i + 1] === '*') {
+      const end = txt.indexOf('*/', i + 2)
+      i = end === -1 ? txt.length : end + 1
+    } else {
+      out += c
+    }
+  }
+  return out
+}
+
+/**
  * The workspace tsconfig's `paths` aliases and the directories they point at. A monorepo app
  * can declare its route paths in a shared table it imports through an alias, and without the
  * alias the checker cannot follow that import, so every such path stays an unresolved
  * expression. Harness 1.4.0; before it this oracle recorded `internalRoutes.account.path` as
  * the route's path, which matched no graph node and scored those apps at zero.
+ *
+ * An alias may name a file (`.../src/public-api.ts`) as often as a directory. The sources to
+ * load are then the file's directory: a glob beneath a file matches nothing, so those
+ * sources were never added and the alias could not be followed into them.
  */
 function workspaceTsPaths(dir0) {
   let dir = dir0
@@ -51,10 +85,7 @@ function workspaceTsPaths(dir0) {
       if (!fs.existsSync(file)) continue
       let opts
       try {
-        const txt = fs.readFileSync(file, 'utf8')
-          .replace(/\/\*[\s\S]*?\*\//g, '')
-          .replace(/(^|\s)\/\/.*$/gm, '$1')
-          .replace(/,(\s*[}\]])/g, '$1')
+        const txt = stripJsonComments(fs.readFileSync(file, 'utf8')).replace(/,(\s*[}\]])/g, '$1')
         opts = JSON.parse(txt).compilerOptions
       } catch { continue }
       const paths = opts?.paths
@@ -65,8 +96,9 @@ function workspaceTsPaths(dir0) {
       const dirs = new Set()
       for (const targets of Object.values(paths ?? {})) {
         for (const t of targets) {
-          const root = path.join(baseUrl, String(t).split('*')[0] || '')
-          if (root.includes('node_modules') || !fs.existsSync(root)) continue
+          const target = path.join(baseUrl, String(t).split('*')[0] || '')
+          if (target.includes('node_modules') || !fs.existsSync(target)) continue
+          const root = fs.statSync(target).isFile() ? path.dirname(target) : target
           if (!dir0.startsWith(root)) dirs.add(root)
         }
       }
@@ -85,17 +117,37 @@ const project = new Project({
   skipFileDependencyResolution: true,
   compilerOptions: { allowJs: false, ...(ws ? { baseUrl: ws.baseUrl, paths: ws.paths } : {}) },
 })
+// A Storybook story builds a throwaway route table (`/foo`, `/bar`, `/active`) to render one
+// component in isolation. Those paths are fixtures that exist only inside the story, so a
+// *.stories.ts file declares no screen of the application; read, they put fixture paths into
+// the denominator coverage is scored against (31 of bitwarden's 225 screen routes).
 project.addSourceFilesAtPaths([
   `${appDir}/**/*.ts`,
   `!${appDir}/**/node_modules/**`,
   `!${appDir}/**/*.spec.ts`,
   `!${appDir}/**/*.test.ts`,
+  `!${appDir}/**/*.stories.ts`,
   `!${appDir}/**/dist/**`,
 ])
 for (const d of ws?.dirs ?? []) {
-  project.addSourceFilesAtPaths([`${d}/**/*.ts`, `!${d}/**/node_modules/**`, `!${d}/**/*.spec.ts`, `!${d}/**/dist/**`])
+  project.addSourceFilesAtPaths([`${d}/**/*.ts`, `!${d}/**/node_modules/**`, `!${d}/**/*.spec.ts`, `!${d}/**/*.stories.ts`, `!${d}/**/dist/**`])
 }
 const files = project.getSourceFiles()
+// The glob above drops Storybook files before parsing, so they leave no trace in `routes`.
+// This script's own rule is that a number it cannot account for is worse than one it admits
+// it does not have, and a denominator that shrinks silently is the one way it could flatter
+// the extractor it exists to check. Count them back, separately, and report it.
+function countStoryFiles(dir) {
+  let n = 0
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue
+    const full = path.join(dir, e.name)
+    if (e.isDirectory()) n += countStoryFiles(full)
+    else if (/\.stories\.ts$/.test(e.name)) n++
+  }
+  return n
+}
+const storyFiles = countStoryFiles(appDir)
 
 // ---------------------------------------------------------------- helpers
 
@@ -138,6 +190,17 @@ function enumDecl(n) {
 /** The object literal an identifier or property-access chain names, or undefined. */
 function objLit(n) {
   const k = n.getKind()
+  // A shared route table is often wrapped in a one-argument call that returns it:
+  // `Object.freeze({...})`, `deepFreeze({...})`, a small clone helper. The wrapper is
+  // transparent for reading a path out of the table, and not following it was why 27 of
+  // bitwarden's declared paths read as unresolvable expressions (`AuthRoute.Login`) when the
+  // literal was one call away -- in BOTH tools, so they agreed about screens neither could see.
+  // Only a single-argument call is followed: a factory taking more than one argument is not an
+  // identity over its first, and reading it as one would invent an address.
+  if (k === SyntaxKind.CallExpression) {
+    const args = n.getArguments()
+    return args.length === 1 ? objLit(args[0]) : undefined
+  }
   if (k === SyntaxKind.AsExpression || k === SyntaxKind.ParenthesizedExpression || k === SyntaxKind.SatisfiesExpression) return objLit(n.getExpression())
   if (k === SyntaxKind.ObjectLiteralExpression) return n
   if (k === SyntaxKind.Identifier) { const i = declInit(n); return i ? objLit(i) : undefined }
@@ -232,21 +295,49 @@ function importedFile(sf, name) {
   return null
 }
 
-/** Resolve a loadChildren module specifier to a source file we already loaded. */
+/**
+ * The path a non-relative specifier maps to through the tsconfig `paths` table, or null. As
+ * TypeScript does, the key with the longest matching prefix wins (an exact key is the longest
+ * of all) and what its `*` matched replaces the `*` in the target; only the first target is tried.
+ * Refusing every scoped specifier, as this oracle did, made a first-party alias import
+ * (`@alfresco/aca-content/folder-rules`) read as an npm package, so its lazy table went unread
+ * and the module's routes were mounted at the project root instead of under their real prefix.
+ */
+function aliasBase(spec) {
+  let best = null
+  for (const [key, targets] of Object.entries(ws?.paths ?? {})) {
+    const star = key.endsWith('*')
+    const stem = star ? key.slice(0, -1) : key
+    if (!targets?.length || !(star ? spec.startsWith(stem) : spec === key)) continue
+    if (!best || stem.length > best.stem.length) best = { stem, target: String(targets[0]) }
+  }
+  return best ? path.join(ws.baseUrl, best.target.replace('*', spec.slice(best.stem.length))) : null
+}
+
+/**
+ * Resolve a loadChildren module specifier to a source file we already loaded: through the
+ * tsconfig `paths` map first, then relative to the importer, then against `baseUrl`. A scoped
+ * specifier the map does not name is an npm package and resolves to nothing.
+ */
 function resolveModule(fromFile, spec) {
-  if (!spec || spec.startsWith('@')) return null
+  if (!spec) return null
+  const aliased = spec.startsWith('.') ? null : aliasBase(spec)
+  if (!aliased && spec.startsWith('@')) return null
   // A workspace that sets tsconfig `baseUrl` imports its own modules without a leading dot
   // (`resource/cluster/module`); resolve those against baseUrl rather than discarding them.
-  const base = spec.startsWith('.')
+  const base = aliased ?? (spec.startsWith('.')
     ? path.resolve(path.dirname(fromFile), spec)
     : ws?.baseUrl
       ? path.resolve(ws.baseUrl, spec)
-      : null
+      : null)
   if (!base) return null
-  for (const cand of [`${base}.ts`, path.join(base, 'index.ts'), `${base}.routes.ts`]) {
+  // `base` itself first: an alias target is often the file, `.../src/public-api.ts`.
+  for (const cand of [base, `${base}.ts`, path.join(base, 'index.ts'), `${base}.routes.ts`]) {
     const sf = project.getSourceFile(cand)
     if (sf) return sf
   }
+  // An alias names its target exactly, so a miss there is a miss, not a reason to guess by name.
+  if (aliased) return null
   // fall back to a basename match, which real monorepos often need
   const want = path.basename(base)
   return files.find((f) => f.getBaseNameWithoutExtension() === want) || null
@@ -259,7 +350,15 @@ const blindSpots = []
 const visitedArrays = new Set()
 const lazyTargets = new Set() // files whose route arrays are reached through loadChildren
 
-function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
+/**
+ * Walk one route-table array: record every route it declares, then follow each `children` and
+ * `loadChildren` into the table beneath it under that route's full path. `unresolved` is the
+ * first path expression above this array that could not be followed to a literal; everything
+ * beneath it inherits it, because a child of an unreadable path has no readable address
+ * either, so a screen there is admitted as a blind spot and not scored as an address.
+ * `lazy` marks tables reached through loadChildren.
+ */
+function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
   if (depth > 12) return
   const key = `${sf.getFilePath()}:${arr.getStart()}:${prefix}`
   if (visitedArrays.has(key)) return
@@ -269,7 +368,7 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
     // Wrapper helpers such as Route.withShell([...]) return routes built from an array
     // argument. Treat the call as transparent and walk the array with the same prefix.
     if (el.getKind() === SyntaxKind.CallExpression) {
-      for (const a of el.getArguments()) if (a.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(a, prefix, sf, depth + 1, constant, lazy)
+      for (const a of el.getArguments()) if (a.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(a, prefix, sf, depth + 1, unresolved, lazy)
       continue
     }
     // An array may name its routes instead of spelling them out (`[ERROR_ROUTE]`).
@@ -282,9 +381,8 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
     // A path that is not a string literal (e.g. internalRoutes.about.path) makes this route
     // and every route below it depend on constant resolution.
     const pathInit = pathProp?.getInitializer?.()
-    // Constant only when the reference could NOT be followed to a literal: a resolved
-    // `internalRoutes.account.path` is as good an address as a written 'account'.
-    const isConstant = constant || (!!pathInit && constText(pathInit) === null)
+    // Unreadable only when NOT followed to a literal (a resolved `internalRoutes.account.path` is a good address); the outermost expression's text is kept to name the blind spot.
+    const unreadable = unresolved || (pathInit && constText(pathInit) === null ? pathInit.getText() : null)
     const compProp = prop('component') || prop('loadComponent')
     const compText = compProp?.getInitializer?.()?.getText() || null
     // loadComponent: keep the import specifier (a file); component: keep the class name.
@@ -307,6 +405,15 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
     else if (childrenProp || loadChildren) kind = 'PREFIX'
     else kind = 'SCREEN' // a bare path with neither component nor children: still a declared address
 
+    const at = `${path.relative(appDir, sf.getFilePath())}:${obj.getStartLineNumber()}`
+    // A screen whose path is an expression has no address to look up: admit it, do not score it.
+    if (kind === 'SCREEN' && unreadable) {
+      kind = 'SCREEN_UNRESOLVED'
+      blindSpots.push({ reason: 'screen path not resolvable to a literal', spec: unreadable, at, prefix: full })
+    }
+    // A UrlMatcher is a function, so the route set under this prefix is a lower bound.
+    if (kind === 'MATCHER') blindSpots.push({ reason: 'matcher route: path not statically knowable', spec: matcher.getText().slice(0, 60), at, prefix: full })
+
     routes.push({
       path: full === '' ? '/' : full.startsWith('/') ? full : `/${full}`,
       kind,
@@ -314,13 +421,13 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
       file: path.relative(appDir, sf.getFilePath()),
       line: obj.getStartLineNumber(),
       component,
-      constantPath: isConstant,
+      constantPath: !!unreadable,
       lazy,
     })
 
     if (childrenProp) {
       const init = childrenProp.getInitializer()
-      if (init && init.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(init, full, sf, depth + 1, isConstant, lazy)
+      if (init && init.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(init, full, sf, depth + 1, unreadable, lazy)
     }
 
     if (loadChildren) {
@@ -331,7 +438,7 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
       const direct = !m ? /^\(\s*\)\s*=>\s*([A-Za-z_$][\w$]*)\s*$/.exec(t.replace(/^loadChildren\s*:\s*/, '').trim()) : null
       const target = m ? resolveModule(sf.getFilePath(), m[1]) : direct ? importedFile(sf, direct[1]) : null
       if (!target) {
-        blindSpots.push({ reason: 'loadChildren target not resolvable', spec: m ? m[1] : t.slice(0, 60), at: `${path.relative(appDir, sf.getFilePath())}:${obj.getStartLineNumber()}`, prefix: full })
+        blindSpots.push({ reason: 'loadChildren target not resolvable', spec: m ? m[1] : t.slice(0, 60), at, prefix: full })
         routes[routes.length - 1].kind = 'LAZY_UNRESOLVED'
       } else {
         let arrays = routeArraysIn(target)
@@ -362,7 +469,7 @@ function walkArray(arr, prefix, sf, depth, constant = false, lazy = false) {
           blindSpots.push({ reason: 'lazy module has no discoverable route array', file: path.relative(appDir, target.getFilePath()), prefix: full })
           routes[routes.length - 1].kind = 'LAZY_UNRESOLVED'
         } else {
-          for (const a of arrays) walkArray(a, full, owner, depth + 1, isConstant, true)
+          for (const a of arrays) walkArray(a, full, owner, depth + 1, unreadable, true)
         }
       }
     }
@@ -376,6 +483,13 @@ for (const sf of files) for (const arr of routeArraysIn(sf)) walkArray(arr, '', 
 routes.length = 0; blindSpots.length = 0; visitedArrays.clear()
 for (const sf of files) {
   if (lazyTargets.has(sf.getFilePath())) continue
+  // A `paths` alias root can be a SIBLING application -- bitwarden's apps/web resolves its
+  // imports through apps/browser -- and that application's route table is not this one's.
+  // Walking it put 41 of bitwarden's 111 declared screen paths in another app's popup, and
+  // the extractor read the same files, so the two tools agreeing about them was not
+  // independent evidence of anything. Such a file is still loaded, so imports through the
+  // alias resolve; it is only no longer read as a declaration of THIS application.
+  if (!sf.getFilePath().startsWith(appDir)) continue
   for (const arr of routeArraysIn(sf)) walkArray(arr, '', sf, 0)
 }
 
@@ -417,6 +531,7 @@ const report = {
   uniqueScreenPaths: uniqScreens.length,
   guardedScreenPaths: uniqScreens.filter((r) => r.guards.length).length,
   blindSpots,
+  excluded: { storybookFiles: storyFiles },
   comparison,
 }
 
@@ -427,6 +542,7 @@ console.log(`files parsed:   ${files.length}`)
 console.log(`declared routes:${routes.length}   ${JSON.stringify(byKind)}`)
 console.log(`screen paths:   ${uniqScreens.length} unique (${report.guardedScreenPaths} guarded)`)
 console.log(`blind spots:    ${blindSpots.length}`)
+console.log(`excluded:       ${storyFiles} Storybook file(s), not read as declared screens`)
 for (const b of blindSpots.slice(0, 8)) console.log(`   ! ${b.reason}: ${b.spec || b.file} (under ${b.prefix || '/'})`)
 if (comparison) {
   console.log(`graph nodes:    ${comparison.graphNodes}`)

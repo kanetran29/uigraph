@@ -11,7 +11,7 @@
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
 import type { SourceFile } from 'ts-morph'
 import { relative, join, dirname } from 'node:path'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, resolveRelativeTarget, type RouteLike } from './matcher'
@@ -53,11 +53,43 @@ export function buildProject(projectDir: string): Project {
 }
 
 /**
+ * Remove `//` and block comments from tsconfig text while leaving string literals untouched.
+ * A regex strip cannot tell a comment opener from the same characters inside a quoted string,
+ * and a `paths` key such as `"@scope/pkg/*"` contains `/*`: the strip read it as a block
+ * comment and swallowed everything up to the next `*` + `/`, the JSON stopped parsing, and the
+ * workspace silently lost its baseUrl and every alias.
+ */
+function stripJsonComments(text: string): string {
+  let out = ''
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]!
+    if (c === '"') {
+      let end = i + 1
+      // A backslash escapes the next character, so an escaped quote does not end the string.
+      while (end < text.length && text[end] !== '"') end += text[end] === '\\' ? 2 : 1
+      out += text.slice(i, end + 1)
+      i = end
+    } else if (c === '/' && text[i + 1] === '/') {
+      while (i + 1 < text.length && text[i + 1] !== '\n') i++
+    } else if (c === '/' && text[i + 1] === '*') {
+      const close = text.indexOf('*/', i + 2)
+      i = close === -1 ? text.length : close + 1
+    } else {
+      out += c
+    }
+  }
+  return out
+}
+
+/**
  * The workspace's tsconfig `paths` aliases, with the directory they are resolved against.
  * In an Nx-style monorepo the app imports shared code — including, in some apps, the table
  * its route paths are declared in — through an alias such as `@scope/common/*`, and those
  * files live outside the app directory. Without the alias the checker cannot follow the
  * import, so every route that names a constant is dropped and the app extracts no screens.
+ * `dirs` lists the directories to add to the project: an alias that names a file contributes
+ * the directory holding it, because a lazy route behind `@scope/feature` lives in that
+ * directory's other files, not in the one file the alias points at.
  */
 function workspaceTsPaths(projectDir: string): { baseUrl: string; paths: Record<string, string[]>; dirs: string[] } | null {
   let dir = projectDir
@@ -68,10 +100,7 @@ function workspaceTsPaths(projectDir: string): { baseUrl: string; paths: Record<
       let opts: { baseUrl?: string; paths?: Record<string, string[]> } | undefined
       try {
         // tsconfig is JSON with comments and trailing commas; a tolerant strip is enough here.
-        const text = readFileSync(file, 'utf8')
-          .replace(/\/\*[\s\S]*?\*\//g, '')
-          .replace(/(^|\s)\/\/.*$/gm, '$1')
-          .replace(/,(\s*[}\]])/g, '$1')
+        const text = stripJsonComments(readFileSync(file, 'utf8')).replace(/,(\s*[}\]])/g, '$1')
         opts = (JSON.parse(text) as { compilerOptions?: { baseUrl?: string; paths?: Record<string, string[]> } }).compilerOptions
       } catch {
         continue
@@ -85,8 +114,11 @@ function workspaceTsPaths(projectDir: string): { baseUrl: string; paths: Record<
       const dirs = new Set<string>()
       for (const targets of Object.values(paths ?? {})) {
         for (const t of targets) {
-          const root = join(baseUrl, t.split('*')[0] ?? '')
-          if (root.includes('node_modules') || !existsSync(root)) continue
+          const resolved = join(baseUrl, t.split('*')[0] ?? '')
+          if (resolved.includes('node_modules') || !existsSync(resolved)) continue
+          // A non-star alias names a file (`.../src/public-api.ts`), and the caller globs
+          // `<dir>/**/*.ts`, which matches nothing under a file path; take its directory.
+          const root = statSync(resolved).isDirectory() ? resolved : dirname(resolved)
           if (!projectDir.startsWith(root)) dirs.add(root)
         }
       }
@@ -103,8 +135,12 @@ function workspaceTsPaths(projectDir: string): { baseUrl: string; paths: Record<
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const redirects = new Map<string, string>()
   const unreadablePaths = { count: 0 }
-  const routes = collectRoutes(project, redirects, unreadablePaths)
+  const routes = collectRoutes(project, redirects, unreadablePaths, projectDir)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
+  // `joinRoutePath` folds `**`, `*` and `/*` into the path `*`, so a catch-all that renders a
+  // component is the one route with that full path. A catch-all that only redirects is no
+  // screen and is absent here; it lives in `redirects` instead.
+  const wildcardScreen = routeLikes.find((r) => r.fullPath === '*') ?? null
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
 
@@ -163,7 +199,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
    * Emit the edges for one set of navigation targets fired from `from`. `note` records the
    * soundiness note for a site once, so an attributed site that fires from many screens does
    * not report the same approximation once per screen. `capMay` holds the edges at may for a
-   * scope the pass is not certain of.
+   * scope the pass is not certain of. A literal no route declares is routed to the application's
+   * catch-all (a `**` redirect target or a `**` screen) at may, never must.
    */
   function emitTargets(from: string, targets: RawTarget[], file: string, note: boolean, capMay = false): void {
     for (const t of targets) {
@@ -176,9 +213,12 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         let target = matchLiteral(value, routeLikes)
         // A link to a redirect reaches what the redirect forwards to; follow it one step.
         if (!target && redirects.has(value)) target = matchLiteral(redirects.get(value)!, routeLikes)
-        // A target no route declares is not nowhere: a `**` route catches it and sends it on.
-        // The destination is real, but the author almost certainly did not mean to go there,
-        // so the edge is held at may and the note says what happened.
+        // A target no route declares is not nowhere: a `**` route catches it. Either it sends
+        // it on (`redirectTo`) or it answers it itself with a catch-all screen (`component`,
+        // mifos's and alfresco's NotFound page). The destination is real, but the author almost
+        // certainly did not mean to go there, so the edge is held at may and the note says what
+        // happened. Following only the redirect flavour left every unmatched literal in an
+        // application with a component catch-all reported as reaching nothing.
         let viaWildcard = false
         // The wildcard edge is where Angular actually goes, so it is drawn whatever the state
         // of the route set; what the route set changes is the CLAIM. A gate on the unreadable
@@ -186,14 +226,23 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // sound edge across the whole application, and it never fired for an application whose
         // route set is complete, which is where the claim mattered most. The note carries both
         // facts instead, once per site.
-        if (!target && redirects.has('*')) {
-          target = matchLiteral(redirects.get('*')!, routeLikes)
+        if (!target) {
+          const wildcardRedirect = redirects.get('*')
+          target = wildcardRedirect !== undefined ? matchLiteral(wildcardRedirect, routeLikes) : wildcardScreen
           viaWildcard = target !== null
           if (viaWildcard && note) {
             const caveat = unreadablePaths.count > 0
               ? `, though ${unreadablePaths.count} declared path(s) could not be read, so it is not claimed that no such route exists`
               : ''
-            soundiness.push({ kind: 'wildcard-redirect', file, loc: t.loc, detail: `literal target "${value}" matches no declared route and the wildcard route redirects it to ${redirects.get('*')}${caveat}` })
+            // The note records the SITE, and it is recorded whether or not a distinct edge
+            // results: `pushEdge` dedupes on (from, to, event, guard), so a catch-all that
+            // lands on a screen the same template already links to merges into that edge and
+            // contributes only a witness. The site is still a link to an address the
+            // application does not declare, which is what the note is for and what the
+            // dead-link census counts -- it counts sites, never edges.
+            // The target must stay the first double-quoted string: a generator reads it from here.
+            const answer = wildcardRedirect !== undefined ? `redirects it to ${wildcardRedirect}` : 'answers it with its own catch-all screen'
+            soundiness.push({ kind: 'wildcard-redirect', file, loc: t.loc, detail: `literal target "${value}" matches no declared route and the wildcard route ${answer}${caveat}` })
           }
         }
         if (!target) {

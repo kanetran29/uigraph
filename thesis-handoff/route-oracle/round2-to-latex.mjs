@@ -3,9 +3,11 @@
 // Emits the second-round tables and inline macros from the result files of the repeat
 // evaluation. Never edit the output by hand.
 //   usage: node round2-to-latex.mjs <outDir> > ../thesis/generated-round2.tex
-// <outDir> holds <slug>.ctrl.{C,L}.json (the extractor as it stood before the round),
-// <slug>.vN.{C,L}.json (after it) and <slug>.why6.json (the reason for every construct
-// still unrecovered).
+// <outDir> holds, per application slug, <slug>.ctrl.{C,L}.json (the extractor as it stood
+// before the round) and five files from after it: <slug>.fin.C.json (the route oracle),
+// <slug>.fin.L.json (the loss breakdown), <slug>.fin.B.json (the witness check),
+// <slug>.fin.why.json (the reason for every construct still unrecovered) and
+// <slug>.fin.notes.json (the extractor's own soundiness notes). run-all.mjs writes them.
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -72,6 +74,9 @@ for (const r of rows) if (r.w) for (const [k, v] of Object.entries(r.w.byReason)
 const PRETTY = {
   'extractor-note:unresolved-target': 'The target was read; no node matches it',
   'unmapped-target': 'A literal target matching no declared route',
+  'target-names-no-declared-route': 'The target names no route the application declares',
+  'target-under-unreadable-subtree': 'The target is inside a subtree the oracle could not read',
+  'relative-target-unresolved': 'A relative target with no base to resolve it against',
   'owner-has-no-node': 'The owning component has neither a node nor a scope',
   'no-witness-though-owner-has-a-node': 'The screen is in the graph; nothing was parsed here',
   'parsed-file-no-note-near-construct': 'The file is parsed, but nothing lands near the site',
@@ -126,6 +131,11 @@ mac('RoundTwoAccounted', pc(tot.rec + tot.dyn + tot.unp, tot.inScope))
 mac('RoundTwoUnexplained', tot.lost)
 mac('RoundTwoBefore', pc(tot.rec0, tot.raw0))
 mac('RoundTwoExcluded', tot.excl)
+// The two reasons a site leaves the denominator, so the sentence that names them both is
+// counted rather than remembered.
+const exclBy = (k) => rows.reduce((a, r) => a + (r.l1.tally[k] ?? 0), 0)
+mac('RoundTwoExcludedOutlet', exclBy('EXCLUDED_NAMED_OUTLET'))
+mac('RoundTwoExcludedNoCommands', exclBy('EXCLUDED_NO_COMMANDS'))
 mac('RoundTwoFullNodes', rows.filter((r) => r.c1.comparison.matched === r.c1.comparison.declaredScreens).length)
 mac('RoundTwoMustClean', `${mC}/${mE}`)
 mac('RoundTwoMustViolations', mE - mC)
@@ -153,23 +163,65 @@ const targetOf = (rec) => (/"([^"]+)"/.exec(rec.detail ?? '') ?? [])[1] ?? null
  */
 const namesAPath = (t) => t !== null && t.startsWith('/') && t !== '/'
 
-let noNode = 0, noRoute = 0, deadFromReasons = 0, relativeUnresolved = 0
+/**
+ * Can this application be said not to declare `target`? The question the dead-link claim
+ * turns on, asked of the INDEPENDENT oracle's route set rather than of the extractor's notes.
+ * The notes say "no node of mine matches", which is a claim about the extractor; a route the
+ * application declares as a path prefix, or inside a module the oracle could not open, or at
+ * an address with a hole where the first segment should be, satisfies the note and refutes
+ * the dead link. Reading the note as the stronger claim is the mistake this whole round is
+ * about, so the test is written once and both arms of the census use it.
+ */
+function undeclaredIn(c, target) {
+  if (!namesAPath(target)) return 'not-a-path'
+  const t = target.split('/').filter(Boolean)
+  // A leading hole is not an address: `['/' + x, 'transactions']` names a family of URLs, and
+  // the pattern matcher is right to refuse it but it is no evidence about any one of them.
+  if (t[0].startsWith(':')) return 'pattern-only'
+  const seg = (r) => String(r.path ?? '').split('/').filter(Boolean)
+  const covers = (d) => d.length <= t.length && d.every((s, i) => s.startsWith(':') || t[i].startsWith(':') || s === t[i])
+  for (const b of c?.blindSpots ?? []) {
+    const d = String(b.prefix ?? '').split('/').filter(Boolean)
+    if (d.length && covers(d)) return 'under-blind-spot'
+  }
+  for (const r of c?.routes ?? []) {
+    const d = seg(r)
+    if (d.length === t.length && d.every((s, i) => s.startsWith(':') || t[i].startsWith(':') || s === t[i])) {
+      return r.kind === 'SCREEN' ? 'declared-no-node' : 'declared-not-a-screen'
+    }
+  }
+  return 'undeclared'
+}
+
+// The sites whose target was read and could not be placed, split by the claim each group can
+// support. The split is read off the reason slug the oracle assigned, never parsed back out
+// of its prose: an earlier version re-derived it from `detail` here, the two scripts then
+// disagreed about which sites were in which group, and the thesis printed a subtraction that
+// did not close. Every member of the group lands in exactly one of the four counters below.
+const NO_ROUTE_GROUP = /^(target-names-no-declared-route|unmapped-target|relative-target-unresolved|target-under-unreadable-subtree)$/
+let noNode = 0, noRoute = 0, deadFromReasons = 0, relativeUnresolved = 0, underUnreadable = 0, caveatedReasons = 0
+const deadSites = []
 for (const r of rows) {
   // An application whose own route set the extractor could not read in full cannot support
   // a claim that some path is undeclared, so its sites are counted but never called dead.
   const complete = !(r.notes ?? []).some((n) => n.kind === 'incomplete-route-set')
   for (const x of r.w?.rows ?? []) {
     if (/declared-route-has-no-node/.test(x.reason)) noNode++
-    // These two slugs are the route-set tests; `extractor-note:*` is the extractor repeating
-    // itself and is deliberately NOT counted here.
-    else if (/^(target-names-no-declared-route|unmapped-target)$/.test(x.reason)) {
+    // `extractor-note:*` is the extractor repeating itself and is deliberately NOT counted.
+    else if (NO_ROUTE_GROUP.test(x.reason)) {
       noRoute++
-      if (!namesAPath(targetOf(x))) relativeUnresolved++
-      else if (complete) deadFromReasons++
+      if (x.reason === 'relative-target-unresolved') relativeUnresolved++
+      else if (x.reason === 'target-under-unreadable-subtree') underUnreadable++
+      else if (!complete) caveatedReasons++
+      else { deadFromReasons++; deadSites.push({ app: r.s, at: x.at, target: targetOf(x) }) }
     }
   }
 }
 mac('RoundTwoRelativeUnresolved', relativeUnresolved)
+mac('RoundTwoUnderUnreadable', underUnreadable)
+// Spelled as a word at zero, so the sentence that lists the four residuals still reads and
+// the figure still comes from the result file rather than from the author's memory of it.
+mac('RoundTwoNoRouteCaveated', caveatedReasons === 0 ? 'none' : String(caveatedReasons))
 mac('RoundTwoTargetNoNode', noNode)
 mac('RoundTwoTargetNoRoute', noRoute)
 // The shape of the must-tier violations, so the paragraph that describes them one by one
@@ -191,22 +243,78 @@ mac('RoundTwoJudged', jE)
 mac('RoundTwoOverApprox', pc(rows.reduce((a, r) => a + (r.b1?.tally?.OVER_APPROX ?? 0), 0), aE))
 // Sites whose target names no route the application declares, counted from the extractor's
 // own notes rather than from the unexplained list, since a wildcard route resolves them.
-let wild = 0, unres = 0, caveated = 0, deadFromNotes = 0, wildRoot = 0
+// Counted as SITES, not as note records. A site attributed to several screens emits the
+// note once per screen, so the record count ran ahead of the number of places in the source
+// a reader could go and look: 79 records were 76 sites and the thesis called them sites.
+let unres = 0
+const wildSites = new Map()
 for (const r of rows) for (const n of r.notes ?? []) {
   if (n.kind === 'wildcard-redirect') {
-    wild++
-    if (/could not be read/.test(n.detail ?? '')) caveated++
-    else if (!namesAPath(targetOf(n))) wildRoot++
-    else deadFromNotes++
+    const target = targetOf(n)
+    const verdict = undeclaredIn(r.c1, target)
+    const bucket = /could not be read/.test(n.detail ?? '') ? 'caveated'
+      : verdict === 'not-a-path' ? 'root'
+        : verdict === 'undeclared' ? 'dead'
+          : verdict
+    wildSites.set(`${r.s}:${n.file}:${n.loc?.line}:${target ?? ''}`, { bucket, app: r.s, at: `${n.file}:${n.loc?.line}`, target })
   } else if (n.kind === 'unresolved-target') unres++
 }
-mac('RoundTwoWildcardRoot', wildRoot)
-mac('RoundTwoWildcardRescued', wild)
+const wildOf = (b) => [...wildSites.values()].filter((s) => s.bucket === b)
+const deadFromNotes = wildOf('dead').length
+// The three ways a catch-all-answered site is NOT evidence of a dead link, reported rather
+// than folded into the residual: the oracle declares the route and the extractor minted no
+// node for it, the route is a path prefix and never was a screen, or it sits inside a module
+// the oracle could not open.
+mac('RoundTwoWildcardNoNode', wildOf('declared-no-node').length + wildOf('declared-not-a-screen').length)
+mac('RoundTwoWildcardBlind', wildOf('under-blind-spot').length)
+mac('RoundTwoWildcardPattern', wildOf('pattern-only').length)
+mac('RoundTwoWildcardRoot', wildOf('root').length)
+mac('RoundTwoWildcardRescued', wildSites.size)
 mac('RoundTwoUnresolvedTarget', unres)
 // A wildcard note whose detail carries the route-set caveat is NOT a dead-link candidate:
 // for those the target was unreadable for the extractor's own reason, so nothing can be
 // claimed about whether the application declares such a route.
-mac('RoundTwoWildcardCaveated', caveated)
+mac('RoundTwoWildcardCaveated', wildOf('caveated').length)
 mac('RoundTwoDeadLinkCandidates', deadFromNotes + deadFromReasons)
 mac('RoundTwoDeadLinkWildcarded', deadFromNotes)
+// The two arms of the census are two different populations, so each states its own
+// residual: the wildcard notes contribute sites a catch-all answers, the reason rows
+// contribute sites nothing answers, and only their sum is the candidate list.
+mac('RoundTwoDeadLinkUnanswered', deadFromReasons)
+// What the surviving list actually is, so the subsection can report its own scale rather
+// than leaving a site count to read as a defect count.
+const allDead = [...deadSites, ...wildOf('dead')]
+mac('RoundTwoDeadLinkUrls', new Set(allDead.map((d) => d.target)).size)
+mac('RoundTwoDeadLinkApps', new Set(allDead.map((d) => d.app)).size)
+mac('RoundTwoDeadLinkWhere', [...new Set(allDead.map((d) => NAME[d.app]))].sort().join(', ') || 'none')
+
+// The largest single fan-out in the corpus. Without this the graph-wide precision figure
+// reads as a property of the method, when most of it is one call site: a `navigateByUrl`
+// whose template literal has an empty static prefix over-approximates to every declared
+// route, so one line can outweigh five applications. A figure nobody can attribute is a
+// figure nobody can argue with.
+const fanout = new Map()
+for (const r of rows) for (const f of r.b1?.findings ?? []) {
+  if (f.verdict !== 'OVER_APPROX' || !f.at) continue
+  const k = `${r.s}\u0000${f.at}`
+  fanout.set(k, (fanout.get(k) ?? 0) + 1)
+}
+const top = [...fanout.entries()].sort((a, b) => b[1] - a[1])[0]
+const tex = (s) => String(s).replace(/([_#%&])/g, '\\$1')
+mac('RoundTwoEdges', aE)
+mac('RoundTwoTopFanoutEdges', top ? top[1] : 0)
+mac('RoundTwoTopFanoutShare', top ? pc(top[1], aE) : '--')
+mac('RoundTwoTopFanoutApp', top ? NAME[top[0].split('\u0000')[0]] : '--')
+mac('RoundTwoTopFanoutSite', top ? `\\texttt{${tex(top[0].split('\u0000')[1].replace(/^.*\//, ''))}}` : '--')
+const mifosEdges = rows.find((r) => r.s === 'mifos')?.b1?.edges ?? 0
+mac('RoundTwoMifosEdgeShare', pc(mifosEdges, aE))
+
+// The dynamic sites of the application whose second column the thesis reads out, and how
+// many files they are spread over: the point of the sentence is that they are a habit of the
+// codebase rather than one builder to fix, which is a claim about the spread.
+const kd = rows.find((r) => r.s === 'k8sdash')?.l1?.rows ?? []
+const dynFiles = new Map()
+for (const row of kd) if (row.cls === 'ACCOUNTED_DYNAMIC') dynFiles.set(row.owner, (dynFiles.get(row.owner) ?? 0) + 1)
+mac('RoundTwoDynamicFiles', dynFiles.size)
+mac('RoundTwoDynamicFilesOne', [...dynFiles.values()].filter((n) => n === 1).length)
 console.log(out.join('\n'))
