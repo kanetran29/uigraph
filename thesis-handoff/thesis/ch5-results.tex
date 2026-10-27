@@ -4,15 +4,18 @@
 %   generated-tables.tex       to-latex.mjs, baseline run, harness 1.2.0
 %   generated-before-after.tex compare.mjs, harness 1.2.0
 %   generated-rq4.tex          rq4-to-latex.mjs, harness 1.3.0
-% RQ1 to RQ3 figures: extractor c4f8b833 for the baseline and branch attribution-v1 for
-% the attributed run, 12 October 2026.
-% RQ4 figures (section 5.4): run 22 October 2026 on attribution-v1.patch applied to
-% c4f8b833. The patch header names commit 4505fd2a, which is not present in any clone we
-% hold, so the run used the commit the patch recreates on top of c4f8b833 rather than
-% 4505fd2a itself. Harness 1.3.0 changes mutate.mjs only, so the RQ1 to RQ3 figures from
-% 1.2.0 are unaffected; see corpus.json harnessChangelog.
-% Still to do: re-run everything on the tagged eval-1 / eval-2 versions once those tags
-% exist, and extend mutation to the remaining three applications.
+% RQ1 to RQ3 figures: ONE extractor commit, run twice. results-before/results.json and
+% results-after/results.json both record sha 4505fd2a and differ only by
+% "attribution": false / true. Run 5 October 2026, harness 1.2.0.
+% 4505fd2a is in no clone the project holds. The tag thesis-eval points at the commit that
+% applying attribution-v1.patch to c4f8b833 recreates, and that commit reproduces the
+% published realworld figures with the pass off (21 edges, 7 must) and on (50 edges,
+% 10 must), so it is behaviourally equivalent on that application.
+% RQ4 figures (section 5.4): run 22 October 2026 at thesis-eval, harness 1.3.0, which
+% changes mutate.mjs only, so the RQ1 to RQ3 figures from 1.2.0 are unaffected; see
+% corpus.json harnessChangelog.
+% Still to do: push thesis-eval, confirm it reproduces the other five applications, and
+% extend mutation beyond the three applications it covers.
 
 The figures in this chapter were produced by the harness of
 Section~\ref{sec:protocol} on the corpus of Section~\ref{sec:corpus}. Every table is
@@ -112,10 +115,14 @@ screens and 378 in screens whose node has no component link. Because mifos is by
 the largest application, these two classes also dominate the corpus total, so the
 per-application view and the total give different rankings. 
 
-The classes also interact. A construct in a shared component that is only used inside screens which
-have no node is counted as attribution, but attribution alone cannot recover it. The
-468 attribution constructs, 28\% of all lost constructs, are therefore an upper bound
-on what scope attribution can recover.
+The classes also interact, and the interaction runs both ways. A construct in a shared
+component that is only used inside screens which have no node is counted as attribution,
+although attribution alone cannot recover it. In the other direction, a construct whose
+own route component has no node is counted as a node defect, yet attribution can still
+reach it through a shell or subtree scope and convert it.
+The 468 attribution constructs are 28\% of all lost constructs, and they are therefore
+neither a floor nor a ceiling on what scope attribution recovers.
+Section~\ref{sec:res-after} measures both directions.
 
 Table~\ref{tab:oracles} reports the witness check and the end-to-end oracle. On the must
 tier, 86 of 87 edges are clean. The one failure is a must edge whose witness navigates to
@@ -146,10 +153,12 @@ on identical inputs. The comparison is made construct by construct: a construct 
 \emph{recovered} if it was lost to attribution in the baseline and is witnessed by an
 edge after attribution.
 
-\begin{table}[t]\small
+\begin{table}[t]\footnotesize
 \caption{Before and after scope attribution. Conversion in percent and the change in
-percentage points; must-tier edges that pass the witness check; constructs lost to
-attribution in the baseline and how many of them are recovered.}
+percentage points; must-tier edges that pass the witness check; constructs that the loss
+rules assigned to attribution in the baseline, and how many of them converted into must
+and into may edges. Conversions of constructs assigned to other classes are in
+Table~\ref{tab:recovery-source}.}
 \label{tab:before-after}
 \TabBeforeAfter
 \end{table}
@@ -165,11 +174,27 @@ ratio almost doubles, from 5.4\% to 10.0\%. On bitwarden and k8s dashboard it ri
 Precision on the must tier does not fall. After attribution, 155 of 156 must edges pass
 the witness check, and the one failure is the realworld edge that already failed in
 the baseline. No construct that was converted in the baseline is lost after
-attribution.
+attribution: following every construct by its identifier across the two runs finds no
+construct that leaves the converted classes.
 
-Across the corpus, 81 of the 468 attribution losses are recovered. The upper bound of
-Section~\ref{sec:res-defects} is far from reached, and Table~\ref{tab:remaining} shows
-why. It classifies each construct that stays lost.
+Across the corpus, attribution converts 81 of the 468 constructs that the loss rules
+assign to it, 38 of them into must edges and 43 into may edges. It also converts 43
+constructs that the rules assign to node defects, 41 of those into must edges.
+Table~\ref{tab:recovery-source} gives the breakdown by the class each construct held in
+the baseline. Deterministic conversions over the whole corpus rise from 96 to 175, so of
+the 79 constructs gained on the must tier, 38 come from the attribution classes and 41
+from the node classes. The classes are not independent, and the attribution class is not
+the ceiling that Section~\ref{sec:res-defects} might suggest.
+
+\begin{table}[t]\small
+\caption{Where the converted constructs came from. Each row is the class the loss rules
+assigned to the construct in the baseline; the columns give the tier it converted into
+after attribution. Constructs are followed by identity, not matched by source location.}
+\label{tab:recovery-source}
+\TabRecoverySource
+\end{table}
+
+Table~\ref{tab:remaining} classifies each construct that stays lost.
 
 \begin{table}[t]\small
 \caption{Why attribution losses remain after attribution.}

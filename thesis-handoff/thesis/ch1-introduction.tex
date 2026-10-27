@@ -39,12 +39,13 @@ are declared in templates and configuration files
 however, have almost always been modelled by executing them. Crawljax builds its state
 flow graph by firing events against the DOM of a running application
 \cite{crawljax2012}, and later tools in the same line improve the exploration strategy
-without changing where the model comes from \cite{feedex2013,fraggen2022}. A survey of
-web testing published in 2025 reports that all of the model-based tools it reviews
-construct their models dynamically \cite{websurvey2025}. During the literature search
+without changing where the model comes from \cite{feedex2013,fraggen2022}. A survey of web
+testing published in 2025 collects the model-based tools of the past decade
+\cite{websurvey2025}. Among the tools it lists, no model is derived from source code
+rather than from execution. During the literature search
 for this thesis, only one static analysis of a modern client-side framework was found;
-it builds a component dependency graph for React and states explicitly that it does not
-handle routing \cite{kurant2025}.
+it builds a component dependency graph for React and does not address routing
+\cite{kurant2025}.
 
 When the dynamic approach was developed, a single-page application had no declarative route table, so the DOM was the only thing to observe (Section~\ref{sec:dynamic-spa}). Client-side routing frameworks changed this. Angular,
 React Router and Vue Router all declare routes as data in the source code, connect
@@ -119,8 +120,11 @@ result on the same corpus with the same methods. RQ4 is answered on the graph pr
 after attribution has been applied.
 
 The thesis has three limits of scope. It does not claim completeness. When a navigation target is computed at run time, the full set of
-transitions cannot be determined statically in general. The thesis therefore proves a
-conditional soundness property over a declared scope and measures recall empirically.
+transitions cannot be determined statically in general. The thesis therefore states a
+conditional soundness property over a declared scope, tests it mechanically against the
+source at every deterministic edge it produces, and measures recall empirically. The
+property is not proved, and Chapter~\ref{ch:results} reports the one edge in the corpus
+that violates it.
 This follows the position of Livshits et al., who argue that a practical static
 analysis should be described as sound modulo an explicit list of the language features
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement

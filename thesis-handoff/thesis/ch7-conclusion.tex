@@ -22,8 +22,10 @@ to exactly one class makes attribution the largest class in four of the six appl
 while node defects, unresolved constant route paths and unfollowed lazy boundaries
 dominate the other two and the corpus total. The answer to RQ3 is that scope attribution
 raises the conversion ratio in four of the six applications, from 15.0\% to 37.5\% on
-realworld and from 5.4\% to 10.0\% on mifos, recovers 81 of the 468 constructs that the
-loss rules assign to it, and costs nothing in deterministic precision, since the one
+realworld and from 5.4\% to 10.0\% on mifos, converts 81 of the 468 constructs that the
+loss rules assign to it, 38 of them deterministically, together with a further 41
+deterministic conversions of constructs the rules had assigned to node defects, and
+costs nothing in deterministic precision, since the one
 must edge that fails the witness check after attribution is the same edge that failed
 before it. The answer to RQ4 is that the graph is sensitive to authored source changes
 in the constructs it represents, with 39 of 48 scored mutants detected, a route path
@@ -35,7 +37,8 @@ call whose old target the baseline had not resolved.
 
 The thesis contributes five things. Attribution is formulated as a dataflow analysis
 over the powerset lattice of screen sets, computed as a fixpoint over four input
-relations, with a soundness property for the deterministic tier that holds over the
+relations, with a soundness property for the deterministic tier that is stated and
+mechanically tested, though not proved, over the
 declared route set and is paired with an explicit list of the constructs the analysis
 does not decide (Claim~\ref{claim:must}, Section~\ref{sec:approximations}). The analysis
 is implemented in \emph{uigraph}, an open-source extractor with a framework-independent
