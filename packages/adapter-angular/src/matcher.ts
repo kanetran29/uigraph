@@ -21,6 +21,30 @@ function patternMatches(target: string, pattern: string): boolean {
 }
 
 /**
+ * Resolve a route-relative navigation target against the path of the screen it fires from,
+ * the way Angular resolves a link whose `relativeTo` is the current route. Relative means
+ * what Angular means by it: `./general`, `../edit`, and equally a bare `journal-entries/create`
+ * — only a leading slash makes a target absolute. An absolute target is returned unchanged,
+ * and so is any target fired from a node that has no path of its own: a scope anchor stands
+ * for many screens, so there is no single base to resolve against.
+ */
+export function resolveRelativeTarget(target: string, ownerPath: string | undefined): string {
+  if (!ownerPath || target === '' || target.startsWith('/') || target === '*') return target
+  const out = segments(ownerPath)
+  const rest = segments(target)
+  let i = 0
+  for (; i < rest.length; i++) {
+    if (rest[i] === '.') continue
+    if (rest[i] === '..') {
+      out.pop()
+      continue
+    }
+    break
+  }
+  return '/' + [...out, ...rest.slice(i)].join('/')
+}
+
+/**
  * Resolve a literal navigation target to a single declared route. Prefers an
  * exact path match, then a parameterized pattern match. Returns null if no
  * declared route matches (the caller records this as a soundiness gap).

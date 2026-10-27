@@ -17,6 +17,13 @@ export interface RouteInfo {
   componentFile: SourceFile | undefined
   guards: GuardInfo[]
   routeObj: ObjectLiteralExpression
+  /**
+   * Node id of the nearest ANCESTOR THAT IS A SCREEN, or null at the root. A componentless
+   * route is a prefix and mints no node, so it is skipped here and its children are attached
+   * to the screen above it; otherwise the route tree scope attribution walks would break at
+   * every prefix.
+   */
+  parentNodeId: string | null
 }
 
 /**
@@ -103,11 +110,11 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
  * `loadChildren: () => import('./x.routes')` is followed into the imported
  * module's route array. Deduplicates by node id (first declaration wins).
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = []): void {
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null): void {
   for (const el of arr.getElements()) {
     if (Node.isCallExpression(el)) {
       for (const arg of el.getArguments()) {
-        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards)
+        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId)
       }
       continue
     }
@@ -129,12 +136,13 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     const isScreen = el.getProperty('component') !== undefined || el.getProperty('loadComponent') !== undefined
     const nodeId = routeToNodeId(fullPath)
     if (isScreen && !out.has(nodeId)) {
-      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: el })
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: el, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
     }
+    const childParent = isScreen ? nodeId : parentNodeId
     const childrenProp = el.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
-      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards)
+      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent)
     }
     const childSpec = lazyImportSpecifier(el, 'loadChildren')
     if (childSpec) {
@@ -143,7 +151,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
         const { owner, arrays } = lazyRouteOwner(childModule)
         loadedChildFiles.add(childModule.getFilePath())
         loadedChildFiles.add(owner.getFilePath())
-        for (const childArr of arrays) walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards)
+        for (const childArr of arrays) walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent)
       }
     }
   }

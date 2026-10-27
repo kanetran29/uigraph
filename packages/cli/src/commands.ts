@@ -211,6 +211,7 @@ export interface RunMapOptions {
   adapter?: AdapterName
   out?: string
   controls?: boolean
+  attribution?: boolean
   /** Path to the app's locale/translation resource file for resolving t() keys (default: auto-detect). */
   i18nFile?: string
   /** Auto-register this workspace in ~/.uigraph (default true; off for --out / experiments). */
@@ -258,7 +259,7 @@ export async function runMap(opts: RunMapOptions): Promise<MapSummary> {
   let soundiness: SoundinessNote[]
   let proposals: Proposal[] | undefined
   try {
-    ;({ graph, soundiness, proposals } = await adapter.extract(opts.dir, { controls: opts.controls ?? false, i18nFile: opts.i18nFile }, ctx))
+    ;({ graph, soundiness, proposals } = await adapter.extract(opts.dir, { controls: opts.controls ?? false, attribution: opts.attribution ?? false, i18nFile: opts.i18nFile }, ctx))
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err)
     throw new CliError(`failed to extract the ${adapterName} graph from ${opts.dir}\n  ${reason}`)

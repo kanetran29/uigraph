@@ -31,6 +31,9 @@ export interface ExtractOptions {
    *  humanized key. Omit to auto-detect a conventional locale path; adapters that support no
    *  i18n resolution ignore this. */
   i18nFile?: string
+  /** When true, run scope attribution: navigation in a component no route renders is
+   *  attributed to the set of screens that render it, and stored once at a `scope` node. */
+  attribution?: boolean
 }
 
 /** One declared-but-unresolved case an adapter deliberately over-approximated. */
