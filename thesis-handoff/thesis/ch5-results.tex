@@ -112,7 +112,7 @@ that exists but is not linked to the component that renders it. It is confirmed 
 by the comparison between the route parser and the graph, so it is reported as a
 candidate until a second method confirms it.
 
-\begin{table}[t]\small
+\begin{table}[p]\footnotesize
 \caption{Defect classes and the evidence for each. A class is admitted on two
 independent lines of evidence, at least one from a named evaluation method; the methods
 column counts only those. This summary is compiled by hand; it is not harness output.}
@@ -124,8 +124,7 @@ Class & Evidence & Methods & All \\
 Attribution: navigation outside route components is invisible & mutation misses;
 multi-mount edge absent; manual audit; zero-edge applications & 1 & 4 \\
 Lazy module boundary not followed & route parser; end-to-end oracle; mutation & 3 & 3 \\
-Guards unreliable in both directions & removal invisible to mutation; witness check
-finds wrong predicate and colliding identifiers; empty-path guard absent
+Guards unreliable in both directions & mutation; witness check; empty-path guard absent
 (Section~\ref{sec:res-mutation}) & 2 & 3 \\
 Named router outlets not modelled & end-to-end oracle; source survey & 1 & 2 \\
 Constant-valued route paths not resolved & route parser; node-count collapse & 1 & 2 \\
