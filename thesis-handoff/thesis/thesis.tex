@@ -24,6 +24,7 @@
 \input{generated-rq4}
 \input{generated-approx}
 \input{generated-node-audit}
+\input{generated-round2}
 \input{generated-plots}
 \input{figures/fig-plots}
 
@@ -82,7 +83,16 @@ is limited by defects in node extraction, which the thesis also quantifies.
 
 Mutation testing on three of the applications shows that the graph detects 39 of 48
 injected source changes, and that eight of the nine changes it fails to detect are
-removals of a route guard. Attribution does not raise the detection rate for an individual change. It
+removals of a route guard.
+
+Finally, the thesis asks whether the losses belong to the applications or to the tool. Each
+defect class is taken to its root cause and repaired where the cause is the extractor's.
+None of the six applications turned out to express its routes in a way static analysis
+cannot follow: four of them then hold a node for every declared screen, and 94 percent of
+the navigation sites are accounted for, as a transition, as a destination only the run time
+knows, or as a source the analysis cannot place. Every site that remains names its reason,
+and a third of those name a route the application does not declare anywhere --- a dead link
+the graph finds without running the application. Attribution does not raise the detection rate for an individual change. It
 widens the part of the source the graph responds to at all.
 
 \vspace{1em}

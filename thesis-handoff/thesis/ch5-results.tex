@@ -302,7 +302,8 @@ in the application has a screen to start from or to reach. In mifos two defects 
 and a further 378 sit in screens whose node exists but carries no link to the component
 that renders it. In both applications attribution behaves as designed and still returns
 nothing, because it resolves the scope of a navigation site and then finds no target node
-to draw an edge to. This is the shape of 132 of the 387 attribution losses that survive
+to draw an edge to. Both defects are the extractor's, and
+Section~\ref{sec:res-round2} reports the corpus again after they were repaired. This is the shape of 132 of the 387 attribution losses that survive
 attribution. An edge cannot be drawn to a screen that was never created, so the ceiling
 on what attribution can contribute to these applications is set by node extraction and
 not by attribution itself.
@@ -404,3 +405,140 @@ Of the 48 scored mutants, 39 were detected. The graph responds to changes in the
 constructs it represents, and the two places where it does not are the coverage gap,
 which the exclusions measure, and the representation of guards on routes with an empty
 path.
+
+\section{Working the loss list (RQ5)}
+\label{sec:res-round2}
+
+The defect classes of Section~\ref{sec:res-defects} are a diagnosis, and a diagnosis is
+worth what the repair is worth. This section reports what happened when the list was
+treated as a worklist: every class was taken to its root cause in the source of the
+application it appeared in, and each cause that turned out to be the extractor's was
+fixed. The question asked of each one was the same, and it is the question the method
+exists to make askable --- is the navigation unreadable, or was it merely unread?
+
+Two things must be said about the figures before they are read. They are measured on a
+later commit of the extractor than the one the rest of this chapter uses, so they do not
+revise Table~\ref{tab:conversion}; the pinned results stand as reported, reproducible from
+the tag recorded with them. And where the oracle shared a blind spot with the extractor it
+too was corrected, which the harness records as version 1.4.0. Three of its corrections
+matter enough to name, because each one had been scoring the extractor against paths the
+oracle itself had failed to read: a route path written through a constant, an enum or
+Angular's \texttt{\$localize}; a first-party import resolved through the workspace's
+\texttt{baseUrl}; and a route array named rather than written out. Before the last of
+these the oracle saw 2 declared screens in k8s dashboard where there are 67, and scored
+the extractor's 67 nodes as 65 unmatched.
+
+\subsection{What the losses were}
+
+Every class resolved to a construct the extractor could read and did not, and none of the
+six applications turned out to express its routes in a way static analysis cannot follow.
+The causes fall into three groups.
+
+\emph{The route table was not reached.} An NgModule loaded by \texttt{loadChildren} keeps
+its routes in a separate \texttt{*-routing.module} that it imports, so stopping at the
+module file found nothing and the routing module was then scanned at the project root,
+where every screen in it was minted at its own relative path. A route array held inline by
+\texttt{RouterModule.forChild([\ldots])} has no variable to find it by, and its elements may
+name routes (\texttt{[ERROR\_ROUTE]}) rather than write them. A loader may reference its
+module directly (\texttt{loadChildren: () => VaultModule}) instead of importing it
+dynamically, and a barrel may re-export the route array rather than import it. A wrapper
+such as mifos's \texttt{Route.withShell([\ldots])} is a call, not an object, and the array it
+is given was skipped whole.
+
+\emph{The path was named, not written.} \texttt{path: internalRoutes.account.path} is a
+compile-time string, and so is an enum member and a \texttt{\$localize} segment with its
+metadata block. Following the name needs the workspace's \texttt{paths} aliases, since the
+table commonly lives in a library outside the application directory, and it needs the
+destructuring a route file reaches it through.
+
+\emph{The destination was named, not written.} A target may be a field, a dotted chain into
+the route table, an element of a commands array, the return of a builder, or a value in a
+lookup the component fills. Resolving these is what separates a link from a dead end, with
+one qualification that cost a soundness violation before it was added: a field seeded with a
+literal is mutable state, not a constant, and following it turns a run-time value into a
+must edge.
+
+\subsection{What the figures became}
+
+Table~\ref{tab:round2nodes} gives node coverage before and after. Four of the six
+applications now hold a node for every declared screen. The two that do not are alfresco,
+whose remaining blind spots are three lazy boundaries, and bitwarden, where two barrels
+still hide their route arrays one hop deeper than the walk reaches.
+
+\begin{table}[t]\small
+\caption{Declared screens that have a node, before and after the loss list was worked.
+Blind spots are lazy boundaries the oracle could not read.}
+\label{tab:round2nodes}
+\TabRoundTwoNodes
+\end{table}
+
+Table~\ref{tab:round2acct} gives the construct accounting, and it is reported in four parts
+rather than as one ratio, because a single number cannot separate three different things.
+A site is \emph{recovered} when it becomes a transition with a destination. It is
+\emph{dynamic} when the destination is one only the run time knows --- a value from the
+backend, a history entry --- in which case the graph records the transition as an edge into
+that screen's \texttt{u\_}\,sink, with modality unknown, rather than dropping it or
+guessing. It is \emph{unplaced} when the destination is readable but the screen it fires
+from is not, in which case the edge is anchored at an \texttt{o\_}\,origin node that says so.
+What is left is unexplained. Seven sites leave the denominator entirely, because they are
+not transitions between screens at all: five navigate a secondary outlet, which the model
+admits no screens for, and two carry no commands and so name no destination.
+
+\begin{table}[t]\small
+\caption{Construct accounting after the loss list was worked. Percentages are of the
+in-scope sites.}
+\label{tab:round2acct}
+\TabRoundTwoAccounting
+\end{table}
+
+Of \RoundTwoInScope{} in-scope sites, \RoundTwoRecovered{} are recovered,
+\RoundTwoDynamic{} are accounted as dynamic and \RoundTwoUnplaced{} as unplaced, so
+\RoundTwoAccounted{} are accounted for in all. The comparable figure before the list was
+worked is \RoundTwoBefore{}. The reading that changes most is k8s dashboard, which recovers
+a fifth of its sites and looks like a failure until the second column is read: two thirds
+of its navigation computes the destination at run time, through one service that builds
+every link, and only four of its sites are unexplained.
+
+\subsection{Nothing is left without a reason}
+
+\RoundTwoUnexplained{} sites remain unexplained, and Table~\ref{tab:round2reasons} gives the
+reason for each. The reasons are produced by a script that exits non-zero if a single site
+reaches the end of it without one, so a site the analysis cannot explain is a failing state
+rather than a silent remainder. The largest group is a target the extractor read for which
+no node matches, and that group divides further in a way that matters: eight name a route
+that is declared and has no node, which is the extractor's defect, and the rest name no
+route the application declares at all.
+
+\begin{table}[t]\small
+\caption{Why each remaining site is not a transition. The script that produces this table
+fails if any site has no reason.}
+\label{tab:round2reasons}
+\TabRoundTwoReasons
+\end{table}
+
+\subsection{Dead links}
+\label{sec:deadlinks}
+
+A site whose target names no route the application declares anywhere is a dead link, and
+finding them is something the method gives away for free. The clearest case is ghostfolio.
+Its shared route table declares
+
+\begin{quote}
+\texttt{users: \{ path: 'users', routerLink: ['/admin', 'users'] \}}
+\end{quote}
+
+\noindent and a component navigates there, but the admin route configuration mounts only
+\texttt{jobs}, \texttt{marketData}, \texttt{settings} and the empty path, and no route with
+the path \texttt{users} exists anywhere in the application. The link cannot be followed. A
+test that never opens that menu would not find it, and a crawler would find it only if it
+reached the screen that holds it; reading the route configuration finds it without running
+anything.
+
+Thirty-five of the forty-three unresolved targets are of this kind. The number should be
+read as a candidate count rather than a verdict: a route the extractor and the oracle both
+fail to read is indistinguishable, from the outside, from a route that does not exist, and
+alfresco in particular declares part of its navigation in an application configuration file
+rather than in TypeScript, which neither tool reads. What can be said is that for
+ghostfolio's \texttt{/admin/users} the absence was confirmed by searching the whole
+application for the path, and that a static transition graph puts every such candidate on
+one list instead of leaving it to be met at run time.
