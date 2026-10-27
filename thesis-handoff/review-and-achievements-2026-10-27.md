@@ -29,6 +29,8 @@ output, not from a reviewer's word.
 | Part 3: RQ4 aggregate carried by rename | **fixed.** 5.4 states that rename detection is near-definitional once the mutant is scored, gives its share (22 of 48 scored, 22 of 39 detections), and reports the three operators that can fail at 17 of 26. Alfresco's single-edge graph is flagged. |
 | Part 3: CI use case proposes guard assertions | **fixed.** The guard assertion is removed from the list and named as the one the graph cannot yet carry, citing RQ4. |
 | Part 4: voice, orphan entry, aphorism, caption | **fixed.** One voice throughout (first person, as the abstract and Ch1 already used); `llmdroid2025` now cited; 4.3.2's closer replaced with the five corrections that were actually found by disbelieving a figure; the mutation figure caption matches Ch5's wording. |
+| Panel: node precision never reported | **fixed.** `comparison.extraNodes` was in every C.json and never reached the page. 197 of 338 nodes match no declared screen. `to-latex.mjs` now emits the column and `node-audit.mjs` decomposes all 197: 143 have no route at the path, 43 are parser blind spots, 11 are prefix or redirect routes that lie outside $S$. |
+| Panel: Claim 3.2 check was near-vacuous | **fixed.** `expandAnchoredEdges` is a loop over `edgesFrom`, so the first check compared a function with its own caller. The check now materialises independently and 5.3 states what it does and does not exercise. |
 | Part 3: RQ2's two-method rule; Part 4: plot redundancy, page balance | **open.** |
 
 Corrections to my own earlier reporting, from redoing the diff on the stable construct
