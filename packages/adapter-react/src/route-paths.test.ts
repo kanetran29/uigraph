@@ -362,3 +362,57 @@ export default () => (<Routes><Route path="admin" element={<Admin/>}><Route path
     expect(soundiness.filter((n) => n.kind === 'route-address-collision')).toHaveLength(1)
   })
 })
+
+describe('two declarations at one address in a data-router config (F-react-adapter)', () => {
+  it('declares the collision instead of dropping the second declaration', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/routes.tsx': `import A from './A'
+import B from './B'
+export const router = createBrowserRouter([{ path: '/dash', element: <A/> }, { path: '/dash', element: <B/> }])`,
+        '/A.tsx': `export default function A(){ return null }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/dash'])
+    expect(soundiness.filter((n) => n.kind === 'route-address-collision')).toHaveLength(1)
+  })
+})
+
+describe('quoted and computed route keys (F-react-adapter)', () => {
+  it('reads a data-router config whose keys are quoted, instead of reading it as empty', () => {
+    // ts-morph's getProperty compares against getName(), which keeps a quoted key's quotes, so
+    // the whole config was read as holding no routes: no node, no note, every link into it dead.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/routes.tsx': `import A from './A'
+import B from './B'
+export const router = createBrowserRouter([{ "path": '/a', "element": <A/> }, { "path": '/b', "element": <B/> }])`,
+        '/A.tsx': `export default function A(){ return null }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/a', '/b'])
+    expect(soundiness.filter((n) => n.kind === 'dynamic-route-path')).toEqual([])
+  })
+
+  it('does not read a computed key by its spelling', () => {
+    // `{ [path]: '/a' }` where `const path = 'id'` declares an id, not an address; matching the
+    // key by how its expression is spelled minted a node at an address the application never
+    // mounts, which is the one error the deterministic tier may not make.
+    const { graph } = extractGraph(
+      inMemory({
+        '/routes.tsx': `import A from './A'
+import B from './B'
+const path = 'id'
+export const router = createBrowserRouter([{ [path]: '/a', element: <A/> }, { path: '/b', element: <B/> }])`,
+        '/A.tsx': `export default function A(){ return null }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/b'])
+  })
+})

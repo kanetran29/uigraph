@@ -11,7 +11,7 @@ import { routeToNodeId } from './ids'
 /** Specs, stories and test doubles: they declare routes that are not the application's. */
 const SPEC_FILE = /\.(spec|test|stories|cy)\.[tj]s$/
 import { analyzeCanActivate, type GuardInfo } from './guards'
-import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf } from './resolve'
+import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, propNamed } from './resolve'
 
 export interface RouteInfo {
   fullPath: string
@@ -55,7 +55,7 @@ export interface UnreadableRoutes {
  * to resolve named functional-guard consts.
  */
 function canActivateGuards(sf: SourceFile, obj: ObjectLiteralExpression): GuardInfo[] {
-  const prop = obj.getProperty('canActivate')
+  const prop = propNamed(obj, 'canActivate')
   if (!prop || !Node.isPropertyAssignment(prop)) return []
   const init = prop.getInitializer()
   if (!init || !Node.isArrayLiteralExpression(init)) return []
@@ -94,7 +94,7 @@ function segments(path: string): string[] {
  */
 function isRouteArray(arr: ArrayLiteralExpression, declaredOnly = false): boolean {
   const isRoutesTyped = arr.getParentIfKind(SyntaxKind.VariableDeclaration)?.getTypeNode()?.getText() === 'Routes'
-  return isRoutesTyped || (!declaredOnly && arr.getElements().some((e) => Node.isObjectLiteralExpression(e) && e.getProperty('path') !== undefined))
+  return isRoutesTyped || (!declaredOnly && arr.getElements().some((e) => Node.isObjectLiteralExpression(e) && propNamed(e, 'path') !== undefined))
 }
 
 /**
@@ -123,12 +123,18 @@ function spreadMintsRoutes(arr: ArrayLiteralExpression, seen = new Set<ArrayLite
     }
     if (Node.isCallExpression(el)) return el.getArguments().some((a) => Node.isArrayLiteralExpression(a) && spreadMintsRoutes(a, seen))
     const obj = Node.isObjectLiteralExpression(el) ? el : objectLiteralOf(el)
-    return obj !== undefined && obj.getProperty('path') !== undefined && MOUNTS.some((k) => obj.getProperty(k) !== undefined)
+    return obj !== undefined && propNamed(obj, 'path') !== undefined && MOUNTS.some((k) => propNamed(obj, k) !== undefined)
   })
 }
 
-/** The properties that make a route object mount something: without one of them the walk mints no node for it. */
-const MOUNTS = ['component', 'loadComponent', 'children', 'loadChildren']
+/**
+ * The properties that make a route object PLACE something under its prefix. `redirectTo` mints
+ * no node and belongs here all the same: a redirect-only route registers a redirect, so refusing
+ * to claim the array that carries it hands the file back to the root scan, which registers the
+ * same redirect at the ROOT -- and a stale link to that root address then resolves through it
+ * into a must edge, at a destination the source does not have.
+ */
+const MOUNTS = ['component', 'loadComponent', 'children', 'loadChildren', 'redirectTo']
 
 /**
  * Find every top-level `Routes`-shaped array literal in a source file
@@ -297,7 +303,10 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     if (Node.isSpreadElement(el)) {
       const arr = arrayLiteralOf(el.getExpression())
       if (arr && Node.isArrayLiteralExpression(arr)) {
-        consumedFiles?.add(arr.getSourceFile().getFilePath())
+        // Only on the evidence the claim itself used: a spread of an array that places nothing
+        // would otherwise mark its file placed, and a real table claimed in the same file would
+        // lose its declaration.
+        if (spreadMintsRoutes(arr)) consumedFiles?.add(arr.getSourceFile().getFilePath())
         walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
       }
       continue
@@ -317,7 +326,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       // evaluated and never minted into a screen — running the matcher is out of reach and
       // guessing its address would claim a destination nothing proves. Angular rejects a route
       // that carries both, so one test counts each hole exactly once.
-      const declaresAddress = obj.getProperty('path') !== undefined || obj.getProperty('matcher') !== undefined
+      const declaresAddress = propNamed(obj, 'path') !== undefined || propNamed(obj, 'matcher') !== undefined
       if (declaresAddress && unreadable) unreadable.paths.add(obj)
       continue
     }
@@ -337,18 +346,22 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // reach the screen it forwards to, and dropping it loses that transition entirely.
     const redirectTo = stringProp(obj, 'redirectTo')
     if (redirectTo !== null && redirects) redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
-    const isScreen = obj.getProperty('component') !== undefined || obj.getProperty('loadComponent') !== undefined
+    const isScreen = propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined
     const nodeId = routeToNodeId(fullPath)
     if (isScreen && !out.has(nodeId)) {
       out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
     }
     const childParent = isScreen ? nodeId : parentNodeId
-    const childrenProp = obj.getProperty('children')
+    const childrenProp = propNamed(obj, 'children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
       if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
     }
     const childSpec = lazyImportSpecifier(obj, 'loadChildren')
+    // A `loadChildren` whose specifier is not a literal (a template over a variable, say) yields
+    // no specifier and no identifier target, so the branch below is skipped: without this the
+    // whole subtree it mounts leaves the route set with nothing said about it.
+    if (!childSpec && !lazyIdentifierTarget(sf, obj, 'loadChildren') && propNamed(obj, 'loadChildren') !== undefined && unreadable) unreadable.subtrees.add(obj)
     if (childSpec || lazyIdentifierTarget(sf, obj, 'loadChildren')) {
       const childModule = childSpec ? resolveRelative(sf, childSpec) : lazyIdentifierTarget(sf, obj, 'loadChildren')
       if (childModule) {
@@ -427,12 +440,16 @@ export function collectRoutes(project: Project, redirects?: Map<string, string>,
  * against the probe's size, because a claimed file that re-declares addresses the graph already
  * holds cost the route set nothing either. The claims go in as a copy because the walk adds to
  * them; this file is not removed from that copy, because the probe starts from the file's own
- * arrays and never consults the set for them, so removing it would change no answer.
+ * arrays and never consults the set for them, so removing it would change no answer. A redirect
+ * the root scan would have registered counts as well, because a redirect is placed under a
+ * prefix like a route and a claimed file holding only redirects would otherwise be lost here in
+ * silence.
  */
 function mintsFromRoot(sf: SourceFile, claims: Set<string>, already: Map<string, RouteInfo>): boolean {
   const probe = new Map<string, RouteInfo>()
-  for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', probe, new Set(claims))
-  return [...probe.keys()].some((id) => !already.has(id))
+  const probeRedirects = new Map<string, string>()
+  for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', probe, new Set(claims), [], null, probeRedirects)
+  return probeRedirects.size > 0 || [...probe.keys()].some((id) => !already.has(id))
 }
 
 /**

@@ -570,6 +570,38 @@ const worstOutside = outside.reduce((a, b) => (b.n > a.n ? b : a), { s: null, n:
 // The largest remaining group, named because it is now the majority of the remainder: a class
 // the extractor parsed, found a navigation site in, and could place under no screen. It is the
 // extractor's own note, so the reason is its record rather than this harness's inference.
+/**
+ * The first round's unexplained group, split by whose defect it was. These are the extractor
+ * nodes the EARLIER oracle matched to no declared route of any kind. A node whose path is the
+ * tail of an address that oracle did declare is the extractor assembling the path without its
+ * parent prefix -- its own defect, not a table the parser missed -- and the chapter attributed
+ * the whole group to the parser until this was counted.
+ */
+function firstRoundExtras() {
+  let total = 0, truncated = 0, synthetic = 0
+  for (const r of rows) {
+    const all = new Set(r.pre.routes.map((x) => x.path))
+    for (const e of r.pre.comparison.extraNodes ?? []) {
+      if (all.has(e.route)) continue
+      total++
+      if (e.route === '*' || e.route === '/*') synthetic++
+      else if ([...all].some((p) => p !== e.route && p.endsWith(e.route))) truncated++
+    }
+  }
+  return { total, truncated, synthetic }
+}
+const fre = firstRoundExtras()
+mac('RoundTwoFirstRoundExtra', fre.total)
+mac('RoundTwoFirstRoundTruncated', fre.truncated)
+mac('RoundTwoFirstRoundSynthetic', fre.synthetic)
+mac('RoundTwoFirstRoundOther', fre.total - fre.truncated - fre.synthetic)
+
+// The sites the control run set aside as a secondary-outlet navigation, which the round-two run
+// has none of. Generated because the chapter names the figure and the application, and a count
+// typed from memory was wrong by two.
+const ctrlOutlet = rows.map((r) => ({ s: r.s, n: (r.l0?.rows ?? []).filter((x) => x.cls === 'NAMED_OUTLET').length })).filter((x) => x.n > 0)
+mac('RoundTwoCtrlOutlet', ctrlOutlet.reduce((a, b) => a + b.n, 0))
+mac('RoundTwoCtrlOutletWhere', ctrlOutlet.map((x) => NAME[x.s]).join(' and ') || 'none')
 const UNPLACED_TEXT = PRETTY['extractor-note:unattributed-non-component']
 mac('RoundTwoUnplacedClass', reasons[UNPLACED_TEXT] ?? 0)
 mac('RoundTwoOutsideWitness', outside.reduce((a, b) => a + b.n, 0))

@@ -486,8 +486,11 @@ application's root table actually reads. What it reads is the file's own call to
 is why the test is sound where it fires. It is also why it does not fire at all on an
 application that registers its root with the standalone \texttt{provideRouter} API, or through
 an alias of \texttt{RouterModule}: two of the six applications here have no
-\texttt{forRoot} call anywhere, and on those two the guard cannot fire at all. Instrumenting
-the predicate over the whole corpus makes the limit sharper than that: it is asked 698 times
+\texttt{forRoot} call anywhere, and on those two the guard cannot fire at all. The first limit
+costs two more: ghostfolio and kubernetes/dashboard each declare their root array in one file
+and register it in another, and the registering file holds no route of its own, so four of the
+six have no file this test can recognise. Instrumenting the predicate over the whole corpus
+makes the limit sharper still: it is asked 698 times
 across the six applications and answers yes on none of them, because it is asked only of the
 dependencies of a lazily loaded module and no application in this corpus names a file holding a
 \texttt{forRoot} call there. Every application is therefore field-identical to the unguarded
@@ -521,10 +524,14 @@ component at all. An earlier version compared the prefix to the path as a bare s
 read \path{/cluster} into \texttt{resourcelist/clusterrole/component.ts} and would have replaced
 the extractor's own true note about that file with a tool blind spot that does not cover it.
 Sixteen of the corpus's loss rows satisfied that predicate. None of them reaches the published
-reason table, because every one is answered by an earlier branch of the explanation chain, and
-on this corpus the attribution decides no published row at all: what is recorded here is a
-property of the rule rather than of any figure in Chapter~\ref{ch:results}. The narrower rule
-is still the one to state, because the broader one was false where it was asked.
+reason table, and the reason is worth stating exactly, because the obvious account of it is
+wrong: it is not that some earlier test answers those rows first. The attribution is asked of
+all twenty-four unaccounted rows in the corpus and declines every one of them on its own first
+two conditions --- sixteen because the owning file is not a component, eight because the graph
+already witnesses an edge from that file --- so the comparison this paragraph is about is never
+reached on this corpus at all. What is recorded here is therefore a property of the rule and not
+of any figure in Chapter~\ref{ch:results}. The narrower rule is still the one to state, because
+the broader one was false wherever it was asked.
 
 \section{Transfer to other frameworks}
 \label{sec:transfer}

@@ -130,9 +130,26 @@ export function componentClassName(sf: SourceFile): string | null {
   return null
 }
 
+/**
+ * The property of `obj` called `name`, whether the key is written bare, quoted or as a constant
+ * computed key. `getProperty(name)` compares against `getName()`, which keeps a quoted key's
+ * quotes and a computed key's brackets, so it answers undefined for `{ "path": 'quoted' }`: that
+ * route was neither minted nor counted as unreadable, so the route set claimed a completeness it
+ * did not have and a live link into the address was published as a dead one. Every read that
+ * decides what a route object IS goes through this, so one spelling of a key cannot make a route
+ * invisible to the walk while another makes it visible.
+ */
+export function propNamed(obj: ObjectLiteralExpression, name: string) {
+  return obj.getProperty((p) => {
+    if (!Node.isPropertyAssignment(p) && !Node.isShorthandPropertyAssignment(p)) return false
+    const key = p.getNameNode()
+    return Node.isStringLiteral(key) ? key.getLiteralValue() === name : key.getText().replace(/^\[|\]$/g, '').replace(/^['"`]|['"`]$/g, '') === name
+  })
+}
+
 /** Read a string-literal property value from a route object literal, or null. */
 export function stringProp(obj: ObjectLiteralExpression, name: string): string | null {
-  const prop = obj.getProperty(name)
+  const prop = propNamed(obj, name)
   if (!prop || !Node.isPropertyAssignment(prop)) return null
   const init = prop.getInitializer()
   if (!init) return null
@@ -423,7 +440,7 @@ function declaredInitializer(id: Node): Node | undefined {
 
 /** Read an identifier property value (e.g. `component: HomeComponent`), or null. */
 export function identifierProp(obj: ObjectLiteralExpression, name: string): string | null {
-  const prop = obj.getProperty(name)
+  const prop = propNamed(obj, name)
   if (!prop || !Node.isPropertyAssignment(prop)) return null
   const init = prop.getInitializer()
   if (init && Node.isIdentifier(init)) return init.getText()

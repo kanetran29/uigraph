@@ -11,7 +11,7 @@ import type { ArrayLiteralExpression, ObjectLiteralExpression, Project, SourceFi
 import type { SoundinessNote } from '@ui-graph/core'
 import { routeToNodeId } from './ids'
 import { resolveVueComponent } from './project'
-import { propNamed, stringProp } from './targets'
+import { keyUnreadable, propNamed, stringProp } from './targets'
 import type { VueComponent, VueProject } from './extract'
 
 /** A flattened route record: full path, node id, optional name/component name, resolved component, and any per-route guards. */
@@ -227,6 +227,9 @@ export function collectRoutes(vp: VueProject): CollectedRoutes {
     const own = stringProp(obj, 'path')
     if (own === null) {
       const pathProp = propNamed(obj, 'path')
+      // A record whose key the walk cannot read declares an unknown property, so whether it is a
+      // route at all is unknown; declaring that is the only honest reading of it.
+      if (!pathProp && keyUnreadable(obj)) notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(obj, sf), detail: 'route record carries a computed key that is not a string constant, so what it declares is not read and the record is skipped' })
       const pathText = pathProp && Node.isPropertyAssignment(pathProp) ? (pathProp.getInitializer()?.getText() ?? pathProp.getText()) : pathProp?.getText()
       if (pathProp) notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(pathProp, sf), detail: `route record path "${pathText}" is not a string literal — the record and any children are skipped` })
       return 0

@@ -185,15 +185,21 @@ function underBlindSpot(p) {
  * spot that does not cover that file, so the segment test is the minimum that keeps the claim
  * honest. It narrows the heuristic; it does not close it, and it is loose in three ways the
  * thesis records. A route prefix does not determine a directory name, so a hole whose components
- * sit under a differently named directory is not attributed. A blind spot whose prefix is
- * entirely parameterised has no literal segment and is never attributed to any owner. And a
+ * sit under a differently named directory is not attributed by the prefix arm. A blind spot
+ * whose prefix is entirely parameterised has no literal segment, so the prefix arm cannot reach
+ * it -- though the file arm still can, independently, where the blind spot carries a file. And a
  * one-segment prefix still matches any owner with that directory name anywhere in its path, so
  * a `/reports` hole in one feature claims a component under another feature's `reports`
  * directory: the remaining false direction, narrowed by the contiguity rule and not removed by
  * it. Where two holes match, `find` returns the first the oracle listed, which is an order and
- * not a ranking. Measured over the six applications, this function attributes no row at all:
- * every unaccounted row is answered by an earlier branch, so nothing it decides is published
- * here, and the three looseness properties are about what it would say rather than what it did.
+ * not a ranking.
+ *
+ * Measured over the six applications, this function is asked 24 times and returns undefined
+ * every one of them, so the comparison below decides nothing that is published. It is NOT that
+ * an earlier branch of the explanation chain answers those rows: they reach here, and this
+ * function's own first two conditions turn all of them away -- 16 because the owning file is not
+ * a component, 8 because the graph already witnesses an edge from it. The looseness properties
+ * above are therefore about what this rule would say, not about any figure.
  */
 function lazyBlindSpotOf(relFile, owner) {
   if (!owner || fileKind(owner) !== 'component') return undefined

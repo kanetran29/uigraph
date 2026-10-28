@@ -5,7 +5,7 @@
 // custom route-wrapper components.
 
 import { Node, Project, SyntaxKind, ts } from 'ts-morph'
-import type { SourceFile } from 'ts-morph'
+import type { ObjectLiteralExpression, SourceFile } from 'ts-morph'
 import { readFileSync } from 'node:fs'
 import { dirname, isAbsolute, join } from 'node:path'
 import { allJsxElements, findAttr, getComponentName, jsxTag } from './jsx'
@@ -322,4 +322,30 @@ export function callSiteComponentFile(sf: SourceFile, el: Node): { name: string 
   const name = callSiteComponentName(el)
   const file = name ? resolveComponentFile(sf, name) : undefined
   return { name, file }
+}
+
+/**
+ * The property of `obj` called `name`, whether the key is written bare, quoted or as a computed
+ * key fixed to a string constant. `getProperty` compares against `getName()`, which keeps a
+ * quoted key's quotes and a computed key's brackets, so a data-router config written
+ * `{ "path": '/a', "element": <A/> }` was read as holding no routes at all: no node, no note,
+ * and every link into it published as a dead one. A computed key is compared by the value its
+ * expression is fixed to and never by its spelling, because the spelling test reads
+ * `{ [path]: '/a' }` where `const path = 'id'` as an address the application does not mount.
+ */
+export function propNamed(obj: ObjectLiteralExpression, name: string) {
+  const bare = obj.getProperty(name)
+  if (bare) return bare
+  return obj.getProperties().find((p) => {
+    if (!Node.isPropertyAssignment(p) && !Node.isShorthandPropertyAssignment(p)) return false
+    const key = p.getNameNode()
+    if (Node.isStringLiteral(key) || Node.isNoSubstitutionTemplateLiteral(key)) return key.getLiteralValue() === name
+    if (!Node.isComputedPropertyName(key)) return false
+    const expr = key.getExpression()
+    if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return expr.getLiteralValue() === name
+    if (!Node.isIdentifier(expr)) return false
+    const init = expr.getSourceFile().getVariableDeclaration(expr.getText())?.getInitializer()
+    if (!init || (!Node.isStringLiteral(init) && !Node.isNoSubstitutionTemplateLiteral(init))) return false
+    return init.getLiteralValue() === name
+  })
 }
