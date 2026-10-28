@@ -178,14 +178,22 @@ function underBlindSpot(p) {
  * a declared blind spot is a gap in the route set, and a note about the same site must not hide it.
  *
  * What the match establishes, stated exactly, because the attribution is a filename heuristic and
- * not a resolution: the blind spot's own file stem is a substring of the owner's path, or every
- * literal segment of its route prefix is a WHOLE path segment of the owner. A bare substring test
- * on the prefix read `/cluster` into `resourcelist/clusterrole/component.ts` and replaced a true
- * extractor note with a tool blind spot that does not cover that file, so the segment test is the
- * minimum that keeps the claim honest. It is still a heuristic in two ways the thesis records: a
- * route prefix does not determine a directory name, so a hole whose components sit under a
- * differently named directory is not attributed; and a blind spot whose prefix is entirely
- * parameterised has no literal segment and is never attributed to any owner.
+ * not a resolution: the blind spot's own file stem is a substring of the owner's path, or the
+ * literal segments of its route prefix appear in the owner's path as WHOLE segments, in order
+ * and next to each other. A bare substring test on the prefix read `/cluster` into
+ * `resourcelist/clusterrole/component.ts` and replaced a true extractor note with a tool blind
+ * spot that does not cover that file, so the segment test is the minimum that keeps the claim
+ * honest. It narrows the heuristic; it does not close it, and it is loose in three ways the
+ * thesis records. A route prefix does not determine a directory name, so a hole whose components
+ * sit under a differently named directory is not attributed. A blind spot whose prefix is
+ * entirely parameterised has no literal segment and is never attributed to any owner. And a
+ * one-segment prefix still matches any owner with that directory name anywhere in its path, so
+ * a `/reports` hole in one feature claims a component under another feature's `reports`
+ * directory: the remaining false direction, narrowed by the contiguity rule and not removed by
+ * it. Where two holes match, `find` returns the first the oracle listed, which is an order and
+ * not a ranking. Measured over the six applications, this function attributes no row at all:
+ * every unaccounted row is answered by an earlier branch, so nothing it decides is published
+ * here, and the three looseness properties are about what it would say rather than what it did.
  */
 function lazyBlindSpotOf(relFile, owner) {
   if (!owner || fileKind(owner) !== 'component') return undefined
@@ -196,7 +204,8 @@ function lazyBlindSpotOf(relFile, owner) {
     if (!b.prefix) return false
     const segs = owner.split('/')
     const lit = b.prefix.replace(/^\//, '').split('/').filter((k) => k && !k.startsWith(':'))
-    return lit.length > 0 && lit.every((k) => segs.includes(k))
+    if (lit.length === 0) return false
+    return segs.some((_, i) => lit.every((k, j) => segs[i + j] === k))
   })
 }
 

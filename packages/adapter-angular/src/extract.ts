@@ -162,6 +162,13 @@ function describeUnreadable(u: UnreadableRoutes): string | null {
  * registers it is not read (a workspace library's effect is registered from inside the
  * application through `provideEffects([...])`), so it is reported as unattributed with a note
  * that says the tool could not place it, and never as a class nothing in the application injects.
+ *
+ * `wildcardScreen` below is looked up by the full path `*`. `joinRoutePath` folds `**`, `*` and
+ * `/*` into `*` only at the ROOT; inside a feature module the same segment becomes
+ * `<parent>/*`, because it catches only that module's unmatched URLs. So the one route whose
+ * full path is `*` is the application's own catch-all and the lookup cannot pick up a feature
+ * module's. A catch-all that only redirects is no screen and is absent from this list; it lives
+ * in `redirects` instead, under the same full path.
  */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const redirects = new Map<string, string>()
@@ -169,11 +176,6 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const routes = collectRoutes(project, redirects, unreadable, projectDir)
   const unreadableText = describeUnreadable(unreadable)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
-  // `joinRoutePath` folds `**`, `*` and `/*` into the path `*` only at the ROOT; inside a feature
-  // module the same segment is `<parent>/*`, because it catches only that module's unmatched URLs.
-  // So the one route whose full path is `*` is the application's own catch-all, and looking it up
-  // by that path cannot pick up a feature module's. A catch-all that only redirects is no screen
-  // and is absent here; it lives in `redirects` instead, under the same full path.
   const wildcardScreen = routeLikes.find((r) => r.fullPath === '*') ?? null
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))

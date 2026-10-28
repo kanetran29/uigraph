@@ -147,23 +147,30 @@ const decl = routesFile
  *
  * This exists because the three questions above all take the edge's destination NODE for
  * granted and ask only whether the witness agrees with it. A node minted at an address the
- * application never mounts therefore passes every one of them: mifos's reports module was
- * read at the project root, so the graph held `/:filter` instead of `/reports/:filter` and
- * nine MUST edges pointed at it while this check reported the must tier clean. The soundness
- * lemma is about the destination, so the destination has to be tested too.
+ * application never mounts therefore passes every one of them: mifos's reports module was read
+ * at the project root, so the graph held `/:filter` and `/run/:name` instead of
+ * `/reports/:filter` and `/reports/run/:name`, and edges pointed at those addresses while this
+ * check reported the must tier clean. No count of them is given here because the defect is
+ * repaired and the graph that carried it is gone, so the figure cannot be re-measured on demand.
+ * The soundness lemma is about the destination, so the destination has to be tested too.
+ * The test is off unless `--routes` is given: `destinationsChecked` in the output says which of
+ * the two this run was, because a run without it judges the must tier by three questions and not
+ * by four, and a reader cannot tell the two apart from the verdicts alone.
+ *
+ * Two things about the comparison itself. Both sides are patterns, so a param may only answer a
+ * param: the looser comparison used when matching a concrete URL against a route would excuse
+ * the exact defect this test is for, because `/:filter` would match any one-segment route the
+ * application happens to declare. And a route inside a subtree the oracle could not open is not
+ * evidence of anything, so a blind spot answers for every address beneath it rather than
+ * condemning it.
  */
 function declaredHere(route) {
   if (!decl) return null
   const t = route.split('/').filter(Boolean)
   if (!t.length) return decl.root
-  // Both sides are patterns, so a param may only answer a param. The looser comparison used
-  // when matching a concrete URL against a route would excuse the exact defect this test is
-  // for: `/:filter` would match any one-segment route the application happens to declare.
   const seg = (s, i) => s === t[i] || (s.startsWith(':') && t[i].startsWith(':'))
   const same = (d) => d.length === t.length && d.every(seg)
   const covers = (d) => d.length > 0 && d.length <= t.length && d.every(seg)
-  // A route inside a subtree the oracle could not open is not evidence of anything, so a
-  // blind spot answers for every address beneath it rather than condemning it.
   if (decl.blind.some(covers)) return true
   return decl.routes.some(same)
 }

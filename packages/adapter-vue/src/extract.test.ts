@@ -366,6 +366,22 @@ export const router = createRouter({ history: createWebHistory(), routes: [share
     })
     expect(details(soundiness, 'unresolved-route').filter((d) => /is not a string literal/.test(d))).toEqual([])
   })
+
+  // ts-morph's getProperty compares against getName(), which keeps a quoted key's quotes, so a
+  // table written with quoted keys was read as holding no routes at all -- silently, and with a
+  // working link into it reported as a dead one.
+  it.each([
+    ["a quoted path key", `[{ \"path\": '/a', component: A }, { path: '/b', component: B }]`, `routes`],
+    ["quoted keys throughout", `[{ \"path\": '/a', \"component\": A }, { \"path\": '/b', \"component\": B }]`, `\"routes\"`],
+  ])('reads a route table written with %s', (_name, table, routesKey) => {
+    const { graph, soundiness } = build({
+      '/src/router.ts': `import { createRouter } from 'vue-router'\nimport A from './A.vue'\nimport B from './B.vue'\ncreateRouter({ ${routesKey}: ${table} })`,
+      '/src/A.vue': page(),
+      '/src/B.vue': page('<router-link to="/a">a</router-link>'),
+    })
+    expect(graph.nodes.map((n) => n.id).sort()).toEqual(['n_a', 'n_b'])
+    expect(details(soundiness, 'unresolved-target')).toEqual([])
+  })
 })
 
 describe('runtime-registered route arrays (F-vue-adapter, addRoutes)', () => {

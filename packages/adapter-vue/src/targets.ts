@@ -4,15 +4,30 @@
 // bodies. Shared by router-link, router.push and control-handler analysis.
 
 import { Node, SyntaxKind } from 'ts-morph'
-import type { ObjectLiteralExpression, Project, SourceFile } from 'ts-morph'
+import type { ObjectLiteralExpression, Project, PropertyAssignment, ShorthandPropertyAssignment, SourceFile } from 'ts-morph'
 import type { TargetInfo } from './types'
 import type { VueComponent } from './extract'
 
 const MAX_DEPTH = 3
 
 /** Read a string-literal property value from a route object literal, or null. */
+/**
+ * The property of `obj` called `name`, whether the key is written bare, quoted or as a constant
+ * computed key. `getProperty` compares against `getName()`, which keeps a quoted key's quotes and
+ * a computed key's brackets, so it answers undefined for `{ "path": '/a' }` -- a table written
+ * that way was read as holding no routes at all, and the whole of it vanished with no note. The
+ * Angular adapter met the same ts-morph behaviour and reads the key off its name node
+ * (`resolve.ts`); this is the Vue side of it.
+ */
+export function propNamed(obj: ObjectLiteralExpression, name: string): PropertyAssignment | ShorthandPropertyAssignment | undefined {
+  const bare = obj.getProperty(name)
+  if (bare && (Node.isPropertyAssignment(bare) || Node.isShorthandPropertyAssignment(bare))) return bare
+  return obj.getProperties().find((p): p is PropertyAssignment | ShorthandPropertyAssignment =>
+    (Node.isPropertyAssignment(p) || Node.isShorthandPropertyAssignment(p)) && p.getName().replace(/^\[|\]$/g, '').replace(/^['"`]|['"`]$/g, '') === name)
+}
+
 export function stringProp(obj: ObjectLiteralExpression, name: string): string | null {
-  const prop = obj.getProperty(name)
+  const prop = propNamed(obj, name)
   if (!prop || !Node.isPropertyAssignment(prop)) return null
   const init = prop.getInitializer()
   if (!init) return null

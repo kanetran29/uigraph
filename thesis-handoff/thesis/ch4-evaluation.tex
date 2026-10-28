@@ -26,10 +26,12 @@ measurements can be repeated on exactly the same code.
 \begin{table}[t]\small
 \caption{The corpus. Routes are the route entries reached by the independent route
 parser of Section~\ref{sec:protocol}, as it stands after the corrections of
-Section~\ref{sec:res-round2}; the entries it still cannot reach are reported per application
-in Table~\ref{tab:round2nodes} rather than here. An earlier version of this table gave
-kubernetes/dashboard as a lower bound of 42 because the parser could not then follow its
-lazily loaded modules.}
+Section~\ref{sec:res-round2}. A count marked $\geq$ is a lower bound: the parser records a
+blind spot for that application, so the entries behind it are not in the figure, and which
+blind spots those are is given per application in Table~\ref{tab:round2nodes}. An earlier
+version of this table gave kubernetes/dashboard as a lower bound of 42 because the parser could
+not then follow its lazily loaded modules; it now reaches them, and the marks that remain are
+ghostfolio's custom \texttt{UrlMatcher} route and bitwarden's two unreadable lazy subtrees.}
 \label{tab:corpus}
 \begin{tabularx}{\textwidth}{@{}lYrY@{}}
 \toprule

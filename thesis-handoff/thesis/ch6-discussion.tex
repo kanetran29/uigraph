@@ -486,10 +486,15 @@ application's root table actually reads. What it reads is the file's own call to
 is why the test is sound where it fires. It is also why it does not fire at all on an
 application that registers its root with the standalone \texttt{provideRouter} API, or through
 an alias of \texttt{RouterModule}: two of the six applications here have no
-\texttt{forRoot} call anywhere, and on those two the guard is inoperative. Both are
-field-identical to the unguarded analysis on this corpus, so no figure in
-Chapter~\ref{ch:results} rests on it; what the limit costs is the guarantee, not the
-measurement. Widening the predicate is not the repair, because a library's own
+\texttt{forRoot} call anywhere, and on those two the guard cannot fire at all. Instrumenting
+the predicate over the whole corpus makes the limit sharper than that: it is asked 698 times
+across the six applications and answers yes on none of them, because it is asked only of the
+dependencies of a lazily loaded module and no application in this corpus names a file holding a
+\texttt{forRoot} call there. Every application is therefore field-identical to the unguarded
+analysis, so no figure in Chapter~\ref{ch:results} rests on the guard --- and equally, no
+application in the corpus is evidence that it works. Its only evidence is the constructed
+fixtures in the oracle's self-check, which is the honest statement of what a guard that never
+fires has been shown to do. Widening the predicate is not the repair, because a library's own
 \texttt{forRoot} is a different thing from the router's; the repair is to resolve each
 registration call's argument and mark that \emph{array}, rather than its file, as the root
 table, which would also close the case where a route table and its registration live in
@@ -513,9 +518,13 @@ than hides. A route prefix does not determine a directory name, so the component
 whose directory is named differently are not attributed to it and are reported only as having no
 node; and a prefix made entirely of parameters has no literal segment, so it is attributed to no
 component at all. An earlier version compared the prefix to the path as a bare substring, which
-read \path{/cluster} into \texttt{resourcelist/clusterrole/component.ts} and replaced the
-extractor's own true note about that file with a tool blind spot that does not cover it. Sixteen
-of the corpus's loss rows matched that way.
+read \path{/cluster} into \texttt{resourcelist/clusterrole/component.ts} and would have replaced
+the extractor's own true note about that file with a tool blind spot that does not cover it.
+Sixteen of the corpus's loss rows satisfied that predicate. None of them reaches the published
+reason table, because every one is answered by an earlier branch of the explanation chain, and
+on this corpus the attribution decides no published row at all: what is recorded here is a
+property of the rule rather than of any figure in Chapter~\ref{ch:results}. The narrower rule
+is still the one to state, because the broader one was false where it was asked.
 
 \section{Transfer to other frameworks}
 \label{sec:transfer}

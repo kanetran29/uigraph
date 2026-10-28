@@ -98,7 +98,9 @@ if (has('--only') && !ONLY) throw new Error('--only needs a comma-separated list
 for (const s of ONLY ?? []) if (!manifest.repos.some((r) => r.slug === s)) throw new Error(`--only names ${s}, which is not an application in corpus.json`)
 const LABEL = arg('--label', 'fin')
 if (!/^\w[\w-]*$/.test(LABEL ?? '')) throw new Error(`--label must be letters, digits, - or _, and not start with -, got ${LABEL}`)
-// Compared without case: on a case-insensitive filesystem a Pre file is the pre file round2-to-latex.mjs reads.
+// Compared without case so no spelling of the label slips through. The refusal is about what the
+// label would MEAN, not about a file anything reads: round2-to-latex.mjs takes the earlier
+// oracle's reading from the repository's tracked results-before/raw and never from this --out.
 if (LABEL.toLowerCase() === 'pre') throw new Error('--label pre is not available here: it would record this harness\'s declared-screen count as the pre-round one. See the --label pre entry in the header of run-all.mjs.')
 const LOCAL_EXTRACTOR = has('--extractor-dir')
 const EXTRACTOR = LOCAL_EXTRACTOR ? path.resolve(arg('--extractor-dir')) : path.join(WORK, 'uigraph')
@@ -334,7 +336,10 @@ for (const r of repos) {
   for (const kind of RAW_KINDS) fs.rmSync(raw(kind), { force: true })
 
   const testC = mapOk ? runTool(r.slug, 'index.mjs', [appPath, path.join(appPath, 'uigraph.db')], raw('C')) : null
-  const testB = mapOk && graph?.edges ? runTool(r.slug, 'witness-check.mjs', [appPath, path.join(appPath, 'uigraph.db')], raw('B')) : null
+  // --routes is what turns on the destination test: without it witness-check reports
+  // destinationsChecked false and NODE_NOT_DECLARED cannot fire, so the driver would publish a
+  // must tier judged by three of the four questions the thesis says are asked of it.
+  const testB = mapOk && graph?.edges ? runTool(r.slug, 'witness-check.mjs', [appPath, path.join(appPath, 'uigraph.db'), '--routes', raw('C')], raw('B')) : null
   const testD = mapOk && r.e2eDir ? runTool(r.slug, 'e2e-oracle.mjs', [path.resolve(repoDir, r.e2eDir), path.join(appPath, 'uigraph.db')], raw('D')) : null
   const testL = mapOk ? runTool(r.slug, 'loss-breakdown.mjs', [appPath, path.join(appPath, 'uigraph.db'), '--routes', raw('C')], raw('L')) : null
   // The reason every unrecovered construct is unrecovered, and the extractor's own notes.
