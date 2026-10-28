@@ -1046,7 +1046,110 @@ import { I } from './i.component'
 export const FEAT: Routes = [{ path: 'inner', component: I }]`,
       '/app/feat/i.component.ts': C('<p>i</p>'),
     })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+    // The note is the whole of what is gained here. The pre-pass cannot claim the target either,
+    // for the same reason, so the root scan still reads the feature table unprefixed and /inner
+    // is minted at an address the application does not mount -- the unclaimed-top-level-`Routes`
+    // over-approximation Chapter 6 declares, which only a readable specifier would close.
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/inner'])
+  })
+
+  it('does not read a computed route key by its spelling', () => {
+    // `{ [path]: 'ghost' }` where `const path = 'redirectTo'` declares a redirect, not an
+    // address. Stripping the brackets off the key's text read it as a route and minted a node
+    // and a must edge at /ghost, which the application never mounts.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { B } from './b.component'
+const path = 'redirectTo'
+export const routes: Routes = [{ path: 'home', component: A }, { [path]: 'ghost', component: B }]`,
+      '/app/a.component.ts': C('<a routerLink="/ghost">z</a>'),
+      '/app/b.component.ts': C('<p>b</p>'),
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(graph.edges.filter((e) => e.modality === 'must')).toEqual([])
+  })
+
+  it('reads a computed route key fixed to a string constant', () => {
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { B } from './b.component'
+const KEY = 'path'
+export const routes: Routes = [{ path: 'home', component: A }, { [KEY]: 'real', component: B }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/b.component.ts': C('<p>b</p>'),
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/real'])
+  })
+
+  it('does not declare a loss for a claimed file whose redirects the graph already registers', () => {
+    // The probe counts a redirect the root scan would register, which it must; counting one the
+    // graph already has at the same address declares a loss where none happened.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'old', redirectTo: '/home' }]`,
+      '/app/a.component.ts': C('<a routerLink="/old">o</a>'),
+      '/app/factory.ts': `import type { Routes } from '@angular/router'
+import { LEGACY } from './legacy'
+export function makeRoutes(): Routes { return [...LEGACY] }`,
+      '/app/legacy.ts': `export const LEGACY = [{ path: 'old', redirectTo: '/home' }]`,
+    })
+    const { soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it.each([
+    ['an empty children array', `export const MENU = [{ path: 'dashboard', children: [] }]`],
+    ['a redirectTo the walk cannot read', `const TARGET = buildTarget()\nexport const MENU = [{ path: 'dashboard', redirectTo: TARGET }]`],
+  ])('declares the claimed table when the spread array places nothing despite %s', (_name, menu) => {
+    // The array has the shape of routes and places nothing, so marking its file placed on shape
+    // hid a real table claimed in the same file.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { MENU } from './feature/shared'
+export const routes: Routes = [{ path: 'home', component: A, children: [...MENU] }, { path: 'feat', loadChildren: () => import('./feature/feature.module').then((m) => m.FeatureModule) }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/feature/shared.ts': `import { G } from './g.component'
+${menu}
+export const SETTINGS = [{ path: 'settings', component: G }]`,
+      '/app/feature/feature.module.ts': `import { FeatureRoutingModule } from './feature-routing.module'
+import { SETTINGS } from './shared'
+export class FeatureModule {}`,
+      '/app/feature/feature-routing.module.ts': `import type { Routes } from '@angular/router'
+import { G } from './g.component'
+export const featureRoutes: Routes = [{ path: 'inner', component: G }]`,
+      '/app/feature/g.component.ts': C('<p>g</p>'),
+    })
     const { soundiness } = extractGraph(project, '/app')
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('does not let a named-outlet route take the primary address from its sibling', () => {
+    // A route on a named outlet is reached as `(aux:path)`, never at the primary address, so it
+    // is no element of S. Minting it let it win the address by being declared first, and the
+    // graph named Side where the application renders Main -- a wrong component, silently.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { Side } from './side.component'
+import { Main } from './main.component'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'detail', children: [{ path: '', component: Side, outlet: 'aux' }, { path: '', component: Main }] }]`,
+      '/app/a.component.ts': C('<a routerLink="/detail">d</a>'),
+      '/app/side.component.ts': `import { Component } from '@angular/core'
+@Component({ standalone: true, template: '<p>side</p>' })
+export class Side {}`,
+      '/app/main.component.ts': `import { Component } from '@angular/core'
+@Component({ standalone: true, template: '<p>main</p>' })
+export class Main {}`,
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => `${n.route}=${n.label}`).sort()).toEqual(['/detail=Main', '/home=A'])
   })
 })

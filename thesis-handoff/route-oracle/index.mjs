@@ -708,11 +708,14 @@ function claimedElsewhere(dep, target) {
  * `forChild` and `provideRouter` as well, so on an application whose root is registered with the
  * standalone API, or through an alias of `RouterModule`, there is no recognisable root table and
  * this guard is inoperative: two of the six evaluated applications, realworld and alfresco, have
- * no `forRoot` call at all. The first limit costs two more. ghostfolio declares its root array in
- * `app/app.routes.ts` and registers it in `main.ts`; k8sdash declares its in `index.routing.ts`
- * and registers it in `index.module.ts`; neither registering file holds a route of its own. So
- * four of the six applications have no file this test can recognise as a root table, and only
- * bitwarden and mifos declare and register in one. And instrumenting it over the whole corpus, it is asked 698 times
+ * no `forRoot` call at all. The first limit costs two more, and in a way worth stating precisely
+ * because it is easy to state wrongly. ghostfolio declares its root array in `app/app.routes.ts`
+ * and registers it in `main.ts`; k8sdash declares its in `index.routing.ts` and registers it in
+ * `index.module.ts`. This test DOES answer true for `main.ts` and for `index.module.ts` -- they
+ * hold the `forRoot` call -- but neither holds a route of its own, so answering true about them
+ * protects nothing: the file a lazy module would adopt is the one holding the ARRAY, and that
+ * file answers false. Four of the six applications therefore have no file whose recognition
+ * would refuse anything, and only bitwarden and mifos declare and register in one file. And instrumenting it over the whole corpus, it is asked 698 times
  * and answers true NONE of them, because it is asked only of a lazy target's dependencies and no
  * corpus application names a file holding a `forRoot` call there. So the mifos reading above is
  * a counterfactual rather than an observation: `reports-routing.module` is adopted, and

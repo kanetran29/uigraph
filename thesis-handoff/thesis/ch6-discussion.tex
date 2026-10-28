@@ -487,13 +487,16 @@ is why the test is sound where it fires. It is also why it does not fire at all 
 application that registers its root with the standalone \texttt{provideRouter} API, or through
 an alias of \texttt{RouterModule}: two of the six applications here have no
 \texttt{forRoot} call anywhere, and on those two the guard cannot fire at all. The first limit
-costs two more: ghostfolio and kubernetes/dashboard each declare their root array in one file
-and register it in another, and the registering file holds no route of its own, so four of the
-six have no file this test can recognise. Instrumenting the predicate over the whole corpus
-makes the limit sharper still: it is asked 698 times
-across the six applications and answers yes on none of them, because it is asked only of the
-dependencies of a lazily loaded module and no application in this corpus names a file holding a
-\texttt{forRoot} call there. Every application is therefore field-identical to the unguarded
+costs two more, and precisely rather than loosely: ghostfolio and kubernetes/dashboard each
+declare their root array in one file and register it in another. The test does recognise the
+registering file --- that is where the call is --- but that file holds no route, and the file a
+lazily loaded module could adopt is the one holding the array, which the test does not
+recognise. So four of the six have no file whose recognition would refuse anything.
+Instrumenting the predicate over the whole corpus makes the limit sharper still: it is asked
+698 times
+across the six applications and answers yes on none of them --- not because no file would
+answer yes, but because it is asked only of the dependencies of a lazily loaded module, and no
+application in this corpus names a file holding a \texttt{forRoot} call there. Every application is therefore field-identical to the unguarded
 analysis, so no figure in Chapter~\ref{ch:results} rests on the guard --- and equally, no
 application in the corpus is evidence that it works. Its only evidence is the constructed
 fixtures in the oracle's self-check, which is the honest statement of what a guard that never
@@ -523,9 +526,10 @@ node; and a prefix made entirely of parameters has no literal segment, so it is 
 component at all. An earlier version compared the prefix to the path as a bare substring, which
 read \path{/cluster} into \texttt{resourcelist/clusterrole/component.ts} and would have replaced
 the extractor's own true note about that file with a tool blind spot that does not cover it.
-Sixteen of the corpus's loss rows satisfied that predicate. None of them reaches the published
-reason table, and the reason is worth stating exactly, because the obvious account of it is
-wrong: it is not that some earlier test answers those rows first. The attribution is asked of
+No count of the rows that satisfied the broader predicate is given, because the figure depends
+on which population it is taken over and nothing in this thesis rests on it. What does matter
+is why the attribution reaches the published reason table in neither form, and the obvious
+account of that is wrong: it is not that some earlier test answers those rows first. The attribution is asked of
 all twenty-four unaccounted rows in the corpus and declines every one of them on its own first
 two conditions --- sixteen because the owning file is not a component, eight because the graph
 already witnesses an edge from that file --- so the comparison this paragraph is about is never

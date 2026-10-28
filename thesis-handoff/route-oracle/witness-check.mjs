@@ -183,9 +183,13 @@ let ok = 0
 // which. Counted and reported rather than judged.
 let outsideApp = 0, outsideAppMust = 0
 
-for (const e of edges) {
+for (const [i, e] of edges.entries()) {
   const w = e.witness || {}
-  const base = { edge: `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}`, event: e.event, ruleId: w.ruleId, at: w.file ? `${w.file}:${w.loc?.line}` : null }
+  // `edgeIndex` is how a finding is matched back to its edge. Matching by the printed endpoints
+  // and the witness line instead left a NO_WITNESS finding -- an edge with no witness file at all
+  // -- unmatchable, so a must edge that carries no witness was counted clean and the must tier
+  // printed "soundness lemma holds" over it. No corpus application has one, so no figure moves.
+  const base = { edgeIndex: i, edge: `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}`, event: e.event, ruleId: w.ruleId, at: w.file ? `${w.file}:${w.loc?.line}` : null }
 
   // Severity order puts this first: an edge whose destination is not an address of this
   // application is wrong however well its witness reads.
@@ -262,7 +266,8 @@ console.log(`CLEAN:   ${ok}/${checked} = ${checked ? ((ok / checked) * 100).toFi
 console.log(`issues:  ${JSON.stringify(tally)}`)
 // The must-tier is what the soundness lemma protects: report it on its own.
 const mustEdges = edges.filter((e) => e.modality === 'must')
-const mustBad = findings.filter((f) => f.verdict !== 'OVER_APPROX' && mustEdges.some((e) => `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}` === f.edge && e.witness && `${e.witness.file}:${e.witness.loc?.line}` === f.at))
+const mustIndexes = new Set(edges.flatMap((e, i) => (e.modality === 'must' ? [i] : [])))
+const mustBad = findings.filter((f) => f.verdict !== 'OVER_APPROX' && mustIndexes.has(f.edgeIndex))
 console.log(`MUST-TIER: ${mustEdges.length - mustBad.length}/${mustEdges.length} clean` + (mustBad.length ? `  <-- ${mustBad.length} SOUNDNESS VIOLATION(S)` : '  (soundness lemma holds on this sample)'))
 console.log(`witness outside the application directory: ${outsideApp} edge(s), ${outsideAppMust} of them must` + (decl ? '' : '  (pass --routes <C.json> to also test destinations)'))
 const order = ['NODE_NOT_DECLARED', 'NO_WITNESS', 'FILE_MISSING', 'LINE_OUT_OF_RANGE', 'NO_CONSTRUCT', 'WRONG_CONSTRUCT', 'TARGET_MISMATCH', 'OFF_BY_N', 'UNKNOWN_RULE', 'OVER_APPROX']

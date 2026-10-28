@@ -596,11 +596,24 @@ mac('RoundTwoFirstRoundTruncated', fre.truncated)
 mac('RoundTwoFirstRoundSynthetic', fre.synthetic)
 mac('RoundTwoFirstRoundOther', fre.total - fre.truncated - fre.synthetic)
 
-// The sites the control run set aside as a secondary-outlet navigation, which the round-two run
-// has none of. Generated because the chapter names the figure and the application, and a count
-// typed from memory was wrong by two.
-const ctrlOutlet = rows.map((r) => ({ s: r.s, n: (r.l0?.rows ?? []).filter((x) => x.cls === 'NAMED_OUTLET').length })).filter((x) => x.n > 0)
+// The sites the control run set aside as a secondary-outlet navigation. Both spellings are
+// accepted because the class was renamed to EXCLUDED_NAMED_OUTLET after the control run was
+// made, and a filter on one of them reads a stale artifact as empty rather than saying so.
+// Generated because the chapter names the figure and the application, and a count typed from
+// memory was wrong by two.
+const OUTLET_CLS = /^(EXCLUDED_)?NAMED_OUTLET$/
+const ctrlOutlet = rows.map((r) => ({ s: r.s, n: (r.l0?.rows ?? []).filter((x) => OUTLET_CLS.test(x.cls)).length })).filter((x) => x.n > 0)
 mac('RoundTwoCtrlOutlet', ctrlOutlet.reduce((a, b) => a + b.n, 0))
+// How many of those sites the round-two run still carries, at the same file and line. It is all
+// of them: the round stopped EXCLUDING them, which is not the same as their going away, and the
+// chapter said the second where the ledger says the first.
+const ctrlOutletStill = rows.reduce((a, r) => {
+  const fin = new Set((r.l1?.rows ?? []).map((x) => x.at))
+  return a + (r.l0?.rows ?? []).filter((x) => OUTLET_CLS.test(x.cls) && fin.has(x.at)).length
+}, 0)
+mac('RoundTwoCtrlOutletStill', ctrlOutletStill)
+// The must tier per application, so a sentence about how far it grew is counted and not rounded.
+for (const r of rows) if (r.b1?.mustEdges) mac(`RoundTwoMustEdges${MACRO_TAG[r.s]}`, r.b1.mustEdges)
 mac('RoundTwoCtrlOutletWhere', ctrlOutlet.map((x) => NAME[x.s]).join(' and ') || 'none')
 const UNPLACED_TEXT = PRETTY['extractor-note:unattributed-non-component']
 mac('RoundTwoUnplacedClass', reasons[UNPLACED_TEXT] ?? 0)

@@ -42,14 +42,20 @@ function constKeyValue(expr: Node): string | null {
   const direct = staticNameValues(expr)
   if (direct.length === 1) return direct[0] ?? null
   if (!Node.isIdentifier(expr)) return null
-  const decl = expr.getSourceFile().getVariableDeclaration(expr.getText())
-  const values = staticNameValues(decl?.getInitializer())
+  // Through the SYMBOL, not by name in the file: a file lookup answers with the module-level
+  // declaration even where a function-scoped one shadows it.
+  const sym = expr.getSymbol()
+  const decl = (sym?.getAliasedSymbol() ?? sym)?.getValueDeclaration()
+  const values = decl && Node.isVariableDeclaration(decl) ? staticNameValues(decl.getInitializer()) : []
   return values.length === 1 ? (values[0] ?? null) : null
 }
 
 /** Whether this object carries a computed key the walk could not read, so what it declares is unknown. */
 export function keyUnreadable(obj: ObjectLiteralExpression): boolean {
   return obj.getProperties().some((p) => {
+    // An accessor or a method is a member no static read of this object can give a value for,
+    // so `get path()` is a path the walk could not read rather than a record without one.
+    if (Node.isGetAccessorDeclaration(p) || Node.isSetAccessorDeclaration(p) || Node.isMethodDeclaration(p)) return true
     if (!Node.isPropertyAssignment(p) && !Node.isShorthandPropertyAssignment(p)) return false
     const key = p.getNameNode()
     return Node.isComputedPropertyName(key) && constKeyValue(key.getExpression()) === null
