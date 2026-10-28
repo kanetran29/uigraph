@@ -168,11 +168,16 @@ export function propNamed(obj: ObjectLiteralExpression, name: string) {
  * never names.
  */
 function constKeyValue(expr: Node): string | null {
+  if (Node.isParenthesizedExpression(expr)) return constKeyValue(expr.getExpression())
   if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return expr.getLiteralValue()
   if (!Node.isIdentifier(expr)) return null
   const sym = expr.getSymbol()
   const decl = (sym?.getAliasedSymbol() ?? sym)?.getValueDeclaration()
   if (!decl || !Node.isVariableDeclaration(decl)) return null
+  // `const` only: a `let` initialised to 'path' and reassigned to 'redirectTo' is not fixed to
+  // its initializer, and reading it as one minted a node and a must edge at an address the
+  // application does not mount.
+  if (decl.getVariableStatement()?.getDeclarationKind() !== 'const') return null
   const init = decl.getInitializer()
   if (!init || (!Node.isStringLiteral(init) && !Node.isNoSubstitutionTemplateLiteral(init))) return null
   return init.getLiteralValue()

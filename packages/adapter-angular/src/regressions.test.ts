@@ -1152,4 +1152,96 @@ export class Main {}`,
     const { graph } = extractGraph(project, '/app')
     expect(graph.nodes.map((n) => `${n.route}=${n.label}`).sort()).toEqual(['/detail=Main', '/home=A'])
   })
+
+  it('does not read a computed key from a binding that is reassigned', () => {
+    // `let K = 'path'; K = 'redirectTo'` is not fixed to its initializer. Reading it as one
+    // minted a node and a must edge at /ghost, which the application does not mount.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { B } from './b.component'
+let K = 'path'
+K = 'redirectTo'
+export const routes: Routes = [{ path: 'home', component: A }, { [K]: 'ghost', component: B }]`,
+      '/app/a.component.ts': C('<a routerLink="/ghost">z</a>'),
+      '/app/b.component.ts': C('<p>b</p>'),
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(graph.edges.filter((e) => e.modality === 'must')).toEqual([])
+  })
+
+  it.each([
+    ['an enum member', `enum E { path = 'path' }`, `[E.path]`],
+    ['an identifier chain', `const BASE = 'path'\nconst K = BASE`, `[K]`],
+    ['a call', `const mk = () => 'path'`, `[mk()]`],
+  ])('declares a record whose key comes from %s', (_name, pre, key) => {
+    // Vue declared these and Angular was silent, because its keyUnreadable was exported and
+    // never called. A key the reader cannot fix to a string may be a path it cannot see.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { B } from './b.component'
+${pre}
+export const routes: Routes = [{ path: 'home', component: A }, { ${key}: 'x', component: B }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/b.component.ts': C('<p>b</p>'),
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('declares a record whose path is given by an accessor', () => {
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { B } from './b.component'
+export const routes: Routes = [{ path: 'home', component: A }, { get path() { return 'x' }, component: B }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/b.component.ts': C('<p>b</p>'),
+    })
+    const { soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('reads a computed key written in parentheses, and says nothing about a benign accessor', () => {
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { B } from './b.component'
+export const routes: Routes = [{ path: 'home', component: A }, { [('path')]: 'x', component: B, get data() { return {} } }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/b.component.ts': C('<p>b</p>'),
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/x'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('does not declare a loss when the spread places an address a sibling already holds', () => {
+    // The walk read shared.ts through the spread and placed /admin/users, which the sibling had
+    // already taken. Measuring placement as growth of the node map saw nothing, so the file was
+    // called unplaced and the route set was declared a lower bound it is not.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { U } from './u.component'
+import { SHARED } from './feature/shared'
+export const routes: Routes = [{ path: 'admin', component: A, children: [{ path: 'users', component: U }, ...SHARED] }, { path: 'feat', loadChildren: () => import('./feature/feature.module').then((m) => m.FeatureModule) }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/u.component.ts': C('<p>u</p>'),
+      '/app/feature/shared.ts': `import { U } from '../u.component'
+export const SHARED = [{ path: 'users', component: U }]`,
+      '/app/feature/feature.module.ts': `import { FeatureRoutingModule } from './feature-routing.module'
+import { SHARED } from './shared'
+export class FeatureModule {}`,
+      '/app/feature/feature-routing.module.ts': `import type { Routes } from '@angular/router'
+import { U } from '../u.component'
+export const featureRoutes: Routes = [{ path: 'inner', component: U }]`,
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin', '/admin/users', '/feat/inner'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
 })

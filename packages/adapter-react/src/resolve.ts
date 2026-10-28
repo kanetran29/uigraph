@@ -341,12 +341,16 @@ export function propNamed(obj: ObjectLiteralExpression, name: string) {
     const key = p.getNameNode()
     if (Node.isStringLiteral(key) || Node.isNoSubstitutionTemplateLiteral(key)) return key.getLiteralValue() === name
     if (!Node.isComputedPropertyName(key)) return false
-    const expr = key.getExpression()
+    let expr = key.getExpression()
+    while (Node.isParenthesizedExpression(expr)) expr = expr.getExpression()
     if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return expr.getLiteralValue() === name
     if (!Node.isIdentifier(expr)) return false
     const sym = expr.getSymbol()
     const decl = (sym?.getAliasedSymbol() ?? sym)?.getValueDeclaration()
     if (!decl || !Node.isVariableDeclaration(decl)) return false
+    // `const` only: a reassigned `let` is not fixed to its initializer, and reading it as one
+    // minted a route at an address the application does not mount.
+    if (decl.getVariableStatement()?.getDeclarationKind() !== 'const') return false
     const init = decl.getInitializer()
     if (!init || (!Node.isStringLiteral(init) && !Node.isNoSubstitutionTemplateLiteral(init))) return false
     return init.getLiteralValue() === name

@@ -102,16 +102,16 @@ throughout --- the opposite of what an earlier draft of this section concluded.
 tail of a route the parser had already declared in full: the extractor had reached the table
 without its parent prefix and minted \path{/premium} where the parser declared
 \path{/settings/subscription/premium}. That is the extractor assembling the path differently,
-not the parser missing a table. The other \RoundTwoFirstRoundSynthetic{} are the extractor's
-own synthetic catch-all, in the five applications that declare one, which is a node by
-construction and not a route
-anyone declared. Which way the group fell matters beyond the bookkeeping, because it is the
+not the parser missing a table. The other \RoundTwoFirstRoundSynthetic{} are the catch-all
+each of those five applications declares, \texttt{path: '**'} with a component, which the
+extractor mints at the path \texttt{*} while the oracle's policy keeps it out of the screen
+set: there the two tools disagree by convention, not over a table either of them missed. Which way the group fell matters beyond the bookkeeping, because it is the
 difference between a measuring instrument that was wrong and a tool that was: the repairs of
 Section~\ref{sec:res-round2} are accordingly almost all in the extractor. The figures above are the first round's and are left standing as the record of
 what that round saw; Section~\ref{sec:res-round2} repeats the comparison with both tools
 corrected, and the corpus is then left with \RoundTwoExtraNodes{} nodes that no declared
-screen matches, of which \RoundTwoExtraNodesWildcard{} sit at the extractor's own synthetic
-catch-all path --- a node by construction, not a route anyone declared. The parser had its own share of the
+screen matches, of which \RoundTwoExtraNodesWildcard{} sit at the path \texttt{*}, where
+the extractor mints the catch-all the application declares and the oracle counts no screen. The parser had its own share of the
 problem, counted in Section~\ref{sec:res-round2}: a route array behind a module it refused to
 follow, a path assembled from a constant it did not resolve, a lazily loaded table walked
 without its parent. It was the smaller share. Reporting the disagreement
@@ -628,18 +628,29 @@ from is not, in which case the edge is anchored at an \texttt{o\_}\,origin node 
 What is left is unexplained. \RoundTwoExcluded{} sites leave the denominator entirely, because
 they carry no commands and so name no destination. A site that navigates a secondary outlet
 would leave it too --- the model admits only the primary outlet --- and the round reported here
-excludes none on that ground. That is not because such sites went away:
-\RoundTwoCtrlOutlet{} of them in \RoundTwoCtrlOutletWhere{} were set aside by the control run,
-and \RoundTwoCtrlOutletStill{} of those are still in the source at the same lines. They are
-inside the denominator now, accounted under other classes, because the round-two extractor
-could place the screen each of them fires from once its route subtree became readable. The
-denominator is larger for it, which is the direction that costs a percentage rather than
-flattering one. The restriction is enforced on the route side as well: a route that declares a
-named \texttt{outlet} is reached as \texttt{(name:path)} and never at the primary address, so it
-contributes no screen. Before that was enforced, such a route could take the primary address
-from the sibling that really renders there, by being declared first, and the graph named the
-wrong component at a real address without saying so. No application in this corpus declares a
-component-bearing named-outlet route, so no figure in this chapter moves with it.
+excludes none on that ground. Not because such sites went away: the control run's ledger
+classified \RoundTwoCtrlOutlet{} of them in \RoundTwoCtrlOutletWhere{} as navigations to a
+named outlet, and \RoundTwoCtrlOutletStill{} are still in the source at the same lines, now
+accounted under other classes because the round-two extractor can place the screen each of them
+fires from. No comparison of denominators is drawn from that, because the control ledger has no
+denominator to compare: it records constructs and losses and has no notion of exclusion at all,
+which the round-two ledger is the first to carry.
+
+The restriction is enforced on the route side as well. A route that declares a named
+\texttt{outlet} is reached as \texttt{(name:path)} and never at the primary address, so it
+contributes no screen; before that was enforced it could take the primary address from the
+sibling that really renders there, by being declared first, and the graph named the wrong
+component at a real address without saying so. bitwarden declares such routes --- a login screen
+and a registration screen each pair a primary component with a second one on a named outlet at
+the same empty path --- so the repair is not hypothetical, though it moves no count there
+because the primary sibling already held the address. What it does not reach is a named outlet
+with a \emph{subtree}: alfresco mounts its viewer as \texttt{\{ outlet: 'viewer', children: [\ldots] \}},
+and the routes beneath it are still minted at the primary address, \path{/view/:nodeId} and
+\path{/search-libraries/view/:nodeId}, which Angular reaches only as \texttt{(viewer:\ldots)}.
+Two of alfresco's route entries are therefore addresses the application does not mount at the
+primary outlet. Both tools read the subtree the same way, so the coverage figure does not expose
+it, which is the independence problem of Section~\ref{sec:protocol} in miniature:
+Chapter~\ref{ch:discussion} records it as an open over-approximation rather than a measured one.
 
 \begin{table}[t]\small
 \caption{Construct accounting after the loss list was worked. Percentages are of the

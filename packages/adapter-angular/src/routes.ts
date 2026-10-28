@@ -11,7 +11,7 @@ import { routeToNodeId } from './ids'
 /** Specs, stories and test doubles: they declare routes that are not the application's. */
 const SPEC_FILE = /\.(spec|test|stories|cy)\.[tj]s$/
 import { analyzeCanActivate, type GuardInfo } from './guards'
-import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, propNamed } from './resolve'
+import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, propNamed, keyUnreadable } from './resolve'
 
 export interface RouteInfo {
   fullPath: string
@@ -276,11 +276,12 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
  * until the stack ran out, which is a crash and not a reading. Reaching one again ends that
  * branch, and where a route object stands for the hop the lost subtree is declared.
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, consumedFiles?: Set<string>, chain: Set<ArrayLiteralExpression> = new Set()): void {
-  if (chain.has(arr)) return
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, consumedFiles?: Set<string>, chain: Set<ArrayLiteralExpression> = new Set()): number {
+  if (chain.has(arr)) return 0
   chain.add(arr)
-  walkElements(arr, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
+  const placed = walkElements(arr, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
   chain.delete(arr)
+  return placed
 }
 
 /**
@@ -289,11 +290,12 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
  * descent and nothing else: one kept across siblings is a visited set, which refuses the same
  * table under a second parent and cost one corpus application a third of its routes.
  */
-function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[], parentNodeId: string | null, redirects: Map<string, string> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>): void {
+function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[], parentNodeId: string | null, redirects: Map<string, string> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>): number {
+  let placed = 0
   for (const el of arr.getElements()) {
     if (Node.isCallExpression(el)) {
       for (const arg of el.getArguments()) {
-        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
+        if (Node.isArrayLiteralExpression(arg)) placed += walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
       }
       continue
     }
@@ -303,13 +305,13 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     if (Node.isSpreadElement(el)) {
       const arr = arrayLiteralOf(el.getExpression())
       if (arr && Node.isArrayLiteralExpression(arr)) {
-        // Marked placed on what this descent actually PLACED, not on the array's shape: an array
-        // of the right shape that places nothing (`children: []`, an unreadable `redirectTo`)
-        // would otherwise mark its file placed, and a real table claimed in the same file would
-        // lose its declaration.
-        const before = out.size + (redirects?.size ?? 0)
-        walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
-        if (out.size + (redirects?.size ?? 0) > before) consumedFiles?.add(arr.getSourceFile().getFilePath())
+        // Marked placed on the number of placements this descent MADE, not on the array's shape
+        // and not on the growth of the maps: shape marks a file placed that places nothing, and a
+        // placement that re-sets an address a sibling already holds grows no map, so measuring
+        // growth declared a loss where the walk had read the file through.
+        const n = walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
+        placed += n
+        if (n > 0) consumedFiles?.add(arr.getSourceFile().getFilePath())
       }
       continue
     }
@@ -328,7 +330,9 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       // evaluated and never minted into a screen — running the matcher is out of reach and
       // guessing its address would claim a destination nothing proves. Angular rejects a route
       // that carries both, so one test counts each hole exactly once.
-      const declaresAddress = propNamed(obj, 'path') !== undefined || propNamed(obj, 'matcher') !== undefined
+      // A record whose key or member the reader could not resolve may declare an address it
+      // cannot see, so it counts as a path it could not read rather than as no route at all.
+      const declaresAddress = propNamed(obj, 'path') !== undefined || propNamed(obj, 'matcher') !== undefined || keyUnreadable(obj)
       if (declaresAddress && unreadable) unreadable.paths.add(obj)
       continue
     }
@@ -347,7 +351,10 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // A redirect renders nothing, so it is no screen — but a link that points AT it does
     // reach the screen it forwards to, and dropping it loses that transition entirely.
     const redirectTo = stringProp(obj, 'redirectTo')
-    if (redirectTo !== null && redirects) redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
+    if (redirectTo !== null && redirects) {
+      placed++
+      redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
+    }
     // A route on a named outlet is reached as `(name:path)` and never at the primary address, so
     // it is no element of S -- Section 3's model admits the primary outlet alone. Minting it here
     // let it take the primary address from the sibling that really renders there, first-declared
@@ -355,6 +362,11 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     const auxOutlet = (() => { const o = stringProp(obj, 'outlet'); return o !== null && o !== 'primary' })()
     const isScreen = !auxOutlet && (propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined)
     const nodeId = routeToNodeId(fullPath)
+    // Counted whether or not the address is free: the walk read a route and reached an address,
+    // and first-declared-wins is a choice between two routes, not a route the walk failed to
+    // place. Counting only the winner told the caller this file had been read through only when
+    // its routes happened to be new.
+    if (isScreen) placed++
     if (isScreen && !out.has(nodeId)) {
       out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
     }
@@ -362,7 +374,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     const childrenProp = propNamed(obj, 'children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
-      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
+      if (childInit && Node.isArrayLiteralExpression(childInit)) placed += walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
     }
     const childSpec = lazyImportSpecifier(obj, 'loadChildren')
     // A `loadChildren` whose specifier is not a literal (a template over a variable, say) yields
@@ -384,13 +396,14 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
           // A lazy hop back onto a table already on this descent would mount it under its own
           // prefix for ever; the subtree is declared unread rather than followed or dropped.
           if (chain.has(childArr)) unreadable?.subtrees.add(obj)
-          else walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
+          else placed += walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
         }
       } else if (unreadable) {
         unreadable.subtrees.add(obj)
       }
     }
   }
+  return placed
 }
 
 /**

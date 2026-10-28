@@ -4,7 +4,7 @@
 // bodies. Shared by router-link, router.push and control-handler analysis.
 
 import { Node, SyntaxKind } from 'ts-morph'
-import type { ObjectLiteralExpression, Project, PropertyAssignment, ShorthandPropertyAssignment, SourceFile } from 'ts-morph'
+import type { ObjectLiteralExpression, Project, PropertyAssignment, ShorthandPropertyAssignment, SourceFile, VariableDeclaration } from 'ts-morph'
 import type { TargetInfo } from './types'
 import type { VueComponent } from './extract'
 
@@ -46,16 +46,24 @@ function constKeyValue(expr: Node): string | null {
   // declaration even where a function-scoped one shadows it.
   const sym = expr.getSymbol()
   const decl = (sym?.getAliasedSymbol() ?? sym)?.getValueDeclaration()
-  const values = decl && Node.isVariableDeclaration(decl) ? staticNameValues(decl.getInitializer()) : []
+  // `const` only: a reassigned `let` is not fixed to its initializer, and reading it as one
+  // minted a route at an address the application does not mount.
+  const isConst = decl && Node.isVariableDeclaration(decl) && decl.getVariableStatement()?.getDeclarationKind() === 'const'
+  const values = isConst ? staticNameValues((decl as VariableDeclaration).getInitializer()) : []
   return values.length === 1 ? (values[0] ?? null) : null
 }
+
+/** The route-record members `collectRoutes` reads; a member it never reads cannot hide anything from it. */
+const READ_MEMBERS = new Set(['path', 'component', 'children', 'redirect', 'name', 'beforeEnter'])
 
 /** Whether this object carries a computed key the walk could not read, so what it declares is unknown. */
 export function keyUnreadable(obj: ObjectLiteralExpression): boolean {
   return obj.getProperties().some((p) => {
     // An accessor or a method is a member no static read of this object can give a value for,
-    // so `get path()` is a path the walk could not read rather than a record without one.
-    if (Node.isGetAccessorDeclaration(p) || Node.isSetAccessorDeclaration(p) || Node.isMethodDeclaration(p)) return true
+    // so `get path()` is a path the walk could not read rather than a record without one. Only
+    // for a member the collector reads, though: `get meta()` or `props(route) {}` hides nothing
+    // it wanted, and declaring a blind spot there is a loss that did not happen.
+    if (Node.isGetAccessorDeclaration(p) || Node.isSetAccessorDeclaration(p) || Node.isMethodDeclaration(p)) return READ_MEMBERS.has(p.getName())
     if (!Node.isPropertyAssignment(p) && !Node.isShorthandPropertyAssignment(p)) return false
     const key = p.getNameNode()
     return Node.isComputedPropertyName(key) && constKeyValue(key.getExpression()) === null
