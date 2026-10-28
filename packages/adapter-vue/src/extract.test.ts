@@ -382,6 +382,47 @@ export const router = createRouter({ history: createWebHistory(), routes: [share
     expect(graph.nodes.map((n) => n.id).sort()).toEqual(['n_a', 'n_b'])
     expect(details(soundiness, 'unresolved-target')).toEqual([])
   })
+
+  it('reads a computed route key fixed to a string constant', () => {
+    const { graph, soundiness } = build({
+      '/src/router.ts': `import { createRouter } from 'vue-router'
+import A from './A.vue'
+import B from './B.vue'
+const KEY = 'path'
+createRouter({ routes: [{ [KEY]: '/a', component: A }, { path: '/b', component: B }] })`,
+      '/src/A.vue': page(),
+      '/src/B.vue': page('<router-link to="/a">a</router-link>'),
+    })
+    expect(graph.nodes.map((n) => n.id).sort()).toEqual(['n_a', 'n_b'])
+    expect(details(soundiness, 'unresolved-target')).toEqual([])
+  })
+
+  it('does not read a computed key by its spelling', () => {
+    // `{ [path]: '/alpha' }` where `const path = 'name'` declares a route NAME. Matching the key
+    // by how it is spelled minted a screen at /alpha, an address the application never mounts.
+    const { graph } = build({
+      '/src/router.ts': `import { createRouter } from 'vue-router'
+import A from './A.vue'
+import B from './B.vue'
+const path = 'name'
+createRouter({ routes: [{ [path]: '/alpha', component: A }, { path: '/beta', component: B }] })`,
+      '/src/A.vue': page(),
+      '/src/B.vue': page(),
+    })
+    expect(graph.nodes.map((n) => n.id)).toEqual(['n_beta'])
+  })
+
+  it('declares a record whose computed key it cannot read', () => {
+    const { soundiness } = build({
+      '/src/router.ts': `import { createRouter } from 'vue-router'
+import A from './A.vue'
+import B from './B.vue'
+createRouter({ routes: [{ [keyOf(A)]: '/a', component: A }, { path: '/b', component: B }] })`,
+      '/src/A.vue': page(),
+      '/src/B.vue': page(),
+    })
+    expect(details(soundiness, 'unresolved-route').filter((d) => /computed key/.test(d))).toHaveLength(1)
+  })
 })
 
 describe('runtime-registered route arrays (F-vue-adapter, addRoutes)', () => {

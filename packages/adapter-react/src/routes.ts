@@ -8,7 +8,7 @@ import type { ArrayLiteralExpression, ObjectLiteralExpression, Project, SourceFi
 import type { SoundinessNote } from '@ui-graph/core'
 import type { RouteInfo } from './types'
 import { allJsxElements, findAttr, inlineElementTag, inlineExprInfo, isJsxEl, jsxRootsOf, jsxTag, stringAttr } from './jsx'
-import { callSiteComponentFile, dynamicImportTarget, fnParams, isRouteWrapperComponent, resolveComponentFile, resolveExportedComponent, resolveLazyComponentFile, usesChildrenProp } from './resolve'
+import { propNamed, callSiteComponentFile, dynamicImportTarget, fnParams, isRouteWrapperComponent, resolveComponentFile, resolveExportedComponent, resolveLazyComponentFile, usesChildrenProp } from './resolve'
 import { constInitializer } from './targets'
 import { routeToNodeId } from './ids'
 
@@ -277,7 +277,7 @@ export function collectDataRoutes(project: Project): RouteCollection {
 
   /** The initializer of an object literal's named property assignment, or undefined. */
   const propInit = (obj: ObjectLiteralExpression, name: string): Node | undefined => {
-    const p = obj.getProperty(name)
+    const p = propNamed(obj, name)
     return p !== undefined && Node.isPropertyAssignment(p) ? p.getInitializer() : undefined
   }
 
@@ -348,7 +348,7 @@ export function collectDataRoutes(project: Project): RouteCollection {
 
   /** Walk one route object: children first (so an index child claims a layout parent's path), then the route's own node. */
   const walkRouteObject = (sf: SourceFile, obj: ObjectLiteralExpression, ancestors: string[]): void => {
-    const pathProp = obj.getProperty('path')
+    const pathProp = propNamed(obj, 'path')
     let ownPath: string | null = null
     if (pathProp !== undefined) {
       const init = Node.isPropertyAssignment(pathProp) ? pathProp.getInitializer() : undefined

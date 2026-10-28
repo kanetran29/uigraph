@@ -27,8 +27,8 @@ measurements can be repeated on exactly the same code.
 \caption{The corpus. Routes are the route entries reached by the independent route
 parser of Section~\ref{sec:protocol}, as it stands after the corrections of
 Section~\ref{sec:res-round2}. A count marked $\geq$ is a lower bound: the parser records a
-blind spot for that application, so the entries behind it are not in the figure, and which
-blind spots those are is given per application in Table~\ref{tab:round2nodes}. An earlier
+blind spot for that application, so the entries behind it are not in the figure, and
+Table~\ref{tab:round2nodes} gives how many such blind spots each application has. An earlier
 version of this table gave kubernetes/dashboard as a lower bound of 42 because the parser could
 not then follow its lazily loaded modules; it now reaches them, and the marks that remain are
 ghostfolio's custom \texttt{UrlMatcher} route and bitwarden's two unreadable lazy subtrees.}
@@ -175,9 +175,11 @@ declares. The second half of that test was added late and is the reason it is st
 here in two parts: asking only whether the witness agrees with the edge's destination
 takes the destination for granted, so a node minted at an address the application never
 mounts passes every question the check asks. One application's lazily loaded reports
-module was read at the project root for exactly that reason, and nine must edges pointed
-at the resulting address while the check reported the tier clean
-(Section~\ref{sec:corrections}). RQ3 is answered positively only if coverage rises and
+module was read at the project root for exactly that reason, so the graph held
+\path{/:filter} where the application mounts \path{/reports/:filter}, and edges pointed at
+that address while the check reported the tier clean (Section~\ref{sec:corrections}). No count
+of those edges is given, because the defect is repaired and the graph that carried it no longer
+exists, so the figure cannot be re-measured against anything. RQ3 is answered positively only if coverage rises and
 must-tier precision does not fall.
 
 \textbf{Node-level recall.} The fraction of distinct URLs visited by an application's

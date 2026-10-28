@@ -10,22 +10,53 @@ import type { VueComponent } from './extract'
 
 const MAX_DEPTH = 3
 
-/** Read a string-literal property value from a route object literal, or null. */
 /**
- * The property of `obj` called `name`, whether the key is written bare, quoted or as a constant
- * computed key. `getProperty` compares against `getName()`, which keeps a quoted key's quotes and
- * a computed key's brackets, so it answers undefined for `{ "path": '/a' }` -- a table written
- * that way was read as holding no routes at all, and the whole of it vanished with no note. The
- * Angular adapter met the same ts-morph behaviour and reads the key off its name node
- * (`resolve.ts`); this is the Vue side of it.
+ * The property of `obj` called `name`, whether the key is written bare, quoted or as a computed
+ * key that resolves to a string constant. `getProperty` compares against `getName()`, which keeps
+ * a quoted key's quotes and a computed key's brackets, so it answers undefined for
+ * `{ "path": '/a' }` -- a table written that way was read as holding no routes at all, and the
+ * whole of it vanished with no note.
+ *
+ * A computed key is compared by the VALUE its expression resolves to and never by how that
+ * expression is spelled. The spelling test matched `{ [path]: '/alpha' }` where `const path =
+ * 'name'`, so a record that declares a route NAME was read as declaring the ADDRESS /alpha and
+ * a node was minted there; and it missed `{ [KEY]: '/a' }` where `const KEY = 'path'`, which is
+ * the only computed form that should match. An unresolvable computed key matches nothing, which
+ * is why `keyUnreadable` exists beside this: a record whose key the walk cannot read is a hole
+ * to declare, not a record to guess at.
  */
 export function propNamed(obj: ObjectLiteralExpression, name: string): PropertyAssignment | ShorthandPropertyAssignment | undefined {
   const bare = obj.getProperty(name)
   if (bare && (Node.isPropertyAssignment(bare) || Node.isShorthandPropertyAssignment(bare))) return bare
-  return obj.getProperties().find((p): p is PropertyAssignment | ShorthandPropertyAssignment =>
-    (Node.isPropertyAssignment(p) || Node.isShorthandPropertyAssignment(p)) && p.getName().replace(/^\[|\]$/g, '').replace(/^['"`]|['"`]$/g, '') === name)
+  return obj.getProperties().find((p): p is PropertyAssignment | ShorthandPropertyAssignment => {
+    if (!Node.isPropertyAssignment(p) && !Node.isShorthandPropertyAssignment(p)) return false
+    const key = p.getNameNode()
+    if (Node.isStringLiteral(key) || Node.isNoSubstitutionTemplateLiteral(key)) return key.getLiteralValue() === name
+    if (Node.isComputedPropertyName(key)) return constKeyValue(key.getExpression()) === name
+    return key.getText() === name
+  })
 }
 
+/** The string a computed key's expression is fixed to, following one identifier to its initializer, or null. */
+function constKeyValue(expr: Node): string | null {
+  const direct = staticNameValues(expr)
+  if (direct.length === 1) return direct[0] ?? null
+  if (!Node.isIdentifier(expr)) return null
+  const decl = expr.getSourceFile().getVariableDeclaration(expr.getText())
+  const values = staticNameValues(decl?.getInitializer())
+  return values.length === 1 ? (values[0] ?? null) : null
+}
+
+/** Whether this object carries a computed key the walk could not read, so what it declares is unknown. */
+export function keyUnreadable(obj: ObjectLiteralExpression): boolean {
+  return obj.getProperties().some((p) => {
+    if (!Node.isPropertyAssignment(p) && !Node.isShorthandPropertyAssignment(p)) return false
+    const key = p.getNameNode()
+    return Node.isComputedPropertyName(key) && constKeyValue(key.getExpression()) === null
+  })
+}
+
+/** Read a string-literal property value from a route object literal, or null. */
 export function stringProp(obj: ObjectLiteralExpression, name: string): string | null {
   const prop = propNamed(obj, name)
   if (!prop || !Node.isPropertyAssignment(prop)) return null

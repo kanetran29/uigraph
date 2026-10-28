@@ -88,23 +88,32 @@ one in realworld, two in alfresco, six in bitwarden and two in mifos. The cleare
 component. These nodes make $\mathit{screen}(r)$ answerable for a route the model treats
 as a path prefix only.
 
-The remaining 143 are the substantial group and have no declared route of any kind at the
-node's path. They are concentrated in mifos, which has 117 of them against a single parser
+The remaining \RoundTwoFirstRoundExtra{} are the substantial group and have no declared route
+of any kind at the node's path. They are concentrated in mifos, which has 117 of them against a single parser
 blind spot, and in bitwarden, which has 23. Either the extractor emits nodes for paths it
 assembles differently from the parser, or the parser misses route tables it does not report
 as blind spots. The two methods disagree here without either being able to adjudicate, and
 at the close of the first round it was the largest single piece of unexplained behaviour
 the evaluation had found, sitting underneath every figure that counts nodes.
 
-The second round resolved it, and the answer was the second of the two explanations
-throughout. The figures above are the first round's and are left standing as the record of
+The second round resolved it, and the answer was the FIRST of the two explanations almost
+throughout --- the opposite of what an earlier draft of this section concluded.
+\RoundTwoFirstRoundTruncated{} of the \RoundTwoFirstRoundExtra{} sit at an address that is the
+tail of a route the parser had already declared in full: the extractor had reached the table
+without its parent prefix and minted \path{/premium} where the parser declared
+\path{/settings/subscription/premium}. That is the extractor assembling the path differently,
+not the parser missing a table. The other \RoundTwoFirstRoundSynthetic{} are the extractor's
+own synthetic catch-all, one per application, which is a node by construction and not a route
+anyone declared. Which way the group fell matters beyond the bookkeeping, because it is the
+difference between a measuring instrument that was wrong and a tool that was: the repairs of
+Section~\ref{sec:res-round2} are accordingly almost all in the extractor. The figures above are the first round's and are left standing as the record of
 what that round saw; Section~\ref{sec:res-round2} repeats the comparison with both tools
 corrected, and the corpus is then left with \RoundTwoExtraNodes{} nodes that no declared
 screen matches, of which \RoundTwoExtraNodesWildcard{} sit at the extractor's own synthetic
-catch-all path --- a node by construction, not a route anyone declared. Almost all of the 143 were the
-parser reaching a route table at the wrong prefix or not reaching it at all: a route array
-behind a module the parser refused to follow, a path assembled from a constant it did not
-resolve, a lazily loaded table walked without its parent. Reporting the disagreement
+catch-all path --- a node by construction, not a route anyone declared. The parser had its own share of the
+problem, counted in Section~\ref{sec:res-round2}: a route array behind a module it refused to
+follow, a path assembled from a constant it did not resolve, a lazily loaded table walked
+without its parent. It was the smaller share. Reporting the disagreement
 rather than attributing it was the right call at the time, and working it is what produced
 most of Section~\ref{sec:res-round2}.
 
@@ -460,8 +469,11 @@ denominator that shrinks is a coverage figure that rises for no reason the extra
 
 \subsection{What the losses were}
 
-Every class resolved to a construct the extractor could read and did not, and none of the
-six applications turned out to express its routes in a way static analysis cannot follow.
+Every class but one resolved to a construct the extractor could read and did not. The exception
+is ghostfolio's custom \texttt{UrlMatcher}, which computes a route's path in a function and
+which no reader of a route table can resolve; it is the one place in the corpus where an
+application expresses a route in a way static analysis cannot follow, and both tools report it
+as a blind spot rather than as a route.
 The causes fall into three groups.
 
 \emph{The route table was not reached.} An NgModule loaded by \texttt{loadChildren} keeps
@@ -615,8 +627,9 @@ from is not, in which case the edge is anchored at an \texttt{o\_}\,origin node 
 What is left is unexplained. \RoundTwoExcluded{} sites leave the denominator entirely, because
 they carry no commands and so name no destination. A site that navigates a secondary outlet
 would leave it too --- the model admits only the primary outlet --- and in the round reported
-here there are none left to exclude: the five in alfresco were sites whose own screen the
-extractor could not place until its route subtree became readable.
+here there are none left to exclude: the \RoundTwoCtrlOutlet{} in
+\RoundTwoCtrlOutletWhere{} were sites whose own screen the extractor could not place until its
+route subtree became readable.
 
 \begin{table}[t]\small
 \caption{Construct accounting after the loss list was worked. Percentages are of the
@@ -665,8 +678,9 @@ a coverage table. \RoundTwoMustInTs{} of the \RoundTwoMustViolations{} sit in a 
 \RoundTwoMustInTemplate{} in a template: \RoundTwoMustMismatch{} are a target mismatch and
 \RoundTwoMustOffBy{} a witness two lines from its construct. The \RoundTwoMustMismatch{}
 mismatches are reported by the target each witness resolved to, which is what the check
-records: \RoundTwoMustRelUp{} resolve to a path still beginning with \texttt{..} ---
-\texttt{['../']}, \texttt{['../centers']}, \texttt{['../actions', \ldots]} ---
+records: \RoundTwoMustRelUp{} resolve to a path still beginning with \texttt{..}, written at six
+sites in four shapes --- \texttt{['../']} ten times, \texttt{['../actions/Sell Loan']} and
+\texttt{['../../general']} three each, \texttt{['../centers']} once ---
 \RoundTwoMustRelBare{} to a single bare segment (\texttt{['adjustment']}), which Angular also
 reads relative to the current route, and \RoundTwoMustRelRoot{} to the application root. In
 each the check resolves the relative path against a different base than the extractor does,

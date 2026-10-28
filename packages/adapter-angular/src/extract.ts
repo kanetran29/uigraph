@@ -166,8 +166,11 @@ function describeUnreadable(u: UnreadableRoutes): string | null {
  * `wildcardScreen` below is looked up by the full path `*`. `joinRoutePath` folds `**`, `*` and
  * `/*` into `*` only at the ROOT; inside a feature module the same segment becomes
  * `<parent>/*`, because it catches only that module's unmatched URLs. So the one route whose
- * full path is `*` is the application's own catch-all and the lookup cannot pick up a feature
- * module's. A catch-all that only redirects is no screen and is absent from this list; it lives
+ * full path is `*` is the application's own catch-all WHENEVER every table was walked under its
+ * prefix. A feature table the walk could not reach, and that the root scan therefore read at
+ * `/`, puts its own `**` here instead: that is the project-root reading Chapter 5 reports, and
+ * it is why the catch-all census is caveated for an application whose route set is a lower
+ * bound rather than trusted outright. A catch-all that only redirects is no screen and is absent from this list; it lives
  * in `redirects` instead, under the same full path.
  */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {

@@ -948,4 +948,105 @@ export const SETTINGS_ROUTES: Routes = [{ path: 'settings', component: F }]`,
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/settings'])
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
   })
+
+  it('claims a spread array that carries only a redirect, so the redirect is not registered at the root', () => {
+    // A redirect-only route mints no node and still PLACES a redirect. Refusing the claim gave
+    // the file back to the root scan, which registered /settings -> /account at the root, and a
+    // stale link to /settings then resolved through it into a must edge the source does not have.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { Admin } from './admin.component'
+import { Account } from './account.component'
+import { LEGACY } from './legacy'
+export const routes: Routes = [{ path: 'admin', component: Admin, children: [...LEGACY] }, { path: 'account', component: Account }]`,
+      '/app/legacy.ts': `export const LEGACY = [{ path: 'settings', redirectTo: '/account' }]`,
+      '/app/admin.component.ts': C('<a routerLink="/settings">s</a>'),
+      '/app/account.component.ts': C('<p>acct</p>'),
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/account', '/admin'])
+    expect(graph.edges.filter((e) => e.modality === 'must')).toEqual([])
+  })
+
+  it('does not mark a file placed because the walk entered a spread of an array that places nothing', () => {
+    // shared.ts holds a menu and a real table. The menu spread let the walk mark the FILE placed,
+    // so the table claimed in it lost its declaration while still missing from the route set.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { MENU } from './feature/shared'
+export const routes: Routes = [{ path: 'home', component: A, children: [...MENU] }, { path: 'feat', loadChildren: () => import('./feature/feature.module').then((m) => m.FeatureModule) }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/feature/shared.ts': `import { G } from './g.component'
+export const MENU = [{ path: 'dashboard', label: 'D' }]
+export const SETTINGS = [{ path: 'settings', component: G }]`,
+      '/app/feature/feature.module.ts': `import { SETTINGS } from './shared'
+import { FeatureRoutingModule } from './feature-routing.module'
+export class FeatureModule {}`,
+      '/app/feature/feature-routing.module.ts': `import type { Routes } from '@angular/router'
+import { G } from './g.component'
+export const featureRoutes: Routes = [{ path: 'inner', component: G }]`,
+      '/app/feature/g.component.ts': C('<p>g</p>'),
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/feat/inner', '/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('reads a route whose keys are quoted, so the link into it is not published as dead', () => {
+    // ts-morph's getProperty compares against getName(), which keeps a quoted key's quotes, so
+    // the route was neither minted nor counted unreadable and the route set claimed a
+    // completeness it did not have.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { Q } from './q.component'
+export const routes: Routes = [{ path: 'home', component: A }, { "path": 'quoted', "component": Q }]`,
+      '/app/a.component.ts': C('<a routerLink="/quoted">q</a>'),
+      '/app/q.component.ts': C('<p>q</p>'),
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/quoted'])
+    expect(graph.edges.map((e) => `${e.from}->${e.to}:${e.modality}`)).toContain('n_home->n_quoted:must')
+  })
+
+  it('declares a claimed file of redirects the walk never placed', () => {
+    // The probe compares node ids, and a redirect mints none, so a table of redirects that the
+    // claim took out of the root scan and no walk placed would be lost without a word.
+    const project = inMemory({
+      '/app/app.module.ts': `import { RouterModule } from '@angular/router'
+import { A } from './a.component'
+@NgModule({ imports: [RouterModule.forRoot([{ path: 'home', component: A }])] })
+export class AppModule {}`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/factory.ts': `import type { Routes } from '@angular/router'
+export function makeRoutes(): Routes {
+  return [{ path: 'x', loadChildren: () => import('./legacy.routes').then((m) => m.LEGACY) }]
+}`,
+      '/app/legacy.routes.ts': `import type { Routes } from '@angular/router'
+export const LEGACY: Routes = [{ path: 'old', redirectTo: '/home' }]`,
+    })
+    const { soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('declares the subtree when a loadChildren specifier is not a literal', () => {
+    // A template specifier yields neither a module nor an identifier target, so the branch that
+    // declares an unreadable subtree was skipped and the whole feature left the route set in
+    // silence -- including its own catch-all, which the root scan then reads as the
+    // application's.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+const which = 'feat'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'feat', loadChildren: () => import('./' + which + '/feat.routes').then((m) => m.FEAT) }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/feat/feat.routes.ts': `import type { Routes } from '@angular/router'
+import { I } from './i.component'
+export const FEAT: Routes = [{ path: 'inner', component: I }]`,
+      '/app/feat/i.component.ts': C('<p>i</p>'),
+    })
+    const { soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
 })
