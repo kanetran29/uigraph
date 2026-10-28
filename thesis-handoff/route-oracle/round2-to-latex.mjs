@@ -605,8 +605,11 @@ const OUTLET_CLS = /^(EXCLUDED_)?NAMED_OUTLET$/
 const ctrlOutlet = rows.map((r) => ({ s: r.s, n: (r.l0?.rows ?? []).filter((x) => OUTLET_CLS.test(x.cls)).length })).filter((x) => x.n > 0)
 mac('RoundTwoCtrlOutlet', ctrlOutlet.reduce((a, b) => a + b.n, 0))
 // How many of those sites the round-two run still carries, at the same file and line. It is all
-// of them: the round stopped EXCLUDING them, which is not the same as their going away, and the
-// chapter said the second where the ledger says the first.
+// of them. The control ledger has no notion of exclusion at all -- its keys are appDir,
+// constructs, lost, tally and rows -- so it counted these sites LOST under a class of its own,
+// and the round-two ledger, the first to carry an exclusion concept, excludes none of them and
+// accounts them under other classes. No comparison of denominators follows from that, because
+// the control run has no denominator to compare.
 const ctrlOutletStill = rows.reduce((a, r) => {
   const fin = new Set((r.l1?.rows ?? []).map((x) => x.at))
   return a + (r.l0?.rows ?? []).filter((x) => OUTLET_CLS.test(x.cls) && fin.has(x.at)).length

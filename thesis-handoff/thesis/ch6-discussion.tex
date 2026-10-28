@@ -515,6 +515,20 @@ application mounts the table there. That makes it a further instance of the uncl
 top-level-\texttt{Routes} over-approximation declared above, and it occurs nowhere in this
 corpus.
 
+A sixth is the named outlet, and it is the one open case where the analysis is known to hold an
+address the application does not mount. A route carrying \texttt{outlet: 'name'} is reached as
+\texttt{(name:path)}, so it contributes no screen, and the extractor refuses it. It refuses only
+the route that carries the property, though: where the named outlet opens a \texttt{children}
+subtree, the routes beneath it are still assembled against the primary path and minted there.
+alfresco mounts its document viewer that way, so two of its route entries,
+\path{/view/:nodeId} and \path{/search-libraries/view/:nodeId}, name addresses reachable in that
+application only through the viewer outlet. The independent route parser reads the subtree the
+same way, so coverage is 100\,\% over a set that holds both, and no number in
+Chapter~\ref{ch:results} shows the gap --- which is exactly the limit of agreement between two
+tools that share a reading. Closing it means carrying an outlet context down the walk in both
+tools and would move alfresco's declared count; it is left open, declared here, rather than
+repaired in a round whose figures are already reported.
+
 One attribution of a blind spot to the component it hides is a filename heuristic and is
 labelled as one. Where a route prefix the analysis could not follow has literal segments, a
 component whose path carries all of them as whole directory names is reported as hidden behind

@@ -436,6 +436,22 @@ export const router = createBrowserRouter([{ [K]: '/a', element: <A/> }])`,
     expect(graph.nodes.map((n) => n.route)).toEqual(['/a'])
   })
 
+  it('does not read a computed key from a binding that is reassigned', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/routes.tsx': `import A from './A'
+import B from './B'
+let K = 'path'
+K = 'id'
+export const router = createBrowserRouter([{ path: '/b', element: <B/> }, { [K]: '/alpha', element: <A/> }])`,
+        '/A.tsx': `export default function A(){ return null }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/b'])
+  })
+
   it('does not read a computed key by its spelling', () => {
     // `{ [path]: '/a' }` where `const path = 'id'` declares an id, not an address; matching the
     // key by how its expression is spelled minted a node at an address the application never

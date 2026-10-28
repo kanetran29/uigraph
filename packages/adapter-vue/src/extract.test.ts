@@ -450,6 +450,30 @@ createRouter({ routes: [{ path: '/a', component: A, [keyOf()]: [] }] })`,
     expect(details(soundiness, 'unresolved-route').filter((d) => /computed key/.test(d))).toHaveLength(1)
   })
 
+  it('does not read a computed key from a binding that is reassigned', () => {
+    const out = `import { createRouter } from 'vue-router'
+import A from './A.vue'
+import B from './B.vue'
+let K = 'path'
+K = 'name'
+createRouter({ routes: [{ path: '/home', component: A }, { [K]: '/ghost', component: B }] })`
+    const { graph } = build({ '/src/router.ts': out, '/src/A.vue': page(), '/src/B.vue': page() })
+    expect(graph.nodes.map((n) => n.id)).toEqual(['n_home'])
+  })
+
+  it('says nothing about an accessor on a member the collector never reads', () => {
+    // `get meta()` hides nothing the walk wanted, and a blind-spot note there is a loss that
+    // did not happen -- which voids every dead-link finding the application carries.
+    const { graph, soundiness } = build({
+      '/src/router.ts': `import { createRouter } from 'vue-router'
+import A from './A.vue'
+createRouter({ routes: [{ path: '/a', component: A, get meta() { return { title: 'x' } } }] })`,
+      '/src/A.vue': page(),
+    })
+    expect(graph.nodes.map((n) => n.id)).toEqual(['n_a'])
+    expect(details(soundiness, 'unresolved-route')).toEqual([])
+  })
+
   it('declares a record whose computed key it cannot read', () => {
     const { soundiness } = build({
       '/src/router.ts': `import { createRouter } from 'vue-router'
