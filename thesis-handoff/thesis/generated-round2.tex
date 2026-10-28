@@ -9,8 +9,8 @@ realworld & 100.0\,\% (10/10) & 100.0\,\% (10/10) & 10 & 0 \\
 alfresco & 96.0\,\% (24/25) & 100.0\,\% (27/27) & 25$\to$27 & 0 \\
 ghostfolio & 0.0\,\% (0/84) & 100.0\,\% (84/84) & 84 & 1 \\
 k8s dashboard & 100.0\,\% (2/2) & 100.0\,\% (67/67) & 2$\to$67 & 0 \\
-bitwarden & 46.4\,\% (45/97) & 100.0\,\% (93/93) & 97$\to$93 & 5 \\
-mifos & 0.3\,\% (2/610) & 100.0\,\% (610/610) & 610 & 1 \\
+bitwarden & 46.4\,\% (45/97) & 100.0\,\% (96/96) & 97$\to$96 & 2 \\
+mifos & 0.3\,\% (2/610) & 100.0\,\% (610/610) & 610 & 0 \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoAccounting}{%
@@ -23,9 +23,9 @@ alfresco & 34 & 0 & 34 & 32.4\,\% & 38.2\,\% & 29.4\,\% \\
 ghostfolio & 198 & 0 & 198 & 40.9\,\% & 43.9\,\% & 14.1\,\% \\
 k8s dashboard & 72 & 0 & 72 & 15.3\,\% & 73.6\,\% & 8.3\,\% \\
 bitwarden & 132 & 1 & 131 & 50.4\,\% & 18.3\,\% & 24.4\,\% \\
-mifos & 1344 & 1 & 1343 & 89.4\,\% & 8.3\,\% & 1.3\,\% \\
+mifos & 1344 & 1 & 1343 & 89.6\,\% & 8.3\,\% & 1.3\,\% \\
 \midrule
-All & 1820 & 2 & 1818 & 77.5\,\% & 15.9\,\% & 5.2\,\% \\
+All & 1820 & 2 & 1818 & 77.6\,\% & 15.9\,\% & 5.2\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoReasons}{%
@@ -33,15 +33,12 @@ All & 1820 & 2 & 1818 & 77.5\,\% & 15.9\,\% & 5.2\,\% \\
 \toprule
 Sites & Reason the site is not a transition \\
 \midrule
-8 & A plain class nothing in the application injects \\
-8 & A service nothing in the application injects \\
+16 & A class the extractor could not place under any screen \\
 4 & The target names no route the application declares \\
-2 & The target is inside a subtree the oracle could not read \\
-2 & A relative target with no base to resolve it against \\
+3 & Over-approximated at the site \\
 1 & The file is parsed, but nothing lands near the site \\
-1 & Over-approximated at the site \\
 \midrule
-26 & All, none of them without a reason \\
+24 & All, none of them without a reason \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoSoundness}{%
@@ -50,66 +47,124 @@ Sites & Reason the site is not a transition \\
 Application & Edges & Judged & Clean of judged & Must clean & Must conversion \\
 \midrule
 realworld & 57 & 35 & 91.4\,\% & 9/9 & 30.0\,\% \\
-alfresco & 59 & 21 & 95.2\,\% & n/a & 0.0\,\% \\
+alfresco & 56 & 21 & 95.2\,\% & n/a & 0.0\,\% \\
 ghostfolio & 410 & 129 & 93.8\,\% & n/a & 0.0\,\% \\
 k8s dashboard & 181 & 28 & 96.4\,\% & n/a & 0.0\,\% \\
-bitwarden & 264 & 194 & 71.6\,\% & 36/36 & 25.8\,\% \\
-mifos & 10698 & 1262 & 94.3\,\% & 979/1003 & 71.4\,\% \\
+bitwarden & 277 & 194 & 71.6\,\% & 34/34 & 28.8\,\% \\
+mifos & 10702 & 1257 & 93.6\,\% & 967/993 & 71.0\,\% \\
 \midrule
-All & 11669 & 1669 & 91.6\,\% & 1024/1048 & 55.3\,\% \\
+All & 11683 & 1664 & 91.1\,\% & 1010/1036 & 55.2\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\RoundTwoInScope}{1818}
-\newcommand{\RoundTwoRecovered}{77.5\,\%}
+\newcommand{\RoundTwoRecovered}{77.6\,\%}
 \newcommand{\RoundTwoDynamic}{15.9\,\%}
 \newcommand{\RoundTwoUnplaced}{5.2\,\%}
-\newcommand{\RoundTwoAccounted}{98.6\,\%}
-\newcommand{\RoundTwoUnexplained}{26}
+\newcommand{\RoundTwoAccounted}{98.7\,\%}
+\newcommand{\RoundTwoUnexplained}{24}
 \newcommand{\RoundTwoBefore}{8.8\,\%}
 \newcommand{\RoundTwoExcluded}{2}
 \newcommand{\RoundTwoExcludedOutlet}{0}
 \newcommand{\RoundTwoExcludedNoCommands}{2}
 \newcommand{\RoundTwoFullNodes}{6}
-\newcommand{\RoundTwoMustClean}{1024/1048}
-\newcommand{\RoundTwoMustViolations}{24}
-\newcommand{\RoundTwoMustConv}{55.3\,\%}
+\newcommand{\RoundTwoMustClean}{1010/1036}
+\newcommand{\RoundTwoMustViolations}{26}
+\newcommand{\RoundTwoMustConv}{55.2\,\%}
 \newcommand{\RoundTwoZeroMustApps}{3}
+\newcommand{\RoundTwoRoutesRealworld}{14}
+\newcommand{\RoundTwoRoutesAlfresco}{56}
+\newcommand{\RoundTwoRoutesGhostfolio}{$\geq$135}
+\newcommand{\RoundTwoRoutesKdash}{140}
+\newcommand{\RoundTwoRoutesBitwarden}{$\geq$168}
+\newcommand{\RoundTwoRoutesMifos}{921}
 \newcommand{\RoundTwoNoMifosRecovered}{43.8\,\%}
 \newcommand{\RoundTwoNoMifosAccounted}{97.3\,\%}
 \newcommand{\RoundTwoMifosShare}{73.9\,\%}
-\newcommand{\RoundTwoRelativeUnresolved}{2}
-\newcommand{\RoundTwoUnderUnreadable}{2}
+\newcommand{\RoundTwoRelativeUnresolved}{0}
+\newcommand{\RoundTwoUnderUnreadable}{0}
 \newcommand{\RoundTwoNoRouteCaveated}{none}
 \newcommand{\RoundTwoTargetNoNode}{0}
-\newcommand{\RoundTwoTargetNoRoute}{8}
-\newcommand{\RoundTwoMustMismatch}{20}
+\newcommand{\RoundTwoTargetNoRoute}{4}
+\newcommand{\RoundTwoMustMismatch}{22}
 \newcommand{\RoundTwoMustOffBy}{4}
-\newcommand{\RoundTwoMustInTs}{24}
+\newcommand{\RoundTwoMustInTs}{26}
 \newcommand{\RoundTwoMustInTemplate}{none}
 \newcommand{\RoundTwoMustRelUp}{17}
-\newcommand{\RoundTwoMustRelBare}{3}
-\newcommand{\RoundTwoGraphClean}{13.1\,\%}
-\newcommand{\RoundTwoJudgedClean}{91.6\,\%}
-\newcommand{\RoundTwoJudged}{1669}
-\newcommand{\RoundTwoOverApprox}{85.7\,\%}
-\newcommand{\RoundTwoWildcardNoNode}{16}
-\newcommand{\RoundTwoWildcardBlind}{5}
+\newcommand{\RoundTwoMustRelBare}{5}
+\newcommand{\RoundTwoGraphClean}{13.0\,\%}
+\newcommand{\RoundTwoJudgedClean}{91.1\,\%}
+\newcommand{\RoundTwoJudged}{1664}
+\newcommand{\RoundTwoOverApprox}{85.8\,\%}
+\newcommand{\RoundTwoWildcardNoNode}{none}
+\newcommand{\RoundTwoWildcardPrefix}{19}
+\newcommand{\RoundTwoWildcardPrefixEmptyChild}{0}
+\newcommand{\RoundTwoWildcardBlind}{0}
 \newcommand{\RoundTwoWildcardPattern}{2}
-\newcommand{\RoundTwoWildcardRoot}{2}
-\newcommand{\RoundTwoWildcardRescued}{146}
+\newcommand{\RoundTwoWildcardRelative}{8}
+\newcommand{\RoundTwoWildcardAppRoot}{0}
+\newcommand{\RoundTwoWildcardNoTarget}{1}
+\newcommand{\RoundTwoWildcardRescued}{151}
 \newcommand{\RoundTwoUnresolvedTarget}{0}
 \newcommand{\RoundTwoWildcardCaveated}{101}
 \newcommand{\RoundTwoDeadLinkCandidates}{24}
 \newcommand{\RoundTwoDeadLinkWildcarded}{20}
 \newcommand{\RoundTwoDeadLinkUnanswered}{4}
 \newcommand{\RoundTwoDeadLinkUrls}{20}
+\newcommand{\RoundTwoDeadLinkLocations}{22}
+\newcommand{\RoundTwoDeadLinkAbsolute}{17}
+\newcommand{\RoundTwoDeadLinkAbsoluteLocations}{17}
+\newcommand{\RoundTwoDeadLinkRelative}{5}
+\newcommand{\RoundTwoDeadLinkRelativeLocations}{3}
+\newcommand{\RoundTwoDeadLinkBaseUnknown}{2}
+\newcommand{\RoundTwoDeadLinkBaseUnknownLocations}{2}
 \newcommand{\RoundTwoDeadLinkApps}{1}
 \newcommand{\RoundTwoDeadLinkWhere}{mifos}
-\newcommand{\RoundTwoEdges}{11669}
-\newcommand{\RoundTwoTopFanoutEdges}{5487}
+\newcommand{\RoundTwoEdges}{11683}
+\newcommand{\RoundTwoTopFanoutEdges}{5496}
 \newcommand{\RoundTwoTopFanoutShare}{47.0\,\%}
 \newcommand{\RoundTwoTopFanoutApp}{mifos}
 \newcommand{\RoundTwoTopFanoutSite}{\texttt{view-transaction.component.ts:135}}
-\newcommand{\RoundTwoMifosEdgeShare}{91.7\,\%}
+\newcommand{\RoundTwoMifosEdgeShare}{91.6\,\%}
+\newcommand{\RoundTwoExtraNodes}{2}
+\newcommand{\RoundTwoExtraNodesWildcard}{2}
 \newcommand{\RoundTwoDynamicFiles}{44}
 \newcommand{\RoundTwoDynamicFilesOne}{37}
+\newcommand{\RoundTwoEarlierOracleAlfrescoDeclared}{25}
+\newcommand{\RoundTwoEarlierOracleAlfrescoOutside}{0}
+\newcommand{\RoundTwoEarlierOracleAlfrescoStorybook}{0}
+\newcommand{\RoundTwoEarlierOracleAlfrescoInside}{1}
+\newcommand{\RoundTwoEarlierOracleAlfrescoAdded}{3}
+\newcommand{\RoundTwoEarlierOracleAlfrescoNow}{27}
+\newcommand{\RoundTwoEarlierOracleGhostfolioDeclared}{84}
+\newcommand{\RoundTwoEarlierOracleGhostfolioOutside}{0}
+\newcommand{\RoundTwoEarlierOracleGhostfolioStorybook}{0}
+\newcommand{\RoundTwoEarlierOracleGhostfolioInside}{84}
+\newcommand{\RoundTwoEarlierOracleGhostfolioAdded}{84}
+\newcommand{\RoundTwoEarlierOracleGhostfolioNow}{84}
+\newcommand{\RoundTwoEarlierOracleKdashDeclared}{2}
+\newcommand{\RoundTwoEarlierOracleKdashOutside}{0}
+\newcommand{\RoundTwoEarlierOracleKdashStorybook}{0}
+\newcommand{\RoundTwoEarlierOracleKdashInside}{0}
+\newcommand{\RoundTwoEarlierOracleKdashAdded}{65}
+\newcommand{\RoundTwoEarlierOracleKdashNow}{67}
+\newcommand{\RoundTwoEarlierOracleBitwardenDeclared}{97}
+\newcommand{\RoundTwoEarlierOracleBitwardenOutside}{0}
+\newcommand{\RoundTwoEarlierOracleBitwardenStorybook}{3}
+\newcommand{\RoundTwoEarlierOracleBitwardenInside}{32}
+\newcommand{\RoundTwoEarlierOracleBitwardenAdded}{34}
+\newcommand{\RoundTwoEarlierOracleBitwardenNow}{96}
+\newcommand{\RoundTwoEarlierOracleMifosDeclared}{610}
+\newcommand{\RoundTwoEarlierOracleMifosOutside}{0}
+\newcommand{\RoundTwoEarlierOracleMifosStorybook}{0}
+\newcommand{\RoundTwoEarlierOracleMifosInside}{3}
+\newcommand{\RoundTwoEarlierOracleMifosAdded}{3}
+\newcommand{\RoundTwoEarlierOracleMifosNow}{610}
+\newcommand{\RoundTwoUnplacedClass}{16}
+\newcommand{\RoundTwoOutsideWitness}{227}
+\newcommand{\RoundTwoOutsideWitnessMust}{5}
+\newcommand{\RoundTwoOutsideWitnessApps}{3}
+\newcommand{\RoundTwoOutsideWitnessWorst}{bitwarden}
+\newcommand{\RoundTwoOutsideWitnessWorstN}{145}
+\newcommand{\RoundTwoOutsideWitnessWorstMust}{5}
+\newcommand{\RoundTwoSetMoved}{5}
+\newcommand{\RoundTwoSetMovedCountSame}{2}

@@ -153,8 +153,10 @@ export function extractGraph(vp: VueProject, projectDir: string, opts: ExtractOp
   }
 
   for (const route of routes) {
+    // a record with `redirect` forwards the URL whether or not it also renders a layout, and the forwarding is never an edge, so declare it
+    if (route.redirect) soundiness.push({ kind: 'unmodeled-redirect', detail: `route ${route.fullPath} forwards via \`redirect\`; the forwarding navigation is not an edge` })
     if (!route.component) {
-      if (route.fullPath !== '*') soundiness.push({ kind: 'unresolved-component', detail: `route ${route.fullPath} has no resolvable .vue component` })
+      if (!route.rendersNothing) soundiness.push({ kind: 'unresolved-component', detail: `route ${route.fullPath} has no resolvable .vue component` })
       continue
     }
     const file = relative(projectDir, route.component.vuePath)

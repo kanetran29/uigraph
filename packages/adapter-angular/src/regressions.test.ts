@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path'
 import { Project } from 'ts-morph'
 import { validateGraph } from '@ui-graph/core'
 import { buildProject, extractGraph } from './extract'
+import { isInsideDir } from './resolve'
 
 function inMemory(files: Record<string, string>): Project {
   const p = new Project({ useInMemoryFileSystem: true })
@@ -344,5 +345,484 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
     } finally {
       rmSync(ws, { recursive: true, force: true })
     }
+  })
+
+  it('reads a routing module imported through a baseUrl specifier, so its routes mount under the lazy prefix', () => {
+    // mifos's reports.module imports its routing module as 'app/reports/reports-routing.module',
+    // which starts with no dot. The owner lookup skipped every such specifier, so the routing
+    // module was never recognised as the lazy owner, was walked at the project root, and
+    // `/reports/:filter` was minted as `/:filter` -- a screen no route of the application has.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nexport const routes: Routes = [{ path: 'reports', loadChildren: () => import('./reports/reports.module').then((m) => m.ReportsModule) }]`,
+      '/app/reports/reports.module.ts': `import { ReportsRoutingModule } from 'app/reports/reports-routing.module'\nexport class ReportsModule { r = ReportsRoutingModule }`,
+      '/app/reports/reports-routing.module.ts': `import type { Routes } from '@angular/router'\nimport { R } from './r.component'\nexport const routes: Routes = [{ path: ':filter', component: R }]\nexport class ReportsRoutingModule {}`,
+      '/app/reports/r.component.ts': C('<p>r</p>'),
+    })
+    project.compilerOptions.set({ baseUrl: '/' })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/reports/:filter'])
+  })
+
+  it('declares the route set incomplete when a lazy module has no route array it can find', () => {
+    // The module the loader names holds no `Routes` array and imports none that does. Whatever
+    // it mounts under /lazy is a boundary the extractor cannot read; saying nothing let every
+    // link into that subtree read as a link to a route the application does not declare.
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [\n  { path: 'home', component: A },\n  { path: 'lazy', loadChildren: () => import('./lazy.module').then((m) => m.LazyModule) },\n  { path: '**', redirectTo: 'home' },\n]`,
+        '/lazy.module.ts': `export class LazyModule {}`,
+        '/a.component.ts': C('<a routerLink="/lazy/thing">x</a>'),
+      }),
+      '/',
+    )
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+    const wild = soundiness.filter((n) => n.kind === 'wildcard-redirect')
+    expect(wild.length).toBeGreaterThan(0)
+    for (const n of wild) expect(n.detail).toMatch(/could not be read/)
+  })
+
+  it('does not guess the lazy owner when two imports both hold a route-shaped array', () => {
+    // mifos's reports.module imports SharedModule BEFORE its routing module. A breadcrumb or menu
+    // config satisfies "an array with a `path`" as well as a route table does, so taking the first
+    // import that holds one minted `/reports/widgets` (an address nothing mounts) and lost the real
+    // `/reports/:filter`. With two holders the owner cannot be told, so nothing is minted from
+    // either, neither is rescanned from the root, and the route set says it is a lower bound.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }, { path: 'reports', loadChildren: () => import('./reports/reports.module').then((m) => m.ReportsModule) }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/reports/reports.module.ts': `import { SharedModule } from 'app/shared/shared.module'\nimport { ReportsRoutingModule } from 'app/reports/reports-routing.module'\nexport class ReportsModule { s = SharedModule; r = ReportsRoutingModule }`,
+      '/app/shared/shared.module.ts': `import type { Routes } from '@angular/router'\nimport { W } from './w.component'\nexport const sharedRoutes: Routes = [{ path: 'widgets', component: W }]\nexport class SharedModule {}`,
+      '/app/shared/w.component.ts': C('<p>w</p>'),
+      '/app/reports/reports-routing.module.ts': `import type { Routes } from '@angular/router'\nimport { R } from './r.component'\nexport const routes: Routes = [{ path: ':filter', component: R }]\nexport class ReportsRoutingModule {}`,
+      '/app/reports/r.component.ts': C('<p>r</p>'),
+    })
+    project.compilerOptions.set({ baseUrl: '/' })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('does not elect a menu config as the lazy owner when it is the only route-shaped array the module imports', () => {
+    // A `path` on an element is the only thing that makes a menu look like a route table; nothing declares it to the router.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }, { path: 'reports', loadChildren: () => import('./reports/reports.module').then((m) => m.ReportsModule) }]`,
+      '/app/a.component.ts': C('<a routerLink="/reports/widgets">w</a>'),
+      '/app/reports/reports.module.ts': `import { MENU } from 'app/shared/menu.config'\nexport class ReportsModule { m = MENU }`,
+      '/app/shared/menu.config.ts': `import { W } from './w.component'\nexport const MENU = [{ path: 'widgets', label: 'Widgets', component: W }, { path: 'charts', label: 'Charts', component: W }]`,
+      '/app/shared/w.component.ts': C('<p>w</p>'),
+    })
+    project.compilerOptions.set({ baseUrl: '/' })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    // Neither under the lazy prefix (elected) nor at the root (rescanned because nothing claimed the file): the menu mounts nothing.
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(graph.edges.filter((e) => e.modality === 'must')).toEqual([])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('elects the one array the module declares to the router, and leaves a menu beside it unminted', () => {
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }, { path: 'reports', loadChildren: () => import('./reports/reports.module').then((m) => m.ReportsModule) }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/reports/reports.module.ts': `import { MENU } from 'app/shared/menu.config'\nimport { ReportsRoutingModule } from 'app/reports/reports-routing.module'\nexport class ReportsModule { m = MENU; r = ReportsRoutingModule }`,
+      '/app/shared/menu.config.ts': `import { W } from './w.component'\nexport const MENU = [{ path: 'widgets', label: 'Widgets', component: W }]`,
+      '/app/shared/w.component.ts': C('<p>w</p>'),
+      '/app/reports/reports-routing.module.ts': `import type { Routes } from '@angular/router'\nimport { R } from './r.component'\nexport const routes: Routes = [{ path: ':filter', component: R }]\nexport class ReportsRoutingModule {}`,
+      '/app/reports/r.component.ts': C('<p>r</p>'),
+    })
+    project.compilerOptions.set({ baseUrl: '/' })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/reports/:filter'])
+    // The menu is claimed (never minted) but shape cannot say it mounts nothing, so the unplaced file is declared.
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual(['1 claimed route file(s) placed under no prefix could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds'])
+  })
+
+  it('declares the route set incomplete when a table another module mounts is claimed by a lazy module, so its link is not published as a dead one', () => {
+    // admin.module mounts ADMIN_ROUTES eagerly by identifier, so only the root scan's shape test sees that array; the lazy module imports the same file for its labels, which claims it.
+    const project = inMemory({
+      '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { A } from './a.component'\nimport { AdminModule } from './admin/admin.module'\n@NgModule({ imports: [AdminModule, RouterModule.forRoot([{ path: 'home', component: A }, { path: 'reports', loadChildren: () => import('./reports/reports.module').then((m) => m.M) }])] })\nexport class AppModule {}`,
+      '/app/a.component.ts': C('<a routerLink="/admin">admin</a><a routerLink="/reports/list">list</a>'),
+      '/app/admin/admin.module.ts': `import { RouterModule } from '@angular/router'\nimport { ADMIN_ROUTES } from './admin.routes'\n@NgModule({ imports: [RouterModule.forChild(ADMIN_ROUTES)] })\nexport class AdminModule {}`,
+      '/app/admin/admin.routes.ts': `import { D } from './d.component'\nexport const ADMIN_ROUTES = [{ path: 'admin', component: D, label: 'Admin' }]`,
+      '/app/admin/d.component.ts': C('<p>d</p>'),
+      '/app/reports/reports.module.ts': `import { ADMIN_ROUTES } from '../admin/admin.routes'\nimport { REPORT_ROUTES } from './reports-routing.module'\nexport class M { labels = ADMIN_ROUTES.map((r) => r.label); r = REPORT_ROUTES }`,
+      '/app/reports/reports-routing.module.ts': `import type { Routes } from '@angular/router'\nimport { B } from './b.component'\nexport const REPORT_ROUTES: Routes = [{ path: 'list', component: B }]`,
+      '/app/reports/b.component.ts': C('<p>b</p>'),
+    })
+    project.compilerOptions.set({ baseUrl: '/' })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    // Not minted at the root, where the claim keeps it out; the loss is declared instead of left silent.
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/reports/list'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual(['1 claimed route file(s) placed under no prefix could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds'])
+  })
+
+  it('counts a routing module once when the lazy module both imports and re-exports it', () => {
+    const project = inMemory({
+      '/app.routes.ts': `import type { Routes } from '@angular/router'\nexport const routes: Routes = [{ path: 'lazy', loadChildren: () => import('./lazy/lazy.module').then((m) => m.LazyModule) }]`,
+      '/lazy/lazy.module.ts': `import { LazyRoutingModule } from './lazy-routing.module'\nexport * from './lazy-routing.module'\nexport class LazyModule { r = LazyRoutingModule }`,
+      '/lazy/lazy-routing.module.ts': `import type { Routes } from '@angular/router'\nimport { L } from './l.component'\nexport const routes: Routes = [{ path: ':id', component: L }]\nexport class LazyRoutingModule {}`,
+      '/lazy/l.component.ts': C('<p>l</p>'),
+    })
+    expect(extractGraph(project, '/').graph.nodes.map((n) => n.route)).toEqual(['/lazy/:id'])
+  })
+
+  it('declares the route set incomplete when a loadChildren names a file that does not exist', () => {
+    // The subtree it would mount is dropped whole; with the target unresolved nothing counted it.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }, { path: 'lazy', loadChildren: () => import('./missing.module').then((m) => m.M) }]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('counts an unreadable route once however many parents spread it, and names each loss for what it is', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { shared } from './shared.routes'\nexport const routes: Routes = [\n  { path: 'x', component: A, children: [...shared] },\n  { path: 'y', component: A, children: [...shared] },\n  { path: '**', redirectTo: 'x' },\n]`,
+        '/shared.routes.ts': `import type { Routes } from '@angular/router'\ndeclare const fromElsewhere: string\nexport const shared: Routes = [\n  { path: fromElsewhere, component: null as any },\n  { path: 'k', loadChildren: () => import('./missing.module').then((m) => m.M) },\n  { path: 'e', loadChildren: () => import('./empty.module').then((m) => m.E) },\n]`,
+        '/empty.module.ts': `export class E {}`,
+        '/a.component.ts': C('<a routerLink="/nowhere">x</a>'),
+      }),
+      '/',
+    )
+    const text = '1 declared path(s) and 2 lazy subtree(s) could not be read'
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([`${text}, so the declared route set is a lower bound and no claim that a path is undeclared holds`])
+    const wild = soundiness.filter((n) => n.kind === 'wildcard-redirect')
+    expect(wild.length).toBeGreaterThan(0)
+    for (const n of wild) expect(n.detail).toContain(`, though ${text}, so it is not claimed`)
+  })
+
+  it('calls a dropped lazy subtree a subtree, never a declared path', () => {
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }, { path: 'lazy', loadChildren: () => import('./missing.module').then((m) => m.M) }]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    const [note] = soundiness.filter((n) => n.kind === 'incomplete-route-set')
+    expect(note!.detail).toMatch(/^1 lazy subtree\(s\) could not be read, /)
+    expect(note!.detail).not.toMatch(/declared path/)
+  })
+
+  /**
+   * A project whose component keeps its template in an external html file, so that a link's
+   * `loc` is a line of that file. The routes end in a `**` redirect unless told otherwise.
+   */
+  const externalTemplate = (html: string, wildcard = true): Project =>
+    inMemory({
+      '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [\n  { path: 'home', component: A },${wildcard ? "\n  { path: '**', redirectTo: 'home' }," : ''}\n]`,
+      '/a.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, templateUrl: './a.component.html' })\nexport class A { dyn = Math.random() > 0.5 ? '/x' : '/y' }`,
+      '/a.component.html': html,
+    })
+
+  it('cites the html file, not the component, for a soundiness note about an external template link', () => {
+    // `t.loc` is a line within the html; paired with the component's `.ts` path it pointed at a
+    // line holding no link, and the published dead-link citations inherited that.
+    const html = '<p>intro</p>\n<a routerLink="/nowhere">a</a>\n<a [routerLink]="[\'/items\', id]">b</a>\n<a [routerLink]="dyn">c</a>\n<a routerLink="/home">h</a>'
+    const { graph, soundiness } = extractGraph(externalTemplate(html), '/')
+    const cited = soundiness.filter((n) => ['wildcard-redirect', 'over-approximation', 'dynamic-target'].includes(n.kind)).map((n) => [n.kind, n.file, n.loc?.line])
+    expect(cited.sort()).toEqual([
+      ['dynamic-target', 'a.component.html', 4],
+      ['over-approximation', 'a.component.html', 3],
+      ['wildcard-redirect', 'a.component.html', 2],
+    ])
+    // The edge's own witnesses already named the html file; the notes now agree with them.
+    const home = graph.edges.find((e) => e.to === 'n_home')
+    expect([home?.witness, ...(home?.mergedWitnesses ?? [])].map((w) => w?.file)).toEqual(['a.component.html', 'a.component.html'])
+  })
+
+  it('cites the html file for an unresolved external template link when no wildcard route answers it', () => {
+    const { soundiness } = extractGraph(externalTemplate('<p>intro</p>\n<a routerLink="/nowhere">a</a>', false), '/')
+    const notes = soundiness.filter((n) => n.kind === 'unresolved-target')
+    expect(notes.map((n) => [n.file, n.loc?.line])).toEqual([['a.component.html', 2]])
+  })
+
+  it('cites the html file for the notes a control raises about its own routerLink', () => {
+    const html = '<p>intro</p>\n<a routerLink="/nowhere">a</a>\n<a [routerLink]="dyn">c</a>'
+    const { soundiness } = extractGraph(externalTemplate(html, false), '/', { controls: true })
+    const cited = soundiness.filter((n) => n.kind === 'unresolved-target' || n.kind === 'dynamic-target').map((n) => [n.kind, n.file, n.loc?.line])
+    expect(cited.sort()).toEqual([
+      ['dynamic-target', 'a.component.html', 3],
+      ['unresolved-target', 'a.component.html', 2],
+    ])
+  })
+
+  it('does not take a sibling application for the shell, yet still attributes a shared library the application renders', () => {
+    // bitwarden's web app resolves imports through an alias that reaches the browser extension.
+    // The extension's root component holds a `<router-outlet>` and no route renders it, so it
+    // was taken for the web app's shell and its `navigate(['login'])` became a must edge. The
+    // first repair filtered every file outside the app out of attribution, which also threw out
+    // `../../libs`: a library component the web app renders through a wrapper lost its edge.
+    const ws = {
+      '/ws/apps/web/src/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { Wrapper } from './wrapper.component'\nexport const routes: Routes = [{ path: 'login', component: A }, { path: 'lock', component: A }, { path: 'confirm', component: Wrapper }]`,
+      '/ws/apps/web/src/a.component.ts': C('<p>a</p>'),
+      '/ws/apps/web/src/shell.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'app-shell', template: '<router-outlet></router-outlet>' })\nexport class Shell { router: any; go() { this.router.navigate(['/lock']) } }`,
+      '/ws/apps/web/src/wrapper.component.ts': `import { Component } from '@angular/core'\nimport { LibConfirm } from '../../../libs/ui/src/lib-confirm.component'\n@Component({ standalone: true, imports: [LibConfirm], template: '<lib-confirm></lib-confirm>' })\nexport class Wrapper {}`,
+      '/ws/libs/ui/src/lib-confirm.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, selector: 'lib-confirm', template: '<p>confirm</p>' })\nexport class LibConfirm { router: any; done() { this.router.navigate(['/login']) } }`,
+      '/ws/apps/browser/src/popup/app.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'app-root', template: '<router-outlet></router-outlet>' })\nexport class Popup { router: any; go() { this.router.navigate(['/login']) } }`,
+      '/ws/apps/browser/src/popup/guard.service.ts': `export class Guard { router: any; go() { this.router.navigate(['/login']) } }`,
+      '/ws/apps/browser/src/popup/popup.effects.ts': `import { createEffect } from '@ngrx/effects'\nexport class PopupEffects { router: any; e = createEffect(() => { this.router.navigate(['/login']); return null as any }, { dispatch: false }) }`,
+      '/ws/apps/web/src/web.effects.ts': `import { createEffect } from '@ngrx/effects'\nexport class WebEffects { router: any; e = createEffect(() => { this.router.navigate(['/login']); return null as any }, { dispatch: false }) }`,
+    }
+    const { graph, soundiness } = extractGraph(inMemory(ws), '/ws/apps/web', { attribution: true })
+    const witnessedIn = (file: string) => graph.edges.filter((e) => e.witness?.file === file || e.mergedWitnesses?.some((m) => m.file === file))
+    // The extension's root is no shell: no must edge, and nothing from the shell node, cites it.
+    expect(witnessedIn('../browser/src/popup/app.component.ts').filter((e) => e.modality === 'must' || e.from === 'n_scope_shell')).toHaveLength(0)
+    expect(witnessedIn('../browser/src/popup/guard.service.ts')).toHaveLength(0)
+    // The sibling's NgRx effect is the one path that bypasses attribution: it is reported as unattributed, never drawn from the shell.
+    expect(witnessedIn('../browser/src/popup/popup.effects.ts')).toHaveLength(0)
+    expect(soundiness.filter((n) => n.kind === 'unattributed-non-component' && n.file === '../browser/src/popup/popup.effects.ts')).toHaveLength(1)
+    // This application's own effect still sits at the shell, so the guard did not switch effects off.
+    expect(witnessedIn('src/web.effects.ts').filter((e) => e.from === 'n_scope_shell' && e.to === 'n_login' && e.modality === 'may')).toHaveLength(1)
+    // The web app's own shell is still read, so the boundary did not simply switch the pass off.
+    expect(graph.edges.filter((e) => e.from === 'n_scope_shell' && e.to === 'n_lock' && e.witness?.file === 'src/shell.component.ts')).toHaveLength(1)
+    // The library component the app renders is attributed to the screen that renders it.
+    expect(graph.edges.filter((e) => e.from === 'n_confirm' && e.to === 'n_login' && e.modality === 'must' && e.witness?.file === '../../libs/ui/src/lib-confirm.component.ts')).toHaveLength(1)
+  })
+
+  it('says an NgRx effect outside the application directory could not be placed, and keeps "nothing injects it" for a plain class', () => {
+    // A workspace library's effect is registered from inside the application by provideEffects([...]), which is not read, so "nothing injects it" would be a false claim about the application.
+    const { soundiness } = extractGraph(
+      inMemory({
+        '/ws/apps/web/src/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }]`,
+        '/ws/apps/web/src/a.component.ts': C('<p>a</p>'),
+        '/ws/apps/web/src/app.config.ts': `import { provideEffects } from '@ngrx/effects'\nimport { RouterEffects } from '../../../libs/store/src/router.effects'\nexport const config = { providers: [provideEffects([RouterEffects])] }`,
+        '/ws/libs/store/src/router.effects.ts': `import { createEffect } from '@ngrx/effects'\nexport class RouterEffects { router: any; e = createEffect(() => { this.router.navigate(['/home']); return null as any }, { dispatch: false }) }`,
+        '/ws/libs/store/src/helper.ts': `export class Helper { router: any; go() { this.router.navigate(['/home']) } }`,
+      }),
+      '/ws/apps/web',
+      { attribution: true },
+    )
+    /** The detail of every unattributed-non-component note raised for `file`. */
+    const detailsFor = (file: string): (string | undefined)[] => soundiness.filter((n) => n.kind === 'unattributed-non-component' && n.file === file).map((n) => n.detail)
+    expect(detailsFor('../../libs/store/src/router.effects.ts')).toEqual(['1 navigation call(s) in an NgRx effect outside the application directory; whether the application registers it is not read, so its scope could not be placed'])
+    expect(detailsFor('../../libs/store/src/helper.ts')).toEqual(['1 navigation call(s) in a class nothing in the application injects; its scope is empty'])
+  })
+
+  it('narrows the one-argument call it follows to a freeze, so a call that builds an object is not read as its argument', () => {
+    // `Object.assign(this, rename({ next: [...] }))` writes `dest`, not `next`. Following any
+    // one-argument call read the argument's keys as the written names, left `dest` looking
+    // unwritten, and drew a must edge to the stale initializer.
+    const src = (write: string): Project =>
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: '', component: A }, { path: 'home', component: A }, { path: 'away', component: A }]`,
+        '/table.ts': `export const table = { home: { routerLink: ['/home'] } }`,
+        '/a.component.ts': `import { Component } from '@angular/core'\nimport { table } from './table'\nconst rename = (o: any) => ({ dest: o.next })\n@Component({ standalone: true, template: '<a [routerLink]="dest">go</a>' })\nexport class A { dest = table.home.routerLink; ngOnInit() { ${write} } }`,
+      })
+    const mustHome = (write: string): number => extractGraph(src(write), '/').graph.edges.filter((e) => e.modality === 'must' && e.to === 'n_home').length
+    expect(mustHome("Object.assign(this, rename({ next: ['/away'] }))")).toBe(0)
+    // A freeze hands its argument back unchanged, so the keys it carries are the keys written.
+    expect(mustHome("Object.assign(this, Object.freeze({ dest: ['/away'] }))")).toBe(0)
+    expect(mustHome('')).toBeGreaterThan(0)
+  })
+
+  it('still reads a route table written Object.freeze({...})', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/routes.ts': `export const AuthRoute = Object.freeze({ Login: 'login' })`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { AuthRoute } from './routes'\nexport const routes: Routes = [{ path: AuthRoute.Login, component: A }]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/login'])
+  })
+
+  it('does not mint a route from a sibling application whose directory name extends the measured one', () => {
+    const files = {
+      '/ws/apps/web/src/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }]`,
+      '/ws/apps/web/src/a.component.ts': C('<p>a</p>'),
+      '/ws/apps/web-extension/src/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'popup', component: A }]`,
+      '/ws/apps/web-extension/src/a.component.ts': C('<p>a</p>'),
+    }
+    expect(extractGraph(inMemory(files), '/ws/apps/web').graph.nodes.map((n) => n.route)).toEqual(['/home'])
+  })
+
+  it('tests a project boundary on a path boundary and not on a string prefix', () => {
+    expect(isInsideDir('/ws/apps/web/src/a.ts', '/ws/apps/web')).toBe(true)
+    expect(isInsideDir('/ws/apps/web/src/a.ts', '/ws/apps/web/')).toBe(true)
+    expect(isInsideDir('/ws/apps/web-extension/src/a.ts', '/ws/apps/web')).toBe(false)
+    expect(isInsideDir('/ws/apps/browser/src/a.ts', '/ws/apps/web')).toBe(false)
+    expect(isInsideDir('/a.ts', '/')).toBe(true)
+  })
+
+  it('reads a route path written as a template over constant strings, and refuses one with a span it cannot read', () => {
+    // bitwarden declares `:vaultId/${MY_ITEMS_ROUTE}` where the constant is a plain exported
+    // string; with no branch for a template with substitutions the three routes written that
+    // way were unreadable, and its node coverage read as complete while they were missing.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/consts.ts': `export const MY_ITEMS_ROUTE = 'my-items'\nexport const SHARED = 'shared-folders'`,
+        '/opaque.ts': `export const opaque = { thing: () => String(Math.random()) }`,
+        '/app.routes.ts': 'import type { Routes } from \'@angular/router\'\nimport { A } from \'./a.component\'\nimport { MY_ITEMS_ROUTE, SHARED } from \'./consts\'\nimport { opaque } from \'./opaque\'\nexport const routes: Routes = [\n  { path: `:vaultId/${MY_ITEMS_ROUTE}`, component: A },\n  { path: `:vaultId/${SHARED}/:collectionId`, component: A },\n  { path: `:vaultId/${opaque.thing()}`, component: A },\n  { path: `plain`, component: A },\n]',
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/:vaultId/my-items', '/:vaultId/shared-folders/:collectionId', '/plain'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it.each([
+    ['a spec', { '/ws/apps/web/src/harness.spec.ts': `import { RouterModule } from '@angular/router'\nRouterModule.forRoot([{ path: 'x', loadChildren: () => import('./admin/admin.module').then((m) => m.AdminModule) }])` }],
+    ['a sibling application outside the measured directory', { '/ws/apps/other/src/other.routes.ts': `import type { Routes } from '@angular/router'\nexport const routes: Routes = [{ path: 'y', loadChildren: () => import('apps/web/src/admin/admin.module').then((m) => m.AdminModule) }]` }],
+  ])('does not let %s that names a route table claim it away from the root scan', (_name, claimant) => {
+    // admin.module mounts ADMIN_ROUTES eagerly by identifier, so only the root scan sees that array; a lazy site the walk never visits must not remove it.
+    const project = inMemory({
+      '/ws/apps/web/src/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { A } from './a.component'\nimport { AdminModule } from './admin/admin.module'\n@NgModule({ imports: [AdminModule, RouterModule.forRoot([{ path: 'home', component: A }])] })\nexport class AppModule {}`,
+      '/ws/apps/web/src/a.component.ts': C('<a routerLink="/admin">admin</a>'),
+      '/ws/apps/web/src/admin/admin.module.ts': `import { RouterModule } from '@angular/router'\nimport { ADMIN_ROUTES } from './admin.routes'\n@NgModule({ imports: [RouterModule.forChild(ADMIN_ROUTES)] })\nexport class AdminModule {}`,
+      '/ws/apps/web/src/admin/admin.routes.ts': `import type { Routes } from '@angular/router'\nimport { D } from './d.component'\nexport const ADMIN_ROUTES: Routes = [{ path: 'admin', component: D }]`,
+      '/ws/apps/web/src/admin/d.component.ts': C('<p>d</p>'),
+      ...claimant,
+    })
+    project.compilerOptions.set({ baseUrl: '/ws' })
+    const { graph, soundiness } = extractGraph(project, '/ws/apps/web')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin', '/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set' || n.kind === 'unresolved-target')).toEqual([])
+  })
+
+  it('does not let a decorator spread of a list of classes claim the file that declares it away from the root scan', () => {
+    // SHARED is a list of classes with no route in it; the file that declares it also holds a table nothing else claims.
+    const project = inMemory({
+      '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { A } from './a.component'\n@NgModule({ imports: [RouterModule.forRoot([{ path: 'home', component: A }])] })\nexport class AppModule {}`,
+      '/app/a.component.ts': `import { Component } from '@angular/core'\nimport { SHARED } from './shared'\n@Component({ standalone: true, imports: [...SHARED], template: '<p>a</p>' })\nexport class A {}`,
+      '/app/shared.ts': `import type { Routes } from '@angular/router'\nimport { D } from './d.component'\nexport const SHARED = [D]\nexport const EXTRA_ROUTES: Routes = [{ path: 'extra', component: D }]`,
+      '/app/d.component.ts': C('<p>d</p>'),
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/extra', '/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  const ONE_UNPLACED = '1 claimed route file(s) placed under no prefix could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds'
+
+  const adminApp = {
+    '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { A } from './a.component'\nimport { AdminModule } from './admin/admin.module'\n@NgModule({ imports: [AdminModule, RouterModule.forRoot([{ path: 'home', component: A }])] })\nexport class AppModule {}`,
+    '/app/a.component.ts': C('<a routerLink="/admin">admin</a>'),
+    '/app/admin/admin.module.ts': `import { RouterModule } from '@angular/router'\nimport { ADMIN_ROUTES } from './admin.routes'\n@NgModule({ imports: [RouterModule.forChild(ADMIN_ROUTES)] })\nexport class AdminModule {}`,
+    '/app/admin/admin.routes.ts': `import type { Routes } from '@angular/router'\nimport { D } from './d.component'\nexport const ADMIN_ROUTES: Routes = [{ path: 'admin', component: D }]`,
+    '/app/admin/d.component.ts': C('<p>d</p>'),
+  }
+
+  it.each([
+    ['a loadChildren inside an array a function returns', { '/app/factory.ts': `import type { Routes } from '@angular/router'\nexport function makeRoutes(): Routes {\n  return [{ path: 'x', loadChildren: () => import('./admin/admin.module').then((m) => m.AdminModule) }]\n}` }],
+    ['a loadChildren in an object no array holds', { '/app/menu.ts': `export const ENTRY = { path: 'x', loadChildren: () => import('./admin/admin.module').then((m) => m.AdminModule) }` }],
+    ['a spread of the table inside an array a function returns', { '/app/spreader.ts': `import type { Routes } from '@angular/router'\nimport { ADMIN_ROUTES } from './admin/admin.routes'\nexport function all(): Routes {\n  return [...ADMIN_ROUTES]\n}` }],
+  ])('declares the table unplaced when %s claims it and the walk never reaches the site', (_name, claimant) => {
+    // The claim keeps ADMIN_ROUTES out of the root scan and no walk places it, so /admin is in no route set and the set says it is a lower bound.
+    const project = inMemory({ ...adminApp, ...claimant })
+    project.compilerOptions.set({ baseUrl: '/' })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([ONE_UNPLACED])
+  })
+
+  it('declares a lazy module unplaced when its loadChildren sits in an arrow-returned array that a call spreads', () => {
+    // viewRoutes() is a call, which the spread branch does not resolve, so the lazy site inside it is never walked while the pre-pass still claims its target.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { viewRoutes } from './view.routes'\nexport const routes: Routes = [{ path: 'home', component: A, children: [...viewRoutes()] }]`,
+      '/app/view.routes.ts': `import type { Routes } from '@angular/router'\nexport const viewRoutes = (): Routes => [{ path: 'view', loadChildren: () => import('./viewer/viewer.routes').then((m) => m.VIEWER) }]`,
+      '/app/viewer/viewer.routes.ts': `import type { Routes } from '@angular/router'\nimport { V } from './v.component'\nexport const VIEWER: Routes = [{ path: 'pane', component: V }]`,
+      '/app/viewer/v.component.ts': C('<p>v</p>'),
+      '/app/a.component.ts': C('<p>a</p>'),
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([ONE_UNPLACED])
+  })
+
+  it('does not count a claimed file the root scan would mint nothing from as a route file the walk missed', () => {
+    // plain.module declares no route array, so skipping it from the root scan loses no route and the note, which counts files the root scan would have minted from, has nothing to count.
+    const project = inMemory({
+      '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { A } from './a.component'\n@NgModule({ imports: [RouterModule.forRoot([{ path: 'home', component: A }])] })\nexport class AppModule {}`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/factory.ts': `import type { Routes } from '@angular/router'\nexport function makeRoutes(): Routes {\n  return [{ path: 'x', loadChildren: () => import('./plain.module').then((m) => m.PlainModule) }]\n}`,
+      '/app/plain.module.ts': `export class PlainModule {}`,
+    })
+    const { soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set' && /claimed route file/.test(n.detail))).toEqual([])
+  })
+
+  it.each([
+    ['a loadChildren in a root-scanned array', { '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }, { path: 'admin-area', loadChildren: () => import('./admin/admin.routes').then((m) => m.ADMIN_ROUTES) }]` }, ['/admin-area/admin', '/home']],
+    ['a spread inside a root-scanned route', { '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { ADMIN_ROUTES } from './admin/admin.routes'\nexport const routes: Routes = [{ path: 'home', component: A, children: [...ADMIN_ROUTES] }]` }, ['/home', '/home/admin']],
+  ])('records %s as placed, so a claim the walk follows is not declared', (_name, root, routes) => {
+    // The claimed table is walked under a prefix here, which is the one outcome that needs no note.
+    const project = inMemory({
+      ...root,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/admin/admin.routes.ts': adminApp['/app/admin/admin.routes.ts'],
+      '/app/admin/d.component.ts': C('<p>d</p>'),
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(routes)
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('does not mint a second unprefixed node when the spread array carries its routes one spread deeper', () => {
+    // The walk recurses into whatever array a spread resolves to, so a claim that tests only the
+    // array's own shape drops the claim while the walk still mints under the prefix, and the root
+    // scan, no longer suppressed, mints the same routes again at the root -- with a must edge from
+    // a stale link into one of them, at an address the application does not mount.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { featureRoutes } from './feature'
+export const routes: Routes = [{ path: 'admin', component: A, children: [...featureRoutes] }]`,
+      '/app/feature.ts': `import { U } from './u.component'
+const core = [{ path: 'users', component: U }]
+export const featureRoutes = [...core]`,
+      '/app/a.component.ts': C('<a routerLink="/users">stale</a>'),
+      '/app/u.component.ts': C('<p>u</p>'),
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin', '/admin/users'])
+    expect(graph.edges.filter((e) => e.modality === 'must')).toEqual([])
+  })
+
+  it('does not declare a loss when the only claimant of a spec file is unreachable', () => {
+    // The root scan skips specs unconditionally, so no claim caused the absence and nothing was lost.
+    const project = inMemory({
+      '/app/app.module.ts': `import { RouterModule } from '@angular/router'
+import { A } from './a.component'
+@NgModule({ imports: [RouterModule.forRoot([{ path: 'home', component: A }])] })
+export class AppModule {}`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/factory.ts': `import type { Routes } from '@angular/router'
+export function makeRoutes(): Routes {
+  return [{ path: 'x', loadChildren: () => import('./demo.spec').then((m) => m.DEMO) }]
+}`,
+      '/app/demo.spec.ts': `import type { Routes } from '@angular/router'
+import { D } from './d.component'
+export const DEMO: Routes = [{ path: 'demo', component: D }]`,
+      '/app/d.component.ts': C('<p>d</p>'),
+    })
+    const { soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('does not declare a loss when the claimed file holds a route-shaped array the root scan would mint nothing from', () => {
+    // A menu config carries `path` with no component, so the root scan would have minted no node
+    // from it: a shape test counts it as a lost route table, and the false note voids every
+    // dead-link claim the application carries.
+    const project = inMemory({
+      '/app/app.module.ts': `import { RouterModule } from '@angular/router'
+import { A } from './a.component'
+@NgModule({ imports: [RouterModule.forRoot([{ path: 'home', component: A }])] })
+export class AppModule {}`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/factory.ts': `import type { Routes } from '@angular/router'
+export function makeRoutes(): Routes {
+  return [{ path: 'x', loadChildren: () => import('./feature/menu').then((m) => m.MENU) }]
+}`,
+      '/app/feature/menu.ts': `export const MENU = [{ path: 'dashboard', label: 'D' }, { path: 'reports', label: 'R' }]`,
+    })
+    const { soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
   })
 })

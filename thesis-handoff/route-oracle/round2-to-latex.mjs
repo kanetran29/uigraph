@@ -7,14 +7,48 @@
 // before the round) and five files from after it: <slug>.fin.C.json (the route oracle),
 // <slug>.fin.L.json (the loss breakdown), <slug>.fin.B.json (the witness check),
 // <slug>.fin.why.json (the reason for every construct still unrecovered) and
-// <slug>.fin.notes.json (the extractor's own soundiness notes). run-all.mjs writes them.
+// <slug>.fin.notes.json (the extractor's own soundiness notes). Two run-all.mjs runs into one
+// --out write them: --label ctrl against the pre-round extractor, --label fin against the
+// round-two one. The ctrl run is expected to exit non-zero, so the two commands must not be
+// chained. The declared-screen denominator move is accounted against the EARLIER oracle's own
+// output, which this script reads from the repository's tracked results-before/raw/<slug>.C.json
+// beside itself and not from <outDir>: that file's provenance is a fact about the repository and
+// not about whatever a scratch directory happens to hold, and a hand-made pre file from a
+// mid-round revision of the oracle passed every internal check this script can make while
+// publishing a denominator move that was partly the round's own doing. run-all.mjs rejects
+// --label pre, and its header entry for that label says which revision the tracked file is.
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const dir = process.argv[2]
 const SLUGS = ['realworld', 'alfresco', 'ghostfolio', 'k8sdash', 'bitwarden', 'mifos']
 const NAME = { realworld: 'realworld', alfresco: 'alfresco', ghostfolio: 'ghostfolio', k8sdash: 'k8s dashboard', bitwarden: 'bitwarden', mifos: 'mifos' }
+/**
+ * What each application is called inside a control-sequence name, which holds letters only. It is
+ * written out because no rule over the slug gives `Kdash` for `k8sdash`: a rule that drops the
+ * digit gives `ksdash`, one that spells it out gives `KEightsdash`, and the chapters write `Kdash`.
+ */
+const MACRO_TAG = { realworld: 'Realworld', alfresco: 'Alfresco', ghostfolio: 'Ghostfolio', k8sdash: 'Kdash', bitwarden: 'Bitwarden', mifos: 'Mifos' }
+/**
+ * Every slug must have a display name and a control-sequence tag, and the tag must be letters
+ * only, which is all a control-sequence name can hold. A slug added to SLUGS alone would print
+ * `undefined` into three table bodies and into macro names such as `\RoundTwoRoutesundefined`,
+ * and a tag with a digit in it (`K8dash`) would emit a `\newcommand` that pdflatex rejects after
+ * this script has exited 0, so both are checked before anything is emitted.
+ */
+for (const s of SLUGS) {
+  if (!NAME[s]) throw new Error(`${s} is in SLUGS but NAME has no entry for it`)
+  if (!/^[A-Za-z]+$/.test(MACRO_TAG[s] ?? '')) throw new Error(`${s}: MACRO_TAG is ${JSON.stringify(MACRO_TAG[s])}, which is not a control-sequence name (letters only)`)
+}
 const rd = (f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) } catch { return null } }
+/**
+ * Read a result file by its path relative to THIS script rather than to `<outDir>`, for the one
+ * input that is a tracked artefact of the repository and not a product of the run being reported.
+ * Absence throws: results-before/raw is committed and complete for every slug, so a missing file
+ * means the script was copied out of the repository, not that the application did not move.
+ */
+const rdHere = (f) => JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), f), 'utf8'))
 const pc = (n, d) => (d ? ((n / d) * 100).toFixed(1) + '\\,\\%' : '--')
 
 const rows = SLUGS.map((s) => ({
@@ -24,7 +58,15 @@ const rows = SLUGS.map((s) => ({
   b1: rd(`${s}.fin.B.json`),
   w: rd(`${s}.fin.why.json`),
   notes: rd(`${s}.fin.notes.json`),
+  pre: rdHere(`results-before/raw/${s}.C.json`),
 })).filter((r) => r.c1 && r.l1)
+/**
+ * Every application must have a readable fin.C.json and fin.L.json. The filter above drops a
+ * slug without them, which would print every table and total over fewer applications than the
+ * thesis names and still exit 0, so a missing or unparsable pair stops the run and names the slug.
+ */
+const unread = SLUGS.filter((s) => !rows.some((r) => r.s === s))
+if (unread.length > 0) throw new Error(`${dir}: <slug>.fin.C.json and <slug>.fin.L.json must both be readable, and at least one is missing or unparsable for ${unread.join(', ')}`)
 
 const tot = rows.reduce((a, r) => {
   a.inScope += r.l1.inScope; a.rec += r.l1.recovered; a.lost += r.l1.lost
@@ -69,8 +111,6 @@ out.push(`All & ${tot.raw} & ${tot.excl} & ${tot.inScope} & ${pc(tot.rec, tot.in
 out.push('\\bottomrule')
 out.push('\\end{tabular}}')
 
-const reasons = {}
-for (const r of rows) if (r.w) for (const [k, v] of Object.entries(r.w.byReason)) reasons[k] = (reasons[k] || 0) + v
 const PRETTY = {
   'extractor-note:unresolved-target': 'The target was read; no node matches it',
   'unmapped-target': 'A literal target matching no declared route',
@@ -80,13 +120,26 @@ const PRETTY = {
   'owner-has-no-node': 'The owning component has neither a node nor a scope',
   'no-witness-though-owner-has-a-node': 'The screen is in the graph; nothing was parsed here',
   'parsed-file-no-note-near-construct': 'The file is parsed, but nothing lands near the site',
-  'non-component-source:plain-class': 'A plain class nothing in the application injects',
-  'non-component-source:service': 'A service nothing in the application injects',
-  'non-component-source:directive': 'A directive nothing applies',
+  'extractor-note:unattributed-non-component': 'A class the extractor could not place under any screen',
+  'owner-file-not-readable': 'The owning file could not be opened here',
+  'non-component-source-unattributed:plain-class': 'A plain class; whether anything injects it is not established',
+  'non-component-source-unattributed:service': 'A service; whether anything injects it is not established',
+  'non-component-source-unattributed:directive': 'A directive; whether anything applies it is not established',
+  // The slug as it was written before the suffix, so a results directory made before it still prints.
+  'non-component-source:plain-class': 'A plain class; whether anything injects it is not established',
+  'non-component-source:service': 'A service; whether anything injects it is not established',
+  'non-component-source:directive': 'A directive; whether anything applies it is not established',
   'edge-exists-witness-on-another-line': 'The edge exists, witnessed on another line',
   'declared-route-has-no-node': 'The route is declared; the node is missing',
   'name-not-resolved': 'The target names a value no resolver could follow',
   'extractor-note:over-approximation': 'Over-approximated at the site',
+}
+// Keyed by the published text, not the slug: two slugs mapping to one reason would otherwise
+// print it as two identical rows whose total still closes, publishing one finding as two.
+const reasons = {}
+for (const r of rows) if (r.w) for (const [k, v] of Object.entries(r.w.byReason)) {
+  const t = PRETTY[k] ?? k.replace(/_/g, '\\_')
+  reasons[t] = (reasons[t] || 0) + v
 }
 out.push('\\newcommand{\\TabRoundTwoReasons}{%')
 out.push('\\begin{tabular}{rl}')
@@ -94,7 +147,7 @@ out.push('\\toprule')
 out.push('Sites & Reason the site is not a transition \\\\')
 out.push('\\midrule')
 for (const [k, v] of Object.entries(reasons).sort((a, b) => b[1] - a[1])) {
-  out.push(`${v} & ${PRETTY[k] ?? k.replace(/_/g, '\\_')} \\\\`)
+  out.push(`${v} & ${k} \\\\`)
 }
 out.push('\\midrule')
 out.push(`${tot.lost} & All, none of them without a reason \\\\`)
@@ -141,6 +194,11 @@ mac('RoundTwoMustClean', `${mC}/${mE}`)
 mac('RoundTwoMustViolations', mE - mC)
 mac('RoundTwoMustConv', pc(mConv, rawAll))
 mac('RoundTwoZeroMustApps', rows.filter((r) => r.b1 && r.b1.mustEdges === 0).length)
+// The Routes column of the corpus table: the route entries the independent parser reached in the
+// fin run, read from the result and not typed, since the figure moves whenever the parser does.
+// A blind spot is a place where the parser could not read what the application declares, so an
+// application that still has one is printed as a lower bound and one that has none as exact.
+for (const r of rows) mac(`RoundTwoRoutes${MACRO_TAG[r.s]}`, `${r.c1.blindSpots.length > 0 ? '$\\geq$' : ''}${r.c1.routes.length}`)
 // The figures without mifos, which supplies three quarters of the corpus on its own.
 const nm = rows.filter((r) => r.s !== 'mifos')
 const nmS = nm.reduce((a, r) => a + r.l1.inScope, 0)
@@ -162,6 +220,13 @@ const targetOf = (rec) => (/"([^"]+)"/.exec(rec.detail ?? '') ?? [])[1] ?? null
  * analysis had no base to resolve it against, which is the analysis's gap, not a dead link.
  */
 const namesAPath = (t) => t !== null && t.startsWith('/') && t !== '/'
+/**
+ * Which of the three reasons a target names no screen path applies. They were one bucket, and
+ * the chapter described it as the relative one, which was true of eight of the nine sites and
+ * not of the ninth: a note that quotes no target establishes nothing about the target, and
+ * saying the analysis lacked a base to resolve it against claims more than the record holds.
+ */
+const notAPathKind = (t) => (t === null ? 'no-target' : t === '/' ? 'app-root' : 'relative')
 
 /**
  * Can this application be said not to declare `target`? The question the dead-link claim
@@ -175,8 +240,7 @@ const namesAPath = (t) => t !== null && t.startsWith('/') && t !== '/'
 function undeclaredIn(c, target) {
   if (!namesAPath(target)) return 'not-a-path'
   const t = target.split('/').filter(Boolean)
-  // A leading hole is not an address: `['/' + x, 'transactions']` names a family of URLs, and
-  // the pattern matcher is right to refuse it but it is no evidence about any one of them.
+  // A leading hole names a family of URLs, not an address, so it is evidence about no one of them.
   if (t[0].startsWith(':')) return 'pattern-only'
   const seg = (r) => String(r.path ?? '').split('/').filter(Boolean)
   const covers = (d) => d.length <= t.length && d.every((s, i) => s.startsWith(':') || t[i].startsWith(':') || s === t[i])
@@ -191,6 +255,72 @@ function undeclaredIn(c, target) {
     }
   }
   return 'undeclared'
+}
+
+/**
+ * The route that placed `target` in the 'declared-not-a-screen' bucket: the first route in the
+ * oracle's list at the same address, by the test `undeclaredIn` applies. `undeclaredIn` files
+ * every non-SCREEN kind (PREFIX, REDIRECT, WILDCARD, LAZY_UNRESOLVED) under that one name and
+ * does not say which it met, so the kind is read off this route, or the bucket gets named for
+ * only one of the things in it.
+ */
+function placedRoute(c, target) {
+  const t = target.split('/').filter(Boolean)
+  return (c?.routes ?? []).find((r) => {
+    const d = String(r.path ?? '').split('/').filter(Boolean)
+    return d.length === t.length && d.every((s, i) => s.startsWith(':') || t[i].startsWith(':') || s === t[i])
+  })
+}
+
+/**
+ * Does the oracle's route set answer the bare URL of a prefix route? `undeclaredIn` files a
+ * target under 'declared-not-a-screen' when the first route it matches is a component-less
+ * prefix, and such a route can never have a node of its own. Angular matches a prefix only to
+ * hand the rest of the URL to its children, so the prefix's own address is answered only when
+ * one of them has the empty path, which the oracle records as a second route at the identical
+ * full path that is a screen or a redirect. The question is put to the route that placed the
+ * site in the bucket and to no other route that merely matches the target: a target hole matches
+ * a declared literal (`:savingAccountId` against `gsim-account`), and a pair found that way
+ * answers a different address. The address test is the one `undeclaredIn` applies.
+ */
+function prefixHasEmptyChild(c, target) {
+  const placed = placedRoute(c, target)
+  return placed?.kind === 'PREFIX' && c.routes.some((r) => r !== placed && /^(SCREEN|REDIRECT)$/.test(r.kind) && r.path === placed.path)
+}
+
+/**
+ * Which base does the link at `at` in `app` resolve against: 'absolute' (the root), 'relative'
+ * (the screen it fires from) or 'unknown' (the ledger cannot show which)? The extractor
+ * resolves a link against its screen when it is a template link or a `navigate` call that
+ * passes `relativeTo` (`nav.ts` sets `relative` from it, `extract.ts` picks the base by it), and
+ * keeps no record that it did; the loss ledger keeps the construct's own text, so the answer is
+ * read there. Only the ledger's literal evidence is used, and it is the evidence the extractor
+ * itself acts on: a first command that is a complete quoted string or plain attribute text,
+ * whose leading slash decides it. A slash-led head is 'absolute' for every kind of construct,
+ * whatever follows it: a leading slash beats `relativeTo` in Angular and in
+ * `resolveRelativeTarget`. Only a template link with a quoted, non-slash head is 'relative'; a
+ * `navigate` call with the same head is 'unknown', because whether it passes `relativeTo` is in
+ * the call's second argument, which the ledger's one line of the call may not show (a multi-line
+ * call is cut at its first bracket).
+ * A first command that is a name, a chain, a concatenation or a template string is 'unknown'
+ * too, because the extractor resolves a name through constants this script cannot see and calls
+ * the link absolute when the constant starts with a slash, so reading the raw text would count
+ * it relative whatever the extractor did. The ledger does not tell a plain `routerLink="edit"`
+ * from a bound `[routerLink]="edit"` either, so unquoted text that is not slash-led is
+ * 'unknown' as well. A dead-link note names the owning component file, a ledger row the file the
+ * construct sits in, so a site is looked up under both spellings; one that matches no row or
+ * more than one is an error, because classing it by guess would put a figure in the thesis that
+ * no result file supports.
+ */
+function linkBaseOf(app, at) {
+  const ledger = rows.find((r) => r.s === app).l1.rows
+  const hits = ledger.filter((x) => x.at === at || (x.owner && `${x.owner}:${x.at.replace(/^.*:/, '')}` === at))
+  if (hits.length !== 1) throw new Error(`${hits.length} loss-ledger rows at ${app} ${at}: cannot say whether the link is relative`)
+  const head = hits[0].target.trim().replace(/^\[\s*/, '').split(',')[0].replace(/\]\s*\)?\s*;?\s*$/, '').trim()
+  const lit = /^'([^']*)'$/.exec(head) ?? /^"([^"]*)"$/.exec(head)
+  const text = lit ? lit[1] : head
+  if (text.startsWith('/')) return 'absolute'
+  return hits[0].kind === 'routerLink' && lit && text !== '' ? 'relative' : 'unknown'
 }
 
 // The sites whose target was read and could not be placed, split by the claim each group can
@@ -253,10 +383,10 @@ for (const r of rows) for (const n of r.notes ?? []) {
     const target = targetOf(n)
     const verdict = undeclaredIn(r.c1, target)
     const bucket = /could not be read/.test(n.detail ?? '') ? 'caveated'
-      : verdict === 'not-a-path' ? 'root'
+      : verdict === 'not-a-path' ? notAPathKind(target)
         : verdict === 'undeclared' ? 'dead'
           : verdict
-    wildSites.set(`${r.s}:${n.file}:${n.loc?.line}:${target ?? ''}`, { bucket, app: r.s, at: `${n.file}:${n.loc?.line}`, target })
+    wildSites.set(`${r.s}:${n.file}:${n.loc?.line}:${target ?? ''}`, { bucket, app: r.s, at: `${n.file}:${n.loc?.line}`, target, placedKind: bucket === 'declared-not-a-screen' ? placedRoute(r.c1, target)?.kind : null, emptyChild: bucket === 'declared-not-a-screen' && prefixHasEmptyChild(r.c1, target) })
   } else if (n.kind === 'unresolved-target') unres++
 }
 const wildOf = (b) => [...wildSites.values()].filter((s) => s.bucket === b)
@@ -265,10 +395,24 @@ const deadFromNotes = wildOf('dead').length
 // than folded into the residual: the oracle declares the route and the extractor minted no
 // node for it, the route is a path prefix and never was a screen, or it sits inside a module
 // the oracle could not open.
-mac('RoundTwoWildcardNoNode', wildOf('declared-no-node').length + wildOf('declared-not-a-screen').length)
+// A screen with no node is the extractor's defect; a prefix has no component and could never have one, so the two are different claims.
+const wildNoNode = wildOf('declared-no-node').length
+mac('RoundTwoWildcardNoNode', wildNoNode === 0 ? 'none' : String(wildNoNode))
+const notScreen = wildOf('declared-not-a-screen')
+// The bucket means "not a screen" and the macros below say "prefix", so a member of any other
+// kind stops the run instead of being counted under the wrong name.
+const notPrefix = notScreen.filter((s) => s.placedKind !== 'PREFIX')
+if (notPrefix.length > 0) {
+  throw new Error(`'declared-not-a-screen' holds ${notPrefix.length} site(s) placed by a route that is not a PREFIX: ${notPrefix.map((s) => `${s.app} ${s.at} (${s.placedKind})`).join('; ')}`)
+}
+const wildPrefix = notScreen.filter((s) => s.placedKind === 'PREFIX')
+mac('RoundTwoWildcardPrefix', wildPrefix.length === 0 ? 'none' : String(wildPrefix.length))
+mac('RoundTwoWildcardPrefixEmptyChild', wildPrefix.filter((s) => s.emptyChild).length)
 mac('RoundTwoWildcardBlind', wildOf('under-blind-spot').length)
 mac('RoundTwoWildcardPattern', wildOf('pattern-only').length)
-mac('RoundTwoWildcardRoot', wildOf('root').length)
+mac('RoundTwoWildcardRelative', wildOf('relative').length)
+mac('RoundTwoWildcardAppRoot', wildOf('app-root').length)
+mac('RoundTwoWildcardNoTarget', wildOf('no-target').length)
 mac('RoundTwoWildcardRescued', wildSites.size)
 mac('RoundTwoUnresolvedTarget', unres)
 // A wildcard note whose detail carries the route-set caveat is NOT a dead-link candidate:
@@ -285,6 +429,17 @@ mac('RoundTwoDeadLinkUnanswered', deadFromReasons)
 // than leaving a site count to read as a defect count.
 const allDead = [...deadSites, ...wildOf('dead')]
 mac('RoundTwoDeadLinkUrls', new Set(allDead.map((d) => d.target)).size)
+// A candidate is a site and a location is a file:line, and they differ: one
+// `[routerLink]="'edit'"` is a single location and three candidates, one per owner screen. So
+// the split is emitted in both units, each named for its own, and a sentence must not move from
+// one to the other.
+const locationOf = (d) => `${d.app}:${d.at}`
+const baseAt = new Map(allDead.map((d) => [locationOf(d), linkBaseOf(d.app, d.at)]))
+mac('RoundTwoDeadLinkLocations', baseAt.size)
+for (const [name, base] of [['Absolute', 'absolute'], ['Relative', 'relative'], ['BaseUnknown', 'unknown']]) {
+  mac(`RoundTwoDeadLink${name}`, allDead.filter((d) => baseAt.get(locationOf(d)) === base).length)
+  mac(`RoundTwoDeadLink${name}Locations`, [...baseAt.values()].filter((b) => b === base).length)
+}
 mac('RoundTwoDeadLinkApps', new Set(allDead.map((d) => d.app)).size)
 mac('RoundTwoDeadLinkWhere', [...new Set(allDead.map((d) => NAME[d.app]))].sort().join(', ') || 'none')
 
@@ -309,6 +464,13 @@ mac('RoundTwoTopFanoutSite', top ? `\\texttt{${tex(top[0].split('\u0000')[1].rep
 const mifosEdges = rows.find((r) => r.s === 'mifos')?.b1?.edges ?? 0
 mac('RoundTwoMifosEdgeShare', pc(mifosEdges, aE))
 
+// The graph nodes the independent oracle matches to no declared screen, and how many of them
+// are the extractor's own synthetic catch-all at route `*`. Both are counted so the prose that
+// calls every one of them the catch-all is checked by these two figures agreeing, not asserted.
+const extraNodes = rows.flatMap((r) => r.c1.comparison.extraNodes ?? [])
+mac('RoundTwoExtraNodes', extraNodes.length)
+mac('RoundTwoExtraNodesWildcard', extraNodes.filter((n) => n.route === '*').length)
+
 // The dynamic sites of the application whose second column the thesis reads out, and how
 // many files they are spread over: the point of the sentence is that they are a habit of the
 // codebase rather than one builder to fix, which is a claim about the spread.
@@ -317,4 +479,75 @@ const dynFiles = new Map()
 for (const row of kd) if (row.cls === 'ACCOUNTED_DYNAMIC') dynFiles.set(row.owner, (dynFiles.get(row.owner) ?? 0) + 1)
 mac('RoundTwoDynamicFiles', dynFiles.size)
 mac('RoundTwoDynamicFilesOne', [...dynFiles.values()].filter((n) => n === 1).length)
+
+/**
+ * How one application's declared-screen denominator moved between the earlier oracle and this
+ * round's. `pre` is the earlier oracle's own tracked output for the application
+ * (`results-before/raw/<slug>.C.json`, which run-all.mjs's --label pre entry identifies as
+ * index.mjs as it stood before f42b615) and `post` this round's (`<slug>.fin.C.json`); the
+ * SCREEN paths of each are diffed, and every path that left is filed by what ALL the files that
+ * declared it in `pre` say: `inside` if any of them is inside the application directory, else
+ * `storybook` if any is a Storybook fixture, else `outside` (a file name that climbs out of the
+ * directory). The weakest claim wins, never the oracle's walk order: a path declared both in a
+ * sibling project and inside the application is a screen this application mounts, so calling it
+ * "found only in other projects" would mint an attribution the data contradicts, which first-wins
+ * did for bitwarden (its split changed with the walk order). The three classes still
+ * partition the dropped paths, so `declared - dropped + added = now` holds by construction
+ * instead of by a sentence typed into the thesis. `pre` is NOT the control run
+ * (`<slug>.ctrl.C.json`), which is the pre-round EXTRACTOR measured by the CURRENT oracle, so
+ * none of these figures may be set beside that table's as if they were one measurement: the node
+ * table's declared column reads earlier oracle to current oracle, while its before and after
+ * columns read earlier extractor to round-two extractor. `declared` and `now` count distinct SCREEN paths, which is what the
+ * oracle's own `declaredScreens` counts, so the caller can hold each against the file's figure.
+ */
+function denominatorMove(pre, post) {
+  const filesOf = new Map()
+  for (const r of pre.routes) if (r.kind === 'SCREEN') filesOf.set(r.path, [...(filesOf.get(r.path) ?? []), r.file])
+  const now = new Set(post.routes.filter((r) => r.kind === 'SCREEN').map((r) => r.path))
+  const classOf = (file) => (/\.stories\.ts$/.test(file) ? 'storybook' : file.startsWith('../') ? 'outside' : 'inside')
+  const dropped = { outside: 0, storybook: 0, inside: 0 }
+  for (const [p, files] of filesOf) {
+    if (now.has(p)) continue
+    const classes = new Set(files.map(classOf))
+    dropped[classes.has('inside') ? 'inside' : classes.has('storybook') ? 'storybook' : 'outside']++
+  }
+  return { declared: filesOf.size, ...dropped, added: [...now].filter((p) => !filesOf.has(p)).length, now: now.size }
+}
+// How many applications' declared SETS moved, and how many of those moved while the COUNT stood
+// still: the count is the figure the node table prints and the one a reader takes for the
+// denominator, and on this corpus it is a bad summary of the set.
+const setMoved = []
+// Only an application whose declared set moved gets macros: for the others the earlier oracle
+// and this one agree, and a row of zeros beside the control run's different count would assert
+// that nothing moved where the node table says something did.
+for (const r of rows.filter((x) => x.pre)) {
+  const m = denominatorMove(r.pre, r.c1)
+  // Each file's declaredScreens must equal the distinct SCREEN paths of its own routes, checked before the skip below so an application that did not move is held to it too.
+  if (m.declared !== r.pre.comparison.declaredScreens || m.now !== r.c1.comparison.declaredScreens) {
+    throw new Error(`${r.s}: results-before/raw/${r.s}.C.json declares ${r.pre.comparison.declaredScreens} screens and lists ${m.declared} distinct SCREEN paths, ${r.s}.fin.C.json declares ${r.c1.comparison.declaredScreens} and lists ${m.now}; the oracle's declaredScreens is that count, so a file where the two differ is not an oracle run's output`)
+  }
+  if (m.outside + m.storybook + m.inside + m.added === 0) continue
+  setMoved.push(m)
+  for (const [k, v] of Object.entries(m)) mac(`RoundTwoEarlierOracle${MACRO_TAG[r.s]}${k[0].toUpperCase()}${k.slice(1)}`, v)
+}
+/**
+ * Edges whose only witness lies outside the application directory, totalled and for the
+ * application that carries most of them. Both tools read those files, so the two agreeing about
+ * such an edge is not independent evidence: the figure is what the independence caveat of
+ * Chapter 4 costs on this corpus, which is why it is generated rather than described.
+ */
+const outside = rows.filter((r) => r.b1).map((r) => ({ s: r.s, n: r.b1.outsideApp ?? 0, m: r.b1.outsideAppMust ?? 0 }))
+const worstOutside = outside.reduce((a, b) => (b.n > a.n ? b : a), { s: null, n: -1, m: 0 })
+// The largest remaining group, named because it is now the majority of the remainder: a class
+// the extractor parsed, found a navigation site in, and could place under no screen. It is the
+// extractor's own note, so the reason is its record rather than this harness's inference.
+mac('RoundTwoUnplacedClass', rows.reduce((a, r) => a + (r.w?.byReason?.['extractor-note:unattributed-non-component'] ?? 0), 0))
+mac('RoundTwoOutsideWitness', outside.reduce((a, b) => a + b.n, 0))
+mac('RoundTwoOutsideWitnessMust', outside.reduce((a, b) => a + b.m, 0))
+mac('RoundTwoOutsideWitnessApps', outside.filter((o) => o.n > 0).length)
+mac('RoundTwoOutsideWitnessWorst', NAME[worstOutside.s] ?? 'none')
+mac('RoundTwoOutsideWitnessWorstN', worstOutside.n)
+mac('RoundTwoOutsideWitnessWorstMust', worstOutside.m)
+mac('RoundTwoSetMoved', setMoved.length)
+mac('RoundTwoSetMovedCountSame', setMoved.filter((m) => m.declared === m.now).length)
 console.log(out.join('\n'))

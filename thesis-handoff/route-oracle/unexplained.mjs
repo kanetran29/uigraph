@@ -57,10 +57,15 @@ function edgeFromFileTo(rel, p) {
   })
 }
 
+// The note about a construct, found by where it sits. A note with a line is keyed `file:line`. One
+// without a line is keyed on its file alone, but only `unattributed-non-component`: its detail counts
+// every navigation call in the file, so it speaks for each of them. Another kind with no line (an
+// ambiguous selector) is about one thing in the file, and keying it on the file would let it explain
+// every site there.
 const noteAt = new Map()
-for (const n of notes) if (n.file && n.loc?.line) {
-  const k = `${n.file}:${n.loc.line}`
-  if (!noteAt.has(k)) noteAt.set(k, n)
+for (const n of notes) if (n.file) {
+  const k = n.loc?.line ? `${n.file}:${n.loc.line}` : n.kind === 'unattributed-non-component' ? n.file : null
+  if (k && !noteAt.has(k)) noteAt.set(k, n)
 }
 const noteKindsInFile = new Map()
 for (const n of notes) if (n.file) {
@@ -165,6 +170,36 @@ function underBlindSpot(p) {
   })
 }
 
+/**
+ * The blindSpots entry that explains why `owner` has no node, or undefined. It holds only for a
+ * component (by its text) that the graph neither anchors a node in nor witnesses an edge from and
+ * that a lazy module the parser could not read plausibly owns; when any of those fails, the
+ * missing node is not the blind spot's doing. It is asked before the extractor's note on purpose:
+ * a declared blind spot is a gap in the route set, and a note about the same site must not hide it.
+ *
+ * What the match establishes, stated exactly, because the attribution is a filename heuristic and
+ * not a resolution: the blind spot's own file stem is a substring of the owner's path, or every
+ * literal segment of its route prefix is a WHOLE path segment of the owner. A bare substring test
+ * on the prefix read `/cluster` into `resourcelist/clusterrole/component.ts` and replaced a true
+ * extractor note with a tool blind spot that does not cover that file, so the segment test is the
+ * minimum that keeps the claim honest. It is still a heuristic in two ways the thesis records: a
+ * route prefix does not determine a directory name, so a hole whose components sit under a
+ * differently named directory is not attributed; and a blind spot whose prefix is entirely
+ * parameterised has no literal segment and is never attributed to any owner.
+ */
+function lazyBlindSpotOf(relFile, owner) {
+  if (!owner || fileKind(owner) !== 'component') return undefined
+  if (witnessFiles.has(relFile) || witnessFiles.has(owner)) return undefined
+  if ((graph.nodes || []).some((n) => n.componentPath === owner)) return undefined
+  return (routesJson.blindSpots || []).find((b) => {
+    if (b.file && owner.includes(b.file.replace(/\.module\.ts$/, ''))) return true
+    if (!b.prefix) return false
+    const segs = owner.split('/')
+    const lit = b.prefix.replace(/^\//, '').split('/').filter((k) => k && !k.startsWith(':'))
+    return lit.length > 0 && lit.every((k) => segs.includes(k))
+  })
+}
+
 const ACCOUNTED = /^(CONVERTED|QUERY_ONLY|ACCOUNTED|EXCLUDED)/
 const rows = []
 for (const r of loss.rows) {
@@ -172,8 +207,9 @@ for (const r of loss.rows) {
   const target = String(r.target ?? '').trim()
   const owner = r.owner
   const [relFile, lineNo] = [r.at.replace(/:\d+$/, ''), Number(r.at.match(/:(\d+)$/)?.[1] ?? 0)]
-  const note = noteAt.get(r.at) ?? noteAt.get(`${relFile}:${lineNo}`)
+  const note = noteAt.get(r.at) ?? noteAt.get(`${relFile}:${lineNo}`) ?? noteAt.get(relFile)
   const lit = literalTarget(target)
+  const lazyBlind = lazyBlindSpotOf(relFile, owner)
   let reason = null
   let detail = ''
 
@@ -198,27 +234,30 @@ for (const r of loss.rows) {
   } else if (lit !== null && !matchesNode(lit)) {
     reason = 'declared-route-has-no-node'
     detail = `the target "${lit}" names a declared route the extractor minted no node for`
+  } else if (lazyBlind) {
+    reason = 'owner-has-no-node:lazy-blind-spot'
+    detail = `the owning route is behind a lazy module the parser could not read: ${lazyBlind.reason ?? ''} ${lazyBlind.file ?? lazyBlind.prefix ?? ''}`
   } else if (note) {
     reason = `extractor-note:${note.kind}`
     detail = note.detail ?? ''
+  } else if (owner && fileKind(owner) === 'missing') {
+    // "Outside a component" is a claim about the file's contents, which cannot be made about a
+    // file that could not be opened: that is this harness's own gap, not a property of the source.
+    reason = 'owner-file-not-readable'
+    detail = `the owning file "${owner}" could not be opened here, so nothing is established about what declares this navigation`
   } else if (owner && fileKind(owner) !== 'component') {
-    reason = `non-component-source:${fileKind(owner)}`
-    detail = 'navigation outside a component; its scope is the join over whatever calls it, and nothing in the application injects this class'
+    reason = `non-component-source-unattributed:${fileKind(owner)}`
+    detail = 'navigation outside a component, and the extractor attached no note to it, so whether anything in the application injects this class is not established'
   } else if (!owner) {
     reason = 'no-owner-file'
     detail = 'the construct sits in a template the harness could not tie to a component class'
   } else if (!witnessFiles.has(relFile) && !witnessFiles.has(owner)) {
-    // The extractor parsed the project but anchored nothing in this file. For a component
-    // that is because its owner has no node to fire from, and the commonest cause of THAT is
-    // a lazy module whose route array the parser could not find, so say which.
+    // The extractor anchored nothing in this file; a lazy blind spot, the commonest cause, was ruled out above.
     const ownerHasNode = (graph.nodes || []).some((n) => n.componentPath === owner)
-    const blind = (routesJson.blindSpots || []).find((b) => (b.file && owner && owner.includes(b.file.replace(/\.module\.ts$/, ''))) || (b.prefix && owner && owner.includes(b.prefix.replace(/^\//, ''))))
-    reason = ownerHasNode ? 'no-witness-though-owner-has-a-node' : blind ? 'owner-has-no-node:lazy-blind-spot' : 'owner-has-no-node'
+    reason = ownerHasNode ? 'no-witness-though-owner-has-a-node' : 'owner-has-no-node'
     detail = ownerHasNode
       ? 'the owning screen is in the graph, but no target was parsed out of this file'
-      : blind
-        ? `the owning route is behind a lazy module the parser could not read: ${blind.reason ?? ''} ${blind.file ?? blind.prefix ?? ''}`
-        : 'the owning component has neither a node nor a scope, so there is no source to anchor its targets at'
+      : 'the owning component has neither a node nor a scope, so there is no source to anchor its targets at'
   } else if (/[A-Za-z]/.test(target) && !/['"`]/.test(target)) {
     reason = 'name-not-resolved'
     detail = `the target names a value (${target.slice(0, 40)}) the resolver could not follow to a constant`

@@ -60,7 +60,10 @@ bounds what either direction can show.}
 
 
 Table~\ref{tab:coverage} also reports the other direction of the same comparison, which
-the differential test produces and which an earlier version of this chapter left out. The
+the differential test produces and which an earlier version of this chapter left out. Every
+figure in this subsection is the first round's, measured with the parser as it stood then;
+Section~\ref{sec:res-round2} repeats the comparison with both tools corrected and the
+numbers move a long way. As the first round measured it, the
 parser holds no declared screen for 197 of the 338 nodes in the corpus, so node extraction
 is as inaccurate as it is incomplete. For k8s dashboard the figure is almost entirely the
 parser's own limit, 37 of its 38 unmatched nodes being the lazily loaded entries it cannot
@@ -89,10 +92,21 @@ The remaining 143 are the substantial group and have no declared route of any ki
 node's path. They are concentrated in mifos, which has 117 of them against a single parser
 blind spot, and in bitwarden, which has 23. Either the extractor emits nodes for paths it
 assembles differently from the parser, or the parser misses route tables it does not report
-as blind spots. The two methods disagree here without either being able to adjudicate, so
-this thesis reports the disagreement and does not resolve it. It is the largest single
-piece of unexplained behaviour the evaluation found, and it sits underneath every figure
-that counts nodes.
+as blind spots. The two methods disagree here without either being able to adjudicate, and
+at the close of the first round it was the largest single piece of unexplained behaviour
+the evaluation had found, sitting underneath every figure that counts nodes.
+
+The second round resolved it, and the answer was the second of the two explanations
+throughout. The figures above are the first round's and are left standing as the record of
+what that round saw; Section~\ref{sec:res-round2} repeats the comparison with both tools
+corrected, and the corpus is then left with \RoundTwoExtraNodes{} nodes that no declared
+screen matches, of which \RoundTwoExtraNodesWildcard{} sit at the extractor's own synthetic
+catch-all path --- a node by construction, not a route anyone declared. Almost all of the 143 were the
+parser reaching a route table at the wrong prefix or not reaching it at all: a route array
+behind a module the parser refused to follow, a path assembled from a constant it did not
+resolve, a lazily loaded table walked without its parent. Reporting the disagreement
+rather than attributing it was the right call at the time, and working it is what produced
+most of Section~\ref{sec:res-round2}.
 
 So the baseline recovers a small fraction of the navigation, and loses it at two levels: some screens never become nodes, and most navigation sites of the screens that do are not turned into edges.
 
@@ -476,28 +490,106 @@ must edge.
 
 \subsection{What the figures became}
 
-Table~\ref{tab:round2nodes} gives node coverage before and after. All \RoundTwoFullNodes{} of
-the applications now hold a node for every declared screen, and one of those figures deserves
-its denominator explained rather than reported. An earlier draft of this section reported bitwarden at
-69.8\,\% of 159 declared screens. Of those 159, 81 were declared in files outside the
-application being measured --- its web app resolves imports through a tsconfig alias that reaches the browser
-extension and the shared component library, and route tables found there are those projects'
-screens, not this one's --- and 19 more were Storybook fixtures, throwaway tables such as
-\texttt{/foo} and \texttt{/item-2} that exist only to render one component in isolation.
-Both tools read those files, so their agreeing about such a path was not independent evidence
-of anything. Neither reads them now, and the oracle reports how many files it set aside.
-Against the 93 screens the application itself declares, 23 of which arrived when both tools
-learned to read a route table wrapped in \texttt{Object.freeze}, the graph holds a node for
-every one.
+Table~\ref{tab:round2nodes} gives node coverage before and after. \RoundTwoFullNodes{} of
+the six applications now hold a node for every declared screen. The denominator of those ratios
+deserves more than a column of its own, because on this corpus the declared-screen \emph{count}
+turns out to be a poor summary of the declared-screen \emph{set}: between the oracle as it stood
+before this round and the oracle reported here, \RoundTwoSetMoved{} of the six applications'
+declared sets changed, and \RoundTwoSetMovedCountSame{} of those changed while the count stood
+still. A moving denominator is how a coverage figure is rigged without anyone intending it, and a
+denominator that holds its size while every address inside it changes is how the same thing
+happens without even the column moving. Each of the five is accounted for below, from the
+generated subtraction rather than from a sentence.
 
-That six of six reach every declared screen is a weaker result than it sounds, and the
+ghostfolio is the clearest case and the one that would have passed unnoticed. Its count did not
+move at all: \RoundTwoEarlierOracleGhostfolioDeclared{} declared screens before,
+\RoundTwoEarlierOracleGhostfolioNow{} after. Every single address in it changed.
+\RoundTwoEarlierOracleGhostfolioInside{} paths left the set and
+\RoundTwoEarlierOracleGhostfolioAdded{} arrived, because the earlier oracle recorded the verbatim
+expression a route's path was written as rather than the address it resolves to ---
+\path{/internalRoutes.account.path} is what it stored, where the application mounts
+\path{/about} and its siblings. A reader comparing the two counts would have concluded that
+nothing about ghostfolio's route set had changed, and would have been wrong about all of it.
+
+k8s dashboard carries the largest move, and it was missing from this section until the
+provenance of the comparison was fixed. It went from \RoundTwoEarlierOracleKdashDeclared{}
+declared screens to \RoundTwoEarlierOracleKdashNow{}, with
+\RoundTwoEarlierOracleKdashAdded{} arriving and none leaving. The earlier oracle reported 37
+blind spots for this application and could follow none of its lazy modules, so it declared the
+two screens of the root table and nothing beneath them; the oracle reported here declares the
+whole tree with no blind spot. That the earlier figure was a near-vacuous denominator, and that
+coverage against it was therefore 100\,\% of almost nothing, is a fact about the measuring
+instrument and not about the application.
+
+bitwarden went from \RoundTwoEarlierOracleBitwardenDeclared{} declared screens to
+\RoundTwoEarlierOracleBitwardenNow{}. \RoundTwoEarlierOracleBitwardenStorybook{} were Storybook
+fixtures, throwaway tables such as \path{/vault} and \path{/sm/:organizationId} that exist only
+to render one component in isolation; neither tool reads them now, and the oracle reports how
+many files it set aside. \RoundTwoEarlierOracleBitwardenInside{} were inside the application and
+left the count for ghostfolio's reason: they were recorded under a verbatim expression rather
+than an address --- \path{/AuthRoute.Login} is what the earlier run stored, because the enum
+behind it was unreadable --- so they leave that count and arrive in this one at the addresses
+they actually mount. \RoundTwoEarlierOracleBitwardenAdded{} arrived when both tools learned to
+read a route table wrapped in \texttt{Object.freeze}. Against the
+\RoundTwoEarlierOracleBitwardenNow{} screens that remain, the graph holds a node for every one.
+
+An earlier draft of this section reported bitwarden against 159 declared screens and decomposed
+that figure in detail, and the decomposition was wrong in every part. The 159 came from a file
+produced by a revision of the oracle from the middle of this round, dropped into the directory
+the tables are generated from and read as though it were the earlier oracle's output. Nothing in
+the generator could tell: the file is internally consistent, as every revision's output is, and
+an absent file was read as an application whose denominator did not move, in silence. The
+comparison is now made against the earlier oracle's own committed output, read from the
+repository rather than from the directory the run writes into, so the revision each column
+belongs to is a fact about the repository and not about what a working directory happened to
+hold. The cost of not having done that is the paragraph this one replaces.
+
+The two remaining moves are small and are printed for the same reason. alfresco went from
+\RoundTwoEarlierOracleAlfrescoDeclared{} declared screens to
+\RoundTwoEarlierOracleAlfrescoNow{}: \RoundTwoEarlierOracleAlfrescoInside{} left the count and
+\RoundTwoEarlierOracleAlfrescoAdded{} arrived, because of the workspace-alias repair rather than
+because anything was set aside. mifos kept its count at
+\RoundTwoEarlierOracleMifosDeclared{} while \RoundTwoEarlierOracleMifosInside{} paths left and
+\RoundTwoEarlierOracleMifosAdded{} arrived: the routes of its reporting module, which the
+earlier run placed at the project root as \path{/}, \path{/:filter} and \path{/run/:name}
+because it would not follow a \texttt{baseUrl} import, now sit at \path{/reports} and beneath
+it. Three fictitious addresses left the set and three real ones took their place, and the
+denominator never moved. The net change is too small to move any percentage in this chapter,
+which is exactly why it is printed: a denominator that moves without being mentioned is how the
+previous figure survived three rounds of review, and the only defence that generalises is to
+generate every part of the subtraction and let it be checked.
+
+One caveat of Chapter~\ref{ch:evaluation} can now be priced. The oracle and the extractor agree
+about an edge only where both read the same source, and \RoundTwoOutsideWitness{} edges across
+\RoundTwoOutsideWitnessApps{} applications --- \RoundTwoOutsideWitnessWorstN{} of them in
+\RoundTwoOutsideWitnessWorst{}, \RoundTwoOutsideWitnessWorstMust{} of those on the deterministic
+tier --- have their only witness in a file outside the application directory, reached through a
+workspace alias. Both tools read those files, so their agreeing there is not independent
+evidence of anything; the witness check reports the figure rather than excluding the edges,
+because the edges are real clicks in the running application even where the agreement about them
+proves less than it appears to.
+
+The reason to distrust that last sentence is not in this application but in the mechanism, and
+this round supplied the illustration. Three of bitwarden's declared screens were, for most of
+this round, outside the denominator entirely: their paths are assembled inside a template
+literal from an exported constant, neither tool could read them, and a denominator counted
+without them gave this application a coverage of exactly 100\,\%. They were readable one
+exported constant away. Both tools read them now and the figure is honest, but nothing about
+the figure itself would have said otherwise: a screen neither tool can address is invisible to
+a coverage ratio in exactly the way a screen that does not exist is. The only defence is to
+report what was set aside, which is what the blind-spots column is for and why it is printed
+beside every coverage figure in this chapter rather than in a footnote.
+
+That so many reach every declared screen is a weaker result than it sounds, and the
 blind-spots column is why: it counts the routes a tool knows are there and cannot address,
 and reaching every screen one can see says the walk finds the route tables rather than that
 the graph is complete. What the graph does with the navigation is the accounting below.
 
 \begin{table}[t]\small
 \caption{Declared screens that have a node, before and after the loss list was worked.
-Blind spots are lazy boundaries the oracle could not read.}
+A blind spot is a route the oracle knows is there and cannot address: a lazy boundary whose
+route array it could not find, a path expression it could not resolve to a literal, or a
+route whose path is computed by a custom matcher.}
 \label{tab:round2nodes}
 \TabRoundTwoNodes
 \end{table}
@@ -615,7 +707,14 @@ second is still nothing.
 \RoundTwoUnexplained{} sites remain unexplained, and Table~\ref{tab:round2reasons} gives the
 reason for each. The reasons are produced by a script that exits non-zero if a single site
 reaches the end of it without one, so a site the analysis cannot explain is a failing state
-rather than a silent remainder. One group concerns a target the extractor read and could not place: \RoundTwoTargetNoRoute{}
+rather than a silent remainder. The largest group, \RoundTwoUnplacedClass{} of the
+\RoundTwoUnexplained{}, is the attribution gap of Chapter~\ref{ch:analysis} showing through: a
+class the extractor parsed and found a navigation site in, and could place under no screen,
+because placing it needs the call graph with dependency injection that Section~\ref{sec:inputs}
+specifies and this implementation does not build. The reason is the extractor's own note and not
+this harness's inference, which matters because the alternative wording --- that nothing in the
+application injects the class --- would be a claim about the application where the truth is a
+claim about the tool. A second group concerns a target the extractor read and could not place: \RoundTwoTargetNoRoute{}
 sites whose target matched no route, split by what can actually be claimed of each ---
 \RoundTwoRelativeUnresolved{} a relative target with no base to resolve against,
 \RoundTwoUnderUnreadable{} inside a subtree one of the tools could not read,
@@ -649,14 +748,32 @@ transactions tab links to a journal entry with
 parent prefix, so the URL it builds is one no route matches. mifos declares
 \texttt{\{ path: '**', component: NotFoundComponent \}}, so the link does not fail
 invisibly: it renders the not-found screen, which is the less obvious of the two defects. The
-same shape repeats across the application. Links to \texttt{/loans-accounts/\ldots} name a
-subtree declared only under \texttt{/clients/:clientId/}, links to
-\texttt{/savings-accounts/\ldots} one declared only under \texttt{/centers/:centerId/}, and
-three calls name \texttt{/users/create}, \texttt{/system/scheduler-jobs} and
-\texttt{/system/global-configurations} where the application mounts \texttt{appusers},
-\texttt{manage-jobs} and \texttt{configurations}. One defect class accounts for all of them:
-an absolute link written against a path the application does not mount, usually the name the
-server uses rather than the one the router does. A test that never opens those tabs would not
+same shape repeats across the application. Links to \path{/loans-accounts/\ldots} name a
+subtree the application declares only under an owner --- \texttt{/clients/:clientId/} and
+\texttt{/groups/:groupId/} --- and never at the root, and links to
+\path{/savings-accounts/\ldots} one declared only under \texttt{/centers/:centerId/},
+\texttt{/clients/:clientId/} and \texttt{/groups/:groupId/}. Four calls name
+\path{/users/create}, \path{/system/scheduler-jobs} twice and
+\path{/system/global-configurations} where the application mounts \texttt{appusers},
+\texttt{manage-jobs} and \texttt{configurations}, and two more of the same shape name
+\path{/organization/users/create} and \path{/organization/data-tables/create}.
+
+The list is not one defect class, and the split matters for what each part is worth.
+\RoundTwoDeadLinkAbsolute{} of the candidates are an absolute link written against a path the
+application does not mount, usually the name the server uses rather than the one the router
+does; those are the application's. \RoundTwoDeadLinkRelative{} come from a
+\emph{relative} \texttt{routerLink} --- \texttt{[routerLink]="'edit'"},
+\texttt{[routerLink]="['../../transactions']"} --- where the target depends on resolving the
+link against the screen it fires from, and getting that base wrong is this analysis's gap
+before it is the application's defect. \RoundTwoDeadLinkBaseUnknown{} are neither, because the
+result files do not record enough of the construct to say which it is; they are counted and
+not classified, rather than assigned to the half that would flatter the finding. The last two
+groups are reported as candidates and weighted lower. Counted as places in the source rather
+than as targets the three groups are \RoundTwoDeadLinkAbsoluteLocations{},
+\RoundTwoDeadLinkRelativeLocations{} and \RoundTwoDeadLinkBaseUnknownLocations{}, and the
+difference is one relative link in a shared template that resolves against three owning
+screens: one mistake, three candidates, one place to go and look.
+A test that never opens those tabs would not
 find them, and a crawler would find them only if it reached the screens that hold them;
 reading the route configuration finds them without running anything.
 
@@ -680,9 +797,13 @@ one of them and raised that application's recovered figure by eight points.
 That enum is read now, and so is the wrapper call that holds it, so those paths resolve
 rather than being forwarded; what remains is the mechanism.
 \RoundTwoWildcardCaveated{} of the catch-all-answered sites still carry the caveat, in the two
-applications whose route sets are a lower bound: bitwarden, where three paths are built by
-substitution into a template literal, and ghostfolio, whose one unreadable declaration is the
-matcher route described below. A single unreadable path in an application voids every claim
+applications whose route sets are a lower bound: bitwarden, where two lazily loaded feature
+modules are barrels the reader cannot find a route array behind, and ghostfolio, whose one
+unreadable declaration is the matcher route described below. An earlier version of this
+paragraph named three bitwarden paths assembled inside a template literal instead; those are
+read now, which is what moved its denominator, and what is left there is a boundary rather
+than a path. The note says which of the two it is, because a dropped subtree and an
+unreadable path are not the same loss. A single unreadable declaration in an application voids every claim
 of this kind across it, which is severe, and deliberately so --- the alternative is a census
 that reports an extractor's blind spot as an application's defect. The edge is drawn either way --- Angular really does forward those URLs --- so
 what had to change was the claim attached to it, not the edge. The extractor now counts the
@@ -724,20 +845,34 @@ test had passed over.
 
 What survives all four corrections is this. Of the \RoundTwoWildcardRescued{} sites a
 catch-all route answers, \RoundTwoWildcardCaveated{} come from an application whose route set
-is a lower bound, \RoundTwoWildcardNoNode{} name a route the application does declare and the
-extractor minted no node for --- a defect, but the extractor's --- \RoundTwoWildcardBlind{}
+is a lower bound, \RoundTwoWildcardNoNode{} name a route the application declares as a screen
+and the extractor minted no node for --- a defect, but the extractor's ---
+\RoundTwoWildcardPrefix{} name a route it declares as a \emph{path prefix}, which carries no
+component and so could never have had a node, \RoundTwoWildcardBlind{}
 address a subtree the oracle could not open, \RoundTwoWildcardPattern{} are a pattern with a
 hole where the first segment should be and so name no single address, and
-\RoundTwoWildcardRoot{} are a relative target the analysis had no base to resolve;
-\RoundTwoDeadLinkWildcarded{} remain. Of the \RoundTwoTargetNoRoute{} unexplained sites whose
+\RoundTwoWildcardRelative{} are a relative target the analysis had no base to resolve,
+\RoundTwoWildcardAppRoot{} name the application root, and for
+\RoundTwoWildcardNoTarget{} the record names no target at all, so nothing is established about
+where it points; \RoundTwoDeadLinkWildcarded{} remain. Of the \RoundTwoTargetNoRoute{} unexplained sites whose
 target named no route, \RoundTwoRelativeUnresolved{} are again a relative target with no base,
 \RoundTwoUnderUnreadable{} address an unreadable subtree and \RoundTwoNoRouteCaveated{} come
 from an application whose route set is a lower bound at all; \RoundTwoDeadLinkUnanswered{} remain.
-Those two residuals are the dead-link candidates: \RoundTwoDeadLinkCandidates{} sites,
-\RoundTwoDeadLinkUrls{} distinct URLs, all of them in \RoundTwoDeadLinkWhere{}. The count is
-of sites rather than of defects: one wrong prefix written into a shared template is one
-mistake and several sites. Six of the seven categories above are the tools' own limits rather
-than the applications', which is the proportion worth remembering about this kind of finding.
+Those two residuals are the dead-link candidates: \RoundTwoDeadLinkCandidates{} sites at
+\RoundTwoDeadLinkLocations{} places in the source, \RoundTwoDeadLinkUrls{} distinct URLs, all
+of them in \RoundTwoDeadLinkWhere{}. The count is of sites rather than of defects: one wrong
+prefix written into a shared template is one mistake and several sites, and one site resolved
+against several owning routes is one place to go and look and several targets. Every category
+in the enumeration above except the last of each arm is a limit of one of the two tools rather
+than a defect of an application, which is the proportion worth remembering about this kind of
+finding: the residual is what is left after the tools stop accusing the applications of their
+own blind spots.
+
+One of those categories is not yet settled. A route the application declares as a path prefix
+answers no URL of its own unless it also declares an empty-path child, so of the
+\RoundTwoWildcardPrefix{} sites excused on that ground, \RoundTwoWildcardPrefixEmptyChild{}
+address a prefix that really is answered and the rest may be dead links this census excused.
+They are reported here rather than folded into either count.
 
 It is a candidate list rather than a verdict, because the preceding four corrections are
 evidence that the tools' blind spots are not yet all known, and a route both the extractor and

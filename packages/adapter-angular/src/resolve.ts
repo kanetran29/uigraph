@@ -5,7 +5,7 @@
 
 import { Node, SyntaxKind, VariableDeclarationKind } from 'ts-morph'
 import type { EnumDeclaration, ObjectLiteralExpression, SourceFile } from 'ts-morph'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 
 // The empty candidate comes last: a `paths` target names its file with the extension
 // (`src/public-api.ts`), and trying it earlier could change what a specifier already resolves to.
@@ -37,6 +37,18 @@ export function resolveRelative(sf: SourceFile, specifier: string): SourceFile |
     }
   }
   return undefined
+}
+
+/**
+ * Whether `file` lies inside directory `dir`, tested on a path boundary. Both project-boundary
+ * guards used to be a bare `file.startsWith(dir)`, which also accepts a SIBLING whose name merely
+ * extends the directory's (`apps/web-extension` against `apps/web`), so the guard that exists to
+ * keep another application's files out let that application's files through. `dir` is resolved
+ * first so a relative or trailing-slash directory compares the way the absolute file paths do.
+ */
+export function isInsideDir(file: string, dir: string): boolean {
+  const root = resolve(dir)
+  return file.startsWith(root.endsWith('/') ? root : `${root}/`)
 }
 
 /**
@@ -132,8 +144,12 @@ export function stringProp(obj: ObjectLiteralExpression, name: string): string |
  * Follow an identifier or property-access chain to the string constant it names, so a route
  * declared as `path: internalRoutes.account.path` reads the same as `path: 'account'`. A
  * workspace that keeps its route paths in one table is otherwise invisible: the route object
- * has no literal path, so no screen is minted for it at all. Returns null for anything that
- * is not a compile-time string reachable from the files in the project.
+ * has no literal path, so no screen is minted for it at all. A template literal reads as the
+ * concatenation of its parts when each substitution is itself such a string: bitwarden declares
+ * `path: `:vaultId/${MY_ITEMS_ROUTE}``, and without that branch the three routes written that
+ * way are unreadable, which is what made its node coverage read as 100%. One span that is not a
+ * constant string makes the whole template unreadable, never a guess. Returns null for anything
+ * that is not a compile-time string reachable from the files in the project.
  */
 export function constantString(expr: Node | undefined): string | null {
   if (!expr) return null
@@ -154,6 +170,15 @@ export function constantString(expr: Node | undefined): string | null {
       // mint a screen at an address the application cannot have.
       return /[\s:]|@@/.test(msg) ? null : msg
     }
+  }
+  if (Node.isTemplateExpression(expr)) {
+    let text = expr.getHead().getLiteralText()
+    for (const span of expr.getTemplateSpans()) {
+      const value = constantString(span.getExpression())
+      if (value === null) return null
+      text += value + span.getLiteral().getLiteralText()
+    }
+    return text
   }
   if (Node.isIdentifier(expr)) return constantString(declaredInitializer(expr))
   if (Node.isPropertyAccessExpression(expr)) {
@@ -338,19 +363,26 @@ export function arrayLiteralOf(expr: Node | undefined): Node | undefined {
   return undefined
 }
 
-/** The object literal an identifier or property-access chain ultimately names, or undefined. */
+/**
+ * The object literal an identifier or property-access chain ultimately names, or undefined. A
+ * call is followed only when its callee is a freeze: the one wrapper known to hand its argument
+ * back unchanged, which is what lets a route table written `Object.freeze({...})` be read at all.
+ * A shared route table is often wrapped that way (bitwarden writes
+ * `export const AuthRoute = Object.freeze({...})`), the wrapper is transparent for reading a path
+ * out of the table, and not following it left 27 of bitwarden's declared paths as unresolvable
+ * expressions (`AuthRoute.Login`) when the literal was one call away, in both tools, so they
+ * agreed about screens neither could see. Following any one-argument call instead is wrong,
+ * because `f(x)` returns whatever f builds from x and not x itself: `writtenNames` reads the
+ * argument of `Object.assign(this, f(x))` through this function, so following `f` would read x's
+ * keys as the fields written and leave the field `f` actually writes untrusted-as-state, which
+ * draws a must edge to a stale initializer. The callee's name therefore decides, and nothing but
+ * a freeze is followed.
+ */
 export function objectLiteralOf(expr: Node): ObjectLiteralExpression | undefined {
-  // A shared route table is often wrapped in a one-argument call that returns it:
-  // `Object.freeze({...})`, `deepFreeze({...})`, a small clone helper. The wrapper is
-  // transparent for reading a path out of the table, and not following it was why 27 of
-  // bitwarden's declared paths read as unresolvable expressions (`AuthRoute.Login`) when the
-  // literal was one call away -- in BOTH tools, so they agreed about screens neither could see.
-  // Only a single-argument call is followed: a factory taking more than one argument is not an
-  // identity over its first, and reading it as one would invent an address.
   if (Node.isCallExpression(expr)) {
     const args = expr.getArguments()
     const only = args[0]
-    return args.length === 1 && only ? objectLiteralOf(only) : undefined
+    return args.length === 1 && only && FREEZE_CALLEE.test(expr.getExpression().getText()) ? objectLiteralOf(only) : undefined
   }
   if (Node.isAsExpression(expr) || Node.isParenthesizedExpression(expr) || Node.isSatisfiesExpression(expr)) return objectLiteralOf(expr.getExpression())
   if (Node.isObjectLiteralExpression(expr)) return expr
@@ -511,6 +543,9 @@ function writtenNames(cls: Node): Set<string> | 'all' {
   if (out.has(UNREADABLE)) return 'all'
   return out
 }
+
+/** The callee names `objectLiteralOf` follows: a freeze returns the object it was given. */
+const FREEZE_CALLEE = /^(Object\.freeze|freeze|deepFreeze)$/
 
 /** Stands for a write whose target name could not be read; it taints the whole class. */
 const UNREADABLE = '\u0000unreadable'

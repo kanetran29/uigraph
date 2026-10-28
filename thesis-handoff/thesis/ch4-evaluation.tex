@@ -25,19 +25,22 @@ measurements can be repeated on exactly the same code.
 
 \begin{table}[t]\small
 \caption{The corpus. Routes are the route entries reached by the independent route
-parser of Section~\ref{sec:protocol}. For kubernetes/dashboard the parser cannot follow
-37 lazily loaded entries, so its count is a lower bound.}
+parser of Section~\ref{sec:protocol}, as it stands after the corrections of
+Section~\ref{sec:res-round2}; the entries it still cannot reach are reported per application
+in Table~\ref{tab:round2nodes} rather than here. An earlier version of this table gave
+kubernetes/dashboard as a lower bound of 42 because the parser could not then follow its
+lazily loaded modules.}
 \label{tab:corpus}
 \begin{tabularx}{\textwidth}{@{}lYrY@{}}
 \toprule
 Application & Commit & Routes & Role in the study \\
 \midrule
-gothinkster/angular-realworld-example-app & \texttt{dd99ed2c} & 14 & size floor; all literal paths \\
-alfresco/alfresco-content-app & \texttt{b88d47f4} & 55 & 87 Playwright specs including a navigation suite \\
-ghostfolio/ghostfolio & \texttt{9884fa0b} & 135 & constant-valued route paths; self-hostable \\
-kubernetes/dashboard & \texttt{0ba796d9} & $\geq$42 & mid-size control \\
-bitwarden/clients (web) & \texttt{e40ce6f0} & 175 & highest guard density \\
-openMF/web-app & \texttt{7f781796} & 921 & size ceiling \\
+gothinkster/angular-realworld-example-app & \texttt{dd99ed2c} & \RoundTwoRoutesRealworld{} & size floor; all literal paths \\
+alfresco/alfresco-content-app & \texttt{b88d47f4} & \RoundTwoRoutesAlfresco{} & 87 Playwright specs including a navigation suite \\
+ghostfolio/ghostfolio & \texttt{9884fa0b} & \RoundTwoRoutesGhostfolio{} & constant-valued route paths; self-hostable \\
+kubernetes/dashboard & \texttt{0ba796d9} & \RoundTwoRoutesKdash{} & mid-size control \\
+bitwarden/clients (web) & \texttt{e40ce6f0} & \RoundTwoRoutesBitwarden{} & highest guard density \\
+openMF/web-app & \texttt{7f781796} & \RoundTwoRoutesMifos{} & size ceiling \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -165,8 +168,15 @@ two rules out any difference between the runs other than the pass itself, which 
 versions could not guarantee; Section~\ref{sec:implementation} reports that with the
 pass off the extractor reproduces the baseline edge set exactly on every application. \emph{Must-tier precision} is the fraction of must
 edges whose witness line contains a construct of the claimed kind with the claimed
-target. RQ3 is answered positively only if coverage rises and must-tier precision does
-not fall.
+target, \emph{and} whose destination node sits at an address the independent route set
+declares. The second half of that test was added late and is the reason it is stated
+here in two parts: asking only whether the witness agrees with the edge's destination
+takes the destination for granted, so a node minted at an address the application never
+mounts passes every question the check asks. One application's lazily loaded reports
+module was read at the project root for exactly that reason, and nine must edges pointed
+at the resulting address while the check reported the tier clean
+(Section~\ref{sec:corrections}). RQ3 is answered positively only if coverage rises and
+must-tier precision does not fall.
 
 \textbf{Node-level recall.} The fraction of distinct URLs visited by an application's
 own passing end-to-end tests that have a matching node in the graph. It is a
@@ -194,9 +204,12 @@ Four methods are used. None establishes correctness alone, so Table~\ref{tab:met
 Method & Quantity & Blind spot \\
 \midrule
 Witness check & Must-tier precision. For every must edge, the witness file is
-re-parsed at the claimed line and the construct kind and target are compared. &
+re-parsed at the claimed line, the construct kind and target are compared, and the
+destination node's address is tested against the independent route set. &
 Cannot see missing edges. Target agreement is invalid for over-approximated may
-edges, whose witness proves only that the call site exists. \\
+edges, whose witness proves only that the call site exists. The destination test is
+only as good as that route set: where both tools read a route table at the wrong
+prefix, they agree on a wrong address and the test passes. \\
 \addlinespace
 Differential test & Disagreements with a separately written route-configuration
 parser. &
