@@ -341,3 +341,24 @@ export const router = createBrowserRouter([
     expect(graph.nodes.some((n) => n.route?.includes('/dashboard/dashboard'))).toBe(false)
   })
 })
+
+describe('two declarations at one address (F-react-adapter)', () => {
+  it('declares the collision when a nested splat and a literal segment take the same node id', () => {
+    // `/admin/*` and `/admin/wildcard` hash to one id, and the second declaration used to be
+    // dropped with a bare continue: a screen left the graph with nothing said about it.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/App.tsx': `import Admin from './Admin'
+import AdminNF from './AdminNF'
+import W from './W'
+export default () => (<Routes><Route path="admin" element={<Admin/>}><Route path="*" element={<AdminNF/>}/><Route path="wildcard" element={<W/>}/></Route></Routes>)`,
+        '/Admin.tsx': `export default function Admin(){ return null }`,
+        '/AdminNF.tsx': `export default function AdminNF(){ return null }`,
+        '/W.tsx': `export default function W(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin', '/admin/*'])
+    expect(soundiness.filter((n) => n.kind === 'route-address-collision')).toHaveLength(1)
+  })
+})

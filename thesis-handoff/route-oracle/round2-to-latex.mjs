@@ -61,12 +61,19 @@ const rows = SLUGS.map((s) => ({
   pre: rdHere(`results-before/raw/${s}.C.json`),
 })).filter((r) => r.c1 && r.l1)
 /**
- * Every application must have a readable fin.C.json and fin.L.json. The filter above drops a
- * slug without them, which would print every table and total over fewer applications than the
- * thesis names and still exit 0, so a missing or unparsable pair stops the run and names the slug.
+ * Every application must have every file this script publishes from. The filter above drops a
+ * slug without the C/L pair, which would print every table and total over fewer applications
+ * than the thesis names and still exit 0; the rest are read through `rd`, which answers null for
+ * a file that is absent or unparsable, so each of them would quietly contribute nothing to a
+ * table whose total line still reads over all six. Deleting one application's fin.why.json left
+ * the reason table short by eleven sites under a total that still said twenty-four, at exit 0.
+ * An input a figure depends on is therefore required by name rather than defaulted away.
  */
 const unread = SLUGS.filter((s) => !rows.some((r) => r.s === s))
 if (unread.length > 0) throw new Error(`${dir}: <slug>.fin.C.json and <slug>.fin.L.json must both be readable, and at least one is missing or unparsable for ${unread.join(', ')}`)
+const REQUIRED = { b1: 'fin.B.json', w: 'fin.why.json', notes: 'fin.notes.json', c0: 'ctrl.C.json', l0: 'ctrl.L.json' }
+const absent = rows.flatMap((r) => Object.entries(REQUIRED).filter(([k]) => !r[k]).map(([, f]) => `${r.s}.${f}`))
+if (absent.length > 0) throw new Error(`${dir}: every table and macro is published over all six applications, so these inputs must be readable: ${absent.join(', ')}`)
 
 const tot = rows.reduce((a, r) => {
   a.inScope += r.l1.inScope; a.rec += r.l1.recovered; a.lost += r.l1.lost
@@ -122,6 +129,7 @@ const PRETTY = {
   'parsed-file-no-note-near-construct': 'The file is parsed, but nothing lands near the site',
   'extractor-note:unattributed-non-component': 'A class the extractor could not place under any screen',
   'owner-file-not-readable': 'The owning file could not be opened here',
+  'owner-has-no-node:lazy-blind-spot': 'The owning route is behind a module the oracle could not read',
   'non-component-source-unattributed:plain-class': 'A plain class; whether anything injects it is not established',
   'non-component-source-unattributed:service': 'A service; whether anything injects it is not established',
   'non-component-source-unattributed:directive': 'A directive; whether anything applies it is not established',
@@ -365,8 +373,17 @@ mac('RoundTwoMustInTs', mb.filter((f) => /\.ts:\d+$/.test(f.at)).length)
 // the result file rather than from the author's memory of it.
 const inTpl = mb.filter((f) => /\.html:\d+$/.test(f.at)).length
 mac('RoundTwoMustInTemplate', inTpl === 0 ? 'none' : String(inTpl))
-mac('RoundTwoMustRelUp', mb.filter((f) => /targets \/\.\./.test(f.detail)).length)
-mac('RoundTwoMustRelBare', mb.filter((f) => f.verdict === 'TARGET_MISMATCH' && !/targets \/\.\./.test(f.detail)).length)
+// Split by the target the witness RESOLVED to, which is what `detail` holds. The commands array
+// as written is not recoverable here: the loss ledger is keyed by file and line and carries
+// several constructs for one line, so no lookup recovers which of them this edge came from. The
+// earlier two-way split called every mismatch that did not resolve under `..` a bare segment,
+// which swept in two that resolve to the application root -- one of them a `navigateByUrl('/')`,
+// not a commands array at all -- and the chapter asserted of all of them a property only the
+// source shows. Three counters, and a sentence about resolved targets, is what the file supports.
+const tm = mb.filter((f) => f.verdict === 'TARGET_MISMATCH')
+mac('RoundTwoMustRelUp', tm.filter((f) => /targets \/\.\./.test(f.detail)).length)
+mac('RoundTwoMustRelRoot', tm.filter((f) => /targets \/, edge/.test(f.detail)).length)
+mac('RoundTwoMustRelBare', tm.filter((f) => !/targets \/\.\./.test(f.detail) && !/targets \/, edge/.test(f.detail)).length)
 mac('RoundTwoGraphClean', pc(aC, aE))
 mac('RoundTwoJudgedClean', pc(jC, jE))
 mac('RoundTwoJudged', jE)
@@ -493,11 +510,14 @@ mac('RoundTwoDynamicFilesOne', [...dynFiles.values()].filter((n) => n === 1).len
  * "found only in other projects" would mint an attribution the data contradicts, which first-wins
  * did for bitwarden (its split changed with the walk order). The three classes still
  * partition the dropped paths, so `declared - dropped + added = now` holds by construction
- * instead of by a sentence typed into the thesis. `pre` is NOT the control run
- * (`<slug>.ctrl.C.json`), which is the pre-round EXTRACTOR measured by the CURRENT oracle, so
- * none of these figures may be set beside that table's as if they were one measurement: the node
- * table's declared column reads earlier oracle to current oracle, while its before and after
- * columns read earlier extractor to round-two extractor. `declared` and `now` count distinct SCREEN paths, which is what the
+ * instead of by a sentence typed into the thesis. `pre` and the control run
+ * (`<slug>.ctrl.C.json`) are the same oracle reading the same source: their `routes` arrays are
+ * byte-identical on all six applications, and they differ only in the graph each was compared
+ * against. So the node table's declared column and this subtraction report ONE change, from the
+ * earlier oracle to this one, while that table's before and after columns report a different
+ * one, from the earlier extractor to the round-two extractor. One table, two changes, which is
+ * why the caption says so and why these figures may not be set beside those as if they were one
+ * measurement. `declared` and `now` count distinct SCREEN paths, which is what the
  * oracle's own `declaredScreens` counts, so the caller can hold each against the file's figure.
  */
 function denominatorMove(pre, post) {
@@ -505,11 +525,19 @@ function denominatorMove(pre, post) {
   for (const r of pre.routes) if (r.kind === 'SCREEN') filesOf.set(r.path, [...(filesOf.get(r.path) ?? []), r.file])
   const now = new Set(post.routes.filter((r) => r.kind === 'SCREEN').map((r) => r.path))
   const classOf = (file) => (/\.stories\.ts$/.test(file) ? 'storybook' : file.startsWith('../') ? 'outside' : 'inside')
-  const dropped = { outside: 0, storybook: 0, inside: 0 }
+  // A path the earlier run recorded as the EXPRESSION it was written as rather than as an
+  // address: an unresolved enum member reads `/AuthRoute.Login`, an unresolved template
+  // `/${ROUTE}`. Counted apart from the rest of `inside` because the chapter explains those two
+  // differently, and saying of all the inside paths what is true of most of them is the kind of
+  // sentence this section exists to stop.
+  const verbatim = (p) => /[A-Za-z]\.[A-Za-z]/.test(p) || p.includes('${')
+  const dropped = { outside: 0, storybook: 0, inside: 0, insideVerbatim: 0 }
   for (const [p, files] of filesOf) {
     if (now.has(p)) continue
     const classes = new Set(files.map(classOf))
-    dropped[classes.has('inside') ? 'inside' : classes.has('storybook') ? 'storybook' : 'outside']++
+    const cls = classes.has('inside') ? 'inside' : classes.has('storybook') ? 'storybook' : 'outside'
+    dropped[cls]++
+    if (cls === 'inside' && verbatim(p)) dropped.insideVerbatim++
   }
   return { declared: filesOf.size, ...dropped, added: [...now].filter((p) => !filesOf.has(p)).length, now: now.size }
 }
@@ -526,6 +554,7 @@ for (const r of rows.filter((x) => x.pre)) {
   if (m.declared !== r.pre.comparison.declaredScreens || m.now !== r.c1.comparison.declaredScreens) {
     throw new Error(`${r.s}: results-before/raw/${r.s}.C.json declares ${r.pre.comparison.declaredScreens} screens and lists ${m.declared} distinct SCREEN paths, ${r.s}.fin.C.json declares ${r.c1.comparison.declaredScreens} and lists ${m.now}; the oracle's declaredScreens is that count, so a file where the two differ is not an oracle run's output`)
   }
+  // insideVerbatim is a part of inside, not a fourth class, so it is left out of this total.
   if (m.outside + m.storybook + m.inside + m.added === 0) continue
   setMoved.push(m)
   for (const [k, v] of Object.entries(m)) mac(`RoundTwoEarlierOracle${MACRO_TAG[r.s]}${k[0].toUpperCase()}${k.slice(1)}`, v)
@@ -541,7 +570,8 @@ const worstOutside = outside.reduce((a, b) => (b.n > a.n ? b : a), { s: null, n:
 // The largest remaining group, named because it is now the majority of the remainder: a class
 // the extractor parsed, found a navigation site in, and could place under no screen. It is the
 // extractor's own note, so the reason is its record rather than this harness's inference.
-mac('RoundTwoUnplacedClass', rows.reduce((a, r) => a + (r.w?.byReason?.['extractor-note:unattributed-non-component'] ?? 0), 0))
+const UNPLACED_TEXT = PRETTY['extractor-note:unattributed-non-component']
+mac('RoundTwoUnplacedClass', reasons[UNPLACED_TEXT] ?? 0)
 mac('RoundTwoOutsideWitness', outside.reduce((a, b) => a + b.n, 0))
 mac('RoundTwoOutsideWitnessMust', outside.reduce((a, b) => a + b.m, 0))
 mac('RoundTwoOutsideWitnessApps', outside.filter((o) => o.n > 0).length)

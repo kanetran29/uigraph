@@ -254,6 +254,40 @@ function lazyHopCheck() {
       want: ' | blind 2',
       reasons: ['route table taken as lazy but reached from no root', 'route table taken as lazy but reached from no root'],
     },
+    // The three cases below reach guards that no corpus application reaches and that no earlier
+    // fixture pinned: deleting any of them left `--self-check` at exit 0 and all six corpus
+    // outputs unchanged, which is the situation the header says the fixtures exist to cover.
+    {
+      name: "a lazy module does not adopt a sibling project's table imported out of the application",
+      tsconfig: '{ "compilerOptions": { "baseUrl": "apps/web/src", "paths": { "@ext/*": ["../../ext/src/*"] } } }\n',
+      files: {
+        'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", lazy('a', './a/a.module', 'AModule')),
+        'app/a/a.module.ts': "import { ExtRoutingModule } from '../../../../../ext/src/app/ext-routing.module';\nexport class AModule {}\n",
+      },
+      workspaceFiles: { 'ext/src/app/ext-routing.module.ts': table("{ path: 'popup', component: Popup }") },
+      want: '/home[SCREEN] /a[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: "a lazy module does not adopt a sibling project's table re-exported out of the application",
+      tsconfig: '{ "compilerOptions": { "baseUrl": "apps/web/src", "paths": { "@ext/*": ["../../ext/src/*"] } } }\n',
+      files: {
+        'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", lazy('a', './a/a.module', 'AModule')),
+        'app/a/a.module.ts': "export { ExtRoutingModule } from '../../../../../ext/src/app/ext-routing.module';\n",
+      },
+      workspaceFiles: { 'ext/src/app/ext-routing.module.ts': table("{ path: 'popup', component: Popup }") },
+      want: '/home[SCREEN] /a[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: 'two barrels over one table are refused to both',
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('a', './a/index', 'ARoutingModule'), lazy('b', './b/index', 'BRoutingModule')),
+        'app/a/index.ts': "export { SharedRoutingModule } from '../shared/shared-routing.module';\n",
+        'app/b/index.ts': "export { SharedRoutingModule } from '../shared/shared-routing.module';\n",
+        'app/shared/shared-routing.module.ts': table("{ path: 'list', component: SList }"),
+      },
+      // The shared table itself is then reached from no root, which is the third blind spot.
+      want: '/a[LAZY_UNRESOLVED] /b[LAZY_UNRESOLVED] | blind 3',
+    },
   ]
   const tmp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'route-oracle-')))
   try {
@@ -262,9 +296,17 @@ function lazyHopCheck() {
       const app = path.join(root, 'apps/web')
       const out = path.join(root, 'out.json')
       fs.mkdirSync(root, { recursive: true })
-      fs.writeFileSync(path.join(root, 'tsconfig.base.json'), '{ "compilerOptions": { "baseUrl": "apps/web/src" } }\n')
+      fs.writeFileSync(path.join(root, 'tsconfig.base.json'), c.tsconfig ?? '{ "compilerOptions": { "baseUrl": "apps/web/src" } }\n')
       for (const [rel, body] of Object.entries(c.files)) {
         const file = path.join(app, 'src', rel)
+        fs.mkdirSync(path.dirname(file), { recursive: true })
+        fs.writeFileSync(file, body)
+      }
+      // `workspaceFiles` are written relative to the WORKSPACE root rather than to the measured
+      // application, which is the only way to build a sibling project: three of the lazy hop's
+      // guards are about leaving the application, and a fixture confined to it cannot reach them.
+      for (const [rel, body] of Object.entries(c.workspaceFiles ?? {})) {
+        const file = path.join(root, rel)
         fs.mkdirSync(path.dirname(file), { recursive: true })
         fs.writeFileSync(file, body)
       }
@@ -660,15 +702,21 @@ function claimedElsewhere(dep, target) {
  * its own with `forChild`, so no lazy module may adopt a `forRoot` table as its own. mifos's
  * `reports-routing.module` registers with `forChild` and is adopted; its `app-routing.module`
  * registers with `forRoot` and is not. No route claims a root table, so `claimedElsewhere` cannot
- * see it. Two limits, both measured rather than assumed. The test reads the file's own `forRoot`
+ * see it. Three limits, all measured rather than assumed. The test reads the file's own `forRoot`
  * call, so a root table whose array is declared in one file and registered in another is not
- * recognised. And it reads `RouterModule.forRoot` only, while the recogniser above accepts
+ * recognised. It reads `RouterModule.forRoot` only, while the recogniser above accepts
  * `forChild` and `provideRouter` as well, so on an application whose root is registered with the
  * standalone API, or through an alias of `RouterModule`, there is no recognisable root table and
  * this guard is inoperative: two of the six evaluated applications, realworld and alfresco, have
- * no `forRoot` call at all. Widening the predicate is not the fix, because a library's own
- * `forRoot` is a different thing from the router's; the fix is to resolve each registration
- * call's argument and mark that ARRAY, not the file, as the root table.
+ * no `forRoot` call at all. And instrumenting it over the whole corpus, it is asked 698 times
+ * and answers true NONE of them, because it is asked only of a lazy target's dependencies and no
+ * corpus application names a file holding a `forRoot` call there. So the mifos reading above is
+ * a counterfactual rather than an observation: `reports-routing.module` is adopted, and
+ * `app-routing.module` would be refused if a lazy target ever reached it, which none does. Every
+ * piece of evidence that this guard works is a constructed fixture in `--self-check`. Widening
+ * the predicate is not the fix, because a library's own `forRoot` is a different thing from the
+ * router's; the fix is to resolve each registration call's argument and mark that ARRAY, not the
+ * file, as the root table.
  */
 function isRootTable(file) {
   return file.getDescendantsOfKind(SyntaxKind.CallExpression).some((c) => /RouterModule\.forRoot$/.test(c.getExpression().getText()))
@@ -724,10 +772,9 @@ function isRootTable(file) {
  *
  * A table the import hop adopts is never recorded as a claim (`claimTables` records the loadChildren
  * target and its re-exports only), so the two hops disagree about a shared table: one routing
- * module imported by two lazy modules is adopted by both and mounted under both prefixes -- which
- * needs one importer to spell it within the target's own directory, since the import hop refuses a
- * non-relative cross-directory specifier -- while the same module behind two barrels is refused to
- * both. Each reading is defensible under forChild, but
+ * module imported by two lazy modules is adopted by both and mounted under both prefixes, by a
+ * relative specifier from anywhere inside the project root or by a non-relative one naming the
+ * target's own directory, while the same module behind two barrels is refused to both. Each reading is defensible under forChild, but
  * the tool gives imports one and barrels the other.
  *
  * One case stays open. None of the tests governs `target` itself, the module a loadChildren
@@ -738,7 +785,10 @@ function isRootTable(file) {
  * The same absence of a test on `target` lets a loadChildren that names the application's own root
  * table mount the whole root table under that route's prefix, silently; `isRootTable` is asked of
  * the DEPENDENCIES of a target, never of the target itself, because a route that names a file
- * directly is taken at its word.
+ * directly is taken at its word. The cost is not only the wrong prefix: the adopted table becomes
+ * a lazy target, so the root scan no longer reads it, and the addresses the application really
+ * mounts leave the route set altogether while the prefixed ones take their place, with no blind
+ * spot recorded.
  */
 function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
   if (depth > 12) return

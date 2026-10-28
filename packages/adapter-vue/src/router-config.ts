@@ -11,7 +11,7 @@ import type { ArrayLiteralExpression, ObjectLiteralExpression, Project, SourceFi
 import type { SoundinessNote } from '@ui-graph/core'
 import { routeToNodeId } from './ids'
 import { resolveVueComponent } from './project'
-import { stringProp } from './targets'
+import { propNamed, stringProp } from './targets'
 import type { VueComponent, VueProject } from './extract'
 
 /** A flattened route record: full path, node id, optional name/component name, resolved component, and any per-route guards. */
@@ -55,7 +55,7 @@ function normalizeRoutePath(parent: string, own: string): string {
 
 /** Resolve a route object's `component` to a registered .vue component (eager ident or lazy import). */
 function resolveComponent(obj: ObjectLiteralExpression, routesSf: SourceFile, components: VueComponent[]): { name: string | null; component: VueComponent | undefined } {
-  const prop = obj.getProperty('component')
+  const prop = propNamed(obj, 'component')
   if (!prop || !Node.isPropertyAssignment(prop)) return { name: null, component: undefined }
   const init = prop.getInitializer()
   if (!init) return { name: null, component: undefined }
@@ -112,7 +112,7 @@ function findConstructorRoutes(project: Project): { arr: ArrayLiteralExpression;
       if (!isRouterConstructor(call)) continue
       const arg = call.getArguments()[0]
       if (!arg || !Node.isObjectLiteralExpression(arg)) continue
-      const routesProp = arg.getProperty('routes')
+      const routesProp = propNamed(arg, 'routes')
       if (!routesProp || !Node.isPropertyAssignment(routesProp)) continue
       const init = routesProp.getInitializer()
       const arr = resolveArray(init, sf)
@@ -124,8 +124,8 @@ function findConstructorRoutes(project: Project): { arr: ArrayLiteralExpression;
 
 /** Whether an object literal looks like a Vue route record ({ path } plus component/children/redirect). */
 function isRouteRecord(obj: ObjectLiteralExpression): boolean {
-  if (!obj.getProperty('path')) return false
-  return ['component', 'children', 'redirect'].some((p) => obj.getProperty(p) !== undefined)
+  if (!propNamed(obj, 'path')) return false
+  return ['component', 'children', 'redirect'].some((p) => propNamed(obj, p) !== undefined)
 }
 
 /** Whether a route-array element is a route record: an object literal, or an identifier resolving to one. */
@@ -196,7 +196,7 @@ function locOf(node: Node, sf: SourceFile): { line: number; col: number } {
 
 /** Whether a route object declares a per-route guard (beforeEnter). */
 function routeGuards(obj: ObjectLiteralExpression): string[] {
-  const prop = obj.getProperty('beforeEnter')
+  const prop = propNamed(obj, 'beforeEnter')
   if (!prop) return []
   if (Node.isPropertyAssignment(prop)) {
     const init = prop.getInitializer()
@@ -226,7 +226,7 @@ export function collectRoutes(vp: VueProject): CollectedRoutes {
     }
     const own = stringProp(obj, 'path')
     if (own === null) {
-      const pathProp = obj.getProperty('path')
+      const pathProp = propNamed(obj, 'path')
       const pathText = pathProp && Node.isPropertyAssignment(pathProp) ? (pathProp.getInitializer()?.getText() ?? pathProp.getText()) : pathProp?.getText()
       if (pathProp) notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(pathProp, sf), detail: `route record path "${pathText}" is not a string literal — the record and any children are skipped` })
       return 0
@@ -242,15 +242,15 @@ export function collectRoutes(vp: VueProject): CollectedRoutes {
     const claimant = claimedBy.get(nodeId)
     if (claimant === undefined) {
       claimedBy.set(nodeId, obj)
-      const redirect = obj.getProperty('redirect') !== undefined
+      const redirect = propNamed(obj, 'redirect') !== undefined
       // a redirect fires only when the record is the last match, so with children its `component` still lays out the matched child; without children it renders nothing
-      const rendersNothing = redirect && obj.getProperty('children') === undefined
+      const rendersNothing = redirect && propNamed(obj, 'children') === undefined
       const { name, component } = rendersNothing ? { name: null, component: undefined } : resolveComponent(obj, sf, vp.components)
       byNodeId.set(nodeId, { fullPath, nodeId, name: stringProp(obj, 'name'), componentName: name, component, guards: routeGuards(obj), redirect, rendersNothing })
     } else if (claimant !== obj) {
       notes.push({ kind: 'route-address-collision', file: sf.getFilePath(), loc: locOf(obj, sf), detail: `route record "${own}" resolves to ${fullPath}, which an earlier record already claims — this record's own component, guards and redirect are dropped (its children are still read); where both records name the same component the address still renders it, so the drop is of the record and not necessarily of a screen` })
     }
-    const childrenProp = obj.getProperty('children')
+    const childrenProp = propNamed(obj, 'children')
     if (childrenProp) {
       const init = Node.isPropertyAssignment(childrenProp) ? childrenProp.getInitializer() : Node.isShorthandPropertyAssignment(childrenProp) ? childrenProp.getNameNode() : undefined
       const arr = resolveArray(init, sf)
@@ -303,7 +303,7 @@ export function collectRoutes(vp: VueProject): CollectedRoutes {
       for (const vd of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
         const init = vd.getInitializer()
         if (!init || !Node.isArrayLiteralExpression(init)) continue
-        if (init.getElements().some((e) => Node.isObjectLiteralExpression(e) && e.getProperty('path') !== undefined)) {
+        if (init.getElements().some((e) => Node.isObjectLiteralExpression(e) && propNamed(e, 'path') !== undefined)) {
           visitElements(init.getElements(), '', sf)
           break outer
         }

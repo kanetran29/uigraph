@@ -77,11 +77,11 @@ injective on the routes whose full paths are pairwise distinct. Angular also per
 component-bearing routes with the same full path, told apart at run time by
 \texttt{pathMatch} or by a \texttt{canMatch} guard. The model assumes that this does not
 occur: the extractor keeps the route declared first under a full path and drops the
-later ones. For Vue the extractor also declares the drop, as a note carrying the file and line
-of the record it discarded, so a graph built from a table with a repeated address says so
-rather than being quietly one screen short; the note is true of the record and over-stated
-about the graph, because where both records name the same component the address still renders
-it. Angular's extractor drops silently, which is one of the asymmetries
+later ones. For Vue and for React the extractor also declares the drop, as a note carrying the
+file and line of the record it discarded, so a graph built from a table with a repeated address
+says so rather than being quietly one screen short; the note is true of the record and
+over-stated about the graph, because where both records name the same component the address
+still renders it. Angular's extractor drops silently, which is one of the asymmetries
 Section~\ref{sec:transfer} returns to. Two routes with different paths that render the same component give two
 screens, which is the case that makes the attribution of
 Section~\ref{sec:attribution} necessary.

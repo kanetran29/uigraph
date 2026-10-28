@@ -217,7 +217,12 @@ export function collectRoutes(project: Project): RouteCollection {
       if (ancestors === null) continue
       const fullPath = joinPath(ancestors, ownPath)
       const nodeId = routeToNodeId(fullPath)
-      if (byNodeId.has(nodeId)) continue
+      const held = byNodeId.get(nodeId)
+      if (held !== undefined) {
+        const lc = sf.getLineAndColumnAtPos(el.getStart())
+        soundiness.push({ kind: 'route-address-collision', file: sf.getFilePath(), loc: { line: lc.line, col: lc.column }, detail: `route ${fullPath} takes the node id ${nodeId}, which ${held.fullPath} already holds — this declaration's component is dropped` })
+        continue
+      }
       const { name: componentName, file: componentFile } = callSiteComponentFile(sf, el)
       const inlineInfo = componentFile ? null : inlineElementTag(el)
       let inlineElement: RouteInfo['inlineElement']
@@ -264,6 +269,7 @@ export function collectDataRoutes(project: Project): RouteCollection {
   const soundiness: SoundinessNote[] = []
 
   /** Record an honest note for a dynamic/unanalyzable piece of route config. */
+
   const note = (sf: SourceFile, node: Node, detail: string, kind = 'dynamic-route-config'): void => {
     const lc = sf.getLineAndColumnAtPos(node.getStart())
     soundiness.push({ kind, file: sf.getFilePath(), loc: { line: lc.line, col: lc.column }, detail })
@@ -365,7 +371,11 @@ export function collectDataRoutes(project: Project): RouteCollection {
     if (ownPath === null && !isIndex) return
     const fullPath = joinPath(ancestors, ownPath ?? '')
     const nodeId = routeToNodeId(fullPath)
-    if (byNodeId.has(nodeId)) return
+    const held = byNodeId.get(nodeId)
+    if (held !== undefined) {
+      note(sf, obj, `route ${fullPath} takes the node id ${nodeId}, which ${held.fullPath} already holds — this declaration's component is dropped`, 'route-address-collision')
+      return
+    }
     const resolved = resolveRouteObject(sf, obj, fullPath)
     byNodeId.set(nodeId, { fullPath, nodeId, componentName: null, componentFile: undefined, ...resolved })
   }

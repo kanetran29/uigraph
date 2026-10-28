@@ -515,9 +515,10 @@ k8s dashboard carries the largest move, and it was missing from this section unt
 provenance of the comparison was fixed. It went from \RoundTwoEarlierOracleKdashDeclared{}
 declared screens to \RoundTwoEarlierOracleKdashNow{}, with
 \RoundTwoEarlierOracleKdashAdded{} arriving and none leaving. The earlier oracle reported 37
-blind spots for this application and could follow none of its lazy modules, so it declared the
-two screens of the root table and nothing beneath them; the oracle reported here declares the
-whole tree with no blind spot. That the earlier figure was a near-vacuous denominator, and that
+blind spots for this application, every one of them a \texttt{loadChildren} target it could not
+resolve, so it declared the two screens its two eagerly registered tables carry ---
+\path{/login} and the application root --- and nothing beneath any lazy module; the oracle
+reported here declares the whole tree with no blind spot. That the earlier figure was a near-vacuous denominator, and that
 coverage against it was therefore 100\,\% of almost nothing, is a fact about the measuring
 instrument and not about the application.
 
@@ -525,11 +526,18 @@ bitwarden went from \RoundTwoEarlierOracleBitwardenDeclared{} declared screens t
 \RoundTwoEarlierOracleBitwardenNow{}. \RoundTwoEarlierOracleBitwardenStorybook{} were Storybook
 fixtures, throwaway tables such as \path{/vault} and \path{/sm/:organizationId} that exist only
 to render one component in isolation; neither tool reads them now, and the oracle reports how
-many files it set aside. \RoundTwoEarlierOracleBitwardenInside{} were inside the application and
-left the count for ghostfolio's reason: they were recorded under a verbatim expression rather
-than an address --- \path{/AuthRoute.Login} is what the earlier run stored, because the enum
-behind it was unreadable --- so they leave that count and arrive in this one at the addresses
-they actually mount. \RoundTwoEarlierOracleBitwardenAdded{} arrived when both tools learned to
+many files it set aside. \RoundTwoEarlierOracleBitwardenInside{} were inside the application.
+\RoundTwoEarlierOracleBitwardenInsideVerbatim{} of those left the count for ghostfolio's
+reason: they were recorded under a verbatim expression rather than an address ---
+\path{/AuthRoute.Login} is what the earlier run stored, because the enum behind it was
+unreadable --- so they leave that count and arrive in this one at the addresses they actually
+mount. The rest are the mifos defect in miniature: the earlier run read their path segments
+correctly but placed them at the project root, as \path{/password} and
+\path{/session-timeout}, because it could not follow the lazy table that carries them; they are
+declared in this run at the addresses the application mounts, under
+\path{/settings/security/} and \path{/vault/}. Those are the same screens at a different
+address, not screens gained or lost, which is a distinction a count of the denominator cannot
+make and a diff of the set can. \RoundTwoEarlierOracleBitwardenAdded{} arrived when both tools learned to
 read a route table wrapped in \texttt{Object.freeze}. Against the
 \RoundTwoEarlierOracleBitwardenNow{} screens that remain, the graph holds a node for every one.
 
@@ -563,8 +571,10 @@ One caveat of Chapter~\ref{ch:evaluation} can now be priced. The oracle and the 
 about an edge only where both read the same source, and \RoundTwoOutsideWitness{} edges across
 \RoundTwoOutsideWitnessApps{} applications --- \RoundTwoOutsideWitnessWorstN{} of them in
 \RoundTwoOutsideWitnessWorst{}, \RoundTwoOutsideWitnessWorstMust{} of those on the deterministic
-tier --- have their only witness in a file outside the application directory, reached through a
-workspace alias. Both tools read those files, so their agreeing there is not independent
+tier --- have their only witness in a file outside the application directory. What the check
+records is that the witness lies outside, not the route by which the file came to be read, so
+the figure is reported here and not explained; the files are of the kind a monorepo puts beside
+an application, a shared library and, in bitwarden, the repository's other front ends. Both tools read those files, so their agreeing there is not independent
 evidence of anything; the witness check reports the figure rather than excluding the edges,
 because the edges are real clicks in the running application even where the agreement about them
 proves less than it appears to.
@@ -653,12 +663,18 @@ grew from 129 edges to over a thousand. That is a worse ratio than the one edge 
 Section~\ref{sec:res-defects}, and it is reported here rather than left to be inferred from
 a coverage table. \RoundTwoMustInTs{} of the \RoundTwoMustViolations{} sit in a \texttt{.ts} file and
 \RoundTwoMustInTemplate{} in a template: \RoundTwoMustMismatch{} are a target mismatch and
-\RoundTwoMustOffBy{} a witness two lines from its construct. All \RoundTwoMustMismatch{}
-mismatches are a route-relative commands array, \RoundTwoMustRelUp{} of them beginning with
-\texttt{..} --- \texttt{['../']}, \texttt{['../centers']},
-\texttt{['../actions', \ldots]} --- and \RoundTwoMustRelBare{} a bare segment
-(\texttt{['adjustment']}), which Angular also reads relative to the current route. In each
-the check resolves the relative path against a different base than the extractor does. An earlier draft of this paragraph blamed two links
+\RoundTwoMustOffBy{} a witness two lines from its construct. The \RoundTwoMustMismatch{}
+mismatches are reported by the target each witness resolved to, which is what the check
+records: \RoundTwoMustRelUp{} resolve to a path still beginning with \texttt{..} ---
+\texttt{['../']}, \texttt{['../centers']}, \texttt{['../actions', \ldots]} ---
+\RoundTwoMustRelBare{} to a single bare segment (\texttt{['adjustment']}), which Angular also
+reads relative to the current route, and \RoundTwoMustRelRoot{} to the application root. In
+each the check resolves the relative path against a different base than the extractor does,
+except for one of the root cases, which is a \texttt{navigateByUrl('/')} and not a commands
+array at all. An earlier version of this paragraph called all of them route-relative commands
+arrays, which the result file does not establish: it holds the target each witness resolved to
+and not the expression the author wrote, and classifying by the first is not classifying by the
+second. An earlier draft of this paragraph blamed two links
 on one template line, which accounts for none of them; the shape above was read off the
 witness output rather than assumed.
 
@@ -755,8 +771,9 @@ subtree the application declares only under an owner --- \texttt{/clients/:clien
 \texttt{/clients/:clientId/} and \texttt{/groups/:groupId/}. Four calls name
 \path{/users/create}, \path{/system/scheduler-jobs} twice and
 \path{/system/global-configurations} where the application mounts \texttt{appusers},
-\texttt{manage-jobs} and \texttt{configurations}, and two more of the same shape name
-\path{/organization/users/create} and \path{/organization/data-tables/create}.
+\texttt{manage-jobs} and \texttt{configurations}, and three further calls of the same shape
+name two more addresses: \path{/organization/users/create}, from two different create-user
+components, and \path{/organization/data-tables/create}.
 
 The list is not one defect class, and the split matters for what each part is worth.
 \RoundTwoDeadLinkAbsolute{} of the candidates are an absolute link written against a path the

@@ -98,28 +98,37 @@ function isRouteArray(arr: ArrayLiteralExpression, declaredOnly = false): boolea
 }
 
 /**
- * Whether a spread of this array puts routes under the spreading route's prefix. `isRouteArray`
- * asks whether the array itself is a table; the walk's spread branch recurses into whatever array
- * it resolves, so an array that carries its routes only through a further spread or a call still
- * mints them. The claim has to answer the walk's question and not the narrower one: an array
- * whose routes are one spread deeper was dropped from the claim while the walk minted it under
- * the prefix anyway, and the root scan, no longer suppressed, minted it a second time unprefixed
- * -- a node, and a must edge into it, at an address the application does not mount. `seen` stops
- * an array that spreads itself.
+ * Whether a spread of this array puts routes under the spreading route's prefix: the question the
+ * pre-pass claim has to answer, because the walk's spread branch recurses into whatever array it
+ * resolves and mints whatever mounts something. Both of the narrower readings were tried and both
+ * are wrong in a different direction. Claiming on the file of EVERY cross-file spread, as the
+ * parent revision did, takes a component decorator's `imports: [...SHARED]` to be a route table.
+ * Claiming on `isRouteArray` instead drops an array whose routes are one spread or one call
+ * deeper, which the walk still mints under the prefix, so the root scan mints them a second time
+ * unprefixed -- a node, and a must edge into it, at an address the application does not mount.
+ * So: a `Routes`-typed array is accepted because its author declared it to the router, and
+ * anything else only when some element actually mounts something, directly or through a nested
+ * spread or call. A menu one spread deep, carrying `path` and no component, therefore claims
+ * nothing, where the shape test claimed its whole FILE and took a real table in the same file out
+ * of the root scan with it. `seen` stops an array that spreads itself.
  */
 function spreadMintsRoutes(arr: ArrayLiteralExpression, seen = new Set<ArrayLiteralExpression>()): boolean {
   if (seen.has(arr)) return false
   seen.add(arr)
-  if (isRouteArray(arr)) return true
+  if (isRouteArray(arr, true)) return true
   return arr.getElements().some((el) => {
     if (Node.isSpreadElement(el)) {
       const inner = arrayLiteralOf(el.getExpression())
       return inner !== undefined && Node.isArrayLiteralExpression(inner) && spreadMintsRoutes(inner, seen)
     }
     if (Node.isCallExpression(el)) return el.getArguments().some((a) => Node.isArrayLiteralExpression(a) && spreadMintsRoutes(a, seen))
-    return objectLiteralOf(el)?.getProperty('path') !== undefined
+    const obj = Node.isObjectLiteralExpression(el) ? el : objectLiteralOf(el)
+    return obj !== undefined && obj.getProperty('path') !== undefined && MOUNTS.some((k) => obj.getProperty(k) !== undefined)
   })
 }
+
+/** The properties that make a route object mount something: without one of them the walk mints no node for it. */
+const MOUNTS = ['component', 'loadComponent', 'children', 'loadChildren']
 
 /**
  * Find every top-level `Routes`-shaped array literal in a source file
@@ -187,9 +196,11 @@ function dependencyFile(decl: ImportDeclaration | ExportDeclaration, from: Sourc
  * shape-only holder and an ambiguous one included, so none of them is then also scanned from the
  * project root, where its entries would be minted at an address the application does not mount.
  * Claiming a shape-only holder beside an elected owner also takes it out of the only scan that
- * could have found it, and shape alone cannot say whether the router mounts it elsewhere, so
- * `unplaced` lists those holders for the caller to record as a loss. It is empty when no owner is
- * elected, because the caller then records the whole subtree as unreadable.
+ * could have found it, and shape alone cannot say whether the router mounts it elsewhere. Whether
+ * that cost anything is NOT decided here: `collectRoutes` compares every claim with what the walk
+ * followed once the walk is over, which is the only point at which the answer is known, and one
+ * place deciding it is why a holder carrying no mountable route can no longer be reported as a
+ * loss from here while the comparison there says otherwise.
  *
  * A `Routes`-typed array is stronger evidence than shape, because its author declared it to the
  * router, but it is not evidence that THIS application mounts it, and the elected owner is not
@@ -202,9 +213,9 @@ function dependencyFile(decl: ImportDeclaration | ExportDeclaration, from: Sourc
  * no application in the corpus elects an owner outside its own directory. The gap is known and
  * left open: the election proves the array is declared to a router, not that this one reads it.
  */
-function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayLiteralExpression[]; claimed: SourceFile[]; unplaced: SourceFile[] } {
+function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayLiteralExpression[]; claimed: SourceFile[] } {
   const own = findRouteArrays(target)
-  if (own.length) return { owner: target, arrays: own, claimed: [target], unplaced: [] }
+  if (own.length) return { owner: target, arrays: own, claimed: [target] }
   const holders = new Map<string, { file: SourceFile; declared: ArrayLiteralExpression[] }>()
   /** Record `dep` as a holder when it has a route-shaped array, keeping the arrays it DECLARES to the router; a file named by both an import and a re-export counts once. */
   const consider = (dep: SourceFile | undefined): void => {
@@ -221,8 +232,8 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
   const declaring = found.filter((h) => h.declared.length > 0)
   const [only] = declaring
   // One declared holder is elected without testing that it belongs to this application; see the note above on what a `Routes` type does not establish.
-  if (only && declaring.length === 1) return { owner: only.file, arrays: only.declared, claimed, unplaced: found.filter((h) => h.declared.length === 0).map((h) => h.file) }
-  return { owner: target, arrays: [], claimed, unplaced: [] }
+  if (only && declaring.length === 1) return { owner: only.file, arrays: only.declared, claimed }
+  return { owner: target, arrays: [], claimed }
 }
 
 /**
@@ -250,15 +261,33 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
  * elected is claimed (so the root scan skips it) but not walked, and is added to
  * `unreadable.unplaced` for the same reason. `paths` and `subtrees` are keyed by the route
  * object and `unplaced` by file, so a route walked under several parents is one entry.
- * `consumedFiles`, when given, collects the file of every lazy target, claimed file and spread
- * array this walk follows, which is how the caller tells a claim the walk reached from one it
- * never did.
+ * `consumedFiles`, when given, collects the file of every table this walk actually PLACES under a
+ * prefix -- a lazy target, the owner elected for it, and the source of every spread array it
+ * enters -- which is how the caller tells a claim that cost nothing from one that lost a table.
+ * A file claimed beside an elected owner and never opened is deliberately not in it, because the
+ * question the caller asks of it is whether the root scan would have minted anything there. `chain` is the arrays on the current descent: a route table that reaches itself
+ * through a `loadChildren` or a spread would otherwise be walked under an ever longer prefix
+ * until the stack ran out, which is a crash and not a reading. Reaching one again ends that
+ * branch, and where a route object stands for the hop the lost subtree is declared.
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, consumedFiles?: Set<string>): void {
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, consumedFiles?: Set<string>, chain: Set<ArrayLiteralExpression> = new Set()): void {
+  if (chain.has(arr)) return
+  chain.add(arr)
+  walkElements(arr, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
+  chain.delete(arr)
+}
+
+/**
+ * The body of `walkRouteArray`, split out so its one caller can add this array to the ancestor
+ * set before the walk and take it out after. The set has to hold the arrays on the CURRENT
+ * descent and nothing else: one kept across siblings is a visited set, which refuses the same
+ * table under a second parent and cost one corpus application a third of its routes.
+ */
+function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[], parentNodeId: string | null, redirects: Map<string, string> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>): void {
   for (const el of arr.getElements()) {
     if (Node.isCallExpression(el)) {
       for (const arg of el.getArguments()) {
-        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles)
+        if (Node.isArrayLiteralExpression(arg)) walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
       }
       continue
     }
@@ -269,7 +298,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
       const arr = arrayLiteralOf(el.getExpression())
       if (arr && Node.isArrayLiteralExpression(arr)) {
         consumedFiles?.add(arr.getSourceFile().getFilePath())
-        walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles)
+        walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
       }
       continue
     }
@@ -317,22 +346,26 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
     const childrenProp = obj.getProperty('children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
       const childInit = childrenProp.getInitializer()
-      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles)
+      if (childInit && Node.isArrayLiteralExpression(childInit)) walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
     }
     const childSpec = lazyImportSpecifier(obj, 'loadChildren')
     if (childSpec || lazyIdentifierTarget(sf, obj, 'loadChildren')) {
       const childModule = childSpec ? resolveRelative(sf, childSpec) : lazyIdentifierTarget(sf, obj, 'loadChildren')
       if (childModule) {
-        const { owner, arrays, claimed, unplaced } = lazyRouteOwner(childModule)
+            const { owner, arrays, claimed } = lazyRouteOwner(childModule)
         if (arrays.length === 0 && unreadable) unreadable.subtrees.add(obj)
-        if (unreadable) for (const f of unplaced) unreadable.unplaced.add(f)
         loadedChildFiles.add(childModule.getFilePath())
         consumedFiles?.add(childModule.getFilePath())
-        for (const f of claimed) {
-          loadedChildFiles.add(f.getFilePath())
-          consumedFiles?.add(f.getFilePath())
+        // Every claimed file leaves the root scan, but only the elected owner is walked: marking
+        // the other holders consumed would say the walk placed a table it never opened.
+        for (const f of claimed) loadedChildFiles.add(f.getFilePath())
+        if (arrays.length > 0) consumedFiles?.add(owner.getFilePath())
+        for (const childArr of arrays) {
+          // A lazy hop back onto a table already on this descent would mount it under its own
+          // prefix for ever; the subtree is declared unread rather than followed or dropped.
+          if (chain.has(childArr)) unreadable?.subtrees.add(obj)
+          else walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
         }
-        for (const childArr of arrays) walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles)
       } else if (unreadable) {
         unreadable.subtrees.add(obj)
       }
@@ -377,26 +410,29 @@ export function collectRoutes(project: Project, redirects?: Map<string, string>,
   if (unreadable) {
     for (const f of claimedFiles) {
       const file = project.getSourceFile(f)
-      if (file && !SPEC_FILE.test(f) && !consumedFiles.has(f) && mintsFromRoot(file, loadedChildFiles)) unreadable.unplaced.add(file)
+      if (!file || SPEC_FILE.test(f) || consumedFiles.has(f)) continue
+      if (projectDir && !isInsideDir(f, projectDir)) continue
+      if (mintsFromRoot(file, loadedChildFiles, byNodeId)) unreadable.unplaced.add(file)
     }
   }
   return [...byNodeId.values()]
 }
 
 /**
- * Would the root scan have minted anything from this file, had no claim removed it? Asked by
+ * Would the root scan have minted anything NEW from this file, had no claim removed it? Asked by
  * running the same walk into a throwaway map, which is the only test that answers it: a shape
  * test counts a file whose only route-shaped array is a menu or a form config, and a note that
  * declares a loss where nothing was lost voids every dead-link finding the application carries.
- * The claims are passed with this file removed, because that is the counterfactual, and as a copy
- * because the walk adds to them.
+ * `already` is the graph built so far, and the comparison is against its node ids rather than
+ * against the probe's size, because a claimed file that re-declares addresses the graph already
+ * holds cost the route set nothing either. The claims go in as a copy because the walk adds to
+ * them; this file is not removed from that copy, because the probe starts from the file's own
+ * arrays and never consults the set for them, so removing it would change no answer.
  */
-function mintsFromRoot(sf: SourceFile, claims: Set<string>): boolean {
-  const probeClaims = new Set(claims)
-  probeClaims.delete(sf.getFilePath())
+function mintsFromRoot(sf: SourceFile, claims: Set<string>, already: Map<string, RouteInfo>): boolean {
   const probe = new Map<string, RouteInfo>()
-  for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', probe, probeClaims)
-  return probe.size > 0
+  for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', probe, new Set(claims))
+  return [...probe.keys()].some((id) => !already.has(id))
 }
 
 /**

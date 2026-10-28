@@ -825,4 +825,127 @@ export function makeRoutes(): Routes {
     const { soundiness } = extractGraph(project, '/app')
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
   })
+
+  it('reads a route table reached from two parents under both prefixes, not once', () => {
+    // The cycle guard holds the arrays on the CURRENT descent. One kept across siblings is a
+    // visited set, and a visited set refuses the second parent: it cost mifos a third of its
+    // routes in an unreleased build, silently and with no note.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { SHARED } from './shared.routes'
+export const routes: Routes = [{ path: 'one', component: A, children: [...SHARED] }, { path: 'two', component: A, children: [...SHARED] }]`,
+      '/app/shared.routes.ts': `import type { Routes } from '@angular/router'
+import { S } from './s.component'
+export const SHARED: Routes = [{ path: 'leaf', component: S }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/s.component.ts': C('<p>s</p>'),
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/one', '/one/leaf', '/two', '/two/leaf'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it.each([
+    ['a lazy hop', {
+      '/app/feature-a/a.routes.ts': `import type { Routes } from '@angular/router'
+export const A_ROUTES: Routes = [{ path: 'ay', loadChildren: () => import('../feature-b/b.routes').then((m) => m.B_ROUTES) }]`,
+      '/app/feature-b/b.routes.ts': `import type { Routes } from '@angular/router'
+export const B_ROUTES: Routes = [{ path: 'bee', loadChildren: () => import('../feature-a/a.routes').then((m) => m.A_ROUTES) }]`,
+    }],
+    ['a spread', {
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { B_ROUTES } from './feature-b/b.routes'
+export const routes: Routes = [{ path: 'home', component: A, children: [...B_ROUTES] }]`,
+      '/app/feature-a/a.routes.ts': `import { B_ROUTES } from '../feature-b/b.routes'
+export const A_ROUTES = [...B_ROUTES]`,
+      '/app/feature-b/b.routes.ts': `import { A_ROUTES } from '../feature-a/a.routes'
+export const B_ROUTES = [...A_ROUTES]`,
+    }],
+  ])('does not run out of stack when two route tables reach each other through %s', (_name, files) => {
+    // Walking such a pair mounts each table under an ever longer prefix until the stack ends,
+    // which is a crash and not a reading of the application.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [{ path: 'home', component: A }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      ...files,
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+  })
+
+  it('does not declare a loss for a claimed file the root scan would never have visited anyway', () => {
+    // The claimed file is outside the measured application, which collectRoutes excludes from the
+    // root scan on its own, so the claim removed nothing and the route set is not a lower bound.
+    const project = inMemory({
+      '/ws/apps/web/src/app.module.ts': `import { RouterModule } from '@angular/router'
+import { A } from './a.component'
+@NgModule({ imports: [RouterModule.forRoot([{ path: 'home', component: A }])] })
+export class AppModule {}`,
+      '/ws/apps/web/src/a.component.ts': C('<p>a</p>'),
+      '/ws/apps/web/src/factory.ts': `import type { Routes } from '@angular/router'
+export function makeRoutes(): Routes {
+  return [{ path: 'x', loadChildren: () => import('@lib/other.routes').then((m) => m.OTHER) }]
+}`,
+      '/ws/lib/other.routes.ts': `import type { Routes } from '@angular/router'
+import { D } from './d.component'
+export const OTHER: Routes = [{ path: 'other', component: D }]`,
+      '/ws/lib/d.component.ts': C('<p>d</p>'),
+    })
+    project.compilerOptions.set({ baseUrl: '/ws', paths: { '@lib/*': ['lib/*'] } })
+    const { graph, soundiness } = extractGraph(project, '/ws/apps/web')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('does not declare a loss for a claimed file whose routes the graph already holds', () => {
+    // Every address the claimed table declares is already in the graph at the same node id, so
+    // the root scan would have minted nothing new and no address is missing from the route set.
+    const project = inMemory({
+      '/app/app.module.ts': `import { RouterModule } from '@angular/router'
+import { A } from './a.component'
+@NgModule({ imports: [RouterModule.forRoot([{ path: 'home', component: A }])] })
+export class AppModule {}`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/factory.ts': `import type { Routes } from '@angular/router'
+export function makeRoutes(): Routes {
+  return [{ path: 'x', loadChildren: () => import('./dup.routes').then((m) => m.DUP) }]
+}`,
+      '/app/dup.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const DUP: Routes = [{ path: 'home', component: A }]`,
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('does not let a menu one spread deep claim the file that also declares a real table', () => {
+    // NAV spreads BASE, whose entries carry `path` and no component, so the walk mints nothing
+    // from it. Claiming on the array's SHAPE took menu.ts out of the root scan all the same, and
+    // SETTINGS_ROUTES, declared in the same file, went with it.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [{ path: 'home', component: A }]`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/tabs.component.ts': `import { Component } from '@angular/core'
+import { NAV } from './feature/menu'
+@Component({ standalone: true, template: '<p>tabs</p>' })
+export class Tabs { readonly tabs = [...NAV] }`,
+      '/app/feature/base.ts': `export const BASE = [{ path: 'dashboard', label: 'D' }, { path: 'reports', label: 'R' }]`,
+      '/app/feature/menu.ts': `import type { Routes } from '@angular/router'
+import { F } from './f.component'
+import { BASE } from './base'
+export const NAV = [...BASE]
+export const SETTINGS_ROUTES: Routes = [{ path: 'settings', component: F }]`,
+      '/app/feature/f.component.ts': C('<p>f</p>'),
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/settings'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
 })
