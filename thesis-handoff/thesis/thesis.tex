@@ -63,7 +63,7 @@ that extracts them statically from the route configuration of a client-side
 framework.
 
 This thesis measures static extraction on six open-source Angular applications with
-between 14 and 921 declared route entries, using a pinned corpus and four independent
+from 14 to at least 921 declared route entries, using a pinned corpus and four independent
 evaluation methods. The baseline extractor recovers between 0 and 15 percent of the
 navigation constructs present in the source as deterministic transitions. For two of
 the six applications it produces a list of routes with no transitions at all.
@@ -87,8 +87,10 @@ removals of a route guard.
 
 Finally, the thesis asks whether the losses belong to the applications or to the tool. Each
 defect class is taken to its root cause and repaired where the cause is the extractor's.
-None of the six applications turned out to express its routes in a way static analysis
-cannot follow: all \RoundTwoFullNodes{} of them then hold a node for every declared screen, and
+Almost every defect class turned out to be a construct the extractor could read and did not,
+and the exception is instructive: one application computes a route's path in a custom matcher
+function, which no reader of a route table can resolve. With the readable classes repaired,
+\RoundTwoFullNodes{} of the six hold a node for every declared screen, and
 \RoundTwoAccounted{} of the in-scope navigation sites are accounted for, as a transition, as a destination only the run time
 knows, or as a source the analysis cannot place. Every site that remains names its reason.
 Some of those reasons are dead links the graph finds without running the application, though

@@ -184,6 +184,19 @@ proxy is not itself measured. The end-to-end oracle is the only method that can 
 it, because a URL that a passing test visits is a screen that exists whatever the source
 looks like, and it covers one application of the six.
 
+Node coverage carries a sharper version of the same threat, and it points the opposite way.
+Its denominator is the screens the independent parser can address, so a screen whose path
+neither tool can read is outside the ratio rather than counted against it: refusing to read
+more of an application raises its reported coverage. The effect is not hypothetical. Three
+of one application's declared screens assemble their paths inside a template literal from an
+exported constant; while neither tool read them, that application's coverage was exactly
+complete, and reading them is what moved its denominator
+(Section~\ref{sec:res-round2}). Nothing in the ratio itself would have said so. The defence
+adopted here is that every coverage figure in this thesis is printed beside the count of
+routes the parser knows are there and cannot address, in the same table, so that a figure
+bought by refusing to look is visible as one; a coverage ratio reported on its own, for this
+kind of analysis, should not be believed.
+
 The two units also stand in a many-to-many relation, which the metrics handle unevenly.
 One construct in a component that many screens render yields one anchored edge that
 expands to many, which is why the ratio counts constructs and not edges
@@ -261,7 +274,12 @@ measurement. The scope is therefore the least directly validated part of the ana
 the figures for it rest on the edges it produces agreeing with the other methods.
 
 \textbf{Oracle independence.} The route parser shares no code with the extractor, which
-makes it independent and says nothing about whether it is right. Its first version did not look
+makes it independent and says nothing about whether it is right. That independence is also
+partial, and Section~\ref{sec:res-round2} says where it stops: for the route-path forms the
+second round added --- a table behind a freezing call, a path assembled from constants, a
+module reached through a workspace alias --- the two tools were taught the same rules
+because each was wrong in the same place, so their agreeing about such a path is weaker
+evidence than their agreeing about a path each reads its own way. Its first version did not look
 inside wrapper calls, did not follow a lazily loaded module to the routing module it
 imports, and walked lazily loaded tables without their prefix, and it therefore reported
 that every declared screen of mifos had a node; after the correction it finds a far
@@ -276,8 +294,11 @@ selected the corpus and defined the defect classes. The mitigations actually
 applied are the following. The selection criteria were fixed before any results were
 obtained, and the rejected candidates are reported with their reasons. The construct
 counts and the declared screens come from a parser that shares no code with the
-extractor. The witness check is mechanical and re-parses the source at the claimed
-location. The mutation oracle is the authored delta, so it does not consult the tool's
+extractor, with the qualification above: for the path forms added in Section~\ref{sec:res-round2}
+the two resolve the same constructs by the same rules, so that mitigation does not cover
+them. The witness check is mechanical and re-parses the source at the claimed
+location, which makes it a check on the witness and not on the address: an edge whose
+target node sits at a path the application does not mount satisfies it. The mutation oracle is the authored delta, so it does not consult the tool's
 output to decide what the expected change is. The corpus commits, the extractor commit
 and the harness version are pinned, the whole evaluation re-runs with one command, and
 the conversion, coverage, loss, remaining-loss, before-and-after and mutation tables of
@@ -421,6 +442,81 @@ it covered. The two figures cover different scopes and are not directly comparab
 right unit for the cost of this particular approximation is the number of
 components and navigation sites it strands, not the number of calls that strand them.
 
+\subsection{What a route table's evidence does not establish}
+\label{sec:ownership}
+
+Three approximations in the reader of route tables share one shape, and they are listed
+together because each was found by attacking a repair of the previous one. All three are
+declared in the tool's own notes; none was closed, and the reason in each case is that
+closing it would refuse a construct the corpus actually uses.
+
+The first concerns which file owns a lazily loaded route array. An Angular module loaded
+through \texttt{loadChildren} usually keeps its routes in a separate routing module that it
+imports, so the reader follows one import to find them. Electing that owner no longer trusts
+the \emph{shape} of an array --- a menu or breadcrumb configuration carrying \texttt{path}
+properties is never elected, and a file claimed beside an elected owner is reported as an
+incomplete route set rather than dropped in silence. But a \texttt{Routes}-typed array is
+evidence that its author declared it to some router, never that \emph{this} application mounts
+it. A sibling application's typed table, reached through a workspace alias and used as data,
+is therefore still elected and still minted under the lazy prefix, with a deterministic edge
+into it. Requiring the elected owner to lie inside the application directory closes that
+case and simultaneously refuses a lazily loaded route array that legitimately lives in a
+shared library outside it, which is a pattern the corpus does use. No corpus application
+distinguishes the two, so the gap is left open and declared rather than traded for a
+construct that is known to occur.
+
+The second is the same boundary one step earlier: the \texttt{loadChildren} specifier itself
+is not bounded, so a loader whose import resolves into another project's alias root mounts
+that project's table under this application's prefix. The obvious guard --- requiring the
+loaded file to belong to the same project root as the route that loads it --- was applied
+experimentally and refuses a lazily loaded module that one corpus application keeps in an
+alias root, turning several of its declared screens into declared blind spots and lowering
+its reported coverage. By path alone the analysis cannot tell a shared lazy library from
+another application's route table, and that is the honest statement of the limit.
+
+The third is a reading, not a defect. A routing module imported by two lazily loaded modules
+and loaded by no route is read as a table of the project root rather than as children of both
+importers. The alternative reading matches Angular more closely but lets one route adopt
+another's table, which is how the first approximation above was reached; the conservative
+reading is taken, and it costs the affected routes their prefix.
+
+A fourth was found by asking what the test that keeps a lazy route from adopting the
+application's root table actually reads. What it reads is the file's own call to
+\texttt{forRoot} on \texttt{RouterModule}, Angular's own discriminator for a root table, which
+is why the test is sound where it fires. It is also why it does not fire at all on an
+application that registers its root with the standalone \texttt{provideRouter} API, or through
+an alias of \texttt{RouterModule}: two of the six applications here have no
+\texttt{forRoot} call anywhere, and on those two the guard is inoperative. Both are
+field-identical to the unguarded analysis on this corpus, so no figure in
+Chapter~\ref{ch:results} rests on it; what the limit costs is the guarantee, not the
+measurement. Widening the predicate is not the repair, because a library's own
+\texttt{forRoot} is a different thing from the router's; the repair is to resolve each
+registration call's argument and mark that \emph{array}, rather than its file, as the root
+table, which would also close the case where a route table and its registration live in
+different files.
+
+A fifth is the mirror of the first, and worth stating because it is where a conservative
+refusal becomes an over-approximation. When the only site that loads a route table lies in a
+test specification, the analysis declines the claim and scans the table from the project root,
+so its routes are reported at the application's root address. The guard establishes that a site
+the walk cannot reach may not justify suppressing the root scan; it does not establish that the
+application mounts the table there. That makes it a further instance of the unclaimed
+top-level-\texttt{Routes} over-approximation declared above, and it occurs nowhere in this
+corpus.
+
+One attribution of a blind spot to the component it hides is a filename heuristic and is
+labelled as one. Where a route prefix the analysis could not follow has literal segments, a
+component whose path carries all of them as whole directory names is reported as hidden behind
+that prefix. The heuristic answers the question a reader asks --- which screens are missing
+because of this hole --- and it is wrong in two directions that the harness now states rather
+than hides. A route prefix does not determine a directory name, so the components behind a hole
+whose directory is named differently are not attributed to it and are reported only as having no
+node; and a prefix made entirely of parameters has no literal segment, so it is attributed to no
+component at all. An earlier version compared the prefix to the path as a bare substring, which
+read \path{/cluster} into \texttt{resourcelist/clusterrole/component.ts} and replaced the
+extractor's own true note about that file with a tool blind spot that does not cover it. Sixteen
+of the corpus's loss rows matched that way.
+
 \section{Transfer to other frameworks}
 \label{sec:transfer}
 
@@ -485,6 +581,23 @@ analogue of Angular's service case: the site has no component of its own, and it
 scope is the join over its callers. Since the link is a plain module import, it can be
 resolved with ordinary import resolution, as in the JavaScript call graphs of
 Feldthaus et al.\ \cite{feldthaus2013jscg}.
+
+Redirects do not transfer, and the asymmetry was found by porting the model's reading rather
+than by arguing about it. Angular's validator refuses a route that declares
+\texttt{redirectTo} beside \texttt{children} or a \texttt{component}, so a redirecting Angular
+route has neither a layout nor a component to lose and the model's step from ``redirects'' to
+``renders nothing'' costs nothing. Vue Router applies a record's redirect only when that record
+is the last one matched, so a redirecting parent with children does render its component for a
+matching child. Carrying the Angular reading into the Vue extractor dropped those components;
+the extractor now keeps the component of a redirecting record that has children, and declares
+the residue --- that navigating to the parent's own address lands on the redirect target with
+that component unmounted --- as a note at the parent rather than modelling it as an edge. The
+same porting exposed a second Vue-only hazard with no Angular counterpart: a table that mixes
+the Vue~2 catch-all \texttt{'*'} with the Vue~3 form
+\texttt{'/:pathMatch(.*)*'} folds both to one address, and the extractor keeps the record
+declared first, which under Vue Router~4 is the invalid one. The surviving component is then the
+wrong one. The collision is declared, so the graph says that a record was dropped at that
+address; which of the two it should have kept is not something the table alone determines.
 
 Guards move to different scopes. A redirect thrown from a React Router loader
 fires when its route, or any route below it, is matched. It plays the role of

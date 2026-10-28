@@ -12,12 +12,26 @@ import { callSiteComponentFile, dynamicImportTarget, fnParams, isRouteWrapperCom
 import { constInitializer } from './targets'
 import { routeToNodeId } from './ids'
 
-/** Join an element's ancestor <Route> paths with its own path into a full absolute route path. */
+/**
+ * Join an element's ancestor <Route> paths with its own path into a full absolute route path.
+ * The ancestors are RESOLVED into the one parent path they mount at, not concatenated: an absolute
+ * ancestor (`/dashboard/admin` under `/dashboard`) is a full path that replaces what came before it,
+ * so flattening the raw list would repeat the prefix and mint `/dashboard/dashboard/admin/…`,
+ * an address react-router never mounts.
+ * A catch-all splat folds to the path `*`, but only at the root: react-router resolves a `*`
+ * under its parent, so one inside `<Route path="admin">` catches only /admin's unmatched URLs.
+ * Folding it to `*` too made it indistinguishable from the application's own catch-all; both
+ * minted the one node `n_wildcard`, the first walked kept it, and the other screen vanished
+ * from the graph.
+ */
 function joinPath(ancestors: string[], own: string): string {
-  if (own === '*' || own === '/*') return '*'
+  const parent = ancestors
+    .reduce((acc, a) => (a.startsWith('/') ? a : `${acc}/${a}`), '')
+    .split('/')
+    .filter(Boolean)
+  if (own === '*' || own === '/*') return parent.length === 0 ? '*' : '/' + [...parent, '*'].join('/')
   if (own.startsWith('/')) return own === '/' ? '/' : own.replace(/\/+$/, '') || '/'
-  const segs = [...ancestors, own].join('/').split('/').filter(Boolean)
-  return '/' + segs.join('/')
+  return '/' + [...parent, ...own.split('/').filter(Boolean)].join('/')
 }
 
 /** Strip path-to-regexp custom regex groups from a resolved path (":slug([0-9]+)" -> ":slug"). */

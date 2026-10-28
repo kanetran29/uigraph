@@ -11,6 +11,9 @@
 //
 // usage: node node-audit.mjs <results-dir> [--tex]
 //
+// All six applications must have a raw/<slug>.C.json in <results-dir>. The ALL row is the total the
+// thesis decomposes, so a directory that holds fewer is an error and not a smaller table.
+//
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -55,6 +58,9 @@ for (const slug of SLUGS) {
   }
   per[slug] = c
 }
+
+const absent = SLUGS.filter((s) => !per[s])
+if (absent.length) throw new Error(`${path.join(dir, 'raw')} holds ${SLUGS.length - absent.length} of ${SLUGS.length} applications, missing ${absent.join(', ')}: the ALL row would total a subset`)
 
 const sum = (k) => Object.values(per).reduce((a, c) => a + c[k], 0)
 

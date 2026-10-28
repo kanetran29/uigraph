@@ -26,16 +26,26 @@
 // account for is worse than a number you admit you do not have.
 //
 // Usage: node index.mjs <appDir> [pathToUigraphDb] [--json out.json]
+//        node index.mjs --self-check     (asserts the path-boundary predicate and the lazy-module hop on built fixtures; no app needed)
 
 import { Project, SyntaxKind } from 'ts-morph'
 import { DatabaseSync } from 'node:sqlite'
 import path from 'node:path'
 import fs from 'node:fs'
+import os from 'node:os'
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import assert from 'node:assert/strict'
 
 const appDir = path.resolve(process.argv[2] || '.')
 const dbArg = process.argv[3] && !process.argv[3].startsWith('--') ? process.argv[3] : path.join(appDir, 'uigraph.db')
 const jsonIdx = process.argv.indexOf('--json')
 const jsonOut = jsonIdx > -1 ? process.argv[jsonIdx + 1] : null
+if (process.argv.includes('--self-check')) {
+  selfCheck()
+  lazyHopCheck()
+  process.exit(0)
+}
 
 // ---------------------------------------------------------------- load sources
 
@@ -67,6 +77,210 @@ function stripJsonComments(txt) {
 }
 
 /**
+ * Is `root` the directory `dir` itself or one of its ancestors? A path-boundary test, not a
+ * string prefix: a bare prefix passes a sibling (`projects/aca` against `projects/aca-content`),
+ * and a root may carry a trailing separator (`apps/browser/src/`), so both sides are normalised
+ * first. This line has been wrong twice, and no alias root in the corpus is a string prefix of
+ * its application without also being an ancestor, so the six corpus runs cannot tell the right
+ * predicate from the wrong one; `selfCheck` pins it.
+ */
+function isSelfOrAncestor(root, dir) {
+  return path.join(dir, path.sep).startsWith(path.join(root, path.sep))
+}
+
+/**
+ * Assert `isSelfOrAncestor` on the cases that matter, so a re-break fails loudly instead of
+ * passing every corpus run: a sibling that shares a prefix, with and without a trailing
+ * separator, another application's root, `<appDir>-extension` and a descendant must all be
+ * added as roots (false); an ancestor and the directory itself, with and without a separator,
+ * are already loaded and must be skipped (true). Run with `node index.mjs --self-check`.
+ */
+function selfCheck() {
+  const app = '/w/projects/aca-content'
+  const cases = [
+    ['sibling sharing a prefix', '/w/projects/aca', app, false],
+    ['sibling sharing a prefix, trailing separator', '/w/projects/aca/', app, false],
+    ['ancestor', '/w/projects', app, true],
+    ['ancestor, trailing separator', '/w/projects/', app, true],
+    ['self', app, app, true],
+    ['self, trailing separator', `${app}/`, app, true],
+    ['another application root, trailing separator', '/w/apps/browser/src/', '/w/apps/web', false],
+    ['appDir-extension', '/w/apps/web-extension', '/w/apps/web', false],
+    ['descendant', '/w/apps/web/shared', '/w/apps/web', false],
+  ]
+  for (const [name, root, dir, want] of cases) assert.equal(isSelfOrAncestor(root, dir), want, name)
+  console.log(`self-check ok: ${cases.length} path-boundary cases`)
+}
+
+/**
+ * Assert that a lazily loaded module adopts a routing module only when the table is its own,
+ * on applications built in a temp directory. A lazy module that adopts a table it does not own
+ * changes no corpus number, so the six corpus runs cannot tell and the check has to build the
+ * shape. It runs this script as a child on each application because the walk's state is
+ * module-level and bound to one appDir at load. A lazy feature's table is registered with
+ * forChild and the application's root table with forRoot, as in a real application.
+ *
+ * Two hops must still be followed: `feat` importing the `feat-routing` one directory over, and
+ * `x` importing its feature table from its own directory by an absolute spelling, which is
+ * mifos's shape. Every other case must end as a declared blind spot and never as a route: `a`
+ * importing `b`'s routing module, whether `b` loads it directly or through a barrel and however
+ * `a` spells the import (absolute from another directory, relative, absolute from the same
+ * directory); `admin` importing the application's own root table; the same import two levels
+ * below the root, spelled absolutely or relatively, and from the lazy module's own directory
+ * while a second root table holds routes of its own; a barrel that re-exports the root table;
+ * a table no route loads, imported by an absolute spelling from another directory; and a table
+ * that every walk took for a lazy one and none reached, which must leave the application
+ * declared as unreadable rather than as having no routes. Run with `node index.mjs --self-check`.
+ */
+function lazyHopCheck() {
+  const head = "import { RouterModule, Routes } from '@angular/router';\n"
+  // The source of a routing module that declares the given route literals as one table and registers it with `register`.
+  const registered = (register, routes) => `${head}const routes: Routes = [\n${routes.map((r) => `  ${r},`).join('\n')}\n];\nexport const R = RouterModule.${register}(routes);\n`
+  // A lazy feature's table, registered with forChild as a real lazy module's is.
+  const table = (...routes) => registered('forChild', routes)
+  // The application's root table, registered with forRoot.
+  const rootTable = (...routes) => registered('forRoot', routes)
+  // The source of a route at path `p` that lazy-loads class `c` from module specifier `f`.
+  const lazy = (p, f, c) => `{ path: '${p}', loadChildren: () => import('${f}').then((m) => m.${c}) }`
+  // Route `b` loads a barrel that re-exports its routing module, and `a`, in `aDir`, imports that routing module as `spec`.
+  const behindBarrel = (aDir, spec) => ({
+    'app/app-routing.module.ts': rootTable(lazy('a', `./${aDir}/a.module`, 'AModule'), lazy('b', './b/index', 'BRoutingModule')),
+    [`app/${aDir}/a.module.ts`]: `import { BRoutingModule } from '${spec}';\nexport class AModule {}\n`,
+    'app/b/index.ts': "export { BRoutingModule } from './b-routing.module';\n",
+    'app/b/b-routing.module.ts': table("{ path: 'list', component: BList }"),
+  })
+  // The root table lazy-loads `y`, which has a table of its own and lazy-loads `z`, which has none and imports the root table as `spec`.
+  const belowRoot = (spec) => ({
+    'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", lazy('y', './y/y.module', 'YModule')),
+    'app/y/y.module.ts': table("{ path: 'yy', component: YY }", lazy('z', '../z/z.module', 'ZModule')),
+    'app/z/z.module.ts': `import { AppRoutingModule } from '${spec}';\nexport class ZModule {}\n`,
+  })
+  const cases = [
+    {
+      name: "a lazy module does not adopt another route's table",
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('a', './a/a.module', 'AModule'), lazy('b', './b/b-routing.module', 'BRoutingModule')),
+        'app/a/a.module.ts': "import { BRoutingModule } from 'app/b/b-routing.module';\nexport class AModule {}\n",
+        'app/b/b-routing.module.ts': table("{ path: 'list', component: BList }"),
+      },
+      want: '/a[LAZY_UNRESOLVED] /b[PREFIX] /b/list[SCREEN] | blind 1',
+    },
+    {
+      name: "a lazy module does not adopt the application's own root table",
+      files: {
+        'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", lazy('admin', './admin/admin.module', 'AdminModule')),
+        'app/admin/admin.module.ts': "import { AppRoutingModule } from 'app/app-routing.module';\nexport class AdminModule {}\n",
+      },
+      want: '/home[SCREEN] /admin[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: 'a lazy module still adopts its own routing module, one directory over',
+      files: {
+        'app/app.module.ts': rootTable(lazy('feat', './feat/feat.module', 'FeatModule')),
+        'app/feat/feat.module.ts': "import { FeatRoutingModule } from '../feat-routing/feat-routing.module';\nexport class FeatModule {}\n",
+        'app/feat-routing/feat-routing.module.ts': table("{ path: 'list', component: FeatList }"),
+      },
+      want: '/feat[PREFIX] /feat/list[SCREEN] | blind 0',
+    },
+    {
+      name: "a lazy module does not adopt the table behind another route's barrel",
+      files: behindBarrel('a', 'app/b/b-routing.module'),
+      want: '/a[LAZY_UNRESOLVED] /b[PREFIX] /b/list[SCREEN] | blind 1',
+    },
+    {
+      name: "a lazy module does not adopt the table behind another route's barrel by a relative import",
+      files: behindBarrel('a', '../b/b-routing.module'),
+      want: '/a[LAZY_UNRESOLVED] /b[PREFIX] /b/list[SCREEN] | blind 1',
+    },
+    {
+      name: "a lazy module does not adopt the table behind another route's barrel from the same directory",
+      files: behindBarrel('b', 'app/b/b-routing.module'),
+      want: '/a[LAZY_UNRESOLVED] /b[PREFIX] /b/list[SCREEN] | blind 1',
+    },
+    {
+      name: "a lazy module two levels down does not adopt the application's root table",
+      files: belowRoot('app/app-routing.module'),
+      want: '/home[SCREEN] /y[PREFIX] /y/yy[SCREEN] /y/z[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: "a lazy module two levels down does not adopt the application's root table by a relative import",
+      files: belowRoot('../app-routing.module'),
+      want: '/home[SCREEN] /y[PREFIX] /y/yy[SCREEN] /y/z[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: "a lazy module does not adopt a root table that sits in its own directory",
+      files: {
+        'app/main-routes.ts': rootTable(lazy('y', './y/y.module', 'YModule')),
+        'app/y/y.module.ts': table(lazy('z', '../z.module', 'ZModule')),
+        'app/z.module.ts': "import { AppRoutingModule } from 'app/app-routing.module';\nexport class ZModule {}\n",
+        'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", "{ path: 'settings', component: Settings }"),
+      },
+      want: '/home[SCREEN] /settings[SCREEN] /y[PREFIX] /y/z[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: "a lazy module does not adopt the application's root table behind its barrel",
+      files: {
+        'app/main-routes.ts': rootTable(lazy('z', './z/index', 'AppRoutingModule')),
+        'app/z/index.ts': "export { AppRoutingModule } from '../app-routing.module';\n",
+        'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", "{ path: 'settings', component: Settings }"),
+      },
+      want: '/home[SCREEN] /settings[SCREEN] /z[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: 'a lazy module still adopts the feature table in its own directory, imported by an absolute spelling',
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('x', './x.module', 'XModule')),
+        'app/x.module.ts': "import { SharedRoutingModule } from 'app/shared-routing.module';\nexport class XModule {}\n",
+        'app/shared-routing.module.ts': table("{ path: 'list', component: SList }"),
+      },
+      want: '/x[PREFIX] /x/list[SCREEN] | blind 0',
+    },
+    {
+      name: 'a lazy module does not adopt, by an absolute spelling from another directory, a table no route loads',
+      files: {
+        'app/shared-routing.module.ts': table("{ path: 'home', component: Home }", lazy('y', './y/y.module', 'YModule')),
+        'app/y/y.module.ts': table(lazy('z', '../z/z.module', 'ZModule')),
+        'app/z/z.module.ts': "import { SharedRoutingModule } from 'app/shared-routing.module';\nexport class ZModule {}\n",
+      },
+      want: '/home[SCREEN] /y[PREFIX] /y/z[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: 'a table taken for a lazy one that no walk reaches is declared, not dropped',
+      files: {
+        'app/shared-routing.module.ts': table("{ path: 'home', component: Home }", lazy('y', './y/y.module', 'YModule')),
+        'app/y/y.module.ts': table(lazy('z', '../z/z.module', 'ZModule')),
+        'app/z/z.module.ts': "import { SharedRoutingModule } from '../shared-routing.module';\nexport class ZModule {}\n",
+      },
+      want: ' | blind 2',
+      reasons: ['route table taken as lazy but reached from no root', 'route table taken as lazy but reached from no root'],
+    },
+  ]
+  const tmp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'route-oracle-')))
+  try {
+    for (const [i, c] of cases.entries()) {
+      const root = path.join(tmp, String(i))
+      const app = path.join(root, 'apps/web')
+      const out = path.join(root, 'out.json')
+      fs.mkdirSync(root, { recursive: true })
+      fs.writeFileSync(path.join(root, 'tsconfig.base.json'), '{ "compilerOptions": { "baseUrl": "apps/web/src" } }\n')
+      for (const [rel, body] of Object.entries(c.files)) {
+        const file = path.join(app, 'src', rel)
+        fs.mkdirSync(path.dirname(file), { recursive: true })
+        fs.writeFileSync(file, body)
+      }
+      const run = spawnSync(process.execPath, [fileURLToPath(import.meta.url), app, path.join(root, 'none.db'), '--json', out], { encoding: 'utf8' })
+      assert.equal(run.status, 0, `${c.name}: ${run.stderr}`)
+      const r = JSON.parse(fs.readFileSync(out, 'utf8'))
+      assert.equal(`${r.routes.map((x) => `${x.path}[${x.kind}]`).join(' ')} | blind ${r.blindSpots.length}`, c.want, c.name)
+      if (c.reasons) assert.deepEqual(r.blindSpots.map((b) => b.reason), c.reasons, c.name)
+    }
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true })
+  }
+  console.log(`self-check ok: ${cases.length} lazy-hop fixtures`)
+}
+
+/**
  * The workspace tsconfig's `paths` aliases and the directories they point at. A monorepo app
  * can declare its route paths in a shared table it imports through an alias, and without the
  * alias the checker cannot follow that import, so every such path stays an unresolved
@@ -76,6 +290,15 @@ function stripJsonComments(txt) {
  * An alias may name a file (`.../src/public-api.ts`) as often as a directory. The sources to
  * load are then the file's directory: a glob beneath a file matches nothing, so those
  * sources were never added and the alias could not be followed into them.
+ *
+ * An alias root that is `dir0` or an ancestor of it is already loaded, so it is left out of
+ * `dirs`. That is a path-boundary test, not a string prefix: `projects/aca` is not an ancestor
+ * of `projects/aca-content`, and treating it as one dropped every `@alfresco/aca/*` import's
+ * subtree. A root may carry a trailing separator (`apps/browser/src/`), so both sides are
+ * normalised before comparing (`isSelfOrAncestor`).
+ *
+ * TypeScript resolves `paths` targets against baseUrl, and baseUrl against the config's own
+ * directory; a non-relative first-party import is resolved against baseUrl alone.
  */
 function workspaceTsPaths(dir0) {
   let dir = dir0
@@ -90,8 +313,7 @@ function workspaceTsPaths(dir0) {
       } catch { continue }
       const paths = opts?.paths
       if (!opts?.baseUrl && (!paths || Object.keys(paths).length === 0)) continue
-      // TypeScript resolves `paths` targets against baseUrl, and baseUrl against the config's
-      // own directory; a non-relative first-party import is resolved against baseUrl alone.
+      // `paths` targets resolve against baseUrl, itself relative to the config's own directory.
       const baseUrl = path.join(dir, opts?.baseUrl ?? '.')
       const dirs = new Set()
       for (const targets of Object.values(paths ?? {})) {
@@ -99,7 +321,7 @@ function workspaceTsPaths(dir0) {
           const target = path.join(baseUrl, String(t).split('*')[0] || '')
           if (target.includes('node_modules') || !fs.existsSync(target)) continue
           const root = fs.statSync(target).isFile() ? path.dirname(target) : target
-          if (!dir0.startsWith(root)) dirs.add(root)
+          if (!isSelfOrAncestor(root, dir0)) dirs.add(root)
         }
       }
       return { baseUrl, paths: paths ?? {}, dirs: [...dirs] }
@@ -153,17 +375,33 @@ const storyFiles = countStoryFiles(appDir)
 
 const text = (n) => (n ? constText(n) ?? n.getText().replace(/^['"`]|['"`]$/g, '') : null)
 
-/** Follow an identifier or property-access chain to the string constant it names, else null. */
+/**
+ * Follow an identifier, property-access chain or template literal to the string constant it
+ * names, else null. A template with substitutions is a constant when EVERY substitution is one
+ * (`:vaultId/${MY_ITEMS_ROUTE}`, each name a plain exported string): the pieces are joined in
+ * source order. Without this branch bitwarden's three routes declared that way read as
+ * SCREEN_UNRESOLVED and left the coverage denominator, so the oracle admitted a blind spot it
+ * could have read. One substitution that is not a string constant makes the whole template null,
+ * never a half-read address: a route path with a hole in it would be an invented one.
+ */
 function constText(n) {
   if (!n) return null
   const k = n.getKind()
   if (k === SyntaxKind.StringLiteral || k === SyntaxKind.NoSubstitutionTemplateLiteral) return n.getLiteralValue()
   if (k === SyntaxKind.AsExpression || k === SyntaxKind.ParenthesizedExpression || k === SyntaxKind.SatisfiesExpression) return constText(n.getExpression())
-  // `$localize`:kebab-case@@routes.about:about`` — a constant with an i18n metadata block in
-  // front of it; the path is the message after it.
+  // A `$localize` tag puts an i18n metadata block (`:kebab-case@@routes.about:`) in front of the message, which is the path.
   if (k === SyntaxKind.TaggedTemplateExpression && /(^|\.)\$localize$/.test(n.getTag().getText())) {
     const tpl = n.getTemplate()
     if (tpl.getKind() === SyntaxKind.NoSubstitutionTemplateLiteral) return tpl.getLiteralValue().replace(/^:.*?:/s, '')
+  }
+  if (k === SyntaxKind.TemplateExpression) {
+    let out = n.getHead().getLiteralText()
+    for (const span of n.getTemplateSpans()) {
+      const v = constText(span.getExpression())
+      if (v === null) return null
+      out += v + span.getLiteral().getLiteralText()
+    }
+    return out
   }
   if (k === SyntaxKind.Identifier) return constText(declInit(n))
   if (k === SyntaxKind.PropertyAccessExpression) {
@@ -187,16 +425,20 @@ function enumDecl(n) {
   return undefined
 }
 
-/** The object literal an identifier or property-access chain names, or undefined. */
+/**
+ * The object literal an identifier or property-access chain names, or undefined.
+ *
+ * A shared route table is often wrapped in a one-argument call that returns it:
+ * `Object.freeze({...})`, `deepFreeze({...})`, a small clone helper. The wrapper is transparent
+ * for reading a path out of the table, and not following it was why 27 of bitwarden's declared
+ * paths read as unresolvable expressions (`AuthRoute.Login`) when the literal was one call away
+ * -- in BOTH tools, so they agreed about screens neither could see. Only a single-argument call
+ * is followed: a factory taking more than one argument is not an identity over its first, and
+ * reading it as one would invent an address.
+ */
 function objLit(n) {
   const k = n.getKind()
-  // A shared route table is often wrapped in a one-argument call that returns it:
-  // `Object.freeze({...})`, `deepFreeze({...})`, a small clone helper. The wrapper is
-  // transparent for reading a path out of the table, and not following it was why 27 of
-  // bitwarden's declared paths read as unresolvable expressions (`AuthRoute.Login`) when the
-  // literal was one call away -- in BOTH tools, so they agreed about screens neither could see.
-  // Only a single-argument call is followed: a factory taking more than one argument is not an
-  // identity over its first, and reading it as one would invent an address.
+  // A wrapper call is transparent only with exactly one argument (see above).
   if (k === SyntaxKind.CallExpression) {
     const args = n.getArguments()
     return args.length === 1 ? objLit(args[0]) : undefined
@@ -213,14 +455,16 @@ function objLit(n) {
   return undefined
 }
 
-/** The initializer of the variable an identifier resolves to, following imports. */
+/**
+ * The initializer of the variable an identifier resolves to, following imports, or the property
+ * a destructured binding names, which is how a route file reaches a shared table.
+ */
 function declInit(id) {
   const sym = id.getSymbol()
   const decls = sym?.getAliasedSymbol()?.getDeclarations() ?? sym?.getDeclarations() ?? []
   for (const d of decls) {
     if (d.getKind() === SyntaxKind.VariableDeclaration) return d.getInitializer()
-    // `const { create, update } = internalRoutes.accounts.subRoutes` names a property of the
-    // object it destructures, which is how a route file reaches a shared table.
+    // `const { create, update } = internalRoutes.accounts.subRoutes` names a property of the object it destructures.
     if (d.getKind() === SyntaxKind.BindingElement) {
       const vd = d.getParent()?.getParent()
       const init = vd && vd.getKind() === SyntaxKind.VariableDeclaration ? vd.getInitializer() : undefined
@@ -323,8 +567,7 @@ function resolveModule(fromFile, spec) {
   if (!spec) return null
   const aliased = spec.startsWith('.') ? null : aliasBase(spec)
   if (!aliased && spec.startsWith('@')) return null
-  // A workspace that sets tsconfig `baseUrl` imports its own modules without a leading dot
-  // (`resource/cluster/module`); resolve those against baseUrl rather than discarding them.
+  // A baseUrl workspace imports its own modules without a leading dot (`resource/cluster/module`); resolve those against baseUrl, do not discard them.
   const base = aliased ?? (spec.startsWith('.')
     ? path.resolve(path.dirname(fromFile), spec)
     : ws?.baseUrl
@@ -348,7 +591,88 @@ function resolveModule(fromFile, spec) {
 const routes = []
 const blindSpots = []
 const visitedArrays = new Set()
-const lazyTargets = new Set() // files whose route arrays are reached through loadChildren
+// Files whose route arrays are reached through loadChildren.
+const lazyTargets = new Set()
+// Every file a route claims as its own table through loadChildren, mapped to the targets that claim it.
+// The first pass fills it and the second reads it, so a hop sees every route's claim, not only
+// the ones walked so far.
+const tableClaims = new Map()
+// The files walkArray reached in the current pass.
+const walkedFiles = new Set()
+
+/**
+ * The project root a loaded file belongs to: this application, or the `paths` alias root that
+ * holds it, as a directory path with a trailing separator, else null. A lazy module may sit in
+ * an alias root rather than under `appDir`, so a hop out of it is bounded by its own root. The
+ * longest match wins because one alias root can nest inside another (`libs/legacy-crypto/src`
+ * and `libs/legacy-crypto/src/node`), and the narrower root is the one that owns the file.
+ */
+function projectRootOf(file) {
+  let best = null
+  for (const r of [appDir, ...(ws?.dirs ?? [])]) {
+    const b = path.join(r, path.sep)
+    if (file.startsWith(b) && (!best || b.length > best.length)) best = b
+  }
+  return best
+}
+
+/**
+ * The files a module re-exports by a relative specifier, which is how a barrel stands in front
+ * of a routing module (`export { FeatRoutingModule } from './feat-routing.module'`). A non-relative
+ * specifier is left out because it can name any file in the application.
+ */
+function relativeReExports(sf) {
+  const deps = []
+  for (const exp of sf.getExportDeclarations()) {
+    const spec = exp.getModuleSpecifierValue()
+    if (!spec || !spec.startsWith('.')) continue
+    const dep = exp.getModuleSpecifierSourceFile() ?? resolveModule(sf.getFilePath(), spec)
+    if (dep) deps.push(dep)
+  }
+  return deps
+}
+
+/**
+ * Record that the route loading `target` claims it, and every file it re-exports by a relative
+ * specifier, as its own table. A route that loads a barrel owns the routing module behind the
+ * barrel as much as one that loads the routing module itself, so both are claimed.
+ */
+function claimTables(target) {
+  for (const f of [target, ...relativeReExports(target)]) {
+    if (!tableClaims.has(f.getFilePath())) tableClaims.set(f.getFilePath(), new Set())
+    tableClaims.get(f.getFilePath()).add(target.getFilePath())
+  }
+}
+
+/**
+ * Does a route other than the one loading `target` claim `dep` as its table, whether by loading
+ * it or by loading a barrel that re-exports it? Such a table belongs to that route, so adopting
+ * it as this target's would mount it at a second address.
+ */
+function claimedElsewhere(dep, target) {
+  for (const t of tableClaims.get(dep.getFilePath()) ?? []) if (t !== target.getFilePath()) return true
+  return false
+}
+
+/**
+ * Does this file register a table with `RouterModule.forRoot`? Such a table is the application's
+ * root table: Angular mounts it at the empty path and nowhere else, and a lazy module registers
+ * its own with `forChild`, so no lazy module may adopt a `forRoot` table as its own. mifos's
+ * `reports-routing.module` registers with `forChild` and is adopted; its `app-routing.module`
+ * registers with `forRoot` and is not. No route claims a root table, so `claimedElsewhere` cannot
+ * see it. Two limits, both measured rather than assumed. The test reads the file's own `forRoot`
+ * call, so a root table whose array is declared in one file and registered in another is not
+ * recognised. And it reads `RouterModule.forRoot` only, while the recogniser above accepts
+ * `forChild` and `provideRouter` as well, so on an application whose root is registered with the
+ * standalone API, or through an alias of `RouterModule`, there is no recognisable root table and
+ * this guard is inoperative: two of the six evaluated applications, realworld and alfresco, have
+ * no `forRoot` call at all. Widening the predicate is not the fix, because a library's own
+ * `forRoot` is a different thing from the router's; the fix is to resolve each registration
+ * call's argument and mark that ARRAY, not the file, as the root table.
+ */
+function isRootTable(file) {
+  return file.getDescendantsOfKind(SyntaxKind.CallExpression).some((c) => /RouterModule\.forRoot$/.test(c.getExpression().getText()))
+}
 
 /**
  * Walk one route-table array: record every route it declares, then follow each `children` and
@@ -357,16 +681,74 @@ const lazyTargets = new Set() // files whose route arrays are reached through lo
  * beneath it inherits it, because a child of an unreadable path has no readable address
  * either, so a screen there is admitted as a blind spot and not scored as an address.
  * `lazy` marks tables reached through loadChildren.
+ *
+ * An NgModule loaded lazily often keeps its routes in a separate *-routing.module that it
+ * imports, or in a barrel that re-exports one, so a target with no array of its own is followed
+ * one level into its imports and then its re-exports: mifos writes
+ * `from 'app/reports/reports-routing.module'`, a tsconfig baseUrl specifier, and refusing it
+ * left /reports, /reports/:filter and /reports/run/:name out of the declared set altogether.
+ * The project is built with the workspace's baseUrl and `paths`, so TypeScript resolves such a
+ * specifier itself, and only to a file already loaded. Four tests then decide whether the file
+ * it names may be adopted as the target's table, and they guard against different things.
+ *
+ * The project-root bound (`projectRootOf`) keeps a hop inside the target's own project. Every
+ * `paths` alias root is loaded too, and for bitwarden those include sibling applications
+ * (apps/browser/src), and a relative specifier can leave the application as easily as an alias
+ * can: a lazy apps/web module that imported or re-exported the extension's AppRoutingModule
+ * would mint the popup's routes under its own prefix, and a sibling's module that re-exported
+ * this application's AppModule would mark that module lazy and erase this application's whole
+ * declared set. A null `dep`, which only rules out npm packages, bounds neither. The dependency
+ * must sit inside the root that owns the target, not merely beside the target's file, because a
+ * routing module may legitimately live a directory over (`../feat-routing/feat-routing.module`).
+ *
+ * That root is the whole application, so it cannot tell a module's own routing module from
+ * another feature's: `feat` importing `feat-routing` and `a` importing `b-routing` look alike.
+ * What tells them apart is ownership. A dependency that another route claims (`tableClaims`: the
+ * file it loads through loadChildren and the files that file re-exports by a relative specifier,
+ * so a barrel in front of a routing module claims it), or the file that holds the route being
+ * followed, belongs to that route, so it is never adopted as this target's table: doing so would
+ * mount it at a second address.
+ *
+ * Ownership cannot see a table that no route claims, and the application's root table is the one
+ * that matters: it is mounted at the empty path and nowhere else, so a lazy module that adopted
+ * it would mount it under a second prefix and take it out of the roots. `isRootTable` tells it
+ * apart by how it is registered, whichever directory it sits in and however the import spells it.
+ *
+ * Nor can ownership see the chain between the route and a non-relative specifier, which can name
+ * any file in the application. An import hop therefore follows a non-relative specifier only into
+ * the target's own directory, which is what mifos needs.
+ * The rule is conservative: two lazy modules importing, from another directory, a routing module no route loads are each declared a blind spot, though Angular would mount its routes under both.
+ *
+ * A hop any of these refuses leaves the target without a route array, which is declared as a
+ * blind spot and not followed.
+ *
+ * A table the import hop adopts is never recorded as a claim (`claimTables` records the loadChildren
+ * target and its re-exports only), so the two hops disagree about a shared table: one routing
+ * module imported by two lazy modules is adopted by both and mounted under both prefixes -- which
+ * needs one importer to spell it within the target's own directory, since the import hop refuses a
+ * non-relative cross-directory specifier -- while the same module behind two barrels is refused to
+ * both. Each reading is defensible under forChild, but
+ * the tool gives imports one and barrels the other.
+ *
+ * One case stays open. None of the tests governs `target` itself, the module a loadChildren
+ * names: it is followed as written wherever it resolves, so a specifier that resolves straight
+ * into a sibling application's alias root mounts that application's table under this route's
+ * prefix. Bounding it by project root closes that but also refuses a shared lazy library that
+ * lives in a `paths` alias root, as alfresco's does, and the path alone cannot tell the two apart.
+ * The same absence of a test on `target` lets a loadChildren that names the application's own root
+ * table mount the whole root table under that route's prefix, silently; `isRootTable` is asked of
+ * the DEPENDENCIES of a target, never of the target itself, because a route that names a file
+ * directly is taken at its word.
  */
 function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
   if (depth > 12) return
   const key = `${sf.getFilePath()}:${arr.getStart()}:${prefix}`
   if (visitedArrays.has(key)) return
   visitedArrays.add(key)
+  walkedFiles.add(sf.getFilePath())
 
   for (const el of arr.getElements()) {
-    // Wrapper helpers such as Route.withShell([...]) return routes built from an array
-    // argument. Treat the call as transparent and walk the array with the same prefix.
+    // A wrapper helper such as Route.withShell([...]) is transparent: walk its array argument under the same prefix.
     if (el.getKind() === SyntaxKind.CallExpression) {
       for (const a of el.getArguments()) if (a.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(a, prefix, sf, depth + 1, unresolved, lazy)
       continue
@@ -378,8 +760,7 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
     const pathProp = prop('path')
     const seg = pathProp ? text(pathProp.getInitializer()) : null
     const full = joinPath(prefix, seg) || '/'
-    // A path that is not a string literal (e.g. internalRoutes.about.path) makes this route
-    // and every route below it depend on constant resolution.
+    // A path that is not a string literal (e.g. internalRoutes.about.path) makes this route and every route below it depend on constant resolution.
     const pathInit = pathProp?.getInitializer?.()
     // Unreadable only when NOT followed to a literal (a resolved `internalRoutes.account.path` is a good address); the outermost expression's text is kept to name the blind spot.
     const unreadable = unresolved || (pathInit && constText(pathInit) === null ? pathInit.getText() : null)
@@ -403,7 +784,8 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
     else if (seg === '**') kind = 'WILDCARD'
     else if (hasComponent) kind = 'SCREEN'
     else if (childrenProp || loadChildren) kind = 'PREFIX'
-    else kind = 'SCREEN' // a bare path with neither component nor children: still a declared address
+    // A bare path with neither component nor children is still a declared address.
+    else kind = 'SCREEN'
 
     const at = `${path.relative(appDir, sf.getFilePath())}:${obj.getStartLineNumber()}`
     // A screen whose path is an expression has no address to look up: admit it, do not score it.
@@ -433,33 +815,41 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
     if (loadChildren) {
       const t = loadChildren.getText()
       const m = t.match(/import\(\s*['"`]([^'"`]+)['"`]\s*\)/)
-      // Angular also accepts `loadChildren: () => VaultModule`, a direct reference with no
-      // dynamic import; reading only `import()` left every route behind one unreachable.
+      // Angular also accepts a direct reference, `loadChildren: () => VaultModule`; reading only `import()` left every route behind one unreachable.
       const direct = !m ? /^\(\s*\)\s*=>\s*([A-Za-z_$][\w$]*)\s*$/.exec(t.replace(/^loadChildren\s*:\s*/, '').trim()) : null
       const target = m ? resolveModule(sf.getFilePath(), m[1]) : direct ? importedFile(sf, direct[1]) : null
       if (!target) {
         blindSpots.push({ reason: 'loadChildren target not resolvable', spec: m ? m[1] : t.slice(0, 60), at, prefix: full })
         routes[routes.length - 1].kind = 'LAZY_UNRESOLVED'
       } else {
+        claimTables(target)
         let arrays = routeArraysIn(target)
-        // An NgModule loaded lazily often keeps its routes in a separate *-routing.module
-        // that it imports. Follow the module's relative imports one level.
         let owner = target
+        const bound = projectRootOf(target.getFilePath())
         if (arrays.length === 0) {
           for (const imp of target.getImportDeclarations()) {
             const dep = imp.getModuleSpecifierSourceFile()
-            if (!dep || !imp.getModuleSpecifierValue().startsWith('.')) continue
+            // The dependency must sit inside the project root that owns the target, so a loaded sibling application's table is never followed.
+            if (!dep || !bound || !dep.getFilePath().startsWith(bound)) continue
+            // Inside the root is not enough: a table this route's own file holds, or another route already loads, is not this target's.
+            if (dep.getFilePath() === sf.getFilePath() || claimedElsewhere(dep, target)) continue
+            // The application's root table is mounted at '' alone, whichever directory it sits in or however the import spells it.
+            if (isRootTable(dep)) continue
+            // A non-relative specifier reaches the whole application, so follow one only into the target's own directory.
+            if (!imp.getModuleSpecifierValue().startsWith('.') && path.dirname(dep.getFilePath()) !== path.dirname(target.getFilePath())) continue
             const a = routeArraysIn(dep)
             if (a.length) { arrays = a; owner = dep; break }
           }
         }
         // A barrel re-exports the routes rather than importing them.
         if (arrays.length === 0) {
-          for (const exp of target.getExportDeclarations()) {
-            const spec = exp.getModuleSpecifierValue()
-            if (!spec || !spec.startsWith('.')) continue
-            const dep = exp.getModuleSpecifierSourceFile() ?? resolveModule(target.getFilePath(), spec)
-            if (!dep) continue
+          for (const dep of relativeReExports(target)) {
+            // A relative specifier can leave the application too: the same bound as the import hop.
+            if (!bound || !dep.getFilePath().startsWith(bound)) continue
+            // The same ownership test as the import hop.
+            if (dep.getFilePath() === sf.getFilePath() || claimedElsewhere(dep, target)) continue
+            // The same root-table test as the import hop.
+            if (isRootTable(dep)) continue
             const a = routeArraysIn(dep)
             if (a.length) { arrays = a; owner = dep; break }
           }
@@ -480,7 +870,7 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
 // are not, so a lazily loaded table is walked under its real prefix and not also from ''.
 // (Harness 1.0.0 walked every table from '' as well, which double-counted lazy screens.)
 for (const sf of files) for (const arr of routeArraysIn(sf)) walkArray(arr, '', sf, 0)
-routes.length = 0; blindSpots.length = 0; visitedArrays.clear()
+routes.length = 0; blindSpots.length = 0; visitedArrays.clear(); walkedFiles.clear()
 for (const sf of files) {
   if (lazyTargets.has(sf.getFilePath())) continue
   // A `paths` alias root can be a SIBLING application -- bitwarden's apps/web resolves its
@@ -489,8 +879,17 @@ for (const sf of files) {
   // the extractor read the same files, so the two tools agreeing about them was not
   // independent evidence of anything. Such a file is still loaded, so imports through the
   // alias resolve; it is only no longer read as a declaration of THIS application.
-  if (!sf.getFilePath().startsWith(appDir)) continue
+  // A path-boundary test: a bare string prefix also passes a sibling directory such as `<appDir>-extension`.
+  if (!sf.getFilePath().startsWith(appDir + path.sep)) continue
   for (const arr of routeArraysIn(sf)) walkArray(arr, '', sf, 0)
+}
+
+// Pass 2 skipped every file pass 1 took for a lazy table. One that no walk then reached was dropped, not absent
+// (a lazy module adopting the one table that was the application's only root is the case), so it is declared and never left silent.
+// None of the six corpus applications reaches this declaration, so the lazyHopCheck fixture for it is its only evidence.
+for (const f of lazyTargets) {
+  if (!f.startsWith(appDir + path.sep) || walkedFiles.has(f)) continue
+  blindSpots.push({ reason: 'route table taken as lazy but reached from no root', file: path.relative(appDir, f), prefix: '' })
 }
 
 // ---------------------------------------------------------------- compare

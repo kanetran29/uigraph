@@ -22,6 +22,10 @@ export interface RouteInfo {
   componentName: string | null
   component: VueComponent | undefined
   guards: string[]
+  /** True when the record declares `redirect`: it forwards the URL, whether or not it also lays out its children. */
+  redirect: boolean
+  /** True when the record declares `redirect` and has no `children` property: it renders nothing, so its `component` is left uncollected and its absence is not a blind spot. The test is the property, not the array's length: `children: []` keeps the component, because router.addRoute(parentName, child) can still attach a child at run time and the layout would then render around it. */
+  rendersNothing: boolean
 }
 
 /** The collected route table plus the soundiness notes route collection itself produced. */
@@ -30,13 +34,23 @@ export interface CollectedRoutes {
   notes: SoundinessNote[]
 }
 
-/** Normalize a Vue route path joining a parent: '' inherits, '/x' absolute, 'x' relative, catch-all -> '*'. */
+/**
+ * Normalize a Vue route path joining a parent: '' inherits, '/x' absolute, 'x' relative.
+ * A catch-all segment (`*`, `:pathMatch(.*)*`, `:rest(.*)`) folds to `*`, so the application's
+ * own catch-all is the path `*`, but only at the root: a relative one inside `/admin` stays
+ * `/admin/*`, because it catches only that subtree's unmatched URLs and is a different screen.
+ * An absolute (`/…`) child is a root path in Vue Router however deeply it is nested, so that one
+ * is the application's catch-all and does fold to `*`. The test is per segment because the
+ * prefix before the marker is part of the address: `/docs/:rest(.*)` is `/docs/*`, never `*`.
+ */
 function normalizeRoutePath(parent: string, own: string): string {
-  if (/pathMatch|\(\.\*\)|^\*$/.test(own)) return '*'
   if (own === '') return parent === '' ? '/' : parent
   const abs = own.startsWith('/') ? own : `${parent === '/' ? '' : parent}/${own}`
-  const segs = abs.split('/').filter(Boolean)
-  return '/' + segs.join('/')
+  const segs = abs
+    .split('/')
+    .filter(Boolean)
+    .map((seg) => (/pathMatch|\(\.\*\)|^\*$/.test(seg) ? '*' : seg))
+  return segs.length === 1 && segs[0] === '*' ? '*' : '/' + segs.join('/')
 }
 
 /** Resolve a route object's `component` to a registered .vue component (eager ident or lazy import). */
@@ -200,23 +214,50 @@ function routeGuards(obj: ObjectLiteralExpression): string[] {
 export function collectRoutes(vp: VueProject): CollectedRoutes {
   const notes: SoundinessNote[] = []
   const byNodeId = new Map<string, RouteInfo>()
+  const claimedBy = new Map<string, ObjectLiteralExpression>()
+  const onStack = new Set<ObjectLiteralExpression>()
 
-  /** Walk one route record (and its children) into the table; returns the count of path-bearing records walked. */
+  /** Walk one route record (and its children) into the table; returns the count of path-bearing records walked. A redirect-only record has its component left uncollected; whatever else the walk cannot read (a spread, a `path` that is not a string literal, an unresolvable `children`, a record dropped onto an address an earlier record claimed, a record that contains itself) is declared as a note, never lost silently. The note fires only when the record HAS a `path` the walk could not read: an object with no `path` at all is not a dropped route, and declaring one there would be a blind spot the tool does not have. */
   const visitObj = (obj: ObjectLiteralExpression, parent: string, sf: SourceFile): number => {
+    for (const prop of obj.getProperties()) {
+      if (Node.isSpreadAssignment(prop)) {
+        notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(prop, sf), detail: `route record spreads "${prop.getText()}" — whatever path, component, redirect or children it supplies is not read` })
+      }
+    }
     const own = stringProp(obj, 'path')
-    if (own === null) return 0
+    if (own === null) {
+      const pathProp = obj.getProperty('path')
+      const pathText = pathProp && Node.isPropertyAssignment(pathProp) ? (pathProp.getInitializer()?.getText() ?? pathProp.getText()) : pathProp?.getText()
+      if (pathProp) notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(pathProp, sf), detail: `route record path "${pathText}" is not a string literal — the record and any children are skipped` })
+      return 0
+    }
+    if (onStack.has(obj)) {
+      notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(obj, sf), detail: `route record "${own}" contains itself through its children — the cycle is not followed` })
+      return 0
+    }
+    onStack.add(obj)
     let count = 1
     const fullPath = normalizeRoutePath(parent, own)
     const nodeId = routeToNodeId(fullPath)
-    if (!byNodeId.has(nodeId)) {
-      const { name, component } = resolveComponent(obj, sf, vp.components)
-      byNodeId.set(nodeId, { fullPath, nodeId, name: stringProp(obj, 'name'), componentName: name, component, guards: routeGuards(obj) })
+    const claimant = claimedBy.get(nodeId)
+    if (claimant === undefined) {
+      claimedBy.set(nodeId, obj)
+      const redirect = obj.getProperty('redirect') !== undefined
+      // a redirect fires only when the record is the last match, so with children its `component` still lays out the matched child; without children it renders nothing
+      const rendersNothing = redirect && obj.getProperty('children') === undefined
+      const { name, component } = rendersNothing ? { name: null, component: undefined } : resolveComponent(obj, sf, vp.components)
+      byNodeId.set(nodeId, { fullPath, nodeId, name: stringProp(obj, 'name'), componentName: name, component, guards: routeGuards(obj), redirect, rendersNothing })
+    } else if (claimant !== obj) {
+      notes.push({ kind: 'route-address-collision', file: sf.getFilePath(), loc: locOf(obj, sf), detail: `route record "${own}" resolves to ${fullPath}, which an earlier record already claims — this record's own component, guards and redirect are dropped (its children are still read); where both records name the same component the address still renders it, so the drop is of the record and not necessarily of a screen` })
     }
     const childrenProp = obj.getProperty('children')
-    if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
-      const arr = childrenProp.getInitializer()
-      if (arr && Node.isArrayLiteralExpression(arr)) count += visitElements(arr.getElements(), fullPath, sf)
+    if (childrenProp) {
+      const init = Node.isPropertyAssignment(childrenProp) ? childrenProp.getInitializer() : Node.isShorthandPropertyAssignment(childrenProp) ? childrenProp.getNameNode() : undefined
+      const arr = resolveArray(init, sf)
+      if (arr) count += visitElements(arr.getElements(), fullPath, sf)
+      else notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(childrenProp, sf), detail: `children of route ${fullPath} ("${(init ?? childrenProp).getText()}") could not be resolved to an array of route records — its routes are skipped` })
     }
+    onStack.delete(obj)
     return count
   }
 

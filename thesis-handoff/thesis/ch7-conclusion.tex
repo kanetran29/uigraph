@@ -68,12 +68,14 @@ analysis and commit-time checking need; where it is not, no change to it is visi
 the coverage gap RQ1 measures is what the excluded mutants of RQ4 report a second time.
 
 RQ5 asked whether the losses belong to the applications or to the tool, and the answer is
-that none of the six applications expresses its routes in a way static analysis cannot
-follow. Every defect class resolved to a construct the extractor could read and did not:
+that almost every loss belongs to the tool, with one instructive exception: ghostfolio
+computes a route's path in a custom \texttt{UrlMatcher}, which no reader of a route table can
+resolve, and that screen stays a declared blind spot rather than a repair.
+Every other defect class resolved to a construct the extractor could read and did not:
 a route table reached through an NgModule, a route factory, a path named by a constant, an
 enum or an i18n segment, a workspace alias, a loader that references its module instead of
-importing it. With those repaired, four of the six applications hold a node for every
-declared screen, and \RoundTwoAccounted{} of the navigation sites in the corpus are
+importing it. With those repaired, \RoundTwoFullNodes{} of the six applications hold a node
+for every declared screen, and \RoundTwoAccounted{} of the navigation sites in the corpus are
 accounted for --- recovered as a transition, recorded as a destination only the run time
 knows, or anchored at a source the analysis cannot place. Three quarters of those sites are
 mifos's, so the corpus figure is close to one application's. The sites that remain each name

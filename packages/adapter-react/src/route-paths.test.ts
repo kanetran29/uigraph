@@ -188,3 +188,156 @@ export const router = createBrowserRouter([
     expect(note?.file).toBe('router.tsx')
   })
 })
+
+// A `*` splat inside a parent route catches only that parent's unmatched URLs, so it is a
+// different route from the application's own catch-all. Both used to fold to `*`, mint the one
+// node `n_wildcard`, and the first one walked kept it while the other screen vanished.
+describe('nested catch-all splat is not the application catch-all', () => {
+  it('keeps a JSX splat under a parent route apart from the root splat', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import Admin from './Admin'
+import AdminMissing from './AdminMissing'
+import NotFound from './NotFound'
+export default () => (
+  <Routes>
+    <Route path="admin" element={<Admin/>}>
+      <Route path="*" element={<AdminMissing/>} />
+    </Route>
+    <Route path="*" element={<NotFound/>} />
+  </Routes>)`,
+        '/Admin.tsx': `export default function Admin(){ return null }`,
+        '/AdminMissing.tsx': `export default function AdminMissing(){ return null }`,
+        '/NotFound.tsx': `export default function NotFound(){ return null }`,
+      }),
+      '/',
+    )
+    const nested = graph.nodes.find((n) => n.id === 'n_admin_wildcard')
+    const root = graph.nodes.find((n) => n.id === 'n_wildcard')
+    expect(nested?.route).toBe('/admin/*')
+    expect(nested?.componentPath).toBe('AdminMissing.tsx')
+    expect(root?.route).toBe('*')
+    expect(root?.componentPath).toBe('NotFound.tsx')
+  })
+
+  it('keeps a data-router splat under a parent route apart from the root splat', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/router.tsx': `import { createBrowserRouter } from 'react-router-dom'
+import Admin from './Admin'
+import AdminMissing from './AdminMissing'
+import NotFound from './NotFound'
+export const router = createBrowserRouter([
+  { path: 'admin', element: <Admin />, children: [{ path: '*', element: <AdminMissing /> }] },
+  { path: '*', element: <NotFound /> },
+])`,
+        '/Admin.tsx': `export default function Admin(){ return null }`,
+        '/AdminMissing.tsx': `export default function AdminMissing(){ return null }`,
+        '/NotFound.tsx': `export default function NotFound(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.find((n) => n.id === 'n_admin_wildcard')?.route).toBe('/admin/*')
+    expect(graph.nodes.find((n) => n.id === 'n_wildcard')?.route).toBe('*')
+  })
+
+  it('still folds a splat under a root-path layout to the root catch-all', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/App.tsx': `import Layout from './Layout'
+import NotFound from './NotFound'
+export default () => (
+  <Routes>
+    <Route path="/" element={<Layout/>}>
+      <Route path="*" element={<NotFound/>} />
+    </Route>
+  </Routes>)`,
+        '/Layout.tsx': `export default function Layout(){ return null }`,
+        '/NotFound.tsx': `export default function NotFound(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.find((n) => n.id === 'n_wildcard')?.route).toBe('*')
+  })
+})
+
+// react-router v6 lets a child declare an absolute path that extends its parent, so the ancestor
+// chain legitimately repeats the prefix. The parent must be resolved, not flattened: flattening
+// minted /dashboard/dashboard/admin/…, an address the application never mounts.
+describe('an absolute child path that extends its parent is not doubled', () => {
+  const files = {
+    '/Dash.tsx': `export default function Dash(){ return null }`,
+    '/Admin.tsx': `export default function Admin(){ return null }`,
+    '/AdminMissing.tsx': `export default function AdminMissing(){ return null }`,
+    '/Reports.tsx': `export default function Reports(){ return null }`,
+  }
+
+  it('resolves a JSX splat under an absolute-child ancestor to the mounted address', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        ...files,
+        '/App.tsx': `import Dash from './Dash'
+import Admin from './Admin'
+import AdminMissing from './AdminMissing'
+export default () => (
+  <Routes>
+    <Route path="/dashboard" element={<Dash/>}>
+      <Route path="/dashboard/admin" element={<Admin/>}>
+        <Route path="*" element={<AdminMissing/>} />
+      </Route>
+    </Route>
+  </Routes>)`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.find((n) => n.id === 'n_dashboard_admin_wildcard')?.route).toBe('/dashboard/admin/*')
+    expect(graph.nodes.some((n) => n.route?.includes('/dashboard/dashboard'))).toBe(false)
+  })
+
+  it('resolves a JSX relative child under an absolute-child ancestor to the mounted address', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        ...files,
+        '/App.tsx': `import Dash from './Dash'
+import Admin from './Admin'
+import Reports from './Reports'
+export default () => (
+  <Routes>
+    <Route path="/dashboard" element={<Dash/>}>
+      <Route path="/dashboard/admin" element={<Admin/>}>
+        <Route path="reports" element={<Reports/>} />
+      </Route>
+    </Route>
+  </Routes>)`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.find((n) => n.id === 'n_dashboard_admin_reports')?.route).toBe('/dashboard/admin/reports')
+    expect(graph.nodes.some((n) => n.route?.includes('/dashboard/dashboard'))).toBe(false)
+  })
+
+  it('resolves the same two shapes in a data-router table', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        ...files,
+        '/router.tsx': `import { createBrowserRouter } from 'react-router-dom'
+import Dash from './Dash'
+import Admin from './Admin'
+import AdminMissing from './AdminMissing'
+import Reports from './Reports'
+export const router = createBrowserRouter([
+  { path: '/dashboard', element: <Dash />, children: [
+    { path: '/dashboard/admin', element: <Admin />, children: [
+      { path: '*', element: <AdminMissing /> },
+      { path: 'reports', element: <Reports /> },
+    ] },
+  ] },
+])`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.find((n) => n.id === 'n_dashboard_admin_wildcard')?.route).toBe('/dashboard/admin/*')
+    expect(graph.nodes.find((n) => n.id === 'n_dashboard_admin_reports')?.route).toBe('/dashboard/admin/reports')
+    expect(graph.nodes.some((n) => n.route?.includes('/dashboard/dashboard'))).toBe(false)
+  })
+})

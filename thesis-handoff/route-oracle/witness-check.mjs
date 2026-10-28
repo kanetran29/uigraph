@@ -29,6 +29,8 @@ const wIdx = process.argv.indexOf('--window')
 const WINDOW = wIdx > -1 ? parseInt(process.argv[wIdx + 1], 10) : 3
 const jIdx = process.argv.indexOf('--json')
 const jsonOut = jIdx > -1 ? process.argv[jIdx + 1] : null
+const rIdx = process.argv.indexOf('--routes')
+const routesFile = rIdx > -1 ? process.argv[rIdx + 1] : null
 
 const db = new DatabaseSync(dbPath)
 const graph = JSON.parse(db.prepare("select json from docs where key='graph'").get()?.json || '{}')
@@ -124,12 +126,68 @@ for (const e of edges) {
 }
 const FANOUT_THRESHOLD = 3
 
+const decl = routesFile
+  ? (() => {
+      const r = JSON.parse(fs.readFileSync(routesFile, 'utf8'))
+      const segs = (r.routes || []).map((x) => String(x.path ?? '').split('/').filter(Boolean))
+      return {
+        // The application root is a declared address like any other, and dropping it because
+        // it has no segments made every edge into `/` read as a fictitious destination.
+        root: segs.some((d) => d.length === 0),
+        routes: segs.filter((d) => d.length),
+        blind: (r.blindSpots || []).map((b) => String(b.prefix ?? '').split('/').filter(Boolean)).filter((d) => d.length),
+      }
+    })()
+  : null
+
+/**
+ * Does the independent route set declare an address at `route`? Compared pattern to pattern,
+ * a declared param matching any single segment either way, which is the same comparison
+ * `targetAgrees` makes one level down.
+ *
+ * This exists because the three questions above all take the edge's destination NODE for
+ * granted and ask only whether the witness agrees with it. A node minted at an address the
+ * application never mounts therefore passes every one of them: mifos's reports module was
+ * read at the project root, so the graph held `/:filter` instead of `/reports/:filter` and
+ * nine MUST edges pointed at it while this check reported the must tier clean. The soundness
+ * lemma is about the destination, so the destination has to be tested too.
+ */
+function declaredHere(route) {
+  if (!decl) return null
+  const t = route.split('/').filter(Boolean)
+  if (!t.length) return decl.root
+  // Both sides are patterns, so a param may only answer a param. The looser comparison used
+  // when matching a concrete URL against a route would excuse the exact defect this test is
+  // for: `/:filter` would match any one-segment route the application happens to declare.
+  const seg = (s, i) => s === t[i] || (s.startsWith(':') && t[i].startsWith(':'))
+  const same = (d) => d.length === t.length && d.every(seg)
+  const covers = (d) => d.length > 0 && d.length <= t.length && d.every(seg)
+  // A route inside a subtree the oracle could not open is not evidence of anything, so a
+  // blind spot answers for every address beneath it rather than condemning it.
+  if (decl.blind.some(covers)) return true
+  return decl.routes.some(same)
+}
+
 const findings = []
 let ok = 0
+// A witness in a file outside the application directory cannot be checked as this
+// application's navigation: a shared component library it renders is legitimate, a sibling
+// application reached through a workspace alias is not, and the witness alone does not say
+// which. Counted and reported rather than judged.
+let outsideApp = 0, outsideAppMust = 0
 
 for (const e of edges) {
   const w = e.witness || {}
   const base = { edge: `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}`, event: e.event, ruleId: w.ruleId, at: w.file ? `${w.file}:${w.loc?.line}` : null }
+
+  // Severity order puts this first: an edge whose destination is not an address of this
+  // application is wrong however well its witness reads.
+  const dest = nodes.get(e.to)?.route
+  if (typeof dest === 'string' && dest.startsWith('/') && declaredHere(dest) === false) {
+    findings.push({ ...base, verdict: 'NODE_NOT_DECLARED', modality: e.modality, detail: `destination node sits at ${dest}, which the independent route set does not declare` })
+    continue
+  }
+  if (w.file && !path.resolve(appDir, w.file).startsWith(appDir + path.sep)) { outsideApp++; if (e.modality === 'must') outsideAppMust++ }
 
   if (e.source !== 'manual' && !w.file) { findings.push({ ...base, verdict: 'NO_WITNESS', detail: 'edge is static/runtime but carries no witness file — golden invariant violated' }); continue }
   const abs = path.isAbsolute(w.file) ? w.file : path.join(appDir, w.file)
@@ -199,7 +257,8 @@ console.log(`issues:  ${JSON.stringify(tally)}`)
 const mustEdges = edges.filter((e) => e.modality === 'must')
 const mustBad = findings.filter((f) => f.verdict !== 'OVER_APPROX' && mustEdges.some((e) => `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}` === f.edge && e.witness && `${e.witness.file}:${e.witness.loc?.line}` === f.at))
 console.log(`MUST-TIER: ${mustEdges.length - mustBad.length}/${mustEdges.length} clean` + (mustBad.length ? `  <-- ${mustBad.length} SOUNDNESS VIOLATION(S)` : '  (soundness lemma holds on this sample)'))
-const order = ['NO_WITNESS', 'FILE_MISSING', 'LINE_OUT_OF_RANGE', 'NO_CONSTRUCT', 'WRONG_CONSTRUCT', 'TARGET_MISMATCH', 'OFF_BY_N', 'UNKNOWN_RULE', 'OVER_APPROX']
+console.log(`witness outside the application directory: ${outsideApp} edge(s), ${outsideAppMust} of them must` + (decl ? '' : '  (pass --routes <C.json> to also test destinations)'))
+const order = ['NODE_NOT_DECLARED', 'NO_WITNESS', 'FILE_MISSING', 'LINE_OUT_OF_RANGE', 'NO_CONSTRUCT', 'WRONG_CONSTRUCT', 'TARGET_MISMATCH', 'OFF_BY_N', 'UNKNOWN_RULE', 'OVER_APPROX']
 for (const v of order) {
   const rows = findings.filter((f) => f.verdict === v)
   if (!rows.length) continue
@@ -211,4 +270,4 @@ for (const v of order) {
 // `mustBad` is written out as well as counted: the soundness violations are the findings the
 // thesis describes one by one, and a description read off `findings` would include the may
 // and unknown tiers the lemma says nothing about.
-if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: checked, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, tally, mustBad, findings }, null, 2))
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: checked, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))

@@ -24,6 +24,7 @@ import type { SourceFile } from 'ts-morph'
 import type { SoundinessNote } from '@ui-graph/core'
 import { inlineTemplate } from './templates'
 import type { RouteInfo } from './routes'
+import { isInsideDir } from './resolve'
 
 export const SHELL_NODE_ID = 'n_scope_shell'
 
@@ -199,9 +200,19 @@ function reach(graph: Map<string, Set<string>>, start: string): Set<string> {
   return seen
 }
 
-/** Compute scopes for every non-route component and descendant screens for route components. */
-export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[]): ScopeResult {
+/**
+ * Compute scopes for every non-route component and descendant screens for route components.
+ * `sfs` is every file the project holds, including a shared library a tsconfig alias brings in:
+ * a library component the application renders is attributed to the screens that render it. When
+ * `projectDir` is given, a component outside it is never ELECTED the application's shell (or an
+ * indirect shell) -- an alias can also reach a sibling application whose root component holds a
+ * `<router-outlet>`, and taking that for this application's shell attributed its navigations to
+ * every screen at confidence 1. Being reached from this application's own shell is unaffected.
+ */
+export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectDir?: string): ScopeResult {
   const notes: SoundinessNote[] = []
+  /** Whether `file` may be elected this application's shell: any file when `projectDir` is unset, otherwise only one inside it. */
+  const mayBeShell = (file: string): boolean => !projectDir || isInsideDir(file, projectDir)
   // Test hosts and stories declare components too; they are not part of the application.
   const appFiles = sfs.filter((sf) => !/\.(spec|test|stories|cy|e2e)\.ts$/.test(sf.getFilePath()) && !/\/(testing|__tests__|e2e)\//.test(sf.getFilePath()))
   const components = collectComponents(appFiles)
@@ -220,7 +231,8 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[]): ScopeRe
     while (stack.length) for (const c of children.get(stack.pop()!) ?? []) if (!out.has(c)) { out.add(c); stack.push(c) }
     return out
   }
-  const routeComponentScreens = new Map<string, Set<string>>() // component file -> screens it renders on (incl. descendants)
+  // Component file -> the screens it renders on, descendants included.
+  const routeComponentScreens = new Map<string, Set<string>>()
   const ownScreens = new Map<string, Set<string>>()
   for (const r of routes) {
     if (!r.componentFile) continue
@@ -253,7 +265,7 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[]): ScopeRe
   // inside any routed component; everything they reach (except routed components) is top.
   const shell = new Set<string>()
   for (const c of components.values()) {
-    if (routeComponentScreens.has(c.file) || screensOf.has(c.file)) continue
+    if (!mayBeShell(c.file) || routeComponentScreens.has(c.file) || screensOf.has(c.file)) continue
     if (!c.template || !/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/.test(c.template)) continue
     for (const x of reach(nesting, c.file)) if (!routeComponentScreens.has(x)) shell.add(x)
   }
@@ -264,12 +276,13 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[]): ScopeRe
   const hasOutlet = (f: string): boolean => /<router-outlet(?![\w-])(?![^>]*\bname\s*=)/.test(components.get(f)?.template ?? '')
   const indirectShell = new Set<string>()
   for (const c of components.values()) {
-    if (referenced.has(c.file) || routeComponentScreens.has(c.file) || screensOf.has(c.file) || shell.has(c.file)) continue
+    if (!mayBeShell(c.file) || referenced.has(c.file) || routeComponentScreens.has(c.file) || screensOf.has(c.file) || shell.has(c.file)) continue
     const r = reach(nesting, c.file)
     if (![...r].some((x) => x !== c.file && hasOutlet(x))) continue
     for (const x of r) if (!routeComponentScreens.has(x) && !shell.has(x)) indirectShell.add(x)
   }
-  for (const x of [...shell, ...indirectShell]) screensOf.delete(x) // top absorbs any screen set (join)
+  // A shell is top, which absorbs any screen set (join).
+  for (const x of [...shell, ...indirectShell]) screensOf.delete(x)
 
   const subtreeOf = new Map<string, Set<string>>()
   for (const r of routes) subtreeOf.set(r.nodeId, subtree(r.nodeId))
@@ -299,7 +312,8 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[]): ScopeRe
       serviceScreens.set(file, set)
     }
   }
-  for (const f of serviceShell) serviceScreens.delete(f) // top absorbs any screen set (join)
+  // A service injected by the shell is top, which absorbs any screen set (join).
+  for (const f of serviceShell) serviceScreens.delete(f)
 
   return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf }
 }

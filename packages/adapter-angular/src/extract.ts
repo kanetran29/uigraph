@@ -16,8 +16,8 @@ import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNot
 import { edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, resolveRelativeTarget, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
-import { collectRoutes } from './routes'
-import { resolveImportedFile } from './resolve'
+import { collectRoutes, type UnreadableRoutes } from './routes'
+import { resolveImportedFile, isInsideDir } from './resolve'
 import { attributeScopes, subtreeAnchor, SHELL_NODE_ID } from './attribute'
 import { templateTargets, routerCallTargets, methodNavTargets, templateLoc, linkAttrTarget, type RawTarget } from './nav'
 import { parseControls } from './controls'
@@ -131,15 +131,49 @@ function workspaceTsPaths(projectDir: string): { baseUrl: string; paths: Record<
   return null
 }
 
-/** Extract a graph from an already-built ts-morph project (testable in memory). */
+/**
+ * Say what the route walk could not read, e.g. "2 declared path(s) and 1 lazy subtree(s) could
+ * not be read", or null when it read everything. The losses are named apart because they are
+ * different things: an unreadable path is one route missing, a lazy subtree is every route the
+ * dropped `loadChildren` would have mounted, and a file that a lazy or spread site claims, that no
+ * walk places under a prefix, and that the root scan would have minted routes from (a lazy
+ * module's file beside its elected routing module, or one whose claiming site the walk never
+ * reaches) holds routes that are neither walked nor rescanned, so it is unknown whether the
+ * application mounts them. The phrase "could
+ * not be read" is kept for all of them because a downstream census keys on it.
+ */
+function describeUnreadable(u: UnreadableRoutes): string | null {
+  const parts: string[] = []
+  if (u.paths.size > 0) parts.push(`${u.paths.size} declared path(s)`)
+  if (u.subtrees.size > 0) parts.push(`${u.subtrees.size} lazy subtree(s)`)
+  if (u.unplaced.size > 0) parts.push(`${u.unplaced.size} claimed route file(s) placed under no prefix`)
+  return parts.length === 0 ? null : `${parts.join(' and ')} could not be read`
+}
+
+/**
+ * Extract a graph from an already-built ts-morph project (testable in memory). Route collection
+ * stops at `projectDir`; scope attribution does not, because a shared library the application
+ * renders lives outside it too and its navigations belong to the screens that render it. What
+ * attribution refuses outside `projectDir` is only the election of a shell, so a sibling
+ * application a tsconfig alias reaches cannot be taken for this one's root. That holds for every
+ * way a shell is elected: a component with a `<router-outlet>`, a service the shell injects, and
+ * an NgRx effect, which is registered for the whole application and so sits at the shell. An
+ * effect outside `projectDir` is therefore not attributed to the shell. Whether this application
+ * registers it is not read (a workspace library's effect is registered from inside the
+ * application through `provideEffects([...])`), so it is reported as unattributed with a note
+ * that says the tool could not place it, and never as a class nothing in the application injects.
+ */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const redirects = new Map<string, string>()
-  const unreadablePaths = { count: 0 }
-  const routes = collectRoutes(project, redirects, unreadablePaths, projectDir)
+  const unreadable: UnreadableRoutes = { paths: new Set(), subtrees: new Set(), unplaced: new Set() }
+  const routes = collectRoutes(project, redirects, unreadable, projectDir)
+  const unreadableText = describeUnreadable(unreadable)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
-  // `joinRoutePath` folds `**`, `*` and `/*` into the path `*`, so a catch-all that renders a
-  // component is the one route with that full path. A catch-all that only redirects is no
-  // screen and is absent here; it lives in `redirects` instead.
+  // `joinRoutePath` folds `**`, `*` and `/*` into the path `*` only at the ROOT; inside a feature
+  // module the same segment is `<parent>/*`, because it catches only that module's unmatched URLs.
+  // So the one route whose full path is `*` is the application's own catch-all, and looking it up
+  // by that path cannot pick up a feature module's. A catch-all that only redirects is no screen
+  // and is absent here; it lives in `redirects` instead, under the same full path.
   const wildcardScreen = routeLikes.find((r) => r.fullPath === '*') ?? null
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
@@ -162,7 +196,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   // One note per application when the declared route set is incomplete. Any claim of the
   // form "the application declares no route at this path" is void while this note is
   // present, so a consumer can gate on it without parsing another note's prose.
-  if (unreadablePaths.count > 0) soundiness.push({ kind: 'incomplete-route-set', detail: `${unreadablePaths.count} declared path(s) could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds` })
+  if (unreadableText) soundiness.push({ kind: 'incomplete-route-set', detail: `${unreadableText}, so the declared route set is a lower bound and no claim that a path is undeclared holds` })
   const seen = new Set<string>()
   const edgeById = new Map<string, GraphEdge>()
   const seenAsyncGuards = new Set<string>()
@@ -200,7 +234,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
    * soundiness note for a site once, so an attributed site that fires from many screens does
    * not report the same approximation once per screen. `capMay` holds the edges at may for a
    * scope the pass is not certain of. A literal no route declares is routed to the application's
-   * catch-all (a `**` redirect target or a `**` screen) at may, never must.
+   * catch-all (a `**` redirect target or a `**` screen) at may, never must. Every note cites
+   * the target's own file when it has one: a link parsed out of an external template carries
+   * the `.html` path and a line within it, and pairing that line with the component's `.ts` path
+   * pointed published dead-link citations at a `.ts` line that holds no link.
    */
   function emitTargets(from: string, targets: RawTarget[], file: string, note: boolean, capMay = false): void {
     for (const t of targets) {
@@ -231,9 +268,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           target = wildcardRedirect !== undefined ? matchLiteral(wildcardRedirect, routeLikes) : wildcardScreen
           viaWildcard = target !== null
           if (viaWildcard && note) {
-            const caveat = unreadablePaths.count > 0
-              ? `, though ${unreadablePaths.count} declared path(s) could not be read, so it is not claimed that no such route exists`
-              : ''
+            const caveat = unreadableText ? `, though ${unreadableText}, so it is not claimed that no such route exists` : ''
             // The note records the SITE, and it is recorded whether or not a distinct edge
             // results: `pushEdge` dedupes on (from, to, event, guard), so a catch-all that
             // lands on a screen the same template already links to merges into that edge and
@@ -242,11 +277,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             // dead-link census counts -- it counts sites, never edges.
             // The target must stay the first double-quoted string: a generator reads it from here.
             const answer = wildcardRedirect !== undefined ? `redirects it to ${wildcardRedirect}` : 'answers it with its own catch-all screen'
-            soundiness.push({ kind: 'wildcard-redirect', file, loc: t.loc, detail: `literal target "${value}" matches no declared route and the wildcard route ${answer}${caveat}` })
+            soundiness.push({ kind: 'wildcard-redirect', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route and the wildcard route ${answer}${caveat}` })
           }
         }
         if (!target) {
-          if (note) soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `literal target "${value}" matches no declared route` })
+          if (note) soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route` })
           continue
         }
         const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
@@ -257,7 +292,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       } else if (t.ti.kind === 'template') {
         const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
         const cands = matchPrefix(prefix, routeLikes)
-        if (note) soundiness.push({ kind: 'over-approximation', file, loc: t.loc, detail: `non-literal target prefix "${prefix}" over-approximated to ${cands.length} route(s)` })
+        if (note) soundiness.push({ kind: 'over-approximation', file: t.file ?? file, loc: t.loc, detail: `non-literal target prefix "${prefix}" over-approximated to ${cands.length} route(s)` })
         for (const cand of cands) {
           const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
           noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
@@ -271,7 +306,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // graph does not claim a destination it cannot know, and `verify` has somewhere to
         // start. Core counts a `u_<screen>` sink as frontier, never as a resolved transition.
         pushEdge(from, unknownSink(from), t, 'unknown', 0, null, file)
-        if (note) soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
+        if (note) soundiness.push({ kind: 'dynamic-target', file: t.file ?? file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
       }
     }
   }
@@ -300,7 +335,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   }
 
   if (opts.attribution) {
-    const scopes = attributeScopes(project.getSourceFiles(), routes)
+    const scopes = attributeScopes(project.getSourceFiles(), routes, projectDir)
     soundiness.push(...scopes.notes)
     const targetsOf = (sf: SourceFile): RawTarget[] => [...templateTargets(sf, projectDir), ...routerCallTargets(sf)]
     // Anchors: a set of screens that is exactly subtree(r) gets one scope node, and the
@@ -392,7 +427,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       // can fire on any screen: its scope is top, the same place the shell sits.
       // From the syntax tree, not the text: a `createEffect(` inside a comment is not an effect.
       const isEffect = sf.getDescendantsOfKind(SyntaxKind.CallExpression).some((c) => /(^|\.)createEffect$/.test(c.getExpression().getText()))
-      if (isEffect) {
+      if (isEffect && isInsideDir(f, projectDir)) {
         const before = edges.length
         emitTargets(SHELL_NODE_ID, ts, file, true, true)
         shellEdges += edges.length - before
@@ -406,7 +441,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       }
       const screens = new Set([...(scopes.serviceScreens.get(f) ?? []), ...(guardScreens.get(f) ?? [])])
       if (screens.size === 0) {
-        soundiness.push({ kind: 'unattributed-non-component', file, detail: `${ts.length} navigation call(s) in a class nothing in the application injects; its scope is empty` })
+        // An effect that reaches here failed the projectDir guard above: it is unplaced, not known to be unused.
+        const where = isEffect ? 'an NgRx effect outside the application directory; whether the application registers it is not read, so its scope could not be placed' : 'a class nothing in the application injects; its scope is empty'
+        soundiness.push({ kind: 'unattributed-non-component', file, detail: `${ts.length} navigation call(s) in ${where}` })
         continue
       }
       for (const s of [...screens].sort()) emitTargets(s, ts, file, false, true)
@@ -461,13 +498,14 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
          * per the target's guards, a static-prefix template over-approximates to a may
          * edge per matching route, a dynamic target is a soundiness note. `guard` is a
          * handler-level condition joined with the route gate; `what` names the source
-         * in notes.
+         * in notes. A note cites `t.file` when set, because `t.loc` is then a line in that
+         * external template and not in the component's `.ts`.
          */
         const wireControlNav = (t: RawTarget, guard: string | null, what: string): void => {
           if (t.ti.kind === 'literal') {
             const target = matchLiteral(t.ti.value, routeLikes)
             if (!target) {
-              soundiness.push({ kind: 'unresolved-target', file, loc: t.loc, detail: `${what} target "${t.ti.value}" matches no declared route` })
+              soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `${what} target "${t.ti.value}" matches no declared route` })
               return
             }
             const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
@@ -486,7 +524,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
               navEffects.add('navigate')
             }
           } else {
-            soundiness.push({ kind: 'dynamic-target', file, loc: t.loc, detail: `${what} navigates to a fully dynamic target` })
+            soundiness.push({ kind: 'dynamic-target', file: t.file ?? file, loc: t.loc, detail: `${what} navigates to a fully dynamic target` })
           }
         }
         for (const handler of c.handlers) {

@@ -60,13 +60,29 @@ concatenates the paths of $r$ and of its ancestors. A route that declares
 \texttt{children} but no \texttt{component} is only a path prefix, as
 Section~\ref{sec:angular} describes: it contributes no element of $S$, and its path is
 carried into the full paths of its children. A route whose only effect is a
-\texttt{redirectTo} renders nothing and likewise contributes no element of $S$. Because
+\texttt{redirectTo} renders nothing and likewise contributes no element of $S$. In Angular
+that case is exactly as narrow as it sounds: the router refuses a configuration that declares
+\texttt{redirectTo} and \texttt{children} together, and likewise \texttt{redirectTo} with a
+\texttt{component}, so a redirecting route can never also be the layout under which a child
+renders. Both refusals were read off the router's own configuration validator in the version
+vendored with this work, Angular~18.2.14; no corpus repository is checked out where the
+invariant could be re-read, so the sentence is scoped to that version. The same is not true of every client-side router --
+Vue Router applies a record's redirect only when that record is the last one matched, so a
+redirecting parent does render its component for a matching child -- and
+Section~\ref{sec:transfer} returns to it, because the model's step from
+``redirects'' to ``renders nothing'' is a fact about Angular rather than about routers.
+Because
 $\mathit{screen}(r)$ is identified by the full path, the map $\mathit{screen}(\cdot)$ is
 injective on the routes whose full paths are pairwise distinct. Angular also permits two
 component-bearing routes with the same full path, told apart at run time by
 \texttt{pathMatch} or by a \texttt{canMatch} guard. The model assumes that this does not
 occur: the extractor keeps the route declared first under a full path and drops the
-later ones. Two routes with different paths that render the same component give two
+later ones. For Vue the extractor also declares the drop, as a note carrying the file and line
+of the record it discarded, so a graph built from a table with a repeated address says so
+rather than being quietly one screen short; the note is true of the record and over-stated
+about the graph, because where both records name the same component the address still renders
+it. Angular's extractor drops silently, which is one of the asymmetries
+Section~\ref{sec:transfer} returns to. Two routes with different paths that render the same component give two
 screens, which is the case that makes the attribution of
 Section~\ref{sec:attribution} necessary.
 
