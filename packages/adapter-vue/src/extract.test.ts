@@ -412,6 +412,44 @@ createRouter({ routes: [{ [path]: '/alpha', component: A }, { path: '/beta', com
     expect(graph.nodes.map((n) => n.id)).toEqual(['n_beta'])
   })
 
+  it('reads a computed key whose constant is imported from another file', () => {
+    const { graph } = build({
+      '/src/keys.ts': `export const C = 'children'`,
+      '/src/router.ts': `import { createRouter } from 'vue-router'
+import L from './L.vue'
+import U from './U.vue'
+import { C } from './keys'
+createRouter({ routes: [{ path: '/admin', component: L, [C]: [{ path: 'users', component: U }] }] })`,
+      '/src/L.vue': page(),
+      '/src/U.vue': page(),
+    })
+    expect(graph.nodes.map((n) => n.id).sort()).toEqual(['n_admin', 'n_admin_users'])
+  })
+
+  it('declares a record whose path is given by an accessor', () => {
+    // `get path()` is a member no static read gives a value for, so the record HAS a path the
+    // walk could not read; it was skipped with nothing said.
+    const { soundiness } = build({
+      '/src/router.ts': `import { createRouter } from 'vue-router'
+import A from './A.vue'
+import B from './B.vue'
+createRouter({ routes: [{ get path() { return '/a' }, component: A }, { path: '/b', component: B }] })`,
+      '/src/A.vue': page(),
+      '/src/B.vue': page(),
+    })
+    expect(details(soundiness, 'unresolved-route')).toHaveLength(1)
+  })
+
+  it('declares an unreadable member even where the path itself was read', () => {
+    const { soundiness } = build({
+      '/src/router.ts': `import { createRouter } from 'vue-router'
+import A from './A.vue'
+createRouter({ routes: [{ path: '/a', component: A, [keyOf()]: [] }] })`,
+      '/src/A.vue': page(),
+    })
+    expect(details(soundiness, 'unresolved-route').filter((d) => /computed key/.test(d))).toHaveLength(1)
+  })
+
   it('declares a record whose computed key it cannot read', () => {
     const { soundiness } = build({
       '/src/router.ts': `import { createRouter } from 'vue-router'

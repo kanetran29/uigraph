@@ -344,7 +344,10 @@ export function propNamed(obj: ObjectLiteralExpression, name: string) {
     const expr = key.getExpression()
     if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return expr.getLiteralValue() === name
     if (!Node.isIdentifier(expr)) return false
-    const init = expr.getSourceFile().getVariableDeclaration(expr.getText())?.getInitializer()
+    const sym = expr.getSymbol()
+    const decl = (sym?.getAliasedSymbol() ?? sym)?.getValueDeclaration()
+    if (!decl || !Node.isVariableDeclaration(decl)) return false
+    const init = decl.getInitializer()
     if (!init || (!Node.isStringLiteral(init) && !Node.isNoSubstitutionTemplateLiteral(init))) return false
     return init.getLiteralValue() === name
   })

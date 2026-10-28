@@ -103,7 +103,8 @@ tail of a route the parser had already declared in full: the extractor had reach
 without its parent prefix and minted \path{/premium} where the parser declared
 \path{/settings/subscription/premium}. That is the extractor assembling the path differently,
 not the parser missing a table. The other \RoundTwoFirstRoundSynthetic{} are the extractor's
-own synthetic catch-all, one per application, which is a node by construction and not a route
+own synthetic catch-all, in the five applications that declare one, which is a node by
+construction and not a route
 anyone declared. Which way the group fell matters beyond the bookkeeping, because it is the
 difference between a measuring instrument that was wrong and a tool that was: the repairs of
 Section~\ref{sec:res-round2} are accordingly almost all in the extractor. The figures above are the first round's and are left standing as the record of
@@ -626,10 +627,19 @@ guessing. It is \emph{unplaced} when the destination is readable but the screen 
 from is not, in which case the edge is anchored at an \texttt{o\_}\,origin node that says so.
 What is left is unexplained. \RoundTwoExcluded{} sites leave the denominator entirely, because
 they carry no commands and so name no destination. A site that navigates a secondary outlet
-would leave it too --- the model admits only the primary outlet --- and in the round reported
-here there are none left to exclude: the \RoundTwoCtrlOutlet{} in
-\RoundTwoCtrlOutletWhere{} were sites whose own screen the extractor could not place until its
-route subtree became readable.
+would leave it too --- the model admits only the primary outlet --- and the round reported here
+excludes none on that ground. That is not because such sites went away:
+\RoundTwoCtrlOutlet{} of them in \RoundTwoCtrlOutletWhere{} were set aside by the control run,
+and \RoundTwoCtrlOutletStill{} of those are still in the source at the same lines. They are
+inside the denominator now, accounted under other classes, because the round-two extractor
+could place the screen each of them fires from once its route subtree became readable. The
+denominator is larger for it, which is the direction that costs a percentage rather than
+flattering one. The restriction is enforced on the route side as well: a route that declares a
+named \texttt{outlet} is reached as \texttt{(name:path)} and never at the primary address, so it
+contributes no screen. Before that was enforced, such a route could take the primary address
+from the sibling that really renders there, by being declared first, and the graph named the
+wrong component at a real address without saying so. No application in this corpus declares a
+component-bearing named-outlet route, so no figure in this chapter moves with it.
 
 \begin{table}[t]\small
 \caption{Construct accounting after the loss list was worked. Percentages are of the
@@ -672,7 +682,7 @@ it.}
 
 Across the corpus \RoundTwoMustClean{} must edges are clean, so
 \RoundTwoMustViolations{} violate the property, all of them in mifos, where the must tier
-grew from 129 edges to over a thousand. That is a worse ratio than the one edge of
+grew from 129 edges to \RoundTwoMustEdgesMifos{}. That is a worse ratio than the one edge of
 Section~\ref{sec:res-defects}, and it is reported here rather than left to be inferred from
 a coverage table. \RoundTwoMustInTs{} of the \RoundTwoMustViolations{} sit in a \texttt{.ts} file and
 \RoundTwoMustInTemplate{} in a template: \RoundTwoMustMismatch{} are a target mismatch and

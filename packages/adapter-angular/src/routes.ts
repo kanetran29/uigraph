@@ -303,11 +303,13 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     if (Node.isSpreadElement(el)) {
       const arr = arrayLiteralOf(el.getExpression())
       if (arr && Node.isArrayLiteralExpression(arr)) {
-        // Only on the evidence the claim itself used: a spread of an array that places nothing
+        // Marked placed on what this descent actually PLACED, not on the array's shape: an array
+        // of the right shape that places nothing (`children: []`, an unreadable `redirectTo`)
         // would otherwise mark its file placed, and a real table claimed in the same file would
         // lose its declaration.
-        if (spreadMintsRoutes(arr)) consumedFiles?.add(arr.getSourceFile().getFilePath())
+        const before = out.size + (redirects?.size ?? 0)
         walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
+        if (out.size + (redirects?.size ?? 0) > before) consumedFiles?.add(arr.getSourceFile().getFilePath())
       }
       continue
     }
@@ -346,7 +348,12 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // reach the screen it forwards to, and dropping it loses that transition entirely.
     const redirectTo = stringProp(obj, 'redirectTo')
     if (redirectTo !== null && redirects) redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
-    const isScreen = propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined
+    // A route on a named outlet is reached as `(name:path)` and never at the primary address, so
+    // it is no element of S -- Section 3's model admits the primary outlet alone. Minting it here
+    // let it take the primary address from the sibling that really renders there, first-declared
+    // winning, so the graph named the wrong component at a real address and said nothing.
+    const auxOutlet = (() => { const o = stringProp(obj, 'outlet'); return o !== null && o !== 'primary' })()
+    const isScreen = !auxOutlet && (propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined)
     const nodeId = routeToNodeId(fullPath)
     if (isScreen && !out.has(nodeId)) {
       out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
@@ -425,7 +432,7 @@ export function collectRoutes(project: Project, redirects?: Map<string, string>,
       const file = project.getSourceFile(f)
       if (!file || SPEC_FILE.test(f) || consumedFiles.has(f)) continue
       if (projectDir && !isInsideDir(f, projectDir)) continue
-      if (mintsFromRoot(file, loadedChildFiles, byNodeId)) unreadable.unplaced.add(file)
+      if (mintsFromRoot(file, loadedChildFiles, byNodeId, redirects)) unreadable.unplaced.add(file)
     }
   }
   return [...byNodeId.values()]
@@ -443,13 +450,15 @@ export function collectRoutes(project: Project, redirects?: Map<string, string>,
  * arrays and never consults the set for them, so removing it would change no answer. A redirect
  * the root scan would have registered counts as well, because a redirect is placed under a
  * prefix like a route and a claimed file holding only redirects would otherwise be lost here in
- * silence.
+ * silence -- held against `alreadyRedirects` for the same reason the nodes are held against
+ * `already`, since a file that re-declares a redirect the graph has cost the route set nothing.
  */
-function mintsFromRoot(sf: SourceFile, claims: Set<string>, already: Map<string, RouteInfo>): boolean {
+function mintsFromRoot(sf: SourceFile, claims: Set<string>, already: Map<string, RouteInfo>, alreadyRedirects?: Map<string, string>): boolean {
   const probe = new Map<string, RouteInfo>()
   const probeRedirects = new Map<string, string>()
   for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', probe, new Set(claims), [], null, probeRedirects)
-  return probeRedirects.size > 0 || [...probe.keys()].some((id) => !already.has(id))
+  if ([...probeRedirects].some(([from, to]) => alreadyRedirects?.get(from) !== to)) return true
+  return [...probe.keys()].some((id) => !already.has(id))
 }
 
 /**

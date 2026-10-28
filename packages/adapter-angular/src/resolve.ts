@@ -95,7 +95,7 @@ export function resolveImportedFile(sf: SourceFile, name: string): SourceFile | 
  * initializer is not a recognizable dynamic-import loader.
  */
 export function lazyImportSpecifier(prop: ObjectLiteralExpression, name: string): string | null {
-  const p = prop.getProperty(name)
+  const p = propNamed(prop, name)
   if (!p || !Node.isPropertyAssignment(p)) return null
   const init = p.getInitializer()
   if (!init || !Node.isArrowFunction(init)) return null
@@ -113,7 +113,7 @@ export function lazyImportSpecifier(prop: ObjectLiteralExpression, name: string)
  * loader unreachable, and with it the whole subtree.
  */
 export function lazyIdentifierTarget(sf: SourceFile, prop: ObjectLiteralExpression, name: string): SourceFile | undefined {
-  const p = prop.getProperty(name)
+  const p = propNamed(prop, name)
   if (!p || !Node.isPropertyAssignment(p)) return undefined
   const init = p.getInitializer()
   if (!init || !Node.isArrowFunction(init)) return undefined
@@ -131,19 +131,62 @@ export function componentClassName(sf: SourceFile): string | null {
 }
 
 /**
- * The property of `obj` called `name`, whether the key is written bare, quoted or as a constant
- * computed key. `getProperty(name)` compares against `getName()`, which keeps a quoted key's
- * quotes and a computed key's brackets, so it answers undefined for `{ "path": 'quoted' }`: that
- * route was neither minted nor counted as unreadable, so the route set claimed a completeness it
- * did not have and a live link into the address was published as a dead one. Every read that
- * decides what a route object IS goes through this, so one spelling of a key cannot make a route
- * invisible to the walk while another makes it visible.
+ * The property of `obj` called `name`, whether the key is written bare, quoted or as a computed
+ * key fixed to a string constant. `getProperty(name)` compares against `getName()`, which keeps a
+ * quoted key's quotes and a computed key's brackets, so it answers undefined for
+ * `{ "path": 'quoted' }`: that route was neither minted nor counted as unreadable, so the route
+ * set claimed a completeness it did not have and a live link into the address was published as a
+ * dead one.
+ *
+ * A computed key is decided by the VALUE its expression is fixed to, never by how that expression
+ * is spelled. Stripping the brackets off the text read `{ [path]: 'ghost' }`, where
+ * `const path = 'redirectTo'`, as a route at /ghost and minted a node and a must edge into an
+ * address the application does not mount; and it missed `{ [KEY]: '/a' }` with
+ * `const KEY = 'path'`, the one computed form that should match. Vue's and React's readers of the
+ * same hazard decide by value, and this one differing from them was the whole of the defect.
+ *
+ * It is not every read: `lazyImportSpecifier` and `lazyIdentifierTarget` below and the guard-scope
+ * read in `extract.ts` take their property through this too, but a reader added without it would
+ * be invisible to the walk for one spelling of a key and not another, which is the shape of the
+ * bug to watch for.
  */
 export function propNamed(obj: ObjectLiteralExpression, name: string) {
   return obj.getProperty((p) => {
     if (!Node.isPropertyAssignment(p) && !Node.isShorthandPropertyAssignment(p)) return false
     const key = p.getNameNode()
-    return Node.isStringLiteral(key) ? key.getLiteralValue() === name : key.getText().replace(/^\[|\]$/g, '').replace(/^['"`]|['"`]$/g, '') === name
+    if (Node.isStringLiteral(key) || Node.isNoSubstitutionTemplateLiteral(key)) return key.getLiteralValue() === name
+    if (!Node.isComputedPropertyName(key)) return key.getText() === name
+    return constKeyValue(key.getExpression()) === name
+  })
+}
+
+/**
+ * The string a computed key's expression is fixed to, or null. An identifier is followed through
+ * its SYMBOL and not by looking its name up in the file: the file lookup answers with the
+ * module-level declaration even where a function-scoped one shadows it, so a key written inside a
+ * factory was read with the outer constant's value and a route minted at an address the inner one
+ * never names.
+ */
+function constKeyValue(expr: Node): string | null {
+  if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) return expr.getLiteralValue()
+  if (!Node.isIdentifier(expr)) return null
+  const sym = expr.getSymbol()
+  const decl = (sym?.getAliasedSymbol() ?? sym)?.getValueDeclaration()
+  if (!decl || !Node.isVariableDeclaration(decl)) return null
+  const init = decl.getInitializer()
+  if (!init || (!Node.isStringLiteral(init) && !Node.isNoSubstitutionTemplateLiteral(init))) return null
+  return init.getLiteralValue()
+}
+
+/** Whether this object carries a computed key the reader could not fix to a string, so what it declares is unknown. */
+export function keyUnreadable(obj: ObjectLiteralExpression): boolean {
+  return obj.getProperties().some((p) => {
+    // An accessor or a method is a member whose value no static read of this object can give,
+    // so a `get path()` is a path the walk could not read rather than a record without one.
+    if (Node.isGetAccessorDeclaration(p) || Node.isSetAccessorDeclaration(p) || Node.isMethodDeclaration(p)) return true
+    if (!Node.isPropertyAssignment(p) && !Node.isShorthandPropertyAssignment(p)) return false
+    const key = p.getNameNode()
+    return Node.isComputedPropertyName(key) && constKeyValue(key.getExpression()) === null
   })
 }
 

@@ -396,6 +396,44 @@ export const router = createBrowserRouter([{ "path": '/a', "element": <A/> }, { 
     )
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/a', '/b'])
     expect(soundiness.filter((n) => n.kind === 'dynamic-route-path')).toEqual([])
+    // Not only the paths: the quoted `element` has to be read too, or the nodes carry no
+    // component and the graph says two screens exist with nothing rendering at either.
+    expect(graph.nodes.map((n) => n.label).sort()).toEqual(['A', 'B'])
+  })
+
+  it('resolves a computed key through its own scope, not the module-level name', () => {
+    // `getVariableDeclaration` on the file answers with the module-level `path`, so a key
+    // shadowed inside the factory was read with the outer value and a route minted at an
+    // address this config never names.
+    const { graph } = extractGraph(
+      inMemory({
+        '/routes.tsx': `import A from './A'
+import B from './B'
+const path = 'path'
+export function makeRouter() {
+  const path = 'id'
+  return createBrowserRouter([{ [path]: '/alpha', element: <A/> }, { path: '/beta', element: <B/> }])
+}`,
+        '/A.tsx': `export default function A(){ return null }`,
+        '/B.tsx': `export default function B(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/beta'])
+  })
+
+  it('reads a computed key whose constant is imported from another file', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/keys.ts': `export const K = 'path'`,
+        '/routes.tsx': `import A from './A'
+import { K } from './keys'
+export const router = createBrowserRouter([{ [K]: '/a', element: <A/> }])`,
+        '/A.tsx': `export default function A(){ return null }`,
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/a'])
   })
 
   it('does not read a computed key by its spelling', () => {

@@ -217,7 +217,7 @@ export function collectRoutes(vp: VueProject): CollectedRoutes {
   const claimedBy = new Map<string, ObjectLiteralExpression>()
   const onStack = new Set<ObjectLiteralExpression>()
 
-  /** Walk one route record (and its children) into the table; returns the count of path-bearing records walked. A redirect-only record has its component left uncollected; whatever else the walk cannot read (a spread, a `path` that is not a string literal, an unresolvable `children`, a record dropped onto an address an earlier record claimed, a record that contains itself) is declared as a note, never lost silently. The note fires only when the record HAS a `path` the walk could not read: an object with no `path` at all is not a dropped route, and declaring one there would be a blind spot the tool does not have. */
+  /** Walk one route record (and its children) into the table; returns the count of path-bearing records walked. A redirect-only record has its component left uncollected; whatever else the walk cannot read (a spread, a `path` that is not a string literal, a member given by an accessor or a computed key fixed to no string, an unresolvable `children`, a record dropped onto an address an earlier record claimed, a record that contains itself) is declared as a note, never lost silently. The path note fires only when the record HAS a `path` the walk could not read: an object with no `path` at all is not a dropped route, and declaring one there would be a blind spot the tool does not have. The unreadable-member note fires whether or not `path` was read, because an unreadable `children` beside a readable path loses a subtree. */
   const visitObj = (obj: ObjectLiteralExpression, parent: string, sf: SourceFile): number => {
     for (const prop of obj.getProperties()) {
       if (Node.isSpreadAssignment(prop)) {
@@ -225,11 +225,13 @@ export function collectRoutes(vp: VueProject): CollectedRoutes {
       }
     }
     const own = stringProp(obj, 'path')
+    // A member the walk cannot read -- a computed key fixed to no string, an accessor, a method
+    // -- leaves it unknown what the record declares. Declared whether or not `path` itself was
+    // read, because an unreadable `children` or `redirect` beside a readable path loses just as
+    // much and said nothing.
+    if (keyUnreadable(obj)) notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(obj, sf), detail: `route record carries a computed key that is not a string constant, or a member no static read can give a value for, so what it declares is not fully read${own === null ? ' and the record is skipped' : ''}` })
     if (own === null) {
       const pathProp = propNamed(obj, 'path')
-      // A record whose key the walk cannot read declares an unknown property, so whether it is a
-      // route at all is unknown; declaring that is the only honest reading of it.
-      if (!pathProp && keyUnreadable(obj)) notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(obj, sf), detail: 'route record carries a computed key that is not a string constant, so what it declares is not read and the record is skipped' })
       const pathText = pathProp && Node.isPropertyAssignment(pathProp) ? (pathProp.getInitializer()?.getText() ?? pathProp.getText()) : pathProp?.getText()
       if (pathProp) notes.push({ kind: 'unresolved-route', file: sf.getFilePath(), loc: locOf(pathProp, sf), detail: `route record path "${pathText}" is not a string literal — the record and any children are skipped` })
       return 0
