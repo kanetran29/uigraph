@@ -376,6 +376,21 @@ function mountedArrays(sf: SourceFile): ArrayLiteralExpression[] {
 }
 
 /**
+ * Is this registration the providers of a module a `loadChildren` loads? Such a module's
+ * providers are its own injector's, so a `provideRouter` among them adds routes under the prefix
+ * that loaded it and not at the application root --- the `forChild` case written the standalone
+ * way. Taking it for a root registration minted the table at the root beside its real prefixed
+ * address. A registration in an exported FACTORY in such a file is a different thing and is not
+ * refused here: alfresco's folder-rules library is a lazy target and its factory, which the shell
+ * calls, really does register its table at the root.
+ */
+function providedByLazyModule(call: CallExpression, lazyTargets: Set<string>): boolean {
+  if (!lazyTargets.has(call.getSourceFile().getFilePath())) return false
+  const prop = call.getFirstAncestor((a) => Node.isPropertyAssignment(a) && a.getName() === 'providers')
+  return prop !== undefined && prop.getFirstAncestor((a) => Node.isDecorator(a)) !== undefined
+}
+
+/**
  * Does this registration run? One at module scope, or in a provider array of a decorator, runs
  * when the module is loaded. One inside a function body runs only if something calls that
  * function, and the difference decides whether a table is mounted at the application root:
@@ -409,13 +424,14 @@ function registrationRuns(call: CallExpression, files: SourceFile[]): boolean {
  * `loadChildren` names is what gives that table its second mount, and exempting the file as well
  * cut the only hole in this rule while buying nothing the name does not already buy.
  */
-function collectRootTableArrays(files: SourceFile[]): Set<ArrayLiteralExpression> {
+function collectRootTableArrays(files: SourceFile[], lazyTargets: Set<string>): Set<ArrayLiteralExpression> {
   const out = new Set<ArrayLiteralExpression>()
   for (const sf of files) {
     for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
       const name = call.getExpression().getText()
       if (!/(RouterModule\.forRoot|provideRouter)$/.test(name)) continue
       if (!registrationRuns(call, files)) continue
+      if (providedByLazyModule(call, lazyTargets)) continue
       for (const arg of call.getArguments()) {
         const arr = arrayLiteralOf(arg)
         if (arr && Node.isArrayLiteralExpression(arr)) out.add(arr)
@@ -519,45 +535,48 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
   return placed
 }
 
+
 /**
- * The path segment a route-table wrapper mounts its argument under, or null when this reader
- * cannot say. The callee is read to the single expression it returns --- an arrow, a function
- * declaration, an object property or a static method --- and the `path` of that literal is the
- * segment. An empty path adds nothing, which is what mifos's `Route.withShell` declares and why
- * taking the call's own prefix was right there and wrong in general. A callee that cannot be read,
- * or whose `path` is not a literal, answers null, and the caller declares the subtree unread
- * rather than mounting it somewhere.
+ * What a call contributes to a route table: the arrays to walk and the path segment they go
+ * under, or null when this reader cannot say and the caller must declare the subtree unread.
+ *
+ * Three shapes, and which array is the table differs between them. A builder that RETURNS an
+ * array returns the table itself --- `section(V2)` giving `[{ path: 'v2', children }]` mounts its
+ * argument under `v2`, so walking the argument instead put that table's addresses at the call's
+ * own prefix. A builder that hands its argument back unchanged contributes that argument at no
+ * segment. A builder that returns an object places its argument in that object's `children`,
+ * under that object's `path`, which is mifos's `Route.withShell` and why its empty path made the
+ * call's own prefix the right answer there and the wrong one in general. Anything else --- a
+ * callee this reader cannot follow, a returned object that files its argument somewhere other
+ * than `children`, a `path` that is not a literal --- answers null.
  */
-function callPathSegment(call: CallExpression): string | null {
-  const returned = builderReturn(call.getExpression())
+function callMount(node: Node | undefined): { arrays: ArrayLiteralExpression[]; segment: string } | null {
+  if (!node || !Node.isCallExpression(node)) return null
+  const returned = builderReturn(node.getExpression())
   if (!returned) return null
-  // A wrapper that hands its argument back unchanged adds no segment.
-  if (Node.isArrayLiteralExpression(returned) || Node.isIdentifier(returned)) return ''
+  if (Node.isArrayLiteralExpression(returned)) return { arrays: [returned], segment: '' }
+  if (Node.isIdentifier(returned)) {
+    const named = arrayLiteralOf(returned)
+    if (named && Node.isArrayLiteralExpression(named)) return { arrays: [named], segment: '' }
+    return { arrays: callArrayArgs(node), segment: '' }
+  }
   const obj = Node.isObjectLiteralExpression(returned) ? returned : objectLiteralOf(returned)
   if (!obj) return null
-  // The wrapper has to put the argument where its own path mounts it. One that files its table
-  // under `data`, or guards it and returns something else, mounts no route under that path, and
-  // reading the path alone put the table's addresses under a prefix nothing serves them at.
   const children = propNamed(obj, 'children')
   if (!children) return null
-  // `{ path: 'v2', children }` is the shorthand for the same thing, and it is how such a wrapper
-  // is usually written.
   if (!Node.isShorthandPropertyAssignment(children)) {
     if (!Node.isPropertyAssignment(children)) return null
     const init = children.getInitializer()
     if (!init || !(Node.isIdentifier(init) || Node.isArrayLiteralExpression(init))) return null
   }
-  if (propNamed(obj, 'path') === undefined) return ''
-  return stringProp(obj, 'path')
+  const segment = propNamed(obj, 'path') === undefined ? '' : stringProp(obj, 'path')
+  if (segment === null) return null
+  return { arrays: callArrayArgs(node), segment }
 }
 
 /**
- * The route arrays a call hands on, for a table written `withShell(ADMIN)` or `[Route.wrap([...])]`.
- * Only the arguments are read: what the callee builds from them is out of reach, and the arguments
- * are what Angular ends up mounting in every shape of this that the corpus holds. The arrays are
- * returned so the walk mounts them under the prefix and the pre-pass claims them out of the root
- * scan -- without the claim the named table is still found by shape and minted at the root as
- * well, at an address the application mounts nothing at.
+ * The array arguments a call is given, resolved through a name. Used for the shapes where the
+ * argument IS the table the call mounts; `callMount` decides which shape that is.
  */
 function callArrayArgs(node: Node | undefined): ArrayLiteralExpression[] {
   if (!node || !Node.isCallExpression(node)) return []
@@ -570,6 +589,17 @@ function callArrayArgs(node: Node | undefined): ArrayLiteralExpression[] {
 }
 
 /**
+ * The distinct arrays a call could put under a prefix, for the pre-pass claim. Both the table the
+ * callee returns and the arguments it is given: an argument ends up INSIDE the returned table, so
+ * claiming only one of the two left the other to the root scan, which minted it unprefixed.
+ */
+function callClaimedArrays(node: Node | undefined): ArrayLiteralExpression[] {
+  const mount = callMount(node)
+  const out = [...(mount ? mount.arrays : []), ...callArrayArgs(node)]
+  return [...new Set(out)]
+}
+
+/**
  * The body of `walkRouteArray`, split out so its one caller can add this array to the ancestor
  * set before the walk and take it out after. The set has to hold the arrays on the CURRENT
  * descent and nothing else: one kept across siblings is a visited set, which refuses the same
@@ -579,17 +609,16 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
   let placed = 0
   for (const el of arr.getElements()) {
     if (Node.isCallExpression(el)) {
-      const seg = callPathSegment(el)
-      // A wrapper that takes its own path as a parameter mounts its argument under a segment this
-      // reader cannot name. Mounting the argument at the CALL's prefix moved a whole subtree to an
-      // address the application does not mount, and said nothing; mifos's wrapper declares
-      // `path: ''`, so the corpus never showed the cost.
-      if (seg === null) {
+      const mount = callMount(el)
+      // A wrapper whose callee, or whose own path, this reader cannot follow mounts its table
+      // somewhere it cannot name. Mounting the argument at the CALL's prefix moved a whole
+      // subtree to an address the application does not mount, and said nothing.
+      if (!mount) {
         unreadable?.calls.add(el)
         continue
       }
-      const prefix = joinRoutePath(parentPath, seg)
-      for (const arg of callArrayArgs(el)) {
+      const prefix = joinRoutePath(parentPath, mount.segment)
+      for (const arg of mount.arrays) {
         placed += walkRouteArray(arg, arg.getSourceFile(), prefix, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
         if (arg.getSourceFile() !== sf) consumedFiles?.add(arg.getSourceFile().getFilePath())
       }
@@ -600,6 +629,31 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // which reads from the outside exactly like a link to a route nobody declares.
     if (Node.isSpreadElement(el)) {
       const arr = arrayLiteralOf(el.getExpression())
+      // A table already on this descent is refused rather than followed, which keeps a table that
+      // spreads itself from mounting for ever --- but an application that embeds its own shell
+      // table under a prefix reaches the same table twice legitimately, and the refusal then
+      // costs that subtree. The walk says so now; before, it was lost in silence.
+      if (arr && Node.isArrayLiteralExpression(arr) && chain.has(arr)) {
+        unreadable?.spreads.add(el)
+        continue
+      }
+      const spreadExpr = el.getExpression()
+      const spreadCall = !arr && Node.isCallExpression(spreadExpr) ? spreadExpr : undefined
+      // `[...section(V2)]` is the same construct as `section(V2)` written as an element, and
+      // taking only the resolvable array left the named table to the root scan, which minted it
+      // unprefixed.
+      if (spreadCall) {
+        const mount = callMount(spreadCall)
+        if (!mount) unreadable?.calls.add(spreadCall)
+        else {
+          for (const a of mount.arrays) {
+            const n = walkRouteArray(a, a.getSourceFile(), joinRoutePath(parentPath, mount.segment), out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
+            placed += n
+            if (n > 0 && a.getSourceFile() !== sf) consumedFiles?.add(a.getSourceFile().getFilePath())
+          }
+        }
+        continue
+      }
       if (arr && Node.isArrayLiteralExpression(arr)) {
         // Marked placed on the number of placements this descent MADE, not on the array's shape
         // and not on the growth of the maps: shape marks a file placed that places nothing, and a
@@ -692,12 +746,16 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       // A `children` handed to a helper is mounted under the segment that helper declares, not
       // under this route's own prefix. Reading it the way the element branch had been read put a
       // whole subtree at /admin/dash for an application that serves /admin/v2/dash.
-      const childSeg = childCall && Node.isCallExpression(childCall) ? callPathSegment(childCall) : ''
-      if (childSeg === null && childCall && Node.isCallExpression(childCall)) unreadable?.calls.add(childCall)
-      const childArrays = childSeg === null ? [] : childInit && Node.isArrayLiteralExpression(childInit) ? [childInit] : callArrayArgs(childrenProp.getInitializer())
-      const childPrefix = joinRoutePath(fullPath, childSeg ?? '')
+      const childMount = childCall && Node.isCallExpression(childCall) ? callMount(childCall) : { arrays: [], segment: '' }
+      if (!childMount && childCall && Node.isCallExpression(childCall)) unreadable?.calls.add(childCall)
+      const childArrays = !childMount ? [] : childInit && Node.isArrayLiteralExpression(childInit) ? [childInit] : childMount.arrays
+      const childPrefix = joinRoutePath(fullPath, childMount ? childMount.segment : '')
       if (childArrays.length > 0) {
         for (const child of childArrays) {
+          if (chain.has(child)) {
+            unreadable?.subtrees.add(obj)
+            continue
+          }
           const n = walkRouteArray(child, child.getSourceFile(), childPrefix, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
           placed += n
           if (n > 0 && child.getSourceFile() !== sf) consumedFiles?.add(child.getSourceFile().getFilePath())
@@ -898,6 +956,16 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): { ta
     // table with it.
     for (const sp of sf.getDescendantsOfKind(SyntaxKind.SpreadElement)) {
       const arr = arrayLiteralOf(sp.getExpression())
+      const expr = sp.getExpression()
+      // A spread of a call carries the call's arguments under a prefix, so the root scan must not
+      // mint them as well.
+      if (!arr && Node.isCallExpression(expr)) {
+        for (const a of callClaimedArrays(expr)) {
+          if (!spreadMintsRoutes(a)) continue
+          spreadArrays.add(a)
+          if (a.getSourceFile() !== sf) targets.add(a.getSourceFile().getFilePath())
+        }
+      }
       const arms = conditionalArrayArms(sp.getExpression())
       for (const a of arms) if (a !== arr && Node.isArrayLiteralExpression(a)) unselected.add(a)
       for (const a of [arr, ...arms]) {
@@ -917,7 +985,7 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): { ta
       // declaration the root scan can see, and that is the one to remove from it. A table handed
       // to a helper is reached through the call's arguments, which the walk mounts under this
       // prefix, so they are removed from the root scan for the same reason.
-      const named = arr && arr !== init && Node.isArrayLiteralExpression(arr) ? [arr] : callArrayArgs(init)
+      const named = arr && arr !== init && Node.isArrayLiteralExpression(arr) ? [arr] : callClaimedArrays(init)
       const arms = conditionalArrayArms(init).filter((a): a is ArrayLiteralExpression => Node.isArrayLiteralExpression(a))
       for (const a of arms) if (a !== arr) unselected.add(a)
       for (const a of [...named, ...arms]) {
@@ -959,7 +1027,7 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): { ta
       // `imports: [RouterModule.forRoot(routes)]` is a call inside an array too, and its argument
       // is the table the ROOT mounts: claiming it takes the root scan's entry point away.
       if (/(RouterModule\.(forRoot|forChild)|provideRouter)$/.test(call.getExpression().getText())) continue
-      for (const a of callArrayArgs(call)) {
+      for (const a of callClaimedArrays(call)) {
         if (!spreadMintsRoutes(a)) continue
         spreadArrays.add(a)
         if (a.getSourceFile() !== sf) targets.add(a.getSourceFile().getFilePath())
@@ -969,7 +1037,7 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): { ta
   spreadConsumedArrays = spreadArrays
   unselectedArms = unselected
   unreadableRegistrations = unreadableCalls
-  rootTableArrays = collectRootTableArrays(files)
+  rootTableArrays = collectRootTableArrays(files, new Set(direct.keys()))
   // The owner search reads `direct`, so it is asked only once every directly named module is in
   // it. What it elects goes back into `direct` under the route that elected it, so a table a
   // route reaches through a barrel is that route's as surely as one it names, and a second route

@@ -722,8 +722,11 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([ONE_UNPLACED])
   })
 
-  it('declares a lazy module unplaced when its loadChildren sits in an arrow-returned array that a call spreads', () => {
-    // viewRoutes() is a call, which the spread branch does not resolve, so the lazy site inside it is never walked while the pre-pass still claims its target.
+  it('reads a lazy module whose loadChildren sits in an arrow-returned array that a call spreads', () => {
+    // The spread branch used to refuse a call, so the lazy site inside the array viewRoutes()
+    // returns was never walked while the pre-pass still claimed its target --- the file was then
+    // reported as placed under no prefix, a declared loss where the literal was one hop away.
+    // A builder that takes no argument carries its table in what it returns, and that is read.
     const project = inMemory({
       '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nimport { viewRoutes } from './view.routes'\nexport const routes: Routes = [{ path: 'home', component: A, children: [...viewRoutes()] }]`,
       '/app/view.routes.ts': `import type { Routes } from '@angular/router'\nexport const viewRoutes = (): Routes => [{ path: 'view', loadChildren: () => import('./viewer/viewer.routes').then((m) => m.VIEWER) }]`,
@@ -732,12 +735,8 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
       '/app/a.component.ts': C('<p>a</p>'),
     })
     const { graph, soundiness } = extractGraph(project, '/app')
-    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
-    // Two losses, not one: the spread itself is a route source the reader cannot bring back to an
-    // array, and the lazy file its unwalked site claims is left under no prefix.
-    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([
-      `1 spread route source(s) and ${ONE_UNPLACED}`,
-    ])
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/home/view/pane'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
   })
 
   it('does not count a claimed file the root scan would mint nothing from as a route file the walk missed', () => {
@@ -1313,7 +1312,7 @@ export const routes: Routes = [
     )
     expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([
-      '1 spread route source(s) could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds',
+      '1 route source(s) built by a call could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds',
     ])
   })
 
@@ -2000,18 +1999,27 @@ export class UsersModule {}`,
     // A root-registered array is mounted at the empty path whatever else carries it. The root
     // rescue was tested after the spread test rather than before it, so an application that
     // embeds its own shell table under a prefix lost both of its real root addresses, silently.
+    // The embedding module has to be REACHABLE, or the four addresses this asserts are not the
+    // four Angular mounts: an earlier spelling of this fixture loaded it from nowhere and
+    // asserted the two embedded addresses all the same, which pinned an invented pair as the
+    // expected output of a test written to forbid inventing.
     const { graph, soundiness } = extractGraph(
       inMemory({
         '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { SHELL } from './shell.routes'\n@NgModule({ imports: [RouterModule.forRoot(SHELL)] })\nexport class AppModule {}`,
-        '/app/shell.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const SHELL: Routes = [{ path: 'home', component: A }, { path: 'about', component: A }]`,
+        '/app/shell.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const SHELL: Routes = [{ path: 'home', component: A }, { path: 'about', component: A }, { path: 'x', loadChildren: () => import('./embed/embed.module').then((m) => m.EmbedModule) }]`,
         '/app/embed/embed.module.ts': `import { RouterModule } from '@angular/router'\nimport { EMBED } from './embed.routes'\n@NgModule({ imports: [RouterModule.forChild(EMBED)] })\nexport class EmbedModule {}`,
         '/app/embed/embed.routes.ts': `import type { Routes } from '@angular/router'\nimport { SHELL } from '../shell.routes'\nexport const EMBED: Routes = [{ path: 'embed', children: [...SHELL] }]`,
         '/app/a.component.ts': C('<p>a</p>'),
       }),
       '/app',
     )
-    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/about', '/embed/about', '/embed/home', '/home'])
-    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+    // What the root rescue has to deliver is the pair at the root: /home and /about survive the
+    // spread claim over their file. The embedded pair is NOT asserted, because this application's
+    // route set is infinite --- the table spread under /x/embed carries the lazy route that loads
+    // the embedding module again --- so a reader of it must cut somewhere, and the cut is a loss
+    // this one declares rather than a set it pretends to have read.
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/about', '/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
   })
 
   it('does not move a subtree a helper call places under a segment it cannot read', () => {
@@ -2157,5 +2165,57 @@ export const routes: Routes = [
     )
     expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+})
+
+describe('a spread of a call, and a provideRouter inside a lazy module', () => {
+  it('mints nothing at the root for a table a spread of a call carries', () => {
+    // `[...section(V2)]` is the same construct as `section(V2)` written as an element, and the
+    // spread branch read only the resolvable array: the named table was left to the root scan,
+    // which minted /dash at an address the application mounts nothing at while /v2/dash was lost.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { V2 } from './v2.routes'
+import { section } from './helpers'
+export const routes: Routes = [{ path: 'home', component: A }, ...section(V2)]`,
+        '/app/helpers.ts': `import type { Routes } from '@angular/router'\nexport function section(children: Routes) { return [{ path: 'v2', children }] }`,
+        '/app/v2.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const V2: Routes = [{ path: 'dash', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    // The table the wrapper returns places its argument through a PARAMETER, which binds only at
+    // the call site, so the subtree is a declared loss rather than a recovered one. What the
+    // repair has to deliver is that nothing is minted at /dash, where the application mounts
+    // nothing: the claim covers the argument as well as the returned table.
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('does not take a provideRouter in a lazily loaded module’s own providers for a root registration', () => {
+    // A lazy NgModule's providers are its own injector's, so such a registration adds routes under
+    // the prefix that loaded it. Treating it as the application's root mounted the table at the
+    // root as well, beside its real prefixed address, with nothing said.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'feature', loadChildren: () => import('./feature/feature.module').then((m) => m.FeatureModule) },
+]`,
+        '/app/feature/feature.module.ts': `import { provideRouter, RouterModule } from '@angular/router'
+import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const RULES: Routes = [{ path: 'rules', component: A }]
+@NgModule({ imports: [RouterModule.forChild(RULES)], providers: [provideRouter(RULES)] })
+export class FeatureModule {}`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/feature/rules', '/home'])
   })
 })
