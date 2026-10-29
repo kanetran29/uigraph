@@ -3,9 +3,10 @@
 \begin{figure}[t]
 \centering
 \PlotCoverage
-\caption{Node coverage, baseline: the share of declared screens that have a node in the
-graph. The value for k8s dashboard rests on two screens only, because the route parser
-cannot follow its lazily loaded route tables.}
+\caption{Node coverage: the share of declared screens that have a node in the graph. It is
+complete on every application; the blind-spot column of Table~\ref{tab:coverage} bounds what
+that means, since a route entry neither reader can resolve to an address is outside the
+denominator.}
 \label{fig:coverage}
 \end{figure}}
 
@@ -13,9 +14,10 @@ cannot follow its lazily loaded route tables.}
 \begin{figure}[t]
 \centering
 \PlotLoss
-\caption{What happens to the navigation constructs of each application in the baseline.
-Attribution losses dominate in four applications; node defects dominate in ghostfolio and
-mifos. The exact counts per class are in Table~\ref{tab:loss}.}
+\caption{What happens to the navigation constructs of each application without the
+attribution pass. Attribution losses are the largest class in every application; the node
+classes are empty on this instrument. The exact counts per class are in
+Table~\ref{tab:loss}.}
 \label{fig:loss}
 \end{figure}}
 
@@ -31,8 +33,9 @@ mifos. The exact counts per class are in Table~\ref{tab:loss}.}
 \begin{figure}[t]
 \centering
 \PlotMutation
-\caption{Mutation outcomes by operator, summed over realworld, alfresco and bitwarden.
-Excluded mutants are not shown. Every mutant that left the graph unchanged was a
-removed guard; the one wrong change was a retargeting.}
+\caption{Mutation outcomes by operator, summed over realworld, alfresco and bitwarden, on
+the attributed graph. Excluded mutants are not shown; \MutExcluded{} of
+\MutScored{} were excluded here against \MutBaseExcluded{} of \MutBaseScored{} on the
+graph without attribution. Most of what the graph does not respond to is a removed guard.}
 \label{fig:mutation}
 \end{figure}}

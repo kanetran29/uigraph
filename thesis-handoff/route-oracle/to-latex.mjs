@@ -116,6 +116,19 @@ const tot = R.map((r) => r.loss?.constructs ?? 0)
 out += `\\midrule\nAll constructs & ${tot.join(' & ')} & ${tot.reduce((a, b) => a + b, 0)} \\\\\n`
 out += `\\bottomrule\n\\end{tabular}}\n`
 
+// The end-to-end oracle's own figures, which two chapters quote and neither generated.
+{
+  const d = R.find((r) => r.slug === 'alfresco')
+  const e2e = d?.testD
+  if (e2e && typeof e2e.recall === 'number') {
+    const n = typeof e2e.urls === 'number' ? e2e.urls : (e2e.rows ?? []).length
+    out += `\n% The end-to-end oracle on the one application that has a usable suite.\n`
+    out += `\\newcommand{\\EtoERecallAlfresco}{${Math.round(e2e.recall * n)} of ${n}}\n`
+    out += `\\newcommand{\\EtoERowsAlfresco}{${n}}\n`
+    out += `\\newcommand{\\EtoERateAlfresco}{${(e2e.recall * 100).toFixed(1)}\\,\\%}\n`
+  }
+}
+
 out += `\n% The corpus construct total, which the chapter states in prose.\n`
 out += `\\newcommand{\\RoundTwoInScopeAll}{${R.reduce((a, r) => a + (r.totalConstructs || 0), 0)}}\n`
 

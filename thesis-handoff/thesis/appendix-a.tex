@@ -7,10 +7,11 @@ record that the figures of Chapter~\ref{ch:results} were produced by instruments
 own failures were looked for and found.
 
 \section{Nodes the two static readers disagreed about}
+\label{app:readers}
 
 Table~\ref{tab:coverage} also reports the other direction of the same comparison, which
-the differential test produces and which an earlier version of this chapter left out. Every
-figure in this subsection is the first round's, measured with the parser as it stood then;
+the differential test produces and which an earlier version of the results chapter left out. Every
+figure in this section is the first round's, measured with the parser as it stood then;
 Section~\ref{sec:res-round2} repeats the comparison with both tools corrected and the
 numbers move a long way. As the first round measured it, the
 parser holds no declared screen for 197 of the 338 nodes in the corpus, so node extraction
@@ -46,7 +47,7 @@ at the close of the first round it was the largest single piece of unexplained b
 the evaluation had found, sitting underneath every figure that counts nodes.
 
 The second round resolved it, and the answer was the FIRST of the two explanations almost
-throughout --- the opposite of what an earlier draft of this section concluded.
+throughout --- the opposite of what an earlier draft concluded.
 \RoundTwoFirstRoundTruncated{} of the \RoundTwoFirstRoundExtra{} sit at an address that is the
 tail of a route the parser had already declared in full: the extractor had reached the table
 without its parent prefix and minted \path{/premium} where the parser declared
@@ -75,11 +76,12 @@ On the instrument the figures of Chapter~\ref{ch:results} are measured on, this
 disagreement is gone: the parser declares a screen for every node the extractor mints
 except the wildcard catch-all route, which it does not count as a screen, and the runtime
 method confirms that the framework mounts a component at every address the extractor
-claims. What this subsection records is therefore not a standing defect but the state the
+claims. What this section records is therefore not a standing defect but the state the
 differential test was in when it was the only check available, and the reason a third,
 independent reader was added.
 
 \section{How the declared-screen set moved}
+\label{app:setmoved}
 
 
 Table~\ref{tab:round2nodes} gives node coverage before and after. \RoundTwoFullNodes{} of
@@ -103,7 +105,7 @@ expression a route's path was written as rather than the address it resolves to 
 \path{/about} and its siblings. A reader comparing the two counts would have concluded that
 nothing about ghostfolio's route set had changed, and would have been wrong about all of it.
 
-k8s dashboard carries the largest move, and it was missing from this section until the
+k8s dashboard carries the largest move, and it was missing from this account until the
 provenance of the comparison was fixed. It went from \RoundTwoEarlierOracleKdashDeclared{}
 declared screens to \RoundTwoEarlierOracleKdashNow{}, with
 \RoundTwoEarlierOracleKdashAdded{} arriving and none leaving. The earlier oracle reported 37
@@ -135,7 +137,7 @@ report and member subtrees, which were declared at the application root until
 Section~\ref{sec:res-probe} showed the running router mounting them elsewhere. Against the
 \RoundTwoEarlierOracleBitwardenNow{} screens that remain, the graph holds a node for every one.
 
-An earlier draft of this section reported bitwarden against 159 declared screens and decomposed
+An earlier draft reported bitwarden against 159 declared screens and decomposed
 that figure in detail, and the decomposition was wrong in every part. The 159 came from a file
 produced by a revision of the oracle from the middle of this round, dropped into the directory
 the tables are generated from and read as though it were the earlier oracle's output. Nothing in
@@ -157,7 +159,7 @@ because anything was set aside. mifos went from
 earlier run placed at the project root as \path{/}, \path{/:filter} and \path{/run/:name}
 because it would not follow a \texttt{baseUrl} import, now sit at \path{/reports} and beneath
 it. Fictitious addresses left the set and real ones took their place, and because more left
-than arrived the denominator moved down. The net change is too small to move any percentage in this chapter,
+than arrived the denominator moved down. The net change is too small to move any percentage in Chapter~\ref{ch:results},
 which is exactly why it is printed: a denominator that moves without being mentioned is how the
 previous figure survived three rounds of review, and the only defence that generalises is to
 generate every part of the subtraction and let it be checked.
@@ -189,7 +191,7 @@ exported constant away. Both tools read them now and the figure is honest, but n
 the figure itself would have said otherwise: a screen neither tool can address is invisible to
 a coverage ratio in exactly the way a screen that does not exist is. The only defence is to
 report what was set aside, which is what the blind-spots column is for and why it is printed
-beside every coverage figure in this chapter rather than in a footnote.
+beside every coverage figure in Chapter~\ref{ch:results} rather than in a footnote.
 
 That so many reach every declared screen is a weaker result than it sounds, and the
 blind-spots column is why: it counts the routes a tool knows are there and cannot address,
@@ -198,6 +200,7 @@ the graph is complete. What the graph does with the navigation is the accounting
 
 
 \section{Every remaining site names a reason}
+\label{app:reasons}
 
 
 \RoundTwoUnexplained{} sites remain unexplained, and Table~\ref{tab:round2reasons} gives the
@@ -229,6 +232,7 @@ fails if any site has no reason.}
 
 
 \section{The four dead-link corrections}
+\label{app:deadlinkfixes}
 
 Four corrections belong with this finding, and all four came from having it attacked. Three
 of them are the same mistake made in three places, which is the more useful thing to report.
