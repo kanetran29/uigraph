@@ -1,0 +1,24 @@
+{
+  "slug": "k8sdash",
+  "counts": {
+    "probeRoutes": 140,
+    "frameworkScreens": 67,
+    "frameworkLeaves": 66,
+    "frameworkShells": 1,
+    "extractorNodes": 67,
+    "oracleDeclared": 67,
+    "invented": 0,
+    "missed": 0,
+    "sharedBlindSpot": 0
+  },
+  "invented": [],
+  "missed": [],
+  "sharedBlindSpot": [],
+  "oracleOnly": [],
+  "frameworkOnlyVsOracle": [],
+  "lazyFailures": [],
+  "routeSet": {
+    "declares": false,
+    "details": []
+  }
+}

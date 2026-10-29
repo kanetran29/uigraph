@@ -5,11 +5,14 @@
 // only under their parent prefix.
 
 import { Node, Project, SyntaxKind } from 'ts-morph'
-import type { ArrayLiteralExpression, ExportDeclaration, ImportDeclaration, ObjectLiteralExpression, SourceFile } from 'ts-morph'
+import type { ArrayLiteralExpression, ExportDeclaration, ImportDeclaration, ObjectLiteralExpression, SourceFile, SpreadElement } from 'ts-morph'
 import { routeToNodeId } from './ids'
 
 /** Specs, stories and test doubles: they declare routes that are not the application's. */
 const SPEC_FILE = /\.(spec|test|stories|cy)\.[tj]s$/
+// A lazy target names a barrel, the barrel a feature module and the feature module its routing
+// module, so the table a `loadChildren` mounts can sit three files from the one it names.
+const LAZY_OWNER_HOPS = 3
 import { analyzeCanActivate, type GuardInfo } from './guards'
 import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, propNamed, keyUnreadable } from './resolve'
 
@@ -41,11 +44,18 @@ export interface RouteInfo {
  * that the root scan would have minted routes from -- one a lazy module imports beside the routing
  * module that was elected, or one whose claiming site sits where the walk never reaches -- so
  * whatever it mounts is not in the route set.
+ * `spreads` is a fourth, keyed by the spread node: a `...` whose expression the reader cannot
+ * bring back to an array literal, which is what a route source built by a call looks like
+ * (bitwarden spreads a helper that picks between two components by feature flag, ghostfolio
+ * spreads a `.map` over a product list). Such a spread carries routes the walk never sees, and
+ * skipping it in silence let the extractor assert a complete route set over a table it had not
+ * read -- the one claim this tool must never make on its own blind spot.
  */
 export interface UnreadableRoutes {
   paths: Set<ObjectLiteralExpression>
   subtrees: Set<ObjectLiteralExpression>
   unplaced: Set<SourceFile>
+  spreads: Set<SpreadElement>
 }
 
 /**
@@ -222,24 +232,51 @@ function dependencyFile(decl: ImportDeclaration | ExportDeclaration, from: Sourc
 function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayLiteralExpression[]; claimed: SourceFile[] } {
   const own = findRouteArrays(target)
   if (own.length) return { owner: target, arrays: own, claimed: [target] }
-  const holders = new Map<string, { file: SourceFile; declared: ArrayLiteralExpression[] }>()
-  /** Record `dep` as a holder when it has a route-shaped array, keeping the arrays it DECLARES to the router; a file named by both an import and a re-export counts once. */
-  const consider = (dep: SourceFile | undefined): void => {
-    if (!dep || holders.has(dep.getFilePath()) || findRouteArrays(dep).length === 0) return
-    holders.set(dep.getFilePath(), { file: dep, declared: findRouteArrays(dep, true) })
+  const seen = new Set<string>([target.getFilePath()])
+  let frontier = [target]
+  for (let hop = 0; hop < LAZY_OWNER_HOPS && frontier.length > 0; hop += 1) {
+    const holders = new Map<string, { file: SourceFile; declared: ArrayLiteralExpression[] }>()
+    const next: SourceFile[] = []
+    for (const sf of frontier) {
+      for (const dep of moduleDependencies(sf)) {
+        if (seen.has(dep.getFilePath())) continue
+        seen.add(dep.getFilePath())
+        // A module that holds no table of its own is a hop on the way to one, not a dead end.
+        if (findRouteArrays(dep).length === 0) next.push(dep)
+        else holders.set(dep.getFilePath(), { file: dep, declared: findRouteArrays(dep, true) })
+      }
+    }
+    const found = [...holders.values()]
+    if (found.length > 0) {
+      const claimed = found.map((h) => h.file)
+      const declaring = found.filter((h) => h.declared.length > 0)
+      const [only] = declaring
+      // One declared holder is elected without testing that it belongs to this application; see the note above on what a `Routes` type does not establish.
+      if (only && declaring.length === 1) return { owner: only.file, arrays: only.declared, claimed }
+      return { owner: target, arrays: [], claimed }
+    }
+    frontier = next
   }
-  for (const imp of target.getImportDeclarations()) consider(dependencyFile(imp, target, imp.getModuleSpecifierValue()))
-  for (const exp of target.getExportDeclarations()) {
+  return { owner: target, arrays: [], claimed: [] }
+}
+
+/**
+ * The files a module could be hiding its route table behind: what it imports and what it
+ * re-exports. A package directory is skipped, because a third-party module declares no screen of
+ * the application under measurement and following one would walk the whole framework.
+ */
+function moduleDependencies(sf: SourceFile): SourceFile[] {
+  const out: SourceFile[] = []
+  /** Keep a resolved dependency unless it comes from an installed package. */
+  const add = (dep: SourceFile | undefined): void => {
+    if (dep && !dep.getFilePath().includes('/node_modules/')) out.push(dep)
+  }
+  for (const imp of sf.getImportDeclarations()) add(dependencyFile(imp, sf, imp.getModuleSpecifierValue()))
+  for (const exp of sf.getExportDeclarations()) {
     const spec = exp.getModuleSpecifierValue()
-    if (spec) consider(dependencyFile(exp, target, spec))
+    if (spec) add(dependencyFile(exp, sf, spec))
   }
-  const found = [...holders.values()]
-  const claimed = found.map((h) => h.file)
-  const declaring = found.filter((h) => h.declared.length > 0)
-  const [only] = declaring
-  // One declared holder is elected without testing that it belongs to this application; see the note above on what a `Routes` type does not establish.
-  if (only && declaring.length === 1) return { owner: only.file, arrays: only.declared, claimed }
-  return { owner: target, arrays: [], claimed }
+  return out
 }
 
 /**
@@ -312,6 +349,8 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         const n = walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
         placed += n
         if (n > 0) consumedFiles?.add(arr.getSourceFile().getFilePath())
+      } else if (unreadable) {
+        unreadable.spreads.add(el)
       }
       continue
     }

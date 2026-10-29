@@ -288,6 +288,31 @@ function lazyHopCheck() {
       // The shared table itself is then reached from no root, which is the third blind spot.
       want: '/a[LAZY_UNRESOLVED] /b[LAZY_UNRESOLVED] | blind 3',
     },
+    {
+      name: 'a lazy module adopts the table two hops behind its barrel',
+      // bitwarden mounts its reports at `reports`, names ReportsModule through a barrel, and keeps
+      // the table in the routing module that feature module imports. One hop found nothing, so the
+      // table was left to the root scan and its screens were declared at the application root.
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('reports', './reports/index', 'ReportsModule')),
+        'app/reports/index.ts': "export { ReportsModule } from './reports.module';\n",
+        'app/reports/reports.module.ts': "import { ReportsRoutingModule } from './reports-routing.module';\nexport class ReportsModule {}\n",
+        'app/reports/reports-routing.module.ts': table("{ path: 'breach-report', component: Breach }"),
+      },
+      want: '/reports[PREFIX] /reports/breach-report[SCREEN] | blind 0',
+    },
+    {
+      name: "a second hop does not reach another route's table",
+      // The ownership test is asked of the route that named the chain, at every level, so a table
+      // another route loads stays that route's however many modules stand in front of it.
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('a', './a/index', 'AModule'), lazy('b', './b/b-routing.module', 'BRoutingModule')),
+        'app/a/index.ts': "export { AModule } from './a.module';\n",
+        'app/a/a.module.ts': "import { BRoutingModule } from '../b/b-routing.module';\nexport class AModule {}\n",
+        'app/b/b-routing.module.ts': table("{ path: 'list', component: BList }"),
+      },
+      want: '/a[LAZY_UNRESOLVED] /b[PREFIX] /b/list[SCREEN] | blind 1',
+    },
   ]
   const tmp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'route-oracle-')))
   try {
@@ -674,6 +699,64 @@ function relativeReExports(sf) {
   return deps
 }
 
+// A lazy route names a barrel, the barrel a feature module and the feature module its routing
+// module, so the table a loadChildren mounts can sit three files from the one it names.
+const LAZY_OWNER_HOPS = 3
+
+/**
+ * The table a lazy target mounts when the target holds none itself, found by following what it
+ * imports and what it re-exports. The search is breadth-first and stops at the nearest file that
+ * holds a table, so a routing module one hop from the feature module is never outranked by an
+ * unrelated table further out. Every ownership test the single hop applied is applied at each
+ * level, unchanged; what is new is only that a module holding no table is a hop on the way to one
+ * rather than a dead end, which is what a barrel in front of a feature module in front of a
+ * routing module requires. Returns null when no level yields one.
+ */
+function tableBehind(target, routeFile, bound) {
+  const seen = new Set([target.getFilePath()])
+  let frontier = [target]
+  for (let hop = 0; hop < LAZY_OWNER_HOPS && frontier.length > 0; hop += 1) {
+    const next = []
+    for (const from of frontier) {
+      for (const dep of hopCandidates(from, routeFile, bound, target)) {
+        if (seen.has(dep.getFilePath())) continue
+        seen.add(dep.getFilePath())
+        const arrays = routeArraysIn(dep)
+        if (arrays.length) return { arrays, owner: dep }
+        next.push(dep)
+      }
+    }
+    frontier = next
+  }
+  return null
+}
+
+/**
+ * The dependencies of one module that a lazy target may adopt a table from: what it imports,
+ * then what it re-exports relatively, each held to the bound, ownership and root-table tests the
+ * single hop used. `routeFile` is the file the route being followed sits in, whose own table is
+ * never adopted; `bound` is the project root that owns the chain; `target` is the module the
+ * loadChildren named, which is the claimant the ownership test is asked about at every level,
+ * because the whole chain belongs to that one route.
+ */
+function hopCandidates(from, routeFile, bound, target) {
+  const out = []
+  /** Keep a dependency unless one of the tests that bound the hop refuses it. */
+  const keep = (dep, relative) => {
+    if (!dep || !bound || !dep.getFilePath().startsWith(bound)) return
+    if (dep.getFilePath() === routeFile.getFilePath() || claimedElsewhere(dep, target)) return
+    if (isRootTable(dep)) return
+    // A non-relative specifier reaches the whole application, so follow one only into the importing module's own directory.
+    if (!relative && path.dirname(dep.getFilePath()) !== path.dirname(from.getFilePath())) return
+    out.push(dep)
+  }
+  for (const imp of from.getImportDeclarations()) {
+    keep(imp.getModuleSpecifierSourceFile(), imp.getModuleSpecifierValue().startsWith('.'))
+  }
+  for (const dep of relativeReExports(from)) keep(dep, true)
+  return out
+}
+
 /**
  * Record that the route loading `target` claims it, and every file it re-exports by a relative
  * specifier, as its own table. A route that loads a barrel owns the routing module behind the
@@ -810,6 +893,15 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
       for (const a of el.getArguments()) if (a.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(a, prefix, sf, depth + 1, unresolved, lazy)
       continue
     }
+    // A spread is a route source this reader does not follow, so the table it carries is outside
+    // the declared set. Saying so is what keeps the set a lower bound rather than a claim: an
+    // application whose routes are partly built by a helper and spread in would otherwise be
+    // reported as fully read, and every "this path is declared nowhere" taken from it would rest
+    // on a table nobody opened.
+    if (el.getKind() === SyntaxKind.SpreadElement) {
+      blindSpots.push({ reason: 'spread route source: not followed', spec: el.getText().slice(0, 60), at: `${path.relative(appDir, sf.getFilePath())}:${el.getStartLineNumber()}`, prefix })
+      continue
+    }
     // An array may name its routes instead of spelling them out (`[ERROR_ROUTE]`).
     const obj = el.getKind() === SyntaxKind.ObjectLiteralExpression ? el : objLit(el)
     if (!obj) continue
@@ -884,32 +976,8 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
         let owner = target
         const bound = projectRootOf(target.getFilePath())
         if (arrays.length === 0) {
-          for (const imp of target.getImportDeclarations()) {
-            const dep = imp.getModuleSpecifierSourceFile()
-            // The dependency must sit inside the project root that owns the target, so a loaded sibling application's table is never followed.
-            if (!dep || !bound || !dep.getFilePath().startsWith(bound)) continue
-            // Inside the root is not enough: a table this route's own file holds, or another route already loads, is not this target's.
-            if (dep.getFilePath() === sf.getFilePath() || claimedElsewhere(dep, target)) continue
-            // The application's root table is mounted at '' alone, whichever directory it sits in or however the import spells it.
-            if (isRootTable(dep)) continue
-            // A non-relative specifier reaches the whole application, so follow one only into the target's own directory.
-            if (!imp.getModuleSpecifierValue().startsWith('.') && path.dirname(dep.getFilePath()) !== path.dirname(target.getFilePath())) continue
-            const a = routeArraysIn(dep)
-            if (a.length) { arrays = a; owner = dep; break }
-          }
-        }
-        // A barrel re-exports the routes rather than importing them.
-        if (arrays.length === 0) {
-          for (const dep of relativeReExports(target)) {
-            // A relative specifier can leave the application too: the same bound as the import hop.
-            if (!bound || !dep.getFilePath().startsWith(bound)) continue
-            // The same ownership test as the import hop.
-            if (dep.getFilePath() === sf.getFilePath() || claimedElsewhere(dep, target)) continue
-            // The same root-table test as the import hop.
-            if (isRootTable(dep)) continue
-            const a = routeArraysIn(dep)
-            if (a.length) { arrays = a; owner = dep; break }
-          }
+          const behind = tableBehind(target, sf, bound)
+          if (behind) { arrays = behind.arrays; owner = behind.owner }
         }
         if (arrays.length) lazyTargets.add(owner.getFilePath())
         if (arrays.length === 0) {

@@ -1,0 +1,26 @@
+{
+  "slug": "mifos",
+  "counts": {
+    "probeRoutes": 935,
+    "frameworkScreens": 614,
+    "frameworkLeaves": 573,
+    "frameworkShells": 41,
+    "extractorNodes": 611,
+    "oracleDeclared": 610,
+    "invented": 0,
+    "missed": 0,
+    "sharedBlindSpot": 0
+  },
+  "invented": [],
+  "missed": [],
+  "sharedBlindSpot": [],
+  "oracleOnly": [],
+  "frameworkOnlyVsOracle": [
+    "/**"
+  ],
+  "lazyFailures": [],
+  "routeSet": {
+    "declares": false,
+    "details": []
+  }
+}

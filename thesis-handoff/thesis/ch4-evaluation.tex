@@ -195,7 +195,9 @@ conditional on coverage, and the number of excluded mutants is reported alongsid
 \section{Evaluation methods}
 \label{sec:protocol}
 
-Four methods are used. None establishes correctness alone, so Table~\ref{tab:methods} states what each can show and where it is blind. Figure~\ref{fig:oracles} shows which part of the graph each method checks and where its ground truth comes from.
+Five methods are used. None establishes correctness alone, so Table~\ref{tab:methods} states what each can show and where it is blind. Figure~\ref{fig:oracles} shows which part of the graph each method checks and where its ground truth comes from.
+
+Four of the five read the application's sources. That shared footing is their common weakness: two readers of the same text can be wrong in the same way, and an agreement between them is then evidence of nothing. The fifth was added for that reason and is described last.
 
 \input{figures/fig-oracles}
 
@@ -213,7 +215,10 @@ destination node's address is tested against the independent route set. &
 Cannot see missing edges. Target agreement is invalid for over-approximated may
 edges, whose witness proves only that the call site exists. The destination test is
 only as good as that route set: where both tools read a route table at the wrong
-prefix, they agree on a wrong address and the test passes. \\
+prefix, they agree on a wrong address and the test passes. This is the gap the
+runtime route oracle below was built to close, and it was not hypothetical:
+Section~\ref{sec:res-probe} reports \ProbeBeforeNotMounted{} addresses on which both
+readers agreed and the running application mounted none of them. \\
 \addlinespace
 Differential test & Disagreements with a separately written route-configuration
 parser. &
@@ -234,6 +239,20 @@ and on the witness set, since several constructs can produce one edge. &
 A mutant whose construct is absent from the baseline graph re-detects a coverage gap and
 is excluded, as is a guard mutant on a screen that no edge enters. Detection is
 therefore conditional on coverage. Sampling is seeded and stratified by operator. \\
+\addlinespace
+Runtime route oracle & Node-level soundness against the framework itself. Each
+application is built in its development configuration, loaded in a headless browser,
+and asked for the route configuration the Angular router holds; every lazily loaded
+subtree is expanded by calling the application's own \texttt{loadChildren} and reading
+the routes out of whatever it resolves to. The addresses the extractor mints are then
+compared with the addresses the framework mounts. Nothing in this method re-reads the
+route files, which is the point: the answer comes from the application's own code. &
+Requires the application to build and boot, which fixes the method to applications
+that can be built without their server. It reads the configuration rather than the
+rendered screen, so a route that a guard always refuses still counts as mounted, and a
+route whose component fails to render is not distinguished from one that renders. A
+workspace application that composes the library a measurement is scoped to mounts the
+shell's own routes as well, so part of any difference is scope and not reading. \\
 \bottomrule
 \end{tabularx}
 \end{table}

@@ -550,8 +550,10 @@ correctly but placed them at the project root, as \path{/password} and
 declared in this run at the addresses the application mounts, under
 \path{/settings/security/} and \path{/vault/}. Those are the same screens at a different
 address, not screens gained or lost, which is a distinction a count of the denominator cannot
-make and a diff of the set can. \RoundTwoEarlierOracleBitwardenAdded{} arrived when both tools learned to
-read a route table wrapped in \texttt{Object.freeze}. Against the
+make and a diff of the set can. \RoundTwoEarlierOracleBitwardenAdded{} arrived, from two
+causes: a route table wrapped in \texttt{Object.freeze} that both tools learned to read, and the
+report and member subtrees, which were declared at the application root until
+Section~\ref{sec:res-probe} showed the running router mounting them elsewhere. Against the
 \RoundTwoEarlierOracleBitwardenNow{} screens that remain, the graph holds a node for every one.
 
 An earlier draft of this section reported bitwarden against 159 declared screens and decomposed
@@ -932,7 +934,136 @@ the oracle fail to read looks, from the outside, exactly like a route that does 
 What can be said is narrower than the previous round claimed. Each candidate was checked
 against the application's own route files by hand, which is how the \texttt{appusers},
 \texttt{manage-jobs} and \texttt{configurations} mismatches above are quoted; no candidate was
-checked by running the application, which is the only check that would settle it. What the
+checked by navigating to it in a running application, which is the only check that would settle
+one. Half of the objection has since been answered. Every candidate in this census is in mifos,
+and Section~\ref{sec:res-probe} compares mifos's declared set with the route configuration the
+framework itself holds and finds the two identical, so the premise a dead-link claim rests on
+--- that the application declares no route at that address --- is no longer resting on two
+readings of the same files. What is still unchecked is the other premise, that the link is
+reached at run time at all. What the
 method contributes is not the verdict but the list: a static transition graph puts every such
 candidate on one page, with a file and a line each, instead of leaving them to be met at run
 time.
+
+\section{Checking the declared set against the framework}
+\label{sec:res-probe}
+
+Every result so far rests on two readings of the same route files. The witness check tests a
+must edge's destination against the independent parser's route set, and Section~\ref{sec:protocol}
+states the condition under which that test is vacuous: where both tools read a route table at
+the wrong prefix, they agree on a wrong address and the check passes. Agreement between two
+readers of one text is evidence only to the extent that the readers can differ. This section
+reports a third reading that does not read the text at all.
+
+\subsection{How the framework was asked}
+
+Each application was built in its development configuration and loaded in a headless browser.
+Once it had bootstrapped, the live \texttt{Router} was found through Angular's debug surface and
+its route configuration read directly. Every lazily loaded subtree was expanded by calling the
+application's own \texttt{loadChildren} and taking the routes out of whatever it resolved to: the
+array itself for a standalone subtree, and the route providers of the module for one that loads
+an \texttt{NgModule}. Nothing in the procedure parses a route file. The answer is the
+configuration the framework holds, produced by the application's own code, so where it disagrees
+with both static readers the disagreement cannot be an artefact of a reading they share.
+
+No server was run. The method needs the application to boot, not to work: an address is counted
+as mounted when the router's configuration places a component there, whether or not a guard
+would admit a visitor or a resolver would find data. All \ProbeApps{} applications built and
+booted, all \ProbeRoutes{} route entries were read, and every lazily loaded subtree expanded ---
+\ProbeLazyFailures{} subtrees were left unread and \ProbePageErrors{} applications raised an
+uncaught error while loading. Table~\ref{tab:probe} reports the comparison.
+
+\begin{table}[t]\small
+\caption{The route configuration the framework holds, against the extractor's node set.
+\emph{Routes} counts the route entries the framework's configuration holds once every lazy
+subtree is expanded, and \emph{mounted} the addresses among them at which the router places a
+component on the primary outlet. \emph{Not mounted} counts nodes the extractor declares at an
+address the framework mounts nothing at, and \emph{not minted} the reverse. \emph{Incomplete} is
+the extractor's own statement, taken from its soundiness notes, that part of the route set was
+beyond it.}
+\label{tab:probe}
+\TabProbe
+\end{table}
+
+\subsection{What is minted at an address the application does not mount}
+
+Across the corpus the extractor declares \ProbeInvented{} screens that the framework mounts
+nothing at, in \ProbeInventedApps{} application of \ProbeApps{}: \path{/view/:nodeId} and
+\path{/search-libraries/view/:nodeId} in \ProbeInventedWhere{}. They are the named-outlet subtree
+that Section~\ref{sec:named-outlet} declares as the one open case in the analysis, and the
+measurement here is the first that shows it. Both static readers assemble the routes beneath a
+named outlet against the primary path, so both hold both addresses, node coverage is 100\,\% over
+a set that contains them, and no comparison between the two can expose it. The framework places
+them under the \texttt{viewer} outlet, where they are reached as \texttt{(viewer:path)} and at no
+primary address. The two counts the comparison reports --- minted-but-not-mounted and shared
+blind spot --- are the same two addresses, which is what a blind spot two readers hold in common
+looks like from outside.
+
+In the other five applications the extractor declares no address the framework does not mount.
+That is the first evidence for the must-tier property that does not come from a tool sharing the
+extractor's reading of the sources, and it is the property the thesis asks to be judged on: a
+lost edge costs recall, an invented one makes the graph unusable for the impact question it is
+built to answer.
+
+The check also found one case nobody had declared. Against the route set as the two static
+readers held it before this round, the same comparison returns \ProbeBeforeNotMounted{} addresses
+in \ProbeBeforeWhere{}: the two in alfresco above, and eight more in bitwarden. Seven of those
+eight are the report screens and the eighth is a member screen. Both readers placed them at the
+application root --- \path{/breach-report}, \path{/sponsored-families} --- where the running
+router mounts the first at \path{/reports/breach-report} and the second three segments deeper,
+under \path{/organizations/:organizationId/members/}. The cause was the same in both
+readers and had been arrived at independently in each: a lazy route names a module through a
+barrel, the barrel re-exports a feature module, and the feature module imports the routing module
+that holds the table. Each reader followed one hop from the module the route named, found no
+table, and left the file to the scan that reads unclaimed tables at the root. Neither could have
+caught the other, because both were wrong in the same place, and the node coverage both reported
+was 100\,\% against a denominator that carried the same eight wrong addresses. Both now follow
+the chain to the table, and both declare the subtree unread when they cannot.
+
+\subsection{What the framework mounts and the extractor does not}
+
+The other direction is not symmetric with the first, and the thesis does not treat it as such. A
+screen the extractor does not mint costs recall; the graph says less than it could. An address it
+mints that nothing mounts would be a claim about an application that is false. The corpus holds
+\ProbeMissed{} of the first and \ProbeInvented{} of the second.
+
+Of the \ProbeMissed{}, \ProbeMissedGhostfolio{} are one construct in ghostfolio. Its product
+comparison pages are not written down: a list of competitor records is mapped to routes and
+spread into the table, and each path is a template string over a field of the record. The
+extractor reads the table, mints the parent, and declares the spread a route source it could not
+read. \ProbeMissedAlfresco{} are in alfresco and all three belong to the shell application that
+composes the measured library, so they are outside the directory the measurement scopes to
+rather than inside it and unread. The remaining \ProbeMissedBitwarden{} is bitwarden's vault,
+whose route is produced by a helper that chooses between two components by feature flag.
+
+One construct in ghostfolio therefore accounts for almost all of this column, and it is worth
+saying what that means and what it does not. It does not mean the graph is missing a quarter of
+the application's screens by accident: the construct is one spread, the extractor says it could
+not read it, and the \ProbeMissedGhostfolio{} pages behind it are generated entries that differ
+only in a path segment and a data key. It does mean that the cost of a declared blind spot can be
+far larger than the number of blind spots suggests, which is a thing a count of notes cannot
+show and this comparison can.
+
+\subsection{The silence is where it should be}
+
+The three applications in which the framework mounts a screen the extractor does not have are
+exactly the three in which the extractor states that it could not read part of the route set.
+\ProbeMissedWithoutDeclaration{} applications have a missing screen without such a statement, and
+\ProbeSilentAndComplete{} say nothing and have none. For realworld, the k8s dashboard and mifos
+--- which hold \RoundTwoMustEdgesRealworld{} must edges, none, and \RoundTwoMustEdgesMifos{}
+respectively, so that the last of the three carries most of the corpus's must tier on its own ---
+the route set the extractor declares and the route set the framework holds are the same set.
+
+That correspondence is what a soundiness claim is supposed to mean, and until now the thesis
+could only assert it. The claim is that the tool may miss things and says what it misses; the
+test of it is whether the things missed are inside what was said. Both halves were measured
+here from outside the tool, and both held.
+
+The correspondence did not hold when this check was first run, and it was not a near miss. Two
+of the three applications that have unread route sources were asserting complete ones: the
+spread that carries ghostfolio's generated pages and the helper that builds bitwarden's vault
+route were each skipped without a word. Bitwarden's silence had already been paid for, because
+the dead-link census suppresses every finding from an application whose route set is a lower
+bound, and with the caveat gone that application's findings entered the census for the first
+time --- on a route set that was missing a screen. Both readers now record a spread they cannot
+resolve as a route source they did not read.
