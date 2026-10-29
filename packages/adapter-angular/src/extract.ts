@@ -213,11 +213,22 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     const id = edgeId(from, to, t.event, guard)
     if (seen.has(id)) {
       // Record the extra construct instead of dropping it, so every construct that yields
-      // an edge stays traceable. Same edge set as before; provenance only.
+      // an edge stays traceable.
       const e = edgeById.get(id)
       const w = { source: 'static' as const, file: t.file ?? file, loc: t.loc, ruleId: t.ruleId }
       if (e && !(e.witness?.file === w.file && e.witness?.loc?.line === w.loc.line) && !e.mergedWitnesses?.some((m) => m.file === w.file && m.loc?.line === w.loc.line)) {
         ;(e.mergedWitnesses ??= []).push(w)
+        // An edge asserts that EVERY site it cites produces it, so its modality has to be the
+        // weakest any of them earns. Keeping the first site's modality let a site that only
+        // reaches this address through the catch-all route merge into a deterministic edge and
+        // inherit its certainty: bitwarden navigates to /vault, which it declares no route
+        // for, and three such sites were cited as evidence for a must edge to the root.
+        if (modality === 'may' && e.modality === 'must') {
+          e.modality = 'may'
+          e.confidence = Math.min(e.confidence ?? 1, confidence)
+        } else if (e.confidence !== undefined && confidence < e.confidence) {
+          e.confidence = confidence
+        }
       }
       return
     }

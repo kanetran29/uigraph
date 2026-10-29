@@ -2515,3 +2515,32 @@ export const routes: Routes = [{ path: 'home', component: A }, withShell(MAIN, A
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/app/main', '/home'])
   })
 })
+
+describe('an edge several constructs cite', () => {
+  it('takes the weakest modality over them, instead of the first one it was created with', () => {
+    // The same (from, to, event, guard) key merges a later construct into an existing edge as
+    // a witness. Keeping the first construct's modality let a site that only reaches the
+    // address through the catch-all route be cited as evidence for a deterministic edge:
+    // bitwarden declares no /vault route, and three such sites backed a must edge to the root.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: '', component: A },
+  { path: 'home', component: A },
+  { path: '**', redirectTo: '' },
+]`,
+        // the first construct reaches the root directly; the second only through the catch-all
+        '/app/a.component.ts': C('<p>a</p>', `go() { this.router.navigate(['/']) }\n  gone() { this.router.navigate(['/nowhere']) }`),
+      }),
+      '/app',
+    )
+    const toRoot = graph.edges.filter((e) => e.to === 'n_root' && e.event === 'navigate')
+    expect(toRoot.length).toBeGreaterThan(0)
+    for (const e of toRoot) {
+      const cites = 1 + (e.mergedWitnesses?.length ?? 0)
+      if (cites > 1) expect(e.modality).toBe('may')
+    }
+  })
+})
