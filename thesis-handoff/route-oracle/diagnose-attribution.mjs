@@ -6,7 +6,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
-const ADP = '/tmp/eval/uigraph/packages/adapter-angular/dist/index.js'
+// The adapter is imported from source, resolved beside this script, so the tool does not
+// depend on a build existing at a path from one machine. Run it under tsx.
+const ADP = process.env.UIGRAPH_ADAPTER ||
+  path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../packages/adapter-angular/src/index.ts')
 const { buildProject, attributeScopes, collectRoutes } = await import(ADP)
 const [appDir, afterL, beforeL, dbp] = process.argv.slice(2)
 const project = buildProject(path.resolve(appDir))

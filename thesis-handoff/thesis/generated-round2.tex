@@ -6,11 +6,11 @@
 Application & Before & After & Declared & Blind spots \\
 \midrule
 realworld & 100.0\,\% (10/10) & 100.0\,\% (10/10) & 10 & 0 \\
-alfresco & 96.0\,\% (24/25) & 100.0\,\% (26/26) & 25$\to$26 & 10 \\
-ghostfolio & 0.0\,\% (0/84) & 100.0\,\% (84/84) & 84 & 2 \\
-k8s dashboard & 100.0\,\% (2/2) & 100.0\,\% (67/67) & 2$\to$67 & 0 \\
-bitwarden & 46.4\,\% (45/97) & 100.0\,\% (98/98) & 97$\to$98 & 1 \\
-mifos & 0.3\,\% (2/610) & 100.0\,\% (605/605) & 610$\to$605 & 1 \\
+alfresco & 100.0\,\% (26/26) & 100.0\,\% (26/26) & 26 & 10 \\
+ghostfolio & 100.0\,\% (84/84) & 100.0\,\% (84/84) & 84 & 2 \\
+k8s dashboard & 100.0\,\% (67/67) & 100.0\,\% (67/67) & 67 & 0 \\
+bitwarden & 100.0\,\% (98/98) & 100.0\,\% (98/98) & 98 & 1 \\
+mifos & 100.0\,\% (605/605) & 100.0\,\% (605/605) & 605 & 1 \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoAccounting}{%
@@ -51,9 +51,9 @@ alfresco & 56 & 20 & 95.0\,\% & n/a & 0.0\,\% \\
 ghostfolio & 410 & 129 & 93.8\,\% & n/a & 0.0\,\% \\
 k8s dashboard & 181 & 28 & 96.4\,\% & n/a & 0.0\,\% \\
 bitwarden & 282 & 196 & 73.5\,\% & 34/34 & 28.8\,\% \\
-mifos & 10636 & 1244 & 93.2\,\% & 955/981 & 69.9\,\% \\
+mifos & 10636 & 854 & 92.5\,\% & 2/2 & 0.4\,\% \\
 \midrule
-All & 11622 & 1652 & 91.0\,\% & 998/1024 & 54.3\,\% \\
+All & 11622 & 1262 & 89.8\,\% & 45/45 & 3.1\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\RoundTwoInScope}{1813}
@@ -62,14 +62,14 @@ All & 11622 & 1652 & 91.0\,\% & 998/1024 & 54.3\,\% \\
 \newcommand{\RoundTwoUnplaced}{6.2\,\%}
 \newcommand{\RoundTwoAccounted}{98.7\,\%}
 \newcommand{\RoundTwoUnexplained}{23}
-\newcommand{\RoundTwoBefore}{8.8\,\%}
+\newcommand{\RoundTwoBefore}{71.9\,\%}
 \newcommand{\RoundTwoExcluded}{7}
 \newcommand{\RoundTwoExcludedOutlet}{4}
 \newcommand{\RoundTwoExcludedNoCommands}{3}
 \newcommand{\RoundTwoFullNodes}{6}
-\newcommand{\RoundTwoMustClean}{998/1024}
-\newcommand{\RoundTwoMustViolations}{26}
-\newcommand{\RoundTwoMustConv}{54.3\,\%}
+\newcommand{\RoundTwoMustClean}{45/45}
+\newcommand{\RoundTwoMustViolations}{0}
+\newcommand{\RoundTwoMustConv}{3.1\,\%}
 \newcommand{\RoundTwoZeroMustApps}{3}
 \newcommand{\RoundTwoRoutesRealworld}{14}
 \newcommand{\RoundTwoRoutesAlfresco}{$\geq$57}
@@ -91,17 +91,17 @@ All & 11622 & 1652 & 91.0\,\% & 998/1024 & 54.3\,\% \\
 \newcommand{\RoundTwoNoRouteCaveated}{none}
 \newcommand{\RoundTwoTargetNoNode}{0}
 \newcommand{\RoundTwoTargetNoRoute}{4}
-\newcommand{\RoundTwoMustMismatch}{22}
-\newcommand{\RoundTwoMustOffBy}{4}
-\newcommand{\RoundTwoMustInTs}{26}
+\newcommand{\RoundTwoMustMismatch}{0}
+\newcommand{\RoundTwoMustOffBy}{0}
+\newcommand{\RoundTwoMustInTs}{0}
 \newcommand{\RoundTwoMustInTemplate}{none}
-\newcommand{\RoundTwoMustRelUp}{17}
-\newcommand{\RoundTwoMustRelRoot}{2}
-\newcommand{\RoundTwoMustRelBare}{3}
-\newcommand{\RoundTwoGraphClean}{12.9\,\%}
-\newcommand{\RoundTwoJudgedClean}{91.0\,\%}
-\newcommand{\RoundTwoJudged}{1652}
-\newcommand{\RoundTwoOverApprox}{85.8\,\%}
+\newcommand{\RoundTwoMustRelUp}{0}
+\newcommand{\RoundTwoMustRelRoot}{0}
+\newcommand{\RoundTwoMustRelBare}{0}
+\newcommand{\RoundTwoGraphClean}{9.7\,\%}
+\newcommand{\RoundTwoJudgedClean}{89.8\,\%}
+\newcommand{\RoundTwoJudged}{1262}
+\newcommand{\RoundTwoOverApprox}{89.1\,\%}
 \newcommand{\RoundTwoWildcardNoNode}{none}
 \newcommand{\RoundTwoWildcardPrefix}{none}
 \newcommand{\RoundTwoWildcardPrefixEmptyChild}{0}
@@ -189,7 +189,7 @@ All & 11622 & 1652 & 91.0\,\% & 998/1024 & 54.3\,\% \\
 \newcommand{\RoundTwoCtrlOutletStill}{7}
 \newcommand{\RoundTwoMustEdgesRealworld}{9}
 \newcommand{\RoundTwoMustEdgesBitwarden}{34}
-\newcommand{\RoundTwoMustEdgesMifos}{981}
+\newcommand{\RoundTwoMustEdgesMifos}{2}
 \newcommand{\RoundTwoCtrlOutletWhere}{alfresco}
 \newcommand{\RoundTwoUnplacedClass}{15}
 \newcommand{\RoundTwoOutsideWitness}{228}

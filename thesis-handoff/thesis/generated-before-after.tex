@@ -6,14 +6,14 @@
 \cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-9}
 Application & Before & After & pp & Before & After & Before & must & may \\
 \midrule
-realworld & 15.0\% & 37.5\% & +22.5 & 6/7 & 9/10 & 22 & 9 & 12 \\
-alfresco & 2.9\% & 2.9\% & +0.0 & 1/1 & 1/1 & 18 & 0 & 0 \\
-ghostfolio & 0.0\% & 0.0\% & +0.0 & -- & -- & 81 & 0 & 0 \\
-k8s dashboard & 0.0\% & 4.2\% & +4.2 & -- & 3/3 & 56 & 2 & 0 \\
-bitwarden & 12.1\% & 15.9\% & +3.8 & 10/10 & 13/13 & 56 & 5 & 1 \\
-mifos & 5.4\% & 10.0\% & +4.6 & 69/69 & 129/129 & 235 & 22 & 30 \\
+realworld & 12.5\% & 30.0\% & +17.5 & 7/7 & 9/9 & 22 & 7 & 15 \\
+alfresco & 0.0\% & 0.0\% & +0.0 & -- & -- & 18 & 0 & 4 \\
+ghostfolio & 0.0\% & 0.0\% & +0.0 & -- & -- & 73 & 0 & 26 \\
+k8s dashboard & 0.0\% & 0.0\% & +0.0 & -- & -- & 56 & 0 & 8 \\
+bitwarden & 25.8\% & 28.8\% & +3.0 & 31/31 & 34/34 & 52 & 4 & 8 \\
+mifos & 0.1\% & 0.4\% & +0.3 & 1/1 & 2/2 & 233 & 4 & 205 \\
 \midrule
-All & & & & & & 468 & 38 & 43 \\
+All & & & & & & 454 & 15 & 266 \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRemaining}{%
@@ -21,11 +21,11 @@ All & & & & & & 468 & 38 & 43 \\
 \toprule
 Reason & rw & alf & gf & k8s & bw & mif & Total \\
 \midrule
-Owner component not reached from any screen & 0 & 10 & 31 & 20 & 24 & 71 & 156 \\
-In a service or guard (not implemented) & 1 & 8 & 9 & 5 & 15 & 10 & 48 \\
-Scope found, target screen has no node & 0 & 0 & 32 & 3 & 2 & 95 & 132 \\
-Scope found, target fully dynamic & 0 & 0 & 2 & 26 & 1 & 5 & 34 \\
-Scope found, not explained & 0 & 0 & 7 & 0 & 8 & 2 & 17 \\
+Owner component not reached from any screen & 0 & 8 & 16 & 5 & 21 & 1 & 51 \\
+In a service or guard (not implemented) & 0 & 6 & 4 & 4 & 10 & 7 & 31 \\
+Scope found, target screen has no node & 0 & 0 & 23 & 2 & 6 & 3 & 34 \\
+Scope found, target fully dynamic & 0 & 0 & 4 & 37 & 1 & 13 & 55 \\
+Scope found, not explained & 0 & 0 & 0 & 0 & 2 & 0 & 2 \\
 \bottomrule
 \end{tabular}}
 
@@ -34,14 +34,27 @@ Scope found, not explained & 0 & 0 & 7 & 0 & 8 & 2 & 17 \\
 \toprule
 Baseline class of the construct & must & may & total \\
 \midrule
-Attribution, shared component & 38 & 43 & 81 \\
+Attribution, shared component & 13 & 253 & 266 \\
+Attribution, service & 2 & 13 & 15 \\
 \addlinespace
-Lazy boundary & 40 & 2 & 42 \\
-Component unlinked & 1 & 0 & 1 \\
 \addlinespace
 \midrule
-Out of the attribution classes & 38 & 43 & 81 \\
-Out of the node classes & 41 & 2 & 43 \\
-All conversions gained & 79 & 45 & 124 \\
+Out of the attribution classes & 15 & 266 & 281 \\
+Out of the node classes & 0 & 0 & 0 \\
+All conversions gained & 15 & 266 & 281 \\
 \bottomrule
 \end{tabular}}
+
+% RQ3 inline figures.
+\newcommand{\AttrLost}{454}
+\newcommand{\AttrRecovered}{281}
+\newcommand{\AttrRecoveredShare}{61.9\,\%}
+\newcommand{\AttrRecoveredMust}{15}
+\newcommand{\AttrRecoveredMay}{266}
+\newcommand{\AttrRegressed}{0}
+\newcommand{\AttrRemaining}{173}
+\newcommand{\AttrEdgesBefore}{5868}
+\newcommand{\AttrEdgesAfter}{11622}
+\newcommand{\AttrMustBefore}{39}
+\newcommand{\AttrMustAfter}{45}
+\newcommand{\AttrAppsGained}{3}

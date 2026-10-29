@@ -79,7 +79,7 @@ extractor, which introduces a possible selection bias.
 
 Three measures address these threats. The selection protocol is reported in full, including the rejected candidates, and the
 criteria were fixed before any results were obtained. The corpus is also stratified
-across two orders of magnitude in the number of routes, so that any effect of application size is visible and not averaged away. Finally, the commits are fixed and the evaluation harness is publicly available. A fourth measure is planned: a case study on a proprietary Angular application from industry, reporting
+across two orders of magnitude in the number of routes, so that any effect of application size is visible and not averaged away. Finally, the commits are fixed, and the evaluation harness is released with the thesis so that the measurement can be repeated rather than taken on trust. A fourth measure is planned: a case study on a proprietary Angular application from industry, reporting
 only aggregate figures; this would be the most direct response to the external validity
 threat, and it is discussed further in Chapter~\ref{ch:discussion}. There is also no standard benchmark corpus for single-page applications. The web
 testing survey confirms that evaluations in this area are carried out on collections of
@@ -348,13 +348,38 @@ in this thesis were arrived at.
 
 \subsection{Reproducibility}
 
-The whole evaluation can be re-run with a single command. The command clones the
-extractor at the commit tagged \texttt{thesis-eval}, fetches each application in the corpus at its fixed
-commit rather than from a branch, runs the extraction and the four methods that read the
-sources, and writes a results file together with the tables derived from it. The fifth
-method, the runtime route oracle, is re-run by its own documented command, because it
-needs each application built in its development configuration and served to a browser,
-which is a step the single command cannot take on a machine that has not built them. Each figure in the
-results file is recorded together with the commit of the extractor, the commits of the
-corpus applications, the version of the harness, and the version of the runtime. The
-tables in this thesis are generated from the results file and not entered by hand.
+The four methods that read the sources are re-run by one command,
+\texttt{run-all.mjs}, which fetches each application at its fixed commit rather than from a
+branch, runs the extraction twice --- with the attribution pass disabled and enabled ---
+and writes a results file together with the raw output of each method. It needs two things
+the command itself cannot supply: the dependencies of the harness directory, which is
+outside the workspace and is installed with \texttt{npm ci} there, and a checkout of the
+extractor at the evaluated commit, which is passed to it. The extractor is run from its
+TypeScript source rather than from a build. An earlier arrangement built it instead, which
+required rewriting each package's \texttt{exports} field from source to build output before
+the built command could resolve its own sibling packages; that rewrite edited the checkout
+being measured, and it was the one step of this evaluation that could not be recorded in
+the repository. Running from source removes it.
+
+The fifth method, the runtime route oracle, is re-run by its own documented command,
+because it needs each application built in its development configuration and served to a
+browser, which is a step the first command cannot take on a machine that has not built
+them. Its result files record no commit or runtime version, unlike the others, so the
+provenance guarantee below does not extend to them.
+
+Each figure in the results file of the first four methods is recorded together with the
+commit of the extractor, the commits of the corpus applications, the version of the
+harness, and the version of the runtime. Every table in this thesis is generated from those
+files and none is entered by hand; where the prose states a figure it reads the same
+generated macro the table does, so a regeneration cannot leave a sentence behind. Several
+generators refuse to write at all rather than emit a figure they cannot account for: the
+census will not print its table unless every route entry falls in exactly one named bucket
+and the buckets sum to the route total, and the before-and-after comparison will not print
+unless every construct assigned to the attribution class is either recovered or carries a
+reason.
+
+Two limits of this arrangement should be stated rather than discovered. The evaluated
+commit of the extractor must be one a reader can fetch, so the figures are reproducible
+only once that commit is published; and the version of the harness decides several figures
+independently of the extractor, so a result file is only comparable with another made by
+the same harness version, which is why each one records it.

@@ -51,8 +51,9 @@ Supervisor: & Prof.\ Petri Vuorimaa \\
 Major: & Computer Science \\
 \end{tabular}
 \vfill
-{\small Draft of 22 October 2026. All seven chapters written. The preamble is a
-preview; the official Aalto thesis class is applied before submission.\par}
+{\small Draft of 29 October 2026. Seven chapters and one appendix. Every figure is
+re-measured on the commit named in the generated tables. The preamble is a preview; the
+official Aalto thesis class is applied before submission.\par}
 \end{titlepage}
 
 \chapter*{Abstract}
@@ -64,10 +65,11 @@ that extracts them statically from the route configuration of a client-side
 framework.
 
 This thesis measures static extraction on six open-source Angular applications with
-14 to 921 declared route entries, using a pinned corpus and five independent
-evaluation methods. The baseline extractor recovers between 0 and 15 percent of the
-navigation constructs present in the source as deterministic transitions. For two of
-the six applications it produces a list of routes with no transitions at all.
+14 declared route entries to more than nine hundred, using a pinned corpus and five
+independent evaluation methods. Measured at two levels, the extractor recovers every
+screen the six applications declare and a small fraction of their navigation constructs as
+deterministic transitions; before the defects this thesis identifies were repaired, two of
+the six yielded a list of routes with no transitions at all.
 
 Every lost construct is assigned to one defect class. Attribution is the largest
 class in four of the six applications. In a web application, a navigation site
@@ -77,14 +79,17 @@ dataflow analysis over a lattice of screen sets, computed as a fixpoint over com
 nesting, router outlets and a call graph that takes dependency injection into account.
 It states a soundness property for the deterministic tier, which it tests mechanically
 rather than proving, implements the nesting and outlet parts, and evaluates them on the
-same corpus with the same methods. With attribution, coverage
-rises in four of the six applications, from 15 to 38 percent on the smallest, and
-precision on the deterministic tier does not fall. On the larger applications the gain
-is limited by defects in node extraction, which the thesis also quantifies.
+same corpus with the same methods. With attribution, \AttrRecoveredShare{} of the
+constructs that loss class holds are recovered, on every application in the corpus, and
+precision on the deterministic tier does not fall. Almost all of the gain is navigation the
+graph reports as possible rather than certain, and nothing in the evaluation establishes
+that the computed screen sets are themselves correct, which is the work's sharpest
+limitation.
 
-Mutation testing on three of the applications shows that the graph detects 39 of 48
-injected source changes, and that eight of the nine changes it fails to detect are
-removals of a route guard.
+Mutation testing on three of the applications shows that the graph detects \MutDetected{}
+of \MutScored{} injected source changes, against \MutBaseDetected{} of \MutBaseScored{}
+without attribution, and that attribution raises both the number of changes that can be
+scored at all and the rate at which a scored change is detected.
 
 Finally, the thesis asks whether the losses belong to the applications or to the tool. Each
 defect class is taken to its root cause and repaired where the cause is the extractor's.
@@ -96,8 +101,10 @@ function, which no reader of a route table can resolve. With the readable classe
 knows, or as a source the analysis cannot place. Every site that remains names its reason.
 Some of those reasons are dead links the graph finds without running the application, though
 the count of them is a candidate list: a route the tools fail to read is indistinguishable
-from one the application never declares. Attribution does not raise the detection rate for an individual change. It
-widens the part of the source the graph responds to at all.
+from one the application never declares. The deterministic tier that survives this scrutiny is small and
+exact: across the corpus it holds the transitions into the screens a user reaches before
+authenticating, and nothing else, because an application that guards its interior has
+almost no unconditional transition to find.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
@@ -137,6 +144,9 @@ here.
 \include{ch5-results}
 \include{ch6-discussion}
 \include{ch7-conclusion}
+
+\appendix
+\include{appendix-a}
 
 \bibliographystyle{plain}
 \bibliography{references}

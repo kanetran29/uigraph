@@ -89,4 +89,7 @@ const tot = R.map((r) => r.loss?.constructs ?? 0)
 out += `\\midrule\nAll constructs & ${tot.join(' & ')} & ${tot.reduce((a, b) => a + b, 0)} \\\\\n`
 out += `\\bottomrule\n\\end{tabular}}\n`
 
+out += `\n% The corpus construct total, which the chapter states in prose.\n`
+out += `\\newcommand{\\RoundTwoInScopeAll}{${R.reduce((a, r) => a + (r.totalConstructs || 0), 0)}}\n`
+
 process.stdout.write(out)

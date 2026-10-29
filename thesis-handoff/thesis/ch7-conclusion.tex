@@ -11,39 +11,50 @@ definition of the conversion ratio and of its denominator
 (Section~\ref{sec:corrections}), and the result tables of Chapter~\ref{ch:results}
 come from the harness run on pinned commits.
 
-The answer to RQ1 is that the baseline extractor witnesses between 0.0\% and 15.0\% of
-the 1820 navigation constructs of the corpus with a deterministic transition, and that
-the loss occurs at two levels, because some declared screens never become nodes at all
-and most navigation sites in the screens that do become nodes are never turned into
-edges. The answer to RQ2 is that the failures fall into five defect classes, each
-confirmed by at least two methods that do not share a mechanism, together with one
-candidate class that has a single confirmation, and that assigning every lost construct
-to exactly one class makes attribution the largest class in four of the six applications
-while node defects, unresolved constant route paths and unfollowed lazy boundaries
-dominate the other two and the corpus total. The answer to RQ3 is that scope attribution
-raises the conversion ratio in four of the six applications, from 15.0\% to 37.5\% on
-realworld and from 5.4\% to 10.0\% on mifos, converts 81 of the 468 constructs that the
-loss rules assign to it, 38 of them deterministically, together with a further 41
-deterministic conversions of constructs the rules had assigned to node defects, and
-costs nothing in deterministic precision, since the one
-must edge that fails the witness check after attribution is the same edge that failed
-before it. The answer to RQ4 is that the graph is sensitive to authored source changes
-in the constructs it represents, with 39 of 48 scored mutants detected, a route path
-rename detected in every scored mutant of all three mutated applications, a deleted link
-detected in every scored mutant, and a retargeted \texttt{navigate} call detected in
-seven of eight. Eight of the nine misses are a guard removal, six of those eight on
-routes whose path is the empty string, and the ninth is a retargeted \texttt{navigate}
-call whose old target the baseline had not resolved.
+The answer to RQ1 is that the loss happens at two levels and that they are very far apart.
+Every screen the six applications declare has a node, and the runtime method confirms that
+no node sits at an address the framework mounts nothing at; but without attribution only a
+small fraction of the navigation constructs becomes a deterministic transition, and on
+\RoundTwoZeroMustApps{} of the six applications none does. Node extraction is not the
+bottleneck it was when this work began --- it was, and
+Section~\ref{sec:res-round2} records what repairing it took.
 
-The thesis contributes five things. Attribution is formulated as a dataflow analysis
-over the powerset lattice of screen sets, computed as a fixpoint over four input
-relations, with a soundness property for the deterministic tier that is stated and
-mechanically tested, though not proved, over the
-declared route set and is paired with an explicit list of the constructs the analysis
-does not decide (Claim~\ref{claim:must}, Section~\ref{sec:approximations}). The analysis
-is implemented in \emph{uigraph}, an open-source extractor with a framework-independent
-core and an Angular adapter that records the rule and the source location that produced
-each node and edge. Static navigation extraction is measured on a corpus of six Angular
+The answer to RQ2 is that the failures fall into five defect classes, each confirmed by at
+least two methods that do not share a mechanism, together with one candidate class that has
+a single confirmation, and that assigning every lost construct to exactly one class makes
+attribution the largest class in most of the corpus once the node defects are repaired.
+
+The answer to RQ3 is that scope attribution recovers \AttrRecovered{} of the \AttrLost{}
+constructs the loss rules assign to it, \AttrRecoveredShare{} of that class, on every
+application in the corpus, roughly doubling the graph from \AttrEdgesBefore{} edges to
+\AttrEdgesAfter{}; that \AttrRecoveredMust{} of those conversions are deterministic and
+\AttrRecoveredMay{} are not, so most of what attribution adds is navigation the graph
+reports as possible rather than certain; and that it costs nothing in deterministic
+precision, since every edge on the must tier passes the witness check both before and
+after. What it does not establish is that the computed screen sets are correct, because no
+method here can be asked that question.
+
+The answer to RQ4 is that the graph is sensitive to authored source changes in the
+constructs it represents, with \MutDetected{} of \MutScored{} scored mutants detected
+against \MutBaseDetected{} of \MutBaseScored{} without attribution, so attribution raises
+both the number of changes that can be scored at all and the rate at which a scored change
+is detected. A route path rename is detected in every scored mutant, which is close to
+guaranteed by construction and tests node extraction rather than behaviour; of the
+\MutFallibleScored{} mutants from the three operators that can fail, \MutFallibleDetected{}
+are detected. \MutNoResponse{} mutants produce no change in the graph at all, and every one
+of them is a guard removal, which is the operator the earlier state of this extractor was
+weakest on and the one that moved furthest when the guard a wrapper returns was read.
+
+The thesis contributes one mechanism, and the apparatus that makes its claims
+checkable. The mechanism is scope attribution, formulated as a dataflow analysis over the
+powerset lattice of screen sets, computed as a fixpoint over four input relations, with a
+soundness property for the deterministic tier that is stated and mechanically tested,
+though not proved, over the declared route set and paired with an explicit list of the
+constructs the analysis does not decide (Claim~\ref{claim:must},
+Section~\ref{sec:approximations}). Nothing in its formulation depends on a particular
+extractor; what an extractor supplies is the screens and the navigation sites it ranges
+over, and Chapter~\ref{ch:results} shows that what the mechanism can recover is bounded
+by how completely those are read. The rest is apparatus. Static navigation extraction is measured on a corpus of six Angular
 applications pinned to fixed commits, with five methods. Four of them read the
 applications' sources --- a witness check that re-parses the source at each claimed
 location, a differential test against an independently written route parser, an
@@ -83,16 +94,27 @@ accounted for --- recovered as a transition, recorded as a destination only the 
 knows, or anchored at a source the analysis cannot place. Three quarters of those sites are
 mifos's, so the corpus figure is close to one application's. The sites that remain each name
 a reason, enforced by a check that fails when any does not, and some name a route the
-application never declares. What the repairs cost is reported with them: the must tier grew, in mifos, from 129 edges to \RoundTwoMustEdgesMifos{} and \RoundTwoMustViolations{} of them violate the
-soundness property, and on \RoundTwoZeroMustApps{} of the six applications the must tier is
-still empty, so RQ1's own measure reads zero there.
+application never declares. What the repairs cost is reported with them, and it is not
+what one would hope for. Reading a guard that a wrapper carries moved almost the whole of
+mifos's deterministic tier onto the may tier, so the corpus must tier is
+\RoundTwoMustClean{} edges of which \RoundTwoMustViolations{} violate the soundness
+property, where the earlier instrument published a tier an order of magnitude larger with
+twenty-six violations in it. None of the edges that left became a correct target; they
+stopped claiming to be deterministic, which they never were. On
+\RoundTwoZeroMustApps{} of the six applications the tier is empty, so RQ1's own measure
+reads zero there, and across the corpus that measure now reads lower than it did before
+the repairs. The exchange is a smaller claim that survives its own test for a larger one
+that did not.
 
 What they leave open is also specific. The call graph with dependency injection and the
 dispatch relations are specified and not implemented; the approximations of
 Section~\ref{sec:res-round2} stand in for them --- a guard scoped to the routes that name
 it, a service to the join over its injectors, an effect to $\top$ --- which is coarser than
-the model and leaves a class nothing injects with no scope at all. Guards on empty-path routes are represented wrongly,
-and one defect class still waits for its second confirmation. Whether a graph of screens
+the model and leaves a class nothing injects with no scope at all. One defect class still waits for its second
+confirmation. And the sharpest gap is in the evaluation rather than the analysis: none of
+the five methods validates the screen set attribution computes, so what the corpus
+establishes is how much navigation the mechanism recovers and that it costs the
+deterministic tier nothing, not that its scopes are right. Whether a graph of screens
 and guarded transitions, recomputed from source and carrying a witness on every edge,
 helps the consumers that motivated the work, agents that drive a user interface or a
 repository and automated test generation, is not measured here; the extractor, the

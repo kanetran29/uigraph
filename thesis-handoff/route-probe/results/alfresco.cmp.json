@@ -68,7 +68,7 @@
   "routeSet": {
     "declares": true,
     "details": [
-      "1 route(s) whose outlet could not be read could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds"
+      "1 route(s) whose outlet could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds"
     ]
   }
 }

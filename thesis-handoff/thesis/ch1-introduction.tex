@@ -96,9 +96,15 @@ Section~\ref{sec:metrics}.
 \medskip\noindent\textbf{RQ1.} \emph{How much of the navigation in Angular
 applications can static analysis recover as deterministic transitions?}
 
-\noindent This is measured as the fraction of navigation constructs in the source code
-that are witnessed by at least one deterministic (\emph{must}) transition in the
-extracted graph.
+\noindent This is measured at two levels, because a transition cannot be recovered
+without the screens it runs between. The first is node coverage: the fraction of the
+screens an application declares that the graph holds a node for. The second is the
+fraction of navigation constructs in the source code that are witnessed by at least one
+deterministic (\emph{must}) transition. The first bounds the second, and
+Chapter~\ref{ch:results} reports both, with the warning
+Section~\ref{sec:limitations} carries: refusing to read part of an application raises its
+reported node coverage, so the figure means nothing apart from the list of what was not
+read.
 
 \medskip\noindent\textbf{RQ2.} \emph{Where does static extraction fail, and why?}
 
@@ -134,31 +140,47 @@ navigation was unreadable or merely unread. Each class of RQ2 is therefore taken
 root cause in the source of the application it appeared in, every cause that is the
 extractor's is repaired, and the corpus is measured again. A site that still yields no
 transition must then name the reason, and the script that produces those reasons fails if
-any site has none, so an unexplained remainder cannot pass silently.
+any site has none, so an unexplained remainder cannot pass silently. One kind of reason is
+a target the application never declares, which makes the graph a way of finding dead links
+without running anything; it is reported as a candidate list and not as a count, because a
+route the readers fail to read is indistinguishable from one the application does not have.
 
 \medskip
 RQ1 and RQ2 are answered by measuring the extractor on a corpus of six open-source
 Angular applications. The applications are pinned to specific commits and range from
-14 to 921 declared route entries. Five evaluation methods are used, chosen so that they do
+from 14 declared route entries to more than nine hundred. Five evaluation methods are used, chosen so that they do
 not share the same blind spot. RQ3 is addressed by formulating attribution as a
 dataflow analysis over a lattice of screen sets, implementing it, and evaluating the
 result on the same corpus with the same methods. RQ4 is answered on the graph produced
-after attribution has been applied. RQ5 repeats the measurement after the loss list of RQ2
-has been worked; because it uses a later commit of the extractor and a corrected harness,
-it is reported separately in Section~\ref{sec:res-round2} and revises none of the figures
-of RQ1 to RQ4.
+after attribution has been applied. RQ5 asks whose the remaining losses are, and it is
+what decides which instrument the other four questions are answered on: every cause that
+proved to be the extractor's was repaired, and the figures reported throughout
+Chapter~\ref{ch:results} are those of the repaired instrument. Section~\ref{sec:res-round2}
+reports what the repairs cost the soundness property, and what the earlier instrument
+measured is kept there for comparison rather than as a second set of results.
 
-The thesis has three limits of scope. It does not claim completeness. When a navigation target is computed at run time, the full set of
+The thesis has four limits of scope. It does not claim completeness. When a navigation target is computed at run time, the full set of
 transitions cannot be determined statically in general. The thesis therefore states a
 conditional soundness property over a declared scope, tests it mechanically against the
 source at every deterministic edge it produces, and measures recall empirically. The
-property is not proved, and Chapter~\ref{ch:results} reports the edges in the corpus that
-violate it: one on the pinned extractor, and \RoundTwoMustViolations{} once the repairs of
-Section~\ref{sec:res-round2} had grown mifos's must tier from 129 edges to \RoundTwoMustEdgesMifos{}.
+property is not proved. Chapter~\ref{ch:results} tests it at every deterministic edge the
+analysis produces: \RoundTwoMustClean{} pass and \RoundTwoMustViolations{} violate it. That
+tier is small, and Section~\ref{sec:res-round2} shows why: an application that guards its
+interior has almost no unconditional transition, so the deterministic tier of this corpus
+is very nearly the set of transitions into the screens a user reaches before
+authenticating. Reading the guards correctly cost the headline recall figure more than it
+cost the property, and the chapter reports that trade rather than only its favourable half.
 This follows the position of Livshits et al., who argue that a practical static
 analysis should be described as sound modulo an explicit list of the language features
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement
-would require a controlled experiment and is left for future work. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
+would require a controlled experiment and is left for future work. A third limit is the one that bears hardest on the
+contribution: nothing in this evaluation validates the screen set that attribution
+computes. The methods of Section~\ref{sec:protocol} check the edges attribution produces
+and the addresses the graph claims, and the running framework can be asked which of those
+addresses it answers; none of them can be asked whether the set of screens from which a
+navigation site can fire is the right set. What is measured is therefore how much
+navigation attribution recovers and that it costs the deterministic tier nothing, not that
+its scopes are correct. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
 has adapters for other frameworks, but all measurements reported here concern Angular
 applications.
 
@@ -178,7 +200,15 @@ Chapter~\ref{ch:analysis} presents the contribution: the graph model and its sou
 claim, the scope attribution analysis, and its implementation.
 Chapter~\ref{ch:evaluation} describes the evaluation setup: the corpus and why it can
 be considered valid, the metrics, and the five evaluation methods.
-Chapter~\ref{ch:results} presents the results for each research question.
+Chapter~\ref{ch:results} presents the results for each research question: node extraction
+and the ceiling it sets, then scope attribution and what it recovers, then the defect
+classes taken to their causes, change sensitivity, what the repairs cost the soundness
+property, and the dead links the graph finds without being run.
+Appendix~\ref{app:validation} holds the validation of the measuring instruments --- the
+disagreements between the two static readers, how the declared-screen set moved under the
+corrections, the case-by-case account of asking the running framework, and the record that
+every remaining site names a reason. It is kept apart from the results because it
+establishes that the instruments measure what they claim, not what the analysis recovers.
 Chapter~\ref{ch:discussion} discusses the results, the limitations of the study, the
 constructs the analysis approximates, how the approach transfers to other frameworks,
 and future work. Chapter~\ref{ch:conclusion} concludes the thesis.
