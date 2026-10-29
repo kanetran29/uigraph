@@ -48,11 +48,19 @@ function probeScreens(routes) {
     // component of its own. That component renders nothing of the application, so an address whose
     // only component is that one places no screen.
     if (r.component === 'ɵEmptyOutletComponent') continue
+    // A route whose address comes from a UrlMatcher, and anything beneath it, has no address this
+    // probe can read. Filing it under its parent would claim the parent answers a URL it does not.
+    if (r.underMatcher) continue
     if (!r.component && !r.hasLoadComponent) continue
     const p = norm(r.fullPath)
     if (!out.has(p)) out.set(p, r)
   }
   return out
+}
+
+/** Routes whose address is decided by a UrlMatcher, which neither reader can resolve to a string. */
+function matcherRoutes(routes) {
+  return routes.filter((r) => r.hasMatcher).length
 }
 
 /**
@@ -151,6 +159,11 @@ const report = {
   },
   invented: minus(extractor, framework),
   missed: minus(leaves, extractor),
+  // A prefix route that carries a layout component but no empty-path child answers no URL of its
+  // own, so the extractor is right not to mint a screen there. It is still an address the
+  // framework's configuration holds and the extractor's set does not, and reporting the
+  // navigable difference without this one would be reporting only the half that flatters.
+  missedPrefixOnly: minus(shells, extractor),
   sharedBlindSpot: minus(extractor, framework).filter((p) => declared.has(p)),
   oracleOnly: minus(declared, framework),
   frameworkOnlyVsOracle: minus(leaves, declared),
@@ -159,12 +172,15 @@ const report = {
 }
 report.counts.invented = report.invented.length
 report.counts.missed = report.missed.length
+report.counts.missedPrefixOnly = report.missedPrefixOnly.length
 report.counts.sharedBlindSpot = report.sharedBlindSpot.length
+report.counts.matcherRoutes = matcherRoutes(probe.routes)
 
 if (a.out) writeFileSync(a.out, JSON.stringify(report, null, 2))
 const c = report.counts
 console.log(`${report.slug}: framework=${c.frameworkScreens} (leaf ${c.frameworkLeaves} + shell ${c.frameworkShells}) extractor=${c.extractorNodes} oracle=${c.oracleDeclared}`)
 console.log(`  invented (extractor mints, framework does not mount): ${c.invented}`)
-console.log(`  missed (framework mounts, extractor has no node):      ${c.missed}`)
+console.log(`  missed (framework mounts, extractor has no node):      ${c.missed} (+${c.missedPrefixOnly} prefix-only)`)
+console.log(`  matcher routes (address unreadable by any reader):     ${c.matcherRoutes}`)
 console.log(`  shared blind spot (extractor AND oracle, not framework): ${c.sharedBlindSpot}`)
 console.log(`  extractor declares its route set incomplete:            ${report.routeSet.declares}`)

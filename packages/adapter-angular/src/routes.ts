@@ -13,6 +13,12 @@ const SPEC_FILE = /\.(spec|test|stories|cy)\.[tj]s$/
 // A lazy target names a barrel, the barrel a feature module and the feature module its routing
 // module, so the table a `loadChildren` mounts can sit three files from the one it names.
 const LAZY_OWNER_HOPS = 3
+// The files some route loads directly through its own `loadChildren`, and the arrays a spread
+// already carries under a prefix, for the length of one `collectRoutes` call. Both are read five
+// frames below the only place that can compute them, and threading them through a walk that
+// already takes eleven arguments would say less about the analysis than it costs to read.
+let directLazyTargets: Set<string> | undefined
+let spreadConsumedArrays: Set<ArrayLiteralExpression> | undefined
 import { analyzeCanActivate, type GuardInfo } from './guards'
 import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, propNamed, keyUnreadable } from './resolve'
 
@@ -229,7 +235,7 @@ function dependencyFile(decl: ImportDeclaration | ExportDeclaration, from: Sourc
  * no application in the corpus elects an owner outside its own directory. The gap is known and
  * left open: the election proves the array is declared to a router, not that this one reads it.
  */
-function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayLiteralExpression[]; claimed: SourceFile[] } {
+function lazyRouteOwner(target: SourceFile, routeFile?: SourceFile, lazyTargets?: Set<string>): { owner: SourceFile; arrays: ArrayLiteralExpression[]; claimed: SourceFile[] } {
   const own = findRouteArrays(target)
   if (own.length) return { owner: target, arrays: own, claimed: [target] }
   const seen = new Set<string>([target.getFilePath()])
@@ -241,6 +247,7 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
       for (const dep of moduleDependencies(sf)) {
         if (seen.has(dep.getFilePath())) continue
         seen.add(dep.getFilePath())
+        if (!ownedByThisRoute(dep, target, routeFile, lazyTargets)) continue
         // A module that holds no table of its own is a hop on the way to one, not a dead end.
         if (findRouteArrays(dep).length === 0) next.push(dep)
         else holders.set(dep.getFilePath(), { file: dep, declared: findRouteArrays(dep, true) })
@@ -258,6 +265,38 @@ function lazyRouteOwner(target: SourceFile): { owner: SourceFile; arrays: ArrayL
     frontier = next
   }
   return { owner: target, arrays: [], claimed: [] }
+}
+
+/**
+ * May this lazy route adopt `dep` as the table it mounts? Searching three modules out reaches
+ * tables that belong to someone else, and adopting one mounts it at a second address, which is a
+ * node the application does not have. Three refusals, the same ones the independent parser
+ * applies at every hop of its own search:
+ * a file the route itself sits in --- a chain that reaches back to the table the route is
+ * written in would elect that table and, by claiming it out of the root scan, take the only
+ * entry point into the walk with it;
+ * a file another route loads directly through its own `loadChildren`, which is that route's
+ * table wherever it is reached from;
+ * a file registering with `RouterModule.forRoot`, which Angular mounts at the empty path and
+ * nowhere else, so no lazy module may carry it under a prefix.
+ * The search is allowed through a file none of these refuses, which is what a barrel and a
+ * feature module in front of a routing module are.
+ */
+function ownedByThisRoute(dep: SourceFile, target: SourceFile, routeFile?: SourceFile, lazyTargets?: Set<string>): boolean {
+  const path = dep.getFilePath()
+  if (routeFile && path === routeFile.getFilePath()) return false
+  if (lazyTargets && path !== target.getFilePath() && lazyTargets.has(path)) return false
+  return !registersRootTable(dep)
+}
+
+/**
+ * Does this file hand a table to `RouterModule.forRoot`? Such a table is the application's root
+ * table: Angular mounts it at the empty path alone, and a lazy module registers its own with
+ * `forChild`.
+ */
+function registersRootTable(sf: SourceFile): boolean {
+  return sf.getDescendantsOfKind(SyntaxKind.CallExpression)
+    .some((call) => /RouterModule\.forRoot$/.test(call.getExpression().getText()))
 }
 
 /**
@@ -412,8 +451,18 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     const childParent = isScreen ? nodeId : parentNodeId
     const childrenProp = propNamed(obj, 'children')
     if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
-      const childInit = childrenProp.getInitializer()
-      if (childInit && Node.isArrayLiteralExpression(childInit)) placed += walkRouteArray(childInit, sf, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
+      // `children: ADMIN` and `children: [...ADMIN]` are the same construct to Angular, so the
+      // initializer is resolved the way a spread's expression is rather than required to be
+      // written out. One the resolver cannot bring back to an array is a subtree the walk never
+      // enters, and saying nothing about it let the named array be minted at the root instead.
+      const childInit = arrayLiteralOf(childrenProp.getInitializer())
+      if (childInit && Node.isArrayLiteralExpression(childInit)) {
+        const n = walkRouteArray(childInit, childInit.getSourceFile(), fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
+        placed += n
+        if (n > 0 && childInit.getSourceFile() !== sf) consumedFiles?.add(childInit.getSourceFile().getFilePath())
+      } else if (unreadable) {
+        unreadable.subtrees.add(obj)
+      }
     }
     const childSpec = lazyImportSpecifier(obj, 'loadChildren')
     // A `loadChildren` whose specifier is not a literal (a template over a variable, say) yields
@@ -423,7 +472,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     if (childSpec || lazyIdentifierTarget(sf, obj, 'loadChildren')) {
       const childModule = childSpec ? resolveRelative(sf, childSpec) : lazyIdentifierTarget(sf, obj, 'loadChildren')
       if (childModule) {
-            const { owner, arrays, claimed } = lazyRouteOwner(childModule)
+            const { owner, arrays, claimed } = lazyRouteOwner(childModule, sf, directLazyTargets)
         if (arrays.length === 0 && unreadable) unreadable.subtrees.add(obj)
         loadedChildFiles.add(childModule.getFilePath())
         consumedFiles?.add(childModule.getFilePath())
@@ -463,7 +512,19 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
  */
 export function collectRoutes(project: Project, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, projectDir?: string): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
-  const claimedFiles = collectLoadChildrenTargets(project, projectDir)
+  const { targets: claimedFiles, direct, spreadArrays } = collectLoadChildrenTargets(project, projectDir)
+  directLazyTargets = direct
+  spreadConsumedArrays = spreadArrays
+  try {
+    return collect(project, byNodeId, claimedFiles, redirects, unreadable, projectDir)
+  } finally {
+    directLazyTargets = undefined
+    spreadConsumedArrays = undefined
+  }
+}
+
+/** The body of `collectRoutes`, split out so the per-run sets above are always cleared. */
+function collect(project: Project, byNodeId: Map<string, RouteInfo>, claimedFiles: Set<string>, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, projectDir?: string): RouteInfo[] {
   const loadedChildFiles = new Set(claimedFiles)
   const consumedFiles = new Set<string>()
   for (const sf of project.getSourceFiles()) {
@@ -477,7 +538,12 @@ export function collectRoutes(project: Project, redirects?: Map<string, string>,
     // confidence 1, which is a must edge to an address the application does not have.
     // Such a file is reachable only through a `loadChildren` that names it.
     if (projectDir && !isInsideDir(f, projectDir)) continue
-    for (const arr of findRouteArrays(sf)) walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles, [], null, redirects, unreadable, consumedFiles)
+    for (const arr of findRouteArrays(sf)) {
+      // An array a spread already carries is mounted under that spread's prefix. Minting it again
+      // here would put its routes at the root as well, at addresses the application never mounts.
+      if (spreadConsumedArrays?.has(arr)) continue
+      walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles, [], null, redirects, unreadable, consumedFiles)
+    }
   }
   if (unreadable) {
     for (const f of claimedFiles) {
@@ -531,8 +597,10 @@ function mintsFromRoot(sf: SourceFile, claims: Set<string>, already: Map<string,
  * the root scan would have minted something, as unplaced. A table whose only claimants were skipped is root-scanned like any
  * unclaimed one, that is, taken to be mounted at the root.
  */
-function collectLoadChildrenTargets(project: Project, projectDir?: string): Set<string> {
+function collectLoadChildrenTargets(project: Project, projectDir?: string): { targets: Set<string>; direct: Set<string>; spreadArrays: Set<ArrayLiteralExpression> } {
   const targets = new Set<string>()
+  const direct = new Set<string>()
+  const spreadArrays = new Set<ArrayLiteralExpression>()
   for (const sf of project.getSourceFiles()) {
     if (SPEC_FILE.test(sf.getFilePath()) || (projectDir && !isInsideDir(sf.getFilePath(), projectDir))) continue
     for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
@@ -540,13 +608,42 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): Set<
       const mod = spec ? resolveRelative(sf, spec) : lazyIdentifierTarget(sf, obj, 'loadChildren')
       if (!mod) continue
       targets.add(mod.getFilePath())
-      for (const f of lazyRouteOwner(mod).claimed) targets.add(f.getFilePath())
-    }
-    // A route-shaped spread array is reached under the spreading route's prefix, so the root must not mint it again unprefixed.
-    for (const sp of sf.getDescendantsOfKind(SyntaxKind.SpreadElement)) {
-      const arr = arrayLiteralOf(sp.getExpression())
-      if (arr && Node.isArrayLiteralExpression(arr) && arr.getSourceFile() !== sf && spreadMintsRoutes(arr)) targets.add(arr.getSourceFile().getFilePath())
+      direct.add(mod.getFilePath())
     }
   }
-  return targets
+  // The owner search reads `direct`, so it is asked only once the whole set is known; asking it
+  // inside the loop above would let a route elected early escape a refusal a later route earns.
+  for (const sf of project.getSourceFiles()) {
+    if (SPEC_FILE.test(sf.getFilePath()) || (projectDir && !isInsideDir(sf.getFilePath(), projectDir))) continue
+    for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+      const spec = lazyImportSpecifier(obj, 'loadChildren')
+      const mod = spec ? resolveRelative(sf, spec) : lazyIdentifierTarget(sf, obj, 'loadChildren')
+      if (!mod) continue
+      for (const f of lazyRouteOwner(mod, sf, direct).claimed) targets.add(f.getFilePath())
+    }
+    // A route-shaped spread array is reached under the spreading route's prefix, so the root must
+    // not mint it again unprefixed. The array is recorded as well as its file, because a helper
+    // array spread into a table in its OWN file cannot be removed by file: that would take the
+    // table with it.
+    for (const sp of sf.getDescendantsOfKind(SyntaxKind.SpreadElement)) {
+      const arr = arrayLiteralOf(sp.getExpression())
+      if (!arr || !Node.isArrayLiteralExpression(arr) || !spreadMintsRoutes(arr)) continue
+      spreadArrays.add(arr)
+      if (arr.getSourceFile() !== sf) targets.add(arr.getSourceFile().getFilePath())
+    }
+    // A `children` written as a name reaches its array the same way and is mounted under the same
+    // prefix, so the root must not mint it either.
+    for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+      const prop = propNamed(obj, 'children')
+      if (!prop || !Node.isPropertyAssignment(prop)) continue
+      const init = prop.getInitializer()
+      const arr = arrayLiteralOf(init)
+      // An array written out in place is reached only here; one reached through a name is also a
+      // declaration the root scan can see, and that is the one to remove from it.
+      if (!arr || arr === init || !Node.isArrayLiteralExpression(arr)) continue
+      spreadArrays.add(arr)
+      if (arr.getSourceFile() !== sf) targets.add(arr.getSourceFile().getFilePath())
+    }
+  }
+  return { targets, direct, spreadArrays }
 }

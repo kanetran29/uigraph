@@ -207,6 +207,41 @@ mac('RoundTwoZeroMustApps', rows.filter((r) => r.b1 && r.b1.mustEdges === 0).len
 // A blind spot is a place where the parser could not read what the application declares, so an
 // application that still has one is printed as a lower bound and one that has none as exact.
 for (const r of rows) mac(`RoundTwoRoutes${MACRO_TAG[r.s]}`, `${r.c1.blindSpots.length > 0 ? '$\\geq$' : ''}${r.c1.routes.length}`)
+// Which applications those are, and on what grounds, so no sentence has to name them from memory
+// after a round moves the set. The reasons are the oracle's own blind-spot strings, deduplicated.
+/**
+ * Applications whose route set the runtime probe measured against the framework's own route
+ * configuration and found to hold every address the framework mounts. Read from the probe's
+ * committed comparison files when a directory is given; without one the set is empty and every
+ * caveat stands, which is the behaviour this script had before the probe existed.
+ */
+const probeDir = (() => {
+  const i = process.argv.indexOf('--probe')
+  return i > -1 ? process.argv[i + 1] : null
+})()
+const confirmedComplete = new Set()
+if (probeDir) {
+  for (const r of rows) {
+    try {
+      const cmp = JSON.parse(fs.readFileSync(path.join(probeDir, `${r.s}.cmp.json`), 'utf8'))
+      if (cmp.counts.missed === 0) confirmedComplete.add(r.s)
+    } catch {}
+  }
+}
+
+/** Does this application support a claim that some path it does not declare is undeclared? */
+function routeSetComplete(r) {
+  if (confirmedComplete.has(r.s)) return true
+  return !(r.notes ?? []).some((n) => n.kind === 'incomplete-route-set')
+}
+
+mac('RoundTwoProbeLicensed', confirmedComplete.size)
+mac('RoundTwoProbeLicensedCaveated', rows.filter((x) => confirmedComplete.has(x.s) && (x.notes ?? []).some((n) => n.kind === 'incomplete-route-set')).map((x) => NAME[x.s]).join(', ') || 'none')
+
+const lowerBound = rows.filter((r) => r.c1.blindSpots.length > 0)
+mac('RoundTwoLowerBoundApps', lowerBound.length)
+mac('RoundTwoLowerBoundWhere', lowerBound.map((r) => NAME[r.s]).join(', ') || 'none')
+mac('RoundTwoLowerBoundReasons', [...new Set(lowerBound.flatMap((r) => r.c1.blindSpots.map((b) => b.reason)))].sort().join('; ') || 'none')
 // The figures without mifos, which supplies three quarters of the corpus on its own.
 const nm = rows.filter((r) => r.s !== 'mifos')
 const nmS = nm.reduce((a, r) => a + r.l1.inScope, 0)
@@ -349,8 +384,11 @@ let noNode = 0, noRoute = 0, deadFromReasons = 0, relativeUnresolved = 0, underU
 const deadSites = []
 for (const r of rows) {
   // An application whose own route set the extractor could not read in full cannot support
-  // a claim that some path is undeclared, so its sites are counted but never called dead.
-  const complete = !(r.notes ?? []).some((n) => n.kind === 'incomplete-route-set')
+  // a claim that some path is undeclared, so its sites are counted but never called dead ---
+  // unless the runtime oracle has since measured that set against the framework's own
+  // configuration and found it to hold every address the framework mounts. The note says the
+  // set MIGHT be short; that measurement says it is not, and a measurement outranks a caution.
+  const complete = routeSetComplete(r)
   for (const x of r.w?.rows ?? []) {
     if (/declared-route-has-no-node/.test(x.reason)) noNode++
     // `extractor-note:*` is the extractor repeating itself and is deliberately NOT counted.
@@ -407,7 +445,7 @@ for (const r of rows) for (const n of r.notes ?? []) {
   if (n.kind === 'wildcard-redirect') {
     const target = targetOf(n)
     const verdict = undeclaredIn(r.c1, target)
-    const bucket = /could not be read/.test(n.detail ?? '') ? 'caveated'
+    const bucket = /could not be read/.test(n.detail ?? '') && !confirmedComplete.has(r.s) ? 'caveated'
       : verdict === 'not-a-path' ? notAPathKind(target)
         : verdict === 'undeclared' ? 'dead'
           : verdict

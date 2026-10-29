@@ -9,10 +9,13 @@
     "oracleDeclared": 10,
     "invented": 0,
     "missed": 0,
-    "sharedBlindSpot": 0
+    "missedPrefixOnly": 0,
+    "sharedBlindSpot": 0,
+    "matcherRoutes": 0
   },
   "invented": [],
   "missed": [],
+  "missedPrefixOnly": [],
   "sharedBlindSpot": [],
   "oracleOnly": [],
   "frameworkOnlyVsOracle": [],

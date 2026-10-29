@@ -1335,3 +1335,92 @@ export const EXTRA: Routes = [{ path: 'extra', component: A }]`,
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
   })
 })
+
+describe('a table the lazy route does not own', () => {
+  it('does not elect the table the route itself is written in', () => {
+    // A feature module that imports anything from the file holding the root table -- a constant,
+    // a type -- put that file one hop from the lazy target. The owner search elected the root
+    // table, and claiming it out of the root scan took the only entry point into the walk with
+    // it: the extractor emitted an empty graph for the whole application.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const TITLE = 'x'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'feat', loadChildren: () => import('./feat/feat.module').then((m) => m.FeatModule) }]`,
+        '/app/feat/feat.module.ts': `import { TITLE } from '../app.routes'
+export class FeatModule { t = TITLE }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('does not elect a table another route loads, two hops out', () => {
+    // The widened search reaches a sibling feature's routing module through a barrel and a
+    // feature module. Angular mounts that table under the route that loads it and nowhere else,
+    // so adopting it here minted /x/list, an address the application does not have, with an
+    // empty soundiness list.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'x', loadChildren: () => import('./x/index').then((m) => m.XModule) },
+  { path: 'y', loadChildren: () => import('./y/y-routing.module').then((m) => m.YRoutingModule) },
+]`,
+        '/app/x/index.ts': `export { XModule } from './x.module'`,
+        '/app/x/x.module.ts': `import { YRoutingModule } from '../y/y-routing.module'
+export class XModule { y = YRoutingModule }`,
+        '/app/y/y-routing.module.ts': `import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const routes: Routes = [{ path: 'list', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/y/list'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+})
+
+describe('a subtree reached through a name', () => {
+  it('reads a children written as an identifier, under its parent prefix', () => {
+    // `children: ADMIN` and `children: [...ADMIN]` are one construct to Angular. The first took
+    // only a syntactic array, so the named table was left to the root scan and minted /users.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { ADMIN } from './admin.routes'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'admin', children: ADMIN }]`,
+        '/app/admin.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const ADMIN: Routes = [{ path: 'users', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin/users', '/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('does not mint a spread source that sits in the table’s own file at the root as well', () => {
+    // Claims are per file, and claiming this file would remove the table with the helper, so the
+    // root scan found the helper array by shape and walked it a second time at the root.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+const EXTRA: Routes = [{ path: 'extra', component: A }]
+export const routes: Routes = [{ path: 'home', component: A, children: [...EXTRA] }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/home/extra'])
+  })
+})

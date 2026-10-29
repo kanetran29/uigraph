@@ -9,7 +9,9 @@
     "oracleDeclared": 84,
     "invented": 0,
     "missed": 242,
-    "sharedBlindSpot": 0
+    "missedPrefixOnly": 0,
+    "sharedBlindSpot": 0,
+    "matcherRoutes": 1
   },
   "invented": [],
   "missed": [
@@ -256,6 +258,7 @@
     "/resources/personal-finance-tools/open-source-alternative-to-zenvesto",
     "/resources/personal-finance-tools/open-source-alternative-to-ziggma"
   ],
+  "missedPrefixOnly": [],
   "sharedBlindSpot": [],
   "oracleOnly": [],
   "frameworkOnlyVsOracle": [

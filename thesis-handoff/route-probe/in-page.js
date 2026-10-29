@@ -128,7 +128,7 @@ globalThis.__uigraphProbe = async function probeAngularRoutes(options) {
    * eager children and lazily loaded subtrees. The chain set holds the arrays on
    * the current path so a self-referential configuration terminates.
    */
-  async function expand(routes, parentPath, chainSet, acc, depth, parentOutlet = null) {
+  async function expand(routes, parentPath, chainSet, acc, depth, parentOutlet = null, parentUnderMatcher = false) {
     if (!Array.isArray(routes) || depth > opt.maxDepth) return
     if (chainSet.has(routes)) return
     chainSet.add(routes)
@@ -139,10 +139,16 @@ globalThis.__uigraphProbe = async function probeAngularRoutes(options) {
       // levels down it sits and whether or not it names an outlet of its own, so the context is
       // carried rather than read off each route.
       const outlet = typeof r.outlet === 'string' ? r.outlet : parentOutlet
+      // A UrlMatcher route declares its address through a function, so neither this probe nor a
+      // static reader knows what it is. Composing it from the parent would file the route at the
+      // parent's address, which is an address it does not answer; the flag is carried down so a
+      // whole subtree beneath such a route is known to have no readable address either.
+      const underMatcher = parentUnderMatcher || typeof r.matcher === 'function'
       acc.push({
         fullPath: full,
         path: typeof r.path === 'string' ? r.path : null,
         hasMatcher: typeof r.matcher === 'function',
+        underMatcher,
         outlet,
         ownOutlet: typeof r.outlet === 'string' ? r.outlet : null,
         redirectTo: typeof r.redirectTo === 'string' ? r.redirectTo : null,
@@ -154,13 +160,13 @@ globalThis.__uigraphProbe = async function probeAngularRoutes(options) {
         depth,
       })
       if (Array.isArray(r.children)) {
-        await expand(r.children, full, chainSet, acc, depth + 1, outlet)
+        await expand(r.children, full, chainSet, acc, depth + 1, outlet, underMatcher)
       }
       if (Array.isArray(r._loadedRoutes)) {
-        await expand(r._loadedRoutes, full, chainSet, acc, depth + 1, outlet)
+        await expand(r._loadedRoutes, full, chainSet, acc, depth + 1, outlet, underMatcher)
       } else if (typeof r.loadChildren === 'function') {
         const loaded = await callLoadChildren(r, full)
-        if (loaded) await expand(loaded, full, chainSet, acc, depth + 1, outlet)
+        if (loaded) await expand(loaded, full, chainSet, acc, depth + 1, outlet, underMatcher)
       }
     }
     chainSet.delete(routes)

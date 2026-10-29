@@ -331,10 +331,24 @@ each case, because Angular removes the debug surface the method reads when an ap
 declares itself in production mode, and a production configuration can differ from a development
 one in ways a route table does not show. Fourth, where a workspace application composes the
 library a measurement is scoped to, the framework's set is a superset of the library's by
-construction, and the difference is scope rather than reading; three of alfresco's addresses are
-that and nothing else. None of these weakens the one-directional claim the check is used for ---
-that an address the extractor mints is an address the framework mounts --- because none of them
-could make a mounted address look unmounted.
+construction, and part of any difference is scope rather than reading; two of alfresco's
+addresses are that, and a third, \path{/rules}, is not --- it is declared inside the measured
+library and registered in a way the extractor does not read.
+
+The first draft of this paragraph closed by saying that none of these weakens the claim the check
+is used for, because none could make a mounted address look unmounted. That has the direction
+backwards. The claim is that an address the extractor mints is one the framework mounts, and it
+is established by finding the extractor's set inside the framework's. Every threat listed above
+makes the framework's set LARGER than the set of addresses a visitor can actually reach --- a
+route behind a guard that always refuses is counted mounted, so is one whose component throws,
+and a development build may carry routes a production build drops. A larger containing set makes
+containment easier to satisfy, so these threats weaken the no-invented-address claim rather than
+leaving it alone. What they cannot do is manufacture the failures the check did report: the two
+alfresco addresses are minted by the extractor and absent from even this generous reading of what
+the framework mounts, and the same is true of the ten the comparison returns against the route set
+as it stood before this round. A finding of an invented address is therefore sound under every
+threat here; a finding of none is weaker than it looks, and is reported as the absence of a
+failure rather than as a proof of its impossibility.
 
 \section{Declared approximations}
 \label{sec:approximations}
