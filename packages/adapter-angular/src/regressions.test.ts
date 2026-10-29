@@ -1571,6 +1571,9 @@ import { provideRouter } from '@angular/router'
 import { A } from '../a.component'
 export const RULES_ROUTES: Routes = [{ path: 'rules', component: A }]
 export function provideRules() { return [provideRouter(RULES_ROUTES)] }`,
+        // alfresco's shell calls the factory one file over, which is what makes the root mount
+        // real; a factory nothing calls is no evidence that a table is mounted anywhere.
+        '/app/app.module.ts': `import { provideRules } from './rules/rules.module'\nexport const config = { providers: [...provideRules()] }`,
         '/app/a.component.ts': C('<p>a</p>'),
       }),
       '/app',
@@ -2059,5 +2062,100 @@ export class RulesModule {}`,
       '/app',
     )
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/nodes/rules'])
+  })
+})
+
+describe('what the fifth panel found in the repairs of the fourth', () => {
+  it('declares the route set unread when a registration call chooses between tables by a condition it cannot read', () => {
+    // Claiming both arms kept the arm the build does not take out of the root scan. With the
+    // condition unreadable neither arm is selected, so BOTH were claimed and the application's
+    // whole route table left the graph: zero nodes, zero notes, and every dead-link verdict over
+    // it reading "the application declares no such route".
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.config.ts': `import { provideRouter } from '@angular/router'\nimport { routes } from './app.routes'\nimport { remoteRoutes } from './remote.routes'\nimport { isRemote } from './flags'\nexport const config = { providers: [provideRouter(isRemote() ? remoteRoutes : routes)] }`,
+        '/app/flags.ts': `export const isRemote = () => Math.random() > 0.5`,
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: A }]`,
+        '/app/remote.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const remoteRoutes: Routes = [{ path: 'remote', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+    expect(graph.nodes.map((n) => n.route)).toEqual([])
+  })
+
+  it('does not mint a spread-carried table at the root on a registration no call reaches', () => {
+    // The root rescue was made unconditional, so a table a spread carries under a prefix was
+    // minted at the root as well, on a `provideRouter` sitting in an exported factory nothing
+    // calls. alfresco's factory IS called, one file over, which is what tells the two apart.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { A } from './a.component'\nimport { RULES } from './rules/rules.module'\n@NgModule({ imports: [RouterModule.forRoot([{ path: 'home', component: A }, { path: 'nodes', children: [...RULES] }])] })\nexport class AppModule {}`,
+        '/app/rules/rules.module.ts': `import type { Routes } from '@angular/router'\nimport { provideRouter } from '@angular/router'\nimport { A } from '../a.component'\nexport const RULES: Routes = [{ path: 'rules', component: A }]\nexport function provideRules() { return [provideRouter(RULES)] }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/nodes/rules'])
+  })
+
+  it('mounts a named children handed to a helper under the segment that helper declares', () => {
+    // `callPathSegment` was wired into the element branch and not into `children:`, so the
+    // construct the chapter names is still read at the parent prefix: /admin/dash for an
+    // application that mounts /admin/v2/dash.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { V2 } from './v2.routes'
+import { section } from './helpers'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'admin', children: section(V2) }]`,
+        '/app/helpers.ts': `import type { Routes } from '@angular/router'\nexport function section(children: Routes) { return { path: 'v2', children } }`,
+        '/app/v2.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const V2: Routes = [{ path: 'dash', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin/v2/dash', '/home'])
+  })
+
+  it('declares the subtree unread when a helper does not put its argument in children', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { V2 } from './v2.routes'
+import { guarded } from './helpers'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'admin', children: guarded(V2) }]`,
+        '/app/helpers.ts': `import type { Routes } from '@angular/router'\nexport function guarded(table: Routes) { return { path: 'v2', component: null, data: { table } } }`,
+        '/app/v2.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const V2: Routes = [{ path: 'dash', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('mints no screen when the outlet of a route is not a readable string', () => {
+    // The outlet test reads a string literal. An outlet carried in by an object spread, or named
+    // by a constant, fell through to "primary" and the whole subtree was minted at an address the
+    // framework answers with its catch-all.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+const common = { outlet: 'viewer' }
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { ...common, path: 'view/:nodeId', component: A, children: [{ path: 'pane', component: A }] },
+]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
   })
 })

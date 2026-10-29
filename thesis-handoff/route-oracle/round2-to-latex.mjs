@@ -588,6 +588,14 @@ mac('RoundTwoWildcardPattern', wildOf('pattern-only').length)
 mac('RoundTwoWildcardRelative', wildOf('relative').length)
 mac('RoundTwoWildcardAppRoot', wildOf('app-root').length)
 mac('RoundTwoWildcardNoTarget', wildOf('no-target').length)
+// The buckets the chapter enumerates must account for every site, or the subtraction it prints
+// does not close --- which it did not when the out-of-directory bucket was added and the
+// enumeration was not. Checked here rather than left to a reader's arithmetic.
+const ENUMERATED = ['caveated', 'declared-no-node', 'framework-mounts-it', 'framework-prefix', 'framework-redirects', 'declared-not-a-screen', 'under-blind-spot', 'pattern-only', 'relative', 'app-root', 'no-target', 'outside-measured-dir', 'dead']
+const unenumerated = [...wildSites.values()].filter((x) => !ENUMERATED.includes(x.bucket))
+if (unenumerated.length > 0) {
+  throw new Error(`${unenumerated.length} rescued site(s) are in a bucket the chapter does not enumerate: ${[...new Set(unenumerated.map((x) => x.bucket))].join(', ')}`)
+}
 mac('RoundTwoWildcardRescued', wildSites.size)
 mac('RoundTwoUnresolvedTarget', unres)
 // A wildcard note whose detail carries the route-set caveat is NOT a dead-link candidate:
