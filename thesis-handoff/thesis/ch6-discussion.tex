@@ -156,6 +156,17 @@ The results are measurements of one tool, on one corpus, with five methods, perf
 the person who wrote the tool. Each of those four choices limits what the figures
 support.
 
+\textbf{No oracle for the scope.} Every method in Chapter~\ref{ch:evaluation} checks a
+node, an edge or a witness. None of them checks the screen set that attribution computes,
+which is the contribution of the thesis. A site attributed to too many screens produces
+edges that the witness check still passes, because the construct really is at that
+location and really does name that target, and the end-to-end oracle only visits URLs and
+so cannot see a source screen that should not have been there. The shell rule is capped at
+\emph{may} where the mounting route is invisible (Section~\ref{sec:implementation}),
+which limits what an over-large scope can claim, but it is a design precaution and not a
+measurement. The scope is therefore the least directly validated part of the analysis, and
+the figures for it rest on the edges it produces agreeing with the other methods.
+
 \textbf{Construct validity.} The conversion ratio divides the constructs witnessed by a
 deterministic edge by all navigation constructs that the independent parser finds in
 non-test source. That denominator over-counts in two ways that both push the ratio down.
@@ -263,17 +274,6 @@ application, while the findings about scale come from applications that have no 
 oracle at all. The results are Angular results. The graph model and the lattice
 do not mention Angular, and Section~\ref{sec:transfer} argues about other routers, but
 that argument is not a measurement.
-
-\textbf{No oracle for the scope.} Every method in Chapter~\ref{ch:evaluation} checks a
-node, an edge or a witness. None of them checks the screen set that attribution computes,
-which is the contribution of the thesis. A site attributed to too many screens produces
-edges that the witness check still passes, because the construct really is at that
-location and really does name that target, and the end-to-end oracle only visits URLs and
-so cannot see a source screen that should not have been there. The shell rule is capped at
-\emph{may} where the mounting route is invisible (Section~\ref{sec:implementation}),
-which limits what an over-large scope can claim, but it is a design precaution and not a
-measurement. The scope is therefore the least directly validated part of the analysis, and
-the figures for it rest on the edges it produces agreeing with the other methods.
 
 \textbf{Oracle independence.} The route parser shares no code with the extractor, which
 makes it independent and says nothing about whether it is right. That independence is also
