@@ -314,7 +314,11 @@ const navigated = new Map()
 if (probeDir) {
   for (const r of rows) {
     const f = path.join(probeDir, `${r.s}.answer.json`)
-    if (!fs.existsSync(f)) continue
+    // Skipping a missing file sent every address of that application into the undecided
+    // bucket, which turned confirmed extractor defects into "no measurement can decide" and
+    // moved four published macros, at exit 0. The sibling generator reading the same files
+    // refuses, and so does this one: --probe none is how a caller says there is no probe.
+    if (!fs.existsSync(f)) throw new Error(`${f} is missing, so every address of ${r.s} would fall to the undecided bucket and the dead-link figures would be measured over a smaller corpus than they claim; run answerability.mjs, or pass --probe none`)
     const answer = JSON.parse(fs.readFileSync(f, 'utf8'))
     if (answer.slug !== r.s) throw new Error(`${r.s}.answer.json reports on ${JSON.stringify(answer.slug)}`)
     for (const row of answer.results ?? []) {

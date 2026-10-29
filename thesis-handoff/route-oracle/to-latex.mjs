@@ -52,13 +52,20 @@ out += `Application & Declared & Nodes & Matched & Coverage & Unmatched & Blind 
 let gN = 0, gX = 0
 for (const r of R) {
   const C = JSON.parse(fs.readFileSync(path.join(rawDir, `${r.slug}.C.json`), 'utf8'))
-  const c = C.comparison || {}
+  const c = requireComparison(r.slug, C)
   const extra = c.extraNodes?.length ?? 0
   gN += c.graphNodes ?? 0; gX += extra
   out += `${NAME[r.slug]} & ${c.declaredScreens ?? '--'} & ${c.graphNodes ?? '--'} & ${c.matched ?? '--'} & ${pct(c.coverage)} & ${extra} & ${C.blindSpots?.length ?? 0} \\\\\n`
 }
 out += `\\midrule\nAll & & ${gN} & & & ${gX} & \\\\\n`
 out += `\\bottomrule\n\\end{tabular}}\n\n`
+
+/** A raw route file with no comparison block zeroed a column and quietly reduced the
+ *  corpus node total, so it is refused: a missing measurement is not a measurement of zero. */
+function requireComparison(slug, C) {
+  if (!C || !C.comparison) throw new Error(`${slug}: its raw route file holds no comparison block, so its nodes would be dropped from the total and its unmatched count printed as 0`)
+  return C.comparison
+}
 
 // ---------------------------------------------------------------- loss breakdown
 const ROWS = [
@@ -70,13 +77,33 @@ const ROWS = [
   ['LAZY_BOUNDARY', 'Lazy boundary'],
   ['CONSTANT_PATH', 'Constant path'],
   ['COMPONENT_UNLINKED', 'Component unlinked'],
-  ['NAMED_OUTLET', 'Named outlet'],
   ['CONSTANT_TARGET', 'Constant target'],
   ['NODE_MISS', 'Node missing, other'],
   ['OTHER', 'Other'],
   null,
+  // Accounted for rather than lost: the destination is one only the run time knows, or the
+  // destination reads but the screen the site fires from does not.
+  ['ACCOUNTED_DYNAMIC', 'Dynamic destination'],
+  ['ACCOUNTED_UNPLACED', 'Source the analysis cannot place'],
+  null,
+  // Outside the denominator. EXCLUDED_NAMED_OUTLET was called NAMED_OUTLET when this table
+  // was written and the row kept the old key, so it printed 0 in all six columns for a class
+  // with real members -- which is how the table came to be short of its own total.
   ['QUERY_ONLY', 'Query only (not a transition)'],
+  ['EXCLUDED_NO_COMMANDS', 'Excluded: names no destination'],
+  ['EXCLUDED_NAMED_OUTLET', 'Excluded: navigates a named outlet'],
 ]
+// The table says it assigns every construct to one outcome, so it is refused unless it does.
+// A row whose key the classifier has renamed prints zero and the remainder goes unaccounted
+// for, which is how 186 constructs went missing from a published table with nothing failing.
+const ROW_KEYS = ROWS.filter(Boolean).map(([k]) => k)
+for (const r of R) {
+  const tally = r.loss?.tally ?? {}
+  const unrowed = Object.keys(tally).filter((k) => !ROW_KEYS.includes(k) && tally[k])
+  if (unrowed.length) throw new Error(`${r.slug}: the loss ledger holds ${unrowed.join(', ')}, which this table has no row for; every construct must appear in exactly one row`)
+  const summed = ROW_KEYS.reduce((a, k) => a + (tally[k] ?? 0), 0)
+  if (summed !== (r.loss?.constructs ?? 0)) throw new Error(`${r.slug}: the rows sum to ${summed} and the table prints ${r.loss?.constructs ?? 0} constructs; the difference is unaccounted for`)
+}
 out += `\\newcommand{\\TabLoss}{%\n\\begin{tabular}{@{}l${'r'.repeat(R.length)}r@{}}\n\\toprule\n`
 out += `Outcome & ${R.map((r) => short[r.slug]).join(' & ')} & Total \\\\\n\\midrule\n`
 for (const row of ROWS) {

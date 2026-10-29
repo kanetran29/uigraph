@@ -75,7 +75,7 @@ console.log('app            conv before -> after     must-tier before -> after  
 for (const r of rows) {
   console.log(`${r.slug.padEnd(14)} ${pct(r.convBefore).replace('\\', '').padStart(6)} -> ${pct(r.convAfter).replace('\\', '').padStart(6)}   ${frac(r.mustBefore).padStart(7)} -> ${frac(r.mustAfter).padEnd(9)}      ${String(r.attrBefore).padStart(4)}  ${String(r.recoveredMust).padStart(4)}/${String(r.recoveredMay).padEnd(4)}           ${r.regressed}        ${JSON.stringify(r.stillLost)}`)
 }
-if (arg('--tex')) fs.writeFileSync(arg('--tex'), tex)
+// held back until every check below has passed; see the single write at the end
 if (arg('--json')) fs.writeFileSync(arg('--json'), JSON.stringify({ before: B.provenance, after: A.provenance, rows }, null, 2))
 
 // Why the remaining attribution losses stay lost (from diagnose-attribution.mjs output).
@@ -96,7 +96,7 @@ const diag = B.results.map((b) => {
 let tex2 = `\\newcommand{\\TabRemaining}{%\n\\begin{tabular}{@{}l${'r'.repeat(B.results.length)}r@{}}\n\\toprule\nReason & ${B.results.map((r) => ({ realworld: 'rw', alfresco: 'alf', ghostfolio: 'gf', k8sdash: 'k8s', bitwarden: 'bw', mifos: 'mif' })[r.slug]).join(' & ')} & Total \\\\\n\\midrule\n`
 for (const [k, label] of DIAG) { const v = diag.map((d) => d[k] || 0); tex2 += `${label} & ${v.join(' & ')} & ${v.reduce((a, b) => a + b, 0)} \\\\\n` }
 tex2 += `\\bottomrule\n\\end{tabular}}\n`
-if (arg('--tex')) fs.appendFileSync(arg('--tex'), tex2)
+// held back until every check below has passed; see the single write at the end
 
 // Which baseline class did each construct that attribution converted come out of? The
 // loss rules assign a construct to one class, so a conversion out of a node class means
@@ -115,13 +115,17 @@ for (const b of B.results) {
   }
 }
 const group = (c) => (ATTR_CLS.includes(c) ? 'attribution' : NODE_CLS.includes(c) ? 'node' : 'other')
+// A conversion out of a class in neither group was printed in no row and counted in no total,
+// while a row labelled "All conversions gained" sat beneath it. The third group is now printed.
+const OTHER_CLS = Object.keys(moves).filter((c) => group(c) === 'other')
 const CLS_LABEL = {
   ATTRIBUTION_SHARED: 'Attribution, shared component', ATTRIBUTION_SERVICE: 'Attribution, service',
   LAZY_BOUNDARY: 'Lazy boundary', CONSTANT_PATH: 'Constant path',
   COMPONENT_UNLINKED: 'Component unlinked', NODE_MISS: 'Node missing', CONSTANT_TARGET: 'Constant target',
+  EXCLUDED_NO_COMMANDS: 'Excluded in the baseline: named no destination',
 }
 let tex3 = `\n\\newcommand{\\TabRecoverySource}{%\n\\begin{tabular}{@{}lrrr@{}}\n\\toprule\nBaseline class of the construct & must & may & total \\\\\n\\midrule\n`
-const gt = { attribution: { must: 0, may: 0 }, node: { must: 0, may: 0 } }
+const gt = { attribution: { must: 0, may: 0 }, node: { must: 0, may: 0 }, other: { must: 0, may: 0 } }
 for (const g of ['attribution', 'node']) {
   for (const [cls, v] of Object.entries(moves).filter(([c]) => group(c) === g).sort((a, b2) => (b2[1].must + b2[1].may) - (a[1].must + a[1].may))) {
     tex3 += `${CLS_LABEL[cls] || cls} & ${v.must} & ${v.may} & ${v.must + v.may} \\\\\n`
@@ -129,11 +133,24 @@ for (const g of ['attribution', 'node']) {
   }
   tex3 += `\\addlinespace\n`
 }
+for (const cls of OTHER_CLS) {
+  const v = moves[cls]
+  tex3 += `${CLS_LABEL[cls] || cls} & ${v.must} & ${v.may} & ${v.must + v.may} \\\\\n`
+  gt.other.must += v.must; gt.other.may += v.may
+}
+if (OTHER_CLS.length) tex3 += `\\addlinespace\n`
 tex3 += `\\midrule\nOut of the attribution classes & ${gt.attribution.must} & ${gt.attribution.may} & ${gt.attribution.must + gt.attribution.may} \\\\\n`
 tex3 += `Out of the node classes & ${gt.node.must} & ${gt.node.may} & ${gt.node.must + gt.node.may} \\\\\n`
-tex3 += `All conversions gained & ${gt.attribution.must + gt.node.must} & ${gt.attribution.may + gt.node.may} & ${gt.attribution.must + gt.node.must + gt.attribution.may + gt.node.may} \\\\\n`
+if (OTHER_CLS.length) tex3 += `Out of the excluded classes & ${gt.other.must} & ${gt.other.may} & ${gt.other.must + gt.other.may} \\\\\n`
+{
+  const m = gt.attribution.must + gt.node.must + gt.other.must
+  const y = gt.attribution.may + gt.node.may + gt.other.may
+  const seen = Object.values(moves).reduce((a, v) => a + v.must + v.may, 0)
+  if (m + y !== seen) throw new Error(`the recovery table prints ${m + y} conversions and the ledger holds ${seen}; a baseline class has no row`)
+  tex3 += `All conversions gained & ${m} & ${y} & ${m + y} \\\\\n`
+}
 tex3 += `\\bottomrule\n\\end{tabular}}\n`
-if (arg('--tex')) fs.appendFileSync(arg('--tex'), tex3)
+// held back until every check below has passed; see the single write at the end
 
 // The inline macros for the figures the chapter states in prose, so no RQ3 number is typed
 // by hand. The closure is asserted here rather than left to the reader: every construct the
@@ -163,8 +180,13 @@ for (const [k, v] of [
   ['AttrRemaining', T.remaining], ['AttrEdgesBefore', T.edgesBefore], ['AttrEdgesAfter', T.edgesAfter],
   ['AttrMustBefore', T.mustBefore], ['AttrMustAfter', T.mustAfter], ['AttrAppsGained', T.gained],
 ]) tex4 += `\\newcommand{\\${k}}{${v}}\n`
-if (arg('--tex')) fs.appendFileSync(arg('--tex'), tex4)
+// held back until every check below has passed; see the single write at the end
 console.log(`\nRQ3: ${recovered} of ${T.lost} recovered (${T.must} must, ${T.may} may), ${T.remaining} with a reason, ${T.regressed} regressed; edges ${T.edgesBefore} -> ${T.edgesAfter}, must ${T.mustBefore} -> ${T.mustAfter}`)
 console.log(`conversions gained, by baseline class: ${JSON.stringify(moves)}`)
 console.log(`  out of attribution classes: ${gt.attribution.must} must, ${gt.attribution.may} may`)
 console.log(`  out of node classes:        ${gt.node.must} must, ${gt.node.may} may`)
+
+// Everything is written in one go, after the closure assertion above. Writing each table as it
+// was built meant the refusal fired only once the file had already been replaced by the output
+// that failed it, which left no good file on disk and a partial one in its place.
+if (arg('--tex')) fs.writeFileSync(arg('--tex'), tex + tex2 + tex3 + tex4)
