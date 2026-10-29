@@ -678,6 +678,54 @@ external evidence for one half of the must-tier property --- that no node is min
 the application does not mount --- and it is evidence the two static readers could not produce,
 because an address both of them place at the wrong prefix is an address they agree on.
 
+That evidence is bounded by what a census keyed on addresses can represent, and the bound
+should be stated rather than inferred from the table. An address is counted as mounted when
+the configuration names it as a literal pattern and places a component there on the primary
+outlet. \ProbeUnaddressableScreens{} route entries in the corpus place a component and are
+counted in neither column, because they have no such pattern:
+\ProbeMatcherScreens{} decides its address through a \texttt{UrlMatcher}, and
+\ProbeOutletScreens{} sit on a named outlet, where the address is \texttt{(name:path)} and
+not a path. Table~\ref{tab:probe-closure} shows every route entry in the bucket it falls
+in, and the generator refuses to write either table unless the buckets sum to the route
+total and unless every exclusion that drops a component-bearing entry is named --- so a
+future exclusion cannot quietly swallow a screen. The matcher case is the sharper of the
+two: a navigation to \path{/admin/users} in the running application is answered by that
+component, so the mounted column is a lower bound by at least one address, and how many
+addresses the matcher claims is not published here, because reading its body by hand is
+not a measurement. Of the \ProbeOutletScreens{} outlet entries, the alfresco viewer's are
+the ones Section~\ref{sec:ownership} declares outside the node set; whether any URL reaches
+the rest, which are auxiliary regions co-mounted with a primary screen, this evaluation
+does not establish.
+
+\begin{table}[t]\footnotesize
+\caption{Every route entry of Table~\ref{tab:probe}, in the one bucket it falls in.
+\emph{One address} counts entries that a surviving entry at the same address already
+answers for. \emph{Named outlet} and \emph{Matcher} are the two exclusions that drop a
+component the application places --- \ProbeOutletScreens{} and \ProbeMatcherScreens{}
+entries, \ProbeUnaddressableScreens{} in all --- and the rest place no component at any
+address. The generator refuses to write this table or Table~\ref{tab:probe} unless the
+buckets sum to the route total and every exclusion that drops a component-bearing entry is
+named here.}
+\label{tab:probe-closure}
+\TabProbeClosure
+\end{table}
+
+Two further limits belong with the \ProbeInvented{} figure, because it is the strongest
+claim in this chapter and should not be read as more than it is. The first is that
+``mounted'' is a property of the configuration and not of what a user sees: some addresses
+the extractor mints hold a component that renders only application chrome, and the
+address's own screen is reached by a redirect or by an empty-path child. The probe measures
+two such addresses directly --- in k8s dashboard the root redirects, and in bitwarden the
+root places chrome and no screen of its own --- and the same shape elsewhere in the corpus
+is counted as a loss for one application and as agreement for another, decided by what the
+extractor happened to mint there. The second is that where two routes sit at one address
+and a \texttt{canMatch} guard chooses between them, no static reader can say which answers:
+bitwarden's \path{/vault} is such a pair, the census keeps the first-declared component and
+the running router activates the other. Neither limit moves a published number --- the
+census counts addresses and both members of that pair are leaves --- and both are reasons
+to read Table~\ref{tab:probe} as a statement about the route configuration rather than
+about the rendered interface.
+
 It was not so when the measurement was first taken. The comparison then returned two addresses in
 alfresco, \path{/view/:nodeId} and \path{/search-libraries/view/:nodeId}, and they were a blind
 spot the two static readers held in common: both assembled the routes beneath a named outlet
