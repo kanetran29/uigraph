@@ -24,6 +24,10 @@ framework: it navigates a running application to a list of addresses and records
 recogniser made of each one, from the `RoutesRecognized` event, which fires before any guard runs
 --- so a guard that sends every visitor to a sign-in page does not hide what was matched.
 
+`run-all.mjs` runs both for every application, from the `answerAddresses` list `apps.json` holds
+per application, and refuses a run in which any application's measurement is missing or in which
+no live `Router` was found. Either can be run alone:
+
 ```bash
 node answerability.mjs --slug mifos --dist <built-app> --addresses /,/home,/collections \
   --out results/mifos.answer.json

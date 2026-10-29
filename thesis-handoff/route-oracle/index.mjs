@@ -360,6 +360,28 @@ function mountingCheck() {
       want: '/home[SCREEN] /a[LAZY_UNRESOLVED] /ghost[SCREEN] | blind 1',
     },
     {
+      name: 'a holder that does not say which of its tables is mounted ends the search',
+      // Hopping past a file that holds tables and names none would mount a further, unrelated
+      // table under this prefix: here the module also imports a tableless one with a real routing
+      // module behind it, which the search would reach at the next hop. The stop is what makes
+      // the subtree a declared loss instead of a wrong address.
+      files: {
+        'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", lazy('f', './f/f.module', 'FModule')),
+        'app/f/f.module.ts': "import { Two } from './two';\nimport { SharedModule } from './shared.module';\nexport class FModule { two = Two; shared = SharedModule; }\n",
+        'app/f/two.ts': `${head}export const A: Routes = [{ path: 'a', component: A1 }];\nexport const B: Routes = [{ path: 'b', component: B1 }];\nexport const Two = A;\n`,
+        'app/f/shared.module.ts': "import { R } from './deeper-routing.module';\nexport class SharedModule { r = R; }\n",
+        'app/f/deeper-routing.module.ts': table("{ path: 'deep', component: D }"),
+      },
+      want: '/home[SCREEN] /f[LAZY_UNRESOLVED] /deep[SCREEN] /a[SCREEN] /b[SCREEN] | blind 1',
+    },
+    {
+      name: 'a default binding beside a type-only named one is still a module edge',
+      // The default names a value, so TypeScript keeps the module: reading the declaration as
+      // erased dropped a real edge and left the table it leads to for the root scan.
+      files: typeOnly("import Routing, { type Shape } from './shape-routing.module';"),
+      want: '/home[SCREEN] /a[PREFIX] /a/ghost[SCREEN] | blind 0',
+    },
+    {
       name: 'a type-only re-export is not a module edge',
       files: typeOnly("export type { Shape } from './shape-routing.module';"),
       want: '/home[SCREEN] /a[LAZY_UNRESOLVED] /ghost[SCREEN] | blind 1',
@@ -1008,10 +1030,14 @@ function projectRootOf(file) {
  * Following one let a lazy module reach a routing module it has no relation to, adopt its table
  * and mount it at a prefix the framework mounts nothing at, with no blind spot recorded. A
  * declaration with no named bindings (`export * from`, a default or namespace import) is a value
- * edge, so the emptiness of the list is never read as "all of them are types".
+ * edge, so the emptiness of the list is never read as "all of them are types" --- and neither is a
+ * NON-empty list standing beside one: `import Routing, { type Shape } from './x'` names a value in
+ * its default binding, TypeScript keeps the module, and reading the declaration as erased dropped
+ * a real module edge and left the table it leads to for the root scan to mint unprefixed.
  */
 function isTypeOnly(decl) {
   if (decl.isTypeOnly()) return true
+  if (decl.getDefaultImport?.() || decl.getNamespaceImport?.()) return false
   const named = decl.getNamedImports?.() ?? decl.getNamedExports()
   return named.length > 0 && named.every((n) => n.isTypeOnly())
 }

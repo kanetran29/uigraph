@@ -103,9 +103,12 @@ if (process.argv.includes('--self-check')) {
   let undecided = 0
   let cmpChecked = 0
   let cmpFailed = 0
+  const absent = []
   for (const slug of ['realworld', 'alfresco', 'ghostfolio', 'k8sdash', 'bitwarden', 'mifos']) {
     let answer
-    try { answer = JSON.parse(readFileSync(`${dir}/${slug}.answer.json`, 'utf8')) } catch { continue }
+    // A measurement that is absent is not a measurement that agreed. Skipping it in silence let a
+    // run in which five of six applications never booted print a full pass at exit 0.
+    try { answer = JSON.parse(readFileSync(`${dir}/${slug}.answer.json`, 'utf8')) } catch { absent.push(slug); continue }
     const probe = JSON.parse(readFileSync(`${dir}/${slug}.probe.json`, 'utf8'))
     // The comparison does not call frameworkAnswer: it decides for itself which of the
     // configuration's entries answer an address, and publishes the result as the list of
@@ -147,6 +150,10 @@ if (process.argv.includes('--self-check')) {
   }
   console.log(`framework-answer self-check: ${checked - failed}/${checked} addresses agree with the navigation` + (undecided > 0 ? `, ${undecided} left undecided by a UrlMatcher` : ''))
   if (cmpChecked > 0) console.log(`comparison self-check: ${cmpChecked - cmpFailed}/${cmpChecked} addresses the comparison holds agree with the navigation`)
+  if (absent.length > 0) {
+    console.error(`  no answerability measurement for ${absent.join(', ')}`)
+    process.exit(1)
+  }
   if (checked === 0) {
     console.error('  no answerability measurement found: run answerability.mjs first')
     process.exit(2)
