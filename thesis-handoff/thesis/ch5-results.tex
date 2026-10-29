@@ -54,8 +54,8 @@ that no node sits at an address the running framework mounts nothing at. That wa
 of the extractor this evaluation began with, which read one application as a single node for
 the \RoundTwoEarlierOracleGhostfolioDeclared{} screens it declares and the largest as under
 a tenth of its screens; Section~\ref{sec:res-round2} reports what had to be repaired to
-reach the figures in this table, and Appendix~\ref{app:validation} the handful of addresses
-the two readers still disagree about.
+reach the figures in this table, and Appendix~\ref{app:readers} the handful of
+addresses the two readers still disagree about.
 
 Completeness here is a claim about the screens the readers can \emph{see}, and the blind-spot
 column bounds it: a route entry neither reader can resolve to an address is outside the
@@ -148,14 +148,14 @@ component that is only used inside screens which have no node is counted as attr
 although attribution alone cannot recover it. In the other direction, a construct whose
 own route component has no node is counted as a node defect, yet attribution can still
 reach it through a shell or subtree scope and convert it.
-The 468 attribution constructs are 28\% of all lost constructs, and they are therefore
+The \AttrLost{} constructs the attribution classes hold are therefore
 neither a floor nor a ceiling on what scope attribution recovers.
 Section~\ref{sec:res-after} measures both directions.
 
-Table~\ref{tab:oracles} reports the witness check and the end-to-end oracle. On the must
-tier, 86 of 87 edges are clean. The one failure is a must edge whose witness navigates to
-\texttt{/profile/:username} while the edge targets \texttt{/profile}; it violates
-Claim~\ref{claim:must}.
+Table~\ref{tab:oracles} reports the witness check and the end-to-end oracle on this
+baseline. Section~\ref{sec:res-round2} gives the must tier its own treatment, because what
+the check reads and how an edge cited by several constructs is judged both changed in the
+course of this work, and the figure is not comparable across those changes.
 
 \begin{table}[t]\small
 \caption{Results of the witness check and the end-to-end oracle, baseline. Mutation is
@@ -166,9 +166,10 @@ summary is written by hand from the harness output rather than generated.}
 \toprule
 Method & Result & $n$ \\
 \midrule
-Witness check, must tier & 86 of 87 clean; one wrong target in realworld. & 87 \\
-End-to-end oracle, alfresco & 9 of 14 visited URLs have a node; one negative test
-excluded. Two of the five misses are named-outlet URLs. & 14 \\
+Witness check, must tier & \RoundTwoMustClean{} clean, judged at every source location each
+edge cites. & \RoundTwoMustEdges{} \\
+End-to-end oracle, alfresco & \EtoERecallAlfresco{} of the visited URLs have a node; one
+negative test excluded. & \EtoERowsAlfresco{} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -179,8 +180,10 @@ excluded. Two of the five misses are named-outlet URLs. & 14 \\
 The analysis under evaluation is the one Chapter~\ref{ch:analysis} states. Every
 navigation site is anchored at a \emph{scope}, the set of screens from which it can fire,
 so a scope is an element of the powerset lattice $\mathcal{P}(S)$ ordered by inclusion
-with union as join (Section~\ref{sec:scope}). A site written inside one screen's own
-component has that screen as its scope. A site written in a component that several screens
+with union as join (Section~\ref{sec:scope}). A site written inside the component of a leaf
+route has that one screen as its scope; written in the component of a route that has
+children, it has $\mathit{subtree}(r)$, because that component stays mounted while any
+descendant is active --- the shell rule of Section~\ref{sec:attribution}. A site written in a component that several screens
 render, or in a service that several components call, has no single owning screen, and its
 scope is the join of the scopes of the places that reach it; because a service may call
 another service, the result is a fixpoint over the component nesting relation, the call
@@ -235,10 +238,13 @@ The witness check also records the edges outside the must tier. Chapter~\ref{ch:
 excludes them from the precision claim, because target agreement is not a meaningful test
 for an edge the extractor produced by over-approximation, and the counts are given here so
 that the exclusion is visible rather than assumed. On the four applications whose per-edge
-records were kept, 179 of 201 non-must edges fail the target comparison before attribution
-and 553 of 599 after it. Mifos accounts for 177 and 529 of those, which is the single
-over-approximated call site of Section~\ref{sec:corrections} seen one edge at a time. The
-growth follows the growth of the may tier and says nothing about the must tier.
+records are kept, the great majority of non-must edges do not agree with their witness's
+target, before attribution and after it, and almost all of that is one over-approximated
+call site in the largest application seen one edge at a time
+(Section~\ref{sec:corrections}). The count grows with the may tier and says nothing about
+the must tier, which is why Chapter~\ref{ch:analysis} excludes it from the precision
+claim and why this paragraph gives no ratio for it: a ratio would invite exactly the
+comparison the exclusion forbids.
 
 The anchored representation was checked on the same graphs.
 Claim~\ref{claim:expansion} requires the expansion of the anchored edge set to equal the
@@ -247,24 +253,40 @@ expansion query and the library's own materialisation function, because that fun
 a loop over the query and the two can only disagree about which nodes they iterate. The
 anchored edges are therefore materialised independently, by walking the edge list and
 fanning each scope-anchored edge over the screens its anchor stands for, with its own
-deduplication. On realworld the attributed graph stores 50 edges against two scope nodes;
-the per-screen query yields 97 edges and the independent materialisation yields the same
-97, and the two sets are identical. What the check exercises is the member walk and the
-deduplication key; the definition of a scope's membership is shared by both paths and is
-not tested by it. On alfresco the attributed graph has no scope node, so
-the check holds trivially and says nothing. The unit tests of the attribution pass cover
-the same property on fixtures. The claim is therefore supported on one application of the
-corpus and on fixtures, not across the corpus, and the 50 against 97 is also the only
-measurement of what the anchored representation saves.
+deduplication.
 
-Across the corpus, attribution converts 81 of the 468 constructs that the loss rules
-assign to it, 38 of them into must edges and 43 into may edges. It also converts 43
-constructs that the rules assign to node defects, 41 of those into must edges.
-Table~\ref{tab:recovery-source} gives the breakdown by the class each construct held in
-the baseline. Deterministic conversions over the whole corpus rise from 96 to 175, so of
-the 79 constructs gained on the must tier, 38 come from the attribution classes and 41
-from the node classes. The classes are not independent, and the attribution class is not
-the ceiling that Section~\ref{sec:res-defects} might suggest.
+The two agree on every application the check was run on, which
+Table~\ref{tab:expansion} reports: the check refuses to write that table at all if the two
+sets differ anywhere. Those ratios are also the only measurement of what the representation
+saves, and they are the reason it exists --- on \ExpansionWidest{} the materialised edge set
+is \ExpansionWidestRatio{} times the size of what is stored. What the check exercises is the member walk and the deduplication
+key; the definition of a scope's membership is shared by both paths and is not tested by it,
+so the claim is supported on \ExpansionApps{} applications and on fixtures rather than
+proved. On two of
+the three the library's own materialisation function returns a larger set than either, which
+is the iteration difference the previous sentence predicts and not a disagreement about the
+edge set.
+
+\begin{table}[t]\small
+\caption{The anchored edge set against its expansion. \emph{Anchored} is what the graph
+stores, \emph{expanded} what the per-screen query yields, and \emph{independent} a second
+materialisation written for this check. Claim~\ref{claim:expansion} requires the last two to
+be equal; the check refuses to emit this table if they differ on any application.}
+\label{tab:expansion}
+\TabExpansion
+\end{table}
+
+Table~\ref{tab:recovery-source} gives the same recovery by the class each construct held in
+the baseline, and on this instrument it says something the earlier one did not. Every
+conversion comes out of the two attribution classes: \AttrRecoveredMust{} onto the must tier
+and \AttrRecoveredMay{} onto the may tier, with none out of the node classes at all. On the
+extractor this evaluation began with, a majority of the deterministic gain came out of
+constructs the loss rules had assigned to node defects, which was evidence that the classes
+were not independent and that the attribution class was not a ceiling. That evidence is gone,
+and for a plain reason: the node classes are now empty (Table~\ref{tab:loss}), so there is
+nothing in them left to convert. The classes are still not independent --- a construct whose
+target screen has no node is an attribution loss the node level caused --- but on a corpus
+whose nodes are complete the question stops being measurable from this table.
 
 \begin{table}[t]\small
 \caption{Where the converted constructs came from. Each row is the class the loss rules
@@ -366,11 +388,18 @@ those six the change appeared in the witness set rather than the edge set, becau
 second identical link in the same template still produces the edge. That is the
 behaviour the graph should have, and it is the reason detection is judged on witnesses as
 well as edges. The operator found no candidates in alfresco, which binds
-\texttt{[routerLink]} instead of writing a literal attribute, and in bitwarden its eight
-sampled candidates were all excluded. Retargeting a \texttt{navigate} call was detected
-in seven of its eight scored mutants. The exception is in bitwarden, where the mutant
-added the expected edge to the new target but removed no edge to the old one, because the
-baseline had not resolved that call site to the old target in the first place.
+\texttt{[routerLink]} instead of writing a literal attribute; in bitwarden all eight of its
+sampled candidates are detected, where on the graph without attribution they could not be
+scored at all, because none of the links in the application shell produces a baseline edge.
+
+Retargeting a \texttt{navigate} call is the weakest operator and the one whose failures are
+most informative. All of them are in the two applications where several screens reach the
+same address: the mutant removes the edges to the old target, as predicted, and adds none to
+the new one, because the new target is an address those screens already reach and the edge
+the mutant would add is one the graph already holds. The harness excludes such a mutant
+where it can tell in advance (Section~\ref{sec:corrections}); where it cannot, the outcome
+is recorded as a change the graph made but not the predicted one, rather than counted as a
+detection.
 
 \begin{table}[t]\small
 \caption{Detection rate per mutation operator on the attributed graph, as detected over
@@ -393,14 +422,20 @@ three operators that can fail are detected in \MutFallibleDetected{} of their
 \MutFallibleScored{} scored mutants. On alfresco the attributed graph carries one
 edge, so its rate is a node-level result and not a statement about transitions.
 
-\MutNoResponse{} mutants produced no change in the graph at all, and every one of them is
-a guard removal. That class was larger before the guard a wrapper function returns was read
-(Section~\ref{sec:res-round2}), and larger again before guards on empty-path routes
-reached the edges entering their screens. A second method confirms the defect directly.
-In realworld both children of the \texttt{editor} route declare
-\texttt{canActivate: [requireAuth]}, one under the path \texttt{':slug'} and one under
-the empty path. In the graph the edge entering \texttt{/editor/:slug} carries the guard
-\texttt{requireAuth} and the edge entering \texttt{/editor} carries no guard at all.
+\MutNoResponse{} mutants produced no change in the graph at all. Four of the five are guard
+removals and the fifth is a retargeted \texttt{navigate}, so this is no longer a class with
+one cause, and saying it was would overstate what the operator shows. Two of the four guard
+misses are guards the reader now names and could not before --- they are written as calls,
+\texttt{deepLinkGuard()} and \texttt{canAccessFeature(\ldots)} --- which means removing them
+changes the guard text the graph records without changing any edge, and the operator checks
+edges. The other two are guards on routes whose path is the empty string, which was a defect
+of the extractor when RQ4 was first run and is repaired: in realworld both children of the
+\texttt{editor} route declare \texttt{canActivate: [requireAuth]}, one under
+\texttt{':slug'} and one under the empty path, and on this instrument both entering edges
+carry the guard. What the operator still cannot see is a guard whose removal leaves the edge
+set identical, which is a limit of judging change at the edge rather than a defect of the
+graph.
+
 The defect class \emph{guards unreliable in both directions} of
 Section~\ref{sec:res-defects} therefore has a second confirmation specific to this case.
 The other two failures are guards whose enclosing route path the harness could not
@@ -431,11 +466,14 @@ application it appeared in, and each cause that turned out to be the extractor's
 fixed. The question asked of each one was the same, and it is the question the method
 exists to make askable --- is the navigation unreadable, or was it merely unread?
 
-Two things must be said about the figures before they are read. They are measured on a
-later commit of the extractor than the one the rest of this chapter uses, so they do not
-revise Table~\ref{tab:conversion}; the pinned results stand as reported, reproducible from
-the tag recorded with them. And where the oracle shared a blind spot with the extractor it
-too was corrected. Those corrections are versioned in the harness manifest, which records
+Two things must be said about the figures before they are read. They are the same figures
+the rest of this chapter reports: when the repairs changed what the extractor recovers, the
+whole evaluation was re-run on the repaired commit rather than reported beside the earlier
+one, so Table~\ref{tab:conversion} and everything after it describe the instrument this
+section arrives at. What the earlier instrument measured is quoted here, where the
+comparison is the point, and the provenance line of each generated table names the commit it
+came from. And where the oracle shared a blind spot with the extractor it too was
+corrected. Those corrections are versioned in the harness manifest, which records
 what each round changed and why. Every after figure in this section was produced by
 rerunning the whole measurement chain at version \HarnessVersion{}. The before figures were
 not: they were measured by the oracle as it stood when the round began, and reproducing
@@ -577,39 +615,53 @@ it.}
 \TabRoundTwoSoundness
 \end{table}
 
-Across the corpus \RoundTwoMustClean{} must edges are clean, so
-\RoundTwoMustViolations{} violate the property. The interesting part of that result is not
-the numerator but the denominator: the tier holds \RoundTwoMustClean{} edges in a graph of
-\RoundTwoEdges{}, and an earlier state of this extractor published a tier more than twenty
-times larger with twenty-six violations in it. Both numbers moved for one reason.
+Of the \RoundTwoMustEdges{} must edges in the corpus,
+\RoundTwoMustCleanCount{} pass the witness check and \RoundTwoMustViolations{} violate the
+property. The tier is small --- \RoundTwoMustEdges{} edges in a graph of \RoundTwoEdges{} ---
+and an earlier state of this extractor published one more than fifty times larger with
+twenty-six violations in it. The difference is three corrections, and they are worth
+separating because each one was hidden by the one before.
 
-One application routes every one of its feature tables through a wrapper function that
-returns a route carrying an authentication guard. The guard set of a screen was assembled
-from the route chain the walk descends, and a route a function \emph{returns} is not on
-that chain, so the guard was not read and the edges below it were published as
-unconditional. Reading it moved almost the whole of that application's must tier onto the
-may tier, and it took the twenty-six violations with it. None of those edges became a
-correct target. They stopped claiming to be deterministic, which they had never been: the
-witness check still records a finding at every one of those sites, now as an
-over-approximation, for which Section~\ref{sec:protocol} does not claim target agreement.
-What the repair removed was a false claim of determinism, not a wrong address.
+The first is a guard the walk never reached. One application routes every feature table
+through a wrapper function that returns a route carrying an authentication guard, and the
+guard set of a screen was assembled from the route chain the walk descends; a route a
+function \emph{returns} is not on that chain, so the guard went unread and everything below
+it was published as unconditional.
 
-That is also why the tier that remains is so small, and its shape is worth stating plainly.
-Of the \RoundTwoMustClean{} deterministic edges in the corpus, not one passes a guard, and
-every one arrives at one of five addresses: the application root, the sign-in screen, the
-single sign-on screen, the sign-up screen, and the screen that finishes a sign-up. In an
-application that guards its interior there is almost no unconditional transition to find,
-so the deterministic tier of this corpus is very nearly the set of transitions into the
-screens a user reaches before authenticating. A reader who expected static extraction to
-recover a large deterministic graph should take this as the answer to that expectation
-rather than as a defect of the analysis.
+The second is smaller in the source and wider in effect. A \texttt{canActivate} element that
+is a \emph{call} rather than a name was not recognised, and an unrecognised element was
+skipped, so a route guarded only by a guard factory read as a route with no guard at all.
+bitwarden guards its root with \texttt{redirectGuard()} and fourteen deterministic edges
+pointed at that root. The rule that replaces it is the one that generalises beyond this
+corpus: an element the reader cannot name gates the edge anyway, because refusing to read a
+guard must never be the reason an edge is called deterministic.
+
+The third was invisible until the check itself was corrected. The extractor files the second
+and later constructs that yield an identical edge as further witnesses of it, and the witness
+check opened only the first, so the tier was being judged on about two thirds of the evidence
+it rests on. Judging every cited site found four edges in bitwarden whose later citations
+targeted \path{/vault}, an address that application declares no route for: the literal matches
+nothing, the catch-all redirects to the root, the site is correctly held at may --- and then
+merged into a must edge the root already had, inheriting its modality. An edge now takes the
+weakest modality over every construct that cites it, which is what an edge citing several
+constructs means. All four moved to the may tier, which is why the property holds over the
+figures in this table and did not over the figures of the round before it.
+
+The shape of the tier that survives is worth stating plainly. Not one of its edges passes a
+guard, and they arrive at a handful of addresses: the application root, the sign-in screen,
+the single sign-on screen, the sign-up screen and the screen that finishes a sign-up. In an
+application that guards its interior there is almost no unconditional transition to find, so
+the deterministic tier of this corpus is very nearly the set of transitions into the screens
+a user reaches before authenticating. A reader who expected static extraction to recover a
+large deterministic graph should take that as the answer to the expectation rather than as a
+defect of the analysis.
 
 The cost is paid in the measure RQ1 is defined on, and it is paid in full. Must conversion
-over the corpus is \RoundTwoMustConv{}, below what the same measure read on this corpus
-before the guard was read at all, because the earlier figure counted guarded transitions as
-deterministic ones. What this section reports is therefore a smaller claim that survives its
-own test in place of a larger claim that did not, and the smaller claim is the one the rest
-of the thesis rests on.
+over the corpus is \RoundTwoMustConv{}, below what the same measure read before any of the
+three corrections, because the earlier figure counted guarded transitions as deterministic
+ones and counted some of them on evidence it had not read. What this section reports is a
+smaller claim that survives a stricter test, in place of a larger claim that did not survive
+a weaker one.
 
 Read over the whole graph rather than the must tier, only \RoundTwoGraphClean{} of edges are
 clean, because \RoundTwoOverApprox{} of them are over-approximations for which the check

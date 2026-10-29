@@ -4,30 +4,26 @@
 \section{Key findings}
 \label{sec:findings}
 
-Static extraction of a transition graph from Angular source fails in two different
-places, and which of the two dominates depends on the size of the application. On
-realworld and alfresco, the two smallest applications by construct count, node
-extraction recovers all or nearly all of the screens that the route configuration
-declares (Table~\ref{tab:coverage}). What is lost there is lost at the edge: the
-navigation sites exist in the source, the screens they would connect exist in the graph,
-and the extractor fails to connect them because it cannot decide which screens a site
-belongs to. On ghostfolio
-and mifos, the two largest applications by construct count, the loss starts one level
-earlier. A route
-whose path is a constant reference, and a route table behind a lazy boundary that the
-extractor does not cross, produce no node at all, and every navigation site that
-belongs to such a screen is lost together with every site that points at it. In two
-applications the baseline produces no transitions at all
-(Table~\ref{tab:conversion}): k8s dashboard yields dozens of nodes with no edges
-between them, and ghostfolio collapses to a graph in which none of its declared screens
-has a node (Table~\ref{tab:coverage}).
+Static extraction of a transition graph from Angular source fails in two different places,
+and the first of them turned out to be the tool's rather than the method's. Node extraction
+is complete on all six applications of the corpus (Table~\ref{tab:coverage}): every screen
+the route configuration declares has a node, and the runtime method confirms that no node
+sits at an address the framework mounts nothing at. That was not so when this work began.
+Two defects of the extractor accounted for most of the corpus then --- a route whose path is
+a constant reference, and a route table behind a lazy boundary it did not cross, each
+producing no node at all, so that every navigation site belonging to such a screen was lost
+together with every site pointing at it. Section~\ref{sec:res-round2} reports what repairing
+them took; on the instrument every figure in this thesis is measured on, that class of loss
+is empty.
 
-Both of those are the tool's, and Section~\ref{sec:res-round2} reports what happened when
-they were repaired: the constant reference and the lazy boundary are readable, and
-ghostfolio, k8s dashboard and mifos each end with a node for every declared screen. The
-structural point survives the repair --- attribution still cannot draw an edge into a
-screen that has no node --- but the figures above measure a particular extractor, not a
-limit of the approach, and should be read that way.
+What remains is lost at the edge, and it is the same everywhere: the navigation sites exist
+in the source, the screens they would connect exist in the graph, and the extractor cannot
+decide which screens a site belongs to. That is the loss class scope attribution addresses,
+and it is the largest in every application of the corpus (Table~\ref{tab:loss}). The
+structural relation between the two levels survives the repair --- attribution still cannot
+draw an edge into a screen that has no node, which is why the chapter reports the two levels
+separately --- but the ranking between them is a fact about an extractor and not a limit of
+the approach, and should be read that way.
 
 The two failures cap each other, and that is the structural result of the measurement.
 Attribution cannot draw an edge into a screen that has no node, so node extraction
@@ -38,17 +34,16 @@ own. An evaluation that reported only one of the two would have described a tool
 works better than it does, which is why Chapter~\ref{ch:results} reports node coverage
 beside the conversion ratio instead of the ratio alone.
 
-The ranking of the defect classes depends on which unit the corpus is counted in.
-Attribution is the largest class in most of the applications
-(Table~\ref{tab:loss}), and node defects dominate the rest and also the corpus total,
-because the largest application contributes most of the constructs and loses them at
-the node level. Both views are
-correct and they answer different questions. The per-application view says what a
-developer would hit on a given codebase, and the corpus view says where the engineering
-effort pays off across codebases. Reporting only the total would have hidden the
-attribution problem that most applications show, and reporting only the per-application
-ranking would have hidden that one large application can dominate everything that is
-aggregated.
+The ranking of the defect classes used to depend on which unit the corpus is counted in, and
+it no longer does. Attribution is the largest class both per application and over the corpus
+total (Table~\ref{tab:loss}); on the extractor this evaluation began with, node defects
+dominated the total because the largest application contributed most of the constructs and
+lost them at the node level. That the two views once disagreed is still worth recording,
+because it is the general hazard: one large application can dominate anything that is
+aggregated, so the per-application view says what a developer would hit on a given codebase
+and the corpus view says where engineering effort pays off across codebases. Reporting only
+the total would have hidden the attribution problem that most applications show, and
+reporting only the per-application ranking would have hidden the weight of the largest.
 
 The answer to RQ3 has to be read against what the loss rules can and cannot delimit.
 Because a lost construct is assigned to the first class that applies
@@ -213,13 +208,17 @@ One construct in a component that many screens render yields one anchored edge t
 expands to many, which is why the ratio counts constructs and not edges
 (Section~\ref{sec:corrections}). In the other direction several constructs can yield one
 edge, and the extractor records the extra ones as merged witnesses so that each is
-traceable. The conversion ratio credits a construct cited by any witness of an edge,
-primary or merged, while the witness check re-opens only the primary witness of each
-edge. In the attributed graph of realworld, 28 of the witness citations are merged and 10
-of those sit on must edges, so a construct can count towards the conversion ratio on
-evidence that the precision check never examines. The ratio and the precision figure are
-therefore computed over different witness sets, and the merged citations carry no
-precision evidence at all.
+traceable. The conversion ratio credits a construct cited by any witness of an edge, primary
+or merged, and for most of this work the witness check re-opened only the primary witness, so
+a construct could count towards the ratio on evidence the precision check never examined. On
+realworld rather more than a third of the citations in the attributed graph are merged ones,
+and the proportion is higher on the larger applications, so the gap was not a technicality:
+the check reported a clean deterministic tier over about two thirds of the evidence that tier
+rests on, and four wrong targets in bitwarden sat in the part it did not read
+(Section~\ref{sec:res-round2}). The check now judges every location an edge cites and an
+edge takes the weakest modality over them, so the two figures are computed over the same
+witness set. What remains is that the ratio and the precision figure still answer different
+questions, and the chapter reports them separately for that reason rather than this one.
 
 Merging also costs guard information. An edge holds one guard, so when several constructs
 under different conditions produce one edge, the edge can represent the condition of at

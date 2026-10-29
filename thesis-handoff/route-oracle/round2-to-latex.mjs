@@ -213,6 +213,10 @@ mac('RoundTwoExcludedOutlet', exclBy('EXCLUDED_NAMED_OUTLET'))
 mac('RoundTwoExcludedNoCommands', exclBy('EXCLUDED_NO_COMMANDS'))
 mac('RoundTwoFullNodes', rows.filter((r) => r.c1.comparison.matched === r.c1.comparison.declaredScreens).length)
 mac('RoundTwoMustClean', `${mC}/${mE}`)
+// The ratio string above cannot stand where a sentence needs a number: it was substituted
+// into "the tier holds ... edges" in four places and the PDF read "45/45 edges".
+mac('RoundTwoMustEdges', mE)
+mac('RoundTwoMustCleanCount', mC)
 mac('RoundTwoMustViolations', mE - mC)
 mac('RoundTwoMustConv', pc(mConv, rawAll))
 mac('RoundTwoZeroMustApps', rows.filter((r) => r.b1 && r.b1.mustEdges === 0).length)

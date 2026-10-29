@@ -164,7 +164,10 @@ transitions cannot be determined statically in general. The thesis therefore sta
 conditional soundness property over a declared scope, tests it mechanically against the
 source at every deterministic edge it produces, and measures recall empirically. The
 property is not proved. Chapter~\ref{ch:results} tests it at every deterministic edge the
-analysis produces: \RoundTwoMustClean{} pass and \RoundTwoMustViolations{} violate it. That
+analysis produces: of \RoundTwoMustEdges{} such edges, \RoundTwoMustCleanCount{} pass and
+\RoundTwoMustViolations{} violate it. Reaching that took three corrections to how a guard is
+read and how an edge that several constructs cite is judged, each of which the figure before
+it had hidden; Chapter~\ref{ch:results} reports them rather than only their result. That
 tier is small, and Section~\ref{sec:res-round2} shows why: an application that guards its
 interior has almost no unconditional transition, so the deterministic tier of this corpus
 is very nearly the set of transitions into the screens a user reaches before

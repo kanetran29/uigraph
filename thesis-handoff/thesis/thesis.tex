@@ -26,6 +26,7 @@
 \input{generated-node-audit}
 \input{generated-round2}
 \input{generated-probe}
+\input{generated-expansion}
 \input{generated-plots}
 \input{figures/fig-plots}
 
@@ -72,7 +73,8 @@ deterministic transitions; before the defects this thesis identifies were repair
 the six yielded a list of routes with no transitions at all.
 
 Every lost construct is assigned to one defect class. Attribution is the largest
-class in four of the six applications. In a web application, a navigation site
+class in every application of the corpus once the
+node-level defects this thesis identifies are repaired. In a web application, a navigation site
 frequently has no single owning screen: it may be located in a shared component, in
 an injected service, or in a route guard. The thesis formulates attribution as a
 dataflow analysis over a lattice of screen sets, computed as a fixpoint over component
