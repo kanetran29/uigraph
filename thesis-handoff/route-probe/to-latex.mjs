@@ -12,7 +12,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { frameworkAnswer } from './framework-answer.mjs'
+import { frameworkAnswer, matches } from './framework-answer.mjs'
 
 const HERE = fileURLToPath(new URL('.', import.meta.url))
 const LABEL = {
@@ -158,14 +158,23 @@ const macros = {
  * scored, because a declined answer is neither agreement nor disagreement.
  */
 function answerMacros() {
-  const out = { ProbeAnswerApps: 0, ProbeAnswerAddresses: 0, ProbeAnswerChecked: 0, ProbeAnswerAgreed: 0, ProbeAnswerUndecided: 0 }
+  const out = { ProbeAnswerApps: 0, ProbeAnswerAddresses: 0, ProbeAnswerChecked: 0, ProbeAnswerAgreed: 0, ProbeAnswerUndecided: 0, ProbeCmpChecked: 0, ProbeCmpAgreed: 0 }
+  let missing = 0
   for (const r of rows) {
     const f = join(a.results, `${r.slug}.answer.json`)
-    if (!existsSync(f)) continue
+    if (!existsSync(f)) { missing += 1; continue }
     const answer = JSON.parse(readFileSync(f, 'utf8'))
     out.ProbeAnswerApps += 1
+    const served = Array.isArray(r.cmp.frameworkAddresses) ? r.cmp.frameworkAddresses : null
     for (const row of answer.results) {
       out.ProbeAnswerAddresses += 1
+      // The comparison's own predicate, held against the same navigations on the two
+      // implications that bind it: a screen it must hold, a catch-all it must not.
+      const seenKind = !row.recognized || row.catchAll ? 'catch-all' : row.redirected ? 'redirect' : row.placesComponent ? 'screen' : 'no-screen'
+      if (served && (seenKind === 'screen' || seenKind === 'catch-all') && frameworkAnswer(r.probe.routes, row.target) !== 'undecided') {
+        out.ProbeCmpChecked += 1
+        if (served.some((pattern) => matches(pattern, row.target)) === (seenKind === 'screen')) out.ProbeCmpAgreed += 1
+      }
       const got = frameworkAnswer(r.probe.routes, row.target)
       if (got === 'undecided') { out.ProbeAnswerUndecided += 1; continue }
       out.ProbeAnswerChecked += 1
@@ -173,6 +182,10 @@ function answerMacros() {
       if (want.includes(got)) out.ProbeAnswerAgreed += 1
     }
   }
+  // An application with no measurement is not one whose classification agreed. Printing an
+  // agreement over whatever files happen to be present would let the chapter cite a check that was
+  // not run, so a run with no measurement at all stops instead of emitting a pass over nothing.
+  if (out.ProbeAnswerApps === 0) throw new Error(`no answerability measurement in ${a.results}: ${missing} application(s) have none; run answerability.mjs`)
   return out
 }
 

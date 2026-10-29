@@ -486,6 +486,23 @@ function mountingCheck() {
       },
       want: '/home[SCREEN] /[AUX_OUTLET] /view/:nodeId[AUX_OUTLET] /view/:nodeId/pane[AUX_OUTLET] | blind 0',
     },
+    {
+      name: 'a nested table inside an arm the build does not take is declared once, not three times',
+      // mifos's users module. The subtree is declared at the `children` that chooses between two
+      // tables with a constant the sources do not fix; the nested arrays inside both arms were
+      // then declared twice more, which put a third of its published blind spots on a reason
+      // that is false of them.
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('u', './u/u.module', 'UModule')),
+        'app/u/u.module.ts': table("{ path: '', children: selected }").replace(
+          "import { RouterModule, Routes } from '@angular/router';",
+          "import { RouterModule, Routes } from '@angular/router';\nimport { flags } from '../flags';\nconst a: Routes = [{ path: 'x', children: [{ path: 'deep', component: D }] }];\nconst b: Routes = [{ path: 'y', children: [{ path: 'deeper', component: D }] }];\nconst selected = flags.get() ? a : b;",
+        ),
+        'app/flags.ts': 'export const flags = { get: () => Math.random() > 0.5 };\n',
+      },
+      want: '/u[PREFIX] /u[PREFIX] | blind 1',
+      reasons: ['children not resolvable to a route array'],
+    },
   ]
   runFixtures(cases, 'mounting-rule')
 }
@@ -961,6 +978,7 @@ const rootArrays = rootRegisteredArrays()
 // name, a table handed to a helper call -- so the root scan, which finds an array by its
 // declaration, must not mint them unprefixed as well.
 const prefixedArrays = new Set()
+const prefixedThisPass = new Set()
 // Arrays kept out of the root scan with nothing left to declare about them: the arm of a
 // build-constant conditional, which the build mounts NOWHERE, and the table behind a spread, whose
 // loss the spread's own blind spot already states.
@@ -1424,6 +1442,8 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false, unde
 // are not, so a lazily loaded table is walked under its real prefix and not also from ''.
 // (Harness 1.0.0 walked every table from '' as well, which double-counted lazy screens.)
 for (const sf of files) for (const arr of routeArraysIn(sf)) walkArray(arr, '', sf, 0)
+// The claim sets are NOT cleared between the passes: the root scan below has to know what a
+// prefix carries before it visits the file, and pass 1 is where that is learnt.
 routes.length = 0; blindSpots.length = 0; visitedArrays.clear(); walkedFiles.clear(); walkedArrays.clear()
 for (const sf of files) {
   // A `paths` alias root can be a SIBLING application -- bitwarden's apps/web resolves its
@@ -1462,7 +1482,26 @@ for (const f of lazyTargets) {
 for (const arr of prefixedArrays) {
   const f = arr.getSourceFile().getFilePath()
   if (walkedArrays.has(arr) || rootArrays.has(arr) || !f.startsWith(appDir + path.sep)) continue
+  // An array nested inside one the build mounts nowhere is covered by that array's own
+  // declaration, and declaring it again says a second table was dropped where one was. mifos
+  // chooses between two tables with a constant the sources do not fix: the subtree is declared
+  // once at the `children` that selects, and the nested arrays inside both arms were then
+  // declared twice more, under a reason that is false of them and that reached the corpus table
+  // as a ground no application in it carries.
+  if (insideUnmounted(arr)) continue
   blindSpots.push({ reason: 'route table carried under a prefix but reached from no root', file: path.relative(appDir, f), at: `${path.relative(appDir, f)}:${arr.getStartLineNumber()}`, prefix: '' })
+}
+
+/**
+ * Does this array lie inside one the build mounts nowhere --- an arm of a conditional it does not
+ * take, or a source a spread this reader does not follow carries? Whatever happens to such an
+ * array is already covered by the declaration made for the array that holds it.
+ */
+function insideUnmounted(arr) {
+  for (let n = arr.getParent(); n; n = n.getParent()) {
+    if (n.getKind() === SyntaxKind.ArrayLiteralExpression && offRootArrays.has(n)) return true
+  }
+  return false
 }
 
 // ---------------------------------------------------------------- compare
