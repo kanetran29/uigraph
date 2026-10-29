@@ -1858,6 +1858,37 @@ export const routes: Routes = [
   })
 })
 
+describe('a redirect on a named outlet', () => {
+  it('registers no redirect at the primary address', () => {
+    // `{ path: 'old', outlet: 'aux', redirectTo }` is reached as (aux:old) and never as /old, so
+    // a link to /old is answered by the catch-all and not by this redirect. The redirect was
+    // registered before the outlet was read, so /old entered the redirect table at the primary
+    // address: the link drew a must edge to the redirect's destination, and following it
+    // swallowed the dead-link note the site deserves. An outlet is inherited, so the same holds
+    // for a `redirectTo` anywhere below a named-outlet route.
+    const fixture = (route: string) =>
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'new', component: A },
+  ${route},
+]`,
+        '/app/a.component.ts': C('<a routerLink="/old">o</a>'),
+      })
+    for (const route of [
+      `{ path: 'old', redirectTo: '/new', outlet: 'aux' }`,
+      `{ path: '', outlet: 'viewer', children: [{ path: 'old', redirectTo: '/new' }] }`,
+    ]) {
+      const { graph, soundiness } = extractGraph(fixture(route), '/app')
+      expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/new'])
+      expect(graph.edges.filter((e) => e.modality === 'must')).toHaveLength(0)
+      expect(soundiness.filter((n) => n.kind === 'unresolved-target').length).toBeGreaterThan(0)
+    }
+  })
+})
+
 describe('a table behind a module that holds none', () => {
   it('reaches it, because a tableless module is a waypoint and not a dead end', () => {
     // The ownership tests are about adopting a table. Asking them of a module that holds none
@@ -2164,7 +2195,9 @@ export const routes: Routes = [
       '/app',
     )
     expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
-    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([
+      '1 route(s) whose outlet could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds',
+    ])
   })
 })
 
@@ -2254,5 +2287,164 @@ export class Route {
     expect(edge).toBeDefined()
     expect(edge?.modality).toBe('may')
     expect(edge?.guard).toContain('AuthenticationGuard')
+  })
+})
+
+describe('a root registration inside an IIFE', () => {
+  it('still rescues its table from the prefix that also carries it', () => {
+    // ghostfolio registers the only table it has from inside `(async () => { ... })()`
+    // (apps/client/src/main.ts), and the name test refused it, because an IIFE is called by no
+    // name. The refusal costs ghostfolio nothing, whose table no spread carries; written the way
+    // below -- a shell embedding the root table under its own prefix -- it dropped the root
+    // mount of every address in that table, in silence, while the same application written with
+    // a module-scope registration kept it.
+    const { graph } = extractGraph(
+      inMemory({
+        '/main.ts': `import { bootstrapApplication } from '@angular/platform-browser'
+import { importProvidersFrom } from '@angular/core'
+import { RouterModule } from '@angular/router'
+import { X } from './a.component'
+import { routes } from './app.routes'
+;(async () => {
+  await bootstrapApplication(X, { providers: [importProvidersFrom(RouterModule.forRoot(routes, { useHash: true }))] })
+})()`,
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { X } from './a.component'\nexport const routes: Routes = [{ path: 'home', component: X }]`,
+        '/shell.routes.ts': `import type { Routes } from '@angular/router'\nimport { X } from './a.component'\nimport { routes } from './app.routes'\nexport const shell: Routes = [{ path: 'shell', component: X, children: [...routes] }]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/shell', '/shell/home'])
+  })
+})
+
+describe('a provideRouter in a lazy module reached through a barrel', () => {
+  it('is no root registration, whichever file of the module the loader names', () => {
+    // `import('./feature')` resolves to the barrel, so the module whose providers hold the
+    // registration is the file BEHIND it, and the lazy-target test, asked of the barrel's own
+    // path, answered false: the table was minted at /rules, an address the application mounts
+    // nothing at, while /feature/rules was lost to a declared blind spot. Angular reads ROUTES
+    // off the loaded module's injector, so the prefix that loads it is the only mount it has.
+    for (const decorator of [
+      '@NgModule({ imports: [RouterModule.forChild(RULES)], providers: [provideRouter(RULES)] })',
+      '@NgModule({ providers: [provideRouter(RULES)] })',
+    ]) {
+      const { graph } = extractGraph(
+        inMemory({
+          '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'feature', loadChildren: () => import('./feature').then((m) => m.FeatureModule) },
+]`,
+          '/app/feature/index.ts': `export * from './feature.module'`,
+          '/app/feature/feature.module.ts': `import { provideRouter, RouterModule } from '@angular/router'
+import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const RULES: Routes = [{ path: 'rules', component: A }]
+${decorator}
+export class FeatureModule {}`,
+          '/app/a.component.ts': C('<p>a</p>'),
+        }),
+        '/app',
+      )
+      expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/feature/rules', '/home'])
+    }
+  })
+})
+describe('a `children` written in ES2015 shorthand', () => {
+  it('mounts the table under its prefix instead of at the root', () => {
+    // `propNamed` returns a shorthand, but the walk and the lazy-target pre-pass both tested for a
+    // PropertyAssignment and dropped it: the named table fell through to the root scan, which
+    // minted /dash at an address the application mounts nothing at, and /admin/dash was lost with
+    // nothing declared. `toEqual` over the whole node list pins both halves at once.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { children } from './admin.routes'\nexport const routes: Routes = [{ path: 'admin', children }]`,
+        '/admin.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const children: Routes = [{ path: 'dash', component: A }]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.id)).toEqual(['n_admin_dash'])
+  })
+
+  it('still mounts the one shorthand site a wrapper already handled', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { KIDS } from './admin.routes'\nimport { section } from './shell'\nexport const routes: Routes = [section(KIDS)]`,
+        '/shell.ts': `import type { Routes } from '@angular/router'\nexport function section(children: Routes) { return { path: 'admin', children } }`,
+        '/admin.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const KIDS: Routes = [{ path: 'dash', component: A }]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.id)).toEqual(['n_admin_dash'])
+  })
+})
+describe('a wrapper call that reaches a table already on the descent', () => {
+  it.each([
+    ['an element written as a call', `children: [withShell(routes)]`],
+    ['a spread of a call', `children: [...sub(routes)]`],
+  ])('declares the cut when %s reaches it', (_name, children) => {
+    // The spread-of-a-name branch declared its cut; these two cut the recursion and said nothing,
+    // so the subtree was lost while the route set still read as complete.
+    const project = inMemory({
+      '/app/app.module.ts': `import { RouterModule } from '@angular/router'
+import { routes } from './app.routes'
+@NgModule({ imports: [RouterModule.forRoot(routes)] })
+export class AppModule {}`,
+      '/app/a.component.ts': C('<p>a</p>'),
+      '/app/shell.ts': `import type { Routes } from '@angular/router'
+export function withShell(children: Routes) { return { path: '', children } }
+export function sub(r: Routes) { return r }`,
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { withShell, sub } from './shell'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'embed', ${children} }]`,
+    })
+    const { graph, soundiness } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+})
+const app = (shell: string, call: string) =>
+  inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { MAIN, AUX } from './feature.routes'
+import { withShell } from './shell'
+export const routes: Routes = [{ path: 'home', component: A }, ${call}]`,
+    '/app/feature.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const MAIN: Routes = [{ path: 'main', component: A }]\nexport const AUX: Routes = [{ path: 'aux', component: A }]`,
+    '/app/shell.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\n${shell}`,
+    '/app/a.component.ts': C('<p>a</p>'),
+  })
+
+describe('a wrapper that files a table other than the one it is given', () => {
+  it.each([
+    ['children names a module constant', `const STATIC: Routes = [{ path: 'dash', component: A }]\nexport function withShell(inner: Routes) { return { path: 'app', children: STATIC } }`],
+    ['children is shorthand for one', `const children: Routes = [{ path: 'dash', component: A }]\nexport function withShell(inner: Routes) { return { path: 'app', children } }`],
+    ['a literal files the argument deeper', `export function withShell(inner: Routes) { return { path: 'app', children: [{ path: 'inner', component: A, children: inner }] } }`],
+  ])('declares the subtree unread when %s', (_name, shell) => {
+    const { graph, soundiness } = extractGraph(app(shell, 'withShell(MAIN)'), '/app')
+    expect(graph.nodes.map((n) => n.route)).not.toContain('/app/main')
+    expect(graph.nodes.map((n) => n.route)).not.toContain('/admin/main')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('mounts only the table the children parameter names when a wrapper is given two', () => {
+    const { graph } = extractGraph(
+      app(`export function withShell(a: Routes, b: Routes) { return { path: 'x', children: a } }`, 'withShell(MAIN, AUX)'),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/x/main'])
+  })
+
+  it('still mounts the argument where children IS the parameter', () => {
+    const { graph } = extractGraph(
+      app(`export function withShell(inner: Routes) { return { path: 'app', component: A, children: inner } }`, 'withShell(MAIN)'),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/app/main', '/home'])
   })
 })

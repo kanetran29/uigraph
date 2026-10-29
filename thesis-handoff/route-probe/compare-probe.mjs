@@ -9,6 +9,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
+import { norm, routeBuckets } from './buckets.mjs'
 
 /** Reads the flags this script takes into a plain object. */
 function args(argv) {
@@ -18,47 +19,6 @@ function args(argv) {
     const key = argv[i].slice(2)
     const next = argv[i + 1]
     out[key] = next && !next.startsWith('--') ? next : true
-  }
-  return out
-}
-
-/**
- * Normalises an address so the three readings can be compared as strings. The
- * extractor writes Angular's catch-all as a single star and the framework holds
- * the two the router actually declares, so both are brought to one spelling.
- */
-function norm(p) {
-  if (typeof p !== 'string') return null
-  const s = `/${p}`.replace(/\/+/g, '/').replace(/\/$/, '')
-  if (s === '') return '/'
-  return s.replace(/\/\*$/, '/**')
-}
-
-/**
- * The addresses the framework mounts a component at. A route that only
- * redirects places no screen, and one on a named outlet is not reached at the
- * primary address, so neither counts.
- */
-function probeScreens(routes) {
-  const out = new Map()
-  for (const r of routes) {
-    if (r.redirectTo) continue
-    if (r.outlet && r.outlet !== 'primary') continue
-    // Angular standardises a route that has children and an outlet by giving it an empty outlet
-    // component of its own. That component renders nothing of the application, so an address whose
-    // only component is that one places no screen.
-    if (r.component === 'ɵEmptyOutletComponent') continue
-    // A route whose address comes from a UrlMatcher, and anything beneath it, has no address this
-    // probe can read. Filing it under its parent would claim the parent answers a URL it does not.
-    if (r.underMatcher) continue
-    if (!r.component && !r.hasLoadComponent) continue
-    const p = norm(r.fullPath)
-    const kept = out.get(p)
-    // Several routes can sit at one address: a prefix carrying a layout, and an empty-path child
-    // of it carrying the screen. Angular answers the URL because of the second. Keeping whichever
-    // came first kept the prefix, and the address was then filed as one that answers nothing.
-    const isLeaf = !r.hasChildren && !r.hasLoadChildren
-    if (!kept || (isLeaf && (kept.hasChildren || kept.hasLoadChildren))) out.set(p, r)
   }
   return out
 }
@@ -172,7 +132,7 @@ if (!Array.isArray(probe.lazyFailures)) {
 }
 const oracle = JSON.parse(readFileSync(a.oracle, 'utf8'))
 
-const framework = probeScreens(probe.routes)
+const framework = routeBuckets(probe.routes).screens
 const { leaves, shells } = splitShells(framework)
 const extractor = extractorScreens(a.db)
 const declared = oracleScreens(oracle)
