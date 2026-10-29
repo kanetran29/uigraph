@@ -9,10 +9,17 @@
     "oracleDeclared": 610,
     "invented": 0,
     "missed": 0,
-    "sharedBlindSpot": 0
+    "missedPrefixOnly": 3,
+    "sharedBlindSpot": 0,
+    "matcherRoutes": 0
   },
   "invented": [],
   "missed": [],
+  "missedPrefixOnly": [
+    "/",
+    "/collections",
+    "/remittances"
+  ],
   "sharedBlindSpot": [],
   "oracleOnly": [],
   "frameworkOnlyVsOracle": [
@@ -20,7 +27,9 @@
   ],
   "lazyFailures": [],
   "routeSet": {
-    "declares": false,
-    "details": []
+    "declares": true,
+    "details": [
+      "1 lazy subtree(s) could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds"
+    ]
   }
 }

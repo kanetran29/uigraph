@@ -9,12 +9,15 @@
     "oracleDeclared": 98,
     "invented": 0,
     "missed": 1,
-    "sharedBlindSpot": 0
+    "missedPrefixOnly": 0,
+    "sharedBlindSpot": 0,
+    "matcherRoutes": 0
   },
   "invented": [],
   "missed": [
     "/vault"
   ],
+  "missedPrefixOnly": [],
   "sharedBlindSpot": [],
   "oracleOnly": [],
   "frameworkOnlyVsOracle": [

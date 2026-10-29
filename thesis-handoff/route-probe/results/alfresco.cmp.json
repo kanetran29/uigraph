@@ -9,7 +9,9 @@
     "oracleDeclared": 27,
     "invented": 2,
     "missed": 3,
-    "sharedBlindSpot": 2
+    "missedPrefixOnly": 1,
+    "sharedBlindSpot": 2,
+    "matcherRoutes": 0
   },
   "invented": [
     "/view/:nodeId",
@@ -19,6 +21,9 @@
     "/view/authentication-confirmation",
     "/rules",
     "/login"
+  ],
+  "missedPrefixOnly": [
+    "/about"
   ],
   "sharedBlindSpot": [
     "/view/:nodeId",
