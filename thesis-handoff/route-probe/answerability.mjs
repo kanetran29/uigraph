@@ -134,7 +134,10 @@ const FIND_ROUTER = () => {
 const NAVIGATE = async (target) => {
   const router = globalThis.__uigraphRouter
   if (!router) return { target, error: 'router-not-found' }
-  const same = (a, b) => String(a || '').split('?')[0].replace(/\/+$/, '') === String(b || '').replace(/\/+$/, '')
+  // Stripped on BOTH sides: a target carrying a query matched nothing on the left and was
+  // reported as a redirect to itself.
+  const bare = (u) => String(u || '').split('#')[0].split('?')[0].replace(/\/+$/, '')
+  const same = (a, b) => bare(a) === bare(b)
   const chainOf = (snapshot) => {
     const chain = []
     let n = snapshot

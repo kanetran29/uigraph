@@ -357,17 +357,51 @@ export function constantForName(sf: SourceFile, text: string): string[] | string
 export function builderReturn(expr: Node | undefined): Node | undefined {
   if (!expr) return undefined
   let fn: Node | undefined
-  if (Node.isIdentifier(expr)) fn = declaredInitializer(expr)
+  if (Node.isIdentifier(expr)) fn = declaredInitializer(expr) ?? functionNamed(expr)
   else if (Node.isPropertyAccessExpression(expr)) {
     const obj = objectLiteralOf(expr.getExpression())
     const prop = obj?.getProperty(expr.getName())
-    fn = prop && Node.isPropertyAssignment(prop) ? prop.getInitializer() : undefined
+    fn = prop && Node.isPropertyAssignment(prop) ? prop.getInitializer() : staticMethod(expr)
   }
-  if (!fn || !(Node.isArrowFunction(fn) || Node.isFunctionExpression(fn))) return undefined
+  if (!fn) return undefined
+  if (Node.isMethodDeclaration(fn) || Node.isFunctionDeclaration(fn)) {
+    const block = fn.getBody()
+    if (!block || !Node.isBlock(block)) return undefined
+    const rets = block.getDescendantsOfKind(SyntaxKind.ReturnStatement)
+    return rets.length === 1 ? rets[0]?.getExpression() : undefined
+  }
+  if (!(Node.isArrowFunction(fn) || Node.isFunctionExpression(fn))) return undefined
   const body = fn.getBody()
   if (!Node.isBlock(body)) return body
   const returns = body.getDescendantsOfKind(SyntaxKind.ReturnStatement)
   return returns.length === 1 ? returns[0]?.getExpression() : undefined
+}
+
+/** The function declaration a name refers to, for a helper written `function f() {}`. */
+function functionNamed(id: Node): Node | undefined {
+  const sym = id.getSymbol()
+  for (const decl of sym?.getAliasedSymbol()?.getDeclarations() ?? sym?.getDeclarations() ?? []) {
+    if (Node.isFunctionDeclaration(decl)) return decl
+  }
+  return undefined
+}
+
+/**
+ * The static method a `Class.name` access refers to. A route-table wrapper is as often written as
+ * a static method as as an arrow (mifos declares `Route.withShell`), and a reader that cannot
+ * follow one cannot tell what prefix the wrapper mounts its argument under.
+ */
+function staticMethod(access: Node): Node | undefined {
+  if (!Node.isPropertyAccessExpression(access)) return undefined
+  const target = access.getExpression()
+  if (!Node.isIdentifier(target)) return undefined
+  const sym = target.getSymbol()
+  for (const decl of sym?.getAliasedSymbol()?.getDeclarations() ?? sym?.getDeclarations() ?? []) {
+    if (!Node.isClassDeclaration(decl)) continue
+    const method = decl.getStaticMethod(access.getName())
+    if (method) return method
+  }
+  return undefined
 }
 
 /** Where a bare name can come from: a field of the component, a module constant, or an import. */

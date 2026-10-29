@@ -224,7 +224,13 @@ for (const r of rows) mac(`RoundTwoRoutes${MACRO_TAG[r.s]}`, `${r.c1.blindSpots.
  */
 const probeDir = (() => {
   const i = process.argv.indexOf('--probe')
-  return i > -1 ? process.argv[i + 1] : null
+  if (i === -1) return null
+  const next = process.argv[i + 1]
+  // `--probe` with nothing after it was read as no probe directory at all, which reinstated every
+  // caveat and emptied the census at exit 0 --- the one failure in this script that publishes
+  // nothing where a finding belongs and says so in no way a reader would notice.
+  if (!next || next.startsWith('--')) throw new Error('--probe needs a directory')
+  return next
 })()
 /**
  * The three readings the licence is bounded by, every one of them required by name. The licence
@@ -261,6 +267,10 @@ if (probeDir) {
     const f = path.join(probeDir, `${r.s}.probe.json`)
     if (!fs.existsSync(f)) continue
     const probe = JSON.parse(fs.readFileSync(f, 'utf8'))
+    // The slug is checked for the same reason the licence checks it: a route configuration read
+    // out of another application's measurement is attributed evidence, and the census would then
+    // accuse one application against another's route set.
+    if (probe.slug !== r.s) throw new Error(`${r.s}.probe.json reports on ${JSON.stringify(probe.slug)}, so it cannot decide ${r.s}'s candidates`)
     if (probe.ok && Array.isArray(probe.routes)) frameworkRoutes.set(r.s, probe.routes)
   }
 }
@@ -454,7 +464,7 @@ function linkBaseOf(app, at) {
 // disagreed about which sites were in which group, and the thesis printed a subtraction that
 // did not close. Every member of the group lands in exactly one of the four counters below.
 const NO_ROUTE_GROUP = /^(target-names-no-declared-route|unmapped-target|relative-target-unresolved|target-under-unreadable-subtree)$/
-let noNode = 0, noRoute = 0, deadFromReasons = 0, relativeUnresolved = 0, underUnreadable = 0, caveatedReasons = 0
+let noNode = 0, noRoute = 0, deadFromReasons = 0, relativeUnresolved = 0, underUnreadable = 0, caveatedReasons = 0, outsideDirReasons = 0
 const deadSites = []
 for (const r of rows) {
   // An application whose own route set the extractor could not read in full cannot support
@@ -470,6 +480,7 @@ for (const r of rows) {
       noRoute++
       if (x.reason === 'relative-target-unresolved') relativeUnresolved++
       else if (x.reason === 'target-under-unreadable-subtree') underUnreadable++
+      else if (outsideMeasuredDir(x.at ?? '')) outsideDirReasons++
       else if (!complete && frameworkVerdict(r.s, targetOf(x)) !== 'catch-all') caveatedReasons++
       else { deadFromReasons++; deadSites.push({ app: r.s, at: x.at, target: targetOf(x) }) }
     }
@@ -523,14 +534,29 @@ for (const r of rows) for (const n of r.notes ?? []) {
     // set is decided, where it can be, by the framework's own configuration instead of by a
     // statement about the whole set: the census asks only whether THIS target is served.
     const caveated = /could not be read/.test(n.detail ?? '') && !confirmedComplete.has(r.s)
-    const fw = caveated ? frameworkVerdict(r.s, target) : null
-    const bucket = caveated
-      ? fw === 'catch-all' ? 'dead'
-        : fw === 'screen' ? 'framework-mounts-it'
-          : fw === 'no-screen' ? 'framework-prefix'
-            : fw === 'redirect' ? 'framework-redirects'
-              : 'caveated'
+    // A site that names no address is in neither arm's question. Asking the framework first put
+    // eighteen relative and empty targets into the caveated bucket, which the chapter explains as
+    // an application no measurement could reach --- a reason that is false of every one of them.
+    const fw = caveated && verdict !== 'not-a-path' && verdict !== 'pattern-only' ? frameworkVerdict(r.s, target) : null
+    // A site outside the directory the measurement is scoped to is not published. The route set
+    // it would be accused against is the measured application's, and a file that climbs out of
+    // that directory belongs to another one: 54 of these are bitwarden's browser extension, whose
+    // own router declares the very addresses the census called dead, and which the measured
+    // application never loads --- the extension's source enters the program only because the
+    // monorepo declares a `paths` alias for it. The measurement establishes neither that the
+    // application loads the file nor that the route set compared against is the one the file's
+    // own application mounts, and an accusation needs both.
+    const bucket = outsideMeasuredDir(`${n.file}`) ? 'outside-measured-dir'
       : verdict === 'not-a-path' ? notAPathKind(target)
+      // A leading hole names a family of URLs and no address, so there is nothing to put to the
+      // configuration; it belongs in the bucket that says so, on either arm.
+      : verdict === 'pattern-only' ? 'pattern-only'
+      : caveated
+        ? fw === 'catch-all' ? 'dead'
+          : fw === 'screen' ? 'framework-mounts-it'
+            : fw === 'no-screen' ? 'framework-prefix'
+              : fw === 'redirect' ? 'framework-redirects'
+                : 'caveated'
         : verdict === 'undeclared' ? 'dead'
           : verdict
     wildSites.set(`${r.s}:${n.file}:${n.loc?.line}:${target ?? ''}`, { bucket, app: r.s, at: `${n.file}:${n.loc?.line}`, target, placedKind: bucket === 'declared-not-a-screen' ? placedRoute(r.c1, target)?.kind : null, emptyChild: bucket === 'declared-not-a-screen' && prefixHasEmptyChild(r.c1, target) })
@@ -568,6 +594,12 @@ mac('RoundTwoUnresolvedTarget', unres)
 // for those the target was unreadable for the extractor's own reason, so nothing can be
 // claimed about whether the application declares such a route.
 mac('RoundTwoWildcardCaveated', wildOf('caveated').length)
+// The sites the census does not publish because they sit outside the directory measured, and the
+// directories they sit in, named from the records rather than from memory.
+const outsideSites = [...wildOf('outside-measured-dir'), ...[]]
+mac('RoundTwoOutsideDirSites', outsideSites.length + outsideDirReasons)
+mac('RoundTwoOutsideDirWhere', [...new Set(outsideSites.map((x) => (/^((?:\.\.\/)+[^/]+)/.exec(x.at) ?? [])[1]).filter(Boolean))].sort().join(', ') || 'none')
+mac('RoundTwoOutsideDirApps', new Set(outsideSites.map((x) => x.app)).size)
 // The three ways the framework's own configuration answers a caveated site, which is what lets
 // such a site be decided at all: it serves a screen there, it matches the address with a route
 // that places only chrome, or it sends the visitor somewhere else. A site the framework answers

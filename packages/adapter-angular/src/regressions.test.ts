@@ -1910,3 +1910,154 @@ export class QRoutingModule {}`,
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
   })
 })
+
+describe('what the fourth panel found in the mounting rule', () => {
+  it('does not elect a menu config in the lazy target file by its shape', () => {
+    // The file the route names was given a weaker test than a file reached by a hop: any
+    // route-SHAPED array in it was mounted. A menu carrying `path` was elected, the real routing
+    // module was left to the root scan, and the graph held /daily instead of /reports/daily with
+    // no note at all.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'reports', loadChildren: () => import('./reports/reports.module').then((m) => m.ReportsModule) },
+]`,
+        '/app/reports/reports.module.ts': `import { ReportsRoutingModule } from './reports-routing.module'\nexport const MENU = [{ path: 'tiles', label: 'Tiles' }]\n@NgModule({ imports: [ReportsRoutingModule] })\nexport class ReportsModule {}`,
+        '/app/reports/reports-routing.module.ts': `import type { Routes } from '@angular/router'
+import { RouterModule } from '@angular/router'
+import { A } from '../a.component'
+const routes: Routes = [{ path: 'daily', component: A }]
+@NgModule({ imports: [RouterModule.forChild(routes)] })
+export class ReportsRoutingModule {}`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/reports/daily'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('declares no loss when forChild is given a table from another file', () => {
+    // The ordinary NgModule shape in Angular's own documentation. The walk read the table and
+    // placed its routes, and the per-file comparison then reported the file as never reached,
+    // which is a lower-bound note where nothing was lost --- and a false note of that kind
+    // suppresses every dead-link finding the application carries.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'users', loadChildren: () => import('./users/users.module').then((m) => m.UsersModule) },
+]`,
+        '/app/users/users.module.ts': `import { RouterModule } from '@angular/router'\nimport { USERS } from './users.routes'\n@NgModule({ imports: [RouterModule.forChild(USERS)] })\nexport class UsersModule {}`,
+        '/app/users/users.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from '../a.component'\nexport const USERS: Routes = [{ path: 'list', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/users/list'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('claims both arms of a conditional handed to a registration call', () => {
+    // The arms were claimed at a spread and at a named `children` and nowhere else, so an arm
+    // the build does not take, selected inside `forChild`, was left to the root scan and minted
+    // unprefixed --- the very address the rule was written to prevent.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'users', loadChildren: () => import('./users/users.module').then((m) => m.UsersModule) },
+]`,
+        '/app/flags.ts': `export const flags = { modern: true }`,
+        '/app/users/users.module.ts': `import { RouterModule } from '@angular/router'
+import { flags } from '../flags'
+import { MODERN } from './modern.routes'
+import { LEGACY } from './legacy.routes'
+const selected = flags.modern ? MODERN : LEGACY
+@NgModule({ imports: [RouterModule.forChild(selected)] })
+export class UsersModule {}`,
+        '/app/users/modern.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from '../a.component'\nexport const MODERN: Routes = [{ path: 'modern', component: A }]`,
+        '/app/users/legacy.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from '../a.component'\nexport const LEGACY: Routes = [{ path: 'legacy', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/users/modern'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('keeps the root mount of a table a spread elsewhere also carries', () => {
+    // A root-registered array is mounted at the empty path whatever else carries it. The root
+    // rescue was tested after the spread test rather than before it, so an application that
+    // embeds its own shell table under a prefix lost both of its real root addresses, silently.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { SHELL } from './shell.routes'\n@NgModule({ imports: [RouterModule.forRoot(SHELL)] })\nexport class AppModule {}`,
+        '/app/shell.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const SHELL: Routes = [{ path: 'home', component: A }, { path: 'about', component: A }]`,
+        '/app/embed/embed.module.ts': `import { RouterModule } from '@angular/router'\nimport { EMBED } from './embed.routes'\n@NgModule({ imports: [RouterModule.forChild(EMBED)] })\nexport class EmbedModule {}`,
+        '/app/embed/embed.routes.ts': `import type { Routes } from '@angular/router'\nimport { SHELL } from '../shell.routes'\nexport const EMBED: Routes = [{ path: 'embed', children: [...SHELL] }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/about', '/embed/about', '/embed/home', '/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('does not move a subtree a helper call places under a segment it cannot read', () => {
+    // The arguments of a call were mounted at the CALL's prefix, on the reading that a wrapper
+    // adds no segment. mifos's wrapper adds none, so the corpus never showed the cost: a wrapper
+    // that takes its path as a parameter moved its whole subtree to /dash, an address the
+    // application mounts nothing at, and said nothing.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { withPrefix } from './helpers'
+import { V2 } from './v2.routes'
+export const routes: Routes = [withPrefix('v2', V2)]`,
+        '/app/helpers.ts': `import type { Route, Routes } from '@angular/router'\nexport function withPrefix(p: string, children: Routes): Route { return { path: p, children } }`,
+        '/app/v2.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const V2: Routes = [{ path: 'dash', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual([])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+})
+
+describe('when the member a route names and a forChild in the same file disagree', () => {
+  it('mounts the member, because that is what the route asked for', () => {
+    // A library file can export a route table AND declare an NgModule that registers a different
+    // one. A `loadChildren` that names the table names the table: the module is not what it
+    // loaded. Reversing the two rules kept every fixture green, which is why this one exists ---
+    // the precedence is the first rule the mounting repair rests on and nothing pinned it.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'nodes', loadChildren: () => import('./rules/rules.module').then((m) => m.RULES) },
+]`,
+        '/app/rules/rules.module.ts': `import type { Routes } from '@angular/router'
+import { RouterModule } from '@angular/router'
+import { A } from '../a.component'
+export const RULES: Routes = [{ path: 'rules', component: A }]
+const standalone: Routes = [{ path: 'other', component: A }]
+@NgModule({ imports: [RouterModule.forChild(standalone)] })
+export class RulesModule {}`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/nodes/rules'])
+  })
+})
