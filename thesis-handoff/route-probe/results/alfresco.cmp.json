@@ -1,0 +1,44 @@
+{
+  "slug": "alfresco",
+  "counts": {
+    "probeRoutes": 123,
+    "frameworkScreens": 30,
+    "frameworkLeaves": 27,
+    "frameworkShells": 3,
+    "extractorNodes": 28,
+    "oracleDeclared": 27,
+    "invented": 2,
+    "missed": 3,
+    "sharedBlindSpot": 2
+  },
+  "invented": [
+    "/view/:nodeId",
+    "/search-libraries/view/:nodeId"
+  ],
+  "missed": [
+    "/view/authentication-confirmation",
+    "/rules",
+    "/login"
+  ],
+  "sharedBlindSpot": [
+    "/view/:nodeId",
+    "/search-libraries/view/:nodeId"
+  ],
+  "oracleOnly": [
+    "/view/:nodeId",
+    "/search-libraries/view/:nodeId"
+  ],
+  "frameworkOnlyVsOracle": [
+    "/view/authentication-confirmation",
+    "/rules",
+    "/login",
+    "/**"
+  ],
+  "lazyFailures": [],
+  "routeSet": {
+    "declares": true,
+    "details": [
+      "10 spread route source(s) could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds"
+    ]
+  }
+}

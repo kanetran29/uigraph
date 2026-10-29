@@ -6,10 +6,10 @@
 Application & Before & After & Declared & Blind spots \\
 \midrule
 realworld & 100.0\,\% (10/10) & 100.0\,\% (10/10) & 10 & 0 \\
-alfresco & 96.0\,\% (24/25) & 100.0\,\% (27/27) & 25$\to$27 & 0 \\
-ghostfolio & 0.0\,\% (0/84) & 100.0\,\% (84/84) & 84 & 1 \\
+alfresco & 96.0\,\% (24/25) & 100.0\,\% (27/27) & 25$\to$27 & 10 \\
+ghostfolio & 0.0\,\% (0/84) & 100.0\,\% (84/84) & 84 & 2 \\
 k8s dashboard & 100.0\,\% (2/2) & 100.0\,\% (67/67) & 2$\to$67 & 0 \\
-bitwarden & 46.4\,\% (45/97) & 100.0\,\% (96/96) & 97$\to$96 & 2 \\
+bitwarden & 46.4\,\% (45/97) & 100.0\,\% (98/98) & 97$\to$98 & 1 \\
 mifos & 0.3\,\% (2/610) & 100.0\,\% (610/610) & 610 & 0 \\
 \bottomrule
 \end{tabular}}
@@ -22,10 +22,10 @@ realworld & 40 & 0 & 40 & 97.5\,\% & 2.5\,\% & 0.0\,\% \\
 alfresco & 34 & 0 & 34 & 32.4\,\% & 38.2\,\% & 29.4\,\% \\
 ghostfolio & 198 & 0 & 198 & 40.9\,\% & 43.9\,\% & 14.1\,\% \\
 k8s dashboard & 72 & 0 & 72 & 15.3\,\% & 73.6\,\% & 8.3\,\% \\
-bitwarden & 132 & 1 & 131 & 50.4\,\% & 18.3\,\% & 24.4\,\% \\
+bitwarden & 132 & 0 & 132 & 51.5\,\% & 18.2\,\% & 24.2\,\% \\
 mifos & 1344 & 1 & 1343 & 89.6\,\% & 8.3\,\% & 1.3\,\% \\
 \midrule
-All & 1820 & 2 & 1818 & 77.6\,\% & 15.9\,\% & 5.2\,\% \\
+All & 1820 & 1 & 1819 & 77.7\,\% & 15.9\,\% & 5.2\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoReasons}{%
@@ -33,12 +33,12 @@ All & 1820 & 2 & 1818 & 77.6\,\% & 15.9\,\% & 5.2\,\% \\
 \toprule
 Sites & Reason the site is not a transition \\
 \midrule
-16 & A class the extractor could not place under any screen \\
+15 & A class the extractor could not place under any screen \\
 4 & The target names no route the application declares \\
 3 & Over-approximated at the site \\
 1 & The file is parsed, but nothing lands near the site \\
 \midrule
-24 & All, none of them without a reason \\
+23 & All, none of them without a reason \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoSoundness}{%
@@ -50,36 +50,36 @@ realworld & 57 & 35 & 91.4\,\% & 9/9 & 30.0\,\% \\
 alfresco & 56 & 21 & 95.2\,\% & n/a & 0.0\,\% \\
 ghostfolio & 410 & 129 & 93.8\,\% & n/a & 0.0\,\% \\
 k8s dashboard & 181 & 28 & 96.4\,\% & n/a & 0.0\,\% \\
-bitwarden & 277 & 194 & 71.6\,\% & 34/34 & 28.8\,\% \\
+bitwarden & 282 & 196 & 73.5\,\% & 34/34 & 28.8\,\% \\
 mifos & 10702 & 1257 & 93.6\,\% & 967/993 & 71.0\,\% \\
 \midrule
-All & 11683 & 1664 & 91.1\,\% & 1010/1036 & 55.2\,\% \\
+All & 11688 & 1666 & 91.3\,\% & 1010/1036 & 55.2\,\% \\
 \bottomrule
 \end{tabular}}
-\newcommand{\RoundTwoInScope}{1818}
-\newcommand{\RoundTwoRecovered}{77.6\,\%}
+\newcommand{\RoundTwoInScope}{1819}
+\newcommand{\RoundTwoRecovered}{77.7\,\%}
 \newcommand{\RoundTwoDynamic}{15.9\,\%}
 \newcommand{\RoundTwoUnplaced}{5.2\,\%}
 \newcommand{\RoundTwoAccounted}{98.7\,\%}
-\newcommand{\RoundTwoUnexplained}{24}
+\newcommand{\RoundTwoUnexplained}{23}
 \newcommand{\RoundTwoBefore}{8.8\,\%}
-\newcommand{\RoundTwoExcluded}{2}
+\newcommand{\RoundTwoExcluded}{1}
 \newcommand{\RoundTwoExcludedOutlet}{0}
-\newcommand{\RoundTwoExcludedNoCommands}{2}
+\newcommand{\RoundTwoExcludedNoCommands}{1}
 \newcommand{\RoundTwoFullNodes}{6}
 \newcommand{\RoundTwoMustClean}{1010/1036}
 \newcommand{\RoundTwoMustViolations}{26}
 \newcommand{\RoundTwoMustConv}{55.2\,\%}
 \newcommand{\RoundTwoZeroMustApps}{3}
 \newcommand{\RoundTwoRoutesRealworld}{14}
-\newcommand{\RoundTwoRoutesAlfresco}{56}
+\newcommand{\RoundTwoRoutesAlfresco}{$\geq$56}
 \newcommand{\RoundTwoRoutesGhostfolio}{$\geq$135}
 \newcommand{\RoundTwoRoutesKdash}{140}
 \newcommand{\RoundTwoRoutesBitwarden}{$\geq$168}
 \newcommand{\RoundTwoRoutesMifos}{921}
-\newcommand{\RoundTwoNoMifosRecovered}{43.8\,\%}
-\newcommand{\RoundTwoNoMifosAccounted}{97.3\,\%}
-\newcommand{\RoundTwoMifosShare}{73.9\,\%}
+\newcommand{\RoundTwoNoMifosRecovered}{44.1\,\%}
+\newcommand{\RoundTwoNoMifosAccounted}{97.5\,\%}
+\newcommand{\RoundTwoMifosShare}{73.8\,\%}
 \newcommand{\RoundTwoRelativeUnresolved}{0}
 \newcommand{\RoundTwoUnderUnreadable}{0}
 \newcommand{\RoundTwoNoRouteCaveated}{none}
@@ -93,9 +93,9 @@ All & 11683 & 1664 & 91.1\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoMustRelRoot}{2}
 \newcommand{\RoundTwoMustRelBare}{3}
 \newcommand{\RoundTwoGraphClean}{13.0\,\%}
-\newcommand{\RoundTwoJudgedClean}{91.1\,\%}
-\newcommand{\RoundTwoJudged}{1664}
-\newcommand{\RoundTwoOverApprox}{85.8\,\%}
+\newcommand{\RoundTwoJudgedClean}{91.3\,\%}
+\newcommand{\RoundTwoJudged}{1666}
+\newcommand{\RoundTwoOverApprox}{85.7\,\%}
 \newcommand{\RoundTwoWildcardNoNode}{none}
 \newcommand{\RoundTwoWildcardPrefix}{19}
 \newcommand{\RoundTwoWildcardPrefixEmptyChild}{0}
@@ -104,9 +104,9 @@ All & 11683 & 1664 & 91.1\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoWildcardRelative}{8}
 \newcommand{\RoundTwoWildcardAppRoot}{0}
 \newcommand{\RoundTwoWildcardNoTarget}{1}
-\newcommand{\RoundTwoWildcardRescued}{151}
+\newcommand{\RoundTwoWildcardRescued}{148}
 \newcommand{\RoundTwoUnresolvedTarget}{0}
-\newcommand{\RoundTwoWildcardCaveated}{101}
+\newcommand{\RoundTwoWildcardCaveated}{98}
 \newcommand{\RoundTwoDeadLinkCandidates}{24}
 \newcommand{\RoundTwoDeadLinkWildcarded}{20}
 \newcommand{\RoundTwoDeadLinkUnanswered}{4}
@@ -118,9 +118,10 @@ All & 11683 & 1664 & 91.1\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoDeadLinkRelativeLocations}{3}
 \newcommand{\RoundTwoDeadLinkBaseUnknown}{2}
 \newcommand{\RoundTwoDeadLinkBaseUnknownLocations}{2}
+\newcommand{\RoundTwoDeadLinkOutsideDir}{0}
 \newcommand{\RoundTwoDeadLinkApps}{1}
 \newcommand{\RoundTwoDeadLinkWhere}{mifos}
-\newcommand{\RoundTwoEdges}{11683}
+\newcommand{\RoundTwoEdges}{11688}
 \newcommand{\RoundTwoTopFanoutEdges}{5496}
 \newcommand{\RoundTwoTopFanoutShare}{47.0\,\%}
 \newcommand{\RoundTwoTopFanoutApp}{mifos}
@@ -154,10 +155,10 @@ All & 11683 & 1664 & 91.1\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoEarlierOracleBitwardenDeclared}{97}
 \newcommand{\RoundTwoEarlierOracleBitwardenOutside}{0}
 \newcommand{\RoundTwoEarlierOracleBitwardenStorybook}{3}
-\newcommand{\RoundTwoEarlierOracleBitwardenInside}{32}
+\newcommand{\RoundTwoEarlierOracleBitwardenInside}{40}
 \newcommand{\RoundTwoEarlierOracleBitwardenInsideVerbatim}{26}
-\newcommand{\RoundTwoEarlierOracleBitwardenAdded}{34}
-\newcommand{\RoundTwoEarlierOracleBitwardenNow}{96}
+\newcommand{\RoundTwoEarlierOracleBitwardenAdded}{44}
+\newcommand{\RoundTwoEarlierOracleBitwardenNow}{98}
 \newcommand{\RoundTwoEarlierOracleMifosDeclared}{610}
 \newcommand{\RoundTwoEarlierOracleMifosOutside}{0}
 \newcommand{\RoundTwoEarlierOracleMifosStorybook}{0}
@@ -175,7 +176,7 @@ All & 11683 & 1664 & 91.1\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoMustEdgesBitwarden}{34}
 \newcommand{\RoundTwoMustEdgesMifos}{993}
 \newcommand{\RoundTwoCtrlOutletWhere}{alfresco}
-\newcommand{\RoundTwoUnplacedClass}{16}
+\newcommand{\RoundTwoUnplacedClass}{15}
 \newcommand{\RoundTwoOutsideWitness}{227}
 \newcommand{\RoundTwoOutsideWitnessMust}{5}
 \newcommand{\RoundTwoOutsideWitnessApps}{3}

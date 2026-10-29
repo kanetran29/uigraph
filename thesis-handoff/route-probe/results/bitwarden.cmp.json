@@ -1,0 +1,30 @@
+{
+  "slug": "bitwarden",
+  "counts": {
+    "probeRoutes": 170,
+    "frameworkScreens": 99,
+    "frameworkLeaves": 92,
+    "frameworkShells": 7,
+    "extractorNodes": 98,
+    "oracleDeclared": 98,
+    "invented": 0,
+    "missed": 1,
+    "sharedBlindSpot": 0
+  },
+  "invented": [],
+  "missed": [
+    "/vault"
+  ],
+  "sharedBlindSpot": [],
+  "oracleOnly": [],
+  "frameworkOnlyVsOracle": [
+    "/vault"
+  ],
+  "lazyFailures": [],
+  "routeSet": {
+    "declares": true,
+    "details": [
+      "1 spread route source(s) could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds"
+    ]
+  }
+}

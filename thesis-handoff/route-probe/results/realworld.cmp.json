@@ -1,0 +1,24 @@
+{
+  "slug": "realworld",
+  "counts": {
+    "probeRoutes": 14,
+    "frameworkScreens": 10,
+    "frameworkLeaves": 9,
+    "frameworkShells": 1,
+    "extractorNodes": 10,
+    "oracleDeclared": 10,
+    "invented": 0,
+    "missed": 0,
+    "sharedBlindSpot": 0
+  },
+  "invented": [],
+  "missed": [],
+  "sharedBlindSpot": [],
+  "oracleOnly": [],
+  "frameworkOnlyVsOracle": [],
+  "lazyFailures": [],
+  "routeSet": {
+    "declares": false,
+    "details": []
+  }
+}

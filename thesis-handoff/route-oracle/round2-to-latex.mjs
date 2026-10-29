@@ -296,6 +296,11 @@ function prefixHasEmptyChild(c, target) {
   return placed?.kind === 'PREFIX' && c.routes.some((r) => r !== placed && /^(SCREEN|REDIRECT)$/.test(r.kind) && r.path === placed.path)
 }
 
+/** Does this site sit outside the directory that was measured, as a path that climbs out of it says? */
+function outsideMeasuredDir(at) {
+  return at.startsWith('../')
+}
+
 /**
  * Which base does the link at `at` in `app` resolve against: 'absolute' (the root), 'relative'
  * (the screen it fires from) or 'unknown' (the ledger cannot show which)? The extractor
@@ -323,6 +328,9 @@ function prefixHasEmptyChild(c, target) {
 function linkBaseOf(app, at) {
   const ledger = rows.find((r) => r.s === app).l1.rows
   const hits = ledger.filter((x) => x.at === at || (x.owner && `${x.owner}:${x.at.replace(/^.*:/, '')}` === at))
+  // The ledger covers the measured directory, so a site in a library beside it has no row by
+  // construction. That is a reach the script cannot classify, not a lookup that went wrong.
+  if (hits.length !== 1 && outsideMeasuredDir(at)) return 'unknown'
   if (hits.length !== 1) throw new Error(`${hits.length} loss-ledger rows at ${app} ${at}: cannot say whether the link is relative`)
   const head = hits[0].target.trim().replace(/^\[\s*/, '').split(',')[0].replace(/\]\s*\)?\s*;?\s*$/, '').trim()
   const lit = /^'([^']*)'$/.exec(head) ?? /^"([^"]*)"$/.exec(head)
@@ -457,6 +465,9 @@ for (const [name, base] of [['Absolute', 'absolute'], ['Relative', 'relative'], 
   mac(`RoundTwoDeadLink${name}`, allDead.filter((d) => baseAt.get(locationOf(d)) === base).length)
   mac(`RoundTwoDeadLink${name}Locations`, [...baseAt.values()].filter((b) => b === base).length)
 }
+// A site a shared library holds is reported against whichever application loads that library, so
+// the count says how much of the surviving list the measured directory does not itself contain.
+mac('RoundTwoDeadLinkOutsideDir', new Set(allDead.filter((d) => outsideMeasuredDir(d.at)).map(locationOf)).size)
 mac('RoundTwoDeadLinkApps', new Set(allDead.map((d) => d.app)).size)
 mac('RoundTwoDeadLinkWhere', [...new Set(allDead.map((d) => NAME[d.app]))].sort().join(', ') || 'none')
 

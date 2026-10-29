@@ -733,7 +733,11 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
     })
     const { graph, soundiness } = extractGraph(project, '/app')
     expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
-    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([ONE_UNPLACED])
+    // Two losses, not one: the spread itself is a route source the reader cannot bring back to an
+    // array, and the lazy file its unwalked site claims is left under no prefix.
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([
+      `1 spread route source(s) and ${ONE_UNPLACED}`,
+    ])
   })
 
   it('does not count a claimed file the root scan would mint nothing from as a route file the walk missed', () => {
@@ -1242,6 +1246,92 @@ export const featureRoutes: Routes = [{ path: 'inner', component: U }]`,
     })
     const { graph, soundiness } = extractGraph(project, '/app')
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin', '/admin/users', '/feat/inner'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+})
+
+describe('a lazy module whose routing module is two hops away', () => {
+  it('mounts a barrel-named module’s routing module under the lazy prefix', () => {
+    // bitwarden's oss-routing names `ReportsModule` through the `./dirt/reports` barrel, and that
+    // module imports `ReportsRoutingModule`, which is where the table lives. The owner lookup
+    // stopped one hop from the barrel, found no table, and left the routing module to the root
+    // scan, which minted `/breach-report` -- an address the application does not mount, under a
+    // prefix the running router puts at `/reports/breach-report`.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { ReportsModule } from './reports'
+export const routes: Routes = [{ path: 'reports', loadChildren: () => ReportsModule }]`,
+      '/app/reports/index.ts': `export * from './reports.module'`,
+      '/app/reports/reports.module.ts': `import { ReportsRoutingModule } from './reports-routing.module'
+export class ReportsModule { r = ReportsRoutingModule }`,
+      '/app/reports/reports-routing.module.ts': `import type { Routes } from '@angular/router'
+import { B } from './breach.component'
+export const routes: Routes = [{ path: 'breach-report', component: B }]`,
+      '/app/reports/breach.component.ts': C('<p>breach</p>'),
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/reports/breach-report'])
+  })
+
+  it('mounts a dynamically imported barrel’s routing module under the lazy prefix', () => {
+    // The same two hops with the shape bitwarden's organization routing uses: a dynamic import of
+    // the barrel, then `.then((m) => m.MembersModule)`.
+    const project = inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+export const routes: Routes = [{ path: 'members', loadChildren: () => import('./members').then((m) => m.MembersModule) }]`,
+      '/app/members/index.ts': `export * from './members.module'`,
+      '/app/members/members.module.ts': `import { MembersRoutingModule } from './members-routing.module'
+export class MembersModule { r = MembersRoutingModule }`,
+      '/app/members/members-routing.module.ts': `import type { Routes } from '@angular/router'
+import { S } from './sponsored.component'
+export const routes: Routes = [{ path: 'sponsored-families', component: S }]`,
+      '/app/members/sponsored.component.ts': C('<p>sponsored</p>'),
+    })
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/members/sponsored-families'])
+  })
+})
+
+describe('a route source built by a call', () => {
+  it('declares the route set incomplete when a spread resolves to no array', () => {
+    // bitwarden builds its vault route with `...featureFlaggedRoute({ ... })`, which picks between
+    // two components by feature flag. The spread was skipped in silence, so the extractor went on
+    // to assert a complete route set over a table it had not read, and every dead-link finding the
+    // application carried was published without the caveat that earns it.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+declare function flagged(o: unknown): Routes
+export const routes: Routes = [
+  { path: 'home', component: A },
+  ...flagged({ path: 'vault' }),
+]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([
+      '1 spread route source(s) could not be read, so the declared route set is a lower bound and no claim that a path is undeclared holds',
+    ])
+  })
+
+  it('stays silent when every spread resolves to an array it reads', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { EXTRA } from './extra.routes'
+export const routes: Routes = [{ path: 'home', component: A }, ...EXTRA]`,
+        '/extra.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const EXTRA: Routes = [{ path: 'extra', component: A }]`,
+        '/a.component.ts': C('<p>a</p>'),
+      }),
+      '/',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/extra', '/home'])
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
   })
 })

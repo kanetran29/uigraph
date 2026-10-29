@@ -318,6 +318,24 @@ appears: Table~\ref{tab:defects} shows that three of the five accepted classes a
 carried to two by an observation rather than by a second instrument, so for those three
 the control is one method plus a judgement I made myself.
 
+The runtime check of Section~\ref{sec:res-probe} removes one threat and introduces others of its
+own. It removes the one that mattered most, which is that two readers of the same route files can
+agree on a wrong address and the agreement be read as a result. What it brings in its place is
+first a selection effect: the method needs an application that builds and boots, and every
+application in this corpus did, but a corpus chosen partly for being buildable is not a corpus
+chosen at random. Second, it reads the route configuration rather than the rendered page, so
+every address it calls mounted is one at which the router would place a component, not one at
+which a visitor would see it; a route behind a guard that always refuses, or one whose component
+throws on render, counts the same as one that works. Third, the build was a development build in
+each case, because Angular removes the debug surface the method reads when an application
+declares itself in production mode, and a production configuration can differ from a development
+one in ways a route table does not show. Fourth, where a workspace application composes the
+library a measurement is scoped to, the framework's set is a superset of the library's by
+construction, and the difference is scope rather than reading; three of alfresco's addresses are
+that and nothing else. None of these weakens the one-directional claim the check is used for ---
+that an address the extractor mints is an address the framework mounts --- because none of them
+could make a mounted address look unmounted.
+
 \section{Declared approximations}
 \label{sec:approximations}
 
@@ -515,6 +533,7 @@ application mounts the table there. That makes it a further instance of the uncl
 top-level-\texttt{Routes} over-approximation declared above, and it occurs nowhere in this
 corpus.
 
+\label{sec:named-outlet}
 A sixth is the named outlet, and it is the one open case where the analysis is known to hold an
 address the application does not mount. A route carrying \texttt{outlet: 'name'} is reached as
 \texttt{(name:path)}, so it contributes no screen, and the extractor refuses it. It refuses only
@@ -523,11 +542,14 @@ subtree, the routes beneath it are still assembled against the primary path and 
 alfresco mounts its document viewer that way, so two of its route entries,
 \path{/view/:nodeId} and \path{/search-libraries/view/:nodeId}, name addresses reachable in that
 application only through the viewer outlet. The independent route parser reads the subtree the
-same way, so coverage is 100\,\% over a set that holds both, and no number in
-Chapter~\ref{ch:results} shows the gap --- which is exactly the limit of agreement between two
-tools that share a reading. Closing it means carrying an outlet context down the walk in both
-tools and would move alfresco's declared count; it is left open, declared here, rather than
-repaired in a round whose figures are already reported.
+same way, so coverage is 100\,\% over a set that holds both, and no comparison between the two
+tools shows the gap --- which is exactly the limit of agreement between two tools that share a
+reading. The runtime check of Section~\ref{sec:res-probe} does show it: those two addresses are
+the whole of its minted-but-not-mounted column, and they are the only addresses in the corpus on
+which the two static readers agree and the running router mounts nothing. Closing the case means
+carrying an outlet context down the walk in both tools and would move alfresco's declared count;
+it is left open, declared here and now measured, rather than repaired in a round whose figures
+are already reported.
 
 One attribution of a blind spot to the component it hides is a filename heuristic and is
 labelled as one. Where a route prefix the analysis could not follow has literal segments, a
