@@ -27,7 +27,7 @@ import { fnv1a } from '@ui-graph/core'
  */
 export interface GuardInfo {
   text: string
-  kind: 'class' | 'functional'
+  kind: 'class' | 'functional' | 'unreadable'
   async: boolean
   signal?: boolean
   literalBoolean?: boolean
@@ -121,7 +121,19 @@ function analyzeElement(sf: SourceFile, el: Node): GuardInfo | null {
     }
     return { text: name, kind: 'class', async: false }
   }
-  return null
+  // A guard factory: `canActivate: [unauthGuardFn()]`. The call returns the guard, so the
+  // route IS guarded; the callee is the only name there is for it. Returning null here read
+  // the route as unguarded, which published a deterministic edge into a guarded screen ---
+  // bitwarden guards its root with `redirectGuard()` and fourteen must edges pointed at it.
+  // The factory's own body is not followed, so the gate takes the functional confidence.
+  if (Node.isCallExpression(el)) {
+    const callee = el.getExpression().getText()
+    return { text: `${callee}()`, kind: 'functional', async: false }
+  }
+  // Anything still unnamed gates the edge anyway. A guard the reader cannot name is a guard,
+  // and skipping it is the one error the must tier cannot absorb: refusing to read a guard
+  // must never be the reason an edge is called deterministic.
+  return { text: `unreadable guard at ${el.getSourceFile().getBaseName()}:${el.getStartLineNumber()}`, kind: 'unreadable', async: false }
 }
 
 /**

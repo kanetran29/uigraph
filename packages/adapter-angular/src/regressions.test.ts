@@ -2448,3 +2448,70 @@ describe('a wrapper that files a table other than the one it is given', () => {
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/app/main', '/home'])
   })
 })
+
+describe('a canActivate element the reader cannot name as an identifier', () => {
+  it('gates the edge when the guard is returned by a call, instead of publishing it as deterministic', () => {
+    // bitwarden guards its root with `redirectGuard()`. analyzeElement answered null for a
+    // call, analyzeCanActivate skipped it, gateFromGuards saw no guard and returned
+    // confidence 1, and fourteen must edges were published into a guarded screen.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { redirectGuard } from './guards'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: '', component: A, canActivate: [redirectGuard()] },
+]`,
+        '/app/guards.ts': `export function redirectGuard() { return () => false }`,
+        '/app/a.component.ts': C('<a routerLink="/">root</a>'),
+      }),
+      '/app',
+    )
+    const edge = graph.edges.find((e) => e.to === 'n_root')
+    expect(edge?.modality).toBe('may')
+    expect(edge?.guard).toContain('redirectGuard()')
+  })
+
+  it('gates the edge for a shape it cannot name at all, rather than reading the route as unguarded', () => {
+    // The default has to be "guarded": refusing to read a guard must never be the reason an
+    // edge is called deterministic. A spread is such a shape.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { GUARDS } from './guards'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'admin', component: A, canActivate: [...GUARDS] },
+]`,
+        '/app/guards.ts': `export const GUARDS = [() => false]`,
+        '/app/a.component.ts': C('<a routerLink="/admin">admin</a>'),
+      }),
+      '/app',
+    )
+    const edge = graph.edges.find((e) => e.to === 'n_admin')
+    expect(edge?.modality).toBe('may')
+  })
+})
+
+describe('a wrapper whose signature declares a this parameter', () => {
+  it('still mounts the table the children parameter names, not the one an index off by one picks', () => {
+    // `this` is a type annotation that no call site passes, so counting it among the
+    // parameters shifted the index and filed AUX under the wrapper's path.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { MAIN, AUX } from './feature.routes'
+import { withShell } from './shell'
+export const routes: Routes = [{ path: 'home', component: A }, withShell(MAIN, AUX)]`,
+        '/app/feature.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const MAIN: Routes = [{ path: 'main', component: A }]\nexport const AUX: Routes = [{ path: 'aux', component: A }]`,
+        '/app/shell.ts': `import type { Routes } from '@angular/router'\nexport function withShell(this: void, inner: Routes, other: Routes) { return { path: 'app', children: inner } }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/app/main', '/home'])
+  })
+})

@@ -119,10 +119,11 @@ function lines(abs) {
 // Fan-out is detected structurally — many edges citing one witness location.
 const witnessFanout = new Map()
 for (const e of edges) {
-  const w = e.witness || {}
-  if (!w.file) continue
-  const k = `${w.file}:${w.loc?.line}`
-  witnessFanout.set(k, (witnessFanout.get(k) || 0) + 1)
+  for (const w of [e.witness, ...(e.mergedWitnesses || [])]) {
+    if (!w?.file) continue
+    const k = `${w.file}:${w.loc?.line}`
+    witnessFanout.set(k, (witnessFanout.get(k) || 0) + 1)
+  }
 }
 const FANOUT_THRESHOLD = 3
 
@@ -183,24 +184,30 @@ let ok = 0
 // which. Counted and reported rather than judged.
 let outsideApp = 0, outsideAppMust = 0
 
-for (const [i, e] of edges.entries()) {
-  const w = e.witness || {}
+// One pass per cited site. The deduplicating extractor files the second and later citations
+// of an identical edge under mergedWitnesses, and judging only e.witness left those sites
+// unopened: the 45 must edges of the corpus cite 74 sites between them, so a third of the
+// evidence the must tier rests on was never read.
+const sites = edges.flatMap((e, i) =>
+  [e.witness, ...(e.mergedWitnesses || [])].map((w, n) => ({ i, e, w: w || {}, merged: n > 0 })))
+for (const { i, e, w, merged } of sites) {
   // `edgeIndex` is how a finding is matched back to its edge. Matching by the printed endpoints
   // and the witness line instead left a NO_WITNESS finding -- an edge with no witness file at all
   // -- unmatchable, so a must edge that carries no witness was counted clean and the must tier
   // printed "soundness lemma holds" over it. No corpus application has one, so no figure moves.
-  const base = { edgeIndex: i, edge: `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}`, event: e.event, ruleId: w.ruleId, at: w.file ? `${w.file}:${w.loc?.line}` : null }
+  const base = { edgeIndex: i, edge: `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}`, event: e.event, ruleId: w.ruleId, at: w.file ? `${w.file}:${w.loc?.line}` : null, ...(merged ? { mergedWitness: true } : {}) }
 
   // Severity order puts this first: an edge whose destination is not an address of this
   // application is wrong however well its witness reads.
   const dest = nodes.get(e.to)?.route
   if (typeof dest === 'string' && dest.startsWith('/') && declaredHere(dest) === false) {
-    findings.push({ ...base, verdict: 'NODE_NOT_DECLARED', modality: e.modality, detail: `destination node sits at ${dest}, which the independent route set does not declare` })
+    if (!merged) findings.push({ ...base, verdict: 'NODE_NOT_DECLARED', modality: e.modality, detail: `destination node sits at ${dest}, which the independent route set does not declare` })
     continue
   }
   if (w.file && !path.resolve(appDir, w.file).startsWith(appDir + path.sep)) { outsideApp++; if (e.modality === 'must') outsideAppMust++ }
 
-  if (e.source !== 'manual' && !w.file) { findings.push({ ...base, verdict: 'NO_WITNESS', detail: 'edge is static/runtime but carries no witness file — golden invariant violated' }); continue }
+  if (e.source !== 'manual' && !w.file) { if (!merged) findings.push({ ...base, verdict: 'NO_WITNESS', detail: 'edge is static/runtime but carries no witness file — golden invariant violated' }); continue }
+  if (e.source === 'manual' && !w.file) continue
   const abs = path.isAbsolute(w.file) ? w.file : path.join(appDir, w.file)
   const src = lines(abs)
   if (!src) { findings.push({ ...base, verdict: 'FILE_MISSING', detail: `cannot open ${abs}` }); continue }
@@ -261,7 +268,8 @@ for (const f of findings) tally[f.verdict] = (tally[f.verdict] || 0) + 1
 const checked = edges.length
 
 console.log(`app:     ${appDir}`)
-console.log(`edges:   ${checked}`)
+console.log(`edges:   ${edges.length}`)
+console.log(`sites:   ${checked} cited by them (${sites.filter((x) => x.merged).length} of them merged citations)`)
 console.log(`CLEAN:   ${ok}/${checked} = ${checked ? ((ok / checked) * 100).toFixed(1) : 0}%`)
 console.log(`issues:  ${JSON.stringify(tally)}`)
 // The must-tier is what the soundness lemma protects: report it on its own.
@@ -282,4 +290,4 @@ for (const v of order) {
 // `mustBad` is written out as well as counted: the soundness violations are the findings the
 // thesis describes one by one, and a description read off `findings` would include the may
 // and unknown tiers the lemma says nothing about.
-if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: checked, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: edges.length, sites: checked, mergedSites: sites.filter((x) => x.merged).length, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))

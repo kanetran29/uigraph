@@ -632,7 +632,12 @@ function childrenArgument(call: CallExpression, children: Node): ArrayLiteralExp
   const param = childrenParameter(children)
   const fn = param?.getParent()
   if (!param || !Node.isParametered(fn)) return null
-  const arr = arrayLiteralOf(call.getArguments()[fn.getParameters().indexOf(param)])
+  // A `this` parameter is a type annotation, not an argument: no call site passes one, so
+  // counting it shifts every index by one and files the wrong table under the wrapper's path.
+  const params = fn.getParameters().filter((pa) => pa.getName() !== 'this')
+  const at = params.indexOf(param)
+  if (at < 0) return null
+  const arr = arrayLiteralOf(call.getArguments()[at])
   return arr && Node.isArrayLiteralExpression(arr) ? arr : null
 }
 
