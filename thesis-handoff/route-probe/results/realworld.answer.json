@@ -1,0 +1,106 @@
+{
+  "slug": "realworld",
+  "origin": "http://127.0.0.1:56692",
+  "routerFound": true,
+  "results": [
+    {
+      "target": "/",
+      "recognized": true,
+      "at": "/",
+      "after": "/",
+      "alreadyThere": true,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_HomeComponent",
+          "lazyComponent": true
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/login",
+      "recognized": true,
+      "at": "/login",
+      "after": "/login",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "login",
+          "component": null,
+          "lazyComponent": true
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/settings",
+      "recognized": true,
+      "at": "/login",
+      "after": "/settings",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "settings",
+          "component": null,
+          "lazyComponent": true
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/article/abc",
+      "recognized": true,
+      "at": "/article/abc",
+      "after": "/article/abc",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "article/:slug",
+          "component": null,
+          "lazyComponent": true
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/zzz-not-a-route",
+      "recognized": false,
+      "at": "/article/abc",
+      "after": "/article/abc",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [],
+      "catchAll": false,
+      "placesComponent": false
+    }
+  ]
+}

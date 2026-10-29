@@ -1,5 +1,6 @@
 {
-  "harnessVersion": "1.0.0",
+  "harnessVersion": "1.1.0",
+  "versionNote": "1.1.0 adds answerability.mjs, which navigates a running application and records what the recogniser made of each address, and framework-answer.mjs, which classifies an address against the configuration and is held against those navigations by --self-check. The comparison gained counts.missedPrefixRedirect and counts.missedPrefixUnanswered, and a lazy subtree read only in part is now reported as a failure rather than as a whole reading.",
   "note": "One entry per corpus application. `dist` is the built output, relative to the --dist-root the runner is given; `appDir` is the directory the extractor measured, relative to --corpus-root, and is where its uigraph.db sits. `adaptations` records every change the build needed that the checked-out source did not already carry, so a reader can tell what the probe ran against.",
   "builtWith": "Each application was built in its development configuration, because Angular removes the `window.ng` debug surface the probe reads when the application calls enableProdMode.",
   "apps": [

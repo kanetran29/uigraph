@@ -788,8 +788,8 @@ fails if any site has no reason.}
 \subsection{Dead links}
 \label{sec:deadlinks}
 
-A site whose target names no route the application declares anywhere is a dead link, and
-finding them is something the method gives away for free. The clearest case is mifos. A
+A site whose target the application mounts nothing at is a dead link, and finding them is
+something the method gives away for free. The clearest case is mifos. A
 transactions tab links to a journal entry with
 
 \begin{quote}
@@ -823,11 +823,20 @@ link against the screen it fires from, and getting that base wrong is this analy
 before it is the application's defect. \RoundTwoDeadLinkBaseUnknown{} are neither, because the
 result files do not record enough of the construct to say which it is; they are counted and
 not classified, rather than assigned to the half that would flatter the finding. The last two
-groups are reported as candidates and weighted lower. Counted as places in the source rather
+groups are reported as candidates and weighted lower, and after this round the unclassified
+group is the largest of the three: the census grew when each caveated candidate began to be
+decided against the framework's configuration, and most of what it admitted comes from
+constructs whose base the loss ledger does not record. Counted as places in the source rather
 than as targets the three groups are \RoundTwoDeadLinkAbsoluteLocations{},
 \RoundTwoDeadLinkRelativeLocations{} and \RoundTwoDeadLinkBaseUnknownLocations{}, and the
 difference is one relative link in a shared template that resolves against three owning
 screens: one mistake, three candidates, one place to go and look.
+\RoundTwoDeadLinkOutsideDir{} of the \RoundTwoDeadLinkLocations{} places are outside the
+directory each measurement is scoped to --- a shared library of bitwarden's monorepo, loaded
+into the application that was measured and into sibling clients that mount different route
+sets. A link there is dead in the application measured, where its URL matches nothing, and may
+be live in a sibling; the count is reported so that a reader can separate the two without
+re-running anything.
 A test that never opens those tabs would not
 find them, and a crawler would find them only if it reached the screens that hold them;
 reading the route configuration finds them without running anything.
@@ -851,20 +860,33 @@ matched nothing for a reason that was the extractor's, and the wildcard then for
 one of them and raised that application's recovered figure by eight points.
 That enum is read now, and so is the wrapper call that holds it, so those paths resolve
 rather than being forwarded; what remains is the mechanism.
-\RoundTwoWildcardCaveated{} of the catch-all-answered sites still carry the caveat, in
-\RoundTwoWildcardCaveatedApps{} applications --- \RoundTwoWildcardCaveatedWhere{} --- whose route
-sets the extractor reports as a lower bound and whose declared sets the runtime check of
-Section~\ref{sec:res-probe} has not measured as whole. An earlier version of this
+An earlier version of this
 paragraph named three bitwarden paths assembled inside a template literal instead; those are
 read now, which is what moved its denominator, and what is left there is a boundary rather
 than a path. The note says which of the two it is, because a dropped subtree and an
-unreadable path are not the same loss. A single unreadable declaration in an application voids every claim
-of this kind across it, which is severe, and deliberately so --- the alternative is a census
-that reports an extractor's blind spot as an application's defect. The edge is drawn either way --- Angular really does forward those URLs --- so
-what had to change was the claim attached to it, not the edge. The extractor now counts the
-declared paths it could not read, records one note per application saying the route set is a
-lower bound, and writes that caveat into every wildcard note from that application. Nothing
-downstream may call a link dead while that note is present.
+unreadable path are not the same loss. The edge is drawn either way --- Angular really does
+forward those URLs --- so what had to change was the claim attached to it, not the edge. The
+extractor counts the declared paths it could not read and records one note per application
+saying the route set is a lower bound, and that caveat is written into every wildcard note
+from that application.
+
+What the caveat then does to a candidate is the part this round changed. A single unreadable
+declaration used to void every claim of this kind across the whole application, which is
+severe and was deliberate: the alternative is a census that reports an extractor's blind spot
+as an application's defect. It is also a harder question than the census asks. Whether an
+application's whole route set was read is one question; whether \emph{this} target is served
+is another, and the runtime check of Section~\ref{sec:res-probe} answers the second directly,
+because the configuration it reads is the one the framework holds. Each caveated candidate is
+therefore put to that configuration. \RoundTwoFrameworkMountsIt{} are withdrawn because the
+framework serves a screen at the target, which makes them a measurement of what the extractor
+failed to read rather than of what the application got wrong; \RoundTwoFrameworkPrefix{} are
+withdrawn because the target is matched by a route that places no screen of its own, and
+\RoundTwoFrameworkRedirects{} because it is answered by a redirect. \RoundTwoWildcardCaveated{}
+sites keep the caveat, in \RoundTwoWildcardCaveatedApps{} applications ---
+\RoundTwoWildcardCaveatedWhere{} --- either because no measurement of that application exists
+or because it mounts a route through a \texttt{UrlMatcher}, which may claim any address and so
+leaves every address in it undecided. What survives is a candidate whose target the framework
+answers with nothing but its catch-all.
 
 A route neither tool can read is indistinguishable, from a navigation site, from a route the
 application never declares --- and this thesis credited the difference to the application
@@ -899,23 +921,26 @@ cleared alfresco's two candidates and it found ten more sites in mifos that the 
 test had passed over.
 
 What survives all four corrections is this. Of the \RoundTwoWildcardRescued{} sites a
-catch-all route answers, \RoundTwoWildcardCaveated{} come from an application whose route set
-is a lower bound, \RoundTwoWildcardNoNode{} name a route the application declares as a screen
-and the extractor minted no node for --- a defect, but the extractor's ---
-\RoundTwoWildcardPrefix{} name a route it declares as a \emph{path prefix}, which carries no
-component and so could never have had a node, \RoundTwoWildcardBlind{}
-address a subtree the oracle could not open, \RoundTwoWildcardPattern{} are a pattern with a
-hole where the first segment should be and so name no single address, and
+catch-all route answers, \RoundTwoWildcardCaveated{} come from an application whose route set is
+a lower bound and whose addresses no measurement can decide,
+\RoundTwoFrameworkMountsIt{} have a target the framework's own configuration serves with a
+screen --- a defect, but the extractor's --- \RoundTwoFrameworkPrefix{} a target it matches with
+a route that places no screen, which could never have had a node, and
+\RoundTwoFrameworkRedirects{} a target it answers with a redirect. \RoundTwoWildcardNoNode{} name
+a route the application declares as a screen and the extractor minted no node for,
+\RoundTwoWildcardPrefix{} name a route it declares as a \emph{path prefix},
+\RoundTwoWildcardBlind{} address a subtree the oracle could not open, \RoundTwoWildcardPattern{}
+are a pattern with a hole where the first segment should be and so name no single address,
 \RoundTwoWildcardRelative{} are a relative target the analysis had no base to resolve,
-\RoundTwoWildcardAppRoot{} name the application root, and for
-\RoundTwoWildcardNoTarget{} the record names no target at all, so nothing is established about
-where it points; \RoundTwoDeadLinkWildcarded{} remain. Of the \RoundTwoTargetNoRoute{} unexplained sites whose
+\RoundTwoWildcardAppRoot{} name the application root, and for \RoundTwoWildcardNoTarget{} the
+record names no target at all, so nothing is established about where it points;
+\RoundTwoDeadLinkWildcarded{} remain. Of the \RoundTwoTargetNoRoute{} unexplained sites whose
 target named no route, \RoundTwoRelativeUnresolved{} are again a relative target with no base,
 \RoundTwoUnderUnreadable{} address an unreadable subtree and \RoundTwoNoRouteCaveated{} come
 from an application whose route set is a lower bound at all; \RoundTwoDeadLinkUnanswered{} remain.
 Those two residuals are the dead-link candidates: \RoundTwoDeadLinkCandidates{} sites at
-\RoundTwoDeadLinkLocations{} places in the source, \RoundTwoDeadLinkUrls{} distinct URLs, all
-of them in \RoundTwoDeadLinkWhere{}. The count is of sites rather than of defects: one wrong
+\RoundTwoDeadLinkLocations{} places in the source, \RoundTwoDeadLinkUrls{} distinct URLs, in
+\RoundTwoDeadLinkApps{} applications --- \RoundTwoDeadLinkWhere{}. The count is of sites rather than of defects: one wrong
 prefix written into a shared template is one mistake and several sites, and one site resolved
 against several owning routes is one place to go and look and several targets. Every category
 in the enumeration above except the last of each arm is a limit of one of the two tools rather
@@ -923,11 +948,15 @@ than a defect of an application, which is the proportion worth remembering about
 finding: the residual is what is left after the tools stop accusing the applications of their
 own blind spots.
 
-One of those categories is not yet settled. A route the application declares as a path prefix
-answers no URL of its own unless it also declares an empty-path child, so of the
-\RoundTwoWildcardPrefix{} sites excused on that ground, \RoundTwoWildcardPrefixEmptyChild{}
-address a prefix that really is answered and the rest may be dead links this census excused.
-They are reported here rather than folded into either count.
+One of those categories used to be unsettled, and is now measured. A route the application
+declares as a path prefix answers no URL of its own unless it also declares an empty-path
+child, and the previous round could not say which of the sites it excused on that ground
+addressed a prefix the application really answers. The framework's own configuration says, per
+address: of the \RoundTwoFrameworkPrefix{} sites now excused on that ground, every one has a
+target the framework matches with a route that places no screen of its own. A navigation to
+one of them, mifos's \path{/collections}, activates a last route carrying no component at all,
+so the address answers with the application's chrome and an empty outlet --- which is what the
+exclusion claimed all along, and is now a measurement rather than an inference.
 
 It is a candidate list rather than a verdict, because the preceding four corrections are
 evidence that the tools' blind spots are not yet all known, and a route both the extractor and
@@ -936,15 +965,18 @@ What can be said is narrower than the previous round claimed. Each candidate was
 against the application's own route files by hand, which is how the \texttt{appusers},
 \texttt{manage-jobs} and \texttt{configurations} mismatches above are quoted; no candidate was
 checked by navigating to it in a running application, which is the only check that would settle
-one. Half of the objection has since been answered. Every candidate in this census is in
-\RoundTwoDeadLinkWhere{}, and Section~\ref{sec:res-probe} compares that application's declared
-set with the route configuration the framework itself holds and finds no address missing from
-it, so the premise a dead-link claim rests on --- that the application declares no route at that
-address --- is no longer resting on two readings of the same files. That measurement is also what
-keeps the census from being empty: the extractor declares one of that application's subtrees
-unread, which by the rule above would suppress every candidate it carries, and the comparison
-with the framework shows the declaration cost the route set nothing. What is still unchecked is
-the other premise, that the link is reached at run time at all. What the
+one. Half of the objection has since been answered, and not by the route files. Every
+candidate's target is put to the route configuration the framework itself holds, read out of
+the running application by the check of Section~\ref{sec:res-probe}, so the premise a dead-link
+claim rests on --- that the application mounts nothing at that address --- no longer rests on two
+readings of the same files. The classification that premise uses was itself held against what
+the framework does, on \ProbeAnswerChecked{} navigated addresses, of which it agrees with
+\ProbeAnswerAgreed{}. That is what keeps the census from being empty: both applications it draws
+from declare part of their route set unread, which by the rule above would suppress every
+candidate they carry. What is still unchecked is the other premise, that the link is reached at
+run time at all, and one step below it: a target is matched against the framework's patterns
+rather than navigated to one address at a time, so a candidate's own URL has not been through
+the recogniser. What the
 method contributes is not the verdict but the list: a static transition graph puts every such
 candidate on one page, with a file and a line each, instead of leaving them to be met at run
 time.
@@ -983,6 +1015,23 @@ route and anything beneath it have no address any of the three readers can resol
 so they are outside both sides of the comparison rather than filed under the parent's address.
 Table~\ref{tab:probe} reports the result.
 
+Reading a configuration is itself a reading, and the one this comparison depends on is which of
+its entries answer an address with a screen. That reading is checked against what the framework
+does. The harness navigates a running application to an address and records the recogniser's
+verdict --- the event Angular emits when a URL has matched, which fires before any guard runs, so
+a guard sending every visitor to a sign-in page does not hide what was matched. Over
+\ProbeAnswerApps{} applications and \ProbeAnswerAddresses{} addresses, chosen to include every
+address this section argues about, the classification taken from the configuration agrees with the
+navigation on \ProbeAnswerAgreed{} of the \ProbeAnswerChecked{} it decides, and declines to decide
+\ProbeAnswerUndecided{}, all of them in the application with the \texttt{UrlMatcher} route. Two of
+its answers are worth naming because the comparison turns on them. An address whose route carries
+children places no screen of its own: a navigation to mifos's \path{/collections} activates a last
+route with no component at all, so the address answers with the application's chrome and an empty
+outlet. And an application with a catch-all answers every address, so the configuration mentioning
+an address is no evidence that anything is mounted there --- in mifos a URL that matches nothing
+reaches a not-found component, and in bitwarden and kubernetes/dashboard it is redirected to a
+screen.
+
 \begin{table}[t]\small
 \caption{The route configuration the framework holds, against the extractor's node set.
 \emph{Routes} counts the route entries the configuration holds once every lazy subtree is
@@ -990,9 +1039,11 @@ expanded, and \emph{mounted} the addresses among them at which the router places
 the primary outlet. \emph{Not mounted} counts nodes the extractor declares at an address the
 framework mounts nothing at. \emph{Not minted} counts addresses the framework mounts and the
 extractor has no node for, and \emph{prefix only} those further addresses the framework's
-configuration holds where a component is placed but no URL is answered, because the route is a
-prefix with no empty-path child: the extractor is right to mint no screen there, and the column
-is reported so that \emph{mounted} less \emph{nodes} is accounted for in full.
+configuration holds where a component is placed but no screen of the address's own is: in
+\ProbeMissedPrefixUnanswered{} the route is a prefix with no empty-path child, and in
+\ProbeMissedPrefixRedirect{} its empty-path child is a redirect, and in neither case is the
+extractor wrong to mint no screen there. The column is reported so that \emph{mounted}
+less \emph{nodes} is accounted for in full.
 \emph{Incomplete} is the extractor's own statement, from its soundiness notes, that part of the
 route set was beyond it.}
 \label{tab:probe}
@@ -1002,23 +1053,24 @@ route set was beyond it.}
 \subsection{What is minted at an address the application does not mount}
 
 Across the corpus the extractor declares \ProbeInvented{} screens that the framework mounts
-nothing at, in \ProbeInventedApps{} application of \ProbeApps{}: \path{/view/:nodeId} and
-\path{/search-libraries/view/:nodeId} in \ProbeInventedWhere{}. They are the named-outlet subtree
-that Section~\ref{sec:named-outlet} declares as the one open case in the analysis, and the
-measurement here is the first that shows it. Both static readers assemble the routes beneath a
-named outlet against the primary path, so both hold both addresses, node coverage is 100\,\% over
-a set that contains them, and no comparison between the two can expose it. The framework places
-them under the \texttt{viewer} outlet, where they are reached as \texttt{(viewer:path)} and at no
-primary address. The two counts the comparison reports --- not mounted, and blind spots the two
-static readers share --- are the same two addresses, which is what a blind spot held in common
-looks like from outside.
+nothing at. Over \ProbeApps{} applications, \ProbeRoutes{} route entries and \ProbeNodes{} nodes,
+every address the extractor claims is an address the framework's own configuration mounts. This is
+external evidence for one half of the must-tier property --- that no node is minted at an address
+the application does not mount --- and it is evidence the two static readers could not produce,
+because an address both of them place at the wrong prefix is an address they agree on.
 
-In the other \ProbeZeroInventedApps{} applications the extractor declares no address the framework
-does not mount. This is external evidence for one half of the must-tier property --- that no node
-is minted at an address the application does not mount. It is not evidence for the other half,
-that a must edge's destination is the one the source names: the probe reads route configuration
-and never looks at a navigation site, so the edge half rests where it did, on the witness check of
-Section~\ref{sec:res-round2} and the tools' independence there.
+It was not so when the measurement was first taken. The comparison then returned two addresses in
+alfresco, \path{/view/:nodeId} and \path{/search-libraries/view/:nodeId}, and they were a blind
+spot the two static readers held in common: both assembled the routes beneath a named outlet
+against the primary path, both held both addresses, node coverage was 100\,\% over a set that
+contained them, and no comparison between the two could expose it. Section~\ref{sec:named-outlet}
+had declared the construct as an open case, and declaring it is not the same as being sound over
+it: a consumer reading the graph finds a node at \path{/view/:nodeId}, and a navigation to that
+address in the built application is answered by the catch-all route. An outlet is inherited, so
+nothing beneath a named-outlet route has a primary address either; the extractor now carries the
+outlet down the walk and mints no screen for such a subtree, which is a loss and no longer a
+claim. The named-outlet limitation stands as a limitation on what the graph contains, and
+Table~\ref{tab:probe} is the measurement that moved it out of the other column.
 
 The check also found one case nobody had declared. Against the route set as the static readers
 held it before this round --- the independent parser's output, which is the one of the two whose
@@ -1035,7 +1087,7 @@ the file to the scan that reads unclaimed tables at the root. Neither could have
 because both were wrong in the same place, and the node coverage both reported was 100\,\% against
 a denominator that carried the same eight wrong addresses. Both now follow the chain to the table,
 bounded at three hops and refusing at every hop a file the route itself sits in, a file another
-route loads, and a file registering the application's root table.
+route loads, and a file whose every table is registered at the application root.
 
 \subsection{What the framework mounts and the extractor does not}
 
@@ -1048,21 +1100,30 @@ Of the \ProbeMissed{}, \ProbeMissedGhostfolio{} are one construct in ghostfolio.
 comparison pages are not written down: a list of competitor records is mapped to routes and
 spread into the table, and each path is a template string over a field of the record. The
 extractor reads the table, mints the parent, and declares the spread a route source it could not
-read. \ProbeMissedAlfresco{} are in alfresco and no two of them share a cause. \path{/login} is declared
-by the shell application that composes the measured library, and
-\path{/view/authentication-confirmation} by an installed package that shell provides; both are
-outside the directory the measurement scopes to, though for different reasons, and the second is
-outside it by a design choice the extractor states --- it does not follow a dependency into a
-package directory, because a package declares no screen of the application under measurement.
+read.
 
-The other two are inside it. \path{/rules} has its table in the measured library's own
-\path{folder-rules} sub-library, which a lazy route mounts under \path{/nodes/:nodeId/} and which
-also hands the same array to \texttt{provideRouter}, so the framework mounts it at \path{/rules}
-as well. The extractor follows the lazy route and not the second registration: the file is already
-claimed by that route and so is outside the scan that reads tables at the root, and because the
-walk does reach the file the loss leaves no note of its own.
+\ProbeMissedMifos{} are in mifos, and they are one construct as well: its users module holds two
+route tables, one for each identity provider the deployment may use, and chooses between them with
+\texttt{!environment.OIDC.oidcServerEnabled}. That constant is not fixed by the sources. It is
+computed from \texttt{window.env}, injected into the page at deployment time, so no reader of the
+code can say which of the two tables the application mounts, and the extractor declares the
+subtree unread. The two tables happen to declare the same five addresses with different
+components, and reading either would have named those five addresses correctly --- which is what
+the extractor used to do, by walking a table the module does not register under the prefix at all.
+That it arrived at the right addresses was an accident of this application: the same reading gives
+every prefix every table a file holds, and where two tables differ it mints the cross product.
+The addresses are lost here and the loss is declared, which is the exchange this analysis is
+built to make.
 
-\path{/about} is not declared in TypeScript at all. The library ships \path{about.plugin.json},
+\ProbeMissedAlfresco{} are in alfresco and no two of them share a cause. Two are outside the
+directory the measurement scopes to, though for different reasons: \path{/login} is declared by
+the shell application that composes the measured library, and
+\texttt{/view/\allowbreak{}authentication-\allowbreak{}confirmation} by an installed package
+that shell provides. The second is outside it by a design choice the extractor states --- it does
+not follow a dependency into a package directory, because a package declares no screen of the
+application under measurement.
+
+The third is inside it, and \path{/about} is not declared in TypeScript at all. The library ships \path{about.plugin.json},
 whose single entry is
 
 \begin{quote}\footnotesize\ttfamily
@@ -1074,9 +1135,10 @@ whose single entry is
 and an extension registry binds the identifier \texttt{app.about.component} to a class at run
 time. The route exists in data; no reader of the application's code can see it, and the
 extractor's analysis is over the code. The probe sees it because the framework assembles the
-table from the manifest before the probe reads the router. Both of these are recorded in the
-approximations of Section~\ref{sec:approximations}. alfresco's route set is a declared lower
-bound on other grounds, so no claim of completeness is made over it either way.
+table from the manifest before the probe reads the router. This construct and mifos's
+runtime-selected table are both recorded in the approximations of
+Section~\ref{sec:approximations}. alfresco's route set is a declared lower bound on other
+grounds, so no claim of completeness is made over it either way.
 
 The remaining \ProbeMissedBitwarden{} is bitwarden's vault, whose route is produced by a helper
 that chooses between two components by feature flag.
@@ -1096,27 +1158,33 @@ has no node for without the extractor having said that part of its route set was
 application in Table~\ref{tab:probe} that has a missing screen is an application that declared
 one. The correspondence is per application and not per cause, which is the weaker of the two
 readings and the only one measured here: alfresco declares that it could not read ten spreads,
-and one of its three missing screens, \path{/rules}, has nothing to do with a spread. What the
-measurement supports is that no application is missing a screen while asserting that its route
-set is whole --- not that every missing screen is behind the construct its application named.
-Until this measurement the thesis could assert neither.
+and one of its \ProbeMissedAlfresco{} missing screens, \path{/about}, has nothing to do with a
+spread --- it is declared in a JSON manifest and in no route file at all. What the measurement
+supports is that no application is missing a screen while asserting that its route set is whole
+--- not that every missing screen is behind the construct its application named. Until this
+measurement the thesis could assert neither.
 
-The converse does not hold, and the table shows that too. \ProbeDeclaredButComplete{} application
---- \ProbeDeclaredButCompleteWhere{} --- declares part of its route set unread and turns out to be
-missing nothing: its unreadable construct is a \texttt{children} written as a name whose value is
-chosen from two route arrays by an environment flag, and the extractor reaches the addresses
-behind both arrays by another path. The declaration is true of the reading and cost the route set
-nothing. \ProbeSilentAndComplete{} applications declare nothing and are missing nothing.
-
-That asymmetry is the useful one. A declaration that turns out to have cost nothing is a tool
-being careful; a screen missing with no declaration would be a tool asserting a completeness it
-does not have, and there are none of those. It also has a consequence for the dead-link census of
-Section~\ref{sec:deadlinks}, which suppresses every candidate from an application whose route set
-is a lower bound. \RoundTwoProbeLicensed{} applications are now exempt from that suppression,
-because this comparison has measured their declared sets against the framework's own configuration
-and found no address missing from them --- among them \RoundTwoProbeLicensedCaveated{}, which
-carries a caveat the measurement shows to be conservative, and which is where every candidate in
-that census is.
+On this corpus the correspondence happens to hold in the other direction as well:
+\ProbeDeclaredButComplete{} applications declare part of the route set unread and turn out to be
+missing nothing, and \ProbeSilentAndComplete{} declare nothing and are missing nothing. That is
+not a property of the analysis and is not offered as one. A declaration costs the route set
+whatever the construct behind it happened to carry, and one that cost nothing is a tool being
+careful rather than a tool being wrong; mifos's declaration cost nothing until this round, when
+the extractor stopped reaching the addresses behind it through a table the module does not
+register, and the same note then stood for five lost screens. The direction that matters is the
+other one: a screen missing with no declaration would be a tool asserting a completeness it does
+not have, and there are none of those. It also changes what the dead-link census of
+Section~\ref{sec:deadlinks} can rest on. That census used to suppress every candidate from an
+application whose route set is a declared lower bound, and a per-application licence was added to
+lift the suppression where this comparison found the declared set complete after all. On the
+figures above that licence lifts the suppression for \RoundTwoProbeLifted{} applications: mifos,
+which is where the census's candidates are, is now missing \ProbeMissedMifos{} screens of its own,
+so it cannot be licensed. A licence of that shape asks a harder question than the census needs ---
+whether a whole route set is complete --- and loses the census of any application that misses one
+screen anywhere. Section~\ref{sec:deadlinks} therefore asks the question per candidate instead,
+of the same framework configuration: a link whose target the framework serves nothing at is a dead
+link whether or not the rest of the route set was read, and one whose target it does serve is not
+a dead link however the extractor read it.
 
 The correspondence did not hold when this check was first run, and it was not a near miss. Two
 applications with unread route sources were asserting complete ones: alfresco, whose document

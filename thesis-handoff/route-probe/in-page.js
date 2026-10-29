@@ -7,6 +7,12 @@
  * Nothing here re-implements Angular's reading of the route files, which is the
  * whole point: it is the application's own code that answers.
  *
+ * Every place the walk stops short of a value it could have read is pushed into
+ * `lazyFailures`, whether or not routes came back from the other half of the
+ * same merge. Downstream the empty array is read as proof that no subtree was
+ * left unexpanded, and a partial read shrinks the comparison set exactly as a
+ * total failure does.
+ *
  * Returns a JSON-safe object; Playwright carries it out of the page.
  */
 globalThis.__uigraphProbe = async function probeAngularRoutes(options) {
@@ -126,11 +132,21 @@ globalThis.__uigraphProbe = async function probeAngularRoutes(options) {
   /**
    * Walks a route array, records one entry per route and descends into both
    * eager children and lazily loaded subtrees. The chain set holds the arrays on
-   * the current path so a self-referential configuration terminates.
+   * the current path so a self-referential configuration terminates. Both ways
+   * of stopping short -- the depth ceiling and an array already on the path --
+   * leave a route array unexpanded and so are declared, because the addresses
+   * below the stop are ones this reading does not hold.
    */
   async function expand(routes, parentPath, chainSet, acc, depth, parentOutlet = null, parentUnderMatcher = false) {
-    if (!Array.isArray(routes) || depth > opt.maxDepth) return
-    if (chainSet.has(routes)) return
+    if (!Array.isArray(routes)) return
+    if (depth > opt.maxDepth) {
+      lazyFailures.push({ where: parentPath || '/', reason: 'route-depth-limit', depth })
+      return
+    }
+    if (chainSet.has(routes)) {
+      lazyFailures.push({ where: parentPath || '/', reason: 'route-array-revisited' })
+      return
+    }
     chainSet.add(routes)
     for (const r of routes) {
       if (!r || typeof r !== 'object') continue
@@ -189,7 +205,7 @@ globalThis.__uigraphProbe = async function probeAngularRoutes(options) {
       lazyFailures.push({ where, reason: 'threw', message: String(e && e.message || e).slice(0, 200) })
       return null
     }
-    const routes = routesFromLoaded(result, new Set(), 0)
+    const routes = routesFromLoaded(result, new Set(), 0, where)
     if (!routes) lazyFailures.push({ where, reason: 'unreadable-result', kind: describe(result) })
     return routes
   }
@@ -198,46 +214,37 @@ globalThis.__uigraphProbe = async function probeAngularRoutes(options) {
    * Extracts a route array from the value a `loadChildren` resolved to, which
    * Angular allows to be the array itself, an NgModule class, or a module with
    * providers. For a module it collects the ROUTES multi-provider values the way
-   * Angular's own injector would, following imports transitively.
+   * Angular's own injector would, following imports transitively. `where` is the
+   * address the subtree hangs under, carried only so that a stop at the depth
+   * ceiling can name it: that ceiling keeps a cyclic `default` or `ngModule`
+   * chain from running forever, and reaching it drops routes the merge would
+   * otherwise have returned alongside the ones it did read.
    */
-  function routesFromLoaded(value, visited, depth) {
-    if (!value || depth > 12) return null
+  function routesFromLoaded(value, visited, depth, where) {
+    if (!value) return null
+    if (depth > 12) {
+      lazyFailures.push({ where, reason: 'module-depth-limit', depth, kind: describe(value) })
+      return null
+    }
     if (Array.isArray(value)) return isRouteArray(value) ? value : null
     if (typeof value === 'object' && value.default !== undefined && !value.ngModule) {
-      const unwrapped = routesFromLoaded(value.default, visited, depth + 1)
+      const unwrapped = routesFromLoaded(value.default, visited, depth + 1, where)
       if (unwrapped) return unwrapped
     }
     if (typeof value === 'object' && value.ngModule) {
-      const fromProviders = routesFromProviders(value.providers, visited, depth + 1)
-      const fromModule = routesFromLoaded(value.ngModule, visited, depth + 1)
+      const fromProviders = routesFromProviders(value.providers, visited, depth + 1, where)
+      const fromModule = routesFromLoaded(value.ngModule, visited, depth + 1, where)
       return merge(fromProviders, fromModule)
     }
     if (typeof value !== 'function' && typeof value !== 'object') return null
     if (visited.has(value)) return null
     visited.add(value)
     const inj = value.ɵinj || value.ngInjectorDef
-    if (!inj) return namedExportRoutes(value, visited, depth)
-    let found = routesFromProviders(inj.providers, visited, depth + 1)
+    if (!inj) return null
+    let found = routesFromProviders(inj.providers, visited, depth + 1, where)
     const imports = flatten(inj.imports)
     for (const imp of imports) {
-      found = merge(found, routesFromLoaded(imp, visited, depth + 1))
-    }
-    return found
-  }
-
-  /**
-   * Last resort for a module namespace object that carries neither a default
-   * export nor an injector: takes a named export that is itself a route array.
-   * Angular reaches such a subtree through the `.then(m => m.ROUTES)` the route
-   * writes, which this probe does not see, so the export is matched by shape.
-   */
-  function namedExportRoutes(value, visited, depth) {
-    if (!value || typeof value !== 'object' || depth > 12) return null
-    let found = null
-    for (const key of Object.keys(value)) {
-      let v
-      try { v = value[key] } catch { continue }
-      if (Array.isArray(v) && isRouteArray(v)) found = merge(found, v)
+      found = merge(found, routesFromLoaded(imp, visited, depth + 1, where))
     }
     return found
   }
@@ -246,15 +253,17 @@ globalThis.__uigraphProbe = async function probeAngularRoutes(options) {
    * Scans a provider array for the route arrays Angular registers under its
    * ROUTES token. The token itself is not reachable by name from outside the
    * framework, so a multi provider whose value is a route array is taken as one.
+   * A provider that yields nothing is a provider that carries no routes, which
+   * is what almost every provider in a module is, so nothing is declared here.
    */
-  function routesFromProviders(providers, visited, depth) {
+  function routesFromProviders(providers, visited, depth, where) {
     let found = null
     for (const p of flatten(providers)) {
       if (!p || typeof p !== 'object') continue
       if (p.multi && Array.isArray(p.useValue) && isRouteArray(p.useValue)) {
         found = merge(found, p.useValue)
       }
-      if (p.ngModule) found = merge(found, routesFromLoaded(p, visited, depth + 1))
+      if (p.ngModule) found = merge(found, routesFromLoaded(p, visited, depth + 1, where))
     }
     return found
   }

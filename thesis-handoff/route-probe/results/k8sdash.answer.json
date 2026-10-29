@@ -1,0 +1,135 @@
+{
+  "slug": "k8sdash",
+  "origin": "http://127.0.0.1:56737",
+  "routerFound": true,
+  "results": [
+    {
+      "target": "/",
+      "recognized": true,
+      "at": "/login",
+      "after": "/workloads",
+      "alreadyThere": false,
+      "redirected": true,
+      "chain": [
+        {
+          "path": null,
+          "component": "RootComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "ChromeComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "workloads",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "WorkloadsComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/workloads",
+      "recognized": true,
+      "at": "/login",
+      "after": "/workloads",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "RootComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "ChromeComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "workloads",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "WorkloadsComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/cluster/nodes",
+      "recognized": true,
+      "at": "/login",
+      "after": "/workloads",
+      "alreadyThere": false,
+      "redirected": true,
+      "chain": [
+        {
+          "path": null,
+          "component": "RootComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "ChromeComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "workloads",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "WorkloadsComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/zzz-not-a-route",
+      "recognized": true,
+      "at": "/login",
+      "after": "/workloads",
+      "alreadyThere": false,
+      "redirected": true,
+      "chain": [
+        {
+          "path": null,
+          "component": "RootComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "ChromeComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "workloads",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "WorkloadsComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    }
+  ]
+}

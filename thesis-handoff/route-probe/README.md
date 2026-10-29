@@ -16,6 +16,31 @@ to. Nothing parses a route file.
 oracle's declared set, and reports addresses minted but not mounted, mounted but not minted, and
 the extractor's own statement about whether its route set is complete.
 
+## Is an address answered, and by what
+
+`compare-probe.mjs` has to decide which entries of a route configuration answer an address with a
+screen, and that decision is a reading like any other. `answerability.mjs` checks it against the
+framework: it navigates a running application to a list of addresses and records what the
+recogniser made of each one, from the `RoutesRecognized` event, which fires before any guard runs
+--- so a guard that sends every visitor to a sign-in page does not hide what was matched.
+
+```bash
+node answerability.mjs --slug mifos --dist <built-app> --addresses /,/home,/collections \
+  --out results/mifos.answer.json
+node framework-answer.mjs --self-check results
+```
+
+`framework-answer.mjs` holds the classification against those navigations and exits non-zero on a
+disagreement. It answers one of four ways --- `screen`, `redirect`, `no-screen`, `catch-all` ---
+and declines to answer for an application mounting a route through a `UrlMatcher`, since such a
+route may claim any address. Two of its answers are the ones a reading would get wrong. A route
+carrying children places no screen at its own address: a navigation to mifos's `/collections`
+activates a last route with no component at all. And an application with a catch-all answers
+every address, so a configuration mentioning an address is no evidence that anything is mounted
+there. `round2-to-latex.mjs` imports the same classifier to decide each dead-link candidate
+against the framework, which is why the census does not rest on an application's whole route set
+being complete.
+
 ## Reproducing
 
 Each application must be built in its **development** configuration: Angular removes the debug

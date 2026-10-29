@@ -1,0 +1,194 @@
+{
+  "slug": "bitwarden",
+  "origin": "http://127.0.0.1:56731",
+  "routerFound": true,
+  "results": [
+    {
+      "target": "/",
+      "recognized": true,
+      "at": "/login",
+      "after": "/",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "FrontendLayoutComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": null,
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": false
+    },
+    {
+      "target": "/login",
+      "recognized": true,
+      "at": "/login",
+      "after": "/login",
+      "alreadyThere": true,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "AnonLayoutWrapperComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "login",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "LoginComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/vault",
+      "recognized": true,
+      "at": "/login",
+      "after": "/vault",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "UserLayoutComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "vault",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "VaultComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/reports",
+      "recognized": true,
+      "at": "/login",
+      "after": "/reports",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "UserLayoutComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "reports",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "ReportsLayoutComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "ReportsHomeComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/settings/account",
+      "recognized": true,
+      "at": "/login",
+      "after": "/settings/account",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "UserLayoutComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "settings",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "account",
+          "component": "AccountComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/zzz-not-a-route",
+      "recognized": true,
+      "at": "/login",
+      "after": "/",
+      "alreadyThere": false,
+      "redirected": true,
+      "chain": [
+        {
+          "path": null,
+          "component": "AppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "FrontendLayoutComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": null,
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": false
+    }
+  ]
+}

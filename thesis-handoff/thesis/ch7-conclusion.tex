@@ -44,11 +44,14 @@ does not decide (Claim~\ref{claim:must}, Section~\ref{sec:approximations}). The 
 is implemented in \emph{uigraph}, an open-source extractor with a framework-independent
 core and an Angular adapter that records the rule and the source location that produced
 each node and edge. Static navigation extraction is measured on a corpus of six Angular
-applications pinned to fixed commits, with four methods chosen so that they do not share
-a blind spot: a witness check that re-parses the source at each claimed location, a
-differential test against an independently written route parser, an end-to-end oracle
-taken from the applications' own passing tests, and a mutation experiment whose ground
-truth is the authored change. The failures are classified into defect classes that are
+applications pinned to fixed commits, with five methods. Four of them read the
+applications' sources --- a witness check that re-parses the source at each claimed
+location, a differential test against an independently written route parser, an
+end-to-end oracle taken from the applications' own passing tests, and a mutation
+experiment whose ground truth is the authored change --- and share that footing as their
+common weakness, since two readers of the same text can be wrong in the same way. The
+fifth reads the route configuration the framework itself holds at run time, and was
+added because the first four can agree on a wrong address. The failures are classified into defect classes that are
 admitted only on two independent lines of evidence, at least one from a named method, and every construct the extractor loses
 is assigned to exactly one class, which makes the classes comparable within an
 application and across the corpus. The corpus and the harness are reusable artefacts:

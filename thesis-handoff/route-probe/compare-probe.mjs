@@ -133,6 +133,25 @@ function minus(a, b) {
   return [...a.keys()].filter((k) => !b.has(k))
 }
 
+/**
+ * The addresses at which some route redirects, which for a prefix is how the framework answers the
+ * prefix's own URL: an empty-path descendant shares the prefix's address, and when that descendant
+ * carries a redirectTo, navigating to the prefix reaches a screen further down. Navigating the
+ * built mifos application confirmed the two cases apart -- /remittances is recognised and
+ * redirected to /remittances/process, while /collections answers with the shell and no screen of
+ * its own -- so the one prefix-only column has to be read as two different phenomena.
+ */
+function redirectingAddresses(routes) {
+  const out = new Set()
+  for (const r of routes) {
+    if (!r.redirectTo) continue
+    if (r.outlet && r.outlet !== 'primary') continue
+    if (r.underMatcher) continue
+    out.add(norm(r.fullPath))
+  }
+  return out
+}
+
 const a = args(process.argv.slice(2))
 if (!a.probe || !a.oracle || !a.db) {
   console.error('usage: node compare-probe.mjs --probe <f> --oracle <f> --db <f> [--out <f>]')
@@ -144,12 +163,22 @@ if (!probe.ok) {
   console.error(`probe did not run: ${probe.reason}`)
   process.exit(1)
 }
+// The licence downstream reads an empty lazyFailures as proof that no subtree was left
+// unexpanded, so a probe file that simply lacks the field must not be read as one that declared
+// nothing: that is the absence of evidence standing in for evidence of absence.
+if (!Array.isArray(probe.lazyFailures)) {
+  console.error(`${a.probe}: a probe that ran must carry a lazyFailures array`)
+  process.exit(1)
+}
 const oracle = JSON.parse(readFileSync(a.oracle, 'utf8'))
 
 const framework = probeScreens(probe.routes)
 const { leaves, shells } = splitShells(framework)
 const extractor = extractorScreens(a.db)
 const declared = oracleScreens(oracle)
+
+const prefixOnly = minus(shells, extractor)
+const redirecting = redirectingAddresses(probe.routes)
 
 const report = {
   slug: probe.slug,
@@ -161,22 +190,31 @@ const report = {
     extractorNodes: extractor.size,
     oracleDeclared: declared.size,
   },
+  // Every address the framework answers with a screen, so a later reader does not have to derive
+  // the set a second time and risk deriving it differently.
+  frameworkAddresses: [...framework.keys()],
   invented: minus(extractor, framework),
   missed: minus(leaves, extractor),
-  // A prefix route that carries a layout component but no empty-path child answers no URL of its
-  // own, so the extractor is right not to mint a screen there. It is still an address the
-  // framework's configuration holds and the extractor's set does not, and reporting the
-  // navigable difference without this one would be reporting only the half that flatters.
-  missedPrefixOnly: minus(shells, extractor),
+  // A prefix route that carries a layout component but mounts no screen of its own is one the
+  // extractor is right to mint nothing at. It is still an address the framework's configuration
+  // holds and the extractor's set does not, and reporting the navigable difference without this
+  // one would be reporting only the half that flatters. The two sublists say which kind each is:
+  // one answers its URL by redirecting into the subtree, the other answers it with the shell
+  // alone. Their counts sum to this list's, so a reader of either number is reading the same set.
+  missedPrefixOnly: prefixOnly,
+  missedPrefixRedirect: prefixOnly.filter((p) => redirecting.has(p)),
+  missedPrefixUnanswered: prefixOnly.filter((p) => !redirecting.has(p)),
   sharedBlindSpot: minus(extractor, framework).filter((p) => declared.has(p)),
   oracleOnly: minus(declared, framework),
   frameworkOnlyVsOracle: minus(leaves, declared),
-  lazyFailures: probe.lazyFailures || [],
+  lazyFailures: probe.lazyFailures,
   routeSet: declaredIncomplete(a.db),
 }
 report.counts.invented = report.invented.length
 report.counts.missed = report.missed.length
 report.counts.missedPrefixOnly = report.missedPrefixOnly.length
+report.counts.missedPrefixRedirect = report.missedPrefixRedirect.length
+report.counts.missedPrefixUnanswered = report.missedPrefixUnanswered.length
 report.counts.sharedBlindSpot = report.sharedBlindSpot.length
 report.counts.matcherRoutes = matcherRoutes(probe.routes)
 
@@ -184,7 +222,7 @@ if (a.out) writeFileSync(a.out, JSON.stringify(report, null, 2))
 const c = report.counts
 console.log(`${report.slug}: framework=${c.frameworkScreens} (leaf ${c.frameworkLeaves} + shell ${c.frameworkShells}) extractor=${c.extractorNodes} oracle=${c.oracleDeclared}`)
 console.log(`  invented (extractor mints, framework does not mount): ${c.invented}`)
-console.log(`  missed (framework mounts, extractor has no node):      ${c.missed} (+${c.missedPrefixOnly} prefix-only)`)
+console.log(`  missed (framework mounts, extractor has no node):      ${c.missed} (+${c.missedPrefixOnly} prefix-only: ${c.missedPrefixRedirect} redirect, ${c.missedPrefixUnanswered} unanswered)`)
 console.log(`  matcher routes (address unreadable by any reader):     ${c.matcherRoutes}`)
 console.log(`  shared blind spot (extractor AND oracle, not framework): ${c.sharedBlindSpot}`)
 console.log(`  extractor declares its route set incomplete:            ${report.routeSet.declares}`)

@@ -21,7 +21,7 @@ let directLazyTargets: Map<string, string> | undefined
 let spreadConsumedArrays: Set<ArrayLiteralExpression> | undefined
 let rootTableArrays: Set<ArrayLiteralExpression> | undefined
 import { analyzeCanActivate, type GuardInfo } from './guards'
-import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, lazyMemberName, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, propNamed, keyUnreadable } from './resolve'
+import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, lazyMemberName, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, conditionalArrayArms, propNamed, keyUnreadable } from './resolve'
 
 export interface RouteInfo {
   fullPath: string
@@ -237,16 +237,24 @@ function dependencyFile(decl: ImportDeclaration | ExportDeclaration, from: Sourc
  * left open: the election proves the array is declared to a router, not that this one reads it.
  */
 function lazyRouteOwner(target: SourceFile, routeFile?: SourceFile, lazyTargets?: Map<string, string>, member?: string | null): { owner: SourceFile; arrays: ArrayLiteralExpression[]; claimed: SourceFile[] } {
-  const own = findRouteArrays(target)
-  if (own.length) return { owner: target, arrays: own, claimed: [target] }
-  // Where the route spells the member out, the table it takes is not in doubt, so the search
-  // looks for that name before it looks for a shape. A table a feature library also hands to
+  // Where the route spells the member out, the table it takes is not in doubt, so the search asks
+  // the name before it asks anything about shape. A table a feature library also hands to
   // `provideRouter` is mounted at the root AND under this prefix, and only the name tells the
   // two apart from a chain that merely reached the application's own root table.
   if (member) {
     const named = namedRouteArray(target, member, new Set())
     if (named) return { owner: named.getSourceFile(), arrays: [named], claimed: [named.getSourceFile()] }
   }
+  const own = mountedArrays(target, true)
+  // The table a `forChild` names is as often as not in another file, and that file is where the
+  // root scan would find it, so it is claimed with the one the route names.
+  if (own.length) return { owner: target, arrays: own, claimed: filesOf([target, ...own.map((a) => a.getSourceFile())]) }
+  // A file holding more than one table, with nothing in it saying which this prefix gets, is
+  // read no further: `mountedArrays` answers with none, and the hop search below then finds no
+  // holder either, so the caller declares the subtree unread. Mounting every table the file
+  // holds, which is what a bare shape scan did, gives each prefix every table and so mints the
+  // cross product -- half of those addresses the application mounts nowhere.
+  if (findRouteArrays(target).length > 1) return { owner: target, arrays: [], claimed: [] }
   const seen = new Set<string>([target.getFilePath()])
   let frontier = [target]
   for (let hop = 0; hop < LAZY_OWNER_HOPS && frontier.length > 0; hop += 1) {
@@ -260,10 +268,10 @@ function lazyRouteOwner(target: SourceFile, routeFile?: SourceFile, lazyTargets?
         // A module that holds no table of its own is a hop on the way to one, not a dead end, and
         // the ownership tests below are about adopting a table: refusing a tableless module as a
         // WAYPOINT would lose every subtree a second route reaches through it.
-        if (findRouteArrays(dep).length === 0) { next.push(dep); continue }
-        const declared = findRouteArrays(dep, true)
-        if (!ownedByThisRoute(dep, target, declared, lazyTargets)) continue
-        holders.set(dep.getFilePath(), { file: dep, declared })
+        const shape = findRouteArrays(dep)
+        if (shape.length === 0) { next.push(dep); continue }
+        if (!ownedByThisRoute(dep, target, shape, lazyTargets)) continue
+        holders.set(dep.getFilePath(), { file: dep, declared: mountedArrays(dep) })
       }
     }
     const found = [...holders.values()]
@@ -272,12 +280,19 @@ function lazyRouteOwner(target: SourceFile, routeFile?: SourceFile, lazyTargets?
       const declaring = found.filter((h) => h.declared.length > 0)
       const [only] = declaring
       // One declared holder is elected without testing that it belongs to this application; see the note above on what a `Routes` type does not establish.
-      if (only && declaring.length === 1) return { owner: only.file, arrays: only.declared, claimed }
+      if (only && declaring.length === 1) return { owner: only.file, arrays: only.declared, claimed: filesOf([...claimed, ...only.declared.map((a) => a.getSourceFile())]) }
       return { owner: target, arrays: [], claimed }
     }
     frontier = next
   }
   return { owner: target, arrays: [], claimed: [] }
+}
+
+/** The distinct files in a list, so a claim is made once per file. */
+function filesOf(files: SourceFile[]): SourceFile[] {
+  const seen = new Map<string, SourceFile>()
+  for (const f of files) seen.set(f.getFilePath(), f)
+  return [...seen.values()]
 }
 
 /**
@@ -296,32 +311,67 @@ function lazyRouteOwner(target: SourceFile, routeFile?: SourceFile, lazyTargets?
  * A file the route itself sits in is refused before this, by the caller, and for a different
  * reason: that one would elect the table the route is written in and, by claiming it out of the
  * root scan, take the only entry point into the walk with it.
+ *
+ * `mountable` is every array the walk could mount out of the file, found by shape, and not the
+ * `Routes`-typed ones alone, so the question asked is about what would be mounted rather than
+ * about what carries a type. It is never empty: the caller has already sent a file holding no
+ * table on as a waypoint. The collapse a root table written without the type used to cause --- the
+ * typed set was empty, the file was adopted, and claiming it took the root scan's only entry
+ * point with it, leaving a graph with no nodes at all --- is held off in `collect`, which mints a
+ * root-registered array whether or not a claim covers its file; this refusal keeps the file out
+ * of the claim as well, and no corpus application tells the two apart.
  */
-function ownedByThisRoute(dep: SourceFile, target: SourceFile, declared: ArrayLiteralExpression[], lazyTargets?: Map<string, string>): boolean {
+function ownedByThisRoute(dep: SourceFile, target: SourceFile, mountable: ArrayLiteralExpression[], lazyTargets?: Map<string, string>): boolean {
   const path = dep.getFilePath()
   const owner = lazyTargets?.get(path)
   if (owner !== undefined && owner !== target.getFilePath()) return false
-  if (declared.length === 0) return true
-  return !declared.every((arr) => rootTableArrays?.has(arr) || spreadConsumedArrays?.has(arr))
+  return !mountable.every((arr) => rootTableArrays?.has(arr) || spreadConsumedArrays?.has(arr))
+}
+
+/**
+ * The arrays in a file a lazy prefix mounts, by the rule the framework itself applies, or none
+ * when the file does not say. `RouterModule.forChild` is a module's own statement of which of its
+ * tables the prefix that loads it gets, and the argument is resolved through a name, because that
+ * is how it is nearly always written. Failing that, a file holding exactly one table holds the
+ * one that is mounted. A file holding several and registering none answers with none: mounting
+ * them all gave every prefix every table, so mifos's users module, which holds three and
+ * registers one, had the two it does not mount walked under the one address it does.
+ */
+function mountedArrays(sf: SourceFile, shapeOnly = false): ArrayLiteralExpression[] {
+  const registered: ArrayLiteralExpression[] = []
+  for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    if (!/RouterModule\.forChild$/.test(call.getExpression().getText())) continue
+    for (const arg of call.getArguments()) {
+      const arr = arrayLiteralOf(arg)
+      if (arr && Node.isArrayLiteralExpression(arr) && !registered.includes(arr)) registered.push(arr)
+    }
+  }
+  if (registered.length > 0) return registered
+  // What the author declared to the router comes before what merely looks like a table: a module
+  // holding one `Routes` array and a menu config beside it mounts the first, and asking shape
+  // first would make the pair ambiguous and lose the subtree.
+  const declared = findRouteArrays(sf, true)
+  if (declared.length === 1) return declared
+  if (declared.length > 1) return []
+  const own = shapeOnly ? findRouteArrays(sf) : []
+  return own.length === 1 ? own : []
 }
 
 /**
  * The arrays an application registers at its root, by either router API. Collected once per
  * `collectRoutes` call, because the registration is as often as not in a different file from the
- * table and a per-file test therefore sees nothing.
+ * table and a per-file test therefore sees nothing. A file that both hands a table to
+ * `provideRouter` and is loaded lazily -- alfresco's folder-rules library, whose table Angular
+ * mounts at the root AND under the prefix that loads it -- is not exempted here: the member the
+ * `loadChildren` names is what gives that table its second mount, and exempting the file as well
+ * cut the only hole in this rule while buying nothing the name does not already buy.
  */
-function collectRootTableArrays(files: SourceFile[], lazyTargets: Map<string, string>): Set<ArrayLiteralExpression> {
+function collectRootTableArrays(files: SourceFile[]): Set<ArrayLiteralExpression> {
   const out = new Set<ArrayLiteralExpression>()
   for (const sf of files) {
     for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
       const name = call.getExpression().getText()
       if (!/(RouterModule\.forRoot|provideRouter)$/.test(name)) continue
-      // `provideRouter` is the bootstrap API, but a feature library uses it too, to add its own
-      // routes to the application it is loaded into. alfresco's folder-rules module does exactly
-      // that and is lazily loaded as well, so Angular mounts its table twice: once at the root and
-      // once under the prefix that loads it. Treating such a table as the root's alone took the
-      // second mount away. `forRoot` carries no such ambiguity.
-      if (/provideRouter$/.test(name) && lazyTargets.has(sf.getFilePath())) continue
       for (const arg of call.getArguments()) {
         const arr = arrayLiteralOf(arg)
         if (arr && Node.isArrayLiteralExpression(arr)) out.add(arr)
@@ -417,12 +467,30 @@ function moduleDependencies(sf: SourceFile): SourceFile[] {
  * until the stack ran out, which is a crash and not a reading. Reaching one again ends that
  * branch, and where a route object stands for the hop the lost subtree is declared.
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, consumedFiles?: Set<string>, chain: Set<ArrayLiteralExpression> = new Set()): number {
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, consumedFiles?: Set<string>, chain: Set<ArrayLiteralExpression> = new Set(), underAuxOutlet = false): number {
   if (chain.has(arr)) return 0
   chain.add(arr)
-  const placed = walkElements(arr, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
+  const placed = walkElements(arr, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
   chain.delete(arr)
   return placed
+}
+
+/**
+ * The route arrays a call hands on, for a table written `withShell(ADMIN)` or `[Route.wrap([...])]`.
+ * Only the arguments are read: what the callee builds from them is out of reach, and the arguments
+ * are what Angular ends up mounting in every shape of this that the corpus holds. The arrays are
+ * returned so the walk mounts them under the prefix and the pre-pass claims them out of the root
+ * scan -- without the claim the named table is still found by shape and minted at the root as
+ * well, at an address the application mounts nothing at.
+ */
+function callArrayArgs(node: Node | undefined): ArrayLiteralExpression[] {
+  if (!node || !Node.isCallExpression(node)) return []
+  const out: ArrayLiteralExpression[] = []
+  for (const arg of node.getArguments()) {
+    const arr = arrayLiteralOf(arg)
+    if (arr && Node.isArrayLiteralExpression(arr) && !out.includes(arr)) out.push(arr)
+  }
+  return out
 }
 
 /**
@@ -431,12 +499,13 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
  * descent and nothing else: one kept across siblings is a visited set, which refuses the same
  * table under a second parent and cost one corpus application a third of its routes.
  */
-function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[], parentNodeId: string | null, redirects: Map<string, string> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>): number {
+function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[], parentNodeId: string | null, redirects: Map<string, string> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>, underAuxOutlet: boolean): number {
   let placed = 0
   for (const el of arr.getElements()) {
     if (Node.isCallExpression(el)) {
-      for (const arg of el.getArguments()) {
-        if (Node.isArrayLiteralExpression(arg)) placed += walkRouteArray(arg, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
+      for (const arg of callArrayArgs(el)) {
+        placed += walkRouteArray(arg, arg.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
+        if (arg.getSourceFile() !== sf) consumedFiles?.add(arg.getSourceFile().getFilePath())
       }
       continue
     }
@@ -450,7 +519,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         // and not on the growth of the maps: shape marks a file placed that places nothing, and a
         // placement that re-sets an address a sibling already holds grows no map, so measuring
         // growth declared a loss where the walk had read the file through.
-        const n = walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain)
+        const n = walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
         placed += n
         if (n > 0) consumedFiles?.add(arr.getSourceFile().getFilePath())
       } else if (unreadable) {
@@ -498,12 +567,14 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       placed++
       redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
     }
-    // A route on a named outlet is reached as `(name:path)` and never at the primary address, so
-    // it is no element of S -- Section 3's model admits the primary outlet alone. Minting it here
-    // let it take the primary address from the sibling that really renders there, first-declared
-    // winning, so the graph named the wrong component at a real address and said nothing.
-    const auxOutlet = (() => { const o = stringProp(obj, 'outlet'); return o !== null && o !== 'primary' })()
-    const isScreen = !auxOutlet && (propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined)
+    // A route on a named outlet is reached as `(name:path)`, and so is everything BELOW it: the
+    // outlet is inherited, so a child of such a route has no primary address either. Testing only
+    // the route's own `outlet` minted alfresco's viewer subtree at /view/:nodeId, and a
+    // navigation to that address in the built application is answered by the catch-all --- two
+    // nodes at addresses the application mounts nothing at.
+    const ownOutlet = stringProp(obj, 'outlet')
+    const auxHere = underAuxOutlet || (ownOutlet !== null && ownOutlet !== 'primary')
+    const isScreen = !auxHere && (propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined)
     const nodeId = routeToNodeId(fullPath)
     // Counted whether or not the address is free: the walk read a route and reached an address,
     // and first-declared-wins is a choice between two routes, not a route the walk failed to
@@ -521,10 +592,16 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       // written out. One the resolver cannot bring back to an array is a subtree the walk never
       // enters, and saying nothing about it let the named array be minted at the root instead.
       const childInit = arrayLiteralOf(childrenProp.getInitializer())
-      if (childInit && Node.isArrayLiteralExpression(childInit)) {
-        const n = walkRouteArray(childInit, childInit.getSourceFile(), fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
-        placed += n
-        if (n > 0 && childInit.getSourceFile() !== sf) consumedFiles?.add(childInit.getSourceFile().getFilePath())
+      // A subtree handed to a helper (`children: withShell(ADMIN)`) is reached through the
+      // helper's arguments, the way an element written as a call is. Taking only the literal
+      // left the named table to the root scan, which minted it unprefixed.
+      const childArrays = childInit && Node.isArrayLiteralExpression(childInit) ? [childInit] : callArrayArgs(childrenProp.getInitializer())
+      if (childArrays.length > 0) {
+        for (const child of childArrays) {
+          const n = walkRouteArray(child, child.getSourceFile(), fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
+          placed += n
+          if (n > 0 && child.getSourceFile() !== sf) consumedFiles?.add(child.getSourceFile().getFilePath())
+        }
       } else if (unreadable) {
         unreadable.subtrees.add(obj)
       }
@@ -549,7 +626,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
           // A lazy hop back onto a table already on this descent would mount it under its own
           // prefix for ever; the subtree is declared unread rather than followed or dropped.
           if (chain.has(childArr)) unreadable?.subtrees.add(obj)
-          else placed += walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain)
+          else placed += walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
         }
       } else if (unreadable) {
         unreadable.subtrees.add(obj)
@@ -597,7 +674,12 @@ function collect(project: Project, byNodeId: Map<string, RouteInfo>, claimedFile
     const f = sf.getFilePath()
     // A spec declares routes of its own to drive the router under test; they are not the
     // application's screens, and minting them puts fictional addresses in the graph.
-    if (loadedChildFiles.has(f) || SPEC_FILE.test(f)) continue
+    if (SPEC_FILE.test(f)) continue
+    // A claim says a walk reaches this file's tables under a prefix. It does not say the root
+    // mounts none of them: a feature library that hands its table to `provideRouter` and is also
+    // loaded lazily has that table mounted at BOTH addresses, and one claim covering both lost
+    // the root one in silence, because the loss is invisible to a test asked per file.
+    const claimed = loadedChildFiles.has(f)
     // A tsconfig `paths` alias brings a whole library directory into the project so that
     // imports through it resolve. A route array in that library is the LIBRARY's, and
     // walking it from the root minted its routes as this application's screens -- at
@@ -608,6 +690,7 @@ function collect(project: Project, byNodeId: Map<string, RouteInfo>, claimedFile
       // An array a spread already carries is mounted under that spread's prefix. Minting it again
       // here would put its routes at the root as well, at addresses the application never mounts.
       if (spreadConsumedArrays?.has(arr)) continue
+      if (claimed && !rootTableArrays?.has(arr)) continue
       walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles, [], null, redirects, unreadable, consumedFiles)
     }
   }
@@ -696,9 +779,12 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): { ta
     // table with it.
     for (const sp of sf.getDescendantsOfKind(SyntaxKind.SpreadElement)) {
       const arr = arrayLiteralOf(sp.getExpression())
-      if (!arr || !Node.isArrayLiteralExpression(arr) || !spreadMintsRoutes(arr)) continue
-      spreadArrays.add(arr)
-      if (arr.getSourceFile() !== sf) targets.add(arr.getSourceFile().getFilePath())
+      const arms = conditionalArrayArms(sp.getExpression())
+      for (const a of [arr, ...arms]) {
+        if (!a || !Node.isArrayLiteralExpression(a) || !spreadMintsRoutes(a)) continue
+        spreadArrays.add(a)
+        if (a.getSourceFile() !== sf) targets.add(a.getSourceFile().getFilePath())
+      }
     }
     // A `children` written as a name reaches its array the same way and is mounted under the same
     // prefix, so the root must not mint it either.
@@ -708,14 +794,35 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): { ta
       const init = prop.getInitializer()
       const arr = arrayLiteralOf(init)
       // An array written out in place is reached only here; one reached through a name is also a
-      // declaration the root scan can see, and that is the one to remove from it.
-      if (!arr || arr === init || !Node.isArrayLiteralExpression(arr)) continue
-      spreadArrays.add(arr)
-      if (arr.getSourceFile() !== sf) targets.add(arr.getSourceFile().getFilePath())
+      // declaration the root scan can see, and that is the one to remove from it. A table handed
+      // to a helper is reached through the call's arguments, which the walk mounts under this
+      // prefix, so they are removed from the root scan for the same reason.
+      const named = arr && arr !== init && Node.isArrayLiteralExpression(arr) ? [arr] : callArrayArgs(init)
+      const arms = conditionalArrayArms(init).filter((a): a is ArrayLiteralExpression => Node.isArrayLiteralExpression(a))
+      for (const a of [...named, ...arms]) {
+        spreadArrays.add(a)
+        if (a.getSourceFile() !== sf) targets.add(a.getSourceFile().getFilePath())
+      }
+    }
+    // An element written as a call carries its arguments under the same prefix, and the array it
+    // is written in need not look like a table itself: `children: [Route.withShell(USERS)]` holds
+    // one call and no route object. The argument is claimed on the same test as a spread's, so an
+    // argument that mints nothing -- a class list, a menu -- claims nothing.
+    for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      const parent = call.getParent()
+      if (!parent || !Node.isArrayLiteralExpression(parent)) continue
+      // `imports: [RouterModule.forRoot(routes)]` is a call inside an array too, and its argument
+      // is the table the ROOT mounts: claiming it takes the root scan's entry point away.
+      if (/(RouterModule\.(forRoot|forChild)|provideRouter)$/.test(call.getExpression().getText())) continue
+      for (const a of callArrayArgs(call)) {
+        if (!spreadMintsRoutes(a)) continue
+        spreadArrays.add(a)
+        if (a.getSourceFile() !== sf) targets.add(a.getSourceFile().getFilePath())
+      }
     }
   }
   spreadConsumedArrays = spreadArrays
-  rootTableArrays = collectRootTableArrays(files, direct)
+  rootTableArrays = collectRootTableArrays(files)
   // The owner search reads `direct`, so it is asked only once every directly named module is in
   // it. What it elects goes back into `direct` under the route that elected it, so a table a
   // route reaches through a barrel is that route's as surely as one it names, and a second route

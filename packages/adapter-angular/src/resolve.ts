@@ -4,7 +4,7 @@
 // literals. Shared by routes/templates extraction.
 
 import { Node, SyntaxKind, VariableDeclarationKind } from 'ts-morph'
-import type { EnumDeclaration, ObjectLiteralExpression, SourceFile } from 'ts-morph'
+import type { ConditionalExpression, EnumDeclaration, ObjectLiteralExpression, SourceFile } from 'ts-morph'
 import { dirname, join, resolve } from 'node:path'
 
 // The empty candidate comes last: a `paths` target names its file with the extension
@@ -419,11 +419,69 @@ export function arrayLiteralOf(expr: Node | undefined): Node | undefined {
   if (!expr) return undefined
   if (Node.isAsExpression(expr) || Node.isParenthesizedExpression(expr) || Node.isSatisfiesExpression(expr)) return arrayLiteralOf(expr.getExpression())
   if (Node.isArrayLiteralExpression(expr)) return expr
+  // A table chosen between by a build constant (`oidc ? zitadelRoutes : mifosRoutes`) is one
+  // table in the build that is read, and which one is not a guess: the constant is declared in
+  // the sources this reader is given. Where the condition cannot be read the whole conditional
+  // is left unresolved, so the caller declares the subtree unread rather than taking an arm.
+  if (Node.isConditionalExpression(expr)) {
+    const truth = staticTruth(expr.getCondition())
+    return truth === undefined ? undefined : arrayLiteralOf(truth ? expr.getWhenTrue() : expr.getWhenFalse())
+  }
   if (Node.isIdentifier(expr)) return arrayLiteralOf(declaredInitializer(expr))
   if (Node.isPropertyAccessExpression(expr)) {
     const obj = objectLiteralOf(expr.getExpression())
     const prop = obj?.getProperty(expr.getName())
     return prop && Node.isPropertyAssignment(prop) ? arrayLiteralOf(prop.getInitializer()) : undefined
+  }
+  return undefined
+}
+
+/**
+ * The route arrays both arms of a conditional name, whether or not the condition can be read.
+ * The arm the build does not take is mounted NOWHERE, so a caller that claims only the selected
+ * one leaves the other to a root scan, which mints it unprefixed: `/legacy` beside the real
+ * `/users/modern`, at an address the application mounts nothing at.
+ */
+export function conditionalArrayArms(expr: Node | undefined): Node[] {
+  const cond = conditionalOf(expr)
+  if (!cond) return []
+  const out: Node[] = []
+  for (const arm of [cond.getWhenTrue(), cond.getWhenFalse()]) {
+    const arr = arrayLiteralOf(arm)
+    if (arr && Node.isArrayLiteralExpression(arr) && !out.includes(arr)) out.push(arr)
+  }
+  return out
+}
+
+/** The conditional an expression ultimately names, through names and casts only. */
+function conditionalOf(expr: Node | undefined): ConditionalExpression | undefined {
+  if (!expr) return undefined
+  if (Node.isAsExpression(expr) || Node.isParenthesizedExpression(expr) || Node.isSatisfiesExpression(expr)) return conditionalOf(expr.getExpression())
+  if (Node.isConditionalExpression(expr)) return expr
+  if (Node.isIdentifier(expr)) return conditionalOf(declaredInitializer(expr))
+  return undefined
+}
+
+/**
+ * The truth value of a condition the sources fix, or undefined when nothing here reads it. Only
+ * what a build constant can be: a boolean literal, a name or property chain that resolves to one,
+ * and a negation of either. Anything that depends on run-time state answers undefined, because a
+ * reader that guessed would place a table the build does not mount.
+ */
+function staticTruth(expr: Node | undefined): boolean | undefined {
+  if (!expr) return undefined
+  if (Node.isAsExpression(expr) || Node.isParenthesizedExpression(expr) || Node.isSatisfiesExpression(expr)) return staticTruth(expr.getExpression())
+  if (Node.isTrueLiteral(expr)) return true
+  if (Node.isFalseLiteral(expr)) return false
+  if (Node.isPrefixUnaryExpression(expr) && expr.getOperatorToken() === SyntaxKind.ExclamationToken) {
+    const inner = staticTruth(expr.getOperand())
+    return inner === undefined ? undefined : !inner
+  }
+  if (Node.isIdentifier(expr)) return staticTruth(declaredInitializer(expr))
+  if (Node.isPropertyAccessExpression(expr)) {
+    const obj = objectLiteralOf(expr.getExpression())
+    const prop = obj?.getProperty(expr.getName())
+    return prop && Node.isPropertyAssignment(prop) ? staticTruth(prop.getInitializer()) : undefined
   }
   return undefined
 }
