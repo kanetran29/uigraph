@@ -3,8 +3,8 @@
   "counts": {
     "probeRoutes": 377,
     "frameworkScreens": 326,
-    "frameworkLeaves": 312,
-    "frameworkShells": 14,
+    "frameworkLeaves": 321,
+    "frameworkShells": 5,
     "extractorNodes": 84,
     "oracleDeclared": 84,
     "invented": 0,

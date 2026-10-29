@@ -1424,3 +1424,155 @@ export const routes: Routes = [{ path: 'home', component: A, children: [...EXTRA
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/home/extra'])
   })
 })
+
+describe('what a lazy route may adopt, after the owner search was widened', () => {
+  const app = (extra: string) => `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const TITLE = 'x'
+export const routes: Routes = [{ path: 'home', component: A }${extra}]`
+
+  it('does not adopt a table the route reaches only through a type-only import', () => {
+    // /y owns the table through its barrel; /x names it in an `import type`, which brings no
+    // value into the module and cannot register a route. Following it let /x adopt the table and,
+    // because the election was decided in file order, take it from the route it belongs to: the
+    // graph held /x/list and not /y/list.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': app(`,
+  { path: 'x', loadChildren: () => import('./x/x.module').then((m) => m.XModule) },
+  { path: 'y', loadChildren: () => import('./y/index').then((m) => m.YModule) }`),
+        '/app/y/index.ts': `export { YModule } from './y.module'`,
+        '/app/y/y.module.ts': `import { YRoutingModule } from './y-routing.module'
+export class YModule { r = YRoutingModule }`,
+        '/app/y/y-routing.module.ts': `import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const routes: Routes = [{ path: 'list', component: A }]
+export interface YShape { a: number }`,
+        '/app/x/x.module.ts': `import type { YShape } from '../y/y-routing.module'
+export class XModule { s?: YShape }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/y/list'])
+  })
+
+  it('refuses a table two routes elect, rather than giving it to whichever was walked first', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': app(`,
+  { path: 'x', loadChildren: () => import('./x/x.module').then((m) => m.XModule) },
+  { path: 'y', loadChildren: () => import('./y/index').then((m) => m.YModule) }`),
+        '/app/y/index.ts': `export { YModule } from './y.module'`,
+        '/app/y/y.module.ts': `import { YRoutingModule } from './y-routing.module'
+export class YModule { r = YRoutingModule }`,
+        '/app/y/y-routing.module.ts': `import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const routes: Routes = [{ path: 'list', component: A }]
+export const Y = 1`,
+        '/app/x/x.module.ts': `import { Y } from '../y/y-routing.module'
+export class XModule { s = Y }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('does not elect the root table when its registration sits in another file', () => {
+    // A file-level test for `RouterModule.forRoot` answered true nowhere in the corpus, because
+    // an application as often as not declares its table in app.routes.ts and registers it in
+    // app.module.ts. The root table was then elected under a lazy prefix and claimed out of the
+    // root scan, which left the walk no entry point and the graph no nodes.
+    const registrations: Record<string, string>[] = [
+      { '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { routes } from './app.routes'\n@NgModule({ imports: [RouterModule.forRoot(routes)] })\nexport class AppModule {}` },
+      { '/app/app.config.ts': `import { provideRouter } from '@angular/router'\nimport { routes } from './app.routes'\nexport const appConfig = { providers: [provideRouter(routes)] }` },
+    ]
+    for (const registration of registrations) {
+      const { graph } = extractGraph(
+        inMemory({
+          ...registration,
+          '/app/app.routes.ts': app(`, { path: 'admin', loadChildren: () => import('./admin/admin.module').then((m) => m.AdminModule) }`),
+          '/app/admin/admin.module.ts': `import { TITLE } from '../app.routes'\nexport class AdminModule { t = TITLE }`,
+          '/app/a.component.ts': C('<p>a</p>'),
+        }),
+        '/app',
+      )
+      expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    }
+  })
+
+  it('does not adopt an array a spread already carries under another prefix', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { EXTRA } from './extra.routes'
+export const routes: Routes = [
+  { path: 'home', component: A, children: [...EXTRA] },
+  { path: 'z', loadChildren: () => import('./z/z.module').then((m) => m.ZModule) },
+]`,
+        '/app/extra.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const EXTRA: Routes = [{ path: 'extra', component: A }]`,
+        '/app/z/z.module.ts': `import { EXTRA } from '../extra.routes'
+export class ZModule { e = EXTRA }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/home/extra'])
+  })
+
+  it('still reaches a subtree through a tableless module another route loads', () => {
+    // The ownership tests refuse the ADOPTION of a table. Applying them to a module that holds
+    // none refused it as a waypoint, and the second route lost the whole subtree behind it.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': app(`,
+  { path: 'p', loadChildren: () => import('./shared/shared.module').then((m) => m.SharedModule) },
+  { path: 'q', loadChildren: () => import('./q/q.module').then((m) => m.QModule) }`),
+        '/app/shared/shared.module.ts': `export class SharedModule {}`,
+        '/app/q/q.module.ts': `import { SharedModule } from '../shared/shared.module'
+import { QRoutingModule } from './q-routing.module'
+export class QModule { s = SharedModule; r = QRoutingModule }`,
+        '/app/q/q-routing.module.ts': `import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const routes: Routes = [{ path: 'list', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/q/list'])
+  })
+})
+
+describe('a table a feature library both provides and lazily loads', () => {
+  it('mounts it under the lazy prefix as well as leaving it to the root', () => {
+    // alfresco's folder-rules library hands FOLDER_RULES_ROUTES to provideRouter and a route also
+    // loads that member lazily, so Angular mounts it at /rules and under /nodes/:nodeId/. Taking
+    // every provideRouter array for the application's root table took the second mount away and
+    // dropped alfresco's coverage to 26 of 27; the member the route names is what tells this case
+    // from a chain that merely reached the root table.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'nodes/:nodeId', children: [{ path: '', loadChildren: () => import('./rules/index').then((m) => m.RULES_ROUTES) }] },
+]`,
+        '/app/rules/index.ts': `export * from './rules.module'`,
+        '/app/rules/rules.module.ts': `import type { Routes } from '@angular/router'
+import { provideRouter } from '@angular/router'
+import { A } from '../a.component'
+export const RULES_ROUTES: Routes = [{ path: 'rules', component: A }]
+export function provideRules() { return [provideRouter(RULES_ROUTES)] }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/nodes/:nodeId/rules'])
+  })
+})

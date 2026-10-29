@@ -3,13 +3,13 @@
   "counts": {
     "probeRoutes": 123,
     "frameworkScreens": 30,
-    "frameworkLeaves": 27,
-    "frameworkShells": 3,
+    "frameworkLeaves": 29,
+    "frameworkShells": 1,
     "extractorNodes": 28,
     "oracleDeclared": 27,
     "invented": 2,
-    "missed": 3,
-    "missedPrefixOnly": 1,
+    "missed": 4,
+    "missedPrefixOnly": 0,
     "sharedBlindSpot": 2,
     "matcherRoutes": 0
   },
@@ -18,13 +18,12 @@
     "/search-libraries/view/:nodeId"
   ],
   "missed": [
+    "/about",
     "/view/authentication-confirmation",
     "/rules",
     "/login"
   ],
-  "missedPrefixOnly": [
-    "/about"
-  ],
+  "missedPrefixOnly": [],
   "sharedBlindSpot": [
     "/view/:nodeId",
     "/search-libraries/view/:nodeId"
@@ -34,6 +33,7 @@
     "/search-libraries/view/:nodeId"
   ],
   "frameworkOnlyVsOracle": [
+    "/about",
     "/view/authentication-confirmation",
     "/rules",
     "/login",

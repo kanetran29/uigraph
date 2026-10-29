@@ -1,6 +1,6 @@
 {
   "slug": "k8sdash",
-  "origin": "http://127.0.0.1:54482",
+  "origin": "http://127.0.0.1:54775",
   "consoleErrors": [],
   "pageErrors": [],
   "ok": true,
@@ -2110,7 +2110,7 @@
   "diagnostics": [
     "scanned 72 elements, 40 instances"
   ],
-  "elapsedMs": 63,
+  "elapsedMs": 59,
   "routerFound": true,
   "booted": {
     "hasNg": true,

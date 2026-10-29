@@ -1,6 +1,6 @@
 {
   "slug": "alfresco",
-  "origin": "http://127.0.0.1:54464",
+  "origin": "http://127.0.0.1:54759",
   "consoleErrors": [],
   "pageErrors": [],
   "ok": true,
@@ -1855,7 +1855,7 @@
   "diagnostics": [
     "scanned 100 elements, 33 instances"
   ],
-  "elapsedMs": 3,
+  "elapsedMs": 2,
   "routerFound": true,
   "booted": {
     "hasNg": true,

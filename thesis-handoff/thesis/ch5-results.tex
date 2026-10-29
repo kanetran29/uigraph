@@ -851,9 +851,10 @@ matched nothing for a reason that was the extractor's, and the wildcard then for
 one of them and raised that application's recovered figure by eight points.
 That enum is read now, and so is the wrapper call that holds it, so those paths resolve
 rather than being forwarded; what remains is the mechanism.
-\RoundTwoWildcardCaveated{} of the catch-all-answered sites still carry the caveat, in the
-\RoundTwoLowerBoundApps{} applications whose route sets are a lower bound ---
-\RoundTwoLowerBoundWhere{} --- on these grounds: \RoundTwoLowerBoundReasons{}. An earlier version of this
+\RoundTwoWildcardCaveated{} of the catch-all-answered sites still carry the caveat, in
+\RoundTwoWildcardCaveatedApps{} applications --- \RoundTwoWildcardCaveatedWhere{} --- whose route
+sets the extractor reports as a lower bound and whose declared sets the runtime check of
+Section~\ref{sec:res-probe} has not measured as whole. An earlier version of this
 paragraph named three bitwarden paths assembled inside a template literal instead; those are
 read now, which is what moved its denominator, and what is left there is a boundary rather
 than a path. The note says which of the two it is, because a dropped subtree and an
@@ -1047,16 +1048,38 @@ Of the \ProbeMissed{}, \ProbeMissedGhostfolio{} are one construct in ghostfolio.
 comparison pages are not written down: a list of competitor records is mapped to routes and
 spread into the table, and each path is a template string over a field of the record. The
 extractor reads the table, mints the parent, and declares the spread a route source it could not
-read. \ProbeMissedAlfresco{} are in alfresco and they do not share a cause. \path{/login} and
-\path{/view/authentication-confirmation} belong to the shell application that composes the
-measured library, so they are outside the directory the measurement scopes to rather than inside
-it and unread. \path{/rules} is not: it is declared in the measured library's own
-\path{folder-rules} sub-library and registered at the root by \texttt{provideRouter} called inside
-a provider factory, a registration the extractor reads only when the routes are written out as an
-array argument. That is a reading gap inside the measured directory, and alfresco's route set is
-a declared lower bound on other grounds, so no claim of completeness is made over it. The
-remaining \ProbeMissedBitwarden{} is bitwarden's vault, whose route is produced by a helper that
-chooses between two components by feature flag.
+read. \ProbeMissedAlfresco{} are in alfresco and no two of them share a cause. \path{/login} is declared
+by the shell application that composes the measured library, and
+\path{/view/authentication-confirmation} by an installed package that shell provides; both are
+outside the directory the measurement scopes to, though for different reasons, and the second is
+outside it by a design choice the extractor states --- it does not follow a dependency into a
+package directory, because a package declares no screen of the application under measurement.
+
+The other two are inside it. \path{/rules} has its table in the measured library's own
+\path{folder-rules} sub-library, which a lazy route mounts under \path{/nodes/:nodeId/} and which
+also hands the same array to \texttt{provideRouter}, so the framework mounts it at \path{/rules}
+as well. The extractor follows the lazy route and not the second registration: the file is already
+claimed by that route and so is outside the scan that reads tables at the root, and because the
+walk does reach the file the loss leaves no note of its own.
+
+\path{/about} is not declared in TypeScript at all. The library ships \path{about.plugin.json},
+whose single entry is
+
+\begin{quote}\footnotesize\ttfamily
+\{ "id": "app.about", "path": "about", "layout": "app.layout.main",\\
+\hphantom{\{ }"component": "app.about.component" \}
+\end{quote}
+
+\noindent
+and an extension registry binds the identifier \texttt{app.about.component} to a class at run
+time. The route exists in data; no reader of the application's code can see it, and the
+extractor's analysis is over the code. The probe sees it because the framework assembles the
+table from the manifest before the probe reads the router. Both of these are recorded in the
+approximations of Section~\ref{sec:approximations}. alfresco's route set is a declared lower
+bound on other grounds, so no claim of completeness is made over it either way.
+
+The remaining \ProbeMissedBitwarden{} is bitwarden's vault, whose route is produced by a helper
+that chooses between two components by feature flag.
 
 One construct in ghostfolio therefore accounts for almost all of this column, and it is worth
 saying what that means and what it does not. It does not mean the graph is missing a quarter of
@@ -1070,10 +1093,13 @@ show and this comparison can.
 
 \ProbeMissedWithoutDeclaration{} applications hold a screen the framework mounts and the extractor
 has no node for without the extractor having said that part of its route set was beyond it. Every
-application in the first column of Table~\ref{tab:probe} that has a missing screen is an
-application that declared one, and that is what a soundiness claim is supposed to mean: the tool
-may miss things and says what it misses, and the things missed are inside what was said. Until
-this measurement the thesis could only assert it.
+application in Table~\ref{tab:probe} that has a missing screen is an application that declared
+one. The correspondence is per application and not per cause, which is the weaker of the two
+readings and the only one measured here: alfresco declares that it could not read ten spreads,
+and one of its three missing screens, \path{/rules}, has nothing to do with a spread. What the
+measurement supports is that no application is missing a screen while asserting that its route
+set is whole --- not that every missing screen is behind the construct its application named.
+Until this measurement the thesis could assert neither.
 
 The converse does not hold, and the table shows that too. \ProbeDeclaredButComplete{} application
 --- \ProbeDeclaredButCompleteWhere{} --- declares part of its route set unread and turns out to be
