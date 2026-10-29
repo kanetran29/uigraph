@@ -61,8 +61,20 @@ for (const app of manifest.apps) {
     '--out', join(a.out, `${app.slug}.cmp.json`),
   ])
   if (status !== 0) failed += 1
+  // The comparison decides which entries of a configuration answer an address, and that decision
+  // is a reading. Navigating to the addresses the chapter reasons about is what holds it against
+  // the framework's own behaviour, so it runs here rather than as a side errand nothing invokes.
+  const answerArgs = ['--slug', app.slug, '--dist', join(a['dist-root'], app.dist), '--addresses', (app.answerAddresses ?? []).join(','), '--out', join(a.out, `${app.slug}.answer.json`), '--wait', '12000']
+  if (app.base) answerArgs.push('--base', app.base)
+  if ((app.answerAddresses ?? []).length === 0) {
+    console.error(`${app.slug}: apps.json names no answerAddresses, so nothing holds the comparison's reading against the framework`)
+    failed += 1
+  } else if (node('answerability.mjs', answerArgs) !== 0) {
+    failed += 1
+  }
 }
+if (failed === 0 && node('framework-answer.mjs', ['--self-check', a.out]) !== 0) failed += 1
 if (failed > 0) {
-  console.error(`${failed} application(s) could not be probed or compared`)
+  console.error(`${failed} application(s) could not be probed, compared or measured`)
   process.exit(1)
 }

@@ -205,12 +205,15 @@ try {
   await browser.close()
   server.close()
 }
+// A file written with no router found says nothing about the application and reads, downstream,
+// exactly like one whose addresses all agreed, so it is not written at all.
+if (!out.routerFound) {
+  console.error(`${out.slug}: no Router found, so nothing was measured; build the application in development mode`)
+  process.exit(1)
+}
 writeFileSync(a.out, JSON.stringify(out, null, 2))
 for (const r of out.results) {
   const verdict = !r.recognized ? 'not-recognized' : r.catchAll ? 'catch-all' : r.redirected ? `redirect to ${r.after}` : r.placesComponent ? 'screen' : 'no screen of its own'
   console.log(`${r.target.padEnd(34)} ${verdict}`)
 }
-if (!out.routerFound) {
-  console.error('  router not found: build the application in development mode')
-  process.exit(1)
-}
+
