@@ -26,7 +26,7 @@
 // account for is worse than a number you admit you do not have.
 //
 // Usage: node index.mjs <appDir> [pathToUigraphDb] [--json out.json]
-//        node index.mjs --self-check     (asserts the path-boundary predicate and the lazy-module hop on built fixtures; no app needed)
+//        node index.mjs --self-check     (asserts the path-boundary predicate, the lazy-module hop and the mounting rules on built fixtures; no app needed)
 
 import { Project, SyntaxKind } from 'ts-morph'
 import { DatabaseSync } from 'node:sqlite'
@@ -44,6 +44,7 @@ const jsonOut = jsonIdx > -1 ? process.argv[jsonIdx + 1] : null
 if (process.argv.includes('--self-check')) {
   selfCheck()
   lazyHopCheck()
+  mountingCheck()
   process.exit(0)
 }
 
@@ -314,6 +315,188 @@ function lazyHopCheck() {
       want: '/a[LAZY_UNRESOLVED] /b[PREFIX] /b/list[SCREEN] | blind 1',
     },
   ]
+  runFixtures(cases, 'lazy-hop')
+}
+
+/**
+ * Assert the rules that decide WHERE a table is mounted, each on a constructed application. They
+ * are the framework's rules, not this reader's preferences, and each was found by building the
+ * shape it governs rather than by a corpus run, so a fixture is the evidence that it works and
+ * what the corpus makes of it is not yet measured:
+ * a type-only import erased by the compiler is not a module edge; a table the application registers
+ * at its root is mounted at the empty path and nowhere else, however and wherever it is registered;
+ * which of a file's tables a lazy prefix gets is said by the member the loader names, else by
+ * `forChild`, else by there being only one, and otherwise not said at all; a table a route carries
+ * by name, through a helper call or through a build constant's conditional is mounted under that
+ * route's prefix and must not be minted at the root as well.
+ *
+ * `want` is the whole route set and the blind-spot count, so a fixture fails both when a rule stops
+ * refusing an address and when it starts refusing one it should mount. Where a table no route
+ * claims appears at the root, that is the root scan's standing assumption -- an unclaimed route
+ * table is taken to be mounted at the root -- and not the rule under test.
+ */
+function mountingCheck() {
+  const head = "import { RouterModule, Routes } from '@angular/router';\n"
+  const registered = (reg, routes) => `${head}const routes: Routes = [\n${routes.map((r) => `  ${r},`).join('\n')}\n];\nexport const R = RouterModule.${reg}(routes);\n`
+  const table = (...routes) => registered('forChild', routes)
+  const rootTable = (...routes) => registered('forRoot', routes)
+  const lazy = (p, f, c) => `{ path: '${p}', loadChildren: () => import('${f}').then((m) => m.${c}) }`
+  // A lazy module whose only edge to the table beside it is erased by the compiler, written three ways.
+  const typeOnly = (edge) => ({
+    'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", lazy('a', './a/a.module', 'AModule')),
+    'app/a/a.module.ts': `${edge}\nexport class AModule {}\n`,
+    'app/a/shape-routing.module.ts': table("{ path: 'ghost', component: Ghost }"),
+  })
+  const cases = [
+    {
+      name: 'a type-only import is not a module edge',
+      files: typeOnly("import type { Shape } from './shape-routing.module';"),
+      // The unclaimed table is root-scanned; what is pinned is the absence of /a/ghost.
+      want: '/home[SCREEN] /a[LAZY_UNRESOLVED] /ghost[SCREEN] | blind 1',
+    },
+    {
+      name: 'an import whose every named binding is type-only is not a module edge',
+      files: typeOnly("import { type Shape } from './shape-routing.module';"),
+      want: '/home[SCREEN] /a[LAZY_UNRESOLVED] /ghost[SCREEN] | blind 1',
+    },
+    {
+      name: 'a type-only re-export is not a module edge',
+      files: typeOnly("export type { Shape } from './shape-routing.module';"),
+      want: '/home[SCREEN] /a[LAZY_UNRESOLVED] /ghost[SCREEN] | blind 1',
+    },
+    {
+      name: 'a lazy chain cannot adopt a root table declared in one file and registered in another',
+      // ghostfolio's and k8sdash's shape; a file-level forRoot test answers about the wrong file.
+      files: {
+        'app/app.routes.ts': `${head}export const routes: Routes = [\n  { path: 'home', component: Home },\n  ${lazy('y', './y/y.module', 'YModule')},\n];\n`,
+        'app/app.config.ts': "import { provideRouter } from '@angular/router';\nimport { routes } from './app.routes';\nexport const config = { providers: [provideRouter(routes)] };\n",
+        'app/y/y.module.ts': table("{ path: 'yy', component: YY }", lazy('z', '../z/z.module', 'ZModule')),
+        'app/z/z.module.ts': "import { routes } from '../app.routes';\nexport class ZModule {}\n",
+      },
+      want: '/home[SCREEN] /y[PREFIX] /y/yy[SCREEN] /y/z[LAZY_UNRESOLVED] | blind 1',
+    },
+    {
+      name: 'the member a loadChildren names picks the table out of a file holding two',
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('feat', './feat/feat.routes', 'FEAT_ROUTES')),
+        'app/feat/feat.routes.ts': `${head}export const FEAT_ROUTES: Routes = [{ path: 'real', component: Real }];\nexport const LEGACY_ROUTES: Routes = [{ path: 'ghost', component: Ghost }];\n`,
+      },
+      want: '/feat[PREFIX] /feat/real[SCREEN] | blind 0',
+    },
+    {
+      name: 'forChild picks the table out of a file holding two',
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('feat', './feat/feat.module', 'FeatModule')),
+        'app/feat/feat.module.ts': `${head}const mounted: Routes = [{ path: 'real', component: Real }];\nconst menuRoutes: Routes = [{ path: 'ghost', component: Ghost }];\nexport const R = RouterModule.forChild(mounted);\n`,
+      },
+      want: '/feat[PREFIX] /feat/real[SCREEN] | blind 0',
+    },
+    {
+      name: 'a file holding two tables and naming neither leaves the subtree unread, and the root does not mount it either',
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('feat', './feat/feat.routes', 'FeatModule')),
+        'app/feat/feat.routes.ts': `${head}export const A_ROUTES: Routes = [{ path: 'a', component: A }];\nexport const B_ROUTES: Routes = [{ path: 'b', component: B }];\n`,
+      },
+      want: '/feat[LAZY_UNRESOLVED] | blind 1',
+      reasons: ['lazy module has no discoverable route array'],
+    },
+    {
+      name: 'two holders the same distance out are refused to the prefix that reached both',
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('feat', './feat/feat.module', 'FeatModule')),
+        'app/feat/feat.module.ts': "import { SharedRoutingModule } from './shared-routing.module';\nimport { FeatRoutingModule } from './feat-routing.module';\nexport class FeatModule {}\n",
+        'app/feat/shared-routing.module.ts': table("{ path: 'shared', component: Shared }"),
+        'app/feat/feat-routing.module.ts': table("{ path: 'list', component: List }"),
+      },
+      want: '/feat[LAZY_UNRESOLVED] /list[SCREEN] /shared[SCREEN] | blind 1',
+    },
+    {
+      name: 'a table handed to a helper call is mounted under the prefix and not at the root',
+      files: {
+        'app/app-routing.module.ts': `${head}const ADMIN: Routes = [{ path: 'users', component: Users }];\nconst routes: Routes = [{ path: 'admin', children: withShell(ADMIN) }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/admin[PREFIX] /admin/users[SCREEN] | blind 0',
+    },
+    {
+      name: 'a route element written as a call over a named table is mounted under the prefix and not at the root',
+      files: {
+        'app/app-routing.module.ts': `${head}const USERS: Routes = [{ path: 'users', component: Users }];\nconst routes: Routes = [{ path: 'org', children: [Route.withShell(USERS)] }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/org[PREFIX] /org/users[SCREEN] | blind 0',
+    },
+    {
+      name: 'a children written as a name is mounted under the prefix and not at the root',
+      files: {
+        'app/app-routing.module.ts': `${head}const ADMIN: Routes = [{ path: 'users', component: Users }];\nconst routes: Routes = [{ path: 'admin', children: ADMIN }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/admin[PREFIX] /admin/users[SCREEN] | blind 0',
+    },
+    {
+      name: 'a build constant picks the arm it mounts, and neither arm is minted at the root',
+      files: {
+        'app/flags.ts': 'export const OIDC = false;\n',
+        'app/app-routing.module.ts': `${head}import { OIDC } from './flags';\nconst zitadel: Routes = [{ path: 'zit', component: Zit }];\nconst local: Routes = [{ path: 'loc', component: Loc }];\nconst routes: Routes = [{ path: 'auth', children: OIDC ? zitadel : local }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/auth[PREFIX] /auth/loc[SCREEN] | blind 0',
+    },
+    {
+      name: 'a conditional this reader cannot fix leaves the subtree unread and mints neither arm',
+      files: {
+        'app/app-routing.module.ts': `${head}const zitadel: Routes = [{ path: 'zit', component: Zit }];\nconst local: Routes = [{ path: 'loc', component: Loc }];\nconst routes: Routes = [{ path: 'auth', children: window.oidc ? zitadel : local }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/auth[PREFIX] | blind 1',
+      reasons: ['children not resolvable to a route array'],
+    },
+    {
+      name: 'an array the root registers is mounted at the root as well as under the prefix that loads it',
+      // alfresco's folder-rules table: handed to provideRouter AND loaded lazily, so mounted twice.
+      files: {
+        'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", lazy('f', './feat.routes', 'FEAT')),
+        'app/feat.routes.ts': `${head}import { provideRouter } from '@angular/router';\nexport const FEAT: Routes = [{ path: 'list', component: FList }];\nexport const P = provideRouter(FEAT);\n`,
+      },
+      want: '/home[SCREEN] /f[PREFIX] /f/list[SCREEN] /list[SCREEN] | blind 0',
+    },
+    {
+      name: 'a table a spread carries is declared unfollowed and not minted at the root either',
+      files: {
+        'app/app-routing.module.ts': `${head}const SUB: Routes = [{ path: 'x', component: X }];\nconst routes: Routes = [{ path: 'a', children: [...SUB] }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/a[PREFIX] | blind 1',
+      reasons: ['spread route source: not followed'],
+    },
+    {
+      name: 'a table carried under a prefix that no walk places is declared, not dropped',
+      files: {
+        'app/app-routing.module.ts': rootTable(lazy('feat', './feat/feat.routes', 'FeatModule')),
+        'app/feat/feat.routes.ts': `${head}const SUB: Routes = [{ path: 's', component: S }];\nexport const A: Routes = [{ path: 'a', children: SUB }];\nexport const B: Routes = [{ path: 'b', component: B }];\n`,
+      },
+      want: '/feat[LAZY_UNRESOLVED] | blind 2',
+      reasons: ['lazy module has no discoverable route array', 'route table carried under a prefix but reached from no root'],
+    },
+    {
+      name: 'a child of a named-outlet route has no primary address either',
+      // alfresco's document viewer. A navigation to /view/:nodeId in the built application is
+      // answered by the catch-all, so reading the subtree against the primary path put two
+      // addresses the framework mounts nothing at into the denominator of its coverage.
+      files: {
+        'app/app-routing.module.ts': rootTable(
+          "{ path: 'home', component: Home }",
+          "{ path: '', outlet: 'viewer', children: [{ path: 'view/:nodeId', component: Viewer, children: [{ path: 'pane', component: Pane }] }] }",
+        ),
+      },
+      want: '/home[SCREEN] /[AUX_OUTLET] /view/:nodeId[AUX_OUTLET] /view/:nodeId/pane[AUX_OUTLET] | blind 0',
+    },
+  ]
+  runFixtures(cases, 'mounting-rule')
+}
+
+/**
+ * Build each fixture as a throwaway Angular workspace, run this script over it as a child process
+ * and assert its route set and blind-spot count against the fixture's `want`. A child is used
+ * because the walk's state is module-level and bound to one appDir at load, so one process cannot
+ * read two applications. `--self-check` drives every fixture group through here.
+ */
+function runFixtures(cases, label) {
   const tmp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'route-oracle-')))
   try {
     for (const [i, c] of cases.entries()) {
@@ -344,7 +527,7 @@ function lazyHopCheck() {
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true })
   }
-  console.log(`self-check ok: ${cases.length} lazy-hop fixtures`)
+  console.log(`self-check ok: ${cases.length} ${label} fixtures`)
 }
 
 /**
@@ -563,6 +746,109 @@ function looksLikeRouteArray(arr) {
   )
 }
 
+/**
+ * The truth value a build constant fixes a condition to, or undefined when nothing in the sources
+ * reads it. Only what a build constant can be: a boolean literal, a name or property chain that
+ * reaches one, and a negation of either. A condition that depends on run-time state has no
+ * statically selected arm, and a reader that guessed one would mount a table this build does not.
+ */
+function staticTruth(n) {
+  if (!n) return undefined
+  const k = n.getKind()
+  if (k === SyntaxKind.AsExpression || k === SyntaxKind.ParenthesizedExpression || k === SyntaxKind.SatisfiesExpression) return staticTruth(n.getExpression())
+  if (k === SyntaxKind.TrueKeyword) return true
+  if (k === SyntaxKind.FalseKeyword) return false
+  if (k === SyntaxKind.PrefixUnaryExpression && n.getOperatorToken() === SyntaxKind.ExclamationToken) {
+    const inner = staticTruth(n.getOperand())
+    return inner === undefined ? undefined : !inner
+  }
+  if (k === SyntaxKind.Identifier) return staticTruth(declInit(n))
+  if (k === SyntaxKind.PropertyAccessExpression) {
+    const obj = objLit(n.getExpression())
+    const p = obj?.getProperty(n.getName())
+    return p && p.getKind() === SyntaxKind.PropertyAssignment ? staticTruth(p.getInitializer()) : undefined
+  }
+  return undefined
+}
+
+/**
+ * The array literal an expression names -- through a cast, a name, a property chain, or the arm a
+ * build constant's conditional selects -- or null. Angular mounts whatever the expression
+ * evaluates to, so `children: ADMIN` is the same table to the router as the array written out in
+ * place, and `oidc ? zitadelRoutes : localRoutes` is ONE table in the build that is read, which
+ * the sources fix rather than leave to a guess. A condition this reader cannot fix answers null,
+ * so the caller declares the subtree unread instead of taking an arm.
+ */
+function namedArray(n) {
+  if (!n) return null
+  const k = n.getKind()
+  if (k === SyntaxKind.ArrayLiteralExpression) return n
+  if (k === SyntaxKind.AsExpression || k === SyntaxKind.ParenthesizedExpression || k === SyntaxKind.SatisfiesExpression) return namedArray(n.getExpression())
+  if (k === SyntaxKind.ConditionalExpression) {
+    const t = staticTruth(n.getCondition())
+    return t === undefined ? null : namedArray(t ? n.getWhenTrue() : n.getWhenFalse())
+  }
+  if (k === SyntaxKind.Identifier) return namedArray(declInit(n))
+  if (k === SyntaxKind.PropertyAccessExpression) {
+    const obj = objLit(n.getExpression())
+    const p = obj?.getProperty(n.getName())
+    return p && p.getKind() === SyntaxKind.PropertyAssignment ? namedArray(p.getInitializer()) : null
+  }
+  return null
+}
+
+/**
+ * Every array literal an expression could name, both arms of a conditional included. Only the
+ * selected arm is mounted; the other is mounted NOWHERE, and the point of naming it is to keep the
+ * root scan from finding it by name and minting its routes at the application root, an address the
+ * build mounts nothing at.
+ */
+function reachableArrays(n) {
+  if (!n) return []
+  const k = n.getKind()
+  if (k === SyntaxKind.AsExpression || k === SyntaxKind.ParenthesizedExpression || k === SyntaxKind.SatisfiesExpression) return reachableArrays(n.getExpression())
+  if (k === SyntaxKind.ConditionalExpression) return [...reachableArrays(n.getWhenTrue()), ...reachableArrays(n.getWhenFalse())]
+  if (k === SyntaxKind.Identifier) return reachableArrays(declInit(n))
+  const one = namedArray(n)
+  return one ? [one] : []
+}
+
+/**
+ * The route arrays a call hands on, for a table written `withShell(ADMIN)` or `[Route.wrap(X)]`.
+ * Only the arguments are read: what the callee builds out of them is beyond a static read, while
+ * the arguments are a table the author wrote and the router ends up with in every shape of this
+ * the corpus holds. An argument written as a name is resolved, because that is how it is written.
+ */
+function callArrayArgs(n) {
+  if (!n || n.getKind() !== SyntaxKind.CallExpression) return []
+  const out = []
+  for (const a of n.getArguments()) {
+    const arr = namedArray(a)
+    if (arr && !out.includes(arr)) out.push(arr)
+  }
+  return out
+}
+
+/**
+ * Keep every array an expression could name out of the root scan: the one the build mounts under
+ * this prefix, and the arm of a conditional it does not mount anywhere. A helper call is read
+ * through its arguments, as `callArrayArgs` reads it. Without this the root scan still finds such
+ * a table by its declaration and mints its routes unprefixed -- `/users` beside the real
+ * `/admin/users`, a node and a must edge at an address the application mounts nothing at.
+ *
+ * The two sets differ in what their absence means, which is why they are two. A prefixed array the
+ * walk never places afterwards is a table that LEFT the route set, and is declared; an arm the
+ * build does not take was never in it.
+ */
+function claimPrefixed(expr) {
+  const parts = expr?.getKind() === SyntaxKind.CallExpression ? expr.getArguments() : [expr]
+  for (const e of parts) {
+    const taken = namedArray(e)
+    if (taken) prefixedArrays.add(taken)
+    for (const a of reachableArrays(e)) if (a !== taken) offRootArrays.add(a)
+  }
+}
+
 /** Collect route-table array literals in a file: typed `Routes`, or passed to the router APIs. */
 function routeArraysIn(sf) {
   const found = []
@@ -575,19 +861,16 @@ function routeArraysIn(sf) {
       found.push(init)
     }
   }
-  // RouterModule.forRoot([...]) / forChild([...]) / provideRouter([...])
+  // RouterModule.forRoot([...]) / forChild([...]) / provideRouter([...]). The argument is resolved
+  // through whatever names it, because a registration writes its table as a name far more often
+  // than inline. Only an array declared in THIS file is returned as this file's: a table reached
+  // by name is read from the file it is written in, and returning it here as well would walk it
+  // twice, under two file names, and double every route it declares.
   for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
     const callee = call.getExpression().getText()
     if (!/(RouterModule\.(forRoot|forChild)|provideRouter)$/.test(callee)) continue
-    const arg = call.getArguments()[0]
-    if (!arg) continue
-    if (arg.getKind() === SyntaxKind.ArrayLiteralExpression) {
-      found.push(arg)
-    } else if (arg.getKind() === SyntaxKind.Identifier) {
-      const decl = sf.getVariableDeclaration(arg.getText())
-      const init = decl?.getInitializer()
-      if (init && init.getKind() === SyntaxKind.ArrayLiteralExpression) found.push(init)
-    }
+    const arr = namedArray(call.getArguments()[0])
+    if (arr && arr.getSourceFile() === sf) found.push(arr)
   }
   return [...new Set(found)]
 }
@@ -666,6 +949,22 @@ const lazyTargets = new Set()
 const tableClaims = new Map()
 // The files walkArray reached in the current pass.
 const walkedFiles = new Set()
+// The arrays walkArray entered in the current pass.
+const walkedArrays = new Set()
+// Files a `loadChildren` claims whose table could not be read: Angular mounts a lazy module's
+// table under the prefix that loads it and never at the root, so the root scan does not get a
+// second go at it. The hole is declared where it is found, so these are not declared again.
+const refusedTargets = new Set()
+// The arrays the application registers at its own root, by either router API.
+const rootArrays = rootRegisteredArrays()
+// Arrays some route carries under a prefix without writing them out -- a `children` written as a
+// name, a table handed to a helper call -- so the root scan, which finds an array by its
+// declaration, must not mint them unprefixed as well.
+const prefixedArrays = new Set()
+// Arrays kept out of the root scan with nothing left to declare about them: the arm of a
+// build-constant conditional, which the build mounts NOWHERE, and the table behind a spread, whose
+// loss the spread's own blind spot already states.
+const offRootArrays = new Set()
 
 /**
  * The project root a loaded file belongs to: this application, or the `paths` alias root that
@@ -684,6 +983,22 @@ function projectRootOf(file) {
 }
 
 /**
+ * Does this import or re-export declaration bring no VALUE into the module? TypeScript erases a
+ * `import type { X }` and an `export type { X }`, and a declaration whose every named binding is
+ * marked `type` is erased with it, so nothing such a declaration names can register a route where
+ * it is written: the module it points at is not in the compiled output's module graph at all.
+ * Following one let a lazy module reach a routing module it has no relation to, adopt its table
+ * and mount it at a prefix the framework mounts nothing at, with no blind spot recorded. A
+ * declaration with no named bindings (`export * from`, a default or namespace import) is a value
+ * edge, so the emptiness of the list is never read as "all of them are types".
+ */
+function isTypeOnly(decl) {
+  if (decl.isTypeOnly()) return true
+  const named = decl.getNamedImports?.() ?? decl.getNamedExports()
+  return named.length > 0 && named.every((n) => n.isTypeOnly())
+}
+
+/**
  * The files a module re-exports by a relative specifier, which is how a barrel stands in front
  * of a routing module (`export { FeatRoutingModule } from './feat-routing.module'`). A non-relative
  * specifier is left out because it can name any file in the application.
@@ -691,6 +1006,7 @@ function projectRootOf(file) {
 function relativeReExports(sf) {
   const deps = []
   for (const exp of sf.getExportDeclarations()) {
+    if (isTypeOnly(exp)) continue
     const spec = exp.getModuleSpecifierValue()
     if (!spec || !spec.startsWith('.')) continue
     const dep = exp.getModuleSpecifierSourceFile() ?? resolveModule(sf.getFilePath(), spec)
@@ -705,27 +1021,39 @@ const LAZY_OWNER_HOPS = 3
 
 /**
  * The table a lazy target mounts when the target holds none itself, found by following what it
- * imports and what it re-exports. The search is breadth-first and stops at the nearest file that
+ * imports and what it re-exports. The search is breadth-first and stops at the nearest level that
  * holds a table, so a routing module one hop from the feature module is never outranked by an
  * unrelated table further out. Every ownership test the single hop applied is applied at each
- * level, unchanged; what is new is only that a module holding no table is a hop on the way to one
- * rather than a dead end, which is what a barrel in front of a feature module in front of a
- * routing module requires. Returns null when no level yields one.
+ * level, unchanged; a module holding no table is a hop on the way to one rather than a dead end,
+ * which is what a barrel in front of a feature module in front of a routing module requires.
+ *
+ * Two answers of "nothing is said" end the search rather than widening it, because hopping past a
+ * table that is there would mount a further one under this prefix instead. A holder whose own file
+ * does not say which of its tables is mounted (`mountedArrays`) says nothing about this prefix
+ * either; and two holders the same distance out say nothing between them, which is the shape of a
+ * feature module importing a shared module beside its own routing module. Returns null in both,
+ * and when no level yields a table at all, and the caller then declares the subtree unread.
  */
 function tableBehind(target, routeFile, bound) {
   const seen = new Set([target.getFilePath()])
   let frontier = [target]
   for (let hop = 0; hop < LAZY_OWNER_HOPS && frontier.length > 0; hop += 1) {
     const next = []
+    let holder = null
+    let unreadable = false
     for (const from of frontier) {
       for (const dep of hopCandidates(from, routeFile, bound, target)) {
         if (seen.has(dep.getFilePath())) continue
         seen.add(dep.getFilePath())
-        const arrays = routeArraysIn(dep)
-        if (arrays.length) return { arrays, owner: dep }
-        next.push(dep)
+        if (routeArraysIn(dep).length === 0) { next.push(dep); continue }
+        const arrays = mountedArrays(dep, null)
+        if (arrays.length === 0) { unreadable = true; continue }
+        if (holder) return null
+        holder = { arrays, owner: dep }
       }
     }
+    if (holder) return holder
+    if (unreadable) return null
     frontier = next
   }
   return null
@@ -745,12 +1073,13 @@ function hopCandidates(from, routeFile, bound, target) {
   const keep = (dep, relative) => {
     if (!dep || !bound || !dep.getFilePath().startsWith(bound)) return
     if (dep.getFilePath() === routeFile.getFilePath() || claimedElsewhere(dep, target)) return
-    if (isRootTable(dep)) return
+    if (mountsOnlyAtRoot(dep)) return
     // A non-relative specifier reaches the whole application, so follow one only into the importing module's own directory.
     if (!relative && path.dirname(dep.getFilePath()) !== path.dirname(from.getFilePath())) return
     out.push(dep)
   }
   for (const imp of from.getImportDeclarations()) {
+    if (isTypeOnly(imp)) continue
     keep(imp.getModuleSpecifierSourceFile(), imp.getModuleSpecifierValue().startsWith('.'))
   }
   for (const dep of relativeReExports(from)) keep(dep, true)
@@ -780,36 +1109,103 @@ function claimedElsewhere(dep, target) {
 }
 
 /**
- * Does this file register a table with `RouterModule.forRoot`? Such a table is the application's
- * root table: Angular mounts it at the empty path and nowhere else, and a lazy module registers
- * its own with `forChild`, so no lazy module may adopt a `forRoot` table as its own. mifos's
- * `reports-routing.module` registers with `forChild` and is adopted; its `app-routing.module`
- * registers with `forRoot` and is not. No route claims a root table, so `claimedElsewhere` cannot
- * see it. Three limits, all measured rather than assumed. The test reads the file's own `forRoot`
- * call, so a root table whose array is declared in one file and registered in another is not
- * recognised. It reads `RouterModule.forRoot` only, while the recogniser above accepts
- * `forChild` and `provideRouter` as well, so on an application whose root is registered with the
- * standalone API, or through an alias of `RouterModule`, there is no recognisable root table and
- * this guard is inoperative: two of the six evaluated applications, realworld and alfresco, have
- * no `forRoot` call at all. The first limit costs two more, and in a way worth stating precisely
- * because it is easy to state wrongly. ghostfolio declares its root array in `app/app.routes.ts`
- * and registers it in `main.ts`; k8sdash declares its in `index.routing.ts` and registers it in
- * `index.module.ts`. This test DOES answer true for `main.ts` and for `index.module.ts` -- they
- * hold the `forRoot` call -- but neither holds a route of its own, so answering true about them
- * protects nothing: the file a lazy module would adopt is the one holding the ARRAY, and that
- * file answers false. Four of the six applications therefore have no file whose recognition
- * would refuse anything, and only bitwarden and mifos declare and register in one file. And instrumenting it over the whole corpus, it is asked 698 times
- * and answers true NONE of them, because it is asked only of a lazy target's dependencies and no
- * corpus application names a file holding a `forRoot` call there. So the mifos reading above is
- * a counterfactual rather than an observation: `reports-routing.module` is adopted, and
- * `app-routing.module` would be refused if a lazy target ever reached it, which none does. Every
- * piece of evidence that this guard works is a constructed fixture in `--self-check`. Widening
- * the predicate is not the fix, because a library's own `forRoot` is a different thing from the
- * router's; the fix is to resolve each registration call's argument and mark that ARRAY, not the
- * file, as the root table.
+ * The arrays an application registers at its own root, by EITHER router API, each resolved through
+ * the name the argument is nearly always written as. Angular mounts such an array at the empty
+ * path and nowhere else, so no lazy prefix may adopt one; and it mounts it there whether or not
+ * some lazy site also claims the file the array sits in.
+ *
+ * Marked per ARRAY and collected over every loaded file, because the registration is as often as
+ * not in a different file from the table: ghostfolio declares its root array in `app/app.routes.ts`
+ * and registers it in `main.ts`, k8sdash declares its in `index.routing.ts` and registers it in
+ * `index.module.ts`. The file-level, `forRoot`-only predicate this replaces therefore answered
+ * about the file holding the CALL, which holds no route of its own, and about nothing else:
+ * instrumented over the corpus it answered true in none of 2798 evaluations, and on the shape
+ * above a lazy chain was free to adopt the application's whole root table -- which collapsed the
+ * declared route set to zero routes, measured on a fixture of that shape.
  */
-function isRootTable(file) {
-  return file.getDescendantsOfKind(SyntaxKind.CallExpression).some((c) => /RouterModule\.forRoot$/.test(c.getExpression().getText()))
+function rootRegisteredArrays() {
+  const out = new Set()
+  for (const sf of files) {
+    for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      if (!/(RouterModule\.forRoot|provideRouter)$/.test(call.getExpression().getText())) continue
+      for (const a of call.getArguments()) {
+        const arr = namedArray(a)
+        if (arr) out.add(arr)
+      }
+    }
+  }
+  return out
+}
+
+/**
+ * Is every table this file holds one the application registers at its root? Then the file is not
+ * one a lazy prefix may adopt: what it declares is mounted at the empty path already, and mounting
+ * it under a prefix as well would both invent that prefix's addresses and take the table out of
+ * the root scan. Asked of the ARRAYS and not of the file, because one file may hold a root table
+ * and a feature table side by side, and because a file holding no table at all is a waypoint on
+ * the way to one rather than something to refuse.
+ */
+function mountsOnlyAtRoot(file) {
+  const own = routeArraysIn(file)
+  return own.length > 0 && own.every((a) => rootArrays.has(a))
+}
+
+/**
+ * The arrays in a lazy target's file that the prefix loading it mounts, by the rule Angular itself
+ * applies, or none when the file does not say which. The member the `loadChildren` names is asked
+ * first: `.then((m) => m.ROUTES)` says which of the module's exports the router is handed, and a
+ * barrel standing in front of it does not change the answer. Failing that,
+ * `RouterModule.forChild` is the module's own statement of which of its tables the prefix that
+ * loads it gets. Failing that, a file holding exactly one table holds the one that is mounted.
+ *
+ * A file holding several and saying nothing answers with NONE, and the caller declares the subtree
+ * unread. Mounting them all, which is what reading every table in the file did, gives the prefix
+ * every table the file happens to hold: on a file declaring one mounted table and one menu or
+ * legacy table beside it, half the addresses minted under that prefix are addresses the
+ * application mounts nothing at.
+ */
+function mountedArrays(target, member) {
+  if (member) {
+    const named = exportedArray(target, member, new Set())
+    if (named) return [named]
+  }
+  const registered = []
+  for (const call of target.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    if (!/RouterModule\.forChild$/.test(call.getExpression().getText())) continue
+    for (const a of call.getArguments()) {
+      const arr = namedArray(a)
+      if (arr && arr.getSourceFile() === target && !registered.includes(arr)) registered.push(arr)
+    }
+  }
+  if (registered.length > 0) return registered
+  const own = routeArraysIn(target)
+  return own.length === 1 ? own : []
+}
+
+/**
+ * The route array a module exports under `name`, through the re-exports a barrel stands behind.
+ * The array has to be one this file's own recogniser calls a route table, so a module's unrelated
+ * export of the same name is never mounted as routes.
+ */
+function exportedArray(sf, name, seen) {
+  if (seen.has(sf.getFilePath()) || seen.size > LAZY_OWNER_HOPS) return null
+  seen.add(sf.getFilePath())
+  for (const vd of sf.getVariableDeclarations()) {
+    if (vd.getName() !== name || !vd.isExported()) continue
+    const arr = namedArray(vd.getInitializer())
+    if (arr && arr.getSourceFile() === sf && routeArraysIn(sf).includes(arr)) return arr
+  }
+  for (const exp of sf.getExportDeclarations()) {
+    if (isTypeOnly(exp)) continue
+    const spec = exp.getModuleSpecifierValue()
+    if (!spec) continue
+    const named = exp.getNamedExports()
+    if (named.length > 0 && !named.some((n) => (n.getAliasNode()?.getText() ?? n.getName()) === name)) continue
+    const dep = exp.getModuleSpecifierSourceFile() ?? resolveModule(sf.getFilePath(), spec)
+    const found = dep ? exportedArray(dep, name, seen) : null
+    if (found) return found
+  }
+  return null
 }
 
 /**
@@ -828,6 +1224,12 @@ function isRootTable(file) {
  * The project is built with the workspace's baseUrl and `paths`, so TypeScript resolves such a
  * specifier itself, and only to a file already loaded. Four tests then decide whether the file
  * it names may be adopted as the target's table, and they guard against different things.
+ *
+ * WHICH of a file's tables the prefix then mounts is a separate question, and it is the framework
+ * that answers it (`mountedArrays`): the member the loader spells out, else the array `forChild`
+ * registers, else the only one there is, and otherwise nothing, with the subtree declared unread.
+ * Walking every table the file happens to hold gave each prefix all of them and minted the cross
+ * product, half of it at addresses the application mounts nothing at.
  *
  * The project-root bound (`projectRootOf`) keeps a hop inside the target's own project. Every
  * `paths` alias root is loaded too, and for bitwarden those include sibling applications
@@ -849,8 +1251,9 @@ function isRootTable(file) {
  *
  * Ownership cannot see a table that no route claims, and the application's root table is the one
  * that matters: it is mounted at the empty path and nowhere else, so a lazy module that adopted
- * it would mount it under a second prefix and take it out of the roots. `isRootTable` tells it
- * apart by how it is registered, whichever directory it sits in and however the import spells it.
+ * it would mount it under a second prefix and take it out of the roots. `rootRegisteredArrays`
+ * tells it apart by how it is registered -- by either router API, and by the ARRAY and not the
+ * file, so a table declared in one file and registered in another is still recognised.
  *
  * Nor can ownership see the chain between the route and a non-relative specifier, which can name
  * any file in the application. An import hop therefore follows a non-relative specifier only into
@@ -873,24 +1276,27 @@ function isRootTable(file) {
  * prefix. Bounding it by project root closes that but also refuses a shared lazy library that
  * lives in a `paths` alias root, as alfresco's does, and the path alone cannot tell the two apart.
  * The same absence of a test on `target` lets a loadChildren that names the application's own root
- * table mount the whole root table under that route's prefix, silently; `isRootTable` is asked of
- * the DEPENDENCIES of a target, never of the target itself, because a route that names a file
- * directly is taken at its word. The cost is not only the wrong prefix: the adopted table becomes
- * a lazy target, so the root scan no longer reads it, and the addresses the application really
- * mounts leave the route set altogether while the prefixed ones take their place, with no blind
- * spot recorded.
+ * table mount that table under the route's prefix as well: the root-table test is asked of the
+ * DEPENDENCIES of a target, never of the target itself, because a route that names a file directly
+ * is taken at its word. It no longer costs the root mount -- a root-registered array is walked at
+ * the root whatever claims its file -- so what remains is one prefix the application does not have
+ * beside the addresses it does. That reading is deliberate for the shape it is really for:
+ * alfresco's folder-rules table is handed to `provideRouter` AND loaded lazily, and Angular mounts
+ * it at both addresses.
  */
-function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
+function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false, underAux = false) {
   if (depth > 12) return
   const key = `${sf.getFilePath()}:${arr.getStart()}:${prefix}`
   if (visitedArrays.has(key)) return
   visitedArrays.add(key)
   walkedFiles.add(sf.getFilePath())
+  walkedArrays.add(arr)
 
   for (const el of arr.getElements()) {
-    // A wrapper helper such as Route.withShell([...]) is transparent: walk its array argument under the same prefix.
+    // A wrapper helper such as Route.withShell(USERS) is transparent: its arguments are the table.
     if (el.getKind() === SyntaxKind.CallExpression) {
-      for (const a of el.getArguments()) if (a.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(a, prefix, sf, depth + 1, unresolved, lazy)
+      claimPrefixed(el)
+      for (const a of callArrayArgs(el)) walkArray(a, prefix, a.getSourceFile(), depth + 1, unresolved, lazy, underAux)
       continue
     }
     // A spread is a route source this reader does not follow, so the table it carries is outside
@@ -899,6 +1305,8 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
     // reported as fully read, and every "this path is declared nowhere" taken from it would rest
     // on a table nobody opened.
     if (el.getKind() === SyntaxKind.SpreadElement) {
+      // The table a spread carries is mounted under THIS prefix, never unprefixed at the root.
+      for (const a of reachableArrays(el.getExpression())) offRootArrays.add(a)
       blindSpots.push({ reason: 'spread route source: not followed', spec: el.getText().slice(0, 60), at: `${path.relative(appDir, sf.getFilePath())}:${el.getStartLineNumber()}`, prefix })
       continue
     }
@@ -927,8 +1335,18 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
       .filter((g) => prop(g))
       .map((g) => prop(g).getInitializer()?.getText().replace(/\s+/g, ' ').slice(0, 80))
 
+    // A route on a named outlet is reached as `(name:path)`, and an outlet is inherited, so
+    // nothing below one has a primary address either. Reading the subtree against the primary
+    // path put alfresco's document viewer at /view/:nodeId, where a navigation to the built
+    // application is answered by the catch-all: two addresses in the declared set that the
+    // framework mounts nothing at, and they were the whole of the denominator's error there.
+    const outletProp = prop('outlet')
+    const outlet = outletProp ? text(outletProp.getInitializer()) : null
+    const aux = underAux || (outlet !== null && outlet !== 'primary')
+
     let kind
-    if (matcher) kind = 'MATCHER'
+    if (aux) kind = 'AUX_OUTLET'
+    else if (matcher) kind = 'MATCHER'
     else if (redirect !== null) kind = 'REDIRECT'
     else if (seg === '**') kind = 'WILDCARD'
     else if (hasComponent) kind = 'SCREEN'
@@ -957,8 +1375,14 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
     })
 
     if (childrenProp) {
-      const init = childrenProp.getInitializer()
-      if (init && init.getKind() === SyntaxKind.ArrayLiteralExpression) walkArray(init, full, sf, depth + 1, unreadable, lazy)
+      // `children: ADMIN`, `withShell(ADMIN)` and `FLAG ? a : b` are the array written out, to Angular.
+      const init = childrenProp.getKind() === SyntaxKind.PropertyAssignment ? childrenProp.getInitializer() : undefined
+      claimPrefixed(init)
+      const named = namedArray(init)
+      const childArrays = named ? [named] : callArrayArgs(init)
+      for (const a of childArrays) walkArray(a, full, a.getSourceFile(), depth + 1, unreadable, lazy, aux)
+      // A `children` this reader cannot bring back to an array is a subtree it never entered.
+      if (childArrays.length === 0) blindSpots.push({ reason: 'children not resolvable to a route array', spec: (init ?? childrenProp).getText().slice(0, 60), at, prefix: full })
     }
 
     if (loadChildren) {
@@ -972,19 +1396,24 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
         routes[routes.length - 1].kind = 'LAZY_UNRESOLVED'
       } else {
         claimTables(target)
-        let arrays = routeArraysIn(target)
-        let owner = target
+        // The member a loadChildren spells out says which table the router is handed.
+        const member = m ? (t.match(/=>\s*[A-Za-z_$][\w$]*\s*\.\s*([A-Za-z_$][\w$]*)/)?.[1] ?? null) : direct ? direct[1] : null
+        let arrays = mountedArrays(target, member)
         const bound = projectRootOf(target.getFilePath())
         if (arrays.length === 0) {
           const behind = tableBehind(target, sf, bound)
-          if (behind) { arrays = behind.arrays; owner = behind.owner }
+          if (behind) arrays = behind.arrays
         }
-        if (arrays.length) lazyTargets.add(owner.getFilePath())
         if (arrays.length === 0) {
+          if (routeArraysIn(target).length > 0) refusedTargets.add(target.getFilePath())
           blindSpots.push({ reason: 'lazy module has no discoverable route array', file: path.relative(appDir, target.getFilePath()), prefix: full })
           routes[routes.length - 1].kind = 'LAZY_UNRESOLVED'
         } else {
-          for (const a of arrays) walkArray(a, full, owner, depth + 1, unreadable, true)
+          // Claimed under the file each table is WRITTEN in, which a barrel in front need not be.
+          for (const a of arrays) {
+            lazyTargets.add(a.getSourceFile().getFilePath())
+            walkArray(a, full, a.getSourceFile(), depth + 1, unreadable, true, aux)
+          }
         }
       }
     }
@@ -995,9 +1424,8 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false) {
 // are not, so a lazily loaded table is walked under its real prefix and not also from ''.
 // (Harness 1.0.0 walked every table from '' as well, which double-counted lazy screens.)
 for (const sf of files) for (const arr of routeArraysIn(sf)) walkArray(arr, '', sf, 0)
-routes.length = 0; blindSpots.length = 0; visitedArrays.clear(); walkedFiles.clear()
+routes.length = 0; blindSpots.length = 0; visitedArrays.clear(); walkedFiles.clear(); walkedArrays.clear()
 for (const sf of files) {
-  if (lazyTargets.has(sf.getFilePath())) continue
   // A `paths` alias root can be a SIBLING application -- bitwarden's apps/web resolves its
   // imports through apps/browser -- and that application's route table is not this one's.
   // Walking it put 41 of bitwarden's 111 declared screen paths in another app's popup, and
@@ -1006,7 +1434,16 @@ for (const sf of files) {
   // alias resolve; it is only no longer read as a declaration of THIS application.
   // A path-boundary test: a bare string prefix also passes a sibling directory such as `<appDir>-extension`.
   if (!sf.getFilePath().startsWith(appDir + path.sep)) continue
-  for (const arr of routeArraysIn(sf)) walkArray(arr, '', sf, 0)
+  const claimed = lazyTargets.has(sf.getFilePath())
+  for (const arr of routeArraysIn(sf)) {
+    // An array registered at the application root is mounted there by Angular whatever else
+    // reaches it, so a lazy claim over its FILE does not unmount it: a feature library that hands
+    // its table to provideRouter and is also loaded lazily has it mounted at BOTH addresses, and
+    // skipping the file lost the root one in silence. Everything else a lazy claim or a prefixed
+    // site covers is mounted under that prefix and must not be minted here as well.
+    if (!rootArrays.has(arr) && (claimed || refusedTargets.has(sf.getFilePath()) || prefixedArrays.has(arr) || offRootArrays.has(arr))) continue
+    walkArray(arr, '', sf, 0)
+  }
 }
 
 // Pass 2 skipped every file pass 1 took for a lazy table. One that no walk then reached was dropped, not absent
@@ -1015,6 +1452,17 @@ for (const sf of files) {
 for (const f of lazyTargets) {
   if (!f.startsWith(appDir + path.sep) || walkedFiles.has(f)) continue
   blindSpots.push({ reason: 'route table taken as lazy but reached from no root', file: path.relative(appDir, f), prefix: '' })
+}
+
+// The same silence, one construct over: a table a `children` name or a helper call carries under a
+// prefix is kept out of the root scan on the strength of a site the second pass may never reach --
+// one inside a lazy subtree that pass then declared unread, say. Such a table was DROPPED and not
+// absent, so it is declared here. An array the root registers was walked at the root above, and an
+// arm the build does not take is mounted nowhere, so neither is a loss.
+for (const arr of prefixedArrays) {
+  const f = arr.getSourceFile().getFilePath()
+  if (walkedArrays.has(arr) || rootArrays.has(arr) || !f.startsWith(appDir + path.sep)) continue
+  blindSpots.push({ reason: 'route table carried under a prefix but reached from no root', file: path.relative(appDir, f), at: `${path.relative(appDir, f)}:${arr.getStartLineNumber()}`, prefix: '' })
 }
 
 // ---------------------------------------------------------------- compare

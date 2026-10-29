@@ -6,11 +6,11 @@
 Application & Before & After & Declared & Blind spots \\
 \midrule
 realworld & 100.0\,\% (10/10) & 100.0\,\% (10/10) & 10 & 0 \\
-alfresco & 96.0\,\% (24/25) & 100.0\,\% (27/27) & 25$\to$27 & 10 \\
+alfresco & 96.0\,\% (24/25) & 100.0\,\% (26/26) & 25$\to$26 & 10 \\
 ghostfolio & 0.0\,\% (0/84) & 100.0\,\% (84/84) & 84 & 2 \\
 k8s dashboard & 100.0\,\% (2/2) & 100.0\,\% (67/67) & 2$\to$67 & 0 \\
 bitwarden & 46.4\,\% (45/97) & 100.0\,\% (98/98) & 97$\to$98 & 1 \\
-mifos & 0.3\,\% (2/610) & 100.0\,\% (610/610) & 610 & 0 \\
+mifos & 0.3\,\% (2/610) & 100.0\,\% (605/605) & 610$\to$605 & 3 \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoAccounting}{%
@@ -19,13 +19,13 @@ mifos & 0.3\,\% (2/610) & 100.0\,\% (610/610) & 610 & 0 \\
 Application & Sites & Excl. & In scope & Recovered & Dynamic & Unplaced \\
 \midrule
 realworld & 40 & 0 & 40 & 97.5\,\% & 2.5\,\% & 0.0\,\% \\
-alfresco & 34 & 0 & 34 & 32.4\,\% & 38.2\,\% & 29.4\,\% \\
+alfresco & 34 & 4 & 30 & 23.3\,\% & 33.3\,\% & 43.3\,\% \\
 ghostfolio & 198 & 0 & 198 & 40.9\,\% & 43.9\,\% & 14.1\,\% \\
 k8s dashboard & 72 & 0 & 72 & 15.3\,\% & 73.6\,\% & 8.3\,\% \\
 bitwarden & 132 & 0 & 132 & 51.5\,\% & 18.2\,\% & 24.2\,\% \\
-mifos & 1344 & 1 & 1343 & 89.6\,\% & 8.3\,\% & 1.3\,\% \\
+mifos & 1344 & 3 & 1341 & 88.4\,\% & 8.2\,\% & 2.5\,\% \\
 \midrule
-All & 1820 & 1 & 1819 & 77.7\,\% & 15.9\,\% & 5.2\,\% \\
+All & 1820 & 7 & 1813 & 76.8\,\% & 15.7\,\% & 6.2\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoReasons}{%
@@ -47,44 +47,45 @@ Sites & Reason the site is not a transition \\
 Application & Edges & Judged & Clean of judged & Must clean & Must conversion \\
 \midrule
 realworld & 57 & 35 & 91.4\,\% & 9/9 & 30.0\,\% \\
-alfresco & 56 & 21 & 95.2\,\% & n/a & 0.0\,\% \\
+alfresco & 56 & 20 & 95.0\,\% & n/a & 0.0\,\% \\
 ghostfolio & 410 & 129 & 93.8\,\% & n/a & 0.0\,\% \\
 k8s dashboard & 181 & 28 & 96.4\,\% & n/a & 0.0\,\% \\
 bitwarden & 282 & 196 & 73.5\,\% & 34/34 & 28.8\,\% \\
-mifos & 10702 & 1257 & 93.6\,\% & 967/993 & 71.0\,\% \\
+mifos & 10636 & 1244 & 93.2\,\% & 955/981 & 69.9\,\% \\
 \midrule
-All & 11688 & 1666 & 91.3\,\% & 1010/1036 & 55.2\,\% \\
+All & 11622 & 1652 & 91.0\,\% & 998/1024 & 54.3\,\% \\
 \bottomrule
 \end{tabular}}
-\newcommand{\RoundTwoInScope}{1819}
-\newcommand{\RoundTwoRecovered}{77.7\,\%}
-\newcommand{\RoundTwoDynamic}{15.9\,\%}
-\newcommand{\RoundTwoUnplaced}{5.2\,\%}
+\newcommand{\RoundTwoInScope}{1813}
+\newcommand{\RoundTwoRecovered}{76.8\,\%}
+\newcommand{\RoundTwoDynamic}{15.7\,\%}
+\newcommand{\RoundTwoUnplaced}{6.2\,\%}
 \newcommand{\RoundTwoAccounted}{98.7\,\%}
 \newcommand{\RoundTwoUnexplained}{23}
 \newcommand{\RoundTwoBefore}{8.8\,\%}
-\newcommand{\RoundTwoExcluded}{1}
-\newcommand{\RoundTwoExcludedOutlet}{0}
-\newcommand{\RoundTwoExcludedNoCommands}{1}
+\newcommand{\RoundTwoExcluded}{7}
+\newcommand{\RoundTwoExcludedOutlet}{4}
+\newcommand{\RoundTwoExcludedNoCommands}{3}
 \newcommand{\RoundTwoFullNodes}{6}
-\newcommand{\RoundTwoMustClean}{1010/1036}
+\newcommand{\RoundTwoMustClean}{998/1024}
 \newcommand{\RoundTwoMustViolations}{26}
-\newcommand{\RoundTwoMustConv}{55.2\,\%}
+\newcommand{\RoundTwoMustConv}{54.3\,\%}
 \newcommand{\RoundTwoZeroMustApps}{3}
 \newcommand{\RoundTwoRoutesRealworld}{14}
-\newcommand{\RoundTwoRoutesAlfresco}{$\geq$56}
+\newcommand{\RoundTwoRoutesAlfresco}{$\geq$57}
 \newcommand{\RoundTwoRoutesGhostfolio}{$\geq$135}
 \newcommand{\RoundTwoRoutesKdash}{140}
 \newcommand{\RoundTwoRoutesBitwarden}{$\geq$168}
-\newcommand{\RoundTwoRoutesMifos}{921}
-\newcommand{\RoundTwoProbeLicensed}{3}
-\newcommand{\RoundTwoProbeLicensedCaveated}{mifos}
-\newcommand{\RoundTwoLowerBoundApps}{3}
-\newcommand{\RoundTwoLowerBoundWhere}{alfresco, ghostfolio, bitwarden}
-\newcommand{\RoundTwoLowerBoundReasons}{matcher route: path not statically knowable; spread route source: not followed}
-\newcommand{\RoundTwoNoMifosRecovered}{44.1\,\%}
+\newcommand{\RoundTwoRoutesMifos}{$\geq$909}
+\newcommand{\RoundTwoProbeLicensed}{2}
+\newcommand{\RoundTwoProbeLifted}{0}
+\newcommand{\RoundTwoProbeLicensedCaveated}{none}
+\newcommand{\RoundTwoLowerBoundApps}{4}
+\newcommand{\RoundTwoLowerBoundWhere}{alfresco, ghostfolio, bitwarden, mifos}
+\newcommand{\RoundTwoLowerBoundReasons}{children not resolvable to a route array; matcher route: path not statically knowable; route table carried under a prefix but reached from no root; spread route source: not followed}
+\newcommand{\RoundTwoNoMifosRecovered}{43.6\,\%}
 \newcommand{\RoundTwoNoMifosAccounted}{97.5\,\%}
-\newcommand{\RoundTwoMifosShare}{73.8\,\%}
+\newcommand{\RoundTwoMifosShare}{74.0\,\%}
 \newcommand{\RoundTwoRelativeUnresolved}{0}
 \newcommand{\RoundTwoUnderUnreadable}{0}
 \newcommand{\RoundTwoNoRouteCaveated}{none}
@@ -97,43 +98,47 @@ All & 11688 & 1666 & 91.3\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoMustRelUp}{17}
 \newcommand{\RoundTwoMustRelRoot}{2}
 \newcommand{\RoundTwoMustRelBare}{3}
-\newcommand{\RoundTwoGraphClean}{13.0\,\%}
-\newcommand{\RoundTwoJudgedClean}{91.3\,\%}
-\newcommand{\RoundTwoJudged}{1666}
-\newcommand{\RoundTwoOverApprox}{85.7\,\%}
+\newcommand{\RoundTwoGraphClean}{12.9\,\%}
+\newcommand{\RoundTwoJudgedClean}{91.0\,\%}
+\newcommand{\RoundTwoJudged}{1652}
+\newcommand{\RoundTwoOverApprox}{85.8\,\%}
 \newcommand{\RoundTwoWildcardNoNode}{none}
-\newcommand{\RoundTwoWildcardPrefix}{19}
+\newcommand{\RoundTwoWildcardPrefix}{none}
 \newcommand{\RoundTwoWildcardPrefixEmptyChild}{0}
 \newcommand{\RoundTwoWildcardBlind}{0}
-\newcommand{\RoundTwoWildcardPattern}{2}
-\newcommand{\RoundTwoWildcardRelative}{8}
+\newcommand{\RoundTwoWildcardPattern}{0}
+\newcommand{\RoundTwoWildcardRelative}{1}
 \newcommand{\RoundTwoWildcardAppRoot}{0}
-\newcommand{\RoundTwoWildcardNoTarget}{1}
-\newcommand{\RoundTwoWildcardRescued}{148}
+\newcommand{\RoundTwoWildcardNoTarget}{0}
+\newcommand{\RoundTwoWildcardRescued}{165}
 \newcommand{\RoundTwoUnresolvedTarget}{0}
-\newcommand{\RoundTwoWildcardCaveated}{98}
-\newcommand{\RoundTwoWildcardCaveatedApps}{2}
-\newcommand{\RoundTwoWildcardCaveatedWhere}{bitwarden, ghostfolio}
-\newcommand{\RoundTwoDeadLinkCandidates}{24}
-\newcommand{\RoundTwoDeadLinkWildcarded}{20}
+\newcommand{\RoundTwoWildcardCaveated}{33}
+\newcommand{\RoundTwoFrameworkMountsIt}{38}
+\newcommand{\RoundTwoFrameworkPrefix}{13}
+\newcommand{\RoundTwoFrameworkRedirects}{0}
+\newcommand{\RoundTwoFrameworkDecided}{131}
+\newcommand{\RoundTwoWildcardCaveatedApps}{3}
+\newcommand{\RoundTwoWildcardCaveatedWhere}{bitwarden, ghostfolio, mifos}
+\newcommand{\RoundTwoDeadLinkCandidates}{84}
+\newcommand{\RoundTwoDeadLinkWildcarded}{80}
 \newcommand{\RoundTwoDeadLinkUnanswered}{4}
-\newcommand{\RoundTwoDeadLinkUrls}{20}
-\newcommand{\RoundTwoDeadLinkLocations}{22}
-\newcommand{\RoundTwoDeadLinkAbsolute}{17}
-\newcommand{\RoundTwoDeadLinkAbsoluteLocations}{17}
+\newcommand{\RoundTwoDeadLinkUrls}{55}
+\newcommand{\RoundTwoDeadLinkLocations}{82}
+\newcommand{\RoundTwoDeadLinkAbsolute}{18}
+\newcommand{\RoundTwoDeadLinkAbsoluteLocations}{18}
 \newcommand{\RoundTwoDeadLinkRelative}{5}
 \newcommand{\RoundTwoDeadLinkRelativeLocations}{3}
-\newcommand{\RoundTwoDeadLinkBaseUnknown}{2}
-\newcommand{\RoundTwoDeadLinkBaseUnknownLocations}{2}
-\newcommand{\RoundTwoDeadLinkOutsideDir}{0}
-\newcommand{\RoundTwoDeadLinkApps}{1}
-\newcommand{\RoundTwoDeadLinkWhere}{mifos}
-\newcommand{\RoundTwoEdges}{11688}
-\newcommand{\RoundTwoTopFanoutEdges}{5496}
-\newcommand{\RoundTwoTopFanoutShare}{47.0\,\%}
+\newcommand{\RoundTwoDeadLinkBaseUnknown}{61}
+\newcommand{\RoundTwoDeadLinkBaseUnknownLocations}{61}
+\newcommand{\RoundTwoDeadLinkOutsideDir}{58}
+\newcommand{\RoundTwoDeadLinkApps}{2}
+\newcommand{\RoundTwoDeadLinkWhere}{bitwarden, mifos}
+\newcommand{\RoundTwoEdges}{11622}
+\newcommand{\RoundTwoTopFanoutEdges}{5451}
+\newcommand{\RoundTwoTopFanoutShare}{46.9\,\%}
 \newcommand{\RoundTwoTopFanoutApp}{mifos}
 \newcommand{\RoundTwoTopFanoutSite}{\texttt{view-transaction.component.ts:135}}
-\newcommand{\RoundTwoMifosEdgeShare}{91.6\,\%}
+\newcommand{\RoundTwoMifosEdgeShare}{91.5\,\%}
 \newcommand{\RoundTwoExtraNodes}{2}
 \newcommand{\RoundTwoExtraNodesWildcard}{2}
 \newcommand{\RoundTwoDynamicFiles}{44}
@@ -141,10 +146,10 @@ All & 11688 & 1666 & 91.3\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoEarlierOracleAlfrescoDeclared}{25}
 \newcommand{\RoundTwoEarlierOracleAlfrescoOutside}{0}
 \newcommand{\RoundTwoEarlierOracleAlfrescoStorybook}{0}
-\newcommand{\RoundTwoEarlierOracleAlfrescoInside}{1}
+\newcommand{\RoundTwoEarlierOracleAlfrescoInside}{0}
 \newcommand{\RoundTwoEarlierOracleAlfrescoInsideVerbatim}{0}
-\newcommand{\RoundTwoEarlierOracleAlfrescoAdded}{3}
-\newcommand{\RoundTwoEarlierOracleAlfrescoNow}{27}
+\newcommand{\RoundTwoEarlierOracleAlfrescoAdded}{1}
+\newcommand{\RoundTwoEarlierOracleAlfrescoNow}{26}
 \newcommand{\RoundTwoEarlierOracleGhostfolioDeclared}{84}
 \newcommand{\RoundTwoEarlierOracleGhostfolioOutside}{0}
 \newcommand{\RoundTwoEarlierOracleGhostfolioStorybook}{0}
@@ -169,10 +174,10 @@ All & 11688 & 1666 & 91.3\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoEarlierOracleMifosDeclared}{610}
 \newcommand{\RoundTwoEarlierOracleMifosOutside}{0}
 \newcommand{\RoundTwoEarlierOracleMifosStorybook}{0}
-\newcommand{\RoundTwoEarlierOracleMifosInside}{3}
+\newcommand{\RoundTwoEarlierOracleMifosInside}{8}
 \newcommand{\RoundTwoEarlierOracleMifosInsideVerbatim}{0}
 \newcommand{\RoundTwoEarlierOracleMifosAdded}{3}
-\newcommand{\RoundTwoEarlierOracleMifosNow}{610}
+\newcommand{\RoundTwoEarlierOracleMifosNow}{605}
 \newcommand{\RoundTwoFirstRoundExtra}{143}
 \newcommand{\RoundTwoFirstRoundTruncated}{138}
 \newcommand{\RoundTwoFirstRoundSynthetic}{5}
@@ -181,14 +186,14 @@ All & 11688 & 1666 & 91.3\,\% & 1010/1036 & 55.2\,\% \\
 \newcommand{\RoundTwoCtrlOutletStill}{7}
 \newcommand{\RoundTwoMustEdgesRealworld}{9}
 \newcommand{\RoundTwoMustEdgesBitwarden}{34}
-\newcommand{\RoundTwoMustEdgesMifos}{993}
+\newcommand{\RoundTwoMustEdgesMifos}{981}
 \newcommand{\RoundTwoCtrlOutletWhere}{alfresco}
 \newcommand{\RoundTwoUnplacedClass}{15}
-\newcommand{\RoundTwoOutsideWitness}{227}
+\newcommand{\RoundTwoOutsideWitness}{228}
 \newcommand{\RoundTwoOutsideWitnessMust}{5}
 \newcommand{\RoundTwoOutsideWitnessApps}{3}
 \newcommand{\RoundTwoOutsideWitnessWorst}{bitwarden}
 \newcommand{\RoundTwoOutsideWitnessWorstN}{145}
 \newcommand{\RoundTwoOutsideWitnessWorstMust}{5}
 \newcommand{\RoundTwoSetMoved}{5}
-\newcommand{\RoundTwoSetMovedCountSame}{2}
+\newcommand{\RoundTwoSetMovedCountSame}{1}

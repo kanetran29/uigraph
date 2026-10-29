@@ -19,6 +19,7 @@
 // --label pre, and its header entry for that label says which revision the tracked file is.
 import fs from 'node:fs'
 import path from 'node:path'
+import { frameworkAnswer } from '../route-probe/framework-answer.mjs'
 import { fileURLToPath } from 'node:url'
 
 const dir = process.argv[2]
@@ -149,6 +150,12 @@ for (const r of rows) if (r.w) for (const [k, v] of Object.entries(r.w.byReason)
   const t = PRETTY[k] ?? k.replace(/_/g, '\\_')
   reasons[t] = (reasons[t] || 0) + v
 }
+const reasonsTotal = Object.values(reasons).reduce((a, b) => a + b, 0)
+// The rows are the reason files' own tally and \RoundTwoUnexplained is the loss breakdowns', so
+// the total line's "none of them without a reason" is a claim ACROSS two result files per
+// application: the table now totals its own rows, and the two files are held against each other
+// here rather than assumed to agree.
+if (reasonsTotal !== tot.lost) throw new Error(`the reason rows account for ${reasonsTotal} sites and the loss breakdowns report ${tot.lost} lost: the reason table would publish a total neither file supports, and \\RoundTwoUnexplained would disagree with the table above it`)
 out.push('\\newcommand{\\TabRoundTwoReasons}{%')
 out.push('\\begin{tabular}{rl}')
 out.push('\\toprule')
@@ -158,7 +165,7 @@ for (const [k, v] of Object.entries(reasons).sort((a, b) => b[1] - a[1])) {
   out.push(`${v} & ${k} \\\\`)
 }
 out.push('\\midrule')
-out.push(`${tot.lost} & All, none of them without a reason \\\\`)
+out.push(`${reasonsTotal} & All, none of them without a reason \\\\`)
 out.push('\\bottomrule')
 out.push('\\end{tabular}}')
 
@@ -219,19 +226,65 @@ const probeDir = (() => {
   const i = process.argv.indexOf('--probe')
   return i > -1 ? process.argv[i + 1] : null
 })()
+/**
+ * The three readings the licence is bounded by, every one of them required by name. The licence
+ * is only as strong as what the probe could read: a subtree it failed to expand and a route
+ * whose address no reader can resolve both shrink the set it compared against, and a smaller
+ * comparison set can only make the extractor look more complete. compare-probe.mjs writes all
+ * three on every run, so a file that carries one of them not at all is not that comparison's
+ * output -- and reading an absent field as zero would license a route set nobody checked, which
+ * is the one failure in this script that publishes every dead-link finding downstream. The slug
+ * is checked for the same reason: a licence read out of another application's comparison is
+ * attributed evidence, which is worse than no evidence.
+ */
+function licenceBounds(slug, cmp) {
+  const c = cmp.counts ?? {}
+  const miss = []
+  if (!Array.isArray(cmp.lazyFailures)) miss.push('lazyFailures')
+  for (const k of ['missed', 'matcherRoutes']) if (!Number.isInteger(c[k])) miss.push(`counts.${k}`)
+  if (miss.length > 0) throw new Error(`${slug}.cmp.json: the probe licence is bounded by ${miss.join(' and ')}, which this file does not carry; an absent bound read as zero licenses a route set nobody checked`)
+  if (cmp.slug !== slug) throw new Error(`${slug}.cmp.json reports on ${JSON.stringify(cmp.slug)}, so it cannot license ${slug}`)
+  return { missed: c.missed, matcher: c.matcherRoutes, lazy: cmp.lazyFailures.length }
+}
+/**
+ * The route configuration the framework itself holds, per application, read from the runtime
+ * probe's committed output, and the classification of one address against it. This is the
+ * per-candidate form of the licence: a link whose target the framework mounts nothing at is a
+ * dead link whether or not the application's own route set is complete, and one whose target the
+ * framework DOES serve is not a dead link however the extractor read it. The per-application
+ * licence asks a harder question than the census needs --- is this whole route set complete ---
+ * and loses the census of any application that misses one screen anywhere.
+ */
+const frameworkRoutes = new Map()
+if (probeDir) {
+  for (const r of rows) {
+    const f = path.join(probeDir, `${r.s}.probe.json`)
+    if (!fs.existsSync(f)) continue
+    const probe = JSON.parse(fs.readFileSync(f, 'utf8'))
+    if (probe.ok && Array.isArray(probe.routes)) frameworkRoutes.set(r.s, probe.routes)
+  }
+}
+
+/**
+ * What the framework does with a candidate's target, or null when nothing measured it. The four
+ * answers are the classifier's own, and it declines to answer for an application that mounts a
+ * route through a `UrlMatcher`, because such a route can claim any address.
+ */
+function frameworkVerdict(slug, target) {
+  const routes = frameworkRoutes.get(slug)
+  if (!routes || typeof target !== 'string' || !target.startsWith('/')) return null
+  const answer = frameworkAnswer(routes, target)
+  return answer === 'undecided' ? null : answer
+}
+
 const confirmedComplete = new Set()
 if (probeDir) {
   for (const r of rows) {
     // Required by name, like every other input: a path that does not resolve would otherwise
     // reinstate every caveat and empty the census at exit 0, which is the one failure this
     // script's history says costs the most.
-    const cmp = JSON.parse(fs.readFileSync(path.join(probeDir, `${r.s}.cmp.json`), 'utf8'))
-    const c = cmp.counts
-    // The licence is only as strong as what the probe could read. A subtree it failed to expand
-    // and a route whose address no reader can resolve both shrink the set it compared against,
-    // and a smaller comparison set can only make the extractor look more complete.
-    const read = (cmp.lazyFailures ?? []).length === 0 && (c.matcherRoutes ?? 0) === 0
-    if (c.missed === 0 && read) confirmedComplete.add(r.s)
+    const b = licenceBounds(r.s, JSON.parse(fs.readFileSync(path.join(probeDir, `${r.s}.cmp.json`), 'utf8')))
+    if (b.missed === 0 && b.lazy === 0 && b.matcher === 0) confirmedComplete.add(r.s)
   }
 }
 
@@ -247,8 +300,17 @@ function routeSetComplete(r) {
   return !(r.notes ?? []).some((n) => n.kind === 'incomplete-route-set')
 }
 
+// The applications whose suppression the licence actually LIFTED: the ones it licensed that had
+// also declared a lower bound, so that there was a caveat there to take off. An application the
+// probe measured and licensed while it declared nothing is licensed and unchanged, and
+// `routeSetComplete` would have answered true for it from its own notes alone. The two counts
+// answer different questions and a sentence about applications exempted from the suppression
+// needs this one: \RoundTwoProbeLicensed counts measured and licensed, \RoundTwoProbeLifted
+// counts exempted, and on this corpus they are three and one.
+const probeLifted = rows.filter((x) => confirmedComplete.has(x.s) && (x.notes ?? []).some((n) => n.kind === 'incomplete-route-set'))
 mac('RoundTwoProbeLicensed', confirmedComplete.size)
-mac('RoundTwoProbeLicensedCaveated', rows.filter((x) => confirmedComplete.has(x.s) && (x.notes ?? []).some((n) => n.kind === 'incomplete-route-set')).map((x) => NAME[x.s]).join(', ') || 'none')
+mac('RoundTwoProbeLifted', probeLifted.length)
+mac('RoundTwoProbeLicensedCaveated', probeLifted.map((x) => NAME[x.s]).join(', ') || 'none')
 
 const lowerBound = rows.filter((r) => r.c1.blindSpots.length > 0)
 mac('RoundTwoLowerBoundApps', lowerBound.length)
@@ -408,7 +470,7 @@ for (const r of rows) {
       noRoute++
       if (x.reason === 'relative-target-unresolved') relativeUnresolved++
       else if (x.reason === 'target-under-unreadable-subtree') underUnreadable++
-      else if (!complete) caveatedReasons++
+      else if (!complete && frameworkVerdict(r.s, targetOf(x)) !== 'catch-all') caveatedReasons++
       else { deadFromReasons++; deadSites.push({ app: r.s, at: x.at, target: targetOf(x) }) }
     }
   }
@@ -457,7 +519,17 @@ for (const r of rows) for (const n of r.notes ?? []) {
   if (n.kind === 'wildcard-redirect') {
     const target = targetOf(n)
     const verdict = undeclaredIn(r.c1, target)
-    const bucket = /could not be read/.test(n.detail ?? '') && !confirmedComplete.has(r.s) ? 'caveated'
+    // A site the extractor caveated because it could not read all of this application's route
+    // set is decided, where it can be, by the framework's own configuration instead of by a
+    // statement about the whole set: the census asks only whether THIS target is served.
+    const caveated = /could not be read/.test(n.detail ?? '') && !confirmedComplete.has(r.s)
+    const fw = caveated ? frameworkVerdict(r.s, target) : null
+    const bucket = caveated
+      ? fw === 'catch-all' ? 'dead'
+        : fw === 'screen' ? 'framework-mounts-it'
+          : fw === 'no-screen' ? 'framework-prefix'
+            : fw === 'redirect' ? 'framework-redirects'
+              : 'caveated'
       : verdict === 'not-a-path' ? notAPathKind(target)
         : verdict === 'undeclared' ? 'dead'
           : verdict
@@ -465,6 +537,8 @@ for (const r of rows) for (const n of r.notes ?? []) {
   } else if (n.kind === 'unresolved-target') unres++
 }
 const wildOf = (b) => [...wildSites.values()].filter((s) => s.bucket === b)
+/** Dead sites reached through the framework's answer rather than through the oracle's route set. */
+const deadByFramework = () => [...wildSites.values()].filter((s) => s.bucket === 'dead' && frameworkVerdict(s.app, s.target) === 'catch-all' && !confirmedComplete.has(s.app)).length
 const deadFromNotes = wildOf('dead').length
 // The three ways a catch-all-answered site is NOT evidence of a dead link, reported rather
 // than folded into the residual: the oracle declares the route and the extractor minted no
@@ -494,6 +568,15 @@ mac('RoundTwoUnresolvedTarget', unres)
 // for those the target was unreadable for the extractor's own reason, so nothing can be
 // claimed about whether the application declares such a route.
 mac('RoundTwoWildcardCaveated', wildOf('caveated').length)
+// The three ways the framework's own configuration answers a caveated site, which is what lets
+// such a site be decided at all: it serves a screen there, it matches the address with a route
+// that places only chrome, or it sends the visitor somewhere else. A site the framework answers
+// with nothing but its catch-all is counted with the census, and one in an application the probe
+// never measured, or whose address a `UrlMatcher` could claim, stays caveated.
+mac('RoundTwoFrameworkMountsIt', wildOf('framework-mounts-it').length)
+mac('RoundTwoFrameworkPrefix', wildOf('framework-prefix').length)
+mac('RoundTwoFrameworkRedirects', wildOf('framework-redirects').length)
+mac('RoundTwoFrameworkDecided', wildOf('framework-mounts-it').length + wildOf('framework-prefix').length + wildOf('framework-redirects').length + deadByFramework())
 // The applications those sites are actually in. The lower-bound list is a different set --- it is
 // the independent parser's blind spots, not the extractor's notes minus the probe's licence ---
 // and naming one where the other is meant put an application in a sentence that carries none of

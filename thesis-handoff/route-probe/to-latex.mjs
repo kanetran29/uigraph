@@ -9,9 +9,10 @@
  *
  * Usage: node to-latex.mjs --results <dir> [--before <dir>] --out <file>
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { frameworkAnswer } from './framework-answer.mjs'
 
 const HERE = fileURLToPath(new URL('.', import.meta.url))
 const LABEL = {
@@ -61,9 +62,12 @@ function norm(p) {
 
 /**
  * The addresses one earlier oracle run declared as screens that the framework mounts nothing at.
- * Returns null when no such run was supplied for the application.
+ * Returns null when no such run was supplied for the application. The mounted set is the one
+ * compare-probe.mjs already decided and wrote down, rather than a second filter over the probe's
+ * routes: deriving it here left out the exclusions that file applies, so an address the framework
+ * holds a route for but mounts no screen at counted as mounted.
  */
-function beforeNotMounted(slug, probe) {
+function beforeNotMounted(slug, cmp) {
   if (!a.before) return null
   let before
   try {
@@ -71,9 +75,10 @@ function beforeNotMounted(slug, probe) {
   } catch {
     return null
   }
-  const mounted = new Set(probe.routes
-    .filter((r) => !r.redirectTo && (!r.outlet || r.outlet === 'primary') && (r.component || r.hasLoadComponent))
-    .map((r) => norm(r.fullPath)))
+  if (!Array.isArray(cmp.frameworkAddresses)) {
+    throw new Error(`${slug}.cmp.json has no frameworkAddresses: re-run compare-probe.mjs`)
+  }
+  const mounted = new Set(cmp.frameworkAddresses)
   const declared = new Set(before.routes.filter((r) => r.kind === 'SCREEN').map((r) => norm(r.path)))
   return [...declared].filter((p) => !mounted.has(p))
 }
@@ -113,10 +118,16 @@ const macros = {
   ProbeConsoleErrorApps: rows.filter((r) => (r.probe.consoleErrors || []).length > 0).length,
   ProbeConsoleErrors: total((r) => (r.probe.consoleErrors || []).length),
   ProbeMissedPrefixOnly: total((r) => r.cmp.counts.missedPrefixOnly || 0),
+  // The prefix-only column split in two, because it reported one number for two different
+  // phenomena: a prefix that answers its own URL by redirecting into the subtree, and one that
+  // answers it with the shell and no screen beyond it.
+  ProbeMissedPrefixRedirect: total((r) => r.cmp.counts.missedPrefixRedirect || 0),
+  ProbeMissedPrefixUnanswered: total((r) => r.cmp.counts.missedPrefixUnanswered || 0),
   ProbeMatcherRoutes: total((r) => r.cmp.counts.matcherRoutes || 0),
   ProbeMissedGhostfolio: rows.find((r) => r.slug === 'ghostfolio').cmp.counts.missed,
   ProbeMissedAlfresco: rows.find((r) => r.slug === 'alfresco').cmp.counts.missed,
   ProbeMissedBitwarden: rows.find((r) => r.slug === 'bitwarden').cmp.counts.missed,
+  ProbeMissedMifos: rows.find((r) => r.slug === 'mifos').cmp.counts.missed,
   ProbeZeroInventedApps: rows.filter((r) => r.cmp.counts.invented === 0).length,
   ProbeInventedWhere: rows.filter((r) => r.cmp.counts.invented > 0).map((r) => LABEL[r.slug]).join(', ') || 'none',
   ProbeInventedApps: rows.filter((r) => r.cmp.counts.invented > 0).length,
@@ -132,9 +143,40 @@ const macros = {
   // nothing: the declaration was true of the reading and cost the route set nothing.
   ProbeDeclaredButComplete: rows.filter((r) => r.cmp.counts.missed === 0 && r.cmp.routeSet.declares).length,
   ProbeDeclaredButCompleteWhere: rows.filter((r) => r.cmp.counts.missed === 0 && r.cmp.routeSet.declares).map((r) => LABEL[r.slug]).join(', ') || 'none',
+  // How far the reading this comparison depends on --- which entries of a route configuration
+  // answer an address with a screen --- was held against what the framework was observed to do.
+  // Counted here rather than asserted in the chapter, from answerability.mjs's own output and
+  // the same classifier the comparison uses, so a disagreement cannot be reported as agreement.
+  ...answerMacros(),
 }
 
-const before = rows.map((r) => ({ slug: r.slug, bad: beforeNotMounted(r.slug, r.probe) })).filter((r) => r.bad !== null)
+/**
+ * The agreement between the classification taken from the route configuration and the verdict a
+ * navigation produced, over every application an answerability measurement exists for. An address
+ * the classifier declines to decide --- which it does for an application mounting a route through
+ * a `UrlMatcher`, since such a route may claim any address --- is counted apart rather than
+ * scored, because a declined answer is neither agreement nor disagreement.
+ */
+function answerMacros() {
+  const out = { ProbeAnswerApps: 0, ProbeAnswerAddresses: 0, ProbeAnswerChecked: 0, ProbeAnswerAgreed: 0, ProbeAnswerUndecided: 0 }
+  for (const r of rows) {
+    const f = join(a.results, `${r.slug}.answer.json`)
+    if (!existsSync(f)) continue
+    const answer = JSON.parse(readFileSync(f, 'utf8'))
+    out.ProbeAnswerApps += 1
+    for (const row of answer.results) {
+      out.ProbeAnswerAddresses += 1
+      const got = frameworkAnswer(r.probe.routes, row.target)
+      if (got === 'undecided') { out.ProbeAnswerUndecided += 1; continue }
+      out.ProbeAnswerChecked += 1
+      const want = !row.recognized || row.catchAll ? ['catch-all'] : row.redirected ? ['redirect', 'catch-all'] : [row.placesComponent ? 'screen' : 'no-screen']
+      if (want.includes(got)) out.ProbeAnswerAgreed += 1
+    }
+  }
+  return out
+}
+
+const before = rows.map((r) => ({ slug: r.slug, bad: beforeNotMounted(r.slug, r.cmp) })).filter((r) => r.bad !== null)
 if (before.length > 0) {
   macros.ProbeBeforeApps = before.length
   macros.ProbeBeforeNotMounted = before.reduce((n, r) => n + r.bad.length, 0)

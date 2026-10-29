@@ -1554,7 +1554,9 @@ describe('a table a feature library both provides and lazily loads', () => {
     // loads that member lazily, so Angular mounts it at /rules and under /nodes/:nodeId/. Taking
     // every provideRouter array for the application's root table took the second mount away and
     // dropped alfresco's coverage to 26 of 27; the member the route names is what tells this case
-    // from a chain that merely reached the root table.
+    // from a chain that merely reached the root table. Both addresses are asserted: the claim the
+    // lazy mount makes used to cover the root one as well, and a graph with only the prefixed
+    // address says the application declares no /rules, which makes a link to it a dead one.
     const { graph } = extractGraph(
       inMemory({
         '/app/app.routes.ts': `import type { Routes } from '@angular/router'
@@ -1573,6 +1575,338 @@ export function provideRules() { return [provideRouter(RULES_ROUTES)] }`,
       }),
       '/app',
     )
-    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/nodes/:nodeId/rules'])
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/nodes/:nodeId/rules', '/rules'])
+  })
+})
+
+describe('a file holding more than one route table', () => {
+  it('gives each lazy prefix only the member its own route names', () => {
+    // Two routes name two members of one file. Mounting every array the file holds gave each
+    // prefix both tables, so the graph held /admin/profile and /settings/users as well --- the
+    // cross product of prefix and path, half of which the application mounts nowhere, and with
+    // an empty soundiness list, which is the one thing this analysis may never produce.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'admin', loadChildren: () => import('./feature/feature.routes').then((m) => m.ADMIN_ROUTES) },
+  { path: 'settings', loadChildren: () => import('./feature/feature.routes').then((m) => m.SETTINGS_ROUTES) },
+]`,
+        '/app/feature/feature.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const ADMIN_ROUTES: Routes = [{ path: 'users', component: A }]
+export const SETTINGS_ROUTES: Routes = [{ path: 'profile', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin/users', '/home', '/settings/profile'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('takes the table the routing module registers with forChild and leaves the two beside it', () => {
+    // mifos's users module is this shape: three Routes arrays in one routing module, one of them
+    // handed to RouterModule.forChild. Walking all three under /appusers happened to agree with
+    // the framework only because two of them declare the same paths.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'users', loadChildren: () => import('./users/users.module').then((m) => m.UsersModule) },
+]`,
+        '/app/users/users.module.ts': `import { RouterModule } from '@angular/router'
+import { routes } from './users-routing.module'
+@NgModule({ imports: [RouterModule.forChild(routes)] })
+export class UsersModule {}`,
+        '/app/users/users-routing.module.ts': `import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const legacyRoutes: Routes = [{ path: 'legacy', component: A }]
+export const zitadelRoutes: Routes = [{ path: 'zitadel', component: A }]
+export const routes: Routes = [{ path: 'list', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/users/list'])
+  })
+
+  it('declares the subtree unread when nothing in the file says which of its tables the prefix gets', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'admin', loadChildren: () => import('./feature/feature.module').then((m) => m.FeatureModule) },
+]`,
+        '/app/feature/feature.module.ts': `import { FEATURE_A, FEATURE_B } from './feature.routes'
+@NgModule({ imports: [] })
+export class FeatureModule {}`,
+        '/app/feature/feature.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+export const FEATURE_A: Routes = [{ path: 'one', component: A }]
+export const FEATURE_B: Routes = [{ path: 'two', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+})
+
+describe('a root table registered in a file of its own', () => {
+  it.each([
+    ['RouterModule.forRoot', `import { RouterModule } from '@angular/router'\nimport { routes } from './app.routes'\n@NgModule({ imports: [RouterModule.forRoot(routes)] })\nexport class AppModule {}`],
+    ['provideRouter', `import { provideRouter } from '@angular/router'\nimport { routes } from './app.routes'\nexport const config = { providers: [provideRouter(routes)] }`],
+  ])('is refused to a lazy chain that reaches its file, where %s registers it', (_api, registration) => {
+    // The table is not `Routes`-typed, so asking the refusal of the typed arrays alone found
+    // none, adopted app.routes.ts for the lazy prefix, and claiming it took the root scan's only
+    // entry point with it: the extractor emitted a graph with no nodes at all.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.module.ts': registration,
+        '/app/app.routes.ts': `import { A } from './a.component'\nexport const TITLE = 'app'\nexport const routes = [\n  { path: 'home', component: A },\n  { path: 'feature', loadChildren: () => import('./feature/feature.module').then((m) => m.FeatureModule) },\n]`,
+        '/app/feature/feature.module.ts': `import { TITLE } from '../app.routes'\n@NgModule({ imports: [] })\nexport class FeatureModule { title = TITLE }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+  })
+
+  it('is refused three modules out, where the chain reaches it through two tableless hops', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.module.ts': `import { RouterModule } from '@angular/router'\nimport { routes } from './app.routes'\n@NgModule({ imports: [RouterModule.forRoot(routes)] })\nexport class AppModule {}`,
+        '/app/app.routes.ts': `import { A } from './a.component'\nexport const TITLE = 'app'\nexport const routes = [\n  { path: 'home', component: A },\n  { path: 'feature', loadChildren: () => import('./feature/feature.module').then((m) => m.FeatureModule) },\n]`,
+        '/app/feature/feature.module.ts': `import { SharedModule } from './shared.module'\n@NgModule({ imports: [SharedModule] })\nexport class FeatureModule {}`,
+        '/app/feature/shared.module.ts': `import { Deep } from './deep'\n@NgModule({ imports: [] })\nexport class SharedModule { deep = Deep }`,
+        '/app/feature/deep.ts': `import { TITLE } from '../app.routes'\nexport const Deep = TITLE`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+  })
+})
+
+describe('a subtree handed to a helper', () => {
+  it('mounts the table the call carries under the prefix, not at the root', () => {
+    // mifos wraps every feature table as `Route.withShell([...])`. Taking only a literal left the
+    // named table to the root scan, which minted /users --- an address the application mounts
+    // nothing at --- beside the real /admin/users.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { ADMIN } from './admin.routes'
+import { withShell } from './shell'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'admin', children: withShell(ADMIN) },
+]`,
+        '/app/admin.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const ADMIN: Routes = [{ path: 'users', component: A }]`,
+        '/app/shell.ts': `import type { Routes } from '@angular/router'\nexport function withShell(inner: Routes): Routes { return inner }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/admin/users', '/home'])
+  })
+})
+
+describe('a table chosen between by a condition', () => {
+  it('reads the arm the build selects when the condition is a constant the sources fix', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { environment } from './environment'
+const modern: Routes = [{ path: 'modern', component: A }]
+const legacy: Routes = [{ path: 'legacy', component: A }]
+const selected = !environment.legacyEnabled ? modern : legacy
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'users', children: selected }]`,
+        '/app/environment.ts': `export const environment = { legacyEnabled: false }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/users/modern'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('declares the subtree unread when the condition depends on something the sources do not fix', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { flags } from './flags'
+const modern: Routes = [{ path: 'modern', component: A }]
+const legacy: Routes = [{ path: 'legacy', component: A }]
+const selected = flags.get('legacy') ? legacy : modern
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'users', children: selected }]`,
+        '/app/flags.ts': `export const flags = { get: (_k: string) => Math.random() > 0.5 }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+})
+
+describe('ownership of a table a lazy chain reaches', () => {
+  it('refuses a target file holding two tables when the route names no member', () => {
+    // `import('./feature/feature.routes')` with no `.then((m) => m.X)` says nothing about which
+    // of the file's tables the prefix gets, and the hop search must not go looking for a third:
+    // the file the route names is the file, and two tables in it is an unread subtree.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'admin', loadChildren: () => import('./feature/feature.routes') },
+]`,
+        '/app/feature/feature.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from '../a.component'
+import { SHARED } from './shared.routes'
+export const FEATURE_A: Routes = [{ path: 'one', component: A }]
+export const FEATURE_B: Routes = [{ path: 'two', component: A }]
+export const used = SHARED`,
+        '/app/feature/shared.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from '../a.component'\nexport const SHARED: Routes = [{ path: 'shared', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/shared'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
+  })
+
+  it('refuses an untyped table a spread already carries under another prefix', () => {
+    // The table is not `Routes`-typed, so asking the refusal of the typed arrays alone found none
+    // and adopted it: the graph then held /lazy/x as well as the real /a/x, and Angular mounts
+    // nothing at the first.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { EXTRA } from './feature/extra'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'a', children: [...EXTRA] },
+  { path: 'lazy', loadChildren: () => import('./feature/lazy.module').then((m) => m.LazyModule) },
+]`,
+        '/app/feature/extra.ts': `import { A } from '../a.component'\nexport const TAG = 'extra'\nexport const EXTRA = [{ path: 'x', component: A }]`,
+        '/app/feature/lazy.module.ts': `import { TAG } from './extra'\n@NgModule({ imports: [] })\nexport class LazyModule { tag = TAG }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/a/x', '/home'])
+  })
+})
+
+describe('a route table an element-level call carries', () => {
+  it('mounts the named array the call takes and does not leave it to the root scan', () => {
+    // mifos writes every feature table as `Route.withShell(TABLE)` INSIDE the array. Taking only
+    // an argument written out in place left TABLE to the root scan, which minted /list at the
+    // root beside the real /users/list.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { USERS } from './users.routes'
+import { Route } from './route.service'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'users', children: [Route.withShell(USERS)] }]`,
+        '/app/users.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const USERS: Routes = [{ path: 'list', component: A }]`,
+        '/app/route.service.ts': `import type { Routes } from '@angular/router'\nexport const Route = { withShell: (inner: Routes) => ({ path: '', children: inner }) }`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/users/list'])
+  })
+})
+
+describe('a subtree under a named outlet', () => {
+  it('mints no screen at the primary address for a child of a named-outlet route', () => {
+    // alfresco's viewer sits under `outlet: 'viewer'`, so Angular reaches its children as
+    // (viewer:view/:nodeId) and answers /view/:nodeId with the catch-all --- which a navigation
+    // to the built application confirms. Testing only the route's own outlet minted two nodes at
+    // addresses the application mounts nothing at.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: '', outlet: 'viewer', children: [{ path: 'view/:nodeId', component: A, children: [{ path: 'pane', component: A }] }] },
+]`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+  })
+})
+
+describe('a table behind a module that holds none', () => {
+  it('reaches it, because a tableless module is a waypoint and not a dead end', () => {
+    // The ownership tests are about adopting a table. Asking them of a module that holds none
+    // refused it as transit, and the route lost the subtree BEHIND it. A fixture with the table
+    // beside the tableless module instead of behind it does not pin this, because the table is
+    // then elected at the first hop and the refusal never matters.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [{ path: 'home', component: A }, { path: 'q', loadChildren: () => import('./q/q.module').then((m) => m.QModule) }]`,
+        '/app/q/q.module.ts': `import { SharedModule } from './shared.module'\n@NgModule({ imports: [SharedModule] })\nexport class QModule {}`,
+        '/app/q/shared.module.ts': `import { QRoutingModule } from './q-routing.module'\n@NgModule({ imports: [QRoutingModule] })\nexport class SharedModule {}`,
+        '/app/q/q-routing.module.ts': `import type { Routes } from '@angular/router'
+import { RouterModule } from '@angular/router'
+import { A } from '../a.component'
+export const routes: Routes = [{ path: 'list', component: A }]
+@NgModule({ imports: [RouterModule.forChild(routes)] })
+export class QRoutingModule {}`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/home', '/q/list'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toEqual([])
+  })
+
+  it('refuses it to both routes when two reach it through the same waypoint, and declares the loss', () => {
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'home', component: A },
+  { path: 'p', loadChildren: () => import('./q/p.module').then((m) => m.PModule) },
+  { path: 'q', loadChildren: () => import('./q/q.module').then((m) => m.QModule) },
+]`,
+        '/app/q/p.module.ts': `import { SharedModule } from './shared.module'\n@NgModule({ imports: [SharedModule] })\nexport class PModule {}`,
+        '/app/q/q.module.ts': `import { SharedModule } from './shared.module'\n@NgModule({ imports: [SharedModule] })\nexport class QModule {}`,
+        '/app/q/shared.module.ts': `import { QRoutingModule } from './q-routing.module'\n@NgModule({ imports: [QRoutingModule] })\nexport class SharedModule {}`,
+        '/app/q/q-routing.module.ts': `import type { Routes } from '@angular/router'
+import { RouterModule } from '@angular/router'
+import { A } from '../a.component'
+export const routes: Routes = [{ path: 'list', component: A }]
+@NgModule({ imports: [RouterModule.forChild(routes)] })
+export class QRoutingModule {}`,
+        '/app/a.component.ts': C('<p>a</p>'),
+      }),
+      '/app',
+    )
+    expect(graph.nodes.map((n) => n.route)).toEqual(['/home'])
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set')).toHaveLength(1)
   })
 })

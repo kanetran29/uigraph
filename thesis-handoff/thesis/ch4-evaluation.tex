@@ -5,7 +5,7 @@ This chapter describes how the analysis of Chapter~\ref{ch:analysis} is evaluate
 Section~\ref{sec:corpus} presents the corpus of applications and discusses why it can
 be considered a valid basis for the measurements. Section~\ref{sec:metrics} defines the
 metrics used to answer each research question. Section~\ref{sec:protocol} describes the
-four evaluation methods, what each of them can and cannot show, and the arrangements
+five evaluation methods, what each of them can and cannot show, and the arrangements
 that keep the results reproducible.
 
 \section{Corpus selection and validity}
@@ -246,11 +246,17 @@ and asked for the route configuration the Angular router holds; every lazily loa
 subtree is expanded by calling the application's own \texttt{loadChildren} and reading
 the routes out of whatever it resolves to. The addresses the extractor mints are then
 compared with the addresses the framework mounts. Nothing in this method re-reads the
-route files, which is the point: the answer comes from the application's own code. &
+route files, which is the point: the answer comes from the application's own code. Which
+addresses in that configuration count as mounted is itself a reading, so it is checked
+against the framework's behaviour: the harness navigates the running application to a
+list of addresses and records what the recogniser made of each one, before any guard
+runs. &
 Requires the application to build and boot, which fixes the method to applications
 that can be built without their server. It reads the configuration rather than the
 rendered screen, so a route that a guard always refuses still counts as mounted, and a
-route whose component fails to render is not distinguished from one that renders. A
+route whose component fails to render is not distinguished from one that renders. An
+address a route claims through a \texttt{UrlMatcher} cannot be decided from the
+configuration at all, since the function is not spelled out there. A
 workspace application that composes the library a measurement is scoped to mounts the
 shell's own routes as well, so part of any difference is scope and not reading. \\
 \bottomrule
@@ -344,8 +350,11 @@ in this thesis were arrived at.
 
 The whole evaluation can be re-run with a single command. The command clones the
 extractor at the commit tagged \texttt{thesis-eval}, fetches each application in the corpus at its fixed
-commit rather than from a branch, runs the extraction and all four evaluation methods,
-and writes a results file together with the tables derived from it. Each figure in the
+commit rather than from a branch, runs the extraction and the four methods that read the
+sources, and writes a results file together with the tables derived from it. The fifth
+method, the runtime route oracle, is re-run by its own documented command, because it
+needs each application built in its development configuration and served to a browser,
+which is a step the single command cannot take on a machine that has not built them. Each figure in the
 results file is recorded together with the commit of the extractor, the commits of the
 corpus applications, the version of the harness, and the version of the runtime. The
 tables in this thesis are generated from the results file and not entered by hand.

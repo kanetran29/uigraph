@@ -152,7 +152,7 @@ witnesses and declared approximations are what tell a consumer which queries tho
 \section{Limitations and threats to validity}
 \label{sec:limitations}
 
-The results are measurements of one tool, on one corpus, with four methods, performed by
+The results are measurements of one tool, on one corpus, with five methods, performed by
 the person who wrote the tool. Each of those four choices limits what the figures
 support.
 
@@ -331,9 +331,11 @@ each case, because Angular removes the debug surface the method reads when an ap
 declares itself in production mode, and a production configuration can differ from a development
 one in ways a route table does not show. Fourth, where a workspace application composes the
 library a measurement is scoped to, the framework's set is a superset of the library's by
-construction, and part of any difference is scope rather than reading; two of alfresco's
-addresses are that, and a third, \path{/rules}, is not --- it is declared inside the measured
-library and registered in a way the extractor does not read.
+construction, and part of any difference is scope rather than reading; two of alfresco's three
+differences are that --- \path{/login}, declared by the shell application, and
+\path{/view/authentication-confirmation}, declared by a package that shell installs --- and the
+third is not: \path{/about} is declared inside the measured library, in a JSON plugin manifest
+that no reader of the code can see.
 
 The first draft of this paragraph closed by saying that none of these weakens the claim the check
 is used for, because none could make a mounted address look unmounted. That has the direction
@@ -365,12 +367,24 @@ A tool that wanted to cover it would have to read the framework's plugin format 
 source language, which is a different undertaking from reading a router configuration and is not
 attempted here.
 
-A table may be mounted twice: once under the prefix a lazy route gives it, and once at the root,
-by a library that both exports it for loading and hands it to \texttt{provideRouter} itself. The
-extractor follows the lazy route, and the file is then claimed out of the scan that reads tables
-at the root, so the second mount is lost. The loss raises no note either, because the walk did
-reach the file and the check that reports an unplaced claim asks only whether a claimed file was
-reached at all, not whether everything it registers was placed.
+Which of several tables a prefix mounts may be decided outside the sources. mifos holds two route
+tables for its users module, one per identity provider, and selects between them with a constant
+assembled from \texttt{window.env}, a value injected into the page when the application is
+deployed. The extractor reads a conditional whose condition the sources fix --- a flag written in
+an environment file is resolved and the arm it selects is read --- and declares the subtree unread
+when they do not, which is this case. The loss is declared and it is five screens wide, which is
+the price of the rule that decides the question: the table a prefix mounts is the one its route
+names, or the one the module registers with \texttt{forChild}, or the only one in the file, and
+otherwise none. Reading every table a file holds instead would have given this prefix the right
+addresses, by accident of the two tables agreeing, and gives any prefix every table a file holds,
+which mints the cross product of prefix and path wherever two tables differ.
+
+Where such a condition \emph{is} fixed by the sources, the value read is the one the checked-out
+sources carry. An Angular build may substitute one environment file for another, so a constant a
+production build fixes differently selects a different arm there, and the graph is then a graph of
+the configuration that was read. The measurements in this thesis are taken over the sources as
+checked out, and the runtime check of Section~\ref{sec:res-probe} reads a development build for
+the same reason, so the two agree about which configuration is under measurement.
 
 The thesis claims soundness only for the deterministic tier and only over the declared
 route set (Claim~\ref{claim:must}). Following the soundiness position of Livshits et
@@ -496,7 +510,18 @@ components and navigation sites it strands, not the number of calls that strand 
 \subsection{What a route table's evidence does not establish}
 \label{sec:ownership}
 
-Three approximations in the reader of route tables share one shape, and they are listed
+One assumption underlies every approximation in the reader of route tables, and the others are
+instances of it. A route table that no site in the application claims --- no
+\texttt{loadChildren} names it, no spread or \texttt{children} carries it, no registration call
+takes it --- is read as a table the application mounts at its root. The assumption is what lets
+either tool find an application's routes however they are declared, and it is an
+over-approximation: a table registered nowhere the compiled build reaches is mounted at no
+address at all, and reading it at the root puts its entries into the graph as screens. It is
+taken deliberately, because the alternative loses the routes of every application whose root
+registration neither tool recognises, and the cases below are the places where it has been
+narrowed rather than abandoned.
+
+Three further approximations in that reader share one shape, and they are listed
 together because each was found by attacking a repair of the previous one. All three are
 declared in the tool's own notes; none was closed, and the reason in each case is that
 closing it would refuse a construct the corpus actually uses.
@@ -532,30 +557,27 @@ another's table, which is how the first approximation above was reached; the con
 reading is taken, and it costs the affected routes their prefix.
 
 A fourth was found by asking what the test that keeps a lazy route from adopting the
-application's root table actually reads. What it reads is the file's own call to
-\texttt{forRoot} on \texttt{RouterModule}, Angular's own discriminator for a root table, which
-is why the test is sound where it fires. It is also why it does not fire at all on an
-application that registers its root with the standalone \texttt{provideRouter} API, or through
-an alias of \texttt{RouterModule}: two of the six applications here have no
-\texttt{forRoot} call anywhere, and on those two the guard cannot fire at all. The first limit
-costs two more, and precisely rather than loosely: ghostfolio and kubernetes/dashboard each
-declare their root array in one file and register it in another. The test does recognise the
-registering file --- that is where the call is --- but that file holds no route, and the file a
-lazily loaded module could adopt is the one holding the array, which the test does not
-recognise. So four of the six have no file whose recognition would refuse anything.
-Instrumenting the predicate over the whole corpus makes the limit sharper still: it is asked
-698 times
-across the six applications and answers yes on none of them --- not because no file would
-answer yes, but because it is asked only of the dependencies of a lazily loaded module, and no
-application in this corpus names a file holding a \texttt{forRoot} call there. Every application is therefore field-identical to the unguarded
-analysis, so no figure in Chapter~\ref{ch:results} rests on the guard --- and equally, no
-application in the corpus is evidence that it works. Its only evidence is the constructed
-fixtures in the oracle's self-check, which is the honest statement of what a guard that never
-fires has been shown to do. Widening the predicate is not the repair, because a library's own
-\texttt{forRoot} is a different thing from the router's; the repair is to resolve each
-registration call's argument and mark that \emph{array}, rather than its file, as the root
-table, which would also close the case where a route table and its registration live in
-different files.
+application's root table actually read, and it is reported here as a repair rather than as a
+limitation, because what the asking produced was a measurement no reading of the code would
+have given. What the test read was the candidate file's own call to \texttt{forRoot} on
+\texttt{RouterModule}, Angular's own discriminator for a root table, which is why it was sound
+where it fired. It is also why it fired nowhere. An application that registers its root with
+the standalone \texttt{provideRouter} API is not recognised at all, and two of the six have no
+\texttt{forRoot} call anywhere; an application that declares its root array in one file and
+registers it in another --- ghostfolio and kubernetes/dashboard both do --- is recognised in the
+registering file, which holds no route, and not in the file a lazily loaded module could adopt.
+Instrumenting the predicate made the limit exact rather than arguable: it was asked 698 times
+across the six applications in the independent parser and 2798 times in the extractor, and
+answered yes on none of them. A guard that never fires is worse than no guard, because a commit
+message and a chapter credit it with a property nothing has shown it to have.
+
+Both tools now mark root tables per \emph{array}, taken from the argument of either
+registration API and resolved through the name it is nearly always written as, which is what
+makes the question answerable in the shape applications actually write. One further case came
+with it: a table a feature library both hands to \texttt{provideRouter} and exports for lazy
+loading is mounted at the root \emph{and} under the prefix that loads it, so a claim on its
+file may not cover both mounts --- the root scan now mints a root-registered array whatever
+claims its file, which is alfresco's \path{/rules}.
 
 A fifth is the mirror of the first, and worth stating because it is where a conservative
 refusal becomes an over-approximation. When the only site that loads a route table lies in a
@@ -567,22 +589,28 @@ top-level-\texttt{Routes} over-approximation declared above, and it occurs nowhe
 corpus.
 
 \label{sec:named-outlet}
-A sixth is the named outlet, and it is the one open case where the analysis is known to hold an
-address the application does not mount. A route carrying \texttt{outlet: 'name'} is reached as
-\texttt{(name:path)}, so it contributes no screen, and the extractor refuses it. It refuses only
-the route that carries the property, though: where the named outlet opens a \texttt{children}
-subtree, the routes beneath it are still assembled against the primary path and minted there.
-alfresco mounts its document viewer that way, so two of its route entries,
-\path{/view/:nodeId} and \path{/search-libraries/view/:nodeId}, name addresses reachable in that
-application only through the viewer outlet. The independent route parser reads the subtree the
-same way, so coverage is 100\,\% over a set that holds both, and no comparison between the two
-tools shows the gap --- which is exactly the limit of agreement between two tools that share a
-reading. The runtime check of Section~\ref{sec:res-probe} does show it: those two addresses are
-the whole of its minted-but-not-mounted column, and they are the only addresses in the corpus on
-which the two static readers agree and the running router mounts nothing. Closing the case means
-carrying an outlet context down the walk in both tools and would move alfresco's declared count;
-it is left open, declared here and now measured, rather than repaired in a round whose figures
-are already reported.
+A sixth is the named outlet, and its history in this work is the clearest case of the difference
+between declaring an approximation and being sound over it. A route carrying
+\texttt{outlet: 'name'} is reached as \texttt{(name:path)}, so it contributes no screen on the
+primary outlet. The extractor refused such a route from the start --- but only the route that
+carries the property: where a named outlet opened a \texttt{children} subtree, the routes beneath
+it were still assembled against the primary path and minted there. alfresco mounts its document
+viewer that way, and the graph held \path{/view/:nodeId} and
+\path{/search-libraries/view/:nodeId}, two addresses that application serves only through the
+viewer outlet. The independent route parser read the subtree the same way, so coverage was
+100\,\% over a set holding both, and no comparison between the two tools could show the gap. This
+was written down as an open case, on the reasoning that an approximation stated is an
+approximation a consumer can price.
+
+That reasoning was wrong, and the runtime check of Section~\ref{sec:res-probe} is what showed it.
+A consumer reading the graph finds a node at \path{/view/:nodeId}; a navigation to that address in
+the built application is answered by the catch-all route. The declaration did not make the node
+true, and the must-tier property admits no exception that a sentence can buy back. An outlet is
+inherited, so nothing below a named-outlet route has a primary address either: the extractor now
+carries outlet context down the walk and mints no screen for such a subtree. What remains is a
+limitation on what the graph contains --- a screen reached only through a named outlet is not an
+element of the node set, and the transitions into it are not in the edge set --- which is a
+statement about recall and is the kind of approximation a declaration can honestly cover.
 
 One attribution of a blind spot to the component it hides is a filename heuristic and is
 labelled as one. Where a route prefix the analysis could not follow has literal segments, a
