@@ -148,6 +148,7 @@ function describeUnreadable(u: UnreadableRoutes): string | null {
   if (u.subtrees.size > 0) parts.push(`${u.subtrees.size} lazy subtree(s)`)
   if (u.spreads.size > 0) parts.push(`${u.spreads.size} spread route source(s)`)
   if (u.calls.size > 0) parts.push(`${u.calls.size} route source(s) built by a call`)
+  if (u.outlets.size > 0) parts.push(`${u.outlets.size} route(s) whose outlet could not be read`)
   if (u.unplaced.size > 0) parts.push(`${u.unplaced.size} claimed route file(s) placed under no prefix`)
   return parts.length === 0 ? null : `${parts.join(' and ')} could not be read`
 }
@@ -177,7 +178,7 @@ function describeUnreadable(u: UnreadableRoutes): string | null {
  */
 export function extractGraph(project: Project, projectDir: string, opts: ExtractOptions = {}): ExtractResult {
   const redirects = new Map<string, string>()
-  const unreadable: UnreadableRoutes = { paths: new Set(), subtrees: new Set(), unplaced: new Set(), spreads: new Set(), calls: new Set() }
+  const unreadable: UnreadableRoutes = { paths: new Set(), subtrees: new Set(), unplaced: new Set(), spreads: new Set(), calls: new Set(), outlets: new Set() }
   const routes = collectRoutes(project, redirects, unreadable, projectDir)
   const unreadableText = describeUnreadable(unreadable)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
