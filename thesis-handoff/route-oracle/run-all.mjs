@@ -104,7 +104,12 @@ if (!/^\w[\w-]*$/.test(LABEL ?? '')) throw new Error(`--label must be letters, d
 if (LABEL.toLowerCase() === 'pre') throw new Error('--label pre is not available here: it would record this harness\'s declared-screen count as the pre-round one. See the --label pre entry in the header of run-all.mjs.')
 const LOCAL_EXTRACTOR = has('--extractor-dir')
 const EXTRACTOR = LOCAL_EXTRACTOR ? path.resolve(arg('--extractor-dir')) : path.join(WORK, 'uigraph')
-const CLI = path.join(EXTRACTOR, 'packages', 'cli', 'dist', 'cli.js')
+// The CLI is run from its TypeScript source through tsx, which `packages/cli/package.json`
+// already declares as its `uigraph` script. Building it instead needed every package's `exports`
+// rewritten from ./src to ./dist first, because a built cli.js cannot resolve a sibling package
+// whose exports point at TypeScript; that rewrite edited the checkout under measurement and was
+// the one step of this harness that could not be committed. Running from source needs neither.
+const CLI = `pnpm -s --dir ${EXTRACTOR} exec tsx ${path.join(EXTRACTOR, 'packages', 'cli', 'src', 'cli.ts')}`
 
 const repos = manifest.repos.filter((r) => !ONLY || ONLY.includes(r.slug))
 fs.mkdirSync(OUT, { recursive: true })
@@ -127,13 +132,12 @@ const log = (...a) => console.log(...a)
  * HEAD sha, and marks the source "local-checkout" so a results file made from one can never
  * be read as a run of the pinned sha. The drift check is skipped for it on purpose.
  *
- * The build rewrites each packages/<pkg>/package.json in place (see the loop below), so a
- * local checkout should be a throwaway worktree, not the tree the extractor is developed in.
- * --skip-clone reuses an already built directory, local or cloned, without rebuilding it.
+ * Nothing is built: the CLI is run from its TypeScript source (see CLI above), so the checkout
+ * is only installed, never rewritten. --skip-clone reuses an already installed directory.
  *
  * A checkout with any change under packages/<pkg>/src, tracked or not, gets "+dirty" on its sha,
- * so the provenance never names a commit the figures were not made from. The package.json
- * rewrite of the build is outside src and does not count.
+ * so the provenance never names a commit the figures were not made from. Since nothing is built
+ * and nothing is rewritten, src is the whole of what decides the figures.
  */
 function buildExtractor() {
   const dir = EXTRACTOR
@@ -146,23 +150,6 @@ function buildExtractor() {
       sh(`git -C ${dir} checkout -q ${manifest.extractor.sha}`)
     } else log(`building local extractor checkout ${dir}`)
     sh(`pnpm install --silent`, { cwd: dir })
-    // See manifest.extractor.buildPatch: workspace exports point at TypeScript source, so
-    // the built CLI cannot resolve its sibling packages at runtime. Rewrite to dist.
-    for (const pkg of fs.readdirSync(path.join(dir, 'packages'))) {
-      const pj = path.join(dir, 'packages', pkg, 'package.json')
-      if (!fs.existsSync(pj)) continue
-      const d = JSON.parse(fs.readFileSync(pj, 'utf8'))
-      // A checkout built before already points at dist, and the rewrite below is not idempotent.
-      if (typeof d.main === 'string' && d.main.startsWith('./dist/')) continue
-      const fix = (s) => s.replace('./src/', './dist/').replace(/\.ts$/, s.includes('types') ? '.d.ts' : '.js')
-      if (d.exports) for (const v of Object.values(d.exports)) {
-        if (typeof v === 'object' && v) { if (v.types) v.types = v.types.replace('./src/', './dist/').replace('.ts', '.d.ts'); if (v.default) v.default = v.default.replace('./src/', './dist/').replace('.ts', '.js') }
-      }
-      if (d.bin) for (const k of Object.keys(d.bin)) d.bin[k] = fix(d.bin[k])
-      d.main = fix(d.main || './dist/index.js')
-      fs.writeFileSync(pj, JSON.stringify(d, null, 2))
-    }
-    sh(`pnpm -r build`, { cwd: dir })
   }
   const sha = sh(`git -C ${dir} rev-parse HEAD`).trim()
   // The pathspec is git's, not the shell's: a shell glob would expand against the caller's cwd, not dir.
@@ -245,11 +232,11 @@ const RAW_KINDS = ['C', 'L', 'B', 'D', 'F', 'why', 'notes']
  * files that survive between runs, a script that died before writing would otherwise hand back
  * the previous run's data as if it were this one's.
  */
-function runTool(slug, script, args, outFile) {
+function runTool(slug, script, args, outFile, env) {
   let status = 0
   try {
     execFileSync('node', ['--max-old-space-size=6144', path.join(HERE, script), ...args, '--json', outFile],
-      { stdio: 'pipe', timeout: 900000 })
+      { stdio: 'pipe', timeout: 900000, env: env ? { ...process.env, ...env } : process.env })
   } catch (e) {
     // status is null when the child was killed (timeout, signal) or never started.
     status = e.status ?? e.signal ?? e.code ?? 1
@@ -328,7 +315,7 @@ for (const r of repos) {
 
   const constructs = countConstructs(appPath)
   let mapOk = true, mapError = ''
-  try { sh(`node ${CLI} map ${appPath} --adapter angular${has('--attribution') ? ' --attribution' : ''}`) }
+  try { sh(`${CLI} map ${appPath} --adapter angular${has('--attribution') ? ' --attribution' : ''}`) }
   catch (e) { mapOk = false; mapError = String(e.stderr || e.message).slice(0, 400) }
 
   const graph = mapOk ? readGraph(appPath) : null
@@ -351,7 +338,15 @@ for (const r of repos) {
   if (!mapOk) toolRuns.push({ slug: r.slug, script: 'unexplained.mjs', status: 'not run: map failed' })
   else if (!(testC && testL)) toolRuns.push({ slug: r.slug, script: 'unexplained.mjs', status: 'not run: route or loss JSON missing' })
   const testNotes = mapOk ? runTool(r.slug, 'notes.mjs', [path.join(appPath, 'uigraph.db')], raw('notes')) : null
-  const testF = mapOk && !has('--no-mutation') ? runTool(r.slug, 'mutate.mjs', [repoDir, appPath, '--limit', arg('--mutants', '5')], raw('F')) : null
+  // mutate.mjs runs the extractor itself, so it needs the same command this runner uses: without
+  // UIGRAPH_MAP it fell back to a bare `uigraph` on PATH, every extraction failed, and the run
+  // still exited 0 with testF null. It takes --quota, not --limit, and the graph it mutates has
+  // to be the graph the rest of the run measured, so --attribution is passed through too.
+  const testF = mapOk && !has('--no-mutation')
+    ? runTool(r.slug, 'mutate.mjs',
+        [repoDir, appPath, '--quota', arg('--mutants', '8'), ...(has('--attribution') ? ['--attribution'] : [])],
+        raw('F'), { UIGRAPH_MAP: CLI })
+    : null
 
   // One definition of a construct across the thesis: the loss-breakdown parser's. The grep
   // count is kept in the results file as a cross-check.

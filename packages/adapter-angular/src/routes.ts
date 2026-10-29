@@ -5,7 +5,7 @@
 // only under their parent prefix.
 
 import { Node, Project, SyntaxKind } from 'ts-morph'
-import type { ArrayLiteralExpression, CallExpression, ExportDeclaration, ImportDeclaration, ObjectLiteralExpression, SourceFile, SpreadElement } from 'ts-morph'
+import type { ArrayLiteralExpression, CallExpression, ExportDeclaration, ImportDeclaration, ObjectLiteralExpression, ParameterDeclaration, SourceFile, SpreadElement } from 'ts-morph'
 import { routeToNodeId } from './ids'
 
 /** Specs, stories and test doubles: they declare routes that are not the application's. */
@@ -382,12 +382,25 @@ function mountedArrays(sf: SourceFile): ArrayLiteralExpression[] {
  * way. Taking it for a root registration minted the table at the root beside its real prefixed
  * address. A registration in an exported FACTORY in such a file is a different thing and is not
  * refused here: alfresco's folder-rules library is a lazy target and its factory, which the shell
- * calls, really does register its table at the root.
+ * calls, really does register its table at the root. `lazyTargets` holds the files a lazy target
+ * re-exports as well as the target itself (see `lazyProvidedFiles`), because a `loadChildren`
+ * naming a directory resolves to the barrel and the module whose providers hold the registration
+ * is the file behind it.
  */
 function providedByLazyModule(call: CallExpression, lazyTargets: Set<string>): boolean {
   if (!lazyTargets.has(call.getSourceFile().getFilePath())) return false
   const prop = call.getFirstAncestor((a) => Node.isPropertyAssignment(a) && a.getName() === 'providers')
   return prop !== undefined && prop.getFirstAncestor((a) => Node.isDecorator(a)) !== undefined
+}
+
+/**
+ * Is this function called at the point it is written --- an IIFE? Such a call is found by no
+ * name, and the body runs wherever the function expression sits.
+ */
+function invokedWhereWritten(fn: Node): boolean {
+  const outer = fn.getParentIfKind(SyntaxKind.ParenthesizedExpression) ?? fn
+  const parent = outer.getParent()
+  return parent !== undefined && Node.isCallExpression(parent) && parent.getExpression() === outer
 }
 
 /**
@@ -401,7 +414,12 @@ function providedByLazyModule(call: CallExpression, lazyTargets: Set<string>): b
  * nothing at. An anonymous function is refused, because no call to it can be found by name.
  */
 function registrationRuns(call: CallExpression, files: SourceFile[]): boolean {
-  const fn = call.getFirstAncestor((a) => Node.isFunctionDeclaration(a) || Node.isMethodDeclaration(a) || Node.isArrowFunction(a) || Node.isFunctionExpression(a))
+  const isFn = (a: Node) => Node.isFunctionDeclaration(a) || Node.isMethodDeclaration(a) || Node.isArrowFunction(a) || Node.isFunctionExpression(a)
+  let fn = call.getFirstAncestor(isFn)
+  // A function invoked where it is written runs there, so the question moves out to whatever
+  // encloses it: ghostfolio bootstraps inside `(async () => { ... })()`, and asking for a name
+  // refused the only registration the application has.
+  while (fn && invokedWhereWritten(fn)) fn = fn.getFirstAncestor(isFn)
   if (!fn) return true
   const named = Node.isFunctionDeclaration(fn) || Node.isMethodDeclaration(fn) ? fn.getName() : fn.getParentIfKind(SyntaxKind.VariableDeclaration)?.getName()
   if (!named) return false
@@ -436,6 +454,31 @@ function collectRootTableArrays(files: SourceFile[], lazyTargets: Set<string>): 
         const arr = arrayLiteralOf(arg)
         if (arr && Node.isArrayLiteralExpression(arr)) out.add(arr)
       }
+    }
+  }
+  return out
+}
+
+/**
+ * The lazy targets, plus the files each of them re-exports. A `loadChildren` naming a directory
+ * resolves to the barrel, so the module whose decorator providers hold a `provideRouter` is a
+ * file the barrel stands in front of and not the target itself. Testing the target's own path
+ * answered false for it, and the table was minted at the empty path as well as under the prefix
+ * that loads it --- an address the application mounts nothing at --- while the prefixed subtree
+ * was declared unread. One hop, and re-exports only: following a lazy module's IMPORTS would
+ * reach the shared modules it pulls in, and a root registration in one of those is the
+ * application's own. Membership refuses nothing by itself: a registration in an exported factory
+ * in such a file is still a root registration, which is what the decorator test in
+ * `providedByLazyModule` decides, and alfresco's folder-rules library turns on exactly that.
+ */
+function lazyProvidedFiles(files: SourceFile[], direct: Map<string, string>): Set<string> {
+  const out = new Set(direct.keys())
+  for (const sf of files) {
+    if (!direct.has(sf.getFilePath())) continue
+    for (const exp of sf.getExportDeclarations()) {
+      const spec = exp.getModuleSpecifierValue()
+      const dep = spec ? dependencyFile(exp, sf, spec) : undefined
+      if (dep && !dep.getFilePath().includes('/node_modules/')) out.add(dep.getFilePath())
     }
   }
   return out
@@ -564,18 +607,48 @@ function callMount(node: Node | undefined): { arrays: ArrayLiteralExpression[]; 
   if (!obj) return null
   const children = propNamed(obj, 'children')
   if (!children) return null
-  if (!Node.isShorthandPropertyAssignment(children)) {
-    if (!Node.isPropertyAssignment(children)) return null
-    const init = children.getInitializer()
-    if (!init || !(Node.isIdentifier(init) || Node.isArrayLiteralExpression(init))) return null
-  }
+  // The table under the wrapper's path is the one `children` NAMES, and the call's argument is
+  // that table only where `children` is a parameter of the wrapper --- a parameter being the one
+  // value that binds at the call site. `children: SOME_CONST`, or a literal array that files the
+  // argument one level deeper, is a DIFFERENT table, and mounting the argument there published a
+  // whole subtree at an address the application does not mount with nothing said; a wrapper given
+  // two tables mounted the one `children` leaves out beside the one it names.
+  const arg = childrenArgument(node, children)
+  if (!arg) return null
   const segment = propNamed(obj, 'path') === undefined ? '' : stringProp(obj, 'path')
   if (segment === null) return null
   // The route the wrapper returns is handed back with the arrays, because it declares more than
   // a path: a `canActivate` on it gates everything the wrapper mounts, and dropping it published
   // 978 of mifos's 981 must edges at confidence 1 for transitions the application refuses
   // whenever its AuthenticationGuard denies, with no note saying so.
-  return { arrays: callArrayArgs(node), segment, route: obj }
+  return { arrays: [arg], segment, route: obj }
+}
+
+/**
+ * The argument a wrapper files in the `children` of the route it returns: the one passed for the
+ * parameter that property names, or null where the property names anything else.
+ */
+function childrenArgument(call: CallExpression, children: Node): ArrayLiteralExpression | null {
+  const param = childrenParameter(children)
+  const fn = param?.getParent()
+  if (!param || !Node.isParametered(fn)) return null
+  const arr = arrayLiteralOf(call.getArguments()[fn.getParameters().indexOf(param)])
+  return arr && Node.isArrayLiteralExpression(arr) ? arr : null
+}
+
+/** The parameter the `children` of a returned route names, shorthand or written out. */
+function childrenParameter(children: Node): ParameterDeclaration | undefined {
+  const named = Node.isShorthandPropertyAssignment(children)
+    ? children.getValueSymbol()?.getValueDeclaration()
+    : declaredBy(Node.isPropertyAssignment(children) ? children.getInitializer() : undefined)
+  return Node.isParameterDeclaration(named) ? named : undefined
+}
+
+/** The declaration a name refers to, through an import. */
+function declaredBy(expr: Node | undefined): Node | undefined {
+  if (!expr || !Node.isIdentifier(expr)) return undefined
+  const sym = expr.getSymbol()
+  return (sym?.getAliasedSymbol() ?? sym)?.getValueDeclaration()
 }
 
 /** The guards the route a wrapper returns declares, resolved in the wrapper's own file. */
@@ -609,6 +682,20 @@ function callClaimedArrays(node: Node | undefined): ArrayLiteralExpression[] {
 }
 
 /**
+ * The expression a `children` property names, written out or in ES2015 shorthand
+ * (`{ path: 'x', children }`), where the key IS the binding. Reading only the long form left the
+ * subtree unwalked AND unclaimed, so the array the name resolves to stayed in the root scan,
+ * which minted its routes unprefixed -- a node at an address the application does not mount,
+ * with nothing said about the address it does.
+ */
+function childrenExpression(obj: ObjectLiteralExpression): Node | undefined {
+  const prop = propNamed(obj, 'children')
+  if (!prop) return undefined
+  if (Node.isShorthandPropertyAssignment(prop)) return prop.getNameNode()
+  return Node.isPropertyAssignment(prop) ? prop.getInitializer() : undefined
+}
+
+/**
  * The body of `walkRouteArray`, split out so its one caller can add this array to the ancestor
  * set before the walk and take it out after. The set has to hold the arrays on the CURRENT
  * descent and nothing else: one kept across siblings is a visited set, which refuses the same
@@ -629,6 +716,12 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       const prefix = joinRoutePath(parentPath, mount.segment)
       const wrapped = [...inheritedGuards, ...wrapperGuards(mount)]
       for (const arg of mount.arrays) {
+        // A table already on this descent is cut rather than mounted again, as in the spread
+        // branch, and the cut is declared for the same reason: the wrapper's table is not read.
+        if (chain.has(arg)) {
+          unreadable?.calls.add(el)
+          continue
+        }
         placed += walkRouteArray(arg, arg.getSourceFile(), prefix, out, loadedChildFiles, wrapped, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
         if (arg.getSourceFile() !== sf) consumedFiles?.add(arg.getSourceFile().getFilePath())
       }
@@ -658,6 +751,10 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         else {
           const wrappedSpread = [...inheritedGuards, ...wrapperGuards(mount)]
           for (const a of mount.arrays) {
+            if (chain.has(a)) {
+              unreadable?.calls.add(spreadCall)
+              continue
+            }
             const n = walkRouteArray(a, a.getSourceFile(), joinRoutePath(parentPath, mount.segment), out, loadedChildFiles, wrappedSpread, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
             placed += n
             if (n > 0 && a.getSourceFile() !== sf) consumedFiles?.add(a.getSourceFile().getFilePath())
@@ -711,13 +808,6 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         if (componentFile) resolvedName = componentClassName(componentFile)
       }
     }
-    // A redirect renders nothing, so it is no screen — but a link that points AT it does
-    // reach the screen it forwards to, and dropping it loses that transition entirely.
-    const redirectTo = stringProp(obj, 'redirectTo')
-    if (redirectTo !== null && redirects) {
-      placed++
-      redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
-    }
     // A route on a named outlet is reached as `(name:path)`, and so is everything BELOW it: the
     // outlet is inherited, so a child of such a route has no primary address either. Testing only
     // the route's own `outlet` minted alfresco's viewer subtree at /view/:nodeId, and a
@@ -732,6 +822,17 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     const outletUnknown = (outletProp !== undefined && ownOutlet === null) || obj.getProperties().some((pr) => Node.isSpreadAssignment(pr))
     if (outletUnknown && unreadable) unreadable.outlets.add(obj)
     const auxHere = underAuxOutlet || outletUnknown || (ownOutlet !== null && ownOutlet !== 'primary')
+    // A redirect renders nothing, so it is no screen — but a link that points AT it does
+    // reach the screen it forwards to, and dropping it loses that transition entirely. A
+    // redirect on a named outlet is reached as `(name:path)` like any other route there, so
+    // registering it at the primary address drew a must edge to its destination from every link
+    // to that address --- which Angular answers with the catch-all --- and swallowed the
+    // dead-link note the site deserves. It is read after the outlet for that reason.
+    const redirectTo = stringProp(obj, 'redirectTo')
+    if (redirectTo !== null && redirects && !auxHere) {
+      placed++
+      redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
+    }
     const isScreen = !auxHere && (propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined)
     const nodeId = routeToNodeId(fullPath)
     // Counted whether or not the address is free: the walk read a route and reached an address,
@@ -744,16 +845,17 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     }
     const childParent = isScreen ? nodeId : parentNodeId
     const childrenProp = propNamed(obj, 'children')
-    if (childrenProp && Node.isPropertyAssignment(childrenProp)) {
+    if (childrenProp) {
+      const childExpr = childrenExpression(obj)
       // `children: ADMIN` and `children: [...ADMIN]` are the same construct to Angular, so the
       // initializer is resolved the way a spread's expression is rather than required to be
       // written out. One the resolver cannot bring back to an array is a subtree the walk never
       // enters, and saying nothing about it let the named array be minted at the root instead.
-      const childInit = arrayLiteralOf(childrenProp.getInitializer())
+      const childInit = arrayLiteralOf(childExpr)
       // A subtree handed to a helper (`children: withShell(ADMIN)`) is reached through the
       // helper's arguments, the way an element written as a call is. Taking only the literal
       // left the named table to the root scan, which minted it unprefixed.
-      const childCall = childInit && Node.isArrayLiteralExpression(childInit) ? undefined : childrenProp.getInitializer()
+      const childCall = childInit && Node.isArrayLiteralExpression(childInit) ? undefined : childExpr
       // A `children` handed to a helper is mounted under the segment that helper declares, not
       // under this route's own prefix. Reading it the way the element branch had been read put a
       // whole subtree at /admin/dash for an application that serves /admin/v2/dash.
@@ -989,9 +1091,8 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): { ta
     // A `children` written as a name reaches its array the same way and is mounted under the same
     // prefix, so the root must not mint it either.
     for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
-      const prop = propNamed(obj, 'children')
-      if (!prop || !Node.isPropertyAssignment(prop)) continue
-      const init = prop.getInitializer()
+      const init = childrenExpression(obj)
+      if (!init) continue
       const arr = arrayLiteralOf(init)
       // An array written out in place is reached only here; one reached through a name is also a
       // declaration the root scan can see, and that is the one to remove from it. A table handed
@@ -1049,7 +1150,7 @@ function collectLoadChildrenTargets(project: Project, projectDir?: string): { ta
   spreadConsumedArrays = spreadArrays
   unselectedArms = unselected
   unreadableRegistrations = unreadableCalls
-  rootTableArrays = collectRootTableArrays(files, new Set(direct.keys()))
+  rootTableArrays = collectRootTableArrays(files, lazyProvidedFiles(files, direct))
   // The owner search reads `direct`, so it is asked only once every directly named module is in
   // it. What it elects goes back into `direct` under the route that elected it, so a table a
   // route reaches through a barrel is that route's as surely as one it names, and a second route

@@ -565,6 +565,15 @@ function declaredInitializer(id: Node): Node | undefined {
       const nameNode = decl.getNameNode()
       if (nameNode !== id) return declaredInitializer(nameNode)
     }
+    // The key of a shorthand property (`{ path: 'x', children }`) is a reference to a binding,
+    // but the key's OWN symbol is the property's, so the value is reached through the checker.
+    // Reading it as an ordinary identifier answered with nothing: the table the key names went
+    // unwalked and unclaimed, and the root scan minted it unprefixed.
+    if (Node.isShorthandPropertyAssignment(decl)) {
+      const value = decl.getValueSymbol()
+      const target = ((value?.getAliasedSymbol() ?? value)?.getDeclarations() ?? []).find((d) => Node.isVariableDeclaration(d))
+      if (target) return target.getInitializer()
+    }
     // `const { update } = internalRoutes.account.subRoutes` names a property of the object it
     // destructures, so the value is that property, not the declaration's own initializer.
     if (Node.isBindingElement(decl)) {

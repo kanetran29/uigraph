@@ -509,6 +509,28 @@ function mountingCheck() {
       want: '/home[SCREEN] /f[PREFIX] /f/list[SCREEN] /list[SCREEN] | blind 0',
     },
     {
+      // The mirror of the fixture below, which spreads the same table by NAME and was green
+      // either way: the call's argument tables were left to the root scan, which minted /x at
+      // an address the application mounts nothing at.
+      name: 'a table a spread of a call carries is not minted at the root either',
+      files: {
+        'app/app-routing.module.ts': `${head}const SUB: Routes = [{ path: 'x', component: X }];\nconst routes: Routes = [{ path: 'a', children: [...withShell(SUB)] }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/a[PREFIX] | blind 1',
+      reasons: ['spread route source: not followed'],
+    },
+    {
+      // The mirror of the wrapper fixture that uses `path: ''`, which stays green either way:
+      // a path the oracle cannot resolve was minted with its own source text as the address.
+      name: 'a wrapper whose path is not a literal is declared, not mounted at its source text',
+      files: {
+        'app/shell.ts': "export class Route {\n  static withShell(routes) {\n    return { path: window.base, component: Shell, children: routes };\n  }\n}\n",
+        'app/app-routing.module.ts': `${head}import { Route } from './shell';\nconst USERS: Routes = [{ path: 'users', component: Users }];\nconst routes: Routes = [{ path: 'org', children: [Route.withShell(USERS)] }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/org[PREFIX] | blind 2',
+      reasons: ['route source built by a call: not followed', 'route table carried under a prefix but reached from no root'],
+    },
+    {
       name: 'a table a spread carries is declared unfollowed and not minted at the root either',
       files: {
         'app/app-routing.module.ts': `${head}const SUB: Routes = [{ path: 'x', component: X }];\nconst routes: Routes = [{ path: 'a', children: [...SUB] }];\nexport const R = RouterModule.forRoot(routes);\n`,
@@ -1258,7 +1280,7 @@ function callMount(node) {
   }
   const pathProp = obj.getProperty('path')
   if (!pathProp) return { arrays: callArrayArgs(node), segment: '' }
-  const seg = text(pathProp.getInitializer?.())
+  const seg = constText(pathProp.getInitializer?.())
   if (seg === null || seg === undefined) return null
   return { arrays: callArrayArgs(node), segment: seg }
 }
@@ -1465,7 +1487,7 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false, unde
     // on a table nobody opened.
     if (el.getKind() === SyntaxKind.SpreadElement) {
       // The table a spread carries is mounted under THIS prefix, never unprefixed at the root.
-      for (const a of reachableArrays(el.getExpression())) offRootArrays.add(a)
+      for (const a of [...reachableArrays(el.getExpression()), ...callArrayArgs(el.getExpression())]) offRootArrays.add(a)
       blindSpots.push({ reason: 'spread route source: not followed', spec: el.getText().slice(0, 60), at: `${path.relative(appDir, sf.getFilePath())}:${el.getStartLineNumber()}`, prefix })
       continue
     }
