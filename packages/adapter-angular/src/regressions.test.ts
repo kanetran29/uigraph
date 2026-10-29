@@ -2219,3 +2219,40 @@ export class FeatureModule {}`,
     expect(graph.nodes.map((n) => n.route).sort()).toEqual(['/feature/rules', '/home'])
   })
 })
+
+describe('a guard on the route a wrapper returns', () => {
+  it('gates the edges below it, instead of publishing them on the deterministic tier', () => {
+    // mifos's Route.withShell returns `{ path: '', component: Shell, children: routes,
+    // canActivate: [AuthenticationGuard] }`, and every feature table goes through it. The call
+    // decision handed back only the arrays and the segment, so the guard on the route the
+    // wrapper returns was dropped: 978 of mifos's 981 must edges asserted, at confidence 1,
+    // transitions the running application refuses whenever that guard denies, and no soundiness
+    // note said so. The same tree written out in place reported them at may.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { Route } from './route.service'
+import { A } from './a.component'
+import { B } from './b.component'
+export const routes: Routes = [Route.withShell([{ path: 'accounting', component: A }, { path: 'accounting/create', component: B }])]`,
+        '/app/route.service.ts': `import type { Routes } from '@angular/router'
+import { AuthenticationGuard } from './auth.guard'
+import { Shell } from './shell.component'
+export class Route {
+  static withShell(routes: Routes) {
+    return { path: '', component: Shell, children: routes, canActivate: [AuthenticationGuard] }
+  }
+}`,
+        '/app/auth.guard.ts': `export class AuthenticationGuard { canActivate() { return false } }`,
+        '/app/shell.component.ts': C('<router-outlet></router-outlet>'),
+        '/app/a.component.ts': C('<a routerLink="/accounting/create">new</a>'),
+        '/app/b.component.ts': C('<p>b</p>'),
+      }),
+      '/app',
+    )
+    const edge = graph.edges.find((e) => e.to === 'n_accounting_create')
+    expect(edge).toBeDefined()
+    expect(edge?.modality).toBe('may')
+    expect(edge?.guard).toContain('AuthenticationGuard')
+  })
+})

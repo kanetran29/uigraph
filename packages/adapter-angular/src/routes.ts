@@ -550,7 +550,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
  * callee this reader cannot follow, a returned object that files its argument somewhere other
  * than `children`, a `path` that is not a literal --- answers null.
  */
-function callMount(node: Node | undefined): { arrays: ArrayLiteralExpression[]; segment: string } | null {
+function callMount(node: Node | undefined): { arrays: ArrayLiteralExpression[]; segment: string; route?: ObjectLiteralExpression } | null {
   if (!node || !Node.isCallExpression(node)) return null
   const returned = builderReturn(node.getExpression())
   if (!returned) return null
@@ -571,7 +571,16 @@ function callMount(node: Node | undefined): { arrays: ArrayLiteralExpression[]; 
   }
   const segment = propNamed(obj, 'path') === undefined ? '' : stringProp(obj, 'path')
   if (segment === null) return null
-  return { arrays: callArrayArgs(node), segment }
+  // The route the wrapper returns is handed back with the arrays, because it declares more than
+  // a path: a `canActivate` on it gates everything the wrapper mounts, and dropping it published
+  // 978 of mifos's 981 must edges at confidence 1 for transitions the application refuses
+  // whenever its AuthenticationGuard denies, with no note saying so.
+  return { arrays: callArrayArgs(node), segment, route: obj }
+}
+
+/** The guards the route a wrapper returns declares, resolved in the wrapper's own file. */
+function wrapperGuards(mount: { route?: ObjectLiteralExpression }): GuardInfo[] {
+  return mount.route ? canActivateGuards(mount.route.getSourceFile(), mount.route) : []
 }
 
 /**
@@ -618,8 +627,9 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         continue
       }
       const prefix = joinRoutePath(parentPath, mount.segment)
+      const wrapped = [...inheritedGuards, ...wrapperGuards(mount)]
       for (const arg of mount.arrays) {
-        placed += walkRouteArray(arg, arg.getSourceFile(), prefix, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
+        placed += walkRouteArray(arg, arg.getSourceFile(), prefix, out, loadedChildFiles, wrapped, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
         if (arg.getSourceFile() !== sf) consumedFiles?.add(arg.getSourceFile().getFilePath())
       }
       continue
@@ -646,8 +656,9 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         const mount = callMount(spreadCall)
         if (!mount) unreadable?.calls.add(spreadCall)
         else {
+          const wrappedSpread = [...inheritedGuards, ...wrapperGuards(mount)]
           for (const a of mount.arrays) {
-            const n = walkRouteArray(a, a.getSourceFile(), joinRoutePath(parentPath, mount.segment), out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
+            const n = walkRouteArray(a, a.getSourceFile(), joinRoutePath(parentPath, mount.segment), out, loadedChildFiles, wrappedSpread, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
             placed += n
             if (n > 0 && a.getSourceFile() !== sf) consumedFiles?.add(a.getSourceFile().getFilePath())
           }
@@ -750,13 +761,14 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       if (!childMount && childCall && Node.isCallExpression(childCall)) unreadable?.calls.add(childCall)
       const childArrays = !childMount ? [] : childInit && Node.isArrayLiteralExpression(childInit) ? [childInit] : childMount.arrays
       const childPrefix = joinRoutePath(fullPath, childMount ? childMount.segment : '')
+      const childGuards = childMount ? [...guards, ...wrapperGuards(childMount)] : guards
       if (childArrays.length > 0) {
         for (const child of childArrays) {
           if (chain.has(child)) {
             unreadable?.subtrees.add(obj)
             continue
           }
-          const n = walkRouteArray(child, child.getSourceFile(), childPrefix, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
+          const n = walkRouteArray(child, child.getSourceFile(), childPrefix, out, loadedChildFiles, childGuards, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
           placed += n
           if (n > 0 && child.getSourceFile() !== sf) consumedFiles?.add(child.getSourceFile().getFilePath())
         }
