@@ -14,7 +14,7 @@ const PRETTY = {
   REMOVE_GUARD: 'Remove a guard',
 }
 
-const runs = process.argv.slice(2).map((f) => {
+const runs = process.argv.slice(2).filter((f) => !path.basename(f).startsWith('rq4base-')).map((f) => {
   const r = JSON.parse(fs.readFileSync(f, 'utf8'))
   r.slug = path.basename(f).replace(/^rq4-/, '').replace(/-attributed\.json$/, '')
   return r
@@ -56,6 +56,47 @@ for (const r of runs) {
   out += `${r.slug} & ${disc} & ${samp} & ${excl} \\\\\n`
 }
 out += '\\bottomrule\n\\end{tabular}}\n'
+
+// The baseline runs, when given, so the chapter can state what attribution does to change
+// sensitivity without a number being typed by hand. A file named rq4base-<slug>.json is read
+// as the same application's unattributed run; the two must cover the same applications.
+const baseFiles = process.argv.slice(2).filter((f) => path.basename(f).startsWith('rq4base-'))
+if (baseFiles.length) {
+  const base = baseFiles.map((f) => ({ slug: path.basename(f).replace(/^rq4base-/, '').replace(/\.json$/, ''), ...JSON.parse(fs.readFileSync(f, 'utf8')) }))
+  const slugs = (rs) => rs.map((r) => r.slug).sort().join(',')
+  if (slugs(base) !== slugs(runs)) throw new Error(`the baseline runs cover ${slugs(base)} and the attributed runs ${slugs(runs)}; the comparison would be between different corpora`)
+  const tot = (rs) => rs.reduce((a, r) => {
+    for (const o of Object.values(r.perOperator || {})) { a.det += o.detected; a.n += o.detected + o.missed + o.wrong; a.exc += o.excluded }
+    return a
+  }, { det: 0, n: 0, exc: 0 })
+  const A = tot(runs), B = tot(base)
+  // RENAME_PATH is detected by construction wherever the path was already parsed, so the
+  // chapter states the rate with and without it. MISSED, as against WRONG, is a mutant the
+  // graph did not respond to at all, which is the one that bears on change impact analysis.
+  const perOp = (rs, ops) => rs.reduce((a, r) => {
+    for (const [op, o] of Object.entries(r.perOperator || {})) {
+      if (!ops.includes(op)) continue
+      a.det += o.detected; a.n += o.detected + o.missed + o.wrong
+    }
+    return a
+  }, { det: 0, n: 0 })
+  const RENAME = ['RENAME_PATH']
+  const FALLIBLE = OPS.filter((o) => !RENAME.includes(o))
+  const R = perOp(runs, RENAME), F = perOp(runs, FALLIBLE)
+  const missed = runs.reduce((a, r) => a + r.results.filter((x) => x.verdict === 'MISSED').length, 0)
+  const candidates = runs.reduce((a, r) => a + Object.values(r.discovered).reduce((x, y) => x + y, 0), 0)
+  for (const [k, v] of [
+    ['HarnessVersionMutation', runs[0].harnessVersion], ['MutCandidates', candidates], ['MutRenameScored', R.n], ['MutRenameDetected', R.det],
+    ['MutFallibleScored', F.n], ['MutFallibleDetected', F.det], ['MutNoResponse', missed],
+  ]) out += `\\newcommand{\\${k}}{${v}}\n`
+  const pc = (x) => `${((x.det / x.n) * 100).toFixed(1)}\\,\\%`
+  out += '\n% Attributed against baseline, for the change-sensitivity claim.\n'
+  for (const [k, v] of [
+    ['MutScored', A.n], ['MutDetected', A.det], ['MutRate', pc(A)], ['MutExcluded', A.exc],
+    ['MutBaseScored', B.n], ['MutBaseDetected', B.det], ['MutBaseRate', pc(B)], ['MutBaseExcluded', B.exc],
+  ]) out += `\\newcommand{\\${k}}{${v}}\n`
+  console.error(`attributed ${A.det}/${A.n} (${pc(A)}), ${A.exc} excluded; baseline ${B.det}/${B.n} (${pc(B)}), ${B.exc} excluded`)
+}
 
 process.stdout.write(out)
 

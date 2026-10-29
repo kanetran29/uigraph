@@ -73,7 +73,13 @@ const DIAG = [
   ['scoped; target dynamic', 'Scope found, target fully dynamic'],
   ['scoped; target resolves', 'Scope found, not explained'],
 ]
-const diag = B.results.map((b) => { const p = path.join(afterDir, 'raw', `${b.slug}.diag.json`); return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : {} })
+// A missing diagnosis file used to read as an empty object, so the table printed a column
+// of zeros and said that nothing stays lost. Refuse instead: a zero here is a claim.
+const diag = B.results.map((b) => {
+  const p = path.join(afterDir, 'raw', `${b.slug}.diag.json`)
+  if (!fs.existsSync(p)) throw new Error(`${b.slug}: no ${p}; run diagnose-attribution.mjs for every application before this table is written`)
+  return JSON.parse(fs.readFileSync(p, 'utf8'))
+})
 let tex2 = `\\newcommand{\\TabRemaining}{%\n\\begin{tabular}{@{}l${'r'.repeat(B.results.length)}r@{}}\n\\toprule\nReason & ${B.results.map((r) => ({ realworld: 'rw', alfresco: 'alf', ghostfolio: 'gf', k8sdash: 'k8s', bitwarden: 'bw', mifos: 'mif' })[r.slug]).join(' & ')} & Total \\\\\n\\midrule\n`
 for (const [k, label] of DIAG) { const v = diag.map((d) => d[k] || 0); tex2 += `${label} & ${v.join(' & ')} & ${v.reduce((a, b) => a + b, 0)} \\\\\n` }
 tex2 += `\\bottomrule\n\\end{tabular}}\n`
@@ -115,6 +121,37 @@ tex3 += `Out of the node classes & ${gt.node.must} & ${gt.node.may} & ${gt.node.
 tex3 += `All conversions gained & ${gt.attribution.must + gt.node.must} & ${gt.attribution.may + gt.node.may} & ${gt.attribution.must + gt.node.must + gt.attribution.may + gt.node.may} \\\\\n`
 tex3 += `\\bottomrule\n\\end{tabular}}\n`
 if (arg('--tex')) fs.appendFileSync(arg('--tex'), tex3)
-console.log(`\nconversions gained, by baseline class: ${JSON.stringify(moves)}`)
+
+// The inline macros for the figures the chapter states in prose, so no RQ3 number is typed
+// by hand. The closure is asserted here rather than left to the reader: every construct the
+// loss rules assigned to attribution is either recovered or carries a reason in TabRemaining,
+// and a generator that cannot show that refuses to write the macros at all.
+const T = {
+  lost: rows.reduce((a, r) => a + r.attrBefore, 0),
+  must: rows.reduce((a, r) => a + r.recoveredMust, 0),
+  may: rows.reduce((a, r) => a + r.recoveredMay, 0),
+  regressed: rows.reduce((a, r) => a + r.regressed, 0),
+  remaining: diag.reduce((a, d) => a + DIAG.reduce((b, [k]) => b + (d[k] || 0), 0), 0),
+  edgesBefore: rows.reduce((a, r) => a + r.edgesBefore, 0),
+  edgesAfter: rows.reduce((a, r) => a + r.edgesAfter, 0),
+  mustBefore: rows.reduce((a, r) => a + r.mustBefore[1], 0),
+  mustAfter: rows.reduce((a, r) => a + r.mustAfter[1], 0),
+  gained: rows.filter((r) => r.convAfter > r.convBefore).length,
+}
+const recovered = T.must + T.may
+if (recovered + T.remaining !== T.lost) {
+  throw new Error(`attribution losses do not close: ${recovered} recovered + ${T.remaining} with a reason != ${T.lost} assigned. One of the two tables is measuring a different population.`)
+}
+const pc = (n, d) => `${(Math.round((n / d) * 1000) / 10).toFixed(1)}\\,\\%`
+let tex4 = '\n% RQ3 inline figures.\n'
+for (const [k, v] of [
+  ['AttrLost', T.lost], ['AttrRecovered', recovered], ['AttrRecoveredShare', pc(recovered, T.lost)],
+  ['AttrRecoveredMust', T.must], ['AttrRecoveredMay', T.may], ['AttrRegressed', T.regressed],
+  ['AttrRemaining', T.remaining], ['AttrEdgesBefore', T.edgesBefore], ['AttrEdgesAfter', T.edgesAfter],
+  ['AttrMustBefore', T.mustBefore], ['AttrMustAfter', T.mustAfter], ['AttrAppsGained', T.gained],
+]) tex4 += `\\newcommand{\\${k}}{${v}}\n`
+if (arg('--tex')) fs.appendFileSync(arg('--tex'), tex4)
+console.log(`\nRQ3: ${recovered} of ${T.lost} recovered (${T.must} must, ${T.may} may), ${T.remaining} with a reason, ${T.regressed} regressed; edges ${T.edgesBefore} -> ${T.edgesAfter}, must ${T.mustBefore} -> ${T.mustAfter}`)
+console.log(`conversions gained, by baseline class: ${JSON.stringify(moves)}`)
 console.log(`  out of attribution classes: ${gt.attribution.must} must, ${gt.attribution.may} may`)
 console.log(`  out of node classes:        ${gt.node.must} must, ${gt.node.may} may`)

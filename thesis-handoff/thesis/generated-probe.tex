@@ -2,18 +2,34 @@
 \newcommand{\ProbeHarnessVersion}{1.1.0}
 \newcommand{\TabProbe}{%
 \setlength{\tabcolsep}{4pt}%
-\begin{tabular}{@{}lrrrrrrc@{}}
+\begin{tabular}{@{}lrrrrrrrc@{}}
 \toprule
-Application & Routes & Mounted & Nodes & \shortstack[r]{Not\\mounted} & \shortstack[r]{Not\\minted} & \shortstack[r]{Prefix\\only} & \shortstack[c]{Declared\\incomplete} \\
+Application & Routes & Mounted & Nodes & \shortstack[r]{Not\\mounted} & \shortstack[r]{Not\\minted} & \shortstack[r]{Prefix\\only} & \shortstack[r]{Matcher\\only} & \shortstack[c]{Declared\\incomplete} \\
 \midrule
-realworld & 14 & 10 & 10 & 0 & 0 & 0 & no \\
-alfresco & 123 & 30 & 27 & 0 & 3 & 0 & yes \\
-ghostfolio & 377 & 326 & 84 & 0 & 242 & 0 & yes \\
-k8s dashboard & 140 & 67 & 67 & 0 & 0 & 0 & no \\
-bitwarden & 170 & 99 & 98 & 0 & 1 & 0 & yes \\
-mifos & 935 & 614 & 606 & 0 & 5 & 3 & yes \\
+realworld & 14 & 10 & 10 & 0 & 0 & 0 & 0 & no \\
+alfresco & 123 & 30 & 27 & 0 & 3 & 0 & 0 & yes \\
+ghostfolio & 377 & 326 & 84 & 0 & 242 & 0 & 1 & yes \\
+k8s dashboard & 140 & 67 & 67 & 0 & 0 & 0 & 0 & no \\
+bitwarden & 170 & 99 & 98 & 0 & 1 & 0 & 0 & yes \\
+mifos & 935 & 614 & 606 & 0 & 5 & 3 & 0 & yes \\
 \midrule
-All & 1759 & 1146 & 892 & 0 & 251 & 3 & \\
+All & 1759 & 1146 & 892 & 0 & 251 & 3 & 1 & \\
+\bottomrule
+\end{tabular}}
+\newcommand{\TabProbeClosure}{%
+\setlength{\tabcolsep}{4pt}%
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+Application & Routes & Mounted & \shortstack[r]{One\\address} & \shortstack[r]{Redirect} & \shortstack[r]{Named\\outlet} & \shortstack[r]{Empty\\outlet} & \shortstack[r]{Matcher} & \shortstack[r]{No\\component} \\
+\midrule
+realworld & 14 & 10 & 1 & 0 & 0 & 0 & 0 & 3 \\
+alfresco & 123 & 30 & 3 & 2 & 66 & 0 & 0 & 22 \\
+ghostfolio & 377 & 326 & 9 & 1 & 0 & 0 & 1 & 40 \\
+k8s dashboard & 140 & 67 & 0 & 3 & 29 & 0 & 0 & 41 \\
+bitwarden & 170 & 99 & 7 & 9 & 13 & 0 & 0 & 42 \\
+mifos & 935 & 614 & 17 & 32 & 0 & 0 & 0 & 272 \\
+\midrule
+All & 1759 & 1146 & 37 & 47 & 108 & 0 & 1 & 420 \\
 \bottomrule
 \end{tabular}}
 \newcommand{\ProbeApps}{6}
@@ -32,6 +48,15 @@ All & 1759 & 1146 & 892 & 0 & 251 & 3 & \\
 \newcommand{\ProbeMissedPrefixRedirect}{2}
 \newcommand{\ProbeMissedPrefixUnanswered}{1}
 \newcommand{\ProbeMatcherRoutes}{1}
+\newcommand{\ProbeDropCollapsed}{37}
+\newcommand{\ProbeDropRedirect}{47}
+\newcommand{\ProbeDropNamedOutlet}{108}
+\newcommand{\ProbeDropEmptyOutlet}{0}
+\newcommand{\ProbeDropUnderMatcher}{1}
+\newcommand{\ProbeDropComponentless}{420}
+\newcommand{\ProbeOutletScreens}{64}
+\newcommand{\ProbeMatcherScreens}{1}
+\newcommand{\ProbeUnaddressableScreens}{65}
 \newcommand{\ProbeMissedGhostfolio}{242}
 \newcommand{\ProbeMissedAlfresco}{3}
 \newcommand{\ProbeMissedBitwarden}{1}

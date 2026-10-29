@@ -135,6 +135,7 @@ route for that screen renders. Navigation sites anywhere else are not attributed
 screen. This one cause explains three symptoms in the baseline: shared components contribute no edges, because the application shell places the header next to the router outlet and not inside the subtree of any screen; a component mounted at several routes contributes one edge instead of one per route; and applications that navigate from injected services produce no edges at all.
 
 \subsection{Scope}
+\label{sec:scope}
 
 Every navigation site is anchored at a \emph{scope}: the set of screens from which it
 can fire. A scope is thus an element of the powerset $\mathcal{P}(S)$, and the abstract
@@ -301,12 +302,13 @@ emits one. The analysis does not try to determine when these edges fire. It mark
 limit explicitly instead of giving a result that looks more precise than it is.
 
 \subsection{Anchored edges}
+\label{sec:anchored}
 
 If the result of attribution were stored explicitly, a single link in the application
 shell would produce one edge for every screen, and the size of the graph would be
 bounded by $|S| \cdot |\mathit{sites}|$, where $\mathit{sites}$ is the set of navigation
 sites. For the largest application in
-the corpus this bound is $610 \times 1344$. Instead, each edge is stored once, anchored
+the corpus this bound is $\RoundTwoEarlierOracleMifosNow{} \times 1344$. Instead, each edge is stored once, anchored
 at its scope, and the set of edges leaving a particular screen is computed when it is
 requested:
 \[

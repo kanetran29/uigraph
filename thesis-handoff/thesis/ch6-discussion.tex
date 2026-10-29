@@ -238,11 +238,13 @@ using the graph itself, which couples the sample to the tool's own coverage; the
 excluded mutants are reported rather than dropped silently, but the sample is not
 independent of the artefact under test. The end-to-end oracle extracts URLs from test
 source text, which under-samples click-driven navigation and can collect strings that no
-test ever visits, so it measures node existence and nothing finer. The independent route
-parser cannot follow the lazy specifiers of one application, which leaves that
-application's node coverage based on two screens and effectively uninformative. That
-application is also one of the two for which the extractor produces no edges at all, so
-the weakest oracle and one of the weakest extraction results fall together.
+test ever visits, so it measures node existence and nothing finer. On the instrument these figures are measured on the
+independent parser follows every lazy specifier in the corpus, and the application whose
+node coverage it once based on two screens is now read in full by both readers; what the
+differential test has lost in exchange is independence, since several of the forms it
+reads it learned from the extractor (Section~\ref{sec:corrections}). That is the reason
+the runtime method was added, and why the chapter rests the external check on it rather
+than on the agreement between the two readers of the same text.
 
 \textbf{External validity.} The corpus is six open-source Angular applications pinned to
 single commits. Proprietary applications are not measured, and they may differ in size,
@@ -403,10 +405,9 @@ follows from it, and guards named on a route as labels on the edges entering tha
 route's subtree. Everything in this group is the analysis's responsibility. The failures
 measured in Chapter~\ref{ch:results} are failures inside it: route paths that are
 constant references are not resolved, route tables behind a lazy boundary are not
-followed, some nodes are not linked to the component that renders them, and a guard
-declared on an empty-path child route does not reach the edges entering its screen.
-These are bugs with known causes and they are listed in Section~\ref{sec:future}, not
-approximations to be declared away.
+followed, and some nodes are not linked to the component that renders them. These are
+bugs with known causes rather than approximations to be declared away, which is why
+RQ5 could repair them; Section~\ref{sec:res-round2} reports what repairing them cost.
 
 Out of scope are the following constructs, each with the reason it is approximated and
 the effect on the graph.
@@ -506,153 +507,6 @@ finds three \texttt{dialog.open} call sites, all in alfresco, in the three appli
 it covered. The two figures cover different scopes and are not directly comparable. The
 right unit for the cost of this particular approximation is the number of
 components and navigation sites it strands, not the number of calls that strand them.
-
-\subsection{What a route table's evidence does not establish}
-\label{sec:ownership}
-
-One assumption underlies every approximation in the reader of route tables, and the others are
-instances of it. A route table that no site in the application claims --- no
-\texttt{loadChildren} names it, no spread or \texttt{children} carries it, no registration call
-takes it --- is read as a table the application mounts at its root. The assumption is what lets
-either tool find an application's routes however they are declared, and it is an
-over-approximation: a table registered nowhere the compiled build reaches is mounted at no
-address at all, and reading it at the root puts its entries into the graph as screens. It is
-taken deliberately, because the alternative loses the routes of every application whose root
-registration neither tool recognises, and the cases below are the places where it has been
-narrowed rather than abandoned.
-
-Three further approximations in that reader share one shape, and they are listed
-together because each was found by attacking a repair of the previous one. All three are
-declared in the tool's own notes; none was closed, and the reason in each case is that
-closing it would refuse a construct the corpus actually uses.
-
-The first concerns which file owns a lazily loaded route array. An Angular module loaded
-through \texttt{loadChildren} usually keeps its routes in a separate routing module that it
-imports, so the reader follows one import to find them. Electing that owner no longer trusts
-the \emph{shape} of an array --- a menu or breadcrumb configuration carrying \texttt{path}
-properties is never elected, and a file claimed beside an elected owner is reported as an
-incomplete route set rather than dropped in silence. But a \texttt{Routes}-typed array is
-evidence that its author declared it to some router, never that \emph{this} application mounts
-it. A sibling application's typed table, reached through a workspace alias and used as data,
-is therefore still elected and still minted under the lazy prefix, with a deterministic edge
-into it. Requiring the elected owner to lie inside the application directory closes that
-case and simultaneously refuses a lazily loaded route array that legitimately lives in a
-shared library outside it, which is a pattern the corpus does use. No corpus application
-distinguishes the two, so the gap is left open and declared rather than traded for a
-construct that is known to occur.
-
-The second is the same boundary one step earlier: the \texttt{loadChildren} specifier itself
-is not bounded, so a loader whose import resolves into another project's alias root mounts
-that project's table under this application's prefix. The obvious guard --- requiring the
-loaded file to belong to the same project root as the route that loads it --- was applied
-experimentally and refuses a lazily loaded module that one corpus application keeps in an
-alias root, turning several of its declared screens into declared blind spots and lowering
-its reported coverage. By path alone the analysis cannot tell a shared lazy library from
-another application's route table, and that is the honest statement of the limit.
-
-The third is a reading, not a defect. A routing module imported by two lazily loaded modules
-and loaded by no route is read as a table of the project root rather than as children of both
-importers. The alternative reading matches Angular more closely but lets one route adopt
-another's table, which is how the first approximation above was reached; the conservative
-reading is taken, and it costs the affected routes their prefix.
-
-A fourth was found by asking what the test that keeps a lazy route from adopting the
-application's root table actually read, and it is reported here as a repair rather than as a
-limitation, because what the asking produced was a measurement no reading of the code would
-have given. What the test read was the candidate file's own call to \texttt{forRoot} on
-\texttt{RouterModule}, Angular's own discriminator for a root table, which is why it was sound
-where it fired. It is also why it fired nowhere. An application that registers its root with
-the standalone \texttt{provideRouter} API is not recognised at all, and two of the six have no
-\texttt{forRoot} call anywhere; an application that declares its root array in one file and
-registers it in another --- ghostfolio and kubernetes/dashboard both do --- is recognised in the
-registering file, which holds no route, and not in the file a lazily loaded module could adopt.
-Instrumenting the predicate made the limit exact rather than arguable: it was asked 698 times
-across the six applications in the independent parser and 2798 times in the extractor, and
-answered yes on none of them. A guard that never fires is worse than no guard, because a commit
-message and a chapter credit it with a property nothing has shown it to have.
-
-Both tools now mark root tables per \emph{array}, taken from the argument of either
-registration API and resolved through the name it is nearly always written as, which is what
-makes the question answerable in the shape applications actually write.
-
-Several repairs of the same reader stand on constructed fixtures and on nothing else, and that
-is worth saying plainly rather than leaving to be discovered. A file holding a menu beside an
-imported routing module, a \texttt{forChild} given a table declared in another file, a
-conditional resolved inside a registration call, a root table a spread elsewhere also carries,
-and a wrapper that takes its own path as a parameter: each of these was reproduced, each
-produced either an address the application does not mount or a declared loss where nothing was
-lost, and each is now refused. None of the five occurs in this corpus. Every figure in
-Chapter~\ref{ch:results} is therefore identical with and without them, so no result here is
-evidence that they work --- their evidence is the fixtures, which fail when the rule each pins is
-removed on its own. The same holds of the refusals in the independent parser --- the test that stops a lazy route
-adopting a table another route owns is asked 174 times in the extractor and 3512 in the parser
-and answers yes in neither --- so for those the corpus is evidence about the reading the two
-tools share and not about the guards that bound it. The per-array root-table test is the
-exception, and the distinction matters: it is asked a few hundred times and answers yes eight
-times in each reader, and one of those answers is what mints alfresco's \path{/rules}. A rule
-the corpus exercises and a rule only a fixture exercises are different kinds of claim, and this
-chapter says which each is. The reverse also holds and is the reason for the paragraph: a corpus of six
-applications is not a sample that makes an analysis sound, and five constructs it happens not to
-contain were enough to break two of the properties this thesis claims. One further case came
-with it: a table a feature library both hands to \texttt{provideRouter} and exports for lazy
-loading is mounted at the root \emph{and} under the prefix that loads it, so a claim on its
-file may not cover both mounts --- the root scan now mints a root-registered array whatever
-claims its file, which is alfresco's \path{/rules}.
-
-A fifth is the mirror of the first, and worth stating because it is where a conservative
-refusal becomes an over-approximation. When the only site that loads a route table lies in a
-test specification, the analysis declines the claim and scans the table from the project root,
-so its routes are reported at the application's root address. The guard establishes that a site
-the walk cannot reach may not justify suppressing the root scan; it does not establish that the
-application mounts the table there. That makes it a further instance of the unclaimed
-top-level-\texttt{Routes} over-approximation declared above, and it occurs nowhere in this
-corpus.
-
-\label{sec:named-outlet}
-A sixth is the named outlet, and its history in this work is the clearest case of the difference
-between declaring an approximation and being sound over it. A route carrying
-\texttt{outlet: 'name'} is reached as \texttt{(name:path)}, so it contributes no screen on the
-primary outlet. The extractor refused such a route from the start --- but only the route that
-carries the property: where a named outlet opened a \texttt{children} subtree, the routes beneath
-it were still assembled against the primary path and minted there. alfresco mounts its document
-viewer that way, and the graph held \path{/view/:nodeId} and
-\path{/search-libraries/view/:nodeId}, two addresses that application serves only through the
-viewer outlet. The independent route parser read the subtree the same way, so coverage was
-100\,\% over a set holding both, and no comparison between the two tools could show the gap. This
-was written down as an open case, on the reasoning that an approximation stated is an
-approximation a consumer can price.
-
-That reasoning was wrong, and the runtime check of Section~\ref{sec:res-probe} is what showed it.
-A consumer reading the graph finds a node at \path{/view/:nodeId}; a navigation to that address in
-the built application is answered by the catch-all route. The declaration did not make the node
-true, and the must-tier property admits no exception that a sentence can buy back. An outlet is
-inherited, so nothing below a named-outlet route has a primary address either: the extractor now
-carries outlet context down the walk and mints no screen for such a subtree. What remains is a
-limitation on what the graph contains --- a screen reached only through a named outlet is not an
-element of the node set, and the transitions into it are not in the edge set --- which is a
-statement about recall and is the kind of approximation a declaration can honestly cover.
-
-One attribution of a blind spot to the component it hides is a filename heuristic and is
-labelled as one. Where a route prefix the analysis could not follow has literal segments, a
-component whose path carries all of them as whole directory names is reported as hidden behind
-that prefix. The heuristic answers the question a reader asks --- which screens are missing
-because of this hole --- and it is wrong in two directions that the harness now states rather
-than hides. A route prefix does not determine a directory name, so the components behind a hole
-whose directory is named differently are not attributed to it and are reported only as having no
-node; and a prefix made entirely of parameters has no literal segment, so it is attributed to no
-component at all. An earlier version compared the prefix to the path as a bare substring, which
-read \path{/cluster} into \texttt{resourcelist/clusterrole/component.ts} and would have replaced
-the extractor's own true note about that file with a tool blind spot that does not cover it.
-No count of the rows that satisfied the broader predicate is given, because the figure depends
-on which population it is taken over and nothing in this thesis rests on it. What does matter
-is why the attribution reaches the published reason table in neither form, and the obvious
-account of that is wrong: it is not that some earlier test answers those rows first. The attribution is asked of
-all \RoundTwoUnexplained{} unaccounted rows in the corpus and declines every one of them on its
-own first two conditions --- \RoundTwoUnplacedClass{} because the owning file is not a component
-and the rest because the graph already witnesses an edge from that file --- so the comparison
-this paragraph is about is never reached on this corpus at all. What is recorded here is therefore a property of the rule and not
-of any figure in Chapter~\ref{ch:results}. The narrower rule is still the one to state, because
-the broader one was false wherever it was asked.
 
 \section{Transfer to other frameworks}
 \label{sec:transfer}
@@ -774,10 +628,12 @@ attributed site, the relation that supplied its scope would make the same compar
 possible per relation.
 
 The two defects that cap the larger applications are the most urgent, because nothing else in the
-analysis can be evaluated properly while they stand. Resolving constant-valued route
-paths means following a path expression to its definition and folding it, which is a
-local analysis over the route tables and would turn the application that currently
-collapses to a single node into one with a full node set. Following lazy boundaries means
+analysis can be evaluated properly while they stand. Both were repaired in the course of
+answering RQ5, so what follows describes what the work was rather than what remains:
+resolving constant-valued route paths means following a path expression to its definition
+and folding it, which is a local analysis over the route tables and turned the
+application that had collapsed to a single node into one with a node for every declared
+screen. Following lazy boundaries means
 resolving a \texttt{loadChildren} or \texttt{loadComponent} specifier to the file it
 names and continuing route extraction there, including through a routing module that a
 lazily loaded module imports. The independent route parser follows lazy boundaries after its correction
@@ -800,11 +656,15 @@ the fixpoint and the complexity bound for it are already stated. Guards that ret
 \texttt{UrlTree} belong to the same group, since a redirecting guard is itself a
 navigation site and not only a label.
 
-RQ4 exposed one defect that is cheap to fix and worth fixing before the graph is used
-for anything: a guard declared on a route whose path is the empty string does not reach
-the edges entering that screen. The repair is in how the guard set of a screen is
-assembled from the route chain, and the test for it is already written in the form of
-the mutation operator that removes a guard. The wider treatment of guards in
+RQ4 exposed one defect in how the guard set of a screen was assembled from the route
+chain: a guard declared on a route whose path is the empty string did not reach the edges
+entering that screen. It has since been repaired, and the repair turned out to matter far
+more than its size suggested, because the same assembly ignored a guard carried by a route
+a wrapper function returns --- the construct through which one application in the corpus
+routes every one of its feature tables. Reading it is what took that application's
+deterministic tier from an order of magnitude more edges, twenty-six of them violating the
+soundness property, down to two that do not (Section~\ref{sec:res-round2}). The mutation
+operator that removes a guard is the test for both. The wider treatment of guards in
 Chapter~\ref{ch:analysis}, where the guard of an edge is the conjunction of the
 conditions on the containment path with the guards of the target route, is the more
 substantial piece of work and would subsume it.
