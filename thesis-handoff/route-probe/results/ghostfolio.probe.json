@@ -1,15 +1,15 @@
 {
   "slug": "ghostfolio",
-  "origin": "http://127.0.0.1:54471/en/",
+  "origin": "http://127.0.0.1:54765/en/",
   "consoleErrors": [
     "Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "ERROR TypeError: Cannot read properties of undefined (reading 'filters.accounts')\n    at _UserService.getFilters (http://127.0.0.1:54471/en/chunk-EFFI6UOZ.js:11851:27)\n    at _UserService.hasFilters (http://127.0.0.1:54471/en/chunk-EFFI6UOZ.js:11884:21)\n    at _GfHeaderComponent.ngOnChanges (http://",
-    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54471/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54471/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp",
-    "ERROR TypeError: Cannot read properties of undefined (reading 'colorScheme')\n    at Object.next (http://127.0.0.1:54471/en/main.js:8850:51)\n    at ConsumerObserver2.next (http://127.0.0.1:54471/en/chunk-EFFI6UOZ.js:658:29)\n    at Subscriber2._next (http://127.0.0.1:54471/en/chunk-EFFI6UOZ.js:627:26)",
-    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54471/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54471/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp",
-    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54471/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54471/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp",
-    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54471/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54471/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp",
-    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54471/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54471/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp"
+    "ERROR TypeError: Cannot read properties of undefined (reading 'filters.accounts')\n    at _UserService.getFilters (http://127.0.0.1:54765/en/chunk-EFFI6UOZ.js:11851:27)\n    at _UserService.hasFilters (http://127.0.0.1:54765/en/chunk-EFFI6UOZ.js:11884:21)\n    at _GfHeaderComponent.ngOnChanges (http://",
+    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54765/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54765/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp",
+    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54765/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54765/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp",
+    "ERROR TypeError: Cannot read properties of undefined (reading 'colorScheme')\n    at Object.next (http://127.0.0.1:54765/en/main.js:8850:51)\n    at ConsumerObserver2.next (http://127.0.0.1:54765/en/chunk-EFFI6UOZ.js:658:29)\n    at Subscriber2._next (http://127.0.0.1:54765/en/chunk-EFFI6UOZ.js:627:26)",
+    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54765/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54765/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp",
+    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54765/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54765/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp",
+    "ERROR TypeError: Cannot read properties of undefined (reading 'isRestrictedView')\n    at showDetails.ngDevMode.debugName [as computation] (http://127.0.0.1:54765/en/chunk-5RFDDIQ6.js:2710:42)\n    at Object.producerRecomputeValue (http://127.0.0.1:54765/en/chunk-AL54G7IN.js:3604:29)\n    at producerUp"
   ],
   "pageErrors": [],
   "ok": true,

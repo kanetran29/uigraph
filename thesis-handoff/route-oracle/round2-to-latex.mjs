@@ -222,14 +222,26 @@ const probeDir = (() => {
 const confirmedComplete = new Set()
 if (probeDir) {
   for (const r of rows) {
-    try {
-      const cmp = JSON.parse(fs.readFileSync(path.join(probeDir, `${r.s}.cmp.json`), 'utf8'))
-      if (cmp.counts.missed === 0) confirmedComplete.add(r.s)
-    } catch {}
+    // Required by name, like every other input: a path that does not resolve would otherwise
+    // reinstate every caveat and empty the census at exit 0, which is the one failure this
+    // script's history says costs the most.
+    const cmp = JSON.parse(fs.readFileSync(path.join(probeDir, `${r.s}.cmp.json`), 'utf8'))
+    const c = cmp.counts
+    // The licence is only as strong as what the probe could read. A subtree it failed to expand
+    // and a route whose address no reader can resolve both shrink the set it compared against,
+    // and a smaller comparison set can only make the extractor look more complete.
+    const read = (cmp.lazyFailures ?? []).length === 0 && (c.matcherRoutes ?? 0) === 0
+    if (c.missed === 0 && read) confirmedComplete.add(r.s)
   }
 }
 
-/** Does this application support a claim that some path it does not declare is undeclared? */
+/**
+ * Does this application support a claim that some path it does not declare is undeclared? Either
+ * it declared no part of its route set unread, or the runtime probe compared what it declares
+ * against the framework's own configuration and found every address the framework ANSWERS on the
+ * primary outlet already in it. The probe's licence does not extend to prefix routes that answer
+ * no URL of their own, which it reports separately and which cannot be a navigation target.
+ */
 function routeSetComplete(r) {
   if (confirmedComplete.has(r.s)) return true
   return !(r.notes ?? []).some((n) => n.kind === 'incomplete-route-set')
@@ -482,6 +494,12 @@ mac('RoundTwoUnresolvedTarget', unres)
 // for those the target was unreadable for the extractor's own reason, so nothing can be
 // claimed about whether the application declares such a route.
 mac('RoundTwoWildcardCaveated', wildOf('caveated').length)
+// The applications those sites are actually in. The lower-bound list is a different set --- it is
+// the independent parser's blind spots, not the extractor's notes minus the probe's licence ---
+// and naming one where the other is meant put an application in a sentence that carries none of
+// the sites it counts.
+mac('RoundTwoWildcardCaveatedApps', new Set(wildOf('caveated').map((s) => s.app)).size)
+mac('RoundTwoWildcardCaveatedWhere', [...new Set(wildOf('caveated').map((s) => NAME[s.app]))].sort().join(', ') || 'none')
 mac('RoundTwoDeadLinkCandidates', deadFromNotes + deadFromReasons)
 mac('RoundTwoDeadLinkWildcarded', deadFromNotes)
 // The two arms of the census are two different populations, so each states its own

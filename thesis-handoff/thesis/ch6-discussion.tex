@@ -353,6 +353,25 @@ failure rather than as a proof of its impossibility.
 \section{Declared approximations}
 \label{sec:approximations}
 
+Two of these were found by the runtime check of Section~\ref{sec:res-probe} rather than by
+reading the analysis, and they are stated first because both are places where the analysis is
+silent rather than approximate.
+
+A route may be declared outside the language. alfresco's about page is registered by a JSON
+manifest that names a path and an identifier, which an extension registry binds to a component
+class at run time. No reader of the application's TypeScript can see such a route, and this one
+raises no note, because nothing in the code is unreadable --- there is simply nothing in the code.
+A tool that wanted to cover it would have to read the framework's plugin format as a second
+source language, which is a different undertaking from reading a router configuration and is not
+attempted here.
+
+A table may be mounted twice: once under the prefix a lazy route gives it, and once at the root,
+by a library that both exports it for loading and hands it to \texttt{provideRouter} itself. The
+extractor follows the lazy route, and the file is then claimed out of the scan that reads tables
+at the root, so the second mount is lost. The loss raises no note either, because the walk did
+reach the file and the check that reports an unplaced claim asks only whether a claimed file was
+reached at all, not whether everything it registers was placed.
+
 The thesis claims soundness only for the deterministic tier and only over the declared
 route set (Claim~\ref{claim:must}). Following the soundiness position of Livshits et
 al.\ \cite{livshits2015soundiness}, the claim is paired here with an explicit list of

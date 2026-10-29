@@ -35,16 +35,24 @@ regenerated rather than remembered.
 
 `round2-to-latex.mjs` takes an optional `--probe <results-dir>`. The dead-link census suppresses
 every candidate from an application whose route set the extractor declared a lower bound. An
-application this harness has measured against the framework's own configuration, and found to be
-missing no address the framework mounts, is exempt from that suppression: the note says the set
-might be short, and the measurement says it is not. Without the flag no application is exempt,
-which is how the script behaved before this harness existed.
+application this harness has measured against the framework's own configuration is exempt from
+that suppression when three things hold: it is missing no address the framework ANSWERS on the
+primary outlet, no lazy subtree failed to expand, and no route in it decides its address through
+a `UrlMatcher`. The last two bound how much the harness could see: a subtree it could not expand
+and an address no reader can resolve both shrink the set it compared against, and a smaller
+comparison set can only make the extractor look more complete. The licence does not extend to
+prefix routes that answer no URL of their own, which are reported in their own column and cannot
+be a navigation target. A missing or unreadable cmp file is an error, not an empty licence.
 
 ## What it does not establish
 
 It reads route configuration, not rendered pages, so an address behind a guard that always
 refuses counts as mounted. That makes the "mounted" set larger than the set a visitor can reach,
 so a finding of an invented address is sound and a finding of none is weaker than it looks.
+
+It reads the application's TypeScript as the framework assembled it, so a route declared outside
+the language is visible to it and to nothing static: alfresco registers one from a JSON plugin
+manifest, and the probe is the only reader here that sees it.
 
 The extractor's spread note is raised from any array its shape test accepts as a route table. No
 array in this corpus is a false positive -- every note comes from a `.routes.ts` or

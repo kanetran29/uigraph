@@ -614,3 +614,23 @@ const FREEZE_CALLEE = /^(Object\.freeze|freeze|deepFreeze)$/
 
 /** Stands for a write whose target name could not be read; it taints the whole class. */
 const UNREADABLE = '\u0000unreadable'
+
+/**
+ * The member a `loadChildren` names out of the module it loads --- the `X` of
+ * `.then((m) => m.X)`, or the identifier a direct `() => X` reference uses. Angular mounts what
+ * that name resolves to, so where the name is spelled out it says which of a module's tables the
+ * route takes, and a search through the module graph does not have to guess.
+ */
+export function lazyMemberName(prop: ObjectLiteralExpression, name: string): string | null {
+  const p = propNamed(prop, name)
+  if (!p || !Node.isPropertyAssignment(p)) return null
+  const init = p.getInitializer()
+  if (!init || !Node.isArrowFunction(init)) return null
+  const body = init.getBody()
+  if (Node.isIdentifier(body)) return body.getText()
+  for (const access of init.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)) {
+    const parent = access.getParent()
+    if (parent && Node.isArrowFunction(parent)) return access.getName()
+  }
+  return null
+}

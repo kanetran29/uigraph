@@ -1,8 +1,8 @@
 {
   "slug": "mifos",
-  "origin": "http://127.0.0.1:54499",
+  "origin": "http://127.0.0.1:54791",
   "consoleErrors": [
-    "[ErrorHandlerInterceptor] Request Error: Http failure during parsing for http://127.0.0.1:54499/fineract-provider/actuator/info"
+    "[ErrorHandlerInterceptor] Request Error: Http failure during parsing for http://127.0.0.1:54791/fineract-provider/actuator/info"
   ],
   "pageErrors": [],
   "ok": true,
@@ -14037,7 +14037,7 @@
   "diagnostics": [
     "scanned 229 elements, 69 instances"
   ],
-  "elapsedMs": 282,
+  "elapsedMs": 270,
   "routerFound": true,
   "booted": {
     "hasNg": true,

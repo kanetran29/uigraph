@@ -53,7 +53,12 @@ function probeScreens(routes) {
     if (r.underMatcher) continue
     if (!r.component && !r.hasLoadComponent) continue
     const p = norm(r.fullPath)
-    if (!out.has(p)) out.set(p, r)
+    const kept = out.get(p)
+    // Several routes can sit at one address: a prefix carrying a layout, and an empty-path child
+    // of it carrying the screen. Angular answers the URL because of the second. Keeping whichever
+    // came first kept the prefix, and the address was then filed as one that answers nothing.
+    const isLeaf = !r.hasChildren && !r.hasLoadChildren
+    if (!kept || (isLeaf && (kept.hasChildren || kept.hasLoadChildren))) out.set(p, r)
   }
   return out
 }
@@ -68,15 +73,14 @@ function matcherRoutes(routes) {
  * that only wrap children, since the extractor mints a node for the first kind
  * and treats the second as scope.
  */
-function splitShells(screens, routes) {
-  const parents = new Set()
-  for (const r of routes) {
-    if (r.hasChildren || r.hasLoadChildren) parents.add(norm(r.fullPath))
-  }
+function splitShells(screens) {
   const leaves = new Map()
   const shells = new Map()
   for (const [p, r] of screens) {
-    if ((r.hasChildren || r.hasLoadChildren) && parents.has(p)) shells.set(p, r)
+    // `probeScreens` has already preferred a leaf wherever one sits at the address, so a route
+    // left here with children is one no empty-path child answers for: the prefix carries a layout
+    // and the URL itself reaches nothing.
+    if (r.hasChildren || r.hasLoadChildren) shells.set(p, r)
     else leaves.set(p, r)
   }
   return { leaves, shells }
@@ -143,7 +147,7 @@ if (!probe.ok) {
 const oracle = JSON.parse(readFileSync(a.oracle, 'utf8'))
 
 const framework = probeScreens(probe.routes)
-const { leaves, shells } = splitShells(framework, probe.routes)
+const { leaves, shells } = splitShells(framework)
 const extractor = extractorScreens(a.db)
 const declared = oracleScreens(oracle)
 

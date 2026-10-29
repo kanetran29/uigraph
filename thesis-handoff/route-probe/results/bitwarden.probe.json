@@ -1,6 +1,6 @@
 {
   "slug": "bitwarden",
-  "origin": "http://127.0.0.1:54490",
+  "origin": "http://127.0.0.1:54782",
   "consoleErrors": [],
   "pageErrors": [],
   "ok": true,
@@ -2560,7 +2560,7 @@
   "diagnostics": [
     "scanned 203 elements, 96 instances"
   ],
-  "elapsedMs": 36,
+  "elapsedMs": 38,
   "routerFound": true,
   "booted": {
     "hasNg": true,
