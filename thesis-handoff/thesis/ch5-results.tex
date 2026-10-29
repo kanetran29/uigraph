@@ -590,9 +590,15 @@ tier --- have their only witness in a file outside the application directory. Wh
 records is that the witness lies outside, not the route by which the file came to be read, so
 the figure is reported here and not explained; the files are of the kind a monorepo puts beside
 an application, a shared library and, in bitwarden, the repository's other front ends. Both tools read those files, so their agreeing there is not independent
-evidence of anything; the witness check reports the figure rather than excluding the edges,
-because the edges are real clicks in the running application even where the agreement about them
-proves less than it appears to.
+evidence of anything; the witness check reports the figure rather than excluding the edges. The
+reason is not that those edges are clicks in the application measured --- the files in
+\RoundTwoOutsideWitnessWorst{} belong to a sibling front end built from the same repository, and
+whether its components are reached in the application under measurement is not established here.
+It is that a precision figure is a claim about the edges this tool emitted, wherever it read them,
+and a reader who wants the figure over the measured directory alone can subtract the count. The
+dead-link census of Section~\ref{sec:deadlinks} takes the other decision for the other reason:
+calling a link dead asserts something about an application, and an accusation needs the link to be
+reached in the one being measured, so there it is the boundary that decides and not the count.
 
 The reason to distrust that last sentence is not in this application but in the mechanism, and
 this round supplied the illustration. Three of bitwarden's declared screens were, for most of
@@ -886,13 +892,13 @@ framework serves a screen at the target, which makes them a measurement of what 
 failed to read rather than of what the application got wrong; \RoundTwoFrameworkPrefix{} are
 withdrawn because the target is matched by a route that places no screen of its own, and
 \RoundTwoFrameworkRedirects{} because it is answered by a redirect. \RoundTwoWildcardCaveated{}
-sites keep the caveat, all of them in \RoundTwoWildcardCaveatedWhere{}, and for one reason:
-their target lies under the route whose address a \texttt{UrlMatcher} decides, and a matcher is
-a function the configuration does not spell out. A matcher leaves undecided only what it could
-claim --- the addresses under its own prefix --- and reading it as leaving the whole application
-undecided withheld twelve findings on a ground the harness's own navigation refutes, ghostfolio's
-matcher sitting at \path{/admin} and reaching nothing above it. What survives is a candidate
-whose target the framework answers with nothing but its catch-all.
+sites keep the caveat. A matcher route leaves undecided only what it could claim --- the addresses
+under its own prefix --- and reading it as leaving the whole application undecided withheld twelve
+findings on a ground the harness's own navigation refutes, ghostfolio's matcher sitting at
+\path{/admin} and reaching nothing above it. Where the configuration still declines, a navigation
+is asked instead: ghostfolio's \path{/admin/users} is behind that matcher, and the recogniser
+places a component there, so the three sites naming it are withdrawn rather than left undecided.
+What survives is a candidate whose target the framework answers with nothing but its catch-all.
 
 A route neither tool can read is indistinguishable, from a navigation site, from a route the
 application never declares --- and this thesis credited the difference to the application

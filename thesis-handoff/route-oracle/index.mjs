@@ -360,6 +360,21 @@ function mountingCheck() {
       want: '/home[SCREEN] /a[LAZY_UNRESOLVED] /ghost[SCREEN] | blind 1',
     },
     {
+      name: 'a menu whose name ends in routes is not elected as a lazy prefix table',
+      // The name-plus-shape branch is for the root scan. Electing one gave the prefix a menu's
+      // addresses and left the real table to be read at the root, stripped of its prefix. What is
+      // pinned here is that /reports gets the routing module's table. The menu is still read at
+      // the root --- the standing assumption that an unclaimed route-shaped table is mounted
+      // there, which Section 6 declares as an over-approximation --- and `/tiles` is the shape of
+      // what that assumption costs.
+      files: {
+        'app/app-routing.module.ts': rootTable("{ path: 'home', component: Home }", lazy('reports', './r/r.module', 'RModule')),
+        'app/r/r.module.ts': "import { RRoutingModule } from './r-routing.module';\nexport const sidebarRoutes = [{ path: 'tiles', label: 'Tiles' }];\nexport class RModule { m = RRoutingModule; }\n",
+        'app/r/r-routing.module.ts': table("{ path: 'daily', component: D }"),
+      },
+      want: '/home[SCREEN] /reports[PREFIX] /reports/daily[SCREEN] /tiles[SCREEN] | blind 0',
+    },
+    {
       name: 'a holder that does not say which of its tables is mounted ends the search',
       // Hopping past a file that holds tables and names none would mount a further, unrelated
       // table under this prefix: here the module also imports a tableless one with a real routing
@@ -440,9 +455,24 @@ function mountingCheck() {
       want: '/admin[PREFIX] /admin/users[SCREEN] | blind 0',
     },
     {
-      name: 'a route element written as a call over a named table is mounted under the prefix and not at the root',
+      name: 'a route element written as a call this reader cannot follow is declared, not mounted',
+      // `Route` is declared nowhere here, so nothing says what the wrapper does with its
+      // argument. Mounting the argument at the call's own prefix is right only for a wrapper
+      // whose path is empty, and reading one that is not there is a guess.
       files: {
         'app/app-routing.module.ts': `${head}const USERS: Routes = [{ path: 'users', component: Users }];\nconst routes: Routes = [{ path: 'org', children: [Route.withShell(USERS)] }];\nexport const R = RouterModule.forRoot(routes);\n`,
+      },
+      want: '/org[PREFIX] | blind 2',
+      reasons: ['route source built by a call: not followed', 'route table carried under a prefix but reached from no root'],
+    },
+    {
+      name: 'a route element written as a call this reader CAN follow is mounted under the segment that call declares',
+      // mifos's shape: a static method returning a shell route whose `path` is empty, so the
+      // table goes under the call's own prefix --- which is why reading the arguments there was
+      // right on this corpus and wrong in general.
+      files: {
+        'app/shell.ts': "export class Route {\n  static withShell(routes) {\n    return { path: '', component: Shell, children: routes };\n  }\n}\n",
+        'app/app-routing.module.ts': `${head}import { Route } from './shell';\nconst USERS: Routes = [{ path: 'users', component: Users }];\nconst routes: Routes = [{ path: 'org', children: [Route.withShell(USERS)] }];\nexport const R = RouterModule.forRoot(routes);\n`,
       },
       want: '/org[PREFIX] /org/users[SCREEN] | blind 0',
     },
@@ -889,14 +919,19 @@ function claimPrefixed(expr) {
 }
 
 /** Collect route-table array literals in a file: typed `Routes`, or passed to the router APIs. */
-function routeArraysIn(sf) {
+function routeArraysIn(sf, declaredOnly = false) {
   const found = []
   // const routes: Routes = [...]
   for (const vd of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
     const t = vd.getTypeNode()?.getText() || ''
     const init = vd.getInitializer()
     if (!init || init.getKind() !== SyntaxKind.ArrayLiteralExpression) continue
-    if (/\bRoutes\b|\bRoute\[\]/.test(t) || (/routes?$/i.test(vd.getName()) && looksLikeRouteArray(init))) {
+    // The name-plus-shape branch is for the ROOT scan, which has to find an application's table
+    // however it is written. It must not decide which table a lazy prefix mounts: a menu config
+    // called `sidebarRoutes` passes it, and electing one mounts a prefix's worth of addresses the
+    // application serves nothing at while the real table is left to be read at the root.
+    const declared = /\bRoutes\b|\bRoute\[\]/.test(t)
+    if (declared || (!declaredOnly && /routes?$/i.test(vd.getName()) && looksLikeRouteArray(init))) {
       found.push(init)
     }
   }
@@ -1195,6 +1230,78 @@ function mountsOnlyAtRoot(file) {
 }
 
 /**
+ * What a call contributes to a route table: the arrays to walk and the segment they go under, or
+ * null when this reader cannot say. The same three shapes the extractor reads --- a callee that
+ * returns the table itself, one that hands its argument back, and one that returns an object
+ * placing the argument in its `children` under its own `path` --- because which array is the
+ * table differs between them, and taking the arguments at the call's own prefix is right only for
+ * a wrapper whose path is empty.
+ */
+function callMount(node) {
+  if (node?.getKind() !== SyntaxKind.CallExpression) return null
+  const returned = builderReturn(node.getExpression())
+  if (!returned) return null
+  if (returned.getKind() === SyntaxKind.ArrayLiteralExpression) return { arrays: [returned], segment: '' }
+  if (returned.getKind() === SyntaxKind.Identifier) {
+    const named = namedArray(returned)
+    return { arrays: named ? [named] : callArrayArgs(node), segment: '' }
+  }
+  const obj = returned.getKind() === SyntaxKind.ObjectLiteralExpression ? returned : objLit(returned)
+  if (!obj) return null
+  const children = obj.getProperty('children')
+  if (!children) return null
+  if (children.getKind() !== SyntaxKind.ShorthandPropertyAssignment) {
+    if (children.getKind() !== SyntaxKind.PropertyAssignment) return null
+    const init = children.getInitializer?.()
+    const k = init?.getKind()
+    if (k !== SyntaxKind.Identifier && k !== SyntaxKind.ArrayLiteralExpression) return null
+  }
+  const pathProp = obj.getProperty('path')
+  if (!pathProp) return { arrays: callArrayArgs(node), segment: '' }
+  const seg = text(pathProp.getInitializer?.())
+  if (seg === null || seg === undefined) return null
+  return { arrays: callArrayArgs(node), segment: seg }
+}
+
+/**
+ * The single expression a first-party builder returns: an arrow, a function declaration, an
+ * object property or a static method. A wrapper this reader cannot follow is a wrapper whose
+ * prefix it cannot name.
+ */
+function builderReturn(expr) {
+  let fn
+  if (expr.getKind() === SyntaxKind.Identifier) {
+    for (const d of expr.getSymbol()?.getAliasedSymbol()?.getDeclarations() ?? expr.getSymbol()?.getDeclarations() ?? []) {
+      if (d.getKind() === SyntaxKind.FunctionDeclaration) { fn = d; break }
+      if (d.getKind() === SyntaxKind.VariableDeclaration) { fn = d.getInitializer(); break }
+    }
+  } else if (expr.getKind() === SyntaxKind.PropertyAccessExpression) {
+    const target = expr.getExpression()
+    const obj = objLit(target)
+    const prop = obj?.getProperty(expr.getName())
+    if (prop?.getKind() === SyntaxKind.PropertyAssignment) fn = prop.getInitializer()
+    else if (target.getKind() === SyntaxKind.Identifier) {
+      for (const d of target.getSymbol()?.getAliasedSymbol()?.getDeclarations() ?? target.getSymbol()?.getDeclarations() ?? []) {
+        if (d.getKind() !== SyntaxKind.ClassDeclaration) continue
+        const m = d.getStaticMethod?.(expr.getName())
+        if (m) { fn = m; break }
+      }
+    }
+  }
+  if (!fn) return null
+  const k = fn.getKind()
+  if (k === SyntaxKind.ArrowFunction) {
+    const body = fn.getBody()
+    if (body.getKind() !== SyntaxKind.Block) return body
+  }
+  if (k !== SyntaxKind.ArrowFunction && k !== SyntaxKind.FunctionDeclaration && k !== SyntaxKind.MethodDeclaration && k !== SyntaxKind.FunctionExpression) return null
+  const block = fn.getBody?.()
+  if (!block || block.getKind() !== SyntaxKind.Block) return null
+  const rets = block.getDescendantsOfKind(SyntaxKind.ReturnStatement)
+  return rets.length === 1 ? rets[0]?.getExpression() ?? null : null
+}
+
+/**
  * The arrays in a lazy target's file that the prefix loading it mounts, by the rule Angular itself
  * applies, or none when the file does not say which. The member the `loadChildren` names is asked
  * first: `.then((m) => m.ROUTES)` says which of the module's exports the router is handed, and a
@@ -1222,7 +1329,7 @@ function mountedArrays(target, member) {
     }
   }
   if (registered.length > 0) return registered
-  const own = routeArraysIn(target)
+  const own = routeArraysIn(target, true)
   return own.length === 1 ? own : []
 }
 
@@ -1340,7 +1447,15 @@ function walkArray(arr, prefix, sf, depth, unresolved = null, lazy = false, unde
     // A wrapper helper such as Route.withShell(USERS) is transparent: its arguments are the table.
     if (el.getKind() === SyntaxKind.CallExpression) {
       claimPrefixed(el)
-      for (const a of callArrayArgs(el)) walkArray(a, prefix, a.getSourceFile(), depth + 1, unresolved, lazy, underAux)
+      const mount = callMount(el)
+      // A wrapper that contributes a path segment mounts its table under that segment, not under
+      // the prefix the call is written at. Reading the arguments at the call's own prefix put a
+      // whole subtree at an address the application serves nothing at.
+      if (!mount) {
+        blindSpots.push({ reason: 'route source built by a call: not followed', spec: el.getText().slice(0, 60), at: `${path.relative(appDir, sf.getFilePath())}:${el.getStartLineNumber()}`, prefix })
+        continue
+      }
+      for (const a of mount.arrays) walkArray(a, joinPath(prefix, mount.segment), a.getSourceFile(), depth + 1, unresolved, lazy, underAux)
       continue
     }
     // A spread is a route source this reader does not follow, so the table it carries is outside

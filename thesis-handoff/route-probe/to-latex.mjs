@@ -164,6 +164,11 @@ function answerMacros() {
     const f = join(a.results, `${r.slug}.answer.json`)
     if (!existsSync(f)) { missing += 1; continue }
     const answer = JSON.parse(readFileSync(f, 'utf8'))
+    // The file has to be this application's, and it has to carry a measurement: a file naming
+    // another application, or one whose addresses the probe file does not cover, would publish an
+    // agreement over evidence that is not about what the macro says it is about.
+    if (answer.slug !== r.slug) throw new Error(`${r.slug}.answer.json reports on ${JSON.stringify(answer.slug)}`)
+    if (!Array.isArray(answer.results) || answer.results.length === 0) throw new Error(`${r.slug}.answer.json carries no measurement`)
     out.ProbeAnswerApps += 1
     const served = Array.isArray(r.cmp.frameworkAddresses) ? r.cmp.frameworkAddresses : null
     for (const row of answer.results) {
@@ -185,7 +190,7 @@ function answerMacros() {
   // An application with no measurement is not one whose classification agreed. Printing an
   // agreement over whatever files happen to be present would let the chapter cite a check that was
   // not run, so a run with no measurement at all stops instead of emitting a pass over nothing.
-  if (out.ProbeAnswerApps === 0) throw new Error(`no answerability measurement in ${a.results}: ${missing} application(s) have none; run answerability.mjs`)
+  if (missing > 0) throw new Error(`${missing} application(s) have no answerability measurement in ${a.results}; the agreement would be published over whatever files happen to exist`)
   return out
 }
 

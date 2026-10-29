@@ -2,7 +2,7 @@
 //
 // Emits the second-round tables and inline macros from the result files of the repeat
 // evaluation. Never edit the output by hand.
-//   usage: node round2-to-latex.mjs <outDir> > ../thesis/generated-round2.tex
+//   usage: node round2-to-latex.mjs <outDir> [--probe <resultsDir>|none] > ../thesis/generated-round2.tex
 // <outDir> holds, per application slug, <slug>.ctrl.{C,L}.json (the extractor as it stood
 // before the round) and five files from after it: <slug>.fin.C.json (the route oracle),
 // <slug>.fin.L.json (the loss breakdown), <slug>.fin.B.json (the witness check),
@@ -19,7 +19,7 @@
 // --label pre, and its header entry for that label says which revision the tracked file is.
 import fs from 'node:fs'
 import path from 'node:path'
-import { frameworkAnswer } from '../route-probe/framework-answer.mjs'
+import { frameworkAnswer, norm } from '../route-probe/framework-answer.mjs'
 import { fileURLToPath } from 'node:url'
 
 const dir = process.argv[2]
@@ -224,8 +224,13 @@ for (const r of rows) mac(`RoundTwoRoutes${MACRO_TAG[r.s]}`, `${r.c1.blindSpots.
  */
 const probeDir = (() => {
   const i = process.argv.indexOf('--probe')
-  if (i === -1) return null
+  // Omitting the flag emptied the census at exit 0, which is the one failure in this script that
+  // publishes nothing where a finding belongs and says so in no way a reader would notice. The
+  // committed measurement sits beside this script, so that is the default and `--probe none` is
+  // the way to ask for the behaviour this script had before the probe existed.
+  if (i === -1) return path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'route-probe', 'results')
   const next = process.argv[i + 1]
+  if (next === 'none') return null
   // `--probe` with nothing after it was read as no probe directory at all, which reinstated every
   // caveat and emptied the census at exit 0 --- the one failure in this script that publishes
   // nothing where a finding belongs and says so in no way a reader would notice.
@@ -265,8 +270,13 @@ const frameworkRoutes = new Map()
 if (probeDir) {
   for (const r of rows) {
     const f = path.join(probeDir, `${r.s}.probe.json`)
-    if (!fs.existsSync(f)) continue
+    // Required by name. A probe file that is missing, or one whose application did not boot, used
+    // to withhold that application's candidates in silence: a run in which one of six failed to
+    // start published two of twenty-six findings and moved the rest into "no measurement can
+    // decide", at exit 0.
+    if (!fs.existsSync(f)) throw new Error(`${r.s}.probe.json is missing from ${probeDir}, so no framework configuration can decide its candidates`)
     const probe = JSON.parse(fs.readFileSync(f, 'utf8'))
+    if (!probe.ok) throw new Error(`${r.s}.probe.json reports the application did not boot (${probe.reason ?? 'no reason given'}), so it cannot decide its candidates`)
     // The slug is checked for the same reason the licence checks it: a route configuration read
     // out of another application's measurement is attributed evidence, and the census would then
     // accuse one application against another's route set.
@@ -284,7 +294,27 @@ function frameworkVerdict(slug, target) {
   const routes = frameworkRoutes.get(slug)
   if (!routes || typeof target !== 'string' || !target.startsWith('/')) return null
   const answer = frameworkAnswer(routes, target)
-  return answer === 'undecided' ? null : answer
+  if (answer !== 'undecided') return answer
+  // The configuration declines an address a `UrlMatcher` could claim. A navigation to that
+  // address does not: the harness drove ghostfolio to /admin/users and the recogniser placed a
+  // component there, while the census was publishing those three sites as sites no measurement
+  // could decide --- in the same commit as the measurement that decides them.
+  return navigated.get(`${slug} ${norm(target)}`) ?? null
+}
+
+/** What a navigation observed at an address, from the answerability measurement. */
+const navigated = new Map()
+if (probeDir) {
+  for (const r of rows) {
+    const f = path.join(probeDir, `${r.s}.answer.json`)
+    if (!fs.existsSync(f)) continue
+    const answer = JSON.parse(fs.readFileSync(f, 'utf8'))
+    if (answer.slug !== r.s) throw new Error(`${r.s}.answer.json reports on ${JSON.stringify(answer.slug)}`)
+    for (const row of answer.results ?? []) {
+      const kind = !row.recognized || row.catchAll ? 'catch-all' : row.redirected ? 'redirect' : row.placesComponent ? 'screen' : 'no-screen'
+      navigated.set(`${r.s} ${norm(row.target)}`, kind)
+    }
+  }
 }
 
 const confirmedComplete = new Set()
