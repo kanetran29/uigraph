@@ -259,7 +259,25 @@ for (const c of constructs) {
   let cls
   let hit = witnessAt.get(k)
   if (!hit && c.tplLine) hit = inlineMatch(c)
-  if (hit === 'must') cls = 'CONVERTED_MUST'
+  // Whether a construct is a transition between primary screens at all is decided first, from
+  // the construct's own text, because it is prior to anything the graph did with it and it is
+  // what the denominator is a count OF. Three shapes are not transitions and so leave the
+  // denominator rather than counting as losses: a call with an empty commands array, which
+  // changes the query of the route it is already on; one carrying an `outlets:` object, which
+  // addresses a secondary outlet the model admits no screens for; and one that names no
+  // destination at all. Counting them as lost blamed the extractor for the question being
+  // wrong.
+  //
+  // These tests used to run AFTER the graph was consulted, and the effect was a denominator
+  // that moved between the two runs RQ3 compares: a site attribution gave an edge to escaped
+  // a bucket its own text had put it in. They could not be moved earlier while the target
+  // reader stopped at the end of the line, because a call with its commands array on the next
+  // line then read as naming no destination -- seventy real transitions in one application.
+  // With that reader fixed, the text is reliable and goes first.
+  if (c.kind !== 'routerLink' && /^\s*\[\s*\]/.test(c.target)) cls = 'QUERY_ONLY'
+  else if (/outlets\s*:/.test(c.target)) cls = 'EXCLUDED_NAMED_OUTLET'
+  else if (String(c.target ?? '').trim() === '') cls = 'EXCLUDED_NO_COMMANDS'
+  else if (hit === 'must') cls = 'CONVERTED_MUST'
   else if (hit === 'may') cls = 'CONVERTED_MAY'
   // An edge into a `u_<screen>` sink carries modality unknown: the construct leaves the screen
   // by an event the graph records, but at a destination only the run time knows. That is
@@ -267,13 +285,6 @@ for (const c of constructs) {
   // taken out of the denominator the loss rules have to explain.
   else if (hit === 'unknown') cls = 'ACCOUNTED_DYNAMIC'
   else if (unplacedAt.has(`${c.file}:${c.line}`)) cls = 'ACCOUNTED_UNPLACED'
-  else if (c.kind !== 'routerLink' && /^\s*\[\s*\]/.test(c.target)) cls = 'QUERY_ONLY'
-  // Two kinds of construct are not transitions between screens at all, so they leave the
-  // denominator rather than counting as losses: a navigation into a secondary outlet, which
-  // the model admits no screens for, and a call that carries no commands and so names no
-  // destination. Counting them as lost blamed the extractor for the question being wrong.
-  else if (/outlets\s*:/.test(c.target)) cls = 'EXCLUDED_NAMED_OUTLET'
-  else if (String(c.target ?? '').trim() === '') cls = 'EXCLUDED_NO_COMMANDS'
   else if (!c.owner || !componentFiles.has(c.owner)) cls = c.isHtml ? 'OTHER' : 'ATTRIBUTION_SERVICE'
   else if (!routeComponent.has(c.owner)) cls = 'ATTRIBUTION_SHARED'
   else if (!nodeComponentFiles.has(c.owner)) {
@@ -293,10 +304,29 @@ for (const c of constructs) {
 }
 
 const order = ['CONVERTED_MUST', 'CONVERTED_MAY', 'QUERY_ONLY', 'ACCOUNTED_DYNAMIC', 'ACCOUNTED_UNPLACED', 'EXCLUDED_NAMED_OUTLET', 'EXCLUDED_NO_COMMANDS', 'ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED', 'LAZY_BOUNDARY', 'CONSTANT_PATH', 'COMPONENT_UNLINKED', 'NAMED_OUTLET', 'CONSTANT_TARGET', 'NODE_MISS', 'OTHER']
-const recovered = (tally.CONVERTED_MUST || 0) + (tally.CONVERTED_MAY || 0) + (tally.QUERY_ONLY || 0)
+// A query-only navigation was counted as recovered AND left in the denominator, so the
+// recovery ratio credited 28 navigations that change no screen as transitions and measured
+// itself over them as well. It is one of the three shapes that are not transitions between
+// screens, and it leaves the denominator with the other two.
+const recovered = (tally.CONVERTED_MUST || 0) + (tally.CONVERTED_MAY || 0)
 const accounted = (tally.ACCOUNTED_DYNAMIC || 0) + (tally.ACCOUNTED_UNPLACED || 0)
-const excluded = (tally.EXCLUDED_NAMED_OUTLET || 0) + (tally.EXCLUDED_NO_COMMANDS || 0)
+const excluded = (tally.EXCLUDED_NAMED_OUTLET || 0) + (tally.EXCLUDED_NO_COMMANDS || 0) + (tally.QUERY_ONLY || 0)
 const inScope = constructs.length - excluded
+// `lost` is a subtraction, so asserting that the four groups sum to the total would assert
+// nothing. What can actually go wrong is a class the summary forgets to put in a group --- a
+// renamed or added class then falls silently into `lost` and is reported as a defect of the
+// extractor. So every key the classifier emitted must be named by one of the four groups.
+const GROUPED = new Set([
+  'CONVERTED_MUST', 'CONVERTED_MAY',
+  'ACCOUNTED_DYNAMIC', 'ACCOUNTED_UNPLACED',
+  'EXCLUDED_NAMED_OUTLET', 'EXCLUDED_NO_COMMANDS', 'QUERY_ONLY',
+  'ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED', 'LAZY_BOUNDARY', 'CONSTANT_PATH',
+  'COMPONENT_UNLINKED', 'CONSTANT_TARGET', 'NODE_MISS', 'OTHER',
+])
+const ungrouped = Object.keys(tally).filter((k) => tally[k] && !GROUPED.has(k))
+if (ungrouped.length) {
+  throw new Error(`${appDir}: the ledger emitted ${ungrouped.join(', ')}, which the recovered/accounted/excluded/lost summary does not name, so those constructs would be reported as losses of the extractor`)
+}
 const lost = inScope - recovered - accounted
 console.log(`app:          ${appDir}`)
 console.log(`constructs:   ${constructs.length}  (routerLink ${constructs.filter((c) => c.kind === 'routerLink').length}, navigate ${constructs.filter((c) => c.kind !== 'routerLink').length})`)
