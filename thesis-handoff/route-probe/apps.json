@@ -37,7 +37,8 @@
         "/view/authentication-confirmation",
         "/view/abc123",
         "/search-libraries/view/abc123",
-        "/zzz-not-a-route"
+        "/zzz-not-a-route",
+        "/personal-files(viewer:view/abc123)"
       ]
     },
     {
@@ -69,7 +70,9 @@
         "/",
         "/workloads",
         "/cluster/nodes",
-        "/zzz-not-a-route"
+        "/zzz-not-a-route",
+        "/namespace",
+        "/namespace(actionbar:)"
       ]
     },
     {
@@ -86,7 +89,9 @@
         "/vault",
         "/reports",
         "/settings/account",
-        "/zzz-not-a-route"
+        "/zzz-not-a-route",
+        "/login(secondary:)",
+        "/login(environment-selector:)"
       ]
     },
     {

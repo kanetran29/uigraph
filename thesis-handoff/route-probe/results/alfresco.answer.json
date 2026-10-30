@@ -1,6 +1,6 @@
 {
   "slug": "alfresco",
-  "origin": "http://127.0.0.1:56724",
+  "origin": "http://127.0.0.1:63239",
   "routerFound": true,
   "results": [
     {
@@ -260,6 +260,17 @@
       ],
       "catchAll": true,
       "placesComponent": true
+    },
+    {
+      "target": "/personal-files(viewer:view/abc123)",
+      "recognized": false,
+      "at": "/login?redirectUrl=%2Fzzz-not-a-route",
+      "after": "/login?redirectUrl=%2Fzzz-not-a-route",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [],
+      "catchAll": false,
+      "placesComponent": false
     }
   ]
 }
