@@ -142,6 +142,37 @@ bound is the corpus: the harness serves one built directory at the server root, 
 ghostfolio's per-locale build does not fit, since each of its bundles declares a base path of
 its own. That application is measured by every other method here and by none of this one.
 
+\textbf{The ablation and the site--screen ground truth (RQ3).} Two further measurements
+answer a question the methods above leave open: whether the attribution computes a better set
+of screens than a simpler analysis, or only a larger one.
+
+The first withholds the mechanisms of Section~\ref{sec:attribution} one at a time and extracts
+the whole corpus at each level. \emph{Owned} attributes a navigation site to the screen whose
+routed component's own file holds it, which is direct ownership and is what resolving the
+owning object yields in the Android literature. \emph{Nesting} adds component containment: a
+component reached through template element selectors is attributed to the screens of the
+components that render it. That level is the mechanism of Oshima and Kishi, so it measures how
+far the prior work of Section~\ref{sec:dynamic-spa} reaches on this corpus. \emph{Outlet} adds
+router-outlet descent, and \emph{full} adds the shell rule and the injected-service join. The
+levels are nested because the implementation withholds results rather than computing them
+differently, and the harness checks that on the real graphs rather than assuming it: a
+(site, screen) pair present at one level and absent at the next is a defect in the switch, and
+no table is written when one is found.
+
+The second supplies what no method above has: a ground truth. For one application the screens
+each navigation site really fires from were read off the sources by hand and recorded, with
+the derivation for each site, in \path{route-oracle/ground-truth/realworld.json}. Every level
+is then scored against it in both directions --- a pair the application has and the level does
+not is a scope too small, a pair the level has and the application does not is a scope too
+large --- which is the comparison the runtime oracle cannot make. Three limits belong with it.
+It is one application, chosen because it is small enough to read exhaustively. It is the
+author's reading, so it is not independent of the tool's author; it is published with its
+reasoning so that a reader can check it against the same sources. And it is checked in the
+one direction available: the scorer reports every site the graph places that the ground truth
+does not list, which is the ground truth's own blind spot. That check found nine sites missing
+from its first version, because the search that enumerated them discarded every line carrying
+\texttt{routerLinkActive} and this application writes both attributes on one anchor.
+
 \textbf{Which ratio is ``coverage''.} Several of the measures below are fractions of
 something over something, and more than one of them has been called coverage in the
 literature this thesis builds on. They are not interchangeable, and on this corpus they

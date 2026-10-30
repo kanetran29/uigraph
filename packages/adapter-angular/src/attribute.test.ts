@@ -103,3 +103,54 @@ describe('scope attribution', () => {
     for (const e of base.edges) expect(ids.has(e.id)).toBe(true)
   })
 })
+
+describe('attribution levels', () => {
+  /**
+   * The (site, screen) pairs a graph asserts, which is what the ablation of Chapter 5 counts.
+   * Only screen-anchored edges count. A site the level cannot place is anchored at an origin
+   * node instead, and those are not nested across levels by design: the pair vanishes from the
+   * origin as soon as a later level finds the component a screen to sit on.
+   */
+  const pairs = (layers: string): Set<string> => {
+    const previous = process.env.UIGRAPH_SCOPE_LAYERS
+    process.env.UIGRAPH_SCOPE_LAYERS = layers
+    try {
+      const g = expandAnchoredEdges(extractGraph(inMemory(app), '/app', { attribution: true }).graph)
+      const screens = new Set(g.nodes.filter((n) => n.kind === 'screen').map((n) => n.id))
+      const out = new Set<string>()
+      for (const e of g.edges) {
+        if (!screens.has(e.from)) continue
+        for (const w of [e.witness, ...(e.mergedWitnesses ?? [])]) {
+          if (!w || w.source !== 'static' || !w.file) continue
+          out.add(`${w.file}:${w.loc?.line ?? '?'}|${e.from}`)
+        }
+      }
+      return out
+    } finally {
+      if (previous === undefined) delete process.env.UIGRAPH_SCOPE_LAYERS
+      else process.env.UIGRAPH_SCOPE_LAYERS = previous
+    }
+  }
+
+  // The ablation compares the levels with one another, so a level that is not contained in the
+  // next makes every comparison drawn from it meaningless.
+  it('are nested, each level within the next', () => {
+    const levels = ['owned', 'nesting', 'outlet', 'full'].map((l) => ({ l, p: pairs(l) }))
+    for (let i = 1; i < levels.length; i += 1) {
+      const escaped = [...levels[i - 1]!.p].filter((x) => !levels[i]!.p.has(x))
+      expect({ level: levels[i - 1]!.l, escaped }).toEqual({ level: levels[i - 1]!.l, escaped: [] })
+    }
+  })
+
+  it('places strictly more at each level than the one below', () => {
+    const sizes = ['owned', 'nesting', 'outlet', 'full'].map((l) => pairs(l).size)
+    expect(sizes[0]!).toBeLessThan(sizes[3]!)
+    for (let i = 1; i < sizes.length; i += 1) expect(sizes[i]!).toBeGreaterThanOrEqual(sizes[i - 1]!)
+  })
+
+  // An unset or unknown value must be the shipped analysis, since every published figure is
+  // measured with the variable unset.
+  it('treats an unset or unknown value as the full analysis', () => {
+    expect(pairs('full')).toEqual(pairs('not-a-level'))
+  })
+})

@@ -38,6 +38,26 @@ export interface ComponentInfo {
   template: string | null
 }
 
+/**
+ * Which attribution mechanisms to apply, for the ablation of Section 5 of the thesis. Each
+ * level adds one mechanism to the one before it, so the levels are nested:
+ *
+ *   owned    a navigation site is attributed to the screen whose routed component's own
+ *            file holds it, and to nothing else -- the direct-ownership baseline, which is
+ *            what resolving the owning object gives in the Android literature.
+ *   nesting  plus component containment: a component reached from a routed component's
+ *            template is attributed to that component's screens. This is the mechanism of
+ *            Oshima and Kishi (2018), so this level is the prior work's reach.
+ *   outlet   plus router-outlet descent: a routed component's own template also renders on
+ *            every descendant screen, because they render inside its outlet.
+ *   full     plus the shell rule and the injected-service join, which is the analysis this
+ *            thesis proposes.
+ *
+ * `full` is the default and the path it takes is untouched: the levels are applied by
+ * withholding results at the end, never by computing them differently.
+ */
+export type ScopeLayers = 'owned' | 'nesting' | 'outlet' | 'full'
+
 export interface ScopeResult {
   /** Components that are not route components, with the screens they render on. */
   screensOf: Map<string, Set<string>>
@@ -209,7 +229,7 @@ function reach(graph: Map<string, Set<string>>, start: string): Set<string> {
  * `<router-outlet>`, and taking that for this application's shell attributed its navigations to
  * every screen at confidence 1. Being reached from this application's own shell is unaffected.
  */
-export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectDir?: string): ScopeResult {
+export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectDir?: string, layers: ScopeLayers = 'full'): ScopeResult {
   const notes: SoundinessNote[] = []
   /** Whether `file` may be elected this application's shell: any file when `projectDir` is unset, otherwise only one inside it. */
   const mayBeShell = (file: string): boolean => !projectDir || isInsideDir(file, projectDir)
@@ -251,8 +271,12 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   }
 
   // Screens on which each component is rendered, by reachability from route components.
+  // Outlet descent is already folded into routeComponentScreens, so a level that excludes
+  // descent must descend from the route components' OWN screens instead; taking it out of
+  // the returned map afterwards would leave it in every nested component's scope.
+  const descentBase = layers === 'owned' || layers === 'nesting' ? ownScreens : routeComponentScreens
   const screensOf = new Map<string, Set<string>>()
-  for (const [f, screens] of routeComponentScreens) {
+  for (const [f, screens] of descentBase) {
     for (const c of reach(nesting, f)) {
       if (c === f || routeComponentScreens.has(c)) continue
       const set = screensOf.get(c) ?? new Set<string>()
@@ -314,6 +338,18 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   }
   // A service injected by the shell is top, which absorbs any screen set (join).
   for (const f of serviceShell) serviceScreens.delete(f)
+
+  // The ablation withholds mechanisms rather than disabling them, so every level is a subset
+  // of `full` by construction and no level can differ from it for any other reason.
+  if (layers !== 'full') {
+    serviceScreens.clear()
+    serviceShell.clear()
+    shell.clear()
+    indirectShell.clear()
+    if (layers === 'owned' || layers === 'nesting') descendantsOfRouteComponent.clear()
+    if (layers === 'owned') screensOf.clear()
+  }
+
 
   return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf }
 }

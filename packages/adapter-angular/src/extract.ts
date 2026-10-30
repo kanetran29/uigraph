@@ -359,7 +359,12 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   }
 
   if (opts.attribution) {
-    const scopes = attributeScopes(project.getSourceFiles(), routes, projectDir)
+    // A measurement switch, not a product option: the thesis ablates the attribution into
+    // its mechanisms and needs each one extracted on the same corpus. Unset, or set to
+    // anything else, means the full analysis, which is the only configuration shipped.
+    const layers = process.env.UIGRAPH_SCOPE_LAYERS
+    const scopes = attributeScopes(project.getSourceFiles(), routes, projectDir,
+      layers === 'owned' || layers === 'nesting' || layers === 'outlet' ? layers : 'full')
     soundiness.push(...scopes.notes)
     const targetsOf = (sf: SourceFile): RawTarget[] => [...templateTargets(sf, projectDir), ...routerCallTargets(sf)]
     // Anchors: a set of screens that is exactly subtree(r) gets one scope node, and the

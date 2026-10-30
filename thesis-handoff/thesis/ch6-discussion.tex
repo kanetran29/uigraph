@@ -159,10 +159,14 @@ The results are measurements of one tool, on one corpus, with five methods, perf
 the person who wrote the tool. Each of those four choices limits what the figures
 support.
 
-\textbf{The scope is validated in one direction only.} Every other method in
-Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none of them can be asked
-whether the set of screens attribution computes for a site is the set it fires from. The
-runtime method answers half of that question (Section~\ref{sec:res-scope}): of the
+\textbf{The scope is validated in both directions on one application only.} Every other
+method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none of them can be
+asked whether the set of screens attribution computes for a site is the set it fires from. Two
+methods can. The hand-built ground truth answers it fully, but for one application of six
+(Section~\ref{sec:res-groundtruth}): there the analysis is right about \GTFullRecall{} of the
+attributions, against \GTNestingRecall{} for containment alone, and its \GTFullExcess{} wrong
+pairs all come from the injected-service join. Across the whole corpus only the runtime method
+applies, and it answers half of the question (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
 judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}
 that are not turn out to be sites attribution declined to place at all rather than sites it
