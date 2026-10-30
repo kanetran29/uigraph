@@ -443,15 +443,98 @@ to be wrong --- the oracle above could not test the direction in which they woul
 but nothing shows them to be right either, and a reader should take the recovered share of
 Table~\ref{tab:round2acct} together with the widths in this table rather than on its own.
 
+\subsection{What each mechanism contributes}
+\label{sec:res-ablation}
+
+The width above says how far the attribution is from doing nothing. It does not say whether
+the mechanisms that produce it earn their place, and the answer is not the same for all of
+them. Table~\ref{tab:ablation} extracts the corpus four times, withholding one mechanism at a
+time.
+
+\begin{table}[t]\small
+\caption{The corpus extracted at each attribution level. \emph{Sites} counts the source
+constructs the level places on at least one screen, \emph{pairs} the (site, screen)
+attributions it asserts. The levels are nested, and the harness refuses to write this table
+unless each one's pairs are a subset of the next one's.}
+\label{tab:ablation}
+\TabAblation
+\end{table}
+
+Two of the four results are what the design expected and one is not. Direct ownership places
+\AblationOwnedSites{} sites, \AblationOwnedSiteShare{} of what the full analysis places.
+Containment raises that to \AblationNestingSites{} --- \AblationNestingSiteShare{} --- which
+is the level the prior work reaches, and the shell rule and the service join raise it to
+\AblationFullSites{}. Mean scope grows with each: \AblationOwnedMean{},
+\AblationNestingMean{}, \AblationOutletMean{}, \AblationFullMean{} screens per site.
+
+The result that does not fit is outlet descent. It places \emph{no} site that containment had
+not already placed --- \AblationOutletSites{} against \AblationNestingSites{} --- while
+raising the pair count from \AblationNestingPairs{} to \AblationOutletPairs{}, close to three
+times. On the corpus as a whole that mechanism buys width and no coverage. Whether the width
+it buys is correct is exactly what a table of counts cannot say, which is the next
+subsection's subject.
+
+\subsection{Whether the scopes are the right ones}
+\label{sec:res-groundtruth}
+
+For \GTApp{} the screens each navigation site really fires from were read off the sources by
+hand (Section~\ref{sec:protocol}): \GTSites{} sites and \GTPairs{} (site, screen) pairs.
+Scoring every level against that gives the comparison no other method here can make, because
+it has both directions of the truth rather than one.
+
+\begin{table}[t]\small
+\caption{Each attribution level against the hand-built ground truth for \GTApp{}.
+\emph{Missing} is a pair the application has and the level does not; \emph{excess} is a pair
+the level has and the application does not.}
+\label{tab:groundtruth}
+\TabGroundTruth
+\end{table}
+
+The simpler levels are exactly precise and badly incomplete. Direct ownership and containment
+each attribute nothing the application does not --- \GTOwnedPrecision{} and
+\GTNestingPrecision{} precision, no excess pair at all --- and between them they miss most of
+the truth: containment recovers \GTNestingRecall{} of the real attributions and leaves
+\GTNestingMissing{} pairs unfound. The full analysis recovers \GTFullRecall{} and gives up
+\GTFullPrecision{} precision to do it. Against the level that measures the prior work's
+mechanism, that is \GTNestingMissing{} missing pairs reduced to \GTFullMissing{}, bought with
+\GTFullExcess{} wrong ones.
+
+Both error sets reduce to a single cause, which is the useful part of the result. All
+\GTFullExcess{} excess pairs come from one site: the \texttt{navigate} inside
+\texttt{UserService.logout}. The service join attributes a navigating service to every screen
+whose components inject it, and this service is injected by thirteen components including the
+header, so the site is attributed to all ten screens; its only caller is a button on the
+settings screen. The analysis already treats that join as an over-approximation and caps edges
+from it at may (Section~\ref{sec:attribution}), so the model does not claim these ten
+transitions are certain --- but the scope is nine screens too wide, and this is the first
+measurement in the thesis that shows a computed scope to be too large rather than merely
+unverified. All \GTFullMissing{} missing pairs are the same screen,
+\path{/profile/:username}: its component is placed by a child route whose path is empty, so
+the child's address collapses onto its parent's, and the components that child renders are not
+attributed to the collapsed address. One cause each, and both are reportable as defects rather
+than as a rate.
+
+Two things follow for RQ3. The first is that the extra mechanisms do buy accuracy and not only
+edges: on this application the full analysis is right about \GTFullRecall{} of the
+attributions where containment alone is right about \GTNestingRecall{}, and it is wrong about
+\GTFullExcess{} pairs out of \GTPairs{}. The second is that this holds for one application of
+six, the smallest, and the corpus-wide widths of Table~\ref{tab:scopebaseline} are not
+licensed by it. What the ground truth establishes is that the mechanism is sound in principle
+and that its known over-approximation is the thing that costs it precision; what it cannot
+establish is that the same holds on an application of six hundred screens.
+
 Scope attribution therefore raises coverage without lowering must-tier precision, which is
 what RQ3 asks. Three qualifications belong with that answer, and all three are visible in the
 tables rather than hidden by them. The first is that the gain is overwhelmingly on the may
 tier, so what attribution mostly adds is navigation the graph says is possible, not
-navigation it says is certain. The second is that the scopes are tested in one direction
-only. The oracle above can refute a scope that is too small, and did so \ScopeUnpredicted{}
-times; it cannot refute one that is too large, because at the screens it can observe the
-graph almost never claims a destination exactly, and because a link a template renders
-conditionally is absent for reasons that have nothing to do with the scope. The third is the
+navigation it says is certain. The second is that the scopes are tested in both
+directions on one application only. Corpus-wide, the oracle above can refute a scope that is
+too small, and did so \ScopeUnpredicted{} times; it cannot refute one that is too large,
+because at the screens it can observe the graph almost never claims a destination exactly, and
+because a link a template renders conditionally is absent for reasons that have nothing to do
+with the scope. The ground truth of Section~\ref{sec:res-groundtruth} does test both
+directions, and finds \GTFullExcess{} scopes too wide and \GTFullMissing{} too narrow out of
+\GTPairs{} --- but on \GTApp{}, the smallest application of the six. The third is the
 width reported in Section~\ref{sec:res-width}: the computed scopes are narrower than the
 trivial attribution by a factor between \BaselineFactorMin{} and \BaselineFactorMax{}, and at
 the low end of that range a scope names most of the application. A site attributed to too

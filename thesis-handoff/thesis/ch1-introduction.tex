@@ -180,17 +180,20 @@ This follows the position of Livshits et al., who argue that a practical static
 analysis should be described as sound modulo an explicit list of the language features
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement
 would require a controlled experiment and is left for future work. A third limit is the one that bears hardest on the
-contribution: the screen sets attribution computes are validated in one direction only. A
-scope that is too small can be refuted by the rendered interface, and
-Section~\ref{sec:res-scope} refutes \ScopeUnpredicted{} of them; a scope that is too large
-cannot be, because at the screens that method can observe the graph almost never claims a
-destination exactly, and because a link a template renders conditionally is absent for
-reasons unrelated to the scope. The computed scopes are also wide: narrower than attributing
-every site to every screen by a factor between \BaselineFactorMin{} and
-\BaselineFactorMax{}, which at the low end names most of an application
-(Section~\ref{sec:res-width}). What is measured is therefore how much navigation attribution
-recovers, that it costs the deterministic tier nothing, and that where the interface could
-judge it the scopes were not too small --- not that they are right. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
+contribution: the screen sets attribution computes are validated in both directions on one
+application only. Across the corpus a scope that is too small can be refuted by the rendered
+interface, and Section~\ref{sec:res-scope} refutes \ScopeUnpredicted{} of them, while a scope
+that is too large cannot be, because at the screens that method can observe the graph almost
+never claims a destination exactly. For one application the screens each site really fires
+from were read off the sources by hand, which gives both directions: the analysis is right
+about \GTFullRecall{} of the attributions there, against \GTNestingRecall{} for the
+containment mechanism earlier work uses, and the \GTFullExcess{} it gets wrong all come from
+one over-approximating rule (Section~\ref{sec:res-groundtruth}). The computed scopes are also
+wide: narrower than attributing every site to every screen by a factor between
+\BaselineFactorMin{} and \BaselineFactorMax{}, which at the low end names most of an
+application (Section~\ref{sec:res-width}). What is established is therefore that the mechanism
+is more accurate than the simpler alternatives on the application that could be checked
+exhaustively, not that the same holds on the largest. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
 has adapters for other frameworks, but all measurements reported here concern Angular
 applications.
 

@@ -1,0 +1,91 @@
+{
+  "app": "realworld",
+  "derivedBy": "hand, from the application sources at the pinned commit",
+  "method": [
+    "Every screen is a route entry in app.routes.ts or profile.routes.ts that places a component on the primary outlet.",
+    "Every navigation site is a routerLink attribute or binding, or a Router.navigate/navigateByUrl call, found by searching the sources; test and spec files are excluded.",
+    "The screens a site fires from are the screens whose routed component renders, transitively through template element selectors, the component whose file holds the site. The shell (app.component) holds the router-outlet, so what it renders appears on every screen.",
+    "A site inside a service is attributed to the screens from which the enclosing method can actually be called, found by searching for callers of that method, not to every component that injects the service.",
+    "This file is the author's reading of the sources and is not independent of the author. It is recorded here so a reader can check it against the same sources rather than take it on trust.",
+    "Its first version missed nine sites in the header, because the search that enumerated them discarded every line carrying routerLinkActive and the header writes both attributes on one anchor. They were found by the scorer, which reports sites the graph places and this file does not list; that check is the only one this file gets, and it earned its place immediately."
+  ],
+  "screens": [
+    "/",
+    "/tag/:tag",
+    "/login",
+    "/register",
+    "/settings",
+    "/profile/:username",
+    "/profile/:username/favorites",
+    "/editor",
+    "/editor/:slug",
+    "/article/:slug"
+  ],
+  "containment": {
+    "app.component (shell, holds the primary router-outlet)": ["header.component", "footer.component"],
+    "home.component": ["article-list.component"],
+    "article-list.component": ["article-preview.component"],
+    "article-preview.component": ["article-meta.component", "favorite-button.component"],
+    "article.component": ["article-comment.component", "article-meta.component", "favorite-button.component", "follow-button.component", "list-errors.component"],
+    "profile.component": ["follow-button.component", "list-errors.component"],
+    "profile-articles.component / profile-favorites.component": ["article-list.component"],
+    "auth.component / settings.component / editor.component": ["list-errors.component"]
+  },
+  "sites": [
+    { "site": "core/layout/header.component.html:3", "target": "/", "screens": "ALL", "why": "header is rendered by the shell, so it is on every screen" },
+    { "site": "core/layout/header.component.html:10", "target": "/", "screens": "ALL", "why": "same header, unauthenticated branch" },
+    { "site": "core/layout/header.component.html:88", "target": "/", "screens": "ALL", "why": "same header, auth-unavailable branch" },
+    { "site": "core/layout/footer.component.html:3", "target": "/", "screens": "ALL", "why": "footer is rendered by the shell" },
+
+    { "site": "core/layout/header.component.html:14", "target": "/login", "screens": "ALL", "why": "header, unauthenticated branch; the branch is a render condition, not a scope" },
+    { "site": "core/layout/header.component.html:18", "target": "/register", "screens": "ALL", "why": "same" },
+    { "site": "core/layout/header.component.html:27", "target": "/", "screens": "ALL", "why": "header, authenticated branch" },
+    { "site": "core/layout/header.component.html:33", "target": "/editor", "screens": "ALL", "why": "same" },
+    { "site": "core/layout/header.component.html:39", "target": "/settings", "screens": "ALL", "why": "same" },
+    { "site": "core/layout/header.component.html:46", "target": "/profile/:username", "screens": "ALL", "why": "same" },
+    { "site": "core/layout/header.component.html:59", "target": "/", "screens": "ALL", "why": "header, auth-unavailable branch" },
+    { "site": "core/layout/header.component.html:65", "target": "/editor", "screens": "ALL", "why": "same" },
+    { "site": "core/layout/header.component.html:71", "target": "/settings", "screens": "ALL", "why": "same" },
+
+    { "site": "core/auth/auth.component.html:8", "target": "/login", "screens": ["/login", "/register"], "why": "auth.component is the routed component of both" },
+    { "site": "core/auth/auth.component.html:12", "target": "/register", "screens": ["/login", "/register"], "why": "same" },
+    { "site": "core/auth/auth.component.ts:76", "target": "/", "screens": ["/login", "/register"], "why": "same" },
+
+    { "site": "core/auth/services/user.service.ts:86", "target": "/", "screens": ["/settings"], "why": "the navigate is inside logout(), and the only caller of logout() is settings.component.ts:57, bound to a button in settings.component.html:69. Every other component injects UserService without calling logout." },
+
+    { "site": "features/settings/settings.component.ts:72", "target": "/profile/:username", "screens": ["/settings"], "why": "routed component of /settings" },
+
+    { "site": "features/profile/components/follow-button.component.ts:59", "target": "/login", "screens": ["/profile/:username", "/profile/:username/favorites", "/article/:slug"], "why": "rendered by profile.component and by article.component" },
+
+    { "site": "features/profile/pages/profile/profile.component.html:23", "target": "/settings", "screens": ["/profile/:username", "/profile/:username/favorites"], "why": "profile.component is the routed component of both, its children render in its outlet" },
+    { "site": "features/profile/pages/profile/profile.component.html:42", "target": "/profile/:username", "screens": ["/profile/:username", "/profile/:username/favorites"], "why": "same" },
+    { "site": "features/profile/pages/profile/profile.component.html:52", "target": "/profile/:username/favorites", "screens": ["/profile/:username", "/profile/:username/favorites"], "why": "same" },
+
+    { "site": "features/article/components/article-list.component.ts:36", "target": "/", "screens": ["/", "/tag/:tag", "/profile/:username", "/profile/:username/favorites"], "why": "rendered by home.component and by both profile children" },
+    { "site": "features/article/components/article-preview.component.ts:18", "target": "/article/:slug", "screens": ["/", "/tag/:tag", "/profile/:username", "/profile/:username/favorites"], "why": "rendered by article-list.component only" },
+
+    { "site": "features/article/components/article-comment.component.ts:21", "target": "/profile/:username", "screens": ["/article/:slug"], "why": "rendered by article.component only" },
+    { "site": "features/article/components/article-comment.component.ts:25", "target": "/profile/:username", "screens": ["/article/:slug"], "why": "same" },
+
+    { "site": "features/article/components/article-meta.component.ts:11", "target": "/profile/:username", "screens": ["/", "/tag/:tag", "/profile/:username", "/profile/:username/favorites", "/article/:slug"], "why": "rendered by article-preview (so wherever article-list is) and directly by article.component" },
+    { "site": "features/article/components/article-meta.component.ts:16", "target": "/profile/:username", "screens": ["/", "/tag/:tag", "/profile/:username", "/profile/:username/favorites", "/article/:slug"], "why": "same" },
+    { "site": "features/article/components/favorite-button.component.ts:57", "target": "/register", "screens": ["/", "/tag/:tag", "/profile/:username", "/profile/:username/favorites", "/article/:slug"], "why": "same placement as article-meta" },
+
+    { "site": "features/article/pages/home/home.component.ts:53", "target": "/login", "screens": ["/", "/tag/:tag"], "why": "routed component of both" },
+    { "site": "features/article/pages/home/home.component.html:23", "target": "/", "screens": ["/", "/tag/:tag"], "why": "same" },
+    { "site": "features/article/pages/home/home.component.html:35", "target": "/", "screens": ["/", "/tag/:tag"], "why": "same" },
+    { "site": "features/article/pages/home/home.component.html:61", "target": "/tag/:tag", "screens": ["/", "/tag/:tag"], "why": "same" },
+
+    { "site": "features/article/pages/article/article.component.html:19", "target": "/editor/:slug", "screens": ["/article/:slug"], "why": "routed component of /article/:slug" },
+    { "site": "features/article/pages/article/article.component.html:66", "target": "/editor/:slug", "screens": ["/article/:slug"], "why": "same" },
+    { "site": "features/article/pages/article/article.component.html:114", "target": "/login and /register", "screens": ["/article/:slug"], "why": "same; two links share this line, and they share a scope" },
+    { "site": "features/article/pages/article/article.component.ts:117", "target": "/", "screens": ["/article/:slug"], "why": "same" },
+
+    { "site": "features/article/pages/editor/editor.component.ts:52", "target": "/", "screens": ["/editor", "/editor/:slug"], "why": "routed component of both" },
+    { "site": "features/article/pages/editor/editor.component.ts:89", "target": "/article/:slug", "screens": ["/editor", "/editor/:slug"], "why": "same" }
+  ],
+  "excluded": [
+    { "site": "features/article/pages/home/home.component.ts:89", "why": "navigate([], {queryParams}) changes the query string of the current screen, so it is not a transition and the thesis counts it on a separate row" },
+    { "site": "core/auth/services/user.service.spec.ts:191", "why": "test source" }
+  ]
+}

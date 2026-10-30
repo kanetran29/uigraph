@@ -28,6 +28,8 @@
 \input{generated-probe}
 \input{generated-expansion}
 \input{generated-baseline}
+\input{generated-ablation}
+\input{generated-groundtruth}
 \input{generated-plots}
 \input{figures/fig-plots}
 
@@ -91,9 +93,12 @@ rather than proving, implements the nesting and outlet parts, and evaluates them
 same corpus with the same methods. With attribution, \AttrRecoveredShare{} of the
 constructs that loss class holds are recovered, on every application in the corpus, and
 precision on the deterministic tier does not fall. Almost all of the gain is navigation the
-graph reports as possible rather than certain, and nothing in the evaluation establishes
-that the computed screen sets are themselves correct, which is the work's sharpest
-limitation.
+graph reports as possible rather than certain. On the one application small enough for the
+screens each navigation site fires from to be read off the sources by hand, the computed sets
+are right about \GTFullRecall{} of those attributions, against \GTNestingRecall{} for the
+component-containment mechanism earlier work stops at, and the \GTFullExcess{} they get wrong
+all come from one over-approximating rule; on the other five applications the sets are checked
+in one direction only, which is the work's sharpest limitation.
 
 Mutation testing on three of the applications shows that the graph detects \MutDetected{}
 of \MutScored{} injected source changes, against \MutBaseDetected{} of \MutBaseScored{}
