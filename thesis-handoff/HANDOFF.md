@@ -52,11 +52,15 @@ unlinked components) cap it on larger apps.
 ## Harness (harness.zip -> route-oracle/)
 
 - `run-all.mjs [--skip-clone] [--allow-branch] [--no-mutation] [--attribution] --out <dir>`: clones extractor + corpus at
-  pinned SHAs from `corpus.json`, builds, maps, runs Tests B (witness-check), C (index.mjs route parser), D (e2e-oracle),
-  F (mutate.mjs), L (loss-breakdown). Writes results.json + tables.md. The runner applies a package.json exports->dist
-  patch to build the CLI (see corpus.json buildPatch); never commit that patch to uigraph.
-- `to-latex.mjs results.json > generated-tables.tex`; `compare.mjs before after --tex generated-before-after.tex`;
-  `diagnose-attribution.mjs` (needs the built adapter; path is hard-coded to /tmp/eval/uigraph, adjust).
+  pinned SHAs from `corpus.json`, maps, runs Tests B (witness-check), C (index.mjs route parser), D (e2e-oracle),
+  F (mutate.mjs), L (loss-breakdown). Writes results.json + tables.md. It no longer BUILDS the CLI: it runs it from
+  source through tsx, which `packages/cli/package.json` already declares. Building it needed each package's `exports`
+  rewritten from ./src to ./dist first, which edited the checkout under measurement and was the one step of this
+  harness that could not be committed. That patch and the rule about it are both gone.
+  The harness directory is outside the workspace, so it needs `npm ci` in `route-oracle/` before the first run.
+- `to-latex.mjs results.json > generated-tables.tex`; `compare.mjs before after --tex generated-before-after.tex`
+  (refuses two runs of different extractor commits, and refuses unless recovered + remaining equals the attribution
+  class); `diagnose-attribution.mjs` (resolves the adapter from source beside itself; run it under tsx).
 - Container paths used before: work dir /tmp/eval. They no longer exist; re-run from scratch.
 
 ## Six protocol corrections already in Section 4.3 (keep them)
