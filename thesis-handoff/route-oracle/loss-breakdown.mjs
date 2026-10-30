@@ -274,7 +274,12 @@ for (const c of constructs) {
   // reader stopped at the end of the line, because a call with its commands array on the next
   // line then read as naming no destination -- seventy real transitions in one application.
   // With that reader fixed, the text is reliable and goes first.
-  if (c.kind !== 'routerLink' && /^\s*\[\s*\]/.test(c.target)) cls = 'QUERY_ONLY'
+  // An empty commands array binds to the route it is already on whether it is written in a
+  // template or in class code: `[routerLink]="[]"` is the same construct as `navigate([])`,
+  // and the usual reason for it is an anchor styled as a link whose own (click) handler does
+  // the work. Restricting this test to class code left 7 of them in the denominator, where
+  // they came out at the far end as sites with the reason "not a navigation".
+  if (/^\s*\[\s*\]/.test(c.target)) cls = 'QUERY_ONLY'
   else if (/outlets\s*:/.test(c.target)) cls = 'EXCLUDED_NAMED_OUTLET'
   else if (String(c.target ?? '').trim() === '') cls = 'EXCLUDED_NO_COMMANDS'
   else if (hit === 'must') cls = 'CONVERTED_MUST'
