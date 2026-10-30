@@ -196,7 +196,19 @@ for (const f of files) {
     let kind = null, target = ''
     const l = line.match(LINK)
     if (l && (isHtml || /template\s*:|`/.test(src))) { kind = 'routerLink'; target = l[2] ?? l[3] ?? '' }
-    else if (!isHtml) { const n = line.match(NAV); if (n) { kind = n[1]; target = n[2] } }
+    else if (!isHtml) {
+      const n = line.match(NAV)
+      if (n) {
+        kind = n[1]
+        target = n[2]
+        // NAV captures to the end of the line, so a call that puts its commands array on the
+        // next line gave an empty target --- and an empty target reads as "names no
+        // destination", which took real transitions out of the denominator. bitwarden writes
+        // most of its navigations that way: 70 of them were filed as naming no destination
+        // while the graph had resolved every one. Read on to the first line that has content.
+        for (let j = 1; j <= 3 && target.trim() === ''; j++) target = lines[i + j] ?? ''
+      }
+    }
     if (!kind) return
     let owner = isHtml ? templateOwner.get(f) || null : f
     let tplLine = null

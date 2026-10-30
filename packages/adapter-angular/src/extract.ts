@@ -318,6 +318,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           const guardText = gate.guarded ? gate.guardTexts.join(',') : null
           pushEdge(from, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file)
         }
+      } else if (t.ti.kind === 'same-screen') {
+        // `navigate([], { queryParams })` changes the query on the route it is already on, so
+        // there is no transition to draw and nothing is lost by not drawing one. No note
+        // either: declaring a loss where there is none is the error the other direction.
+        continue
       } else {
         // A target only the run time knows — a value from the backend, a history entry — still
         // leaves a screen by an event. Record it as an edge into that screen's unknown sink
@@ -542,7 +547,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
               pushEdge(cId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guards.length > 0 ? guards.join(',') : null, file)
               navEffects.add('navigate')
             }
-          } else {
+          } else if (t.ti.kind !== 'same-screen') {
             soundiness.push({ kind: 'dynamic-target', file: t.file ?? file, loc: t.loc, detail: `${what} navigates to a fully dynamic target` })
           }
         }

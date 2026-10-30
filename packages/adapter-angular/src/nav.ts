@@ -14,6 +14,11 @@ export type TargetInfo =
   | { kind: 'literal'; value: string; holes?: boolean }
   | { kind: 'template'; staticPrefix: string }
   | { kind: 'dynamic' }
+  // `navigate([], { queryParams })` with no commands stays on the route it is already on, so
+  // it is not a transition between screens. Classifying it as dynamic drew an edge into the
+  // unknown sink for all 28 such sites in the corpus, which reported a navigation that
+  // changes no screen as a transition to a screen only the run time knows.
+  | { kind: 'same-screen' }
 
 /**
  * Classify a navigation argument expression as literal / template-prefix / dynamic. A call is
@@ -215,7 +220,7 @@ function joinCommands(segs: string[]): string {
  * that is not is a prefix; nothing static is dynamic.
  */
 function classifyCommandParts(parts: string[], sf: SourceFile | undefined): TargetInfo {
-  if (parts.length === 0) return { kind: 'dynamic' }
+  if (parts.length === 0) return { kind: 'same-screen' }
   const segs: string[] = []
   let holes = 0
   let known = 0
@@ -263,7 +268,7 @@ function classifyLinkArray(arr: string, sf?: SourceFile): TargetInfo {
   const inner = arr.slice(1, arr.lastIndexOf(']'))
   const parts = splitTopLevel(inner)
   if (sf) return classifyCommandParts(parts, sf)
-  if (parts.length === 0) return { kind: 'dynamic' }
+  if (parts.length === 0) return { kind: 'same-screen' }
   const lits: string[] = []
   for (const p of parts) {
     const lit = /^'([^']*)'$/.exec(p) ?? /^"([^"]*)"$/.exec(p)
