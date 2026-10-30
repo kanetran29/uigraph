@@ -2544,3 +2544,35 @@ export const routes: Routes = [
     }
   })
 })
+
+describe('a navigation with no commands', () => {
+  it('draws no edge and declares no loss, because it stays on the screen it is on', () => {
+    // `navigate([], { queryParams })` changes the query of the route it is already on. It was
+    // classified as a fully dynamic target, which drew an edge into the unknown sink and
+    // reported a navigation that changes no screen as a transition to one only the run time
+    // knows -- all 28 such sites in the corpus. It is not a transition, and it is not a loss.
+    const { graph, soundiness } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'list', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>', `filter() { this.router.navigate([], { queryParams: { q: 1 } }) }`),
+      }),
+      '/app',
+    )
+    expect(graph.edges.filter((e) => e.modality === 'unknown')).toHaveLength(0)
+    expect(graph.nodes.filter((n) => n.id.startsWith('u_'))).toHaveLength(0)
+    expect(soundiness.filter((n) => n.kind === 'dynamic-target')).toHaveLength(0)
+  })
+
+  it('still records a navigation whose commands array is on the following line', () => {
+    // The ledger's own target reader stopped at the newline, so a multi-line call read as
+    // naming no destination; the graph had resolved it all along.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'billing', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>', `go() {\n    this.router.navigate(\n      ['billing'],\n      { queryParams: { q: 1 } },\n    )\n  }`),
+      }),
+      '/app',
+    )
+    expect(graph.edges.some((e) => e.to === 'n_billing')).toBe(true)
+  })
+})
