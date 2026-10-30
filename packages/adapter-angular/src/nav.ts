@@ -19,6 +19,13 @@ export type TargetInfo =
   // unknown sink for all 28 such sites in the corpus, which reported a navigation that
   // changes no screen as a transition to a screen only the run time knows.
   | { kind: 'same-screen' }
+  // A commands array carrying an `outlets:` object addresses a secondary outlet, which the
+  // model admits no screens for (Section on the node set). It is not a transition between
+  // primary screens either way, but it was only recognised as one when its first element was
+  // a literal: where the array began with a spread or a variable the target read as dynamic
+  // and drew an unknown-sink edge, so the same construct left the denominator or did not
+  // depending on how its author wrote the first element.
+  | { kind: 'aux-outlet' }
 
 /**
  * Classify a navigation argument expression as literal / template-prefix / dynamic. A call is
@@ -221,6 +228,7 @@ function joinCommands(segs: string[]): string {
  */
 function classifyCommandParts(parts: string[], sf: SourceFile | undefined): TargetInfo {
   if (parts.length === 0) return { kind: 'same-screen' }
+  if (parts.some((p) => /^\{[\s\S]*\boutlets\s*:/.test(p.trim()))) return { kind: 'aux-outlet' }
   const segs: string[] = []
   let holes = 0
   let known = 0
@@ -269,6 +277,7 @@ function classifyLinkArray(arr: string, sf?: SourceFile): TargetInfo {
   const parts = splitTopLevel(inner)
   if (sf) return classifyCommandParts(parts, sf)
   if (parts.length === 0) return { kind: 'same-screen' }
+  if (parts.some((p) => /^\{[\s\S]*\boutlets\s*:/.test(p.trim()))) return { kind: 'aux-outlet' }
   const lits: string[] = []
   for (const p of parts) {
     const lit = /^'([^']*)'$/.exec(p) ?? /^"([^"]*)"$/.exec(p)

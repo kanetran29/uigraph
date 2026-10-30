@@ -28,6 +28,25 @@ const raw = (d, slug) => JSON.parse(fs.readFileSync(path.join(d, 'raw', `${slug}
 
 const conv = (c) => c === 'CONVERTED_MUST' || c === 'CONVERTED_MAY'
 const attr = (c) => c === 'ATTRIBUTION_SHARED' || c === 'ATTRIBUTION_SERVICE'
+// RQ3 compares two runs of one commit over the same inputs, so the population the two
+// columns are ratios OF has to be the same population. The classes that leave the
+// denominator are decided by the construct's own text --- a navigation that only changes the
+// query, one that targets a named outlet, one that names no destination --- and none of them
+// can depend on what the graph did. When they did, a site that attribution gave an edge to
+// escaped a bucket the text had put it in, and the after column was a ratio over 24 more
+// sites than the before column. The comparison refuses rather than quietly reporting it.
+const OUT_OF_SCOPE = ['QUERY_ONLY', 'EXCLUDED_NAMED_OUTLET', 'EXCLUDED_NO_COMMANDS']
+for (const b of B.results) {
+  const was = new Map(raw(beforeDir, b.slug).rows.map((r) => [r.at, r.cls]))
+  const now = new Map(raw(afterDir, b.slug).rows.map((r) => [r.at, r.cls]))
+  const moved = [...was].filter(([at, cls]) => OUT_OF_SCOPE.includes(cls) && now.has(at) && now.get(at) !== cls)
+  const joined = [...now].filter(([at, cls]) => OUT_OF_SCOPE.includes(cls) && was.has(at) && was.get(at) !== cls)
+  if (moved.length || joined.length) {
+    const show = [...moved, ...joined].slice(0, 3).map(([at, cls]) => `${at} (${cls})`).join('; ')
+    throw new Error(`${b.slug}: ${moved.length + joined.length} construct(s) change their out-of-denominator class between the two runs, so the two columns are ratios over different populations -- ${show}`)
+  }
+}
+
 const rows = []
 for (const b of B.results) {
   const a = A.results.find((x) => x.slug === b.slug)

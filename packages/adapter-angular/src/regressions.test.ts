@@ -2576,3 +2576,25 @@ describe('a navigation with no commands', () => {
     expect(graph.edges.some((e) => e.to === 'n_billing')).toBe(true)
   })
 })
+
+describe('a navigation that addresses a secondary outlet', () => {
+  it.each([
+    ['a literal first element', `['view', { outlets: { viewer: ['v', id] } }]`],
+    ['a spread first element', `[...base, { outlets: { viewer: ['v', id] } }]`],
+    ['a variable first element', `[loc, { outlets: { viewer: ['v', id] } }]`],
+  ])('draws no primary-outlet edge when the array has %s', (_name, commands) => {
+    // The model admits no screens for a secondary outlet, so such a navigation is out of the
+    // denominator. It was recognised only where the first element was a literal: with a
+    // spread or a variable the target read as dynamic and drew an unknown-sink edge, so the
+    // same construct left the denominator or did not depending on how it was written.
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'view', component: A }]`,
+        '/app/a.component.ts': C('<p>a</p>', `open(id: string, loc: string) {\n    const base = ['view']\n    this.router.navigate(${commands})\n  }`),
+      }),
+      '/app',
+    )
+    expect(graph.edges.filter((e) => e.modality === 'unknown')).toHaveLength(0)
+    expect(graph.nodes.filter((n) => n.id.startsWith('u_'))).toHaveLength(0)
+  })
+})

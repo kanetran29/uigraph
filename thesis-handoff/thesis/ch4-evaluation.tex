@@ -111,6 +111,23 @@ as one edge per screen (Section~\ref{sec:attribution}). An earlier version of th
 measure divided the number of must edges by the number of constructs. It was replaced
 for that reason (Section~\ref{sec:corrections}).
 
+\textbf{Which ratio is ``coverage''.} Several of the measures below are fractions of
+something over something, and more than one of them has been called coverage in the
+literature this thesis builds on. They are not interchangeable, and on this corpus they
+differ by a factor of fifty, so each is named here with the population it is a fraction of.
+\emph{Node coverage} is declared screens that have a node, over the screens the independent
+parser declares --- a figure that rises if less of an application is read, which is why the
+blind-spot count is printed beside it. The same quantity over the addresses the running
+framework mounts is a different and smaller figure, reported separately in
+Section~\ref{sec:res-probe}. The \emph{conversion ratio} is navigation constructs witnessed
+by a \emph{must} edge, over all in-scope constructs. \emph{Recovered} is the same numerator
+widened to an edge of any tier, and on an application whose screens sit behind guards the two
+are far apart: almost every transition such an application has is conditional, so a corpus
+can be most of the way recovered and almost nowhere deterministic. \emph{Accounted} is
+recovered plus the sites that name a reason for not being recovered, and it is the only one
+of these that is a claim about honesty rather than about reach. Where this thesis says
+coverage without qualifying it, it means node coverage; every other figure is named.
+
 \textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness
 cites it. A construct with no such edge is \emph{lost}, and it is assigned to exactly
 one defect class by the first rule in Table~\ref{tab:loss-rules} that applies. Because
