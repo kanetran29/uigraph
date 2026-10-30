@@ -1,14 +1,14 @@
 {
-  "harnessVersion": "1.3.0",
+  "harnessVersion": "1.4.0",
   "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco",
   "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco/projects/aca-content",
   "attribution": false,
   "seed": 20261021,
   "quota": 8,
   "baseline": {
-    "nodes": 30,
-    "edges": 1,
-    "routes": 30
+    "nodes": 37,
+    "edges": 17,
+    "routes": 27
   },
   "discovered": {
     "RENAME_PATH": 17,
@@ -25,19 +25,19 @@
       "discovered": 4,
       "sampled": 4,
       "detected": 1,
-      "missed": 0,
+      "missed": 3,
       "wrong": 0,
-      "excluded": 3,
+      "excluded": 0,
       "broke": 0,
       "skip": 0
     },
     "REMOVE_GUARD": {
       "discovered": 4,
       "sampled": 4,
-      "detected": 0,
-      "missed": 2,
+      "detected": 2,
+      "missed": 1,
       "wrong": 0,
-      "excluded": 2,
+      "excluded": 1,
       "broke": 0,
       "skip": 0
     },
@@ -52,16 +52,16 @@
       "skip": 0
     }
   },
-  "detectionRate": 0.8181818181818182,
-  "scored": 11,
-  "detected": 9,
+  "detectionRate": 0.7333333333333333,
+  "scored": 15,
+  "detected": 11,
   "results": [
     {
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/view-profile/view-profile.component.ts",
       "line": 141,
-      "subject": "/personal-files => /search",
-      "predict": "the edge to /personal-files is replaced by an edge to /search",
+      "subject": "/personal-files => /search-libraries",
+      "predict": "the edge to /personal-files is replaced by an edge to /search-libraries",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -71,7 +71,7 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/profile -> /search (navigate)"
+          "/profile -> /search-libraries (navigate)"
         ],
         "edgesRemoved": [
           "/profile -> /personal-files (navigate)"
@@ -83,28 +83,58 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-navigation.service.ts",
       "line": 57,
-      "subject": "/personal-files => /favorites",
-      "predict": "the edge to /personal-files is replaced by an edge to /favorites",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/lib/components/search/search-navigation.service.ts:57 is witnessed by no baseline edge"
+      "subject": "/personal-files => /recent-files",
+      "predict": "the edge to /personal-files is replaced by an edge to /recent-files",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
     },
     {
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts",
       "line": 163,
-      "subject": "/search => /all",
-      "predict": "the edge to /search is replaced by an edge to /all",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts:163 is witnessed by no baseline edge"
+      "subject": "/search => /favorite/libraries",
+      "predict": "the edge to /search is replaced by an edge to /favorite/libraries",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
     },
     {
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-navigation.service.ts",
       "line": 63,
-      "subject": "/search => /",
-      "predict": "the edge to /search is replaced by an edge to /",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/lib/components/search/search-navigation.service.ts:63 is witnessed by no baseline edge"
+      "subject": "/search => /view",
+      "predict": "the edge to /search is replaced by an edge to /view",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
     },
     {
       "kind": "REMOVE_GUARD",
@@ -121,8 +151,21 @@
       "line": 37,
       "subject": "path \"rules\"",
       "predict": "the guard on edges entering the screen of path \"rules\" changes",
-      "verdict": "EXCLUDED",
-      "reason": "no baseline edge enters a screen with route segment \"rules\""
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": [
+          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard, modality may->may",
+          "/nodes/:nodeId/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard, modality may->may"
+        ]
+      }
     },
     {
       "kind": "REMOVE_GUARD",
@@ -149,8 +192,8 @@
       "line": 111,
       "subject": "path \"\"",
       "predict": "the guard on edges entering the screen of path \"\" changes",
-      "verdict": "MISSED",
-      "touched": 0,
+      "verdict": "DETECTED",
+      "touched": 7,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -159,7 +202,12 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [],
-        "guardChanged": []
+        "guardChanged": [
+          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard->PluginEnabledGuard, modality may->may",
+          "/profile -> /personal-files: guard ExtensionsDataLoaderGuard->null, modality may->must",
+          "/personal-files -> /personal-files: guard ExtensionsDataLoaderGuard->null, modality may->must",
+          "/personal-files/:folderId -> /personal-files/:folderId: guard ExtensionsDataLoaderGuard->null, modality may->must"
+        ]
       }
     },
     {
@@ -242,17 +290,15 @@
       "subject": "view",
       "predict": "a node route containing \"view\" becomes \"view-mutated\"",
       "verdict": "DETECTED",
-      "touched": 4,
+      "touched": 2,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/view-mutated",
-          "/view-mutated/:nodeId"
+          "/view-mutated"
         ],
         "nodesRemoved": [
-          "/view",
-          "/view/:nodeId"
+          "/view"
         ],
         "routeChanged": [],
         "edgesAdded": [],
@@ -290,23 +336,33 @@
       "subject": "repository",
       "predict": "a node route containing \"repository\" becomes \"repository-mutated\"",
       "verdict": "DETECTED",
-      "touched": 6,
+      "touched": 14,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
           "/repository-mutated",
           "/repository-mutated/details/:nodeId",
-          "/repository-mutated/details/:nodeId/:activeTab"
+          "/repository-mutated/details/:nodeId/:activeTab",
+          "u_n_repository-mutated_details_nodeId",
+          "u_n_repository-mutated_details_nodeId_activeTab"
         ],
         "nodesRemoved": [
           "/repository",
           "/repository/details/:nodeId",
-          "/repository/details/:nodeId/:activeTab"
+          "/repository/details/:nodeId/:activeTab",
+          "u_n_repository_details_nodeId",
+          "u_n_repository_details_nodeId_activeTab"
         ],
         "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
+        "edgesAdded": [
+          "/repository-mutated/details/:nodeId -> u_n_repository-mutated_details_nodeId (navigate)",
+          "/repository-mutated/details/:nodeId/:activeTab -> u_n_repository-mutated_details_nodeId_activeTab (navigate)"
+        ],
+        "edgesRemoved": [
+          "/repository/details/:nodeId -> u_n_repository_details_nodeId (navigate)",
+          "/repository/details/:nodeId/:activeTab -> u_n_repository_details_nodeId_activeTab (navigate)"
+        ],
         "guardChanged": []
       }
     },
@@ -340,16 +396,14 @@
       "subject": "all",
       "predict": "a node route containing \"all\" becomes \"all-mutated\"",
       "verdict": "DETECTED",
-      "touched": 4,
+      "touched": 2,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/all-mutated",
           "/all-mutated/libraries"
         ],
         "nodesRemoved": [
-          "/all",
           "/all/libraries"
         ],
         "routeChanged": [],
