@@ -151,16 +151,27 @@ The results are measurements of one tool, on one corpus, with five methods, perf
 the person who wrote the tool. Each of those four choices limits what the figures
 support.
 
-\textbf{No oracle for the scope.} Every method in Chapter~\ref{ch:evaluation} checks a
-node, an edge or a witness. None of them checks the screen set that attribution computes,
-which is the contribution of the thesis. A site attributed to too many screens produces
-edges that the witness check still passes, because the construct really is at that
-location and really does name that target, and the end-to-end oracle only visits URLs and
-so cannot see a source screen that should not have been there. The shell rule is capped at
-\emph{may} where the mounting route is invisible (Section~\ref{sec:implementation}),
-which limits what an over-large scope can claim, but it is a design precaution and not a
-measurement. The scope is therefore the least directly validated part of the analysis, and
-the figures for it rest on the edges it produces agreeing with the other methods.
+\textbf{The scope is validated in one direction only.} Every other method in
+Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none of them can be asked
+whether the set of screens attribution computes for a site is the set it fires from. The
+runtime method answers half of that question (Section~\ref{sec:res-scope}): of the
+\ScopeObserved{} links the applications render on the screens it could judge,
+\ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{} that are
+not turn out to be sites attribution declined to place at all rather than sites it placed
+wrongly.
+
+What remains unvalidated is the other half and the reach. A site attributed to too MANY
+screens produces edges whose witnesses all pass, because the construct really is at that
+location and really does name that target; the oracle cannot convict it, because a predicted
+link missing from the DOM is equally well a link the template renders only to a signed-in
+user. And the oracle judged \ScopeJudged{} screens of \ScopeScreens{}: without a backend,
+\ScopeUnjudged{} of them redirect to a sign-in page and render another screen's links.
+Driving the applications far enough to render their interiors --- seeding a backend, signing
+in, and visiting a guarded screen in a known state --- is what would lift both limits, and it
+is the single piece of future work that would most change what this thesis can claim about
+its own contribution. The shell rule is capped at \emph{may} where the mounting route is
+invisible (Section~\ref{sec:implementation}), which limits what an over-large scope can claim,
+but that is a design precaution and not a measurement.
 
 \textbf{Construct validity.} The conversion ratio divides the constructs witnessed by a
 deterministic edge by all navigation constructs that the independent parser finds in

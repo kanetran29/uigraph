@@ -315,6 +315,51 @@ implement. The rest are scoped successfully and have nowhere to go, because the 
 computed at run time or names an address the graph holds no node for. Only the second kind
 is work the analysis as specified would do and this implementation does not.
 
+\subsection{Whether the scopes are right}
+\label{sec:res-scope}
+
+Everything above measures what attribution recovers. Whether the \emph{set of screens} it
+computes for a site is the set that site fires from is a different question, and the one the
+contribution turns on. The runtime method of Section~\ref{sec:protocol} answers one direction
+of it: navigate to each screen the graph holds, let it render, read the in-app links the page
+carries, and compare them with the edges the graph's per-screen query yields there.
+
+\begin{table}[t]\small
+\caption{The scopes against the rendered interface. \emph{Judged} counts screens that rendered
+themselves rather than redirecting to a sign-in page; the rest cannot be judged from what
+rendered, because a redirected screen shows another screen's links. \emph{Not predicted} is the
+only column that counts against the analysis.}
+\label{tab:scope}
+\TabScope
+\end{table}
+
+Of the \ScopeObserved{} links the running applications render on the screens that could be
+judged, \ScopeConfirmed{} are predicted by the scope the analysis computed ---
+\ScopeConfirmedShare{}. On realworld, the one application whose screens render without a
+backend, every rendered link on every judged screen is predicted. That is the first direct
+evidence in this thesis that the computed scopes are right, and it is worth being plain about
+its size: \ScopeJudged{} screens of \ScopeScreens{}, because \ScopeUnjudged{} redirect to a
+sign-in page when there is no backend behind them. The oracle does not scale to this corpus;
+it settles a question on part of it that nothing else here settles at all.
+
+The \ScopeUnpredicted{} links it does not predict are the informative part, and they are one
+defect seen four times. All four are in bitwarden: its \path{/login} screen renders links to
+\path{/hint} and \path{/signup}, and two further screens render a link to \path{/signup},
+none of which the graph has leaving those screens. The graph does hold those edges --- with
+the right witness, \path{libs/auth/src/angular/login/login.component.html} --- but anchored
+at an origin node rather than at a screen, because the component that renders them lives in a
+workspace library outside the application directory and attribution computed the empty scope
+for it. So the failure is not a scope that names the wrong screens; it is a scope the analysis
+declined to compute, which the running application then shows to be non-empty. Those sites are
+the \emph{unplaced} class of Table~\ref{tab:round2acct}, and this is the first measurement
+that any of them has a screen.
+
+\ScopeUnrendered{} edges run the other way: the graph has them and the DOM did not show them.
+That is not counted against the analysis, because a template renders links conditionally and
+this harness signs in to nothing --- realworld's header offers \emph{New Article} only to a
+signed-in user. Separating the two directions is the whole reason the measure is reported as
+two numbers instead of a precision figure.
+
 Scope attribution therefore raises coverage without lowering must-tier precision, which is
 what RQ3 asks. Two qualifications belong with that answer, and both are visible in the
 tables rather than hidden by them. The first is that the gain is overwhelmingly on the may

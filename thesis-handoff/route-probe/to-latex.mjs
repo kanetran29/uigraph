@@ -38,6 +38,7 @@ function args(argv) {
 }
 
 const a = args(process.argv.slice(2))
+const scopeTable = []
 if (!a.results || !a.out) {
   console.error('usage: node to-latex.mjs --results <dir> --out <file>')
   process.exit(2)
@@ -205,6 +206,44 @@ const macros = {
   // Counted here rather than asserted in the chapter, from answerability.mjs's own output and
   // the same classifier the comparison uses, so a disagreement cannot be reported as agreement.
   ...answerMacros(),
+  // The scope oracle: whether the SET OF SCREENS attribution computed for a navigation site is
+  // the set the running application renders it on. Counted from scope-check.mjs's own output.
+  ...scopeMacros(),
+}
+
+/**
+ * The scope oracle's figures and its table. Only the direction "rendered but not predicted" is
+ * evidence against the analysis, and the bound is as important as the figure: a screen the
+ * router redirects away from without a backend cannot be judged at all, and on this corpus that
+ * is most of them. Both are published, so the share is never read as covering the corpus.
+ */
+function scopeMacros() {
+  const files = rows.map((r) => ({ slug: r.slug, path: join(a.results, `${r.slug}.scope.json`) })).filter((f) => existsSync(f.path))
+  if (!files.length) return {}
+  const rs = files.map((f) => ({ slug: f.slug, ...JSON.parse(readFileSync(f.path, 'utf8')) }))
+  const sum = (k) => rs.reduce((t, r) => t + (r[k] || 0), 0)
+  const observed = sum('observedLinks')
+  const confirmed = sum('confirmed')
+  const unpredicted = sum('unpredicted')
+  if (confirmed + unpredicted !== observed) {
+    throw new Error(`the scope oracle saw ${observed} rendered links and classified ${confirmed + unpredicted}; every rendered link must be either predicted or not`)
+  }
+  scopeTable.push('\\newcommand{\\TabScope}{%', '\\begin{tabular}{@{}lrrrrr@{}}', '\\toprule')
+  scopeTable.push('Application & Screens & Judged & \\shortstack[r]{Links\\\\rendered} & \\shortstack[r]{Predicted\\\\by the scope} & \\shortstack[r]{Not\\\\predicted} \\\\', '\\midrule')
+  for (const r of rs) scopeTable.push(`${LABEL[r.slug] ?? r.slug} & ${r.screensInGraph} & ${r.usable} & ${r.observedLinks} & ${r.confirmed} & ${r.unpredicted} \\\\`)
+  scopeTable.push('\\midrule', `All & ${sum('screensInGraph')} & ${sum('usable')} & ${observed} & ${confirmed} & ${unpredicted} \\\\`)
+  scopeTable.push('\\bottomrule', '\\end{tabular}}')
+  return {
+    ScopeApps: rs.length,
+    ScopeScreens: sum('screensInGraph'),
+    ScopeJudged: sum('usable'),
+    ScopeUnjudged: sum('redirectedAway'),
+    ScopeObserved: observed,
+    ScopeConfirmed: confirmed,
+    ScopeConfirmedShare: observed ? `${((confirmed / observed) * 100).toFixed(1)}\\,\\%` : 'n/a',
+    ScopeUnpredicted: unpredicted,
+    ScopeUnrendered: sum('unrendered'),
+  }
 }
 
 /**
@@ -259,6 +298,7 @@ if (before.length > 0) {
   macros.ProbeBeforeAffectedApps = before.filter((r) => r.bad.length > 0).length
 }
 for (const [k, v] of Object.entries(macros)) lines.push(`\\newcommand{\\${k}}{${v}}`)
+lines.push(...scopeTable)
 
 writeFileSync(a.out, `${lines.join('\n')}\n`)
 console.log(`wrote ${a.out}: ${rows.length} applications, ${macros.ProbeInvented} minted-but-not-mounted, ${macros.ProbeMissed} mounted-but-not-minted`)

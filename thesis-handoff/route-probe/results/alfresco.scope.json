@@ -1,0 +1,311 @@
+{
+  "slug": "alfresco",
+  "dist": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/dist/alfresco/content-ce",
+  "dbPath": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco/projects/aca-content/uigraph.db",
+  "screensInGraph": 26,
+  "visited": 26,
+  "usable": 3,
+  "redirectedAway": 23,
+  "errors": 0,
+  "observedLinks": 0,
+  "confirmed": 0,
+  "unpredicted": 0,
+  "unrendered": 1,
+  "opaqueLinks": 0,
+  "rows": [
+    {
+      "address": "/rules",
+      "landed": "/rules",
+      "stayed": true,
+      "predicted": [
+        "/nodes/:nodeId/rules"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/nodes/:nodeId/rules"
+      ],
+      "opaque": 0
+    },
+    {
+      "address": "/preview/s/:id",
+      "landed": "/preview/s/probe-value",
+      "stayed": true,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/view",
+      "landed": "/view",
+      "stayed": true,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/profile",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/personal-files",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/personal-files/details/:nodeId",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/personal-files/details/:nodeId/:activeTab",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/personal-files/:folderId",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/repository",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/repository/details/:nodeId",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/repository/details/:nodeId/:activeTab",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/repository/:folderId",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/libraries",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/libraries/:folderId",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/favorite/libraries",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/favorite/libraries/:folderId",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/all/libraries",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/favorites",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/recent-files",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/shared",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/trashcan",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/search",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/search-libraries",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    },
+    {
+      "address": "/nodes/:nodeId/rules",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/nodes/:nodeId/rules"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/nodes/:nodeId/rules"
+      ],
+      "opaque": 0
+    },
+    {
+      "address": "/saved-searches",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "opaque": 0
+    }
+  ]
+}
