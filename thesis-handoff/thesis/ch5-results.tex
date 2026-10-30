@@ -460,19 +460,27 @@ unless each one's pairs are a subset of the next one's.}
 \TabAblation
 \end{table}
 
-Two of the four results are what the design expected and one is not. Direct ownership places
-\AblationOwnedSites{} sites, \AblationOwnedSiteShare{} of what the full analysis places.
-Containment raises that to \AblationNestingSites{} --- \AblationNestingSiteShare{} --- which
-is the level the prior work reaches, and the shell rule and the service join raise it to
-\AblationFullSites{}. Mean scope grows with each: \AblationOwnedMean{},
-\AblationNestingMean{}, \AblationOutletMean{}, \AblationFullMean{} screens per site.
+The levels are not evenly spaced, and the step that matters is not the one this thesis adds.
+Direct ownership places \AblationOwnedSites{} sites, \AblationOwnedSiteShare{} of what the
+full analysis places, and containment raises that only to \AblationNestingSites{}. The shell
+rule is what changes the picture: \emph{rooted} places \AblationRootedSites{} sites,
+\AblationRootedSiteShare{} of the full figure, and carries the pair count from
+\AblationNestingPairs{} to \AblationRootedPairs{}. Everything this thesis adds on top of that
+--- outlet descent and the injected-service join --- raises the site count by the remaining
+\AblationFullSiteShare{}, from \AblationRootedSites{} to \AblationFullSites{}.
 
-The result that does not fit is outlet descent. It places \emph{no} site that containment had
-not already placed --- \AblationOutletSites{} against \AblationNestingSites{} --- while
-raising the pair count from \AblationNestingPairs{} to \AblationOutletPairs{}, close to three
-times. On the corpus as a whole that mechanism buys width and no coverage. Whether the width
-it buys is correct is exactly what a table of counts cannot say, which is the next
-subsection's subject.
+That ordering matters for the comparison with earlier work, because the shell rule is not a
+mechanism this thesis introduced. Oshima and Kishi assemble their page information from the
+root component as well as from the components beneath it
+(Section~\ref{sec:dynamic-spa}), so \emph{rooted}, and not \emph{nesting}, is the level that
+stands for what they reach. A comparison drawn against containment alone would be a comparison
+with a method nobody proposed.
+
+Outlet descent is the one mechanism whose contribution is width almost without coverage: it
+places \AblationOutletSites{} sites against rooted's \AblationRootedSites{}, the same number
+on five of the six applications, while raising the pair count from \AblationRootedPairs{} to
+\AblationOutletPairs{}. Whether that width is correct is what a table of counts cannot say,
+which is the next subsection's subject.
 
 \subsection{Whether the scopes are the right ones}
 \label{sec:res-groundtruth}
@@ -490,14 +498,21 @@ the level has and the application does not.}
 \TabGroundTruth
 \end{table}
 
-The simpler levels are exactly precise and badly incomplete. Direct ownership and containment
-each attribute nothing the application does not --- \GTOwnedPrecision{} and
-\GTNestingPrecision{} precision, no excess pair at all --- and between them they miss most of
-the truth: containment recovers \GTNestingRecall{} of the real attributions and leaves
-\GTNestingMissing{} pairs unfound. The full analysis recovers \GTFullRecall{} and gives up
-\GTFullPrecision{} precision to do it. Against the level that measures the prior work's
-mechanism, that is \GTNestingMissing{} missing pairs reduced to \GTFullMissing{}, bought with
-\GTFullExcess{} wrong ones.
+Every level below the last is exactly precise: none of them attributes a single pair the
+application does not have. What separates them is how much they find. Direct ownership
+recovers \GTOwnedRecall{} and containment \GTNestingRecall{}, both far short. Adding the
+shell rule --- the level that stands for the prior work's reach --- recovers
+\GTRootedRecall{} at \GTRootedPrecision{} precision, leaving \GTRootedMissing{} pairs
+unfound and inventing none.
+
+The honest reading of the last two rows is therefore not the one an author would prefer.
+Against \emph{rooted}, everything this thesis adds buys \GTRootedMissing{} missing pairs
+reduced to \GTFullMissing{} --- five more correct attributions --- and introduces
+\GTFullExcess{} wrong ones, taking precision from \GTRootedPrecision{} to
+\GTFullPrecision{}. On this application the trade is negative: the additional mechanisms cost
+more in precision than they return in recall, and a reader who wanted the most accurate
+attribution of the five would choose \emph{outlet}, which recovers \GTOutletRecall{} with no
+excess at all.
 
 Both error sets reduce to a single cause, which is the useful part of the result. All
 \GTFullExcess{} excess pairs come from one site: the \texttt{navigate} inside
@@ -514,14 +529,18 @@ the child's address collapses onto its parent's, and the components that child r
 attributed to the collapsed address. One cause each, and both are reportable as defects rather
 than as a rate.
 
-Two things follow for RQ3. The first is that the extra mechanisms do buy accuracy and not only
-edges: on this application the full analysis is right about \GTFullRecall{} of the
-attributions where containment alone is right about \GTNestingRecall{}, and it is wrong about
-\GTFullExcess{} pairs out of \GTPairs{}. The second is that this holds for one application of
-six, the smallest, and the corpus-wide widths of Table~\ref{tab:scopebaseline} are not
-licensed by it. What the ground truth establishes is that the mechanism is sound in principle
-and that its known over-approximation is the thing that costs it precision; what it cannot
-establish is that the same holds on an application of six hundred screens.
+Two things follow for RQ3. The first is that most of the recovery attributed to this analysis
+is produced by a mechanism earlier work already had: \GTRootedRecall{} of the
+\GTPairs{} pairs are reached by the shell rule, and the mechanisms added here take that to
+\GTFullRecall{} while introducing the only wrong attributions any level makes. The second is
+that this is one application of six, the smallest, and the corpus-wide widths of
+Table~\ref{tab:scopebaseline} are not licensed by it --- on \BaselineBluntest{} the mean
+scope is \BaselineBluntestShare{} of the application, and no ground truth exists to say
+whether that width is earned. What the ground truth establishes is narrower than soundness, since it found errors in both
+directions: the additional mechanisms raise attribution recall on this annotated application,
+at a measured cost in precision, and the precision they cost is spent entirely on one known
+over-approximation. What it cannot establish is that the same holds on an application of six
+hundred screens.
 
 Scope attribution therefore raises coverage without lowering must-tier precision, which is
 what RQ3 asks. Three qualifications belong with that answer, and all three are visible in the
@@ -572,7 +591,10 @@ positive in aggregate; four of the six are a change the attributed graph detecte
 baseline did not respond to at all, and two are a change the attributed graph responded to
 with the wrong delta while the baseline did not respond. Outside the paired set,
 \MutAttributedOnly{} mutants are scorable only against the attributed graph and
-\MutBaselineOnly{} only against the baseline. So attribution does raise the detection rate
+\MutBaselineOnly{} only against the baseline. A further \MutUnmatchedSites{} constructs are
+mutated in both runs but into different things, because the retargeting operator picks its new
+destination at random; those are two different mutants rather than evidence about either
+graph, and they are counted apart rather than as an eligibility difference. So attribution does raise the detection rate
 per scored change, by about half of what the unpaired rates suggest, and most of its effect
 on this corpus is the widening of what can be scored at all. An earlier
 measurement of this corpus reported the opposite, that attribution widened the graph's

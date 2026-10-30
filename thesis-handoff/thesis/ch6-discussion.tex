@@ -164,8 +164,9 @@ method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none 
 asked whether the set of screens attribution computes for a site is the set it fires from. Two
 methods can. The hand-built ground truth answers it fully, but for one application of six
 (Section~\ref{sec:res-groundtruth}): there the analysis is right about \GTFullRecall{} of the
-attributions, against \GTNestingRecall{} for containment alone, and its \GTFullExcess{} wrong
-pairs all come from the injected-service join. Across the whole corpus only the runtime method
+attributions, its \GTFullExcess{} wrong pairs all come from the injected-service join, and
+the level that stands for what earlier work reaches already recovers \GTRootedRecall{} of
+them with nothing wrong at all. Across the whole corpus only the runtime method
 applies, and it answers half of the question (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
 judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}
@@ -651,14 +652,19 @@ future work.
 \section{Future work}
 \label{sec:future}
 
-An oracle for the screen set is the cheapest addition that would strengthen the thesis
-most, because the scope is the contribution and
-Section~\ref{sec:limitations} records that no method validates it directly. On an
-application small enough to read, the screens that render each navigation site can be
-enumerated by hand and compared with the computed scope, which would give attribution the
-kind of ground truth the test-source cross-check gives node extraction. Recording, for each
-attributed site, the relation that supplied its scope would make the same comparison
-possible per relation.
+An oracle for the screen set on a \emph{large} application is now the cheapest addition
+that would strengthen the thesis most. The hand-built ground truth of
+Section~\ref{sec:res-groundtruth} supplies one for the smallest application in the corpus,
+and it was worth building: it convicted the injected-service join of attributing a site to
+nine screens it cannot fire from, which no other method here could do. What it cannot do is
+carry to an application of six hundred screens, where reading every site by hand is not
+practical, and that is exactly where the computed scopes are widest
+(Table~\ref{tab:scopebaseline}). Driving such an application into a signed-in state and
+reading its rendered links, or annotating a stratified sample of its sites rather than all of
+them, are the two ways to get there. Recording, for each attributed site, the relation that
+supplied its scope would narrow the verdict further: the ground truth here shows which
+\emph{sites} are wrong, and that would show which \emph{rule} made them wrong without having
+to re-extract once per rule.
 
 The two defects that cap the larger applications are the most urgent, because nothing else in the
 analysis can be evaluated properly while they stand. Both were repaired in the course of

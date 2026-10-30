@@ -18,14 +18,15 @@
 // this harness refuses to emit a table in that case.
 //
 // Usage: pnpm exec tsx scope-ablation.mjs --corpus <dir> --out <dir> [--tex <file>] [--apps a,b,c]
+//        [--keep <slug>]  which application's per-level databases to keep (default realworld)
 import { DatabaseSync } from 'node:sqlite'
 import { scopeMembers } from '@ui-graph/core'
 import { execSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 
-const LEVELS = ['owned', 'nesting', 'outlet', 'full']
+const LEVELS = ['owned', 'nesting', 'rooted', 'outlet', 'full']
 const EXTRACTOR = path.resolve(path.join(import.meta.dirname, '..', '..'))
 const CLI = `pnpm -s --dir ${EXTRACTOR} exec tsx ${path.join(EXTRACTOR, 'packages', 'cli', 'src', 'cli.ts')}`
 
@@ -50,6 +51,8 @@ const APPS = {
   mifos: '.',
 }
 const only = flag('--apps') ? flag('--apps').split(',') : Object.keys(APPS)
+/** The one application whose per-level databases are kept, for scoring against a ground truth. */
+const keep = flag('--keep', 'realworld')
 
 /** The (site, screen) pairs a graph asserts: one per source construct, per screen it fires from. */
 function pairsOf(dbPath) {
@@ -106,9 +109,14 @@ for (const slug of only) {
       const snap = path.join(outDir, `${slug}.${level}.uigraph.db`)
       copyFileSync(db, snap)
       measured[level] = pairsOf(snap)
+      // Only the application scored against a ground truth needs its databases afterwards.
+      // Keeping one per level for every application is several gigabytes of derived data
+      // whose only published form is the counts below.
+      if (keep !== slug) rmSync(snap, { force: true })
     }
   } finally {
     copyFileSync(backup, db)
+    if (keep !== slug) rmSync(backup, { force: true })
     const after = createHash('sha256').update(readFileSync(db)).digest('hex')
     if (after !== before) throw new Error(`${slug}: the corpus database was not restored (${before.slice(0, 12)} -> ${after.slice(0, 12)})`)
   }

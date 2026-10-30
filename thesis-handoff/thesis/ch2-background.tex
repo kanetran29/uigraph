@@ -684,8 +684,10 @@ interpretation of JavaScript is established \cite{jensen2009type}, source-level 
 over a typed syntax tree is a standard tooling style \cite{baxter1998clone,pawlak2016spoon},
 and the Java literature has shown repeatedly that framework behaviour can be modelled
 explicitly to recover call edges that a general analysis loses
-\cite{sridharan2011f4f,antoniadis2020enterprise,chen2022jasmine}. What has not been done
-is to apply this to a client-side framework in order to recover navigation. The one
+\cite{sridharan2011f4f,antoniadis2020enterprise,chen2022jasmine}. Applying this to a
+client-side framework in order to recover navigation has been done once, within the
+restrictions set out above \cite{oshima2018model}; what has not been done is to apply it
+without them, or to measure what the recovery misses. The one
 peer-reviewed static analysis in the Angular family targets AngularJS 1.x and checks
 template and controller consistency rather than navigation \cite{ocariza2015detecting},
 and the type information that TypeScript adds narrows a dispatch without settling it,

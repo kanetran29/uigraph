@@ -46,17 +46,19 @@ export interface ComponentInfo {
  *            file holds it, and to nothing else -- the direct-ownership baseline, which is
  *            what resolving the owning object gives in the Android literature.
  *   nesting  plus component containment: a component reached from a routed component's
- *            template is attributed to that component's screens. This is the mechanism of
- *            Oshima and Kishi (2018), so this level is the prior work's reach.
+ *            template is attributed to that component's screens.
+ *   rooted   plus the shell rule, so a component the root renders is attributed to every
+ *            screen. Oshima and Kishi (2018) assemble page information from the root
+ *            component as well as from the components under it, so this level, and not
+ *            `nesting`, is the one that stands for the prior work's reach.
  *   outlet   plus router-outlet descent: a routed component's own template also renders on
  *            every descendant screen, because they render inside its outlet.
- *   full     plus the shell rule and the injected-service join, which is the analysis this
- *            thesis proposes.
+ *   full     plus the injected-service join, which is what this thesis adds on top.
  *
  * `full` is the default and the path it takes is untouched: the levels are applied by
  * withholding results at the end, never by computing them differently.
  */
-export type ScopeLayers = 'owned' | 'nesting' | 'outlet' | 'full'
+export type ScopeLayers = 'owned' | 'nesting' | 'rooted' | 'outlet' | 'full'
 
 export interface ScopeResult {
   /** Components that are not route components, with the screens they render on. */
@@ -274,7 +276,7 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // Outlet descent is already folded into routeComponentScreens, so a level that excludes
   // descent must descend from the route components' OWN screens instead; taking it out of
   // the returned map afterwards would leave it in every nested component's scope.
-  const descentBase = layers === 'owned' || layers === 'nesting' ? ownScreens : routeComponentScreens
+  const descentBase = layers === 'outlet' || layers === 'full' ? routeComponentScreens : ownScreens
   const screensOf = new Map<string, Set<string>>()
   for (const [f, screens] of descentBase) {
     for (const c of reach(nesting, f)) {
@@ -344,9 +346,11 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   if (layers !== 'full') {
     serviceScreens.clear()
     serviceShell.clear()
-    shell.clear()
-    indirectShell.clear()
-    if (layers === 'owned' || layers === 'nesting') descendantsOfRouteComponent.clear()
+    if (layers === 'owned' || layers === 'nesting') {
+      shell.clear()
+      indirectShell.clear()
+    }
+    if (layers !== 'outlet') descendantsOfRouteComponent.clear()
     if (layers === 'owned') screensOf.clear()
   }
 
