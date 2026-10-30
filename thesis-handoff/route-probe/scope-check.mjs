@@ -65,6 +65,7 @@ const dist = flag('--dist')
 const dbPath = flag('--db')
 const outFile = flag('--out')
 const waitMs = Number(flag('--wait', '900'))
+const SCOPE_HARNESS = '1.1.0'
 if (!slug || !dist || !dbPath || !outFile) {
   console.error('usage: node scope-check.mjs --slug <s> --dist <dir> --db <uigraph.db> --out <file> [--addresses a,b,c] [--wait ms]')
   process.exit(2)
@@ -246,6 +247,11 @@ server.close()
 const usable = rows.filter((r) => !r.error && r.stayed)
 const tot = (k) => usable.reduce((a, r) => a + r[k].length, 0)
 const report = {
+  // The version of this harness, so a result set assembled from two runs of different
+  // versions cannot be published as one measurement. The first run of this oracle read only
+  // `a[href]`; the second also reads a static routerLink, and one application's file survived
+  // from the first because it was read while the second run was still writing it.
+  scopeHarness: SCOPE_HARNESS,
   slug,
   dist,
   dbPath,

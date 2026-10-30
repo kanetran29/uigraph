@@ -221,6 +221,12 @@ function scopeMacros() {
   const files = rows.map((r) => ({ slug: r.slug, path: join(a.results, `${r.slug}.scope.json`) })).filter((f) => existsSync(f.path))
   if (!files.length) return {}
   const rs = files.map((f) => ({ slug: f.slug, ...JSON.parse(readFileSync(f.path, 'utf8')) }))
+  // One measurement means one harness. A file with no stamp predates the version that reads a
+  // static routerLink, and mixing it with the others publishes two readings as one.
+  const versions = [...new Set(rs.map((r) => r.scopeHarness ?? 'unstamped'))]
+  if (versions.length > 1) {
+    throw new Error(`the scope results come from ${versions.join(' and ')}; re-run scope-check.mjs for every application so the table is one measurement`)
+  }
   const sum = (k) => rs.reduce((t, r) => t + (r[k] || 0), 0)
   const observed = sum('observedLinks')
   const confirmed = sum('confirmed')
