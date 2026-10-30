@@ -265,11 +265,18 @@ for (const { i, e, w, merged } of sites) {
 
 const tally = {}
 for (const f of findings) tally[f.verdict] = (tally[f.verdict] || 0) + 1
-const checked = edges.length
+// The site entries that reached a verdict: one passed (`ok`) or one finding each. The rest
+// were skipped before judging --- a merged citation of an edge whose destination is already
+// condemned, a manual edge with no witness. This used to be `edges.length`, and when the
+// report began calling it `sites` every share computed over it mixed two populations: the
+// round-two table published "-69.3 %" of edges clean and "119.8 %" over-approximated,
+// because clean counts sites and the denominator counted edges.
+const checked = ok + findings.length
+const sitesCited = sites.length
 
 console.log(`app:     ${appDir}`)
 console.log(`edges:   ${edges.length}`)
-console.log(`sites:   ${checked} cited by them (${sites.filter((x) => x.merged).length} of them merged citations)`)
+console.log(`sites:   ${sitesCited} cited by them (${sites.filter((x) => x.merged).length} merged citations), of which ${checked} judged`)
 console.log(`CLEAN:   ${ok}/${checked} = ${checked ? ((ok / checked) * 100).toFixed(1) : 0}%`)
 console.log(`issues:  ${JSON.stringify(tally)}`)
 // The must-tier is what the soundness lemma protects: report it on its own.
@@ -290,4 +297,4 @@ for (const v of order) {
 // `mustBad` is written out as well as counted: the soundness violations are the findings the
 // thesis describes one by one, and a description read off `findings` would include the may
 // and unknown tiers the lemma says nothing about.
-if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: edges.length, sites: checked, mergedSites: sites.filter((x) => x.merged).length, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: edges.length, sites: checked, sitesCited, mergedSites: sites.filter((x) => x.merged).length, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))

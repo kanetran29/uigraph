@@ -6,9 +6,17 @@
 
 Static extraction of a transition graph from Angular source fails in two different places,
 and the first of them turned out to be the tool's rather than the method's. Node extraction
-is complete on all six applications of the corpus (Table~\ref{tab:coverage}): every screen
-the route configuration declares has a node, and the runtime method confirms that no node
-sits at an address the framework mounts nothing at. That was not so when this work began.
+is complete on all six applications of the corpus against the readers of the route
+configuration (Table~\ref{tab:coverage}): every screen those readers find declared has a
+node, and the runtime method confirms that no node sits at an address the framework mounts
+nothing at. Completeness in that sense is bounded by what a route table can be read to
+declare, and the runtime method is also the method that bounds it: visiting the addresses
+the applications answer finds \ProbeMissed{} with no node, \ProbeMissedGhostfolio{} of them
+in ghostfolio alone, so \ProbeExactApps{} of the six are complete in the stronger sense of
+holding a node for every address the running application answers
+(Section~\ref{sec:res-probe}). Both readings are reported, because the weaker one is what
+the loss classification of this chapter is computed against and the stronger one is what a
+user of the graph would want. That was not so when this work began.
 Two defects of the extractor accounted for most of the corpus then --- a route whose path is
 a constant reference, and a route table behind a lazy boundary it did not cross, each
 producing no node at all, so that every navigation site belonging to such a screen was lost
@@ -155,23 +163,34 @@ support.
 Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none of them can be asked
 whether the set of screens attribution computes for a site is the set it fires from. The
 runtime method answers half of that question (Section~\ref{sec:res-scope}): of the
-\ScopeObserved{} links the applications render on the screens it could judge,
-\ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{} that are
-not turn out to be sites attribution declined to place at all rather than sites it placed
-wrongly.
+\ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
+judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}
+that are not turn out to be sites attribution declined to place at all rather than sites it
+placed wrongly.
 
 What remains unvalidated is the other half and the reach. A site attributed to too MANY
 screens produces edges whose witnesses all pass, because the construct really is at that
 location and really does name that target; the oracle cannot convict it, because a predicted
 link missing from the DOM is equally well a link the template renders only to a signed-in
-user. And the oracle judged \ScopeJudged{} screens of \ScopeScreens{}: without a backend,
+user. The count of predictions it could in principle convict --- those naming a destination
+exactly, rather than over-approximating to every address a static prefix admits --- is
+\ScopeExact{} across the whole corpus, against \ScopeApprox{} that over-approximate, so the
+direction is not merely unrefuted but close to untestable by this method. And the oracle
+judged \ScopeJudged{} screens of \ScopeScreens{}: without a backend,
 \ScopeUnjudged{} of them redirect to a sign-in page and render another screen's links.
 Driving the applications far enough to render their interiors --- seeding a backend, signing
 in, and visiting a guarded screen in a known state --- is what would lift both limits, and it
 is the single piece of future work that would most change what this thesis can claim about
 its own contribution. The shell rule is capped at \emph{may} where the mounting route is
 invisible (Section~\ref{sec:implementation}), which limits what an over-large scope can claim,
-but that is a design precaution and not a measurement.
+but that is a design precaution and not a measurement. What can be measured without a
+running application is the width of the scopes rather than their truth, and
+Section~\ref{sec:res-width} measures it: the computed attribution is narrower than assigning
+every site to every screen by a factor between \BaselineFactorMin{} and
+\BaselineFactorMax{}, and on \BaselineBluntest{} the average site is attributed to
+\BaselineBluntestShare{} of the screens. A scope that wide is a weak statement about where a
+site fires even if it is sound, and the coverage attribution recovers is bought at that
+width.
 
 \textbf{Construct validity.} The conversion ratio divides the constructs witnessed by a
 deterministic edge by all navigation constructs that the independent parser finds in
@@ -197,7 +216,7 @@ An assignment to \texttt{location.href}, a redirect driven by a server response,
 navigation performed inside a third-party component are all invisible on the same
 grounds. The conversion ratio is therefore recall against an enumerable syntactic proxy
 for an application's navigation, not against its navigation, and the completeness of that
-proxy is not itself measured. The end-to-end oracle is the only method that can see past
+proxy is not itself measured. The test-source cross-check is the only method that can see past
 it, because a URL that a passing test visits is a screen that exists whatever the source
 looks like, and it covers one application of the six.
 
@@ -257,7 +276,7 @@ mutation experiments is followed for that reason \cite{papadakis2019mutation}. T
 exclusion rule that removes mutants whose construct is absent from the graph is applied
 using the graph itself, which couples the sample to the tool's own coverage; the
 excluded mutants are reported rather than dropped silently, but the sample is not
-independent of the artefact under test. The end-to-end oracle extracts URLs from test
+independent of the artefact under test. The test-source cross-check extracts URLs from test
 source text, which under-samples click-driven navigation and can collect strings that no
 test ever visits, so it measures node existence and nothing finer. On the instrument these figures are measured on the
 independent parser follows every lazy specifier in the corpus, and the application whose
@@ -431,7 +450,7 @@ absent from the graph.
 \item \textbf{Named outlets and targets of the form \texttt{\{outlets: \ldots\}}.} An
 auxiliary route adds a second active route and a second mount point, encoded in the URL
 \cite{angulardocs}. The model of Chapter~\ref{ch:analysis} represents this as a second
-mount, but the adapter does not implement it, and the end-to-end oracle shows the
+mount, but the adapter does not implement it, and the test-source cross-check shows the
 corresponding URLs among its misses.
 \item \textbf{Navigation relative to the active route (\texttt{relativeTo}).} The target
 is a function of the route that is active when the call runs, so it has no single value
@@ -633,7 +652,7 @@ most, because the scope is the contribution and
 Section~\ref{sec:limitations} records that no method validates it directly. On an
 application small enough to read, the screens that render each navigation site can be
 enumerated by hand and compared with the computed scope, which would give attribution the
-kind of ground truth the end-to-end oracle gives node extraction. Recording, for each
+kind of ground truth the test-source cross-check gives node extraction. Recording, for each
 attributed site, the relation that supplied its scope would make the same comparison
 possible per relation.
 
@@ -719,7 +738,7 @@ makes the nesting relation a dataflow problem.
 The defect class ``node not linked to its component'' still has one confirmation, from the
 comparison between the route parser and the graph, and the rule adopted in
 Chapter~\ref{ch:results} admits a class only with two. A second method has to reach it
-independently, and the end-to-end oracle is the natural candidate, since a screen whose
+independently, and the test-source cross-check is the natural candidate, since a screen whose
 node exists but carries no component link should still be visited by tests while
 contributing no outbound edges. Until then the class stays a candidate, and the share of
 the corpus total that it accounts for stays provisional with it.

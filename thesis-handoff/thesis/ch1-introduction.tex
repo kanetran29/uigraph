@@ -43,9 +43,12 @@ without changing where the model comes from \cite{feedex2013,fraggen2022}. A sur
 testing published in 2025 collects the model-based tools of the past decade
 \cite{websurvey2025}. Among the tools it lists, no model is derived from source code
 rather than from execution. During the literature search
-for this thesis, only one static analysis of a modern client-side framework was found;
-it builds a component dependency graph for React and does not address routing
-\cite{kurant2025}.
+for this thesis, two static analyses of a modern client-side framework were found. One
+builds a component dependency graph for React and does not address routing
+\cite{kurant2025}. The other does extract page transitions from Angular, in order to
+model-check them, but accepts only applications that declare no nested routes, no route
+parameters and no data-bound navigation \cite{oshima2018model};
+Section~\ref{sec:dynamic-spa} compares it with the work reported here.
 
 When the dynamic approach was developed, a single-page application had no declarative route table, so the DOM was the only thing to observe (Section~\ref{sec:dynamic-spa}). Client-side routing frameworks changed this. Angular,
 React Router and Vue Router all declare routes as data in the source code, connect
@@ -177,13 +180,17 @@ This follows the position of Livshits et al., who argue that a practical static
 analysis should be described as sound modulo an explicit list of the language features
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement
 would require a controlled experiment and is left for future work. A third limit is the one that bears hardest on the
-contribution: nothing in this evaluation validates the screen set that attribution
-computes. The methods of Section~\ref{sec:protocol} check the edges attribution produces
-and the addresses the graph claims, and the running framework can be asked which of those
-addresses it answers; none of them can be asked whether the set of screens from which a
-navigation site can fire is the right set. What is measured is therefore how much
-navigation attribution recovers and that it costs the deterministic tier nothing, not that
-its scopes are correct. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
+contribution: the screen sets attribution computes are validated in one direction only. A
+scope that is too small can be refuted by the rendered interface, and
+Section~\ref{sec:res-scope} refutes \ScopeUnpredicted{} of them; a scope that is too large
+cannot be, because at the screens that method can observe the graph almost never claims a
+destination exactly, and because a link a template renders conditionally is absent for
+reasons unrelated to the scope. The computed scopes are also wide: narrower than attributing
+every site to every screen by a factor between \BaselineFactorMin{} and
+\BaselineFactorMax{}, which at the low end names most of an application
+(Section~\ref{sec:res-width}). What is measured is therefore how much navigation attribution
+recovers, that it costs the deterministic tier nothing, and that where the interface could
+judge it the scopes were not too small --- not that they are right. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
 has adapters for other frameworks, but all measurements reported here concern Angular
 applications.
 

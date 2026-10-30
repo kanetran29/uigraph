@@ -30,7 +30,7 @@
  * restriction to declare, not a flaw to hide: those are also the sites the nesting and outlet
  * relations matter most for, since a shared component's links are exactly what a scope is for.
  *
- * Usage: node scope-check.mjs --slug <s> --dist <dir> --db <uigraph.db> --out <file>
+ * Usage: pnpm exec tsx scope-check.mjs --slug <s> --dist <dir> --db <uigraph.db> --out <file>
  *                             [--addresses a,b,c] [--wait ms]
  */
 import { createServer } from 'node:http'
@@ -65,9 +65,9 @@ const dist = flag('--dist')
 const dbPath = flag('--db')
 const outFile = flag('--out')
 const waitMs = Number(flag('--wait', '900'))
-const SCOPE_HARNESS = '1.1.0'
+const SCOPE_HARNESS = '1.3.0'
 if (!slug || !dist || !dbPath || !outFile) {
-  console.error('usage: node scope-check.mjs --slug <s> --dist <dir> --db <uigraph.db> --out <file> [--addresses a,b,c] [--wait ms]')
+  console.error('usage: pnpm exec tsx scope-check.mjs --slug <s> --dist <dir> --db <uigraph.db> --out <file> [--addresses a,b,c] [--wait ms]')
   process.exit(2)
 }
 
@@ -225,20 +225,44 @@ for (const address of chosen) {
   const stayed = matchesPattern(landed, address)
 
   const node = screens.find((n) => n.route === address)
-  const predicted = node
-    ? [...new Set(edgesFrom(graph, node.id)
-        .filter((e) => String(e.event || '').startsWith('click'))
-        .map((e) => graph.nodes.find((n) => n.id === e.to))
-        .filter((n) => n && typeof n.route === 'string')
-        .map((n) => n.route))]
+  const clicks = node
+    ? edgesFrom(graph, node.id).filter((e) => String(e.event || '').startsWith('click'))
     : []
+  const routesOf = (es) => [...new Set(es
+    .map((e) => graph.nodes.find((n) => n.id === e.to))
+    .filter((n) => n && typeof n.route === 'string')
+    .map((n) => n.route))]
+  const predicted = routesOf(clicks)
+  // A site whose target the analysis could not resolve to a single address contributes every
+  // address its static prefix admits, and the graph says so by lowering the edge's
+  // confidence. Such an address is not a claim that this screen links there, so the screen
+  // not linking there refutes nothing. The over-attribution direction is therefore judged
+  // only over the addresses the graph claims exactly.
+  const approximated = routesOf(clicks.filter((e) => e.confidence !== undefined && e.confidence < 1))
+  const definite = predicted.filter((p) => !approximated.includes(p))
 
   const observed = [...new Set((obs.links || []).map(norm).filter(Boolean))]
   const confirmed = observed.filter((o) => predicted.some((p) => matchesPattern(o, p) || norm(p) === o))
   const unpredicted = observed.filter((o) => !confirmed.includes(o))
-  const unrendered = predicted.filter((p) => !observed.some((o) => matchesPattern(o, p) || norm(p) === o))
+  const notRendered = (p) => !observed.some((o) => matchesPattern(o, p) || norm(p) === o)
+  const unrendered = predicted.filter(notRendered)
+  const overAttributed = definite.filter(notRendered)
 
-  rows.push({ address, landed, stayed, predicted, observed, confirmed, unpredicted, unrendered, opaque: obs.opaque ?? 0 })
+  // A scope claim is "this site fires from this screen", so the unit is a (screen, target
+  // pattern) pair. Counting raw anchors instead inflates it: one tag list renders fifteen
+  // links that answer the single pattern /tag/:param, and a shared header's three links are
+  // counted again on every screen that renders it. Both counts are kept, and the pair count
+  // is the one the chapter states.
+  const asPattern = (o) => predicted.find((q) => matchesPattern(o, q) || norm(q) === o) ?? o
+  const patterns = [...new Set(observed.map(asPattern))]
+  rows.push({
+    address, landed, stayed, predicted, observed, confirmed, unpredicted, unrendered,
+    definite, approximated, overAttributed,
+    patterns,
+    patternsConfirmed: patterns.filter((q) => predicted.includes(q)),
+    patternsUnpredicted: patterns.filter((q) => !predicted.includes(q)),
+    opaque: obs.opaque ?? 0,
+  })
 }
 
 await browser.close()
@@ -262,10 +286,21 @@ const report = {
   usable: usable.length,
   redirectedAway: rows.filter((r) => !r.error && !r.stayed).length,
   errors: rows.filter((r) => r.error).length,
+  // The pair counts: one row per (screen, target pattern) the application renders.
+  pairs: tot('patterns'),
+  pairsConfirmed: tot('patternsConfirmed'),
+  pairsUnpredicted: tot('patternsUnpredicted'),
+  // The raw anchor counts, kept so the inflation is visible rather than hidden.
   observedLinks: tot('observed'),
   confirmed: tot('confirmed'),
   unpredicted: tot('unpredicted'),
   unrendered: tot('unrendered'),
+  // The two directions of the scope claim, kept apart. Under-attribution is decidable from
+  // what rendered; over-attribution is decidable only where the graph claims an exact
+  // destination, and the count of those is published so a vacuous denominator is visible.
+  predictedDefinite: tot('definite'),
+  predictedApprox: tot('approximated'),
+  overAttributed: tot('overAttributed'),
   // Elements carrying a routerLink whose target this oracle cannot read. They bound what the
   // confirmed figure covers on each screen, so they are published beside it.
   opaqueLinks: usable.reduce((a, r) => a + (r.opaque || 0), 0),
@@ -274,11 +309,18 @@ const report = {
 writeFileSync(outFile, JSON.stringify(report, null, 2))
 
 console.log(`${slug}: ${report.usable} of ${report.visited} screens judged (${report.redirectedAway} redirected away, ${report.errors} unreachable)`)
-console.log(`  links the running application renders:        ${report.observedLinks}`)
+console.log(`  (screen, target pattern) pairs rendered:      ${report.pairs}`)
+console.log(`  of those, predicted by the graph's scope:      ${report.pairsConfirmed}` +
+  (report.pairs ? ` = ${((report.pairsConfirmed / report.pairs) * 100).toFixed(1)}%` : ''))
+console.log(`  pairs NOT predicted (scope too small):        ${report.pairsUnpredicted}`)
+console.log(`  raw anchors behind those pairs:               ${report.observedLinks}`)
 console.log(`  of those, predicted by the graph's scope:     ${report.confirmed}` +
   (report.observedLinks ? ` = ${((report.confirmed / report.observedLinks) * 100).toFixed(1)}%` : ''))
 console.log(`  rendered but NOT predicted (scope too small): ${report.unpredicted}`)
-console.log(`  predicted but not rendered (conditional, or scope too large -- not decided here): ${report.unrendered}`)
+console.log(`  predicted but not rendered, any target:       ${report.unrendered}`)
+console.log(`  of the predictions, exact-destination:        ${report.predictedDefinite}` +
+  ` (over-approximated: ${report.predictedApprox})`)
+console.log(`  over-attributed (exact, and not rendered):    ${report.overAttributed}`)
 for (const r of usable.filter((r) => r.unpredicted.length).slice(0, 6)) {
   console.log(`    ${r.address}: renders ${r.unpredicted.slice(0, 5).join(', ')}`)
 }
