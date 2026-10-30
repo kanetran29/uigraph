@@ -19,14 +19,14 @@ mifos & 100.0\,\% (605/605) & 100.0\,\% (605/605) & 605 & 1 \\
 \toprule
 Application & Sites & Excl. & In scope & Recovered & Dynamic & Unplaced \\
 \midrule
-realworld & 40 & 0 & 40 & 100.0\,\% & 0.0\,\% & 0.0\,\% \\
+realworld & 40 & 1 & 39 & 100.0\,\% & 0.0\,\% & 0.0\,\% \\
 alfresco & 34 & 7 & 27 & 25.9\,\% & 25.9\,\% & 44.4\,\% \\
-ghostfolio & 198 & 1 & 197 & 44.7\,\% & 39.1\,\% & 13.2\,\% \\
-k8s dashboard & 72 & 0 & 72 & 20.8\,\% & 68.1\,\% & 8.3\,\% \\
-bitwarden & 132 & 0 & 132 & 63.6\,\% & 11.4\,\% & 16.7\,\% \\
+ghostfolio & 198 & 12 & 186 & 43.5\,\% & 41.4\,\% & 14.0\,\% \\
+k8s dashboard & 72 & 4 & 68 & 16.2\,\% & 72.1\,\% & 8.8\,\% \\
+bitwarden & 132 & 19 & 113 & 60.2\,\% & 13.3\,\% & 19.5\,\% \\
 mifos & 1344 & 0 & 1344 & 88.2\,\% & 8.2\,\% & 2.5\,\% \\
 \midrule
-All & 1820 & 8 & 1812 & 78.4\,\% & 14.2\,\% & 5.5\,\% \\
+All & 1820 & 43 & 1777 & 78.3\,\% & 14.5\,\% & 5.6\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoReasons}{%
@@ -35,13 +35,12 @@ All & 1820 & 8 & 1812 & 78.4\,\% & 14.2\,\% & 5.5\,\% \\
 Sites & Reason the site is not a transition \\
 \midrule
 15 & A class the extractor could not place under any screen \\
-7 & not-a-navigation \\
 6 & Over-approximated at the site \\
 4 & The target names no route the application declares \\
 1 & A service; whether anything injects it is not established \\
 1 & The file is parsed, but nothing lands near the site \\
 \midrule
-34 & All, none of them without a reason \\
+27 & All, none of them without a reason \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoSoundness}{%
@@ -59,14 +58,15 @@ mifos & 10636 & -2200 & -49.7\,\% & 1/1 & 0.1\,\% \\
 All & 11601 & -2294 & -69.3\,\% & 20/20 & 1.5\,\% \\
 \bottomrule
 \end{tabular}}
-\newcommand{\RoundTwoInScope}{1812}
-\newcommand{\RoundTwoRecovered}{78.4\,\%}
-\newcommand{\RoundTwoDynamic}{14.2\,\%}
-\newcommand{\RoundTwoUnplaced}{5.5\,\%}
-\newcommand{\RoundTwoAccounted}{98.1\,\%}
-\newcommand{\RoundTwoUnexplained}{34}
-\newcommand{\RoundTwoBefore}{71.5\,\%}
-\newcommand{\RoundTwoExcluded}{8}
+\newcommand{\RoundTwoInScope}{1777}
+\newcommand{\RoundTwoRecovered}{78.3\,\%}
+\newcommand{\RoundTwoDynamic}{14.5\,\%}
+\newcommand{\RoundTwoUnplaced}{5.6\,\%}
+\newcommand{\RoundTwoAccounted}{98.5\,\%}
+\newcommand{\RoundTwoUnexplained}{27}
+\newcommand{\RoundTwoBefore}{71.9\,\%}
+\newcommand{\RoundTwoExcluded}{43}
+\newcommand{\RoundTwoExcludedQueryOnly}{35}
 \newcommand{\RoundTwoExcludedOutlet}{7}
 \newcommand{\RoundTwoExcludedNoCommands}{1}
 \newcommand{\RoundTwoFullNodes}{6}
@@ -88,9 +88,9 @@ All & 11601 & -2294 & -69.3\,\% & 20/20 & 1.5\,\% \\
 \newcommand{\RoundTwoLowerBoundApps}{4}
 \newcommand{\RoundTwoLowerBoundWhere}{alfresco, ghostfolio, bitwarden, mifos}
 \newcommand{\RoundTwoLowerBoundReasons}{children not resolvable to a route array; matcher route: path not statically knowable; spread route source: not followed}
-\newcommand{\RoundTwoNoMifosRecovered}{50.0\,\%}
-\newcommand{\RoundTwoNoMifosAccounted}{95.7\,\%}
-\newcommand{\RoundTwoMifosShare}{74.2\,\%}
+\newcommand{\RoundTwoNoMifosRecovered}{47.6\,\%}
+\newcommand{\RoundTwoNoMifosAccounted}{97.0\,\%}
+\newcommand{\RoundTwoMifosShare}{75.6\,\%}
 \newcommand{\RoundTwoRelativeUnresolved}{0}
 \newcommand{\RoundTwoUnderUnreadable}{0}
 \newcommand{\RoundTwoNoRouteCaveated}{none}

@@ -149,12 +149,17 @@ const PRETTY = {
   'declared-route-has-no-node': 'The route is declared; the node is missing',
   'name-not-resolved': 'The target names a value no resolver could follow',
   'extractor-note:over-approximation': 'Over-approximated at the site',
+  'not-a-navigation': 'The construct carries no commands, so it names no destination',
+  'named-outlet': 'Navigates a secondary outlet, which the model does not admit',
 }
 // Keyed by the published text, not the slug: two slugs mapping to one reason would otherwise
 // print it as two identical rows whose total still closes, publishing one finding as two.
 const reasons = {}
 for (const r of rows) if (r.w) for (const [k, v] of Object.entries(r.w.byReason)) {
-  const t = PRETTY[k] ?? k.replace(/_/g, '\\_')
+  // An unmapped slug used to print itself, so an internal key reached a published table in a
+  // row of sentences. A reason with no wording is a reason nobody decided how to report.
+  if (!PRETTY[k]) throw new Error(`the reason "${k}" has no published wording, so this table would print its internal key beside ${v} site(s); add it to PRETTY`)
+  const t = PRETTY[k]
   reasons[t] = (reasons[t] || 0) + v
 }
 const reasonsTotal = Object.values(reasons).reduce((a, b) => a + b, 0)
@@ -206,9 +211,17 @@ mac('RoundTwoAccounted', pc(tot.rec + tot.dyn + tot.unp, tot.inScope))
 mac('RoundTwoUnexplained', tot.lost)
 mac('RoundTwoBefore', pc(tot.rec0, tot.raw0))
 mac('RoundTwoExcluded', tot.excl)
-// The two reasons a site leaves the denominator, so the sentence that names them both is
-// counted rather than remembered.
+// The three reasons a site leaves the denominator, so the sentence that names them is
+// counted rather than remembered. There were two when it was written; the third was always
+// there and was being counted as a recovered transition instead, which is why the breakdown
+// is checked against its own total below rather than trusted to stay complete.
 const exclBy = (k) => rows.reduce((a, r) => a + (r.l1.tally[k] ?? 0), 0)
+const EXCL_GROUNDS = ['EXCLUDED_NAMED_OUTLET', 'EXCLUDED_NO_COMMANDS', 'QUERY_ONLY']
+const groundsTotal = EXCL_GROUNDS.reduce((a, k) => a + exclBy(k), 0)
+if (groundsTotal !== tot.excl) {
+  throw new Error(`the grounds for leaving the denominator sum to ${groundsTotal} and ${tot.excl} sites left it; a ground has no macro and the sentence naming them would not add up`)
+}
+mac('RoundTwoExcludedQueryOnly', exclBy('QUERY_ONLY'))
 mac('RoundTwoExcludedOutlet', exclBy('EXCLUDED_NAMED_OUTLET'))
 mac('RoundTwoExcludedNoCommands', exclBy('EXCLUDED_NO_COMMANDS'))
 mac('RoundTwoFullNodes', rows.filter((r) => r.c1.comparison.matched === r.c1.comparison.declaredScreens).length)

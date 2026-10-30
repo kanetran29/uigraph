@@ -548,16 +548,20 @@ backend, a history entry --- in which case the graph records the transition as a
 that screen's \texttt{u\_}\,sink, with modality unknown, rather than dropping it or
 guessing. It is \emph{unplaced} when the destination is readable but the screen it fires
 from is not, in which case the edge is anchored at an \texttt{o\_}\,origin node that says so.
-What is left is unexplained. \RoundTwoExcluded{} sites leave the denominator entirely:
-\RoundTwoExcludedNoCommands{} carry no commands and so name no destination, and
-\RoundTwoExcludedOutlet{} navigate a secondary outlet, which the model does not admit. The second ground is new to this round. The
-control run's ledger classified \RoundTwoCtrlOutlet{} sites in \RoundTwoCtrlOutletWhere{} as
-navigations to a named outlet and \RoundTwoCtrlOutletStill{} are still in the source at the same
-lines, of which \RoundTwoExcludedOutlet{} are excluded on that ground now and the rest are
-accounted under other classes, because the round-two extractor can place the screen each of them
-fires from. No comparison of denominators is drawn from that, because the control ledger has no
-denominator to compare: it records constructs and losses and has no notion of exclusion at all,
-which the round-two ledger is the first to carry.
+What is left is unexplained. \RoundTwoExcluded{} sites leave the denominator entirely, on three grounds, none of which is
+a transition between screens: \RoundTwoExcludedQueryOnly{} pass an empty commands array and
+so change the query of the route they are already on,
+\RoundTwoExcludedOutlet{} navigate a secondary outlet, which the model admits no screens
+for, and \RoundTwoExcludedNoCommands{} names no destination at all. All three are decided
+from the construct's own text before the graph is consulted, so the set is the same in both
+runs; the generator refuses to write these figures if the grounds do not sum to the total. Both runs are measured by the same ledger
+with the same exclusions, so the two columns of Table~\ref{tab:before-after} are ratios over
+the same \RoundTwoInScope{} sites. That was not so for most of this work. The grounds were
+tested after the graph had been consulted, so a site attribution gave an edge to escaped the
+ground its own text had put it in, and the after column was a ratio over more sites than the
+before column --- the thing Appendix~\ref{app:setmoved} says a coverage figure should never
+be allowed to do. The comparison now refuses to print at all if any construct changes its
+ground between the two runs.
 
 The restriction is enforced on the route side as well. A route that declares a named
 \texttt{outlet} is reached as \texttt{(name:path)} and never at the primary address, so it
