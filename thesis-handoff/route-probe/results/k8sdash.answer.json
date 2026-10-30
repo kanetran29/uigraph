@@ -1,6 +1,6 @@
 {
   "slug": "k8sdash",
-  "origin": "http://127.0.0.1:56737",
+  "origin": "http://127.0.0.1:63317",
   "routerFound": true,
   "results": [
     {
@@ -130,6 +130,49 @@
       ],
       "catchAll": false,
       "placesComponent": true
+    },
+    {
+      "target": "/namespace",
+      "recognized": true,
+      "at": "/login",
+      "after": "/namespace",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "RootComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "ChromeComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "namespace",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "NamespaceListComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/namespace(actionbar:)",
+      "recognized": false,
+      "at": "/login",
+      "after": "/login",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [],
+      "catchAll": false,
+      "placesComponent": false
     }
   ]
 }

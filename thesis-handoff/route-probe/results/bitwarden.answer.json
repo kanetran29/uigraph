@@ -1,6 +1,6 @@
 {
   "slug": "bitwarden",
-  "origin": "http://127.0.0.1:56731",
+  "origin": "http://127.0.0.1:63513",
   "routerFound": true,
   "results": [
     {
@@ -187,6 +187,28 @@
           "lazyComponent": false
         }
       ],
+      "catchAll": false,
+      "placesComponent": false
+    },
+    {
+      "target": "/login(secondary:)",
+      "recognized": false,
+      "at": "/login",
+      "after": "/login",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [],
+      "catchAll": false,
+      "placesComponent": false
+    },
+    {
+      "target": "/login(environment-selector:)",
+      "recognized": false,
+      "at": "/login",
+      "after": "/login",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [],
       "catchAll": false,
       "placesComponent": false
     }
