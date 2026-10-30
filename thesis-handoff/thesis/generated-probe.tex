@@ -78,7 +78,30 @@ All & 1759 & 1146 & 37 & 47 & 108 & 0 & 1 & 420 \\
 \newcommand{\ProbeAnswerUndecided}{1}
 \newcommand{\ProbeCmpChecked}{31}
 \newcommand{\ProbeCmpAgreed}{31}
+\newcommand{\ScopeApps}{5}
+\newcommand{\ScopeScreens}{806}
+\newcommand{\ScopeJudged}{30}
+\newcommand{\ScopeUnjudged}{776}
+\newcommand{\ScopeObserved}{67}
+\newcommand{\ScopeConfirmed}{63}
+\newcommand{\ScopeConfirmedShare}{94.0\,\%}
+\newcommand{\ScopeUnpredicted}{4}
+\newcommand{\ScopeUnrendered}{80}
 \newcommand{\ProbeBeforeApps}{6}
 \newcommand{\ProbeBeforeNotMounted}{10}
 \newcommand{\ProbeBeforeWhere}{alfresco, bitwarden}
 \newcommand{\ProbeBeforeAffectedApps}{2}
+\newcommand{\TabScope}{%
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Application & Screens & Judged & \shortstack[r]{Links\\rendered} & \shortstack[r]{Predicted\\by the scope} & \shortstack[r]{Not\\predicted} \\
+\midrule
+realworld & 10 & 7 & 59 & 59 & 0 \\
+alfresco & 26 & 3 & 0 & 0 & 0 \\
+k8s dashboard & 67 & 1 & 0 & 0 & 0 \\
+bitwarden & 98 & 18 & 8 & 4 & 4 \\
+mifos & 605 & 1 & 0 & 0 & 0 \\
+\midrule
+All & 806 & 30 & 67 & 63 & 4 \\
+\bottomrule
+\end{tabular}}

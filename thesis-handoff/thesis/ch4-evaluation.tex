@@ -111,6 +111,29 @@ as one edge per screen (Section~\ref{sec:attribution}). An earlier version of th
 measure divided the number of must edges by the number of constructs. It was replaced
 for that reason (Section~\ref{sec:corrections}).
 
+\textbf{Agreement between a scope and the rendered interface (RQ3).} The measures above check
+nodes, edges and witnesses. None of them can be asked the question the contribution turns on:
+is the set of screens attribution computed for a navigation site the set that site can really
+fire from? The runtime method answers one direction of it. A scope says a site fires from
+certain screens, so the harness navigates to each screen the graph holds, lets it render, and
+reads the in-app links the DOM actually carries; those are compared with the edges the
+graph's own per-screen query yields at that screen.
+
+Only one direction of the comparison is evidence. A link the application renders at a screen
+that the graph does not have leaving it is unambiguous: the link is there, so either the site
+was attributed to too few screens or it was never read. The opposite --- an edge the graph has
+and the DOM does not show --- is not evidence of too large a scope, because a template renders
+links conditionally, and this harness signs in to nothing. It is counted and reported, never
+scored against the analysis.
+
+Two bounds belong with the figure. The oracle sees a link only where the rendered page carries
+a readable target, which means an anchor's \texttt{href} or a static \texttt{routerLink}
+attribute; a \texttt{Router.navigate} call in an event handler leaves nothing in the DOM to
+read, so the sites it covers are the template-sourced ones. And a screen whose guard redirects
+it to a sign-in page without a backend renders another screen's links, so its scope cannot be
+judged from what rendered; such screens are counted apart. On this corpus that is most of
+them, and Section~\ref{sec:res-scope} gives both numbers rather than the share alone.
+
 \textbf{Which ratio is ``coverage''.} Several of the measures below are fractions of
 something over something, and more than one of them has been called coverage in the
 literature this thesis builds on. They are not interchangeable, and on this corpus they
