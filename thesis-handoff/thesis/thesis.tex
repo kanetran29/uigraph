@@ -95,10 +95,11 @@ constructs that loss class holds are recovered, on every application in the corp
 precision on the deterministic tier does not fall. Almost all of the gain is navigation the
 graph reports as possible rather than certain. On the one application small enough for the
 screens each navigation site fires from to be read off the sources by hand, the computed sets
-are right about \GTFullRecall{} of those attributions, against \GTNestingRecall{} for the
-component-containment mechanism earlier work stops at, and the \GTFullExcess{} they get wrong
-all come from one over-approximating rule; on the other five applications the sets are checked
-in one direction only, which is the work's sharpest limitation.
+are right about \GTFullRecall{} of those attributions. Most of that is not new: attributing
+what the root component renders to every screen, which earlier work already does, reaches
+\GTRootedRecall{} of them and attributes nothing the application does not, while every wrong
+attribution any level makes comes from a rule this thesis adds. On the other five applications
+the sets are checked in one direction only, which is the work's sharpest limitation.
 
 Mutation testing on three of the applications shows that the graph detects \MutDetected{}
 of \MutScored{} injected source changes, against \MutBaseDetected{} of \MutBaseScored{}

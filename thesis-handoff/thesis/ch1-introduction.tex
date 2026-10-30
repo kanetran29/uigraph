@@ -185,10 +185,11 @@ application only. Across the corpus a scope that is too small can be refuted by 
 interface, and Section~\ref{sec:res-scope} refutes \ScopeUnpredicted{} of them, while a scope
 that is too large cannot be, because at the screens that method can observe the graph almost
 never claims a destination exactly. For one application the screens each site really fires
-from were read off the sources by hand, which gives both directions: the analysis is right
-about \GTFullRecall{} of the attributions there, against \GTNestingRecall{} for the
-containment mechanism earlier work uses, and the \GTFullExcess{} it gets wrong all come from
-one over-approximating rule (Section~\ref{sec:res-groundtruth}). The computed scopes are also
+from were read off the sources by hand, which gives both directions, and the result qualifies
+the contribution rather than confirming it: the analysis is right about \GTFullRecall{} of the
+attributions there, but the mechanism earlier work already has reaches \GTRootedRecall{} of
+them without a single wrong attribution, and all \GTFullExcess{} of the wrong ones this
+analysis makes come from one rule it adds (Section~\ref{sec:res-groundtruth}). The computed scopes are also
 wide: narrower than attributing every site to every screen by a factor between
 \BaselineFactorMin{} and \BaselineFactorMax{}, which at the low end names most of an
 application (Section~\ref{sec:res-width}). What is established is therefore that the mechanism

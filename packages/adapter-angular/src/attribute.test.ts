@@ -135,7 +135,7 @@ describe('attribution levels', () => {
   // The ablation compares the levels with one another, so a level that is not contained in the
   // next makes every comparison drawn from it meaningless.
   it('are nested, each level within the next', () => {
-    const levels = ['owned', 'nesting', 'outlet', 'full'].map((l) => ({ l, p: pairs(l) }))
+    const levels = ['owned', 'nesting', 'rooted', 'outlet', 'full'].map((l) => ({ l, p: pairs(l) }))
     for (let i = 1; i < levels.length; i += 1) {
       const escaped = [...levels[i - 1]!.p].filter((x) => !levels[i]!.p.has(x))
       expect({ level: levels[i - 1]!.l, escaped }).toEqual({ level: levels[i - 1]!.l, escaped: [] })
@@ -143,7 +143,7 @@ describe('attribution levels', () => {
   })
 
   it('places strictly more at each level than the one below', () => {
-    const sizes = ['owned', 'nesting', 'outlet', 'full'].map((l) => pairs(l).size)
+    const sizes = ['owned', 'nesting', 'rooted', 'outlet', 'full'].map((l) => pairs(l).size)
     expect(sizes[0]!).toBeLessThan(sizes[3]!)
     for (let i = 1; i < sizes.length; i += 1) expect(sizes[i]!).toBeGreaterThanOrEqual(sizes[i - 1]!)
   })

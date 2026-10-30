@@ -115,14 +115,24 @@ if (baseFiles.length) {
   const favour = paired.filter((k) => kA.get(k) !== kB.get(k))
   const againstAttr = favour.filter((k) => kB.get(k) === 'DETECTED' && kA.get(k) !== 'DETECTED')
   const ppc = (d) => `${((d / paired.length) * 100).toFixed(1)}\\,\\%`
+  // An unmatched mutant is not the same thing as an ineligible one. The operators pick a new
+  // target at random, so the two runs can mutate the same construct into different things;
+  // that pair is two different mutants and says nothing about what either graph can score.
+  // Counted apart from the mutants that are genuinely absent from the other run.
+  const site = (k) => k.split('|').slice(0, 4).join('|')
+  const aOnly = [...kA.keys()].filter((k) => !kB.has(k))
+  const bOnly = [...kB.keys()].filter((k) => !kA.has(k))
+  const aSites = new Set(aOnly.map(site)), bSites = new Set(bOnly.map(site))
+  const bothSites = [...aSites].filter((x) => bSites.has(x))
   for (const [k, v] of [
     ['MutPaired', paired.length],
     ['MutPairedDetected', pDet(kA)], ['MutPairedRate', ppc(pDet(kA))],
     ['MutPairedBaseDetected', pDet(kB)], ['MutPairedBaseRate', ppc(pDet(kB))],
     ['MutPairedDisagree', favour.length],
     ['MutPairedAgainstAttribution', againstAttr.length],
-    ['MutAttributedOnly', [...kA.keys()].filter((k) => !kB.has(k)).length],
-    ['MutBaselineOnly', [...kB.keys()].filter((k) => !kA.has(k)).length],
+    ['MutAttributedOnly', aOnly.filter((k) => !bSites.has(site(k))).length],
+    ['MutBaselineOnly', bOnly.filter((k) => !aSites.has(site(k))).length],
+    ['MutUnmatchedSites', bothSites.length],
   ]) out += `\\newcommand{\\${k}}{${v}}\n`
   console.error(`paired ${paired.length}: attributed ${pDet(kA)} (${ppc(pDet(kA))}), baseline ${pDet(kB)} (${ppc(pDet(kB))}), ` +
     `${favour.length} disagree, ${againstAttr.length} against attribution`)
