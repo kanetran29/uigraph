@@ -1,14 +1,14 @@
 {
-  "harnessVersion": "1.3.0",
+  "harnessVersion": "1.4.0",
   "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden",
   "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden/apps/web",
   "attribution": false,
   "seed": 20261021,
   "quota": 8,
   "baseline": {
-    "nodes": 78,
-    "edges": 20,
-    "routes": 78
+    "nodes": 105,
+    "edges": 58,
+    "routes": 98
   },
   "discovered": {
     "CHANGE_NAV_TARGET": 34,
@@ -26,30 +26,30 @@
     "CHANGE_NAV_TARGET": {
       "discovered": 34,
       "sampled": 8,
-      "detected": 2,
-      "missed": 0,
-      "wrong": 1,
-      "excluded": 5,
+      "detected": 5,
+      "missed": 3,
+      "wrong": 0,
+      "excluded": 0,
       "broke": 0,
       "skip": 0
     },
     "DELETE_ROUTERLINK": {
       "discovered": 11,
       "sampled": 8,
-      "detected": 0,
+      "detected": 4,
       "missed": 0,
       "wrong": 0,
-      "excluded": 8,
+      "excluded": 4,
       "broke": 0,
       "skip": 0
     },
     "REMOVE_GUARD": {
       "discovered": 78,
       "sampled": 8,
-      "detected": 0,
-      "missed": 5,
+      "detected": 3,
+      "missed": 3,
       "wrong": 0,
-      "excluded": 3,
+      "excluded": 2,
       "broke": 0,
       "skip": 0
     },
@@ -64,46 +64,16 @@
       "skip": 0
     }
   },
-  "detectionRate": 0.625,
-  "scored": 16,
-  "detected": 10,
+  "detectionRate": 0.7692307692307693,
+  "scored": 26,
+  "detected": 20,
   "results": [
     {
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
       "line": 52,
-      "subject": "/finish-signup => /tools",
-      "predict": "the edge to /finish-signup is replaced by an edge to /tools",
-      "verdict": "WRONG",
-      "touched": 1,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/accept-families-for-enterprise -> /tools (navigate)"
-        ],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/billing/organizations/change-plan-dialog.component.ts",
-      "line": 833,
-      "subject": "/organizations => /settings/data-recovery",
-      "predict": "the edge to /organizations is replaced by an edge to /settings/data-recovery",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/billing/organizations/change-plan-dialog.component.ts:833 is witnessed by no baseline edge"
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
-      "line": 38,
-      "subject": "/setup/families-for-enterprise => /tools/import",
-      "predict": "the edge to /setup/families-for-enterprise is replaced by an edge to /tools/import",
+      "subject": "/finish-signup => /setup-extension",
+      "predict": "the edge to /finish-signup is replaced by an edge to /setup-extension",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -113,7 +83,49 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/accept-families-for-enterprise -> /tools/import (navigate)"
+          "/accept-families-for-enterprise -> /setup-extension (navigate)"
+        ],
+        "edgesRemoved": [
+          "/accept-families-for-enterprise -> /finish-signup (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/billing/organizations/change-plan-dialog.component.ts",
+      "line": 833,
+      "subject": "/organizations => /confirm-key-connector-domain",
+      "predict": "the edge to /organizations is replaced by an edge to /confirm-key-connector-domain",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
+      "line": 38,
+      "subject": "/setup/families-for-enterprise => /folders",
+      "predict": "the edge to /setup/families-for-enterprise is replaced by an edge to /folders",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/accept-families-for-enterprise -> /folders (navigate)"
         ],
         "edgesRemoved": [
           "/accept-families-for-enterprise -> /setup/families-for-enterprise (navigate)"
@@ -125,44 +137,8 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts",
       "line": 112,
-      "subject": "/login => /settings/sponsored-families",
-      "predict": "the edge to /login is replaced by an edge to /settings/sponsored-families",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/auth/organization-invite/accept-org-direct-invite.component.ts:112 is witnessed by no baseline edge"
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/billing/members/billing-constraint/billing-constraint.service.ts",
-      "line": 155,
-      "subject": "/organizations => /events",
-      "predict": "the edge to /organizations is replaced by an edge to /events",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/billing/members/billing-constraint/billing-constraint.service.ts:155 is witnessed by no baseline edge"
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/auth/settings/security/password-settings/password-settings.component.ts",
-      "line": 40,
-      "subject": "/settings/security/two-factor => /request-sm-access",
-      "predict": "the edge to /settings/security/two-factor is replaced by an edge to /request-sm-access",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/auth/settings/security/password-settings/password-settings.component.ts:40 is witnessed by no baseline edge"
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/dirt/event-logs/components/entity-events/entity-events.component.ts",
-      "line": 169,
-      "subject": "/organizations => /lock",
-      "predict": "the edge to /organizations is replaced by an edge to /lock",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/dirt/event-logs/components/entity-events/entity-events.component.ts:169 is witnessed by no baseline edge"
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts",
-      "line": 80,
-      "subject": "/create-organization => /settings/export",
-      "predict": "the edge to /create-organization is replaced by an edge to /settings/export",
+      "subject": "/login => /setup-extension",
+      "predict": "the edge to /login is replaced by an edge to /setup-extension",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -172,7 +148,91 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/request-sm-access -> /settings/export (navigate)"
+          "/accept-organization -> /setup-extension (navigate)"
+        ],
+        "edgesRemoved": [
+          "/accept-organization -> /login (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/billing/members/billing-constraint/billing-constraint.service.ts",
+      "line": 155,
+      "subject": "/organizations => /reports/breach-report",
+      "predict": "the edge to /organizations is replaced by an edge to /reports/breach-report",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/auth/settings/security/password-settings/password-settings.component.ts",
+      "line": 40,
+      "subject": "/settings/security/two-factor => /recover-2fa",
+      "predict": "the edge to /settings/security/two-factor is replaced by an edge to /recover-2fa",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/settings/security/password -> /recover-2fa (navigate)"
+        ],
+        "edgesRemoved": [
+          "/settings/security/password -> /settings/security/two-factor (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/dirt/event-logs/components/entity-events/entity-events.component.ts",
+      "line": 169,
+      "subject": "/organizations => /login",
+      "predict": "the edge to /organizations is replaced by an edge to /login",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts",
+      "line": 80,
+      "subject": "/create-organization => /premium/checkout/success",
+      "predict": "the edge to /create-organization is replaced by an edge to /premium/checkout/success",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/request-sm-access -> /premium/checkout/success (navigate)"
         ],
         "edgesRemoved": [
           "/request-sm-access -> /create-organization (navigate)"
@@ -186,8 +246,22 @@
       "line": 63,
       "subject": "/vault",
       "predict": "the graph stops citing this line, and the edge to /vault disappears unless another construct also produces it",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/vault/components/setup-extension/setup-extension.component.html:63 is witnessed by no baseline edge"
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/vault/components/setup-extension/setup-extension.component.html:63"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/setup-extension -> / (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
     },
     {
       "kind": "DELETE_ROUTERLINK",
@@ -195,8 +269,22 @@
       "line": 35,
       "subject": "/login",
       "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/auth/recover-two-factor.component.html:35 is witnessed by no baseline edge"
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/auth/recover-two-factor.component.html:35"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/recover-2fa -> /login (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
     },
     {
       "kind": "DELETE_ROUTERLINK",
@@ -213,8 +301,22 @@
       "line": 12,
       "subject": "/login",
       "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/auth/recover-delete.component.html:12 is witnessed by no baseline edge"
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/auth/recover-delete.component.html:12"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/recover-delete -> /login (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
     },
     {
       "kind": "DELETE_ROUTERLINK",
@@ -249,8 +351,22 @@
       "line": 12,
       "subject": "/login",
       "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/auth/verify-recover-delete.component.html:12 is witnessed by no baseline edge"
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/auth/verify-recover-delete.component.html:12"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/verify-recover-delete -> /login (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
     },
     {
       "kind": "REMOVE_GUARD",
@@ -258,8 +374,8 @@
       "line": 684,
       "subject": "path \"\"",
       "predict": "the guard on edges entering the screen of path \"\" changes",
-      "verdict": "MISSED",
-      "touched": 0,
+      "verdict": "DETECTED",
+      "touched": 9,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -268,7 +384,12 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [],
-        "guardChanged": []
+        "guardChanged": [
+          "/accept-families-for-enterprise -> /setup/families-for-enterprise: guard deepLinkGuard(),authGuard->null, modality may->must",
+          "/recover-2fa -> /settings/security/two-factor: guard deepLinkGuard(),authGuard->null, modality may->must",
+          "/premium/checkout/success -> /settings/subscription/premium: guard deepLinkGuard(),authGuard->null, modality may->must",
+          "/request-sm-access -> /sm-landing: guard deepLinkGuard(),authGuard->null, modality may->must"
+        ]
       }
     },
     {
@@ -277,8 +398,8 @@
       "line": 17,
       "subject": "path \"\"",
       "predict": "the guard on edges entering the screen of path \"\" changes",
-      "verdict": "MISSED",
-      "touched": 0,
+      "verdict": "DETECTED",
+      "touched": 1,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -287,7 +408,9 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [],
-        "guardChanged": []
+        "guardChanged": [
+          "/organizations/:organizationId/settings/two-factor -> /organizations/:organizationId/settings/policies: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard()->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may"
+        ]
       }
     },
     {
@@ -324,8 +447,20 @@
       "line": 31,
       "subject": "path \"payment-details\"",
       "predict": "the guard on edges entering the screen of path \"payment-details\" changes",
-      "verdict": "EXCLUDED",
-      "reason": "no baseline edge enters a screen with route segment \"payment-details\""
+      "verdict": "DETECTED",
+      "touched": 1,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": [
+          "/organizations/:organizationId/vault -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may"
+        ]
+      }
     },
     {
       "kind": "REMOVE_GUARD",
@@ -381,19 +516,21 @@
       "subject": "premium",
       "predict": "a node route containing \"premium\" becomes \"premium-mutated\"",
       "verdict": "DETECTED",
-      "touched": 3,
+      "touched": 5,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [
+          "src/app/billing/individual/premium/cloud-hosted-premium.component.ts:208",
           "src/app/billing/individual/premium/cloud-hosted-premium.component.ts:210"
         ],
         "nodesAdded": [
-          "/premium-mutated"
+          "/settings/subscription/premium-mutated"
         ],
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/premium-mutated -> /vault (navigate)"
+          "/settings/subscription/premium-mutated -> /settings/subscription/user-subscription (navigate)",
+          "/settings/subscription/premium-mutated -> / (navigate)"
         ],
         "edgesRemoved": [],
         "guardChanged": []
@@ -437,19 +574,23 @@
       "subject": "password",
       "predict": "a node route containing \"password\" becomes \"password-mutated\"",
       "verdict": "DETECTED",
-      "touched": 2,
+      "touched": 4,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/password-mutated"
+          "/settings/security/password-mutated"
         ],
         "nodesRemoved": [
-          "/password"
+          "/settings/security/password"
         ],
         "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
+        "edgesAdded": [
+          "/settings/security/password-mutated -> /settings/security/two-factor (navigate)"
+        ],
+        "edgesRemoved": [
+          "/settings/security/password -> /settings/security/two-factor (navigate)"
+        ],
         "guardChanged": []
       }
     },
@@ -465,10 +606,10 @@
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/:organizationId/groups-mutated"
+          "/organizations/:organizationId/groups-mutated"
         ],
         "nodesRemoved": [
-          "/:organizationId/groups"
+          "/organizations/:organizationId/groups"
         ],
         "routeChanged": [],
         "edgesAdded": [],
@@ -488,10 +629,10 @@
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/security-keys-mutated"
+          "/settings/security/security-keys-mutated"
         ],
         "nodesRemoved": [
-          "/security-keys"
+          "/settings/security/security-keys"
         ],
         "routeChanged": [],
         "edgesAdded": [],
@@ -557,10 +698,10 @@
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/sponsored-families-mutated"
+          "/organizations/:organizationId/members/sponsored-families-mutated"
         ],
         "nodesRemoved": [
-          "/sponsored-families"
+          "/organizations/:organizationId/members/sponsored-families"
         ],
         "routeChanged": [],
         "edgesAdded": [],

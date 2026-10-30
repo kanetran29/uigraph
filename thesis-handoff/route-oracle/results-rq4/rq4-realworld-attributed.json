@@ -1,14 +1,14 @@
 {
-  "harnessVersion": "1.3.0",
+  "harnessVersion": "1.4.0",
   "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/realworld",
   "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/realworld",
   "attribution": true,
   "seed": 20261021,
   "quota": 8,
   "baseline": {
-    "nodes": 13,
-    "edges": 50,
-    "routes": 11
+    "nodes": 12,
+    "edges": 55,
+    "routes": 10
   },
   "discovered": {
     "RENAME_PATH": 6,
@@ -26,10 +26,10 @@
     "CHANGE_NAV_TARGET": {
       "discovered": 5,
       "sampled": 5,
-      "detected": 4,
+      "detected": 3,
       "missed": 0,
-      "wrong": 0,
-      "excluded": 1,
+      "wrong": 2,
+      "excluded": 0,
       "broke": 0,
       "skip": 0
     },
@@ -46,8 +46,8 @@
     "REMOVE_GUARD": {
       "discovered": 5,
       "sampled": 5,
-      "detected": 4,
-      "missed": 1,
+      "detected": 5,
+      "missed": 0,
       "wrong": 0,
       "excluded": 0,
       "broke": 0,
@@ -64,8 +64,8 @@
       "skip": 0
     }
   },
-  "detectionRate": 0.9523809523809523,
-  "scored": 21,
+  "detectionRate": 0.9090909090909091,
+  "scored": 22,
   "detected": 20,
   "results": [
     {
@@ -99,19 +99,20 @@
       "line": 72,
       "subject": "/profile => /register",
       "predict": "the edge to /profile is replaced by an edge to /register",
-      "verdict": "DETECTED",
-      "touched": 2,
+      "verdict": "WRONG",
+      "touched": 3,
       "delta": {
-        "witnessLinesRemoved": [],
+        "witnessLinesRemoved": [
+          "src/app/features/settings/settings.component.ts:72"
+        ],
         "witnessLinesAdded": [],
         "nodesAdded": [],
         "nodesRemoved": [],
         "routeChanged": [],
-        "edgesAdded": [
-          "/settings -> /register (navigate)"
-        ],
+        "edgesAdded": [],
         "edgesRemoved": [
-          "/settings -> /profile (navigate)"
+          "/settings -> /profile/:username (navigate)",
+          "/settings -> /profile/:username/favorites (navigate)"
         ],
         "guardChanged": []
       }
@@ -120,8 +121,8 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/app/features/article/components/favorite-button.component.ts",
       "line": 57,
-      "subject": "/register => /settings",
-      "predict": "the edge to /register is replaced by an edge to /settings",
+      "subject": "/register => /editor",
+      "predict": "the edge to /register is replaced by an edge to /editor",
       "verdict": "DETECTED",
       "touched": 8,
       "delta": {
@@ -131,10 +132,10 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/article/:slug -> /settings (navigate)",
-          "/profile/:username/favorites -> /settings (navigate)",
-          "/ -> /settings (navigate)",
-          "/tag/:tag -> /settings (navigate)"
+          "/article/:slug -> /editor (navigate)",
+          "/profile/:username/favorites -> /editor (navigate)",
+          "/ -> /editor (navigate)",
+          "/tag/:tag -> /editor (navigate)"
         ],
         "edgesRemoved": [
           "/article/:slug -> /register (navigate)",
@@ -149,10 +150,25 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/app/features/article/pages/editor/editor.component.ts",
       "line": 89,
-      "subject": "/article => /",
-      "predict": "the edge to /article is replaced by an edge to /",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/features/article/pages/editor/editor.component.ts:89 is witnessed by no baseline edge"
+      "subject": "/article => /login",
+      "predict": "the edge to /article is replaced by an edge to /login",
+      "verdict": "WRONG",
+      "touched": 3,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/features/article/pages/editor/editor.component.ts:89"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/editor -> /article/:slug (navigate)",
+          "/editor/:slug -> /article/:slug (navigate)"
+        ],
+        "guardChanged": []
+      }
     },
     {
       "kind": "CHANGE_NAV_TARGET",
@@ -409,8 +425,8 @@
       "line": 48,
       "subject": "path \"\"",
       "predict": "the guard on edges entering the screen of path \"\" changes",
-      "verdict": "MISSED",
-      "touched": 0,
+      "verdict": "DETECTED",
+      "touched": 1,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -419,7 +435,9 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [],
-        "guardChanged": []
+        "guardChanged": [
+          "n_scope_shell -> /editor: guard requireAuth->null, modality may->must"
+        ]
       }
     },
     {
@@ -500,7 +518,7 @@
       "subject": "profile",
       "predict": "a node route containing \"profile\" becomes \"profile-mutated\"",
       "verdict": "DETECTED",
-      "touched": 45,
+      "touched": 44,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/settings/settings.component.ts:72",
@@ -514,13 +532,11 @@
         ],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/profile-mutated",
           "/profile-mutated/:username",
           "/profile-mutated/:username/favorites",
           "n_scope_subtree__n_profile-mutated_username"
         ],
         "nodesRemoved": [
-          "/profile",
           "/profile/:username",
           "/profile/:username/favorites",
           "n_scope_subtree__n_profile_username"
@@ -533,10 +549,10 @@
           "/profile-mutated/:username/favorites -> /article/:slug (click:routerLink)"
         ],
         "edgesRemoved": [
-          "/settings -> /profile (navigate)",
+          "/settings -> /profile/:username (navigate)",
+          "/settings -> /profile/:username/favorites (navigate)",
           "/profile/:username -> /settings (click:routerLink)",
-          "/profile/:username -> /profile/:username (click:routerLink)",
-          "/profile/:username -> /profile/:username/favorites (click:routerLink)"
+          "/profile/:username -> /profile/:username (click:routerLink)"
         ],
         "guardChanged": []
       }
@@ -548,7 +564,7 @@
       "subject": "editor",
       "predict": "a node route containing \"editor\" becomes \"editor-mutated\"",
       "verdict": "DETECTED",
-      "touched": 12,
+      "touched": 18,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/article/pages/article/article.component.html:19",
@@ -567,12 +583,16 @@
         ],
         "routeChanged": [],
         "edgesAdded": [
-          "/editor-mutated/:slug -> / (navigate)"
+          "/editor-mutated -> / (navigate)",
+          "/editor-mutated -> /article/:slug (navigate)",
+          "/editor-mutated/:slug -> / (navigate)",
+          "/editor-mutated/:slug -> /article/:slug (navigate)"
         ],
         "edgesRemoved": [
+          "/editor -> / (navigate)",
+          "/editor -> /article/:slug (navigate)",
           "/editor/:slug -> / (navigate)",
-          "/article/:slug -> /editor/:slug (click:routerLink)",
-          "n_scope_shell -> /editor (click:routerLink)"
+          "/editor/:slug -> /article/:slug (navigate)"
         ],
         "guardChanged": []
       }
@@ -584,9 +604,11 @@
       "subject": "favorites",
       "predict": "a node route containing \"favorites\" becomes \"favorites-mutated\"",
       "verdict": "DETECTED",
-      "touched": 26,
+      "touched": 29,
       "delta": {
-        "witnessLinesRemoved": [],
+        "witnessLinesRemoved": [
+          "src/app/features/profile/pages/profile/profile.component.html:52"
+        ],
         "witnessLinesAdded": [],
         "nodesAdded": [
           "/profile/:username/favorites-mutated"
@@ -596,16 +618,16 @@
         ],
         "routeChanged": [],
         "edgesAdded": [
+          "/settings -> /profile/:username/favorites-mutated (navigate)",
           "/profile/:username -> /profile/:username/favorites-mutated (click:routerLink)",
           "n_scope_subtree__n_profile_username -> /profile/:username/favorites-mutated (click:routerLink)",
-          "/profile/:username/favorites-mutated -> / (click:routerLink)",
-          "/profile/:username/favorites-mutated -> /article/:slug (click:routerLink)"
+          "/profile/:username/favorites-mutated -> / (click:routerLink)"
         ],
         "edgesRemoved": [
+          "/settings -> /profile/:username/favorites (navigate)",
           "/profile/:username -> /profile/:username/favorites (click:routerLink)",
           "n_scope_subtree__n_profile_username -> /profile/:username/favorites (click:routerLink)",
-          "/profile/:username/favorites -> / (click:routerLink)",
-          "/profile/:username/favorites -> /article/:slug (click:routerLink)"
+          "/profile/:username/favorites -> / (click:routerLink)"
         ],
         "guardChanged": []
       }
@@ -617,7 +639,7 @@
       "subject": "settings",
       "predict": "a node route containing \"settings\" becomes \"settings-mutated\"",
       "verdict": "DETECTED",
-      "touched": 10,
+      "touched": 12,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/profile/pages/profile/profile.component.html:23",
@@ -633,13 +655,14 @@
         ],
         "routeChanged": [],
         "edgesAdded": [
-          "/settings-mutated -> /profile (navigate)"
+          "/settings-mutated -> /profile/:username (navigate)",
+          "/settings-mutated -> /profile/:username/favorites (navigate)"
         ],
         "edgesRemoved": [
-          "/settings -> /profile (navigate)",
+          "/settings -> /profile/:username (navigate)",
+          "/settings -> /profile/:username/favorites (navigate)",
           "/profile/:username -> /settings (click:routerLink)",
-          "n_scope_subtree__n_profile_username -> /settings (click:routerLink)",
-          "n_scope_shell -> /settings (click:routerLink)"
+          "n_scope_subtree__n_profile_username -> /settings (click:routerLink)"
         ],
         "guardChanged": []
       }
