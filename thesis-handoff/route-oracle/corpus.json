@@ -12,11 +12,12 @@
   "capturedAt": "2026-09-13",
   "extractor": {
     "repo": "kanetran29/uigraph",
-    "sha": "c4f8b833bd10273d1a1ffcbf73616b5732363a42",
-    "date": "2026-07-19",
-    "note": "This is the PRE-attribution parent and is NOT what produced the published figures. Both the baseline and the attributed run used the attribution commit, recorded in results*.json as sha 4505fd2a, with the pass disabled and enabled respectively. 4505fd2a is in no clone the project holds; the tag thesis-eval points at the commit that applying attribution-v1.patch to this sha recreates, and it reproduces the published realworld figures under both settings.",
+    "sha": "eb9dab8030b09f17f7c953ff3bd3e294958195e3",
+    "date": "2026-10-30",
+    "note": "This is the commit every figure in the thesis is measured on, and the provenance line of each generated table names it. packages/ has not changed since it, so a later commit of the repository reproduces the same graphs; the harness HAS changed after it, and each result file records the harness version that produced it. The figures were produced by two runs of run-all.mjs over this commit, with the attribution pass disabled and enabled. The earlier pinned commit c4f8b833 was the pre-attribution parent and never produced a published figure; 4505fd2a, which earlier revisions of this manifest named, exists in no clone the project holds.",
+    "reachability": "NOT YET PUSHED. This sha is local at the time of writing, so a reader cannot fetch it and the single-command reproduction of Section 4.5 cannot run until the branch is pushed and evalTag is moved to this commit. Section 4.5 states that condition rather than assuming it.",
     "evalTag": "thesis-eval",
-    "buildPatch": "package.json exports point at ./src in the workspace, so a built dist/cli.js cannot resolve sibling packages. The runner rewrites exports/bin/main to ./dist before building. Fix upstream with publishConfig or conditional exports."
+    "evalTagNote": "Still points at the superseded extractor; it is moved to extractor.sha when the branch is pushed."
   },
   "repos": [
     {
