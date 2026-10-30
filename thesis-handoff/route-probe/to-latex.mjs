@@ -228,27 +228,49 @@ function scopeMacros() {
     throw new Error(`the scope results come from ${versions.join(' and ')}; re-run scope-check.mjs for every application so the table is one measurement`)
   }
   const sum = (k) => rs.reduce((t, r) => t + (r[k] || 0), 0)
-  const observed = sum('observedLinks')
-  const confirmed = sum('confirmed')
-  const unpredicted = sum('unpredicted')
-  if (confirmed + unpredicted !== observed) {
-    throw new Error(`the scope oracle saw ${observed} rendered links and classified ${confirmed + unpredicted}; every rendered link must be either predicted or not`)
+  // The unit is a (screen, target pattern) pair, because that is what a scope claims. The raw
+  // anchor count is published beside it and never as the headline: one tag list renders fifteen
+  // anchors answering one pattern, and a shared header's links are rendered again on every
+  // screen, so anchors overstate the number of facts by roughly a factor of two here.
+  const pairs = sum('pairs')
+  const confirmed = sum('pairsConfirmed')
+  const unpredicted = sum('pairsUnpredicted')
+  const anchors = sum('observedLinks')
+  if (confirmed + unpredicted !== pairs) {
+    throw new Error(`the scope oracle saw ${pairs} rendered (screen, pattern) pairs and classified ${confirmed + unpredicted}; every pair must be either predicted or not`)
   }
-  scopeTable.push('\\newcommand{\\TabScope}{%', '\\begin{tabular}{@{}lrrrrr@{}}', '\\toprule')
-  scopeTable.push('Application & Screens & Judged & \\shortstack[r]{Links\\\\rendered} & \\shortstack[r]{Predicted\\\\by the scope} & \\shortstack[r]{Not\\\\predicted} \\\\', '\\midrule')
-  for (const r of rs) scopeTable.push(`${LABEL[r.slug] ?? r.slug} & ${r.screensInGraph} & ${r.usable} & ${r.observedLinks} & ${r.confirmed} & ${r.unpredicted} \\\\`)
-  scopeTable.push('\\midrule', `All & ${sum('screensInGraph')} & ${sum('usable')} & ${observed} & ${confirmed} & ${unpredicted} \\\\`)
+  if (rs.some((r) => r.pairs === undefined)) {
+    throw new Error('a scope result predates the pair count; re-run scope-check.mjs for every application')
+  }
+  if (rs.some((r) => r.predictedDefinite === undefined)) {
+    throw new Error('a scope result predates the exact-target split, so the over-attribution direction cannot be reported; re-run scope-check.mjs for every application')
+  }
+  // The over-attribution direction is only as strong as the number of predictions it can be
+  // asked about. Published so the chapter states the denominator rather than the share.
+  const exact = sum('predictedDefinite')
+  const over = sum('overAttributed')
+  if (over > exact) {
+    throw new Error(`${over} predictions were judged over-attributed out of ${exact} that carry an exact destination`)
+  }
+  scopeTable.push('\\newcommand{\\TabScope}{%', '\\begin{tabular}{@{}lrrrrrr@{}}', '\\toprule')
+  scopeTable.push('Application & Screens & Judged & \\shortstack[r]{Pairs\\\\rendered} & \\shortstack[r]{Predicted\\\\by the scope} & \\shortstack[r]{Not\\\\predicted} & \\shortstack[r]{Raw\\\\anchors} \\\\', '\\midrule')
+  for (const r of rs) scopeTable.push(`${LABEL[r.slug] ?? r.slug} & ${r.screensInGraph} & ${r.usable} & ${r.pairs} & ${r.pairsConfirmed} & ${r.pairsUnpredicted} & ${r.observedLinks} \\\\`)
+  scopeTable.push('\\midrule', `All & ${sum('screensInGraph')} & ${sum('usable')} & ${pairs} & ${confirmed} & ${unpredicted} & ${anchors} \\\\`)
   scopeTable.push('\\bottomrule', '\\end{tabular}}')
   return {
     ScopeApps: rs.length,
     ScopeScreens: sum('screensInGraph'),
     ScopeJudged: sum('usable'),
     ScopeUnjudged: sum('redirectedAway'),
-    ScopeObserved: observed,
+    ScopePairs: pairs,
     ScopeConfirmed: confirmed,
-    ScopeConfirmedShare: observed ? `${((confirmed / observed) * 100).toFixed(1)}\\,\\%` : 'n/a',
+    ScopeConfirmedShare: pairs ? `${((confirmed / pairs) * 100).toFixed(1)}\\,\\%` : 'n/a',
+    ScopeAnchors: anchors,
     ScopeUnpredicted: unpredicted,
     ScopeUnrendered: sum('unrendered'),
+    ScopeExact: exact,
+    ScopeApprox: sum('predictedApprox'),
+    ScopeOverAttributed: over,
   }
 }
 

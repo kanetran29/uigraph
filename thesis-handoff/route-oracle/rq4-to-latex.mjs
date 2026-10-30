@@ -90,6 +90,43 @@ if (baseFiles.length) {
     ['MutFallibleScored', F.n], ['MutFallibleDetected', F.det], ['MutNoResponse', missed],
   ]) out += `\\newcommand{\\${k}}{${v}}\n`
   const pc = (x) => `${((x.det / x.n) * 100).toFixed(1)}\\,\\%`
+
+  // The two rates above are taken over different mutant sets, because a mutant whose
+  // construct produces no edge in one graph cannot be scored against it. Comparing them
+  // directly therefore mixes a detection difference with an eligibility difference. The
+  // paired figures below are taken over the mutants BOTH graphs can score, identified by the
+  // operator, file, line and subject the harness records, so the two columns answer the same
+  // question about the same changes.
+  const SCORED = new Set(['DETECTED', 'MISSED', 'WRONG'])
+  const keyed = (rs) => {
+    const m = new Map()
+    for (const r of rs) {
+      for (const x of r.results) {
+        if (!SCORED.has(x.verdict)) continue
+        m.set(`${r.slug}|${x.kind}|${x.file}|${x.line}|${x.subject ?? ''}`, x.verdict)
+      }
+    }
+    return m
+  }
+  const kA = keyed(runs), kB = keyed(base)
+  const paired = [...kA.keys()].filter((k) => kB.has(k))
+  if (!paired.length) throw new Error('no mutant is scorable by both graphs, so the paired comparison has no subject')
+  const pDet = (m) => paired.filter((k) => m.get(k) === 'DETECTED').length
+  const favour = paired.filter((k) => kA.get(k) !== kB.get(k))
+  const againstAttr = favour.filter((k) => kB.get(k) === 'DETECTED' && kA.get(k) !== 'DETECTED')
+  const ppc = (d) => `${((d / paired.length) * 100).toFixed(1)}\\,\\%`
+  for (const [k, v] of [
+    ['MutPaired', paired.length],
+    ['MutPairedDetected', pDet(kA)], ['MutPairedRate', ppc(pDet(kA))],
+    ['MutPairedBaseDetected', pDet(kB)], ['MutPairedBaseRate', ppc(pDet(kB))],
+    ['MutPairedDisagree', favour.length],
+    ['MutPairedAgainstAttribution', againstAttr.length],
+    ['MutAttributedOnly', [...kA.keys()].filter((k) => !kB.has(k)).length],
+    ['MutBaselineOnly', [...kB.keys()].filter((k) => !kA.has(k)).length],
+  ]) out += `\\newcommand{\\${k}}{${v}}\n`
+  console.error(`paired ${paired.length}: attributed ${pDet(kA)} (${ppc(pDet(kA))}), baseline ${pDet(kB)} (${ppc(pDet(kB))}), ` +
+    `${favour.length} disagree, ${againstAttr.length} against attribution`)
+
   out += '\n% Attributed against baseline, for the change-sensitivity claim.\n'
   for (const [k, v] of [
     ['MutScored', A.n], ['MutDetected', A.det], ['MutRate', pc(A)], ['MutExcluded', A.exc],

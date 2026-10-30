@@ -1,5 +1,5 @@
 {
-  "scopeHarness": "1.1.0",
+  "scopeHarness": "1.3.0",
   "slug": "bitwarden",
   "dist": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/dist/bitwarden",
   "dbPath": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden/apps/web/uigraph.db",
@@ -8,10 +8,16 @@
   "usable": 18,
   "redirectedAway": 80,
   "errors": 0,
+  "pairs": 8,
+  "pairsConfirmed": 4,
+  "pairsUnpredicted": 4,
   "observedLinks": 8,
   "confirmed": 4,
   "unpredicted": 4,
   "unrendered": 22,
+  "predictedDefinite": 0,
+  "predictedApprox": 26,
+  "overAttributed": 0,
   "opaqueLinks": 0,
   "rows": [
     {
@@ -32,6 +38,20 @@
       ],
       "unrendered": [
         "/settings/account"
+      ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
       ],
       "opaque": 0
     },
@@ -54,6 +74,20 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -75,6 +109,20 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -95,6 +143,20 @@
       ],
       "unrendered": [
         "/settings/account"
+      ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
       ],
       "opaque": 0
     },
@@ -119,6 +181,21 @@
         "/login",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/login",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -139,6 +216,19 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/login",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/login"
+      ],
+      "patternsConfirmed": [
+        "/login"
+      ],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -154,6 +244,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -169,6 +267,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -184,6 +290,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -199,6 +313,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -222,6 +344,21 @@
         "/login",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/login",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -242,6 +379,20 @@
       ],
       "unrendered": [
         "/settings/account"
+      ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
       ],
       "opaque": 0
     },
@@ -264,6 +415,20 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -279,6 +444,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -294,6 +467,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -315,6 +496,20 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -333,6 +528,18 @@
       ],
       "unrendered": [
         "/settings/account"
+      ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/signup"
       ],
       "opaque": 0
     },
@@ -355,6 +562,20 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -374,6 +595,18 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -389,6 +622,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -409,6 +650,20 @@
       ],
       "unrendered": [
         "/settings/account"
+      ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
       ],
       "opaque": 0
     },
@@ -431,6 +686,20 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -451,6 +720,19 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/login",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/login"
+      ],
+      "patternsConfirmed": [
+        "/login"
+      ],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -471,6 +753,19 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/login",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/login"
+      ],
+      "patternsConfirmed": [
+        "/login"
+      ],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -491,6 +786,20 @@
       ],
       "unrendered": [
         "/settings/account"
+      ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
       ],
       "opaque": 0
     },
@@ -515,6 +824,21 @@
         "/login",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/login",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -535,6 +859,19 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/login",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/login"
+      ],
+      "patternsConfirmed": [
+        "/login"
+      ],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -558,6 +895,21 @@
         "/login",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/login",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -579,6 +931,20 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/hint",
+        "/signup"
+      ],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [
+        "/hint",
+        "/signup"
+      ],
       "opaque": 0
     },
     {
@@ -594,6 +960,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -611,6 +985,15 @@
         "/organizations/:organizationId/members",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/organizations/:organizationId/members",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -628,6 +1011,15 @@
         "/organizations/:organizationId/members",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/organizations/:organizationId/members",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -643,6 +1035,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -660,6 +1060,15 @@
         "/settings/subscription/premium",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/subscription/premium",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -675,6 +1084,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -692,6 +1109,15 @@
         "/",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -709,6 +1135,15 @@
         "/settings/security/device-management",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/security/device-management",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -726,6 +1161,15 @@
         "/settings/security/device-management",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/security/device-management",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -741,6 +1185,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -758,6 +1210,15 @@
         "/settings/security/device-management",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/security/device-management",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -773,6 +1234,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -788,6 +1257,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -803,6 +1280,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -820,6 +1305,15 @@
         "/sm-landing",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/sm-landing",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -835,6 +1329,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -850,6 +1352,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -865,6 +1375,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -880,6 +1398,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -895,6 +1421,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -910,6 +1444,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -927,6 +1469,15 @@
         "/",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -942,6 +1493,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -957,6 +1516,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -974,6 +1541,15 @@
         "/",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -989,6 +1565,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1004,6 +1588,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1019,6 +1611,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1034,6 +1634,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1049,6 +1657,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1064,6 +1680,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1079,6 +1703,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1094,6 +1726,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1109,6 +1749,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1124,6 +1772,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1139,6 +1795,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1154,6 +1818,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1169,6 +1841,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1184,6 +1864,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1199,6 +1887,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1214,6 +1910,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1229,6 +1933,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1244,6 +1956,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1259,6 +1979,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1274,6 +2002,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1289,6 +2025,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1304,6 +2048,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1319,6 +2071,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1334,6 +2094,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1351,6 +2119,15 @@
         "/",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1366,6 +2143,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1383,6 +2168,15 @@
         "/organizations/:organizationId/settings/policies",
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/organizations/:organizationId/settings/policies",
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1398,6 +2192,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1413,6 +2215,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1428,6 +2238,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1443,6 +2261,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1458,6 +2284,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1473,6 +2307,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1488,6 +2330,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1503,6 +2353,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1518,6 +2376,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1533,6 +2399,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1548,6 +2422,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1563,6 +2445,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1578,6 +2468,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1593,6 +2491,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1608,6 +2514,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1623,6 +2537,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     },
     {
@@ -1638,6 +2560,14 @@
       "unrendered": [
         "/settings/account"
       ],
+      "definite": [],
+      "approximated": [
+        "/settings/account"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
       "opaque": 0
     }
   ]

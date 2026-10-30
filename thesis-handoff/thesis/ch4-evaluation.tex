@@ -119,12 +119,17 @@ certain screens, so the harness navigates to each screen the graph holds, lets i
 reads the in-app links the DOM actually carries; those are compared with the edges the
 graph's own per-screen query yields at that screen.
 
-Only one direction of the comparison is evidence. A link the application renders at a screen
-that the graph does not have leaving it is unambiguous: the link is there, so either the site
-was attributed to too few screens or it was never read. The opposite --- an edge the graph has
-and the DOM does not show --- is not evidence of too large a scope, because a template renders
-links conditionally, and this harness signs in to nothing. It is counted and reported, never
-scored against the analysis.
+The two directions are not equally decidable. A link the application renders at a screen that
+the graph does not have leaving it is unambiguous: the link is there, so either the site was
+attributed to too few screens or it was never read. The opposite --- an edge the graph has and
+the DOM does not show --- is weaker in two ways. A template renders links conditionally and
+this harness signs in to nothing, so an absent link may be correctly attributed and merely
+unreachable in the state observed. And where the analysis could not resolve a site's target to
+a single address it contributes every address the static prefix admits, recording the edge at
+reduced confidence; such an address is not a claim that the screen links there, so the screen
+not linking there refutes nothing. The harness therefore judges this direction only over the
+predictions that name a destination exactly, and publishes how many those are, so a share is
+never read off a denominator that cannot support one.
 
 Two bounds belong with the figure. The oracle sees a link only where the rendered page carries
 a readable target, which means an anchor's \texttt{href} or a static \texttt{routerLink}
@@ -132,7 +137,10 @@ attribute; a \texttt{Router.navigate} call in an event handler leaves nothing in
 read, so the sites it covers are the template-sourced ones. And a screen whose guard redirects
 it to a sign-in page without a backend renders another screen's links, so its scope cannot be
 judged from what rendered; such screens are counted apart. On this corpus that is most of
-them, and Section~\ref{sec:res-scope} gives both numbers rather than the share alone.
+them, and Section~\ref{sec:res-scope} gives both numbers rather than the share alone. A third
+bound is the corpus: the harness serves one built directory at the server root, which
+ghostfolio's per-locale build does not fit, since each of its bundles declares a base path of
+its own. That application is measured by every other method here and by none of this one.
 
 \textbf{Which ratio is ``coverage''.} Several of the measures below are fractions of
 something over something, and more than one of them has been called coverage in the
@@ -267,10 +275,15 @@ missed whole route tables in several applications until it was corrected (Sectio
 and for the path forms added in Section~\ref{sec:res-round2} it is no longer independent of
 the extractor at all. \\
 \addlinespace
-End-to-end oracle & Node-level recall. Every URL a passing test visits is a screen
-that provably exists; ground truth comes from execution. &
-Tested subset only. A direct \texttt{goto} is not a UI transition, so visit pairs are
-not counted as edges. Textual URL extraction under-samples click-driven navigation. \\
+Test-source cross-check & Node-level recall against a fourth reader of the source. The
+end-to-end specifications of the application are parsed and the URL literals in them
+collected; a URL the application's own test suite names is an address its authors expect
+to exist, and the extractor is asked whether it minted a node there. &
+Reads test source text and runs nothing, so a collected string is an address a test
+\emph{names}, not one a test was observed to reach, and whether the suite passes is not
+established by this method. Tested subset only. A direct \texttt{goto} is not a UI
+transition, so visit pairs are not counted as edges. Textual extraction under-samples
+click-driven navigation. \\
 \addlinespace
 Mutation test & Detection rate over four operators: rename a path, remove a guard,
 delete a \texttt{routerLink}, retarget a \texttt{navigate}. Ground truth is the
@@ -278,7 +291,11 @@ authored delta, so nothing is circular. Detection is judged on the node and edge
 and on the witness set, since several constructs can produce one edge. &
 A mutant whose construct is absent from the baseline graph re-detects a coverage gap and
 is excluded, as is a guard mutant on a screen that no edge enters. Detection is
-therefore conditional on coverage. Sampling is seeded and stratified by operator. \\
+therefore conditional on coverage, and the attributed and unattributed graphs do not
+exclude the same mutants, so their overall rates are not taken over one set: the
+comparison between them is also reported over the mutants both can score, paired by
+operator, file, line and subject. The sample is drawn from the graph, so it is not
+independent of the artefact under test. Sampling is seeded and stratified by operator. \\
 \addlinespace
 Runtime route oracle & Node-level soundness against the framework itself. Each
 application is built in its development configuration, loaded in a headless browser,
@@ -321,7 +338,7 @@ Seven corrections were made to the protocol while it was being developed. They a
 described here because each of them would otherwise have led to an incorrect figure
 in this thesis, and because the underlying mistakes are general ones.
 
-In the end-to-end oracle, a URL parameter observed in a test was at first allowed to match a literal segment of a route, which
+In the test-source cross-check, a URL parameter observed in a test was at first allowed to match a literal segment of a route, which
 produced matches that did not correspond to real screens. After the rule was
 tightened, the recall figure for one application fell from 86.7\% to 66.7\%. A negative
 test, which visits a URL that must not exist, is now also excluded, which gives the

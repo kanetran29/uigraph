@@ -100,6 +100,22 @@ Every must edge corresponds to a navigation that occurs, for every input on whic
 enclosing code executes, over the declared route set.
 \end{claim}
 
+The evaluation tests a necessary condition of this claim rather than the claim itself,
+and the distinction decides how the figures of Chapter~\ref{ch:results} may be read. The
+witness check of Section~\ref{sec:protocol} re-reads the source at every location an edge
+cites and asks whether the construct found there names the destination the edge names. An
+edge whose cited construct names a different destination cannot satisfy the claim, so a
+failure of the check refutes it; agreement does not establish it. Whether the navigation
+occurs \emph{for every input on which the enclosing code executes} is decided by the rules
+that place an edge in the must tier instead of the may tier --- a site under a template
+condition, or on a route a guard can refuse, is demoted --- and no independent reader
+re-derives those rules. They are covered by the extractor's own unit tests, which share the
+implementation's reading of each construct, and Section~\ref{sec:res-round2} reports two
+cases in which that reading was wrong and the tier was too large as a result. What the
+check establishes is therefore narrower than the claim: that every cited site exists in the
+source and agrees on its target. The stronger half of the claim rests on the demotion rules
+and is not independently verified.
+
 This is the only soundness property claimed in the thesis, and it holds only relative
 to the declared route set. No such property is claimed for the may and unknown tiers.
 The witness of a may edge shows that the corresponding call site exists in the source,

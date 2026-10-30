@@ -140,11 +140,40 @@ practice not feasible. So the dynamic approach was used because there was no sta
 
 Client-side routing frameworks changed this situation. The route table is now a
 declared data structure in the source, a navigation is an attribute or a method call
-that names a route, and a guard is a named function attached to a route. Only one
-static analysis of such a framework was found during the literature search for this
-thesis, namely Kurant's component dependency graph for React, and it stops at the
-component rendering graph without addressing routing \cite{kurant2025}. The work
-in this thesis is located between that analysis and the dynamic tools described above.
+that names a route, and a guard is a named function attached to a route. Two static
+analyses of such a framework were found during the literature search for this thesis.
+Kurant's component dependency graph for React stops at the component rendering graph
+without addressing routing \cite{kurant2025}.
+
+The second does address routing. Oshima and Kishi extract page transitions from an
+Angular application in order to model-check them with SPIN \cite{oshima2018model}. Their
+extraction reads the transition information from the route declarations in
+\texttt{RouterModule}, reads the navigable paths from every component rather than only
+from the routed ones, and then resolves the parent--child relationships among the root
+component, the routed component and the custom child components in order to attribute
+each navigable path to the routed component that contains it. The problem addressed in
+this thesis is therefore not a new one. That attribution step is scope attribution
+computed over the template containment tree, and it is performed statically from the
+router configuration.
+
+What distinguishes the present work is the input the method accepts and what it claims
+about its output. The authors state that the applications they handle must not use the
+\texttt{children} attribute or route parameters in the routing declarations, and that
+navigations arising from data binding are not treated as page transitions. Those three
+exclusions remove nested route trees, parameterised addresses, and every navigation
+whose destination is an expression rather than a literal. A screen is identified by the
+name of its routed component rather than by an address, so path composition does not
+arise, and guards, lazy loading and named outlets are not part of the model. The
+attribution follows template containment alone, so a navigation site that reaches a
+screen through a method call or through a dispatch lies outside the mechanism. The model
+carries no modality, so a navigation that is always available and one that is available
+only if a guard admits it are represented identically. The evaluation applies the tool
+to four constructed applications and to two published ones of 1824 and 6893 lines, with
+six and twenty-three pages, and reports whether the intended model was produced and
+whether injected transition faults were detected. What the extraction loses on an
+application it cannot fully read is not measured, which is the question this thesis
+takes as its subject. The work reported here is located between these two analyses and
+the dynamic tools described above.
 
 \section{Formal foundations}
 \label{sec:formal}
@@ -633,11 +662,18 @@ it was derived from changes.
 
 Navigation models have been extracted statically from web applications, but only from
 server-rendered frameworks.
-Client-side routing frameworks have been modelled dynamically, and the only static
-analysis of such a framework found in the literature excludes routing. Static extraction
-of a guarded transition graph from client-side router configuration, in which each
-navigation site is correctly attributed to the screens it can be triggered from, has
-not been covered by earlier work. The Android literature is the nearest static
+Client-side routing frameworks have been modelled dynamically. Static extraction from a
+client-side router configuration, with navigation sites attributed to screens, has been
+carried out once, by Oshima and Kishi, and that work fixes the terms of the problem
+addressed here (Section~\ref{sec:dynamic-spa}). It does so, however, only for
+applications that declare no nested routes, no route parameters and no data-bound
+navigation, with attribution computed over template containment alone, with no modality
+on the transitions, and with no measurement of what the extraction fails to read. What
+has not been covered by earlier work is that extraction without those restrictions:
+over nested and lazily loaded route trees, with guards carried onto the transitions as a
+modality, with attribution that follows calls and dispatch as well as containment, and
+with the resulting loss declared and measured on applications large enough for the
+difficult constructs to occur. The Android literature is the nearest static
 relative. It attributes navigation by resolving the owning object, and when that fails
 for shared code it falls back on runtime traces. A navigation site in a web application
 frequently has no owning object that could be resolved. In Android the owning object of a handler usually identifies the window, so the attribution problem studied here does not arise there in the same form, and an Android technique cannot simply be reused.

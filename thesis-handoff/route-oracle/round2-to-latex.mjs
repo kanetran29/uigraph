@@ -50,7 +50,20 @@ const rd = (f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), '
  * means the script was copied out of the repository, not that the application did not move.
  */
 const rdHere = (f) => JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), f), 'utf8'))
-const pc = (n, d) => (d ? ((n / d) * 100).toFixed(1) + '\\,\\%' : '--')
+// A published share is a claim about a population, so it has to lie in it. Every refusal in
+// this harness until now checked that the parts summed to the whole, and none checked that the
+// whole was the right whole: when the witness check began judging every source location an edge
+// cites, a site count kept being divided by an edge count and this file published "-69.3 %" of
+// edges clean and "119.8 %" over-approximated. Arithmetically impossible figures reached the
+// chapter because nothing asked whether a percentage was a percentage.
+const pc = (n, d) => {
+  if (!d) return '--'
+  const v = (n / d) * 100
+  if (!Number.isFinite(v) || v < 0 || v > 100) {
+    throw new Error(`${n}/${d} is ${v.toFixed(1)} %, which is not a share of anything: the numerator and the denominator are counting different populations`)
+  }
+  return v.toFixed(1) + '\\,\\%'
+}
 
 const rows = SLUGS.map((s) => ({
   s,
@@ -182,23 +195,28 @@ out.push('\\bottomrule')
 out.push('\\end{tabular}}')
 
 out.push('\\newcommand{\\TabRoundTwoSoundness}{%')
-out.push('\\begin{tabular}{lrrrrr}')
+out.push('\\begin{tabular}{lrrrrrr}')
 out.push('\\toprule')
-out.push('Application & Edges & Judged & Clean of judged & Must clean & Must conversion \\\\')
+out.push('Application & Edges & \\shortstack[r]{Sites\\\\cited} & Judged & \\shortstack[r]{Clean of\\\\judged} & \\shortstack[r]{Must\\\\clean} & \\shortstack[r]{Must\\\\conversion} \\\\')
 out.push('\\midrule')
-let mE = 0, mC = 0, mConv = 0, rawAll = 0, aE = 0, aC = 0, jE = 0, jC = 0
+let mE = 0, mC = 0, mConv = 0, rawAll = 0, aS = 0, aC = 0, jS = 0, jC = 0, aE = 0
 for (const r of rows) {
   const b = r.b1
   const conv = r.l1.tally.CONVERTED_MUST || 0
   mConv += conv; rawAll += r.l1.constructs
-  if (b) { mE += b.mustEdges; mC += b.mustClean; aE += b.edges; aC += b.clean }
+  // The witness check judges every source location an edge cites, so `clean` and the verdict
+  // tally count SITES while `edges` counts edges. Mixing the two is what produced a negative
+  // share. The must tier stays an edge count, because a finding at any citation condemns its
+  // edge; everything judged per site is reported over the site total.
+  if (b && b.sites === undefined) throw new Error(`${r.s}: its witness-check file predates the per-site judging and reports no site total, so a share over it cannot be computed`)
+  if (b) { mE += b.mustEdges; mC += b.mustClean; aE += b.edges; aS += b.sites; aC += b.clean }
   const cell = b ? (b.mustEdges === 0 ? 'n/a' : `${b.mustClean}/${b.mustEdges}`) : '--'
-  const judged = b ? b.edges - (b.tally?.OVER_APPROX ?? 0) : 0
-  if (b) { jE += judged; jC += b.clean }
-  out.push(`${NAME[r.s]} & ${b ? b.edges : '--'} & ${b ? judged : '--'} & ${b ? pc(b.clean, judged) : '--'} & ${cell} & ${pc(conv, r.l1.constructs)} \\\\`)
+  const judged = b ? b.sites - (b.tally?.OVER_APPROX ?? 0) : 0
+  if (b) { jS += judged; jC += b.clean }
+  out.push(`${NAME[r.s]} & ${b ? b.edges : '--'} & ${b ? b.sites : '--'} & ${b ? judged : '--'} & ${b ? pc(b.clean, judged) : '--'} & ${cell} & ${pc(conv, r.l1.constructs)} \\\\`)
 }
 out.push('\\midrule')
-out.push(`All & ${aE} & ${jE} & ${pc(jC, jE)} & ${mC}/${mE} & ${pc(mConv, rawAll)} \\\\`)
+out.push(`All & ${aE} & ${aS} & ${jS} & ${pc(jC, jS)} & ${mC}/${mE} & ${pc(mConv, rawAll)} \\\\`)
 out.push('\\bottomrule')
 out.push('\\end{tabular}}')
 
@@ -573,10 +591,11 @@ const tm = mb.filter((f) => f.verdict === 'TARGET_MISMATCH')
 mac('RoundTwoMustRelUp', tm.filter((f) => /targets \/\.\./.test(f.detail)).length)
 mac('RoundTwoMustRelRoot', tm.filter((f) => /targets \/, edge/.test(f.detail)).length)
 mac('RoundTwoMustRelBare', tm.filter((f) => !/targets \/\.\./.test(f.detail) && !/targets \/, edge/.test(f.detail)).length)
-mac('RoundTwoGraphClean', pc(aC, aE))
-mac('RoundTwoJudgedClean', pc(jC, jE))
-mac('RoundTwoJudged', jE)
-mac('RoundTwoOverApprox', pc(rows.reduce((a, r) => a + (r.b1?.tally?.OVER_APPROX ?? 0), 0), aE))
+mac('RoundTwoGraphClean', pc(aC, aS))
+mac('RoundTwoJudgedClean', pc(jC, jS))
+mac('RoundTwoJudged', jS)
+mac('RoundTwoSites', aS)
+mac('RoundTwoOverApprox', pc(rows.reduce((a, r) => a + (r.b1?.tally?.OVER_APPROX ?? 0), 0), aS))
 // Sites whose target names no route the application declares, counted from the extractor's
 // own notes rather than from the unexplained list, since a wildcard route resolves them.
 // Counted as SITES, not as note records. A site attributed to several screens emits the

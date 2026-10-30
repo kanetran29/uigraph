@@ -27,6 +27,7 @@
 \input{generated-round2}
 \input{generated-probe}
 \input{generated-expansion}
+\input{generated-baseline}
 \input{generated-plots}
 \input{figures/fig-plots}
 
@@ -61,16 +62,22 @@ official Aalto thesis class is applied before submission.\par}
 A UI transition graph describes the screens of an application and the transitions a
 user can cause between them. Static extraction of such graphs is well established for
 Android, where each event handler can be attributed to the widget that registered it
-and thus to a single window. For web applications, navigation models have been built at design time, extracted statically from server-rendered applications, or obtained by crawling a running application. I found no earlier work
-that extracts them statically from the route configuration of a client-side
-framework.
+and thus to a single window. For web applications, navigation models have been built at design time, extracted statically from server-rendered applications, or obtained by crawling a running application. One earlier work extracts them
+statically from the route configuration of a client-side framework, for applications
+that declare no nested routes, no route parameters and no data-bound navigation, and
+does not measure what its extraction fails to read.
 
 This thesis measures static extraction on six open-source Angular applications with
 14 declared route entries to more than nine hundred, using a pinned corpus and five
-independent evaluation methods. Measured at two levels, the extractor recovers every
-screen the six applications declare and a small fraction of their navigation constructs as
+independent evaluation methods. Measured at two levels, the extractor mints a node for
+every screen the route configuration declares, as two independent static readers
+enumerate it, and recovers a small fraction of the navigation constructs as
 deterministic transitions; before the defects this thesis identifies were repaired, two of
-the six yielded a list of routes with no transitions at all.
+the six yielded a list of routes with no transitions at all. The node result is bounded
+by what a reader of the route table can enumerate: a runtime probe that visits every
+address the applications answer finds \ProbeMissed{} mounted addresses with no node,
+\ProbeMissedGhostfolio{} of them in a single application, and only \ProbeExactApps{} of
+the six are exact against it.
 
 Every lost construct is assigned to one defect class. Attribution is the largest
 class in every application of the corpus once the
@@ -90,17 +97,23 @@ limitation.
 
 Mutation testing on three of the applications shows that the graph detects \MutDetected{}
 of \MutScored{} injected source changes, against \MutBaseDetected{} of \MutBaseScored{}
-without attribution, and that attribution raises both the number of changes that can be
-scored at all and the rate at which a scored change is detected.
+without attribution. Those two sets are not the same, because a change to a construct the
+baseline graph holds no edge for cannot be scored against it; on the \MutPaired{} mutants
+both graphs can score, the figures are \MutPairedDetected{} and \MutPairedBaseDetected{}.
+Attribution therefore raises both the number of changes that can be scored at all and,
+by the smaller paired margin, the rate at which a scored change is detected.
 
 Finally, the thesis asks whether the losses belong to the applications or to the tool. Each
 defect class is taken to its root cause and repaired where the cause is the extractor's.
 Almost every defect class turned out to be a construct the extractor could read and did not,
 and the exception is instructive: one application computes a route's path in a custom matcher
 function, which no reader of a route table can resolve. With the readable classes repaired,
-\RoundTwoFullNodes{} of the six hold a node for every declared screen, and
-\RoundTwoAccounted{} of the in-scope navigation sites are accounted for, as a transition, as a destination only the run time
-knows, or as a source the analysis cannot place. Every site that remains names its reason.
+\RoundTwoFullNodes{} of the six hold a node for every screen the static readers find
+declared, \ProbeExactApps{} of the six hold one for every address the running
+application answers, and \RoundTwoAccounted{} of the navigation sites that remain in
+scope are accounted for, as a transition, as a destination only the run time knows, or
+as a source the analysis cannot place; the sites excluded from that scope, and the
+ground for each exclusion, are counted in Chapter~5. Every site that remains names its reason.
 Some of those reasons are dead links the graph finds without running the application, though
 the count of them is a candidate list: a route the tools fail to read is indistinguishable
 from one the application never declares. The deterministic tier that survives this scrutiny is small and

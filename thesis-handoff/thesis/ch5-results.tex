@@ -48,9 +48,16 @@ the fraction of constructs witnessed by a must edge; the edge columns count edge
 
 Table~\ref{tab:coverage} and Figure~\ref{fig:coverage} give the first measure, comparing the
 nodes the extractor mints against the screens an independently written parser finds
-declared. Node extraction is complete: on all six applications every declared screen has a
-node, and the runtime method of Section~\ref{sec:res-probe} confirms the other direction,
-that no node sits at an address the running framework mounts nothing at. That was not true
+declared. Against that denominator node extraction is complete: on all six applications every
+declared screen has a node. Two things have to be said in the same breath, because the figure
+invites a reading neither supports. The denominator is the screens a \emph{static reader} can
+enumerate, and against the addresses the running framework actually mounts the same node set
+is \ProbeNodes{} of \ProbeScreens{} (Section~\ref{sec:res-probe}) --- the difference being
+almost entirely one unreadable construct in one application. And the two static readers
+reached their agreement partly by being corrected against each other during this work, so
+their agreeing exactly is weaker evidence than it was when they were written independently;
+the runtime method is the external check for that reason, and it confirms the other direction,
+that no node sits at an address the framework mounts nothing at. That was not true
 of the extractor this evaluation began with, which read one application as a single node for
 the \RoundTwoEarlierOracleGhostfolioDeclared{} screens it declares and the largest as under
 a tenth of its screens; Section~\ref{sec:res-round2} reports what had to be repaired to
@@ -101,10 +108,10 @@ Class & Evidence & Methods & All \\
 \midrule
 Attribution: navigation outside route components is invisible & mutation misses;
 multi-mount edge absent; manual audit; zero-edge applications & 1 & 4 \\
-Lazy module boundary not followed & route parser; end-to-end oracle; mutation & 3 & 3 \\
+Lazy module boundary not followed & route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & mutation; witness check; empty-path guard absent
 (Section~\ref{sec:res-mutation}) & 2 & 3 \\
-Named router outlets not modelled & end-to-end oracle; source survey & 1 & 2 \\
+Named router outlets not modelled & test-source cross-check; source survey & 1 & 2 \\
 Constant-valued route paths not resolved & route parser; node-count collapse & 1 & 2 \\
 \addlinespace
 \emph{Candidate:} node not linked to its component & route parser against graph & 1 & 1 \\
@@ -152,13 +159,13 @@ The \AttrLost{} constructs the attribution classes hold are therefore
 neither a floor nor a ceiling on what scope attribution recovers.
 Section~\ref{sec:res-after} measures both directions.
 
-Table~\ref{tab:oracles} reports the witness check and the end-to-end oracle on this
+Table~\ref{tab:oracles} reports the witness check and the test-source cross-check on this
 baseline. Section~\ref{sec:res-round2} gives the must tier its own treatment, because what
 the check reads and how an edge cited by several constructs is judged both changed in the
 course of this work, and the figure is not comparable across those changes.
 
 \begin{table}[t]\small
-\caption{Results of the witness check and the end-to-end oracle, baseline. Mutation is
+\caption{Results of the witness check and the test-source cross-check, baseline. Mutation is
 reported separately in Section~\ref{sec:res-mutation}, on the attributed graph. This
 summary is written by hand from the harness output rather than generated.}
 \label{tab:oracles}
@@ -166,9 +173,10 @@ summary is written by hand from the harness output rather than generated.}
 \toprule
 Method & Result & $n$ \\
 \midrule
-Witness check, must tier & \RoundTwoMustClean{} clean, judged at every source location each
-edge cites. & \RoundTwoMustEdges{} \\
-End-to-end oracle, alfresco & \EtoERecallAlfresco{} of the visited URLs have a node; one
+Witness check, must tier & \RoundTwoMustClean{} agree on their target, at every source
+location each edge cites; target agreement is necessary for Claim~\ref{claim:must} and not
+sufficient for it. & \RoundTwoMustEdges{} \\
+Test-source cross-check, alfresco & \EtoERecallAlfresco{} of the visited URLs have a node; one
 negative test excluded. & \EtoERowsAlfresco{} \\
 \bottomrule
 \end{tabularx}
@@ -325,22 +333,37 @@ of it: navigate to each screen the graph holds, let it render, read the in-app l
 carries, and compare them with the edges the graph's per-screen query yields there.
 
 \begin{table}[t]\small
-\caption{The scopes against the rendered interface. \emph{Judged} counts screens that rendered
-themselves rather than redirecting to a sign-in page; the rest cannot be judged from what
-rendered, because a redirected screen shows another screen's links. \emph{Not predicted} is the
-only column that counts against the analysis.}
+\caption{The scopes against the rendered interface, on the \ScopeApps{} applications this
+harness can serve. \emph{Judged} counts screens that rendered themselves rather than
+redirecting to a sign-in page; the rest cannot be judged from what rendered, because a
+redirected screen shows another screen's links. \emph{Not predicted} is the only column that
+counts against the analysis; the other direction is reported in the text, because it can be
+judged only where the graph names a destination exactly.}
 \label{tab:scope}
 \TabScope
 \end{table}
 
-Of the \ScopeObserved{} links the running applications render on the screens that could be
-judged, \ScopeConfirmed{} are predicted by the scope the analysis computed ---
-\ScopeConfirmedShare{}. On realworld, the one application whose screens render without a
-backend, every rendered link on every judged screen is predicted. That is the first direct
-evidence in this thesis that the computed scopes are right, and it is worth being plain about
-its size: \ScopeJudged{} screens of \ScopeScreens{}, because \ScopeUnjudged{} redirect to a
-sign-in page when there is no backend behind them. The oracle does not scale to this corpus;
-it settles a question on part of it that nothing else here settles at all.
+A scope claim has two ways to be wrong, and they are not equally testable. It can be too
+small, so that the application renders a link the graph does not attribute to that screen;
+this the rendered interface decides. It can be too large, so that the graph attributes a site
+to a screen the application never fires it from; this the rendered interface decides only
+where the graph claims a destination exactly. The two are reported separately below, and the
+second is reported with its denominator, because that denominator turns out to be what limits
+the method.
+
+In the first direction, of the \ScopePairs{} (screen, target pattern) pairs the running
+applications render on the screens that could be judged, \ScopeConfirmed{} are predicted by
+the scope the analysis computed --- \ScopeConfirmedShare{} --- behind which stand
+\ScopeAnchors{} raw anchors. On realworld, which renders most of its screens without a
+backend, every rendered pair on every judged screen is predicted; the pairs that are not
+predicted are all bitwarden's. That is evidence that the computed scopes are not too small on
+what could be observed, and it is worth being plain about its size: \ScopeJudged{} screens of
+\ScopeScreens{}, because \ScopeUnjudged{} redirect to a sign-in page when there is no backend
+behind them, and \ScopeApps{} of the six applications are measured at all. ghostfolio is the
+one left out: it builds a separate bundle per locale, each declaring a base path of its own,
+and the harness serves a single directory at the server root, so its screens cannot be
+addressed the way the other five are. The oracle does not scale to this corpus; it settles
+one direction of a question, on part of it, that nothing else here settles at all.
 
 The \ScopeUnpredicted{} links it does not predict are the informative part, and they are one
 defect seen four times. All four are in bitwarden: its \path{/login} screen renders links to
@@ -354,25 +377,91 @@ declined to compute, which the running application then shows to be non-empty. T
 the \emph{unplaced} class of Table~\ref{tab:round2acct}, and this is the first measurement
 that any of them has a screen.
 
-\ScopeUnrendered{} edges run the other way: the graph has them and the DOM did not show them.
-That is not counted against the analysis, because a template renders links conditionally and
-this harness signs in to nothing --- realworld's header offers \emph{New Article} only to a
-signed-in user. Separating the two directions is the whole reason the measure is reported as
-two numbers instead of a precision figure.
+The other direction is the one an earlier draft of this section reported as a single
+figure, and it does not support one. \ScopeUnrendered{} predictions run that way: the graph
+holds the edge and the page showed no link. Three causes are mixed in that count, and two of
+them are not defects. The first is interface state: realworld's header is wrapped in
+\texttt{@if (authState === 'authenticated')} and offers \emph{New Article}, \emph{Settings}
+and the profile link only to a signed-in user, and this harness signs in to nothing, so the
+graph is right and the probe is blind. The second is data: a tag page navigated to with a
+placeholder segment lists no articles, so it renders none of the article links the graph
+correctly attributes to it. The third is target over-approximation, which is a property of
+the destination rather than of the scope. realworld's
+\texttt{[routerLink]="['/profile', article.author.username]"} resolves to
+\path{/profile/:username} and to \path{/profile/:username/favorites}, because a two-segment
+link with a hole admits the deeper route; the edge is recorded as a may edge at half
+confidence, which is the graph stating that it does not claim the address.
+
+Only the predictions that name a destination exactly can be refuted by a page not linking
+there, so those are the ones the oracle judges in this direction. There are \ScopeExact{} of
+them across the judged screens, against \ScopeApprox{} over-approximated, and
+\ScopeOverAttributed{} of the \ScopeExact{} were not rendered. A denominator of
+\ScopeExact{} supports no rate, and reporting one would be the same error as the negative
+percentage of Section~\ref{sec:res-round2}. The honest result is therefore narrower than the
+first direction's: the over-attribution direction was not refuted on this corpus, and the
+reason is that the graph almost never claims an exact destination at a screen this oracle can
+observe. Separating the two directions is the whole reason the measure is reported as
+several numbers rather than as a precision figure.
+
+\subsection{What the attribution discriminates}
+\label{sec:res-width}
+
+The oracle above cannot say whether the scopes are too large, so the question is worth asking
+in a form that does not need a running application: how much narrower is the computed
+attribution than the widest attribution there is? Assigning every navigation site to every
+screen recovers every construct by construction, needs no analysis, and is useless --- the
+per-screen query would return the whole site list on every screen. The ratio between the two
+is a measure of what the analysis buys, and Table~\ref{tab:scopebaseline} reports it.
+
+\begin{table}[t]\small
+\caption{The computed attribution against assigning every site to every screen. A site is a
+source construct a witness cites; an edge anchored at a scope is counted over the screens that
+scope stands for, since counting it at its anchor would understate the analysis's breadth.
+\emph{Mean scope} is the attributed pairs per site.}
+\label{tab:scopebaseline}
+\TabScopeBaseline
+\end{table}
+
+The analysis is between \BaselineFactorMin{} and \BaselineFactorMax{} times narrower than
+that baseline, and the low end of that range is the figure that qualifies RQ3. On
+\BaselineBluntest{} the average site is attributed to \BaselineBluntestScope{} of
+\BaselineBluntestScreens{} screens, which is \BaselineBluntestShare{} of the application:
+the per-screen query there excludes about two screens in five and admits the rest. The widest
+margin is \BaselineSharpest{}, where \BaselineSharpestAttributed{} attributions are computed
+where the baseline would assert \BaselineSharpestTrivial{}. Across the corpus the mean scope
+runs from \BaselineMeanScopeMin{} to \BaselineMeanScopeMax{} screens.
+
+Two things follow, and the second is the more uncomfortable. The first is that the trivial
+baseline is not a competitor for the must tier: an unguarded site in a shared component
+attributed to every screen would yield a must edge from screens that never render it, so
+Claim~\ref{claim:must} would fail by construction rather than be tested, and the result that
+attribution costs the deterministic tier nothing is only meaningful because the attribution is
+narrow. The second is that on this corpus it is not very narrow. A scope that names three
+fifths of an application is a weak statement about where a site fires, and the coverage RQ3
+reports is bought with scopes of that width. Nothing in the evaluation shows those wide scopes
+to be wrong --- the oracle above could not test the direction in which they would be wrong ---
+but nothing shows them to be right either, and a reader should take the recovered share of
+Table~\ref{tab:round2acct} together with the widths in this table rather than on its own.
 
 Scope attribution therefore raises coverage without lowering must-tier precision, which is
-what RQ3 asks. Two qualifications belong with that answer, and both are visible in the
+what RQ3 asks. Three qualifications belong with that answer, and all three are visible in the
 tables rather than hidden by them. The first is that the gain is overwhelmingly on the may
 tier, so what attribution mostly adds is navigation the graph says is possible, not
-navigation it says is certain. The second is that the measurement says nothing about
-whether the \emph{scopes} are right. Every method of Section~\ref{sec:protocol} checks a
-node, an edge or a witness; none can be asked whether the set of screens a site was
-attributed to is the set it can really fire from. A site attributed to too many screens
-produces edges whose witnesses all pass, because the construct really is at that location
-and really does name that target. What this section establishes is that attribution
-recovers a large part of a loss class no other analysis here addresses, and that it costs
-the deterministic tier nothing. That its scopes are correct is not established, and
-Section~\ref{sec:limitations} states it as the sharpest limitation of the work.
+navigation it says is certain. The second is that the scopes are tested in one direction
+only. The oracle above can refute a scope that is too small, and did so \ScopeUnpredicted{}
+times; it cannot refute one that is too large, because at the screens it can observe the
+graph almost never claims a destination exactly, and because a link a template renders
+conditionally is absent for reasons that have nothing to do with the scope. The third is the
+width reported in Section~\ref{sec:res-width}: the computed scopes are narrower than the
+trivial attribution by a factor between \BaselineFactorMin{} and \BaselineFactorMax{}, and at
+the low end of that range a scope names most of the application. A site attributed to too
+many screens produces edges whose witnesses all pass, because the construct really is at that
+location and really does name that target, so no witness-based method can find it. What this
+section establishes is that attribution recovers a large part of a loss class no other
+analysis here addresses, that it costs the deterministic tier nothing, and that where the
+rendered interface could judge it, it was not found to be too small. That the scopes are not
+too large is not established, and Section~\ref{sec:limitations} states it as the sharpest
+limitation of the work.
 
 The same mutants were also run against the baseline graph, which answers a question RQ3
 leaves open: whether attribution changes how sensitive the graph is to a source change.
@@ -384,10 +473,25 @@ operator on realworld, where every candidate sits in the application shell and n
 them produces a baseline edge. Attribution widens the part of the source the graph
 responds to at all.
 
-The second was not expected. Of the mutants that can be scored, the attributed graph
-detects \MutDetected{} of \MutScored{} --- \MutRate{} --- against \MutBaseDetected{} of
-\MutBaseScored{} on the baseline, \MutBaseRate{}. Attribution raises the detection rate
-per scored change as well as the number of changes that can be scored. An earlier
+The second was not expected, and it needs a comparison the two rates above cannot make.
+Of the mutants each graph can score, the attributed graph detects \MutDetected{} of
+\MutScored{} --- \MutRate{} --- against \MutBaseDetected{} of \MutBaseScored{} on the
+baseline, \MutBaseRate{}. Those two rates are taken over different mutant sets, so the
+difference between them mixes a detection effect with the eligibility effect of the
+paragraph above, and the gap it shows is larger than the detection effect alone. The
+comparison that isolates the detection effect is the paired one: of the \MutPaired{}
+mutants both graphs can score, identified by operator, file, line and subject, the
+attributed graph detects \MutPairedDetected{} --- \MutPairedRate{} --- and the baseline
+\MutPairedBaseDetected{}, \MutPairedBaseRate{}. The two graphs disagree on
+\MutPairedDisagree{} of those mutants and \MutPairedAgainstAttribution{} of the
+disagreements go against attribution, so the effect is consistent in direction as well as
+positive in aggregate; four of the six are a change the attributed graph detected and the
+baseline did not respond to at all, and two are a change the attributed graph responded to
+with the wrong delta while the baseline did not respond. Outside the paired set,
+\MutAttributedOnly{} mutants are scorable only against the attributed graph and
+\MutBaselineOnly{} only against the baseline. So attribution does raise the detection rate
+per scored change, by about half of what the unpaired rates suggest, and most of its effect
+on this corpus is the widening of what can be scored at all. An earlier
 measurement of this corpus reported the opposite, that attribution widened the graph's
 reach without making it more sensitive per construct; that conclusion was an artefact of
 two defects in the apparatus rather than a property of the analysis. One was in the
@@ -712,14 +816,21 @@ ones and counted some of them on evidence it had not read. What this section rep
 smaller claim that survives a stricter test, in place of a larger claim that did not survive
 a weaker one.
 
-Read over the whole graph rather than the must tier, only \RoundTwoGraphClean{} of edges are
-clean, because \RoundTwoOverApprox{} of them are over-approximations for which the check
-claims no target agreement by design. That is reported beside the must column because the
-must tier is a small and deliberately chosen slice of the graph, and a precision figure for
-the slice is not one for the graph. Nor is it a defect rate: on the \RoundTwoJudged{} edges
-the check does judge --- every edge that is not an over-approximation ---
-\RoundTwoJudgedClean{} are clean. The three figures answer three different questions, and
-only the first is the soundness property.
+Read over the whole graph rather than the must tier, the figures are counted per cited source
+location and not per edge, because that is what the check opens: the \RoundTwoEdges{} edges of
+the corpus cite \RoundTwoSites{} locations between them, an edge citing several wherever
+several constructs yield it. Of those locations only \RoundTwoGraphClean{} are clean, because
+\RoundTwoOverApprox{} of them are over-approximations for which the check claims no target
+agreement by design. That is reported beside the must column because the must tier is a small
+and deliberately chosen slice of the graph, and a precision figure for the slice is not one
+for the graph. Nor is it a defect rate: on the \RoundTwoJudged{} locations the check does
+judge --- every one that is not an over-approximation --- \RoundTwoJudgedClean{} are clean.
+The three figures answer three different questions. The first is the one that bears on
+Claim~\ref{claim:must}, and it bears on it in one direction: a must edge whose cited site
+named another destination would refute the claim, while the claim's quantification over
+inputs is carried by the demotion rules and not by this check
+(Section~\ref{sec:model}). Keeping the unit explicit is not pedantry here: dividing a count of locations by a
+count of edges is how an earlier draft of this paragraph published a negative percentage.
 
 One caveat belongs with the \RoundTwoOverApprox{} figure, because ``by design'' reads as a
 property of the method and most of it is a property of one line. Of the
