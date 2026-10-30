@@ -1,4 +1,5 @@
 {
+  "scopeHarness": "1.1.0",
   "slug": "k8sdash",
   "dist": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/dist/k8sdash",
   "dbPath": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/k8sdash/modules/web/uigraph.db",
