@@ -77,7 +77,10 @@ is assigned to exactly one class, which makes the classes comparable within an
 application and across the corpus. The corpus and the harness are reusable artefacts:
 the evaluation re-runs with one command against pinned commits of the extractor and of
 every application, and the conversion, coverage, loss, remaining-loss, before-and-after and mutation tables
-of Chapter~\ref{ch:results} are generated from the results file. The defect-class table,
+of Chapter~\ref{ch:results} are generated from the results file. The few figures that
+compare the present instrument with the one the work began with are generated too, but from
+that earlier commit's own results read out of version control, since re-running the extractor
+now would measure a different tool. The defect-class table,
 the oracle table and the inspection of the unreached components are written by hand.
 
 What the measurements establish is that a declared route table is a usable starting
@@ -110,8 +113,8 @@ application never declares. What the repairs cost is reported with them, and it 
 what one would hope for. Reading a guard that a wrapper carries moved almost the whole of
 mifos's deterministic tier onto the may tier, so the corpus must tier is
 \RoundTwoMustEdges{} edges of which \RoundTwoMustViolations{} violate the soundness
-property, where the earlier instrument published a tier more than fifty times larger with
-twenty-six violations in it. Three corrections separate the two, each hidden by the one
+property, where the earlier instrument published a tier \EarlierMustFactor{} times larger
+with \EarlierMustViolations{} violations in it (Section~\ref{sec:res-round2}). Three corrections separate the two, each hidden by the one
 before: a guard carried by a route a wrapper function returns, a \texttt{canActivate}
 element that is a call rather than a name, and an edge that several constructs cite taking
 the modality of the first of them instead of the weakest. None of the edges that left became a correct target; they

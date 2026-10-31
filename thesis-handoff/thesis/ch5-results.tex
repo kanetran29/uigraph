@@ -288,8 +288,11 @@ Table~\ref{tab:recovery-source} gives the same recovery by the class each constr
 the baseline, and on this instrument it says something the earlier one did not. Every
 conversion comes out of the two attribution classes: \AttrRecoveredMust{} onto the must tier
 and \AttrRecoveredMay{} onto the may tier, with none out of the node classes at all. On the
-extractor this evaluation began with, a majority of the deterministic gain came out of
-constructs the loss rules had assigned to node defects, which was evidence that the classes
+extractor this evaluation began with --- commit \EarlierCommit{}, whose generated results
+these figures also come from --- \EarlierGainFromNode{} of \EarlierGainMust{} deterministic
+conversions, \EarlierGainFromNodeShare{}, came out of constructs the loss rules had assigned
+to node defects, against \EarlierGainFromAttribution{} out of the attribution classes. That
+was evidence that the classes
 were not independent and that the attribution class was not a ceiling. That evidence is gone,
 and for a plain reason: the node classes are now empty (Table~\ref{tab:loss}), so there is
 nothing in them left to convert. The classes are still not independent --- a construct whose
@@ -881,9 +884,12 @@ it.}
 Of the \RoundTwoMustEdges{} must edges in the corpus,
 \RoundTwoMustCleanCount{} pass the witness check and \RoundTwoMustViolations{} violate the
 property. The tier is small --- \RoundTwoMustEdges{} edges in a graph of \RoundTwoEdges{} ---
-and an earlier state of this extractor published one more than fifty times larger with
-twenty-six violations in it. The difference is three corrections, and they are worth
-separating because each one was hidden by the one before.
+and an earlier state of this extractor, commit \EarlierCommit{}, published one
+\EarlierMustFactor{} times larger: \EarlierMustEdges{} edges, of which \EarlierMustClean{}
+passed the check and \EarlierMustViolations{} violated it. Those figures are read from
+that commit's own generated results rather than re-measured, since the extractor has moved
+and running it now would measure a different tool. The difference is three corrections, and
+they are worth separating because each one was hidden by the one before.
 
 The first is a guard the walk never reached. One application routes every feature table
 through a wrapper function that returns a route carrying an authentication guard, and the
