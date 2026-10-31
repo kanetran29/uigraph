@@ -55,11 +55,11 @@ function emptyDelta(delta) {
 
 /**
  * Reads, from a REMOVE_GUARD mutant's own subject text, how the harness labelled the guard it
- * removed: 'emptyPath' when it recorded the guarded path as the empty string, 'namedCall' when
- * the canActivate element is written as a call, guard(), rather than as a name. The label is the
- * harness's, not a fact about the route: it reads the nearest preceding path literal, which for a
- * route that has children is the last child's path rather than the route's own. Returns null when
- * the record shows neither, so the caller's sum check refuses it instead of guessing.
+ * removed: 'emptyPath' when the route's own path is the empty string, 'namedCall' when the route
+ * declares no path literal and the subject falls back to the canActivate text. Since harness
+ * 1.5.0 the path is the route's own, resolved by brace matching, so the label is a fact about
+ * the route rather than an artefact of a nearest-literal search. Returns null when the record
+ * shows neither, so the caller's sum check refuses it instead of guessing.
  */
 function guardMissCause(x) {
   if (/^path ""$/.test(x.subject)) return 'emptyPath'
@@ -79,23 +79,17 @@ function emptyPathGuards(runs) {
 }
 
 /**
- * Reads the route segment an EXCLUDED mutant's reason names, for example
- * 'no baseline edge enters a screen with route segment "sends"'. Throws on a reason of any
- * other shape, since a segment guessed from free text would reach the thesis unchecked.
+ * Which of the harness's recorded reasons excluded a mutant: 'unreached' when no baseline edge
+ * enters any screen the guarded route yields, 'noScreen' when the guarded route yields none at
+ * all, 'unwitnessed' when the mutated construct draws no baseline edge. Throws on a reason of
+ * any other shape, since an unrecognised reason would be counted as a silent zero.
  */
-function excludedSegment(x) {
-  const m = /route segment "([^"]+)"/.exec(x.reason || '')
-  if (!m) throw new Error(`cannot read a route segment from the reason of the excluded mutant at ${x.file}:${x.line}: ${JSON.stringify(x.reason)}`)
-  return m[1]
-}
-
-/**
- * Renders text as \texttt{} with every character LaTeX reads as markup escaped, so a route
- * segment such as a path parameter or an underscore name cannot break the document.
- */
-function texttt(s) {
-  const ESC = { '\\': '\\textbackslash{}', '~': '\\textasciitilde{}', '^': '\\textasciicircum{}' }
-  return `\\texttt{${s.replace(/[\\~^{}#$%&_]/g, (c) => ESC[c] || `\\${c}`)}}`
+function excludedReason(x) {
+  const r = x.reason || ''
+  if (/^no baseline edge enters any screen the guarded route yields \(/.test(r)) return 'unreached'
+  if (/^the guarded route declares no component/.test(r)) return 'noScreen'
+  if (/is witnessed by no baseline edge$/.test(r)) return 'unwitnessed'
+  throw new Error(`cannot classify the reason of the excluded mutant at ${x.file}:${x.line}: ${JSON.stringify(r)}`)
 }
 
 /**
@@ -297,7 +291,13 @@ if (baseFiles.length) {
 
   const excluded = runs.flatMap((r) => r.results.filter((x) => x.verdict === 'EXCLUDED'))
   expectSum(['MutExcluded', A.exc], [['the EXCLUDED records', excluded.length]])
-  const segments = [...new Set(excluded.map(excludedSegment))]
+  const exGuard = excluded.filter((x) => x.kind === 'REMOVE_GUARD').length
+  expectAtMost(['MutExcludedGuard', exGuard], ['MutExcluded', A.exc])
+  const reasonCount = (want) => excluded.filter((x) => excludedReason(x) === want).length
+  const exUnreached = reasonCount('unreached'), exNoScreen = reasonCount('noScreen')
+  const exUnwitnessed = reasonCount('unwitnessed')
+  expectSum(['MutExcluded', A.exc], [['MutExcludedUnreached', exUnreached],
+    ['MutExcludedNoScreen', exNoScreen], ['MutExcludedUnwitnessed', exUnwitnessed]])
 
   for (const [k, v] of [
     ['MutSampled', nSampled], ['MutBaseSampled', nBaseSampled], ['MutFailures', nFailures], ...failuresPerApp,
@@ -310,13 +310,15 @@ if (baseFiles.length) {
     ['MutGuardMissedEmptyPath', guardEmptyPath], ['MutGuardMissedNamedCall', guardNamedCall],
     ['MutGuardEmptyPathScored', emptyPath.scored], ['MutGuardEmptyPathDetected', emptyPath.detected],
     ['MutNoResponseGuard', silentGuard], ['MutNoResponseRetarget', silentRetarget],
+    ['MutExcludedGuard', exGuard],
+    ['MutExcludedUnreached', exUnreached], ['MutExcludedNoScreen', exNoScreen],
+    ['MutExcludedUnwitnessed', exUnwitnessed],
   ]) {
     if (!Number.isInteger(v) || v < 0) throw new Error(`${k} is ${v}, which is not a count`)
     out += `\\newcommand{\\${k}}{${v}}\n`
   }
-  out += `\\newcommand{\\MutExcludedSegments}{${segments.map(texttt).join(' and ')}}\n`
   console.error(`prose figures: ${nSampled} sampled (${nBaseSampled} baseline), ${nFailures} failures, ` +
-    `guard misses ${guardFailures.length} in ${guardApps} apps (${guardEmptyPath} empty path, ${guardNamedCall} named call), excluded segments ${segments.join(', ')}`)
+    `guard misses ${guardFailures.length} in ${guardApps} apps (${guardEmptyPath} empty path, ${guardNamedCall} named call), excluded ${exUnreached} unreached, ${exNoScreen} with no screen, ${exUnwitnessed} unwitnessed`)
 }
 
 process.stdout.write(out)

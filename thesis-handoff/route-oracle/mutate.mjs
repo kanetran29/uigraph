@@ -4,6 +4,26 @@
 // analysis? Seeds a known delta into the source, re-extracts, and compares the graph
 // against the predicted difference.
 //
+// Harness 1.5.0. Change against 1.4.0: REMOVE_GUARD resolves the route it guards by brace
+// matching the enclosing object literal and reading the components that route's subtree
+// renders, instead of taking the nearest preceding path literal in the source text. The old
+// resolution returned a child's path for a route that has children, the empty string for an
+// empty-path child, and nothing at all for a route whose path is a constant reference or a
+// template literal -- and the exclusion rule, which asks whether any screen the guarded route
+// yields is entered by a baseline edge, was keyed on it. An empty literal satisfied the old
+// segment test for every absolute path and an absent one skipped the test, so four mutants
+// whose guarded screens no edge enters were scored instead of excluded, and reported as
+// misses. A guarded route that declares no component at all now excludes too, since it yields
+// no screen for a guard to be recorded on. Component names are collected over the whole
+// subtree, by class name and by the module a loadComponent imports, and matched against the
+// class and file each screen node carries. Brace matching runs over a copy of the source with
+// comment and string contents blanked, because one corpus route file ends a line with
+// `children: [], // ... work, },` whose comment would otherwise close the enclosing object
+// nine hundred characters early -- and a truncated span names fewer components, which is the
+// one way this rule can drop a mutant it should have scored. The detection check is likewise
+// keyed on the resolved screens rather than on a substring of the path literal; where no
+// screen resolves it falls back to any guard change, which the chapter states.
+//
 // Harness 1.4.0. Change against 1.3.0: CHANGE_NAV_TARGET no longer counts a correct graph
 // response as wrong. Its check requires an ADDED edge to the new destination, but attribution
 // fans a navigation site over every screen it can be triggered from, and retargeting such a
@@ -31,6 +51,7 @@ import { execSync } from 'node:child_process'
 import { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
+import { guardedRoute } from './guard-resolve.mjs'
 
 const argv = process.argv.slice(2)
 const flag = (name, dflt) => {
@@ -164,14 +185,7 @@ function tsFiles(dir) {
 
 const lineOf = (src, index) => src.slice(0, index).split('\n').length
 
-/** The nearest path literal declared before a guard property, i.e. the route it guards. */
-function enclosingRoutePath(src, index) {
-  const before = src.slice(Math.max(0, index - 400), index)
-  const hits = [...before.matchAll(/path:\s*['"]([^'"]*)['"]/g)]
-  return hits.length ? hits[hits.length - 1][1] : null
-}
-
-function discover(routes, guardedTargets, rnd, alreadyReached) {
+function discover(routes, screensOfRoute, rnd, alreadyReached) {
   const muts = []
   // The preference is only a preference: falling back to the whole pool keeps one rnd()
   // draw per call either way, so the seeded sample of every other operator is unchanged.
@@ -238,25 +252,33 @@ function discover(routes, guardedTargets, rnd, alreadyReached) {
     }
 
     for (const m of src.matchAll(/\bcanActivate:\s*\[[^\]]*\],?/g)) {
-      const guarded = enclosingRoutePath(src, m.index)
+      const route = guardedRoute(src, m.index)
+      const screens = route ? screensOfRoute(route) : []
+      const reached = screens.filter((x) => x.entered).map((x) => x.route)
       muts.push({
         kind: 'REMOVE_GUARD', file: f, rel, line: lineOf(src, m.index),
-        index: m.index, find: m[0], replace: '', subject: guarded === null ? m[0].slice(0, 40) : `path "${guarded}"`,
-        predict: guarded === null
-          ? 'the guard text or modality of at least one edge changes'
-          : `the guard on edges entering the screen of path "${guarded}" changes`,
-        // A guard is represented on the edges entering the guarded screen, so a guard on a
-        // screen that no edge reaches cannot be observed at all. Such a mutant re-detects
-        // the edge-coverage gap already counted under RQ1, so it is excluded here.
-        confound: () => guarded === null
-          ? null
-          : (guardedTargets.some((t) => t.split('/').includes(guarded))
-              ? null
-              : `no baseline edge enters a screen with route segment "${guarded}"`),
-        // Strict: the guard must change on an edge entering the guarded screen. A change
-        // somewhere else counts as WRONG, which is the informative verdict.
-        check: (d) => guarded
-          ? d.guardChanged.some((c) => c.includes(`/${guarded}`))
+        index: m.index, find: m[0], replace: '',
+        subject: route && route.own !== null ? `path "${route.own}"` : m[0].slice(0, 40),
+        predict: reached.length
+          ? `the guard on edges entering ${reached.slice(0, 3).join(', ')} changes`
+          : 'the guard text or modality of at least one edge changes',
+        // A guard is represented on the edges entering the screens the guarded route yields,
+        // so a guard whose route yields no screen, or none that any edge enters, cannot be
+        // observed at all. Such a mutant re-detects the edge-coverage gap already counted
+        // under RQ1, so it is excluded here. Where the route cannot be resolved the mutant is
+        // kept and scored, because dropping it on an unread route would hide a real miss.
+        confound: () => {
+          if (!route) return null
+          if (!route.declaresTarget) return 'the guarded route declares no component and no populated children, so it yields no screen'
+          if (!screens.length) return null
+          return reached.length
+            ? null
+            : `no baseline edge enters any screen the guarded route yields (${screens.map((x) => x.route).slice(0, 3).join(', ')})`
+        },
+        // Strict: the guard must change on an edge entering one of the guarded screens. A
+        // change somewhere else counts as WRONG, which is the informative verdict.
+        check: (d) => reached.length
+          ? d.guardChanged.some((c) => reached.some((rt) => c.includes(`-> ${rt}:`)))
           : d.guardChanged.length > 0,
       })
     }
@@ -283,6 +305,16 @@ const baseRouteOf = nodeRoutes(baseline)
 const guardedTargets = [...new Set(baseline.edges.map((e) => baseRouteOf.get(e.to)).filter(Boolean))]
 console.log(`             ${guardedTargets.length} screens are entered by at least one edge`)
 
+// The screens a guarded route yields, read off the baseline graph: a screen node carries the
+// class that renders it, but not the source location of the route entry that declares it, so
+// the classes and module paths a route's subtree names are what its screens are looked up by.
+const enteredIds = new Set(baseline.edges.map((e) => e.to))
+const screensOfRoute = (route) => baseline.nodes
+  .filter((n) => n.kind === 'screen' && n.route &&
+    (route.components.some((c) => (n.label || '').includes(c)) ||
+     route.modules.some((m) => (n.componentPath || '').endsWith(`${m.replace(/^\.\//, '')}.ts`))))
+  .map((n) => ({ route: n.route, entered: enteredIds.has(n.id) }))
+
 // Which screens a navigation site belongs to is read back off the baseline graph: the edges a
 // source line witnesses are exactly the edges attribution drew for that site.
 const siteEdges = witnessEdges(baseline)
@@ -293,7 +325,7 @@ const alreadyReached = (fileLine, dest) => {
 }
 
 const rnd = mulberry32(SEED)
-const all = discover(routes, guardedTargets, rnd, alreadyReached)
+const all = discover(routes, screensOfRoute, rnd, alreadyReached)
 const discovered = {}
 for (const m of all) discovered[m.kind] = (discovered[m.kind] || 0) + 1
 console.log(`discovered ${all.length} candidate mutations ${JSON.stringify(discovered)}`)
@@ -390,7 +422,7 @@ console.log(`  ${'OVERALL'.padEnd(20)} detected ${tD}/${tN} = ${tN ? ((tD / tN) 
 
 if (jsonOut) {
   fs.writeFileSync(jsonOut, JSON.stringify({
-    harnessVersion: '1.4.0', repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
+    harnessVersion: '1.5.0', repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
     baseline: { nodes: baseline.nodes.length, edges: baseline.edges.length, routes: routes.length },
     discovered, sampled, perOperator,
     detectionRate: tN ? tD / tN : null, scored: tN, detected: tD, results,

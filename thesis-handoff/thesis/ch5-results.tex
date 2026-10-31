@@ -604,7 +604,8 @@ with the wrong delta while the baseline did not respond. Outside the paired set,
 mutated in both runs but into different things, because the retargeting operator picks its new
 destination at random; those are two different mutants rather than evidence about either
 graph, and they are counted apart rather than as an eligibility difference. So attribution does raise the detection rate
-per scored change, by about half of what the unpaired rates suggest, and most of its effect
+per scored change, \MutPairedRate{} against \MutPairedBaseRate{} on the paired set where the
+unpaired rates are \MutRate{} and \MutBaseRate{}, and most of its effect
 on this corpus is the widening of what can be scored at all. An earlier
 measurement of this corpus reported the opposite, that attribution widened the graph's
 reach without making it more sensitive per construct; that conclusion was an artefact of
@@ -615,8 +616,8 @@ was in the mutation harness itself, whose retargeting operator required the grap
 \emph{add} an edge to the new destination: attribution fans a navigation site over every
 screen it can fire from, so retargeting such a site to a destination those screens already
 reach removes the old edges and adds none, and a correct response was scored as a wrong
-one. Both are repaired, and the operator that moved furthest is the one the earlier
-measurement named as the graph's weakest.
+one. Both are repaired. Which operator moved furthest cannot be said, since no per-operator
+mutation result from the earlier instrument survives to compare against.
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}
 
@@ -629,10 +630,12 @@ made to the mutation harness are described in Section~\ref{sec:corrections}.
 
 Table~\ref{tab:mutation-sample} shows how the sample was drawn. Over the three
 applications the harness found \MutCandidates{} candidate mutations, sampled \MutSampled{}
-of them under the quota and scored \MutScored{}. \MutExcluded{} were excluded, either because the construct a mutant
-changes is absent from the graph, or, for a guard, because no edge enters the screen that
-guard protects. An excluded mutant carries no information about sensitivity, since it can
-only repeat a coverage gap that RQ1 has already counted. The exclusions are few here and
+of them under the quota and scored \MutScored{}. \MutExcluded{} were excluded: for
+\MutExcludedUnreached{} of them no baseline edge enters any screen the guarded route yields,
+and \MutExcludedNoScreen{} guards a route that declares neither a component nor children, so
+it yields no screen for a guard to be recorded on. An excluded mutant carries no information
+about sensitivity: it either repeats a coverage gap that RQ1 has already counted or acts on a
+route that declares no screen for RQ1 to have missed. The exclusions are few here and
 were not always: of the \MutBaseSampled{} mutants sampled against the graph produced
 without attribution, \MutBaseExcluded{} are excluded and \MutBaseScored{} remain, which is
 the same coverage gap seen from the mutation side. Where the quota capped an operator, the candidates left
@@ -647,8 +650,8 @@ quota, and mutants excluded as confounded with a coverage gap.}
 
 Table~\ref{tab:mutation} gives the detection rate per operator, and Figure~\ref{fig:mutation} shows the same outcomes summed over the applications. Renaming a route path
 was detected in all \MutRenameScored{} scored mutants of the three applications. Deleting a
-\texttt{routerLink} was detected in all six scored mutants of realworld, and in
-\MutLinkWitnessOnly{} of them the change appeared in the witness set rather than the edge set, because a
+\texttt{routerLink} was detected in all six scored mutants of realworld, and over the corpus
+\MutLinkWitnessOnly{} of these mutants moved the witness set rather than the edge set, because a
 second identical link in the same template still produces the edge. That is the
 behaviour the graph should have, and it is the reason detection is judged on witnesses as
 well as edges. The operator found no candidates in alfresco, which binds
@@ -695,69 +698,51 @@ three operators that can fail are detected in \MutFallibleDetected{} of their
 \texttt{routerLink} bindings, \MutRetargetDetected{} of \MutRetargetScored{} retargeted
 \texttt{navigate} calls, and \MutGuardDetected{} of \MutGuardScored{} removed guards.
 
-\MutNoResponse{} mutants produced no change in the graph at all: \MutNoResponseGuard{} guard
-removals and \MutNoResponseRetarget{} retargeted \texttt{navigate} call. The guard removals
-are not what this operator was written to find. A guard is recorded on the edges that enter
-the guarded screen, so removing it can be observed only where the graph both holds that screen
-and enters it. Reading the graph by hand at each of the \MutGuardMissed{} sites finds that
-condition unmet at every one, in two different ways. Three are guards on screens the graph
-holds and no edge enters: \path{/shared} in alfresco, and \path{/accept-emergency} and
-\path{/vault/:vaultId/my-items} in bitwarden. The fourth is a guard on a route that declares
-neither a component nor a child that declares one, bitwarden's redirect helper under
-\path{/organizations/:organizationId}, so it guards no screen and there is no edge for it to
-be recorded on at all. The alfresco mutant is weaker still: removing its \texttt{canActivate}
-leaves a \texttt{canActivateChild} naming the same guard on the line above, so the
-application's access control for that screen is unchanged and a detection would have been a
-false alarm.
-
-The exclusion rule removed none of them, and the reason lies in how it is implemented rather
-than in what it is meant to express. It asks whether the guarded route's path literal appears
-as a segment of a screen that some edge enters, and takes that literal to be the nearest one
-preceding the \texttt{canActivate} in the source, which for a route that has children is the
-last child's path rather than the route's own. Where that literal is the empty string the test
-is satisfied by every absolute path and the mutant is never excluded, which accounts for
-\MutGuardMissedEmptyPath{} of the four; where the route names its path with a constant
-reference or a template literal there is no literal to test and the rule does not run, which
-accounts for the other \MutGuardMissedNamedCall{}.
-
-Whether the guarded route declares the empty path is therefore not what separates a detected
-guard mutant from a missed one. \MutGuardEmptyPathDetected{} of the
-\MutGuardEmptyPathScored{} scored guards the harness labels with the empty path are detected,
-the empty-path child of realworld's \texttt{editor} route among them, whose entering edge
-carries \texttt{requireAuth} on this instrument as the edge entering \path{/editor/:slug}
-does. What separates them is whether the guarded route yields a screen the graph enters. What
-the operator cannot see is a guard whose removal leaves both the edge set and the guard text
-identical, and on this corpus every such case is of that kind.
+Every guard removal the run can score is detected: \MutGuardDetected{} of
+\MutGuardScored{}, on all three applications, each judged on the edges entering the screens
+its guarded route yields. Guards are what the corrections of
+Section~\ref{sec:res-round2} were about, although no per-operator figure from the earlier
+instrument survives to put a number on the movement. It is also the operator whose exclusions
+are the most informative, because a guard
+is recorded on the edges that enter the guarded screen, so removing it can be observed only
+where the graph both holds that screen and enters it. All \MutExcludedGuard{} exclusions are
+that condition failing, in two ways: for \MutExcludedUnreached{} of them the graph holds the
+screen and no edge enters it, and \MutExcludedNoScreen{} guards a route that declares no
+component and no populated children, so it yields no screen at all. Among the guards that are scored, the empty path makes no difference ---
+\MutGuardEmptyPathDetected{} of the \MutGuardEmptyPathScored{} scored guards on a route whose
+own path is the empty string are detected, the empty-path child of realworld's
+\texttt{editor} route among them, whose entering edge carries \texttt{requireAuth} on this
+instrument as the edge entering \path{/editor/:slug} does. What the operator cannot see is a
+guard whose removal leaves both the edge set and the guard text identical, and on this corpus
+there is no such case left once the unobservable guards are excluded.
 
 The mutation run therefore does not confirm the defect class \emph{guards unreliable in
-both directions} of Section~\ref{sec:res-defects} on this instrument. Every guard the run
-could observe behaved as the model requires, and the \MutGuardMissed{} it could not observe
-report either RQ1's coverage gap, which is what the exclusion rule exists to separate out and
-what it failed to separate here, or a route that declares no screen. The evidence for that
-class is what Section~\ref{sec:res-round2} records at commit \EarlierCommit{}: a guard
-carried by a route a wrapper function returns, and a \texttt{canActivate} element written as
-a call rather than as a name, neither read by the extractor as it stood then and both read
-now. The \MutExcluded{} mutants the rule did remove are
-guards on the screens of route segments \MutExcludedSegments{}, which no baseline edge
-enters.
+both directions} of Section~\ref{sec:res-defects} on this instrument, and it does not
+contradict it either: every guard it could observe behaved as the model requires, and the
+\MutExcludedGuard{} it could not observe carry no information about guard representation. The
+evidence for that class is what Section~\ref{sec:res-round2} records at commit
+\EarlierCommit{}: a guard carried by a route a wrapper function returns, and a
+\texttt{canActivate} element written as a call rather than as a name, neither read by the
+extractor as it stood then and both read now.
 
-The \MutFailures{} failures divide by application as follows.
-\MutFailuresRealworld{} are in realworld, both of them retargeted \texttt{navigate} calls
-that moved the graph but not as the operator predicted. \MutFailuresAlfresco{} is in
-alfresco, the guard on \path{/shared}. \MutFailuresBitwarden{} are in bitwarden, which holds
-every remaining guard miss and every remaining retarget. The three applications do not declare their routes
+\MutNoResponse{} mutant produced no change in the graph at all, and it is the retargeted
+\texttt{navigate} call described above rather than a guard.
+
+The \MutFailures{} failures are all retargeted \texttt{navigate} calls, and they divide by
+application as follows. \MutFailuresRealworld{} are in realworld,
+\MutFailuresBitwarden{} in bitwarden and \MutFailuresAlfresco{} in alfresco. The three
+applications do not declare their routes
 in the same way: realworld and alfresco export route arrays, while bitwarden declares
 its routes inside NgModule routing modules through \texttt{RouterModule.forRoot} and
-\texttt{forChild}. Guard misses occur under both styles, and under both they are screens
-the graph does not reach rather than guards it records wrongly.
+\texttt{forChild}. No operator fails under one style and not the other, so nothing in this
+experiment distinguishes them.
 
 
 Of the \MutScored{} scored mutants, \MutDetected{} were detected. The graph responds to changes in the
 constructs it represents. Where it does not respond at all, the construct is not
-represented: the \MutExcluded{} mutants the exclusion rule removed and the
-\MutGuardMissed{} it did not are guards the graph can record on no edge, and the
-\MutRetargetNoChange{} silent retarget is a \texttt{navigate} call in a component the
-analysis could not place under any screen.
+represented: all \MutExcludedGuard{} excluded mutants are guards the graph can record on no
+edge, and the \MutRetargetNoChange{} silent retarget is a \texttt{navigate} call in a
+component the analysis could not place under any screen.
 
 \section{What the repairs cost the claim (RQ5)}
 \label{sec:res-round2}

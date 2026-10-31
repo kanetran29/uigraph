@@ -6,7 +6,7 @@ application can be recovered from its source code without running the applicatio
 explain where that recovery fails, and to repair the largest class of failure with an
 analysis that attributes a navigation site to the screens from which it can fire. The
 selection criteria for the corpus were fixed before any results were obtained. The
-protocol was corrected seven times while it was being developed, including the
+protocol was corrected eight times while it was being developed, including the
 definition of the conversion ratio and of its denominator
 (Section~\ref{sec:corrections}), and the result tables of Chapter~\ref{ch:results}
 come from the harness run on pinned commits.
@@ -49,12 +49,14 @@ both the number of changes that can be scored at all and the rate at which a sco
 is detected. A route path rename is detected in every scored mutant, which is close to
 guaranteed by construction and tests node extraction rather than behaviour; of the
 \MutFallibleScored{} mutants from the three operators that can fail, \MutFallibleDetected{}
-are detected. \MutNoResponse{} mutants produce no change in the graph at all. The
-\MutNoResponseGuard{} guard removals act on guards the graph can record on no edge, read off
-the graph site by site: the guarded screen is one no edge enters, or the guarded route declares
-no screen at all. The \MutNoResponseRetarget{} retarget is a call in a component the analysis
-could not place under any screen. None of them is a defect in how the graph represents a guard
-it can place.
+are detected. Removing a guard is detected in every scored mutant, which is the operator the
+corrections of Chapter~\ref{ch:results} were about. \MutNoResponse{} mutant produces no
+change in the graph at all, a retargeted call in a component the analysis could not place
+under any screen, so the graph holds no edge for it to move. The \MutExcludedGuard{} mutants
+that cannot be scored are guards the graph can record on no edge: for \MutExcludedUnreached{}
+of them no edge enters the screen, which is RQ1's coverage gap, and \MutExcludedNoScreen{}
+guards a route that yields no screen for RQ1 to have missed. Neither is a defect in how the
+graph represents a guard.
 
 The thesis contributes one mechanism, and the apparatus that makes its claims
 checkable. The mechanism is scope attribution, formulated as a dataflow analysis over the
@@ -84,8 +86,7 @@ of Chapter~\ref{ch:results} are generated from the results file. The few figures
 compare the present instrument with the one the work began with are generated too, but from
 that earlier commit's own results read out of version control, since re-running the extractor
 now would measure a different tool. The defect-class table,
-the oracle table, the inspection of the unreached components and the reading of the graph at
-each site where a guard mutant produced no response are written by hand.
+the oracle table and the inspection of the unreached components are written by hand.
 
 What the measurements establish is that a declared route table is a usable starting
 point for static navigation extraction and not a sufficient one. The two levels of loss

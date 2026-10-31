@@ -89,10 +89,11 @@ RQ4 gives a conditional answer, and the condition is RQ1. Renaming a route path 
 detected in every scored mutant in all three applications that were mutated. Deleting
 a \texttt{routerLink} was detected in every scored mutant, and retargeting a
 \texttt{Router.navigate} call in \MutRetargetDetected{} of its \MutRetargetScored{}
-(Table~\ref{tab:mutation}). Of the \MutNoResponse{} mutants that left the graph unchanged,
-\MutNoResponseGuard{} are guard removals and \MutNoResponseRetarget{} is a retarget, and
-every one of them acts on a construct the graph does not hold at all rather than on one it
-holds wrongly (Section~\ref{sec:res-mutation}).
+(Table~\ref{tab:mutation}). Removing a guard was detected in every scored mutant of all
+three, which is the operator the earlier state of this extractor was weakest on. The
+\MutNoResponse{} mutant that left the graph unchanged is a retargeted call in a component the
+analysis could not place under any screen, so the graph holds no edge for it to move
+(Section~\ref{sec:res-mutation}).
 
 An earlier state of this extractor was read directly off the graph for this class: in
 realworld the edge entering \texttt{/editor} carried no guard although the route declares
@@ -100,7 +101,9 @@ realworld the edge entering \texttt{/editor} carried no guard although the route
 difference between the two was put down to the empty path. That reading was right about the
 graph it was taken from and wrong about the cause. On the instrument this thesis ships both
 edges carry \texttt{requireAuth}, and the empty path is not what separates a detected guard
-mutant from a missed one (Section~\ref{sec:res-mutation}). The class ``guards unreliable in
+mutant from an unobservable one: what decides that is whether any edge enters a screen the
+guarded route yields, which is now the exclusion rule
+(Section~\ref{sec:res-mutation}). The class ``guards unreliable in
 both directions'' of Chapter~\ref{ch:results}
 rests instead on what Section~\ref{sec:res-round2} measured, a guard carried by a route a
 wrapper function returns and a \texttt{canActivate} element written as a call; the mutation
@@ -109,7 +112,7 @@ run neither confirms nor refutes it.
 Detection is conditional on coverage in a second sense, which the exclusion rule makes
 visible --- although far less of it than on the instrument this work began with. Against the
 attributed graph only \MutExcluded{} of the sampled mutants cannot be scored at all, all of
-them guard removals on a screen that no edge enters
+them guards the graph can record on no edge
 (Table~\ref{tab:mutation-sample}); against the baseline graph \MutBaseExcluded{} cannot.
 The distance between those two counts is where RQ1's coverage shows up in this experiment:
 the constructs that attribution puts into the graph are largely the ones the baseline run had
@@ -121,12 +124,9 @@ the right shape of claim, because an impact query is only ever asked about the p
 the application that the model represents, and the graph states which part that is
 through its witnesses.
 
-Guard removals were missed in \MutGuardMissedApps{} of the three mutated applications, one
-that declares its routes as a standalone array and one that declares them in NgModule
-routing modules, so the miss is not a property of one routing style. Neither is it a property
-of how the graph represents a guard it can place: in every case the guarded screen is one no
-edge enters, or the guarded route declares no screen at all
-(Section~\ref{sec:res-mutation}). That is the whole of the comparison the measurements support. The corpus
+The three mutated applications do not declare their routes the same way, two as standalone
+arrays and one in NgModule routing modules, and no operator fails under one style and not the
+other (Section~\ref{sec:res-mutation}). That is the whole of the comparison the measurements support. The corpus
 was not stratified by routing style and the other three applications were not mutated,
 so nothing more general about the two styles follows from this thesis.
 
@@ -354,10 +354,9 @@ output to decide what the expected change is. The corpus commits, the extractor 
 and the harness version are pinned, the whole evaluation re-runs with one command, and
 the conversion, coverage, loss, remaining-loss, before-and-after and mutation tables of
 Chapter~\ref{ch:results} are generated from the results file instead of being entered
-by hand. The defect-class table, the oracle table, the inspection of the unreached
-components and the reading of the graph at each site where a guard mutant produced no
-response are written by hand. Determinism and the absence of accumulated state were checked
-before any measurement. Seven protocol corrections are reported in full
+by hand. The defect-class table, the oracle table and the inspection of the unreached
+components are written by hand. Determinism and the absence of accumulated state were checked
+before any measurement. Eight protocol corrections are reported in full
 (Section~\ref{sec:corrections}), including the three that made the reported figures
 worse. What
 was not done is equally relevant: there was no blinding, no second annotator for the

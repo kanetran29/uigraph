@@ -336,10 +336,10 @@ delete a \texttt{routerLink}, retarget a \texttt{navigate}. Ground truth is the
 authored delta, so nothing is circular. Detection is judged on the node and edge sets
 and on the witness set, since several constructs can produce one edge. &
 A mutant whose construct is absent from the baseline graph re-detects a coverage gap and
-is excluded, as is a guard mutant on a screen that no edge enters --- which the harness can
-establish only where it can name the guarded screen from the source text, so the rule misses a
-guard whose route names its path with the empty string, a constant or a template literal
-(Section~\ref{sec:res-mutation}). Detection is
+is excluded, as is a guard mutant on a screen that no edge enters. The screens a guarded route
+yields are looked up by what its subtree names, so a component several routes render maps to
+every screen those routes declare; that over-approximates, which errs towards scoring a mutant
+rather than dropping it. Detection is
 therefore conditional on coverage, and the attributed and unattributed graphs do not
 exclude the same mutants, so their overall rates are not taken over one set: the
 comparison between them is also reported over the mutants both can score, paired by
@@ -382,7 +382,7 @@ for a mutant could be affected by the earlier baseline run.
 \subsection{Corrections made to the protocol}
 \label{sec:corrections}
 
-Seven corrections were made to the protocol while it was being developed. They are
+Eight corrections were made to the protocol while it was being developed. They are
 described here because each of them would otherwise have led to an incorrect figure
 in this thesis, and because the underlying mistakes are general ones. Every figure
 quoted below is the one a superseded instrument produced, recorded so that the
@@ -430,7 +430,8 @@ subtree are stored once (Section~\ref{sec:attribution}).
 
 The mutation harness patched the source by searching for the text of the
 construct, so a mutant aimed at one of several identical constructs edited the first of
-them instead of its own. In realworld all five guard mutants removed the same guard.
+them instead of its own. In realworld the five guard mutants collapsed onto two sites,
+because the five \texttt{canActivate} properties are written with only two distinct texts.
 The harness also judged detection on the node and edge sets alone, which scored the
 deletion of one of two identical links in a template as a miss, although the graph had
 behaved correctly: it kept the edge, which the second link still produces, and dropped
@@ -440,9 +441,7 @@ smaller changes followed from the same review. A retargeting mutant now points a
 another declared route instead of an invented one, so that it cannot be confused with a
 missing target. A guard mutant on a screen that no edge enters is excluded, because a
 guard is represented on the edges entering the screen it guards, so such a mutant can
-only repeat the edge-coverage gap already counted under RQ1. The rule as implemented names the
-guarded screen from the nearest path literal preceding the \texttt{canActivate}, and
-Section~\ref{sec:res-mutation} reports the mutants it therefore failed to exclude. A rename mutant counts as
+only repeat the edge-coverage gap already counted under RQ1. A rename mutant counts as
 detected when the renamed route appears in the graph, without also requiring the
 original node to disappear, since the same path segment may be declared in a second
 routing module. With the offset and witness corrections in place, on the same seed and
@@ -450,7 +449,29 @@ the same sample, the detection rate for realworld changed from 71.4\% to 95.2\%.
 Sampling is seeded and stratified with a fixed quota per operator, and the detection
 rate is reported per operator with its $n$.
 
-Five of the seven corrections were found the same way, by a figure that looked too good
+The eighth correction is to that guard exclusion rule, and it was found by reading the graph
+at the sites the rule had let through rather than by a figure that looked wrong. The rule asks
+whether any screen the guarded route yields is entered by a baseline edge, and it identified
+that route by the nearest path literal preceding the \texttt{canActivate} in the source. For a
+route that has children, that literal is the last child's path rather than the route's own;
+for an empty-path child it is the empty string, which is a segment of every absolute path and
+so satisfied the test whatever the application; and for a route whose path is a constant
+reference or a template literal there is no literal at all, which skipped the test. Four guard
+mutants that cannot be observed at all were therefore scored rather than excluded and reported
+as misses, which the discussion then explained as a defect in how the graph represents a
+guard; three of them guard screens no baseline edge enters and the fourth a route that yields
+no screen. The rule now matches the braces of the enclosing object literal to find the route,
+over a copy of the source with comment and string contents blanked so that a brace inside
+either cannot close the object early, reads what its subtree renders --- a component class, or
+the module a \texttt{loadComponent} imports --- and looks those up against the class and file
+each screen node carries; a route that declares no component and no populated children is excluded
+as well, since it yields no screen for a guard to be recorded on, and the detection check is
+keyed on the same screens rather than on a substring of a path literal. On the superseded
+instrument the run scored 68 of the 70 sampled mutants and detected 59, with 5 producing no
+change in the graph at all; Chapter~\ref{ch:results} reports what the corrected rule gives on
+the same seed and the same sample.
+
+Five of the eight corrections were found the same way, by a figure that looked too good
 or too bad to believe: the conversion ratio that rose to 75.7\%, the precision that fell
 to 44.7\%, the coverage that reached 100\%, the construct count that tripled, and the
 detection rate that moved by more than twenty points. Each turned out to be a property of

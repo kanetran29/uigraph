@@ -1,5 +1,5 @@
 {
-  "harnessVersion": "1.4.0",
+  "harnessVersion": "1.5.0",
   "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco",
   "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco/projects/aca-content",
   "attribution": true,
@@ -35,9 +35,9 @@
       "discovered": 4,
       "sampled": 4,
       "detected": 3,
-      "missed": 1,
+      "missed": 0,
       "wrong": 0,
-      "excluded": 0,
+      "excluded": 1,
       "broke": 0,
       "skip": 0
     },
@@ -52,8 +52,8 @@
       "skip": 0
     }
   },
-  "detectionRate": 0.9375,
-  "scored": 16,
+  "detectionRate": 1,
+  "scored": 15,
   "detected": 15,
   "results": [
     {
@@ -157,7 +157,7 @@
       "file": "src/lib/aca-content.routes.ts",
       "line": 115,
       "subject": "path \"profile\"",
-      "predict": "the guard on edges entering the screen of path \"profile\" changes",
+      "predict": "the guard on edges entering /profile changes",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -178,7 +178,7 @@
       "file": "folder-rules/src/folder-rules.module.ts",
       "line": 37,
       "subject": "path \"rules\"",
-      "predict": "the guard on edges entering the screen of path \"rules\" changes",
+      "predict": "the guard on edges entering /nodes/:nodeId/rules changes",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -199,27 +199,17 @@
       "kind": "REMOVE_GUARD",
       "file": "src/lib/aca-content.routes.ts",
       "line": 348,
-      "subject": "path \"\"",
-      "predict": "the guard on edges entering the screen of path \"\" changes",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
+      "subject": "path \"shared\"",
+      "predict": "the guard text or modality of at least one edge changes",
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters any screen the guarded route yields (/shared)"
     },
     {
       "kind": "REMOVE_GUARD",
       "file": "src/lib/aca-content.routes.ts",
       "line": 111,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "predict": "the guard on edges entering /profile, /personal-files, /personal-files/:folderId changes",
       "verdict": "DETECTED",
       "touched": 37,
       "delta": {
