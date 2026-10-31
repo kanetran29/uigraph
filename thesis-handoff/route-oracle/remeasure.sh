@@ -42,6 +42,9 @@ echo "== must tier with every guard passing"
 pnpm -s -C "$REPO" exec tsx "$HERE/guard-only.mjs" --corpus "$W/corpus" --out "$W/guard-only" --tex "$TEX/generated-guard-only.tex"
 cp "$W/guard-only/guard-only.json" results-must/guard-only.json
 
+echo "== call graph resolution"
+pnpm -s -C "$REPO" exec tsx "$HERE/callgraph-stats.mjs" --corpus "$W/corpus" --out "$HERE/results-callgraph" --tex "$TEX/generated-callgraph.tex"
+
 echo "== ablation and ground truth"
 pnpm -s exec tsx scope-ablation.mjs --corpus "$W/corpus" --out "$W/ablation" --keep realworld --tex "$TEX/generated-ablation.tex"
 pnpm -s exec tsx score-ground-truth.mjs --truth ground-truth/realworld.json \
