@@ -8,13 +8,16 @@
 // and this ledger accounts for every edge of it against the current graph.
 //
 // Each edge of the earlier tier gets one fate, decided in this order:
-//   kept       the current graph still holds a must edge with the same endpoints and event;
+//   kept       the current graph still holds a must edge with the same endpoints and event, or,
+//              for an edge the shell or a scope anchor held, from one of the screens it stands
+//              for, now that such an edge is drawn per screen;
 //   guard      the current graph reads a guard on the destination that the earlier one missed;
-//   redirect   the destination is a screen whose own address an empty-path child redirects,
-//              so the edge now enters the screen the redirect reaches;
-//   self-loop  the source already displays the destination, or stands for screens that include
-//              it, so whether the navigation runs depends on parameters and router settings;
-//   condition  every construct the edge cites runs under a condition.
+//   self-loop  the source already displays the destination, so whether the navigation runs
+//              depends on parameters and router settings;
+//   condition  every construct the edge cites runs under a condition;
+//   retargeted no edge joins the two ends any more, and the constructs the edge cited now lead
+//              from the same source to another screen, through a redirect the reader now follows.
+// An edge that fits none of these stops the ledger, rather than being filed under one.
 // Each construct an edge cites is classified as well, with the extractor's OWN readers
 // (callCondition and templateCondition in packages/adapter-angular/src/conditions.ts). This is
 // therefore a record of the extractor's decisions, not a second opinion on them: a construct
@@ -31,6 +34,7 @@ import { Project, SyntaxKind } from 'ts-morph'
 import { callCondition, templateCondition } from '../../packages/adapter-angular/src/conditions.ts'
 import { inlineTemplate } from '../../packages/adapter-angular/src/templates.ts'
 import { templateLoc } from '../../packages/adapter-angular/src/nav.ts'
+import { extractorStamp } from './provenance.mjs'
 
 const argv = process.argv.slice(2)
 const flag = (n, d) => { const i = argv.indexOf(n); return i > -1 ? argv[i + 1] : d }
@@ -101,32 +105,37 @@ for (const [slug, sub] of Object.entries(APPS)) {
   const project = new Project({ skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true })
   for (const f of tsFiles(root)) project.addSourceFileAtPath(f)
   const route = new Map([...was.nodes, ...now.nodes].map((n) => [n.id, n.route ?? n.id]))
-  const scopeOf = new Map(now.nodes.filter((n) => n.scope).map((n) => [n.id, n.scope]))
+  const scopeOf = new Map(was.nodes.filter((n) => n.scope).map((n) => [n.id, n.scope]))
+  const screens = was.nodes.filter((n) => n.kind === 'screen').map((n) => n.id)
+  const citesAny = (x, keys) => [x.witness, ...(x.mergedWitnesses ?? [])].some((w) => w?.file && keys.has(`${w.file}:${w.loc?.line}`))
   for (const e of musts) {
     const label = `${route.get(e.from)} -> ${route.get(e.to)}`
-    const same = now.edges.filter((x) => x.from === e.from && x.to === e.to && x.event === e.event)
-    const scope = scopeOf.get(e.from)
-    const selfLoop = e.from === e.to || scope?.kind === 'top' || (scope?.members ?? []).includes(e.to)
     const sites = [e.witness, ...(e.mergedWitnesses ?? [])].filter((w) => w?.file)
+    const keys = new Set(sites.map((w) => `${w.file}:${w.loc.line}`))
+    const scope = scopeOf.get(e.from)
+    const members = scope ? new Set(scope.kind === 'top' ? screens : scope.members ?? []) : null
+    // An edge the shell or an anchor held is drawn per screen now when its destination is one of them.
+    const same = now.edges.filter((x) => x.to === e.to && x.event === e.event && (x.from === e.from || (members?.has(x.from) && citesAny(x, keys))))
+    const elsewhere = now.edges.filter((x) => x.from === e.from && x.to !== e.to && x.event === e.event && citesAny(x, keys))
     const read = sites.map((w) => ({ app: slug, edge: label, site: `${w.file}:${w.loc.line}`, ...conditionAt(project, root, w.file, w.loc.line) }))
     constructs.push(...read)
     const fate = same.some((x) => x.modality === 'must') ? 'kept'
       : same.some((x) => x.guard && !e.guard) ? 'guard'
-      : same.length === 0 ? 'redirect'
-      : selfLoop ? 'self-loop'
-      : read.every((r) => r.condition !== null) ? 'condition'
+      : e.from === e.to ? 'self-loop'
+      : same.length > 0 && read.every((r) => r.condition !== null) ? 'condition'
+      : same.length === 0 && elsewhere.length > 0 ? 'retargeted'
       : 'unexplained'
     edgesOut.push({ app: slug, edge: label, event: e.event, fate, sites: read.length, unconditionalSites: read.filter((r) => r.condition === null).length })
   }
 }
 
 const total = edgesOut.length
-const fates = ['kept', 'guard', 'redirect', 'self-loop', 'condition']
+const fates = ['kept', 'guard', 'self-loop', 'condition', 'retargeted']
 const fateCount = Object.fromEntries(fates.map((f) => [f, edgesOut.filter((r) => r.fate === f).length]))
 const unexplained = edgesOut.filter((r) => r.fate === 'unexplained')
 if (unexplained.length) throw new Error(`${unexplained.length} edge(s) left the must tier for no reason this ledger knows: ${unexplained.map((r) => `${r.app} ${r.edge}`).join('; ')}`)
 if (fates.reduce((a, f) => a + fateCount[f], 0) !== total) throw new Error(`the fates do not account for all ${total} edges`)
-const reasons = ['after await', 'in a callback', 'under a branch', 'after early exit', 'in a catch clause', 'in a loop', 'control-flow block', 'structural directive', 'ng-template', 'unreadable template']
+const reasons = ['after await', 'in a callback', 'in a helper method', 'under a branch', 'after early exit', 'in a catch clause', 'in a loop', 'control-flow block', 'structural directive', 'ng-template', 'ICU case', 'unreadable template']
 const reasonCount = Object.fromEntries(reasons.map((r) => [r, constructs.filter((c) => c.condition === r).length]))
 const conditional = constructs.filter((c) => c.condition !== null).length
 if (reasons.reduce((a, r) => a + reasonCount[r], 0) !== conditional) throw new Error('a construct carries a condition this ledger does not name')
@@ -140,7 +149,7 @@ const tex = flag('--tex')
 if (tex) {
   const esc = (s) => String(s).replace(/\\/g, '\\textbackslash{}').replace(/([_%&#$])/g, '\\$1').replace(/~/g, '\\textasciitilde{}')
   const cap = (s) => s.split(/[^a-z]+/i).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')
-  const lines = ['% Generated by must-context.mjs from the corpus graphs. Do not edit by hand.',
+  const lines = ['% Generated by must-context.mjs from the corpus graphs. Do not edit by hand.', extractorStamp(),
     `\\newcommand{\\MustCtxEdges}{${total}}`,
     `\\newcommand{\\MustCtxConstructs}{${constructs.length}}`,
     `\\newcommand{\\MustCtxDistinct}{${new Set(constructs.map((c) => `${c.app} ${c.site}`)).size}}`,
@@ -148,6 +157,7 @@ if (tex) {
     `\\newcommand{\\MustCtxUnconditional}{${constructs.length - conditional}}`,
     `\\newcommand{\\MustCtxHoldingApps}{${new Set(edgesOut.map((r) => r.app)).size}}`,
     `\\newcommand{\\MustCtxMixed}{${edgesOut.filter((r) => r.unconditionalSites > 0 && r.unconditionalSites < r.sites).length}}`,
+    `\\newcommand{\\MustCtxAllConditional}{${edgesOut.filter((r) => r.unconditionalSites === 0).length}}`,
     ...fates.map((f) => `\\newcommand{\\MustFate${cap(f)}}{${fateCount[f]}}`),
     ...reasons.map((r) => `\\newcommand{\\MustWhy${cap(r)}}{${reasonCount[r]}}`),
     `\\newcommand{\\MustWhyTemplate}{${reasonCount['control-flow block'] + reasonCount['structural directive'] + reasonCount['ng-template']}}`,

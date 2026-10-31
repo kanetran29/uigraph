@@ -34,6 +34,7 @@
 // not counted) and `router.navigate(` / `navigateByUrl(`.
 //
 // Harness 1.2.0: merged witnesses and inline-template matching by target.
+// Harness 1.3.0: a construct is credited with its own witness's modality where the graph records one.
 //
 // Usage: node loss-breakdown.mjs <appDir> <uigraph.db> [--routes C.json] [--json out.json]
 
@@ -145,17 +146,21 @@ const witnessList = []
 for (const e of graph.edges || []) for (const w of [e.witness, ...(e.mergedWitnesses || [])]) if (w) witnessList.push({ e, w })
 for (const { e, w } of witnessList) {
   if (!w.file || !w.loc?.line) continue
+  // A construct is credited with the modality it earns on its own: an edge is as certain as its
+  // most certain construct, so a construct that a must edge cites can itself earn only may. A
+  // graph written before witnesses carried a modality credits every witness with its edge's.
+  const m = w.modality ?? e.modality
   const abs = path.isAbsolute(w.file) ? w.file : path.resolve(appDir, w.file)
   for (const d of [-1, 0, 1]) {
     const k = `${abs}:${w.loc.line + d}`
     if (unknownKindNodes.has(e.from)) unplacedAt.add(k)
-    else if ((rank[e.modality] || 0) > (rank[witnessAt.get(k)] || 0)) witnessAt.set(k, e.modality)
+    else if ((rank[m] || 0) > (rank[witnessAt.get(k)] || 0)) witnessAt.set(k, m)
   }
   // Inline templates: the extractor cites the line of `template:` for every link inside
   // it. Keep the edge targets per template line so a construct can be matched by target.
   const tk = `${abs}:${w.loc.line}`
   if (!inlineWitness.has(tk)) inlineWitness.set(tk, [])
-  inlineWitness.get(tk).push({ modality: e.modality, to: nodeRoute.get(e.to) })
+  inlineWitness.get(tk).push({ modality: m, to: nodeRoute.get(e.to) })
 }
 
 // Declared routes from the independent route parser (Test C), when available: full path,

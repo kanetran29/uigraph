@@ -348,7 +348,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // whichever Angular meets first, which the matcher does not decide; and a screen whose own
         // address an empty-path child redirects is never displayed, so no edge leaves it for sure.
         const unsure = parsed.aux || landed.ambiguous || redirectOfNode.has(from)
-        const uncertain = gate.guarded || capMay || viaWildcard || baseUnknown || selfLoop || unsure || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
+        // A measurement switch, not a product option: the thesis counts what would be must if every
+        // guard let the navigation through, to tell what the extractor cannot prove apart from what
+        // the application does not have. The guard text stays on the edge either way.
+        const gated = gate.guarded && process.env.UIGRAPH_IGNORE_GUARDS !== '1'
+        const uncertain = gated || capMay || viaWildcard || baseUnknown || selfLoop || unsure || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
         if (members?.has(target.nodeId) && !uncertain) {
           // Every screen the edge stands for reaches the destination for certain except the one
           // that is the destination, so the edge is drawn per screen: must from the others, and a
