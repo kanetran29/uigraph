@@ -1,0 +1,326 @@
+{
+ "note": "Each demotion rule deleted in turn from a copy of packages/adapter-angular at 890f830, the full adapter suite run against it. A mutant survives when the suite still passes. The four that survived were re-run after tests for them were added (be4e382 plus those tests); each then failed one test.",
+ "baseline": "Tests  319 passed (319)",
+ "mutants": [
+  {
+   "id": "1",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "templateCondition: `ICU_OPEN.test(t.slice(i, i + 200)) ? 'icu' : 'plain'` -> `'plain'`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "2",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "openTag: deleted the two quote-handling lines `if (quote) { if (ch === quote) quote = null; continue }` and `if (ch === '\"' || ch === \"'\") { quote = ch; continue }`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "3",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "memberCondition: inserted `return null` as the first statement, before `if (handlersOf(cls).has(name)) return null`",
+   "result": "Tests  3 failed | 316 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "4",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "handlersOf: `if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue` -> `if (!isBareCall(expr)) continue`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "5",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "handlersOf: `if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue` -> `if (templateCondition(tpl!.text, b.index) !== null) continue`",
+   "result": "Tests  319 passed (319)",
+   "survived": true,
+   "afterAddedTests": "killed: Tests 1 failed | 322 passed (323)"
+  },
+  {
+   "id": "6",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "interruption: deleted the two lines `const jumps = [...stmt.getDescendantsOfKind(SyntaxKind.BreakStatement), ...stmt.getDescendantsOfKind(SyntaxKind.ContinueStatement)]` and `if (Node.isBreakStatement(stmt) || Node.isContinueStatement(stmt) || jumps.some((x) => leavesBlock(x, stmt))) return 'after early exit'`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "7",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "callCondition: deleted the line `if (Node.isCallExpression(parent) && parent.getArguments().includes(node as never) && /\\?\\./.test(parent.getExpression().getText())) return 'under a branch'`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "8",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "callCondition: deleted the line `if (Node.isParameterDeclaration(parent) && parent.getInitializer() === node) return 'under a branch'`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "9",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "callCondition operator list: `SyntaxKind.QuestionQuestionToken,\\n SyntaxKind.AmpersandAmpersandEqualsToken, SyntaxKind.BarBarEqualsToken, SyntaxKind.QuestionQuestionEqualsToken].includes(op)` -> `SyntaxKind.QuestionQuestionToken].includes(op)`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "10",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "callCondition: deleted the first line `if (/\\?\\./.test(call.getExpression().getText())) return 'under a branch'`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "11",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "callCondition: deleted the line `if (Node.isConditionalExpression(parent) && parent.getCondition() !== node) return 'under a branch'`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "12",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "callCondition: deleted the line `if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) return 'under a branch'` (the later Block/SourceFile/CaseClause statement-walk condition left intact)",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "13",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "callCondition: deleted the line `if (Node.isForStatement(parent) && parent.getInitializer() !== node) return 'in a loop'`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "14",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "callCondition: deleted the line `if (Node.isCatchClause(parent)) return 'in a catch clause'`",
+   "result": "Tests  2 failed | 317 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "15",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "templateCondition: `open.name === 'ng-template' ? 'ng-template' : STRUCTURAL_ATTR.test(open.attrs) ? 'structural directive' : null` -> `STRUCTURAL_ATTR.test(open.attrs) ? 'structural directive' : null`",
+   "result": "Tests  2 failed | 317 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "16",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "templateCondition (close-tag branch): `if (k < 0) return 'unreadable template'` -> `if (k < 0) return null` (the unmatched-brace `return 'unreadable template'` left intact)",
+   "result": "Tests  319 passed (319)",
+   "survived": true,
+   "afterAddedTests": "killed: Tests 1 failed | 322 passed (323)"
+  },
+  {
+   "id": "17",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "land(): `if (matchAll(path, routeLikes).length + (rival ? 1 : 0) > 1) ambiguous = true` -> `... > 1) ambiguous = false`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "18",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "land(): `for (let hop = 0; hop < 10; hop += 1) {` -> `for (let hop = 0; hop < 1; hop += 1) {`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "19",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "emitTargets: `const unsure = parsed.aux || landed.ambiguous || redirectOfNode.has(from)` -> `const unsure = parsed.aux || landed.ambiguous`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "20",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "emitTargets: `const unsure = parsed.aux || landed.ambiguous || redirectOfNode.has(from)` -> `const unsure = landed.ambiguous || redirectOfNode.has(from)`",
+   "result": "Tests  319 passed (319)",
+   "survived": true,
+   "afterAddedTests": "killed: Tests 1 failed | 322 passed (323)"
+  },
+  {
+   "id": "21",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "emitTargets only (controls-mode wireControlNav untouched): `const parsed = t.url ? urlPath(t.ti.value) : { path: t.ti.value, aux: false }` -> `const parsed = urlPath(t.ti.value)`, and `const landed = land(value, t.url !== true)` -> `const landed = land(value, false)`",
+   "result": "Tests  2 failed | 317 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "22",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "emitTargets: `if (members?.has(target.nodeId) && !uncertain) {` -> `if (false && members?.has(target.nodeId) && !uncertain) {`",
+   "result": "Tests  3 failed | 316 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "23",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "emitTargets expansion loop: `pushEdge(m, target.nodeId, t, m === target.nodeId ? 'may' : 'must', m === target.nodeId ? 0.5 : 1, guardText, file)` -> `pushEdge(m, target.nodeId, t, 'must', m === target.nodeId ? 0.5 : 1, guardText, file)` (confidence expression unchanged)",
+   "result": "Tests  2 failed | 317 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "24",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "attribution: `if (unsure.size > 0) emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))` -> `if (unsure.size > 0) emitOver(unsure, ts, relative(projectDir, f))`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "25",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "attribution shell loop: `emitTargets(SHELL_NODE_ID, scopes.firmShell.has(f) ? ts : ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f), true)` -> `emitTargets(SHELL_NODE_ID, ts, relative(projectDir, f), true)`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "26",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "pushEdge same(): `m?.file === w.file && m?.loc?.line === w.loc.line && m?.loc?.col === w.loc.col` -> `m?.file === w.file && m?.loc?.line === w.loc.line`",
+   "result": "Tests  2 failed | 317 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "27",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "pushEdge: `if (MODALITY_RANK[modality] > MODALITY_RANK[e.modality] || (modality === e.modality && confidence > e.confidence)) {` -> `if (false) {` (so the else branch always pushes to mergedWitnesses)",
+   "result": "Tests  4 failed | 315 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "28",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "controls mode wireControlNav call: `conditional: controlConditional || !bare || nav.conditional }` -> `conditional: controlConditional || nav.conditional }`",
+   "result": "Tests  319 passed (319)",
+   "survived": true,
+   "afterAddedTests": "killed: Tests 1 failed | 322 passed (323)"
+  },
+  {
+   "id": "29",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "`const guards = [...inheritedGuards, ...canActivateGuards(sf, obj), ...canActivateGuards(sf, obj, 'canMatch'), ...canActivateGuards(sf, obj, 'canActivateChild')]` -> same without `...canActivateGuards(sf, obj, 'canMatch'),` (the `own` list in the empty-path host block untouched)",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "30",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "`const guards = [...inheritedGuards, ...canActivateGuards(sf, obj), ...canActivateGuards(sf, obj, 'canMatch'), ...canActivateGuards(sf, obj, 'canActivateChild')]` -> same without `, ...canActivateGuards(sf, obj, 'canActivateChild')`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "31",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "`else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = ...` -> `else if (host.redirectsTo === undefined) host.redirectsTo = ...` (the `emptyPathAnswered.add(host)` line left in place)",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "32",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "`const host = !auxHere && ownPath === '' && ...` -> `const host = !auxHere && !isScreen && ownPath === '' && ...`",
+   "result": "Tests  2 failed | 317 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "33",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "isOwnRoute: inserted `return true` as the first statement of the body",
+   "result": "Tests  3 failed | 316 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "34",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "templateTargets: `const boundBase = (at: number): boolean => /\\[relativeTo\\]\\s*=/.test(tpl.text.slice(tpl.text.lastIndexOf('<', at), tpl.text.indexOf('>', at) + 1))` -> `const boundBase = (at: number): boolean => false`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "35",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "closesAtEnd: inserted `return true` as the first statement of the body",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "36",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "staticLinkTarget: inserted `return { kind: 'literal', value }` as the first statement of the body",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "37",
+   "file": "packages/adapter-angular/src/matcher.ts",
+   "what": "urlPath: `path: out.split('/').map((seg) => seg.split(';')[0]).join('/'), aux` -> `path: out, aux`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "38",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "emitTargets uncertain term: `baseUnknown || selfLoop || unsure` -> `baseUnknown || unsure`",
+   "result": "Tests  3 failed | 316 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "39",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "emitTargets uncertain term: `viaWildcard || baseUnknown || selfLoop` -> `viaWildcard || selfLoop`",
+   "result": "Tests  3 failed | 316 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "40",
+   "file": "packages/adapter-angular/src/attribute.ts",
+   "what": "nestingGraph: `const firmTags = new Set(tagMatches.filter((m) => templateCondition(template, m.index + 1) === null).map((m) => m[1] as string))` -> `const firmTags = new Set(tagMatches.map((m) => m[1] as string))`",
+   "result": "Tests  1 failed | 318 passed (319)",
+   "survived": false,
+   "afterAddedTests": null
+  }
+ ]
+}

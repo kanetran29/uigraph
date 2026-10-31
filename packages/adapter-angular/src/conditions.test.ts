@@ -184,3 +184,13 @@ describe('callCondition on the rest of the ways a call can be skipped', () => {
     expect(callIn('stay = () => { this.router.navigate(["/x"]) }')).toBe('in a helper method')
   })
 })
+
+describe('the remaining fallbacks of the condition readers', () => {
+  it('fails safe on a close tag it cannot match', () => {
+    expect(templateCondition(...site('</div><a §routerLink="/x">x</a>'))).toBe('unreadable template')
+  })
+  it('does not take a binding that calls a member and then more for a bare call', () => {
+    const sf = new Project({ useInMemoryFileSystem: true }).createSourceFile('/h.ts', `@Component({ template: '<b (click)="go() || reset()"></b>' })\nclass C { router: any\ngo() { this.router.navigate(["/x"]) }\nreset() {}\n}`)
+    expect(callCondition(sf.getDescendantsOfKind(SyntaxKind.CallExpression).find((c) => /\.navigate$/.test(c.getExpression().getText()))!)).toBe('in a helper method')
+  })
+})

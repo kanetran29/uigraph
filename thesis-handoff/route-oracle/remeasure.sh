@@ -4,13 +4,16 @@
 # the ablation re-extracts and restores them, and the mutation run edits sources in place, so it
 # runs last and on a copy of the corpus, never on the one the others read.
 #
-# Usage: remeasure.sh <work dir holding corpus/<app>> <dir holding the round-two graphs>
+# Usage: remeasure.sh <work dir holding corpus/<app>>
+# The work dir must not be under /tmp: macOS deletes files there it has not seen used for a few
+# days, and it emptied every corpus repository's .git once during this work.
 set -euo pipefail
-W=$(cd "$1" && pwd); BEFORE=$(cd "$2" && pwd)
-HERE=$(cd "$(dirname "$0")" && pwd); REPO=$(cd "$HERE/../.." && pwd); TEX="$HERE/../thesis"
+W=$(cd "$1" && pwd)
+case "$W" in /tmp/*|/private/tmp/*) echo "the work dir must not be under /tmp" >&2; exit 2;; esac
+HERE=$(cd "$(dirname "$0")" && pwd); REPO=$(cd "$HERE/../.." && pwd); TEX="$HERE/../thesis"; BEFORE="$HERE/round-two-graphs"
 APPS="realworld:. alfresco:projects/aca-content ghostfolio:apps/client k8sdash:modules/web bitwarden:apps/web mifos:."
 if [ -n "$(git -C "$REPO" status --porcelain -- packages)" ]; then echo "packages/ has uncommitted changes; commit before measuring" >&2; exit 2; fi
-MAP="pnpm -s -C $REPO/packages/cli run uigraph -- map"
+CLI="pnpm -s -C $REPO/packages/cli run uigraph --"; MAP="$CLI map"
 export NODE_OPTIONS=--max-old-space-size=8192
 cd "$HERE"
 
@@ -36,7 +39,7 @@ echo "== ledger of the round's tier"
 pnpm -s -C "$REPO" exec tsx "$HERE/must-context.mjs" --corpus "$W/corpus" --before "$BEFORE" --after "$W/corpus" --out "$HERE/results-must" --tex "$TEX/generated-must.tex"
 
 echo "== must tier with every guard passing"
-node guard-only.mjs --corpus "$W/corpus" --out "$W/guard-only" --tex "$TEX/generated-guard-only.tex"
+pnpm -s -C "$REPO" exec tsx "$HERE/guard-only.mjs" --corpus "$W/corpus" --out "$W/guard-only" --tex "$TEX/generated-guard-only.tex"
 cp "$W/guard-only/guard-only.json" results-must/guard-only.json
 
 echo "== ablation and ground truth"
@@ -47,7 +50,7 @@ pnpm -s exec tsx score-ground-truth.mjs --truth ground-truth/realworld.json \
 echo "== mutation run, on a copy of the corpus"
 rm -rf "$W/corpus-rq4"; mkdir -p "$W/corpus-rq4"
 for a in realworld alfresco bitwarden; do cp -cR "$W/corpus/$a" "$W/corpus-rq4/$a" 2>/dev/null || cp -R "$W/corpus/$a" "$W/corpus-rq4/$a"; done
-export UIGRAPH_MAP="$MAP"
+export UIGRAPH_MAP="$CLI"
 for p in realworld:. alfresco:projects/aca-content bitwarden:apps/web; do a=${p%%:*}; s=${p#*:}
   node mutate.mjs "$W/corpus-rq4/$a" "$W/corpus-rq4/$a/$s" --attribution --quota 8 --seed 20261021 --json "results-rq4/rq4-$a-attributed.json" > "$W/rq4-$a.log" 2>&1
   node mutate.mjs "$W/corpus-rq4/$a" "$W/corpus-rq4/$a/$s" --quota 8 --seed 20261021 --json "results-rq4/rq4base-$a.json" > "$W/rq4base-$a.log" 2>&1
@@ -56,4 +59,5 @@ node rq4-to-latex.mjs results-rq4/rq4-realworld-attributed.json results-rq4/rq4-
   results-rq4/rq4base-realworld.json results-rq4/rq4base-alfresco.json results-rq4/rq4base-bitwarden.json > "$W/rq4.tex" 2> results-rq4/rq4-diagnostics.txt
 cp "$W/rq4.tex" "$TEX/generated-rq4.tex"
 node to-plots.mjs --rq4-only results-rq4/rq4-realworld-attributed.json results-rq4/rq4-alfresco-attributed.json results-rq4/rq4-bitwarden-attributed.json > "$TEX/generated-plots-rq4.tex"
+node sweep-to-latex.mjs --tex "$TEX/generated-sweep.tex"
 echo "== done $(date +%H:%M:%S)"

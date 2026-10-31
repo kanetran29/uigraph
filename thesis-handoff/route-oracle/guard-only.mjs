@@ -1,46 +1,42 @@
 #!/usr/bin/env node
 // What the must tier would hold if every guard let the navigation through.
 //
-// The extractor never evaluates a guard: a guard on the destination demotes the edge whatever
-// the guard would decide. So a small must tier says what the extractor can prove without
-// evaluating guards, not that the applications lack unconditional transitions. This maps each
-// application again with UIGRAPH_IGNORE_GUARDS=1, which keeps every other demotion, and counts
-// the must edges that a guard alone kept off the tier, and, of those, the ones whose source is
-// already behind every guard of the destination: a user on that screen has passed those guards,
-// so the navigation is refused only if a guard decides differently on a second call. The source's
-// guards are read off the edges that enter it, so a source no edge enters counts as unguarded,
-// and that count is a lower bound.
+// The extractor never evaluates a guard: a guard that can refuse the navigation demotes the edge
+// whatever the guard would decide. So a small must tier says what the extractor can prove
+// without evaluating guards, not that the applications lack unconditional transitions. This
+// extracts each application again with UIGRAPH_IGNORE_GUARDS=1, which keeps every other
+// demotion, and counts the must edges a guard alone kept off the tier, and, of those, the ones
+// whose source screen is already behind every guard of the destination, read off the route
+// configuration with the extractor's own readers: a user on that screen has passed those
+// guards, so the navigation is refused only if a guard decides differently on a second call. A
+// source that is not a screen of its own counts as not behind.
 //
-// Usage: node guard-only.mjs --corpus <dir> --out <dir> [--tex <file>]
-import { execSync } from 'node:child_process'
-import { DatabaseSync } from 'node:sqlite'
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+// Usage: pnpm exec tsx guard-only.mjs --corpus <dir> --out <dir> [--tex <file>]
+import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { buildProject, extractGraph } from '../../packages/adapter-angular/src/extract.ts'
+import { collectRoutes } from '../../packages/adapter-angular/src/routes.ts'
+import { gateFromGuards } from '../../packages/adapter-angular/src/gates.ts'
 import { extractorStamp } from './provenance.mjs'
 
 const argv = process.argv.slice(2)
 const flag = (n) => { const i = argv.indexOf(n); return i > -1 ? argv[i + 1] : undefined }
 const corpus = flag('--corpus'), outDir = flag('--out'), tex = flag('--tex')
-if (!corpus || !outDir) { console.error('usage: node guard-only.mjs --corpus <dir> --out <dir> [--tex <file>]'); process.exit(2) }
-const repo = path.resolve(import.meta.dirname, '..', '..')
+if (!corpus || !outDir) { console.error('usage: pnpm exec tsx guard-only.mjs --corpus <dir> --out <dir> [--tex <file>]'); process.exit(2) }
 const APPS = { realworld: '.', alfresco: 'projects/aca-content', ghostfolio: 'apps/client', k8sdash: 'modules/web', bitwarden: 'apps/web', mifos: '.' }
 
 mkdirSync(outDir, { recursive: true })
 const rows = []
 for (const [slug, sub] of Object.entries(APPS)) {
-  const db = path.join(outDir, `${slug}.guard-only.uigraph.db`)
-  rmSync(db, { force: true })
-  execSync(`pnpm -s -C ${JSON.stringify(path.join(repo, 'packages', 'cli'))} run uigraph -- map ${JSON.stringify(path.join(corpus, slug, sub))} --adapter angular --attribution --out ${JSON.stringify(db)}`,
-    { stdio: 'pipe', env: { ...process.env, UIGRAPH_IGNORE_GUARDS: '1', NODE_OPTIONS: '--max-old-space-size=8192' } })
-  const g = JSON.parse(new DatabaseSync(db).prepare("select json from docs where key='graph'").get().json)
-  const guardsOf = (text) => new Set((text ?? '').split(',').filter(Boolean))
-  const behind = new Map()
-  for (const e of g.edges) for (const x of guardsOf(e.guard)) (behind.get(e.to) ?? behind.set(e.to, new Set()).get(e.to)).add(x)
-  const must = g.edges.filter((e) => e.modality === 'must')
+  const dir = path.resolve(corpus, slug, sub)
+  process.env.UIGRAPH_IGNORE_GUARDS = '1'
+  const { graph } = extractGraph(buildProject(dir), dir, { attribution: true })
+  delete process.env.UIGRAPH_IGNORE_GUARDS
+  const guardsOf = new Map(collectRoutes(buildProject(dir), new Map(), undefined, dir).map((r) => [r.nodeId, new Set(gateFromGuards(r.guards).guardTexts)]))
+  const must = graph.edges.filter((e) => e.modality === 'must')
   const guarded = must.filter((e) => e.guard)
-  const sourceBehind = guarded.filter((e) => [...guardsOf(e.guard)].every((x) => behind.get(e.from)?.has(x)))
+  const sourceBehind = guarded.filter((e) => [...(guardsOf.get(e.to) ?? [])].every((g) => guardsOf.get(e.from)?.has(g)))
   rows.push({ slug, must: must.length, unguarded: must.length - guarded.length, guarded: guarded.length, sourceBehind: sourceBehind.length })
-  rmSync(db, { force: true })
 }
 const sum = (k) => rows.reduce((a, r) => a + r[k], 0)
 writeFileSync(path.join(outDir, 'guard-only.json'), JSON.stringify({ rows }, null, 2) + '\n')
