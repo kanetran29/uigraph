@@ -1,21 +1,20 @@
 \chapter{Results}
 \label{ch:results}
-% Tables are generated. Do not edit them here.
-%   generated-tables.tex       to-latex.mjs, baseline run, harness 1.2.0
-%   generated-before-after.tex compare.mjs, harness 1.2.0
-%   generated-rq4.tex          rq4-to-latex.mjs, harness 1.3.0
-% RQ1 to RQ3 figures: ONE extractor commit, run twice. results-before/results.json and
-% results-after/results.json both record sha 4505fd2a and differ only by
-% "attribution": false / true. Run 5 October 2026, harness 1.2.0.
-% 4505fd2a is in no clone the project holds. The tag thesis-eval points at the commit that
-% applying attribution-v1.patch to c4f8b833 recreates, and that commit reproduces the
-% published realworld figures with the pass off (21 edges, 7 must) and on (50 edges,
-% 10 must), so it is behaviourally equivalent on that application.
-% RQ4 figures (section 5.4): run 22 October 2026 at thesis-eval, harness 1.3.0, which
-% changes mutate.mjs only, so the RQ1 to RQ3 figures from 1.2.0 are unaffected; see
-% corpus.json harnessChangelog.
-% Still to do: push thesis-eval, confirm it reproduces the other five applications, and
-% extend mutation beyond the three applications it covers.
+% Tables are generated. Do not edit them here. Each generated file names its own harness
+% version and run in its first lines; this block records only what no single file can say.
+% RQ1 to RQ3 figures: ONE extractor commit, run twice, results-before/results.json and
+% results-after/results.json, which both record sha 4505fd2a and differ only by
+% "attribution": false / true. 4505fd2a is in no clone the project holds; the tag thesis-eval
+% points at the commit that applying attribution-v1.patch to c4f8b833 recreates, and that
+% commit reproduces the published realworld figures with the pass off (21 edges, 7 must) and
+% on (50 edges, 10 must), so it is behaviourally equivalent on that application. The tag is
+% pushed. Those two result files are the inputs generated-plots.tex and generated-round2.tex
+% were made from, and the harness that made them is no longer on disk, so neither file can be
+% regenerated: the mutation plot is emitted separately by to-plots.mjs --rq4-only, and
+% generated-census.tex re-measures the node and edge composition from the corpus graphs.
+% RQ4 figures (section 5.4) and the census are the only ones re-measurable today.
+% Still to do: confirm the tagged commit reproduces the other five applications, and extend
+% mutation beyond the three applications it covers.
 
 The figures in this chapter were produced by the harness of
 Section~\ref{sec:protocol} on the corpus of Section~\ref{sec:corpus}. Every table is
@@ -335,6 +334,7 @@ computes for a site is the set that site fires from is a different question, and
 contribution turns on. The runtime method of Section~\ref{sec:protocol} answers one direction
 of it: navigate to each screen the graph holds, let it render, read the in-app links the page
 carries, and compare them with the edges the graph's per-screen query yields there.
+Table~\ref{tab:scope} reports it.
 
 \begin{table}[t]\small
 \caption{The scopes against the rendered interface, on the \ScopeApps{} applications this
@@ -502,7 +502,7 @@ which is the next subsection's subject.
 For \GTApp{} the screens each navigation site really fires from were read off the sources by
 hand (Section~\ref{sec:protocol}): \GTSites{} sites and \GTPairs{} (site, screen) pairs.
 Scoring every level against that gives the comparison no other method here can make, because
-it has both directions of the truth rather than one.
+it has both directions of the truth rather than one; Table~\ref{tab:groundtruth} reports it.
 
 \begin{table}[t]\small
 \caption{Each attribution level against the hand-built ground truth for \GTApp{}.

@@ -15,7 +15,7 @@
 \usepackage{titlesec}
 \titleformat{\chapter}[display]{\normalfont\Large\bfseries}{\chaptertitlename\ \thechapter}{10pt}{\LARGE}
 \newtheorem{definition}{Definition}[chapter]
-\newtheorem{claim}[definition]{Claim}
+\newtheorem{claim}{Claim}[chapter]
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \setcounter{secnumdepth}{2}
 \setcounter{tocdepth}{2}
@@ -66,6 +66,7 @@ official Aalto thesis class is applied before submission.\par}
 \end{titlepage}
 
 \chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
 A UI transition graph describes the screens of an application and the transitions a
 user can cause between them. Static extraction of such graphs is well established for
 Android, where each event handler can be attributed to the widget that registered it
@@ -139,6 +140,7 @@ almost no unconditional transition to find.
 application; Angular; dataflow analysis; program analysis; software testing
 
 \chapter*{Use of AI tools}
+\addcontentsline{toc}{chapter}{Use of AI tools}
 
 Aalto University asks that the use of artificial intelligence tools in a thesis be
 declared. An AI coding assistant was used in three ways in this work, and I am responsible for the
@@ -177,5 +179,6 @@ here.
 \include{appendix-a}
 
 \bibliographystyle{plain}
+\addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{references}
 \end{document}
