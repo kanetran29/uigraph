@@ -82,14 +82,18 @@ export interface UnreadableRoutes {
   outlets: Set<ObjectLiteralExpression>
 }
 
+/** The screens whose own address a child at the empty path already answers, in declaration order. */
+const emptyPathAnswered = new WeakSet<RouteInfo>()
+
 /**
- * Analyze a `canActivate: [A, B]` array into structured guard descriptors.
+ * Analyze a `canActivate: [A, B]` array, or the array of another guard property such as
+ * `canMatch` or `canActivateChild`, into structured guard descriptors.
  * Covers class-reference guards, named functional guards (`[requireAuth]`), and
  * inline arrow guards (`[() => inject(X)...]`); the route's source file is needed
  * to resolve named functional-guard consts.
  */
-function canActivateGuards(sf: SourceFile, obj: ObjectLiteralExpression): GuardInfo[] {
-  const prop = propNamed(obj, 'canActivate')
+function canActivateGuards(sf: SourceFile, obj: ObjectLiteralExpression, name = 'canActivate'): GuardInfo[] {
+  const prop = propNamed(obj, name)
   if (!prop || !Node.isPropertyAssignment(prop)) return []
   const init = prop.getInitializer()
   if (!init || !Node.isArrayLiteralExpression(init)) return []
@@ -809,7 +813,10 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       continue
     }
     const fullPath = joinRoutePath(parentPath, ownPath)
-    const guards = [...inheritedGuards, ...canActivateGuards(sf, obj)]
+    // A route is entered only if its canActivate and canMatch let it be (a canMatch that refuses
+    // sends the router on to another route), and its canActivateChild runs whenever a child is
+    // entered, which includes the child at the empty path that its own address may resolve to.
+    const guards = [...inheritedGuards, ...canActivateGuards(sf, obj), ...canActivateGuards(sf, obj, 'canMatch'), ...canActivateGuards(sf, obj, 'canActivateChild')]
     const componentName = identifierProp(obj, 'component')
     let componentFile = componentName ? resolveImportedFile(sf, componentName) : undefined
     let resolvedName = componentName
@@ -852,11 +859,16 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // every navigation into that screen: a guard it carries runs (bitwarden's root sends every
     // visitor on with a redirectGuard() on such a child), and a redirect it declares replaces the
     // screen as the destination. Taking a guard a branch Angular may not match is the safe side.
-    const host = !isScreen && !auxHere && ownPath === '' && parentNodeId === nodeId ? out.get(nodeId) : undefined
+    // Angular takes the first child that matches, so a redirect after a child that already
+    // answers the empty path is never reached; a guard on a later child is kept anyway, which is
+    // the safe side. A child with a component of its own at that address loses the address to the
+    // screen above it, first declared wins, but its guards still run there.
+    const host = !auxHere && ownPath === '' && parentNodeId === nodeId ? out.get(nodeId) : undefined
     if (host) {
-      const own = redirectTo === null ? canActivateGuards(sf, obj) : []
+      const own = redirectTo === null ? [...canActivateGuards(sf, obj), ...canActivateGuards(sf, obj, 'canMatch')] : []
       if (own.length > 0) host.guards = [...host.guards, ...own]
-      if (redirectTo !== null && host.redirectsTo === undefined) host.redirectsTo = redirects?.get(fullPath) ?? (redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
+      if (redirectTo === null) emptyPathAnswered.add(host)
+      else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = redirects?.get(fullPath) ?? (redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
     }
     // Counted whether or not the address is free: the walk read a route and reached an address,
     // and first-declared-wins is a choice between two routes, not a route the walk failed to

@@ -48,7 +48,7 @@ describe('templateConditional', () => {
 
 describe('callConditional', () => {
   const navigateIn = (body: string) => {
-    const sf = new Project({ useInMemoryFileSystem: true }).createSourceFile('/c.ts', `class C { router: any; svc: any; flag = true\n${body}\n}`)
+    const sf = new Project({ useInMemoryFileSystem: true }).createSourceFile('/c.ts', `@Component({ template: '<b (click)="go()"></b><b (click)="submit()"></b>' })\nclass C { router: any; svc: any; flag = true\n${body}\n}`)
     const call = sf.getDescendantsOfKind(SyntaxKind.CallExpression).find((c) => /\.navigate$/.test(c.getExpression().getText()))
     if (!call) throw new Error('no navigate call in the fixture')
     return callCondition(call)
@@ -120,7 +120,7 @@ describe('callConditional at module level', () => {
 
 describe('the reason a condition reader gives', () => {
   const callIn = (body: string) => {
-    const sf = new Project({ useInMemoryFileSystem: true }).createSourceFile('/r.ts', `class C { router: any; svc: any; flag = true\n${body}\n}`)
+    const sf = new Project({ useInMemoryFileSystem: true }).createSourceFile('/r.ts', `@Component({ template: '<b (click)="go()"></b>' })\nclass C { router: any; svc: any; flag = true\n${body}\n}`)
     return callCondition(sf.getDescendantsOfKind(SyntaxKind.CallExpression).find((c) => /\.navigate$/.test(c.getExpression().getText()))!)
   }
   it('names the construct that makes a site conditional', () => {
@@ -131,5 +131,56 @@ describe('the reason a condition reader gives', () => {
     expect(templateCondition(...site('@if (a) { <a §routerLink="/x">x</a> }'))).toBe('control-flow block')
     expect(templateCondition(...site('<p *ngIf="a"><a §routerLink="/x">x</a></p>'))).toBe('structural directive')
     expect(templateCondition(...site('<ng-template><a §routerLink="/x">x</a></ng-template>'))).toBe('ng-template')
+  })
+})
+
+describe('templateCondition on markup a scan can misread', () => {
+  it('reports a link inside an ICU case, where Angular instantiates no directive', () => {
+    expect(templateCondition(...site('<span i18n>{n, plural, =0 {<a §routerLink="/x">x</a>} other {y}}</span>'))).toBe('ICU case')
+    expect(templateCondition(...site('<span i18n>{g, select, a {<a §routerLink="/x">x</a>} other {y}}</span>'))).toBe('ICU case')
+  })
+  it('reads past a > inside a quoted attribute value', () => {
+    expect(templateCondition(...site('<div [class.a]="n > 0" *ngIf="c"><a §routerLink="/y">y</a></div>'))).toBe('structural directive')
+    expect(templateCondition(...site('<div [class.a]="n > 0"><a §routerLink="/y">y</a></div>'))).toBeNull()
+  })
+})
+
+describe('callCondition on the rest of the ways a call can be skipped', () => {
+  const callIn = (body: string, tpl = '<b (click)="go()"></b>') => {
+    const sf = new Project({ useInMemoryFileSystem: true }).createSourceFile('/k.ts', `@Component({ template: '${tpl}' })\nclass C { router: any; svc: any; flag = true; r: any\n${body}\n}`)
+    return callCondition(sf.getDescendantsOfKind(SyntaxKind.CallExpression).find((c) => /\.navigate$/.test(c.getExpression().getText()))!)
+  }
+  it('reports a call in a ternary arm, after && || ??, in a case clause, in a for loop and after a throw', () => {
+    expect(callIn('go() { this.flag ? this.router.navigate(["/x"]) : null }')).toBe('under a branch')
+    expect(callIn('go() { this.flag && this.router.navigate(["/x"]) }')).toBe('under a branch')
+    expect(callIn('go() { this.flag || this.router.navigate(["/x"]) }')).toBe('under a branch')
+    expect(callIn('go() { this.r ?? this.router.navigate(["/x"]) }')).toBe('under a branch')
+    expect(callIn('go() { switch (this.flag) { case true: this.router.navigate(["/x"]) } }')).toBe('under a branch')
+    expect(callIn('go() { for (let i = 0; i < 3; i++) { this.router.navigate(["/x"]) } }')).toBe('in a loop')
+    expect(callIn('go() { if (!this.flag) { throw new Error() } \n this.router.navigate(["/x"]) }')).toBe('after early exit')
+  })
+  it('reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value', () => {
+    expect(callIn('go() { do { if (this.flag) break; this.router.navigate(["/x"]) } while (false) }')).toBe('after early exit')
+    expect(callIn('go() { out: { if (this.flag) break out; this.router.navigate(["/x"]) } }')).toBe('after early exit')
+    expect(callIn('go() { this.r ||= this.router.navigate(["/x"]) }')).toBe('under a branch')
+    expect(callIn('go() { this.r ??= this.router.navigate(["/x"]) }')).toBe('under a branch')
+    expect(callIn('go() { this.svc?.log(this.router.navigate(["/x"])) }')).toBe('under a branch')
+    expect(callIn('go(r = this.router.navigate(["/x"])) { }')).toBe('under a branch')
+    expect(callIn('go() { this.router?.navigate(["/x"]) }')).toBe('under a branch')
+  })
+  it('does not count a break that leaves only a loop of its own', () => {
+    expect(callIn('go() { for (const x of this.svc.xs) { if (x) break } \n this.router.navigate(["/x"]) }')).toBeNull()
+  })
+  it('treats a member the template does not bind as a helper, conditional unless a handler calls it unconditionally', () => {
+    expect(callIn('go() { this.bail() } \n private bail() { this.router.navigate(["/x"]) }')).toBeNull()
+    expect(callIn('go() { if (this.flag) { this.bail() } } \n private bail() { this.router.navigate(["/x"]) }')).toBe('in a helper method')
+    expect(callIn('other() { this.router.navigate(["/x"]) }')).toBe('in a helper method')
+    expect(callIn('ngOnInit() { this.router.navigate(["/x"]) }')).toBeNull()
+  })
+  it('treats a member bound only under a template condition, or bound with a guard, as conditional', () => {
+    expect(callIn('go() { this.router.navigate(["/x"]) }', '<b *ngIf="flag" (click)="go()"></b>')).toBe('in a helper method')
+    expect(callIn('go() { this.router.navigate(["/x"]) }', '<b (click)="flag && go()"></b>')).toBe('in a helper method')
+    expect(callIn('go = () => { this.router.navigate(["/x"]) }')).toBeNull()
+    expect(callIn('stay = () => { this.router.navigate(["/x"]) }')).toBe('in a helper method')
   })
 })

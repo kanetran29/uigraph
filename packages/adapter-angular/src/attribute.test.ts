@@ -19,7 +19,7 @@ const app = {
     export class AppComponent {}`,
   '/app/src/header.component.ts': `
     import { Component } from '@angular/core'
-    @Component({ selector: 'app-header', template: \`<a routerLink="/settings">Settings</a>\` })
+    @Component({ selector: 'app-header', template: \`<a routerLink="/settings">Settings</a>@if (signedIn) { <a routerLink="/feed">Feed</a> }\` })
     export class HeaderComponent {}`,
   '/app/src/card.component.ts': `
     import { Component } from '@angular/core'
@@ -68,18 +68,23 @@ describe('scope attribution', () => {
     expect(validateGraph(attr)).toEqual([])
   })
 
-  it('anchors shell navigation once at the scope node', () => {
+  it('anchors an uncertain shell navigation once at the scope node', () => {
     expect(attr.nodes.find((n) => n.id === SHELL_NODE_ID)?.kind).toBe('scope')
     const shell = attr.edges.filter((e) => e.from === SHELL_NODE_ID)
-    expect(shell).toHaveLength(1)
-    expect(shell[0]?.to).toBe('n_settings')
+    expect(shell.map((e) => [e.to, e.modality])).toEqual([['n_feed', 'may']])
     expect(shell[0]?.witness?.file).toBe('src/header.component.ts')
+  })
+
+  it('draws a certain shell navigation per screen, with a may self-loop at its destination', () => {
+    const fromHeader = attr.edges.filter((e) => e.to === 'n_settings' && [e.witness, ...(e.mergedWitnesses ?? [])].some((w) => w?.file === 'src/header.component.ts'))
+    expect(fromHeader.map((e) => [e.from, e.modality]).sort()).toEqual([['n_feed', 'must'], ['n_root', 'must'], ['n_settings', 'may'], ['n_settings_profile', 'must']])
   })
 
   it('attributes a shared component to every screen that renders it', () => {
     expect(has(attr, 'n_root', 'n_settings')).toBe(true)
     expect(has(attr, 'n_feed', 'n_settings')).toBe(true)
-    expect(has(attr, 'n_settings_profile', 'n_settings')).toBe(false)
+    const cardTo = (from: string) => attr.edges.some((e) => e.from === from && e.to === 'n_settings' && [e.witness, ...(e.mergedWitnesses ?? [])].some((w) => w?.file === 'src/card.component.ts'))
+    expect(cardTo('n_settings_profile')).toBe(false)
   })
 
   it('anchors a parent route template at its subtree and expands it to the child screen', () => {
@@ -93,7 +98,7 @@ describe('scope attribution', () => {
   it('expands shell edges to every screen', () => {
     const expanded = expandAnchoredEdges(attr)
     for (const s of ['n_root', 'n_feed', 'n_settings', 'n_settings_profile']) {
-      expect(expanded.edges.some((e) => e.from === s && e.to === 'n_settings')).toBe(true)
+      expect(expanded.edges.some((e) => e.from === s && e.to === 'n_feed')).toBe(true)
     }
     expect(expanded.nodes.some((n) => n.kind === 'scope')).toBe(false)
   })

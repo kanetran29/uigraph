@@ -563,7 +563,7 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
       '/ws/apps/web/src/a.component.ts': C('<p>a</p>'),
       '/ws/apps/web/src/shell.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'app-shell', template: '<router-outlet></router-outlet>' })\nexport class Shell { router: any; go() { this.router.navigate(['/lock']) } }`,
       '/ws/apps/web/src/wrapper.component.ts': `import { Component } from '@angular/core'\nimport { LibConfirm } from '../../../libs/ui/src/lib-confirm.component'\n@Component({ standalone: true, imports: [LibConfirm], template: '<lib-confirm></lib-confirm>' })\nexport class Wrapper {}`,
-      '/ws/libs/ui/src/lib-confirm.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, selector: 'lib-confirm', template: '<p>confirm</p>' })\nexport class LibConfirm { router: any; done() { this.router.navigate(['/login']) } }`,
+      '/ws/libs/ui/src/lib-confirm.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, selector: 'lib-confirm', template: '<p (click)="done()">confirm</p>' })\nexport class LibConfirm { router: any; done() { this.router.navigate(['/login']) } }`,
       '/ws/apps/browser/src/popup/app.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'app-root', template: '<router-outlet></router-outlet>' })\nexport class Popup { router: any; go() { this.router.navigate(['/login']) } }`,
       '/ws/apps/browser/src/popup/guard.service.ts': `export class Guard { router: any; go() { this.router.navigate(['/login']) } }`,
       '/ws/apps/browser/src/popup/popup.effects.ts': `import { createEffect } from '@ngrx/effects'\nexport class PopupEffects { router: any; e = createEffect(() => { this.router.navigate(['/login']); return null as any }, { dispatch: false }) }`,
@@ -2532,8 +2532,8 @@ export const routes: Routes = [
   { path: '**', redirectTo: '' },
 ]`,
     // the catch-all construct comes first, so the certain one has to take its place
-    '/app/a.component.ts': C('<p>a</p>', `gone() { this.router.navigate(['/nowhere']) }\n  go() { this.router.navigate(['/']) }`),
-    '/app/b.component.ts': C('<p>b</p>', `gone() { this.router.navigate(['/nowhere']) }`),
+    '/app/a.component.ts': C('<p (click)="gone()">a</p><b (click)="go()">b</b>', `gone() { this.router.navigate(['/nowhere']) }\n  go() { this.router.navigate(['/']) }`),
+    '/app/b.component.ts': C('<p (click)="gone()">b</p>', `gone() { this.router.navigate(['/nowhere']) }`),
   })
 
   it('is as certain as its most certain construct, which becomes its witness', () => {

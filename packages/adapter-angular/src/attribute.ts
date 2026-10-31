@@ -25,6 +25,7 @@ import type { SoundinessNote } from '@ui-graph/core'
 import { inlineTemplate } from './templates'
 import type { RouteInfo } from './routes'
 import { isInsideDir } from './resolve'
+import { templateCondition } from './conditions'
 
 export const SHELL_NODE_ID = 'n_scope_shell'
 
@@ -95,6 +96,15 @@ export interface ScopeResult {
   notes: SoundinessNote[]
   /** subtree(r) for every route node id: r and all its descendants. */
   subtreeOf: Map<string, Set<string>>
+  /**
+   * The screens of `screensOf` on which a component is mounted unconditionally: reached from a
+   * route component through templates that place each child outside any control-flow block,
+   * structural directive or `<ng-template>`. On its other screens it renders only on some
+   * executions, so its navigation sites are conditional there.
+   */
+  firmScreensOf: Map<string, Set<string>>
+  /** The shell components mounted unconditionally from the shell's root. */
+  firmShell: Set<string>
 }
 
 /** The route whose subtree is exactly `screens`, if there is one (an anchor), else null. */
@@ -166,8 +176,12 @@ function importedFiles(sf: SourceFile): Set<string> {
   return out
 }
 
-/** Nesting graph: component file -> component files its template instantiates. */
-export function nestingGraph(components: Map<string, ComponentInfo>, notes: SoundinessNote[]): Map<string, Set<string>> {
+/**
+ * Nesting graph: component file -> component files its template instantiates. `firm`, when
+ * given, receives the sub-graph of the placements at least one of which sits outside every
+ * template condition, read at the child's own tag so a directive on it counts.
+ */
+export function nestingGraph(components: Map<string, ComponentInfo>, notes: SoundinessNote[], firm?: Map<string, Set<string>>): Map<string, Set<string>> {
   const bySelector = new Map<string, ComponentInfo[]>()
   for (const c of components.values()) for (const s of c.selectors) {
     const list = bySelector.get(s) ?? []
@@ -183,9 +197,14 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
   const graph = new Map<string, Set<string>>()
   for (const a of components.values()) {
     const kids = new Set<string>()
+    const firmKids = new Set<string>()
     graph.set(a.file, kids)
+    firm?.set(a.file, firmKids)
     if (!a.template) continue
-    const tags = new Set([...a.template.matchAll(/<([a-zA-Z][\w-]*)/g)].map((m) => m[1] as string))
+    const template = a.template
+    const tagMatches = [...template.matchAll(/<([a-zA-Z][\w-]*)/g)]
+    const tags = new Set(tagMatches.map((m) => m[1] as string))
+    const firmTags = new Set(tagMatches.filter((m) => templateCondition(template, m.index + 1) === null).map((m) => m[1] as string))
     let imports: Set<string> | null = null
     for (const tag of tags) {
       const cands = bySelector.get(tag)
@@ -197,12 +216,14 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
         if (narrowed.length > 0) chosen = narrowed
         else notes.push({ kind: 'ambiguous-selector', file: a.file, detail: `<${tag}> matches ${cands.length} components and none is imported directly; joined over all` })
       }
-      for (const c of chosen) if (c.file !== a.file) kids.add(c.file)
+      for (const c of chosen) if (c.file !== a.file) { kids.add(c.file); if (firmTags.has(tag)) firmKids.add(c.file) }
     }
     // A directive is applied as an attribute, so the template that carries the attribute is
     // what renders it. Bound and plain forms both count: `acaAction`, `[acaAction]`.
     if (byAttribute.size > 0) {
-      const attrs = new Set([...a.template.matchAll(/[\s[(]([a-zA-Z][\w-]*)[\])]?\s*(?==|\/?>|\s)/g)].map((m) => m[1] as string))
+      const attrMatches = [...template.matchAll(/[\s[(]([a-zA-Z][\w-]*)[\])]?\s*(?==|\/?>|\s)/g)]
+      const attrs = new Set(attrMatches.map((m) => m[1] as string))
+      const firmAttrs = new Set(attrMatches.filter((m) => templateCondition(template, m.index) === null).map((m) => m[1] as string))
       for (const attr of attrs) {
         const cands = byAttribute.get(attr)
         if (!cands) continue
@@ -213,7 +234,7 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
           if (narrowed.length > 0) chosen = narrowed
           else notes.push({ kind: 'ambiguous-selector', file: a.file, detail: `attribute ${attr} matches ${cands.length} directives and none is imported directly; joined over all` })
         }
-        for (const c of chosen) if (c.file !== a.file) kids.add(c.file)
+        for (const c of chosen) if (c.file !== a.file) { kids.add(c.file); if (firmAttrs.has(attr)) firmKids.add(c.file) }
       }
     }
   }
@@ -246,7 +267,8 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // Test hosts and stories declare components too; they are not part of the application.
   const appFiles = sfs.filter((sf) => !/\.(spec|test|stories|cy|e2e)\.ts$/.test(sf.getFilePath()) && !/\/(testing|__tests__|e2e)\//.test(sf.getFilePath()))
   const components = collectComponents(appFiles)
-  const nesting = nestingGraph(components, notes)
+  const firmNesting = new Map<string, Set<string>>()
+  const nesting = nestingGraph(components, notes, firmNesting)
 
   // Route tree: children per node id, and the screens each route component renders on.
   const children = new Map<string, string[]>()
@@ -286,22 +308,27 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // the returned map afterwards would leave it in every nested component's scope.
   const descentBase = layers === 'outlet' || layers === 'full' ? routeComponentScreens : ownScreens
   const screensOf = new Map<string, Set<string>>()
-  for (const [f, screens] of descentBase) {
-    for (const c of reach(nesting, f)) {
-      if (c === f || routeComponentScreens.has(c)) continue
-      const set = screensOf.get(c) ?? new Set<string>()
-      for (const s of screens) set.add(s)
-      screensOf.set(c, set)
+  const firmScreensOf = new Map<string, Set<string>>()
+  for (const [graph, into] of [[nesting, screensOf], [firmNesting, firmScreensOf]] as const) {
+    for (const [f, screens] of descentBase) {
+      for (const c of reach(graph, f)) {
+        if (c === f || routeComponentScreens.has(c)) continue
+        const set = into.get(c) ?? new Set<string>()
+        for (const s of screens) set.add(s)
+        into.set(c, set)
+      }
     }
   }
 
   // Shell: non-routed components that hold a <router-outlet> and are not rendered
   // inside any routed component; everything they reach (except routed components) is top.
   const shell = new Set<string>()
+  const firmShell = new Set<string>()
   for (const c of components.values()) {
     if (!mayBeShell(c.file) || routeComponentScreens.has(c.file) || screensOf.has(c.file)) continue
     if (!c.template || !/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/.test(c.template)) continue
     for (const x of reach(nesting, c.file)) if (!routeComponentScreens.has(x)) shell.add(x)
+    for (const x of reach(firmNesting, c.file)) if (!routeComponentScreens.has(x)) firmShell.add(x)
   }
   // Indirect shells: components nobody references and no route renders, whose subtree
   // contains a component with the primary outlet.
@@ -363,7 +390,7 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   }
 
 
-  return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf, standIns: layers === 'full' }
+  return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf, standIns: layers === 'full', firmScreensOf, firmShell }
 }
 
 /** Class names a component declares a dependency on: constructor parameter types and `inject(X)`. */
