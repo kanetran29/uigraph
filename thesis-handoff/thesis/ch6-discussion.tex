@@ -508,9 +508,12 @@ at startup from provider configuration instead of being declared as data, neithe
 extractor nor the independent parser recovers the routes. This approximation bounds the
 corpus as well as the tool, since it is why one candidate application was rejected
 (Section~\ref{sec:corpus}).
-\item \textbf{Attribute selectors in the nesting relation.} Only element selectors are
-matched, so a component instantiated through an attribute selector does not appear in the
-nesting graph.
+\item \textbf{Ambiguous selectors in the nesting relation.} When a selector belongs to more
+than one component, the candidates are narrowed to those the rendering file imports; where none
+is imported, the analysis joins over all of them and records a note. Such a join can attribute a
+site to screens on which the component it belongs to is never rendered. Attribute selectors are
+matched as element selectors are, so a directive is in the nesting graph wherever its attribute
+appears.
 \end{itemize}
 
 Table~\ref{tab:approx-counts} gives the prevalence of the approximated constructs in the

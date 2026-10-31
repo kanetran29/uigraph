@@ -27,7 +27,8 @@ Section~\ref{sec:res-round2} records what repairing it took.
 The answer to RQ2 is that the failures fall into five defect classes, each confirmed by at
 least two independent lines of evidence, at least one of them from a named evaluation
 method, together with one candidate class that has a single confirmation, and that assigning every lost construct to exactly one class makes
-attribution the largest class in most of the corpus once the node defects are repaired.
+attribution the largest class in every application of the corpus once the node defects are
+repaired.
 
 The answer to RQ3 is that scope attribution recovers \AttrRecovered{} of the \AttrLost{}
 constructs the loss rules assign to it, \AttrRecoveredShare{} of that class, on every
@@ -58,16 +59,20 @@ of them no edge enters the screen, which is RQ1's coverage gap, and \MutExcluded
 guards a route that yields no screen for RQ1 to have missed. Neither is a defect in how the
 graph represents a guard.
 
-The thesis contributes one mechanism, and the apparatus that makes its claims
-checkable. The mechanism is scope attribution, formulated as a dataflow analysis over the
-powerset lattice of screen sets, computed as a fixpoint over four input relations, with a
-soundness property for the deterministic tier that is stated and mechanically tested,
-though not proved, over the declared route set and paired with an explicit list of the
-constructs the analysis does not decide (Claim~\ref{claim:must},
-Section~\ref{sec:approximations}). Nothing in its formulation depends on a particular
+The thesis contributes a measurement and the apparatus that makes it checkable, and a
+mechanism whose specification outruns its evidence. The mechanism is scope attribution,
+specified as a dataflow analysis over the powerset lattice of screen sets and implemented over
+two of its four input relations, with a soundness property for the deterministic tier that is
+stated and mechanically tested, though not proved, over the declared route set and paired with
+an explicit list of the constructs the analysis does not decide (Claim~\ref{claim:must},
+Section~\ref{sec:approximations}). It recovers \AttrRecoveredShare{} of the loss class it
+addresses, almost all of it onto the uncertain tier, and where the real (site, screen) pairs
+could be read by hand it raises recall from \GTRootedRecall{} to \GTFullRecall{} while taking
+precision from \GTRootedPrecision{} to \GTFullPrecision{} --- a trade rather than an
+improvement, and established on \GTApp{} alone. Nothing in its formulation depends on a particular
 extractor; what an extractor supplies is the screens and the navigation sites it ranges
 over, and Chapter~\ref{ch:results} shows that what the mechanism can recover is bounded
-by how completely those are read. The rest is apparatus. Static navigation extraction is measured on a corpus of six Angular
+by how completely those are read. The measurement is the part that stands on its own. Static navigation extraction is measured on a corpus of six Angular
 applications pinned to fixed commits, with five methods. Four of them read the
 applications' sources --- a witness check that re-parses the source at each claimed
 location, a differential test against an independently written route parser, a

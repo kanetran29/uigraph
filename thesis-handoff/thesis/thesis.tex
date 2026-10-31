@@ -79,7 +79,7 @@ what the extraction fails to read.
 
 This thesis measures static extraction on six open-source Angular applications with
 \RoundTwoRoutesRealworld{} declared route entries to more than nine hundred, using a pinned corpus and five
-independent evaluation methods. Measured at two levels, the extractor mints a node for
+evaluation methods, four reading the applications' sources and one the running application. Measured at two levels, the extractor mints a node for
 every screen the route configuration declares, as two independent static readers
 enumerate it, and recovers a small fraction of the navigation constructs as
 deterministic transitions; before the defects this thesis identifies were repaired, two of
@@ -94,11 +94,18 @@ class in every application of the corpus once the
 node-level defects this thesis identifies are repaired. In a web application, a navigation site
 frequently has no single owning screen: it may be located in a shared component, in
 an injected service, or in a route guard. The thesis formulates attribution as a
-dataflow analysis over a lattice of screen sets, computed as a fixpoint over component
-nesting, router outlets and a call graph that takes dependency injection into account.
-It states a soundness property for the deterministic tier, which it tests mechanically
-rather than proving, implements the nesting and outlet parts, and evaluates them on the
-same corpus with the same methods. With attribution, \AttrRecoveredShare{} of the
+dataflow analysis over a lattice of screen sets, specified as a fixpoint over four input
+relations: component nesting, router outlets, a call graph that takes dependency injection into
+account, and a dispatch relation. The prototype implements the first two, for which the
+fixpoint reduces to reachability, and stands in for the other two with approximations it never
+reports as deterministic.
+It states a soundness property for the deterministic tier, which it tests mechanically on
+every one of the \RoundTwoMustEdges{} such edges the corpus yields rather than proving, and
+evaluates the implemented part on the same corpus. What it adds beyond the mechanism earlier
+work already has is small and measured: router-outlet descent leaves the number of placed sites
+unchanged on \AblationOutletSameSitesApps{} of the six applications, the injected-service join
+places \AblationFullAddedSites{} more, \AblationFullAddedShare{} of the corpus total, and the
+width they buy is checked in both directions on one application only. With attribution, \AttrRecoveredShare{} of the
 constructs that loss class holds are recovered, on every application in the corpus, and
 precision on the deterministic tier does not fall. Almost all of the gain is navigation the
 graph reports as possible rather than certain. On the one application small enough for the
