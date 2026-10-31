@@ -41,8 +41,8 @@ flow graph by firing events against the DOM of a running application
 \cite{crawljax2012}, and later tools in the same line improve the exploration strategy
 without changing where the model comes from \cite{feedex2013,fraggen2022}. A survey of web
 testing published in 2025 collects the model-based tools of the past decade
-\cite{websurvey2025}. Among the tools it lists, no model is derived from source code
-rather than from execution. Static analyses of a modern client-side framework are few. One
+\cite{websurvey2025}. Of the tools it lists, every one whose model construction was examined for this thesis
+builds that model by executing the application. Static analyses of a modern client-side framework are few. One
 builds a component dependency graph for React and does not address routing
 \cite{kurant2025}. Three extract navigation, each for a different consumer: one from Angular
 in order to model-check it, accepting only applications that declare no nested routes, no

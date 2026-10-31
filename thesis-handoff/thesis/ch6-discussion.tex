@@ -124,7 +124,8 @@ through its witnesses.
 Guard removals were missed in \MutGuardMissedApps{} of the three mutated applications, one
 that declares its routes as a standalone array and one that declares them in NgModule
 routing modules, so the miss is not a property of one routing style. Neither is it a property
-of how the graph represents a guard: every one is a guard on a screen no edge enters
+of how the graph represents a guard it can place: in every case the guarded screen is one no
+edge enters, or the guarded route declares no screen at all
 (Section~\ref{sec:res-mutation}). That is the whole of the comparison the measurements support. The corpus
 was not stratified by routing style and the other three applications were not mutated,
 so nothing more general about the two styles follows from this thesis.
@@ -353,8 +354,9 @@ output to decide what the expected change is. The corpus commits, the extractor 
 and the harness version are pinned, the whole evaluation re-runs with one command, and
 the conversion, coverage, loss, remaining-loss, before-and-after and mutation tables of
 Chapter~\ref{ch:results} are generated from the results file instead of being entered
-by hand. The defect-class table, the oracle table and the inspection of the unreached
-components are written by hand. Determinism and the absence of accumulated state were checked
+by hand. The defect-class table, the oracle table, the inspection of the unreached
+components and the reading of the graph at each site where a guard mutant produced no
+response are written by hand. Determinism and the absence of accumulated state were checked
 before any measurement. Seven protocol corrections are reported in full
 (Section~\ref{sec:corrections}), including the three that made the reported figures
 worse. What
@@ -364,8 +366,8 @@ inspected by hand, and the defect classes were defined after the first observati
 rather than in advance. The requirement of two independent lines of evidence per
 defect class is the strongest control that was applied to that last point, and it is the
 reason one class is still reported as a candidate. It is a weaker control than it first
-appears: Table~\ref{tab:defects} shows that three of the five accepted classes are
-carried to two by an observation rather than by a second instrument, so for those three
+appears: Table~\ref{tab:defects} shows that four of the five accepted classes are
+carried to two by an observation rather than by a second instrument, so for those four
 the control is one method plus a judgement I made myself.
 
 The runtime check of Section~\ref{sec:res-probe} removes one threat and introduces others of its

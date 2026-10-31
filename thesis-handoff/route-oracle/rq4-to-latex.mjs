@@ -258,6 +258,10 @@ if (baseFiles.length) {
   expectSum(['MutFailures', nFailures], failuresPerApp)
 
   const L = perOp(runs, ['DELETE_ROUTERLINK']), T = perOp(runs, ['CHANGE_NAV_TARGET']), G = perOp(runs, ['REMOVE_GUARD'])
+  // The same operator on the baseline graph, because the chapter contrasts the two and the
+  // contrast is not that the baseline could score none of these mutants.
+  const LB = perOp(base, ['DELETE_ROUTERLINK'])
+  expectAtMost(['MutLinkBaseDetected', LB.det], ['MutLinkBaseScored', LB.n])
   expectSum(['MutScored', A.n], [['MutRenameScored', R.n], ['MutLinkScored', L.n], ['MutRetargetScored', T.n], ['MutGuardScored', G.n]])
   expectSum(['MutDetected', A.det], [['MutRenameDetected', R.det], ['MutLinkDetected', L.det], ['MutRetargetDetected', T.det], ['MutGuardDetected', G.det]])
   const linkWitnessOnly = runs.reduce((a, r) => a + witnessOnly(r, 'DELETE_ROUTERLINK'), 0)
@@ -267,6 +271,11 @@ if (baseFiles.length) {
   const retargetWrong = retargetFailures.filter((x) => x.verdict === 'WRONG').length
   const retargetNoChange = retargetFailures.filter((x) => x.verdict === 'MISSED').length
   expectSum(['MutRetargetScored - MutRetargetDetected', T.n - T.det], [['MutRetargetWrong', retargetWrong], ['MutRetargetNoChange', retargetNoChange]])
+  // A WRONG retarget that adds no edge and one that adds an edge to the wrong screen are two
+  // different outcomes, and the chapter states both, so neither count is typed by hand.
+  const retargetWrongNoAdd = retargetFailures.filter((x) => x.verdict === 'WRONG' &&
+    !((x.delta?.edgesAdded || []).length)).length
+  expectAtMost(['MutRetargetWrongNoAdd', retargetWrongNoAdd], ['MutRetargetWrong', retargetWrong])
 
   const guardFailuresPerApp = runs.map((r) => failures(r, 'REMOVE_GUARD'))
   const guardFailures = guardFailuresPerApp.flat()
@@ -293,7 +302,9 @@ if (baseFiles.length) {
   for (const [k, v] of [
     ['MutSampled', nSampled], ['MutBaseSampled', nBaseSampled], ['MutFailures', nFailures], ...failuresPerApp,
     ['MutLinkScored', L.n], ['MutLinkDetected', L.det], ['MutLinkWitnessOnly', linkWitnessOnly],
+    ['MutLinkBaseScored', LB.n], ['MutLinkBaseDetected', LB.det],
     ['MutRetargetScored', T.n], ['MutRetargetDetected', T.det], ['MutRetargetWrong', retargetWrong], ['MutRetargetNoChange', retargetNoChange],
+    ['MutRetargetWrongNoAdd', retargetWrongNoAdd],
     ['MutGuardScored', G.n], ['MutGuardDetected', G.det],
     ['MutGuardMissed', guardFailures.length], ['MutGuardMissedApps', guardApps],
     ['MutGuardMissedEmptyPath', guardEmptyPath], ['MutGuardMissedNamedCall', guardNamedCall],
