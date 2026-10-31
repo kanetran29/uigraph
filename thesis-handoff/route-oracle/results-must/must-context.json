@@ -68,7 +68,7 @@
       "app": "realworld",
       "edge": "n_scope_shell -> /",
       "event": "click:routerLink",
-      "fate": "self-loop",
+      "fate": "kept",
       "sites": 6,
       "unconditionalSites": 2
     },
@@ -416,15 +416,16 @@
     }
   ],
   "fates": {
-    "kept": 1,
+    "kept": 2,
     "guard": 10,
-    "redirect": 0,
-    "self-loop": 2,
-    "condition": 7
+    "self-loop": 1,
+    "condition": 7,
+    "retargeted": 0
   },
   "reasons": {
     "after await": 5,
     "in a callback": 3,
+    "in a helper method": 0,
     "under a branch": 11,
     "after early exit": 3,
     "in a catch clause": 1,
@@ -432,6 +433,17 @@
     "control-flow block": 7,
     "structural directive": 2,
     "ng-template": 0,
+    "ICU case": 0,
     "unreadable template": 0
+  },
+  "review": {
+    "a": {
+      "agree": 30,
+      "differ": []
+    },
+    "b": {
+      "agree": 30,
+      "differ": []
+    }
   }
 }

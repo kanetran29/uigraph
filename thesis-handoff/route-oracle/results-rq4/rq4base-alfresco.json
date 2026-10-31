@@ -1,7 +1,8 @@
 {
   "harnessVersion": "1.5.0",
-  "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco",
-  "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/alfresco/projects/aca-content",
+  "extractor": "% Extractor fd7b289, packages/ clean when generated.",
+  "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco",
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco/projects/aca-content",
   "attribution": false,
   "seed": 20261021,
   "quota": 8,
@@ -162,8 +163,8 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard, modality may->may",
-          "/nodes/:nodeId/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard, modality may->may"
+          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may",
+          "/nodes/:nodeId/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may"
         ]
       }
     },
@@ -193,10 +194,10 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard->PluginEnabledGuard, modality may->may",
-          "/profile -> /personal-files: guard ExtensionsDataLoaderGuard->null, modality may->must",
-          "/personal-files -> /personal-files: guard ExtensionsDataLoaderGuard->null, modality may->may",
-          "/personal-files/:folderId -> /personal-files/:folderId: guard ExtensionsDataLoaderGuard->null, modality may->may"
+          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->AuthGuard,PluginEnabledGuard, modality may->may",
+          "/profile -> /personal-files: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
+          "/personal-files -> /personal-files: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
+          "/personal-files/:folderId -> /personal-files/:folderId: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may"
         ]
       }
     },

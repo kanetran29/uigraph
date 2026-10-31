@@ -1,13 +1,14 @@
 {
   "harnessVersion": "1.5.0",
-  "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden",
-  "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden/apps/web",
+  "extractor": "% Extractor fd7b289, packages/ clean when generated.",
+  "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/bitwarden",
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/bitwarden/apps/web",
   "attribution": true,
   "seed": 20261021,
   "quota": 8,
   "baseline": {
-    "nodes": 259,
-    "edges": 270,
+    "nodes": 258,
+    "edges": 272,
     "routes": 98
   },
   "discovered": {
@@ -453,9 +454,9 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/accept-families-for-enterprise -> /setup/families-for-enterprise: guard deepLinkGuard(),authGuard->null, modality may->must",
+          "/accept-families-for-enterprise -> /setup/families-for-enterprise: guard deepLinkGuard(),authGuard->null, modality may->may",
           "/recover-2fa -> /settings/security/two-factor: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/premium/checkout/success -> /settings/subscription/premium: guard deepLinkGuard(),authGuard->null, modality may->must",
+          "/premium/checkout/success -> /settings/subscription/premium: guard deepLinkGuard(),authGuard,isSelfHosted->isSelfHosted, modality may->may",
           "/request-sm-access -> /sm-landing: guard deepLinkGuard(),authGuard->null, modality may->must"
         ]
       }
