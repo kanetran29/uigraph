@@ -256,7 +256,8 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
     )
     const toWildcard = graph.edges.filter((e) => e.to === 'n_wildcard')
     expect(toWildcard.map((e) => [e.from, e.modality, e.confidence])).toEqual([['n_home', 'may', 0.5]])
-    expect(graph.edges.some((e) => e.from === 'n_home' && e.to === 'n_home' && e.modality === 'must')).toBe(true)
+    // A link to the address already displayed is a self-loop, which the router ignores or runs only when the query differs.
+    expect(graph.edges.some((e) => e.from === 'n_home' && e.to === 'n_home' && e.modality === 'may')).toBe(true)
     expect(soundiness.some((n) => n.kind === 'unresolved-target')).toBe(false)
     const notes = soundiness.filter((n) => n.kind === 'wildcard-redirect')
     expect(notes).toHaveLength(1)
@@ -2517,31 +2518,41 @@ export const routes: Routes = [{ path: 'home', component: A }, withShell(MAIN, A
 })
 
 describe('an edge several constructs cite', () => {
-  it('takes the weakest modality over them, instead of the first one it was created with', () => {
-    // The same (from, to, event, guard) key merges a later construct into an existing edge as
-    // a witness. Keeping the first construct's modality let a site that only reaches the
-    // address through the catch-all route be cited as evidence for a deterministic edge:
-    // bitwarden declares no /vault route, and three such sites backed a must edge to the root.
-    const { graph } = extractGraph(
-      inMemory({
-        '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+  // The same (from, to, event, guard) key merges a later construct into an existing edge as a
+  // witness. bitwarden declares no /vault route, and sites that reach the root only through the
+  // catch-all were cited, with nothing to tell them apart, as evidence for a must edge to it.
+  const project = () => inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
 import { A } from './a.component'
+import { B } from './b.component'
 export const routes: Routes = [
   { path: '', component: A },
   { path: 'home', component: A },
+  { path: 'b', component: B },
   { path: '**', redirectTo: '' },
 ]`,
-        // the first construct reaches the root directly; the second only through the catch-all
-        '/app/a.component.ts': C('<p>a</p>', `go() { this.router.navigate(['/']) }\n  gone() { this.router.navigate(['/nowhere']) }`),
-      }),
-      '/app',
-    )
-    const toRoot = graph.edges.filter((e) => e.to === 'n_root' && e.event === 'navigate')
-    expect(toRoot.length).toBeGreaterThan(0)
-    for (const e of toRoot) {
-      const cites = 1 + (e.mergedWitnesses?.length ?? 0)
-      if (cites > 1) expect(e.modality).toBe('may')
-    }
+    // the catch-all construct comes first, so the certain one has to take its place
+    '/app/a.component.ts': C('<p>a</p>', `gone() { this.router.navigate(['/nowhere']) }\n  go() { this.router.navigate(['/']) }`),
+    '/app/b.component.ts': C('<p>b</p>', `gone() { this.router.navigate(['/nowhere']) }`),
+  })
+
+  it('is as certain as its most certain construct, which becomes its witness', () => {
+    const { graph } = extractGraph(project(), '/app')
+    const e = graph.edges.find((x) => x.from === 'n_home' && x.to === 'n_root' && x.event === 'navigate')!
+    expect(e.modality).toBe('must')
+    expect(e.witness?.modality).toBe('must')
+    expect(e.witness?.loc?.line).toBe(4)
+  })
+
+  it('lists every other construct with the modality it earns on its own', () => {
+    const { graph } = extractGraph(project(), '/app')
+    const e = graph.edges.find((x) => x.from === 'n_home' && x.to === 'n_root' && x.event === 'navigate')!
+    expect(e.mergedWitnesses?.map((w) => [w.loc?.line, w.modality])).toEqual([[3, 'may']])
+  })
+
+  it('stays may when no construct it cites is certain', () => {
+    const { graph } = extractGraph(project(), '/app')
+    expect(graph.edges.find((x) => x.from === 'n_b' && x.to === 'n_root')?.modality).toBe('may')
   })
 })
 

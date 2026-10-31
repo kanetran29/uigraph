@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { matchLiteral, matchPrefix, type RouteLike } from './matcher'
+import { matchLiteral, matchPrefix, primaryPath, type RouteLike } from './matcher'
 
 const routes: RouteLike[] = [
   { fullPath: '/', nodeId: 'n_root' },
@@ -33,5 +33,20 @@ describe('matchPrefix', () => {
 
   it('returns nothing when no route extends the prefix', () => {
     expect(matchPrefix('/orders/', routes)).toEqual([])
+  })
+})
+
+describe('primaryPath', () => {
+  it('leaves a URL that names no auxiliary outlet unchanged', () => {
+    expect(primaryPath('/inbox/42')).toBe('/inbox/42')
+    expect(primaryPath('edit')).toBe('edit')
+  })
+  it('drops the auxiliary groups and keeps the primary path', () => {
+    expect(primaryPath('/inbox(popup:compose)')).toBe('/inbox')
+    expect(primaryPath('/inbox/(popup:compose//side:help)')).toBe('/inbox/')
+    expect(primaryPath('/(popup:compose)')).toBe('/')
+  })
+  it('gives up on a group that also carries a primary segment', () => {
+    expect(primaryPath('/a/(b//popup:c)')).toBeNull()
   })
 })

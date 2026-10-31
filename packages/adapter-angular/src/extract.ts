@@ -14,8 +14,9 @@ import { relative, join, dirname } from 'node:path'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
-import { matchLiteral, matchPrefix, resolveRelativeTarget, type RouteLike } from './matcher'
+import { matchLiteral, matchPrefix, primaryPath, resolveRelativeTarget, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
+import { templateConditional } from './conditions'
 import { collectRoutes, type UnreadableRoutes } from './routes'
 import { resolveImportedFile, isInsideDir } from './resolve'
 import { attributeScopes, subtreeAnchor, SHELL_NODE_ID } from './attribute'
@@ -153,6 +154,9 @@ function describeUnreadable(u: UnreadableRoutes): string | null {
   return parts.length === 0 ? null : `${parts.join(' and ')} could not be read`
 }
 
+/** Order of certainty among the modalities an edge can carry. */
+const MODALITY_RANK: Record<GraphEdge['modality'], number> = { unknown: 0, may: 1, must: 2 }
+
 /**
  * Extract a graph from an already-built ts-morph project (testable in memory). Route collection
  * stops at `projectDir`; scope attribution does not, because a shared library the application
@@ -185,6 +189,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const wildcardScreen = routeLikes.find((r) => r.fullPath === '*') ?? null
   const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
+  const redirectOfNode = new Map(routes.flatMap((r) => (r.redirectsTo !== undefined ? [[r.nodeId, r.redirectsTo] as const] : [])))
+  const componentByNodeId = new Map(routes.map((r) => [r.nodeId, r.componentFile ? relative(projectDir, r.componentFile.getFilePath()) : null]))
+  // The screens a scope anchor stands for, filled as anchors are minted.
+  const anchorMembers = new Map<string, Set<string>>()
 
   // A screen is a ROUTE, not a component: one component serving several routes
   // (/login and /register on one AuthComponent) is several states. Label those
@@ -205,47 +213,35 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   // form "the application declares no route at this path" is void while this note is
   // present, so a consumer can gate on it without parsing another note's prose.
   if (unreadableText) soundiness.push({ kind: 'incomplete-route-set', detail: `${unreadableText}, so the declared route set is a lower bound and no claim that a path is undeclared holds` })
-  const seen = new Set<string>()
   const edgeById = new Map<string, GraphEdge>()
   const seenAsyncGuards = new Set<string>()
 
   function pushEdge(from: string, to: string, t: RawTarget, modality: GraphEdge['modality'], confidence: number, guard: string | null, file: string): void {
     const id = edgeId(from, to, t.event, guard)
-    if (seen.has(id)) {
-      // Record the extra construct instead of dropping it, so every construct that yields
-      // an edge stays traceable.
-      const e = edgeById.get(id)
-      const w = { source: 'static' as const, file: t.file ?? file, loc: t.loc, ruleId: t.ruleId }
-      if (e && !(e.witness?.file === w.file && e.witness?.loc?.line === w.loc.line) && !e.mergedWitnesses?.some((m) => m.file === w.file && m.loc?.line === w.loc.line)) {
-        ;(e.mergedWitnesses ??= []).push(w)
-        // An edge asserts that EVERY site it cites produces it, so its modality has to be the
-        // weakest any of them earns. Keeping the first site's modality let a site that only
-        // reaches this address through the catch-all route merge into a deterministic edge and
-        // inherit its certainty: bitwarden navigates to /vault, which it declares no route
-        // for, and three such sites were cited as evidence for a must edge to the root.
-        if (modality === 'may' && e.modality === 'must') {
-          e.modality = 'may'
-          e.confidence = Math.min(e.confidence ?? 1, confidence)
-        } else if (e.confidence !== undefined && confidence < e.confidence) {
-          e.confidence = confidence
-        }
-      }
+    const w = { source: 'static' as const, file: t.file ?? file, loc: t.loc, ruleId: t.ruleId, modality }
+    const e = edgeById.get(id)
+    if (!e) {
+      edges.push({ id, from, to, event: t.event, guard, effect: t.effect, modality, source: 'static', confidence, witness: w })
+      edgeById.set(id, edges[edges.length - 1]!)
       return
     }
-    seen.add(id)
-    edges.push({
-      id,
-      from,
-      to,
-      event: t.event,
-      guard,
-      effect: t.effect,
-      modality,
-      source: 'static',
-      confidence,
-      witness: { source: 'static', file: t.file ?? file, loc: t.loc, ruleId: t.ruleId },
-    })
-    edgeById.set(id, edges[edges.length - 1]!)
+    // Record the extra construct instead of dropping it, so every construct that yields an
+    // edge stays traceable.
+    if ((e.witness?.file === w.file && e.witness?.loc?.line === w.loc.line) || e.mergedWitnesses?.some((m) => m.file === w.file && m.loc?.line === w.loc.line)) return
+    // An edge is as certain as the most certain construct that produces it: one construct that
+    // reaches the destination on every execution of its code makes the transition certain,
+    // whatever else may also reach it. That construct becomes the edge's witness, and every
+    // other construct is listed with the modality it earns on its own, so a construct that
+    // reaches the destination only through the catch-all, or only under a condition, is never
+    // cited as evidence of certainty.
+    if (MODALITY_RANK[modality] > MODALITY_RANK[e.modality] || (modality === e.modality && confidence > e.confidence)) {
+      if (e.witness) (e.mergedWitnesses ??= []).push(e.witness)
+      e.witness = w
+      e.modality = modality
+      e.confidence = confidence
+    } else {
+      ;(e.mergedWitnesses ??= []).push(w)
+    }
   }
 
   /**
@@ -265,10 +261,19 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // a template one or the call passes `relativeTo`; without that the base is the root.
         // Either way a leading `.` or `..` is resolved — leaving it raw matches nothing.
         const base = t.relative ? pathByNodeId.get(from) : '/'
-        const value = resolveRelativeTarget(t.ti.value, base)
+        // An auxiliary outlet the adapter does not model; the primary path is what it reaches.
+        const primary = primaryPath(t.ti.value)
+        if (primary === null) continue
+        const value = resolveRelativeTarget(primary, base)
+        // A relative target resolves against the route of the component that holds the site, and
+        // the emitting node's path is that route only when the node is the component's own route.
+        const baseUnknown = !primary.startsWith('/') && (t.baseUnknown === true || (t.relative === true && componentByNodeId.get(from) !== file))
         let target = matchLiteral(value, routeLikes)
-        // A link to a redirect reaches what the redirect forwards to; follow it one step.
-        if (!target && redirects.has(value)) target = matchLiteral(redirects.get(value)!, routeLikes)
+        // A link to a redirect reaches what the redirect forwards to; follow it one step. So does a
+        // link to a screen whose own address an empty-path child redirects.
+        const forwarded = target ? redirectOfNode.get(target.nodeId) : undefined
+        if (target && forwarded !== undefined && pathByNodeId.get(target.nodeId) === value.split(/[?#]/)[0]) target = matchLiteral(forwarded, routeLikes)
+        else if (!target && redirects.has(value)) target = matchLiteral(redirects.get(value)!, routeLikes)
         // A target no route declares is not nowhere: a `**` route catches it. Either it sends
         // it on (`redirectTo`) or it answers it itself with a catch-all screen (`component`,
         // mifos's and alfresco's NotFound page). The destination is real, but the author almost
@@ -300,13 +305,17 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           }
         }
         if (!target) {
-          if (note) soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route` })
+          if (note) soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route${baseUnknown ? ', resolved against a base the reader could not fix' : ''}` })
           continue
         }
         const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
         noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
         const guardText = gate.guarded ? gate.guardTexts.join(',') : null
-        const uncertain = gate.guarded || capMay || viaWildcard || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
+        // A navigation to the address its source already displays is ignored by Angular's
+        // default router, or runs only when a parameter or the query differs, so it does not
+        // occur on every execution. The shell stands for every screen, the target among them.
+        const selfLoop = target.nodeId === from || from === SHELL_NODE_ID || anchorMembers.get(from)?.has(target.nodeId) === true
+        const uncertain = gate.guarded || capMay || viaWildcard || baseUnknown || selfLoop || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
         pushEdge(from, target.nodeId, t, uncertain ? 'may' : 'must', gate.guarded ? gate.confidence : uncertain ? 0.5 : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
         const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
@@ -376,6 +385,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         id = `n_scope_subtree__${root}`
         anchors.set(root, id)
         const members = [root, ...[...scopes.subtreeOf.get(root)!].filter((m) => m !== root).sort()]
+        anchorMembers.set(id, new Set(members))
         nodes.push({ id, route: null, componentPath: null, label: `subtree of ${pathByNodeId.get(root) ?? root}`, kind: 'scope', scope: { kind: 'subtree', root, members } })
       }
       return id
@@ -471,8 +481,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const screens = new Set([...(scopes.serviceScreens.get(f) ?? []),
         ...(scopes.standIns ? guardScreens.get(f) ?? [] : [])])
       if (screens.size === 0) {
-        // An effect that reaches here failed the projectDir guard above: it is unplaced, not known to be unused.
-        const where = isEffect ? 'an NgRx effect outside the application directory; whether the application registers it is not read, so its scope could not be placed' : 'a class nothing in the application injects; its scope is empty'
+        // An effect that reaches here is unplaced, not known to be unused.
+        const where = !isEffect ? 'a class nothing in the application injects; its scope is empty'
+          : isInsideDir(f, projectDir) ? 'an NgRx effect; the shell stand-in for dispatch applies only at the full attribution level, so its scope could not be placed'
+          : 'an NgRx effect outside the application directory; whether the application registers it is not read, so its scope could not be placed'
         soundiness.push({ kind: 'unattributed-non-component', file, detail: `${ts.length} navigation call(s) in ${where}` })
         continue
       }
@@ -521,6 +533,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       for (const c of controls) {
         const cId = controlNodeId(route.nodeId, c.selector)
         const loc = tpl ? templateLoc(sf, tpl, c.index) : { line: 1, col: 1 }
+        // The offset past `<` so the scan reads the control's own open tag and its directives.
+        const controlConditional = tpl ? templateConditional(tpl.text, c.index + 1) : false
         const navEffects = new Set<string>()
         /**
          * Wire one navigation this control fires — from a traced (click) handler or
@@ -533,7 +547,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
          */
         const wireControlNav = (t: RawTarget, guard: string | null, what: string): void => {
           if (t.ti.kind === 'literal') {
-            const target = matchLiteral(t.ti.value, routeLikes)
+            const primary = primaryPath(t.ti.value)
+            if (primary === null) return
+            const target = matchLiteral(primary, routeLikes)
             if (!target) {
               soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `${what} target "${t.ti.value}" matches no declared route` })
               return
@@ -542,8 +558,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
             const guards = [guard, ...gate.guardTexts].filter((g): g is string => g != null)
             const guarded = guards.length > 0
-            const confidence = gate.guarded ? gate.confidence : guard != null ? 0.6 : 1
-            pushEdge(cId, target.nodeId, t, guarded ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
+            // This mode resolves no relative target, so one without a leading slash is matched as
+            // written and never trusted; the other demotions are the screen-level ones.
+            const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true
+            const confidence = gate.guarded ? gate.confidence : guard != null ? 0.6 : uncertain ? 0.5 : 1
+            pushEdge(cId, target.nodeId, t, uncertain ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
             navEffects.add('navigate')
           } else if (t.ti.kind === 'template') {
             for (const cand of matchPrefix(t.ti.staticPrefix, routeLikes)) {
@@ -561,11 +580,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           const methodName = /([a-zA-Z_$][\w$]*)\s*\(/.exec(handler)?.[1]
           if (methodName === undefined) continue
           for (const nav of methodNavTargets(sf, methodName)) {
-            wireControlNav({ ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc, file: tplFile }, nav.guard, `control handler ${methodName}()`)
+            wireControlNav({ ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc, file: tplFile, conditional: controlConditional || nav.conditional }, nav.guard, `control handler ${methodName}()`)
           }
         }
         const link = linkAttrTarget(c.attrs)
-        if (link !== null) wireControlNav({ ti: link, event: 'click', effect: 'navigate', ruleId: 'ng.control.router-link', loc, file: tplFile }, null, 'control routerLink')
+        if (link !== null) wireControlNav({ ti: link, event: 'click', effect: 'navigate', ruleId: 'ng.control.router-link', loc, file: tplFile, conditional: controlConditional }, null, 'control routerLink')
 
         const name = c.text ?? c.attrs.get('aria-label') ?? c.attrs.get('placeholder') ?? c.attrs.get('name')
         // A nameless generic element is usually a child component with an @Output

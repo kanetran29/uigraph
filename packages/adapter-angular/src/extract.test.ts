@@ -814,3 +814,174 @@ export class Home {
     })
   }
 })
+
+describe('extractGraph — a target whose base or primary path the reader cannot fix is never must', () => {
+  const page = (cls: string, tpl = '', body = ''): string =>
+    `import { Component } from '@angular/core'\nimport { Router, ActivatedRoute } from '@angular/router'\n@Component({ selector: 'x-${cls.toLowerCase()}', standalone: true, template: \`${tpl}\` })\nexport class ${cls} { opts: any = {}; constructor(private router: Router, private route: ActivatedRoute) {} ${body} }`
+  const project = inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { P } from './p.component'
+import { G } from './g.component'
+import { E } from './e.component'
+import { Root } from './root.component'
+import { Home } from './home.component'
+import { Inbox } from './inbox.component'
+import { Slug } from './slug.component'
+export const routes: Routes = [
+  { path: 'items/:id', component: P, children: [{ path: 'general', component: G }, { path: 'edit', component: E }, { path: 'c', component: E }, { path: 'e', component: E }] },
+  { path: 'edit', component: Root },
+  { path: 'home', component: Home },
+  { path: 'inbox', component: Inbox },
+  { path: ':slug', component: Slug },
+]`,
+    '/app/p.component.ts': page('P', '<a routerLink="./general">g</a><x-tabs></x-tabs><router-outlet></router-outlet>'),
+    '/app/tabs.component.ts': page('Tabs', '<a routerLink="edit">e</a>'),
+    '/app/g.component.ts': page('G', '', `
+  a() { this.router.navigate(['../edit'], { relativeTo: this.route }) }
+  b() { this.router.navigate(['edit']) }
+  c() { const relativeTo = this.route; this.router.navigate(['../c'], { relativeTo }) }
+  d() { this.router.navigate(['edit'], this.opts) }
+  e() { this.router.navigate(['../e'], { relativeTo: this.route.parent }) }
+  f() { this.router.navigate(['/home'], this.opts) }`),
+    '/app/e.component.ts': page('E'),
+    '/app/root.component.ts': page('Root'),
+    '/app/home.component.ts': page('Home', '<a routerLink="/inbox(popup:compose)">i</a><a routerLink="/x/(b//popup:c)">x</a>'),
+    '/app/inbox.component.ts': page('Inbox'),
+    '/app/slug.component.ts': page('Slug'),
+  })
+
+  for (const attribution of [false, true]) {
+    const { graph, soundiness } = extractGraph(project, '/app', { attribution })
+    const at = (line: number) => graph.edges.filter((e) => [e.witness, ...(e.mergedWitnesses ?? [])].some((w) => w?.file === 'g.component.ts' && w.loc?.line === line))
+
+    it(`keeps a call whose base is the component's own route on must (attribution ${attribution})`, () => {
+      expect(graph.edges.find((e) => e.from === routeId('/items/:id/general') && e.to === routeId('/items/:id/edit'))?.modality).toBe('must')
+      expect(graph.edges.find((e) => e.from === routeId('/items/:id/general') && e.to === routeId('/home'))?.modality).toBe('must')
+      expect(graph.edges.find((e) => e.from === routeId('/items/:id') && e.to === routeId('/items/:id/general'))?.modality).toBe('must')
+    })
+
+    it(`demotes a call whose options hide the base (attribution ${attribution})`, () => {
+      for (const line of [7, 8, 9]) {
+        const own = at(line).flatMap((e) => [e.witness, ...(e.mergedWitnesses ?? [])]).filter((w) => w?.file === 'g.component.ts' && w.loc?.line === line)
+        expect(own.length).toBeGreaterThan(0)
+        expect(own.every((w) => w?.modality === 'may')).toBe(true)
+      }
+    })
+
+    it(`reads the primary path of an auxiliary URL and never matches it to a parameter (attribution ${attribution})`, () => {
+      const fromHome = graph.edges.filter((e) => e.from === routeId('/home'))
+      expect(fromHome.find((e) => e.to === routeId('/inbox'))?.modality).toBe('must')
+      expect(fromHome.some((e) => e.to === routeId('/:slug'))).toBe(false)
+      expect(soundiness.some((n) => /inbox\(popup/.test(n.detail ?? ''))).toBe(false)
+    })
+  }
+
+  it('never emits must for a relative link in a component rendered under a route it does not own', () => {
+    const { graph } = extractGraph(project, '/app', { attribution: true })
+    const fromTabs = graph.edges.filter((e) => [e.witness, ...(e.mergedWitnesses ?? [])].some((w) => w?.file === 'tabs.component.ts'))
+    expect(fromTabs.length).toBeGreaterThan(0)
+    expect(fromTabs.every((e) => e.modality !== 'must')).toBe(true)
+  })
+})
+
+describe('extractGraph — a navigation to the address its source already displays is never must', () => {
+  const page = (cls: string, tpl: string, sel = cls.toLowerCase()): string =>
+    `import { Component } from '@angular/core'\n@Component({ selector: 'x-${sel}', standalone: true, template: '${tpl}' })\nexport class ${cls} {}`
+  const project = inMemory({
+    '/app/main.ts': `import { bootstrapApplication } from '@angular/platform-browser'\nimport { App } from './app.component'\nbootstrapApplication(App)`,
+    '/app/app.component.ts': page('App', '<x-header></x-header><router-outlet></router-outlet>', 'root'),
+    '/app/header.component.ts': page('Header', '<a routerLink="/">logo</a>'),
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Home } from './home.component'\nimport { Other } from './other.component'\nexport const routes: Routes = [{ path: '', component: Home }, { path: 'other', component: Other }]`,
+    '/app/home.component.ts': page('Home', '<a routerLink="/">self</a><a routerLink="/other">o</a>'),
+    '/app/other.component.ts': page('Other', '<p>o</p>'),
+  })
+
+  it('demotes a link from a screen to itself and keeps one to another screen', () => {
+    const { graph } = extractGraph(project, '/app')
+    expect(graph.edges.find((e) => e.from === routeId('/') && e.to === routeId('/'))?.modality).toBe('may')
+    expect(graph.edges.find((e) => e.from === routeId('/') && e.to === routeId('/other'))?.modality).toBe('must')
+  })
+
+  it('demotes a shell link, since the shell is also on the screen it points at', () => {
+    const { graph } = extractGraph(project, '/app', { attribution: true })
+    const shell = graph.edges.filter((e) => e.from === 'n_scope_shell')
+    expect(shell.length).toBeGreaterThan(0)
+    expect(shell.every((e) => e.modality !== 'must')).toBe(true)
+  })
+})
+
+describe('extractGraph — controls mode demotes a conditional control or handler', () => {
+  const project = inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Home } from './home.component'\nimport { Other } from './other.component'\nexport const routes: Routes = [{ path: 'home', component: Home }, { path: 'other', component: Other }]`,
+    '/app/home.component.ts': `import { Component } from '@angular/core'
+import { Router } from '@angular/router'
+@Component({ selector: 'x-home', standalone: true, template: \`<button id="a" (click)="go()">a</button><button id="b" *ngIf="flag" (click)="go()">b</button><button id="c" (click)="later()">c</button>\` })
+export class Home {
+  flag = true
+  constructor(private router: Router, private svc: any) {}
+  go() { this.router.navigate(['/other']) }
+  later() { this.svc.save().subscribe(() => this.router.navigate(['/other'])) }
+}`,
+    '/app/other.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-other', standalone: true, template: '<p>o</p>' })\nexport class Other {}`,
+  })
+  const { graph } = extractGraph(project, '/app', { controls: true })
+  const tierOf = (id: string) => {
+    const c = graph.nodes.find((n) => n.kind === 'control' && n.control?.selector?.value === `button|${id}`)
+    return graph.edges.find((e) => e.from === c?.id && e.to === routeId('/other'))?.modality
+  }
+
+  it('keeps an unconditional control whose handler navigates unconditionally on must', () => {
+    expect(tierOf('a')).toBe('must')
+  })
+  it('demotes a control under a structural directive and a handler that navigates in a callback', () => {
+    expect(tierOf('b')).toBe('may')
+    expect(tierOf('c')).toBe('may')
+  })
+})
+
+describe('extractGraph — an empty-path child with no component speaks for the screen above it', () => {
+  const page = (cls: string, tpl = '<router-outlet></router-outlet>'): string =>
+    `import { Component } from '@angular/core'\n@Component({ selector: 'x-${cls.toLowerCase()}', standalone: true, template: '${tpl}' })\nexport class ${cls} {}`
+  const project = inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { Layout } from './layout.component'
+import { Shell } from './shell.component'
+import { Vault } from './vault.component'
+import { Links } from './links.component'
+import { redirectGuard } from './redirect.guard'
+export const routes: Routes = [
+  { path: '', component: Layout, children: [
+    { path: '', pathMatch: 'full', children: [], canActivate: [redirectGuard()] },
+    { path: 'links', component: Links },
+  ] },
+  { path: 'app', component: Shell, children: [
+    { path: '', redirectTo: 'vault', pathMatch: 'full' },
+    { path: 'vault', component: Vault },
+  ] },
+]`,
+    '/app/redirect.guard.ts': `export function redirectGuard() { return () => true }`,
+    '/app/layout.component.ts': page('Layout'),
+    '/app/shell.component.ts': page('Shell'),
+    '/app/vault.component.ts': page('Vault', '<p>v</p>'),
+    '/app/links.component.ts': page('Links', '<a routerLink="/">root</a><a routerLink="/app">app</a><a routerLink="/app/vault">vault</a>'),
+  })
+  const { graph } = extractGraph(project, '/app')
+  const from = graph.edges.filter((e) => e.from === routeId('/links'))
+
+  it('puts the guard of the empty-path child on every edge into the screen above it', () => {
+    const e = from.find((x) => x.to === routeId('/'))
+    expect(e?.guard).toContain('redirectGuard')
+    expect(e?.modality).toBe('may')
+  })
+
+  it('does not put that guard on the screen\'s other children', () => {
+    expect(graph.edges.every((x) => x.to !== routeId('/links') || !(x.guard ?? '').includes('redirectGuard'))).toBe(true)
+  })
+
+  it('sends a link to a screen whose empty-path child redirects on to the redirect\'s destination', () => {
+    expect(from.some((x) => x.to === routeId('/app'))).toBe(false)
+    const toVault = from.filter((x) => x.to === routeId('/app/vault'))
+    expect(toVault.length).toBe(1)
+    expect(toVault[0]?.modality).toBe('must')
+  })
+})
