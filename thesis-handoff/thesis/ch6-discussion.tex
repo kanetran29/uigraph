@@ -73,7 +73,8 @@ all: the target screen has no node, the owning component is never reached from a
 screen, or the site sits in a service or a guard that this version does not analyse.
 No construct that the baseline converted was lost, so the coverage gain was not bought by
 widening the must tier, and after the fourth correction of Section~\ref{sec:res-round2} there
-is no must tier for it to widen: the tier is empty with attribution and without. On the
+is almost no must tier for it to widen: the tier is the same single edge with attribution and
+without. On the
 instrument before that correction every must edge passed the witness check in both runs ---
 \RoundTwoMustClean{} after attribution --- so there was no violation for attribution either to
 have caused or to have inherited.
@@ -266,9 +267,10 @@ realworld rather more than a third of the citations in the attributed graph are 
 and the proportion is higher on the larger applications, so the gap was not a technicality:
 the check reported a clean deterministic tier over about two thirds of the evidence that tier
 rests on, and four wrong targets in bitwarden sat in the part it did not read
-(Section~\ref{sec:res-round2}). The check now judges every location an edge cites and an
-edge takes the weakest modality over them, so the two figures are computed over the same
-witness set. What remains is that the ratio and the precision figure still answer different
+(Section~\ref{sec:res-round2}). The check now judges every location an edge cites, each
+location records the modality it earns on its own, and the must tier is judged on the
+locations that earn must, so a construct counts towards the ratio only on evidence the check
+has read. What remains is that the ratio and the precision figure still answer different
 questions, and the chapter reports them separately for that reason rather than this one.
 
 Merging also costs guard information. An edge holds one guard, so when several constructs
@@ -464,51 +466,125 @@ the effect on the graph.
 
 \begin{itemize}[nosep]
 \item \textbf{Components created programmatically, including dialogs and overlays.} An
-overlay is a user interface state that no route declares, so it has no node, and the
-component that implements it is reached from no template, so its navigation sites have
-the empty scope and contribute nothing. Both the state and everything inside it are
-absent from the graph.
+overlay is a user interface state that no route declares, so it has no screen node, and no
+edge records that a screen opens or dismisses it. The component that implements it is reached
+from no template, so its navigation sites have the empty scope. Without attribution they
+contribute nothing. With it, each such component that navigates, and each navigating
+component nested in its template, is given an unplaced origin that carries its file, and its
+navigation sites become edges from that origin to their resolved destinations, held at
+\emph{may}; these are the edges Section~\ref{sec:model} counts as leaving a node that is not a
+screen. A navigation in a service that only such a component injects receives no scope and is
+recorded only as a note. What the graph lacks is therefore the overlay state, the transitions
+into and out of it, and the screens from which its exits fire, not the destinations of those
+exits.
 \item \textbf{Named outlets and targets of the form \texttt{\{outlets: \ldots\}}.} An
-auxiliary route adds a second active route and a second mount point, encoded in the URL
-\cite{angulardocs}. The model of Chapter~\ref{ch:analysis} represents this as a second
-mount, but the adapter does not implement it, and the test-source cross-check shows the
-corresponding URLs among its misses.
+auxiliary route adds a second active route and a second mount point, encoded in the URL as
+\texttt{(name:path)} \cite{angulardocs}. The model of Chapter~\ref{ch:analysis} represents this
+as a second mount, and the adapter does not implement it. A route that names an outlet other
+than the primary one, every route beneath it, and a route whose outlet the reader cannot fix to a
+string mint no node; the last kind is counted in the note that marks the route set incomplete.
+A commands array that carries an \texttt{\{outlets: \ldots\}} element yields no edge and no
+note. An auxiliary address written as a URL string is reduced to its primary path, which is
+where the primary outlet goes, so \path{/inbox(popup:compose)} is an edge to \path{/inbox}; a
+string whose parenthesised group also carries a primary segment is not rebuilt and yields
+nothing. The test-source cross-check shows the auxiliary URLs among its misses.
 \item \textbf{Navigation relative to the active route (\texttt{relativeTo}).} The target
-is a function of the route that is active when the call runs, so it has no single value
-in the source. This is the one item in this list that attribution makes approachable,
-since a scope is exactly the set of screens the site can fire from, and the target can
-be resolved once per member of that scope.
+is a function of the route of the component that holds the site, so it has no single value in
+the source, and attribution is what makes it resolvable: the analysis resolves it once for each
+screen the edge is emitted from. A template \texttt{routerLink}, and a \texttt{Router.navigate}
+call whose options are an object literal with a \texttt{relativeTo} key, are resolved against the
+path of that screen, applying a leading run of \texttt{.} and \texttt{..} segments; a call
+without \texttt{relativeTo}, and \texttt{navigateByUrl}, are resolved against the root. The base
+is right only when the screen is the route of the component that holds the site, and only then
+can the edge be must. Everywhere else it is held at may: for a component rendered under a route
+it does not own, whose own route the analysis does not track; for \texttt{relativeTo} written in
+shorthand, passed through an options variable, or given a route other than the component's
+own, such as \texttt{this.route.parent}, none of which the reader evaluates; and for an edge
+emitted from a node without a path of its own, a scope anchor, the shell or an unplaced origin,
+where a bare relative target is matched as if it were absolute. Such an edge can name the wrong
+screen, which the may tier admits and the must tier does not, and a target that matches nothing
+under the assumed base is recorded with a note that says the base was assumed.
 \item \textbf{Templates passed as values (\texttt{TemplateRef}) and rendered elsewhere.}
-The nesting relation can no longer be read from element names, and recovering it becomes
-a dataflow problem over the values that carry the template. This is the same obstacle
-that Section~\ref{sec:transfer} identifies for JSX.
+The analysis does not follow a template value from where it is declared to where it is
+instantiated. Elements and \texttt{routerLink} bindings inside an \texttt{<ng-template>} are read
+from the text of the template that declares them, so they enter the nesting relation and the
+edge set as part of the declaring component and are attributed to its screens. Because nothing
+says whether or where the template is instantiated, every such link is held at \emph{may}. The
+attribution is right when the template is instantiated within the declaring component's own
+subtree, as with a template passed to a child's input or to a dialog opened from that screen;
+when the value is carried to a component rendered on other screens, through a service or an
+outlet in the shell, the edges are attributed to the declaring screens rather than to the
+screens on which the template appears. Recovering the place of instantiation is a dataflow
+problem over the values that carry the template, the same obstacle that
+Section~\ref{sec:transfer} identifies for JSX.
 \item \textbf{Dispatch through NgRx effects and router event subscriptions.} The
-dispatch relation is specified in Chapter~\ref{ch:analysis} and not implemented. On the
-pinned extractor a navigation inside an effect is attributed to no screen; the approximation
-of Section~\ref{sec:res-round2} gives it $\top$ instead, which is sound and coarse --- an
-effect can fire on any screen, so the edge is offered from the shell at \emph{may} rather
-than from the screen that actually dispatched the action.
+dispatch relation is specified in Chapter~\ref{ch:analysis} and not implemented, so the screen
+that dispatched an action is never recovered. The extractor stands in for it at the
+\emph{full} attribution level only: every navigation call in a file inside the application
+directory that contains a \texttt{createEffect} call is given $\top$ and offered from the shell
+at \emph{may}, or into the shell's \texttt{u\_}\,sink when its target is fully dynamic. This is
+sound and coarse, since an effect can fire on any screen and the edge is drawn from the shell
+rather than from the screen that dispatched the action. With attribution disabled, at any level
+below \emph{full}, for an effect outside the application directory, and for an effect declared
+with the older \texttt{@Effect} decorator, the navigation is attributed to no screen, contributes
+no edge, and is recorded as a note. A subscription to \texttt{Router.events} is not treated as
+dispatch: a navigation inside it is attributed to the scope of the class that contains it, as
+any other call site is, and because it runs in a callback the subscription invokes, it is held
+at \emph{may} (Section~\ref{sec:res-round2}).
 \item \textbf{Navigation inside signal effects and observable subscriptions.} The firing
-condition is a data dependence in a graph the runtime builds, not a control-flow
-condition in the program text (Sections~\ref{sec:signals} and~\ref{sec:reactive}). The
-model gives such edges the modality \emph{unknown}, with the read set recorded as the
-symbolic guard. The pinned extractor emits none; after
-Section~\ref{sec:res-round2} an unknown edge is emitted, but into the \texttt{u\_}\,sink and
-without the read set, so what it records is that the screen is left, not under what
-condition.
+condition is a data dependence in a graph the runtime builds, not a control-flow condition in
+the program text (Sections~\ref{sec:signals} and~\ref{sec:reactive}). The model gives such
+edges the modality \emph{unknown}, with the read set recorded as the symbolic guard. The
+extractor implements neither the modality nor the read set. A navigation inside an
+\texttt{effect} body, a \texttt{subscribe} callback or any other function something else
+calls is attributed to the scope of its class like any other call, and held at \emph{may}
+because it runs only when that function is called (Section~\ref{sec:res-round2}); a fully
+dynamic target goes to the \texttt{u\_}\,sink as any other does. What the graph records is
+that the screen can be left for that destination, not under what condition.
 \item \textbf{Computed navigation targets.} A target built at run time from values cannot
-be enumerated statically in general. The analysis emits an edge into the screen's
-\texttt{u\_}\,sink, or over-approximates into the may tier, where a single unresolved call site can connect to every declared
-route, as one of the protocol corrections showed (Section~\ref{sec:corrections}).
-\item \textbf{Injection tokens with several bindings.} Where a token can resolve to more
-than one implementation, the analysis joins over all of them, and the resulting edges are
-capped at \emph{may}. Resolution is relative to an injector, so the provider hierarchy is
-part of the input (Section~\ref{sec:di}).
-\item \textbf{Configuration-driven route registration.} Where the route table is assembled
-at startup from provider configuration instead of being declared as data, neither the
-extractor nor the independent parser recovers the routes. This approximation bounds the
-corpus as well as the tool, since it is why one candidate application was rejected
-(Section~\ref{sec:corpus}).
+be enumerated statically in general, and the analysis treats it according to the static text it
+contains. A target with no static part is recorded as an edge of modality \emph{unknown} and
+confidence 0 into the \texttt{u\_}\,sink of the node it fires from. A target with a static
+leading part --- the head of a template literal, the left operand of a string concatenation, or
+the constant elements before a trailing variable element of a commands array --- is
+over-approximated into the \emph{may} tier, with one edge to every declared route that extends
+that prefix by at least one segment. An empty prefix therefore connects the site to every
+declared route except the root, as one of the protocol corrections showed
+(Section~\ref{sec:corrections}). The over-approximation is not complete: a prefix segment
+matches only an identical route segment, so a route with a parameter in that position is not a
+candidate, and a prefix that matches no route yields no edge and no sink, only a note that
+gives the count as zero. A commands array whose variable element is followed by constant
+elements is read as a pattern and drawn as a single \emph{may} edge to the first declared route
+that matches it, with the variable element matching only a parameter segment, so a route whose
+segment in that position is a constant is not reached, and no note records the omission.
+\item \textbf{Injection tokens and provider bindings.} The implemented pass resolves no
+injection token and reads no provider declaration. A navigating class is attributed to the join
+of the screens of the components that name that class itself as a dependency, by constructor
+parameter type or by \texttt{inject}, and those edges are capped at \emph{may}
+(Section~\ref{sec:res-round2}). A class reached only through a binding --- \texttt{useClass},
+\texttt{useExisting}, a factory, or an \texttt{InjectionToken} --- is named by no component, so
+its navigation sites have the empty scope and contribute no edge, unless the class is declared
+in the same file as the class the component names, since the join is taken per file. The note
+recorded for such a site describes it as a class nothing in the application injects, which is
+true of the name and false of the instance. The join over every implementation a token can
+resolve to, relative to the injector that resolves it (Section~\ref{sec:di}), is what the model
+specifies in Section~\ref{sec:inputs}; the pass does not implement it.
+\item \textbf{Configuration-driven route registration.} A table passed as an array to
+\texttt{RouterModule.forRoot}, \texttt{forChild} or \texttt{provideRouter} is read wherever the
+registration runs, including inside a provider factory the application calls, which is how
+alfresco's folder-rules library mounts \path{/rules}; a table held in a variable is also found by
+its shape, whatever registers it. What is not recovered is a route that exists only once
+configuration has been evaluated at startup, and the effect on the graph depends on whether the
+source declares the route object. Where a route object is declared and its \texttt{path} is
+supplied by configuration, the path is counted as unreadable, no node is minted, and the route
+set is declared a lower bound. Where the table is computed by a function and passed to a
+registration call, provided through the \texttt{ROUTES} token by a factory or as an inline value,
+installed with \texttt{Router.resetConfig}, or declared in a JSON extension manifest such as the
+one that registers alfresco's about page (Section~\ref{sec:res-probe}), the routes are absent
+from the graph and no note is raised, so the route set is not declared a lower bound on their
+account. The independent parser behaves identically on each of these forms, which is why the
+two readers agree on routes neither can see. This approximation bounds the corpus as well as
+the tool, since it is why one candidate application was rejected (Section~\ref{sec:corpus}).
 \item \textbf{Ambiguous selectors in the nesting relation.} When a selector belongs to more
 than one component, the candidates are narrowed to those the rendering file imports; where none
 is imported, the analysis joins over all of them and records a note. Such a join can attribute a

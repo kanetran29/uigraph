@@ -1,191 +1,164 @@
 #!/usr/bin/env node
-// Under what control-flow context each published must edge's navigation actually runs.
+// What became of each must edge the round-two instrument published, and why.
 //
 // Claim 3.1 says a must edge corresponds to a navigation that occurs for every input on which
-// the enclosing code executes, and Chapter 3 says what decides that: a site under a template
-// condition, or on a route a guard can refuse, is demoted to may. The witness check cannot see
-// whether a site fires unconditionally -- it only re-reads the target at the cited line -- so
-// whether the demotion rules cover every way a navigation can be conditional is not tested
-// anywhere. This reads each must edge's witness out of the corpus graphs, finds the navigation
-// call at that line in the syntax tree, and reports the context it sits in.
+// the enclosing code executes. The witness check cannot test that: it re-reads the destination
+// at the cited line and never asks whether the line runs every time its code does. The round's
+// instrument published a must tier the corrections that followed then emptied almost entirely,
+// and this ledger accounts for every edge of it against the current graph.
 //
-// A navigation is conditional, in the sense the demotion rules use, when it runs only on some
-// executions of the event handler that contains it: inside a callback passed to subscribe,
-// then or catch, or under an object's next or error key passed to one; after an await in the
-// same function, which a rejection skips; after a return or throw an earlier statement can take;
-// or under an if, a ternary, a switch case or a
-// short-circuit. A template site is conditional when it sits inside an @if, @else, @for,
-// @empty, @switch, @case, @default or @defer block, or inside an element carrying a structural
-// directive such as *ngIf or *ngFor: a loop body runs zero times on an empty list, so it is as
-// conditional as a branch.
+// Each edge of the earlier tier gets one fate, decided in this order:
+//   kept       the current graph still holds a must edge with the same endpoints and event;
+//   guard      the current graph reads a guard on the destination that the earlier one missed;
+//   redirect   the destination is a screen whose own address an empty-path child redirects,
+//              so the edge now enters the screen the redirect reaches;
+//   self-loop  the source already displays the destination, or stands for screens that include
+//              it, so whether the navigation runs depends on parameters and router settings;
+//   condition  every construct the edge cites runs under a condition.
+// Each construct an edge cites is classified as well, with the extractor's OWN readers
+// (callCondition and templateCondition in packages/adapter-angular/src/conditions.ts). This is
+// therefore a record of the extractor's decisions, not a second opinion on them: a construct
+// both get wrong is wrong here too. The per-construct table it writes is what a reader checks.
 //
-// Usage: node must-context.mjs --corpus <dir> [--graphs <dir>] [--out <dir>] [--tex <file>]
-//        --graphs reads each graph from <dir>/<app>/<sub>/uigraph.db instead of from the corpus,
-//        so a graph built by another extractor can be classified against the same sources.
+// Usage: pnpm exec tsx must-context.mjs --corpus <dir> --before <dir> --after <dir>
+//                                       [--out <dir>] [--tex <file>]
+//        --before and --after hold <app>/<sub>/uigraph.db for the two instruments; --corpus
+//        holds the sources both were extracted from.
 import { DatabaseSync } from 'node:sqlite'
-import { createRequire } from 'node:module'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { templateContextsOf } from './template-context.mjs'
-
-const require = createRequire(path.join(import.meta.dirname, '..', '..', 'packages', 'adapter-angular', 'package.json'))
-const { Project, SyntaxKind, Node } = require('ts-morph')
+import { Project, SyntaxKind } from 'ts-morph'
+import { callCondition, templateCondition } from '../../packages/adapter-angular/src/conditions.ts'
+import { inlineTemplate } from '../../packages/adapter-angular/src/templates.ts'
+import { templateLoc } from '../../packages/adapter-angular/src/nav.ts'
 
 const argv = process.argv.slice(2)
 const flag = (n, d) => { const i = argv.indexOf(n); return i > -1 ? argv[i + 1] : d }
-const corpus = flag('--corpus')
-const graphs = flag('--graphs', corpus)
-if (!corpus) { console.error('usage: node must-context.mjs --corpus <dir> [--out <dir>] [--tex <file>]'); process.exit(2) }
+const corpus = flag('--corpus'), before = flag('--before'), after = flag('--after')
+if (!corpus || !before || !after) { console.error('usage: pnpm exec tsx must-context.mjs --corpus <dir> --before <dir> --after <dir> [--out <dir>] [--tex <file>]'); process.exit(2) }
 
 /** Where each application's database sits under the corpus, as the other harnesses have it. */
 const APPS = { realworld: '.', alfresco: 'projects/aca-content', ghostfolio: 'apps/client', k8sdash: 'modules/web', bitwarden: 'apps/web', mifos: '.' }
+const LINK_RE = /\[?routerLink\]?\s*=\s*"/g
 
-const ASYNC_CALLEES = new Set(['subscribe', 'then', 'catch', 'finally'])
-const ASYNC_KEYS = new Set(['next', 'error', 'complete'])
+/** The graph a database holds. */
+function graphOf(db) {
+  if (!existsSync(db)) throw new Error(`no graph at ${db}`)
+  return JSON.parse(new DatabaseSync(db).prepare("select json from docs where key='graph'").get().json)
+}
+
+/** Every .ts file under a directory, skipping dependencies and build output. */
+function tsFiles(dir) {
+  const out = []
+  for (const ent of readdirSync(dir, { withFileTypes: true })) {
+    if (ent.name === 'node_modules' || ent.name === 'dist' || ent.name.startsWith('.')) continue
+    const p = path.join(dir, ent.name)
+    if (ent.isDirectory()) out.push(...tsFiles(p))
+    else if (ent.name.endsWith('.ts') && !ent.name.endsWith('.spec.ts')) out.push(p)
+  }
+  return out
+}
 
 /**
- * The conditional contexts between a navigation call and the function that contains it. A
- * context is recorded once per kind; the walk stops at the first function boundary that is not
- * itself an asynchronous callback, since above that point the code is the event handler, and an
- * event handler running is what the edge's event already means.
+ * The condition the extractor reads for the construct at file:line, or null when it reads none.
+ * A template site is found the way the extractor finds it: through the component whose template
+ * it is, at the line `templateLoc` gives the link.
  */
-function contextsOf(call) {
-  const found = new Set()
-  let node = call
-  while (node) {
-    const parent = node.getParent()
-    if (!parent) break
-    if (Node.isArrowFunction(node) || Node.isFunctionExpression(node)) {
-      const host = parent
-      const viaKey = Node.isPropertyAssignment(host) && ASYNC_KEYS.has(host.getName())
-      const callExpr = viaKey ? host.getParent()?.getParent() : host
-      const callee = Node.isCallExpression(callExpr) ? callExpr.getExpression() : null
-      const name = callee && Node.isPropertyAccessExpression(callee) ? callee.getName() : null
-      if (name && ASYNC_CALLEES.has(name)) { found.add('async-callback'); node = parent; continue }
-      break
-    }
-    if (Node.isMethodDeclaration(node) || Node.isFunctionDeclaration(node) || Node.isConstructorDeclaration(node)) break
-    if (Node.isIfStatement(parent) && parent.getExpression() !== node) found.add('branch')
-    if (Node.isConditionalExpression(parent) && parent.getCondition() !== node) found.add('branch')
-    if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) found.add('branch')
-    if (Node.isBinaryExpression(parent)) {
-      const op = parent.getOperatorToken().getKind()
-      if ((op === SyntaxKind.AmpersandAmpersandToken || op === SyntaxKind.BarBarToken || op === SyntaxKind.QuestionQuestionToken) &&
-          parent.getRight() === node) found.add('branch')
-    }
-    if (Node.isBlock(parent)) {
-      const idx = parent.getStatements().indexOf(node)
-      const earlier = idx > 0 ? parent.getStatements().slice(0, idx) : []
-      if (earlier.some((s) => s.getDescendantsOfKind(SyntaxKind.AwaitExpression).length || Node.isAwaitExpression(s))) {
-        found.add('after-await')
-      }
-      // A return or throw in an earlier statement skips the call on some executions, unless it
-      // belongs to a function nested in that statement and so leaves only that function.
-      const leaves = (st) => Node.isReturnStatement(st) || Node.isThrowStatement(st) ||
-        [...st.getDescendantsOfKind(SyntaxKind.ReturnStatement), ...st.getDescendantsOfKind(SyntaxKind.ThrowStatement)].some((x) => {
-          for (let a = x.getParent(); a && a !== st; a = a.getParent()) {
-            if (Node.isArrowFunction(a) || Node.isFunctionExpression(a) || Node.isFunctionDeclaration(a) || Node.isMethodDeclaration(a)) return false
-          }
-          return true
-        })
-      if (earlier.some(leaves)) found.add('early-exit')
-    }
-    node = parent
+function conditionAt(project, root, file, line) {
+  const abs = path.resolve(root, file)
+  // A site in a shared library outside the application directory is read where it lies.
+  const load = (f) => project.getSourceFile(f) ?? project.addSourceFileAtPath(f)
+  if (file.endsWith('.html')) {
+    for (const f of readdirSync(path.dirname(abs))) if (f.endsWith('.ts') && !f.endsWith('.spec.ts')) load(path.join(path.dirname(abs), f))
   }
-  return [...found]
+  const owners = file.endsWith('.html')
+    ? project.getSourceFiles().filter((sf) => inlineTemplate(sf)?.externalFile === abs)
+    : [load(abs)]
+  for (const sf of owners) {
+    const tpl = inlineTemplate(sf)
+    if (!tpl) continue
+    const hits = [...tpl.text.matchAll(LINK_RE)].filter((m) => templateLoc(sf, tpl, m.index).line === line)
+    if (hits.length === 0) continue
+    const verdicts = new Set(hits.map((m) => templateCondition(tpl.text, m.index)))
+    if (verdicts.size > 1) throw new Error(`${file}:${line} holds links the extractor reads differently`)
+    return { kind: 'template', condition: [...verdicts][0] }
+  }
+  if (file.endsWith('.html')) throw new Error(`no component template places a link at ${file}:${line}`)
+  const calls = load(abs).getDescendantsOfKind(SyntaxKind.CallExpression)
+    .filter((c) => c.getStartLineNumber() === line && /(^|\.)navigate(ByUrl)?$/.test(c.getExpression().getText()))
+  if (calls.length !== 1) throw new Error(`${file}:${line} holds ${calls.length} navigation calls`)
+  return { kind: 'call', condition: callCondition(calls[0]) }
 }
 
-/** The template a site sits in, and the site's offset within it, for an .html file or an inline template. */
-function templateAt(file, line) {
-  const text = readFileSync(file, 'utf8')
-  if (file.endsWith('.html')) return { text, offset: text.split('\n').slice(0, line - 1).join('\n').length + (line > 1 ? 1 : 0) }
-  const sf = new Project({ skipAddingFilesFromTsConfig: true }).addSourceFileAtPath(file)
-  for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyAssignment)) {
-    if (prop.getName() !== 'template') continue
-    const init = prop.getInitializer()
-    if (!init || line < init.getStartLineNumber() || line > init.getEndLineNumber()) continue
-    const body = init.getText().slice(1, -1)
-    const lineInBody = line - init.getStartLineNumber()
-    return { text: body, offset: body.split('\n').slice(0, lineInBody).join('\n').length + (lineInBody > 0 ? 1 : 0) }
-  }
-  return null
-}
-
-const rows = []
-const projects = new Map()
+const edgesOut = []
+const constructs = []
 for (const [slug, sub] of Object.entries(APPS)) {
   const root = path.join(corpus, slug, sub)
-  const db = path.join(graphs, slug, sub, 'uigraph.db')
-  if (!existsSync(db)) throw new Error(`no graph for ${slug} at ${db}`)
-  const g = JSON.parse(new DatabaseSync(db).prepare("select json from docs where key='graph'").get().json)
-  const route = new Map(g.nodes.map((n) => [n.id, n.route ?? n.id]))
-  for (const e of g.edges.filter((e) => e.modality === 'must')) {
-   const witnesses = [e.witness, ...(e.mergedWitnesses || [])].filter((w) => w?.file)
-   const perWitness = []
-   for (const w of witnesses) {
-    const file = path.resolve(root, w.file || '')
-    const line = w.loc?.line
-    const row = { app: slug, edge: `${route.get(e.from)} -> ${route.get(e.to)}`, site: `${w.file}:${line}`, contexts: [], kind: 'unresolved' }
-    if (!w.file || !line || !existsSync(file)) { perWitness.push(row); continue }
-    const tpl = templateAt(file, line)
-    if (tpl) {
-      const ctx = templateContextsOf(tpl.text, tpl.offset)
-      if (ctx === null) { row.kind = 'unresolved (template did not parse)'; perWitness.push(row); continue }
-      row.site += ' [template]'
-      row.contexts = ctx
-      row.kind = ctx.length ? 'conditional' : 'unconditional'
-      perWitness.push(row)
-      continue
-    }
-    if (!projects.has(file)) projects.set(file, new Project({ skipAddingFilesFromTsConfig: true }).addSourceFileAtPath(file))
-    const sf = projects.get(file)
-    const calls = sf.getDescendantsOfKind(SyntaxKind.CallExpression).filter((c) =>
-      c.getStartLineNumber() === line && /(^|\.)navigate(ByUrl)?$/.test(c.getExpression().getText()))
-    if (calls.length !== 1) { row.kind = `unresolved (${calls.length} navigate calls on the line)`; perWitness.push(row); continue }
-    row.contexts = contextsOf(calls[0])
-    row.kind = row.contexts.length ? 'conditional' : 'unconditional'
-    perWitness.push(row)
-   }
-   const unresolvedW = perWitness.filter((r) => r.kind.startsWith('unresolved'))
-   rows.push({
-     app: slug, edge: `${route.get(e.from)} -> ${route.get(e.to)}`,
-     site: `${witnesses[0]?.file}:${witnesses[0]?.loc?.line}`, witnesses: perWitness.length,
-     contexts: [...new Set(perWitness.flatMap((r) => r.contexts))],
-     unconditionalWitnesses: perWitness.filter((r) => r.kind === 'unconditional').length,
-     kind: unresolvedW.length ? unresolvedW[0].kind
-       : perWitness.every((r) => r.kind === 'conditional') ? 'conditional'
-       : perWitness.every((r) => r.kind === 'unconditional') ? 'unconditional' : 'mixed',
-   })
+  const was = graphOf(path.join(before, slug, sub, 'uigraph.db'))
+  const now = graphOf(path.join(after, slug, sub, 'uigraph.db'))
+  const musts = was.edges.filter((e) => e.modality === 'must')
+  if (musts.length === 0) continue
+  const project = new Project({ skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true })
+  for (const f of tsFiles(root)) project.addSourceFileAtPath(f)
+  const route = new Map([...was.nodes, ...now.nodes].map((n) => [n.id, n.route ?? n.id]))
+  const scopeOf = new Map(now.nodes.filter((n) => n.scope).map((n) => [n.id, n.scope]))
+  for (const e of musts) {
+    const label = `${route.get(e.from)} -> ${route.get(e.to)}`
+    const same = now.edges.filter((x) => x.from === e.from && x.to === e.to && x.event === e.event)
+    const scope = scopeOf.get(e.from)
+    const selfLoop = e.from === e.to || scope?.kind === 'top' || (scope?.members ?? []).includes(e.to)
+    const sites = [e.witness, ...(e.mergedWitnesses ?? [])].filter((w) => w?.file)
+    const read = sites.map((w) => ({ app: slug, edge: label, site: `${w.file}:${w.loc.line}`, ...conditionAt(project, root, w.file, w.loc.line) }))
+    constructs.push(...read)
+    const fate = same.some((x) => x.modality === 'must') ? 'kept'
+      : same.some((x) => x.guard && !e.guard) ? 'guard'
+      : same.length === 0 ? 'redirect'
+      : selfLoop ? 'self-loop'
+      : read.every((r) => r.condition !== null) ? 'condition'
+      : 'unexplained'
+    edgesOut.push({ app: slug, edge: label, event: e.event, fate, sites: read.length, unconditionalSites: read.filter((r) => r.condition === null).length })
   }
 }
 
-const count = (k) => rows.filter((r) => r.kind === k).length
-const unresolved = rows.filter((r) => r.kind.startsWith('unresolved'))
-if (unresolved.length) {
-  throw new Error(`${unresolved.length} must edges could not be located in the syntax tree: ${unresolved.map((r) => `${r.app} ${r.site} (${r.kind})`).join('; ')}`)
-}
-const total = rows.length
-const parts = [['conditional', count('conditional')], ['unconditional', count('unconditional')], ['mixed', count('mixed')]]
-if (parts.reduce((a, [, v]) => a + v, 0) !== total) throw new Error(`the classes do not account for all ${total} must edges`)
-
-for (const r of rows) console.error(`${r.kind.padEnd(13)} ${r.app.padEnd(10)} ${r.edge.padEnd(48)} ${r.unconditionalWitnesses}/${r.witnesses} witnesses unconditional  ${r.contexts.join(',')}`)
+const total = edgesOut.length
+const fates = ['kept', 'guard', 'redirect', 'self-loop', 'condition']
+const fateCount = Object.fromEntries(fates.map((f) => [f, edgesOut.filter((r) => r.fate === f).length]))
+const unexplained = edgesOut.filter((r) => r.fate === 'unexplained')
+if (unexplained.length) throw new Error(`${unexplained.length} edge(s) left the must tier for no reason this ledger knows: ${unexplained.map((r) => `${r.app} ${r.edge}`).join('; ')}`)
+if (fates.reduce((a, f) => a + fateCount[f], 0) !== total) throw new Error(`the fates do not account for all ${total} edges`)
+const reasons = ['after await', 'in a callback', 'under a branch', 'after early exit', 'in a catch clause', 'in a loop', 'control-flow block', 'structural directive', 'ng-template', 'unreadable template']
+const reasonCount = Object.fromEntries(reasons.map((r) => [r, constructs.filter((c) => c.condition === r).length]))
+const conditional = constructs.filter((c) => c.condition !== null).length
+if (reasons.reduce((a, r) => a + reasonCount[r], 0) !== conditional) throw new Error('a construct carries a condition this ledger does not name')
 
 const outDir = flag('--out')
-if (outDir) { mkdirSync(outDir, { recursive: true }); writeFileSync(path.join(outDir, 'must-context.json'), JSON.stringify(rows, null, 2)) }
-
+if (outDir) {
+  mkdirSync(outDir, { recursive: true })
+  writeFileSync(path.join(outDir, 'must-context.json'), JSON.stringify({ edges: edgesOut, constructs, fates: fateCount, reasons: reasonCount }, null, 2) + '\n')
+}
 const tex = flag('--tex')
 if (tex) {
-  const by = (c) => rows.filter((r) => r.contexts.includes(c)).length
-  let out = '% Generated by must-context.mjs from the corpus graphs. Do not edit by hand.\n'
-  for (const [k, v] of [
-    ['MustCtxEdges', total], ['MustCtxConditional', count('conditional')], ['MustCtxUnconditional', count('unconditional')],
-    ['MustCtxMixed', count('mixed')], ['MustCtxAnyUnconditional', rows.filter((r) => r.unconditionalWitnesses > 0).length],
-    ['MustCtxTemplate', rows.filter((r) => r.contexts.some((c) => c.startsWith('@') || c.startsWith('*'))).length],
-    ['MustCtxAsync', by('async-callback')], ['MustCtxAfterAwait', by('after-await')],
-    ['MustCtxBranch', by('branch')], ['MustCtxEarlyExit', by('early-exit')],
-    ['MustCtxHoldingApps', new Set(rows.map((r) => r.app)).size],
-  ]) out += `\\newcommand{\\${k}}{${v}}\n`
-  writeFileSync(tex, out)
-  console.error(`wrote ${tex}`)
+  const esc = (s) => String(s).replace(/\\/g, '\\textbackslash{}').replace(/([_%&#$])/g, '\\$1').replace(/~/g, '\\textasciitilde{}')
+  const cap = (s) => s.split(/[^a-z]+/i).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+  const lines = ['% Generated by must-context.mjs from the corpus graphs. Do not edit by hand.',
+    `\\newcommand{\\MustCtxEdges}{${total}}`,
+    `\\newcommand{\\MustCtxConstructs}{${constructs.length}}`,
+    `\\newcommand{\\MustCtxDistinct}{${new Set(constructs.map((c) => `${c.app} ${c.site}`)).size}}`,
+    `\\newcommand{\\MustCtxConditional}{${conditional}}`,
+    `\\newcommand{\\MustCtxUnconditional}{${constructs.length - conditional}}`,
+    `\\newcommand{\\MustCtxHoldingApps}{${new Set(edgesOut.map((r) => r.app)).size}}`,
+    `\\newcommand{\\MustCtxMixed}{${edgesOut.filter((r) => r.unconditionalSites > 0 && r.unconditionalSites < r.sites).length}}`,
+    ...fates.map((f) => `\\newcommand{\\MustFate${cap(f)}}{${fateCount[f]}}`),
+    ...reasons.map((r) => `\\newcommand{\\MustWhy${cap(r)}}{${reasonCount[r]}}`),
+    `\\newcommand{\\MustWhyTemplate}{${reasonCount['control-flow block'] + reasonCount['structural directive'] + reasonCount['ng-template']}}`,
+    '\\newcommand{\\TabMustLedger}{%',
+    '\\begin{tabular}{@{}l>{\\raggedright\\arraybackslash}p{0.31\\textwidth}>{\\raggedright\\arraybackslash}p{0.33\\textwidth}>{\\raggedright\\arraybackslash}p{0.14\\textwidth}@{}}',
+    '\\toprule',
+    'Application & Edge & Construct & Condition read \\\\',
+    '\\midrule',
+    ...constructs.map((c) => `${esc(c.app)} & ${c.edge.split(' -> ').map((x) => `\\path{${x}}`).join(' $\\to$ ')} & \\path{${c.site}} & ${c.condition ?? 'none'} \\\\`),
+    '\\bottomrule',
+    '\\end{tabular}}']
+  writeFileSync(tex, lines.join('\n') + '\n')
 }
-console.error(`\n${total} must edges: ${count('conditional')} with every witness conditional, ${count('unconditional')} with every witness unconditional, ${count('mixed')} mixed; ${rows.filter((r) => r.unconditionalWitnesses > 0).length} have at least one unconditional witness`)
+console.log(`must tier of the earlier instrument: ${total} edges citing ${constructs.length} constructs; fates ${JSON.stringify(fateCount)}; ${conditional} constructs conditional ${JSON.stringify(reasonCount)}`)

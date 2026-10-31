@@ -73,6 +73,12 @@ function censusOf(dbPath) {
     maySourceNotScreen: edges.filter((e) => e.modality === 'may' &&
       !['screen', 'scope'].includes(kind.get(e.from))).length,
     modalityDrift: edges.filter((e) => (e.modality === 'unknown') !== (kind.get(e.to) !== 'screen')).length,
+    // A must edge can cite constructs that earn only may on their own; these count the sites that
+    // earn must, which is what RQ1's conversion counts, and every site the must edges cite.
+    mustSites: new Set(edges.filter((e) => e.modality === 'must').flatMap((e) => [e.witness, ...(e.mergedWitnesses || [])])
+      .filter((w) => w && (w.modality ?? 'must') === 'must').map((w) => `${w.file}:${w.loc?.line}`)).size,
+    mustCitedSites: new Set(edges.filter((e) => e.modality === 'must').flatMap((e) => [e.witness, ...(e.mergedWitnesses || [])])
+      .filter(Boolean).map((w) => `${w.file}:${w.loc?.line}`)).size,
   }
 }
 
@@ -134,6 +140,7 @@ if (tex) {
     ['MaySourceNotScreen', all.maySourceNotScreen],
     ['UnknownApps', rows.filter((r) => r.unknown > 0).length],
     ['ZeroMustApps', rows.filter((r) => r.must === 0).length],
+    ['MustSites', all.mustSites], ['MustCitedSites', all.mustCitedSites],
     ['Apps', rows.length],
   ]) {
     if (!Number.isInteger(v) || v < 0) throw new Error(`${k} is ${v}, which is not a count`)

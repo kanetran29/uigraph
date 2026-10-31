@@ -1,0 +1,13 @@
+{
+ "edges": 10627,
+ "sitesCited": 14079,
+ "mustEdges": 0,
+ "mustClean": 0,
+ "mustBad": [],
+ "tally": {
+  "TARGET_MISMATCH": 256,
+  "NO_CONSTRUCT": 2,
+  "OVER_APPROX": 12836,
+  "OFF_BY_N": 4
+ }
+}

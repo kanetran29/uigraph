@@ -7,7 +7,7 @@
   "quota": 8,
   "baseline": {
     "nodes": 259,
-    "edges": 271,
+    "edges": 270,
     "routes": 98
   },
   "discovered": {
@@ -454,7 +454,7 @@
         "edgesRemoved": [],
         "guardChanged": [
           "/accept-families-for-enterprise -> /setup/families-for-enterprise: guard deepLinkGuard(),authGuard->null, modality may->must",
-          "/recover-2fa -> /settings/security/two-factor: guard deepLinkGuard(),authGuard->null, modality may->must",
+          "/recover-2fa -> /settings/security/two-factor: guard deepLinkGuard(),authGuard->null, modality may->may",
           "/premium/checkout/success -> /settings/subscription/premium: guard deepLinkGuard(),authGuard->null, modality may->must",
           "/request-sm-access -> /sm-landing: guard deepLinkGuard(),authGuard->null, modality may->must"
         ]

@@ -122,16 +122,20 @@ a reason, enforced by a check that fails when any does not, and some name a rout
 application never declares. What the repairs cost is reported with them, and it is not
 what one would hope for. The earlier instrument published a deterministic tier of
 \EarlierMustEdges{} edges with \EarlierMustViolations{} violations in it, and four corrections
-took it to nothing, each hidden by the one before: a guard carried by a route a wrapper
+took it to a single edge, each hidden by the one before: a guard carried by a route a wrapper
 function returns, a \texttt{canActivate} element that is a call rather than a name, an edge
-that several constructs cite taking the modality of the first of them instead of the weakest,
-and a navigation that runs under a condition being called deterministic. The first three left
-\RoundTwoMustEdges{} edges with \RoundTwoMustViolations{} violations; the fourth found every one of
-those running under a condition, and demoted all of them (Section~\ref{sec:res-round2}). None
-of the edges that left became a correct target; they stopped claiming to be deterministic,
-which they never were. On all \CensusZeroMustApps{} applications the tier is now empty, so
-RQ1's stricter measure reads zero across the corpus, and Claim~\ref{claim:must} holds there
-only because it ranges over nothing. The exchange is the end of a sequence in which each
+that several constructs cite taking the modality of the first of them, and three gaps in the
+demotion rules at once --- a navigation that runs under a condition, a guard on an empty-path
+child that matches whenever its parent does, and a navigation to the screen already displayed.
+The first three left \RoundTwoMustEdges{} edges with \RoundTwoMustViolations{} violations; the
+fourth demoted all but \MustFateKept{} of those (Section~\ref{sec:res-round2}). None of the edges
+that left became a correct target; they stopped claiming to be deterministic, which they never
+were. The one that stayed did so because the fourth correction also replaced the third's rule,
+which had demoted an edge whenever any construct citing it was uncertain: an edge is now as
+certain as the most certain construct that yields it. On \CensusZeroMustApps{} of the six
+applications there is no must edge, so RQ1's stricter measure reads zero there, and
+Claim~\ref{claim:must} ranges over \MustWitnessEdges{} edge in the corpus, with
+\MustWitnessViolations{} violations. The exchange is the end of a sequence in which each
 claim that did not survive its own test was withdrawn.
 
 What they leave open is also specific. The call graph with dependency injection and the

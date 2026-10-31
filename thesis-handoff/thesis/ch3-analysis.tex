@@ -36,8 +36,8 @@ and the paragraph on witnesses below says how they are traced.
 
 \textbf{What the materialised graph carries beyond the model.} The extractor emits two node
 kinds that are not screens, and the edge relation above does not range over them. An
-\emph{unplaced origin} stands for a navigation site the analysis could not place under any
-screen; a \emph{dynamic target} stands for a destination only the run time knows. Both are
+\emph{unplaced origin} stands for a component, with the navigation sites in it, that the
+analysis could not place under any screen; a \emph{dynamic target} stands for a destination only the run time knows. Both are
 kept in the output rather than dropped, because a site the analysis cannot place is a loss
 Chapter~\ref{ch:results} has to count, and a destination it cannot name is one the run time
 could still take. Table~\ref{tab:census} reports how much of each graph they are. Over the
@@ -79,8 +79,10 @@ Alongside the modality the artefact records a numeric \emph{confidence} on each 
 not part of the model and carries no claim this thesis makes. It is a finer version of the same
 ordering: $1$ where the target is resolved and no guard applies, $0.6$ where a guard does,
 $0.5$ where the target could be one of several routes, and $0$ for an edge into a dynamic
-target. Where several constructs yield one edge the weakest value is kept, so the number never
-rises when evidence is merged. Every figure in this thesis is reported over the modalities,
+target. Where several constructs yield one edge, the edge carries the modality and the
+confidence of the most certain of them, and each construct it cites records the modality it
+earns on its own, so the edge is as certain as the best evidence for it and no construct is cited
+as stronger evidence than it is. Every figure in this thesis is reported over the modalities,
 never over the confidence.
 
 \textbf{Screens and routes.} The set $S$ is derived from the route configuration, and
@@ -144,15 +146,21 @@ edge whose cited construct names a different destination cannot satisfy the clai
 failure of the check refutes it; agreement does not establish it. Whether the navigation
 occurs \emph{for every input on which the enclosing code executes} is decided by the rules
 that place an edge in the must tier instead of the may tier. A site is demoted when a guard on
-its target can refuse it, and when it runs only on some executions of its own code: under a
-template control-flow block or a structural directive, under a branch, inside a callback the
-result of an asynchronous call invokes, or after an \texttt{await} or an early
-\texttt{return}. The extractor's own unit tests cover those rules and share its reading of
-each construct; the conditional part is also re-derived by a second reader, written apart from
-the extractor, from the syntax tree of every construct a must edge cites. The guard part has
-no such second reader. Section~\ref{sec:res-round2} reports three cases in which the
-extractor's reading was wrong and the tier was too large as a result, the last of them the
-absence of the conditional rule altogether. What the
+its target can refuse it, including a guard on a child route with an empty path and no component,
+which Angular matches on every navigation to the screen above it; when its target is the address
+its source already displays, which the router ignores or follows only on some inputs; and when
+it runs only on some executions of its own code: under a template control-flow block, a
+structural directive or an \texttt{<ng-template>}, under a branch, in a loop or a
+\texttt{catch} clause, inside a callback or any other function something else has to call, or
+after an \texttt{await} or an early \texttt{return} or \texttt{throw}. An exception from an
+earlier synchronous call is not counted, since every call can throw; an \texttt{await} is,
+because a rejected request is an ordinary outcome of the code that awaits it. The extractor's own
+unit tests cover those rules and share its reading of each construct, and no second classifier
+re-derives them. What stands in for one is a review that read every construct the round's must
+tier cited in the source, without a classifier, and agreed with the extractor's readers at every
+one once they were corrected (Section~\ref{sec:res-round2}). Section~\ref{sec:res-round2} reports
+four cases in which the extractor's reading was wrong and the tier was too large as a result, the
+last of them three gaps in the demotion rules at once. What the
 check establishes is therefore narrower than the claim: that every cited site exists in the
 source and agrees on its target. The stronger half of the claim rests on the demotion rules
 and is not independently verified.
@@ -224,10 +232,12 @@ contributing no edge is the correct answer. A site is \emph{unresolved} when
 $\mathit{scope}(x) = \varnothing$ because no rule of the analysis reaches it --- a navigation
 in a service nothing is known to inject, or behind a construct the reader could not follow ---
 and the true scope is simply unknown. Both yield $\bot$, so $\bot$ alone does not say which
-holds. The extractor therefore does not let an unresolved site vanish: it records a note
-naming the construct and anchors the site at an unplaced origin, which is what makes the
-unresolved sites countable in Chapter~\ref{ch:results} rather than indistinguishable from
-code that is genuinely unreachable.
+holds. The extractor therefore does not let an unresolved site vanish silently. A site in a
+component that no rule places is anchored at an unplaced origin, a node that carries the
+component's file, and its edges are held at \emph{may}; a site in any other class whose scope
+is empty contributes no edge, and the extractor records a note naming its file and the reason.
+Either trace is what makes the unresolved sites countable in Chapter~\ref{ch:results} rather
+than indistinguishable from code that is genuinely unreachable.
 
 Three elements of the domain are named, because attribution anchors edges at them.
 Writing $r' \succeq r$ for the reflexive ancestor relation on routes, that is $r'$ is

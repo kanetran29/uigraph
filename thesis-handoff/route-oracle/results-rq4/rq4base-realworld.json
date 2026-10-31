@@ -271,9 +271,9 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/login -> /register: guard fn#ddb96242->null, modality may->must",
-          "/register -> /register: guard fn#ddb96242->null, modality may->must",
-          "/article/:slug -> /register: guard fn#ddb96242->null, modality may->must"
+          "/login -> /register: guard fn#ddb96242->null, modality may->may",
+          "/register -> /register: guard fn#ddb96242->null, modality may->may",
+          "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may"
         ]
       }
     },
@@ -294,10 +294,10 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/ -> /login: guard fn#ddb96242->null, modality may->must",
-          "/tag/:tag -> /login: guard fn#ddb96242->null, modality may->must",
-          "/login -> /login: guard fn#ddb96242->null, modality may->must",
-          "/register -> /login: guard fn#ddb96242->null, modality may->must"
+          "/ -> /login: guard fn#ddb96242->null, modality may->may",
+          "/tag/:tag -> /login: guard fn#ddb96242->null, modality may->may",
+          "/login -> /login: guard fn#ddb96242->null, modality may->may",
+          "/register -> /login: guard fn#ddb96242->null, modality may->may"
         ]
       }
     },
@@ -318,7 +318,7 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/profile/:username -> /settings: guard requireAuth->null, modality may->must"
+          "/profile/:username -> /settings: guard requireAuth->null, modality may->may"
         ]
       }
     },

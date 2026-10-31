@@ -692,3 +692,20 @@ and the rest because the graph already witnesses an edge from that file --- so t
 this paragraph is about is never reached on this corpus at all. What is recorded here is therefore a property of the rule and not
 of any figure in Chapter~\ref{ch:results}. The narrower rule is still the one to state, because
 the broader one was false wherever it was asked.
+
+\section{The round's must tier, construct by construct}
+\label{app:mustledger}
+
+Table~\ref{tab:mustledger} lists every construct the \MustCtxEdges{} must edges of the round-two
+instrument cite, with the edge that cites it and the condition the current extractor reads at
+it (Section~\ref{sec:res-round2}). A construct cited by two edges appears twice. The condition is
+read by the extractor's own readers, so the table records the extractor's decisions and a reader
+checks it by opening each construct at the line given.
+
+\begin{table}[ht]\scriptsize
+\caption{The constructs behind the round's must tier and the condition the extractor reads at
+each. \emph{none} means the construct runs whenever its template or handler does.}
+\label{tab:mustledger}
+\TabMustLedger
+\end{table}
+
