@@ -49,11 +49,12 @@ both the number of changes that can be scored at all and the rate at which a sco
 is detected. A route path rename is detected in every scored mutant, which is close to
 guaranteed by construction and tests node extraction rather than behaviour; of the
 \MutFallibleScored{} mutants from the three operators that can fail, \MutFallibleDetected{}
-are detected. \MutNoResponse{} mutants produce no change in the graph at all,
-\MutNoResponseGuard{} of them guard removals and \MutNoResponseRetarget{} a retarget, and
-every one acts on a construct the graph does not hold: reading the graph at each site finds no
-edge entering the screen the mutant changes. They report the coverage gap of RQ1 a second time
-rather than a defect in how the graph represents a guard.
+are detected. \MutNoResponse{} mutants produce no change in the graph at all. The
+\MutNoResponseGuard{} guard removals act on guards the graph can record on no edge, read off
+the graph site by site: the guarded screen is one no edge enters, or the guarded route declares
+no screen at all. The \MutNoResponseRetarget{} retarget is a call in a component the analysis
+could not place under any screen. None of them is a defect in how the graph represents a guard
+it can place.
 
 The thesis contributes one mechanism, and the apparatus that makes its claims
 checkable. The mechanism is scope attribution, formulated as a dataflow analysis over the

@@ -60,6 +60,9 @@ Tkachuk and Rajan \cite{tkachuk2013patent} & Struts/JSP & yes & outcome & not st
 Crawljax \cite{crawljax2012} & Ajax DOM states & no & no & manual \\
 FeedEx, FRAGGEN \cite{feedex2013,fraggen2022} & DOM states & no & no & coverage \\
 Kurant \cite{kurant2025} & React components & yes & n/a & F1, no routing \\
+Oshima and Kishi \cite{oshima2018model} & Angular pages & yes & no & 6 apps, faults \\
+Rima et al.\ \cite{rima2026e2e} & Angular workflows & yes & conditions & 7 apps, tests run \\
+Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & yes & no & 2 apps, policy paths \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -141,7 +144,8 @@ practice not feasible. So the dynamic approach was used because there was no sta
 Client-side routing frameworks changed this situation. The route table is now a
 declared data structure in the source, a navigation is an attribute or a method call
 that names a route, and a guard is a named function attached to a route. Four static
-analyses of such a framework were found during the literature search for this thesis.
+analyses of such a framework were found during the literature search for this thesis, three
+of them reading the framework's own sources and one a compiled bundle.
 Kurant's component dependency graph for React stops at the component rendering graph
 without addressing routing \cite{kurant2025}.
 
@@ -182,7 +186,8 @@ al.\ parse Angular sources and templates to build a graph of navigation structur
 interaction sites and the conditions --- guards among them --- that decide whether an
 interaction is executable, enumerate workflows over that graph, and compile each workflow
 into a browser test; the graph is a coverage denominator for generated end-to-end tests
-\cite{rima2026e2e}. Zhang et al.\ parse
+\cite{rima2026e2e}. That account is taken from the publisher's abstract and the project's
+replication package, the chapter itself not having been available to this review. Zhang et al.\ parse
 the compiled JavaScript bundle rather than the sources, take declared routes as vertices and
 navigation calls as edges, and check an access-control policy against the screens reachable
 from an authorised one; their graph is declared an over-approximation and is not narrowed,
@@ -686,9 +691,10 @@ it was derived from changes.
 Static extraction of navigation models from web applications has been directed largely at
 server-rendered frameworks, in which a page is a file and a link an anchor; client-side
 routing frameworks have mostly been modelled dynamically instead. The literature search for
-this thesis found three static extractions from a client-side router configuration, each
-building its graph for a different consumer. Only one of them attributes navigation sites to
-screens: Oshima and Kishi's, which fixes the terms of the problem addressed here
+this thesis found three static extractions of a client-side navigation graph, two from a
+framework's own sources and one from a compiled bundle, each
+building its graph for a different consumer. Oshima and Kishi's is the one that fixes the
+terms of the problem addressed here
 (Section~\ref{sec:dynamic-spa}). It does so, however, only for
 applications that declare no nested routes, no route parameters and no data-bound
 navigation, with attribution computed over component containment and the root component's
@@ -698,8 +704,8 @@ two put the graph to work without narrowing it: one as the coverage denominator 
 generated end-to-end suite \cite{rima2026e2e}, one as the reachability relation of an
 access-control check, declared an over-approximation \cite{zhang2025veriflow}. What
 has not been covered by earlier work is that extraction without those restrictions:
-over nested and lazily loaded route trees, with guards carried onto the transitions as a
-modality, with attribution that follows calls and dispatch as well as containment, and
+over nested and lazily loaded route trees, with guards carried onto each transition as a
+modality rather than onto a workflow as a feasibility verdict, with attribution that follows calls and dispatch as well as containment, and
 with the resulting loss declared and measured on applications large enough for the
 difficult constructs to occur. The Android literature is the nearest static
 relative. It attributes navigation by resolving the owning object, and when that fails

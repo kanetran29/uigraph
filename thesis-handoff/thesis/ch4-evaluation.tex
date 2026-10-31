@@ -336,7 +336,10 @@ delete a \texttt{routerLink}, retarget a \texttt{navigate}. Ground truth is the
 authored delta, so nothing is circular. Detection is judged on the node and edge sets
 and on the witness set, since several constructs can produce one edge. &
 A mutant whose construct is absent from the baseline graph re-detects a coverage gap and
-is excluded, as is a guard mutant on a screen that no edge enters. Detection is
+is excluded, as is a guard mutant on a screen that no edge enters --- which the harness can
+establish only where it can name the guarded screen from the source text, so the rule misses a
+guard whose route names its path with the empty string, a constant or a template literal
+(Section~\ref{sec:res-mutation}). Detection is
 therefore conditional on coverage, and the attributed and unattributed graphs do not
 exclude the same mutants, so their overall rates are not taken over one set: the
 comparison between them is also reported over the mutants both can score, paired by
@@ -437,7 +440,9 @@ smaller changes followed from the same review. A retargeting mutant now points a
 another declared route instead of an invented one, so that it cannot be confused with a
 missing target. A guard mutant on a screen that no edge enters is excluded, because a
 guard is represented on the edges entering the screen it guards, so such a mutant can
-only repeat the edge-coverage gap already counted under RQ1. A rename mutant counts as
+only repeat the edge-coverage gap already counted under RQ1. The rule as implemented names the
+guarded screen from the nearest path literal preceding the \texttt{canActivate}, and
+Section~\ref{sec:res-mutation} reports the mutants it therefore failed to exclude. A rename mutant counts as
 detected when the renamed route appears in the graph, without also requiring the
 original node to disappear, since the same path segment may be declared in a second
 routing module. With the offset and witness corrections in place, on the same seed and
