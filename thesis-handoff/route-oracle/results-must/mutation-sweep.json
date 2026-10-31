@@ -1,326 +1,678 @@
 {
- "note": "Each demotion rule deleted in turn from a copy of packages/adapter-angular at 890f830, the full adapter suite run against it. A mutant survives when the suite still passes. The four that survived were re-run after tests for them were added (be4e382 plus those tests); each then failed one test.",
- "baseline": "Tests  319 passed (319)",
+ "note": "Each demotion rule the thesis lists deleted in turn from a copy of packages/adapter-angular at a8c7480, the full adapter suite run against it; a mutant survives when the suite still passes. The six that survived were re-run against the suite of the commit that records this file, which adds tests for them, and each then failed the test named in afterAddedTests. The extra mutants split mutant 59 and the controls-mode hole term, which the sweep had not deleted alone, and were run against the same suite.",
+ "commit": "a8c7480",
+ "baseline": "Tests  345 passed (345)",
  "mutants": [
   {
    "id": "1",
+   "rule": "if branch returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "templateCondition: `ICU_OPEN.test(t.slice(i, i + 200)) ? 'icu' : 'plain'` -> `'plain'`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if (Node.isIfStatement(parent) && parent.getExpression() !== node) return 'under a branch'\" -> 'if (Node.isIfStatement(parent) && parent.getExpression() !== node) return null'",
+   "result": "Tests  4 failed | 341 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "2",
+   "rule": "ternary branch removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "openTag: deleted the two quote-handling lines `if (quote) { if (ch === quote) quote = null; continue }` and `if (ch === '\"' || ch === \"'\") { quote = ch; continue }`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if (Node.isConditionalExpression(parent) && parent.getCondition() !== node) return 'under a branch'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "3",
+   "rule": "case/default clause removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "memberCondition: inserted `return null` as the first statement, before `if (handlersOf(cls).has(name)) return null`",
-   "result": "Tests  3 failed | 316 passed (319)",
+   "what": "\"if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) return 'under a branch'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "4",
+   "rule": "catch clause removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "handlersOf: `if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue` -> `if (!isBareCall(expr)) continue`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if (Node.isCatchClause(parent)) return 'in a catch clause'\" -> ''",
+   "result": "Tests  2 failed | 343 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "5",
+   "rule": "classic for removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "handlersOf: `if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue` -> `if (templateCondition(tpl!.text, b.index) !== null) continue`",
-   "result": "Tests  319 passed (319)",
-   "survived": true,
-   "afterAddedTests": "killed: Tests 1 failed | 322 passed (323)"
+   "what": "\"if (Node.isForStatement(parent) && parent.getInitializer() !== node) return 'in a loop'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
   },
   {
    "id": "6",
+   "rule": "for-of/for-in removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "interruption: deleted the two lines `const jumps = [...stmt.getDescendantsOfKind(SyntaxKind.BreakStatement), ...stmt.getDescendantsOfKind(SyntaxKind.ContinueStatement)]` and `if (Node.isBreakStatement(stmt) || Node.isContinueStatement(stmt) || jumps.some((x) => leavesBlock(x, stmt))) return 'after early exit'`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if ((Node.isForOfStatement(parent) || Node.isForInStatement(parent)) && parent.getExpression() !== node) return 'in a loop'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "7",
+   "rule": "while removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "callCondition: deleted the line `if (Node.isCallExpression(parent) && parent.getArguments().includes(node as never) && /\\?\\./.test(parent.getExpression().getText())) return 'under a branch'`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if (Node.isWhileStatement(parent) && parent.getExpression() !== node) return 'in a loop'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "8",
+   "rule": "parameter initializer removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "callCondition: deleted the line `if (Node.isParameterDeclaration(parent) && parent.getInitializer() === node) return 'under a branch'`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if (Node.isParameterDeclaration(parent) && parent.getInitializer() === node) return 'under a branch'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "9",
+   "rule": "optional-call argument removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "callCondition operator list: `SyntaxKind.QuestionQuestionToken,\\n SyntaxKind.AmpersandAmpersandEqualsToken, SyntaxKind.BarBarEqualsToken, SyntaxKind.QuestionQuestionEqualsToken].includes(op)` -> `SyntaxKind.QuestionQuestionToken].includes(op)`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if (Node.isCallExpression(parent) && parent.getArguments().includes(node as never) && /\\\\?\\\\./.test(parent.getExpression().getText())) return 'under a branch'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "10",
+   "rule": "leading optional-chain check removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "callCondition: deleted the first line `if (/\\?\\./.test(call.getExpression().getText())) return 'under a branch'`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if (/\\\\?\\\\./.test(call.getExpression().getText())) return 'under a branch'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "11",
+   "rule": "&& removed from operator list",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "callCondition: deleted the line `if (Node.isConditionalExpression(parent) && parent.getCondition() !== node) return 'under a branch'`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "'[SyntaxKind.AmpersandAmpersandToken, SyntaxKind.BarBarToken,' -> '[SyntaxKind.BarBarToken,'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "12",
+   "rule": "logical-assignment tokens removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "callCondition: deleted the line `if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) return 'under a branch'` (the later Block/SourceFile/CaseClause statement-walk condition left intact)",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "'SyntaxKind.QuestionQuestionToken,\\n        SyntaxKind.AmpersandAmpersandEqualsToken, SyntaxKind.BarBarEqualsToken, SyntaxKind.QuestionQuestionEqualsToken].includes(op)' -> 'SyntaxKind.QuestionQuestionToken].includes(op)'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "13",
+   "rule": "interruption await case removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "callCondition: deleted the line `if (Node.isForStatement(parent) && parent.getInitializer() !== node) return 'in a loop'`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "what": "\"if (owned(SyntaxKind.AwaitExpression)) return 'after await'\" -> ''",
+   "result": "Tests  4 failed | 341 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "14",
+   "rule": "interruption return/throw case removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "callCondition: deleted the line `if (Node.isCatchClause(parent)) return 'in a catch clause'`",
-   "result": "Tests  2 failed | 317 passed (319)",
+   "what": "\"if (Node.isReturnStatement(stmt) || Node.isThrowStatement(stmt) || owned(SyntaxKind.ReturnStatement) || owned(SyntaxKind.ThrowStatement)) return 'after early exit'\" -> ''",
+   "result": "Tests  4 failed | 341 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "15",
+   "rule": "interruption break/continue case removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "templateCondition: `open.name === 'ng-template' ? 'ng-template' : STRUCTURAL_ATTR.test(open.attrs) ? 'structural directive' : null` -> `STRUCTURAL_ATTR.test(open.attrs) ? 'structural directive' : null`",
-   "result": "Tests  2 failed | 317 passed (319)",
+   "what": "\"if (Node.isBreakStatement(stmt) || Node.isContinueStatement(stmt) || jumps.some((x) => leavesBlock(x, stmt))) return 'after early exit'\" -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "16",
+   "rule": "arrow/function-expr callback returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "templateCondition (close-tag branch): `if (k < 0) return 'unreadable template'` -> `if (k < 0) return null` (the unmatched-brace `return 'unreadable template'` left intact)",
-   "result": "Tests  319 passed (319)",
-   "survived": true,
-   "afterAddedTests": "killed: Tests 1 failed | 322 passed (323)"
+   "what": "\"? memberCondition(cls, parent.getName(), seen) : 'in a callback'\" -> '? memberCondition(cls, parent.getName(), seen) : null'",
+   "result": "Tests  6 failed | 339 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
   },
   {
    "id": "17",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "land(): `if (matchAll(path, routeLikes).length + (rival ? 1 : 0) > 1) ambiguous = true` -> `... > 1) ambiguous = false`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "object-literal method returns null",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (Node.isObjectLiteralExpression(parent)) return 'in a callback'\" -> 'if (Node.isObjectLiteralExpression(parent)) return null'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "18",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "land(): `for (let hop = 0; hop < 10; hop += 1) {` -> `for (let hop = 0; hop < 1; hop += 1) {`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "nested function declaration returns null",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"return Node.isSourceFile(parent) ? 'in a helper function' : 'in a callback'\" -> \"return Node.isSourceFile(parent) ? 'in a helper function' : null\"",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "19",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "emitTargets: `const unsure = parsed.aux || landed.ambiguous || redirectOfNode.has(from)` -> `const unsure = parsed.aux || landed.ambiguous`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "memberCondition returns null first",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "'function memberCondition(cls: ClassDeclaration, name: string, seen: Set<string>): string | null {' -> 'function memberCondition(cls: ClassDeclaration, name: string, seen: Set<string>): string | null {\\n  return null'",
+   "result": "Tests  6 failed | 339 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "20",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "emitTargets: `const unsure = parsed.aux || landed.ambiguous || redirectOfNode.has(from)` -> `const unsure = landed.ambiguous || redirectOfNode.has(from)`",
-   "result": "Tests  319 passed (319)",
-   "survived": true,
-   "afterAddedTests": "killed: Tests 1 failed | 322 passed (323)"
+   "rule": "top-level helper returns null",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())) return 'in a helper function'\" -> 'if (Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())) return null' ;; \"return Node.isSourceFile(parent) ? 'in a helper function' : 'in a callback'\" -> \"return Node.isSourceFile(parent) ? null : 'in a callback'\"",
+   "result": "Tests  2 failed | 343 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
   },
   {
    "id": "21",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "emitTargets only (controls-mode wireControlNav untouched): `const parsed = t.url ? urlPath(t.ti.value) : { path: t.ti.value, aux: false }` -> `const parsed = urlPath(t.ti.value)`, and `const landed = land(value, t.url !== true)` -> `const landed = land(value, false)`",
-   "result": "Tests  2 failed | 317 passed (319)",
+   "rule": "handlersOf: any decorator is a handler",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"m.getDecorators().some((d) => d.getName() === 'HostListener')\" -> 'm.getDecorators().length > 0'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "22",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "emitTargets: `if (members?.has(target.nodeId) && !uncertain) {` -> `if (false && members?.has(target.nodeId) && !uncertain) {`",
-   "result": "Tests  3 failed | 316 passed (319)",
+   "rule": "handlersOf: templateCondition check dropped",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "'if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue' -> 'if (!isBareCall(expr)) continue'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "23",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "emitTargets expansion loop: `pushEdge(m, target.nodeId, t, m === target.nodeId ? 'may' : 'must', m === target.nodeId ? 0.5 : 1, guardText, file)` -> `pushEdge(m, target.nodeId, t, 'must', m === target.nodeId ? 0.5 : 1, guardText, file)` (confidence expression unchanged)",
-   "result": "Tests  2 failed | 317 passed (319)",
+   "rule": "handlersOf: isBareCall check dropped",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "'if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue' -> 'if (templateCondition(tpl!.text, b.index) !== null) continue'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "24",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "attribution: `if (unsure.size > 0) emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))` -> `if (unsure.size > 0) emitOver(unsure, ts, relative(projectDir, f))`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "supersededAt always false",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "'function supersededAt(call: CallExpression): boolean {' -> 'function supersededAt(call: CallExpression): boolean {\\n  return false'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "25",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "attribution shell loop: `emitTargets(SHELL_NODE_ID, scopes.firmShell.has(f) ? ts : ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f), true)` -> `emitTargets(SHELL_NODE_ID, ts, relative(projectDir, f), true)`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "control-flow block returns null",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (braces.includes('block')) return 'control-flow block'\" -> \"if (braces.includes('block')) return null\"",
+   "result": "Tests  8 failed | 337 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "26",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "pushEdge same(): `m?.file === w.file && m?.loc?.line === w.loc.line && m?.loc?.col === w.loc.col` -> `m?.file === w.file && m?.loc?.line === w.loc.line`",
-   "result": "Tests  2 failed | 317 passed (319)",
+   "rule": "structural attribute never matches",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"STRUCTURAL_ATTR.test(open.attrs) ? 'structural directive' : null\" -> \"false ? 'structural directive' : null\"",
+   "result": "Tests  9 failed | 336 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "27",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "pushEdge: `if (MODALITY_RANK[modality] > MODALITY_RANK[e.modality] || (modality === e.modality && confidence > e.confidence)) {` -> `if (false) {` (so the else branch always pushes to mergedWitnesses)",
-   "result": "Tests  4 failed | 315 passed (319)",
+   "rule": "ng-template arm removed",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"const structural = open.name === 'ng-template' ? 'ng-template' : LAZY_CONTAINERS.has(open.name)\" -> 'const structural = LAZY_CONTAINERS.has(open.name)'",
+   "result": "Tests  2 failed | 343 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "28",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "controls mode wireControlNav call: `conditional: controlConditional || !bare || nav.conditional }` -> `conditional: controlConditional || nav.conditional }`",
-   "result": "Tests  319 passed (319)",
-   "survived": true,
-   "afterAddedTests": "killed: Tests 1 failed | 322 passed (323)"
+   "rule": "ICU arm removed (always plain)",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"braces.push(ICU_OPEN.test(t.slice(i, i + 200)) ? 'icu' : 'plain')\" -> \"braces.push('plain')\"",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
   },
   {
    "id": "29",
-   "file": "packages/adapter-angular/src/routes.ts",
-   "what": "`const guards = [...inheritedGuards, ...canActivateGuards(sf, obj), ...canActivateGuards(sf, obj, 'canMatch'), ...canActivateGuards(sf, obj, 'canActivateChild')]` -> same without `...canActivateGuards(sf, obj, 'canMatch'),` (the `own` list in the empty-path host block untouched)",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "lazy container arm removed",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"LAZY_CONTAINERS.has(open.name) ? 'lazy container' : STRUCTURAL_ATTR\" -> 'STRUCTURAL_ATTR'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "30",
-   "file": "packages/adapter-angular/src/routes.ts",
-   "what": "`const guards = [...inheritedGuards, ...canActivateGuards(sf, obj), ...canActivateGuards(sf, obj, 'canMatch'), ...canActivateGuards(sf, obj, 'canActivateChild')]` -> same without `, ...canActivateGuards(sf, obj, 'canActivateChild')`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "unmatched brace returns null",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (braces.length === 0) return 'unreadable template'\" -> 'if (braces.length === 0) return null'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "31",
-   "file": "packages/adapter-angular/src/routes.ts",
-   "what": "`else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = ...` -> `else if (host.redirectsTo === undefined) host.redirectsTo = ...` (the `emptyPathAnswered.add(host)` line left in place)",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "unmatched close tag returns null",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (k < 0) return 'unreadable template'\" -> 'if (k < 0) return null'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "32",
-   "file": "packages/adapter-angular/src/routes.ts",
-   "what": "`const host = !auxHere && ownPath === '' && ...` -> `const host = !auxHere && !isScreen && ownPath === '' && ...`",
-   "result": "Tests  2 failed | 317 passed (319)",
+   "rule": "openTag ignores quotes",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "'if (ch === \\'\"\\' || ch === \"\\'\") { quote = ch; continue }' -> ''",
+   "result": "Tests  2 failed | 343 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "33",
-   "file": "packages/adapter-angular/src/nav.ts",
-   "what": "isOwnRoute: inserted `return true` as the first statement of the body",
-   "result": "Tests  3 failed | 316 passed (319)",
+   "rule": "withoutComments returns input",
+   "file": "packages/adapter-angular/src/templates.ts",
+   "what": "\"return text.replace(/<!--[\\\\s\\\\S]*?-->/g, (m) => m.replace(/[^\\\\n]/g, ' '))\" -> 'return text'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "34",
-   "file": "packages/adapter-angular/src/nav.ts",
-   "what": "templateTargets: `const boundBase = (at: number): boolean => /\\[relativeTo\\]\\s*=/.test(tpl.text.slice(tpl.text.lastIndexOf('<', at), tpl.text.indexOf('>', at) + 1))` -> `const boundBase = (at: number): boolean => false`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "gated forced false",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"const gated = gate.guarded && process.env.UIGRAPH_IGNORE_GUARDS !== '1'\" -> 'const gated = false'",
+   "result": "Tests  19 failed | 326 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "35",
-   "file": "packages/adapter-angular/src/nav.ts",
-   "what": "closesAtEnd: inserted `return true` as the first statement of the body",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "run.resolves removed from verdict",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'const may = common || gated || run.resolves || src === target.nodeId' -> 'const may = common || gated || src === target.nodeId'",
+   "result": "Tests  1 failed | 344 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "36",
-   "file": "packages/adapter-angular/src/nav.ts",
-   "what": "staticLinkTarget: inserted `return { kind: 'literal', value }` as the first statement of the body",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "self-loop term removed from verdict",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'|| run.resolves || src === target.nodeId || (src !== undefined && hidden(src))' -> '|| run.resolves || (src !== undefined && hidden(src))'",
+   "result": "Tests  4 failed | 341 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "37",
-   "file": "packages/adapter-angular/src/matcher.ts",
-   "what": "urlPath: `path: out.split('/').map((seg) => seg.split(';')[0]).join('/'), aux` -> `path: out, aux`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "hidden(src) removed from verdict",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'|| src === target.nodeId || (src !== undefined && hidden(src))' -> '|| src === target.nodeId'",
+   "result": "Tests  2 failed | 343 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "38",
+   "rule": "capMay removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "emitTargets uncertain term: `baseUnknown || selfLoop || unsure` -> `baseUnknown || unsure`",
-   "result": "Tests  3 failed | 316 passed (319)",
-   "survived": false,
-   "afterAddedTests": null
+   "what": "'const common = capMay || viaWildcard ||' -> 'const common = viaWildcard ||'",
+   "result": "Tests  345 passed (345)",
+   "survived": true,
+   "afterAddedTests": "killed: the demotions no other rule happens to cover > holds a link in a shell no route visibly mounts at may although the link is unconditional"
   },
   {
    "id": "39",
+   "rule": "viaWildcard removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "emitTargets uncertain term: `viaWildcard || baseUnknown || selfLoop` -> `viaWildcard || selfLoop`",
-   "result": "Tests  3 failed | 316 passed (319)",
+   "what": "'const common = capMay || viaWildcard || baseUnknown' -> 'const common = capMay || baseUnknown'",
+   "result": "Tests  4 failed | 341 passed (345)",
    "survived": false,
    "afterAddedTests": null
   },
   {
    "id": "40",
-   "file": "packages/adapter-angular/src/attribute.ts",
-   "what": "nestingGraph: `const firmTags = new Set(tagMatches.filter((m) => templateCondition(template, m.index + 1) === null).map((m) => m[1] as string))` -> `const firmTags = new Set(tagMatches.map((m) => m[1] as string))`",
-   "result": "Tests  1 failed | 318 passed (319)",
+   "rule": "baseUnknown removed from common",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'capMay || viaWildcard || baseUnknown || parsed.aux' -> 'capMay || viaWildcard || parsed.aux'",
+   "result": "Tests  4 failed | 341 passed (345)",
    "survived": false,
    "afterAddedTests": null
+  },
+  {
+   "id": "41",
+   "rule": "parsed.aux removed from common",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'baseUnknown || parsed.aux || landed.ambiguous || t.conditional' -> 'baseUnknown || landed.ambiguous || t.conditional'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "42",
+   "rule": "landed.ambiguous removed from common",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'parsed.aux || landed.ambiguous || t.conditional === true' -> 'parsed.aux || t.conditional === true'",
+   "result": "Tests  2 failed | 343 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "43",
+   "rule": "t.conditional removed from common",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"landed.ambiguous || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)\" -> \"landed.ambiguous || (t.ti.kind === 'literal' && t.ti.holes === true)\"",
+   "result": "Tests  13 failed | 332 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "44",
+   "rule": "holes removed from common",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"|| t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)\" -> '|| t.conditional === true'",
+   "result": "Tests  345 passed (345)",
+   "survived": true,
+   "afterAddedTests": "killed: the demotions no other rule happens to cover > holds a commands array with a hole before a constant at may, and keeps a whole one on must"
+  },
+  {
+   "id": "45",
+   "rule": "anchored: single edge with first verdict",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'if (first && !members.has(target.nodeId) && each.every(({ v }) => v.modality === first.modality && v.guardText === first.guardText)) {' -> 'if (first) {'",
+   "result": "Tests  4 failed | 341 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "46",
+   "rule": "behindHiddenOutlet always false",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'const behindHiddenOutlet = (route: (typeof routes)[number]): boolean => {' -> 'const behindHiddenOutlet = (route: (typeof routes)[number]): boolean => {\\n    return false'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "47",
+   "rule": "unsure screens emitted unmarked",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))' -> 'emitOver(unsure, ts, relative(projectDir, f))'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "48",
+   "rule": "shell emitted unmarked",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'emitTargets(SHELL_NODE_ID, scopes.firmShell.has(f) ? ts : ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f), true)' -> 'emitTargets(SHELL_NODE_ID, ts, relative(projectDir, f), true)'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "49",
+   "rule": "runningGuards: k = full target chain length",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'if (s) while (k < t.length && k < s.length && t[k]!.obj === s[k]!.obj && !t[k]!.params && !t[k]!.always) k += 1' -> 'if (s) k = t.length'",
+   "result": "Tests  24 failed | 321 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "50",
+   "rule": "runningGuards: canDeactivate dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "', ...(s ? s.slice(k).flatMap((l) => l.canDeactivate) : [])' -> ''",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "51",
+   "rule": "runningGuards: canActivateChild dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'...(entered.length > 0 ? t.slice(0, -1).flatMap((l) => l.canActivateChild) : []), ...(s' -> '...(s'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "52",
+   "rule": "runningGuards: canMatch dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'guards: [...t.flatMap((l) => l.canMatch), ...entered' -> 'guards: [...entered'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "53",
+   "rule": "runningGuards: params check removed",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'&& !t[k]!.params && !t[k]!.always) k += 1' -> '&& !t[k]!.always) k += 1'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "54",
+   "rule": "runningGuards: always check removed",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'&& !t[k]!.params && !t[k]!.always) k += 1' -> '&& !t[k]!.params) k += 1'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "55",
+   "rule": "controls: controlConditional dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'conditional: controlConditional || !bare || nav.conditional }' -> 'conditional: !bare || nav.conditional }' ;; \"ruleId: 'ng.control.router-link', loc, file: tplFile, conditional: controlConditional }\" -> \"ruleId: 'ng.control.router-link', loc, file: tplFile }\"",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "56",
+   "rule": "controls: !bare dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'conditional: controlConditional || !bare || nav.conditional }' -> 'conditional: controlConditional || nav.conditional }'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "57",
+   "rule": "controls: !primary.startsWith('/') dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId\" -> 'const uncertain = guarded || t.conditional === true || target.nodeId'",
+   "result": "Tests  345 passed (345)",
+   "survived": true,
+   "afterAddedTests": "killed: controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
+  },
+  {
+   "id": "58",
+   "rule": "controls: target.nodeId === route.nodeId dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"|| !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true\" -> \"|| !primary.startsWith('/') || t.ti.holes === true\"",
+   "result": "Tests  345 passed (345)",
+   "survived": true,
+   "afterAddedTests": "killed: controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
+  },
+  {
+   "id": "59",
+   "rule": "controls: run.resolves || hidden(route) dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)' -> 'parsed.aux || landed.ambiguous'",
+   "result": "Tests  345 passed (345)",
+   "survived": true,
+   "afterAddedTests": "killed: controls mode, link by link > both tests"
+  },
+  {
+   "id": "60",
+   "rule": "levelOf: canLoad read as []",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"canLoad: canActivateGuards(sf, obj, 'canLoad'),\" -> 'canLoad: [],'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "61",
+   "rule": "unreadable guard list returns []",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"return [{ text: init?.getText() ?? name, kind: 'unreadable', async: false }]\" -> 'return []'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "62",
+   "rule": "redirects: last declared wins",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "'if (!redirects.has(fullPath)) redirects.set(fullPath, redirectTarget)' -> 'redirects.set(fullPath, redirectTarget)'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "63",
+   "rule": "empty-path child guards not appended to host",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "'host.levels = [...host.levels, level]\\n        host.guards = [...host.guards, ...entryGuards([level])]' -> ''",
+   "result": "Tests  2 failed | 343 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "64",
+   "rule": "levelOf: resolve always false",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"resolve: propNamed(obj, 'resolve') !== undefined,\" -> 'resolve: false,'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "65",
+   "rule": "later-command slash encoding removed",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "\"segs.push(i === 0 ? lit[1] ?? '' : (lit[1] ?? '').replace(/\\\\//g, '%2F'))\" -> \"segs.push(lit[1] ?? '')\"",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "66",
+   "rule": "boundBase always false",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "\"const boundBase = (at: number): boolean => /\\\\[relativeTo\\\\]\\\\s*=/.test(openTag(tpl.text, tpl.text.lastIndexOf('<', at))?.attrs ?? '')\" -> 'const boundBase = (at: number): boolean => false'",
+   "result": "Tests  2 failed | 343 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "67",
+   "rule": "isOwnRoute always true",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "'function isOwnRoute(expr: Node | undefined): boolean {' -> 'function isOwnRoute(expr: Node | undefined): boolean {\\n  return true'",
+   "result": "Tests  3 failed | 342 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "68",
+   "rule": "closesAtEnd always true",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "'function closesAtEnd(text: string): boolean {' -> 'function closesAtEnd(text: string): boolean {\\n  return true'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "69",
+   "rule": "staticLinkTarget always literal",
+   "file": "packages/adapter-angular/src/nav.ts",
+   "what": "'function staticLinkTarget(value: string): TargetInfo {' -> \"function staticLinkTarget(value: string): TargetInfo {\\n  return { kind: 'literal', value }\"",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "70",
+   "rule": "urlPath used for commands too (emitTargets)",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'const parsed = t.url ? urlPath(t.ti.value) : { path: t.ti.value, aux: false }\\n        if (parsed === null) continue' -> 'const parsed = urlPath(t.ti.value)\\n        if (parsed === null) continue'",
+   "result": "Tests  2 failed | 343 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "71",
+   "rule": "firmTags = all tags",
+   "file": "packages/adapter-angular/src/attribute.ts",
+   "what": "'const firmTags = new Set(tagMatches.filter((m) => templateCondition(template, m.index + 1) === null).map((m) => m[1] as string))' -> 'const firmTags = new Set(tagMatches.map((m) => m[1] as string))'",
+   "result": "Tests  1 failed | 344 passed (345)",
+   "survived": false,
+   "afterAddedTests": null
+  },
+  {
+   "id": "72",
+   "rule": "firmAttrs = all attributes",
+   "file": "packages/adapter-angular/src/attribute.ts",
+   "what": "'const firmAttrs = new Set(attrMatches.filter((m) => templateCondition(template, m.index) === null).map((m) => m[1] as string))' -> 'const firmAttrs = new Set(attrMatches.map((m) => m[1] as string))'",
+   "result": "Tests  345 passed (345)",
+   "survived": true,
+   "afterAddedTests": "killed: the demotions no other rule happens to cover > reads a component placed by an attribute selector under a condition as conditionally mounted"
+  }
+ ],
+ "extra": [
+  {
+   "id": "59a",
+   "rule": "controls: run.resolves dropped alone",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)' -> 'parsed.aux || landed.ambiguous || hidden(route.nodeId)'",
+   "result": "killed: controls mode, link by link > holds a relative link, ... and keeps a plain one on must"
+  },
+  {
+   "id": "59b",
+   "rule": "controls: hidden(route) dropped alone",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)' -> 'parsed.aux || landed.ambiguous || run.resolves'",
+   "result": "killed: controls mode, link by link > holds every link on a screen a redirect answers at may"
+  },
+  {
+   "id": "59c",
+   "rule": "controls: t.ti.holes dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "'|| target.nodeId === route.nodeId || t.ti.holes === true ||' -> '|| target.nodeId === route.nodeId ||'",
+   "result": "killed: controls mode, link by link > holds a relative link, ... and keeps a plain one on must"
   }
  ]
 }

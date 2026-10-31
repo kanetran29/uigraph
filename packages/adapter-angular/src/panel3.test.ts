@@ -83,3 +83,70 @@ describe('a route component behind a conditional outlet', () => {
     expect(tier(graph, '/x', '/q/c')).toBe('must')
   })
 })
+
+describe('the demotions no other rule happens to cover', () => {
+  it('holds a link in a shell no route visibly mounts at may although the link is unconditional', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': routesTo(['x']),
+      '/app/home.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-home', standalone: true, template: '<p>h</p>' })\nexport class Home {}`,
+      '/app/root.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-root', standalone: true, template: '<x-layout></x-layout><a routerLink="/x">x</a>' })\nexport class Root {}`,
+      '/app/layout.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-layout', standalone: true, template: '<router-outlet></router-outlet>' })\nexport class Layout {}`,
+      '/app/t.component.ts': leaf,
+    }), '/app', { attribution: true })
+    const fromRoot = graph.edges.filter((e) => e.to === routeId('/x') && e.witness?.file === 'root.component.ts')
+    expect(fromRoot.length).toBeGreaterThan(0)
+    expect(fromRoot.every((e) => e.modality === 'may')).toBe(true)
+  })
+
+  it('reads a component placed by an attribute selector under a condition as conditionally mounted', () => {
+    const kid = (cls: string, sel: string, to: string) => `import { Component } from '@angular/core'\n@Component({ selector: '[${sel}]', standalone: true, template: '<a routerLink="${to}">k</a>' })\nexport class ${cls} {}`
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': routesTo(['k', 'f']),
+      '/app/home.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-home', standalone: true, template: '@if (flag) { <div x-kid></div> }<div x-firm></div>' })\nexport class Home { flag = true }`,
+      '/app/kid.component.ts': kid('Kid', 'x-kid', '/k'),
+      '/app/firm.component.ts': kid('Firm', 'x-firm', '/f'),
+      '/app/t.component.ts': leaf,
+    }), '/app', { attribution: true })
+    expect(tier(graph, '/k')).toBe('may')
+    expect(tier(graph, '/f')).toBe('must')
+  })
+
+  it('holds a commands array with a hole before a constant at may, and keeps a whole one on must', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Home } from './home.component'\nimport { T } from './t.component'\nexport const routes: Routes = [{ path: 'home', component: Home }, { path: 'view/:id/edit', component: T }, { path: 'plain', component: T }]`,
+      '/app/home.component.ts': `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'\n@Component({ selector: 'x-home', standalone: true, template: '<b (click)="go(r)"></b><b (click)="plain()"></b>' })\nexport class Home { r = { id: 1 }; constructor(private router: Router) {}\n  go(row: { id: number }) { this.router.navigate(['/view', row.id, 'edit']) }\n  plain() { this.router.navigate(['/plain']) } }`,
+      '/app/t.component.ts': leaf,
+    }), '/app')
+    expect(tier(graph, '/view/:id/edit')).toBe('may')
+    expect(tier(graph, '/plain')).toBe('must')
+  })
+})
+
+describe('controls mode, link by link', () => {
+  it("holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must", () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Home } from './home.component'\nimport { T } from './t.component'\nexport class R { resolve() { return null } }\nexport const routes: Routes = [{ path: 'home', component: Home }, { path: 'edit', component: T }, { path: 'data', component: T, resolve: { d: R } }, { path: 'plain', component: T }, { path: 'view/:id/edit', component: T }]`,
+      '/app/home.component.ts': `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'\n@Component({ selector: 'x-home', standalone: true, template: '<a data-testid="r" routerLink="edit">r</a><a data-testid="s" routerLink="/home">s</a><a data-testid="d" routerLink="/data">d</a><a data-testid="p" routerLink="/plain">p</a><button data-testid="h" (click)="view(row)">h</button>' })\nexport class Home { row = { id: 1 }; constructor(private router: Router) {}\n  view(r: { id: number }) { this.router.navigate(['/view', r.id, 'edit']) } }`,
+      '/app/t.component.ts': leaf,
+    }), '/app', { controls: true })
+    const tierOf = (id: string) => {
+      const c = graph.nodes.find((n) => n.kind === 'control' && n.control?.selector?.value === id)
+      return graph.edges.find((e) => e.from === c?.id)?.modality
+    }
+    expect(tierOf('r')).toBe('may')
+    expect(tierOf('s')).toBe('may')
+    expect(tierOf('d')).toBe('may')
+    expect(tierOf('p')).toBe('must')
+    expect(tierOf('h')).toBe('may')
+  })
+
+  it('holds every link on a screen a redirect answers at may', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Home } from './home.component'\nimport { T } from './t.component'\nexport const routes: Routes = [{ path: 'home', redirectTo: 'plain' }, { path: 'home', component: Home }, { path: 'plain', component: T }]`,
+      '/app/home.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-home', standalone: true, template: '<a data-testid="p" routerLink="/plain">p</a>' })\nexport class Home {}`,
+      '/app/t.component.ts': leaf,
+    }), '/app', { controls: true })
+    const c = graph.nodes.find((n) => n.kind === 'control' && n.control?.selector?.value === 'p')
+    expect(graph.edges.find((e) => e.from === c?.id)?.modality).toBe('may')
+  })
+})
