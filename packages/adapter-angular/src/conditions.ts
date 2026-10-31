@@ -14,24 +14,24 @@ const CONTROL_BLOCK = /@(?:else\s+if|if|else|for|empty|switch|case|default|defer
 const STRUCTURAL_ATTR = /(?:^|\s)(?:\*[a-zA-Z][\w.-]*|\[ngIf\]|\[ngForOf\])(?=[\s=>/]|$)/
 
 /**
- * Whether the template position `offset` lies inside a control-flow block, inside an element
- * that carries a structural directive, or inside an `<ng-template>`, whose content renders only
- * where and when something instantiates it. A loop body counts, since it runs zero times on an
+ * The condition the template position `offset` renders under, or null when it renders whenever
+ * its template does: a control-flow block, an element that carries a structural directive, or an
+ * `<ng-template>`, whose content renders only where and when something instantiates it. A loop body counts, since it runs zero times on an
  * empty list. Any attribute written with a leading asterisk is structural, an application's own
  * directive as much as *ngIf. Interpolations, comments and style sheets are blanked first, and
  * every other brace is matched as plain text, so an ICU message is not taken for a block. A scan
- * that cannot balance its braces or its elements returns true, so a template the reader cannot
- * follow costs precision rather than soundness.
+ * that cannot balance its braces or its elements is reported as a condition, so a template the
+ * reader cannot follow costs precision rather than soundness.
  */
-export function templateConditional(text: string, offset: number): boolean {
+export function templateCondition(text: string, offset: number): string | null {
   const blank = (m: string) => m.replace(/[^\n]/g, ' ')
   const t = text
     .replace(/\{\{[\s\S]*?\}\}/g, blank)
     .replace(/<!--[\s\S]*?-->/g, blank)
     .replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style\s*>)/gi, (_m, a: string, b: string, c: string) => a + blank(b) + c)
   const braces: boolean[] = []
-  const elements: { name: string; structural: boolean }[] = []
-  let siteStructural = false
+  const elements: { name: string; structural: string | null }[] = []
+  let siteStructural: string | null = null
   let i = 0
   while (i < offset) {
     if (t[i] === '@') {
@@ -53,7 +53,7 @@ export function templateConditional(text: string, offset: number): boolean {
     }
     if (t[i] === '{') { braces.push(false); i += 1; continue }
     if (t[i] === '}') {
-      if (braces.length === 0) return true
+      if (braces.length === 0) return 'unreadable template'
       braces.pop()
       i += 1
       continue
@@ -62,7 +62,7 @@ export function templateConditional(text: string, offset: number): boolean {
       const close = /^<\/([a-zA-Z][\w-]*)\s*>/.exec(t.slice(i, i + 200))
       if (close) {
         const k = elements.map((e) => e.name).lastIndexOf(close[1]!.toLowerCase())
-        if (k < 0) return true
+        if (k < 0) return 'unreadable template'
         elements.length = k
         i += close[0].length
         continue
@@ -70,7 +70,7 @@ export function templateConditional(text: string, offset: number): boolean {
       const open = /^<([a-zA-Z][\w-]*)([^>]*?)(\/?)>/.exec(t.slice(i))
       if (open) {
         const name = open[1]!.toLowerCase()
-        const structural = name === 'ng-template' || STRUCTURAL_ATTR.test(open[2] ?? '')
+        const structural = name === 'ng-template' ? 'ng-template' : STRUCTURAL_ATTR.test(open[2] ?? '') ? 'structural directive' : null
         if (i + open[0].length > offset) { siteStructural = structural; break }
         if (!open[3] && !VOID_ELEMENTS.has(name)) elements.push({ name, structural })
         i += open[0].length
@@ -79,7 +79,8 @@ export function templateConditional(text: string, offset: number): boolean {
     }
     i += 1
   }
-  return braces.includes(true) || siteStructural || elements.some((e) => e.structural)
+  if (braces.includes(true)) return 'control-flow block'
+  return siteStructural ?? elements.find((e) => e.structural !== null)?.structural ?? null
 }
 
 /**
@@ -95,48 +96,53 @@ function ownedBy(x: Node, stmt: Node): boolean {
   return false
 }
 
-/** Whether an earlier statement can leave the function, or suspend it on a promise that may reject, before the next one runs. */
-function interrupts(stmt: Node): boolean {
-  if (Node.isReturnStatement(stmt) || Node.isThrowStatement(stmt)) return true
-  const kinds = [SyntaxKind.ReturnStatement, SyntaxKind.ThrowStatement, SyntaxKind.AwaitExpression]
-  return kinds.some((k) => stmt.getDescendantsOfKind(k).some((x) => ownedBy(x, stmt)))
+/** How an earlier statement can stop the next one running: an await on a promise that may reject, or a return or throw. */
+function interruption(stmt: Node): string | null {
+  const owned = (k: SyntaxKind) => stmt.getDescendantsOfKind(k).some((x) => ownedBy(x, stmt))
+  if (owned(SyntaxKind.AwaitExpression)) return 'after await'
+  if (Node.isReturnStatement(stmt) || Node.isThrowStatement(stmt) || owned(SyntaxKind.ReturnStatement) || owned(SyntaxKind.ThrowStatement)) return 'after early exit'
+  return null
 }
 
 /**
- * Whether a navigation call runs only on some executions of the function that holds it. The
- * walk climbs from the call and reports a branch, a loop body, a catch clause, or an earlier
+ * The condition a navigation call runs under, or null when it runs on every execution of the
+ * function that holds it. The walk climbs from the call and reports a branch, a loop body, a catch clause, or an earlier
  * statement that can return, throw or await, in any enclosing block. It stops at the handler:
  * a class method, constructor or accessor, a function stored in a class field, or a function
  * declared at the top of a module. Any other function on the way up --- a callback passed to
  * subscribe, tap or setTimeout, a member of an observer object, a function declared inside the
  * handler --- runs only if and when something calls it, so the site is conditional.
  */
-export function callConditional(call: CallExpression): boolean {
+export function callCondition(call: CallExpression): string | null {
   let node: Node = call
   for (let parent = node.getParent(); parent; node = parent, parent = node.getParent()) {
     if (Node.isArrowFunction(node) || Node.isFunctionExpression(node)) {
       const top = Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())
-      return !(Node.isPropertyDeclaration(parent) || top)
+      return Node.isPropertyDeclaration(parent) || top ? null : 'in a callback'
     }
-    if (Node.isFunctionDeclaration(node)) return !Node.isSourceFile(parent)
+    if (Node.isFunctionDeclaration(node)) return Node.isSourceFile(parent) ? null : 'in a callback'
     if (Node.isMethodDeclaration(node) || Node.isGetAccessorDeclaration(node) || Node.isSetAccessorDeclaration(node)) {
-      return Node.isObjectLiteralExpression(parent)
+      return Node.isObjectLiteralExpression(parent) ? 'in a callback' : null
     }
-    if (Node.isConstructorDeclaration(node)) return false
-    if (Node.isIfStatement(parent) && parent.getExpression() !== node) return true
-    if (Node.isConditionalExpression(parent) && parent.getCondition() !== node) return true
-    if (Node.isCaseClause(parent) || Node.isDefaultClause(parent) || Node.isCatchClause(parent)) return true
-    if (Node.isForStatement(parent) && parent.getInitializer() !== node) return true
-    if ((Node.isForOfStatement(parent) || Node.isForInStatement(parent)) && parent.getExpression() !== node) return true
-    if (Node.isWhileStatement(parent) && parent.getExpression() !== node) return true
+    if (Node.isConstructorDeclaration(node)) return null
+    if (Node.isIfStatement(parent) && parent.getExpression() !== node) return 'under a branch'
+    if (Node.isConditionalExpression(parent) && parent.getCondition() !== node) return 'under a branch'
+    if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) return 'under a branch'
+    if (Node.isCatchClause(parent)) return 'in a catch clause'
+    if (Node.isForStatement(parent) && parent.getInitializer() !== node) return 'in a loop'
+    if ((Node.isForOfStatement(parent) || Node.isForInStatement(parent)) && parent.getExpression() !== node) return 'in a loop'
+    if (Node.isWhileStatement(parent) && parent.getExpression() !== node) return 'in a loop'
     if (Node.isBinaryExpression(parent) && parent.getRight() === node) {
       const op = parent.getOperatorToken().getKind()
-      if (op === SyntaxKind.AmpersandAmpersandToken || op === SyntaxKind.BarBarToken || op === SyntaxKind.QuestionQuestionToken) return true
+      if (op === SyntaxKind.AmpersandAmpersandToken || op === SyntaxKind.BarBarToken || op === SyntaxKind.QuestionQuestionToken) return 'under a branch'
     }
     if (Node.isBlock(parent) || Node.isSourceFile(parent)) {
       const stmts = parent.getStatements()
-      if (stmts.slice(0, stmts.indexOf(node as never)).some(interrupts)) return true
+      for (const s of stmts.slice(0, stmts.indexOf(node as never))) {
+        const why = interruption(s)
+        if (why !== null) return why
+      }
     }
   }
-  return false
+  return null
 }

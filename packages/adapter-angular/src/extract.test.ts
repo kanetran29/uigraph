@@ -985,3 +985,20 @@ export const routes: Routes = [
     expect(toVault[0]?.modality).toBe('must')
   })
 })
+
+describe('extractGraph — an interpolated routerLink is a computed target', () => {
+  it('sends a fully interpolated link to the unknown sink and an interpolated tail to a prefix', () => {
+    const { graph } = extractGraph(
+      inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Home } from './home.component'\nimport { U } from './u.component'\nexport const routes: Routes = [{ path: 'home', component: Home }, { path: 'users/:id', component: U }, { path: '**', redirectTo: 'home' }]`,
+        '/app/home.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-home', standalone: true, template: '<a routerLink="{{ next().route }}">n</a>\\n<a routerLink="/users/{{ id }}">u</a>' })\nexport class Home {}`,
+        '/app/u.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-u', standalone: true, template: '<p>u</p>' })\nexport class U {}`,
+      }),
+      '/app',
+    )
+    const fromHome = graph.edges.filter((e) => e.from === routeId('/home'))
+    expect(fromHome.find((e) => e.to === 'u_' + routeId('/home'))?.modality).toBe('unknown')
+    expect(fromHome.find((e) => e.to === routeId('/users/:id'))?.modality).toBe('may')
+    expect(fromHome.some((e) => e.to === routeId('/home'))).toBe(false)
+  })
+})
