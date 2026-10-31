@@ -1,15 +1,18 @@
-[realworld] detected 20/21 (95.2%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=4 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
+paired 53: attributed 44 (83.0\,\%), baseline 40 (75.5\,\%), 6 disagree, 0 against attribution
+attributed 59/68 (86.8\,\%), 2 excluded; baseline 42/57 (73.7\,\%), 13 excluded
+prose figures: 70 sampled (70 baseline), 9 failures, guard misses 4 in 2 apps (2 empty path, 2 named call), excluded segments sends, weak-passwords-report
+[realworld] detected 20/22 (90.9%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=4 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
 [realworld] operators with no candidates: none
-[realworld] MISSED REMOVE_GUARD path "" at src/app/app.routes.ts:48
-[alfresco] detected 9/11 (81.8%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=0 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
+[realworld] WRONG CHANGE_NAV_TARGET /profile => /register at src/app/features/settings/settings.component.ts:72
+[realworld] WRONG CHANGE_NAV_TARGET /article => /login at src/app/features/article/pages/editor/editor.component.ts:89
+[alfresco] detected 15/16 (93.8%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=0 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
 [alfresco] operators with no candidates: DELETE_ROUTERLINK
 [alfresco] MISSED REMOVE_GUARD path "" at src/lib/aca-content.routes.ts:348
-[alfresco] MISSED REMOVE_GUARD path "" at src/lib/aca-content.routes.ts:111
-[bitwarden] detected 10/16 (62.5%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=0 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
+[bitwarden] detected 24/30 (80.0%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=0 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
 [bitwarden] operators with no candidates: none
-[bitwarden] WRONG CHANGE_NAV_TARGET /finish-signup => /tools at src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts:52
-[bitwarden] MISSED REMOVE_GUARD path "" at src/app/oss-routing.module.ts:684
-[bitwarden] MISSED REMOVE_GUARD path "" at src/app/admin-console/organizations/settings/organization-settings-routing.module.ts:17
+[bitwarden] MISSED CHANGE_NAV_TARGET /organizations => /confirm-key-connector-domain at src/app/billing/organizations/change-plan-dialog.component.ts:833
+[bitwarden] WRONG CHANGE_NAV_TARGET /organizations => /reports/breach-report at src/app/billing/members/billing-constraint/billing-constraint.service.ts:155
+[bitwarden] WRONG CHANGE_NAV_TARGET /organizations => /login at src/app/dirt/event-logs/components/entity-events/entity-events.component.ts:169
 [bitwarden] MISSED REMOVE_GUARD canActivate: [
       canAccessFeature(Fe at src/app/vault/individual-vault/vault-routing.module.ts:45
 [bitwarden] MISSED REMOVE_GUARD canActivate: [deepLinkGuard()], at src/app/oss-routing.module.ts:524

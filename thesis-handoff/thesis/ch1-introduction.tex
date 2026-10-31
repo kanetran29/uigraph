@@ -42,13 +42,16 @@ flow graph by firing events against the DOM of a running application
 without changing where the model comes from \cite{feedex2013,fraggen2022}. A survey of web
 testing published in 2025 collects the model-based tools of the past decade
 \cite{websurvey2025}. Among the tools it lists, no model is derived from source code
-rather than from execution. During the literature search
-for this thesis, two static analyses of a modern client-side framework were found. One
+rather than from execution. Static analyses of a modern client-side framework are few. One
 builds a component dependency graph for React and does not address routing
-\cite{kurant2025}. The other does extract page transitions from Angular, in order to
-model-check them, but accepts only applications that declare no nested routes, no route
-parameters and no data-bound navigation \cite{oshima2018model};
-Section~\ref{sec:dynamic-spa} compares it with the work reported here.
+\cite{kurant2025}. Three extract navigation, each for a different consumer: one from Angular
+in order to model-check it, accepting only applications that declare no nested routes, no
+route parameters and no data-bound navigation \cite{oshima2018model}; one from Angular
+sources in order to enumerate the workflows a generated end-to-end suite should cover
+\cite{rima2026e2e}; and one from the compiled JavaScript bundle of a single-page application
+in order to check an access-control policy against the screens it can reach
+\cite{zhang2025veriflow}. Section~\ref{sec:dynamic-spa} compares them with the work reported
+here.
 
 When the dynamic approach was developed, a single-page application had no declarative route table, so the DOM was the only thing to observe (Section~\ref{sec:dynamic-spa}). Client-side routing frameworks changed this. Angular,
 React Router and Vue Router all declare routes as data in the source code, connect

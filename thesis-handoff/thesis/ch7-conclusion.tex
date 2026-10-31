@@ -25,8 +25,8 @@ bottleneck it was when this work began --- it was, and
 Section~\ref{sec:res-round2} records what repairing it took.
 
 The answer to RQ2 is that the failures fall into five defect classes, each confirmed by at
-least two methods that do not share a mechanism, together with one candidate class that has
-a single confirmation, and that assigning every lost construct to exactly one class makes
+least two independent lines of evidence, at least one of them from a named evaluation
+method, together with one candidate class that has a single confirmation, and that assigning every lost construct to exactly one class makes
 attribution the largest class in most of the corpus once the node defects are repaired.
 
 The answer to RQ3 is that scope attribution recovers \AttrRecovered{} of the \AttrLost{}
@@ -49,9 +49,11 @@ both the number of changes that can be scored at all and the rate at which a sco
 is detected. A route path rename is detected in every scored mutant, which is close to
 guaranteed by construction and tests node extraction rather than behaviour; of the
 \MutFallibleScored{} mutants from the three operators that can fail, \MutFallibleDetected{}
-are detected. \MutNoResponse{} mutants produce no change in the graph at all, and every one
-of them is a guard removal, which is the operator the earlier state of this extractor was
-weakest on and the one that moved furthest when the guard a wrapper returns was read.
+are detected. \MutNoResponse{} mutants produce no change in the graph at all,
+\MutNoResponseGuard{} of them guard removals and \MutNoResponseRetarget{} a retarget, and
+every one acts on a construct the graph does not hold: reading the graph at each site finds no
+edge entering the screen the mutant changes. They report the coverage gap of RQ1 a second time
+rather than a defect in how the graph represents a guard.
 
 The thesis contributes one mechanism, and the apparatus that makes its claims
 checkable. The mechanism is scope attribution, formulated as a dataflow analysis over the
@@ -81,7 +83,8 @@ of Chapter~\ref{ch:results} are generated from the results file. The few figures
 compare the present instrument with the one the work began with are generated too, but from
 that earlier commit's own results read out of version control, since re-running the extractor
 now would measure a different tool. The defect-class table,
-the oracle table and the inspection of the unreached components are written by hand.
+the oracle table, the inspection of the unreached components and the reading of the graph at
+each site where a guard mutant produced no response are written by hand.
 
 What the measurements establish is that a declared route table is a usable starting
 point for static navigation extraction and not a sufficient one. The two levels of loss

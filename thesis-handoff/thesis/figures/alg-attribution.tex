@@ -1,18 +1,26 @@
 \begin{algorithm}[t]
-\caption{Scope attribution as a worklist fixpoint over $\mathcal{P}(S)$. The loop marked \emph{model only} belongs to the full analysis and is not implemented in the
+\caption{Scope attribution as a worklist fixpoint over $\mathcal{P}(S)$. The loops marked \emph{model only} belong to the full analysis and are not implemented in the
 prototype evaluated in Chapter~\ref{ch:results}.}
 \label{alg:attribution}
 \begin{algorithmic}[1]
-\Require routes $R$ with route tree; components $C$; nesting $N \subseteq C \times C$;
-  call graph $\mathit{CG}$; dispatch relation $D$
+\Require routes $R$ with route tree, and the guards $\mathit{guards}(r)$ that route $r$ names
+  in \texttt{canActivate} or \texttt{canMatch}; components $C$; nesting $N \subseteq C \times C$;
+  HTTP interceptors $I$; call graph $\mathit{CG}$; dispatch relation $D$
 \Ensure $\mathit{scope}(x) \in \mathcal{P}(S)$ for every component and callable $x$
 \ForAll{$x$} $\mathit{scope}(x) \gets \varnothing$ \EndFor
 \ForAll{$r \in R$ with $\mathit{component}(r) = c$}
   \State $\mathit{scope}(c) \gets \mathit{scope}(c) \cup \mathit{subtree}(r)$
   \Comment{own screen and outlet descendants}
 \EndFor
-\ForAll{non-routed $c$ holding the primary outlet, not nested in any component}
+\ForAll{$c$ on the nesting path from the root component to the holder of the primary outlet}
   \State $\mathit{scope}(c) \gets S$ \Comment{application shell, $\top$}
+\EndFor
+\ForAll{$r \in R$ and $g \in \mathit{guards}(r)$}
+  \State $\mathit{scope}(g) \gets \mathit{scope}(g) \cup \mathit{subtree}(r)$
+  \Comment{guard named on $r$}
+\EndFor
+\ForAll{HTTP interceptor $i \in I$} \Comment{\emph{model only}: registered for the application}
+  \State $\mathit{scope}(i) \gets S$
 \EndFor
 \State $W \gets$ every $x$ with $\mathit{scope}(x) \neq \varnothing$
 \While{$W \neq \emptyset$}
