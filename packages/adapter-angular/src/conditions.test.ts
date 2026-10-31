@@ -27,6 +27,23 @@ describe('templateConditional', () => {
   it('reports a loop body, since it can run zero times', () => {
     expect(templateConditional(...site('@for (x of xs(); track x.id) {\n  <a §routerLink="/x">x</a>\n}'))).toBe(true)
   })
+  it('reports a link inside an ng-template, which renders only where something instantiates it', () => {
+    expect(templateConditional(...site('<ng-template #t><a §routerLink="/x">x</a></ng-template>'))).toBe(true)
+  })
+  it('does not let an ng-template that closed before the site leak into it', () => {
+    expect(templateConditional(...site('<ng-template #t><b>t</b></ng-template><a §routerLink="/x">x</a>'))).toBe(false)
+  })
+  it('matches the braces of an ICU message as text, not as a block', () => {
+    expect(templateConditional(...site('<span i18n>{n, plural, =0 {none} other {some}}</span><a §routerLink="/x">x</a>'))).toBe(false)
+    expect(templateConditional(...site('@if (a) { <span i18n>{n, plural, =0 {none} other {some}}</span><a §routerLink="/x">x</a> }'))).toBe(true)
+  })
+  it('ignores a commented-out directive and the braces of a style sheet', () => {
+    expect(templateConditional(...site('<!-- <div *ngIf="old"> --><a §routerLink="/x">x</a>'))).toBe(false)
+    expect(templateConditional(...site('<style>.a { color: red }</style><a §routerLink="/x">x</a>'))).toBe(false)
+  })
+  it('fails safe on a brace it cannot match', () => {
+    expect(templateConditional(...site('<p>use the } key</p><a §routerLink="/x">x</a>'))).toBe(true)
+  })
 })
 
 describe('callConditional', () => {
@@ -56,5 +73,47 @@ describe('callConditional', () => {
   })
   it('reports a call after an await in a class-property arrow function', () => {
     expect(navigateIn('submit = async () => { await this.svc.save(); await this.router.navigate(["/x"]) }')).toBe(true)
+  })
+  it('keeps a call at the top of a class-property arrow function unconditional', () => {
+    expect(navigateIn('go = () => { this.router.navigate(["/x"]) }')).toBe(false)
+  })
+  it('reports a call in a catch clause, which runs only when the try throws', () => {
+    expect(navigateIn('go() { try { this.svc.save() } catch (e) { this.router.navigate(["/x"]) } }')).toBe(true)
+  })
+  it('keeps a call in a finally clause unconditional', () => {
+    expect(navigateIn('go() { try { this.svc.save() } finally { this.router.navigate(["/x"]) } }')).toBe(false)
+  })
+  it('reports a call in a loop body, which can run zero times', () => {
+    expect(navigateIn('go() { for (const x of this.svc.xs) { this.router.navigate(["/x"]) } }')).toBe(true)
+    expect(navigateIn('go() { while (this.flag) { this.router.navigate(["/x"]) } }')).toBe(true)
+  })
+  it('reports a call in any callback, not only one passed to subscribe', () => {
+    expect(navigateIn('go() { setTimeout(() => this.router.navigate(["/x"])) }')).toBe(true)
+    expect(navigateIn('go() { this.svc.save().pipe(tap(() => this.router.navigate(["/x"]))).subscribe() }')).toBe(true)
+    expect(navigateIn('go() { this.svc.save().subscribe({ next() { this.router.navigate(["/x"]) } }) }')).toBe(true)
+  })
+  it('does not count a return or an await that belongs to a function declared in an earlier statement', () => {
+    expect(navigateIn('go() { function h() { return 1 } \n this.router.navigate(["/x"]) }')).toBe(false)
+    expect(navigateIn('go() { const o = { get v() { return 1 } } \n this.router.navigate(["/x"]) }')).toBe(false)
+    expect(navigateIn('go() { const f = async () => { await this.svc.a() } \n this.router.navigate(["/x"]) }')).toBe(false)
+  })
+  it('reports a return inside a switch case of an earlier statement', () => {
+    expect(navigateIn('go() { switch (this.flag) { case true: return } \n this.router.navigate(["/x"]) }')).toBe(true)
+  })
+})
+
+describe('callConditional at module level', () => {
+  const navigateAt = (code: string) => {
+    const sf = new Project({ useInMemoryFileSystem: true }).createSourceFile('/g.ts', code)
+    const call = sf.getDescendantsOfKind(SyntaxKind.CallExpression).find((c) => /\.navigate$/.test(c.getExpression().getText()))
+    if (!call) throw new Error('no navigate call in the fixture')
+    return callConditional(call)
+  }
+  it('stops at a function declared at the top of a module', () => {
+    expect(navigateAt('export const guard = () => { router.navigate(["/x"]) }')).toBe(false)
+    expect(navigateAt('export function guard() { router.navigate(["/x"]) }')).toBe(false)
+  })
+  it('reports a function declared inside another, which runs only when called', () => {
+    expect(navigateAt('export function outer() { function inner() { router.navigate(["/x"]) } }')).toBe(true)
   })
 })

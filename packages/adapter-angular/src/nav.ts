@@ -125,6 +125,13 @@ export interface RawTarget {
    */
   relative?: boolean
   /**
+   * Whether the base a relative target resolves against cannot be read from the call: its
+   * options are not an object literal, or they pass `relativeTo` a value other than the
+   * component's own injected route, such as `this.route.parent`. The target is then resolved as
+   * well as the reader can, and the edge is never must.
+   */
+  baseUnknown?: boolean
+  /**
    * Whether the navigation runs only on some executions of the code that holds it: under a
    * template control-flow block or structural directive, under a branch, inside a callback an
    * asynchronous result invokes, or after an await a rejection would skip. A must edge promises
@@ -347,12 +354,16 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
       const arg0 = call.getArguments()[0]
       // `navigate(x)` takes a commands array. Written out, every element counts, not only the
       // first: `['/clients', id]` is a prefix, not the literal `/clients`.
-      const relative = /\brelativeTo\s*:/.test(call.getArguments()[1]?.getText() ?? '')
+      const extras = call.getArguments()[1]
+      const relativeTo = extras && Node.isObjectLiteralExpression(extras) ? extras.getProperty('relativeTo') : undefined
+      const relative = relativeTo !== undefined
+      const baseUnknown = extras !== undefined && (!Node.isObjectLiteralExpression(extras) ||
+        (relativeTo !== undefined && !(Node.isPropertyAssignment(relativeTo) && /^(this\.)?[A-Za-z_$][\w$]*$/.test(relativeTo.getInitializer()?.getText() ?? ''))))
       const ti =
         arg0 && Node.isArrayLiteralExpression(arg0)
           ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf)
           : classifyTarget(arg0)
-      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, conditional: callConditional(call) })
+      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, baseUnknown, conditional: callConditional(call) })
     }
   }
   return out
@@ -410,8 +421,8 @@ function extraConditionGuard(node: Node): string | null {
 }
 
 /** Navigations a component method performs: trace `methodName` to its class method, collect router.navigate/navigateByUrl with guards. */
-export function methodNavTargets(sf: SourceFile, methodName: string): { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null }[] {
-  const out: { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null }[] = []
+export function methodNavTargets(sf: SourceFile, methodName: string): { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null; conditional: boolean }[] {
+  const out: { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null; conditional: boolean }[] = []
   for (const cls of sf.getClasses()) {
     const method = cls.getMethod(methodName)
     if (!method) continue
@@ -424,11 +435,11 @@ export function methodNavTargets(sf: SourceFile, methodName: string): { ti: Targ
       const loc = { line: lc.line, col: lc.column }
       const guard = getGuard(call) ?? extraConditionGuard(call)
       if (member === 'navigateByUrl') {
-        out.push({ ti: classifyTarget(call.getArguments()[0]), event: 'click', effect: 'router.navigateByUrl', ruleId: 'ng.control.navigate-by-url', loc, guard })
+        out.push({ ti: classifyTarget(call.getArguments()[0]), event: 'click', effect: 'router.navigateByUrl', ruleId: 'ng.control.navigate-by-url', loc, guard, conditional: callConditional(call) })
       } else {
         const arg0 = call.getArguments()[0]
         const first = arg0 && Node.isArrayLiteralExpression(arg0) ? arg0.getElements()[0] : undefined
-        out.push({ ti: classifyTarget(first), event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard })
+        out.push({ ti: classifyTarget(first), event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard, conditional: callConditional(call) })
       }
     }
     return out

@@ -45,6 +45,22 @@ export function resolveRelativeTarget(target: string, ownerPath: string | undefi
 }
 
 /**
+ * The primary path of a URL that names auxiliary outlets, as Angular reads it:
+ * `/inbox(popup:compose)` moves the primary outlet to `/inbox` and opens `compose` beside it.
+ * A URL that names none comes back unchanged. When a parenthesised group also carries a primary
+ * segment, as in `/a/(b//popup:c)`, the primary path is not rebuilt and null is returned.
+ */
+export function primaryPath(url: string): string | null {
+  if (!url.includes('(')) return url
+  let readable = true
+  const out = url.replace(/\(([^()]*)\)/g, (_m, inner: string) => {
+    if (!inner.split('//').every((part) => /^[\w-]+:/.test(part))) readable = false
+    return ''
+  })
+  return readable && !out.includes('(') ? out : null
+}
+
+/**
  * Resolve a literal navigation target to a single declared route. Prefers an
  * exact path match, then a parameterized pattern match. Returns null if no
  * declared route matches (the caller records this as a soundiness gap).

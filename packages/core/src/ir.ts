@@ -102,6 +102,12 @@ export interface Witness {
   ruleId?: string
   observationId?: string
   screenshot?: string
+  /**
+   * The modality this construct earns on its own, recorded on a static witness. An edge is as
+   * certain as the most certain construct that produces it, so a must edge can also cite
+   * constructs that reach its destination only on some executions; this says which is which.
+   */
+  modality?: Modality
 }
 
 /**

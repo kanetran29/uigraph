@@ -45,6 +45,13 @@ export interface RouteInfo {
    * every prefix.
    */
   parentNodeId: string | null
+  /**
+   * Where a navigation to this screen's own address actually lands, when a child at the empty
+   * path redirects it (`{ path: '', redirectTo: 'vault', pathMatch: 'full' }` under a layout):
+   * Angular matches that child whenever the address is the layout's, so the layout is never
+   * the destination there.
+   */
+  redirectsTo?: string
 }
 
 /**
@@ -840,6 +847,17 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     }
     const isScreen = !auxHere && (propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined)
     const nodeId = routeToNodeId(fullPath)
+    // A child at the empty path with no component of its own is matched whenever the screen
+    // above it is navigated to at that screen's own address, so what it declares applies to
+    // every navigation into that screen: a guard it carries runs (bitwarden's root sends every
+    // visitor on with a redirectGuard() on such a child), and a redirect it declares replaces the
+    // screen as the destination. Taking a guard a branch Angular may not match is the safe side.
+    const host = !isScreen && !auxHere && ownPath === '' && parentNodeId === nodeId ? out.get(nodeId) : undefined
+    if (host) {
+      const own = redirectTo === null ? canActivateGuards(sf, obj) : []
+      if (own.length > 0) host.guards = [...host.guards, ...own]
+      if (redirectTo !== null && host.redirectsTo === undefined) host.redirectsTo = redirects?.get(fullPath) ?? (redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
+    }
     // Counted whether or not the address is free: the walk read a route and reached an address,
     // and first-declared-wins is a choice between two routes, not a route the walk failed to
     // place. Counting only the winner told the caller this file had been read through only when
