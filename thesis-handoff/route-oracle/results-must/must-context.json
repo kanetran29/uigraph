@@ -1,0 +1,192 @@
+[
+  {
+    "app": "realworld",
+    "edge": "/ -> /",
+    "site": "src/app/features/article/pages/home/home.component.html:23 [template]",
+    "contexts": [
+      "*ifAuthenticated"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "realworld",
+    "edge": "/tag/:tag -> /",
+    "site": "src/app/features/article/pages/home/home.component.html:23 [template]",
+    "contexts": [
+      "*ifAuthenticated"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "realworld",
+    "edge": "/login -> /",
+    "site": "src/app/core/auth/auth.component.ts:76",
+    "contexts": [
+      "async-callback"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "realworld",
+    "edge": "/register -> /",
+    "site": "src/app/core/auth/auth.component.ts:76",
+    "contexts": [
+      "async-callback"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "realworld",
+    "edge": "/editor -> /",
+    "site": "src/app/features/article/pages/editor/editor.component.ts:52",
+    "contexts": [
+      "branch",
+      "async-callback"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "realworld",
+    "edge": "/editor/:slug -> /",
+    "site": "src/app/features/article/pages/editor/editor.component.ts:52",
+    "contexts": [
+      "branch",
+      "async-callback"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "realworld",
+    "edge": "/article/:slug -> /",
+    "site": "src/app/features/article/pages/article/article.component.ts:117",
+    "contexts": [
+      "async-callback"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "realworld",
+    "edge": "/profile/:username/favorites -> /",
+    "site": "src/app/features/article/components/article-list.component.ts:36 [template]",
+    "contexts": [
+      "@if",
+      "@empty"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "realworld",
+    "edge": "n_scope_shell -> /",
+    "site": "src/app/core/layout/footer.component.html:3 [template]",
+    "contexts": [],
+    "kind": "unconditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/verify-email -> /",
+    "site": "src/app/auth/verify-email-token.component.ts:53",
+    "contexts": [
+      "after-await",
+      "branch",
+      "async-callback"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/verify-recover-delete-org -> /",
+    "site": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts:43",
+    "contexts": [
+      "branch",
+      "after-await"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/recover-delete -> /",
+    "site": "src/app/auth/recover-delete.component.ts:66",
+    "contexts": [
+      "after-await"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/verify-recover-delete -> /",
+    "site": "src/app/auth/verify-recover-delete.component.ts:58",
+    "contexts": [
+      "branch",
+      "async-callback"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/request-sm-access -> /",
+    "site": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts:76",
+    "contexts": [
+      "after-await"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/settings/sponsored-families -> /",
+    "site": "src/app/billing/settings/sponsored-families.component.ts:194",
+    "contexts": [
+      "branch",
+      "after-await"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/setup/families-for-enterprise -> /",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:86",
+    "contexts": [
+      "branch",
+      "async-callback"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/organizations/:organizationId/settings/account -> /",
+    "site": "src/app/admin-console/organizations/settings/account.component.ts:260",
+    "contexts": [
+      "branch",
+      "after-await"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/confirm-key-connector-domain -> /",
+    "site": "../../libs/key-management-ui/src/key-connector/confirm-key-connector-domain.component.ts:116",
+    "contexts": [
+      "after-await"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "bitwarden",
+    "edge": "/settings/security/password -> /",
+    "site": "../../libs/angular/src/auth/password-management/change-password/change-password.component.ts:193",
+    "contexts": [
+      "branch",
+      "after-await"
+    ],
+    "kind": "conditional"
+  },
+  {
+    "app": "mifos",
+    "edge": "/callback -> /login",
+    "site": "src/app/zitadel/callback/callback.component.ts:39",
+    "contexts": [
+      "branch",
+      "after-await"
+    ],
+    "kind": "conditional"
+  }
+]
