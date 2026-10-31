@@ -1,5 +1,5 @@
 {
-  "harnessVersion": "1.4.0",
+  "harnessVersion": "1.5.0",
   "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden",
   "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/bitwarden/apps/web",
   "attribution": true,
@@ -47,9 +47,9 @@
       "discovered": 78,
       "sampled": 8,
       "detected": 3,
-      "missed": 3,
+      "missed": 0,
       "wrong": 0,
-      "excluded": 2,
+      "excluded": 5,
       "broke": 0,
       "skip": 0
     },
@@ -64,8 +64,8 @@
       "skip": 0
     }
   },
-  "detectionRate": 0.8,
-  "scored": 30,
+  "detectionRate": 0.8888888888888888,
+  "scored": 27,
   "detected": 24,
   "results": [
     {
@@ -441,7 +441,7 @@
       "file": "src/app/oss-routing.module.ts",
       "line": 684,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "predict": "the guard on edges entering /folders, /sm-landing, /create-organization changes",
       "verdict": "DETECTED",
       "touched": 17,
       "delta": {
@@ -465,7 +465,7 @@
       "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
       "line": 17,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "predict": "the guard on edges entering /settings/account, /settings/security/two-factor, /organizations/:organizationId/settings/policies changes",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -487,34 +487,24 @@
       "line": 45,
       "subject": "canActivate: [\n      canAccessFeature(Fe",
       "predict": "the guard text or modality of at least one edge changes",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters any screen the guarded route yields (/vault/:vaultId, /vault/:vaultId/my-items, /vault/:vaultId/shared-folders/:collectionId)"
     },
     {
       "kind": "REMOVE_GUARD",
       "file": "src/app/oss-routing.module.ts",
       "line": 695,
       "subject": "path \"sends\"",
-      "predict": "the guard on edges entering the screen of path \"sends\" changes",
+      "predict": "the guard text or modality of at least one edge changes",
       "verdict": "EXCLUDED",
-      "reason": "no baseline edge enters a screen with route segment \"sends\""
+      "reason": "no baseline edge enters any screen the guarded route yields (/sends)"
     },
     {
       "kind": "REMOVE_GUARD",
       "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
       "line": 31,
       "subject": "path \"payment-details\"",
-      "predict": "the guard on edges entering the screen of path \"payment-details\" changes",
+      "predict": "the guard on edges entering /organizations/:organizationId/billing/payment-details changes",
       "verdict": "DETECTED",
       "touched": 24,
       "delta": {
@@ -538,9 +528,9 @@
       "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
       "line": 85,
       "subject": "path \"weak-passwords-report\"",
-      "predict": "the guard on edges entering the screen of path \"weak-passwords-report\" changes",
+      "predict": "the guard text or modality of at least one edge changes",
       "verdict": "EXCLUDED",
-      "reason": "no baseline edge enters a screen with route segment \"weak-passwords-report\""
+      "reason": "no baseline edge enters any screen the guarded route yields (/reports/weak-passwords-report, /organizations/:organizationId/reporting/reports/weak-passwords-report)"
     },
     {
       "kind": "REMOVE_GUARD",
@@ -548,37 +538,17 @@
       "line": 524,
       "subject": "canActivate: [deepLinkGuard()],",
       "predict": "the guard text or modality of at least one edge changes",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters any screen the guarded route yields (/accept-emergency)"
     },
     {
       "kind": "REMOVE_GUARD",
       "file": "src/app/admin-console/organizations/organization-routing.module.ts",
       "line": 32,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering the screen of path \"\" changes",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
+      "predict": "the guard text or modality of at least one edge changes",
+      "verdict": "EXCLUDED",
+      "reason": "the guarded route declares no component and no populated children, so it yields no screen"
     },
     {
       "kind": "RENAME_PATH",

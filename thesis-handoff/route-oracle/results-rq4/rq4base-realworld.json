@@ -1,5 +1,5 @@
 {
-  "harnessVersion": "1.4.0",
+  "harnessVersion": "1.5.0",
   "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/realworld",
   "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/realworld",
   "attribution": false,
@@ -238,7 +238,7 @@
       "file": "src/app/app.routes.ts",
       "line": 53,
       "subject": "path \":slug\"",
-      "predict": "the guard on edges entering the screen of path \":slug\" changes",
+      "predict": "the guard on edges entering /editor/:slug changes",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -259,7 +259,7 @@
       "file": "src/app/app.routes.ts",
       "line": 31,
       "subject": "path \"register\"",
-      "predict": "the guard on edges entering the screen of path \"register\" changes",
+      "predict": "the guard on edges entering /login, /register changes",
       "verdict": "DETECTED",
       "touched": 3,
       "delta": {
@@ -282,7 +282,7 @@
       "file": "src/app/app.routes.ts",
       "line": 26,
       "subject": "path \"login\"",
-      "predict": "the guard on edges entering the screen of path \"login\" changes",
+      "predict": "the guard on edges entering /login, /register changes",
       "verdict": "DETECTED",
       "touched": 5,
       "delta": {
@@ -306,7 +306,7 @@
       "file": "src/app/app.routes.ts",
       "line": 36,
       "subject": "path \"settings\"",
-      "predict": "the guard on edges entering the screen of path \"settings\" changes",
+      "predict": "the guard on edges entering /settings changes",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -327,7 +327,7 @@
       "file": "src/app/app.routes.ts",
       "line": 48,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering the screen of path \"\" changes",
+      "predict": "the guard on edges entering /editor/:slug changes",
       "verdict": "MISSED",
       "touched": 0,
       "delta": {
