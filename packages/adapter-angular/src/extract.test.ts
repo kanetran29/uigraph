@@ -1169,3 +1169,32 @@ export class G {
     expect(sites(10).map((w) => w?.modality)).toEqual(['must'])
   })
 })
+
+describe('extractGraph — a URL naming an auxiliary outlet is never must on its own account', () => {
+  it('holds it at may even where only one route answers the primary path', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Home } from './home.component'\nimport { Inbox } from './inbox.component'\nexport const routes: Routes = [{ path: 'home', component: Home }, { path: 'inbox', component: Inbox }]`,
+      '/app/home.component.ts': `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'\n@Component({ selector: 'x-home', standalone: true, template: '<b (click)="a()"></b><b (click)="b()"></b>' })\nexport class Home { constructor(private router: Router) {}\n  a() { this.router.navigateByUrl('/inbox(popup:compose)') }\n  b() { this.router.navigateByUrl('/inbox?tab=1') } }`,
+      '/app/inbox.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-inbox', standalone: true, template: '<p>i</p>' })\nexport class Inbox {}`,
+    }), '/app')
+    const e = graph.edges.find((x) => x.from === routeId('/home') && x.to === routeId('/inbox'))!
+    expect(e.modality).toBe('must')
+    expect([e.witness, ...(e.mergedWitnesses ?? [])].map((w) => [w?.loc?.line, w?.modality]).sort()).toEqual([[5, 'may'], [6, 'must']])
+  })
+})
+
+describe('extractGraph — controls mode reads a guarded binding as conditional', () => {
+  it('holds a control whose binding guards the call at may, and keeps a bare one on must', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Home } from './home.component'\nimport { Other } from './other.component'\nexport const routes: Routes = [{ path: 'home', component: Home }, { path: 'other', component: Other }]`,
+      '/app/home.component.ts': `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'\n@Component({ selector: 'x-home', standalone: true, template: \`<button id="a" (click)="go()">a</button><button id="b" (click)="flag && go()">b</button>\` })\nexport class Home { flag = true\n  constructor(private router: Router) {}\n  go() { this.router.navigate(['/other']) } }`,
+      '/app/other.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-other', standalone: true, template: '<p>o</p>' })\nexport class Other {}`,
+    }), '/app', { controls: true })
+    const tier = (id: string) => {
+      const c = graph.nodes.find((n) => n.kind === 'control' && n.control?.selector?.value === `button|${id}`)
+      return graph.edges.find((e) => e.from === c?.id && e.to === routeId('/other'))?.modality
+    }
+    expect(tier('a')).toBe('must')
+    expect(tier('b')).toBe('may')
+  })
+})

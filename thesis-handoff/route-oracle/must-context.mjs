@@ -25,10 +25,14 @@
 //
 // Usage: pnpm exec tsx must-context.mjs --corpus <dir> --before <dir> --after <dir>
 //                                       [--out <dir>] [--tex <file>]
-//        --before and --after hold <app>/<sub>/uigraph.db for the two instruments; --corpus
-//        holds the sources both were extracted from.
+//        --before and --after hold <app>/<sub>/uigraph.db for the two instruments, or
+//        <app>.graph.json.gz; --corpus holds the sources both were extracted from. The round-two
+//        graphs are committed beside this file in round-two-graphs/, as the extractor at b7926b7
+//        writes them with its conditional demotion switched off, which reproduces the round's
+//        published graphs edge for edge.
 import { DatabaseSync } from 'node:sqlite'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { gunzipSync } from 'node:zlib'
 import path from 'node:path'
 import { Project, SyntaxKind } from 'ts-morph'
 import { callCondition, templateCondition } from '../../packages/adapter-angular/src/conditions.ts'
@@ -45,9 +49,12 @@ if (!corpus || !before || !after) { console.error('usage: pnpm exec tsx must-con
 const APPS = { realworld: '.', alfresco: 'projects/aca-content', ghostfolio: 'apps/client', k8sdash: 'modules/web', bitwarden: 'apps/web', mifos: '.' }
 const LINK_RE = /\[?routerLink\]?\s*=\s*"/g
 
-/** The graph a database holds. */
-function graphOf(db) {
-  if (!existsSync(db)) throw new Error(`no graph at ${db}`)
+/** The graph an application has under `dir`: a committed `<app>.graph.json.gz`, or a database at `<app>/<sub>/uigraph.db`. */
+function graphOf(dir, slug, sub) {
+  const gz = path.join(dir, `${slug}.graph.json.gz`)
+  if (existsSync(gz)) return JSON.parse(gunzipSync(readFileSync(gz)).toString('utf8'))
+  const db = path.join(dir, slug, sub, 'uigraph.db')
+  if (!existsSync(db)) throw new Error(`no graph for ${slug} under ${dir}`)
   return JSON.parse(new DatabaseSync(db).prepare("select json from docs where key='graph'").get().json)
 }
 
@@ -98,8 +105,8 @@ const edgesOut = []
 const constructs = []
 for (const [slug, sub] of Object.entries(APPS)) {
   const root = path.join(corpus, slug, sub)
-  const was = graphOf(path.join(before, slug, sub, 'uigraph.db'))
-  const now = graphOf(path.join(after, slug, sub, 'uigraph.db'))
+  const was = graphOf(before, slug, sub)
+  const now = graphOf(after, slug, sub)
   const musts = was.edges.filter((e) => e.modality === 'must')
   if (musts.length === 0) continue
   const project = new Project({ skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true })
