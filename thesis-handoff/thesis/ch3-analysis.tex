@@ -146,39 +146,51 @@ edge whose construct that earns must names a different destination cannot satisf
 so a failure of the check there refutes it; agreement does not establish it. The other
 constructs a must edge cites are evidence for may and are not judged against the claim. Whether the navigation
 occurs \emph{for every input on which the enclosing code executes} is decided by the rules
-that place an edge in the must tier instead of the may tier, and the guard half of them is a
-syntactic one: the extractor never evaluates a guard, so a guard that can refuse the navigation
-demotes it whatever the guard would decide. That covers a \texttt{canActivate} or
-\texttt{canMatch} on the target or on a route above it, a \texttt{canActivateChild} above it,
-and the guard of a child at the empty path, which Angular matches at the target's own address
-unless an earlier child at that path matches first; the extractor takes such a guard in either
-case, which is the safe side. A site is also demoted when its target is the address its source
-already displays: the claim is read as one about router navigations, and the router ignores a
-navigation to the address it shows, or follows it only when a parameter or the query differs,
-although in the transition-system reading of an edge the screen stays where it was. A shell or
-anchor edge whose destination is one of the screens it stands for is therefore drawn per screen,
-must from the others and may at the destination. It is demoted when the address is one that two
-declared routes, or a route and a redirect, can answer, since Angular takes whichever it meets
-first; when the base a relative target resolves against cannot be read; when a URL names an
-auxiliary outlet, whose route the adapter does not read; and when it runs only on some
-executions of its own handler: under a template control-flow block, a structural directive, an
-\texttt{<ng-template>} or an ICU case, under a branch, in a loop or a \texttt{catch} clause, in an
-optional call or a default value, inside a callback, after an \texttt{await}, an early
-\texttt{return} or \texttt{throw} or a \texttt{break} out of its block, in a member of its class
-that no handler calls unconditionally, or in a component mounted under a template condition on
-that screen. A handler is a member the framework calls itself, a lifecycle hook or a member a
-decorator registers, or one the template binds to an event as a bare call outside any template
-condition. An exception from an earlier synchronous call is not counted, since every call can
-throw; an \texttt{await} is, because a rejected request is an ordinary outcome of the code that
-awaits it. The extractor's own unit tests cover each of these rules in both directions, a site
-the rule demotes and one it leaves alone, and a sweep that deletes each rule in turn checks that
-some test fails (Section~\ref{sec:res-round2}); they share the extractor's reading of each
-construct, and no second classifier re-derives them. What stands in for one is a review that read
-the constructs behind the must tier in the source without a classifier and recorded a verdict
-for each (Section~\ref{sec:res-round2}). Section~\ref{sec:res-round2} reports four corrections to
-the extractor's reading. The first three made the tier smaller; the fourth closed gaps in the
-demotion rules and also replaced the third's merge rule, which had demoted an edge that one of
-its constructs made certain. What the
+that place an edge in the must tier instead of the may tier. Their guard half is read off the
+route configuration and never evaluates a guard, so a guard the navigation runs demotes it
+whatever the guard would decide; which guards a navigation runs is decided the way the router
+decides it. The routes the source and the target share are reused unless their parameters can
+change or \texttt{runGuardsAndResolvers} asks otherwise, and a reused route's
+\texttt{canActivate} and resolvers do not run again. A navigation runs the \texttt{canMatch} of
+every route its address is matched through, the \texttt{canActivate}, \texttt{canLoad} and
+resolvers of every route it enters, the \texttt{canActivateChild} of every route above those, and
+the \texttt{canDeactivate} of every route it leaves; a child at the empty path that the target's
+own address resolves to is one of the routes it enters. A resolver is awaited by the router and
+demotes the edge as an \texttt{await} does, and a guard list the reader cannot bring back to an
+array demotes it as a guard does. A site is also demoted when its target is the address its
+source already displays: the router ignores such a navigation in its default configuration, or
+follows it only when a parameter or the query differs, so the extractor holds it at may as a
+matter of policy, which is the safe side for an application that configures otherwise, and a
+shell or anchor edge is judged per screen and drawn per screen where the screens disagree. A site
+is demoted when its source is never displayed at its own address because a redirect answers it;
+when the address is one that two declared routes, or a route and a redirect, can answer, since
+Angular takes whichever it meets first; when the base a relative target resolves against cannot
+be read; when a URL names an auxiliary outlet, whose route the adapter does not read; and when it
+runs only on some executions of its own handler: under a template control-flow block, a
+structural directive, an \texttt{<ng-template>}, an ICU case or a container that renders its
+content lazily, under a branch, in a loop or a \texttt{catch} clause, in an optional call or a
+default value, inside a callback, after an \texttt{await}, an early \texttt{return} or
+\texttt{throw} or a \texttt{break} out of its block, before a later navigation in the same block
+that supersedes it, in a function declared at module level or a member of its class that no
+handler calls unconditionally, in a component mounted under a template condition on that screen,
+or in a route component behind a conditional outlet. A handler is a member the framework calls
+itself, a lifecycle hook or a member \texttt{@HostListener} registers, or one the template binds to
+an event as a bare call outside any template condition. An exception from an earlier synchronous
+call is not counted, since every call can throw; an \texttt{await} is, because a rejected request
+is an ordinary outcome of the code that awaits it. The router's own fetch of a lazily loaded
+route is not counted either: a failed chunk load is a fault of the deployment rather than an
+outcome of the application, and the extractor takes the code as deployed. The extractor's unit
+tests cover each of these rules in both directions, a site the rule demotes and one it leaves
+alone, and a mutation sweep deletes each rule in turn and checks that some test fails
+(Section~\ref{sec:res-round2}); they share the extractor's reading of each construct, and no
+second classifier re-derives them. What stands in for one, for the condition rules, is a review
+in which the assistant the declaration describes read the constructs behind the round's must
+tier in the source, twice and separately, without the extractor's readers, and recorded a verdict
+for each (Section~\ref{sec:res-round2}). Section~\ref{sec:res-round2} reports the corrections to
+the extractor's reading. Three made the tier smaller, each hidden by the one before; the fourth,
+found by review rather than by the witness check, closed gaps in the demotion rules, replaced the
+third's merge rule, which had demoted an edge one of its constructs made certain, and replaced a
+guard rule that demoted an edge for guards the router does not run on it. What the
 check establishes is therefore narrower than the claim: that every cited site exists in the
 source and agrees on its target. The stronger half of the claim rests on the demotion rules
 and is not independently verified.

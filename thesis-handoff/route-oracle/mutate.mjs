@@ -4,6 +4,16 @@
 // analysis? Seeds a known delta into the source, re-extracts, and compares the graph
 // against the predicted difference.
 //
+// Harness 1.6.0. Change against 1.5.0: REMOVE_GUARD is judged by the guard the edges lose. The
+// extractor now gates an edge only on the guards the navigation runs, so a guard on a route
+// that the source and the destination share does not appear on the edge between them; it
+// appears on the edges that enter the guarded route from outside it. A mutant is detected when
+// some edge loses a guard it carried, and excluded when no baseline edge carries a guard the
+// removed list names, since then no edge enters the guarded route from outside and the removal
+// cannot be observed. Measured on alfresco without attribution: the guard at
+// aca-content.routes.ts:111 left the edges inside its route unchanged, as it should, and was
+// scored WRONG under 1.5.0's rule that it must change on every edge entering its screens.
+//
 // Harness 1.5.0. Change against 1.4.0: REMOVE_GUARD resolves the route it guards by brace
 // matching the enclosing object literal and reading the components that route's subtree
 // renders, instead of taking the nearest preceding path literal in the source text. The old
@@ -256,13 +266,14 @@ function discover(routes, screensOfRoute, rnd, alreadyReached) {
       const route = guardedRoute(src, m.index)
       const screens = route ? screensOfRoute(route) : []
       const reached = screens.filter((x) => x.entered).map((x) => x.route)
+      // The guards the removed list names, as the extractor writes a named guard on an edge.
+      const named = (/\[([^\]]*)\]/.exec(m[0])?.[1] ?? '').split(',').map((x) => x.trim()).filter((x) => /^[A-Za-z_$][\w$]*(\(\))?$/.test(x))
+      const carried = named.length > 0 && baseline.edges.some((e) => (e.guard ?? '').split(',').some((g) => named.includes(g)))
       muts.push({
         kind: 'REMOVE_GUARD', file: f, rel, line: lineOf(src, m.index),
         index: m.index, find: m[0], replace: '',
         subject: route && route.own !== null ? `path "${route.own}"` : m[0].slice(0, 40),
-        predict: reached.length
-          ? `the guard on edges entering ${reached.slice(0, 3).join(', ')} changes`
-          : 'the guard text or modality of at least one edge changes',
+        predict: 'an edge that carried the guard loses it',
         // A guard is represented on the edges entering the screens the guarded route yields,
         // so a guard whose route yields no screen, or none that any edge enters, cannot be
         // observed at all. Such a mutant re-detects the edge-coverage gap already counted
@@ -272,15 +283,17 @@ function discover(routes, screensOfRoute, rnd, alreadyReached) {
           if (!route) return null
           if (!route.declaresTarget) return 'the guarded route declares no component and no populated children, so it yields no screen'
           if (!screens.length) return null
-          return reached.length
-            ? null
-            : `no baseline edge enters any screen the guarded route yields (${screens.map((x) => x.route).slice(0, 3).join(', ')})`
+          if (!reached.length) return `no baseline edge enters any screen the guarded route yields (${screens.map((x) => x.route).slice(0, 3).join(', ')})`
+          return named.length > 0 && !carried ? 'no baseline edge carries the guard, so none enters the guarded route from outside it' : null
         },
-        // Strict: the guard must change on an edge entering one of the guarded screens. A
-        // change somewhere else counts as WRONG, which is the informative verdict.
-        check: (d) => reached.length
-          ? d.guardChanged.some((c) => reached.some((rt) => c.includes(`-> ${rt}:`)))
-          : d.guardChanged.length > 0,
+        // Strict: some edge must lose a guard it carried. A change that only adds one, or one on
+        // the modality alone, is WRONG.
+        check: (d) => d.guardChanged.some((c) => {
+          const g = /: guard (.*)->(.*), modality /.exec(c)
+          if (!g) return false
+          const after = new Set((g[2] ?? '').split(','))
+          return (g[1] ?? '').split(',').some((x) => x !== 'null' && !after.has(x))
+        }),
       })
     }
   }
@@ -423,7 +436,7 @@ console.log(`  ${'OVERALL'.padEnd(20)} detected ${tD}/${tN} = ${tN ? ((tD / tN) 
 
 if (jsonOut) {
   fs.writeFileSync(jsonOut, JSON.stringify({
-    harnessVersion: '1.5.0', extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
+    harnessVersion: '1.6.0', extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
     baseline: { nodes: baseline.nodes.length, edges: baseline.edges.length, routes: routes.length },
     discovered, sampled, perOperator,
     detectionRate: tN ? tD / tN : null, scored: tN, detected: tD, results,
