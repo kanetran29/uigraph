@@ -1,0 +1,230 @@
+{
+ "note": "Every construct that earns must in the attributed graphs of the final measurement, read against the application's source by the assistant the declaration at the front of the thesis describes: the template or method around it for a condition, the route configuration for the address the construct resolves to and for every guard, resolver and canDeactivate that runs on the navigation. graph-census.mjs refuses to report a must construct that is not listed here.",
+ "sites": [
+  {
+   "app": "realworld",
+   "site": "src/app/core/layout/footer.component.html:3",
+   "targets": [
+    "/"
+   ],
+   "verdict": "must",
+   "reading": "Logo link routerLink=\"/\" in the footer, which app.component.html renders unconditionally beside the outlet on every screen; '/' declares no guard or resolver and no screen it is drawn from declares canDeactivate. Drawn from every screen but '/', where it is a self-loop."
+  },
+  {
+   "app": "realworld",
+   "site": "src/app/core/layout/header.component.html:3",
+   "targets": [
+    "/"
+   ],
+   "verdict": "must",
+   "reading": "Logo link routerLink=\"/\" at the top of the header, before the @if (authState$ | async) block, so outside every template condition; same reasoning as the footer logo."
+  },
+  {
+   "app": "realworld",
+   "site": "src/app/features/article/pages/home/home.component.html:35",
+   "targets": [
+    "/"
+   ],
+   "verdict": "must",
+   "reading": "Global Feed link to '/' outside the template conditions of the home template; drawn from /tag/:tag, which renders the home component, and a self-loop at '/'."
+  },
+  {
+   "app": "k8sdash",
+   "site": "src/chrome/component.ts:82",
+   "targets": [
+    "/create"
+   ],
+   "verdict": "must",
+   "reading": "goToCreateState() calls this.router_.navigate(['create'], {queryParamsHandling: 'preserve'}) as its only statement; with no relativeTo the command resolves against the root, so '/create'. It is bound bare as (click)=\"goToCreateState()\" on a toolbar button outside every template condition. Entering /create runs no guard (its route declares canDeactivate only, which runs on leaving it)."
+  },
+  {
+   "app": "k8sdash",
+   "site": "src/chrome/template.html:30",
+   "targets": [
+    "/workloads"
+   ],
+   "verdict": "must",
+   "reading": "Toolbar logo [routerLink]=\"getWorkloadsStateName()\", a method that returns the constant '/workloads'; the toolbar sits outside the *ngIf banner. The chrome component is the route component of the '' route whose children are every screen drawn; that level carries AuthGuard, which a navigation between two of its children does not run again. /search (SearchGuard) and /create (CanDeactivateGuard) declare canDeactivate and are held at may as sources, as the graph records."
+  },
+  {
+   "app": "bitwarden",
+   "site": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.html:32",
+   "targets": [
+    "/sm-landing"
+   ],
+   "verdict": "must",
+   "reading": "Cancel button [routerLink]=\"'/sm-landing'\" (type=button) outside every template condition. Source and target are children of the same '' route with UserLayoutComponent, whose deepLinkGuard and authGuard a navigation between its children does not run again; neither child declares a guard or resolver."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/accounting/accounting-rules/create-rule/create-rule.component.html:146",
+   "targets": [
+    "/accounting"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/accounting/create-journal-entry/create-journal-entry.component.html:212",
+   "targets": [
+    "/accounting"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/accounting/frequent-postings/frequent-postings.component.html:226",
+   "targets": [
+    "/accounting"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/accounting/periodic-accruals/periodic-accruals.component.html:37",
+   "targets": [
+    "/accounting"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/centers/create-center/create-center.component.html:163",
+   "targets": [
+    "/centers"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/groups/create-group/create-group.component.html:169",
+   "targets": [
+    "/groups"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/organization/bulk-loan-reassignmnet/bulk-loan-reassignmnet.component.html:163",
+   "targets": [
+    "/organization"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/organization/exchange-rates/view-exchange-rate/view-exchange-rate.component.html:55",
+   "targets": [
+    "/organization"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/organization/password-preferences/password-preferences.component.html:35",
+   "targets": [
+    "/organization"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/organization/working-days/working-days.component.html:45",
+   "targets": [
+    "/organization"
+   ],
+   "verdict": "must",
+   "reading": "Cancel or Back button [routerLink] with '../' or '../../' outside every template condition. Angular resolves it against the segments the component's route consumed, so '../' drops one segment and '../../' two, which lands on the address recorded; the target screen declares no guard or resolver, and source and target sit in the same lazily loaded module under the same withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/system/system.component.html:294",
+   "targets": [
+    "/system/system-information"
+   ],
+   "verdict": "must",
+   "reading": "A [routerLink] on a mat-list-item of the system menu, or on the div inside it, relative to /system; the menu items sit outside every @if (only the expand arrows are conditional). The target child of the system routes declares no guard or resolver, and source and target share the withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/system/system.component.html:296",
+   "targets": [
+    "/system/system-information"
+   ],
+   "verdict": "must",
+   "reading": "A [routerLink] on a mat-list-item of the system menu, or on the div inside it, relative to /system; the menu items sit outside every @if (only the expand arrows are conditional). The target child of the system routes declares no guard or resolver, and source and target share the withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/system/system.component.html:538",
+   "targets": [
+    "/system/external-services"
+   ],
+   "verdict": "must",
+   "reading": "A [routerLink] on a mat-list-item of the system menu, or on the div inside it, relative to /system; the menu items sit outside every @if (only the expand arrows are conditional). The target child of the system routes declares no guard or resolver, and source and target share the withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/system/system.component.html:540",
+   "targets": [
+    "/system/external-services"
+   ],
+   "verdict": "must",
+   "reading": "A [routerLink] on a mat-list-item of the system menu, or on the div inside it, relative to /system; the menu items sit outside every @if (only the expand arrows are conditional). The target child of the system routes declares no guard or resolver, and source and target share the withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/system/system.component.html:572",
+   "targets": [
+    "/system/manage-dashboards"
+   ],
+   "verdict": "must",
+   "reading": "A [routerLink] on a mat-list-item of the system menu, or on the div inside it, relative to /system; the menu items sit outside every @if (only the expand arrows are conditional). The target child of the system routes declares no guard or resolver, and source and target share the withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/system/system.component.html:574",
+   "targets": [
+    "/system/manage-dashboards"
+   ],
+   "verdict": "must",
+   "reading": "A [routerLink] on a mat-list-item of the system menu, or on the div inside it, relative to /system; the menu items sit outside every @if (only the expand arrows are conditional). The target child of the system routes declares no guard or resolver, and source and target share the withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/system/system.component.html:606",
+   "targets": [
+    "/system/about-us"
+   ],
+   "verdict": "must",
+   "reading": "A [routerLink] on a mat-list-item of the system menu, or on the div inside it, relative to /system; the menu items sit outside every @if (only the expand arrows are conditional). The target child of the system routes declares no guard or resolver, and source and target share the withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/system/system.component.html:608",
+   "targets": [
+    "/system/about-us"
+   ],
+   "verdict": "must",
+   "reading": "A [routerLink] on a mat-list-item of the system menu, or on the div inside it, relative to /system; the menu items sit outside every @if (only the expand arrows are conditional). The target child of the system routes declares no guard or resolver, and source and target share the withShell level, whose AuthenticationGuard does not run again."
+  },
+  {
+   "app": "mifos",
+   "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+   "targets": [
+    "/checker-inbox-and-tasks/requests"
+   ],
+   "verdict": "must",
+   "reading": "mat-tab-link [routerLink]=\"['./requests']\" in the eager mat-tab-nav-bar, the one tab link without a *mifosxHasPermission directive. From /checker-inbox-and-tasks, which renders the tab component with an empty outlet; 'requests' declares no guard or resolver and the parent level is shared."
+  }
+ ]
+}
