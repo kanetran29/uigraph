@@ -12,8 +12,13 @@ definition of the conversion ratio and of its denominator
 come from the harness run on pinned commits.
 
 The answer to RQ1 is that the loss happens at two levels and that they are very far apart.
-Every screen the six applications declare has a node, and the runtime method confirms that
-no node sits at an address the framework mounts nothing at; but without attribution only a
+In all \RoundTwoFullNodes{} applications every screen the static readers find declared has a
+node, and the runtime method confirms that no node sits at an address the framework mounts
+nothing at. That completeness is over the route set a static reader can read, and not over
+the addresses the framework serves: the same runtime method finds \ProbeMissed{} answered
+addresses with no node at all, \ProbeMissedGhostfolio{} of them in the one application whose
+paths a custom matcher computes, so only \ProbeExactApps{} of the six are complete against
+what the browser answers. Below that level, without attribution only a
 small fraction of the navigation constructs becomes a deterministic transition, and on
 \RoundTwoZeroMustApps{} of the six applications none does. Node extraction is not the
 bottleneck it was when this work began --- it was, and
@@ -31,8 +36,11 @@ application in the corpus, roughly doubling the graph from \AttrEdgesBefore{} ed
 \AttrRecoveredMay{} are not, so most of what attribution adds is navigation the graph
 reports as possible rather than certain; and that it costs nothing in deterministic
 precision, since every edge on the must tier passes the witness check both before and
-after. What it does not establish is that the computed screen sets are correct, because no
-method here can be asked that question.
+after. Whether the computed screen sets are correct is established on one application and
+not on the corpus: read site by site on \GTApp{}, the analysis names \GTFullRecall{} of the
+(site, screen) pairs the application really has at \GTFullPrecision{} precision, every wrong
+pair coming from a single over-approximating rule, and no method here can put that question
+to the other five.
 
 The answer to RQ4 is that the graph is sensitive to authored source changes in the
 constructs it represents, with \MutDetected{} of \MutScored{} scored mutants detected
@@ -126,10 +134,11 @@ attribution declined to place rather than sites it placed wrongly. What that can
 convict a scope of being too large: only \ScopeExact{} of the predictions at those screens
 name a destination exactly, so the direction is close to untestable by this method. Reading
 one application's sites by hand does convict it, and the verdict is specific and unflattering:
-\GTFullExcess{} attributions of \GTPairs{} are too wide, all of them from the rule that joins
-a navigating service over its injectors, and the level that stands for earlier work's reach
-recovers \GTRootedRecall{} of the same pairs with none too wide, against \GTFullRecall{} for
-this analysis. It judged
+against the \GTPairs{} pairs that application really has, the analysis asserts \GTFullExcess{}
+more that it does not have, all of them at \GTFullExcessSites{} of its \GTSites{} sites and all
+from the rule that joins a navigating service over its injectors; the level that stands for
+earlier work's reach recovers \GTRootedRecall{} of the real pairs while asserting nothing
+wrong at all, against \GTFullRecall{} for this analysis. It judged
 \ScopeJudged{} screens of \ScopeScreens{}, because without a backend the
 rest redirect to a sign-in page. Driving the applications into a signed-in state is the work
 that would decide the other half. Whether a graph of screens

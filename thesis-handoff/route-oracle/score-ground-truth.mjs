@@ -93,12 +93,17 @@ for (const spec of dbArgs) {
     correct,
     missing,
     excess,
+    excessSites: worst.filter((w) => w.excess).length,
+    missingSites: worst.filter((w) => w.missing).length,
     unplaced,
     precision: claimed ? correct / claimed : 0,
     recall: real ? correct / real : 0,
     unlisted: unlisted.length,
     unlistedExamples: unlisted.slice(0, 5),
     worst: worst.sort((a, b) => (b.excess + b.missing) - (a.excess + a.missing)).slice(0, 6),
+  }
+  if (row.correct + row.missing !== [...wanted.values()].reduce((a, w) => a + w.screens.size, 0)) {
+    throw new Error(`${level}: correct + missing does not account for every ground-truth pair`)
   }
   levels.push(row)
   console.error(`  ${level.padEnd(8)} correct=${String(correct).padStart(3)} missing=${String(missing).padStart(3)} ` +
@@ -136,6 +141,11 @@ if (tex) {
     out += `\\newcommand{\\GT${cap}Recall}{${pc(l.recall)}}\n`
     out += `\\newcommand{\\GT${cap}Excess}{${l.excess}}\n`
     out += `\\newcommand{\\GT${cap}Missing}{${l.missing}}\n`
+    // How many SCOPES the pairs above are spread over. An excess of nine pairs at one site
+    // and at nine sites are different defects, and prose that says "nine scopes" when the
+    // count is one site nine screens too wide states the wrong one.
+    out += `\\newcommand{\\GT${cap}ExcessSites}{${l.excessSites}}\n`
+    out += `\\newcommand{\\GT${cap}MissingSites}{${l.missingSites}}\n`
   }
   const best = levels.reduce((a, l) => (l.precision > a.precision ? l : a))
   out += `\\newcommand{\\GTBestPrecision}{${best.level}}\n`
