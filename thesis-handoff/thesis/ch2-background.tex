@@ -1,23 +1,30 @@
 \chapter{Background}
 \label{ch:background}
 
-This chapter provides the background needed for the rest of the thesis. Section 2.1
+This chapter provides the background needed for the rest of the thesis.
+Section~\ref{sec:terminology}
 fixes the terminology, since the same kind of graph is called by different names in
-different communities. Sections 2.2 to 2.4 review the three lines of prior work that
+different communities. Sections~\ref{sec:android} to~\ref{sec:dynamic-spa} review the three
+lines of prior work that
 are closest to this thesis: static extraction for Android, navigation models for web
-applications, and dynamic state models for single-page applications. Section 2.5
-summarises the three formal ideas the analysis builds on. Section 2.6 reviews static
+applications, and dynamic state models for single-page applications.
+Section~\ref{sec:formal}
+summarises the three formal ideas the analysis builds on. Section~\ref{sec:asttools} reviews
+static
 analysis carried out over a source-level syntax tree, and what the type annotations of
 a TypeScript program do and do not contribute to it; this is the tooling style used by
-the analysis in Chapter~\ref{ch:analysis}. Section 2.7 introduces the Angular
+the analysis in Chapter~\ref{ch:analysis}. Section~\ref{sec:angular} introduces the Angular
 mechanisms that the analysis has to deal with and the program analysis problem each of
 them raises, with dependency injection treated at length because it is the mechanism
-that hides the most control flow. Section 2.8 reviews reactive programming and the
-boundary it puts on a static analysis. Section 2.9 reviews mutation testing, which is
-the method used in Chapter~\ref{ch:evaluation} to answer RQ4. Section 2.10 states the
+that hides the most control flow. Section~\ref{sec:reactive} reviews reactive programming and
+the
+boundary it puts on a static analysis. Section~\ref{sec:mutation} reviews mutation testing,
+which is
+the method used in Chapter~\ref{ch:evaluation} to answer RQ4. Section~\ref{sec:gap} states the
 gap that the thesis addresses.
 
 \section{UI transition graphs}
+\label{sec:terminology}
 
 A UI transition graph is a directed graph in which the nodes represent user-visible
 states of an application and the edges represent transitions that a user action can
@@ -68,6 +75,7 @@ Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & yes & no & 2
 \end{table}
 
 \section{Static extraction for Android}
+\label{sec:android}
 
 The largest body of static work on transition graphs concerns Android. Yang et al.\
 introduced the window transition graph, in which the nodes are windows (activities,
@@ -98,6 +106,7 @@ static window transition graph loses precision on user-interface code that is sh
 between contexts, such as a dialog that several activities reuse. They address this by combining the static analysis with runtime traces and a learned model \cite{promal2022}. This is the case in which no single owning window exists, and here the Android work moves away from static analysis.
 
 \section{Navigation models for web applications}
+\label{sec:webmodels}
 
 Navigation models for the web were first extracted from server-rendered sites, well
 before single-page applications became common. Ricca and Tonella modelled a web
