@@ -5,7 +5,7 @@
 // (and loop/branch/early-return conditions that demote a nav to `may`).
 
 import { Node, SyntaxKind } from 'ts-morph'
-import { callConditional, templateConditional } from './conditions'
+import { callCondition, templateCondition } from './conditions'
 import { constantString, constantStringArray, constantForName, builderReturn, classPropertyInitializer } from './resolve'
 import type { SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
@@ -141,6 +141,18 @@ export interface RawTarget {
 }
 
 const STATIC_LINK_RE = /(?<!\[)\brouterLink\s*=\s*"([^"]*)"/g
+
+/**
+ * The target of a `routerLink` attribute written without brackets, as Angular binds it: an
+ * interpolation in the value makes it computed, a prefix when literal text precedes the first
+ * one. Reading `routerLink="{{ addInfo().route }}"` as a literal sent it to the catch-all.
+ */
+function staticLinkTarget(value: string): TargetInfo {
+  const at = value.indexOf('{{')
+  if (at < 0) return { kind: 'literal', value }
+  const head = value.slice(0, at)
+  return head === '' ? { kind: 'dynamic' } : { kind: 'template', staticPrefix: head }
+}
 const BOUND_LINK_RE = /\[routerLink\]\s*=\s*"([^"]*)"/g
 
 /**
@@ -155,10 +167,10 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
   const locAt = (index: number): { line: number; col: number } => templateLoc(sf, tpl, index)
   const file = tpl.externalFile ? relative(projectDir, tpl.externalFile) : undefined
   for (const m of tpl.text.matchAll(STATIC_LINK_RE)) {
-    out.push({ ti: { kind: 'literal', value: m[1] ?? '' }, event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, conditional: templateConditional(tpl.text, m.index) })
+    out.push({ ti: staticLinkTarget(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, conditional: templateCondition(tpl.text, m.index) !== null })
   }
   for (const m of tpl.text.matchAll(BOUND_LINK_RE)) {
-    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, conditional: templateConditional(tpl.text, m.index) })
+    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, conditional: templateCondition(tpl.text, m.index) !== null })
   }
   return out
 }
@@ -349,7 +361,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
     const loc = { line: lc.line, col: lc.column }
     if (member === 'navigateByUrl') {
       const arg0 = call.getArguments()[0]
-      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, conditional: callConditional(call) })
+      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, conditional: callCondition(call) !== null })
     } else {
       const arg0 = call.getArguments()[0]
       // `navigate(x)` takes a commands array. Written out, every element counts, not only the
@@ -363,7 +375,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
         arg0 && Node.isArrayLiteralExpression(arg0)
           ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf)
           : classifyTarget(arg0)
-      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, baseUnknown, conditional: callConditional(call) })
+      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, baseUnknown, conditional: callCondition(call) !== null })
     }
   }
   return out
@@ -435,11 +447,11 @@ export function methodNavTargets(sf: SourceFile, methodName: string): { ti: Targ
       const loc = { line: lc.line, col: lc.column }
       const guard = getGuard(call) ?? extraConditionGuard(call)
       if (member === 'navigateByUrl') {
-        out.push({ ti: classifyTarget(call.getArguments()[0]), event: 'click', effect: 'router.navigateByUrl', ruleId: 'ng.control.navigate-by-url', loc, guard, conditional: callConditional(call) })
+        out.push({ ti: classifyTarget(call.getArguments()[0]), event: 'click', effect: 'router.navigateByUrl', ruleId: 'ng.control.navigate-by-url', loc, guard, conditional: callCondition(call) !== null })
       } else {
         const arg0 = call.getArguments()[0]
         const first = arg0 && Node.isArrayLiteralExpression(arg0) ? arg0.getElements()[0] : undefined
-        out.push({ ti: classifyTarget(first), event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard, conditional: callConditional(call) })
+        out.push({ ti: classifyTarget(first), event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard, conditional: callCondition(call) !== null })
       }
     }
     return out

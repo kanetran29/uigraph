@@ -16,7 +16,7 @@ import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNot
 import { edgeId, controlNodeId } from './ids'
 import { matchLiteral, matchPrefix, primaryPath, resolveRelativeTarget, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
-import { templateConditional } from './conditions'
+import { templateCondition } from './conditions'
 import { collectRoutes, type UnreadableRoutes } from './routes'
 import { resolveImportedFile, isInsideDir } from './resolve'
 import { attributeScopes, subtreeAnchor, SHELL_NODE_ID } from './attribute'
@@ -534,7 +534,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const cId = controlNodeId(route.nodeId, c.selector)
         const loc = tpl ? templateLoc(sf, tpl, c.index) : { line: 1, col: 1 }
         // The offset past `<` so the scan reads the control's own open tag and its directives.
-        const controlConditional = tpl ? templateConditional(tpl.text, c.index + 1) : false
+        const controlConditional = tpl ? templateCondition(tpl.text, c.index + 1) !== null : false
         const navEffects = new Set<string>()
         /**
          * Wire one navigation this control fires — from a traced (click) handler or
