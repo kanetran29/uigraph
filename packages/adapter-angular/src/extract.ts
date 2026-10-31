@@ -14,9 +14,9 @@ import { relative, join, dirname } from 'node:path'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
-import { matchLiteral, matchPrefix, primaryPath, resolveRelativeTarget, type RouteLike } from './matcher'
+import { matchAll, matchLiteral, matchPrefix, resolveRelativeTarget, urlPath, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
-import { templateCondition } from './conditions'
+import { isBareCall, templateCondition } from './conditions'
 import { collectRoutes, type UnreadableRoutes } from './routes'
 import { resolveImportedFile, isInsideDir } from './resolve'
 import { attributeScopes, subtreeAnchor, SHELL_NODE_ID } from './attribute'
@@ -191,7 +191,34 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
   const redirectOfNode = new Map(routes.flatMap((r) => (r.redirectsTo !== undefined ? [[r.nodeId, r.redirectsTo] as const] : [])))
   const componentByNodeId = new Map(routes.map((r) => [r.nodeId, r.componentFile ? relative(projectDir, r.componentFile.getFilePath()) : null]))
-  // The screens a scope anchor stands for, filled as anchors are minted.
+  /**
+   * Where a navigation to `value` lands once every redirect on the way is followed: a redirect
+   * route at that address, or an empty-path child that redirects the screen matched there. The
+   * walk stops at a fixed point or after ten hops. `ambiguous` says that more than one declared
+   * route, or a route and a redirect, could answer an address on the way, so which one Angular
+   * meets first decides it. A command is matched as written; a redirect's target is a URL.
+   */
+  function land(value: string, command: boolean): { target: RouteLike | null; ambiguous: boolean } {
+    let current = value
+    let asUrl = !command
+    let ambiguous = false
+    for (let hop = 0; hop < 10; hop += 1) {
+      const path = asUrl ? current.split(/[?#]/)[0] ?? current : current
+      const redirect = redirects.get(path)
+      const target = matchLiteral(path, routeLikes, asUrl)
+      // An empty-path child's redirect is registered at its parent's address as well; it is the
+      // same redirect as the screen's own, not a rival to it.
+      const rival = redirect !== undefined && !(target && redirectOfNode.has(target.nodeId))
+      if (matchAll(path, routeLikes).length + (rival ? 1 : 0) > 1) ambiguous = true
+      const next = target ? redirectOfNode.get(target.nodeId) : redirect
+      if (next === undefined) return { target, ambiguous }
+      current = next
+      asUrl = true
+    }
+    return { target: null, ambiguous: true }
+  }
+  // The screens a scope anchor stands for, filled as anchors are minted, and every screen, which the shell stands for.
+  const screenIds = new Set(routes.map((r) => r.nodeId))
   const anchorMembers = new Map<string, Set<string>>()
 
   // A screen is a ROUTE, not a component: one component serving several routes
@@ -227,7 +254,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     }
     // Record the extra construct instead of dropping it, so every construct that yields an
     // edge stays traceable.
-    if ((e.witness?.file === w.file && e.witness?.loc?.line === w.loc.line) || e.mergedWitnesses?.some((m) => m.file === w.file && m.loc?.line === w.loc.line)) return
+    // Two links on one line are two constructs; only the same construct reached again is one.
+    const same = (m: { file?: string; loc?: { line: number; col: number } } | undefined) => m?.file === w.file && m?.loc?.line === w.loc.line && m?.loc?.col === w.loc.col
+    if (same(e.witness) || e.mergedWitnesses?.some(same)) return
     // An edge is as certain as the most certain construct that produces it: one construct that
     // reaches the destination on every execution of its code makes the transition certain,
     // whatever else may also reach it. That construct becomes the edge's witness, and every
@@ -261,19 +290,15 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // a template one or the call passes `relativeTo`; without that the base is the root.
         // Either way a leading `.` or `..` is resolved — leaving it raw matches nothing.
         const base = t.relative ? pathByNodeId.get(from) : '/'
-        // An auxiliary outlet the adapter does not model; the primary path is what it reaches.
-        const primary = primaryPath(t.ti.value)
-        if (primary === null) continue
-        const value = resolveRelativeTarget(primary, base)
+        // A URL is parsed as navigateByUrl parses it; a command keeps every character but the slash.
+        const parsed = t.url ? urlPath(t.ti.value) : { path: t.ti.value, aux: false }
+        if (parsed === null) continue
+        const value = resolveRelativeTarget(parsed.path, base)
         // A relative target resolves against the route of the component that holds the site, and
         // the emitting node's path is that route only when the node is the component's own route.
-        const baseUnknown = !primary.startsWith('/') && (t.baseUnknown === true || (t.relative === true && componentByNodeId.get(from) !== file))
-        let target = matchLiteral(value, routeLikes)
-        // A link to a redirect reaches what the redirect forwards to; follow it one step. So does a
-        // link to a screen whose own address an empty-path child redirects.
-        const forwarded = target ? redirectOfNode.get(target.nodeId) : undefined
-        if (target && forwarded !== undefined && pathByNodeId.get(target.nodeId) === value.split(/[?#]/)[0]) target = matchLiteral(forwarded, routeLikes)
-        else if (!target && redirects.has(value)) target = matchLiteral(redirects.get(value)!, routeLikes)
+        const baseUnknown = !parsed.path.startsWith('/') && (t.baseUnknown === true || (t.relative === true && componentByNodeId.get(from) !== file))
+        const landed = land(value, t.url !== true)
+        let target = landed.target
         // A target no route declares is not nowhere: a `**` route catches it. Either it sends
         // it on (`redirectTo`) or it answers it itself with a catch-all screen (`component`,
         // mifos's and alfresco's NotFound page). The destination is real, but the author almost
@@ -301,7 +326,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             // dead-link census counts -- it counts sites, never edges.
             // The target must stay the first double-quoted string: a generator reads it from here.
             const answer = wildcardRedirect !== undefined ? `redirects it to ${wildcardRedirect}` : 'answers it with its own catch-all screen'
-            soundiness.push({ kind: 'wildcard-redirect', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route and the wildcard route ${answer}${caveat}` })
+            const assumed = baseUnknown ? ', resolved against a base the reader could not fix' : ''
+            soundiness.push({ kind: 'wildcard-redirect', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route${assumed} and the wildcard route ${answer}${caveat}` })
           }
         }
         if (!target) {
@@ -313,10 +339,25 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const guardText = gate.guarded ? gate.guardTexts.join(',') : null
         // A navigation to the address its source already displays is ignored by Angular's
         // default router, or runs only when a parameter or the query differs, so it does not
-        // occur on every execution. The shell stands for every screen, the target among them.
-        const selfLoop = target.nodeId === from || from === SHELL_NODE_ID || anchorMembers.get(from)?.has(target.nodeId) === true
-        const uncertain = gate.guarded || capMay || viaWildcard || baseUnknown || selfLoop || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
-        pushEdge(from, target.nodeId, t, uncertain ? 'may' : 'must', gate.guarded ? gate.confidence : uncertain ? 0.5 : 1, guardText, file)
+        // occur on every execution.
+        const selfLoop = target.nodeId === from
+        // The shell and a scope anchor stand for many screens, the destination possibly among them.
+        const members = from === SHELL_NODE_ID ? screenIds : anchorMembers.get(from)
+        // A URL naming an auxiliary outlet fails whole when that outlet's route does not match,
+        // which is not read; an address several declared routes or a redirect can answer goes to
+        // whichever Angular meets first, which the matcher does not decide; and a screen whose own
+        // address an empty-path child redirects is never displayed, so no edge leaves it for sure.
+        const unsure = parsed.aux || landed.ambiguous || redirectOfNode.has(from)
+        const uncertain = gate.guarded || capMay || viaWildcard || baseUnknown || selfLoop || unsure || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
+        if (members?.has(target.nodeId) && !uncertain) {
+          // Every screen the edge stands for reaches the destination for certain except the one
+          // that is the destination, so the edge is drawn per screen: must from the others, and a
+          // may self-loop at the destination.
+          for (const m of [...members].sort()) pushEdge(m, target.nodeId, t, m === target.nodeId ? 'may' : 'must', m === target.nodeId ? 0.5 : 1, guardText, file)
+          continue
+        }
+        const held = uncertain || members?.has(target.nodeId) === true
+        pushEdge(from, target.nodeId, t, held ? 'may' : 'must', gate.guarded ? gate.confidence : held ? 0.5 : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
         const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
         const cands = matchPrefix(prefix, routeLikes)
@@ -408,12 +449,18 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     }
     // Components rendered inside screens: anchored at a subtree when their screen set is one,
     // otherwise one edge per screen that renders them.
+    // On a screen where the component is mounted only under a template condition, every site
+    // in it runs only on some executions, however unconditional it is in its own template.
     for (const [f, screens] of scopes.screensOf) {
       const c = scopes.components.get(f)
       if (!c) continue
       const ts = targetsOf(c.sf)
       if (ts.length === 0) continue
-      emitOver(screens, ts, relative(projectDir, f))
+      const firm = scopes.firmScreensOf.get(f) ?? new Set<string>()
+      const sure = new Set([...screens].filter((x) => firm.has(x)))
+      const unsure = new Set([...screens].filter((x) => !firm.has(x)))
+      if (sure.size > 0) emitOver(sure, ts, relative(projectDir, f))
+      if (unsure.size > 0) emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))
     }
     // The application shell: anchored once at a scope node, expanded on query.
     let shellEdges = 0
@@ -421,7 +468,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const c = scopes.components.get(f)
       if (!c) continue
       const before = edges.length
-      emitTargets(SHELL_NODE_ID, targetsOf(c.sf), relative(projectDir, f), true)
+      const ts = targetsOf(c.sf)
+      emitTargets(SHELL_NODE_ID, scopes.firmShell.has(f) ? ts : ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f), true)
       shellEdges += edges.length - before
     }
     for (const f of [...scopes.indirectShell].sort()) {
@@ -490,7 +538,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       }
       for (const s of [...screens].sort()) emitTargets(s, ts, file, false, true)
     }
-    if (shellEdges > 0) nodes.push({ id: SHELL_NODE_ID, route: null, componentPath: null, label: 'application shell (every screen)', kind: 'scope', scope: { kind: 'top' } })
+    if (shellEdges > 0 && edges.some((e) => e.from === SHELL_NODE_ID)) nodes.push({ id: SHELL_NODE_ID, route: null, componentPath: null, label: 'application shell (every screen)', kind: 'scope', scope: { kind: 'top' } })
 
     // An edge needs both ends. The `u_<screen>` sink supplies a destination the run time owns;
     // this supplies a SOURCE the analysis could not place. A component that no route renders
@@ -547,9 +595,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
          */
         const wireControlNav = (t: RawTarget, guard: string | null, what: string): void => {
           if (t.ti.kind === 'literal') {
-            const primary = primaryPath(t.ti.value)
-            if (primary === null) return
-            const target = matchLiteral(primary, routeLikes)
+            const parsed = t.url ? urlPath(t.ti.value) : { path: t.ti.value, aux: false }
+            if (parsed === null) return
+            const primary = parsed.path
+            const landed = land(primary, t.url !== true)
+            const target = landed.target
             if (!target) {
               soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `${what} target "${t.ti.value}" matches no declared route` })
               return
@@ -560,7 +610,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             const guarded = guards.length > 0
             // This mode resolves no relative target, so one without a leading slash is matched as
             // written and never trusted; the other demotions are the screen-level ones.
-            const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true
+            const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true ||
+              parsed.aux || landed.ambiguous || redirectOfNode.has(route.nodeId)
             const confidence = gate.guarded ? gate.confidence : guard != null ? 0.6 : uncertain ? 0.5 : 1
             pushEdge(cId, target.nodeId, t, uncertain ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
             navEffects.add('navigate')
@@ -579,8 +630,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         for (const handler of c.handlers) {
           const methodName = /([a-zA-Z_$][\w$]*)\s*\(/.exec(handler)?.[1]
           if (methodName === undefined) continue
+          // `(click)="flag && go()"` calls the method only on some clicks.
+          const bare = isBareCall(handler)
           for (const nav of methodNavTargets(sf, methodName)) {
-            wireControlNav({ ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc, file: tplFile, conditional: controlConditional || nav.conditional }, nav.guard, `control handler ${methodName}()`)
+            wireControlNav({ ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc, file: tplFile, url: nav.effect === 'router.navigateByUrl', conditional: controlConditional || !bare || nav.conditional }, nav.guard, `control handler ${methodName}()`)
           }
         }
         const link = linkAttrTarget(c.attrs)
@@ -621,6 +674,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     ),
   )
 
+  // An anchor whose every edge was drawn per screen stands for nothing in the graph.
+  const anchored = new Set(edges.map((e) => e.from))
+  const kept = nodes.filter((n) => n.kind !== 'scope' || anchored.has(n.id))
   const graph = {
     version: 0 as const,
     meta: {
@@ -629,7 +685,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       rulesetVersion: opts.rulesetVersion ?? DEFAULT_RULESET,
       ...(opts.commit ? { commit: opts.commit } : {}),
     },
-    nodes,
+    nodes: kept,
     edges,
   }
   return { graph, soundiness }

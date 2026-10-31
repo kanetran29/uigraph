@@ -45,28 +45,40 @@ export function resolveRelativeTarget(target: string, ownerPath: string | undefi
 }
 
 /**
- * The primary path of a URL that names auxiliary outlets, as Angular reads it:
- * `/inbox(popup:compose)` moves the primary outlet to `/inbox` and opens `compose` beside it.
- * A URL that names none comes back unchanged. When a parenthesised group also carries a primary
- * segment, as in `/a/(b//popup:c)`, the primary path is not rebuilt and null is returned.
+ * The path a URL string reaches in the primary outlet, read the way `navigateByUrl` parses it:
+ * the query, the fragment and each segment's matrix parameters are not part of the path, and a
+ * parenthesised group addresses an auxiliary outlet (`/inbox(popup:compose)`), which the adapter
+ * does not model, so `aux` says the URL named one. A group that also carries the primary outlet,
+ * as in `/(primary:inbox//popup:x)`, is not rebuilt, and null is returned. Only a URL is read this
+ * way: a `routerLink` string or a `navigate` command is split on slashes alone, and Angular keeps
+ * every other character in the segment, so those are matched as written.
  */
-export function primaryPath(url: string): string | null {
-  if (!url.includes('(')) return url
+export function urlPath(url: string): { path: string; aux: boolean } | null {
+  const bare = (url.split('#')[0] ?? '').split('?')[0] ?? ''
+  let aux = false
   let readable = true
-  const out = url.replace(/\(([^()]*)\)/g, (_m, inner: string) => {
-    if (!inner.split('//').every((part) => /^[\w-]+:/.test(part))) readable = false
+  const out = bare.replace(/\(([^()]*)\)/g, (_m, inner: string) => {
+    aux = true
+    if (!inner.split('//').every((part) => /^[\w-]+:/.test(part) && !part.startsWith('primary:'))) readable = false
     return ''
   })
-  return readable && !out.includes('(') ? out : null
+  if (!readable || /[()]/.test(out)) return null
+  return { path: out.split('/').map((seg) => seg.split(';')[0]).join('/'), aux }
+}
+
+/** Every declared route a target can reach, exact or by a parameter pattern. */
+export function matchAll(target: string, routes: RouteLike[]): RouteLike[] {
+  return routes.filter((r) => r.fullPath === target || patternMatches(target, r.fullPath))
 }
 
 /**
- * Resolve a literal navigation target to a single declared route. Prefers an
- * exact path match, then a parameterized pattern match. Returns null if no
- * declared route matches (the caller records this as a soundiness gap).
+ * Resolve a navigation target to a single declared route. Prefers an exact path match, then a
+ * parameterized pattern match. Returns null if no declared route matches (the caller records
+ * this as a soundiness gap). A URL drops its query and fragment first; a command is matched as
+ * written.
  */
-export function matchLiteral(target: string, routes: RouteLike[]): RouteLike | null {
-  const norm = target.split('?')[0]?.split('#')[0] ?? target
+export function matchLiteral(target: string, routes: RouteLike[], asUrl = true): RouteLike | null {
+  const norm = asUrl ? target.split('?')[0]?.split('#')[0] ?? target : target
   const exact = routes.find((r) => r.fullPath === norm)
   if (exact) return exact
   const byPattern = routes.find((r) => patternMatches(norm, r.fullPath))

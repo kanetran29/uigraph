@@ -131,6 +131,8 @@ export interface RawTarget {
    * well as the reader can, and the edge is never must.
    */
   baseUnknown?: boolean
+  /** Whether the target is a URL string, as `navigateByUrl` takes, rather than a command, as `routerLink` and `navigate` take. */
+  url?: boolean
   /**
    * Whether the navigation runs only on some executions of the code that holds it: under a
    * template control-flow block or structural directive, under a branch, inside a callback an
@@ -166,11 +168,13 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
   const out: RawTarget[] = []
   const locAt = (index: number): { line: number; col: number } => templateLoc(sf, tpl, index)
   const file = tpl.externalFile ? relative(projectDir, tpl.externalFile) : undefined
+  // A link that binds its own `relativeTo` input resolves against a route the reader does not evaluate.
+  const boundBase = (at: number): boolean => /\[relativeTo\]\s*=/.test(tpl.text.slice(tpl.text.lastIndexOf('<', at), tpl.text.indexOf('>', at) + 1))
   for (const m of tpl.text.matchAll(STATIC_LINK_RE)) {
-    out.push({ ti: staticLinkTarget(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, conditional: templateCondition(tpl.text, m.index) !== null })
+    out.push({ ti: staticLinkTarget(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, baseUnknown: boundBase(m.index), conditional: templateCondition(tpl.text, m.index) !== null })
   }
   for (const m of tpl.text.matchAll(BOUND_LINK_RE)) {
-    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, conditional: templateCondition(tpl.text, m.index) !== null })
+    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, baseUnknown: boundBase(m.index), conditional: templateCondition(tpl.text, m.index) !== null })
   }
   return out
 }
@@ -178,8 +182,8 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
 /** Witness loc for a position inside a template: a line within an external html file, or the .ts offset for inline templates. */
 export function templateLoc(sf: SourceFile, tpl: ComponentTemplate, index: number): { line: number; col: number } {
   if (tpl.externalFile) {
-    const line = tpl.text.slice(0, index).split('\n').length
-    return { line, col: 1 }
+    const before = tpl.text.slice(0, index)
+    return { line: before.split('\n').length, col: index - before.lastIndexOf('\n') }
   }
   // An inline template is a string literal in the .ts file, so a match inside it is at the
   // literal's start plus the match offset (+1 for the opening backtick). Reporting the
@@ -217,7 +221,8 @@ function classifyBoundLink(expr: string, sf?: SourceFile): TargetInfo {
   if (literalOnly) return { kind: 'literal', value: literalOnly[1] ?? '' }
   const concatPrefix = /^'([^']*)'\s*\+/.exec(trimmed) ?? /^"([^"]*)"\s*\+/.exec(trimmed)
   if (concatPrefix) return { kind: 'template', staticPrefix: concatPrefix[1] ?? '' }
-  if (trimmed.startsWith('[')) return classifyLinkArray(trimmed, sf)
+  // `['/a'].concat(rest)` starts like an array and is not one: only a lone array literal is read.
+  if (trimmed.startsWith('[')) return closesAtEnd(trimmed) ? classifyLinkArray(trimmed, sf) : { kind: 'dynamic' }
   // `[routerLink]="routerLinkBlog"` binds to a field of the component, which commonly holds
   // the link from a shared route table (`publicRoutes.blog.routerLink`). Follow the field to
   // that constant rather than calling the whole site dynamic.
@@ -238,6 +243,20 @@ function classifyBoundLink(expr: string, sf?: SourceFile): TargetInfo {
   return { kind: 'dynamic' }
 }
 
+
+/** Whether the bracket that opens `text` is closed by its last character, quotes respected. */
+function closesAtEnd(text: string): boolean {
+  let depth = 0
+  let quote: string | null = null
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i]!
+    if (quote) { if (ch === quote && text[i - 1] !== '\\') quote = null; continue }
+    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; continue }
+    if (ch === '[' || ch === '(' || ch === '{') depth += 1
+    else if ((ch === ']' || ch === ')' || ch === '}') && --depth === 0) return i === text.length - 1
+  }
+  return false
+}
 
 /**
  * Join resolved command segments as Angular joins a commands array. The leading form is kept:
@@ -349,6 +368,21 @@ function splitTopLevel(s: string): string[] {
   return out
 }
 
+/**
+ * Whether `expr` names the component's own injected route: a constructor parameter typed
+ * `ActivatedRoute`, or a field initialised with `inject(ActivatedRoute)`. Anything else, a field
+ * holding `this.route.parent` among them, may be another route, so a target relative to it has a
+ * base the reader does not know.
+ */
+function isOwnRoute(expr: Node | undefined): boolean {
+  const name = expr ? /^(?:this\.)?([A-Za-z_$][\w$]*)$/.exec(expr.getText())?.[1] : undefined
+  const cls = expr?.getFirstAncestorByKind(SyntaxKind.ClassDeclaration)
+  if (!name || !cls) return false
+  const param = cls.getConstructors().flatMap((c) => c.getParameters()).find((p) => p.getName() === name)
+  if (param) return /^ActivatedRoute$/.test(param.getTypeNode()?.getText() ?? '')
+  return /^inject\(\s*ActivatedRoute\s*\)$/.test(cls.getProperty(name)?.getInitializer()?.getText() ?? '')
+}
+
 /** Parse `this.router.navigate([...])` and `this.router.navigateByUrl(...)` calls. */
 export function routerCallTargets(sf: SourceFile): RawTarget[] {
   const out: RawTarget[] = []
@@ -361,7 +395,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
     const loc = { line: lc.line, col: lc.column }
     if (member === 'navigateByUrl') {
       const arg0 = call.getArguments()[0]
-      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, conditional: callCondition(call) !== null })
+      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, url: true, conditional: callCondition(call) !== null })
     } else {
       const arg0 = call.getArguments()[0]
       // `navigate(x)` takes a commands array. Written out, every element counts, not only the
@@ -370,7 +404,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
       const relativeTo = extras && Node.isObjectLiteralExpression(extras) ? extras.getProperty('relativeTo') : undefined
       const relative = relativeTo !== undefined
       const baseUnknown = extras !== undefined && (!Node.isObjectLiteralExpression(extras) ||
-        (relativeTo !== undefined && !(Node.isPropertyAssignment(relativeTo) && /^(this\.)?[A-Za-z_$][\w$]*$/.test(relativeTo.getInitializer()?.getText() ?? ''))))
+        (relativeTo !== undefined && !(Node.isPropertyAssignment(relativeTo) && isOwnRoute(relativeTo.getInitializer()))))
       const ti =
         arg0 && Node.isArrayLiteralExpression(arg0)
           ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf)
@@ -450,8 +484,8 @@ export function methodNavTargets(sf: SourceFile, methodName: string): { ti: Targ
         out.push({ ti: classifyTarget(call.getArguments()[0]), event: 'click', effect: 'router.navigateByUrl', ruleId: 'ng.control.navigate-by-url', loc, guard, conditional: callCondition(call) !== null })
       } else {
         const arg0 = call.getArguments()[0]
-        const first = arg0 && Node.isArrayLiteralExpression(arg0) ? arg0.getElements()[0] : undefined
-        out.push({ ti: classifyTarget(first), event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard, conditional: callCondition(call) !== null })
+        const ti = arg0 && Node.isArrayLiteralExpression(arg0) ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf) : classifyTarget(arg0)
+        out.push({ ti, event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard, conditional: callCondition(call) !== null })
       }
     }
     return out
