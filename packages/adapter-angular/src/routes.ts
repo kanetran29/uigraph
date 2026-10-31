@@ -46,6 +46,12 @@ export interface RouteInfo {
    */
   parentNodeId: string | null
   /**
+   * The routes from the root to this screen, each with what the router may run on it during a
+   * navigation, so the guards a particular navigation runs can be told from those it does not.
+   * A child at the empty path that the screen's own address resolves to is the last level.
+   */
+  levels: RouteLevel[]
+  /**
    * Where a navigation to this screen's own address actually lands, when a child at the empty
    * path redirects it (`{ path: '', redirectTo: 'vault', pathMatch: 'full' }` under a layout):
    * Angular matches that child whenever the address is the layout's, so the layout is never
@@ -82,6 +88,48 @@ export interface UnreadableRoutes {
   outlets: Set<ObjectLiteralExpression>
 }
 
+/**
+ * One route on the way from the root to a screen. Two screens share a level when they share the
+ * route object, and a navigation between them reuses it: Angular then runs its canActivate and
+ * resolvers again only when its parameters change, or always where runGuardsAndResolvers asks.
+ */
+export interface RouteLevel {
+  obj: ObjectLiteralExpression
+  /** Whether the route's own path has a parameter, so a navigation that keeps it may change it. */
+  params: boolean
+  /** Whether runGuardsAndResolvers asks for more than a parameter change before running again. */
+  always: boolean
+  canActivate: GuardInfo[]
+  canActivateChild: GuardInfo[]
+  canMatch: GuardInfo[]
+  canLoad: GuardInfo[]
+  canDeactivate: GuardInfo[]
+  /** Whether the route declares resolvers, which the router awaits before it activates it. */
+  resolve: boolean
+}
+
+/** The level a route object contributes. */
+function levelOf(sf: SourceFile, obj: ObjectLiteralExpression): RouteLevel {
+  const run = propNamed(obj, 'runGuardsAndResolvers')
+  const runMode = stringProp(obj, 'runGuardsAndResolvers')
+  return {
+    obj,
+    params: (stringProp(obj, 'path') ?? '').split('/').some((seg) => seg.startsWith(':')),
+    always: run !== undefined && runMode !== 'paramsChange' && runMode !== 'pathParamsChange',
+    canActivate: canActivateGuards(sf, obj),
+    canActivateChild: canActivateGuards(sf, obj, 'canActivateChild'),
+    canMatch: canActivateGuards(sf, obj, 'canMatch'),
+    canLoad: canActivateGuards(sf, obj, 'canLoad'),
+    canDeactivate: canActivateGuards(sf, obj, 'canDeactivate'),
+    resolve: propNamed(obj, 'resolve') !== undefined,
+  }
+}
+
+/** Every guard a chain of levels declares that can refuse entering it, as the screen's guard list has always held them. */
+function entryGuards(levels: RouteLevel[]): GuardInfo[] {
+  return levels.flatMap((l) => [...l.canActivate, ...l.canMatch, ...l.canActivateChild, ...l.canLoad])
+}
+
 /** The screens whose own address a child at the empty path already answers, in declaration order. */
 const emptyPathAnswered = new WeakSet<RouteInfo>()
 
@@ -94,10 +142,13 @@ const emptyPathAnswered = new WeakSet<RouteInfo>()
  */
 function canActivateGuards(sf: SourceFile, obj: ObjectLiteralExpression, name = 'canActivate'): GuardInfo[] {
   const prop = propNamed(obj, name)
-  if (!prop || !Node.isPropertyAssignment(prop)) return []
-  const init = prop.getInitializer()
-  if (!init || !Node.isArrayLiteralExpression(init)) return []
-  return analyzeCanActivate(sf, init.getElements())
+  if (!prop) return []
+  const init = Node.isPropertyAssignment(prop) ? prop.getInitializer() : Node.isShorthandPropertyAssignment(prop) ? prop.getNameNode() : undefined
+  const arr = arrayLiteralOf(init)
+  if (arr && Node.isArrayLiteralExpression(arr)) return analyzeCanActivate(sf, arr.getElements())
+  // A guard list the reader cannot bring back to an array still gates the route: refusing to
+  // read a guard must never be the reason an edge is called deterministic.
+  return [{ text: init?.getText() ?? name, kind: 'unreadable', async: false }]
 }
 
 /**
@@ -581,10 +632,10 @@ function moduleDependencies(sf: SourceFile): SourceFile[] {
  * until the stack ran out, which is a crash and not a reading. Reaching one again ends that
  * branch, and where a route object stands for the hop the lost subtree is declared.
  */
-function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, consumedFiles?: Set<string>, chain: Set<ArrayLiteralExpression> = new Set(), underAuxOutlet = false): number {
+function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedLevels: RouteLevel[] = [], parentNodeId: string | null = null, redirects?: Map<string, string>, unreadable?: UnreadableRoutes, consumedFiles?: Set<string>, chain: Set<ArrayLiteralExpression> = new Set(), underAuxOutlet = false): number {
   if (chain.has(arr)) return 0
   chain.add(arr)
-  const placed = walkElements(arr, sf, parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
+  const placed = walkElements(arr, sf, parentPath, out, loadedChildFiles, inheritedLevels, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
   chain.delete(arr)
   return placed
 }
@@ -667,9 +718,9 @@ function declaredBy(expr: Node | undefined): Node | undefined {
   return (sym?.getAliasedSymbol() ?? sym)?.getValueDeclaration()
 }
 
-/** The guards the route a wrapper returns declares, resolved in the wrapper's own file. */
-function wrapperGuards(mount: { route?: ObjectLiteralExpression }): GuardInfo[] {
-  return mount.route ? canActivateGuards(mount.route.getSourceFile(), mount.route) : []
+/** The level the route a wrapper returns contributes, resolved in the wrapper's own file. */
+function wrapperLevels(mount: { route?: ObjectLiteralExpression }): RouteLevel[] {
+  return mount.route ? [levelOf(mount.route.getSourceFile(), mount.route)] : []
 }
 
 /**
@@ -717,7 +768,7 @@ function childrenExpression(obj: ObjectLiteralExpression): Node | undefined {
  * descent and nothing else: one kept across siblings is a visited set, which refuses the same
  * table under a second parent and cost one corpus application a third of its routes.
  */
-function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedGuards: GuardInfo[], parentNodeId: string | null, redirects: Map<string, string> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>, underAuxOutlet: boolean): number {
+function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedLevels: RouteLevel[], parentNodeId: string | null, redirects: Map<string, string> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>, underAuxOutlet: boolean): number {
   let placed = 0
   for (const el of arr.getElements()) {
     if (Node.isCallExpression(el)) {
@@ -730,7 +781,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         continue
       }
       const prefix = joinRoutePath(parentPath, mount.segment)
-      const wrapped = [...inheritedGuards, ...wrapperGuards(mount)]
+      const wrapped = [...inheritedLevels, ...wrapperLevels(mount)]
       for (const arg of mount.arrays) {
         // A table already on this descent is cut rather than mounted again, as in the spread
         // branch, and the cut is declared for the same reason: the wrapper's table is not read.
@@ -765,7 +816,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         const mount = callMount(spreadCall)
         if (!mount) unreadable?.calls.add(spreadCall)
         else {
-          const wrappedSpread = [...inheritedGuards, ...wrapperGuards(mount)]
+          const wrappedSpread = [...inheritedLevels, ...wrapperLevels(mount)]
           for (const a of mount.arrays) {
             if (chain.has(a)) {
               unreadable?.calls.add(spreadCall)
@@ -783,7 +834,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         // and not on the growth of the maps: shape marks a file placed that places nothing, and a
         // placement that re-sets an address a sibling already holds grows no map, so measuring
         // growth declared a loss where the walk had read the file through.
-        const n = walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedGuards, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
+        const n = walkRouteArray(arr, arr.getSourceFile(), parentPath, out, loadedChildFiles, inheritedLevels, parentNodeId, redirects, unreadable, consumedFiles, chain, underAuxOutlet)
         placed += n
         if (n > 0) consumedFiles?.add(arr.getSourceFile().getFilePath())
       } else if (unreadable) {
@@ -813,10 +864,9 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       continue
     }
     const fullPath = joinRoutePath(parentPath, ownPath)
-    // A route is entered only if its canActivate and canMatch let it be (a canMatch that refuses
-    // sends the router on to another route), and its canActivateChild runs whenever a child is
-    // entered, which includes the child at the empty path that its own address may resolve to.
-    const guards = [...inheritedGuards, ...canActivateGuards(sf, obj), ...canActivateGuards(sf, obj, 'canMatch'), ...canActivateGuards(sf, obj, 'canActivateChild')]
+    // Which of a level's guards run is decided per navigation, against the screen it leaves.
+    const levels = [...inheritedLevels, levelOf(sf, obj)]
+    const guards = entryGuards(levels)
     const componentName = identifierProp(obj, 'component')
     let componentFile = componentName ? resolveImportedFile(sf, componentName) : undefined
     let resolvedName = componentName
@@ -848,9 +898,12 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // to that address --- which Angular answers with the catch-all --- and swallowed the
     // dead-link note the site deserves. It is read after the outlet for that reason.
     const redirectTo = stringProp(obj, 'redirectTo')
-    if (redirectTo !== null && redirects && !auxHere) {
+    // Angular takes the first route that matches an address, so the first redirect declared at
+    // it is the one that applies.
+    const redirectTarget = redirectTo === null ? null : redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo)
+    if (redirectTarget !== null && redirects && !auxHere) {
       placed++
-      redirects.set(fullPath, redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
+      if (!redirects.has(fullPath)) redirects.set(fullPath, redirectTarget)
     }
     const isScreen = !auxHere && (propNamed(obj, 'component') !== undefined || propNamed(obj, 'loadComponent') !== undefined)
     const nodeId = routeToNodeId(fullPath)
@@ -865,10 +918,12 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // screen above it, first declared wins, but its guards still run there.
     const host = !auxHere && ownPath === '' && parentNodeId === nodeId ? out.get(nodeId) : undefined
     if (host) {
-      const own = redirectTo === null ? [...canActivateGuards(sf, obj), ...canActivateGuards(sf, obj, 'canMatch')] : []
-      if (own.length > 0) host.guards = [...host.guards, ...own]
-      if (redirectTo === null) emptyPathAnswered.add(host)
-      else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = redirects?.get(fullPath) ?? (redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo))
+      if (redirectTarget === null) {
+        const level = levelOf(sf, obj)
+        host.levels = [...host.levels, level]
+        host.guards = [...host.guards, ...entryGuards([level])]
+        emptyPathAnswered.add(host)
+      } else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = redirectTarget
     }
     // Counted whether or not the address is free: the walk read a route and reached an address,
     // and first-declared-wins is a choice between two routes, not a route the walk failed to
@@ -876,7 +931,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // its routes happened to be new.
     if (isScreen) placed++
     if (isScreen && !out.has(nodeId)) {
-      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, levels, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
     }
     const childParent = isScreen ? nodeId : parentNodeId
     const childrenProp = propNamed(obj, 'children')
@@ -898,14 +953,14 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       if (!childMount && childCall && Node.isCallExpression(childCall)) unreadable?.calls.add(childCall)
       const childArrays = !childMount ? [] : childInit && Node.isArrayLiteralExpression(childInit) ? [childInit] : childMount.arrays
       const childPrefix = joinRoutePath(fullPath, childMount ? childMount.segment : '')
-      const childGuards = childMount ? [...guards, ...wrapperGuards(childMount)] : guards
+      const childLevels = childMount ? [...levels, ...wrapperLevels(childMount)] : levels
       if (childArrays.length > 0) {
         for (const child of childArrays) {
           if (chain.has(child)) {
             unreadable?.subtrees.add(obj)
             continue
           }
-          const n = walkRouteArray(child, child.getSourceFile(), childPrefix, out, loadedChildFiles, childGuards, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
+          const n = walkRouteArray(child, child.getSourceFile(), childPrefix, out, loadedChildFiles, childLevels, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
           placed += n
           if (n > 0 && child.getSourceFile() !== sf) consumedFiles?.add(child.getSourceFile().getFilePath())
         }
@@ -939,7 +994,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
           // A lazy hop back onto a table already on this descent would mount it under its own
           // prefix for ever; the subtree is declared unread rather than followed or dropped.
           if (chain.has(childArr)) unreadable?.subtrees.add(obj)
-          else placed += walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, guards, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
+          else placed += walkRouteArray(childArr, owner, fullPath, out, loadedChildFiles, levels, childParent, redirects, unreadable, consumedFiles, chain, auxHere)
         }
       } else if (unreadable) {
         unreadable.subtrees.add(obj)

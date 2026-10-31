@@ -5,7 +5,7 @@
 // (and loop/branch/early-return conditions that demote a nav to `may`).
 
 import { Node, SyntaxKind } from 'ts-morph'
-import { callCondition, templateCondition } from './conditions'
+import { callCondition, openTag, templateCondition } from './conditions'
 import { constantString, constantStringArray, constantForName, builderReturn, classPropertyInitializer } from './resolve'
 import type { SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
@@ -175,7 +175,7 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
   const locAt = (index: number): { line: number; col: number } => templateLoc(sf, tpl, index)
   const file = tpl.externalFile ? relative(projectDir, tpl.externalFile) : undefined
   // A link that binds its own `relativeTo` input resolves against a route the reader does not evaluate.
-  const boundBase = (at: number): boolean => /\[relativeTo\]\s*=/.test(tpl.text.slice(tpl.text.lastIndexOf('<', at), tpl.text.indexOf('>', at) + 1))
+  const boundBase = (at: number): boolean => /\[relativeTo\]\s*=/.test(openTag(tpl.text, tpl.text.lastIndexOf('<', at))?.attrs ?? '')
   for (const m of tpl.text.matchAll(STATIC_LINK_RE)) {
     out.push({ ti: staticLinkTarget(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, baseUnknown: boundBase(m.index), conditional: templateCondition(tpl.text, m.index) !== null })
   }
@@ -284,10 +284,12 @@ function classifyCommandParts(parts: string[], sf: SourceFile | undefined): Targ
   const segs: string[] = []
   let holes = 0
   let known = 0
-  for (const p of parts) {
+  for (const [i, p] of parts.entries()) {
     const lit = /^'([^']*)'$/.exec(p) ?? /^"([^"]*)"$/.exec(p)
     if (lit) {
-      segs.push(lit[1] ?? '')
+      // Angular splits only the first command on slashes; a later string is one segment, its
+      // slashes encoded, which no route segment but a parameter answers.
+      segs.push(i === 0 ? lit[1] ?? '' : (lit[1] ?? '').replace(/\//g, '%2F'))
       known++
       continue
     }

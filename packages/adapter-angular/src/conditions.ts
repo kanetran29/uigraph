@@ -14,7 +14,9 @@ const VOID_ELEMENTS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img'
 const CONTROL_BLOCK = /@(?:else\s+if|if|else|for|empty|switch|case|default|defer|placeholder|loading|error)\b/y
 const STRUCTURAL_ATTR = /(?:^|\s)(?:\*[a-zA-Z][\w.-]*|\[ngIf\]|\[ngForOf\])(?=[\s=>/]|$)/
 const ICU_OPEN = /^\{\s*[^{}]*?,\s*(?:plural|select|selectordinal)\s*,/
-const EVENT_BINDING = /(?:\(([\w.:-]+)\)|\bon-([\w.:-]+))\s*=\s*"([^"]*)"/g
+const EVENT_BINDING = /(?:\(([\w.:-]+)\)|(?<=\s)on-([\w.:-]+))\s*=\s*"([^"]*)"/g
+// Library containers that render their content only once the user opens or selects them.
+const LAZY_CONTAINERS = new Set(['mat-menu', 'mat-tab'])
 const LIFECYCLE = new Set(['ngOnInit', 'ngOnChanges', 'ngDoCheck', 'ngAfterContentInit', 'ngAfterContentChecked', 'ngAfterViewInit', 'ngAfterViewChecked', 'ngOnDestroy'])
 
 /**
@@ -73,7 +75,7 @@ export function templateCondition(text: string, offset: number): string | null {
       }
       const open = openTag(t, i)
       if (open) {
-        const structural = open.name === 'ng-template' ? 'ng-template' : STRUCTURAL_ATTR.test(open.attrs) ? 'structural directive' : null
+        const structural = open.name === 'ng-template' ? 'ng-template' : LAZY_CONTAINERS.has(open.name) ? 'lazy container' : STRUCTURAL_ATTR.test(open.attrs) ? 'structural directive' : null
         if (open.end > offset) { siteStructural = structural; break }
         if (!open.selfClosing && !VOID_ELEMENTS.has(open.name)) elements.push({ name: open.name, structural })
         i = open.end
@@ -93,7 +95,7 @@ export function templateCondition(text: string, offset: number): string | null {
  * The open tag that starts at `i`, read with its attribute values quoted, so a `>` inside
  * `[class.a]="n > 0"` does not end it. Null when no tag starts there.
  */
-function openTag(t: string, i: number): { name: string; attrs: string; selfClosing: boolean; end: number } | null {
+export function openTag(t: string, i: number): { name: string; attrs: string; selfClosing: boolean; end: number } | null {
   const head = /^<([a-zA-Z][\w-]*)/.exec(t.slice(i, i + 100))
   if (!head) return null
   let quote: string | null = null
@@ -131,14 +133,14 @@ export function isBareCall(binding: string): boolean {
 
 /**
  * The members of a class that run whenever the event that triggers them fires: a lifecycle
- * hook, the constructor, a member a decorator such as @HostListener registers, and a member the
- * component's template binds to an event as a bare call outside any template condition. Any
- * other member runs only when one of these calls it.
+ * hook, the constructor, a member @HostListener registers, and a member the component's
+ * template binds to an event as a bare call outside any template condition. Any other member,
+ * one another decorator wraps among them, runs only when one of these calls it.
  */
 function handlersOf(cls: ClassDeclaration): Set<string> {
   const out = new Set<string>(LIFECYCLE)
   for (const m of cls.getMembers()) {
-    if ((Node.isMethodDeclaration(m) || Node.isPropertyDeclaration(m)) && m.getDecorators().length > 0) out.add(m.getName())
+    if ((Node.isMethodDeclaration(m) || Node.isPropertyDeclaration(m)) && m.getDecorators().some((d) => d.getName() === 'HostListener')) out.add(m.getName())
   }
   const tpl = inlineTemplate(cls.getSourceFile())
   for (const b of tpl?.text.matchAll(EVENT_BINDING) ?? []) {
@@ -203,6 +205,28 @@ function interruption(stmt: Node): string | null {
   return null
 }
 
+/** Whether a statement is, apart from `void`, a navigation call: `this.router.navigate(...)` or `navigateByUrl`. */
+function navigatesOnly(stmt: Node): boolean {
+  if (!Node.isExpressionStatement(stmt)) return false
+  let e: Node = stmt.getExpression()
+  while (Node.isVoidExpression(e)) e = e.getExpression()
+  return Node.isCallExpression(e) && /(^|\.)navigate(ByUrl)?$/.test(e.getExpression().getText())
+}
+
+/**
+ * Whether a navigation call that is a statement of its own, not awaited, is followed in its block
+ * by a statement that is itself a navigation: the second starts before the first can finish, and
+ * the router cancels the first.
+ */
+function supersededAt(call: CallExpression): boolean {
+  const stmt = call.getParent() && Node.isVoidExpression(call.getParent()!) ? call.getParent()!.getParent() : call.getParent()
+  if (!stmt || !Node.isExpressionStatement(stmt)) return false
+  const block = stmt.getParent()
+  if (!block || !(Node.isBlock(block) || Node.isSourceFile(block))) return false
+  const stmts = block.getStatements()
+  return stmts.slice(stmts.indexOf(stmt as never) + 1).some(navigatesOnly)
+}
+
 /**
  * The condition a navigation call runs under, or null when it runs on every execution of the
  * handler that holds it. The walk climbs from the call and reports a branch, a loop body, a catch
@@ -213,18 +237,21 @@ function interruption(stmt: Node): string | null {
  * only when the template or the framework calls it directly (see `handlersOf`); any other member
  * runs when a handler calls it, so the walk continues from each call to it in the class and
  * reports a condition unless one of those calls is itself unconditional. A function declared at
- * the top of a module is taken as a handler.
+ * the top of a module is a helper too: whoever calls it, the reader does not follow the call.
+ * A navigation followed, in the same block and without an await between, by another one the
+ * block always makes is superseded: the router cancels the first when the second starts.
  */
 export function callCondition(call: CallExpression, seen = new Set<string>()): string | null {
   if (/\?\./.test(call.getExpression().getText())) return 'under a branch'
+  if (supersededAt(call)) return 'superseded by a later navigation'
   let node: Node = call
   for (let parent = node.getParent(); parent; node = parent, parent = node.getParent()) {
     if (Node.isArrowFunction(node) || Node.isFunctionExpression(node)) {
-      if (Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())) return null
+      if (Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())) return 'in a helper function'
       const cls = Node.isPropertyDeclaration(parent) ? parent.getParentIfKind(SyntaxKind.ClassDeclaration) : undefined
       return cls && Node.isPropertyDeclaration(parent) ? memberCondition(cls, parent.getName(), seen) : 'in a callback'
     }
-    if (Node.isFunctionDeclaration(node)) return Node.isSourceFile(parent) ? null : 'in a callback'
+    if (Node.isFunctionDeclaration(node)) return Node.isSourceFile(parent) ? 'in a helper function' : 'in a callback'
     if (Node.isMethodDeclaration(node) || Node.isGetAccessorDeclaration(node) || Node.isSetAccessorDeclaration(node)) {
       if (Node.isObjectLiteralExpression(parent)) return 'in a callback'
       return Node.isClassDeclaration(parent) ? memberCondition(parent, node.getName(), seen) : null
