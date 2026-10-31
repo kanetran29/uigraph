@@ -53,14 +53,12 @@ export function memberScopes(files: SourceFile[], seeds: Map<string, Set<string>
     if (name) byName.set(name, [...(byName.get(name) ?? []), { file: sf.getFilePath(), cls }])
   }
 
-  // Provider bindings, application-wide: `{ provide: T, useClass: X }` and `useExisting`.
+  // Provider bindings, application-wide: every `{ provide: T, useClass: X }` or `useExisting`,
+  // wherever it is written --- a providers array, or a helper such as bitwarden's
+  // `safeProvider({ ... })` that wraps one.
   const bindings = new Map<string, Set<string>>()
-  for (const sf of files) for (const p of sf.getDescendantsOfKind(SyntaxKind.PropertyAssignment)) {
-    if (p.getName() !== 'providers') continue
-    const arr = p.getInitializer()
-    if (!arr || !Node.isArrayLiteralExpression(arr)) continue
-    for (const el of arr.getElements()) {
-      if (!Node.isObjectLiteralExpression(el)) continue
+  for (const sf of files) for (const el of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+    {
       const value = (key: string) => { const x = el.getProperty(key); return x && Node.isPropertyAssignment(x) ? typeName(x.getInitializer()?.getText()) : undefined }
       const token = value('provide')
       for (const key of ['useClass', 'useExisting']) {

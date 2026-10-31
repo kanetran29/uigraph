@@ -564,18 +564,20 @@ gives the count as zero. A commands array whose variable element is followed by 
 elements is read as a pattern and drawn as a single \emph{may} edge to the first declared route
 that matches it, with the variable element matching only a parameter segment, so a route whose
 segment in that position is a constant is not reached, and no note records the omission.
-\item \textbf{Injection tokens and provider bindings.} The implemented pass resolves no
-injection token and reads no provider declaration. A navigating class is attributed to the join
-of the screens of the components that name that class itself as a dependency, by constructor
-parameter type or by \texttt{inject}, and those edges are capped at \emph{may}
-(Section~\ref{sec:res-round2}). A class reached only through a binding --- \texttt{useClass},
-\texttt{useExisting}, a factory, or an \texttt{InjectionToken} --- is named by no component, so
-its navigation sites have the empty scope and contribute no edge, unless the class is declared
-in the same file as the class the component names, since the join is taken per file. The note
-recorded for such a site describes it as a class nothing in the application injects, which is
-true of the name and false of the instance. The join over every implementation a token can
-resolve to, relative to the injector that resolves it (Section~\ref{sec:di}), is what the model
-specifies in Section~\ref{sec:inputs}; the pass does not implement it.
+\item \textbf{Injection tokens and provider bindings.} The call graph resolves a call on a
+field through the field's declared type: the class it names, the classes a provider declaration
+binds it to with \texttt{useClass} or \texttt{useExisting}, or the subclasses of an abstract
+class no provider binds. Three things are not read. A binding is taken application-wide rather
+than from the injector that resolves the token, so where two components provide a token
+differently both implementations are joined, which widens a scope and never narrows it. A
+factory or value provider (\texttt{useFactory}, \texttt{useValue}) and a provider array a
+function returns from outside the application bind nothing the pass can follow, so a call through
+such a token contributes no edge, and the member it would have reached falls back to the join
+over every component that injects its class, or to no scope at all if none does. And a receiver
+that is not a field --- a local variable, a parameter, a value returned by another call --- is not
+resolved. Over the corpus the pass resolved \CGDirect{} calls on application types to the class
+the type names, \CGBound{} through a provider binding and \CGSubclass{} to subclasses, and left
+\CGUnresolved{} unresolved, in \CGUnresolvedApps{} of the six applications.
 \item \textbf{Configuration-driven route registration.} A table passed as an array to
 \texttt{RouterModule.forRoot}, \texttt{forChild} or \texttt{provideRouter} is read wherever the
 registration runs, including inside a provider factory the application calls, which is how
