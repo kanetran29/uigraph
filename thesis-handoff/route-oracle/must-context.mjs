@@ -10,8 +10,9 @@
 // Each edge of the earlier tier gets one fate, decided in this order:
 //   kept       a construct the edge cited still earns must on its own, on an edge with the same
 //              endpoints and event, or, for an edge the shell or a scope anchor held, on one from a
-//              screen it stands for, now that such an edge is drawn per screen. An edge whose ends
-//              another construct now joins at must is not kept on that account;
+//              screen it stands for, now that such an edge is drawn per screen;
+//   joined     none of its own constructs earns must, but the same edge is must through another
+//              construct, which it did not cite;
 //   guard      the current graph reads a guard on the destination that the earlier one missed;
 //   self-loop  the source already displays the destination, so whether the navigation runs
 //              depends on parameters and router settings;
@@ -129,6 +130,7 @@ for (const [slug, sub] of Object.entries(APPS)) {
     constructs.push(...read)
     const earnsMust = (x) => [x.witness, ...(x.mergedWitnesses ?? [])].some((w) => w?.modality === 'must' && keys.has(`${w.file}:${w.loc?.line}`))
     const fate = same.some(earnsMust) ? 'kept'
+      : same.some((x) => x.modality === 'must') ? 'joined'
       : same.some((x) => x.guard && !e.guard) ? 'guard'
       : e.from === e.to ? 'self-loop'
       : same.length > 0 && read.every((r) => r.condition !== null) ? 'condition'
@@ -139,7 +141,7 @@ for (const [slug, sub] of Object.entries(APPS)) {
 }
 
 const total = edgesOut.length
-const fates = ['kept', 'guard', 'self-loop', 'condition', 'retargeted']
+const fates = ['kept', 'joined', 'guard', 'self-loop', 'condition', 'retargeted']
 const fateCount = Object.fromEntries(fates.map((f) => [f, edgesOut.filter((r) => r.fate === f).length]))
 const unexplained = edgesOut.filter((r) => r.fate === 'unexplained')
 if (unexplained.length) throw new Error(`${unexplained.length} edge(s) left the must tier for no reason this ledger knows: ${unexplained.map((r) => `${r.app} ${r.edge}`).join('; ')}`)

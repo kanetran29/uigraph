@@ -1,15 +1,13 @@
 #!/usr/bin/env node
-// What the must tier would hold if every guard let the navigation through.
+// What the must tier would hold if every guard that runs let the navigation through.
 //
-// The extractor never evaluates a guard: a guard that can refuse the navigation demotes the edge
-// whatever the guard would decide. So a small must tier says what the extractor can prove
-// without evaluating guards, not that the applications lack unconditional transitions. This
-// extracts each application again with UIGRAPH_IGNORE_GUARDS=1, which keeps every other
-// demotion, and counts the must edges a guard alone kept off the tier, and, of those, the ones
-// whose source screen is already behind every guard of the destination, read off the route
-// configuration with the extractor's own readers: a user on that screen has passed those
-// guards, so the navigation is refused only if a guard decides differently on a second call. A
-// source that is not a screen of its own counts as not behind.
+// The extractor never evaluates a guard: a guard the navigation runs demotes the edge whatever
+// the guard would decide. This extracts each application again with UIGRAPH_IGNORE_GUARDS=1,
+// which keeps every other demotion (a resolver among them), and counts the must edges a guard
+// alone kept off the tier, in edges and in the constructs behind them, and, of the edges, the
+// ones whose source screen is already behind every guard on the destination's routes, read off
+// the route configuration with the extractor's own readers. A source that is not a screen of its
+// own counts as not behind.
 //
 // Usage: pnpm exec tsx guard-only.mjs --corpus <dir> --out <dir> [--tex <file>]
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -36,7 +34,10 @@ for (const [slug, sub] of Object.entries(APPS)) {
   const must = graph.edges.filter((e) => e.modality === 'must')
   const guarded = must.filter((e) => e.guard)
   const sourceBehind = guarded.filter((e) => [...(guardsOf.get(e.to) ?? [])].every((g) => guardsOf.get(e.from)?.has(g)))
-  rows.push({ slug, must: must.length, unguarded: must.length - guarded.length, guarded: guarded.length, sourceBehind: sourceBehind.length })
+  // Edges are counted as drawn, and a shell edge is drawn once per screen when it is must, so the
+  // constructs behind them are counted too, the unit RQ1 uses.
+  const sites = new Set(must.flatMap((e) => [e.witness, ...(e.mergedWitnesses ?? [])]).filter((w) => w && (w.modality ?? 'must') === 'must').map((w) => `${w.file}:${w.loc?.line}`))
+  rows.push({ slug, must: must.length, unguarded: must.length - guarded.length, guarded: guarded.length, sourceBehind: sourceBehind.length, sites: sites.size })
 }
 const sum = (k) => rows.reduce((a, r) => a + r[k], 0)
 writeFileSync(path.join(outDir, 'guard-only.json'), JSON.stringify({ rows }, null, 2) + '\n')
@@ -46,6 +47,7 @@ if (tex) {
     `\\newcommand{\\GuardOnlyUnguarded}{${sum('unguarded')}}`,
     `\\newcommand{\\GuardOnlyGuarded}{${sum('guarded')}}`,
     `\\newcommand{\\GuardOnlySourceBehind}{${sum('sourceBehind')}}`,
-    `\\newcommand{\\GuardOnlyApps}{${rows.filter((r) => r.must > 0).length}}`].join('\n') + '\n')
+    `\\newcommand{\\GuardOnlyApps}{${rows.filter((r) => r.must > 0).length}}`,
+    `\\newcommand{\\GuardOnlySites}{${sum('sites')}}`].join('\n') + '\n')
 }
 console.log(JSON.stringify(rows))

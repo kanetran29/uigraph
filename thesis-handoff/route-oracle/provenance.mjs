@@ -9,9 +9,9 @@ import path from 'node:path'
 
 const repo = path.resolve(import.meta.dirname, '..', '..')
 
-/** `% Extractor <sha>, packages/ clean` (or `with uncommitted changes`), for a generated file's header. */
+/** `% Extractor <sha>, packages/ clean, harness clean` (or `with uncommitted changes`), for a generated file's header; only code counts, not results. */
 export function extractorStamp() {
   const sha = execSync(`git -C ${JSON.stringify(repo)} rev-parse --short HEAD`, { encoding: 'utf8' }).trim()
-  const dirty = execSync(`git -C ${JSON.stringify(repo)} status --porcelain -- packages`, { encoding: 'utf8' }).trim() !== ''
-  return `% Extractor ${sha}, packages/ ${dirty ? 'with uncommitted changes' : 'clean'} when generated.`
+  const dirty = (dir) => execSync(`git -C ${JSON.stringify(repo)} status --porcelain -- ${dir}`, { encoding: 'utf8' }).split('\n').some((l) => /\.(ts|mts|mjs|js|sh)$/.test(l.trim()))
+  return `% Extractor ${sha}, packages/ ${dirty('packages') ? 'with uncommitted changes' : 'clean'}, harness ${dirty('thesis-handoff/route-oracle') ? 'with uncommitted changes' : 'clean'} when generated.`
 }

@@ -1,5 +1,5 @@
 {
- "note": "Two readings, made independently by hand from the application sources at the corpus commits, of each distinct construct the round-two must tier cites. Each reader applied the demotion rules of Chapter 3 as written in its instructions and was not shown the extractor, its readers or its results. Both were made with the AI assistant the thesis declares, in separate contexts, on 2026-11-01.",
+ "note": "Two readings of each distinct construct the round-two must tier cites, made on 2026-11-01 by the AI assistant the thesis declares, in two separate contexts, from the application sources at the corpus commits. Each reader was given the condition rules of Chapter 3 in its instructions (results-must/review-instructions.md) and was not shown the extractor, its readers or its results. The readings judge whether each construct runs on every execution of its handler or template, and its destination; they do not judge guards, route order, relative bases or self-loops.",
  "readers": {
   "a": [
    {

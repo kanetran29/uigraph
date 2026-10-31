@@ -104,8 +104,9 @@ frequently has no single owning screen: it may be located in a shared component,
 an injected service, or in a route guard. The thesis formulates attribution as a
 dataflow analysis over a lattice of screen sets, specified as a fixpoint over four input
 relations: component nesting, router outlets, a call graph that takes dependency injection into
-account, and a dispatch relation. The prototype implements the first two, for which the
-fixpoint reduces to reachability, and stands in for the other two with approximations it never
+account, and a dispatch relation. The prototype implements the first three, the call graph at
+the granularity of class members with provider bindings read application-wide, computes the
+fixpoint with a worklist, and stands in for the dispatch relation with an approximation it never
 reports as deterministic.
 It states a soundness property for the deterministic tier and tests it mechanically rather
 than proving it. Four corrections, each hidden by the one before, take that tier from the

@@ -287,8 +287,18 @@ console.log(`issues:  ${JSON.stringify(tally)}`)
 // The must-tier is what the soundness lemma protects: report it on its own.
 const mustEdges = edges.filter((e) => e.modality === 'must')
 const mustIndexes = new Set(edges.flatMap((e, i) => (e.modality === 'must' ? [i] : [])))
+// A must edge every witness of which earns only may has nothing behind its tier, which the filter
+// below would pass silently; it is a finding of its own. A graph that records no witness modality
+// is exempt, since there every witness counts as the edge's.
+edges.forEach((e, i) => {
+  if (e.modality !== 'must') return
+  const ws = [e.witness, ...(e.mergedWitnesses || [])].filter(Boolean)
+  if (ws.some((w) => w.modality !== undefined) && !ws.some((w) => w.modality === 'must')) findings.push({ verdict: 'NO_MUST_WITNESS', witnessModality: 'must', edgeIndex: i, edge: `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}`, detail: 'a must edge cites no construct that earns must' })
+})
 const mustBad = findings.filter((f) => f.verdict !== 'OVER_APPROX' && mustIndexes.has(f.edgeIndex) && f.witnessModality === 'must')
-console.log(`MUST-TIER: ${mustEdges.length - mustBad.length}/${mustEdges.length} clean` + (mustBad.length ? `  <-- ${mustBad.length} SOUNDNESS VIOLATION(S)` : '  (soundness lemma holds on this sample)'))
+// Counted per edge: one edge can fail at several of the locations it cites.
+const mustBadEdges = new Set(mustBad.map((f) => f.edgeIndex)).size
+console.log(`MUST-TIER: ${mustEdges.length - mustBadEdges}/${mustEdges.length} clean` + (mustBad.length ? `  <-- ${mustBadEdges} EDGE(S) FAIL` : '  (every must edge names what its constructs name)'))
 console.log(`witness outside the application directory: ${outsideApp} edge(s), ${outsideAppMust} of them must` + (decl ? '' : '  (pass --routes <C.json> to also test destinations)'))
 const order = ['NODE_NOT_DECLARED', 'NO_WITNESS', 'FILE_MISSING', 'LINE_OUT_OF_RANGE', 'NO_CONSTRUCT', 'WRONG_CONSTRUCT', 'TARGET_MISMATCH', 'OFF_BY_N', 'UNKNOWN_RULE', 'OVER_APPROX']
 for (const v of order) {
@@ -302,4 +312,4 @@ for (const v of order) {
 // `mustBad` is written out as well as counted: the soundness violations are the findings the
 // thesis describes one by one, and a description read off `findings` would include the may
 // and unknown tiers the lemma says nothing about.
-if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: edges.length, sites: checked, sitesCited, mergedSites: sites.filter((x) => x.merged).length, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBad.length, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: edges.length, sites: checked, sitesCited, mergedSites: sites.filter((x) => x.merged).length, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBadEdges, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))
