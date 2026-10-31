@@ -18,9 +18,9 @@ nothing at. That completeness is over the route set a static reader can read, an
 the addresses the framework serves: the same runtime method finds \ProbeMissed{} answered
 addresses with no node at all, \ProbeMissedGhostfolio{} of them in the one application whose
 paths a custom matcher computes, so only \ProbeExactApps{} of the six are complete against
-what the browser answers. Below that level, without attribution only a
-small fraction of the navigation constructs becomes a deterministic transition, and on
-\RoundTwoZeroMustApps{} of the six applications none does. Node extraction is not the
+what the browser answers. Below that level no navigation construct becomes a deterministic
+transition on any of the \CensusApps{} applications, with attribution or without, once a
+navigation that runs under a condition is demoted as Claim~\ref{claim:must} requires. Node extraction is not the
 bottleneck it was when this work began --- it was, and
 Section~\ref{sec:res-round2} records what repairing it took.
 
@@ -33,11 +33,11 @@ repaired.
 The answer to RQ3 is that scope attribution recovers \AttrRecovered{} of the \AttrLost{}
 constructs the loss rules assign to it, \AttrRecoveredShare{} of that class, on every
 application in the corpus, roughly doubling the graph from \AttrEdgesBefore{} edges to
-\AttrEdgesAfter{}; that \AttrRecoveredMust{} of those conversions are deterministic and
-\AttrRecoveredMay{} are not, so most of what attribution adds is navigation the graph
-reports as possible rather than certain; and that it costs nothing in deterministic
-precision, since every edge on the must tier passes the witness check both before and
-after. Whether the computed screen sets are correct is established on one application and
+\AttrEdgesAfter{}; and that every one of those conversions is navigation the graph reports as
+possible rather than certain, since after the conditional demotion of
+Section~\ref{sec:res-round2} no edge is deterministic either before attribution or after it.
+Attribution therefore costs nothing in deterministic precision only because there is no
+deterministic tier for it to cost. Whether the computed screen sets are correct is established on one application and
 not on the corpus: read site by site on \GTApp{}, the analysis names \GTFullRecall{} of the
 (site, screen) pairs the application really has at \GTFullPrecision{} precision, every wrong
 pair coming from a single over-approximating rule, and no method here can put that question
@@ -120,19 +120,19 @@ knows, or anchored at a source the analysis cannot place. Three quarters of thos
 mifos's, so the corpus figure is close to one application's. The sites that remain each name
 a reason, enforced by a check that fails when any does not, and some name a route the
 application never declares. What the repairs cost is reported with them, and it is not
-what one would hope for. Reading a guard that a wrapper carries moved almost the whole of
-mifos's deterministic tier onto the may tier, so the corpus must tier is
-\RoundTwoMustEdges{} edges of which \RoundTwoMustViolations{} violate the soundness
-property, where the earlier instrument published a tier \EarlierMustFactor{} times larger
-with \EarlierMustViolations{} violations in it (Section~\ref{sec:res-round2}). Three corrections separate the two, each hidden by the one
-before: a guard carried by a route a wrapper function returns, a \texttt{canActivate}
-element that is a call rather than a name, and an edge that several constructs cite taking
-the modality of the first of them instead of the weakest. None of the edges that left became a correct target; they
-stopped claiming to be deterministic, which they never were. On
-\RoundTwoZeroMustApps{} of the six applications the tier is empty, so RQ1's own measure
-reads zero there, and across the corpus that measure now reads lower than it did before
-the repairs. The exchange is a smaller claim that survives its own test for a larger one
-that did not.
+what one would hope for. The earlier instrument published a deterministic tier of
+\EarlierMustEdges{} edges with \EarlierMustViolations{} violations in it, and four corrections
+took it to nothing, each hidden by the one before: a guard carried by a route a wrapper
+function returns, a \texttt{canActivate} element that is a call rather than a name, an edge
+that several constructs cite taking the modality of the first of them instead of the weakest,
+and a navigation that runs under a condition being called deterministic. The first three left
+\RoundTwoMustEdges{} edges with \RoundTwoMustViolations{} violations; the fourth found every one of
+those running under a condition, and demoted all of them (Section~\ref{sec:res-round2}). None
+of the edges that left became a correct target; they stopped claiming to be deterministic,
+which they never were. On all \CensusZeroMustApps{} applications the tier is now empty, so
+RQ1's stricter measure reads zero across the corpus, and Claim~\ref{claim:must} holds there
+only because it ranges over nothing. The exchange is the end of a sequence in which each
+claim that did not survive its own test was withdrawn.
 
 What they leave open is also specific. The call graph with dependency injection and the
 dispatch relations are specified and not implemented; the approximations of

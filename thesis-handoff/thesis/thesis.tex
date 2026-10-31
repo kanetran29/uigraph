@@ -36,6 +36,8 @@
 \input{generated-plots}
 \input{generated-plots-rq4}
 \input{generated-census}
+\input{generated-census-base}
+\input{generated-must}
 \input{figures/fig-plots}
 
 \begin{document}
@@ -81,9 +83,10 @@ This thesis measures static extraction on six open-source Angular applications w
 \RoundTwoRoutesRealworld{} declared route entries to more than nine hundred, using a pinned corpus and five
 evaluation methods, four reading the applications' sources and one the running application. Measured at two levels, the extractor mints a node for
 every screen the route configuration declares, as two independent static readers
-enumerate it, and recovers a small fraction of the navigation constructs as
-deterministic transitions; before the defects this thesis identifies were repaired, two of
-the six yielded a list of routes with no transitions at all. The node result is bounded
+enumerate it, and recovers none of the navigation constructs as a deterministic transition
+once a navigation that runs under a condition is demoted, as the soundness property requires;
+before the defects this thesis identifies were repaired, two of the six yielded a list of
+routes with no transitions at all. The node result is bounded
 by what a reader of the route table can enumerate: a runtime probe that visits every
 address the applications answer finds \ProbeMissed{} mounted addresses with no node,
 \ProbeMissedGhostfolio{} of them in a single application, and only \ProbeExactApps{} of
@@ -99,16 +102,19 @@ relations: component nesting, router outlets, a call graph that takes dependency
 account, and a dispatch relation. The prototype implements the first two, for which the
 fixpoint reduces to reachability, and stands in for the other two with approximations it never
 reports as deterministic.
-It states a soundness property for the deterministic tier, which it tests mechanically on
-every one of the \RoundTwoMustEdges{} such edges the corpus yields rather than proving, and
-evaluates the implemented part on the same corpus. What it adds beyond the mechanism earlier
+It states a soundness property for the deterministic tier and tests it mechanically rather
+than proving it. Four corrections, each hidden by the one before, take that tier from the
+\EarlierMustEdges{} edges an earlier instrument published to none: the last finds every one of
+the \RoundTwoMustEdges{} edges the first three left running under a condition --- after a
+request returns, in a branch, under a template condition --- so the property holds on this
+corpus only because it ranges over nothing. The implemented part is evaluated on the same
+corpus. What it adds beyond the mechanism earlier
 work already has is small and measured: router-outlet descent leaves the number of placed sites
 unchanged on \AblationOutletSameSitesApps{} of the six applications, the injected-service join
 places \AblationFullAddedSites{} more, \AblationFullAddedShare{} of the corpus total, and the
 width they buy is checked in both directions on one application only. With attribution, \AttrRecoveredShare{} of the
-constructs that loss class holds are recovered, on every application in the corpus, and
-precision on the deterministic tier does not fall. Almost all of the gain is navigation the
-graph reports as possible rather than certain. On the one application small enough for the
+constructs that loss class holds are recovered, on every application in the corpus, all of it
+navigation the graph reports as possible rather than certain. On the one application small enough for the
 screens each navigation site fires from to be read off the sources by hand, the computed sets
 are right about \GTFullRecall{} of those attributions. Most of that is not new: attributing
 what the root component renders to every screen, which earlier work already does, reaches
@@ -137,10 +143,10 @@ as a source the analysis cannot place; the sites excluded from that scope, and t
 ground for each exclusion, are counted in Chapter~5. Every site that remains names its reason.
 Some of those reasons are dead links the graph finds without running the application, though
 the count of them is a candidate list: a route the tools fail to read is indistinguishable
-from one the application never declares. The deterministic tier that survives this scrutiny is small and
-exact: across the corpus it holds the transitions into the screens a user reaches before
-authenticating, and nothing else, because an application that guards its interior has
-almost no unconditional transition to find.
+from one the application never declares. No deterministic tier survives this scrutiny: the
+transitions earlier instruments called certain were transitions into the screens a user
+reaches before authenticating, and every one of them runs only once something has happened,
+because an application that guards its interior has no unconditional transition to find.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page

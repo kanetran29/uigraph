@@ -143,11 +143,16 @@ cites and asks whether the construct found there names the destination the edge 
 edge whose cited construct names a different destination cannot satisfy the claim, so a
 failure of the check refutes it; agreement does not establish it. Whether the navigation
 occurs \emph{for every input on which the enclosing code executes} is decided by the rules
-that place an edge in the must tier instead of the may tier --- a site under a template
-condition, or on a route a guard can refuse, is demoted --- and no independent reader
-re-derives those rules. They are covered by the extractor's own unit tests, which share the
-implementation's reading of each construct, and Section~\ref{sec:res-round2} reports two
-cases in which that reading was wrong and the tier was too large as a result. What the
+that place an edge in the must tier instead of the may tier. A site is demoted when a guard on
+its target can refuse it, and when it runs only on some executions of its own code: under a
+template control-flow block or a structural directive, under a branch, inside a callback the
+result of an asynchronous call invokes, or after an \texttt{await} or an early
+\texttt{return}. The extractor's own unit tests cover those rules and share its reading of
+each construct; the conditional part is also re-derived by a second reader, written apart from
+the extractor, from the syntax tree of every construct a must edge cites. The guard part has
+no such second reader. Section~\ref{sec:res-round2} reports three cases in which the
+extractor's reading was wrong and the tier was too large as a result, the last of them the
+absence of the conditional rule altogether. What the
 check establishes is therefore narrower than the claim: that every cited site exists in the
 source and agrees on its target. The stronger half of the claim rests on the demotion rules
 and is not independently verified.

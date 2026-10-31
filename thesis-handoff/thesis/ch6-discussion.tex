@@ -71,11 +71,12 @@ The gap between the bound and what was recovered elsewhere is accounted for by
 Table~\ref{tab:remaining}, and three of its reasons are not attribution problems at
 all: the target screen has no node, the owning component is never reached from any
 screen, or the site sits in a service or a guard that this version does not analyse.
-Precision on the deterministic tier did not fall, and no construct that the baseline
-converted was lost, so the coverage gain was not bought by widening the must tier. Every
-edge on the must tier passes the witness check in both runs --- \RoundTwoMustClean{} after
-attribution --- so there is no violation for attribution either to have caused or to have
-inherited.
+No construct that the baseline converted was lost, so the coverage gain was not bought by
+widening the must tier, and after the fourth correction of Section~\ref{sec:res-round2} there
+is no must tier for it to widen: the tier is empty with attribution and without. On the
+instrument before that correction every must edge passed the witness check in both runs ---
+\RoundTwoMustClean{} after attribution --- so there was no violation for attribution either to
+have caused or to have inherited.
 
 The part of the model that Chapter~\ref{ch:analysis} specifies but does not implement
 has a measurable price. Navigation sites in services, guards, interceptors, resolvers
@@ -717,10 +718,10 @@ The witness check exposed a defect in how the guard set of a screen was assemble
 route chain: the assembly ignored a guard carried by a route a wrapper function returns ---
 the construct through which one application in the corpus
 routes every one of its feature tables. Reading it is what took that application's
-deterministic tier from an order of magnitude more edges down to the
-\RoundTwoMustEdgesMifos{} that remains, and took the corpus tier from
-\EarlierMustViolations{} violations of the soundness property to \RoundTwoMustViolations{}
-(Section~\ref{sec:res-round2}). The mutation
+deterministic tier from an order of magnitude more edges down to
+\RoundTwoMustEdgesMifos{}, and took the corpus tier from \EarlierMustViolations{} violations of
+the soundness property to \RoundTwoMustViolations{}; the conditional demotion that followed
+removed the rest (Section~\ref{sec:res-round2}). The mutation
 operator that removes a guard is the obvious second test for it, and on this corpus it
 reaches only the guards the graph already records on an edge
 (Section~\ref{sec:res-mutation}). The wider treatment of guards in
