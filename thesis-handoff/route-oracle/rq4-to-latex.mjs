@@ -81,13 +81,15 @@ function emptyPathGuards(runs) {
 /**
  * Which of the harness's recorded reasons excluded a mutant: 'unreached' when no baseline edge
  * enters any screen the guarded route yields, 'noScreen' when the guarded route yields none at
- * all, 'unwitnessed' when the mutated construct draws no baseline edge. Throws on a reason of
+ * all, 'uncarried' when no baseline edge carries the guard because none enters the guarded route
+ * from outside it, 'unwitnessed' when the mutated construct draws no baseline edge. Throws on a reason of
  * any other shape, since an unrecognised reason would be counted as a silent zero.
  */
 function excludedReason(x) {
   const r = x.reason || ''
   if (/^no baseline edge enters any screen the guarded route yields \(/.test(r)) return 'unreached'
   if (/^the guarded route declares no component/.test(r)) return 'noScreen'
+  if (/^no baseline edge carries the guard/.test(r)) return 'uncarried'
   if (/is witnessed by no baseline edge$/.test(r)) return 'unwitnessed'
   throw new Error(`cannot classify the reason of the excluded mutant at ${x.file}:${x.line}: ${JSON.stringify(r)}`)
 }
@@ -298,9 +300,9 @@ if (baseFiles.length) {
   expectAtMost(['MutExcludedGuard', exGuard], ['MutExcluded', A.exc])
   const reasonCount = (want) => excluded.filter((x) => excludedReason(x) === want).length
   const exUnreached = reasonCount('unreached'), exNoScreen = reasonCount('noScreen')
-  const exUnwitnessed = reasonCount('unwitnessed')
+  const exUnwitnessed = reasonCount('unwitnessed'), exUncarried = reasonCount('uncarried')
   expectSum(['MutExcluded', A.exc], [['MutExcludedUnreached', exUnreached],
-    ['MutExcludedNoScreen', exNoScreen], ['MutExcludedUnwitnessed', exUnwitnessed]])
+    ['MutExcludedNoScreen', exNoScreen], ['MutExcludedUnwitnessed', exUnwitnessed], ['MutExcludedUncarried', exUncarried]])
 
   for (const [k, v] of [
     ['MutSampled', nSampled], ['MutBaseSampled', nBaseSampled], ['MutFailures', nFailures], ...failuresPerApp,
@@ -314,7 +316,7 @@ if (baseFiles.length) {
     ['MutGuardEmptyPathScored', emptyPath.scored], ['MutGuardEmptyPathDetected', emptyPath.detected],
     ['MutNoResponseGuard', silentGuard], ['MutNoResponseRetarget', silentRetarget],
     ['MutExcludedGuard', exGuard],
-    ['MutExcludedUnreached', exUnreached], ['MutExcludedNoScreen', exNoScreen],
+    ['MutExcludedUnreached', exUnreached], ['MutExcludedNoScreen', exNoScreen], ['MutExcludedUncarried', exUncarried],
     ['MutExcludedUnwitnessed', exUnwitnessed],
   ]) {
     if (!Number.isInteger(v) || v < 0) throw new Error(`${k} is ${v}, which is not a count`)

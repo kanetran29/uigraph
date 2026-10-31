@@ -488,9 +488,10 @@ A commands array that carries an \texttt{\{outlets: \ldots\}} element yields no 
 note. Only \texttt{navigateByUrl} parses a URL: an auxiliary group there is dropped and the edge to
 the primary path is held at \emph{may}, since the whole navigation fails when the auxiliary route
 does not match and that route is not read, and a group that also carries the primary outlet is not
-rebuilt and yields nothing. A \texttt{routerLink} string or a \texttt{navigate} command is split on
-slashes alone, as Angular splits it, so \path{/inbox(popup:compose)} written there is one segment
-and reaches whichever route matches it, a parameter route if there is one. The test-source
+rebuilt and yields nothing. A \texttt{routerLink} string or the first element of a
+\texttt{navigate} command is split on slashes alone, as Angular splits it, and a later string
+element is one segment whatever it holds, so \path{/inbox(popup:compose)} written there is one
+segment and reaches whichever route matches it, a parameter route if there is one. The test-source
 cross-check shows the auxiliary URLs among its misses.
 \item \textbf{Navigation relative to the active route (\texttt{relativeTo}).} The target
 is a function of the route of the component that holds the site, so it has no single value in
@@ -595,13 +596,19 @@ account. The independent parser behaves identically on each of these forms, whic
 two readers agree on routes neither can see. This approximation bounds the corpus as well as
 the tool, since it is why one candidate application was rejected (Section~\ref{sec:corpus}).
 \item \textbf{Guards that would let the navigation through.} A guard is a function of the
-application's state, and the extractor does not evaluate it: any guard that can refuse a
-navigation --- \texttt{canActivate} or \texttt{canMatch} on the target or above it,
-\texttt{canActivateChild} above it, or the guard of a child at the empty path --- holds the edge at
-\emph{may}, even when the user on the source screen has passed that same guard to get there. This
-is the approximation that decides the size of the must tier (Section~\ref{sec:res-round2}). A
-guard is identified by the text of its expression, so two guards that compute the same thing are
-two guards.
+application's state, and the extractor does not evaluate it: a guard the navigation runs ---
+the \texttt{canMatch} of a route its address is matched through, the \texttt{canActivate},
+\texttt{canLoad} or resolver of a route it enters, the \texttt{canActivateChild} above those, the
+\texttt{canDeactivate} of a route it leaves --- holds the edge at \emph{may}, even when the guard
+would always pass. A route the source and target share is taken to be reused unless its path has
+a parameter or \texttt{runGuardsAndResolvers} is set, which a parameter that does not in fact change
+makes too cautious. A guard is identified by the text of its expression, so two guards that
+compute the same thing are two guards. Content a component projects through
+\texttt{<ng-content>} is read as its host template places it, so a link projected into a component
+that renders the projection only under a condition is read as unconditional; \texttt{mat-menu} and
+\texttt{mat-tab} are the only library containers read as rendering their content lazily. A route
+component behind a conditional outlet is conditional, but a component nested in it is judged by
+its own placement, and the application root's outlet is not read.
 \item \textbf{The order in which Angular matches routes.} The router takes the first route, in
 declaration order, that matches an address; the matcher prefers an exact path to a parameter
 route and consults a redirect only when no route matches. Wherever two declared routes, or a
