@@ -456,7 +456,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       // can fire on any screen: its scope is top, the same place the shell sits.
       // From the syntax tree, not the text: a `createEffect(` inside a comment is not an effect.
       const isEffect = sf.getDescendantsOfKind(SyntaxKind.CallExpression).some((c) => /(^|\.)createEffect$/.test(c.getExpression().getText()))
-      if (isEffect && isInsideDir(f, projectDir)) {
+      if (scopes.standIns && isEffect && isInsideDir(f, projectDir)) {
         const before = edges.length
         emitTargets(SHELL_NODE_ID, ts, file, true, true)
         shellEdges += edges.length - before
@@ -468,7 +468,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         shellEdges += edges.length - before
         continue
       }
-      const screens = new Set([...(scopes.serviceScreens.get(f) ?? []), ...(guardScreens.get(f) ?? [])])
+      const screens = new Set([...(scopes.serviceScreens.get(f) ?? []),
+        ...(scopes.standIns ? guardScreens.get(f) ?? [] : [])])
       if (screens.size === 0) {
         // An effect that reaches here failed the projectDir guard above: it is unplaced, not known to be unused.
         const where = isEffect ? 'an NgRx effect outside the application directory; whether the application registers it is not read, so its scope could not be placed' : 'a class nothing in the application injects; its scope is empty'

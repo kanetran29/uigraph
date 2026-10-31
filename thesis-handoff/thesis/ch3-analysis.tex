@@ -75,6 +75,14 @@ the graph can read a guard, but is not expected to decide whether it holds. This
 the set $G$ opaque and means that the model does not need to represent application
 state.
 
+Alongside the modality the artefact records a numeric \emph{confidence} on each edge, which is
+not part of the model and carries no claim this thesis makes. It is a finer version of the same
+ordering: $1$ where the target is resolved and no guard applies, $0.6$ where a guard does,
+$0.5$ where the target could be one of several routes, and $0$ for an edge into a dynamic
+target. Where several constructs yield one edge the weakest value is kept, so the number never
+rises when evidence is merged. Every figure in this thesis is reported over the modalities,
+never over the confidence.
+
 \textbf{Screens and routes.} The set $S$ is derived from the route configuration, and
 not every route contributes a screen. Write $\mathit{Routes}$ for the set of routes the
 application declares and $\mathit{component}(r)$ for the component that route $r$
@@ -191,9 +199,30 @@ which is the powerset lattice over the screens. Its least element is the empty s
 \[
   \bot \;=\; \varnothing ,
 \]
-a site that fires from no screen at all. This is the scope of unreached code: the
-navigation site exists in the source, but no screen has been found from which it can be
-reached, so it contributes no edge. The greatest element is $\top = S$, every screen.
+a site that fires from no screen at all. The greatest element is $\top = S$, every screen.
+
+Two different things are called a scope, and the rest of this thesis keeps them apart.
+Write $\mathit{scope}^{*}(x)$ for the \emph{true scope} of a site $x$, the set of screens
+from which $x$ really can fire, which is a property of the application and not of any
+analysis; and $\mathit{scope}(x)$ for the \emph{computed scope}, the set the fixpoint of
+Section~\ref{sec:inputs} returns. The two are measured against each other only where a true
+scope has been established by hand, which in this thesis is one application
+(Section~\ref{sec:res-groundtruth}): a screen in
+$\mathit{scope}^{*}(x) \setminus \mathit{scope}(x)$ is a scope too small and a screen in
+$\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ is a scope too large. Everywhere else the
+thesis reports the computed scope and says so.
+
+The empty computed scope is likewise two situations, and conflating them would hide a defect
+inside a property of the application. A site is \emph{unreachable} when
+$\mathit{scope}^{*}(x) = \varnothing$: the code exists and no screen can reach it, so
+contributing no edge is the correct answer. A site is \emph{unresolved} when
+$\mathit{scope}(x) = \varnothing$ because no rule of the analysis reaches it --- a navigation
+in a service nothing is known to inject, or behind a construct the reader could not follow ---
+and the true scope is simply unknown. Both yield $\bot$, so $\bot$ alone does not say which
+holds. The extractor therefore does not let an unresolved site vanish: it records a note
+naming the construct and anchors the site at an unplaced origin, which is what makes the
+unresolved sites countable in Chapter~\ref{ch:results} rather than indistinguishable from
+code that is genuinely unreachable.
 
 Three elements of the domain are named, because attribution anchors edges at them.
 Writing $r' \succeq r$ for the reflexive ancestor relation on routes, that is $r'$ is
@@ -412,7 +441,7 @@ example through a helper function that wraps a route table. It is also treated a
 shell, but its edges are capped at \emph{may}, so that Claim~\ref{claim:must} is not
 put at risk by a scope that may be too large.
 
-The pass departs from Algorithm~\ref{alg:attribution} in one respect. It does not
+The pass departs from Algorithm~\ref{alg:attribution} in two respects. The first is that it does not
 propagate a scope into a component that a route mounts: a routed component keeps
 $\mathit{subtree}(r)$ and does not also receive the scope of a component whose template
 renders it. The prototype therefore computes the least solution of the system of
@@ -422,6 +451,15 @@ in such a component can be attributed to fewer screens than the model allows, ne
 more. A scope that is too small loses edges and cannot invent them, which is why the
 restriction cannot put Claim~\ref{claim:must} at risk; what it costs is recall, and the
 constructs it strands are counted in Chapter~\ref{ch:results}.
+
+The second departure is granularity. Algorithm~\ref{alg:attribution} ranges over every
+component and callable, so each method of a service has a scope of its own. The pass joins per
+file: the screens of every component that injects a class are collected against that class's
+file, so two methods of one service called from different components share a single scope, as
+do two services declared in one file. A method is therefore attributed to the screens of its
+file's callers rather than to its own, which is a widening, and these sites are held at
+\emph{may} for that reason. Separating them is what the call graph of
+Section~\ref{sec:inputs} is for, and it is the relation this pass does not implement.
 
 \textbf{Anchored edges.} Edges with scope $\top$ are stored once at a node of kind
 \texttt{scope}. Edges whose screen set is exactly $\mathit{subtree}(r)$ are stored once
