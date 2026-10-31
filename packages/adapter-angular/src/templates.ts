@@ -16,10 +16,19 @@ export interface ComponentTemplate {
 }
 
 /**
+ * A template with its HTML comments blanked, newlines kept, so nothing commented out is read as
+ * a link, a binding or a placed component, and every offset still points where it did.
+ */
+function withoutComments(text: string): string {
+  return text.replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, ' '))
+}
+
+/**
  * Read a component's template, from an inline `@Component({ template })` string
  * or, failing that, an external `templateUrl: './x.html'` sibling resolved
  * relative to the component file. Inline templates carry their `.ts` offset;
  * external ones carry the html file path so witnesses point at the real source.
+ * Comments are blanked (see `withoutComments`).
  */
 export function inlineTemplate(sf: SourceFile): ComponentTemplate | null {
   for (const cls of sf.getClasses()) {
@@ -31,12 +40,12 @@ export function inlineTemplate(sf: SourceFile): ComponentTemplate | null {
       if (inline !== null) {
         const prop = arg.getProperty('template')
         const init = Node.isPropertyAssignment(prop) ? prop.getInitializer() : undefined
-        return { text: inline, start: init ? init.getStart() : arg.getStart() }
+        return { text: withoutComments(inline), start: init ? init.getStart() : arg.getStart() }
       }
       const url = stringProp(arg, 'templateUrl')
       if (url !== null) {
         const html = readExternalTemplate(sf, url)
-        if (html !== null) return { text: html, start: 0, externalFile: resolveTemplatePath(sf, url) }
+        if (html !== null) return { text: withoutComments(html), start: 0, externalFile: resolveTemplatePath(sf, url) }
       }
     }
   }

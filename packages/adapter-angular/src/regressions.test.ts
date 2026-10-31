@@ -2255,7 +2255,7 @@ export class FeatureModule {}`,
 })
 
 describe('a guard on the route a wrapper returns', () => {
-  it('gates the edges below it, instead of publishing them on the deterministic tier', () => {
+  it('gates the edges into it from outside, and not those between the screens it already holds', () => {
     // mifos's Route.withShell returns `{ path: '', component: Shell, children: routes,
     // canActivate: [AuthenticationGuard] }`, and every feature table goes through it. The call
     // decision handed back only the arrays and the segment, so the guard on the route the
@@ -2268,7 +2268,8 @@ describe('a guard on the route a wrapper returns', () => {
 import { Route } from './route.service'
 import { A } from './a.component'
 import { B } from './b.component'
-export const routes: Routes = [Route.withShell([{ path: 'accounting', component: A }, { path: 'accounting/create', component: B }])]`,
+import { Login } from './login.component'
+export const routes: Routes = [{ path: 'login', component: Login }, Route.withShell([{ path: 'accounting', component: A }, { path: 'accounting/create', component: B }])]`,
         '/app/route.service.ts': `import type { Routes } from '@angular/router'
 import { AuthenticationGuard } from './auth.guard'
 import { Shell } from './shell.component'
@@ -2281,13 +2282,18 @@ export class Route {
         '/app/shell.component.ts': C('<router-outlet></router-outlet>'),
         '/app/a.component.ts': C('<a routerLink="/accounting/create">new</a>'),
         '/app/b.component.ts': C('<p>b</p>'),
+        '/app/login.component.ts': C('<a routerLink="/accounting/create">in</a>'),
       }),
       '/app',
     )
-    const edge = graph.edges.find((e) => e.to === 'n_accounting_create')
-    expect(edge).toBeDefined()
-    expect(edge?.modality).toBe('may')
-    expect(edge?.guard).toContain('AuthenticationGuard')
+    // From outside the shell route the router enters it and runs its canActivate.
+    const fromLogin = graph.edges.find((e) => e.from === 'n_login' && e.to === 'n_accounting_create')
+    expect(fromLogin?.modality).toBe('may')
+    expect(fromLogin?.guard).toContain('AuthenticationGuard')
+    // Between two screens under it the route is reused, and Angular does not run its canActivate again.
+    const inside = graph.edges.find((e) => e.from === 'n_accounting' && e.to === 'n_accounting_create')
+    expect(inside?.modality).toBe('must')
+    expect(inside?.guard).toBeNull()
   })
 })
 

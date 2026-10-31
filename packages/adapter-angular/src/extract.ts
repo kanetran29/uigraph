@@ -24,6 +24,7 @@ import { templateTargets, routerCallTargets, methodNavTargets, templateLoc, link
 import { parseControls } from './controls'
 import { inlineTemplate } from './templates'
 import { gateFromGuards, noteGuards } from './gates'
+import type { GuardInfo } from './guards'
 
 const ADAPTER_VERSION = '0.1.0'
 const DEFAULT_RULESET = 'ng-v0-2026.06'
@@ -187,7 +188,28 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const unreadableText = describeUnreadable(unreadable)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
   const wildcardScreen = routeLikes.find((r) => r.fullPath === '*') ?? null
-  const guardsByNodeId = new Map(routes.map((r) => [r.nodeId, r.guards]))
+  const levelsByNodeId = new Map(routes.map((r) => [r.nodeId, r.levels]))
+  /**
+   * The guards Angular runs for a navigation from `from` to `to`, and whether it awaits a
+   * resolver. The routes the two screens share, by route object, are reused unless their
+   * parameters can change or runGuardsAndResolvers asks otherwise, and a reused route's
+   * canActivate and resolvers do not run again. canMatch runs on every route the address is
+   * matched through; canActivate, canLoad and resolvers on every route the navigation enters; the
+   * canActivateChild of every route above the one it enters; canDeactivate on every route it
+   * leaves. A source that is not a screen of its own shares nothing, the safe side.
+   */
+  const runningGuards = (from: string | undefined, to: string): { guards: GuardInfo[]; resolves: boolean } => {
+    const t = levelsByNodeId.get(to) ?? []
+    const s = from !== undefined ? levelsByNodeId.get(from) : undefined
+    let k = 0
+    if (s) while (k < t.length && k < s.length && t[k]!.obj === s[k]!.obj && !t[k]!.params && !t[k]!.always) k += 1
+    const entered = t.slice(k)
+    return {
+      guards: [...t.flatMap((l) => l.canMatch), ...entered.flatMap((l) => [...l.canActivate, ...l.canLoad]),
+        ...(entered.length > 0 ? t.slice(0, -1).flatMap((l) => l.canActivateChild) : []), ...(s ? s.slice(k).flatMap((l) => l.canDeactivate) : [])],
+      resolves: entered.some((l) => l.resolve),
+    }
+  }
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
   const redirectOfNode = new Map(routes.flatMap((r) => (r.redirectsTo !== undefined ? [[r.nodeId, r.redirectsTo] as const] : [])))
   const componentByNodeId = new Map(routes.map((r) => [r.nodeId, r.componentFile ? relative(projectDir, r.componentFile.getFilePath()) : null]))
@@ -207,8 +229,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const redirect = redirects.get(path)
       const target = matchLiteral(path, routeLikes, asUrl)
       // An empty-path child's redirect is registered at its parent's address as well; it is the
-      // same redirect as the screen's own, not a rival to it.
-      const rival = redirect !== undefined && !(target && redirectOfNode.has(target.nodeId))
+      // same redirect as the screen's own, not a rival to it. Any other redirect there is.
+      const rival = redirect !== undefined && !(target && redirectOfNode.get(target.nodeId) === redirect)
       if (matchAll(path, routeLikes).length + (rival ? 1 : 0) > 1) ambiguous = true
       const next = target ? redirectOfNode.get(target.nodeId) : redirect
       if (next === undefined) return { target, ambiguous }
@@ -216,6 +238,25 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       asUrl = true
     }
     return { target: null, ambiguous: true }
+  }
+  /**
+   * Whether a screen is never displayed at its own address: an empty-path child of it redirects,
+   * or a redirect is declared at the same address, which Angular may meet first.
+   */
+  const hidden = (id: string): boolean => redirectOfNode.has(id) || (pathByNodeId.has(id) && redirects.has(pathByNodeId.get(id)!))
+  const routeByNodeId = new Map(routes.map((r) => [r.nodeId, r]))
+  /**
+   * Whether a route component renders only on some executions of the screens above it: the
+   * primary outlet of a route component above it sits under a template condition, so the route
+   * component is not on the screen however its own template reads.
+   */
+  const behindHiddenOutlet = (route: (typeof routes)[number]): boolean => {
+    for (let p = route.parentNodeId ? routeByNodeId.get(route.parentNodeId) : undefined; p; p = p.parentNodeId ? routeByNodeId.get(p.parentNodeId) : undefined) {
+      const tpl = p.componentFile ? inlineTemplate(p.componentFile) : null
+      const at = tpl ? tpl.text.search(/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/) : -1
+      if (tpl && at >= 0 && templateCondition(tpl.text, at + 1) !== null) return true
+    }
+    return false
   }
   // The screens a scope anchor stands for, filled as anchors are minted, and every screen, which the shell stands for.
   const screenIds = new Set(routes.map((r) => r.nodeId))
@@ -334,40 +375,54 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           if (note) soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route${baseUnknown ? ', resolved against a base the reader could not fix' : ''}` })
           continue
         }
-        const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
-        noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
-        const guardText = gate.guarded ? gate.guardTexts.join(',') : null
-        // A navigation to the address its source already displays is ignored by Angular's
-        // default router, or runs only when a parameter or the query differs, so it does not
-        // occur on every execution.
-        const selfLoop = target.nodeId === from
+        const conservative = gateFromGuards(runningGuards(undefined, target.nodeId).guards)
+        noteGuards(conservative, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
         // The shell and a scope anchor stand for many screens, the destination possibly among them.
         const members = from === SHELL_NODE_ID ? screenIds : anchorMembers.get(from)
         // A URL naming an auxiliary outlet fails whole when that outlet's route does not match,
         // which is not read; an address several declared routes or a redirect can answer goes to
-        // whichever Angular meets first, which the matcher does not decide; and a screen whose own
-        // address an empty-path child redirects is never displayed, so no edge leaves it for sure.
-        const unsure = parsed.aux || landed.ambiguous || redirectOfNode.has(from)
-        // A measurement switch, not a product option: the thesis counts what would be must if every
-        // guard let the navigation through, to tell what the extractor cannot prove apart from what
-        // the application does not have. The guard text stays on the edge either way.
-        const gated = gate.guarded && process.env.UIGRAPH_IGNORE_GUARDS !== '1'
-        const uncertain = gated || capMay || viaWildcard || baseUnknown || selfLoop || unsure || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
-        if (members?.has(target.nodeId) && !uncertain) {
-          // Every screen the edge stands for reaches the destination for certain except the one
-          // that is the destination, so the edge is drawn per screen: must from the others, and a
-          // may self-loop at the destination.
-          for (const m of [...members].sort()) pushEdge(m, target.nodeId, t, m === target.nodeId ? 'may' : 'must', m === target.nodeId ? 0.5 : 1, guardText, file)
+        // whichever Angular meets first, which the matcher does not decide.
+        const common = capMay || viaWildcard || baseUnknown || parsed.aux || landed.ambiguous || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
+        /**
+         * The edge as drawn from one screen. A guard that runs on this navigation, or a resolver it
+         * awaits, holds it at may; so does a navigation to the address the screen already displays,
+         * which the router ignores or follows only when a parameter or the query differs, and a
+         * screen that is never displayed at its own address because a redirect answers it.
+         */
+        const verdict = (src: string | undefined) => {
+          const run = runningGuards(src, target.nodeId)
+          const gate = gateFromGuards(run.guards)
+          // A measurement switch, not a product option: the thesis counts what would be must if
+          // every guard that runs let the navigation through. The guard text stays on the edge.
+          const gated = gate.guarded && process.env.UIGRAPH_IGNORE_GUARDS !== '1'
+          const may = common || gated || run.resolves || src === target.nodeId || (src !== undefined && hidden(src))
+          return { modality: may ? 'may' as const : 'must' as const, confidence: gate.guarded ? gate.confidence : may ? 0.5 : 1, guardText: gate.guarded ? gate.guardTexts.join(',') : null }
+        }
+        if (members && !common) {
+          // Each screen the edge stands for gets its own verdict; the edge stays one anchored edge
+          // only when they all agree and the destination is not among them.
+          const each = [...members].sort().map((m) => ({ m, v: verdict(m) }))
+          const first = each[0]?.v
+          if (first && !members.has(target.nodeId) && each.every(({ v }) => v.modality === first.modality && v.guardText === first.guardText)) {
+            pushEdge(from, target.nodeId, t, first.modality, first.confidence, first.guardText, file)
+          } else {
+            for (const { m, v } of each) pushEdge(m, target.nodeId, t, v.modality, v.confidence, v.guardText, file)
+          }
           continue
         }
-        const held = uncertain || members?.has(target.nodeId) === true
-        pushEdge(from, target.nodeId, t, held ? 'may' : 'must', gate.guarded ? gate.confidence : held ? 0.5 : 1, guardText, file)
+        if (members) {
+          // Held at may for a reason every screen shares, so one anchored edge says it for all of them.
+          pushEdge(from, target.nodeId, t, 'may', conservative.guarded ? conservative.confidence : 0.5, conservative.guarded ? conservative.guardTexts.join(',') : null, file)
+          continue
+        }
+        const v = verdict(levelsByNodeId.has(from) ? from : undefined)
+        pushEdge(from, target.nodeId, t, v.modality, v.confidence, v.guardText, file)
       } else if (t.ti.kind === 'template') {
         const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
         const cands = matchPrefix(prefix, routeLikes)
         if (note) soundiness.push({ kind: 'over-approximation', file: t.file ?? file, loc: t.loc, detail: `non-literal target prefix "${prefix}" over-approximated to ${cands.length} route(s)` })
         for (const cand of cands) {
-          const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
+          const gate = gateFromGuards(runningGuards(undefined, cand.nodeId).guards)
           noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
           const guardText = gate.guarded ? gate.guardTexts.join(',') : null
           pushEdge(from, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file)
@@ -409,7 +464,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // In controls mode every template routerLink is anchored to the link control that
     // fires it (below), so the screen-level copy would be an undrivable duplicate.
     const targets = [...(opts.controls ? [] : templateTargets(route.componentFile, projectDir)), ...routerCallTargets(route.componentFile)]
-    emitTargets(route.nodeId, targets, file, true)
+    emitTargets(route.nodeId, behindHiddenOutlet(route) ? targets.map((t) => ({ ...t, conditional: true })) : targets, file, true)
   }
 
   if (opts.attribution) {
@@ -622,20 +677,21 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
               soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `${what} target "${t.ti.value}" matches no declared route` })
               return
             }
-            const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
+            const run = runningGuards(route.nodeId, target.nodeId)
+            const gate = gateFromGuards(run.guards)
             noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
             const guards = [guard, ...gate.guardTexts].filter((g): g is string => g != null)
             const guarded = guards.length > 0
             // This mode resolves no relative target, so one without a leading slash is matched as
             // written and never trusted; the other demotions are the screen-level ones.
             const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true ||
-              parsed.aux || landed.ambiguous || redirectOfNode.has(route.nodeId)
+              parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)
             const confidence = gate.guarded ? gate.confidence : guard != null ? 0.6 : uncertain ? 0.5 : 1
             pushEdge(cId, target.nodeId, t, uncertain ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
             navEffects.add('navigate')
           } else if (t.ti.kind === 'template') {
             for (const cand of matchPrefix(t.ti.staticPrefix, routeLikes)) {
-              const gate = gateFromGuards(guardsByNodeId.get(cand.nodeId) ?? [])
+              const gate = gateFromGuards(runningGuards(undefined, cand.nodeId).guards)
               noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
               const guards = [guard, ...gate.guardTexts].filter((g): g is string => g != null)
               pushEdge(cId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guards.length > 0 ? guards.join(',') : null, file)

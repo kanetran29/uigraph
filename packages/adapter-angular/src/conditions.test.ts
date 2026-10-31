@@ -109,9 +109,9 @@ describe('callConditional at module level', () => {
     if (!call) throw new Error('no navigate call in the fixture')
     return callCondition(call)
   }
-  it('stops at a function declared at the top of a module', () => {
-    expect(navigateAt('export const guard = () => { router.navigate(["/x"]) }')).toBeNull()
-    expect(navigateAt('export function guard() { router.navigate(["/x"]) }')).toBeNull()
+  it('takes a function declared at the top of a module for a helper, whose callers it does not follow', () => {
+    expect(navigateAt('export const guard = () => { router.navigate(["/x"]) }')).toBe('in a helper function')
+    expect(navigateAt('export function guard() { router.navigate(["/x"]) }')).toBe('in a helper function')
   })
   it('reports a function declared inside another, which runs only when called', () => {
     expect(navigateAt('export function outer() { function inner() { router.navigate(["/x"]) } }')).not.toBeNull()
