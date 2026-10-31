@@ -8,9 +8,10 @@
 // and this ledger accounts for every edge of it against the current graph.
 //
 // Each edge of the earlier tier gets one fate, decided in this order:
-//   kept       the current graph still holds a must edge with the same endpoints and event, or,
-//              for an edge the shell or a scope anchor held, from one of the screens it stands
-//              for, now that such an edge is drawn per screen;
+//   kept       a construct the edge cited still earns must on its own, on an edge with the same
+//              endpoints and event, or, for an edge the shell or a scope anchor held, on one from a
+//              screen it stands for, now that such an edge is drawn per screen. An edge whose ends
+//              another construct now joins at must is not kept on that account;
 //   guard      the current graph reads a guard on the destination that the earlier one missed;
 //   self-loop  the source already displays the destination, so whether the navigation runs
 //              depends on parameters and router settings;
@@ -126,7 +127,8 @@ for (const [slug, sub] of Object.entries(APPS)) {
     const elsewhere = now.edges.filter((x) => x.from === e.from && x.to !== e.to && x.event === e.event && citesAny(x, keys))
     const read = sites.map((w) => ({ app: slug, edge: label, site: `${w.file}:${w.loc.line}`, ...conditionAt(project, root, w.file, w.loc.line) }))
     constructs.push(...read)
-    const fate = same.some((x) => x.modality === 'must') ? 'kept'
+    const earnsMust = (x) => [x.witness, ...(x.mergedWitnesses ?? [])].some((w) => w?.modality === 'must' && keys.has(`${w.file}:${w.loc?.line}`))
+    const fate = same.some(earnsMust) ? 'kept'
       : same.some((x) => x.guard && !e.guard) ? 'guard'
       : e.from === e.to ? 'self-loop'
       : same.length > 0 && read.every((r) => r.condition !== null) ? 'condition'
@@ -147,10 +149,24 @@ const reasonCount = Object.fromEntries(reasons.map((r) => [r, constructs.filter(
 const conditional = constructs.filter((c) => c.condition !== null).length
 if (reasons.reduce((a, r) => a + reasonCount[r], 0) !== conditional) throw new Error('a construct carries a condition this ledger does not name')
 
+// The review: two readings of each distinct construct, by hand and without the readers above,
+// recorded in results-must/review.json. Each is compared with the extractor construct by construct.
+const reviewFile = path.join(import.meta.dirname, 'results-must', 'review.json')
+const review = existsSync(reviewFile) ? JSON.parse(readFileSync(reviewFile, 'utf8')) : null
+const distinct = [...new Map(constructs.map((c) => [`${c.app} ${c.site}`, c])).values()]
+const agreement = review && Object.fromEntries(Object.entries(review.readers).map(([name, verdicts]) => {
+  const byKey = new Map(verdicts.map((v) => [`${v.app} ${v.site}`, v]))
+  const missing = distinct.filter((c) => !byKey.has(`${c.app} ${c.site}`))
+  if (missing.length) throw new Error(`reader ${name} gives no verdict for ${missing.map((c) => c.site).join(', ')}`)
+  const differ = distinct.filter((c) => byKey.get(`${c.app} ${c.site}`).runsAlways !== (c.condition === null))
+  return [name, { agree: distinct.length - differ.length, differ: differ.map((c) => ({ app: c.app, site: c.site, extractor: c.condition, reader: byKey.get(`${c.app} ${c.site}`) })) }]
+}))
+const readersAgree = review && distinct.filter((c) => new Set(Object.values(review.readers).map((vs) => vs.find((v) => v.app === c.app && v.site === c.site)?.runsAlways)).size === 1).length
+
 const outDir = flag('--out')
 if (outDir) {
   mkdirSync(outDir, { recursive: true })
-  writeFileSync(path.join(outDir, 'must-context.json'), JSON.stringify({ edges: edgesOut, constructs, fates: fateCount, reasons: reasonCount }, null, 2) + '\n')
+  writeFileSync(path.join(outDir, 'must-context.json'), JSON.stringify({ edges: edgesOut, constructs, fates: fateCount, reasons: reasonCount, review: agreement }, null, 2) + '\n')
 }
 const tex = flag('--tex')
 if (tex) {
@@ -167,7 +183,13 @@ if (tex) {
     `\\newcommand{\\MustCtxAllConditional}{${edgesOut.filter((r) => r.unconditionalSites === 0).length}}`,
     ...fates.map((f) => `\\newcommand{\\MustFate${cap(f)}}{${fateCount[f]}}`),
     ...reasons.map((r) => `\\newcommand{\\MustWhy${cap(r)}}{${reasonCount[r]}}`),
-    `\\newcommand{\\MustWhyTemplate}{${reasonCount['control-flow block'] + reasonCount['structural directive'] + reasonCount['ng-template']}}`,
+    ...(agreement ? [
+      `\\newcommand{\\MustReviewReaders}{${Object.keys(agreement).length}}`,
+      `\\newcommand{\\MustReviewReadersAgree}{${readersAgree}}`,
+      `\\newcommand{\\MustReviewAgreeMin}{${Math.min(...Object.values(agreement).map((a) => a.agree))}}`,
+      `\\newcommand{\\MustReviewAgreeMax}{${Math.max(...Object.values(agreement).map((a) => a.agree))}}`,
+    ] : []),
+    `\\newcommand{\\MustWhyTemplate}{${reasonCount['control-flow block'] + reasonCount['structural directive'] + reasonCount['ng-template'] + reasonCount['ICU case']}}`,
     '\\newcommand{\\TabMustLedger}{%',
     '\\begin{tabular}{@{}l>{\\raggedright\\arraybackslash}p{0.31\\textwidth}>{\\raggedright\\arraybackslash}p{0.33\\textwidth}>{\\raggedright\\arraybackslash}p{0.14\\textwidth}@{}}',
     '\\toprule',

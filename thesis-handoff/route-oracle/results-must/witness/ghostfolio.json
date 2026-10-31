@@ -1,11 +1,11 @@
 {
  "edges": 402,
- "sitesCited": 682,
+ "sitesCited": 680,
  "mustEdges": 0,
  "mustClean": 0,
  "mustBad": [],
  "tally": {
-  "OVER_APPROX": 480,
+  "OVER_APPROX": 478,
   "TARGET_MISMATCH": 13
  }
 }

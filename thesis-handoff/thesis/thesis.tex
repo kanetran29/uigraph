@@ -39,6 +39,8 @@
 \input{generated-census-base}
 \input{generated-must}
 \input{generated-must-witness}
+\input{generated-guard-only}
+\input{generated-sweep}
 \input{figures/fig-plots}
 
 \begin{document}
@@ -63,7 +65,7 @@ Supervisor: & Prof.\ Petri Vuorimaa \\
 Major: & Computer Science \\
 \end{tabular}
 \vfill
-{\small Draft of 29 October 2026. Seven chapters and one appendix. Every figure is
+{\small Draft of 1 November 2026. Seven chapters and one appendix. Every figure is
 re-measured on the commit named in the generated tables. The preamble is a preview; the
 official Aalto thesis class is applied before submission.\par}
 \end{titlepage}
@@ -84,8 +86,9 @@ This thesis measures static extraction on six open-source Angular applications w
 \RoundTwoRoutesRealworld{} declared route entries to more than nine hundred, using a pinned corpus and five
 evaluation methods, four reading the applications' sources and one the running application. Measured at two levels, the extractor mints a node for
 every screen the route configuration declares, as two independent static readers
-enumerate it, and recovers a single navigation construct as a deterministic transition
-once a navigation that runs under a condition is demoted, as the soundness property requires;
+enumerate it, and recovers almost no navigation construct as a deterministic transition once
+the demotion rules the soundness property rests on are applied, because the extractor does not
+evaluate the guards almost every such transition passes;
 before the defects this thesis identifies were repaired, two of the six yielded a list of
 routes with no transitions at all. The node result is bounded
 by what a reader of the route table can enumerate: a runtime probe that visits every
@@ -106,10 +109,13 @@ reports as deterministic.
 It states a soundness property for the deterministic tier and tests it mechanically rather
 than proving it. Four corrections, each hidden by the one before, take that tier from the
 \EarlierMustEdges{} edges an earlier instrument published to \CensusMust{}: of the
-\RoundTwoMustEdges{} edges the first three left, the last finds all but \MustFateKept{} running
-under a condition --- after a request returns, in a branch, under a template condition ---,
-behind a guard the reader had missed, or pointing at the screen already displayed, so the
-property is tested on this corpus over a single edge. The implemented part is evaluated on the same
+\RoundTwoMustEdges{} edges the first three left, the last keeps a construct that earns must in
+\MustFateKept{} and finds the others running under a condition --- after a request returns, in a
+branch, under a template condition ---, behind a guard the reader had missed, or pointing at the
+screen already displayed. Two independent readings of every construct behind those edges agree
+with the extractor at \MustReviewAgreeMin{} of the \MustCtxDistinct{}, and taking every guard to
+let the navigation through would give \GuardOnlyMust{} must edges instead, so the small tier
+measures what the extractor can prove without evaluating guards. The implemented part is evaluated on the same
 corpus. What it adds beyond the mechanism earlier
 work already has is small and measured: router-outlet descent leaves the number of placed sites
 unchanged on \AblationOutletSameSitesApps{} of the six applications, the injected-service join
@@ -145,11 +151,11 @@ as a source the analysis cannot place; the sites excluded from that scope, and t
 ground for each exclusion, are counted in Chapter~5. Every site that remains names its reason.
 Some of those reasons are dead links the graph finds without running the application, though
 the count of them is a candidate list: a route the tools fail to read is indistinguishable
-from one the application never declares. Almost no deterministic tier survives this scrutiny:
-the transitions earlier instruments called certain were transitions into the screens a user
-reaches before authenticating, and all but one of them run only once something has happened,
-because an application that guards its interior has almost no unconditional transition to
-find.
+from one the application never declares. Little of the deterministic tier survives this
+scrutiny: of the round's must edges, which led to the application root and the sign-in screen,
+all but \MustFateKept{} run only once something has happened, behind a guard, or to the screen
+already displayed, and the transitions a static reader cannot certify are, for the most part,
+behind guards it does not evaluate.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page

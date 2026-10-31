@@ -169,16 +169,17 @@ The thesis has four limits of scope. It does not claim completeness. When a navi
 transitions cannot be determined statically in general. The thesis therefore states a
 conditional soundness property over a declared scope, tests it mechanically against the
 source at every deterministic edge it produces, and measures recall empirically. The
-property is not proved, and on this corpus almost nothing is left for it to range over. Four
+property is not proved, and on this corpus little is left for it to range over. Four
 corrections --- to how a guard is read, to how an edge that several constructs cite is judged,
 and to whether a navigation runs under a condition, is refused by a guard or targets the screen
-already displayed --- each shrank the deterministic tier, and the last leaves one edge in one of
-the six applications (Section~\ref{sec:res-round2}). Nearly every transition the earlier
-instruments called deterministic turned out to run only once something had happened: a request
-had returned, a branch had been taken, a template condition held, a guard had let it through.
-Chapter~\ref{ch:results} reports each correction rather than only its result. Reading those
-conditions correctly cost RQ1's stricter measure almost everything it counted, and the chapter
-reports that rather than a favourable half.
+already displayed --- each changed the deterministic tier, and after the last it holds
+\CensusMust{} edges, all in one of the six applications (Section~\ref{sec:res-round2}). Nearly every
+transition the earlier instruments called deterministic turned out to run only once something had
+happened --- a request had returned, a branch had been taken, a template condition held --- or
+behind a guard the extractor does not evaluate; taking every guard to let the navigation through
+would leave \GuardOnlyMust{} must edges instead. Chapter~\ref{ch:results} reports each correction
+rather than only its result. Reading those conditions correctly cost RQ1's stricter measure
+almost everything it counted, and the chapter reports that rather than a favourable half.
 This follows the position of Livshits et al., who argue that a practical static
 analysis should be described as sound modulo an explicit list of the language features
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement

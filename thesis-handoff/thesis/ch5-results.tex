@@ -33,18 +33,19 @@ have.
 
 Table~\ref{tab:conversion} gives the second measure. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2},
 the extractor without the attribution pass recovers a small fraction of the navigation
-constructs as must edges; after it, it recovers \CensusBaseMustSites{} construct in the whole
-corpus without attribution and \CensusMustSites{} with it, both in realworld, and none on the
-other \CensusZeroMustApps{} applications. Edge counts in that table
+constructs as must edges; after it, the constructs it recovers as must edges number
+\CensusBaseMustSites{} in the whole corpus without attribution and \CensusMustSites{} with it, all in
+realworld, and none on the other \CensusZeroMustApps{} applications. Edge counts in that table
 must be read per tier and not summed: the may column of the largest application is almost
 entirely one over-approximation from a single unresolvable call site, not that many distinct
 transitions.
 
 \begin{table}[t]\small
 \caption{Construct-to-transition conversion per application, baseline. Conversion is
-the fraction of constructs witnessed by a must edge; the edge columns count edges. Measured
-before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which a single
-construct in realworld converts and conversion is zero on every other application.}
+the fraction of constructs witnessed by a must edge (on this instrument, every construct a must
+edge cites); the edge columns count edges. Measured
+before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which conversion is
+zero on every application but realworld, where \CensusBaseMustSites{} construct converts.}
 \label{tab:conversion}
 \TabConversion
 \end{table}
@@ -180,7 +181,7 @@ Method & Result & $n$ \\
 \midrule
 Witness check, must tier & \RoundTwoMustClean{} agree on their target, at every source
 location each edge cites; target agreement is necessary for Claim~\ref{claim:must} and not
-sufficient for it. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2}; after it, \MustWitnessViolations{} violations in a tier of \MustWitnessEdges{}. & \RoundTwoMustEdges{} \\
+sufficient for it. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2}; after it, \MustWitnessViolations{} witness-check failures in a tier of \MustWitnessEdges{}. & \RoundTwoMustEdges{} \\
 Test-source cross-check, alfresco & \EtoERecallAlfresco{} of the visited URLs have a node; one
 negative test excluded. & \EtoERowsAlfresco{} \\
 \bottomrule
@@ -225,7 +226,7 @@ percentage points; must-tier edges that pass the witness check; constructs that 
 rules assigned to attribution in the baseline, and how many of them converted into must
 and into may edges. Conversions of constructs assigned to other classes are in
 Table~\ref{tab:recovery-source}. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2}, which leaves
-one must edge in each run, the same edge.}
+\CensusBaseMust{} must edge without attribution and \CensusMust{} with it, all in realworld.}
 \label{tab:before-after}
 \TabBeforeAfter
 \end{table}
@@ -234,23 +235,26 @@ one must edge in each run, the same edge.}
 
 Attribution recovers \AttrRecovered{} of the \AttrLost{} constructs the loss rules assign
 to it, \AttrRecoveredShare{} of that class, and it recovers some on every application in
-the corpus. The graph roughly doubles, from \AttrEdgesBefore{} edges to \AttrEdgesAfter{}.
+the corpus. On the round's instrument the graph roughly doubles, from \AttrEdgesBefore{} edges to
+\AttrEdgesAfter{}; the current graphs hold \CensusBaseEdges{} and \CensusEdges{}.
 Measured instead by the deterministic conversion ratio RQ1 is defined on, only
 \AttrAppsGained{} of the six applications move at all. That is the first thing the two
 measures disagree about, and the reason both are reported: on the instrument the table
 measures, \AttrRecoveredMust{} of the recovered constructs convert onto the must tier and
-\AttrRecoveredMay{} onto the may tier, and after the fourth must-tier correction of
-Section~\ref{sec:res-round2} the attribution pass adds no must edge, so everything it recovers
-lands on may.
+\AttrRecoveredMay{} onto the may tier. After the fourth must-tier correction of
+Section~\ref{sec:res-round2} the attributed run has \CensusMust{} must edges against
+\CensusBaseMust{} without attribution; the difference is realworld's header and footer logo
+links, which attribution places on every screen the shell renders, and everything else it
+recovers lands on may.
 An application whose screens all sit behind a guard can gain a great deal of navigation and
 almost no \emph{deterministic} navigation, and Section~\ref{sec:res-round2} returns to why.
 
 On the instrument the table measures, precision on the must tier did not fall: the tier grew
 from \AttrMustBefore{} edges to \AttrMustAfter{}, and every edge in it passed the witness check in
-both runs. After the fourth must-tier correction of Section~\ref{sec:res-round2} the tier is a
-single edge in both runs --- \CensusBaseMust{} must edge without attribution and \CensusMust{}
-with it, the same edge --- so the precision RQ3 asks about holds only in the sense that
-attribution adds no must edge, and there is no larger tier for it to have kept clean. No construct converted in the baseline is lost after attribution: following every
+both runs. After the fourth must-tier correction of Section~\ref{sec:res-round2} the tier holds
+\CensusBaseMust{} edge without attribution and \CensusMust{} with it, and the witness check finds
+\MustWitnessViolations{} failures in the attributed tier, so attribution added must edges without
+adding a witness-check failure; the tier is too small for that to be a precision figure. No construct converted in the baseline is lost after attribution: following every
 construct by its identifier across the two runs finds \AttrRegressed{} that leave the converted
 classes.
 
@@ -300,8 +304,8 @@ Table~\ref{tab:recovery-source} gives the same recovery by the class each constr
 the baseline, and on this instrument it says something the earlier one did not. Every
 conversion comes out of the two attribution classes: \AttrRecoveredMust{} onto the must tier
 and \AttrRecoveredMay{} onto the may tier on the instrument the table measures, all of them onto
-may after the fourth must-tier correction of Section~\ref{sec:res-round2}, which leaves the
-attribution pass no must edge of its own, with none out of the node classes at all. On the
+may after the fourth must-tier correction of Section~\ref{sec:res-round2} except realworld's
+logo links, with none out of the node classes at all. On the
 extractor this evaluation began with --- commit \EarlierCommit{}, whose generated results
 these figures also come from --- \EarlierGainFromNode{} of \EarlierGainMust{} deterministic
 conversions, \EarlierGainFromNodeShare{}, came out of constructs the loss rules had assigned
@@ -318,7 +322,7 @@ whose nodes are complete the question stops being measurable from this table.
 assigned to the construct in the baseline; the columns give the tier it converted into
 after attribution. Constructs are followed by identity, not matched by source location. The
 must column is the instrument before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which every conversion
-attribution makes lands on may.}
+attribution makes lands on may except realworld's header and footer logo links.}
 \label{tab:recovery-source}
 \TabRecoverySource
 \end{table}
@@ -922,23 +926,26 @@ the declared column states both numbers wherever they differ.
 A coverage gain that quietly loosened the must tier would not be a gain, so the witness check
 of Section~\ref{sec:protocol} was run again on all six applications.
 Table~\ref{tab:round2sound} reports it as the round left it, beside the conversion ratio RQ1 is
-defined on. A fourth correction, made after the table was measured, leaves one edge of the
-tier, and is reported after the first three.
+defined on. A fourth correction, made after the table was measured, keeps \MustFateKept{} of the
+tier's edges, and is reported after the first three.
 
 \begin{table}[t]\small
-\caption{Must-tier soundness and must conversion after the loss list was worked, before the
-fourth correction of this section, which demotes all but one edge of the tier. ``Not applicable''
-means the application emits no must edge, so the property cannot be tested on it.}
+\caption{The witness check of the must tier, and must conversion, after the loss list was worked
+and before the fourth correction of this section, which keeps \MustFateKept{} of the tier's edges.
+A passing edge names the destination its constructs name, which Claim~\ref{claim:must} requires
+and does not reduce to. ``Not applicable'' means the application emits no must edge, so there is
+nothing to check.}
 \label{tab:round2sound}
 \TabRoundTwoSoundness
 \end{table}
 
 Of the \RoundTwoMustEdges{} must edges the round left in the corpus,
-\RoundTwoMustCleanCount{} pass the witness check and \RoundTwoMustViolations{} violate the
-property. The tier was small --- \RoundTwoMustEdges{} edges in a graph of \RoundTwoEdges{} ---
+\RoundTwoMustCleanCount{} pass the witness check and \RoundTwoMustViolations{} fail it. Passing is
+a necessary condition of Claim~\ref{claim:must} and not a sufficient one, and the fourth
+correction below shows how far apart the two are on this tier. The tier was small --- \RoundTwoMustEdges{} edges in a graph of \RoundTwoEdges{} ---
 and an earlier state of this extractor, commit \EarlierCommit{}, published one
 \EarlierMustFactor{} times larger: \EarlierMustEdges{} edges, of which \EarlierMustClean{}
-passed the check and \EarlierMustViolations{} violated it. Those figures are read from
+passed the check and \EarlierMustViolations{} failed it. Those figures are read from
 that commit's own generated results rather than re-measured, since the extractor has moved
 and running it now would measure a different tool. The difference is three corrections, and
 they are worth separating because each one was hidden by the one before.
@@ -965,17 +972,19 @@ targeted \path{/vault}, an address that application declares no route for: the l
 nothing, the catch-all redirects to the root, the site is correctly held at may --- and then
 merged into a must edge the root already had, and cited as evidence for it. The round answered
 this by giving an edge the weakest modality over every construct that cites it. All four moved
-to the may tier, which is why the property holds over the figures in this table and did not
-over the figures of the round before it. That rule did not survive the next correction, for a
+to the may tier, which is why the witness check passes the tier in this table and did not
+pass the tier of the round before it. That rule did not survive the next correction, for a
 reason given below.
 
 The fourth was not found by the witness check, because the witness check cannot find it. It
 compares the destination a cited construct names with the destination its edge names, and never
 asks whether the construct runs every time its code does, nor whether the router lets the
 navigation through --- the half of Claim~\ref{claim:must} that Section~\ref{sec:model} assigns to
-the demotion rules. A review of the round's tier, made with the assistant the declaration at the
-front of this thesis describes, read every construct its \MustCtxEdges{} edges cite in the source, \MustCtxDistinct{} distinct constructs cited \MustCtxConstructs{} times, and
-found three defects that between them explain every edge but one.
+the demotion rules. A review of the round's tier read every construct its \MustCtxEdges{} edges
+cite in the source, \MustCtxDistinct{} distinct constructs cited \MustCtxConstructs{} times, and two
+red-team panels then attacked the corrected rules; the review and the panels were made with the
+assistant the declaration at the front of this thesis describes, and every defect they reported
+was reproduced against the code before it was repaired. Three defects explain the round's tier.
 
 The first is that the demotion rules were incomplete. They demoted a site for a guard on its
 target, a cap from attribution, a catch-all route or a target with holes, and for nothing else.
@@ -987,75 +996,88 @@ in a \texttt{catch} clause, or after an \texttt{await} or an early \texttt{retur
 realworld's own \texttt{*ifAuthenticated} directive among them, \MustWhyAfterAwait{} after an
 \texttt{await}, \MustWhyInACallback{} in a callback, \MustWhyAfterEarlyExit{} after an early
 exit and \MustWhyInACatchClause{} in a \texttt{catch} clause. The extractor now demotes a site
-under any of these. The second is that the guard the second correction names was still unread.
-bitwarden's \texttt{redirectGuard()} does not sit on the route that renders the root: it sits on
-a child of that route with an empty path and no component, which Angular matches on every
-navigation to the root, and the guard set of a screen was assembled from the routes that render
-it. A guard on such a child now gates the screen above it, and \MustFateGuard{} edges, every one
-of bitwarden's, are guarded; each construct they cite also runs under a condition, so either
-correction alone moves them. The third is a navigation to the address its source already
-displays. Angular's default configuration ignores it, and where the address differs only in a
-parameter or the query it runs only on some inputs, so it is not a navigation that occurs on
-every execution. \MustFateSelfLoop{} edges were of this kind, one of them offered from the
-shell, which is on the screen it points at as well. Such a navigation is now held at may.
+under every condition Section~\ref{sec:model} lists, which the panels extended to a member no
+handler calls unconditionally, a component mounted under a template condition, an ICU case, and
+an address two declared routes can answer. The second is that the guard the second correction
+names was still unread. bitwarden's \texttt{redirectGuard()} does not sit on the route that renders
+the root: it sits on a child of that route with an empty path and no component, which Angular
+matches on every navigation to the root, and the guard set of a screen was assembled from the
+routes that render it. A guard on such a child now gates the screen above it, as do
+\texttt{canMatch} and \texttt{canActivateChild}, which were not read at all, and
+\MustFateGuard{} edges, every one of bitwarden's, are guarded; each construct they cite also runs
+under a condition, so either correction alone moves them. The third is a navigation to the address
+its source already displays. Angular's default configuration ignores it, and where the address
+differs only in a parameter or the query it runs only on some inputs, so it is not a navigation
+that occurs on every execution. A shell or anchor edge whose destination is one of the screens it
+stands for is now drawn per screen, must from the others and a may self-loop at the destination,
+rather than demoted whole, which a panel showed discards transitions that do occur.
 
 Table~\ref{tab:mustledger} in Appendix~\ref{app:mustledger} records, construct by construct, the
 condition the extractor now reads. It is produced with the extractor's own readers, so it
-records the extractor's decisions rather than corroborating them; the corroboration is the
-review, which read each construct without a classifier and agrees with the table at every one
-of the \MustCtxDistinct{} once the \texttt{catch} clause, which the readers first missed, was
-added to them.
+records the extractor's decisions rather than corroborating them. The corroboration is a recorded
+review: \MustReviewReaders{} readings of the \MustCtxDistinct{} constructs, each made by hand from
+the sources without the readers, are kept in \path{results-must/review.json}. The extractor agrees
+with the less favourable of them at \MustReviewAgreeMin{} of the \MustCtxDistinct{} constructs, and
+the two readings agree with each other at \MustReviewReadersAgree{}.
 
-The edge that survives shows why the third correction's rule had to go. realworld's tag page
+The edges that survive show why the third correction's rule had to go. realworld's tag page
 renders the home component, whose Global Feed link to the root runs whenever the page does.
 Two other links reach the root from the same page --- one under the application's
 \texttt{*ifAuthenticated} directive, one inside the \texttt{@empty} block of an article list
---- and they do not. The
-weakest-modality rule demoted the edge for them, although the navigation the first construct
-makes occurs on every execution of its template, which is all Claim~\ref{claim:must} asks of an
-edge: the claim is that a must edge corresponds to \emph{a} navigation that occurs, not that
-every construct reaching the same screen does. The rule had been written for a different
-question, which construct an edge's certainty may be credited to, and it answered that question
-by discarding a certainty the edge had. An edge now takes the modality of its most certain
-construct, which becomes its witness, and every other construct it cites records the modality it
-earns on its own; the witness check judges the must tier only on the constructs that earn must.
-The \path{/vault} citations of the third correction are recorded as may under that rule, which is
-what they are evidence for. Of the \MustCtxEdges{} edges, \MustFateCondition{} have every construct
-they cite under a condition, \MustFateGuard{} are guarded, \MustFateSelfLoop{} are
-self-loops, and \MustFateKept{} remains. With these corrections the deterministic tier of the
-corpus is \CensusMust{} edge with attribution and \CensusBaseMust{} without it, the same edge in
-realworld, resting on \CensusMustSites{} construct; \CensusZeroMustApps{} of the
-\CensusApps{} applications have no must edge.
+--- and they do not. The weakest-modality rule demoted the edge for them, although the navigation
+the first construct makes occurs on every execution of its template, which is all
+Claim~\ref{claim:must} asks of an edge: the claim is that a must edge corresponds to \emph{a}
+navigation that occurs, not that every construct reaching the same screen does. The rule had been
+written for a different question, which construct an edge's certainty may be credited to, and it
+answered that question by discarding a certainty the edge had. An edge now takes the modality of
+its most certain construct, which becomes its witness, and every other construct it cites records
+the modality it earns on its own; the witness check judges the must tier only on the constructs
+that earn must. The \path{/vault} citations of the third correction are recorded as may under that
+rule, which is what they are evidence for. Of the round's \MustCtxEdges{} edges,
+\MustCtxAllConditional{} have every construct they cite under a condition, \MustFateGuard{} of them
+also guarded; taking guard first, then self-loop, then condition, \MustFateGuard{} are guarded,
+\MustFateSelfLoop{} is a self-loop, \MustFateCondition{} are conditional, and \MustFateKept{} keep a
+construct that earns must: the Global Feed link, and the logo links of realworld's header and
+footer, which the shell renders on every screen. With these corrections the deterministic tier of
+the corpus is \CensusMust{} edges with attribution and \CensusBaseMust{} without it, all in realworld
+and all into its root, resting on \CensusMustSites{} constructs with attribution and
+\CensusBaseMustSites{} without; \CensusZeroMustApps{} of the \CensusApps{} applications have no must
+edge. The witness check finds \MustWitnessViolations{} failures in the \MustWitnessEdges{}.
 
-The shape of the tier the round left is worth stating, because the fourth correction removes
-almost all of it. As the round read them, none of its edges carried a guard, and ten of them
-should have; they arrived at two addresses, the application root and the sign-in screen. Those
-are the screens a navigation reaches once something has happened --- a request has returned, a
-sign-in has been checked --- and that is exactly the condition the fourth correction reads. The
-edge that survives is the exception that fits the reading: a link in a page any visitor can
-open, to a page any visitor can open. In an application that guards its interior there is
-almost no unconditional transition to find. A reader who expected static extraction to recover
-a large deterministic graph should take that as the answer to the expectation rather than as a
-defect of the analysis.
+What the tier measures needs saying plainly, because it is easy to read as a property of the
+applications. The extractor never evaluates a guard, so a guard that can refuse a navigation
+demotes it whatever the guard would decide. Extracting the corpus again with every guard taken to
+let the navigation through, and every other rule kept, gives \GuardOnlyMust{} must edges in
+\GuardOnlyApps{} applications instead of \CensusMust{}: \GuardOnlyGuarded{} of them carry a guard on
+the destination, and for \GuardOnlySourceBehind{} of those the source screen is already behind
+every guard of the destination, read off the route configuration, so a user on that screen has
+passed them. The small tier therefore says what the extractor can prove without evaluating
+guards, and the round's edges arrived where that matters most: at the application root and the
+sign-in screen, the screens a navigation reaches once something has happened --- a request has
+returned, a sign-in has been checked. A reader who expected static extraction to recover a large
+deterministic graph should take this as the answer to the expectation: the transitions are
+there, mostly behind guards a static reader does not evaluate.
 
-The cost is paid in the measure RQ1 is defined on, and it is paid almost in full. Must
-conversion over the corpus read \RoundTwoMustConv{} on the round's instrument, already below what
-it read before any of the corrections, because the earlier figure counted guarded transitions as
-deterministic ones and counted some of them on evidence it had not read. After the fourth, RQ1's
-numerator --- the constructs witnessed by a must edge that they themselves earn --- is
-\CensusMustSites{}. Each correction removed a claim the extractor could not support.
-Claim~\ref{claim:must} now ranges on this corpus over \MustWitnessEdges{} edge, in which the
-witness check finds \MustWitnessViolations{} violations, and that is too little to be a soundness result in any statistical sense; what it shows
-is that the extractor asserts a deterministic transition only where one exists, and that on these
-applications there is almost none.
+The cost is paid in the measure RQ1 is defined on. Must conversion over the corpus read
+\RoundTwoMustConv{} on the round's instrument, already below what it read before any of the
+corrections, because the earlier figure counted guarded transitions as deterministic ones and
+counted some of them on evidence it had not read. After the fourth, RQ1's numerator --- the
+constructs that earn must on their own --- is \CensusMustSites{} with attribution and
+\CensusBaseMustSites{} without. Each correction removed a claim the extractor could not support.
+Claim~\ref{claim:must} now ranges on this corpus over \MustWitnessEdges{} edges, which is too few to
+be a soundness result in any statistical sense. What the corrections establish is narrower: every
+must edge the corpus yields has been read, construct by construct, against the rules the claim
+rests on, and the rules themselves are each covered by a test that fails when the rule is deleted
+(\SweepRules{} rules, \SweepFirstPass{} covered by the suite as it stood and \SweepAdded{} by tests
+added after a sweep found them uncovered).
 
 Read over the whole graph rather than the must tier, the figures are counted per cited source
 location and not per edge, because that is what the check opens: the \RoundTwoEdges{} edges of
-the corpus cite \RoundTwoSites{} locations between them, an edge citing several wherever
+the round's corpus graphs cite \RoundTwoSites{} locations between them, an edge citing several wherever
 several constructs yield it. Of those locations only \RoundTwoGraphClean{} are clean, because
 \RoundTwoOverApprox{} of them are over-approximations for which the check claims no target
 agreement by design. That is reported beside the must column because the must tier was a small
-slice of the graph and is now a single edge, and a precision figure for a slice is not one for
+slice of the graph and is a smaller one now, and a precision figure for a slice is not one for
 the graph. Nor is it a defect rate: on the \RoundTwoJudged{} locations the check does
 judge --- every one that is not an over-approximation --- \RoundTwoJudgedClean{} are clean.
 The three figures answer three different questions. The first is the one that bears on
@@ -1087,14 +1109,16 @@ tells the analysis nothing, and the model would lose nothing by recording it as 
 sink instead of as six hundred may edges.
 
 The second column is the more uncomfortable one. RQ1 defines conversion as the fraction of
-constructs witnessed by at least one \emph{must} edge, and by that definition
+constructs witnessed by at least one \emph{must} edge --- on the current instrument, constructs that
+earn must themselves --- and by that definition
 \RoundTwoZeroMustApps{} of the six applications sat at zero after the round, because they
 emitted no must edge at all, and after the fourth correction \CensusZeroMustApps{} do: every
 edge they yield is a may or an unknown. The recovered column
 of Table~\ref{tab:round2acct} counts a site as recovered when any edge witnesses it,
 which is a weaker predicate than RQ1's. Both are reported because neither alone is honest:
 the weaker one measures whether the graph represents the navigation, the stricter one whether
-it commits to a destination, and the answer to the second is now one construct in the corpus.
+it commits to a destination, and the answer to the second is now \CensusMustSites{} constructs in
+the corpus.
 
 \begin{table}[t]\small
 \caption{The route configuration the framework holds, against the extractor's node set.

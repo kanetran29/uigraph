@@ -77,9 +77,9 @@ state.
 
 Alongside the modality the artefact records a numeric \emph{confidence} on each edge, which is
 not part of the model and carries no claim this thesis makes. It is a finer version of the same
-ordering: $1$ where the target is resolved and no guard applies, $0.6$ where a guard does,
-$0.5$ where the target could be one of several routes, and $0$ for an edge into a dynamic
-target. Where several constructs yield one edge, the edge carries the modality and the
+ordering: $1$ for a must edge; where a guard applies, $0.6$, or $0.5$ when the guard is
+asynchronous; $0.5$ for every other may edge, whatever demoted it; and $0$ for an edge into a
+dynamic target. Where several constructs yield one edge, the edge carries the modality and the
 confidence of the most certain of them, and each construct it cites records the modality it
 earns on its own, so the edge is as certain as the best evidence for it and no construct is cited
 as stronger evidence than it is. Every figure in this thesis is reported over the modalities,
@@ -141,26 +141,44 @@ enclosing code executes, over the declared route set.
 The evaluation tests a necessary condition of this claim rather than the claim itself,
 and the distinction decides how the figures of Chapter~\ref{ch:results} may be read. The
 witness check of Section~\ref{sec:protocol} re-reads the source at every location an edge
-cites and asks whether the construct found there names the destination the edge names. An
-edge whose cited construct names a different destination cannot satisfy the claim, so a
-failure of the check refutes it; agreement does not establish it. Whether the navigation
+cites and asks whether the construct found there names the destination the edge names. A must
+edge whose construct that earns must names a different destination cannot satisfy the claim,
+so a failure of the check there refutes it; agreement does not establish it. The other
+constructs a must edge cites are evidence for may and are not judged against the claim. Whether the navigation
 occurs \emph{for every input on which the enclosing code executes} is decided by the rules
-that place an edge in the must tier instead of the may tier. A site is demoted when a guard on
-its target can refuse it, including a guard on a child route with an empty path and no component,
-which Angular matches on every navigation to the screen above it; when its target is the address
-its source already displays, which the router ignores or follows only on some inputs; and when
-it runs only on some executions of its own code: under a template control-flow block, a
-structural directive or an \texttt{<ng-template>}, under a branch, in a loop or a
-\texttt{catch} clause, inside a callback or any other function something else has to call, or
-after an \texttt{await} or an early \texttt{return} or \texttt{throw}. An exception from an
-earlier synchronous call is not counted, since every call can throw; an \texttt{await} is,
-because a rejected request is an ordinary outcome of the code that awaits it. The extractor's own
-unit tests cover those rules and share its reading of each construct, and no second classifier
-re-derives them. What stands in for one is a review that read every construct the round's must
-tier cited in the source, without a classifier, and agreed with the extractor's readers at every
-one once they were corrected (Section~\ref{sec:res-round2}). Section~\ref{sec:res-round2} reports
-four cases in which the extractor's reading was wrong and the tier was too large as a result, the
-last of them three gaps in the demotion rules at once. What the
+that place an edge in the must tier instead of the may tier, and the guard half of them is a
+syntactic one: the extractor never evaluates a guard, so a guard that can refuse the navigation
+demotes it whatever the guard would decide. That covers a \texttt{canActivate} or
+\texttt{canMatch} on the target or on a route above it, a \texttt{canActivateChild} above it,
+and the guard of a child at the empty path, which Angular matches at the target's own address
+unless an earlier child at that path matches first; the extractor takes such a guard in either
+case, which is the safe side. A site is also demoted when its target is the address its source
+already displays: the claim is read as one about router navigations, and the router ignores a
+navigation to the address it shows, or follows it only when a parameter or the query differs,
+although in the transition-system reading of an edge the screen stays where it was. A shell or
+anchor edge whose destination is one of the screens it stands for is therefore drawn per screen,
+must from the others and may at the destination. It is demoted when the address is one that two
+declared routes, or a route and a redirect, can answer, since Angular takes whichever it meets
+first; when the base a relative target resolves against cannot be read; when a URL names an
+auxiliary outlet, whose route the adapter does not read; and when it runs only on some
+executions of its own handler: under a template control-flow block, a structural directive, an
+\texttt{<ng-template>} or an ICU case, under a branch, in a loop or a \texttt{catch} clause, in an
+optional call or a default value, inside a callback, after an \texttt{await}, an early
+\texttt{return} or \texttt{throw} or a \texttt{break} out of its block, in a member of its class
+that no handler calls unconditionally, or in a component mounted under a template condition on
+that screen. A handler is a member the framework calls itself, a lifecycle hook or a member a
+decorator registers, or one the template binds to an event as a bare call outside any template
+condition. An exception from an earlier synchronous call is not counted, since every call can
+throw; an \texttt{await} is, because a rejected request is an ordinary outcome of the code that
+awaits it. The extractor's own unit tests cover each of these rules in both directions, a site
+the rule demotes and one it leaves alone, and a sweep that deletes each rule in turn checks that
+some test fails (Section~\ref{sec:res-round2}); they share the extractor's reading of each
+construct, and no second classifier re-derives them. What stands in for one is a review that read
+the constructs behind the must tier in the source without a classifier and recorded a verdict
+for each (Section~\ref{sec:res-round2}). Section~\ref{sec:res-round2} reports four corrections to
+the extractor's reading. The first three made the tier smaller; the fourth closed gaps in the
+demotion rules and also replaced the third's merge rule, which had demoted an edge that one of
+its constructs made certain. What the
 check establishes is therefore narrower than the claim: that every cited site exists in the
 source and agrees on its target. The stronger half of the claim rests on the demotion rules
 and is not independently verified.

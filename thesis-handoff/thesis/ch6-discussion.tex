@@ -72,12 +72,13 @@ Table~\ref{tab:remaining}, and three of its reasons are not attribution problems
 all: the target screen has no node, the owning component is never reached from any
 screen, or the site sits in a service or a guard that this version does not analyse.
 No construct that the baseline converted was lost, so the coverage gain was not bought by
-widening the must tier, and after the fourth correction of Section~\ref{sec:res-round2} there
-is almost no must tier for it to widen: the tier is the same single edge with attribution and
-without. On the
+widening the must tier, and after the fourth correction of Section~\ref{sec:res-round2} the tier
+holds \CensusBaseMust{} edge without attribution and \CensusMust{} with it, the added edges being
+realworld's logo links placed on every screen the shell renders. On the
 instrument before that correction every must edge passed the witness check in both runs ---
-\RoundTwoMustClean{} after attribution --- so there was no violation for attribution either to
-have caused or to have inherited.
+\RoundTwoMustClean{} after attribution --- so attribution introduced no edge that names the wrong
+destination; whether those edges occurred on every input is the question the fourth correction
+answered, and for most of them it was no.
 
 The part of the model that Chapter~\ref{ch:analysis} specifies but does not implement
 has a measurable price. Navigation sites in services, guards, interceptors, resolvers
@@ -260,8 +261,8 @@ One construct in a component that many screens render yields one anchored edge t
 expands to many, which is why the ratio counts constructs and not edges
 (Section~\ref{sec:corrections}). In the other direction several constructs can yield one
 edge, and the extractor records the extra ones as merged witnesses so that each is
-traceable. The conversion ratio credits a construct cited by any witness of an edge, primary
-or merged, and for most of this work the witness check re-opened only the primary witness, so
+traceable. For most of this work the conversion ratio credited a construct cited by any witness
+of an edge, primary or merged, while the witness check re-opened only the primary witness, so
 a construct could count towards the ratio on evidence the precision check never examined. On
 realworld rather more than a third of the citations in the attributed graph are merged ones,
 and the proportion is higher on the larger applications, so the gap was not a technicality:
@@ -484,10 +485,13 @@ as a second mount, and the adapter does not implement it. A route that names an 
 than the primary one, every route beneath it, and a route whose outlet the reader cannot fix to a
 string mint no node; the last kind is counted in the note that marks the route set incomplete.
 A commands array that carries an \texttt{\{outlets: \ldots\}} element yields no edge and no
-note. An auxiliary address written as a URL string is reduced to its primary path, which is
-where the primary outlet goes, so \path{/inbox(popup:compose)} is an edge to \path{/inbox}; a
-string whose parenthesised group also carries a primary segment is not rebuilt and yields
-nothing. The test-source cross-check shows the auxiliary URLs among its misses.
+note. Only \texttt{navigateByUrl} parses a URL: an auxiliary group there is dropped and the edge to
+the primary path is held at \emph{may}, since the whole navigation fails when the auxiliary route
+does not match and that route is not read, and a group that also carries the primary outlet is not
+rebuilt and yields nothing. A \texttt{routerLink} string or a \texttt{navigate} command is split on
+slashes alone, as Angular splits it, so \path{/inbox(popup:compose)} written there is one segment
+and reaches whichever route matches it, a parameter route if there is one. The test-source
+cross-check shows the auxiliary URLs among its misses.
 \item \textbf{Navigation relative to the active route (\texttt{relativeTo}).} The target
 is a function of the route of the component that holds the site, so it has no single value in
 the source, and attribution is what makes it resolvable: the analysis resolves it once for each
@@ -499,7 +503,9 @@ is right only when the screen is the route of the component that holds the site,
 can the edge be must. Everywhere else it is held at may: for a component rendered under a route
 it does not own, whose own route the analysis does not track; for \texttt{relativeTo} written in
 shorthand, passed through an options variable, or given a route other than the component's
-own, such as \texttt{this.route.parent}, none of which the reader evaluates; and for an edge
+own, such as \texttt{this.route.parent}, none of which the reader evaluates, which is to say
+anything but a constructor parameter or an \texttt{inject} call that yields the component's
+\texttt{ActivatedRoute}; for a link that binds its own \texttt{[relativeTo]} input; and for an edge
 emitted from a node without a path of its own, a scope anchor, the shell or an unplaced origin,
 where a bare relative target is matched as if it were absolute. Such an edge can name the wrong
 screen, which the may tier admits and the must tier does not, and a target that matches nothing
@@ -543,8 +549,9 @@ dynamic target goes to the \texttt{u\_}\,sink as any other does. What the graph 
 that the screen can be left for that destination, not under what condition.
 \item \textbf{Computed navigation targets.} A target built at run time from values cannot
 be enumerated statically in general, and the analysis treats it according to the static text it
-contains. A target with no static part is recorded as an edge of modality \emph{unknown} and
-confidence 0 into the \texttt{u\_}\,sink of the node it fires from. A target with a static
+contains. A target with no static part, a \texttt{routerLink} whose value is an interpolation
+among them, is recorded as an edge of modality \emph{unknown} and confidence 0 into the
+\texttt{u\_}\,sink of the node it fires from. A target with a static
 leading part --- the head of a template literal, the left operand of a string concatenation, or
 the constant elements before a trailing variable element of a commands array --- is
 over-approximated into the \emph{may} tier, with one edge to every declared route that extends
@@ -585,6 +592,19 @@ from the graph and no note is raised, so the route set is not declared a lower b
 account. The independent parser behaves identically on each of these forms, which is why the
 two readers agree on routes neither can see. This approximation bounds the corpus as well as
 the tool, since it is why one candidate application was rejected (Section~\ref{sec:corpus}).
+\item \textbf{Guards that would let the navigation through.} A guard is a function of the
+application's state, and the extractor does not evaluate it: any guard that can refuse a
+navigation --- \texttt{canActivate} or \texttt{canMatch} on the target or above it,
+\texttt{canActivateChild} above it, or the guard of a child at the empty path --- holds the edge at
+\emph{may}, even when the user on the source screen has passed that same guard to get there. This
+is the approximation that decides the size of the must tier (Section~\ref{sec:res-round2}). A
+guard is identified by the text of its expression, so two guards that compute the same thing are
+two guards.
+\item \textbf{The order in which Angular matches routes.} The router takes the first route, in
+declaration order, that matches an address; the matcher prefers an exact path to a parameter
+route and consults a redirect only when no route matches. Wherever two declared routes, or a
+route and a redirect, can answer an address, the edge is held at \emph{may} rather than decided,
+and it may name the route Angular does not take.
 \item \textbf{Ambiguous selectors in the nesting relation.} When a selector belongs to more
 than one component, the candidates are narrowed to those the rendering file imports; where none
 is imported, the analysis joins over all of them and records a note. Such a join can attribute a
@@ -795,9 +815,9 @@ route chain: the assembly ignored a guard carried by a route a wrapper function 
 the construct through which one application in the corpus
 routes every one of its feature tables. Reading it is what took that application's
 deterministic tier from an order of magnitude more edges down to
-\RoundTwoMustEdgesMifos{}, and took the corpus tier from \EarlierMustViolations{} violations of
-the soundness property to \RoundTwoMustViolations{}; the conditional demotion that followed
-removed the rest (Section~\ref{sec:res-round2}). The mutation
+\RoundTwoMustEdgesMifos{}, and took the corpus tier from \EarlierMustViolations{} witness-check
+failures to \RoundTwoMustViolations{}; the demotion rules that followed found that most of the
+edges that passed did not occur on every input either (Section~\ref{sec:res-round2}). The mutation
 operator that removes a guard is the obvious second test for it, and on this corpus it
 reaches only the guards the graph already records on an edge
 (Section~\ref{sec:res-mutation}). The wider treatment of guards in

@@ -18,9 +18,13 @@ nothing at. That completeness is over the route set a static reader can read, an
 the addresses the framework serves: the same runtime method finds \ProbeMissed{} answered
 addresses with no node at all, \ProbeMissedGhostfolio{} of them in the one application whose
 paths a custom matcher computes, so only \ProbeExactApps{} of the six are complete against
-what the browser answers. Below that level no navigation construct becomes a deterministic
-transition on any of the \CensusApps{} applications, with attribution or without, once a
-navigation that runs under a condition is demoted as Claim~\ref{claim:must} requires. Node extraction is not the
+what the browser answers. Below that level almost no navigation construct becomes a
+deterministic transition once the demotion rules Claim~\ref{claim:must} rests on are applied:
+\CensusBaseMustSites{} construct without attribution and \CensusMustSites{} with it, all in
+realworld, and none on the other \CensusZeroMustApps{} applications. That measures what the
+extractor can prove without evaluating guards, which is little, rather than what the applications
+do: with every guard taken to let the navigation through, the tier would hold \GuardOnlyMust{}
+edges. Node extraction is not the
 bottleneck it was when this work began --- it was, and
 Section~\ref{sec:res-round2} records what repairing it took.
 
@@ -32,12 +36,13 @@ repaired.
 
 The answer to RQ3 is that scope attribution recovers \AttrRecovered{} of the \AttrLost{}
 constructs the loss rules assign to it, \AttrRecoveredShare{} of that class, on every
-application in the corpus, roughly doubling the graph from \AttrEdgesBefore{} edges to
-\AttrEdgesAfter{}; and that every one of those conversions is navigation the graph reports as
-possible rather than certain, since after the conditional demotion of
-Section~\ref{sec:res-round2} no edge is deterministic either before attribution or after it.
-Attribution therefore costs nothing in deterministic precision only because there is no
-deterministic tier for it to cost. Whether the computed screen sets are correct is established on one application and
+application in the corpus, roughly doubling the graph, from \CensusBaseEdges{} edges to
+\CensusEdges{} on the current graphs; and that almost all of those conversions are navigation the graph reports as
+possible rather than certain. After the fourth correction of Section~\ref{sec:res-round2} the
+attributed run holds \CensusMust{} must edges against \CensusBaseMust{} without attribution, the
+difference being realworld's header and footer logo links drawn from every screen the shell
+renders, and the witness check finds \MustWitnessViolations{} failures among them; the tier is too
+small for that to be a statement about precision in general. Whether the computed screen sets are correct is established on one application and
 not on the corpus: read site by site on \GTApp{}, the analysis names \GTFullRecall{} of the
 (site, screen) pairs the application really has at \GTFullPrecision{} precision, every wrong
 pair coming from a single over-approximating rule, and no method here can put that question
@@ -121,22 +126,27 @@ mifos's, so the corpus figure is close to one application's. The sites that rema
 a reason, enforced by a check that fails when any does not, and some name a route the
 application never declares. What the repairs cost is reported with them, and it is not
 what one would hope for. The earlier instrument published a deterministic tier of
-\EarlierMustEdges{} edges with \EarlierMustViolations{} violations in it, and four corrections
-took it to a single edge, each hidden by the one before: a guard carried by a route a wrapper
-function returns, a \texttt{canActivate} element that is a call rather than a name, an edge
-that several constructs cite taking the modality of the first of them, and three gaps in the
-demotion rules at once --- a navigation that runs under a condition, a guard on an empty-path
-child that matches whenever its parent does, and a navigation to the screen already displayed.
-The first three left \RoundTwoMustEdges{} edges with \RoundTwoMustViolations{} violations; the
-fourth demoted all but \MustFateKept{} of those (Section~\ref{sec:res-round2}). None of the edges
-that left became a correct target; they stopped claiming to be deterministic, which they never
-were. The one that stayed did so because the fourth correction also replaced the third's rule,
-which had demoted an edge whenever any construct citing it was uncertain: an edge is now as
-certain as the most certain construct that yields it. On \CensusZeroMustApps{} of the six
-applications there is no must edge, so RQ1's stricter measure reads zero there, and
-Claim~\ref{claim:must} ranges over \MustWitnessEdges{} edge in the corpus, with
-\MustWitnessViolations{} violations. The exchange is the end of a sequence in which each
-claim that did not survive its own test was withdrawn.
+\EarlierMustEdges{} edges with \EarlierMustViolations{} witness-check failures in it, and four corrections
+took it to \CensusMust{} edges, each correction hidden by the one before: a guard carried by a
+route a wrapper function returns, a \texttt{canActivate} element that is a call rather than a
+name, an edge that several constructs cite taking the modality of the first of them, and gaps
+in the demotion rules --- a navigation that runs under a condition, guards the reader did not
+read (one on an empty-path child, \texttt{canMatch}, \texttt{canActivateChild}), and a
+navigation to the screen already displayed. The first three left \RoundTwoMustEdges{} edges with
+\RoundTwoMustViolations{} witness-check failures, which is not the same as satisfying the claim:
+the fourth kept a construct that earns must in only \MustFateKept{} of them
+(Section~\ref{sec:res-round2}). The others did not become correct targets; they stopped claiming
+to be deterministic, which they had no evidence for. The fourth correction also replaced the
+third's merge rule, which had demoted an edge whenever any construct citing it was uncertain: an
+edge is now as certain as the most certain construct that yields it, and that is why realworld's
+Global Feed and logo links remain. On \CensusZeroMustApps{} of the six applications there is no
+must edge, so RQ1's stricter measure reads zero there, and Claim~\ref{claim:must} ranges over
+\MustWitnessEdges{} edges in the corpus, with \MustWitnessViolations{} witness-check failures.
+What the small tier measures is what the extractor can prove without evaluating a guard: taking
+every guard to let the navigation through gives \GuardOnlyMust{} must edges, and for
+\GuardOnlySourceBehind{} of the \GuardOnlyGuarded{} that carry a guard the source is already behind
+it. The exchange is the end of a sequence in which each claim that did not survive its own test
+was withdrawn.
 
 What they leave open is also specific. The call graph with dependency injection and the
 dispatch relations are specified and not implemented; the approximations of

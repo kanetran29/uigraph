@@ -1,13 +1,14 @@
 {
   "harnessVersion": "1.5.0",
-  "repoRoot": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/realworld",
-  "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/realworld",
+  "extractor": "% Extractor fd7b289, packages/ clean when generated.",
+  "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "attribution": true,
   "seed": 20261021,
   "quota": 8,
   "baseline": {
     "nodes": 12,
-    "edges": 55,
+    "edges": 62,
     "routes": 10
   },
   "discovered": {
@@ -447,7 +448,7 @@
       "subject": "login",
       "predict": "a node route containing \"login\" becomes \"login-mutated\"",
       "verdict": "DETECTED",
-      "touched": 19,
+      "touched": 21,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/article/pages/home/home.component.ts:53",
@@ -465,7 +466,8 @@
         "routeChanged": [],
         "edgesAdded": [
           "/login-mutated -> /register (click:routerLink)",
-          "/login-mutated -> / (navigate)"
+          "/login-mutated -> / (navigate)",
+          "/login-mutated -> / (click:routerLink)"
         ],
         "edgesRemoved": [
           "/ -> /login (navigate)",
@@ -483,7 +485,7 @@
       "subject": "register",
       "predict": "a node route containing \"register\" becomes \"register-mutated\"",
       "verdict": "DETECTED",
-      "touched": 17,
+      "touched": 19,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/core/auth/auth.component.html:12",
@@ -500,7 +502,8 @@
         "routeChanged": [],
         "edgesAdded": [
           "/register-mutated -> /login (click:routerLink)",
-          "/register-mutated -> / (navigate)"
+          "/register-mutated -> / (navigate)",
+          "/register-mutated -> / (click:routerLink)"
         ],
         "edgesRemoved": [
           "/login -> /register (click:routerLink)",
@@ -518,7 +521,7 @@
       "subject": "profile",
       "predict": "a node route containing \"profile\" becomes \"profile-mutated\"",
       "verdict": "DETECTED",
-      "touched": 44,
+      "touched": 46,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/settings/settings.component.ts:72",
@@ -564,7 +567,7 @@
       "subject": "editor",
       "predict": "a node route containing \"editor\" becomes \"editor-mutated\"",
       "verdict": "DETECTED",
-      "touched": 18,
+      "touched": 22,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/article/pages/article/article.component.html:19",
@@ -639,7 +642,7 @@
       "subject": "settings",
       "predict": "a node route containing \"settings\" becomes \"settings-mutated\"",
       "verdict": "DETECTED",
-      "touched": 12,
+      "touched": 14,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/profile/pages/profile/profile.component.html:23",
@@ -656,7 +659,8 @@
         "routeChanged": [],
         "edgesAdded": [
           "/settings-mutated -> /profile/:username (navigate)",
-          "/settings-mutated -> /profile/:username/favorites (navigate)"
+          "/settings-mutated -> /profile/:username/favorites (navigate)",
+          "/settings-mutated -> / (click:routerLink)"
         ],
         "edgesRemoved": [
           "/settings -> /profile/:username (navigate)",

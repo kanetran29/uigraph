@@ -1,0 +1,489 @@
+{
+ "note": "Two readings, made independently by hand from the application sources at the corpus commits, of each distinct construct the round-two must tier cites. Each reader applied the demotion rules of Chapter 3 as written in its instructions and was not shown the extractor, its readers or its results. Both were made with the AI assistant the thesis declares, in separate contexts, on 2026-11-01.",
+ "readers": {
+  "a": [
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/pages/home/home.component.html:23",
+    "runsAlways": false,
+    "condition": "under *ifAuthenticated=\"true\" structural directive on the <li>",
+    "destination": "/ (with [queryParams]=\"{ feed: 'following' }\")",
+    "evidence": "home.component.html:19 <li class=\"nav-item\" *ifAuthenticated=\"true\"> encloses the <a> at :20-27 whose routerLink=\"/\" is :23; :24 queryParams"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/pages/home/home.component.html:35",
+    "runsAlways": true,
+    "condition": "none",
+    "destination": "/",
+    "evidence": "home.component.html:29 <li class=\"nav-item\"> has no structural directive; ancestors :1,:14-18 plain divs/ul; :35 routerLink=\"/\"; component mounted via route '' and 'tag/:tag' (app.routes.ts:15-22) into unconditional <router-outlet> (app.component.html:3)"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/components/article-list.component.ts:36",
+    "runsAlways": false,
+    "condition": "@if (loading()===LOADED) > @for @empty > @if (isFollowingFeed)",
+    "destination": "/",
+    "evidence": "article-list.component.ts:29 @if (loading() === LoadingState.LOADED), :30-32 @for ... @empty, :34 @if (isFollowingFeed), :36 <a routerLink=\"/\">"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/auth/auth.component.ts:76",
+    "runsAlways": false,
+    "condition": "inside subscribe observer next callback",
+    "destination": "['/']",
+    "evidence": "auth.component.ts:60 submitForm(); :75 observable...subscribe({ :76 next: () => void this.router.navigate(['/']) })"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/pages/editor/editor.component.ts:52",
+    "runsAlways": false,
+    "condition": "if (slug param) > subscribe callback > else of username check",
+    "destination": "['/']",
+    "evidence": "editor.component.ts:43 ngOnInit; :44 if (this.route.snapshot.params['slug']); :47 .subscribe(([article,{user}]) => ; :48 if (user.username === article.author.username) ... :51 else; :52 navigate(['/'])"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/pages/article/article.component.ts:117",
+    "runsAlways": false,
+    "condition": "inside delete().subscribe callback; after early return if (!article)",
+    "destination": "['/']",
+    "evidence": "article.component.ts:107 deleteArticle(); :109 if (!article) return; :116 .subscribe(() => { :117 void this.router.navigate(['/']); })"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/footer.component.html:3",
+    "runsAlways": true,
+    "condition": "none",
+    "destination": "/",
+    "evidence": "footer.component.html:1-3 <footer><div class=\"container\"><a ... routerLink=\"/\"> no control flow; footer.component.ts:6-7 selector app-layout-footer templateUrl footer.component.html; app.component.html:5 <app-layout-footer /> unconditional"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:3",
+    "runsAlways": true,
+    "condition": "none",
+    "destination": "/",
+    "evidence": "header.component.html:1-3 <nav><div class=\"container\"><a class=\"navbar-brand\" routerLink=\"/\"> before the @if at :5; header.component.ts:8-9 selector app-layout-header; app.component.html:1 <app-layout-header /> unconditional"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:10",
+    "runsAlways": false,
+    "condition": "@if (authState$ | async) > @if (authState === 'unauthenticated')",
+    "destination": "/",
+    "evidence": "header.component.html:5 @if (authState$ | async; as authState), :7 @if (authState === 'unauthenticated'), :10 <a routerLink=\"/\"> Home"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:27",
+    "runsAlways": false,
+    "condition": "@if (authState$ | async) > @if (authState === 'authenticated')",
+    "destination": "/",
+    "evidence": "header.component.html:5 @if (authState$ | async; as authState), :24 @if (authState === 'authenticated'), :27 <a routerLink=\"/\" routerLinkActive ...>"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:59",
+    "runsAlways": false,
+    "condition": "@if (authState$ | async) > @if (authState === 'unavailable')",
+    "destination": "/",
+    "evidence": "header.component.html:5 @if (authState$ | async; as authState), :56 @if (authState === 'unavailable'), :59 <a routerLink=\"/\" ...>"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:88",
+    "runsAlways": false,
+    "condition": "@if (authState$ | async) > @if (authState === 'loading')",
+    "destination": "/",
+    "evidence": "header.component.html:5 @if (authState$ | async; as authState), :85 @if (authState === 'loading'), :88 <a routerLink=\"/\"> Home"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/verify-email-token.component.ts:53",
+    "runsAlways": false,
+    "condition": "inside queryParams.subscribe async callback, under if (userId && token), inside try after awaits",
+    "destination": "[\"/\"]",
+    "evidence": "verify-email-token.component.ts:35 ngOnInit; :37 .subscribe(async (qParams) => ; :38 if (qParams.userId != null && qParams.token != null); :39 try; :40,:43 await; :53 this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/verify-email-token.component.ts:66",
+    "runsAlways": false,
+    "condition": "inside queryParams.subscribe async callback; after earlier return in the if/try branch",
+    "destination": "[\"/\"]",
+    "evidence": "verify-email-token.component.ts:37 .subscribe(async (qParams) => { ... :54 return; ... :66 this.router.navigate([\"/\"]); :67 })"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts:43",
+    "runsAlways": false,
+    "condition": "else branch of if (orgId && token && name); after await",
+    "destination": "[\"/\"]",
+    "evidence": "verify-recover-delete-org.component.ts:35 async ngOnInit; :36 await firstValueFrom(...); :37 if (qParams.orgId != null && ...); :42 } else {; :43 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts:58",
+    "runsAlways": false,
+    "condition": "in submit arrow property (bound as [bitAction], not an event call); after guard return and earlier await",
+    "destination": "[\"/\"]",
+    "evidence": "verify-recover-delete-org.component.ts:47 submit = async () => ; :48-50 if (token==null||orgId==null) return; :52 await this.apiService.deleteUsingToken; :58 await this.router.navigate([\"/\"]); template verify-recover-delete-org.component.html:20 [bitAction]=\"submit\" (property binding)"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/recover-delete.component.ts:66",
+    "runsAlways": false,
+    "condition": "in submit arrow property (bound as [bitSubmit]); after if (form invalid) return and earlier await",
+    "destination": "[\"/\"]",
+    "evidence": "recover-delete.component.ts:52 submit = async () => ; :53-55 if (this.recoverDeleteForm.invalid) return; :59 await this.apiService.postAccountRecoverDelete; :66 await this.router.navigate([\"/\"]); recover-delete.component.html:1 <form ... [bitSubmit]=\"submit\">"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/verify-recover-delete.component.ts:58",
+    "runsAlways": false,
+    "condition": "inside queryParams.subscribe async callback, else branch of if (userId && token && email)",
+    "destination": "[\"/\"]",
+    "evidence": "verify-recover-delete.component.ts:50 ngOnInit; :52 .subscribe(async (qParams) => ; :53 if (qParams.userId != null && ...); :57 } else {; :58 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/verify-recover-delete.component.ts:71",
+    "runsAlways": false,
+    "condition": "in submit arrow property (bound as [bitSubmit]); after earlier await",
+    "destination": "[\"/\"]",
+    "evidence": "verify-recover-delete.component.ts:63 submit = async () => ; :65 await this.apiService.postAccountRecoverDeleteToken; :71 await this.router.navigate([\"/\"]); verify-recover-delete.component.html:1 <form [bitSubmit]=\"submit\">"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts:76",
+    "runsAlways": false,
+    "condition": "in submit arrow property (bound as [bitSubmit]); after if (form invalid) return and earlier await",
+    "destination": "[\"/\"]",
+    "evidence": "request-sm-access.component.ts:59 submit = async () => ; :61-63 if (this.requestAccessForm.invalid) return; :70 await this.smLandingApiService.requestSMAccessFromAdmins; :76 await this.router.navigate([\"/\"]); request-sm-access.component.html:4 <form ... [bitSubmit]=\"submit\">. (The /create-organization call is at :80, not :76.)"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/billing/settings/sponsored-families.component.ts:194",
+    "runsAlways": false,
+    "condition": "if (!showFreeFamiliesPage), after await, in private helper",
+    "destination": "[\"/\"]",
+    "evidence": "sponsored-families.component.ts:130 async ngOnInit; :131 await firstValueFrom(...); :133 await this.preventAccessToFreeFamiliesPage(); :188 private async preventAccessToFreeFamiliesPage(); :189 await firstValueFrom(showFreeFamilies$); :193 if (!showFreeFamiliesPage) {; :194 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:86",
+    "runsAlways": false,
+    "condition": "inside queryParams.subscribe async callback, under if (token == null)",
+    "destination": "[\"/\"]",
+    "evidence": "families-for-enterprise-setup.component.ts:71 async ngOnInit; :74 .subscribe(async (qParams) => ; :75 const error = qParams.token == null; :76 if (error) {; :86 this.router.navigate([\"/\"]); :87 return;"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:112",
+    "runsAlways": false,
+    "condition": "inside subscribe callback, under if (isFreeFamilyPolicyEnabled), after awaits and earlier conditional return",
+    "destination": "[\"/\"]",
+    "evidence": "families-for-enterprise-setup.component.ts:74 .subscribe(async (qParams) => ; :95,:97 await; :105 if (this.preValidateSponsorshipResponse.isFreeFamilyPolicyEnabled) {; :112 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:187",
+    "runsAlways": false,
+    "condition": "inside try in private doSubmit, after awaits (postRedeemSponsorship, fullSync)",
+    "destination": "[\"/\"]",
+    "evidence": "families-for-enterprise-setup.component.ts:151-153 submit = async () => await this.doSubmit(...); :164 private async doSubmit; :169 try {; :175 await this.apiService.postRedeemSponsorship; :183 await this.syncService.fullSync(true); :187 this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:214",
+    "runsAlways": false,
+    "condition": "catch clause > if (showNewOrganization) > if (result === Deleted), after await",
+    "destination": "[\"/\"]",
+    "evidence": "families-for-enterprise-setup.component.ts:189 } catch (e) {; :198 if (this.showNewOrganization) {; :209 await lastValueFrom(dialog.closed); :211 if (result === DeleteOrganizationDialogResult.Deleted) {; :214 this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/settings/account.component.ts:260",
+    "runsAlways": false,
+    "condition": "if (result === DeleteOrganizationDialogResult.Deleted), after await dialog.closed",
+    "destination": "[\"/\"]",
+    "evidence": "account.component.ts:247 async deleteOrganization(); :255 const result = await lastValueFrom(dialog.closed); :257 if (result === DeleteOrganizationDialogResult.Deleted) {; :260 this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "../../libs/key-management-ui/src/key-connector/confirm-key-connector-domain.component.ts:116",
+    "runsAlways": false,
+    "condition": "in confirm arrow property, after earlier awaits",
+    "destination": "[\"/\"]",
+    "evidence": "confirm-key-connector-domain.component.ts:89 confirm = async () => ; :90 await convertNewSsoUserToKeyConnector; :110 await this.syncService.fullSync(true); :114 await this.onBeforeNavigation(); :116 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "../../libs/angular/src/auth/password-management/change-password/change-password.component.ts:193",
+    "runsAlways": false,
+    "condition": "try > else of if (rotateUserKey) > if (shouldNavigateToRoot), after awaits",
+    "destination": "[\"/\"]",
+    "evidence": "change-password.component.ts:147 async handlePasswordFormSubmit; :150 try {; :152 if (passwordInputResult.rotateUserKey) ... :162 } else {; :177/:188 await; :190 const shouldNavigateToRoot = ...; :191 if (shouldNavigateToRoot) {; :193 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "mifos",
+    "site": "src/app/zitadel/callback/callback.component.ts:39",
+    "runsAlways": false,
+    "condition": "else branch of if (success), inside try after await",
+    "destination": "['/login']",
+    "evidence": "callback.component.ts:28 async ngOnInit; :29 try {; :30 const success = await this.authenticationService.handleOAuthCallback(); :32 if (success) {; :34 } else {; :39 this.router.navigate(['/login'])"
+   },
+   {
+    "app": "mifos",
+    "site": "src/app/zitadel/callback/callback.component.ts:47",
+    "runsAlways": false,
+    "condition": "catch clause",
+    "destination": "['/login']",
+    "evidence": "callback.component.ts:28 async ngOnInit; :29 try { ... :41 } catch (error) {; :47 this.router.navigate(['/login'])"
+   }
+  ],
+  "b": [
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/pages/home/home.component.html:23",
+    "runsAlways": false,
+    "condition": "under structural directive *ifAuthenticated=\"true\" on the enclosing <li>",
+    "destination": "\"/\" (with [queryParams]=\"{ feed: 'following' }\")",
+    "evidence": "home.component.html:19 <li class=\"nav-item\" *ifAuthenticated=\"true\"> encloses the <a> whose routerLink=\"/\" is at :23; home mounted via router-outlet (app.routes.ts:15-21, app.component.html:3)"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/pages/home/home.component.html:35",
+    "runsAlways": true,
+    "condition": "none",
+    "destination": "\"/\"",
+    "evidence": "home.component.html:29 plain <li class=\"nav-item\"> (no directive), :31-36 <a ... routerLink=\"/\">; ancestors :14-18 have no structural directive/control-flow (the *ifAuthenticated banner at :2 closes at :12); home routed at path '' and 'tag/:tag' (app.routes.ts:15-21) into unconditional <router-outlet> (app.component.html:3)"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/components/article-list.component.ts:36",
+    "runsAlways": false,
+    "condition": "inline template: @if (loading()===LOADED) > @for @empty > @if (isFollowingFeed)",
+    "destination": "\"/\"",
+    "evidence": "article-list.component.ts:29 @if (loading() === LoadingState.LOADED), :30-32 @for ... @empty, :34 @if (isFollowingFeed), :36 <a routerLink=\"/\">"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/auth/auth.component.ts:76",
+    "runsAlways": false,
+    "condition": "inside subscribe observer next callback",
+    "destination": "['/']",
+    "evidence": "auth.component.ts:75 observable.pipe(...).subscribe({ :76 next: () => void this.router.navigate(['/']) \u2014 inside submitForm() (:60) observer member"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/pages/editor/editor.component.ts:52",
+    "runsAlways": false,
+    "condition": "ngOnInit if slug, inside subscribe callback, else of username check",
+    "destination": "['/']",
+    "evidence": "editor.component.ts:44 if (this.route.snapshot.params['slug']), :47 .subscribe(([article, { user }]) => {, :48 if (user.username === article.author.username) ... :51 else { :52 navigate(['/'])"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/features/article/pages/article/article.component.ts:117",
+    "runsAlways": false,
+    "condition": "inside subscribe callback after delete; also after early return guard",
+    "destination": "['/']",
+    "evidence": "article.component.ts:107 deleteArticle(), :109 if (!article) return; :116 .subscribe(() => { :117 void this.router.navigate(['/'])"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/footer.component.html:3",
+    "runsAlways": true,
+    "condition": "none",
+    "destination": "\"/\"",
+    "evidence": "footer.component.html:1-3 <footer><div class=\"container\"><a class=\"logo-font\" routerLink=\"/\"> with no directive/control flow; selector app-layout-footer (footer.component.ts:6) mounted unconditionally at app.component.html:5"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:3",
+    "runsAlways": true,
+    "condition": "none",
+    "destination": "\"/\"",
+    "evidence": "header.component.html:1-3 <nav><div class=\"container\"><a class=\"navbar-brand\" routerLink=\"/\">, before the @if at :5; selector app-layout-header (header.component.ts:8) mounted unconditionally at app.component.html:1"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:10",
+    "runsAlways": false,
+    "condition": "@if (authState$ | async) > @if (authState === 'unauthenticated')",
+    "destination": "\"/\"",
+    "evidence": "header.component.html:5 @if (authState$ | async; as authState) {, :7 @if (authState === 'unauthenticated') {, :10 <a routerLink=\"/\">"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:27",
+    "runsAlways": false,
+    "condition": "@if (authState$ | async) > @if (authState === 'authenticated')",
+    "destination": "\"/\"",
+    "evidence": "header.component.html:5 @if (authState$ | async; as authState), :24 @if (authState === 'authenticated') {, :27 <a routerLink=\"/\" ...>"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:59",
+    "runsAlways": false,
+    "condition": "@if (authState$ | async) > @if (authState === 'unavailable')",
+    "destination": "\"/\"",
+    "evidence": "header.component.html:5 @if (authState$ | async; as authState), :56 @if (authState === 'unavailable') {, :59 <a routerLink=\"/\" ...>"
+   },
+   {
+    "app": "realworld",
+    "site": "src/app/core/layout/header.component.html:88",
+    "runsAlways": false,
+    "condition": "@if (authState$ | async) > @if (authState === 'loading')",
+    "destination": "\"/\"",
+    "evidence": "header.component.html:5 @if (authState$ | async; as authState), :85 @if (authState === 'loading') {, :88 <a routerLink=\"/\">"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/verify-email-token.component.ts:53",
+    "runsAlways": false,
+    "condition": "inside queryParams subscribe callback, if userId&&token, try block after awaits",
+    "destination": "[\"/\"]",
+    "evidence": "verify-email-token.component.ts:35 ngOnInit, :37 .subscribe(async (qParams) => {, :38 if (qParams.userId != null && qParams.token != null), :39 try {, :40/:43/:44 awaits, :53 this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/verify-email-token.component.ts:66",
+    "runsAlways": false,
+    "condition": "inside queryParams subscribe callback (after earlier return path and awaits)",
+    "destination": "[\"/\"]",
+    "evidence": "verify-email-token.component.ts:37 .subscribe(async (qParams) => {, :54 return inside try, :66 this.router.navigate([\"/\"]) still within the callback closed at :67"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts:43",
+    "runsAlways": false,
+    "condition": "ngOnInit else branch (missing orgId/token/name), after await",
+    "destination": "[\"/\"]",
+    "evidence": "verify-recover-delete-org.component.ts:35 async ngOnInit, :36 await firstValueFrom(...), :37 if (qParams.orgId != null && ...), :42 } else {, :43 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.ts:58",
+    "runsAlways": false,
+    "condition": "submit arrow after early-return guard and after await deleteUsingToken",
+    "destination": "[\"/\"]",
+    "evidence": "verify-recover-delete-org.component.ts:47 submit = async () => {, :48-50 if (token==null||orgId==null) return, :52 await this.apiService.deleteUsingToken(...), :58 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/recover-delete.component.ts:66",
+    "runsAlways": false,
+    "condition": "submit arrow after invalid-form early return and after await",
+    "destination": "[\"/\"]",
+    "evidence": "recover-delete.component.ts:52 submit = async () => {, :53-55 if (this.recoverDeleteForm.invalid) return, :59 await this.apiService.postAccountRecoverDelete(request), :66 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/verify-recover-delete.component.ts:58",
+    "runsAlways": false,
+    "condition": "inside queryParams subscribe callback, else branch (params missing)",
+    "destination": "[\"/\"]",
+    "evidence": "verify-recover-delete.component.ts:50 ngOnInit, :52 .subscribe(async (qParams) => {, :53 if (userId/token/email != null), :57 } else {, :58 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/auth/verify-recover-delete.component.ts:71",
+    "runsAlways": false,
+    "condition": "submit arrow after await postAccountRecoverDeleteToken",
+    "destination": "[\"/\"]",
+    "evidence": "verify-recover-delete.component.ts:63 submit = async () => {, :65 await this.apiService.postAccountRecoverDeleteToken(request), :71 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts:76",
+    "runsAlways": false,
+    "condition": "submit arrow after invalid-form early return and after await",
+    "destination": "[\"/\"]",
+    "evidence": "request-sm-access.component.ts:59 submit = async () => {, :61-63 if (this.requestAccessForm.invalid) return, :70 await this.smLandingApiService.requestSMAccessFromAdmins(request), :76 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/billing/settings/sponsored-families.component.ts:194",
+    "runsAlways": false,
+    "condition": "private helper: if (!showFreeFamiliesPage), after await",
+    "destination": "[\"/\"]",
+    "evidence": "sponsored-families.component.ts:188 private async preventAccessToFreeFamiliesPage(), :189 await firstValueFrom(showFreeFamilies$), :193 if (!showFreeFamiliesPage) {, :194 await this.router.navigate([\"/\"]); called from ngOnInit :133 after await at :131"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:86",
+    "runsAlways": false,
+    "condition": "inside queryParams subscribe callback, if token missing",
+    "destination": "[\"/\"]",
+    "evidence": "families-for-enterprise-setup.component.ts:71 async ngOnInit, :74 .subscribe(async (qParams) => {, :75-76 const error = qParams.token == null; if (error) {, :86 this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:112",
+    "runsAlways": false,
+    "condition": "inside subscribe callback, if isFreeFamilyPolicyEnabled, after awaits and earlier return",
+    "destination": "[\"/\"]",
+    "evidence": "families-for-enterprise-setup.component.ts:74 .subscribe(async (qParams) => {, :87 return, :95/:97 awaits, :105 if (this.preValidateSponsorshipResponse.isFreeFamilyPolicyEnabled) {, :112 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:187",
+    "runsAlways": false,
+    "condition": "private doSubmit try block after awaits (postRedeemSponsorship, fullSync)",
+    "destination": "[\"/\"]",
+    "evidence": "families-for-enterprise-setup.component.ts:164 private async doSubmit, :169 try {, :175 await this.apiService.postRedeemSponsorship, :183 await this.syncService.fullSync(true), :187 this.router.navigate([\"/\"]); called from submit :152 and onOrganizationCreateSuccess :226"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:214",
+    "runsAlways": false,
+    "condition": "catch clause, if showNewOrganization, if result === Deleted, after await",
+    "destination": "[\"/\"]",
+    "evidence": "families-for-enterprise-setup.component.ts:189 } catch (e) {, :198 if (this.showNewOrganization) {, :209 await lastValueFrom(dialog.closed), :211 if (result === DeleteOrganizationDialogResult.Deleted) {, :214 this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "src/app/admin-console/organizations/settings/account.component.ts:260",
+    "runsAlways": false,
+    "condition": "if (result === Deleted) after await dialog.closed",
+    "destination": "[\"/\"]",
+    "evidence": "account.component.ts:247 async deleteOrganization(), :255 const result = await lastValueFrom(dialog.closed), :257 if (result === DeleteOrganizationDialogResult.Deleted) {, :260 this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "../../libs/key-management-ui/src/key-connector/confirm-key-connector-domain.component.ts:116",
+    "runsAlways": false,
+    "condition": "confirm arrow after several awaits",
+    "destination": "[\"/\"]",
+    "evidence": "confirm-key-connector-domain.component.ts:89 confirm = async () => {, :90 await convertNewSsoUserToKeyConnector, :110 await this.syncService.fullSync(true), :114 await this.onBeforeNavigation(), :116 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "bitwarden",
+    "site": "../../libs/angular/src/auth/password-management/change-password/change-password.component.ts:193",
+    "runsAlways": false,
+    "condition": "try > else (no key rotation) > if (shouldNavigateToRoot), after awaits",
+    "destination": "[\"/\"]",
+    "evidence": "change-password.component.ts:147 async handlePasswordFormSubmit, :150 try {, :152 if (rotateUserKey) ... :162 } else {, :177/:188 awaits, :191 if (shouldNavigateToRoot) {, :193 await this.router.navigate([\"/\"])"
+   },
+   {
+    "app": "mifos",
+    "site": "src/app/zitadel/callback/callback.component.ts:39",
+    "runsAlways": false,
+    "condition": "ngOnInit try, else branch of if (success), after await handleOAuthCallback",
+    "destination": "['/login']",
+    "evidence": "callback.component.ts:28 async ngOnInit, :29 try {, :30 const success = await this.authenticationService.handleOAuthCallback(), :32 if (success) {, :34 } else {, :39 this.router.navigate(['/login'])"
+   },
+   {
+    "app": "mifos",
+    "site": "src/app/zitadel/callback/callback.component.ts:47",
+    "runsAlways": false,
+    "condition": "catch clause of ngOnInit",
+    "destination": "['/login']",
+    "evidence": "callback.component.ts:28 async ngOnInit, :41 } catch (error) {, :47 this.router.navigate(['/login'])"
+   }
+  ]
+ }
+}
