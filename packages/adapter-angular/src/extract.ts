@@ -418,7 +418,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // anything else, means the full analysis, which is the only configuration shipped.
     const layers = process.env.UIGRAPH_SCOPE_LAYERS
     const scopes = attributeScopes(project.getSourceFiles(), routes, projectDir,
-      layers === 'owned' || layers === 'nesting' || layers === 'rooted' || layers === 'outlet' ? layers : 'full')
+      layers === 'owned' || layers === 'nesting' || layers === 'rooted' || layers === 'outlet' || layers === 'class' ? layers : 'full')
     soundiness.push(...scopes.notes)
     const targetsOf = (sf: SourceFile): RawTarget[] => [...templateTargets(sf, projectDir), ...routerCallTargets(sf)]
     // Anchors: a set of screens that is exactly subtree(r) gets one scope node, and the
@@ -505,9 +505,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     }
 
     // Navigation in a class that is not a component (a service, facade or store) fires on
-    // behalf of whatever injects it, so its scope is the join over those callers. The join is
-    // taken per class rather than per method, so it can be wider than the real scope and the
-    // edges are capped at may. A service nothing injects has no scope at all and is reported.
+    // behalf of whatever calls the member that holds it, so its scope is the join over the
+    // screens of those callers, which the call graph gives. Where the call graph reaches no
+    // caller, the join is taken over every component that injects the class, which can be wider
+    // than the real scope. The calls on the way carry conditions the analysis does not follow,
+    // so the edges are capped at may. A class nothing reaches has no scope at all and is reported.
     for (const sf of project.getSourceFiles()) {
       const f = sf.getFilePath()
       if (scopes.components.has(f) || /\.(spec|test|stories)\.ts$/.test(f)) continue
@@ -524,9 +526,21 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         shellEdges += edges.length - before
         continue
       }
+      // The call graph places what it reaches, member by member; the rest falls to the join below.
+      const keyOf = (t: RawTarget) => `${f}#${t.member}`
+      const atTop = ts.filter((t) => t.member !== undefined && scopes.memberTop.has(keyOf(t)))
+      const byMember = ts.filter((t) => t.member !== undefined && !scopes.memberTop.has(keyOf(t)) && (scopes.memberScreens.get(keyOf(t))?.size ?? 0) > 0)
+      if (atTop.length > 0) {
+        const before = edges.length
+        emitTargets(SHELL_NODE_ID, atTop, file, true, true)
+        shellEdges += edges.length - before
+      }
+      for (const t of byMember) for (const s of [...scopes.memberScreens.get(keyOf(t))!].sort()) emitTargets(s, [t], file, false, true)
+      const rest = ts.filter((t) => !atTop.includes(t) && !byMember.includes(t))
+      if (rest.length === 0) continue
       if (scopes.serviceShell.has(f)) {
         const before = edges.length
-        emitTargets(SHELL_NODE_ID, ts, file, true, true)
+        emitTargets(SHELL_NODE_ID, rest, file, true, true)
         shellEdges += edges.length - before
         continue
       }
@@ -537,10 +551,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const where = !isEffect ? 'a class nothing in the application injects; its scope is empty'
           : isInsideDir(f, projectDir) ? 'an NgRx effect; the shell stand-in for dispatch applies only at the full attribution level, so its scope could not be placed'
           : 'an NgRx effect outside the application directory; whether the application registers it is not read, so its scope could not be placed'
-        soundiness.push({ kind: 'unattributed-non-component', file, detail: `${ts.length} navigation call(s) in ${where}` })
+        soundiness.push({ kind: 'unattributed-non-component', file, detail: `${rest.length} navigation call(s) in ${where}` })
         continue
       }
-      for (const s of [...screens].sort()) emitTargets(s, ts, file, false, true)
+      for (const s of [...screens].sort()) emitTargets(s, rest, file, false, true)
     }
     if (shellEdges > 0 && edges.some((e) => e.from === SHELL_NODE_ID)) nodes.push({ id: SHELL_NODE_ID, route: null, componentPath: null, label: 'application shell (every screen)', kind: 'scope', scope: { kind: 'top' } })
 

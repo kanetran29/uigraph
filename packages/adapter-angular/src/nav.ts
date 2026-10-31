@@ -134,6 +134,12 @@ export interface RawTarget {
   /** Whether the target is a URL string, as `navigateByUrl` takes, rather than a command, as `routerLink` and `navigate` take. */
   url?: boolean
   /**
+   * The member of the class that holds a navigation call, as `Class.member`: a method, a field
+   * holding a function, an accessor, or `constructor`. Attribution places a call in a service by the callers of this
+   * member rather than by everything that injects the class.
+   */
+  member?: string
+  /**
    * Whether the navigation runs only on some executions of the code that holds it: under a
    * template control-flow block or structural directive, under a branch, inside a callback an
    * asynchronous result invokes, or after an await a rejection would skip. A must edge promises
@@ -383,6 +389,17 @@ function isOwnRoute(expr: Node | undefined): boolean {
   return /^inject\(\s*ActivatedRoute\s*\)$/.test(cls.getProperty(name)?.getInitializer()?.getText() ?? '')
 }
 
+/** The class member that holds `node`, as `Class.member` (`Class.constructor`), or undefined outside a named class. */
+export function enclosingMember(node: Node): string | undefined {
+  for (let a: Node | undefined = node.getParent(); a; a = a.getParent()) {
+    const cls = a.getParent()
+    if (!Node.isClassDeclaration(cls) || !cls.getName()) continue
+    if (Node.isConstructorDeclaration(a)) return `${cls.getName()}.constructor`
+    if (Node.isMethodDeclaration(a) || Node.isPropertyDeclaration(a) || Node.isGetAccessorDeclaration(a) || Node.isSetAccessorDeclaration(a)) return `${cls.getName()}.${a.getName()}`
+  }
+  return undefined
+}
+
 /** Parse `this.router.navigate([...])` and `this.router.navigateByUrl(...)` calls. */
 export function routerCallTargets(sf: SourceFile): RawTarget[] {
   const out: RawTarget[] = []
@@ -395,7 +412,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
     const loc = { line: lc.line, col: lc.column }
     if (member === 'navigateByUrl') {
       const arg0 = call.getArguments()[0]
-      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, url: true, conditional: callCondition(call) !== null })
+      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, url: true, member: enclosingMember(call), conditional: callCondition(call) !== null })
     } else {
       const arg0 = call.getArguments()[0]
       // `navigate(x)` takes a commands array. Written out, every element counts, not only the
@@ -409,7 +426,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
         arg0 && Node.isArrayLiteralExpression(arg0)
           ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf)
           : classifyTarget(arg0)
-      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, baseUnknown, conditional: callCondition(call) !== null })
+      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, baseUnknown, member: enclosingMember(call), conditional: callCondition(call) !== null })
     }
   }
   return out

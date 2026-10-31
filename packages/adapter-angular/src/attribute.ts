@@ -26,6 +26,7 @@ import { inlineTemplate } from './templates'
 import type { RouteInfo } from './routes'
 import { isInsideDir } from './resolve'
 import { templateCondition } from './conditions'
+import { memberScopes, type MemberKey } from './callgraph'
 
 export const SHELL_NODE_ID = 'n_scope_shell'
 
@@ -54,12 +55,18 @@ export interface ComponentInfo {
  *            `nesting`, is the one that stands for the prior work's reach.
  *   outlet   plus router-outlet descent: a routed component's own template also renders on
  *            every descendant screen, because they render inside its outlet.
- *   full     plus the injected-service join, which is what this thesis adds on top.
+ *   full     plus the call graph: a navigation in a class that is not a component is
+ *            attributed to the screens of the members that call the member holding it,
+ *            transitively, through declared types and provider bindings, and where no caller is
+ *            found, to every component that injects the class.
+ *
+ * `class` sits beside the chain rather than in it: it is `full` with the per-class join of an
+ * earlier version in place of the call graph, kept so the two can be compared.
  *
  * `full` is the default and the path it takes is untouched: the levels are applied by
  * withholding results at the end, never by computing them differently.
  */
-export type ScopeLayers = 'owned' | 'nesting' | 'rooted' | 'outlet' | 'full'
+export type ScopeLayers = 'owned' | 'nesting' | 'rooted' | 'outlet' | 'full' | 'class'
 
 export interface ScopeResult {
   /** Components that are not route components, with the screens they render on. */
@@ -105,6 +112,12 @@ export interface ScopeResult {
   firmScreensOf: Map<string, Set<string>>
   /** The shell components mounted unconditionally from the shell's root. */
   firmShell: Set<string>
+  /** Screens of each class member the call graph reaches from a component; empty below `full`. */
+  memberScreens: Map<MemberKey, Set<string>>
+  /** Members the call graph reaches from the shell. */
+  memberTop: Set<MemberKey>
+  /** How the call graph resolved the calls it followed. */
+  memberResolved: { direct: number; bound: number; subclass: number; unresolved: number }
 }
 
 /** The route whose subtree is exactly `screens`, if there is one (an anchor), else null. */
@@ -306,7 +319,7 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // Outlet descent is already folded into routeComponentScreens, so a level that excludes
   // descent must descend from the route components' OWN screens instead; taking it out of
   // the returned map afterwards would leave it in every nested component's scope.
-  const descentBase = layers === 'outlet' || layers === 'full' ? routeComponentScreens : ownScreens
+  const descentBase = layers === 'outlet' || layers === 'full' || layers === 'class' ? routeComponentScreens : ownScreens
   const screensOf = new Map<string, Set<string>>()
   const firmScreensOf = new Map<string, Set<string>>()
   for (const [graph, into] of [[nesting, screensOf], [firmNesting, firmScreensOf]] as const) {
@@ -376,9 +389,18 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // A service injected by the shell is top, which absorbs any screen set (join).
   for (const f of serviceShell) serviceScreens.delete(f)
 
+  // The call graph: every member of a component runs on the component's screens, and a member
+  // runs wherever a member that calls it does.
+  const seeds = new Map<string, Set<string> | null>()
+  for (const c of components.values()) {
+    const s = shell.has(c.file) || indirectShell.has(c.file) ? null : (routeComponentScreens.get(c.file) ?? screensOf.get(c.file))
+    if (s !== undefined) seeds.set(c.file, s)
+  }
+  const members = layers === 'full' ? memberScopes(appFiles, seeds) : { screens: new Map<MemberKey, Set<string>>(), top: new Set<MemberKey>(), resolved: { direct: 0, bound: 0, subclass: 0, unresolved: 0 } }
+
   // The ablation withholds mechanisms rather than disabling them, so every level is a subset
   // of `full` by construction and no level can differ from it for any other reason.
-  if (layers !== 'full') {
+  if (layers !== 'full' && layers !== 'class') {
     serviceScreens.clear()
     serviceShell.clear()
     if (layers === 'owned' || layers === 'nesting') {
@@ -390,7 +412,8 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   }
 
 
-  return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf, standIns: layers === 'full', firmScreensOf, firmShell }
+  return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf,
+    standIns: layers === 'full' || layers === 'class', firmScreensOf, firmShell, memberScreens: members.screens, memberTop: members.top, memberResolved: members.resolved }
 }
 
 /** Class names a component declares a dependency on: constructor parameter types and `inject(X)`. */

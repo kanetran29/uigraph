@@ -33,6 +33,9 @@ import path from 'node:path'
 import { extractorStamp } from './provenance.mjs'
 
 const LEVELS = ['owned', 'nesting', 'rooted', 'outlet', 'full']
+// Measured beside the chain, not in it: `full` with the per-class join of the earlier version in
+// place of the call graph, so what the call graph changes can be counted pair by pair.
+const BESIDE = ['class']
 const EXTRACTOR = path.resolve(path.join(import.meta.dirname, '..', '..'))
 const CLI = `pnpm -s --dir ${EXTRACTOR} exec tsx ${path.join(EXTRACTOR, 'packages', 'cli', 'src', 'cli.ts')}`
 
@@ -107,7 +110,7 @@ for (const slug of from ? [] : only) {
 
   const measured = {}
   try {
-    for (const level of LEVELS) {
+    for (const level of [...LEVELS, ...BESIDE]) {
       if (level === 'full') {
         // Not re-extracted: the level that produced the published graph is the graph on disk.
         measured.full = pairsOf(backup)
@@ -142,8 +145,12 @@ for (const slug of from ? [] : only) {
     }
   }
 
-  const row = { slug, screens: measured.full.screens, levels: {} }
-  for (const l of LEVELS) {
+  const row = { slug, screens: measured.full.screens, levels: {},
+    // Pairs only one of the two service treatments asserts: what the call graph drops from the
+    // per-class join, and what it reaches that the join never did (a service another calls).
+    classOnly: [...measured.class.pairs].filter((x) => !measured.full.pairs.has(x)).length,
+    fullOnly: [...measured.full.pairs].filter((x) => !measured.class.pairs.has(x)).length }
+  for (const l of [...LEVELS, ...BESIDE]) {
     const m = measured[l]
     row.levels[l] = { pairs: m.pairs.size, sites: m.sites.size, edges: m.edges, nodes: m.nodes,
       mean: m.sites.size ? m.pairs.size / m.sites.size : 0 }
@@ -153,7 +160,7 @@ for (const slug of from ? [] : only) {
     LEVELS.map((l) => `${l}=${row.levels[l].pairs}/${row.levels[l].sites}`).join(' '))
 }
 
-writeFileSync(path.join(outDir, 'ablation.json'), JSON.stringify({ levels: LEVELS, rows }, null, 2))
+writeFileSync(path.join(outDir, 'ablation.json'), JSON.stringify({ levels: LEVELS, beside: BESIDE, rows }, null, 2))
 
 const tex = flag('--tex')
 if (tex) {
@@ -187,7 +194,10 @@ if (tex) {
     out += `\\newcommand{\\Ablation${cap}AddedShare}{${((added / sum('full', 'sites')) * 100).toFixed(1)}\\,\\%}\n`
     out += `\\newcommand{\\Ablation${cap}SameSitesApps}{${same}}\n`
   }
-  for (const l of LEVELS) {
+  out += `\\newcommand{\\AblationClassOnlyPairs}{${rows.reduce((a, r) => a + r.classOnly, 0)}}\n`
+  out += `\\newcommand{\\AblationFullOnlyPairs}{${rows.reduce((a, r) => a + r.fullOnly, 0)}}\n`
+  out += `\\newcommand{\\AblationClassChangedApps}{${rows.filter((r) => r.classOnly + r.fullOnly > 0).length}}\n`
+  for (const l of [...LEVELS, ...BESIDE]) {
     const S = sum(l, 'sites'), P = sum(l, 'pairs')
     const cap = l[0].toUpperCase() + l.slice(1)
     out += `\\newcommand{\\Ablation${cap}Sites}{${S}}\n`
