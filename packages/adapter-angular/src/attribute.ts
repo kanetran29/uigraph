@@ -84,6 +84,14 @@ export interface ScopeResult {
   serviceScreens: Map<string, Set<string>>
   /** Services injected somewhere in the application shell: their scope is top. */
   serviceShell: Set<string>
+  /**
+   * Whether this level stands in for the relations Chapter 3 specifies and the prototype does
+   * not implement: an effect at the shell, and a navigation inside a guard attributed to the
+   * routes that name it. Both are approximations of the dispatch relation and the call graph,
+   * so a level below `full` must not carry them, or the lowest level is not the ownership
+   * baseline it is reported as. The service join is withheld by clearing its sets instead.
+   */
+  standIns: boolean
   notes: SoundinessNote[]
   /** subtree(r) for every route node id: r and all its descendants. */
   subtreeOf: Map<string, Set<string>>
@@ -355,7 +363,7 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   }
 
 
-  return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf }
+  return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf, standIns: layers === 'full' }
 }
 
 /** Class names a component declares a dependency on: constructor parameter types and `inject(X)`. */

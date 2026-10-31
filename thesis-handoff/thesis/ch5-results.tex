@@ -453,7 +453,14 @@ Table~\ref{tab:round2acct} together with the widths in this table rather than on
 The width above says how far the attribution is from doing nothing. It does not say whether
 the mechanisms that produce it earn their place, and the answer is not the same for all of
 them. Table~\ref{tab:ablation} extracts the corpus at \AblationLevels{} nested levels, each
-withholding every mechanism above it.
+withholding every mechanism above it. The withholding covers the stand-ins of
+Section~\ref{sec:implementation} as well as the implemented relations: a navigation inside a
+guard, attributed to the routes that name it, and an effect placed at the shell are
+approximations of the two relations the prototype does not implement, so a level below
+\emph{full} does not carry them either. Without that, the lowest level would not be the
+ownership baseline it is read as --- it credited direct ownership with sites that only the
+service and dispatch stand-ins place, and the service join's own contribution was correspondingly
+understated.
 
 \begin{table}[t]\footnotesize
 \caption{The corpus extracted at each attribution level. \emph{Sites} counts the source
