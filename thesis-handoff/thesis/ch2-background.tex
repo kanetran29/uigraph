@@ -140,12 +140,12 @@ practice not feasible. So the dynamic approach was used because there was no sta
 
 Client-side routing frameworks changed this situation. The route table is now a
 declared data structure in the source, a navigation is an attribute or a method call
-that names a route, and a guard is a named function attached to a route. Two static
+that names a route, and a guard is a named function attached to a route. Four static
 analyses of such a framework were found during the literature search for this thesis.
 Kurant's component dependency graph for React stops at the component rendering graph
 without addressing routing \cite{kurant2025}.
 
-The second does address routing. Oshima and Kishi extract page transitions from an
+The other three do address routing. Oshima and Kishi extract page transitions from an
 Angular application in order to model-check them with SPIN \cite{oshima2018model}. Their
 extraction reads the transition information from the route declarations in
 \texttt{RouterModule}, reads the navigable paths from every component rather than only
@@ -175,7 +175,25 @@ to four constructed applications and to two published ones of 1824 and 6893 line
 six and twenty-three pages, and reports whether the intended model was produced and
 whether injected transition faults were detected. What the extraction loses on an
 application it cannot fully read is not measured, which is the question this thesis
-takes as its subject. The work reported here is located between these two analyses and
+takes as its subject.
+
+Two recent works read a client-side router configuration statically for other ends. Rima et
+al.\ parse Angular sources and templates to build a graph of navigation structure,
+interaction sites and the conditions --- guards among them --- that decide whether an
+interaction is executable, enumerate workflows over that graph, and compile each workflow
+into a browser test; the graph is a coverage denominator for generated end-to-end tests
+\cite{rima2026e2e}. Zhang et al.\ parse
+the compiled JavaScript bundle rather than the sources, take declared routes as vertices and
+navigation calls as edges, and check an access-control policy against the screens reachable
+from an authorised one; their graph is declared an over-approximation and is not narrowed,
+and no navigation site is attributed to the screens it can fire from
+\cite{zhang2025veriflow}. This review found a measurement of extraction loss in neither. The
+problem addressed in this thesis is therefore neither new nor settled: the graph has been
+extracted statically for model checking, for test generation and for policy checking, and in
+none of those is the attribution of a site in shared code computed beyond containment or the
+loss quantified.
+
+The work reported here is located between these analyses and
 the dynamic tools described above.
 
 \section{Formal foundations}
@@ -665,16 +683,20 @@ it was derived from changes.
 \section{The gap}
 \label{sec:gap}
 
-Static extraction of navigation models from web applications has been directed almost
-entirely at server-rendered frameworks, in which a page is a file and a link an anchor;
-client-side routing frameworks have been modelled dynamically instead. The one static
-extraction from a client-side router configuration that the literature search for this thesis
-found, with navigation sites attributed to screens, is Oshima and Kishi's, and that work fixes
-the terms of the problem addressed here (Section~\ref{sec:dynamic-spa}). It does so, however, only for
+Static extraction of navigation models from web applications has been directed largely at
+server-rendered frameworks, in which a page is a file and a link an anchor; client-side
+routing frameworks have mostly been modelled dynamically instead. The literature search for
+this thesis found three static extractions from a client-side router configuration, each
+building its graph for a different consumer. Only one of them attributes navigation sites to
+screens: Oshima and Kishi's, which fixes the terms of the problem addressed here
+(Section~\ref{sec:dynamic-spa}). It does so, however, only for
 applications that declare no nested routes, no route parameters and no data-bound
 navigation, with attribution computed over component containment and the root component's
 own paths, with no modality
-on the transitions, and with no measurement of what the extraction fails to read. What
+on the transitions, and with no measurement of what the extraction fails to read. The other
+two put the graph to work without narrowing it: one as the coverage denominator of a
+generated end-to-end suite \cite{rima2026e2e}, one as the reachability relation of an
+access-control check, declared an over-approximation \cite{zhang2025veriflow}. What
 has not been covered by earlier work is that extraction without those restrictions:
 over nested and lazily loaded route trees, with guards carried onto the transitions as a
 modality, with attribution that follows calls and dispatch as well as containment, and
@@ -692,8 +714,10 @@ and the Java literature has shown repeatedly that framework behaviour can be mod
 explicitly to recover call edges that a general analysis loses
 \cite{sridharan2011f4f,antoniadis2020enterprise,chen2022jasmine}. Applying this to a
 client-side framework in order to recover navigation has been done, within the
-restrictions set out above \cite{oshima2018model}; what this review found no instance of is
-applying it without them, or measuring what the recovery misses. The other
+restrictions set out above \cite{oshima2018model} and, more recently, for test generation
+and for access-control checking \cite{rima2026e2e,zhang2025veriflow}; what this review found
+no instance of is an attribution that carries a navigation site in shared code beyond
+component containment, or a reported measurement of what the recovery fails to read. The other
 peer-reviewed static analysis in the Angular family targets AngularJS 1.x and checks
 template and controller consistency rather than navigation \cite{ocariza2015detecting},
 and the type information that TypeScript adds narrows a dispatch without settling it,

@@ -67,10 +67,12 @@ official Aalto thesis class is applied before submission.\par}
 A UI transition graph describes the screens of an application and the transitions a
 user can cause between them. Static extraction of such graphs is well established for
 Android, where each event handler can be attributed to the widget that registered it
-and thus to a single window. For web applications, navigation models have been built at design time, extracted statically from server-rendered applications, or obtained by crawling a running application. One earlier work extracts them
-statically from the route configuration of a client-side framework, for applications
-that declare no nested routes, no route parameters and no data-bound navigation, and
-does not measure what its extraction fails to read.
+and thus to a single window. For web applications, navigation models have been built at design time, extracted statically from server-rendered applications, or obtained by crawling a running application. Earlier work extracts them
+statically from the route configuration of a client-side framework for three different
+purposes --- model checking, restricted to applications that declare no nested routes, no
+route parameters and no data-bound navigation; end-to-end test generation; and
+access-control checking --- and in none of the three did this review find a measurement of
+what the extraction fails to read.
 
 This thesis measures static extraction on six open-source Angular applications with
 14 declared route entries to more than nine hundred, using a pinned corpus and five

@@ -85,9 +85,9 @@ bounds what either direction can show.}
 \label{sec:res-defects}
 
 Table~\ref{tab:defects} lists the defect classes and the evidence for each, separating
-the named evaluation methods from the other observations. Three of the five accepted
+the named evaluation methods from the other observations. Four of the five accepted
 classes rest on one named method and are carried to two by an observation: attribution,
-named outlets and constant paths. The attribution class is the weakest in this respect,
+guards, named outlets and constant paths. The attribution class is the weakest in this respect,
 with one method and three observations, and it is the class the analysis of
 Chapter~\ref{ch:analysis} addresses. Its observations are not weak evidence in
 themselves, since two applications producing no edges at all is hard to explain any other
@@ -109,8 +109,8 @@ Class & Evidence & Methods & All \\
 Attribution: navigation outside route components is invisible & mutation misses;
 multi-mount edge absent; manual audit; zero-edge applications & 1 & 4 \\
 Lazy module boundary not followed & route parser; test-source cross-check; mutation & 3 & 3 \\
-Guards unreliable in both directions & mutation; witness check; empty-path guard absent
-(Section~\ref{sec:res-mutation}) & 2 & 3 \\
+Guards unreliable in both directions & witness check; guard behind a route factory unread;
+\texttt{canActivate} written as a call (Section~\ref{sec:res-round2}) & 1 & 3 \\
 Named router outlets not modelled & test-source cross-check; source survey & 1 & 2 \\
 Constant-valued route paths not resolved & route parser; node-count collapse & 1 & 2 \\
 \addlinespace
@@ -627,13 +627,14 @@ harness \HarnessVersionMutation{}, a fixed seed and a quota of eight mutants per
 made to the mutation harness are described in Section~\ref{sec:corrections}.
 
 Table~\ref{tab:mutation-sample} shows how the sample was drawn. Over the three
-applications the harness found \MutCandidates{} candidate mutations and scored
-\MutScored{} of them. \MutExcluded{} were excluded, either because the construct a mutant
+applications the harness found \MutCandidates{} candidate mutations, sampled \MutSampled{}
+of them under the quota and scored \MutScored{}. \MutExcluded{} were excluded, either because the construct a mutant
 changes is absent from the graph, or, for a guard, because no edge enters the screen that
 guard protects. An excluded mutant carries no information about sensitivity, since it can
 only repeat a coverage gap that RQ1 has already counted. The exclusions are few here and
-were not always: on the graph produced without attribution, \MutBaseExcluded{} of
-\MutBaseScored{} are excluded, which is the same coverage gap seen from the mutation side. Where the quota capped an operator, the candidates left
+were not always: of the \MutBaseSampled{} mutants sampled against the graph produced
+without attribution, \MutBaseExcluded{} are excluded and \MutBaseScored{} remain, which is
+the same coverage gap seen from the mutation side. Where the quota capped an operator, the candidates left
 unsampled are reported rather than passed over.
 
 \begin{table}[t]\small
@@ -645,8 +646,8 @@ quota, and mutants excluded as confounded with a coverage gap.}
 
 Table~\ref{tab:mutation} gives the detection rate per operator, and Figure~\ref{fig:mutation} shows the same outcomes summed over the applications. Renaming a route path
 was detected in all \MutRenameScored{} scored mutants of the three applications. Deleting a
-\texttt{routerLink} was detected in all six scored mutants of realworld, and in four of
-those six the change appeared in the witness set rather than the edge set, because a
+\texttt{routerLink} was detected in all six scored mutants of realworld, and in
+\MutLinkWitnessOnly{} of them the change appeared in the witness set rather than the edge set, because a
 second identical link in the same template still produces the edge. That is the
 behaviour the graph should have, and it is the reason detection is judged on witnesses as
 well as edges. The operator found no candidates in alfresco, which binds
@@ -655,13 +656,15 @@ sampled candidates are detected, where on the graph without attribution they cou
 scored at all, because none of the links in the application shell produces a baseline edge.
 
 Retargeting a \texttt{navigate} call is the weakest operator and the one whose failures are
-most informative. All of them are in the two applications where several screens reach the
-same address: the mutant removes the edges to the old target, as predicted, and adds none to
+most informative. \MutRetargetWrong{} of its \MutRetargetScored{} mutants moved the graph
+but not as predicted, and all of them are in the two applications where several screens reach
+the same address: the mutant removes the edges to the old target, as predicted, and adds none to
 the new one, because the new target is an address those screens already reach and the edge
 the mutant would add is one the graph already holds. The harness excludes such a mutant
 where it can tell in advance (Section~\ref{sec:corrections}); where it cannot, the outcome
 is recorded as a change the graph made but not the predicted one, rather than counted as a
-detection.
+detection. The \MutRetargetNoChange{} that moved the graph not at all is a different case,
+and it is the coverage gap again rather than a limit of the operator.
 
 \begin{table}[t]\small
 \caption{Detection rate per mutation operator on the attributed graph, as detected over
@@ -681,42 +684,61 @@ detection for this operator is close to guaranteed by construction. It supplies 
 \MutScored{} scored mutants and \MutRenameDetected{} of the \MutDetected{} detections. What
 it tests is node extraction rather than the graph's response to a change in behaviour. The
 three operators that can fail are detected in \MutFallibleDetected{} of their
-\MutFallibleScored{} scored mutants. On alfresco the attributed graph carries one
-edge, so its rate is a node-level result and not a statement about transitions.
+\MutFallibleScored{} scored mutants: \MutLinkDetected{} of \MutLinkScored{} deleted
+\texttt{routerLink} bindings, \MutRetargetDetected{} of \MutRetargetScored{} retargeted
+\texttt{navigate} calls, and \MutGuardDetected{} of \MutGuardScored{} removed guards.
 
-\MutNoResponse{} mutants produced no change in the graph at all. Four of the five are guard
-removals and the fifth is a retargeted \texttt{navigate}, so this is no longer a class with
-one cause, and saying it was would overstate what the operator shows. Two of the four guard
-misses are guards the reader now names and could not before --- they are written as calls,
-\texttt{deepLinkGuard()} and \texttt{canAccessFeature(\ldots)} --- which means removing them
-changes the guard text the graph records without changing any edge, and the operator checks
-edges. The other two are guards on routes whose path is the empty string, which was a defect
-of the extractor when RQ4 was first run and is repaired: in realworld both children of the
-\texttt{editor} route declare \texttt{canActivate: [requireAuth]}, one under
-\texttt{':slug'} and one under the empty path, and on this instrument both entering edges
-carry the guard. What the operator still cannot see is a guard whose removal leaves the edge
-set identical, which is a limit of judging change at the edge rather than a defect of the
-graph.
+\MutNoResponse{} mutants produced no change in the graph at all: \MutNoResponseGuard{} guard
+removals and \MutNoResponseRetarget{} retargeted \texttt{navigate} call. The guard removals
+have one cause, and it is not the one this operator was written to find. A guard is recorded
+on the edges that enter the guarded screen, so a guard on a screen that no edge enters cannot
+be observed at all, which is precisely the condition under which the harness excludes a guard
+mutant. Reading the graph at each of the \MutGuardMissed{} sites finds that condition at
+every one of them: no edge enters \path{/shared} in alfresco, or \path{/accept-emergency},
+\path{/vault/:vaultId/my-items} and \path{/organizations/:organizationId} in bitwarden. The
+exclusion rule did not remove them because it identifies the guarded screen from the nearest
+preceding path literal in the source text, which is the empty string for
+\MutGuardMissedEmptyPath{} of the four --- and is the last child's path rather than the
+route's own in one of those --- and absent for the \MutGuardMissedNamedCall{} whose route
+names its path with a constant reference or a template literal. Whether the guarded route
+declares the empty path is therefore not what separates a detected guard mutant from a missed
+one: \MutGuardEmptyPathDetected{} of the \MutGuardEmptyPathScored{} scored guards the
+harness labels with the empty path are detected, the empty-path child of realworld's
+\texttt{editor} route among them, whose entering edge carries \texttt{requireAuth} on this
+instrument as the edge entering \path{/editor/:slug} does. What the operator cannot see is a
+guard whose removal leaves both the edge set and the guard text identical, and on this corpus
+every such case is a guard on a screen the graph does not reach, where there is no edge to
+record it on.
 
-The defect class \emph{guards unreliable in both directions} of
-Section~\ref{sec:res-defects} therefore has a second confirmation specific to this case.
-The other two failures are guards whose enclosing route path the harness could not
-resolve, so they are reported as failures of the operator and are not attributed to this
-defect.
+The mutation run therefore does not confirm the defect class \emph{guards unreliable in
+both directions} of Section~\ref{sec:res-defects} on this instrument. Every guard the run
+could observe behaved as the model requires, and the \MutGuardMissed{} it could not observe
+report RQ1's coverage gap a second time, which is what the exclusion rule exists to separate
+out and what it failed to separate here. The evidence for that class is the evidence
+Section~\ref{sec:res-round2} records: a guard carried by a route a wrapper function returns,
+and a \texttt{canActivate} element written as a call rather than as a name, neither read by
+the earlier extractor and both read now. The \MutExcluded{} mutants the rule did remove are
+guards on the screens of route segments \MutExcludedSegments{}, which no baseline edge
+enters.
 
-The eight failures divide by application as follows. One is in realworld, on the
-empty-path child of the \texttt{editor} route. Two are in alfresco, both on routes whose
-path is empty. Five are in bitwarden, of which three are on empty-path routes and two are
-the unresolved cases just described. The three applications do not declare their routes
+The \MutFailures{} failures divide by application as follows.
+\MutFailuresRealworld{} are in realworld, both of them retargeted \texttt{navigate} calls
+that moved the graph but not as the operator predicted. \MutFailuresAlfresco{} is in
+alfresco, the guard on \path{/shared}. \MutFailuresBitwarden{} are in bitwarden, which holds
+every remaining guard miss and every remaining retarget. The three applications do not declare their routes
 in the same way: realworld and alfresco export route arrays, while bitwarden declares
 its routes inside NgModule routing modules through \texttt{RouterModule.forRoot} and
-\texttt{forChild}. Empty-path guard misses occur under both styles.
+\texttt{forChild}. Guard misses occur under both styles, and under both they are screens
+the graph does not reach rather than guards it records wrongly.
 
 
 Of the \MutScored{} scored mutants, \MutDetected{} were detected. The graph responds to changes in the
-constructs it represents, and the two places where it does not are the coverage gap,
-which the exclusions measure, and the representation of guards on routes with an empty
-path.
+constructs it represents. Where it does not respond at all, the construct is not
+represented: the \MutExcluded{} mutants the exclusion rule removed and the
+\MutGuardMissed{} it should have removed are guards on screens no edge enters, and the
+\MutRetargetNoChange{} silent retarget is a \texttt{navigate} call in a component the
+analysis could not place under any screen, so the only edge it draws joins two nodes that
+are not screens.
 
 \section{What the repairs cost the claim (RQ5)}
 \label{sec:res-round2}

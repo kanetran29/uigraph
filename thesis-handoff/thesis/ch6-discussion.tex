@@ -88,19 +88,23 @@ required for applications that navigate from services.
 RQ4 gives a conditional answer, and the condition is RQ1. Renaming a route path was
 detected in every scored mutant in all three applications that were mutated. Deleting
 a \texttt{routerLink} was detected in every scored mutant, and retargeting a
-\texttt{Router.navigate} call in all but one of its own scored mutants. Every mutant
-that left the graph unchanged was a guard removal, and the one remaining miss is a
-retargeted \texttt{navigate} call in bitwarden whose old target the baseline had not
-resolved (Table~\ref{tab:mutation}). Most of the missed guards are declared on a route
-whose path is the empty string (Section~\ref{sec:res-mutation}). A second method
-confirms the mechanism independently of the mutation run: in realworld the edge
-entering \texttt{/editor} carries no guard although the route declares
-\texttt{canActivate}, while the edge entering \texttt{/editor/:slug} carries it. So a
-guard declared on an empty-path child route is not represented on the edges that enter
-that screen. This is a new instance of the class ``guards unreliable in both
-directions'' from Chapter~\ref{ch:results}, and that class is the one whose evidence is
-strongest, since this instance alone rests on two named methods that share no mechanism,
-mutation and direct inspection of the graph.
+\texttt{Router.navigate} call in \MutRetargetDetected{} of its \MutRetargetScored{}
+(Table~\ref{tab:mutation}). Of the \MutNoResponse{} mutants that left the graph unchanged,
+\MutNoResponseGuard{} are guard removals and \MutNoResponseRetarget{} is a retarget, and
+every one of them acts on a construct the graph does not hold at all rather than on one it
+holds wrongly (Section~\ref{sec:res-mutation}).
+
+An earlier state of this extractor was read directly off the graph for this class: in
+realworld the edge entering \texttt{/editor} carried no guard although the route declares
+\texttt{canActivate}, while the edge entering \texttt{/editor/:slug} carried it, and the
+difference between the two was put down to the empty path. That reading was right about the
+graph it was taken from and wrong about the cause. On the instrument this thesis ships both
+edges carry \texttt{requireAuth}, and the empty path is not what separates a detected guard
+mutant from a missed one (Section~\ref{sec:res-mutation}). The class ``guards unreliable in
+both directions'' of Chapter~\ref{ch:results}
+rests instead on what Section~\ref{sec:res-round2} measured, a guard carried by a route a
+wrapper function returns and a \texttt{canActivate} element written as a call; the mutation
+run neither confirms nor refutes it.
 
 Detection is conditional on coverage in a second sense, which the exclusion rule makes
 visible --- although far less of it than on the instrument this work began with. Against the
@@ -117,11 +121,11 @@ the right shape of claim, because an impact query is only ever asked about the p
 the application that the model represents, and the graph states which part that is
 through its witnesses.
 
-Guard removals were missed in all three mutated applications, and
-Section~\ref{sec:res-mutation} records the routing style of each of them: realworld and
-alfresco declare their routes as standalone arrays and bitwarden declares them in
-NgModule routing modules. The defect appears under both, so it is not a property of one
-routing style. That is the whole of the comparison the measurements support. The corpus
+Guard removals were missed in \MutGuardMissedApps{} of the three mutated applications, one
+that declares its routes as a standalone array and one that declares them in NgModule
+routing modules, so the miss is not a property of one routing style. Neither is it a property
+of how the graph represents a guard: every one is a guard on a screen no edge enters
+(Section~\ref{sec:res-mutation}). That is the whole of the comparison the measurements support. The corpus
 was not stratified by routing style and the other three applications were not mutated,
 so nothing more general about the two styles follows from this thesis.
 
@@ -144,8 +148,9 @@ served, authenticated against or crawled. Properties of the navigation structure
 then be asserted on every commit in the same way a type check is: that a screen still
 has at least one inbound deterministic transition, that a screen that was reachable from
 the shell still is, that a route path a test depends on has not been renamed. A guard
-assertion is the one obvious member of that list the graph cannot yet carry, because RQ4
-found guards on empty-path routes missing from the edges entering their screen, and an
+assertion is the one obvious member of that list the graph cannot yet carry, because a guard
+is recorded on the edges entering the guarded screen, so for a screen that no edge enters
+there is nothing for such an assertion to read (Section~\ref{sec:res-mutation}), and an
 assertion is worth less than nothing if it passes for the wrong reason.
 A dynamically built model cannot be used this way at the same cost, because it needs a
 running application, test data and an exploration budget, and it has to be rebuilt for
@@ -704,17 +709,17 @@ the fixpoint and the complexity bound for it are already stated. Guards that ret
 \texttt{UrlTree} belong to the same group, since a redirecting guard is itself a
 navigation site and not only a label.
 
-RQ4 exposed one defect in how the guard set of a screen was assembled from the route
-chain: a guard declared on a route whose path is the empty string did not reach the edges
-entering that screen. It has since been repaired, and the repair turned out to matter far
-more than its size suggested, because the same assembly ignored a guard carried by a route
-a wrapper function returns --- the construct through which one application in the corpus
+The witness check exposed a defect in how the guard set of a screen was assembled from the
+route chain: the assembly ignored a guard carried by a route a wrapper function returns ---
+the construct through which one application in the corpus
 routes every one of its feature tables. Reading it is what took that application's
 deterministic tier from an order of magnitude more edges down to the
 \RoundTwoMustEdgesMifos{} that remains, and took the corpus tier from
 \EarlierMustViolations{} violations of the soundness property to \RoundTwoMustViolations{}
 (Section~\ref{sec:res-round2}). The mutation
-operator that removes a guard is the test for both. The wider treatment of guards in
+operator that removes a guard is the obvious second test for it, and on this corpus it
+reaches only the guards the graph already records on an edge
+(Section~\ref{sec:res-mutation}). The wider treatment of guards in
 Chapter~\ref{ch:analysis}, where the guard of an edge is the conjunction of the
 conditions on the containment path with the guards of the target route, is the more
 substantial piece of work and would subsume it.
