@@ -18,7 +18,7 @@
 // The census is written as a result file as well as a table, so the figures the thesis quotes
 // come from a recorded measurement rather than from a database that is not committed.
 import { DatabaseSync } from 'node:sqlite'
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { extractorStamp } from './provenance.mjs'
 
@@ -41,6 +41,8 @@ const APPS = {
   mifos: '.',
 }
 const NAME = { k8sdash: 'k8s dashboard' }
+/** The application's name as a macro suffix; a TeX macro name holds no digit. */
+const MACRO = { realworld: 'Realworld', alfresco: 'Alfresco', ghostfolio: 'Ghostfolio', k8sdash: 'Kdash', bitwarden: 'Bitwarden', mifos: 'Mifos' }
 
 const MODALITIES = ['must', 'may', 'unknown']
 
@@ -76,11 +78,16 @@ function censusOf(dbPath) {
     modalityDrift: edges.filter((e) => (e.modality === 'unknown') !== (kind.get(e.to) !== 'screen')).length,
     // A must edge can cite constructs that earn only may on their own; these count the sites that
     // earn must, which is what RQ1's conversion counts, and every site the must edges cite.
-    mustSites: new Set(edges.filter((e) => e.modality === 'must').flatMap((e) => [e.witness, ...(e.mergedWitnesses || [])])
-      .filter((w) => w && (w.modality ?? 'must') === 'must').map((w) => `${w.file}:${w.loc?.line}`)).size,
+    mustSites: mustSiteKeys(edges).size,
     mustCitedSites: new Set(edges.filter((e) => e.modality === 'must').flatMap((e) => [e.witness, ...(e.mergedWitnesses || [])])
       .filter(Boolean).map((w) => `${w.file}:${w.loc?.line}`)).size,
   }
+}
+
+/** The `file:line` of every construct that earns must on its own, the unit RQ1 counts. */
+function mustSiteKeys(edges) {
+  return new Set(edges.filter((e) => e.modality === 'must').flatMap((e) => [e.witness, ...(e.mergedWitnesses || [])])
+    .filter((w) => w && (w.modality ?? 'must') === 'must').map((w) => `${w.file}:${w.loc?.line}`))
 }
 
 /** Refuses rather than emitting a part that does not account for its whole. */
@@ -91,6 +98,10 @@ function expectSum(total, parts) {
   }
 }
 
+// The chapter says every must construct was read against the source, so a census that finds one
+// the recorded reading does not list refuses to report the tier.
+const reading = new Set(JSON.parse(readFileSync(path.join(import.meta.dirname, 'results-must', 'tier-reading.json'), 'utf8'))
+  .sites.filter((r) => r.verdict === 'must').map((r) => `${r.app}:${r.site}`))
 const rows = []
 for (const [slug, sub] of Object.entries(APPS)) {
   const db = path.join(corpus, slug, sub, 'uigraph.db')
@@ -105,6 +116,9 @@ for (const [slug, sub] of Object.entries(APPS)) {
   if (c.modalityDrift) {
     throw new Error(`${slug}: ${c.modalityDrift} edges where carrying the unknown modality and reaching a node that is not a screen do not coincide`)
   }
+  const g = JSON.parse(new DatabaseSync(db).prepare("select json from docs where key='graph'").get()?.json || '{}')
+  const unread = [...mustSiteKeys(g.edges || [])].filter((k) => !reading.has(`${slug}:${k}`))
+  if (unread.length) throw new Error(`${slug}: ${unread.length} must construct(s) results-must/tier-reading.json does not list, e.g. ${unread[0]}`)
   rows.push({ slug, ...c })
 }
 
@@ -142,7 +156,9 @@ if (tex) {
     ['UnknownApps', rows.filter((r) => r.unknown > 0).length],
     ['ZeroMustApps', rows.filter((r) => r.must === 0).length],
     ['MustSites', all.mustSites], ['MustCitedSites', all.mustCitedSites],
+    ['MustApps', rows.filter((r) => r.must > 0).length],
     ['Apps', rows.length],
+    ...rows.flatMap((r) => [[`Must${MACRO[r.slug]}`, r.must], [`MustSites${MACRO[r.slug]}`, r.mustSites]]),
   ]) {
     if (!Number.isInteger(v) || v < 0) throw new Error(`${k} is ${v}, which is not a count`)
     out += `\\newcommand{\\${prefix}${k}}{${v}}\n`

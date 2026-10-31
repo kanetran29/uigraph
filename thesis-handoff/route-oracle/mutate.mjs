@@ -4,6 +4,12 @@
 // analysis? Seeds a known delta into the source, re-extracts, and compares the graph
 // against the predicted difference.
 //
+// Harness 1.7.0. Change against 1.6.0: a guard an edge loses is counted, not looked up. The
+// extractor writes a guard factory without its arguments, so two guards on one navigation can
+// print alike; bitwarden's settings route and its children all carry
+// organizationPermissionsGuard(...), and removing the settings route's left the edge with two
+// copies of the text instead of three, which 1.6.0 read as no guard lost and scored WRONG.
+//
 // Harness 1.6.0. Change against 1.5.0: REMOVE_GUARD is judged by the guard the edges lose. The
 // extractor now gates an edge only on the guards the navigation runs, so a guard on a route
 // that the source and the destination share does not appear on the edge between them; it
@@ -291,8 +297,8 @@ function discover(routes, screensOfRoute, rnd, alreadyReached) {
         check: (d) => d.guardChanged.some((c) => {
           const g = /: guard (.*)->(.*), modality /.exec(c)
           if (!g) return false
-          const after = new Set((g[2] ?? '').split(','))
-          return (g[1] ?? '').split(',').some((x) => x !== 'null' && !after.has(x))
+          const count = (list, x) => list.split(',').filter((y) => y === x).length
+          return (g[1] ?? '').split(',').some((x) => x !== 'null' && count(g[2] ?? '', x) < count(g[1] ?? '', x))
         }),
       })
     }
@@ -436,7 +442,7 @@ console.log(`  ${'OVERALL'.padEnd(20)} detected ${tD}/${tN} = ${tN ? ((tD / tN) 
 
 if (jsonOut) {
   fs.writeFileSync(jsonOut, JSON.stringify({
-    harnessVersion: '1.6.0', extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
+    harnessVersion: '1.7.0', extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
     baseline: { nodes: baseline.nodes.length, edges: baseline.edges.length, routes: routes.length },
     discovered, sampled, perOperator,
     detectionRate: tN ? tD / tN : null, scored: tN, detected: tD, results,
