@@ -1,0 +1,208 @@
+{
+  "slug": "ghostfolio",
+  "origin": "http://127.0.0.1:56747/en/",
+  "routerFound": true,
+  "results": [
+    {
+      "target": "/",
+      "recognized": true,
+      "at": "/home",
+      "after": "/home",
+      "alreadyThere": false,
+      "redirected": true,
+      "chain": [
+        {
+          "path": null,
+          "component": "_GfAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "home",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_GfHomePageComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_GfHomeOverviewComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/home",
+      "recognized": true,
+      "at": "/home",
+      "after": "/home",
+      "alreadyThere": true,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_GfAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "home",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_GfHomePageComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_GfHomeOverviewComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/portfolio",
+      "recognized": true,
+      "at": "/portfolio",
+      "after": "/portfolio",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_GfAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "portfolio",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_PortfolioPageComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_GfAnalysisPageComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/resources/personal-finance-tools/open-source-alternative-to-acemoney",
+      "recognized": true,
+      "at": "/resources/personal-finance-tools/open-source-alternative-to-acemoney",
+      "after": "/resources/personal-finance-tools/open-source-alternative-to-acemoney",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_GfAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "resources",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_ResourcesPageComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "personal-finance-tools",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "open-source-alternative-to-acemoney",
+          "component": null,
+          "lazyComponent": true
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/admin/users",
+      "recognized": true,
+      "at": "/admin/users",
+      "after": "/admin/users",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_GfAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "admin",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_AdminPageComponent",
+          "lazyComponent": false
+        },
+        {
+          "component": "_GfAdminUsersComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/zzz-not-a-route",
+      "recognized": true,
+      "at": "/home",
+      "after": "/home",
+      "alreadyThere": false,
+      "redirected": true,
+      "chain": [
+        {
+          "path": null,
+          "component": "_GfAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "home",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_GfHomePageComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_GfHomeOverviewComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    }
+  ]
+}

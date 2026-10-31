@@ -326,7 +326,9 @@ too late \cite{madsen2015static}. An Angular application has the same shape of p
 with the router, template event bindings and observable subscriptions in place of the
 Node.js event emitter.
 
-The closest peer-reviewed static analysis of a framework in the Angular family is
+Two peer-reviewed static analyses of a framework in the Angular family bear on this work.
+The one that addresses navigation is Oshima and Kishi's, discussed in
+Section~\ref{sec:dynamic-spa}. The other, which does not, is
 Aurebesh, by Ocariza et al.\ \cite{ocariza2015detecting}. It defines a consistency
 model for web applications built on an MVC framework and detects identifier and type
 inconsistencies between models, views and controllers, reporting a recall of 96.1\%
@@ -687,7 +689,7 @@ explicitly to recover call edges that a general analysis loses
 \cite{sridharan2011f4f,antoniadis2020enterprise,chen2022jasmine}. Applying this to a
 client-side framework in order to recover navigation has been done once, within the
 restrictions set out above \cite{oshima2018model}; what has not been done is to apply it
-without them, or to measure what the recovery misses. The one
+without them, or to measure what the recovery misses. The other
 peer-reviewed static analysis in the Angular family targets AngularJS 1.x and checks
 template and controller consistency rather than navigation \cite{ocariza2015detecting},
 and the type information that TypeScript adds narrows a dispatch without settling it,

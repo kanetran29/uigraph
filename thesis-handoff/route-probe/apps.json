@@ -1,0 +1,114 @@
+{
+  "harnessVersion": "1.1.0",
+  "versionNote": "1.1.0 adds answerability.mjs, which navigates a running application and records what the recogniser made of each address, and framework-answer.mjs, which classifies an address against the configuration and is held against those navigations by --self-check. The comparison gained counts.missedPrefixRedirect and counts.missedPrefixUnanswered, and a lazy subtree read only in part is now reported as a failure rather than as a whole reading. 1.1.0 also records answerAddresses per application: the addresses run-all.mjs navigates to, chosen as the ones Chapter 5 reasons about, and the self-check refuses a run in which any application's measurement is missing.",
+  "note": "One entry per corpus application. `dist` is the built output, relative to the --dist-root the runner is given; `appDir` is the directory the extractor measured, relative to --corpus-root, and is where its uigraph.db sits. `adaptations` records every change the build needed that the checked-out source did not already carry, so a reader can tell what the probe ran against.",
+  "builtWith": "Each application was built in its development configuration, because Angular removes the `window.ng` debug surface the probe reads when the application calls enableProdMode.",
+  "apps": [
+    {
+      "slug": "realworld",
+      "appDir": "realworld",
+      "dist": "realworld/angular-conduit/browser",
+      "base": null,
+      "adaptations": [
+        "angular.json names a global stylesheet inside a package the manifest does not depend on, so no install resolves it; the entry was emptied for the build. A stylesheet declares no route."
+      ],
+      "answerAddresses": [
+        "/",
+        "/login",
+        "/settings",
+        "/article/abc",
+        "/zzz-not-a-route"
+      ]
+    },
+    {
+      "slug": "alfresco",
+      "appDir": "alfresco/projects/aca-content",
+      "dist": "alfresco/content-ce",
+      "base": null,
+      "adaptations": [
+        "The runnable application is content-ce, which composes the measured library aca-content with the shell's own routes, so the framework's set is a superset of the measured directory's by construction."
+      ],
+      "answerAddresses": [
+        "/",
+        "/personal-files",
+        "/about",
+        "/rules",
+        "/login",
+        "/view/authentication-confirmation",
+        "/view/abc123",
+        "/search-libraries/view/abc123",
+        "/zzz-not-a-route",
+        "/personal-files(viewer:view/abc123)"
+      ]
+    },
+    {
+      "slug": "ghostfolio",
+      "appDir": "ghostfolio/apps/client",
+      "dist": "ghostfolio/apps/client",
+      "base": "/en/",
+      "adaptations": [
+        "The build emits one directory per locale under a base href, so the probe is served the whole tree and loads the English one."
+      ],
+      "answerAddresses": [
+        "/",
+        "/home",
+        "/portfolio",
+        "/resources/personal-finance-tools/open-source-alternative-to-acemoney",
+        "/admin/users",
+        "/zzz-not-a-route"
+      ]
+    },
+    {
+      "slug": "k8sdash",
+      "appDir": "k8sdash/modules/web",
+      "dist": "k8sdash",
+      "base": null,
+      "adaptations": [
+        "The workspace declares only a production configuration, so the build ran with the bare options, which is what leaves the debug surface in place."
+      ],
+      "answerAddresses": [
+        "/",
+        "/workloads",
+        "/cluster/nodes",
+        "/zzz-not-a-route",
+        "/namespace",
+        "/namespace(actionbar:)"
+      ]
+    },
+    {
+      "slug": "bitwarden",
+      "appDir": "bitwarden/apps/web",
+      "dist": "bitwarden",
+      "base": null,
+      "adaptations": [
+        "Built through the application's own webpack configuration with ENV=development."
+      ],
+      "answerAddresses": [
+        "/",
+        "/login",
+        "/vault",
+        "/reports",
+        "/settings/account",
+        "/zzz-not-a-route",
+        "/login(secondary:)",
+        "/login(environment-selector:)"
+      ]
+    },
+    {
+      "slug": "mifos",
+      "appDir": "mifos",
+      "dist": "mifos/web-app/browser",
+      "base": null,
+      "adaptations": [],
+      "answerAddresses": [
+        "/",
+        "/home",
+        "/collections",
+        "/remittances",
+        "/appusers",
+        "/collections/collection-sheet",
+        "/zzz-not-a-route"
+      ]
+    }
+  ]
+}

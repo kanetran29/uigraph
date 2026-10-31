@@ -1,0 +1,226 @@
+{
+  "slug": "mifos",
+  "origin": "http://127.0.0.1:56707",
+  "routerFound": true,
+  "results": [
+    {
+      "target": "/",
+      "recognized": true,
+      "at": "/login?returnUrl=%2Fhome",
+      "after": "/home",
+      "alreadyThere": false,
+      "redirected": true,
+      "chain": [
+        {
+          "path": null,
+          "component": "_WebAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_ShellComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "home",
+          "component": "_HomeComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/home",
+      "recognized": true,
+      "at": "/login?returnUrl=%2Fhome",
+      "after": "/home",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_WebAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_ShellComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "home",
+          "component": "_HomeComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/collections",
+      "recognized": true,
+      "at": "/login?returnUrl=%2Fcollections",
+      "after": "/collections",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_WebAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "collections",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_ShellComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": null,
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": false
+    },
+    {
+      "target": "/remittances",
+      "recognized": true,
+      "at": "/login?returnUrl=%2Fremittances%2Fprocess",
+      "after": "/remittances/process",
+      "alreadyThere": false,
+      "redirected": true,
+      "chain": [
+        {
+          "path": null,
+          "component": "_WebAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "remittances",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_ShellComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "process",
+          "component": "_ProcessRemittanceComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/appusers",
+      "recognized": true,
+      "at": "/login?returnUrl=%2Fappusers",
+      "after": "/appusers",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_WebAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "appusers",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_ShellComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_UsersComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/collections/collection-sheet",
+      "recognized": true,
+      "at": "/login?returnUrl=%2Fcollections%2Fcollection-sheet",
+      "after": "/collections/collection-sheet",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_WebAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "collections",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": "_ShellComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "",
+          "component": null,
+          "lazyComponent": false
+        },
+        {
+          "path": "collection-sheet",
+          "component": "_CollectionSheetComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": false,
+      "placesComponent": true
+    },
+    {
+      "target": "/zzz-not-a-route",
+      "recognized": true,
+      "at": "/zzz-not-a-route",
+      "after": "/zzz-not-a-route",
+      "alreadyThere": false,
+      "redirected": false,
+      "chain": [
+        {
+          "path": null,
+          "component": "_WebAppComponent",
+          "lazyComponent": false
+        },
+        {
+          "path": "**",
+          "component": "_NotFoundComponent",
+          "lazyComponent": false
+        }
+      ],
+      "catchAll": true,
+      "placesComponent": true
+    }
+  ]
+}
