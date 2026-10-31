@@ -52,6 +52,7 @@ import { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
 import { guardedRoute } from './guard-resolve.mjs'
+import { extractorStamp } from './provenance.mjs'
 
 const argv = process.argv.slice(2)
 const flag = (name, dflt) => {
@@ -422,7 +423,7 @@ console.log(`  ${'OVERALL'.padEnd(20)} detected ${tD}/${tN} = ${tN ? ((tD / tN) 
 
 if (jsonOut) {
   fs.writeFileSync(jsonOut, JSON.stringify({
-    harnessVersion: '1.5.0', repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
+    harnessVersion: '1.5.0', extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
     baseline: { nodes: baseline.nodes.length, edges: baseline.edges.length, routes: routes.length },
     discovered, sampled, perOperator,
     detectionRate: tN ? tD / tN : null, scored: tN, detected: tD, results,
