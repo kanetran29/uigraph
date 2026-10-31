@@ -523,9 +523,9 @@ excess at all.
 Both error sets reduce to a single cause, which is the useful part of the result. All
 \GTFullExcess{} excess pairs come from one site: the \texttt{navigate} inside
 \texttt{UserService.logout}. The service join attributes a navigating service to every screen
-whose components inject it, and this service is injected by thirteen components including the
-header, so the site is attributed to all ten screens; its only caller is a button on the
-settings screen. The analysis already treats that join as an over-approximation and caps edges
+whose components inject it. Ten components inject this one, the header among them, and the
+shell renders the header on every screen, so the site is attributed to every screen the
+application has; its only caller is a button on the settings screen. The analysis already treats that join as an over-approximation and caps edges
 from it at may (Section~\ref{sec:attribution}), so the model does not claim these ten
 transitions are certain --- but the scope is nine screens too wide, and this is the first
 measurement in the thesis that shows a computed scope to be too large rather than merely
@@ -900,8 +900,8 @@ it was published as unconditional.
 The second is smaller in the source and wider in effect. A \texttt{canActivate} element that
 is a \emph{call} rather than a name was not recognised, and an unrecognised element was
 skipped, so a route guarded only by a guard factory read as a route with no guard at all.
-bitwarden guards its root with \texttt{redirectGuard()} and fourteen deterministic edges
-pointed at that root. The rule that replaces it is the one that generalises beyond this
+bitwarden guards its root with \texttt{redirectGuard()}, so the deterministic edges that
+point at that root read as unconditional. The rule that replaces it is the one that generalises beyond this
 corpus: an element the reader cannot name gates the edge anyway, because refusing to read a
 guard must never be the reason an edge is called deterministic.
 

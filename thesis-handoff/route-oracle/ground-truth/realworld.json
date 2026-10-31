@@ -51,7 +51,7 @@
     { "site": "core/auth/auth.component.html:12", "target": "/register", "screens": ["/login", "/register"], "why": "same" },
     { "site": "core/auth/auth.component.ts:76", "target": "/", "screens": ["/login", "/register"], "why": "same" },
 
-    { "site": "core/auth/services/user.service.ts:86", "target": "/", "screens": ["/settings"], "why": "the navigate is inside logout(), and the only caller of logout() is settings.component.ts:57, bound to a button in settings.component.html:69. Every other component injects UserService without calling logout." },
+    { "site": "core/auth/services/user.service.ts:86", "target": "/", "screens": ["/settings"], "why": "the navigate is inside logout(), and the only caller of logout() is settings.component.ts:57, bound to a button in settings.component.html:69. Ten components inject UserService, the header among them, and none of the other nine calls logout; four further injectors are not components (two configuration files, a directive and an interceptor)." },
 
     { "site": "features/settings/settings.component.ts:72", "target": "/profile/:username", "screens": ["/settings"], "why": "routed component of /settings" },
 
