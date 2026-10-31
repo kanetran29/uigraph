@@ -45,7 +45,7 @@ cp "$W/guard-only/guard-only.json" results-must/guard-only.json
 echo "== ablation and ground truth"
 pnpm -s exec tsx scope-ablation.mjs --corpus "$W/corpus" --out "$W/ablation" --keep realworld --tex "$TEX/generated-ablation.tex"
 pnpm -s exec tsx score-ground-truth.mjs --truth ground-truth/realworld.json \
-  $(for l in owned nesting rooted outlet full; do echo --db $l="$W/ablation/realworld.$l.uigraph.db"; done) --tex "$TEX/generated-groundtruth.tex"
+  $(for l in owned nesting rooted outlet full class; do echo --db $l="$W/ablation/realworld.$l.uigraph.db"; done) --tex "$TEX/generated-groundtruth.tex"
 
 echo "== mutation run, on a copy of the corpus"
 rm -rf "$W/corpus-rq4"; mkdir -p "$W/corpus-rq4"
