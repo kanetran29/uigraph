@@ -7,13 +7,15 @@
       "scopes": 0,
       "nonScreens": 0,
       "edges": 25,
-      "must": 0,
-      "may": 25,
+      "must": 1,
+      "may": 24,
       "unknown": 0,
       "sourceNotScreen": 0,
       "targetNotScreen": 0,
       "maySourceNotScreen": 0,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 1,
+      "mustCitedSites": 2
     },
     {
       "slug": "alfresco",
@@ -28,7 +30,9 @@
       "sourceNotScreen": 0,
       "targetNotScreen": 10,
       "maySourceNotScreen": 0,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     },
     {
       "slug": "ghostfolio",
@@ -43,7 +47,9 @@
       "sourceNotScreen": 0,
       "targetNotScreen": 28,
       "maySourceNotScreen": 0,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     },
     {
       "slug": "k8sdash",
@@ -58,7 +64,9 @@
       "sourceNotScreen": 0,
       "targetNotScreen": 7,
       "maySourceNotScreen": 0,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     },
     {
       "slug": "bitwarden",
@@ -73,7 +81,9 @@
       "sourceNotScreen": 0,
       "targetNotScreen": 7,
       "maySourceNotScreen": 0,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     },
     {
       "slug": "mifos",
@@ -88,7 +98,9 @@
       "sourceNotScreen": 0,
       "targetNotScreen": 85,
       "maySourceNotScreen": 0,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     }
   ],
   "all": {
@@ -97,12 +109,14 @@
     "scopes": 0,
     "nonScreens": 130,
     "edges": 5859,
-    "must": 0,
-    "may": 5722,
+    "must": 1,
+    "may": 5721,
     "unknown": 137,
     "sourceNotScreen": 0,
     "targetNotScreen": 137,
     "maySourceNotScreen": 0,
-    "modalityDrift": 0
+    "modalityDrift": 0,
+    "mustSites": 1,
+    "mustCitedSites": 2
   }
 }

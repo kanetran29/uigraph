@@ -7,13 +7,15 @@
       "scopes": 2,
       "nonScreens": 0,
       "edges": 55,
-      "must": 0,
-      "may": 55,
+      "must": 1,
+      "may": 54,
       "unknown": 0,
       "sourceNotScreen": 0,
       "targetNotScreen": 0,
       "maySourceNotScreen": 0,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 1,
+      "mustCitedSites": 3
     },
     {
       "slug": "alfresco",
@@ -28,7 +30,9 @@
       "sourceNotScreen": 7,
       "targetNotScreen": 19,
       "maySourceNotScreen": 1,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     },
     {
       "slug": "ghostfolio",
@@ -43,7 +47,9 @@
       "sourceNotScreen": 18,
       "targetNotScreen": 140,
       "maySourceNotScreen": 9,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     },
     {
       "slug": "k8sdash",
@@ -58,7 +64,9 @@
       "sourceNotScreen": 5,
       "targetNotScreen": 103,
       "maySourceNotScreen": 2,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     },
     {
       "slug": "bitwarden",
@@ -66,14 +74,16 @@
       "screens": 98,
       "scopes": 7,
       "nonScreens": 154,
-      "edges": 271,
+      "edges": 270,
       "must": 0,
-      "may": 183,
+      "may": 182,
       "unknown": 88,
       "sourceNotScreen": 116,
       "targetNotScreen": 88,
       "maySourceNotScreen": 95,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     },
     {
       "slug": "mifos",
@@ -81,14 +91,16 @@
       "screens": 606,
       "scopes": 14,
       "nonScreens": 120,
-      "edges": 10636,
+      "edges": 10627,
       "must": 0,
-      "may": 10514,
+      "may": 10505,
       "unknown": 122,
       "sourceNotScreen": 13,
       "targetNotScreen": 122,
       "maySourceNotScreen": 10,
-      "modalityDrift": 0
+      "modalityDrift": 0,
+      "mustSites": 0,
+      "mustCitedSites": 0
     }
   ],
   "all": {
@@ -96,13 +108,15 @@
     "screens": 892,
     "scopes": 39,
     "nonScreens": 481,
-    "edges": 11601,
-    "must": 0,
-    "may": 11129,
+    "edges": 11591,
+    "must": 1,
+    "may": 11118,
     "unknown": 472,
     "sourceNotScreen": 159,
     "targetNotScreen": 472,
     "maySourceNotScreen": 117,
-    "modalityDrift": 0
+    "modalityDrift": 0,
+    "mustSites": 1,
+    "mustCitedSites": 3
   }
 }

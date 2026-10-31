@@ -223,8 +223,8 @@
         "guardChanged": [
           "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard->PluginEnabledGuard, modality may->may",
           "/profile -> /personal-files: guard ExtensionsDataLoaderGuard->null, modality may->must",
-          "/personal-files -> /personal-files: guard ExtensionsDataLoaderGuard->null, modality may->must",
-          "/personal-files/:folderId -> /personal-files/:folderId: guard ExtensionsDataLoaderGuard->null, modality may->must"
+          "/personal-files -> /personal-files: guard ExtensionsDataLoaderGuard->null, modality may->may",
+          "/personal-files/:folderId -> /personal-files/:folderId: guard ExtensionsDataLoaderGuard->null, modality may->may"
         ]
       }
     },

@@ -1,0 +1,11 @@
+{
+ "edges": 56,
+ "sitesCited": 80,
+ "mustEdges": 0,
+ "mustClean": 0,
+ "mustBad": [],
+ "tally": {
+  "OVER_APPROX": 40,
+  "NO_CONSTRUCT": 13
+ }
+}

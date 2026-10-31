@@ -103,8 +103,11 @@ corrections described in Section~\ref{sec:corrections}.
 
 \textbf{Conversion ratio (RQ1).} The conversion ratio is the fraction of navigation
 constructs that are witnessed by at least one must edge. When several constructs
-produce the same edge, the extractor keeps the first as the edge's witness and records
-the others as merged witnesses, so every construct that yields an edge can be traced.
+produce the same edge, the extractor keeps the most certain as the edge's witness and records
+the others as merged witnesses, each with the modality it earns on its own, so every construct
+that yields an edge can be traced; on the current instrument a construct counts as converted
+only where it earns must itself, while the round-two tables of Chapter~\ref{ch:results}, measured
+before witnesses carried a modality, count every construct a must edge cites.
 The ratio is computed over constructs rather than edges because the number of edges
 depends on representation: the same construct can be stored as one anchored edge or
 as one edge per screen (Section~\ref{sec:attribution}). An earlier version of this
