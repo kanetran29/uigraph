@@ -1068,8 +1068,10 @@ Claim~\ref{claim:must} now ranges on this corpus over \MustWitnessEdges{} edges,
 be a soundness result in any statistical sense. What the corrections establish is narrower: every
 must edge the corpus yields has been read, construct by construct, against the rules the claim
 rests on, and the rules themselves are each covered by a test that fails when the rule is deleted
-(\SweepRules{} rules, \SweepFirstPass{} covered by the suite as it stood and \SweepAdded{} by tests
-added after a sweep found them uncovered).
+(\SweepMutants{} mutants, each deleting one rule or one term of a rule from a copy of the
+extractor at \texttt{\SweepCommit}; \SweepFirstPass{} were killed by the suite as it stood, and the
+\SweepAdded{} that survived, and \SweepExtra{} further mutants splitting a compound term, are killed by
+tests added after the sweep).
 
 Read over the whole graph rather than the must tier, the figures are counted per cited source
 location and not per edge, because that is what the check opens: the \RoundTwoEdges{} edges of
