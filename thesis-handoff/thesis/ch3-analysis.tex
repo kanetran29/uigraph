@@ -34,14 +34,42 @@ in the source that agree on source, event kind, guard and target yield the same 
 and the paragraph on witnesses below says how they are traced.
 \end{definition}
 
+\textbf{What the materialised graph carries beyond the model.} The extractor emits two node
+kinds that are not screens, and the edge relation above does not range over them. An
+\emph{unplaced origin} stands for a navigation site the analysis could not place under any
+screen; a \emph{dynamic target} stands for a destination only the run time knows. Both are
+kept in the output rather than dropped, because a site the analysis cannot place is a loss
+Chapter~\ref{ch:results} has to count, and a destination it cannot name is one the run time
+could still take. Table~\ref{tab:census} reports how much of each graph they are. Over the
+corpus \CensusOtherNodes{} of the \CensusNodes{} nodes are of these two kinds,
+\CensusOtherNodeShare{} of them, and \CensusTargetNotScreen{} of the \CensusEdges{} edges
+reach a dynamic target. A further \CensusMaySourceNotScreen{} edges leave an unplaced origin
+and are held at \emph{may}, so they sit inside a tier Chapter~\ref{ch:results} reports while
+their source is not a screen. An edge that reaches a dynamic target asserts that the screen it
+leaves has an outgoing navigation whose destination the analysis could not name, and asserts
+nothing about which screen is reached. Claim~\ref{claim:must} and the conversion ratio RQ1 is
+defined on range over the edges whose source and target are both screens.
+
+\begin{table}[t]\small
+\caption{What the published graphs are made of: nodes by kind, where an anchor stands for a
+whole subtree of screens and \emph{other} counts unplaced origins and dynamic targets
+together, and edges by modality.}
+\label{tab:census}
+\TabCensus
+\end{table}
+
 A \emph{must} edge is claimed to fire for every input on which the enclosing code
 executes; a \emph{may} edge is possible but
 conditional; \emph{unknown} marks an edge whose modality could not be determined. The
 third modality carries the destinations the analysis cannot name: an edge into the
 \texttt{u\_}\,sink of Section~\ref{sec:res-round2}, which records that a screen is left by
-an event whose target only the run time knows. The pinned extractor the tables of
-Sections~\ref{sec:res-baseline} to~\ref{sec:res-mutation} measure produces no such edge, so those
-tables report the \emph{must} and \emph{may} tiers only.
+an event whose target only the run time knows. The pinned extractor does produce such edges:
+\CensusUnknown{} of the \CensusEdges{} edges in the corpus, in \CensusUnknownApps{} of the
+\CensusApps{} applications. Carrying this modality and reaching a node that is not a screen
+coincide exactly, on every edge of every corpus graph, and the census refuses to report a graph
+in which they come apart. The conversion ratio of RQ1 and the soundness property of
+Claim~\ref{claim:must} are defined over the other two tiers, so the unknown tier is counted in
+the edge totals and in no rate.
 Guards are stored as source text and are never evaluated by the tool. A consumer of
 the graph can read a guard, but is not expected to decide whether it holds. This keeps
 the set $G$ opaque and means that the model does not need to represent application
@@ -344,8 +372,7 @@ Figure~\ref{fig:anchored} contrasts the two representations.
 
 \begin{claim}[Expansion]
 \label{claim:expansion}
-The expansion of the anchored edge set equals the materialised edge set, modulo the
-declared approximation list of Section~\ref{sec:approximations}.
+The expansion of the anchored edge set equals the materialised edge set.
 \end{claim}
 
 \section{Implementation}
