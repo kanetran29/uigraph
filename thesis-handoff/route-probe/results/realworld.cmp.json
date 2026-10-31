@@ -1,0 +1,43 @@
+{
+  "slug": "realworld",
+  "counts": {
+    "probeRoutes": 14,
+    "frameworkScreens": 10,
+    "frameworkLeaves": 10,
+    "frameworkShells": 0,
+    "extractorNodes": 10,
+    "oracleDeclared": 10,
+    "invented": 0,
+    "missed": 0,
+    "missedPrefixOnly": 0,
+    "missedPrefixRedirect": 0,
+    "missedPrefixUnanswered": 0,
+    "sharedBlindSpot": 0,
+    "matcherRoutes": 0
+  },
+  "frameworkAddresses": [
+    "/",
+    "/tag/:tag",
+    "/login",
+    "/register",
+    "/settings",
+    "/profile/:username",
+    "/profile/:username/favorites",
+    "/editor",
+    "/editor/:slug",
+    "/article/:slug"
+  ],
+  "invented": [],
+  "missed": [],
+  "missedPrefixOnly": [],
+  "missedPrefixRedirect": [],
+  "missedPrefixUnanswered": [],
+  "sharedBlindSpot": [],
+  "oracleOnly": [],
+  "frameworkOnlyVsOracle": [],
+  "lazyFailures": [],
+  "routeSet": {
+    "declares": false,
+    "details": []
+  }
+}

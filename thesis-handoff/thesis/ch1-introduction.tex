@@ -192,9 +192,11 @@ them without a single wrong attribution, and all \GTFullExcess{} of the wrong on
 analysis makes come from one rule it adds (Section~\ref{sec:res-groundtruth}). The computed scopes are also
 wide: narrower than attributing every site to every screen by a factor between
 \BaselineFactorMin{} and \BaselineFactorMax{}, which at the low end names most of an
-application (Section~\ref{sec:res-width}). What is established is therefore that the mechanism
-is more accurate than the simpler alternatives on the application that could be checked
-exhaustively, not that the same holds on the largest. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
+application (Section~\ref{sec:res-width}). What is established on the application that could be
+checked exhaustively is therefore a trade and not an improvement: the mechanism finds more of
+the real attributions than the simpler alternatives and is the only one that invents any, so
+which of them is preferable depends on whether recall or precision is wanted. Whether even
+that trade holds on the largest application is not established. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
 has adapters for other frameworks, but all measurements reported here concern Angular
 applications.
 

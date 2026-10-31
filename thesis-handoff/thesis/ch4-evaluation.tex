@@ -151,9 +151,12 @@ the whole corpus at each level. \emph{Owned} attributes a navigation site to the
 routed component's own file holds it, which is direct ownership and is what resolving the
 owning object yields in the Android literature. \emph{Nesting} adds component containment: a
 component reached through template element selectors is attributed to the screens of the
-components that render it. That level is the mechanism of Oshima and Kishi, so it measures how
-far the prior work of Section~\ref{sec:dynamic-spa} reaches on this corpus. \emph{Outlet} adds
-router-outlet descent, and \emph{full} adds the shell rule and the injected-service join. The
+components that render it. \emph{Rooted} adds the shell rule, so a component the application's
+root renders is attributed to every screen; since Oshima and Kishi assemble their page
+information from the root component as well as from the components beneath it
+(Section~\ref{sec:dynamic-spa}), that level, and not containment alone, is the one that
+measures how far the prior work reaches on this corpus. \emph{Outlet} adds router-outlet
+descent, and \emph{full} adds the injected-service join. The
 levels are nested because the implementation withholds results rather than computing them
 differently, and the harness checks that on the real graphs rather than assuming it: a
 (site, screen) pair present at one level and absent at the next is a defect in the switch, and
@@ -281,13 +284,25 @@ Four of the five read the application's sources. That shared footing is their co
 \input{figures/fig-oracles}
 
 
-\begin{table}[t]\small
+\begingroup\small
+% Taller than a page, so it breaks rather than overflowing one.
+\begin{xltabular}{\textwidth}{@{}lYY@{}}
 \caption{Evaluation methods, the quantity each measures, and the blind spot each has.}
-\label{tab:methods}
-\begin{tabularx}{\textwidth}{@{}lYY@{}}
+\label{tab:methods}\\
 \toprule
 Method & Quantity & Blind spot \\
 \midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{\itshape Table~\ref{tab:methods} continued from the previous page}\\
+\toprule
+Method & Quantity & Blind spot \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r@{}}{\itshape continued on the next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
 Witness check & Must-tier precision. For every must edge, the witness file is
 re-parsed at the claimed line, the construct kind and target are compared, and the
 destination node's address is tested against the independent route set. &
@@ -347,9 +362,8 @@ address a route claims through a \texttt{UrlMatcher} cannot be decided from the
 configuration at all, since the function is not spelled out there. A
 workspace application that composes the library a measurement is scoped to mounts the
 shell's own routes as well, so part of any difference is scope and not reading. \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\end{xltabular}
+\endgroup
 
 \subsection{Preconditions}
 

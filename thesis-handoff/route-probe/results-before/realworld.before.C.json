@@ -1,0 +1,176 @@
+{
+  "appDir": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/realworld",
+  "db": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/corpus/realworld/uigraph.db",
+  "filesParsed": 44,
+  "declaredRoutesTotal": 14,
+  "byKind": {
+    "SCREEN": 11,
+    "PREFIX": 3
+  },
+  "uniqueScreenPaths": 10,
+  "guardedScreenPaths": 5,
+  "blindSpots": [],
+  "excluded": {
+    "storybookFiles": 0
+  },
+  "comparison": {
+    "declaredScreens": 10,
+    "graphNodes": 10,
+    "matched": 10,
+    "coverage": 1,
+    "missing": [],
+    "extraNodes": []
+  },
+  "routes": [
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 15,
+      "component": "./features/article/pages/home/home.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/tag/:tag",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 19,
+      "component": "./features/article/pages/home/home.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/login",
+      "kind": "SCREEN",
+      "guards": [
+        "[() => inject(UserService).isAuthenticated.pipe(map(isAuth => !isAuth))]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 23,
+      "component": "./core/auth/auth.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/register",
+      "kind": "SCREEN",
+      "guards": [
+        "[() => inject(UserService).isAuthenticated.pipe(map(isAuth => !isAuth))]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 28,
+      "component": "./core/auth/auth.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings",
+      "kind": "SCREEN",
+      "guards": [
+        "[requireAuth]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 33,
+      "component": "./features/settings/settings.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/profile",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 38,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/profile",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 5,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/profile/:username",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 8,
+      "component": "ProfileComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/profile/:username",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 12,
+      "component": "./components/profile-articles.component",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/profile/:username/favorites",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 16,
+      "component": "./components/profile-favorites.component",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/editor",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 42,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/editor",
+      "kind": "SCREEN",
+      "guards": [
+        "[requireAuth]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 45,
+      "component": "./features/article/pages/editor/editor.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/editor/:slug",
+      "kind": "SCREEN",
+      "guards": [
+        "[requireAuth]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 50,
+      "component": "./features/article/pages/editor/editor.component",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/article/:slug",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 57,
+      "component": "./features/article/pages/article/article.component",
+      "constantPath": false,
+      "lazy": false
+    }
+  ]
+}

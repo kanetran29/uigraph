@@ -451,7 +451,7 @@ the mechanisms that produce it earn their place, and the answer is not the same 
 them. Table~\ref{tab:ablation} extracts the corpus four times, withholding one mechanism at a
 time.
 
-\begin{table}[t]\small
+\begin{table}[t]\footnotesize
 \caption{The corpus extracted at each attribution level. \emph{Sites} counts the source
 constructs the level places on at least one screen, \emph{pairs} the (site, screen)
 attributions it asserts. The levels are nested, and the harness refuses to write this table
@@ -466,8 +466,10 @@ full analysis places, and containment raises that only to \AblationNestingSites{
 rule is what changes the picture: \emph{rooted} places \AblationRootedSites{} sites,
 \AblationRootedSiteShare{} of the full figure, and carries the pair count from
 \AblationNestingPairs{} to \AblationRootedPairs{}. Everything this thesis adds on top of that
---- outlet descent and the injected-service join --- raises the site count by the remaining
-\AblationFullSiteShare{}, from \AblationRootedSites{} to \AblationFullSites{}.
+--- outlet descent and the injected-service join --- raises the site count from
+\AblationRootedSites{} to \AblationFullSites{}: outlet descent adds
+\AblationOutletAddedSites{} sites and the service join \AblationFullAddedSites{},
+\AblationFullAddedShare{} of the corpus total.
 
 That ordering matters for the comparison with earlier work, because the shell rule is not a
 mechanism this thesis introduced. Oshima and Kishi assemble their page information from the
