@@ -756,3 +756,61 @@ describe('extractGraph — withComponentInputBinding + route-input binding (Angu
     expect(a).toEqual(b)
   })
 })
+
+describe('extractGraph — a conditional navigation site is never must', () => {
+  const leaf = (cls: string): string =>
+    `import { Component } from '@angular/core'\n@Component({ selector: 'x-${cls.toLowerCase()}', standalone: true, template: '' })\nexport class ${cls} {}`
+  const targets = 'ABCDEFGH'.split('')
+  const project = inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { Home } from './home.component'
+${targets.map((c) => `import { ${c} } from './${c.toLowerCase()}.component'`).join('\n')}
+export const routes: Routes = [
+  { path: 'home', component: Home },
+${targets.map((c) => `  { path: '${c.toLowerCase()}', component: ${c} },`).join('\n')}
+]`,
+    '/app/home.component.ts': `import { Component } from '@angular/core'
+import { Router } from '@angular/router'
+@Component({ selector: 'x-home', standalone: true, template: \`
+<a routerLink="/a">unconditional</a>
+<a *ngIf="flag" routerLink="/b">ngIf</a>
+@if (flag) {
+  <a routerLink="/c">at-if</a>
+}
+@for (x of xs; track x) { <span>{{x}}</span> } @empty {
+  <a routerLink="/d">at-empty</a>
+}
+\` })
+export class Home {
+  flag = true; xs: number[] = []
+  constructor(private router: Router, private svc: any) {}
+  goE() { this.router.navigate(['/e']) }
+  goF() { if (this.flag) { this.router.navigate(['/f']) } }
+  goG() { this.svc.save().subscribe(() => this.router.navigate(['/g'])) }
+  async goH() { await this.svc.save(); this.router.navigate(['/h']) }
+}`,
+    ...Object.fromEntries(targets.map((c) => [`/app/${c.toLowerCase()}.component.ts`, leaf(c)])),
+  })
+
+  for (const attribution of [false, true]) {
+    const { graph } = extractGraph(project, '/app', { attribution })
+    const tier = (to: string): string | undefined => graph.edges.find((e) => e.from === routeId('/home') && e.to === routeId(to))?.modality
+
+    it(`keeps an unconditional link and an unconditional call on must (attribution ${attribution})`, () => {
+      expect(tier('/a')).toBe('must')
+      expect(tier('/e')).toBe('must')
+    })
+
+    it(`demotes a link under *ngIf, @if or @empty to may (attribution ${attribution})`, () => {
+      expect(tier('/b')).toBe('may')
+      expect(tier('/c')).toBe('may')
+      expect(tier('/d')).toBe('may')
+    })
+
+    it(`demotes a call under a branch, in a subscribe callback or after an await to may (attribution ${attribution})`, () => {
+      expect(tier('/f')).toBe('may')
+      expect(tier('/g')).toBe('may')
+      expect(tier('/h')).toBe('may')
+    })
+  }
+})

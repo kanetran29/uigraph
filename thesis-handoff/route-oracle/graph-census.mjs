@@ -128,6 +128,7 @@ if (tex) {
     ['CensusSourceNotScreen', all.sourceNotScreen], ['CensusTargetNotScreen', all.targetNotScreen],
     ['CensusMaySourceNotScreen', all.maySourceNotScreen],
     ['CensusUnknownApps', rows.filter((r) => r.unknown > 0).length],
+    ['CensusZeroMustApps', rows.filter((r) => r.must === 0).length],
     ['CensusApps', rows.length],
   ]) {
     if (!Number.isInteger(v) || v < 0) throw new Error(`${k} is ${v}, which is not a count`)

@@ -5,6 +5,7 @@
 // (and loop/branch/early-return conditions that demote a nav to `may`).
 
 import { Node, SyntaxKind } from 'ts-morph'
+import { callConditional, templateConditional } from './conditions'
 import { constantString, constantStringArray, constantForName, builderReturn, classPropertyInitializer } from './resolve'
 import type { SourceFile } from 'ts-morph'
 import { relative } from 'node:path'
@@ -123,6 +124,13 @@ export interface RawTarget {
    * so both are absolute.
    */
   relative?: boolean
+  /**
+   * Whether the navigation runs only on some executions of the code that holds it: under a
+   * template control-flow block or structural directive, under a branch, inside a callback an
+   * asynchronous result invokes, or after an await a rejection would skip. A must edge promises
+   * the navigation occurs whenever its code runs, so a conditional site is placed on may.
+   */
+  conditional?: boolean
 }
 
 const STATIC_LINK_RE = /(?<!\[)\brouterLink\s*=\s*"([^"]*)"/g
@@ -140,10 +148,10 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
   const locAt = (index: number): { line: number; col: number } => templateLoc(sf, tpl, index)
   const file = tpl.externalFile ? relative(projectDir, tpl.externalFile) : undefined
   for (const m of tpl.text.matchAll(STATIC_LINK_RE)) {
-    out.push({ ti: { kind: 'literal', value: m[1] ?? '' }, event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true })
+    out.push({ ti: { kind: 'literal', value: m[1] ?? '' }, event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, conditional: templateConditional(tpl.text, m.index) })
   }
   for (const m of tpl.text.matchAll(BOUND_LINK_RE)) {
-    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true })
+    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, conditional: templateConditional(tpl.text, m.index) })
   }
   return out
 }
@@ -334,7 +342,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
     const loc = { line: lc.line, col: lc.column }
     if (member === 'navigateByUrl') {
       const arg0 = call.getArguments()[0]
-      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc })
+      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, conditional: callConditional(call) })
     } else {
       const arg0 = call.getArguments()[0]
       // `navigate(x)` takes a commands array. Written out, every element counts, not only the
@@ -344,7 +352,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
         arg0 && Node.isArrayLiteralExpression(arg0)
           ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf)
           : classifyTarget(arg0)
-      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative })
+      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, conditional: callConditional(call) })
     }
   }
   return out

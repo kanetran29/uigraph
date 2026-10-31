@@ -306,7 +306,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const gate = gateFromGuards(guardsByNodeId.get(target.nodeId) ?? [])
         noteGuards(gate, pathByNodeId.get(target.nodeId) ?? target.nodeId, soundiness, seenAsyncGuards)
         const guardText = gate.guarded ? gate.guardTexts.join(',') : null
-        const uncertain = gate.guarded || capMay || viaWildcard || (t.ti.kind === 'literal' && t.ti.holes === true)
+        const uncertain = gate.guarded || capMay || viaWildcard || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
         pushEdge(from, target.nodeId, t, uncertain ? 'may' : 'must', gate.guarded ? gate.confidence : uncertain ? 0.5 : 1, guardText, file)
       } else if (t.ti.kind === 'template') {
         const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
