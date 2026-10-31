@@ -67,7 +67,7 @@ graph represents a guard.
 The thesis contributes a measurement and the apparatus that makes it checkable, and a
 mechanism whose specification outruns its evidence. The mechanism is scope attribution,
 specified as a dataflow analysis over the powerset lattice of screen sets and implemented over
-two of its four input relations, with a soundness property for the deterministic tier that is
+three of its four input relations, with a soundness property for the deterministic tier that is
 stated and mechanically tested, though not proved, over the declared route set and paired with
 an explicit list of the constructs the analysis does not decide (Claim~\ref{claim:must},
 Section~\ref{sec:approximations}). It recovers \AttrRecoveredShare{} of the loss class it
@@ -148,11 +148,12 @@ every guard to let the navigation through gives \GuardOnlyMust{} must edges, and
 it. The exchange is the end of a sequence in which each claim that did not survive its own test
 was withdrawn.
 
-What they leave open is also specific. The call graph with dependency injection and the
-dispatch relations are specified and not implemented; the approximations of
-Section~\ref{sec:res-round2} stand in for them --- a guard scoped to the routes that name
-it, a service to the join over its injectors, an effect to $\top$ --- which is coarser than
-the model and leaves a class nothing injects with no scope at all. One defect class still waits for its second
+What they leave open is also specific. The dispatch relation is specified and not implemented,
+and the call graph is implemented without the injector hierarchy, reading every provider binding
+as if it applied everywhere; approximations stand in where the model has no implemented relation
+--- a guard scoped to the routes that name it, an effect to $\top$, and a service member no caller
+reaches to the join over the components that inject its class --- which is coarser than the
+model and leaves a class nothing reaches with no scope at all. One defect class still waits for its second
 confirmation. And the sharpest gap is in the evaluation rather than the
 analysis, though it is now half closed: asking the running applications which links they
 render confirms \ScopeConfirmed{} of the \ScopePairs{} rendered (screen, pattern) pairs

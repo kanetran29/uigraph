@@ -27,11 +27,17 @@ echo "== census"
 node graph-census.mjs --corpus "$W/corpus" --out results-census --tex "$TEX/generated-census.tex"
 node graph-census.mjs --corpus "$W/noattr" --prefix CensusBase --out results-census --tex "$TEX/generated-census-base.tex"
 
+echo "== anchored edges against their expansion"
+pnpm -s exec tsx expansion-check.mts $(for p in $APPS; do a=${p%%:*}; s=${p#*:}; echo "$W/corpus/$a/$s/uigraph.db"; done) --tex > "$W/expansion.tex"
+cp "$W/expansion.tex" "$TEX/generated-expansion.tex"
+
 echo "== witness check of the must tier"
 mkdir -p results-must/witness
 for p in $APPS; do a=${p%%:*}; s=${p#*:}
-  node witness-check.mjs "$W/corpus/$a/$s" "$W/corpus/$a/$s/uigraph.db" --json "$W/wc-$a.json" > /dev/null 2>&1
-  node -e "const d=require('$W/wc-$a.json');const o={};for(const k of ['edges','sitesCited','mustEdges','mustClean','mustBad','tally'])o[k]=d[k];require('fs').writeFileSync('results-must/witness/$a.json',JSON.stringify(o,null,1)+'\n')"
+  # The independent parser's route set, against which each must edge's destination is tested.
+  node index.mjs "$W/corpus/$a/$s" "$W/corpus/$a/$s/uigraph.db" --json "$W/C-$a.json" > /dev/null 2>&1
+  node witness-check.mjs "$W/corpus/$a/$s" "$W/corpus/$a/$s/uigraph.db" --routes "$W/C-$a.json" --json "$W/wc-$a.json" > /dev/null 2>&1
+  node -e "const d=require('$W/wc-$a.json');const o={};for(const k of ['edges','sitesCited','mergedSites','mustEdges','mustClean','destinationsChecked','mustBad','tally'])o[k]=d[k];require('fs').writeFileSync('results-must/witness/$a.json',JSON.stringify(o,null,1)+'\n')"
 done
 node must-witness.mjs --dir results-must/witness --tex "$TEX/generated-must-witness.tex"
 
