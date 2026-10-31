@@ -57,19 +57,25 @@ The answer to RQ3 has to be read against what the loss rules can and cannot deli
 Because a lost construct is assigned to the first class that applies
 (Table~\ref{tab:loss-rules}), a construct inside a shared component that only appears
 in screens without nodes is counted as an attribution loss, although attribution alone
-cannot recover it. The measurement shows the converse as well: a majority of the
-deterministic gain came out of constructs the rules had assigned to node defects
-(Table~\ref{tab:recovery-source}). The attribution class is therefore not a bound in
-either direction, and the two levels of failure are not separable by the rules that
-classify them. On realworld, whose node extraction is complete, attribution recovered
-all of its attribution losses but one, and that one is in a service.
-The gap between the bound and what was recovered is accounted for by
+cannot recover it. The measurement does not show the converse: every one of the
+\AttrRecovered{} conversions came out of a construct the rules had already assigned to an
+attribution class, and none out of a node class (Table~\ref{tab:recovery-source}). The
+misclassification therefore runs one way only on this instrument --- the class can hold a
+construct attribution alone cannot recover, but nothing attribution recovered was classified
+elsewhere --- so the class bounds what attribution can repair from above and does not measure
+it. On realworld, whose node extraction is complete, attribution recovered every one of its
+attribution losses, must tier and may tier together
+(Table~\ref{tab:before-after}), and Table~\ref{tab:remaining} records no remaining loss
+there under any heading.
+The gap between the bound and what was recovered elsewhere is accounted for by
 Table~\ref{tab:remaining}, and three of its reasons are not attribution problems at
 all: the target screen has no node, the owning component is never reached from any
 screen, or the site sits in a service or a guard that this version does not analyse.
 Precision on the deterministic tier did not fall, and no construct that the baseline
-converted was lost, so the coverage gain was not bought by widening the must tier. The
-must-tier violation is the same edge in both runs and predates attribution.
+converted was lost, so the coverage gain was not bought by widening the must tier. Every
+edge on the must tier passes the witness check in both runs --- \RoundTwoMustClean{} after
+attribution --- so there is no violation for attribution either to have caused or to have
+inherited.
 
 The part of the model that Chapter~\ref{ch:analysis} specifies but does not implement
 has a measurable price. Navigation sites in services, guards, interceptors, resolvers
@@ -97,11 +103,13 @@ strongest, since this instance alone rests on two named methods that share no me
 mutation and direct inspection of the graph.
 
 Detection is conditional on coverage in a second sense, which the exclusion rule makes
-visible. Nearly a third of the sampled mutants could not be scored at all, either
-because the construct they change is absent from the graph or, for a guard, because no
-edge enters the screen it protects (Table~\ref{tab:mutation-sample}). Those exclusions
-are not a sensitivity result; they are the coverage gap of RQ1 appearing in a different
-experiment. The
+visible --- although far less of it than on the instrument this work began with. Against the
+attributed graph only \MutExcluded{} of the sampled mutants cannot be scored at all, all of
+them guard removals on a screen that no edge enters
+(Table~\ref{tab:mutation-sample}); against the baseline graph \MutBaseExcluded{} cannot.
+The distance between those two counts is where RQ1's coverage shows up in this experiment:
+the constructs that attribution puts into the graph are largely the ones the baseline run had
+to exclude. Either count is a coverage result and not a sensitivity one. The
 defensible statement is therefore conditional: given that a construct is represented in
 the graph, a change to it is almost always visible in the graph, and the probability
 that it is represented at all is what RQ1 measures. For change impact analysis this is
@@ -163,10 +171,11 @@ support.
 method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none of them can be
 asked whether the set of screens attribution computes for a site is the set it fires from. Two
 methods can. The hand-built ground truth answers it fully, but for one application of six
-(Section~\ref{sec:res-groundtruth}): there the analysis is right about \GTFullRecall{} of the
-attributions, its \GTFullExcess{} wrong pairs all come from the injected-service join, and
-the level that stands for what earlier work reaches already recovers \GTRootedRecall{} of
-them with nothing wrong at all. Across the whole corpus only the runtime method
+(Section~\ref{sec:res-groundtruth}): there the analysis finds \GTFullRecall{} of the
+(site, screen) pairs that application really has, at \GTFullPrecision{} precision, its
+\GTFullExcess{} wrong pairs all come from the injected-service join and all sit at
+\GTFullExcessSites{} of its \GTSites{} sites, and the level that stands for what earlier work
+reaches already recovers \GTRootedRecall{} of the real pairs with nothing wrong at all. Across the whole corpus only the runtime method
 applies, and it answers half of the question (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
 judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}

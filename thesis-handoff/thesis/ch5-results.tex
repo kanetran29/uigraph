@@ -448,8 +448,8 @@ Table~\ref{tab:round2acct} together with the widths in this table rather than on
 
 The width above says how far the attribution is from doing nothing. It does not say whether
 the mechanisms that produce it earn their place, and the answer is not the same for all of
-them. Table~\ref{tab:ablation} extracts the corpus four times, withholding one mechanism at a
-time.
+them. Table~\ref{tab:ablation} extracts the corpus at \AblationLevels{} nested levels, each
+withholding every mechanism above it.
 
 \begin{table}[t]\footnotesize
 \caption{The corpus extracted at each attribution level. \emph{Sites} counts the source
@@ -478,10 +478,11 @@ root component as well as from the components beneath it
 stands for what they reach. A comparison drawn against containment alone would be a comparison
 with a method nobody proposed.
 
-Outlet descent is the one mechanism whose contribution is width almost without coverage: it
-places \AblationOutletSites{} sites against rooted's \AblationRootedSites{}, the same number
-on five of the six applications, while raising the pair count from \AblationRootedPairs{} to
-\AblationOutletPairs{}. Whether that width is correct is what a table of counts cannot say,
+Outlet descent is the one mechanism whose contribution is width without coverage at all: it
+places \AblationOutletSites{} sites against rooted's \AblationRootedSites{}, the same count on
+\AblationOutletSameSitesApps{} of the six applications and
+\AblationOutletAddedSites{} new sites over the corpus, while raising the pair count from
+\AblationRootedPairs{} to \AblationOutletPairs{}. Whether that width is correct is what a table of counts cannot say,
 which is the next subsection's subject.
 
 \subsection{Whether the scopes are the right ones}
@@ -554,8 +555,10 @@ too small, and did so \ScopeUnpredicted{} times; it cannot refute one that is to
 because at the screens it can observe the graph almost never claims a destination exactly, and
 because a link a template renders conditionally is absent for reasons that have nothing to do
 with the scope. The ground truth of Section~\ref{sec:res-groundtruth} does test both
-directions, and finds \GTFullExcess{} scopes too wide and \GTFullMissing{} too narrow out of
-\GTPairs{} --- but on \GTApp{}, the smallest application of the six. The third is the
+directions: against the \GTPairs{} pairs it records, the analysis asserts \GTFullExcess{}
+that are not there, all at \GTFullExcessSites{} of the \GTSites{} sites, and misses
+\GTFullMissing{}, one each at \GTFullMissingSites{} further sites --- but on \GTApp{}, the
+smallest application of the six. The third is the
 width reported in Section~\ref{sec:res-width}: the computed scopes are narrower than the
 trivial attribution by a factor between \BaselineFactorMin{} and \BaselineFactorMax{}, and at
 the low end of that range a scope names most of the application. A site attributed to too

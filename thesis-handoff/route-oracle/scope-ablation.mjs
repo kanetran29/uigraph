@@ -4,13 +4,18 @@
 // The baseline table (scope-baseline.mts) compares the computed attribution with the widest
 // attribution there is. That says how much narrower the analysis is than doing nothing, but
 // not whether its extra mechanisms earn their place against a simpler analysis. This harness
-// answers that by extracting every application four times, withholding one mechanism at a
-// time, and reporting what each level recovers and how wide its scopes are:
+// answers that by extracting every application once per level, each level withholding every
+// mechanism above it, and reporting what each one recovers and how wide its scopes are:
 //
 //   owned    the routed component's own file only -- direct ownership.
-//   nesting  plus component containment, which is the mechanism of Oshima and Kishi (2018).
+//   nesting  plus component containment.
+//   rooted   plus the shell rule: what Oshima and Kishi (2018) reach, since they assemble
+//            page information from the root component as well as the components beneath it.
 //   outlet   plus router-outlet descent.
-//   full     plus the shell rule and the injected-service join: the proposed analysis.
+//   full     plus the injected-service join: the proposed analysis.
+//
+// `full` is not re-extracted: the level that produced the published graph is the graph on
+// disk, so the corpus is extracted LEVELS.length - 1 times per application.
 //
 // The levels are nested by construction (attribute.ts withholds results rather than computing
 // them differently), and that is checked here on the real graphs rather than assumed: a level
@@ -167,14 +172,19 @@ if (tex) {
   out += LEVELS.map((l) => `${sum(l, 'sites')}\\,/\\,${sum(l, 'pairs')}`).join(' & ') + ' \\\\\n'
   out += '\\bottomrule\n\\end{tabular}}\n'
   out += `\\newcommand{\\AblationApps}{${rows.length}}\n`
+  out += `\\newcommand{\\AblationLevels}{${LEVELS.length}}\n`
   // What a level ADDS over the one below it. The share of the full count that a level
   // reaches is a different quantity, and for `full` it is trivially 100 per cent, so a
-  // sentence about what the last mechanisms contribute needs this one.
+  // sentence about what the last mechanisms contribute needs this one. The count of
+  // applications where a level adds no site is emitted too, because a sentence saying a
+  // mechanism widens scopes without placing a new site has to say on how many it holds.
   for (let i = 1; i < LEVELS.length; i += 1) {
     const cap = LEVELS[i][0].toUpperCase() + LEVELS[i].slice(1)
     const added = sum(LEVELS[i], 'sites') - sum(LEVELS[i - 1], 'sites')
+    const same = rows.filter((r) => r.levels[LEVELS[i]].sites === r.levels[LEVELS[i - 1]].sites).length
     out += `\\newcommand{\\Ablation${cap}AddedSites}{${added}}\n`
     out += `\\newcommand{\\Ablation${cap}AddedShare}{${((added / sum('full', 'sites')) * 100).toFixed(1)}\\,\\%}\n`
+    out += `\\newcommand{\\Ablation${cap}SameSitesApps}{${same}}\n`
   }
   for (const l of LEVELS) {
     const S = sum(l, 'sites'), P = sum(l, 'pairs')
