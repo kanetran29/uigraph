@@ -88,10 +88,10 @@ This thesis measures static extraction on six open-source Angular applications w
 evaluation methods, four reading the applications' sources and one the running application. Measured at two levels, the extractor mints a node for
 every screen the route configuration declares, as two static readers that share no code but
 were corrected against each other enumerate it, and recovers almost no navigation construct as a
-deterministic transition once the demotion rules the soundness property rests on are applied ---
+deterministic transition once the demotion rules the soundness property rests on are applied:
 \CensusMustSites{} constructs behind \CensusMust{} edges, and taking every guard to let the
-navigation through raises that only to \GuardOnlySites{} constructs behind \GuardOnlyMust{} edges;
-before the defects this thesis identifies were repaired, two of the six yielded a list of
+navigation through raises that only to \GuardOnlySites{} constructs behind \GuardOnlyMust{} edges.
+Before the defects this thesis identifies were repaired, two of the six yielded a list of
 routes with no transitions at all. The node result is bounded
 by what a reader of the route table can enumerate: a runtime probe that visits every
 address the applications answer finds \ProbeMissed{} mounted addresses with no node,

@@ -21,10 +21,10 @@ routes in ghostfolio that the extractor declares unread, so only \ProbeExactApps
 what the browser answers. Below that level almost no navigation construct becomes a
 deterministic transition once the demotion rules Claim~\ref{claim:must} rests on are applied:
 \CensusBaseMustSites{} constructs without attribution and \CensusMustSites{} with it, in
-\CensusMustApps{} of the six applications and none on the other \CensusZeroMustApps{}. That measures what the
-extractor can prove without evaluating guards, which is little, rather than what the applications
-do: with every guard taken to let the navigation through, the tier would hold \GuardOnlyMust{}
-edges. Node extraction is not the
+\CensusMustApps{} of the six applications and none on the other \CensusZeroMustApps{}. Evaluating
+guards would add little to it: with every guard taken to let the navigation through, the tier
+would hold \GuardOnlyMust{} edges on \GuardOnlySites{} constructs, of which only \GuardOnlyGuarded{}
+edges run a guard. Node extraction is not the
 bottleneck it was when this work began --- it was, and
 Section~\ref{sec:res-round2} records what repairing it took.
 
@@ -147,7 +147,7 @@ read (one on an empty-path child, \texttt{canMatch}, \texttt{canActivateChild}),
 navigation to the screen already displayed. The first three left \RoundTwoMustEdges{} edges with
 \RoundTwoMustViolations{} witness-check failures, which is not the same as satisfying the claim:
 the fourth, found by reading every construct the tier cited rather than by the check, kept a
-construct that earns must in only \MustFateKept{} of them (Section~\ref{sec:res-round2}). The others did not become correct targets; they stopped claiming
+construct that earns must in only \MustFateKept{} of them, and \MustFateJoined{} more stayed must only because a construct it had not cited yields it (Section~\ref{sec:res-round2}). The others did not become correct targets; they stopped claiming
 to be deterministic, which they had no evidence for. The fourth correction also replaced the
 third's merge rule, which had demoted an edge whenever any construct citing it was uncertain: an
 edge is now as certain as the most certain construct that yields it, and that is why realworld's

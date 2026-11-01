@@ -1111,8 +1111,8 @@ navigation runs is one the source screen's own routes carry by name, read off th
 configuration, so a user on that screen has passed it once already. \GuardOnlyGuardedGhostfolio{}
 of the guarded edges are ghostfolio's, which names its authentication guard on each route rather
 than once on a parent, so that a navigation between two signed-in screens runs it again. The small
-tier therefore says what the extractor can prove without evaluating guards, and where an
-application puts its guard decides how much of its navigation that is. A reader who expected
+tier therefore says what the extractor can prove without evaluating guards. Evaluating them would
+move \GuardOnlyGuarded{} edges from may to must, those on which the navigation runs a guard. A reader who expected
 static extraction to recover a large deterministic graph should take this as part of the answer:
 some of the transitions are there, behind guards a static reader does not evaluate.
 
@@ -1138,8 +1138,7 @@ location and not per edge, because that is what the check opens: the \RoundTwoEd
 the round's corpus graphs cite \RoundTwoSites{} locations between them, an edge citing several wherever
 several constructs yield it. Of those locations only \RoundTwoGraphClean{} are clean, because
 \RoundTwoOverApprox{} of them are over-approximations for which the check claims no target
-agreement by design. That is reported beside the must column because the must tier was a small
-slice of the graph and is a smaller one now, and a precision figure for a slice is not one for
+agreement by design. That is reported beside the must column because the must tier is still a small slice of the graph, \CensusMust{} edges of \CensusEdges{}, and a precision figure for a slice is not one for
 the graph. Nor is it a defect rate: on the \RoundTwoJudged{} locations the check does
 judge --- every one that is not an over-approximation --- \RoundTwoJudgedClean{} are clean.
 The three figures answer three different questions. The first is the one that bears on
