@@ -5,7 +5,9 @@
 //
 // For every construct (identified by file:line) it reads the class in the before run
 // and in the after run. "Recovered" means: an attribution class before, converted after.
-// "Regressed" means: converted before, not converted after (should be zero).
+// "Regressed" means: converted before, not converted after (should be zero). "Demoted" means
+// the construct stayed converted but moved from the must class to the may class, which lowers the
+// deterministic conversion ratio that RQ1 reports without leaving the converted classes.
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -52,7 +54,7 @@ for (const b of B.results) {
   const a = A.results.find((x) => x.slug === b.slug)
   const lb = raw(beforeDir, b.slug).rows, la = raw(afterDir, b.slug).rows
   const after = new Map(la.map((r) => [r.at, r.cls]))
-  let attrBefore = 0, recoveredMust = 0, recoveredMay = 0, regressed = 0
+  let attrBefore = 0, recoveredMust = 0, recoveredMay = 0, regressed = 0, demoted = 0
   const stillLost = {}
   for (const r of lb) {
     const ac = after.get(r.at)
@@ -63,6 +65,7 @@ for (const b of B.results) {
       else stillLost[ac] = (stillLost[ac] || 0) + 1
     }
     if (conv(r.cls) && !conv(ac)) regressed++
+    if (r.cls === 'CONVERTED_MUST' && ac === 'CONVERTED_MAY') demoted++
   }
   rows.push({
     slug: b.slug,
@@ -71,7 +74,7 @@ for (const b of B.results) {
     mustBefore: b.testB ? [b.testB.mustClean, b.testB.mustEdges] : null,
     mustAfter: a.testB ? [a.testB.mustClean, a.testB.mustEdges] : null,
     edgesBefore: b.graph?.edges, edgesAfter: a.graph?.edges,
-    attrBefore, recoveredMust, recoveredMay, regressed, stillLost,
+    attrBefore, recoveredMust, recoveredMay, regressed, demoted, stillLost,
   })
 }
 
@@ -105,6 +108,9 @@ const DIAG = [
   ['scoped; target dynamic', 'Scope found, target fully dynamic'],
   ['scoped; target resolves', 'Scope found, not explained'],
 ]
+// The one row of the table above that gives no reason: the scope was found and the target
+// resolves, and the diagnosis stops there.
+const UNEXPLAINED = 'scoped; target resolves'
 // A missing diagnosis file used to read as an empty object, so the table printed a column
 // of zeros and said that nothing stays lost. Refuse instead: a zero here is a claim.
 const diag = B.results.map((b) => {
@@ -173,8 +179,9 @@ tex3 += `\\bottomrule\n\\end{tabular}}\n`
 
 // The inline macros for the figures the chapter states in prose, so no RQ3 number is typed
 // by hand. The closure is asserted here rather than left to the reader: every construct the
-// loss rules assigned to attribution is either recovered or carries a reason in TabRemaining,
-// and a generator that cannot show that refuses to write the macros at all.
+// loss rules assigned to attribution is either recovered or classified in TabRemaining, and a
+// generator that cannot show that refuses to write the macros at all. Classified is not
+// explained: the row that gives no reason is counted as AttrRemainingUnexplained.
 const T = {
   lost: rows.reduce((a, r) => a + r.attrBefore, 0),
   must: rows.reduce((a, r) => a + r.recoveredMust, 0),
@@ -186,21 +193,26 @@ const T = {
   mustBefore: rows.reduce((a, r) => a + r.mustBefore[1], 0),
   mustAfter: rows.reduce((a, r) => a + r.mustAfter[1], 0),
   gained: rows.filter((r) => r.convAfter > r.convBefore).length,
+  fell: rows.filter((r) => r.convAfter < r.convBefore).length,
+  fellWhere: rows.filter((r) => r.convAfter < r.convBefore).map((r) => NAME[r.slug]).join(', ') || 'none',
+  demoted: rows.reduce((a, r) => a + r.demoted, 0),
+  unexplained: diag.reduce((a, d) => a + (d[UNEXPLAINED] || 0), 0),
 }
 const recovered = T.must + T.may
 if (recovered + T.remaining !== T.lost) {
-  throw new Error(`attribution losses do not close: ${recovered} recovered + ${T.remaining} with a reason != ${T.lost} assigned. One of the two tables is measuring a different population.`)
+  throw new Error(`attribution losses do not close: ${recovered} recovered + ${T.remaining} classified != ${T.lost} assigned. One of the two tables is measuring a different population.`)
 }
 const pc = (n, d) => `${(Math.round((n / d) * 1000) / 10).toFixed(1)}\\,\\%`
 let tex4 = '\n% RQ3 inline figures.\n'
 for (const [k, v] of [
   ['AttrLost', T.lost], ['AttrRecovered', recovered], ['AttrRecoveredShare', pc(recovered, T.lost)],
   ['AttrRecoveredMust', T.must], ['AttrRecoveredMay', T.may], ['AttrRegressed', T.regressed],
-  ['AttrRemaining', T.remaining], ['AttrEdgesBefore', T.edgesBefore], ['AttrEdgesAfter', T.edgesAfter],
+  ['AttrRemaining', T.remaining], ['AttrRemainingUnexplained', T.unexplained], ['AttrEdgesBefore', T.edgesBefore], ['AttrEdgesAfter', T.edgesAfter],
   ['AttrMustBefore', T.mustBefore], ['AttrMustAfter', T.mustAfter], ['AttrAppsGained', T.gained],
+  ['AttrAppsFell', T.fell], ['AttrFellWhere', T.fellWhere], ['AttrDemoted', T.demoted],
 ]) tex4 += `\\newcommand{\\${k}}{${v}}\n`
 // held back until every check below has passed; see the single write at the end
-console.log(`\nRQ3: ${recovered} of ${T.lost} recovered (${T.must} must, ${T.may} may), ${T.remaining} with a reason, ${T.regressed} regressed; edges ${T.edgesBefore} -> ${T.edgesAfter}, must ${T.mustBefore} -> ${T.mustAfter}`)
+console.log(`\nRQ3: ${recovered} of ${T.lost} recovered (${T.must} must, ${T.may} may), ${T.remaining} classified (${T.unexplained} unexplained), ${T.regressed} regressed, ${T.demoted} demoted from must to may (conversion fell on ${T.fell}: ${T.fellWhere}); edges ${T.edgesBefore} -> ${T.edgesAfter}, must ${T.mustBefore} -> ${T.mustAfter}`)
 console.log(`conversions gained, by baseline class: ${JSON.stringify(moves)}`)
 console.log(`  out of attribution classes: ${gt.attribution.must} must, ${gt.attribution.may} may`)
 console.log(`  out of node classes:        ${gt.node.must} must, ${gt.node.may} may`)

@@ -64,6 +64,8 @@ if (process.argv.includes('--tex')) {
   for (const r of rows) out += `${r.slug} & ${r.screens} & ${r.anchored} & ${r.query} & ${r.independent} \\\\\n`
   out += '\\bottomrule\n\\end{tabular}}\n'
   out += `\\newcommand{\\ExpansionApps}{${rows.length}}\n`
+  // The library's own materialisation walks every node that is not an anchor or a control, not only the screens, so it can return more than the query.
+  out += `\\newcommand{\\ExpansionLibraryLarger}{${rows.filter((r) => r.caller > r.query).length}}\n`
   const biggest = rows.reduce((a, r) => (r.query / r.anchored > a.query / a.anchored ? r : a))
   out += `\\newcommand{\\ExpansionWidest}{${biggest.slug}}\n`
   out += `\\newcommand{\\ExpansionWidestRatio}{${(biggest.query / biggest.anchored).toFixed(1)}}\n`
