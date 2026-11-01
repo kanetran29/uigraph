@@ -721,6 +721,34 @@ export const routes: Routes = [
   })
 })
 
+describe('controls mode + conditional outlets (round 4)', () => {
+  it('demotes control edges from routes below a conditional outlet', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { X } from './x.component'
+import { Y } from './y.component'
+import { P } from './p.component'
+export const routes: Routes = [
+  { path: 'x', component: X, children: [{ path: 'y', component: Y }] },
+  { path: 'p', component: P }
+]`,
+      '/app/x.component.ts': `import { Component } from '@angular/core'
+@Component({ selector: 'x-x', standalone: true, template: '@if (on) { <router-outlet></router-outlet> }' })
+export class X { on = true }`,
+      '/app/y.component.ts': `import { Component } from '@angular/core'
+import { Router } from '@angular/router'
+@Component({ selector: 'x-y', standalone: true, template: '<button (click)="go()">go</button><a routerLink="/p">link</a>' })
+export class Y { constructor(private router: Router) { } go() { this.router.navigate(['/p']) } }`,
+      '/app/p.component.ts': page('P'),
+    }), '/app', { controls: true })
+    // Both control edges (button from navigate, link from routerLink) should be demoted to may
+    const buttonEdge = graph.edges.find(e => e.from.startsWith('c_n_x_y') && e.to === 'n_p' && e.effect === 'router.navigate')
+    const linkEdge = graph.edges.find(e => e.from.startsWith('c_n_x_y') && e.to === 'n_p' && e.event === 'click')
+    expect(buttonEdge?.modality).toBe('may')
+    expect(linkEdge?.modality).toBe('may')
+  })
+})
+
 describe('host branch through wrapper call (round 4)', () => {
   it('demotes links of an empty-path child reached through wrapper with conditional outlet', () => {
     const { graph } = extractGraph(inMemory({
