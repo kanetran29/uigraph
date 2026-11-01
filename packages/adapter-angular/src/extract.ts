@@ -19,7 +19,7 @@ import { analyzeInputBindings } from './inputs'
 import { isBareCall, templateCondition } from './conditions'
 import { collectRoutes, type Redirect, type RouteLevel, type UnreadableRoutes } from './routes'
 import { resolveImportedFile, isInsideDir } from './resolve'
-import { attributeScopes, isEffectFile, subtreeAnchor, SHELL_NODE_ID } from './attribute'
+import { appSourceFiles, attributeScopes, isEffectFile, outletHiddenAbove, subtreeAnchor, SHELL_NODE_ID } from './attribute'
 import { templateTargets, routerCallTargets, methodNavTargets, templateLoc, linkAttrTarget, type RawTarget } from './nav'
 import { parseControls } from './controls'
 import { inlineTemplate } from './templates'
@@ -383,20 +383,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     const first = levelsByNodeId.get(id)
     return redirectOfNode.has(id) || (path !== undefined && redirectsAt(path, first, true).length + catchAllsAt(path, first, true).filter((c) => !below(c, id)).length > 0)
   }
-  /**
-   * Whether a route component renders only on some executions of the screens above it: the
-   * primary outlet of a route component or layout above it sits under a template condition, so
-   * the route component is not on the screen however its own template reads.
-   */
-  const behindHiddenOutlet = (route: (typeof routes)[number]): boolean => {
-    const holders = [...route.layouts]
-    for (let p = route.parentNodeId ? routeByNodeId.get(route.parentNodeId) : undefined; p; p = p.parentNodeId ? routeByNodeId.get(p.parentNodeId) : undefined) if (p.componentFile) holders.push(p.componentFile)
-    return holders.some((sf) => {
-      const tpl = inlineTemplate(sf)
-      const at = tpl ? tpl.text.search(/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/) : -1
-      return tpl !== null && at >= 0 && templateCondition(tpl.text, at + 1) !== null
-    })
-  }
+  // Whether a route component or layout renders on a screen only on some executions of it.
+  const hiddenAbove = outletHiddenAbove(routes, appSourceFiles(project.getSourceFiles()))
   // The screens a scope anchor stands for, filled as anchors are minted, and every screen, which the shell stands for.
   const screenIds = new Set(routes.map((r) => r.nodeId))
   const anchorMembers = new Map<string, Set<string>>()
@@ -616,7 +604,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // In controls mode every template routerLink is anchored to the link control that
     // fires it (below), so the screen-level copy would be an undrivable duplicate.
     const targets = [...(opts.controls ? [] : templateTargets(route.componentFile, projectDir)), ...routerCallTargets(route.componentFile)]
-    emitTargets(route.nodeId, behindHiddenOutlet(route) ? targets.map((t) => ({ ...t, conditional: true })) : targets, file, true)
+    emitTargets(route.nodeId, hiddenAbove(route, route.componentFile.getFilePath()) ? targets.map((t) => ({ ...t, conditional: true })) : targets, file, true)
   }
 
   if (opts.attribution) {
@@ -625,7 +613,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // anything else, means the full analysis, which is the only configuration shipped.
     const layers = process.env.UIGRAPH_SCOPE_LAYERS
     const scopes = attributeScopes(project.getSourceFiles(), routes, projectDir,
-      layers === 'owned' || layers === 'nesting' || layers === 'rooted' || layers === 'outlet' || layers === 'class' ? layers : 'full')
+      layers === 'owned' || layers === 'nesting' || layers === 'rooted' || layers === 'outlet' || layers === 'class' ? layers : 'full', hiddenAbove)
     soundiness.push(...scopes.notes)
     const targetsOf = (sf: SourceFile): RawTarget[] => [...templateTargets(sf, projectDir), ...routerCallTargets(sf)]
     // Anchors: a set of screens that is exactly subtree(r) gets one scope node, and the
@@ -651,12 +639,18 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       for (const s of [...screens].sort()) emitTargets(s, ts, file, false)
     }
     // A route component's template is also rendered on every descendant screen (its outlet):
-    // its scope is subtree(r).
+    // its scope is subtree(r). A layout's is the screens it wraps. On a screen where an outlet
+    // above it is conditional, it is rendered only on some executions, as on its own screen.
     for (const [f, extra] of scopes.descendantsOfRouteComponent) {
       const sf = project.getSourceFile(f)
       if (!sf) continue
       const own = routes.filter((r) => r.componentFile?.getFilePath() === f).map((r) => r.nodeId)
-      emitOver(new Set([...own, ...extra]), targetsOf(sf), relative(projectDir, f))
+      const all = [...new Set([...own, ...extra])]
+      const unsure = new Set(all.filter((s) => hiddenAbove(routeByNodeId.get(s)!, f)))
+      const sure = new Set(all.filter((s) => !unsure.has(s)))
+      const ts = targetsOf(sf)
+      if (sure.size > 0) emitOver(sure, ts, relative(projectDir, f))
+      if (unsure.size > 0) emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))
     }
     // Components rendered inside screens: anchored at a subtree when their screen set is one,
     // otherwise one edge per screen that renders them.
@@ -716,11 +710,14 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // screens of those callers, which the call graph gives. Where the call graph reaches no
     // caller, the join is taken over every component that injects the class, which can be wider
     // than the real scope. A member a caller the graph cannot see also reaches (a constructor the
-    // injector runs, a guard, an interceptor) runs where that caller does, too, and the caller is
-    // placed the way an unreached member is: by the join of its own file, which adds nothing for
-    // a caller nothing injects and no route names. The calls on the way carry conditions the
-    // analysis does not follow, so the edges are capped at may. A class nothing reaches has no
-    // scope at all and is reported.
+    // injector runs, a guard, an interceptor) runs where that caller does, too, whether the graph
+    // places the member or not, and the caller is placed the way an unreached member is: by the
+    // join of its own file. A caller nothing injects and no route names still runs somewhere the
+    // graph cannot name (an HTTP interceptor, an app initializer, a binding's implementation, a
+    // service only another service injects), so it falls back to this class's own join, and to
+    // top where the shell injects this class, as before the caller's own join was read. The calls
+    // on the way carry conditions the analysis does not follow, so the edges are capped at may. A
+    // class nothing reaches has no scope at all and is reported.
     for (const sf of project.getSourceFiles()) {
       const f = sf.getFilePath()
       if (scopes.components.has(f) || /\.(spec|test|stories)\.ts$/.test(f)) continue
@@ -748,7 +745,13 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const unseenFrom = (t: RawTarget) => [...(scopes.memberUnseen.get(keyOf(t)) ?? [])]
       /** Whether the call graph gives the member holding `t` at least one screen. */
       const placedAt = (t: RawTarget) => (scopes.memberScreens.get(keyOf(t))?.size ?? 0) > 0
-      const atTop = ts.filter((t) => t.member !== undefined && (scopes.memberTop.has(keyOf(t)) || (placedAt(t) && unseenFrom(t).some((g) => scopes.serviceShell.has(g)))))
+      /** Whether nothing places the file `g` of an unseen caller: the shell injects none of its classes, no component injects them and no route names it. */
+      const unplacedCaller = (g: string) => !scopes.serviceShell.has(g) && joinOf(g).length === 0
+      /** The screens the unseen callers of the member holding `t` add: each caller's own join, or this class's join for a caller nothing places. */
+      const unseenScreens = (t: RawTarget) => unseenFrom(t).flatMap((g) => (unplacedCaller(g) ? [...joinScreens] : joinOf(g)))
+      /** Whether an unseen caller of the member holding `t` runs on every screen: the shell injects its class, or nothing places it and the shell injects this one. */
+      const unseenTop = (t: RawTarget) => unseenFrom(t).some((g) => scopes.serviceShell.has(g) || (joinTop && unplacedCaller(g)))
+      const atTop = ts.filter((t) => t.member !== undefined && (scopes.memberTop.has(keyOf(t)) || unseenTop(t)))
       const byMember = ts.filter((t) => t.member !== undefined && !atTop.includes(t) && placedAt(t))
       if (atTop.length > 0) {
         const before = edges.length
@@ -757,7 +760,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       }
       for (const t of byMember) {
         const own = scopes.memberScreens.get(keyOf(t))!
-        const screens = new Set([...own, ...unseenFrom(t).flatMap(joinOf)])
+        const screens = new Set([...own, ...unseenScreens(t)])
         for (const [i, s] of [...screens].sort().entries()) emitTargets(s, [t], file, i === 0, true)
       }
       const rest = ts.filter((t) => !atTop.includes(t) && !byMember.includes(t))
@@ -768,16 +771,18 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         shellEdges += edges.length - before
         continue
       }
-      const screens = joinScreens
-      if (screens.size === 0) {
+      const lost = rest.filter((t) => joinScreens.size === 0 && unseenScreens(t).length === 0)
+      if (lost.length > 0) {
         // An effect that reaches here is unplaced, not known to be unused.
         const where = !isEffect ? 'a class nothing in the application injects; its scope is empty'
           : isInsideDir(f, projectDir) ? 'an NgRx effect; the shell stand-in for dispatch applies only at the full attribution level, so its scope could not be placed'
           : 'an NgRx effect outside the application directory; whether the application registers it is not read, so its scope could not be placed'
-        soundiness.push({ kind: 'unattributed-non-component', file, detail: `${rest.length} navigation call(s) in ${where}` })
-        continue
+        soundiness.push({ kind: 'unattributed-non-component', file, detail: `${lost.length} navigation call(s) in ${where}` })
       }
-      for (const [i, s] of [...screens].sort().entries()) emitTargets(s, rest, file, i === 0, true)
+      for (const t of rest) {
+        const screens = new Set([...joinScreens, ...unseenScreens(t)])
+        for (const [i, s] of [...screens].sort().entries()) emitTargets(s, [t], file, i === 0, true)
+      }
     }
     if (shellEdges > 0 && edges.some((e) => e.from === SHELL_NODE_ID)) nodes.push({ id: SHELL_NODE_ID, route: null, componentPath: null, label: 'application shell (every screen)', kind: 'scope', scope: { kind: 'top' } })
 
@@ -787,7 +792,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // navigation left no trace at all — even when its destination was perfectly readable.
     // Anchoring it at an unplaced origin keeps the destination, says plainly that the source
     // is unknown, and holds the edges at may.
-    const placed = new Set<string>([...scopes.screensOf.keys(), ...scopes.shell, ...scopes.indirectShell, ...routes.flatMap((r) => [...(r.componentFile ? [r.componentFile] : []), ...r.layouts].map((sf) => sf.getFilePath()))])
+    // A layout is placed by the screens it wraps, which a level below `outlet` withholds; there it has no screen at all.
+    const placed = new Set<string>([...scopes.screensOf.keys(), ...scopes.shell, ...scopes.indirectShell, ...scopes.descendantsOfRouteComponent.keys(), ...routes.flatMap((r) => (r.componentFile ? [r.componentFile.getFilePath()] : []))])
     for (const [f, c] of scopes.components) {
       if (placed.has(f)) continue
       const ts = targetsOf(c.sf)

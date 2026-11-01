@@ -32,7 +32,7 @@ let unreadableRegistrations: Set<CallExpression> | undefined
 // length of one `collectRoutes` call that asks for them.
 let guardedLevels: RouteLevel[] | undefined
 import { analyzeCanActivate, type GuardInfo } from './guards'
-import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, lazyMemberName, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, builderReturn, conditionalArrayArms, propNamed, keyUnreadable } from './resolve'
+import { resolveImportedFile, lazyImportSpecifier, lazyIdentifierTarget, lazyMemberName, resolveRelative, isInsideDir, componentClassName, stringProp, identifierProp, objectLiteralOf, arrayLiteralOf, builderReturn, conditionalArrayArms, propNamed, keyUnreadable, declarationsOf } from './resolve'
 
 export interface RouteInfo {
   fullPath: string
@@ -68,7 +68,9 @@ export interface RouteInfo {
    * third `{ path: '', component }` at one level, or an empty-path child with a component under a
    * screen. Angular reaches a later sibling by backtracking out of an earlier one whose children
    * cannot take the rest of the address, so the later one's component wraps the screens it
-   * declares and the earlier one's does not; the address itself stays with the earlier route.
+   * declares and the earlier one's does not; the address itself stays with the earlier route. The
+   * first empty-path child with a component under a screen also renders on that screen itself,
+   * so it is among that screen's layouts as well, listed after the levels above the screen.
    */
   layouts: SourceFile[]
 }
@@ -221,6 +223,28 @@ function entryGuards(levels: RouteLevel[]): GuardInfo[] {
 
 /** The screens whose own address a child at the empty path already answers, in declaration order. */
 const emptyPathAnswered = new WeakSet<RouteInfo>()
+
+/**
+ * The addresses an earlier route answers, per map of screens a walk fills, whether or not it mints
+ * a screen there: Angular matches a route at its own address whatever its children are (router.mjs
+ * 3859-3876 and 3967-3968 turn a child list that matches nothing into NoLeftoversInUrl), so a later
+ * route at that address is reached only for longer addresses and mints no screen there. It is what
+ * a route without a component, which mints nothing, needs; one with a canMatch may be refused
+ * there and holds nothing, and a redirect or a route on a named outlet is not recorded.
+ */
+const heldEmpty = new WeakMap<Map<string, RouteInfo>, Set<string>>()
+
+/**
+ * The file a route's `component` is declared in, followed through re-exports, so a component
+ * imported from a barrel (`export * from './x.component'`) is its own file and not the barrel's.
+ * Undefined when the name is not imported, as `resolveImportedFile` has it.
+ */
+export function componentFileOf(sf: SourceFile, obj: ObjectLiteralExpression, name: string): SourceFile | undefined {
+  const imported = resolveImportedFile(sf, name)
+  const prop = propNamed(obj, 'component')
+  const cls = declarationsOf(prop && Node.isPropertyAssignment(prop) ? prop.getInitializer() : undefined).find((d) => Node.isClassDeclaration(d))
+  return imported && cls ? cls.getSourceFile() : imported
+}
 
 /**
  * Analyze a `canActivate: [A, B]` array, or the array of another guard property such as
@@ -745,7 +769,7 @@ function walkRouteArray(arr: ArrayLiteralExpression, sf: SourceFile, parentPath:
  * callee this reader cannot follow, a returned object that files its argument somewhere other
  * than `children`, a `path` that is not a literal --- answers null.
  */
-function callMount(node: Node | undefined): { arrays: ArrayLiteralExpression[]; segment: string; route?: ObjectLiteralExpression } | null {
+export function callMount(node: Node | undefined): { arrays: ArrayLiteralExpression[]; segment: string; route?: ObjectLiteralExpression } | null {
   if (!node || !Node.isCallExpression(node)) return null
   const returned = builderReturn(node.getExpression())
   if (!returned) return null
@@ -863,6 +887,11 @@ function childrenExpression(obj: ObjectLiteralExpression): Node | undefined {
  * table under a second parent and cost one corpus application a third of its routes. A route
  * with a component whose address is already held mints no screen, but its children still render
  * inside it: they keep it as a layout and hang under the screen above it, not under the holder.
+ * An address is held by an earlier route with a component, or by an earlier one without a
+ * component and without a canMatch (see `heldEmpty`); a route with a canMatch may be refused, so
+ * the later route keeps the address, as it did before. The first child at the empty path under a
+ * screen renders on that screen's own address and is recorded among its layouts; a later one, or
+ * one with a canMatch, may not render there and is not.
  */
 function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedLevels: RouteLevel[], parentNodeId: string | null, redirects: Map<string, Redirect> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>, auxAt: string | undefined): number {
   let placed = 0
@@ -961,7 +990,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     }
     const fullPath = joinRoutePath(parentPath, ownPath)
     const componentName = identifierProp(obj, 'component')
-    let componentFile = componentName ? resolveImportedFile(sf, componentName) : undefined
+    let componentFile = componentName ? componentFileOf(sf, obj, componentName) : undefined
     let resolvedName = componentName
     if (!componentFile) {
       const spec = lazyImportSpecifier(obj, 'loadComponent')
@@ -1024,6 +1053,8 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     if (host) {
       if (!redirectDeclared) {
         const level = levels[levels.length - 1]!
+        // The first such child renders its component on the host's address, unless a canMatch may refuse it there.
+        if (componentFile && !emptyPathAnswered.has(host) && level.canMatch.length === 0) host.layouts = [...host.layouts, componentFile]
         host.levels = [...host.levels, level]
         host.guards = [...host.guards, ...entryGuards([level])]
         emptyPathAnswered.add(host)
@@ -1034,7 +1065,9 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // place. Counting only the winner told the caller this file had been read through only when
     // its routes happened to be new.
     if (isScreen) placed++
-    const minted = isScreen && !out.has(nodeId)
+    const held = heldEmpty.get(out) ?? new Set<string>()
+    heldEmpty.set(out, held)
+    const minted = isScreen && !out.has(nodeId) && !held.has(nodeId)
     if (minted) {
       out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, levels, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId, layouts: levels.flatMap((l) => (l.layout ? [l.layout] : [])) })
     }
@@ -1107,6 +1140,8 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         unreadable.subtrees.add(obj)
       }
     }
+    // Marked after its children, which may mint the address themselves; a canMatch may refuse it, so then it holds nothing.
+    if (!redirectDeclared && !auxHere && levels[levels.length - 1]!.canMatch.length === 0) held.add(nodeId)
   }
   return placed
 }
