@@ -4,6 +4,21 @@
 // analysis? Seeds a known delta into the source, re-extracts, and compares the graph
 // against the predicted difference.
 //
+// Harness 1.8.0. Change against 1.7.0: a REMOVE_GUARD mutant is detected only when the guard an
+// edge loses is one the removed list names. 1.7.0 passed when any edge lost any guard, so it did
+// not test that the guard lost is the one removed. The list is read as the extractor writes it:
+// an identifier is its own name and a factory call `f(args)` is `f()`, so a guard factory called
+// with arguments is now a name too; 1.7.0 read only bare identifiers and `f()`, and so named
+// nothing in bitwarden's `organizationPermissionsGuard(canAccessSettingsTab)`. Where the list
+// holds an element the extractor writes from a hash or a position, an inline arrow function or a
+// member access, the lost guard cannot be matched by name and any lost guard counts, as under
+// 1.7.0. The record keeps every guard change of a mutant: 1.7.0 cut it to four entries, so a
+// verdict that rested on a later one could not be audited from the result file. The factory
+// names also reach the exclusion rule, which asks whether any baseline edge carries a guard the
+// list names; it now differs from 1.7.0's on 12 of bitwarden's 78 candidate lists (6 on the graph
+// without attribution). Re-judged offline on the 1.7.0 results at the seed they were sampled
+// with, all eleven detections stand and no sampled mutant changes its exclusion.
+//
 // Harness 1.7.0. Change against 1.6.0: a guard an edge loses is counted, not looked up. The
 // extractor writes a guard factory without its arguments, so two guards on one navigation can
 // print alike; bitwarden's settings route and its children all carry
@@ -67,7 +82,7 @@ import { execSync } from 'node:child_process'
 import { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
-import { guardedRoute } from './guard-resolve.mjs'
+import { guardedRoute, lostGuard, namedGuards } from './guard-resolve.mjs'
 import { extractorStamp } from './provenance.mjs'
 
 const argv = process.argv.slice(2)
@@ -202,6 +217,12 @@ function tsFiles(dir) {
 
 const lineOf = (src, index) => src.slice(0, index).split('\n').length
 
+/**
+ * Every mutation the four operators can make in the application's sources, each with the edit
+ * to apply, the confound that excludes it when the graph cannot show it, and the check that
+ * scores the graph's response. A REMOVE_GUARD mutant is checked against the guards its own
+ * removed list names, read by namedGuards.
+ */
 function discover(routes, screensOfRoute, rnd, alreadyReached) {
   const muts = []
   // The preference is only a preference: falling back to the whole pool keeps one rnd()
@@ -273,7 +294,7 @@ function discover(routes, screensOfRoute, rnd, alreadyReached) {
       const screens = route ? screensOfRoute(route) : []
       const reached = screens.filter((x) => x.entered).map((x) => x.route)
       // The guards the removed list names, as the extractor writes a named guard on an edge.
-      const named = (/\[([^\]]*)\]/.exec(m[0])?.[1] ?? '').split(',').map((x) => x.trim()).filter((x) => /^[A-Za-z_$][\w$]*(\(\))?$/.test(x))
+      const { names: named, complete } = namedGuards(m[0])
       const carried = named.length > 0 && baseline.edges.some((e) => (e.guard ?? '').split(',').some((g) => named.includes(g)))
       muts.push({
         kind: 'REMOVE_GUARD', file: f, rel, line: lineOf(src, m.index),
@@ -292,14 +313,10 @@ function discover(routes, screensOfRoute, rnd, alreadyReached) {
           if (!reached.length) return `no baseline edge enters any screen the guarded route yields (${screens.map((x) => x.route).slice(0, 3).join(', ')})`
           return named.length > 0 && !carried ? 'no baseline edge carries the guard, so none enters the guarded route from outside it' : null
         },
-        // Strict: some edge must lose a guard it carried. A change that only adds one, or one on
-        // the modality alone, is WRONG.
-        check: (d) => d.guardChanged.some((c) => {
-          const g = /: guard (.*)->(.*), modality /.exec(c)
-          if (!g) return false
-          const count = (list, x) => list.split(',').filter((y) => y === x).length
-          return (g[1] ?? '').split(',').some((x) => x !== 'null' && count(g[2] ?? '', x) < count(g[1] ?? '', x))
-        }),
+        // Strict: some edge must lose a guard it carried, and where the removed list names every
+        // guard in it, one of those. A change that only adds one, one on the modality alone, or the
+        // loss of a guard the list does not name is WRONG.
+        check: (d) => lostGuard(d.guardChanged, complete ? named : null),
       })
     }
   }
@@ -406,7 +423,7 @@ for (const [i, m] of chosen.entries()) {
       witnessLinesRemoved: d.witnessLinesRemoved, witnessLinesAdded: d.witnessLinesAdded,
       nodesAdded: d.nodesAdded, nodesRemoved: d.nodesRemoved, routeChanged: d.routeChanged,
       edgesAdded: d.edgesAdded.slice(0, 4), edgesRemoved: d.edgesRemoved.slice(0, 4),
-      guardChanged: d.guardChanged.slice(0, 4),
+      guardChanged: d.guardChanged,
     } : null,
     error: mut.failed ? mut.error : undefined,
   })
@@ -442,7 +459,7 @@ console.log(`  ${'OVERALL'.padEnd(20)} detected ${tD}/${tN} = ${tN ? ((tD / tN) 
 
 if (jsonOut) {
   fs.writeFileSync(jsonOut, JSON.stringify({
-    harnessVersion: '1.7.0', extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
+    harnessVersion: '1.8.0', extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
     baseline: { nodes: baseline.nodes.length, edges: baseline.edges.length, routes: routes.length },
     discovered, sampled, perOperator,
     detectionRate: tN ? tD / tN : null, scored: tN, detected: tD, results,

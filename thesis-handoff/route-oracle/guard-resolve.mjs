@@ -112,3 +112,60 @@ export function guardedRoute(src, index) {
       /\bchildren\s*:\s*\[\s*[^\]\s]/.test(struct),
   }
 }
+
+/**
+ * The guards a `canActivate: [...]` text lists, as the extractor writes them on an edge, and
+ * whether every element could be named. An identifier is its own name; a factory call
+ * `f(args)` is written `f()`, without its arguments, which is why two guards of one factory
+ * print alike. Anything else, an inline arrow function, a member access or a spread, is written
+ * from a hash or a source position the text does not give, so the list is then not `complete`
+ * and a guard an edge loses cannot be attributed to the list by name.
+ */
+export function namedGuards(listText) {
+  const open = listText.indexOf('[')
+  const close = listText.lastIndexOf(']')
+  if (open < 0 || close < open) return { names: [], complete: false }
+  const inner = listText.slice(open + 1, close)
+  const masked = maskCode(inner)
+  const elements = []
+  let depth = 0
+  let from = 0
+  for (let i = 0; i <= masked.length; i += 1) {
+    const c = masked[i]
+    if (c === '(' || c === '[' || c === '{') depth += 1
+    else if (c === ')' || c === ']' || c === '}') depth -= 1
+    else if ((c === ',' && depth === 0) || i === masked.length) {
+      const el = inner.slice(from, i).trim()
+      if (el) elements.push(el)
+      from = i + 1
+    }
+  }
+  const names = []
+  let complete = elements.length > 0
+  for (const el of elements) {
+    const call = /^([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*\(/.exec(el)
+    if (/^[A-Za-z_$][\w$]*$/.test(el)) names.push(el)
+    else if (call && el.endsWith(')')) names.push(`${call[1]}()`)
+    else complete = false
+  }
+  return { names, complete }
+}
+
+/**
+ * Whether some edge lost a guard it carried, from the `guardChanged` lines the mutation
+ * harness records ("<from> -> <to>: guard <before>-><after>, modality ..."). Guards are counted
+ * rather than looked up, because a factory prints without its arguments and a route can carry
+ * several that print alike. With `only`, the names of the guards the removed list names, the lost
+ * guard has to be one of them: an edge that lost some other guard is a different change, not a
+ * detection. Without it any lost guard counts.
+ */
+export function lostGuard(guardChanged, only = null) {
+  const count = (list, x) => list.filter((y) => y === x).length
+  return guardChanged.some((c) => {
+    const g = /: guard (.*)->(.*), modality /.exec(c)
+    if (!g) return false
+    const before = (g[1] ?? '').split(',')
+    const after = (g[2] ?? '').split(',')
+    return before.some((x) => x !== 'null' && (only === null || only.includes(x)) && count(after, x) < count(before, x))
+  })
+}
