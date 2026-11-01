@@ -171,9 +171,10 @@ const MODALITY_RANK: Record<GraphEdge['modality'], number> = { unknown: 0, may: 
  * application through `provideEffects([...])`), so it is reported as unattributed with a note
  * that says the tool could not place it, and never as a class nothing in the application injects.
  *
- * `wildcardScreen` below is looked up by the full path `*`. `joinRoutePath` folds `**`, `*` and
- * `/*` into `*` only at the ROOT; inside a feature module the same segment becomes
- * `<parent>/*`, because it catches only that module's unmatched URLs. So the one route whose
+ * The catch-all an unmatched address goes to (`catchAllFor` below) is looked up by full path.
+ * `joinRoutePath` folds `**`, `*` and `/*` into `*` only at the ROOT; inside a feature module the
+ * same segment becomes `<parent>/*`, because it catches only the unmatched URLs under that
+ * parent, which therefore go to it rather than to the root one. So the one route whose
  * full path is `*` is the application's own catch-all WHENEVER every table was walked under its
  * prefix. A feature table the walk could not reach, and that the root scan therefore read at
  * `/`, puts its own `**` here instead: that is the project-root reading Chapter 5 reports, and
@@ -191,7 +192,6 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const auxLevels = guarded.filter((l) => l.aux !== undefined)
   const unreadableText = describeUnreadable(unreadable)
   const routeLikes: RouteLike[] = routes.map((r) => ({ fullPath: r.fullPath, nodeId: r.nodeId }))
-  const wildcardScreen = routeLikes.find((r) => r.fullPath === '*') ?? null
   const levelsByNodeId = new Map(routes.map((r) => [r.nodeId, r.levels]))
   const pathByNodeId = new Map(routes.map((r) => [r.nodeId, r.fullPath]))
   /**
@@ -260,15 +260,27 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
    * the order Angular's guidance asks for, and the one the corpus keeps (bitwarden imports its
    * WildcardRoutingModule last, k8sdash its feature module before the module that calls forRoot).
    * A table spread into another is not one registered apart, and its order is not read either.
+   * Each catch-all dismissed on this assumption is named in the application's `route-order` note.
    */
   const apart = (a: RouteLevel[], b: RouteLevel[]): boolean => {
     const x = a[0]?.obj.getParent()
     const y = b[0]?.obj.getParent()
     return x !== undefined && y !== undefined && x !== y && roots.has(x) && roots.has(y)
   }
-  /** Whether the router meets chain `first` before the route at full path `at` with chain `levels`. */
-  const metFirst = (first: RouteLevel[] | undefined, at: string, levels: RouteLevel[]): boolean =>
-    first !== undefined && (before(first, levels) || (at.endsWith('*') && apart(first, levels)))
+  // The catch-alls dismissed only on the assumption `apart` states, by full path, for the application's note.
+  const assumedOrder = new Map<string, RouteLevel[]>()
+  /**
+   * Whether the router meets chain `first` before the route at full path `at` with chain `levels`.
+   * A catch-all dismissed only on the assumption `apart` states is recorded in `assumedOrder`, so
+   * the application's soundiness notes say that its edges rest on that assumption.
+   */
+  const metFirst = (first: RouteLevel[] | undefined, at: string, levels: RouteLevel[]): boolean => {
+    if (first === undefined) return false
+    if (before(first, levels)) return true
+    if (!at.endsWith('*') || !apart(first, levels)) return false
+    assumedOrder.set(at, levels)
+    return true
+  }
   /**
    * The redirects the router could meet at an address before chain `first`, the screen or redirect
    * that answers it: one declared at it, at a parameter pattern that matches it, or with
@@ -283,21 +295,50 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const catchAllsAt = (path: string, first: RouteLevel[] | undefined, every = false) =>
     catchAllScreens.filter((c) => c.levels !== first && overlaps(path, c.fullPath, true, every) && !metFirst(first, c.fullPath, c.levels))
   /**
+   * The catch-all that answers an address no screen and no other redirect answers: the deepest `**`
+   * whose parent path matches it, since the router enters that parent before it reaches a catch-all
+   * above it, and at one depth a redirect before a screen. A guard on that parent, or a catch-all
+   * declared before it, can make the router meet another, which is not read; the edge drawn to it
+   * is held at may.
+   */
+  const catchAllFor = (path: string): { at: string; redirect?: Redirect; screen?: RouteLike } | undefined =>
+    [...[...redirects].filter(([at]) => at.endsWith('*')).map(([at, redirect]) => ({ at, redirect })), ...catchAllScreens.map((screen) => ({ at: screen.fullPath, screen }))]
+      .filter((c) => overlaps(path, c.at, true))
+      .sort((x, y) => y.at.split('/').length - x.at.split('/').length)[0]
+  /**
+   * Whether chain `a` stays in the table that holds the last route of chain `l`, the one the router
+   * matches an address in again after that route's relative redirect, with redirects off at that
+   * level (@angular/router 18.2.14 router.mjs:3922-3925, :3896-3899): it shares every route above
+   * that one, whose children, or the joined root tables, are that table. With `deeper` it must go
+   * on below a route of that table, because a redirect in the table itself is skipped there, while
+   * one in a child table is applied (:3967).
+   */
+  const within = (l: RouteLevel[], a: RouteLevel[], deeper: boolean): boolean => {
+    const d = l.length - 1
+    return d >= 0 && a.length > d + (deeper ? 1 : 0) && a.slice(0, d).every((x, i) => x.obj === l[i]!.obj)
+  }
+  /**
    * Where a navigation to `value` lands once every redirect on the way is followed: a redirect
    * route at that address, or, where no screen and no redirect is declared at it, the one redirect
    * at a pattern or shorter prefix that answers it, its parameters filled in, or an empty-path child
    * that redirects the screen matched there. The walk stops at a fixed point or after ten hops.
    * `ambiguous` says that more than one declared route, or a route and a redirect or catch-all,
    * could answer an address on the way, so which one Angular meets first decides it, and so does a
-   * redirect the reader cannot follow. `unread` says the walk stopped at such a redirect with no
-   * screen: the address is declared, but where it lands is not read. `redirected` says a redirect
-   * rewrote the address, and `tried` holds the guarded routes whose path matches some address on
-   * the way, which the router may try there. A command is matched as written; a redirect's target is a URL.
+   * redirect the reader cannot follow. `unread` says the walk stopped with no screen at such a
+   * redirect, at one Angular rejects because it names a parameter its own route does not bind, or
+   * after a relative redirect at an address that its own table does not answer but by a redirect
+   * there, which Angular skips: the address is declared, but where it lands is not read. A redirect
+   * met after an absolute one makes the landing ambiguous: Angular 18 matches the new address from
+   * the root with redirects on (router.mjs:3579, :3797-3799), but before 18 the router applied no
+   * redirect after an absolute one, and which version the application runs is not read. `redirected` says a redirect rewrote the address, and `tried` holds the guarded routes
+   * whose path matches some address on the way, which the router may try there. A command is
+   * matched as written; a redirect's target is a URL.
    */
   function land(value: string, command: boolean): { target: RouteLike | null; ambiguous: boolean; redirected: boolean; tried: RouteLevel[]; unread: boolean } {
     let current = value
     let asUrl = !command
     let ambiguous = false
+    let prev: Redirect | undefined
     const tried: RouteLevel[] = []
     for (let hop = 0; hop < 10; hop += 1) {
       const path = asUrl ? current.split(/[?#]/)[0] ?? current : current
@@ -305,31 +346,43 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const own = target ? redirectOfNode.get(target.nodeId) : undefined
       const exact = redirects.get(path)
       const patterned = target || exact ? [] : redirectsAt(path, undefined).filter(([at]) => !at.endsWith('*'))
-      const [at, redirect] = exact ? [path, exact] : patterned.length === 1 ? patterned[0]! : [path, undefined]
+      const [at, redirect] = target ? [target.fullPath, own] : exact ? [path, exact] : patterned.length === 1 ? patterned[0]! : [path, undefined]
       const first = target ? levelsByNodeId.get(target.nodeId) : redirect?.levels
       // An empty-path child's redirect is registered at its parent's address as well; it is the
       // same redirect as the screen's own, not a rival to it. Any other redirect there is.
-      const rivals = redirectsAt(path, first).filter(([a, r]) => !(target && a === target.fullPath && r.to === own))
+      const rivals = redirectsAt(path, first).filter(([a, r]) => !(target && a === target.fullPath && r.to === own?.to))
       tried.push(...guarded.filter((l) => overlaps(path, l.path, true)))
       if (matchAll(path, routeLikes).length + rivals.length + catchAllsAt(path, first).length > 1) ambiguous = true
-      const next = target ? own : redirect ? redirect.to && redirectAddress(path, at, redirect.to) : patterned.length > 1 ? null : undefined
+      if (prev?.relative && !(first && within(prev.levels, first, !target))) return { target: null, ambiguous: true, redirected: true, tried, unread: true }
+      if (prev && !prev.relative && redirect) ambiguous = true
+      const next = redirect ? redirect.to && redirectAddress(path, at, redirect.to, redirect.own, redirect.relative) : target || patterned.length < 2 ? undefined : null
       if (next === undefined) return { target, ambiguous, redirected: hop > 0, tried, unread: false }
-      if (next === null) return { target, ambiguous: true, redirected: hop > 0, tried, unread: target === null }
+      // An unread target still hides the screen it redirects; a redirect Angular rejects lands nowhere.
+      const kept = redirect?.to === null ? target : null
+      if (next === null) return { target: kept, ambiguous: true, redirected: hop > 0, tried, unread: kept === null }
+      prev = redirect
       current = next
       asUrl = true
     }
     return { target: null, ambiguous: true, redirected: true, tried, unread: false }
   }
+  const routeByNodeId = new Map(routes.map((r) => [r.nodeId, r]))
+  /** Whether screen `c` is declared below screen `id`, so Angular renders it inside that screen. */
+  const below = (c: (typeof routes)[number], id: string): boolean => {
+    for (let p = c.parentNodeId; p !== null; p = routeByNodeId.get(p)?.parentNodeId ?? null) if (p === id) return true
+    return false
+  }
   /**
    * Whether a screen is never displayed at its own address: an empty-path child of it redirects,
-   * or a redirect or catch-all the router may meet first answers every address the screen does.
+   * or a redirect or catch-all the router may meet first answers every address the screen does. A
+   * catch-all screen below the screen does not hide it, since it renders inside it; a redirect
+   * below it does, since it replaces it.
    */
   const hidden = (id: string): boolean => {
     const path = pathByNodeId.get(id)
     const first = levelsByNodeId.get(id)
-    return redirectOfNode.has(id) || (path !== undefined && redirectsAt(path, first, true).length + catchAllsAt(path, first, true).length > 0)
+    return redirectOfNode.has(id) || (path !== undefined && redirectsAt(path, first, true).length + catchAllsAt(path, first, true).filter((c) => !below(c, id)).length > 0)
   }
-  const routeByNodeId = new Map(routes.map((r) => [r.nodeId, r]))
   /**
    * Whether a route component renders only on some executions of the screens above it: the
    * primary outlet of a route component or layout above it sits under a template condition, so
@@ -404,8 +457,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
    * Emit the edges for one set of navigation targets fired from `from`. `note` records the
    * soundiness note for a site once, so an attributed site that fires from many screens does
    * not report the same approximation once per screen. `capMay` holds the edges at may for a
-   * scope the pass is not certain of. A literal no route declares is routed to the application's
-   * catch-all (a `**` redirect target or a `**` screen) at may, never must. Every note cites
+   * scope the pass is not certain of. A literal no route declares is routed to the catch-all that
+   * answers it (`catchAllFor`: a `**` redirect target or a `**` screen, the root's or one under a
+   * parent the literal is below) at may, never must. Every note cites
    * the target's own file when it has one: a link parsed out of an external template carries
    * the `.html` path and a line within it, and pairing that line with the component's `.ts` path
    * pointed published dead-link citations at a `.ts` line that holds no link.
@@ -445,8 +499,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // route set is complete, which is where the claim mattered most. The note carries both
         // facts instead, once per site.
         if (!target) {
-          const wildcardRedirect = redirects.get('*')?.to
-          target = wildcardRedirect === undefined ? wildcardScreen : wildcardRedirect === null ? null : matchLiteral(wildcardRedirect, routeLikes)
+          const wild = catchAllFor(value)
+          const wildcardRedirect = wild?.redirect?.to
+          const sent = wild?.redirect && wildcardRedirect ? redirectAddress(value, wild.at, wildcardRedirect, wild.redirect.own, wild.redirect.relative) : null
+          target = !wild ? null : wild.screen ?? (sent === null ? null : matchLiteral(sent, routeLikes))
           viaWildcard = target !== null
           if (viaWildcard && note) {
             const caveat = unreadableText ? `, though ${unreadableText}, so it is not claimed that no such route exists` : ''
@@ -459,7 +515,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             // The target must stay the first double-quoted string: a generator reads it from here.
             const answer = typeof wildcardRedirect === 'string' ? `redirects it to ${wildcardRedirect}` : 'answers it with its own catch-all screen'
             const assumed = baseUnknown ? ', resolved against a base the reader could not fix' : ''
-            soundiness.push({ kind: 'wildcard-redirect', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route${assumed} and the wildcard route ${answer}${caveat}` })
+            const where = wild!.at === '*' ? '' : ` at ${wild!.at}`
+            soundiness.push({ kind: 'wildcard-redirect', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route${assumed} and the wildcard route${where} ${answer}${caveat}` })
           }
         }
         if (!target) {
@@ -874,6 +931,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     },
     nodes: kept,
     edges,
+  }
+  if (assumedOrder.size > 0) {
+    const named = [...assumedOrder].map(([at, levels]) => `${at} (${relative(projectDir, levels[levels.length - 1]?.obj.getSourceFile().getFilePath() ?? projectDir)})`)
+    soundiness.push({ kind: 'route-order', detail: `the catch-all route(s) at ${named.join(', ')} sit in a route table the application registers apart from its other tables, and are taken to be matched after every route of those, since the order the tables are registered in is not read; any edge such a rival would otherwise hold at may rests on that order` })
   }
   return { graph, soundiness }
 }
