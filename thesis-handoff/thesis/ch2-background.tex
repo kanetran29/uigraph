@@ -395,11 +395,14 @@ objects. Each route has a \texttt{path} pattern and, in addition, either a
 \texttt{component} to render, a \texttt{redirectTo} target, or a list of
 \texttt{children}. A route that has children but no component acts as a path prefix
 and does not itself correspond to a screen. Routes can be loaded lazily using
-\texttt{loadChildren} or \texttt{loadComponent}; in that case the child routes are
-defined in another module or file that is resolved when the application is built.
-Routes may also have guards, namely \texttt{canActivate}, \texttt{canMatch} and
-\texttt{canDeactivate}, which are functions or injectable classes that return either a
-boolean or a \texttt{UrlTree} representing a redirect. Route paths are strings, but
+\texttt{loadChildren} or \texttt{loadComponent}; in that case the child routes or the
+component are defined in another module or file, which the bundler resolves when the
+application is built and the router fetches when a navigation first matches the route.
+Routes may also have guards, namely \texttt{canMatch}, \texttt{canLoad}, \texttt{canActivate},
+\texttt{canActivateChild} and \texttt{canDeactivate}, which are functions or injectable classes
+that return either a boolean or a \texttt{UrlTree} representing a redirect, and resolvers, which
+fetch data the router awaits before it activates the route; \texttt{runGuardsAndResolvers}
+decides when a route a navigation keeps runs them again. Route paths are strings, but
 they are not necessarily string literals. Applications that keep their route table in
 one place often write \texttt{path: routes.about.path}, and resolving such a path
 requires following the constant to its definition.

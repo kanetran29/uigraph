@@ -41,7 +41,7 @@ gothinkster/angular-realworld-example-app & \texttt{dd99ed2c} & \RoundTwoRoutesR
 alfresco/alfresco-content-app & \texttt{b88d47f4} & \RoundTwoRoutesAlfresco{} & 87 Playwright specs including a navigation suite \\
 ghostfolio/ghostfolio & \texttt{9884fa0b} & \RoundTwoRoutesGhostfolio{} & constant-valued route paths; self-hostable \\
 kubernetes/dashboard & \texttt{0ba796d9} & \RoundTwoRoutesKdash{} & mid-size control \\
-bitwarden/clients (web) & \texttt{e40ce6f0} & \RoundTwoRoutesBitwarden{} & highest guard density \\
+bitwarden/clients (web) & \texttt{e40ce6f0} & \RoundTwoRoutesBitwarden{} & many guards, guard factories among them \\
 openMF/web-app & \texttt{7f781796} & \RoundTwoRoutesMifos{} & size ceiling \\
 \bottomrule
 \end{tabularx}
@@ -170,14 +170,21 @@ differently, and the harness checks that on the real graphs rather than assuming
 no table is written when one is found.
 
 The second supplies what no method above has: a ground truth. For one application the screens
-each navigation site really fires from were read off the sources by hand and recorded, with
-the derivation for each site, in \path{route-oracle/ground-truth/realworld.json}. Every level
+each navigation site fires from were read off the sources by hand, under the rules stated in
+the file's method field, and recorded, with the derivation for each site, in
+\path{route-oracle/ground-truth/realworld.json}. Every level
 is then scored against it in both directions --- a pair the application has and the level does
 not is a scope too small, a pair the level has and the application does not is a scope too
 large --- which is the comparison the runtime oracle cannot make. Three limits belong with it.
 It is one application, chosen because it is small enough to read exhaustively. It is the
 author's reading, so it is not independent of the tool's author; it is published with its
-reasoning so that a reader can check it against the same sources. And it is checked in the
+reasoning so that a reader can check it against the same sources. Its rules are the analysis's own
+relations: a component is on every screen whose routed component renders it through template
+selectors, what the shell renders is on every screen, and a navigation inside a service member is
+on the screens its callers are on. A template condition or a guard that admits a screen only in
+one sign-in state does not narrow a scope under those rules, so the ground truth tests whether the
+implementation applies the relations correctly, not whether the relations match what the running
+application renders. And it is checked in the
 one direction available: the scorer reports every site the graph places that the ground truth
 does not list, which is the ground truth's own blind spot. That check found nine sites missing
 from its first version, because the search that enumerated them discarded every line carrying
@@ -390,7 +397,7 @@ for a mutant could be affected by the earlier baseline run.
 \subsection{Corrections made to the protocol}
 \label{sec:corrections}
 
-Eight corrections were made to the protocol while it was being developed. They are
+Ten corrections were made to the protocol while it was being developed. They are
 described here because each of them would otherwise have led to an incorrect figure
 in this thesis, and because the underlying mistakes are general ones. Every figure
 quoted below is the one a superseded instrument produced, recorded so that the

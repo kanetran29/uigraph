@@ -13,11 +13,11 @@ come from the harness run on pinned commits.
 
 The answer to RQ1 is that the loss happens at two levels and that they are very far apart.
 In all \RoundTwoFullNodes{} applications every screen the static readers find declared has a
-node, and the runtime method confirms that no node sits at an address the framework mounts
-nothing at. That completeness is over the route set a static reader can read, and not over
+node, and the runtime method finds no node at an address the framework mounts nothing at,
+which is the absence of a failure rather than a proof that none can occur. That completeness is over the route set a static reader can read, and not over
 the addresses the framework serves: the same runtime method finds \ProbeMissed{} answered
-addresses with no node at all, \ProbeMissedGhostfolio{} of them in the one application whose
-paths a custom matcher computes, so only \ProbeExactApps{} of the six are complete against
+addresses with no node at all, \ProbeMissedGhostfolio{} of them behind one spread of computed
+routes in ghostfolio that the extractor declares unread, so only \ProbeExactApps{} of the six are complete against
 what the browser answers. Below that level almost no navigation construct becomes a
 deterministic transition once the demotion rules Claim~\ref{claim:must} rests on are applied:
 \CensusBaseMustSites{} constructs without attribution and \CensusMustSites{} with it, in
@@ -28,9 +28,12 @@ edges. Node extraction is not the
 bottleneck it was when this work began --- it was, and
 Section~\ref{sec:res-round2} records what repairing it took.
 
-The answer to RQ2 is that the failures fall into five defect classes, each confirmed by at
-least two independent lines of evidence, at least one of them from a named evaluation
-method, together with one candidate class that has a single confirmation, and that assigning every lost construct to exactly one class makes
+The answer to RQ2 is that the failures fall into five defect classes, each with at least two
+lines of evidence of which at least one is a named evaluation method; for four of them,
+attribution among them, the second line is an observation rather than a second instrument
+(Table~\ref{tab:defects}), so for those four the two-line requirement is a weaker control than
+the count suggests. There is also one candidate class that has a single confirmation, and
+assigning every lost construct to exactly one class makes
 attribution the largest class in every application of the corpus once the node defects are
 repaired.
 
@@ -45,15 +48,20 @@ k8sdash's toolbar --- drawn from every screen the shell renders, and the witness
 \MustWitnessViolations{} failures among them; the tier is too small for that to be a statement
 about precision in general. Whether the computed screen sets are correct is established on one
 application and not on the corpus: read site by site on \GTApp{}, the analysis names
-\GTFullRecall{} of the (site, screen) pairs the application really has at \GTFullPrecision{}
+\GTFullRecall{} of the (site, screen) pairs the application has under the ground truth's rules at \GTFullPrecision{}
 precision, after the one over-approximating rule that reading exposed had been replaced by the
-call graph, and no method here can put that question to the other five.
+call graph. Elsewhere the running interface puts half of that question to \ScopeApps{} of the
+six applications, and nothing here puts it to ghostfolio.
 
-The answer to RQ4 is that the graph is sensitive to authored source changes in the
-constructs it represents, with \MutDetected{} of \MutScored{} scored mutants detected
-against \MutBaseDetected{} of \MutBaseScored{} without attribution, so attribution raises
-both the number of changes that can be scored at all and the rate at which a scored change
-is detected. A route path rename is detected in every scored mutant, which is close to
+The answer to RQ4, on the three applications that were mutated, is that the graph is sensitive
+to authored source changes in the constructs it represents, with \MutDetected{} of \MutScored{}
+scored mutants detected against \MutBaseDetected{} of \MutBaseScored{} without attribution. Those
+two sets are not the same, because a change to a construct the baseline graph holds no edge for
+cannot be scored against it; on the \MutPaired{} mutants both graphs can score, the figures are
+\MutPairedDetected{} and \MutPairedBaseDetected{}, and \MutPairedAgainstAttribution{} of the
+\MutPairedDisagree{} disagreements go against attribution. Attribution therefore raises the rate
+at which a scored change is detected by that smaller paired margin, and most of its effect on
+this corpus is the widening of what can be scored at all. A route path rename is detected in every scored mutant, which is close to
 guaranteed by construction and tests node extraction rather than behaviour; of the
 \MutFallibleScored{} mutants from the three operators that can fail, \MutFallibleDetected{}
 are detected. Removing a guard is detected in \MutGuardDetected{} of \MutGuardScored{} scored
@@ -110,9 +118,12 @@ analysis and commit-time checking need; where it is not, no change to it is visi
 the coverage gap RQ1 measures is what the excluded mutants of RQ4 report a second time.
 
 RQ5 asked whether the losses belong to the applications or to the tool, and the answer is
-that almost every loss belongs to the tool, with one instructive exception: ghostfolio
-computes a route's path in a custom \texttt{UrlMatcher}, which no reader of a route table can
-resolve, and that screen stays a declared blind spot rather than a repair.
+that almost every defect class belongs to the tool, with exceptions decided outside the route
+table: ghostfolio computes a route's path in a custom \texttt{UrlMatcher}, which no reader of a
+route table can resolve, and mifos chooses between two route tables by a value injected at
+deployment, which no reader of the code can fix; both stay declared blind spots rather than
+repairs. The largest single loss of nodes is a construct of the tool's, not of the application's:
+ghostfolio's spread of computed routes, which the extractor declares unread and does not repair.
 Every other defect class resolved to a construct the extractor could read and did not:
 a route table reached through an NgModule, a route factory, a path named by a constant, an
 enum or an i18n segment, a workspace alias, a loader that references its module instead of

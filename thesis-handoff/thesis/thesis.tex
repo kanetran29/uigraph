@@ -66,8 +66,9 @@ Supervisor: & Prof.\ Petri Vuorimaa \\
 Major: & Computer Science \\
 \end{tabular}
 \vfill
-{\small Draft of 1 November 2026. Seven chapters and one appendix. Every figure is
-re-measured on the commit named in the generated tables. The preamble is a preview; the
+{\small Draft of 1 November 2026. Seven chapters and one appendix. Every figure of the current
+instrument is generated from the results of the commit named at the head of its generated file,
+and figures of earlier instruments are read from their own recorded results, which the text names. The preamble is a preview; the
 official Aalto thesis class is applied before submission.\par}
 \end{titlepage}
 
@@ -84,12 +85,13 @@ access-control checking --- and in none of the three did this review find a meas
 what the extraction fails to read.
 
 This thesis measures static extraction on six open-source Angular applications with
-\RoundTwoRoutesRealworld{} declared route entries to more than nine hundred, using a pinned corpus and five
+\RoundTwoRoutesRealworld{} declared route entries to \RoundTwoRoutesMifos{}, using a pinned corpus and five
 evaluation methods, four reading the applications' sources and one the running application. Measured at two levels, the extractor mints a node for
-every screen the route configuration declares, as two independent static readers
-enumerate it, and recovers almost no navigation construct as a deterministic transition once
-the demotion rules the soundness property rests on are applied, because the extractor does not
-evaluate the guards almost every such transition passes;
+every screen the route configuration declares, as two static readers that share no code but
+were corrected against each other enumerate it, and recovers almost no navigation construct as a
+deterministic transition once the demotion rules the soundness property rests on are applied ---
+\CensusMustSites{} constructs behind \CensusMust{} edges, and taking every guard to let the
+navigation through raises that only to \GuardOnlySites{} constructs behind \GuardOnlyMust{} edges;
 before the defects this thesis identifies were repaired, two of the six yielded a list of
 routes with no transitions at all. The node result is bounded
 by what a reader of the route table can enumerate: a runtime probe that visits every
@@ -112,15 +114,16 @@ It states a soundness property for the deterministic tier and tests it mechanica
 than proving it. Four corrections take that tier from the \EarlierMustEdges{} edges an earlier
 instrument published to \CensusMust{}. The first three were each hidden by the one before; the
 fourth was found by reading the tier construct by construct, and of the \RoundTwoMustEdges{} edges
-the first three left it keeps a construct that earns must in \MustFateKept{} and finds the others
-running under a condition --- after a request returns, in a branch, under a template condition
----, behind a guard the reader had missed, or pointing at the screen already displayed. Two blind
-readings of every construct behind those edges agree with the extractor at \MustReviewAgreeMin{}
-of the \MustCtxDistinct{}. Reading guards as the router runs them then lets through navigations
-between screens that share a guarded parent, which is where most of the current tier lies, in
-\CensusMustApps{} of the six applications; taking every guard to let the navigation through would
-give \GuardOnlyMust{} must edges instead, so the tier measures what the extractor can prove
-without evaluating guards. The implemented part is evaluated on the same
+the first three left it finds a construct that earns must in \MustFateKept{}, holds \MustFateJoined{}
+more at must only through constructs it did not cite, and finds the others running under a
+condition --- after a request returns, in a branch, under a template condition ---, behind a guard
+the reader had missed, or pointing at the screen already displayed. Two readings of whether each
+construct behind those edges runs every time its code does, made by the AI assistant from the
+sources with the extractor's condition rules as their definition, agree with it at
+\MustReviewAgreeMin{} of the \MustCtxDistinct{}; they show that the rules are applied as written, not
+that the rules are right. Reading guards as the router runs them then lets through navigations
+between screens under a parent whose \texttt{canActivate} the router does not run again, in
+\CensusMustApps{} of the six applications. The implemented part is evaluated on the same
 corpus. What it adds beyond the mechanism earlier
 work already has is small and measured: router-outlet descent leaves the number of placed sites
 unchanged on \AblationOutletSameSitesApps{} of the six applications, the member-level call graph
@@ -134,8 +137,9 @@ what the root component renders to every screen, which earlier work already does
 \GTRootedRecall{} of them and attributes nothing the application does not. The analysis adds the
 rest without a wrong attribution, but only after replacing a rule of its own that the same reading
 had caught attributing one service's navigation to every screen, so that application cannot test
-the replacement independently. On the other five applications
-the sets are checked in one direction only, which is the work's sharpest limitation.
+the replacement independently. Elsewhere the sets are checked in one direction only, by the
+running interface on \ScopeApps{} of the \ProbeApps{} applications and \ScopeJudged{} of their
+\ScopeScreens{} screens, and ghostfolio's not at all, which is the work's sharpest limitation.
 
 Mutation testing on three of the applications shows that the graph detects \MutDetected{}
 of \MutScored{} injected source changes, against \MutBaseDetected{} of \MutBaseScored{}
@@ -148,8 +152,11 @@ by the smaller paired margin, the rate at which a scored change is detected.
 Finally, the thesis asks whether the losses belong to the applications or to the tool. Each
 defect class is taken to its root cause and repaired where the cause is the extractor's.
 Almost every defect class turned out to be a construct the extractor could read and did not,
-and the exception is instructive: one application computes a route's path in a custom matcher
-function, which no reader of a route table can resolve. With the readable classes repaired,
+and the exceptions are decided outside the route table: one application computes a route's path
+in a custom matcher function, and another chooses between two route tables by a value injected at
+deployment. The largest single loss is neither: \ProbeMissedGhostfolio{} of the \ProbeMissed{}
+addresses the running applications answer without a node sit behind one spread of computed routes,
+which the extractor declares unread and does not repair. With the other readable classes repaired,
 \RoundTwoFullNodes{} of the six hold a node for every screen the static readers find
 declared, \ProbeExactApps{} of the six hold one for every address the running
 application answers, and \RoundTwoAccounted{} of the navigation sites that remain in
@@ -158,11 +165,7 @@ as a source the analysis cannot place; the sites excluded from that scope, and t
 ground for each exclusion, are counted in Chapter~5. Every site that remains names its reason.
 Some of those reasons are dead links the graph finds without running the application, though
 the count of them is a candidate list: a route the tools fail to read is indistinguishable
-from one the application never declares. Little of the round's deterministic tier survived this
-scrutiny: of its must edges, which led to the application root and the sign-in screen, all but
-\MustFateKept{} run only once something has happened, behind a guard, or to the screen already
-displayed. The tier that remains is mostly cancel buttons, menus and toolbar links that move
-between screens under one guarded parent, which the router does not guard again.
+from one the application never declares.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
@@ -172,8 +175,8 @@ application; Angular; dataflow analysis; program analysis; software testing
 \addcontentsline{toc}{chapter}{Use of AI tools}
 
 Aalto University asks that the use of artificial intelligence tools in a thesis be
-declared. An AI coding assistant was used in four ways in this work, and I am responsible for the
-whole of the result.
+declared. An AI coding assistant was used in this work in the ways set out below, and I am
+responsible for the whole of the result.
 
 The extractor under study and the evaluation harness were written with the help of an AI
 coding assistant. Every number reported in this thesis is produced by running that
@@ -182,11 +185,17 @@ its result files, except the two tables marked as compiled by hand, so that any 
 be reproduced from the commits recorded with it. The diagrams in
 Chapters~\ref{ch:introduction} to~\ref{ch:evaluation} were drawn by hand.
 
-The assistant was also used to review the extractor's output against the application
-sources, reading the constructs behind an edge and reporting where the extractor's reading
-disagreed with them. Every disagreement it reported was checked against the code before
-anything was changed, and the corrections that followed are reported in
-Chapter~\ref{ch:results} as corrections.
+The assistant was also used to read the application sources, in three roles. As a reviewer it
+read the constructs behind an edge and reported where the extractor's reading disagreed with
+them. In red-team panels it attacked the extractor, the harness and this text, and several of
+the demotion rules of Section~\ref{sec:res-round2}, the rule by which the extractor decides which
+guards a navigation runs among them, were written in response to its objections. Every defect it
+reported in either role was reproduced against the code before anything was changed, and the
+corrections that followed are reported in Chapter~\ref{ch:results} as corrections. Its readings
+are also part of the evaluation itself: the two readings of the round's must tier in
+\path{results-must/review.json} and the reading of the final tier in
+\path{results-must/tier-reading.json} were made by the assistant, and Chapter~\ref{ch:results} says
+of each what it can and cannot show, given who made it.
 
 The assistant was also used during the literature search, to locate candidate sources and
 to summarise them. No source is cited on the strength of such a summary. Every entry in
@@ -196,9 +205,10 @@ checked in this way are kept in a separate block in the bibliography file and ar
 cited anywhere in the text.
 
 Finally, the assistant was used to draft and edit prose, which I then revised. The
-research questions, the design of the analysis, the evaluation protocol and the
-interpretation of the results are my own, as is the responsibility for every claim made
-here.
+research questions and the interpretation of the results are my own; the analysis and the
+evaluation protocol were revised in the course of the work in response to the reviews and panels
+described above, as Chapter~\ref{ch:results} records, and the responsibility for every claim
+made here is mine.
 
 \tableofcontents
 

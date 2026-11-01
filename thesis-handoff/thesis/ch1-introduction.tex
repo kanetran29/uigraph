@@ -154,7 +154,7 @@ route the readers fail to read is indistinguishable from one the application doe
 \medskip
 RQ1 and RQ2 are answered by measuring the extractor on a corpus of six open-source
 Angular applications. The applications are pinned to specific commits and range from
-\RoundTwoRoutesRealworld{} declared route entries to more than nine hundred. Five evaluation methods are used, chosen so that they do
+\RoundTwoRoutesRealworld{} declared route entries to \RoundTwoRoutesMifos{}. Five evaluation methods are used, chosen so that they do
 not share the same blind spot. RQ3 is addressed by formulating attribution as a
 dataflow analysis over a lattice of screen sets, implementing it, and evaluating the
 result on the same corpus with the same methods. RQ4 is answered on the graph produced
@@ -185,10 +185,10 @@ analysis should be described as sound modulo an explicit list of the language fe
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement
 would require a controlled experiment and is left for future work. A third limit is the one that bears hardest on the
 contribution: the screen sets attribution computes are validated in both directions on one
-application only. Across the corpus a scope that is too small can be refuted by the rendered
-interface, and Section~\ref{sec:res-scope} refutes \ScopeUnpredicted{} of them, while a scope
+application only. On \ScopeApps{} of the \ProbeApps{} applications, all but ghostfolio, a scope that
+is too small can be refuted by the rendered interface, and Section~\ref{sec:res-scope} refutes \ScopeUnpredicted{} of them, while a scope
 that is too large cannot be, because at the screens that method can observe the graph almost
-never claims a destination exactly. For one application the screens each site really fires
+never claims a destination exactly. For one application the screens each site fires
 from were read off the sources by hand, which gives both directions, and the result qualifies
 the contribution rather than confirming it: the analysis is right about \GTFullRecall{} of the
 attributions there and asserts none the application does not have, but the mechanism earlier

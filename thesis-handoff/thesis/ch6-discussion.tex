@@ -8,8 +8,8 @@ Static extraction of a transition graph from Angular source fails in two differe
 and the first of them turned out to be the tool's rather than the method's. Node extraction
 is complete on all six applications of the corpus against the readers of the route
 configuration (Table~\ref{tab:coverage}): every screen those readers find declared has a
-node, and the runtime method confirms that no node sits at an address the framework mounts
-nothing at. Completeness in that sense is bounded by what a route table can be read to
+node, and the runtime method finds no node at an address the framework mounts nothing at,
+which is the absence of a failure rather than a proof that none can occur. Completeness in that sense is bounded by what a route table can be read to
 declare, and the runtime method is also the method that bounds it: visiting the addresses
 the applications answer finds \ProbeMissed{} with no node, \ProbeMissedGhostfolio{} of them
 in ghostfolio alone, so \ProbeExactApps{} of the six are complete in the stronger sense of
@@ -72,9 +72,9 @@ Table~\ref{tab:remaining}, and three of its reasons are not attribution problems
 all: the target screen has no node, the owning component is never reached from any
 screen, or the site sits in a service or a guard that the instrument those tables measure did not
 analyse.
-No construct that the baseline converted was lost, so the coverage gain was not bought by
-widening the must tier, and after the fourth correction of Section~\ref{sec:res-round2} the tier
-holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, the added edges being
+No construct that the baseline converted was lost --- \AttrRegressed{} leave the converted classes
+--- so the coverage gain cost the baseline nothing. The gain does widen the must tier: after the
+fourth correction of Section~\ref{sec:res-round2} that tier holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, the added edges being
 the links of realworld's and k8sdash's shells placed on every screen the shell renders. On the
 instrument before that correction every must edge passed the witness check in both runs ---
 \RoundTwoMustClean{} after attribution --- so attribution introduced no edge that names the wrong
@@ -85,8 +85,9 @@ The part of the model that the instrument of those tables did not implement had 
 price. Navigation sites in services, guards, interceptors, resolvers
 and effects are counted separately, and in absolute terms they are a small class across
 the corpus, yet they are not spread evenly: in one application they are almost as large
-as the shared-component class, and in another they are the only attribution loss left
-after the implemented pass had run. The call graph with dependency injection, which the current
+as the shared-component class (Table~\ref{tab:loss}), and after the implemented pass had run they
+were the only remaining loss that the analysis as specified would have recovered
+(Table~\ref{tab:remaining}). The call graph with dependency injection, which the current
 extractor implements (Section~\ref{sec:res-ablation}), was thus required for applications that
 navigate from services; the dispatch relation is still not implemented.
 
@@ -95,7 +96,9 @@ detected in every scored mutant in all three applications that were mutated. Del
 a \texttt{routerLink} was detected in every scored mutant, and retargeting a
 \texttt{Router.navigate} call in \MutRetargetDetected{} of its \MutRetargetScored{}
 (Table~\ref{tab:mutation}). Removing a guard was detected in every scored mutant of all
-three, which is the operator the earlier state of this extractor was weakest on. The
+three. Guards are what the first correction of Section~\ref{sec:res-round2} was about, but no
+per-operator result from the earlier instrument survives, so how far this operator moved cannot be
+said. The
 \MutNoResponse{} mutant that left the graph unchanged is a retargeted call in a component the
 analysis could not place under any screen, so the graph holds no edge for it to move
 (Section~\ref{sec:res-mutation}).
@@ -183,13 +186,13 @@ method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none 
 asked whether the set of screens attribution computes for a site is the set it fires from. Two
 methods can. The hand-built ground truth answers it fully, but for one application of six
 (Section~\ref{sec:res-groundtruth}): there the analysis finds \GTFullRecall{} of the
-(site, screen) pairs that application really has, at \GTFullPrecision{} precision; the rule the
+(site, screen) pairs that application has under the ground truth's rules, at \GTFullPrecision{} precision; the rule the
 call graph replaced, which joined a navigating service over its injectors, asserted
 \GTClassExcess{} wrong pairs at one site, and the call graph was written after that finding and
 scored on the same ground truth, so the clean figure confirms the repair rather than testing the
 call graph independently. The level that stands for what earlier work reaches already recovers
-\GTRootedRecall{} of the real pairs with nothing wrong at all. Across the whole corpus only the runtime method
-applies, and it answers half of the question (Section~\ref{sec:res-scope}): of the
+\GTRootedRecall{} of the real pairs with nothing wrong at all. Beyond \GTApp{} only the runtime method
+applies, on \ScopeApps{} of the six applications, and it answers half of the question (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
 judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}
 that are not turn out to be sites attribution declined to place at all rather than sites it
@@ -201,7 +204,7 @@ location and really does name that target; the oracle cannot convict it, because
 link missing from the DOM is equally well a link the template renders only to a signed-in
 user. The count of predictions it could in principle convict --- those naming a destination
 exactly, rather than over-approximating to every address a static prefix admits --- is
-\ScopeExact{} across the whole corpus, against \ScopeApprox{} that over-approximate, so the
+\ScopeExact{} on the screens it could judge, against \ScopeApprox{} that over-approximate, so the
 direction is not merely unrefuted but close to untestable by this method. And the oracle
 judged \ScopeJudged{} screens of \ScopeScreens{}: without a backend,
 \ScopeUnjudged{} of them redirect to a sign-in page and render another screen's links.
@@ -364,7 +367,7 @@ the conversion, coverage, loss, remaining-loss, before-and-after and mutation ta
 Chapter~\ref{ch:results} are generated from the results file instead of being entered
 by hand. The defect-class table, the oracle table and the inspection of the unreached
 components are written by hand. Determinism and the absence of accumulated state were checked
-before any measurement. Eight protocol corrections are reported in full
+before any measurement. Ten protocol corrections are reported in full
 (Section~\ref{sec:corrections}), including the three that made the reported figures
 worse. What
 was not done is equally relevant: there was no blinding, no second annotator for the
@@ -431,7 +434,7 @@ tables for its users module, one per identity provider, and selects between them
 assembled from \texttt{window.env}, a value injected into the page when the application is
 deployed. The extractor reads a conditional whose condition the sources fix --- a flag written in
 an environment file is resolved and the arm it selects is read --- and declares the subtree unread
-when they do not, which is this case. The loss is declared and it is five screens wide, which is
+when they do not, which is this case. The loss is declared and it is \ProbeMissedMifos{} screens wide, which is
 the price of the rule that decides the question: the table a prefix mounts is the one its route
 names, or the one the module registers with \texttt{forChild}, or the only one in the file, and
 otherwise none. Reading every table a file holds instead would have given this prefix the right
@@ -819,14 +822,15 @@ recovered. A large part of the attribution losses that remain after attribution 
 constructs whose scope was found but whose target screen has no node, and those are
 repaired by node extraction rather than by any change to the attribution pass.
 
-The part of the model that Chapter~\ref{ch:analysis} specifies and the prototype
-leaves out comes next: the call graph with dependency injection, and the dispatch
-relations that carry NgRx effects and router event subscriptions. The remaining losses
-in services and guards quantify what the omission costs on this corpus, which makes the
-work measurable rather than speculative. Resolution would follow class hierarchy
-analysis against Angular's provider declarations, in the style the framework-modelling
-literature recommends \cite{dean1995cha,sridharan2011f4f,antoniadis2020enterprise}, and
-the fixpoint and the complexity bound for it are already stated. Guards that return a
+The part of the model that Chapter~\ref{ch:analysis} specifies and the prototype leaves out
+comes next: the dispatch relations that carry NgRx effects and router event subscriptions, and
+the injector hierarchy that the implemented call graph reads past, since it takes every provider
+binding as applying application-wide (Section~\ref{sec:approximations}). The call graph itself
+follows class hierarchy analysis against Angular's provider declarations, in the style the
+framework-modelling literature recommends
+\cite{dean1995cha,sridharan2011f4f,antoniadis2020enterprise}; reading bindings relative to the
+injector that resolves them would narrow the scopes it computes, and the fixpoint and the
+complexity bound already cover it. Guards that return a
 \texttt{UrlTree} belong to the same group, since a redirecting guard is itself a
 navigation site and not only a label.
 
@@ -842,7 +846,7 @@ operator that removes a guard is the obvious second test for it, and on this cor
 reaches only the guards the graph already records on an edge
 (Section~\ref{sec:res-mutation}). The wider treatment of guards in
 Chapter~\ref{ch:analysis}, where the guard of an edge is the conjunction of the
-conditions on the containment path with the guards of the target route, is the more
+conditions on the containment path with the guards the router runs on that navigation, is the more
 substantial piece of work and would subsume it.
 
 Dialogs and overlays should become user interface states. They are the largest declared
