@@ -64,15 +64,33 @@ export function keptSegments(target: string, ownerPath: string | undefined): num
  * Whether a route pattern can match an address, segment by segment, where a parameter on either
  * side matches anything. With `prefix` the address may go on past the pattern, as it does for a
  * route with children or a redirect with `pathMatch: 'prefix'`; a trailing catch-all matches
- * whatever is left.
+ * whatever is left. With `every` the address is itself a pattern and the question is whether the
+ * route matches every address it stands for, so a parameter in it is matched only by a parameter:
+ * a literal there matches one value of it.
  */
-export function overlaps(address: string, pattern: string, prefix: boolean): boolean {
+export function overlaps(address: string, pattern: string, prefix: boolean, every = false): boolean {
   const a = segments(address)
   const p = segments(pattern)
   const wild = p[p.length - 1] === '*'
   const fixed = wild ? p.slice(0, -1) : p
   if (a.length < fixed.length || (!prefix && !wild && a.length > fixed.length)) return false
-  return fixed.every((seg, i) => seg === a[i] || seg.startsWith(':') || a[i]!.startsWith(':'))
+  return fixed.every((seg, i) => seg === a[i] || seg.startsWith(':') || (!every && a[i]!.startsWith(':')))
+}
+
+/**
+ * Where a redirect declared at pattern `at` sends an address the pattern consumes whole, as
+ * Angular applies `redirectTo`: each `:name` segment of `to` takes the segment the pattern binds
+ * to that name. Null when segments are left over, whose fate turns on whether `to` was written
+ * relative, which the full path does not keep, and when `to` names a parameter the pattern does
+ * not bind, which Angular rejects.
+ */
+export function redirectAddress(address: string, at: string, to: string): string | null {
+  const a = segments(address)
+  const p = segments(at)
+  if (a.length !== p.length || p.includes('*')) return null
+  const bound = new Map(p.flatMap((seg, i) => (seg.startsWith(':') ? [[seg, a[i]!] as const] : [])))
+  const out = to.split('/').map((seg) => (seg.startsWith(':') ? bound.get(seg) : seg))
+  return out.includes(undefined) ? null : out.join('/')
 }
 
 /**

@@ -277,3 +277,195 @@ export const routes: Routes = [
     expect(edgeOf(graph, '/a', '/c')?.guard).toContain('gate')
   })
 })
+
+describe('the sub-rules of a shared route being kept', () => {
+  it('counts the segments the routes above a shared one consume, not only its own', () => {
+    // `x` consumes the segment and does not run again on a matrix change, but the empty-path route
+    // below it does: its parent's segment is part of what it compares, so /x;m=1/one -> /x/two runs `auth`.
+    const { graph } = extractGraph(inMemory({
+      '/app/guards.ts': `export const auth = () => true`,
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { auth } from './guards'
+import { P } from './p.component'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'x', runGuardsAndResolvers: 'pathParamsChange', children: [{ path: '', component: P, canActivate: [auth], children: [{ path: 'one', component: A }, { path: 'two', component: P }] }] },
+]`,
+      '/app/p.component.ts': page('P'),
+      '/app/a.component.ts': page('A', '<a routerLink="/x/two">t</a>'),
+    }), '/app')
+    expect(edgeOf(graph, '/x/one', '/x/two')?.modality).toBe('may')
+    expect(edgeOf(graph, '/x/one', '/x/two')?.guard).toContain('auth')
+  })
+
+  it('keeps no segment of the source once a redirect rewrote the address', () => {
+    // ../c keeps /p;m=1 as it is, but the absolute redirect at /p/c builds /p/b afresh, so p's matrix parameter goes and `auth` runs.
+    const { graph } = extractGraph(inMemory({
+      '/app/guards.ts': `export const auth = () => true`,
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { auth } from './guards'
+import { P } from './p.component'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'p', component: P, canActivate: [auth], children: [{ path: 'a', component: A }, { path: 'b', component: P }, { path: 'c', redirectTo: '/p/b', pathMatch: 'full' }] },
+]`,
+      '/app/p.component.ts': page('P'),
+      '/app/a.component.ts': page('A', '<a routerLink="../c">c</a>'),
+    }), '/app')
+    expect(edgeOf(graph, '/p/a', '/p/b')?.modality).toBe('may')
+    expect(edgeOf(graph, '/p/a', '/p/b')?.guard).toContain('auth')
+  })
+
+  it('runs the canMatch of a route tried at an address a redirect leads to', () => {
+    // /old becomes /new/page, where the router tries the first `new` route, runs `beta`, finds no `page` under it and goes on.
+    const { graph } = extractGraph(inMemory({
+      '/app/guards.ts': `export const beta = () => true`,
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { beta } from './guards'
+import { P } from './p.component'
+import { A } from './a.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'old', redirectTo: '/new/page', pathMatch: 'full' },
+  { path: 'new', canMatch: [beta], children: [{ path: 'other', component: P }] },
+  { path: 'new', children: [{ path: 'page', component: P }] },
+]`,
+      '/app/p.component.ts': page('P'),
+      '/app/a.component.ts': page('A', '<a routerLink="/old">o</a>'),
+    }), '/app')
+    expect(edgeOf(graph, '/a', '/new/page')?.modality).toBe('may')
+    expect(edgeOf(graph, '/a', '/new/page')?.guard).toContain('beta')
+  })
+
+  it('lets a later prefix redirect at the same address answer the longer addresses a full one leaves', () => {
+    // /old/x passes the full redirect by, and the prefix one after it sends it to /a, so X is never shown.
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { X } from './x.component'
+export const routes: Routes = [
+  { path: 'old', redirectTo: '/a', pathMatch: 'full' },
+  { path: 'old', redirectTo: '/a' },
+  { path: 'old/x', component: X },
+  { path: 'a', component: A },
+]`,
+      '/app/a.component.ts': page('A'),
+      '/app/x.component.ts': page('X', '<a routerLink="/a">a</a>'),
+    }), '/app')
+    expect(edgeOf(graph, '/old/x', '/a')?.modality).toBe('may')
+  })
+})
+
+describe('a screen a redirect hides', () => {
+  it('is hidden only when the redirect answers every address the screen does', () => {
+    // /items/new is one instance of /items/:id, and /items/5 still shows P; /q/:id answers every address /q/new does.
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { P } from './p.component'
+export const routes: Routes = [
+  { path: 'items/new', redirectTo: '/a', pathMatch: 'full' },
+  { path: 'items/:id', component: P },
+  { path: 'q/:id', redirectTo: '/a', pathMatch: 'full' },
+  { path: 'q/new', component: P },
+  { path: 'a', component: A },
+]`,
+      '/app/a.component.ts': page('A'),
+      '/app/p.component.ts': page('P', '<a routerLink="/a">a</a>'),
+    }), '/app')
+    expect(edgeOf(graph, '/items/:id', '/a')?.modality).toBe('must')
+    expect(edgeOf(graph, '/q/new', '/a')?.modality).toBe('may')
+  })
+})
+
+describe('a catch-all in declaration order', () => {
+  it('meets a catch-all declared before the screen in the same table, and not one declared after it', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { P } from './p.component'
+import { NotFound } from './nf.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'adm', children: [{ path: '**', redirectTo: '/a' }, { path: 'x', component: P }] },
+  { path: 'ok', children: [{ path: 'x', component: P }, { path: '**', redirectTo: '/a' }] },
+  { path: 'nf', children: [{ path: '**', component: NotFound }, { path: 'x', component: P }] },
+  { path: 'b', component: P },
+  { path: '**', redirectTo: '/a' },
+  { path: 'old', redirectTo: '/b' },
+]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/adm/x">x</a><a routerLink="/ok/x">o</a><a routerLink="/nf/x">n</a><a routerLink="/old">b</a>'),
+      '/app/p.component.ts': page('P'),
+      '/app/nf.component.ts': page('NotFound'),
+    }), '/app')
+    expect(edgeOf(graph, '/a', '/adm/x')?.modality).toBe('may')
+    expect(edgeOf(graph, '/a', '/ok/x')?.modality).toBe('must')
+    expect(edgeOf(graph, '/a', '/nf/x')?.modality).toBe('may')
+    // The root catch-all comes before `old`, so /old goes to /a and never to /b.
+    expect(edgeOf(graph, '/a', '/b')?.modality).not.toBe('must')
+  })
+
+  it('takes a catch-all in a table registered apart to come after the screens of another, an assumption since registration order is not read', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const ROOT: Routes = [{ path: 'a', component: A }, { path: '**', redirectTo: '/a' }]`,
+      '/app/feature.routes.ts': `import type { Routes } from '@angular/router'\nimport { P } from './p.component'\nexport const FEATURE: Routes = [{ path: 'b', component: P }]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/b">b</a>'),
+      '/app/p.component.ts': page('P'),
+    }), '/app')
+    expect(edgeOf(graph, '/a', '/b')?.modality).toBe('must')
+  })
+})
+
+describe('an address only a redirect answers', () => {
+  it('is not sent down the catch-all branch when the redirect cannot be followed, and is followed when its pattern binds every parameter', () => {
+    const { graph, soundiness } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { P } from './p.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'x', redirectTo: () => '/a', pathMatch: 'full' },
+  { path: 'item/:id', redirectTo: '/items/:id', pathMatch: 'full' },
+  { path: 'items/:id', component: P },
+  { path: 'gone', redirectTo: 'a' },
+  { path: 'm/:a', redirectTo: '/a', pathMatch: 'full' },
+  { path: ':b/n', redirectTo: '/items/1', pathMatch: 'full' },
+  { path: '**', component: P },
+]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/x">x</a><a routerLink="/item/5">i</a><a routerLink="/gone/deep">g</a><a routerLink="/m/n">m</a>'),
+      '/app/p.component.ts': page('P'),
+    }), '/app')
+    expect(edgeOf(graph, '/a', '*')).toBeUndefined()
+    expect(soundiness.filter((n) => n.kind === 'wildcard-redirect' || n.kind === 'unresolved-target')).toEqual([])
+    expect(soundiness.filter((n) => n.kind === 'dynamic-target').map((n) => n.detail)).toEqual([
+      'literal target "/x" is answered by a redirect the reader does not follow, so where it lands is not read',
+      'literal target "/gone/deep" is answered by a redirect the reader does not follow, so where it lands is not read',
+      'literal target "/m/n" is answered by a redirect the reader does not follow, so where it lands is not read',
+    ])
+    expect(edgeOf(graph, '/a', '/items/:id')?.modality).toBe('must')
+  })
+})
+
+describe('a named-outlet route the source has open', () => {
+  it('runs its canMatch on every navigation, and its canActivate where it asks to run always', () => {
+    // An absolute link keeps the root's other outlets, so /a(popup:compose) -> /b(popup:compose) matches the popup route again.
+    const { graph } = extractGraph(inMemory({
+      '/app/guards.ts': `export const cm = () => true\nexport const ca = () => true`,
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { cm, ca } from './guards'
+import { A } from './a.component'
+import { P } from './p.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'b', component: P },
+  { path: 'compose', component: P, outlet: 'popup', canMatch: [cm] },
+  { path: 'chat', component: P, outlet: 'side', canActivate: [ca], runGuardsAndResolvers: 'always' },
+]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/b">b</a>'),
+      '/app/p.component.ts': page('P'),
+    }), '/app')
+    expect(edgeOf(graph, '/a', '/b')?.modality).toBe('may')
+    expect(edgeOf(graph, '/a', '/b')?.guard).toContain('cm')
+    expect(edgeOf(graph, '/a', '/b')?.guard).toContain('ca')
+  })
+})
