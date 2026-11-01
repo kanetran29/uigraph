@@ -30,6 +30,8 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `~/personal/uigraph-corpus/` | the six corpus applications at their pinned SHAs (`fetch.sh` re-creates them). |
 | `~/personal/uigraph-work/` | work dir: `corpus` symlinks to the durable corpus; `noattr/`, `ablation/`, `guard-only/`, `corpus-rq4/`, `final7/`, logs. Never use `/tmp` for this: macOS pruned a corpus `.git` there once, and `remeasure.sh` refuses it. |
 | `thesis-handoff/route-oracle/results-round2/final7.tgz` | archived inputs of the round-two tables (extractor eb9dab80). They do not reproduce the committed round tables exactly. |
+| `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
+| `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
 ## State at a glance
 
@@ -41,9 +43,29 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
   (a rewrite of the superseded-navigation rule), new `packages/adapter-angular/src/supersession.test.ts`,
   new `route-oracle/merge-sweeps.mjs` and `merge-sweeps.test.mjs`, edits to `route-oracle/{compare,
   diagnose-attribution,round2-to-latex,sweep-mutants}.mjs`, `harness.test.mjs`, `corpus.json`, and prose in
-  `thesis.tex`, `ch1`, `ch3`..`ch7`, `figures/alg-attribution.tex` (about 600 lines). The prose edits address many
-  of the open prose findings below. Read the diff (`git diff`) and decide with the student whether to keep it
-  before doing anything else; do not commit or discard it unread.
+  `thesis.tex`, `ch1`, `ch3`..`ch7`, `figures/alg-attribution.tex` (about 600 lines, 16 files). They are still
+  uncommitted and untouched; the student has not decided what to keep.
+  **Reviewed on 1 Nov** (`reviews/wip-2026-11-01.json`). Mechanically they pass: `tsc` clean, adapter suite
+  475/475, harness suite 104/104 (their new mutant anchors fix the two red sweep tests), the thesis builds at
+  140 pages, and the six corpus graphs are edge-for-edge and modality-for-modality identical to HEAD's. The
+  review (4 critical, 21 major, 20 minor confirmed) found:
+  - **Prose: do not commit as it is.** It relabels the eb9dab80 round-two tables (conversion, loss,
+    before/after, round2 soundness) as the "final snapshot" although no `generated-*.tex` was regenerated, so
+    the PDF prints contradictions (Table 5.1 baseline must 7/10/1 beside the census's 1/1/15; Table 5.18
+    "Final-snapshot" over the 20-edge round tier with k8sdash n/a). It undoes the panel-4 provenance
+    corrections, leaves the `**` route-order assumption (126 of the 150 must edges) and the known open
+    false-must paths undeclared, still blames guards for the small tier, credits the call graph with 35 sites
+    instead of its own 6, and overstates the sweep's coverage.
+  - **`corpus.json`: do not commit as it is.** It bumps the harness to 1.8.1 with the changelog entry "Final
+    repair measurement. Re-runs ..." for a measurement that never ran.
+  - **Harness code:** the new mutant list has no mutant for the soundness-side router rules of the fix rounds
+    (rerun, catch-all rivals, `within`, `apart`), and some supersession mutants point the wrong way;
+    `merge-sweeps.mjs` checks less than its note claims.
+  - **Extractor (`conditions.ts`, wider supersession rule):** mostly more conservative, but one regression
+    makes a false must (a navigation in a getter called as `this.x()` goes from may to must); a callback
+    registered before the site is ignored while one registered after it demotes; `mayNavigate` is exponential
+    without memoisation; ch3 still describes the old same-block rule. The corpus exercises none of the new
+    must-preserving sub-rules, so the identical graphs are no evidence for them.
 - Worktrees under `.claude/worktrees/`: 13. The nine of rounds one to three are merged into `main`; the three of
   round four (`wf_f4a7a38a-07e-*`) are empty (round four was stopped before it committed). All can be removed with
   `git worktree remove`.
@@ -68,7 +90,10 @@ Generated at extractor `0027017` (the last full `remeasure.sh`), before fix roun
 
 Each fix branch of rounds one to three re-mapped the corpus read-only and found the must tier unchanged:
 the same 150 edges, sources, targets and witnesses. May edges, (site, screen) pairs, call-graph resolution
-counts and ablation figures did change (details in the round JSONs). `remeasure.sh` has not been run since,
+counts and ablation figures did change (details in the round JSONs). Mapped on 1 Nov with the code at
+`469b210` (`wip-review/maps/head`), the attributed graphs hold realworld 65, alfresco 55, ghostfolio 406,
+k8sdash 309, bitwarden 529 and mifos 10811 edges (the thesis prints the `0027017` counts: 62, 56, 402, 309,
+253, 10819). `remeasure.sh` has not been run since,
 and the round-two tables (`generated-{tables,before-after,round2,plots}.tex`) still come from extractor
 `eb9dab80`, before the call graph and the router-guard rule. They must be regenerated (Open work 4).
 
@@ -94,7 +119,9 @@ and the round-two tables (`generated-{tables,before-after,round2,plots}.tex`) st
 
 ## Open work, in order
 
-1. **Decide the uncommitted working-tree changes** (above) with the student.
+1. **Decide the uncommitted working-tree changes** (above) with the student. On the review's evidence the
+   prose and the `corpus.json` changelog should not go in as they are; the extractor, test and harness parts
+   can be kept only after the listed defects are fixed and the mutant list covers every rule.
 2. **Round four (was stopped).** The open review problems are in `reviews/panel4/round3.json`. Fix the
    false-must ones first:
    - `routes.ts` host branch: the first empty-path child reached through a wrapper call (new false must).
@@ -120,7 +147,8 @@ and the round-two tables (`generated-{tables,before-after,round2,plots}.tex`) st
    ~/personal/uigraph-work/final8` for the round-two tables. Re-check `tier-reading.json` against the new
    must tier (the census refuses unlisted or changed constructs).
 5. **Prose.** At committed `HEAD`, these prose-panel findings (`reviews/panel4/prose-panel.json`) are still
-   open; check each against the uncommitted diff first, since that diff addresses many of them:
+   open. The uncommitted diff touches many of them but, per its review, closes three with new defects and
+   leaves about fifteen open, so do not take it as their fix:
    guards blamed for the small tier (ch7, ch5); "cost RQ1's stricter measure almost everything" (ch1);
    "move at all", "ratios over the same", "node classes are now empty", "carries a reason", "two of the
    three", "is a smaller one now", "Each correction removed a claim", "An application whose screens all sit
@@ -156,6 +184,12 @@ and the round-two tables (`generated-{tables,before-after,round2,plots}.tex`) st
 - Repo-local git identity is `Kane Tran <113832098+kanetran29@users.noreply.github.com>`; commit messages end with
   the session's `Co-Authored-By` line.
 - `.uigraph-gate/` and `uigraph.db` are never committed.
+- **Memory.** The machine has 24 GB and 14 cores, and other apps hold about 15 GB. Parallel agents running test
+  suites caused two jetsam events (30 Oct 00:01, 1 Nov 06:18) and a forced reboot (1 Nov 09:46). Measured: one
+  adapter `vitest run` forks 13 workers, about 3.9 GB; root `pnpm check` about 5.1 GB; mapping mifos 0.9 GB;
+  each claude agent 0.3-0.5 GB. Check `memory_pressure` first; at most 2-3 agents that run tests at once,
+  vitest with `--maxWorkers=2`, no `pnpm check` inside agents (run it once after merging), reviewers and
+  verifiers read only, corpus maps and the sweep in one place at a time.
 
 ## Open admin items (from the earlier handoff; not re-checked)
 
