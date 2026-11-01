@@ -20,7 +20,10 @@
 //        and reach fewer addresses, but one it does not list, or one that reaches an address the
 //        reading does not name, still refuses the census. Without it the reading and the graph
 //        must agree exactly. A construct that earns must only without attribution is listed
-//        with the verdict `must-unattributed`, which only the subset check counts as listed.
+//        with the verdict `must-unattributed`, which only the subset check counts as listed, and
+//        there it has to earn a must edge and reach exactly its targets, so that a row cannot
+//        outlive its construct; a `must` row that reaches further addresses without attribution
+//        lists them as `unattributedTargets`, which the subset check accepts and requires.
 //
 // The census is written as a result file as well as a table, so the figures the thesis quotes
 // come from a recorded measurement rather than from a database that is not committed.

@@ -27,12 +27,20 @@ const HARNESS = 'thesis-handoff/route-oracle'
  * reads as much as a source file, is a change to what was measured.
  */
 const GENERATED = [':(exclude)*.db', ':(exclude)*.db-*']
+/**
+ * The files at the repository root that pin what the extractor is built from: the workspace
+ * catalog names the ts-morph and typescript that packages/* declare as `catalog:`, and the lockfile
+ * fixes the versions installed. A change to either changes what was measured as surely as a change
+ * under packages/, so it is reported with it.
+ */
+const PINS = ['pnpm-lock.yaml', 'pnpm-workspace.yaml']
 
 /**
  * `% Extractor <sha>, packages/ clean, harness clean` (or `with uncommitted changes`), for a
- * generated file's header. Any change under packages/ counts, generated databases apart; so does
- * code under the harness directory, and so do the data files a generator reads (INPUTS);
- * generated results do not. `root` is the repository to ask, the one this file sits in by default.
+ * generated file's header. Any change under packages/ counts, generated databases apart, and so
+ * does one to the root files that pin the extractor's dependencies (PINS); so does code under the
+ * harness directory, and so do the data files a generator reads (INPUTS); generated results do
+ * not. `root` is the repository to ask, the one this file sits in by default.
  */
 export function extractorStamp(root = repo) {
   const git = (...args) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' })
@@ -40,7 +48,22 @@ export function extractorStamp(root = repo) {
   // `-uall` lists the files of an untracked directory, not the directory, so a new script in one is seen.
   const status = (...paths) => git('status', '--porcelain', '-uall', '--', ...paths).split('\n').map((l) => l.trim()).filter(Boolean)
   const code = (lines) => lines.some((l) => /\.(ts|mts|mjs|js|sh)$/.test(l))
-  const packagesDirty = status('packages', ...GENERATED).length > 0
+  const packagesDirty = status('packages', ...PINS, ...GENERATED).length > 0
   const harnessDirty = code(status(HARNESS)) || status(...INPUTS.map((p) => `${HARNESS}/${p}`)).length > 0
   return `% Extractor ${sha}, packages/ ${packagesDirty ? 'with uncommitted changes' : 'clean'}, harness ${harnessDirty ? 'with uncommitted changes' : 'clean'} when generated.`
+}
+
+/**
+ * The git tree hash of packages/adapter-angular/src at `rev` (HEAD by default), the identity of the
+ * rules and of the tests that cover them: the mutation sweep records it, and sweep-to-latex.mjs
+ * compares it with HEAD's so that a sweep of other rules cannot be published as this extractor's.
+ * Null when `rev` does not resolve or holds no such directory, which a caller must not read as a
+ * match. `root` is the repository to ask, the one this file sits in by default.
+ */
+export function adapterSrcTree(rev = 'HEAD', root = repo) {
+  try {
+    return execFileSync('git', ['-C', root, 'rev-parse', '--verify', '--quiet', `${rev}:packages/adapter-angular/src`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null
+  } catch {
+    return null
+  }
 }
