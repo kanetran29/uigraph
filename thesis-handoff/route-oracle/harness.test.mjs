@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url'
 import { afterAll, describe, expect, it } from 'vitest'
 import { lostGuard, namedGuards } from './guard-resolve.mjs'
 import { extractorStamp } from './provenance.mjs'
+import { conversion, judgedSites, pct1 } from './report-counts.mjs'
+import { MUTANTS, applyMutant, mutationProblems } from './sweep-mutants.mjs'
 import { readingProblems } from './tier-reading.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -111,6 +113,43 @@ describe('witness-check (code panel 24): a must witness whose destination it can
   })
 })
 
+describe('witness-check (review of code panel 24): a commands array with no literal segment names no address', () => {
+  /** Four must edges, each citing a dynamic or half-dynamic array, and the result the check writes for them. */
+  function fixture() {
+    const app = dir('app')
+    put(app, {
+      'src/a.html': [
+        `<a [routerLink]="[target]">no literal at all</a>`,
+        `<a [routerLink]="['/', id]">only a root and a parameter</a>`,
+        `<a [routerLink]="['/workloads', id]">a literal head</a>`,
+      ].join('\n'),
+      'src/a.ts': `this.router.navigate([target])\n`,
+    })
+    const edge = (to, file, line, ruleId) => ({ from: 'a', to, event: 'click', modality: 'must', source: 'static', witness: { file, loc: { line }, ruleId, modality: 'must', source: 'static' } })
+    const db = path.join(app, 'uigraph.db')
+    writeGraph(db, {
+      nodes: [{ id: 'a', kind: 'screen', route: '/a' }, { id: 'w', kind: 'screen', route: '/workloads' }, { id: 'wid', kind: 'screen', route: '/workloads/:id' }],
+      edges: [edge('w', 'src/a.html', 1, 'ng.router-link'), edge('w', 'src/a.html', 2, 'ng.router-link'), edge('wid', 'src/a.html', 3, 'ng.router-link'), edge('w', 'src/a.ts', 1, 'ng.navigate')],
+    })
+    const out = path.join(app, 'out.json')
+    run('witness-check.mjs', [app, db, '--json', out])
+    return JSON.parse(fs.readFileSync(out, 'utf8'))
+  }
+
+  it('records such an array as unread instead of letting `/:param` agree with any one-segment destination', () => {
+    const r = fixture()
+    // `/:param` matched /workloads, so before the fix all four edges passed and none was unread.
+    expect(r.tally.TARGET_UNREAD).toBe(3)
+    expect(r.mustUnread).toBe(3)
+    expect(r.mustBad).toEqual([])
+  })
+
+  it('still reads an array with a literal head as an address, and compares it', () => {
+    const r = fixture()
+    expect(r.findings.filter((f) => f.at === 'src/a.html:3')).toEqual([])
+  })
+})
+
 describe('must-witness (code panel 24 and 30)', () => {
   const APPS = ['realworld', 'alfresco', 'ghostfolio', 'k8sdash', 'bitwarden', 'mifos']
   function witnessDir() {
@@ -193,6 +232,25 @@ describe('tier-reading gate (code panel 8 and 32)', () => {
     expect(readingProblems(wider, 'app', graph(), { exact: false })).toEqual([])
     expect(readingProblems(reading(['/b']), 'app', graph('c'), { exact: false })).toHaveLength(1)
   })
+
+  describe('a construct that attribution demotes from must to may (review of code panel 8)', () => {
+    /** The graph the reading is made on: attribution holds the construct at may, so it earns no must edge. */
+    const attributed = () => ({ ...graph(), edges: graph().edges.map((e) => ({ ...e, modality: 'may', witness: { ...e.witness, modality: 'may' } })) })
+    const unattributed = { sites: [{ app: 'app', site: 'x.html:3', targets: ['/b'], verdict: 'must-unattributed' }] }
+
+    it('can be listed so that the exact check on the attributed graph and the subset check on the unattributed graph both pass', () => {
+      // Listed as `must` the exact check refuses it as earning no must edge, and unlisted the subset check refuses it.
+      expect(readingProblems(unattributed, 'app', attributed())).toEqual([])
+      expect(readingProblems(unattributed, 'app', graph(), { exact: false })).toEqual([])
+      expect(readingProblems(reading(['/b']), 'app', attributed()).join()).toMatch(/x\.html:3 is listed but earns no must edge/)
+      expect(readingProblems({ sites: [] }, 'app', graph(), { exact: false }).join()).toMatch(/does not list/)
+    })
+
+    it('is refused on the attributed graph if it earns a must edge there after all, and on the subset check if it reaches an unrecorded address', () => {
+      expect(readingProblems(unattributed, 'app', graph()).join()).toMatch(/x\.html:3 is listed as must only without attribution but earns a must edge here/)
+      expect(readingProblems(unattributed, 'app', graph('c'), { exact: false }).join()).toMatch(/x\.html:3.*\[\/b\].*\[\/b, \/c\]/)
+    })
+  })
 })
 
 describe('graph-census (code panel 8 and 32): the census refuses a tier its reading does not describe', () => {
@@ -231,6 +289,26 @@ describe('graph-census (code panel 8 and 32): the census refuses a tier its read
     const c = corpus({ extraRow: { app: 'mifos', site: 'gone.html:9', targets: ['/b'], verdict: 'must' } })
     expect(refusal('graph-census.mjs', ['--corpus', c.root, '--reading', c.readingFile])?.output).toMatch(/mifos: gone\.html:9 is listed but earns no must edge/)
     expect(() => census(c, '--reading-subset')).not.toThrow()
+  })
+
+  it('passes both censuses for a construct that only the graph without attribution holds at must', () => {
+    // Attribution holds x.html:3 at may; without it the construct earns must. One reading has to satisfy the exact
+    // census of the attributed corpus and the subset census of the plain one, which a `must` row cannot.
+    const build = (modality) => {
+      const root = dir('census')
+      for (const [slug, sub] of Object.entries(APPS)) {
+        const w = { file: 'x.html', loc: { line: 3 }, modality }
+        writeGraph(path.join(root, slug, sub, 'uigraph.db'), {
+          nodes: [{ id: 'a', kind: 'screen', route: '/a' }, { id: 'b', kind: 'screen', route: '/b' }],
+          edges: [{ from: 'a', to: 'b', modality, witness: w }],
+        })
+      }
+      return root
+    }
+    const readingFile = path.join(dir('reading'), 'reading.json')
+    fs.writeFileSync(readingFile, JSON.stringify({ sites: Object.keys(APPS).map((app) => ({ app, site: 'x.html:3', targets: ['/b'], verdict: 'must-unattributed' })) }))
+    expect(() => run('graph-census.mjs', ['--corpus', build('may'), '--reading', readingFile])).not.toThrow()
+    expect(() => run('graph-census.mjs', ['--corpus', build('must'), '--reading', readingFile, '--reading-subset'])).not.toThrow()
   })
 })
 
@@ -299,7 +377,10 @@ describe('provenance stamp (code panel 31)', () => {
     const git = (...args) => execFileSync('/usr/bin/git', ['-C', r, '-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8' })
     put(r, {
       'packages/core/src/a.ts': 'export const a = 1\n',
+      'packages/core/package.json': '{"name":"core"}\n',
       'thesis-handoff/route-oracle/run.mjs': 'export {}\n',
+      'thesis-handoff/route-oracle/package.json': '{"dependencies":{"ts-morph":"28.0.0"}}\n',
+      'thesis-handoff/route-oracle/package-lock.json': '{"lockfileVersion":3}\n',
       'thesis-handoff/route-oracle/results-must/tier-reading.json': '{"sites":[]}\n',
       'thesis-handoff/route-oracle/results-must/review.json': '{}\n',
       'thesis-handoff/route-oracle/results-must/mutation-sweep.json': '{}\n',
@@ -322,6 +403,7 @@ describe('provenance stamp (code panel 31)', () => {
   it.each([
     'results-must/tier-reading.json', 'results-must/review.json', 'results-must/mutation-sweep.json',
     'ground-truth/realworld.json', 'corpus.json', 'round-two-graphs/realworld.json.gz',
+    'package.json', 'package-lock.json',
   ])('is dirty when %s, which a generator reads, is edited', (rel) => {
     const { r, sha } = repo()
     fs.appendFileSync(path.join(r, 'thesis-handoff/route-oracle', rel), 'edited')
@@ -345,6 +427,24 @@ describe('provenance stamp (code panel 31)', () => {
     put(r, { 'thesis-handoff/route-oracle/results-census/census.json': '{}\n' })
     expect(extractorStamp(r)).toBe(stamp(sha, 'clean'))
   })
+
+  it('is dirty when a file under packages/ that is not code is edited (review of code panel 31)', () => {
+    const { r, sha } = repo()
+    fs.appendFileSync(path.join(r, 'packages/core/package.json'), ' ')
+    expect(extractorStamp(r)).toBe(`% Extractor ${sha}, packages/ with uncommitted changes, harness clean when generated.`)
+  })
+
+  it('is dirty when a new non-code file appears under packages/', () => {
+    const { r, sha } = repo()
+    put(r, { 'packages/core/vitest.config.json': '{}\n' })
+    expect(extractorStamp(r)).toBe(`% Extractor ${sha}, packages/ with uncommitted changes, harness clean when generated.`)
+  })
+
+  it('stays clean when a run of the extractor leaves a graph database under packages/', () => {
+    const { r, sha } = repo()
+    put(r, { 'packages/core/uigraph.db': 'x', 'packages/core/test-fixtures/app/uigraph-mutate.db': 'x', 'packages/core/uigraph.db-journal': 'x' })
+    expect(extractorStamp(r)).toBe(stamp(sha, 'clean'))
+  })
 })
 
 describe('REMOVE_GUARD detection (code panel 33)', () => {
@@ -358,6 +458,14 @@ describe('REMOVE_GUARD detection (code panel 33)', () => {
 
   it('does not call a list complete when an element is written from a hash or a position', () => {
     expect(namedGuards('canActivate: [() => inject(X).ok(), A],')).toEqual({ names: ['A'], complete: false })
+  })
+
+  it('does not name a chained call, which the extractor prints with only its last callee (review of code panel 33)', () => {
+    // The extractor writes `roleGuard('admin').and(authGuard)` as `roleGuard('admin').and()`; naming it
+    // `roleGuard()` would score a real loss of that guard WRONG and exclude the mutant.
+    expect(namedGuards(`canActivate: [roleGuard('admin').and(authGuard)],`)).toEqual({ names: [], complete: false })
+    expect(namedGuards('canActivate: [factory(a, b).x(c), A],')).toEqual({ names: ['A'], complete: false })
+    expect(namedGuards('canActivate: [a.b(c)(d)],')).toEqual({ names: [], complete: false })
   })
 
   it('counts the lost guard only when the removed list names it', () => {
@@ -400,10 +508,66 @@ describe('REMOVE_GUARD detection (code panel 33)', () => {
     run('mutate.mjs', [app, app, '--quota', '8', '--json', out], { env: { UIGRAPH_MAP: cli } })
     const r = JSON.parse(fs.readFileSync(out, 'utf8'))
     const guard = r.results.find((x) => x.kind === 'REMOVE_GUARD')
-    expect(r.harnessVersion).toBe('1.8.0')
+    // Not '1.8.0' alone: run-all.mjs is at 1.8.0 too, and the thesis prints this string as \HarnessVersionMutation.
+    expect(r.harnessVersion).toBe('mutate 1.8.0')
     expect(guard.verdict).toBe('DETECTED')
     expect(guard.delta.guardChanged).toHaveLength(5)
   }, 180000)
+
+  describe('scores a removal by whether the lost guard is one the removed list names (review of code panel 33)', () => {
+    /**
+     * An application whose route file guards /admin with `[AdminGuard]`, mapped by a stand-in for the
+     * extractor: with the guard list in the source the edge into /admin carries `before`, and with it
+     * removed `after`. The stand-in lets a removal lose a guard other than the one removed, which no
+     * route file the real extractor reads makes it do.
+     */
+    function removal(before, after) {
+      const app = dir('guardapp')
+      put(app, {
+        'src/app.routes.ts': [
+          `export const routes: Routes = [`,
+          `  { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },`,
+          `]`,
+        ].join('\n'),
+      })
+      const mapper = path.join(dir('mapper'), 'map.mjs')
+      put(path.dirname(mapper), {
+        'map.mjs': [
+          `import { DatabaseSync } from 'node:sqlite'`,
+          `import fs from 'node:fs'`,
+          `const arg = (n) => process.argv[process.argv.indexOf(n) + 1]`,
+          `const guarded = fs.readFileSync(arg('map') + '/src/app.routes.ts', 'utf8').includes('canActivate')`,
+          `const graph = {`,
+          `  nodes: [{ id: 'home', kind: 'screen', route: '/', label: 'HomeComponent' }, { id: 'admin', kind: 'screen', route: '/admin', label: 'AdminComponent' }],`,
+          `  edges: [{ from: 'home', to: 'admin', event: 'click', guard: guarded ? process.env.BEFORE : process.env.AFTER, modality: 'may', witness: { file: 'src/home.html', loc: { line: 1 } } }],`,
+          `}`,
+          `fs.rmSync(arg('--out'), { force: true })`,
+          `const db = new DatabaseSync(arg('--out'))`,
+          `db.exec('create table docs (key text primary key, json text)')`,
+          `db.prepare('insert into docs values (?, ?)').run('graph', JSON.stringify(graph))`,
+          `db.close()`,
+        ].join('\n'),
+      })
+      const git = (...args) => execFileSync('/usr/bin/git', ['-C', app, '-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8' })
+      git('init', '-q')
+      git('add', '-A')
+      git('commit', '-q', '-m', 'init')
+      const out = path.join(app, 'rq4.json')
+      run('mutate.mjs', [app, app, '--quota', '8', '--json', out], { env: { UIGRAPH_MAP: `node ${mapper}`, BEFORE: before, AFTER: after } })
+      return JSON.parse(fs.readFileSync(out, 'utf8')).results.find((x) => x.kind === 'REMOVE_GUARD')
+    }
+
+    it('calls it WRONG when the edge loses some other guard', () => {
+      // The list removed is [AdminGuard]; the edge went from AdminGuard,OtherGuard to AdminGuard, so it lost OtherGuard.
+      const guard = removal('AdminGuard,OtherGuard', 'AdminGuard')
+      expect(guard.delta.guardChanged).toHaveLength(1)
+      expect(guard.verdict).toBe('WRONG')
+    })
+
+    it('calls it DETECTED when the edge loses the guard the list names', () => {
+      expect(removal('AdminGuard,OtherGuard', 'OtherGuard').verdict).toBe('DETECTED')
+    })
+  })
 })
 
 describe('compare.mjs (prose panel 3 and 6)', () => {
@@ -412,14 +576,15 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
   const DIAG = { realworld: { 'service (not in this version)': 0 }, bitwarden: { 'scoped; target resolves': 1 } }
 
   /** One run directory: results.json, raw/<slug>.L.json for every application, and the diagnosis. */
-  function run1(label, classes, withDiag) {
+  function run1(label, classes, withDiag, over = {}) {
     const d = dir(label)
     const results = Object.entries(classes).map(([slug, cls]) => {
       const must = cls.filter((c) => c === 'CONVERTED_MUST').length
       fs.mkdirSync(path.join(d, 'raw'), { recursive: true })
       fs.writeFileSync(path.join(d, 'raw', `${slug}.L.json`), JSON.stringify({ rows: cls.map((c, i) => ({ at: `f.ts:${i + 1}`, cls: c })) }))
-      if (withDiag) fs.writeFileSync(path.join(d, 'raw', `${slug}.diag.json`), JSON.stringify(DIAG[slug]))
-      return { slug, totalConstructs: cls.length, conversion: must / cls.length, graph: { edges: 10 }, testB: { mustClean: 1, mustEdges: 1 } }
+      if (withDiag) fs.writeFileSync(path.join(d, 'raw', `${slug}.diag.json`), JSON.stringify(DIAG[slug] ?? {}))
+      const tally = Object.fromEntries([...new Set(cls)].map((c) => [c, cls.filter((x) => x === c).length]))
+      return { slug, totalConstructs: cls.length, conversion: must / cls.length, loss: { constructs: cls.length, tally }, graph: { edges: 10 }, testB: { mustClean: 1, mustEdges: 1 }, ...over }
     })
     fs.writeFileSync(path.join(d, 'results.json'), JSON.stringify({ provenance: { extractor: { sha: 'abc' }, harnessVersion: 'x' }, results }))
     return d
@@ -437,6 +602,19 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
     expect(macro(out, 'AttrDemoted')).toBe('2')
     // Moving from must to may leaves the converted classes, so nothing regressed.
     expect(macro(out, 'AttrRegressed')).toBe('0')
+  })
+
+  it('prints a conversion from the counts, not from the ratio results.json already rounded (prose 38)', () => {
+    // 1 of 26 is 3.846 %: the plot prints 3.8, and rounding the stored 0.0385 a second time gave 3.9 here.
+    const same = { realworld: ['CONVERTED_MUST', ...Array(25).fill('LAZY_BOUNDARY')] }
+    const before = run1('before', same, false, { conversion: 0.0385 })
+    const after = run1('after', same, true, { conversion: 0.0385 })
+    const tex = path.join(before, 'out.tex')
+    run('compare.mjs', [before, after, '--tex', tex])
+    const out = fs.readFileSync(tex, 'utf8')
+    expect(out).toContain('realworld & 3.8\\% & 3.8\\% & +0.0 &')
+    expect(out).not.toContain('3.9')
+    expect(pct1(1, 26)).toBe('3.8')
   })
 
   it('counts the remaining constructs the diagnosis gives no reason for', () => {
@@ -500,5 +678,104 @@ describe('to-plots (prose panel 38 and 39)', () => {
     const odd = app('ghostfolio', { CONVERTED_MUST: 1, SOMETHING_NEW: 2 })
     const refused = refusal('to-plots.mjs', [write('b.json', [odd]), write('a.json', [odd])])
     expect(refused?.output).toMatch(/ghostfolio.*SOMETHING_NEW/)
+  })
+})
+
+describe('to-latex (prose panel 38): the conversion table rounds the counts once, as the figure does', () => {
+  const SLUGS = ['realworld', 'alfresco', 'ghostfolio', 'k8sdash', 'bitwarden', 'mifos']
+
+  /** A results.json of the six applications, each with `must` of `all` constructs converted and a stale stored ratio. */
+  function results(must, all) {
+    const d = dir('tables')
+    fs.mkdirSync(path.join(d, 'raw'))
+    const rows = SLUGS.map((slug) => {
+      fs.writeFileSync(path.join(d, 'raw', `${slug}.C.json`), JSON.stringify({ comparison: { declaredScreens: 1, graphNodes: 1, matched: 1, coverage: 1, extraNodes: [] }, blindSpots: [] }))
+      const tally = { CONVERTED_MUST: must, LAZY_BOUNDARY: all - must }
+      return { slug, totalConstructs: all, conversion: +(must / all).toFixed(4), graph: { nodes: 1, must: 1, may: 1 }, loss: { constructs: all, tally } }
+    })
+    const file = path.join(d, 'results.json')
+    fs.writeFileSync(file, JSON.stringify({ provenance: { extractor: { sha: '0123456789abcdef' }, harnessVersion: 'x', startedAt: '2026-01-01T00:00:00Z' }, results: rows }))
+    return file
+  }
+
+  it('prints 3.8 for 1 of 26, where rounding the stored 0.0385 again printed 3.9', () => {
+    const out = run('to-latex.mjs', [results(1, 26)])
+    expect(out).toContain('realworld & 26 & 1 & 1 & 1 & 3.8\\% \\\\')
+    expect(out).not.toContain('3.9')
+  })
+})
+
+describe('mutation sweep: the mutants are data that must apply to the adapter as it stands', () => {
+  const SRC = path.join(ROOT, 'packages', 'adapter-angular', 'src')
+
+  it('applies every mutant exactly once, so a rule that moved is found here and not by a run that tests nothing', () => {
+    expect(mutationProblems(MUTANTS, (f) => fs.readFileSync(path.join(SRC, f), 'utf8'))).toEqual([])
+  })
+
+  it('refuses a find string that is gone, occurs twice or changes nothing, and an id used twice', () => {
+    const files = { 'a.ts': 'x = 1\nx = 1\ny = 2\n' }
+    const problems = mutationProblems([
+      { id: 'a', rule: 'gone', file: 'a.ts', find: 'z = 3', replace: 'z = 4' },
+      { id: 'b', rule: 'twice', file: 'a.ts', find: 'x = 1', replace: 'x = 2' },
+      { id: 'c', rule: 'same', file: 'a.ts', find: 'y = 2', replace: 'y = 2' },
+      { id: 'c', rule: 'again', file: 'a.ts', find: 'y = 2', replace: 'y = 3' },
+    ], (f) => files[f])
+    expect(problems).toHaveLength(4)
+    expect(problems.join('\n')).toMatch(/gone.*occurs 0 times/)
+    expect(problems.join('\n')).toMatch(/twice.*occurs 2 times/)
+  })
+
+  it('keeps the 72 mutants of the first sweep, the three that split a term, and gives each caller and each token its own', () => {
+    const ids = MUTANTS.map((m) => m.id)
+    for (let i = 1; i <= 72; i += 1) expect(ids).toContain(String(i))
+    expect(ids).toEqual(expect.arrayContaining(['59a', '59b', '59c']))
+    expect(MUTANTS.filter((m) => m.rule.startsWith('capMay:'))).toHaveLength(7)
+    expect(MUTANTS.filter((m) => m.rule.startsWith('logical assignment:'))).toHaveLength(3)
+  })
+
+  it('applies a replacement literally, whatever `$` it holds', () => {
+    expect(applyMutant({ find: 'a', replace: '$&b' }, 'a')).toBe('$&b')
+    expect(applyMutant({ find: ['a', 'c'], replace: ['1', '2'] }, 'a c')).toBe('1 2')
+  })
+
+  it('checks the list from the command line without running a suite', () => {
+    expect(run('mutation-sweep.mjs', ['--dry-run'])).toMatch(/each applies exactly once/)
+  })
+
+  describe('sweep-to-latex reads what the sweep writes', () => {
+    const killed = (id) => ({ id, rule: 'r', file: 'f', result: 'Tests  1 failed | 379 passed (380)', survived: false, killedBy: 't' })
+    const sweep = (extra) => {
+      const f = path.join(dir('sweep'), 'sweep.json')
+      fs.writeFileSync(f, JSON.stringify({ commit: 'abc1234', baseline: 'Tests  380 passed (380)', mutants: [killed('1'), killed('2')], ...extra }))
+      return f
+    }
+
+    it('states the counts and the commit when every mutant was killed', () => {
+      const out = run('sweep-to-latex.mjs', ['--in', sweep()])
+      expect(out).toMatch(/SweepMutants\}\{2\}.*SweepAdded\}\{0\}.*SweepCommit\}\{abc1234\}/)
+    })
+
+    it('refuses a mutant that survived, one with no recorded outcome, and a partial run', () => {
+      expect(refusal('sweep-to-latex.mjs', ['--in', sweep({ mutants: [killed('1'), { ...killed('2'), survived: true }] })])?.output).toMatch(/rules no test covers: 2/)
+      expect(refusal('sweep-to-latex.mjs', ['--in', sweep({ mutants: [killed('1'), { ...killed('2'), survived: null }] })])?.output).toMatch(/rules no test covers: 2/)
+      expect(refusal('sweep-to-latex.mjs', ['--in', sweep({ partial: true })])?.output).toMatch(/partial run/)
+    })
+  })
+})
+
+describe('report-counts (prose panel 38, and the round-two soundness table)', () => {
+  it('takes a percentage from the counts and prints it as the figure does', () => {
+    // 54,766 of the n/d with d up to 1500 differ between rounding the ratio twice and rounding the counts once.
+    expect(pct1(1, 26)).toBe('3.8')
+    expect(pct1(14, 17)).toBe('82.4')
+    expect(conversion({ loss: { constructs: 26, tally: { CONVERTED_MUST: 1 } } }).toFixed(1)).toBe('3.8')
+    expect(conversion({ loss: null })).toBeNull()
+  })
+
+  it('leaves out of the judged sites those the check reached no verdict on, so the clean share counts neither as a failure', () => {
+    // 10 sites: 4 clean, 3 over-approximated, 2 unread must targets, 1 mismatch. The unread were counted as judged and not clean.
+    const b = { sites: 10, clean: 4, tally: { OVER_APPROX: 3, TARGET_UNREAD: 2, TARGET_MISMATCH: 1 } }
+    expect(judgedSites(b)).toBe(5)
+    expect(judgedSites({ sites: 10, tally: {} })).toBe(10)
   })
 })
