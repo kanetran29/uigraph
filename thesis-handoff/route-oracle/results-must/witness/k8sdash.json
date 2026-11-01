@@ -4,10 +4,12 @@
  "mergedSites": 132,
  "mustEdges": 125,
  "mustClean": 125,
+ "mustUnread": 62,
  "destinationsChecked": true,
  "mustBad": [],
  "tally": {
   "OVER_APPROX": 255,
+  "TARGET_UNREAD": 62,
   "TARGET_MISMATCH": 2
  }
 }
