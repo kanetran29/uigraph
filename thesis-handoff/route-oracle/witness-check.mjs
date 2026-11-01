@@ -44,6 +44,11 @@ const RULES = {
   'ng.router-link': {
     ext: '.html',
     detect: (l) => /\[?routerLink\]?\s*=/.test(l),
+    /**
+     * The address a routerLink names: a plain attribute, an array of literals (a segment that is
+     * not a literal becomes a `:param`), or a bound string literal. Null for anything else, a
+     * method call or an expression, which this check cannot read and says so (TARGET_UNREAD).
+     */
     target: (l) => {
       // routerLink="/a/b"  |  [routerLink]="['/a', x]"  |  [routerLink]="['/a', x, 'b']"
       // The leading form is kept: a link without a slash is relative to the screen, and the

@@ -217,6 +217,12 @@ function tsFiles(dir) {
 
 const lineOf = (src, index) => src.slice(0, index).split('\n').length
 
+/**
+ * Every mutation the four operators can make in the application's sources, each with the edit
+ * to apply, the confound that excludes it when the graph cannot show it, and the check that
+ * scores the graph's response. A REMOVE_GUARD mutant is checked against the guards its own
+ * removed list names, read by namedGuards.
+ */
 function discover(routes, screensOfRoute, rnd, alreadyReached) {
   const muts = []
   // The preference is only a preference: falling back to the whole pool keeps one rnd()
