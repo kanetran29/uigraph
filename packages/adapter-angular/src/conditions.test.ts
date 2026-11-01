@@ -162,6 +162,7 @@ describe('callCondition on the rest of the ways a call can be skipped', () => {
   it('reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value', () => {
     expect(callIn('go() { do { if (this.flag) break; this.router.navigate(["/x"]) } while (false) }')).toBe('after early exit')
     expect(callIn('go() { out: { if (this.flag) break out; this.router.navigate(["/x"]) } }')).toBe('after early exit')
+    expect(callIn('go() { this.r &&= this.router.navigate(["/x"]) }')).toBe('under a branch')
     expect(callIn('go() { this.r ||= this.router.navigate(["/x"]) }')).toBe('under a branch')
     expect(callIn('go() { this.r ??= this.router.navigate(["/x"]) }')).toBe('under a branch')
     expect(callIn('go() { this.svc?.log(this.router.navigate(["/x"])) }')).toBe('under a branch')
