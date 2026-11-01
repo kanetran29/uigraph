@@ -12,12 +12,13 @@ export interface MemberScopes {
   /** Members reached from the shell, which run on every screen. */
   top: Set<MemberKey>
   /**
-   * Members a caller the graph cannot see may also reach: whatever runs from a member that
-   * nothing seeded, nothing in the graph and no template calls (a constructor the injector runs,
-   * a guard or interceptor the router runs, a function that injects a service by itself), and
-   * whatever those call in turn. Their scope is at least what the graph gives and may be wider.
+   * Members a caller the graph cannot see may also reach, each with the files of those callers:
+   * whatever runs from a member that nothing seeded, nothing in the graph and no template calls (a
+   * constructor the injector runs, a guard or interceptor the router runs, a function that injects
+   * a service by itself), and whatever those call in turn. Their scope is at least what the graph
+   * gives, and may also be wherever those files' own code runs.
    */
-  unseen: Set<MemberKey>
+  unseen: Map<MemberKey, Set<string>>
   /**
    * How the calls on an application-declared type were resolved, for the measurement of
    * Section 5: to the class itself, through a provider binding, or to the subclasses of an
@@ -62,13 +63,16 @@ function isInjectCall(n: Node | undefined): n is CallExpression {
  * Every name is resolved to the declaration it denotes, through imports and re-exports, never by
  * its text: two classes of one name in different files are two classes, a call in one never lands
  * on the other, and a type is never taken for a sibling application's namesake. `loaded`, when
- * given, is the set of files the application loads; a provider binding or an implementation of an
- * abstract class written in any other file is not read, since nothing there runs.
+ * given, is the set of files the application loads; a call, a provider binding or an
+ * implementation of an abstract class written in any other file is not read, since nothing there
+ * runs, unless the file is a seed.
  */
 export function memberScopes(files: SourceFile[], seeds: Map<string, Set<string> | null>, loaded?: ReadonlySet<string>): MemberScopes {
   const inApp = new Set(files.map((sf) => sf.getFilePath()))
   /** Whether the application loads the file `cls` is declared in. */
   const isLoaded = (cls: ClassDeclaration) => !loaded || loaded.has(cls.getSourceFile().getFilePath())
+  /** Whether code in `sf` runs: the application loads it, or it is a seed. */
+  const runs = (sf: SourceFile) => !loaded || loaded.has(sf.getFilePath()) || seeds.has(sf.getFilePath())
   /** Whether `d` is a class some file of the application declares, not a framework's. */
   const appClass = (d: Node): d is ClassDeclaration => Node.isClassDeclaration(d) && inApp.has(d.getSourceFile().getFilePath())
   /** The application classes `n` denotes. */
@@ -78,8 +82,14 @@ export function memberScopes(files: SourceFile[], seeds: Map<string, Set<string>
     const d = declarationsOf(n)
     return d.find((x) => Node.isClassDeclaration(x)) ?? d[0]
   }
-  /** The key of the member `member` of `cls`. */
-  const keyOf = (cls: ClassDeclaration, member: string): MemberKey => `${cls.getSourceFile().getFilePath()}#${cls.getName()}.${member}`
+  const fileOfKey = new Map<MemberKey, string>()
+  /** The key of the member `member` of `cls`, remembering the file it is declared in. */
+  const keyOf = (cls: ClassDeclaration, member: string): MemberKey => {
+    const file = cls.getSourceFile().getFilePath()
+    const key = `${file}#${cls.getName()}.${member}`
+    fileOfKey.set(key, file)
+    return key
+  }
 
   const classes = files.flatMap((sf) => sf.getClasses().filter((c) => c.getName()))
   const bases = new Map<ClassDeclaration, ClassDeclaration | undefined>()
@@ -170,7 +180,7 @@ export function memberScopes(files: SourceFile[], seeds: Map<string, Set<string>
   /** Record a call to `callee` on a value of token `t`, made from `from`. */
   const callOn = (from: MemberKey, t: Node, callee: string): void => {
     const c = candidates(t)
-    if (!c) { if (appClass(t) || bindings.has(t)) resolved.unresolved += 1; return }
+    if (!c) { if (appClass(t)) resolved.unresolved += 1; return }
     const targets = c.classes.flatMap((k) => lookup(k, callee))
     if (targets.length === 0) return
     resolved[c.how] += 1
@@ -188,7 +198,7 @@ export function memberScopes(files: SourceFile[], seeds: Map<string, Set<string>
     }
   }
 
-  for (const cls of classes) {
+  for (const cls of classes.filter((c) => runs(c.getSourceFile()))) {
     const types = fieldTypes(cls)
     for (const member of cls.getMembers().filter((m) => Node.isMethodDeclaration(m) || Node.isPropertyDeclaration(m) || Node.isGetAccessorDeclaration(m) || Node.isSetAccessorDeclaration(m) || Node.isConstructorDeclaration(m))) {
       const from = keyOf(cls, Node.isConstructorDeclaration(member) ? 'constructor' : (member as { getName(): string }).getName())
@@ -204,7 +214,8 @@ export function memberScopes(files: SourceFile[], seeds: Map<string, Set<string>
     }
   }
   // Code outside any class (a functional guard, an interceptor, a helper) calls a service it injects or is handed.
-  for (const sf of files) {
+  for (const sf of files.filter(runs)) {
+    fileOfKey.set(`${sf.getFilePath()}#<module>`, sf.getFilePath())
     follow(`${sf.getFilePath()}#<module>`, sf.getDescendantsOfKind(SyntaxKind.CallExpression).filter((c) => !c.getFirstAncestorByKind(SyntaxKind.ClassDeclaration)), undefined, new Map())
   }
 
@@ -235,8 +246,16 @@ export function memberScopes(files: SourceFile[], seeds: Map<string, Set<string>
   // A member nothing calls and nothing seeds runs by a path the graph does not follow, and so
   // does everything it calls: its callees are reached from a scope that is not in `screens`.
   const called = new Set<MemberKey>([...edges.values()].flatMap((tos) => [...tos]))
-  const unseen = new Set<MemberKey>()
-  const roots = [...edges.keys()].filter((k) => !seeded.has(k) && !called.has(k))
-  while (roots.length) for (const to of edges.get(roots.pop()!) ?? []) if (!unseen.has(to)) { unseen.add(to); roots.push(to) }
+  const unseen = new Map<MemberKey, Set<string>>()
+  for (const root of [...edges.keys()].filter((k) => !seeded.has(k) && !called.has(k))) {
+    const file = fileOfKey.get(root)!
+    const stack = [root]
+    while (stack.length) for (const to of edges.get(stack.pop()!) ?? []) {
+      const from = unseen.get(to) ?? new Set<string>()
+      if (from.has(file)) continue
+      unseen.set(to, from.add(file))
+      stack.push(to)
+    }
+  }
   return { screens, top, unseen, resolved }
 }
