@@ -90,6 +90,20 @@ export function resolveImportedFile(sf: SourceFile, name: string): SourceFile | 
 }
 
 /**
+ * The declarations a name denotes, followed through import aliases and re-exports to where they
+ * are written. Resolving by the name's text instead names every class that shares it, in every
+ * file, which is how a call in one class came to land on another's members. Anything that is not
+ * a bare, dotted or qualified name (a call, a conditional, `forwardRef(...)`) denotes nothing.
+ */
+export function declarationsOf(node: Node | undefined): Node[] {
+  const id = node && Node.isPropertyAccessExpression(node) ? node.getNameNode() : node && Node.isQualifiedName(node) ? node.getRight() : node
+  if (!id || !Node.isIdentifier(id)) return []
+  let sym = id.getSymbol()
+  if (sym?.isAlias()) sym = sym.getAliasedSymbol() ?? sym
+  return sym?.getDeclarations() ?? []
+}
+
+/**
  * Extract the import specifier string from a lazy loader arrow function such as
  * `() => import('./x.component')`, returning `'./x.component'`, or null when the
  * initializer is not a recognizable dynamic-import loader.
