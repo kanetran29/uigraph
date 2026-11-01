@@ -1097,7 +1097,8 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
  * application whose directory name extends this one's is outside too. When `unreadable` is given,
  * the routes the walk could not read are recorded into it (see `UnreadableRoutes`). When `guarded`
  * is given, the levels whose guards the router can run off a target's own chain are recorded into
- * it (see `levelOf`).
+ * it (see `levelOf`). When `roots` is given, every table the root scan walks is recorded into it:
+ * each is one the application registers apart from the others, as far as this reading goes.
  *
  * A claimed file is skipped by the root scan on the strength of a site that may sit where the
  * walk cannot see it (see `collectLoadChildrenTargets`), so once the walk is done each claim is
@@ -1107,14 +1108,14 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
  * because no route was lost there. The comparison is per FILE, so a file holding two route
  * arrays of which the walk reached one is counted as placed and the other array stays silent.
  */
-export function collectRoutes(project: Project, redirects?: Map<string, Redirect>, unreadable?: UnreadableRoutes, projectDir?: string, guarded?: RouteLevel[]): RouteInfo[] {
+export function collectRoutes(project: Project, redirects?: Map<string, Redirect>, unreadable?: UnreadableRoutes, projectDir?: string, guarded?: RouteLevel[], roots?: Set<Node>): RouteInfo[] {
   const byNodeId = new Map<string, RouteInfo>()
   try {
     const { targets: claimedFiles, direct, spreadArrays } = collectLoadChildrenTargets(project, projectDir)
     directLazyTargets = direct
     spreadConsumedArrays = spreadArrays
     guardedLevels = guarded
-    return collect(project, byNodeId, claimedFiles, redirects, unreadable, projectDir)
+    return collect(project, byNodeId, claimedFiles, redirects, unreadable, projectDir, roots)
   } finally {
     directLazyTargets = undefined
     spreadConsumedArrays = undefined
@@ -1126,7 +1127,7 @@ export function collectRoutes(project: Project, redirects?: Map<string, Redirect
 }
 
 /** The body of `collectRoutes`, split out so the per-run sets above are always cleared. */
-function collect(project: Project, byNodeId: Map<string, RouteInfo>, claimedFiles: Set<string>, redirects?: Map<string, Redirect>, unreadable?: UnreadableRoutes, projectDir?: string): RouteInfo[] {
+function collect(project: Project, byNodeId: Map<string, RouteInfo>, claimedFiles: Set<string>, redirects?: Map<string, Redirect>, unreadable?: UnreadableRoutes, projectDir?: string, roots?: Set<Node>): RouteInfo[] {
   const loadedChildFiles = new Set(claimedFiles)
   const consumedFiles = new Set<string>()
   for (const sf of project.getSourceFiles()) {
@@ -1155,6 +1156,7 @@ function collect(project: Project, byNodeId: Map<string, RouteInfo>, claimedFile
       // here would put its routes at the root as well, at addresses the application never mounts.
       if (!atRoot && spreadConsumedArrays?.has(arr)) continue
       if (!atRoot && claimed) continue
+      roots?.add(arr)
       walkRouteArray(arr, sf, '/', byNodeId, loadedChildFiles, [], null, redirects, unreadable, consumedFiles)
     }
   }
@@ -1186,6 +1188,8 @@ function collect(project: Project, byNodeId: Map<string, RouteInfo>, claimedFile
  * prefix like a route and a claimed file holding only redirects would otherwise be lost here in
  * silence -- held against `alreadyRedirects` for the same reason the nodes are held against
  * `already`, since a file that re-declares a redirect the graph has cost the route set nothing.
+ * That holds whatever the redirect's target: one whose `redirectTo` the reader cannot fix still
+ * declares its address, so a file whose only route is such a redirect is unplaced as well.
  */
 function mintsFromRoot(sf: SourceFile, claims: Set<string>, already: Map<string, RouteInfo>, alreadyRedirects?: Map<string, Redirect>): boolean {
   const probe = new Map<string, RouteInfo>()

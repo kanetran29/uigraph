@@ -14,7 +14,7 @@ import { relative, join, dirname } from 'node:path'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
-import { keptSegments, matchAll, matchLiteral, matchPrefix, overlaps, resolveRelativeTarget, urlPath, type RouteLike } from './matcher'
+import { keptSegments, matchAll, matchLiteral, matchPrefix, overlaps, redirectAddress, resolveRelativeTarget, urlPath, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
 import { isBareCall, templateCondition } from './conditions'
 import { collectRoutes, type Redirect, type RouteLevel, type UnreadableRoutes } from './routes'
@@ -185,7 +185,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const redirects = new Map<string, Redirect>()
   const unreadable: UnreadableRoutes = { paths: new Set(), subtrees: new Set(), unplaced: new Set(), spreads: new Set(), calls: new Set(), outlets: new Set() }
   const guarded: RouteLevel[] = []
-  const routes = collectRoutes(project, redirects, unreadable, projectDir, guarded)
+  const roots = new Set<Node>()
+  const routes = collectRoutes(project, redirects, unreadable, projectDir, guarded, roots)
   // A route on an outlet the reader could not fix may be on the primary one, so every guarded level counts as tried where its path matches.
   const auxLevels = guarded.filter((l) => l.aux !== undefined)
   const unreadableText = describeUnreadable(unreadable)
@@ -204,9 +205,12 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
    * `tried`, the routes the router tries on the way whether or not it ends under them;
    * canActivate, canLoad and resolvers on every route the navigation enters; the canActivateChild
    * of every route above the one it enters; canDeactivate on every route it leaves. A route on a
-   * named outlet is not on either chain: its canDeactivate is counted whenever the source could
-   * have it open, and its other guards and resolvers whenever the target opens it by matching an
-   * empty path. A source that is not a screen of its own shares nothing, the safe side.
+   * named outlet is not on either chain. One the source could have open is matched again on every
+   * navigation that keeps it, as a command does, so its canMatch is counted with its canDeactivate;
+   * where it asks to run always, or sits under a route whose parameters the navigation may change,
+   * its canActivate, the canActivateChild above it and its resolvers are counted too. One the
+   * target opens by matching an empty path has all of its guards and resolvers counted. A source
+   * that is not a screen of its own shares nothing, the safe side.
    */
   const runningGuards = (from: string | undefined, to: string, preserved = 0, tried: RouteLevel[] = []): { guards: GuardInfo[]; resolves: boolean } => {
     const t = levelsByNodeId.get(to) ?? []
@@ -224,74 +228,107 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     const fromPath = from !== undefined ? pathByNodeId.get(from) : undefined
     const toPath = pathByNodeId.get(to)
     const closing = fromPath === undefined ? [] : auxLevels.filter((l) => overlaps(fromPath, l.aux!, true))
+    const rerun = closing.filter((l) => l.always || l.aux !== '/')
     const opening = toPath === undefined ? [] : auxLevels.filter((l) => l.path === l.aux && overlaps(toPath, l.aux, true))
     return {
       guards: [...t.flatMap((l) => l.canMatch), ...entered.flatMap((l) => [...l.canActivate, ...l.canLoad]),
         ...(entered.length > 0 ? t.slice(0, -1).flatMap((l) => l.canActivateChild) : []), ...(s ? s.slice(k).flatMap((l) => l.canDeactivate) : []),
-        ...offChain.flatMap((l) => [...l.canMatch, ...l.canLoad]), ...closing.flatMap((l) => l.canDeactivate),
+        ...offChain.flatMap((l) => [...l.canMatch, ...l.canLoad]), ...closing.flatMap((l) => [...l.canDeactivate, ...l.canMatch]),
+        ...rerun.flatMap((l) => l.canActivate), ...(rerun.length > 0 ? closing.flatMap((l) => l.canActivateChild) : []),
         ...opening.flatMap((l) => [...l.canMatch, ...l.canActivate, ...l.canActivateChild, ...l.canLoad])],
-      resolves: entered.some((l) => l.resolve) || opening.some((l) => l.resolve),
+      resolves: entered.some((l) => l.resolve) || opening.some((l) => l.resolve) || rerun.some((l) => l.resolve),
     }
   }
   const redirectOfNode = new Map(routes.flatMap((r) => (r.redirectsTo !== undefined ? [[r.nodeId, r.redirectsTo] as const] : [])))
   const componentByNodeId = new Map(routes.map((r) => [r.nodeId, r.componentFile ? relative(projectDir, r.componentFile.getFilePath()) : null]))
   /**
-   * Whether the router meets screen `id`'s branch before redirect `r`'s: the two part at sibling
-   * routes of one table and the screen's is declared first, so it answers every address it
-   * matches before the redirect is tried. Anywhere else the order is not read, the safe side.
+   * Whether the router meets the branch of chain `a` before that of chain `b`: the two part at
+   * sibling routes of one table and `a`'s is declared first, so it answers every address it
+   * matches before `b`'s is tried. Anywhere else the order is not read, the safe side.
    */
-  const before = (id: string, r: Redirect): boolean => {
-    const t = levelsByNodeId.get(id) ?? []
-    const k = t.findIndex((l, i) => l.obj !== r.levels[i]?.obj)
-    const a = t[k]?.obj
-    const b = r.levels[k]?.obj
-    return a !== undefined && b !== undefined && a.getParent() === b.getParent() && Node.isArrayLiteralExpression(a.getParent()) && a.getStart() < b.getStart()
+  const before = (a: RouteLevel[], b: RouteLevel[]): boolean => {
+    const k = a.findIndex((l, i) => l.obj !== b[i]?.obj)
+    const x = a[k]?.obj
+    const y = b[k]?.obj
+    return x !== undefined && y !== undefined && x.getParent() === y.getParent() && Node.isArrayLiteralExpression(x.getParent()) && x.getStart() < y.getStart()
   }
   /**
-   * The redirects the router could meet at an address before screen `id`, when one answers it:
-   * one declared at it, at a parameter pattern that matches it, or with `pathMatch: 'prefix'` at
-   * a shorter one. A catch-all is matched last and so never meets an address another route answers.
+   * Whether chains `a` and `b` start in two tables the root scan walked apart, which the
+   * application registers apart. The router joins such tables in the order their `ROUTES`
+   * providers are registered, an imported module's before the importer's own, and the walk does
+   * not read that order, so a catch-all in one is ASSUMED to come after every route of the others:
+   * the order Angular's guidance asks for, and the one the corpus keeps (bitwarden imports its
+   * WildcardRoutingModule last, k8sdash its feature module before the module that calls forRoot).
+   * A table spread into another is not one registered apart, and its order is not read either.
    */
-  const redirectsAt = (path: string, id: string | undefined): [string, Redirect][] =>
-    [...redirects].filter(([at, r]) => !at.endsWith('*') && overlaps(path, at, r.prefix) && !(id !== undefined && before(id, r)))
+  const apart = (a: RouteLevel[], b: RouteLevel[]): boolean => {
+    const x = a[0]?.obj.getParent()
+    const y = b[0]?.obj.getParent()
+    return x !== undefined && y !== undefined && x !== y && roots.has(x) && roots.has(y)
+  }
+  /** Whether the router meets chain `first` before the route at full path `at` with chain `levels`. */
+  const metFirst = (first: RouteLevel[] | undefined, at: string, levels: RouteLevel[]): boolean =>
+    first !== undefined && (before(first, levels) || (at.endsWith('*') && apart(first, levels)))
+  /**
+   * The redirects the router could meet at an address before chain `first`, the screen or redirect
+   * that answers it: one declared at it, at a parameter pattern that matches it, or with
+   * `pathMatch: 'prefix'` at a shorter one, a catch-all among them, since Angular tries `**` in
+   * declaration order like any route. With `every` the address is a screen's own pattern and only a
+   * redirect that answers every address it stands for counts.
+   */
+  const redirectsAt = (path: string, first: RouteLevel[] | undefined, every = false): [string, Redirect][] =>
+    [...redirects].filter(([at, r]) => overlaps(path, at, r.prefix, every) && !metFirst(first, at, r.levels))
+  const catchAllScreens = routes.filter((r) => r.fullPath.endsWith('*'))
+  /** The catch-all screens the router could meet at an address before chain `first`, on the terms of `redirectsAt`. */
+  const catchAllsAt = (path: string, first: RouteLevel[] | undefined, every = false) =>
+    catchAllScreens.filter((c) => c.levels !== first && overlaps(path, c.fullPath, true, every) && !metFirst(first, c.fullPath, c.levels))
   /**
    * Where a navigation to `value` lands once every redirect on the way is followed: a redirect
-   * route at that address, or an empty-path child that redirects the screen matched there. The
-   * walk stops at a fixed point or after ten hops. `ambiguous` says that more than one declared
-   * route, or a route and a redirect, could answer an address on the way, so which one Angular
-   * meets first decides it, and so does a redirect whose target is not a string the reader can
-   * fix. `redirected` says a redirect rewrote the address, and `tried` holds the guarded routes
-   * whose path matches some address on the way, which the router may try there. A command is
-   * matched as written; a redirect's target is a URL.
+   * route at that address, or, where no screen and no redirect is declared at it, the one redirect
+   * at a pattern or shorter prefix that answers it, its parameters filled in, or an empty-path child
+   * that redirects the screen matched there. The walk stops at a fixed point or after ten hops.
+   * `ambiguous` says that more than one declared route, or a route and a redirect or catch-all,
+   * could answer an address on the way, so which one Angular meets first decides it, and so does a
+   * redirect the reader cannot follow. `unread` says the walk stopped at such a redirect with no
+   * screen: the address is declared, but where it lands is not read. `redirected` says a redirect
+   * rewrote the address, and `tried` holds the guarded routes whose path matches some address on
+   * the way, which the router may try there. A command is matched as written; a redirect's target is a URL.
    */
-  function land(value: string, command: boolean): { target: RouteLike | null; ambiguous: boolean; redirected: boolean; tried: RouteLevel[] } {
+  function land(value: string, command: boolean): { target: RouteLike | null; ambiguous: boolean; redirected: boolean; tried: RouteLevel[]; unread: boolean } {
     let current = value
     let asUrl = !command
     let ambiguous = false
     const tried: RouteLevel[] = []
     for (let hop = 0; hop < 10; hop += 1) {
       const path = asUrl ? current.split(/[?#]/)[0] ?? current : current
-      const redirect = redirects.get(path)
       const target = matchLiteral(path, routeLikes, asUrl)
       const own = target ? redirectOfNode.get(target.nodeId) : undefined
+      const exact = redirects.get(path)
+      const patterned = target || exact ? [] : redirectsAt(path, undefined).filter(([at]) => !at.endsWith('*'))
+      const [at, redirect] = exact ? [path, exact] : patterned.length === 1 ? patterned[0]! : [path, undefined]
+      const first = target ? levelsByNodeId.get(target.nodeId) : redirect?.levels
       // An empty-path child's redirect is registered at its parent's address as well; it is the
       // same redirect as the screen's own, not a rival to it. Any other redirect there is.
-      const rivals = redirectsAt(path, target?.nodeId).filter(([at, r]) => !(target && at === target.fullPath && r.to === own))
+      const rivals = redirectsAt(path, first).filter(([a, r]) => !(target && a === target.fullPath && r.to === own))
       tried.push(...guarded.filter((l) => overlaps(path, l.path, true)))
-      if (matchAll(path, routeLikes).length + rivals.length > 1) ambiguous = true
-      const next = target ? own : redirect?.to
-      if (next === undefined) return { target, ambiguous, redirected: hop > 0, tried }
-      if (next === null) return { target, ambiguous: true, redirected: hop > 0, tried }
+      if (matchAll(path, routeLikes).length + rivals.length + catchAllsAt(path, first).length > 1) ambiguous = true
+      const next = target ? own : redirect ? redirect.to && redirectAddress(path, at, redirect.to) : patterned.length > 1 ? null : undefined
+      if (next === undefined) return { target, ambiguous, redirected: hop > 0, tried, unread: false }
+      if (next === null) return { target, ambiguous: true, redirected: hop > 0, tried, unread: target === null }
       current = next
       asUrl = true
     }
-    return { target: null, ambiguous: true, redirected: true, tried }
+    return { target: null, ambiguous: true, redirected: true, tried, unread: false }
   }
   /**
    * Whether a screen is never displayed at its own address: an empty-path child of it redirects,
-   * or a redirect the router may meet first answers that address.
+   * or a redirect or catch-all the router may meet first answers every address the screen does.
    */
-  const hidden = (id: string): boolean => redirectOfNode.has(id) || (pathByNodeId.has(id) && redirectsAt(pathByNodeId.get(id)!, id).length > 0)
+  const hidden = (id: string): boolean => {
+    const path = pathByNodeId.get(id)
+    const first = levelsByNodeId.get(id)
+    return redirectOfNode.has(id) || (path !== undefined && redirectsAt(path, first, true).length + catchAllsAt(path, first, true).length > 0)
+  }
   const routeByNodeId = new Map(routes.map((r) => [r.nodeId, r]))
   /**
    * Whether a route component renders only on some executions of the screens above it: the
@@ -387,6 +424,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // the emitting node's path is that route only when the node is the component's own route.
         const baseUnknown = !parsed.path.startsWith('/') && (t.baseUnknown === true || (t.relative === true && componentByNodeId.get(from) !== file))
         const landed = land(value, t.url !== true)
+        // An address a redirect answers is declared wherever the redirect sends it, so it is not the catch-all's.
+        if (!landed.target && landed.unread) {
+          if (note) soundiness.push({ kind: 'dynamic-target', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" is answered by a redirect the reader does not follow, so where it lands is not read` })
+          continue
+        }
         let target = landed.target
         // A target no route declares is not nowhere: a `**` route catches it. Either it sends
         // it on (`redirectTo`) or it answers it itself with a catch-all screen (`component`,
@@ -724,7 +766,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
          * Wire one navigation this control fires — from a traced (click) handler or
          * its own routerLink — to the declared route(s): a literal target is must/may
          * per the target's guards, a static-prefix template over-approximates to a may
-         * edge per matching route, a dynamic target is a soundiness note. `guard` is a
+         * edge per matching route, a dynamic target is a soundiness note, and so is an address
+         * only a redirect the reader does not follow answers, which is no dead link. `guard` is a
          * handler-level condition joined with the route gate; `what` names the source
          * in notes. A note cites `t.file` when set, because `t.loc` is then a line in that
          * external template and not in the component's `.ts`.
@@ -737,7 +780,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             const landed = land(primary, t.url !== true)
             const target = landed.target
             if (!target) {
-              soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `${what} target "${t.ti.value}" matches no declared route` })
+              const said = landed.unread ? 'is answered by a redirect the reader does not follow, so where it lands is not read' : 'matches no declared route'
+              soundiness.push({ kind: landed.unread ? 'dynamic-target' : 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `${what} target "${t.ti.value}" ${said}` })
               return
             }
             const run = runningGuards(route.nodeId, target.nodeId, 0, landed.tried)
