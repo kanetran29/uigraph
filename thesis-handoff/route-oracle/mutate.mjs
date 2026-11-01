@@ -15,9 +15,9 @@
 // 1.7.0. The record keeps every guard change of a mutant: 1.7.0 cut it to four entries, so a
 // verdict that rested on a later one could not be audited from the result file. The factory
 // names also reach the exclusion rule, which asks whether any baseline edge carries a guard the
-// list names; it now differs from 1.7.0's on 12 of bitwarden's 78 candidate lists. Re-judged
-// offline on the 1.7.0 results at the seed they were sampled with, all eleven detections stand
-// and no sampled mutant changes its exclusion.
+// list names; it now differs from 1.7.0's on 12 of bitwarden's 78 candidate lists (6 on the graph
+// without attribution). Re-judged offline on the 1.7.0 results at the seed they were sampled
+// with, all eleven detections stand and no sampled mutant changes its exclusion.
 //
 // Harness 1.7.0. Change against 1.6.0: a guard an edge loses is counted, not looked up. The
 // extractor writes a guard factory without its arguments, so two guards on one navigation can
