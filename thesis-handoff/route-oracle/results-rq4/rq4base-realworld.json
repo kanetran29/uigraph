@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "1.7.0",
-  "extractor": "% Extractor 0027017, packages/ clean, harness clean when generated.",
+  "harnessVersion": "mutate 1.8.0",
+  "extractor": "% Extractor 5c4c709, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "attribution": false,
@@ -262,7 +262,7 @@
       "subject": "path \"register\"",
       "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 2,
+      "touched": 3,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -273,6 +273,7 @@
         "edgesRemoved": [],
         "guardChanged": [
           "/login -> /register: guard fn#ddb96242->null, modality may->may",
+          "/register -> /register: guard fn#ddb96242->null, modality may->may",
           "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may"
         ]
       }
@@ -284,7 +285,7 @@
       "subject": "path \"login\"",
       "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 4,
+      "touched": 5,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -296,6 +297,7 @@
         "guardChanged": [
           "/ -> /login: guard fn#ddb96242->null, modality may->may",
           "/tag/:tag -> /login: guard fn#ddb96242->null, modality may->may",
+          "/login -> /login: guard fn#ddb96242->null, modality may->may",
           "/register -> /login: guard fn#ddb96242->null, modality may->may",
           "/article/:slug -> /login: guard fn#ddb96242->null, modality may->may"
         ]

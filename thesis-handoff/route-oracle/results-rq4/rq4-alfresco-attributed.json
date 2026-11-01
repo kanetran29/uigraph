@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "1.7.0",
-  "extractor": "% Extractor 0027017, packages/ clean, harness clean when generated.",
+  "harnessVersion": "mutate 1.8.0",
+  "extractor": "% Extractor 5c4c709, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco/projects/aca-content",
   "attribution": true,
@@ -8,7 +8,7 @@
   "quota": 8,
   "baseline": {
     "nodes": 54,
-    "edges": 56,
+    "edges": 55,
     "routes": 27
   },
   "discovered": {
@@ -135,7 +135,7 @@
       "subject": "/search => /view",
       "predict": "the edge to /search is replaced by an edge to /view",
       "verdict": "DETECTED",
-      "touched": 4,
+      "touched": 2,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -143,12 +143,10 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/search -> /view (navigate)",
-          "/search-libraries -> /view (navigate)"
+          "n_scope_shell -> /view (navigate)"
         ],
         "edgesRemoved": [
-          "/search -> /search (navigate)",
-          "/search-libraries -> /search (navigate)"
+          "n_scope_shell -> /search (navigate)"
         ],
         "guardChanged": []
       }
@@ -212,7 +210,7 @@
       "subject": "path \"\"",
       "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 4,
+      "touched": 5,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -225,6 +223,7 @@
           "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard,AuthGuard->PluginEnabledGuard,AuthGuard, modality may->may",
           "/preview/s/:id -> *: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
           "/rules -> *: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
+          "n_scope_shell -> /search: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
           "o_UserInfoComponent -> /profile: guard ExtensionsDataLoaderGuard,ViewProfileRuleGuard,AuthGuard->ViewProfileRuleGuard,AuthGuard, modality may->may"
         ]
       }
