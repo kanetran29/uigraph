@@ -205,26 +205,72 @@ function interruption(stmt: Node): string | null {
   return null
 }
 
-/** Whether a statement is, apart from `void`, a navigation call: `this.router.navigate(...)` or `navigateByUrl`. */
-function navigatesOnly(stmt: Node): boolean {
-  if (!Node.isExpressionStatement(stmt)) return false
-  let e: Node = stmt.getExpression()
-  while (Node.isVoidExpression(e)) e = e.getExpression()
-  return Node.isCallExpression(e) && /(^|\.)navigate(ByUrl)?$/.test(e.getExpression().getText())
+const NAVIGATION = /(^|\.)navigate(ByUrl)?$/
+
+/** The bodies a call can run, where the reader can name them: a member of the same class, or a function or member the checker resolves to the application's source. */
+function calleeBodies(call: CallExpression): Node[] {
+  const e = call.getExpression()
+  let decls: Node[] = []
+  if (Node.isPropertyAccessExpression(e) && e.getExpression().getKind() === SyntaxKind.ThisKeyword) {
+    const member = call.getFirstAncestorByKind(SyntaxKind.ClassDeclaration)?.getMember(e.getName())
+    if (member) decls = [member]
+  } else if (Node.isPropertyAccessExpression(e) || Node.isIdentifier(e)) {
+    const sym = (Node.isPropertyAccessExpression(e) ? e.getNameNode() : e).getSymbol()
+    decls = (sym?.getAliasedSymbol() ?? sym)?.getDeclarations() ?? []
+  }
+  const out: Node[] = []
+  for (const d of decls) {
+    if (d.getSourceFile().isDeclarationFile()) continue
+    const fn = Node.isPropertyDeclaration(d) || Node.isVariableDeclaration(d) ? d.getInitializer() : d
+    const body = fn && (Node.isMethodDeclaration(fn) || Node.isFunctionDeclaration(fn) || Node.isArrowFunction(fn) || Node.isFunctionExpression(fn)) ? fn.getBody() : undefined
+    if (body) out.push(body)
+  }
+  return out
 }
 
 /**
- * Whether a navigation call that is a statement of its own, not awaited, is followed in its block
- * by a statement that is itself a navigation: the second starts before the first can finish, and
- * the router cancels the first.
+ * Whether running `node` may start a navigation: a navigation call anywhere in it, a callback
+ * included, or a call to a body the reader can name that may. A call it cannot name, into a
+ * library for one, is taken not to navigate, which Section 6.3 of the thesis declares.
+ */
+function mayNavigate(node: Node, seen: Set<Node>): boolean {
+  const calls = Node.isCallExpression(node) ? [node, ...node.getDescendantsOfKind(SyntaxKind.CallExpression)] : node.getDescendantsOfKind(SyntaxKind.CallExpression)
+  for (const c of calls) {
+    if (NAVIGATION.test(c.getExpression().getText())) return true
+    for (const body of calleeBodies(c)) {
+      if (seen.has(body)) continue
+      seen.add(body)
+      if (mayNavigate(body, seen)) return true
+    }
+  }
+  return false
+}
+
+/**
+ * Whether code that runs after `call`, before the function holding it returns, may start a
+ * navigation: the statements after it in its block and in every block around it up to that
+ * function, and a finally block around it. A navigation started there begins before the one
+ * `call` makes can finish, and the router cancels the first. A navigation call that is awaited
+ * has finished by then, so it is not superseded; a call to anything else is not taken to cover
+ * the navigations it makes, which it may not return.
  */
 function supersededAt(call: CallExpression): boolean {
-  const stmt = call.getParent() && Node.isVoidExpression(call.getParent()!) ? call.getParent()!.getParent() : call.getParent()
-  if (!stmt || !Node.isExpressionStatement(stmt)) return false
-  const block = stmt.getParent()
-  if (!block || !(Node.isBlock(block) || Node.isSourceFile(block))) return false
-  const stmts = block.getStatements()
-  return stmts.slice(stmts.indexOf(stmt as never) + 1).some(navigatesOnly)
+  const seen = new Set<Node>()
+  const navigates = NAVIGATION.test(call.getExpression().getText())
+  let node: Node = call
+  for (let parent = node.getParent(); parent; node = parent, parent = node.getParent()) {
+    if (Node.isFunctionLikeDeclaration(node) || Node.isArrowFunction(node) || Node.isFunctionExpression(node)) return false
+    if (navigates && Node.isAwaitExpression(parent)) return false
+    if (Node.isBlock(parent) || Node.isSourceFile(parent) || Node.isCaseClause(parent) || Node.isDefaultClause(parent)) {
+      const stmts = parent.getStatements()
+      if (stmts.slice(stmts.indexOf(node as never) + 1).some((s) => mayNavigate(s, seen))) return true
+    }
+    if (Node.isTryStatement(parent) && parent.getFinallyBlock() !== node) {
+      const fin = parent.getFinallyBlock()
+      if (fin && mayNavigate(fin, seen)) return true
+    }
+  }
+  return false
 }
 
 /**
@@ -238,8 +284,8 @@ function supersededAt(call: CallExpression): boolean {
  * runs when a handler calls it, so the walk continues from each call to it in the class and
  * reports a condition unless one of those calls is itself unconditional. A function declared at
  * the top of a module is a helper too: whoever calls it, the reader does not follow the call.
- * A navigation followed, in the same block and without an await between, by another one the
- * block always makes is superseded: the router cancels the first when the second starts.
+ * A navigation that code after it may follow with another, before its function returns, is
+ * superseded: the router cancels the first when the second starts (see `supersededAt`).
  */
 export function callCondition(call: CallExpression, seen = new Set<string>()): string | null {
   if (/\?\./.test(call.getExpression().getText())) return 'under a branch'
