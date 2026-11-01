@@ -360,7 +360,7 @@ export function outletHiddenAbove(routes: RouteInfo[], sfs: SourceFile[]): (rout
     components ??= collectComponents(sfs)
     const firmKids = new Map<string, Set<string>>()
     nestingGraph(components, [], firmKids, file)
-    const found = [...firmKids.get(file) ?? []].some((kid) => { const c = components!.get(kid); return c !== undefined && firmOutlet(c.sf) })
+    const found = [...firmKids.get(file) ?? []].every((kid) => { const c = components!.get(kid); return c !== undefined && firmOutlet(c.sf) })
     firm.set(file, found)
     return found
   }
