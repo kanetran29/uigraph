@@ -1,26 +1,19 @@
 \chapter{Results}
 \label{ch:results}
-% Tables are generated. Do not edit them here. Each generated file names its own harness
-% version and run in its first lines; this block records only what no single file can say.
-% RQ1 to RQ3 figures: ONE extractor commit, run twice, results-before/results.json and
-% results-after/results.json, which both record sha 4505fd2a and differ only by
-% "attribution": false / true. 4505fd2a is in no clone the project holds; the tag thesis-eval
-% points at the commit that applying attribution-v1.patch to c4f8b833 recreates, and that
-% commit reproduces the published realworld figures with the pass off (21 edges, 7 must) and
-% on (50 edges, 10 must), so it is behaviourally equivalent on that application. The tag is
-% pushed. Those two result files are the inputs generated-plots.tex and generated-round2.tex
-% were made from, and the harness that made them is no longer on disk, so neither file can be
-% regenerated: the mutation plot is emitted separately by to-plots.mjs --rq4-only, and
-% generated-census.tex re-measures the node and edge composition from the corpus graphs.
-% RQ4 figures (section 5.4) and the census are the only ones re-measurable today.
-% Still to do: confirm the tagged commit reproduces the other five applications, and extend
-% mutation beyond the three applications it covers.
+% Numerical tables are generated. Each generated file identifies its evaluated snapshot.
+% The main RQ1--RQ3 tables use the final snapshot with attribution off and on.
+% Historical evidence is retained only where explicitly identified in the text.
 
 The figures in this chapter were produced by the harness of
-Section~\ref{sec:protocol} on the corpus of Section~\ref{sec:corpus}. Every table is
-generated from the harness's results files. The baseline is the extractor without
-scope attribution; the attributed version is the same code with the attribution pass
-enabled.
+Section~\ref{sec:protocol} on the corpus of Section~\ref{sec:corpus}. The numerical
+result tables are generated from its result files; the summaries compiled by hand
+are explicitly marked. The main conversion, loss, before-and-after and
+graph-composition tables describe the final evaluated extractor snapshot. The
+baseline is that code without scope attribution; the attributed version is the same
+code with the pass enabled. Each generated file records the snapshot it measures.
+Historical results are identified separately in Section~\ref{sec:res-round2}; they
+explain the repairs rather than supplying a second population for the final
+comparison.
 
 \section{The two levels of loss (RQ1)}
 \label{sec:res-baseline}
@@ -31,22 +24,18 @@ of the application's navigation becomes a deterministic transition between them.
 bounds the second, because a transition cannot start or end at a screen the graph does not
 have.
 
-Table~\ref{tab:conversion} gives the second measure. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2},
-the extractor without the attribution pass recovers a small fraction of the navigation
-constructs as must edges; after it, the constructs that earn must number
-\CensusBaseMustSites{} in the whole corpus without attribution and \CensusMustSites{} with it,
-in \CensusMustApps{} applications with attribution and none on the other \CensusZeroMustApps{};
-\CensusMustSitesMifos{} of them are cancel buttons and menu links in mifos. Edge counts in that table
-must be read per tier and not summed: the may column of the largest application is almost
-entirely one over-approximation from a single unresolvable call site, not that many distinct
-transitions.
+Table~\ref{tab:conversion} gives the second measure on the final snapshot. The
+constructs that earn must number \CensusBaseMustSites{} in the whole corpus without
+attribution and \CensusMustSites{} with it, in \CensusMustApps{} applications with
+attribution and none on the other \CensusZeroMustApps{}. Edge counts in that table
+must be read per tier and not summed as distinct constructs: one unresolved site can
+produce many over-approximated may edges.
 
 \begin{table}[t]\small
 \caption{Construct-to-transition conversion per application, baseline. Conversion is
-the fraction of constructs witnessed by a must edge (on this instrument, every construct a must
-edge cites); the edge columns count edges. Measured
-before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which
-\CensusBaseMustSites{} constructs convert without attribution, in \CensusBaseMustApps{} applications.}
+the fraction of in-scope constructs whose own witness earns must; the edge columns
+count edges. The baseline and attributed graphs are extracted from the same final
+snapshot on identical corpus inputs.}
 \label{tab:conversion}
 \TabConversion
 \end{table}
@@ -125,15 +114,17 @@ Constant-valued route paths not resolved & route parser; node-count collapse & 1
 \end{tabularx}
 \end{table}
 
-Table~\ref{tab:loss} and Figure~\ref{fig:loss} assign every navigation construct to one outcome using the rules
-of Table~\ref{tab:loss-rules}. Of the \RoundTwoInScopeAll{} constructs in the
-corpus, Table~\ref{tab:loss} shows how many convert onto each tier and why the rest do not; its
-must row is the instrument before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which that row holds \CensusBaseMustSites{} constructs. Guard defects are measured separately (Section~\ref{sec:metrics}).
+Table~\ref{tab:loss} and Figure~\ref{fig:loss} assign every navigation construct to one
+outcome using the rules of Table~\ref{tab:loss-rules}. Of the
+\RoundTwoInScopeAll{} constructs in the corpus, they show how many convert onto each
+tier and why the rest do not. A construct is counted on the must tier only when its
+own witness earns that modality. Guard defects are measured separately
+(Section~\ref{sec:metrics}).
 
 \begin{table}[t]\small
 \caption{Outcome of every navigation construct, baseline. Columns: realworld,
-alfresco, ghostfolio, k8s dashboard, bitwarden, mifos. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2},
-after which the \emph{Converted, must} row holds \CensusBaseMustSites{} constructs, in \CensusBaseMustApps{} applications.}
+alfresco, ghostfolio, k8s dashboard, bitwarden, mifos. All rows are measured on the
+final snapshot with attribution disabled.}
 \label{tab:loss}
 \TabLoss
 \end{table}
@@ -180,9 +171,10 @@ summary is written by hand from the harness output rather than generated.}
 \toprule
 Method & Result & $n$ \\
 \midrule
-Witness check, must tier & \RoundTwoMustClean{} agree on their target, at every source
-location each edge cites; target agreement is necessary for Claim~\ref{claim:must} and not
-sufficient for it. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2}; after it, \MustWitnessViolations{} witness-check failures in a tier of \MustWitnessEdges{}. & \RoundTwoMustEdges{} \\
+Witness check, final attributed must tier & \MustWitnessViolations{} detected
+failures; \MustWitnessUnread{} edges have a destination the checker cannot read.
+Unread edges are not passes, and target agreement does not establish
+Claim~\ref{claim:must}. & \MustWitnessEdges{} \\
 Test-source cross-check, alfresco & \EtoERecallAlfresco{} of the visited URLs have a node; one
 negative test excluded. & \EtoERowsAlfresco{} \\
 \bottomrule
@@ -222,44 +214,37 @@ on identical inputs. The comparison is made construct by construct: a construct 
 edge after attribution.
 
 \begin{table}[t]\footnotesize
-\caption{Before and after scope attribution. Conversion in percent and the change in
-percentage points; must-tier edges that pass the witness check; constructs that the loss
-rules assigned to attribution in the baseline, and how many of them converted into must
-and into may edges. Conversions of constructs assigned to other classes are in
-Table~\ref{tab:recovery-source}. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2}, which leaves
-\CensusBaseMust{} must edges without attribution and \CensusMust{} with it.}
+\caption{Before and after scope attribution on the final evaluated snapshot.
+Conversion in percent and its change in percentage points; must-tier edges without a
+detected witness-check failure; and constructs assigned to attribution in the
+baseline that recover onto must or may. A construct's tier is the modality its own
+witness earns. Unread destinations are reported separately in the text and are not
+passes. Conversions from other baseline classes are in Table~\ref{tab:recovery-source}.}
 \label{tab:before-after}
 \TabBeforeAfter
 \end{table}
 \FigBeforeAfter
 
 
-Attribution recovers \AttrRecovered{} of the \AttrLost{} constructs the loss rules assign
-to it, \AttrRecoveredShare{} of that class, and it recovers some on every application in
-the corpus. On the round's instrument the graph roughly doubles, from \AttrEdgesBefore{} edges to
-\AttrEdgesAfter{}; the current graphs hold \CensusBaseEdges{} and \CensusEdges{}.
-Measured instead by the deterministic conversion ratio RQ1 is defined on, only
-\AttrAppsGained{} of the six applications move at all. That is the first thing the two
-measures disagree about, and the reason both are reported: on the instrument the table
-measures, \AttrRecoveredMust{} of the recovered constructs convert onto the must tier and
-\AttrRecoveredMay{} onto the may tier. After the fourth must-tier correction of
-Section~\ref{sec:res-round2} the attributed run has \CensusMust{} must edges against
-\CensusBaseMust{} without attribution. The constructs that make the difference all sit in a
-shell, which attribution draws from every screen the shell renders: realworld's header and
-footer logo links, which take that application from \CensusBaseMustRealworld{} must edge to
-\CensusMustRealworld{}, and the logo link and the Create button of k8sdash's toolbar, which take
-it from none to \CensusMustKdash{}. Everything else attribution recovers lands on may.
-An application whose screens all sit behind a guard can gain a great deal of navigation and
-almost no \emph{deterministic} navigation, and Section~\ref{sec:res-round2} returns to why.
+Attribution recovers \AttrRecovered{} of the \AttrLost{} constructs the loss rules
+assign to it, \AttrRecoveredShare{} of that class. The final graphs contain
+\AttrEdgesBefore{} edges without attribution and \AttrEdgesAfter{} with it. Measured
+instead by RQ1's deterministic conversion ratio, \AttrAppsGained{} of the six
+applications have a positive gain: \AttrRecoveredMust{} of the recovered constructs
+earn must and \AttrRecoveredMay{} earn may. These are different measures of recovery,
+which is why both are reported. The attributed run has \CensusMust{} must edges
+against \CensusBaseMust{} without attribution. A gain in represented navigation need
+not be a gain in deterministic transitions when targets or execution conditions
+remain uncertain.
 
-On the instrument the table measures, precision on the must tier did not fall: the tier grew
-from \AttrMustBefore{} edges to \AttrMustAfter{}, and every edge in it passed the witness check in
-both runs. After the fourth must-tier correction of Section~\ref{sec:res-round2} the tier holds
-\CensusBaseMust{} edges without attribution and \CensusMust{} with it, and the witness check finds
-\MustWitnessViolations{} failures in the attributed tier, so attribution added must edges without
-adding a witness-check failure; the tier is too small for that to be a precision figure. No construct converted in the baseline is lost after attribution: following every
-construct by its identifier across the two runs finds \AttrRegressed{} that leave the converted
-classes.
+The final must tiers contain \AttrMustBefore{} edges without attribution and
+\AttrMustAfter{} with it. The attributed tier has \MustWitnessViolations{} detected
+witness-check failures and \MustWitnessUnread{} unread edges; the latter cannot be
+treated as agreements. The separate source review is reported in
+Section~\ref{sec:res-round2}. Following each construct by its identifier across the
+two runs finds \AttrRegressed{} that leave the converted classes. This measures
+recovery of represented constructs, while the incomplete mechanical comparison limits
+what can be concluded about must-tier precision.
 
 The witness check also records the edges outside the must tier. Chapter~\ref{ch:analysis}
 excludes them from the precision claim, because target agreement is not a meaningful test
@@ -303,29 +288,25 @@ be equal; the check refuses to emit this table if they differ on any application
 \TabExpansion
 \end{table}
 
-Table~\ref{tab:recovery-source} gives the same recovery by the class each construct held in
-the baseline, and on this instrument it says something the earlier one did not. Every
-conversion comes out of the two attribution classes: \AttrRecoveredMust{} onto the must tier
-and \AttrRecoveredMay{} onto the may tier on the instrument the table measures, all of them onto
-may after the fourth must-tier correction of Section~\ref{sec:res-round2} except the shell links
-of realworld and k8sdash, with none out of the node classes at all. On the
-extractor this evaluation began with --- commit \EarlierCommit{}, whose generated results
-these figures also come from --- \EarlierGainFromNode{} of \EarlierGainMust{} deterministic
-conversions, \EarlierGainFromNodeShare{}, came out of constructs the loss rules had assigned
-to node defects, against \EarlierGainFromAttribution{} out of the attribution classes. That
-was evidence that the classes
-were not independent and that the attribution class was not a ceiling. That evidence is gone,
-and for a plain reason: the node classes are now empty (Table~\ref{tab:loss}), so there is
-nothing in them left to convert. The classes are still not independent --- a construct whose
-target screen has no node is an attribution loss the node level caused --- but on a corpus
-whose nodes are complete the question stops being measurable from this table.
+Table~\ref{tab:recovery-source} gives the same recovery by the class each construct
+held in the final baseline and by the modality its own witness earns. Of the
+attribution-class recoveries, \AttrRecoveredMust{} earn must and
+\AttrRecoveredMay{} earn may. The diagnostic classes should not be interpreted as
+independent causes: a shared component can be assigned to attribution even when a
+missing target node prevents its recovery.
+
+The historical comparison illustrates that interaction. On the extractor this
+evaluation began with, commit \EarlierCommit{}, \EarlierGainFromNode{} of
+\EarlierGainMust{} deterministic conversions, \EarlierGainFromNodeShare{}, came out
+of node-defect classes, against \EarlierGainFromAttribution{} from attribution
+classes. These figures come from that earlier commit's recorded results; they do not
+supply counts for the final comparison.
 
 \begin{table}[t]\small
-\caption{Where the converted constructs came from. Each row is the class the loss rules
-assigned to the construct in the baseline; the columns give the tier it converted into
-after attribution. Constructs are followed by identity, not matched by source location. The
-must column is the instrument before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which every conversion
-attribution makes lands on may except the shell links of realworld and k8sdash.}
+\caption{Where recovered constructs came from on the final snapshot. Rows are their
+baseline loss classes; columns give the modality each construct's own witness earns
+after attribution. Constructs are followed by identity, not matched by source
+location.}
 \label{tab:recovery-source}
 \TabRecoverySource
 \end{table}
@@ -341,16 +322,13 @@ Table~\ref{tab:remaining} classifies each construct that stays lost.
 Every one of the \AttrRemaining{} constructs that stays lost carries a reason, and the two
 tables close the class between them: \AttrRecovered{} recovered plus \AttrRemaining{} with
 a reason is the \AttrLost{} the rules assigned, which the generator asserts before it will
-write either table. The reasons are of three kinds. Some sites sit in a component no screen
-reaches, so the analysis computes the empty scope for them, which is the right answer:
-nothing in the source says that component is ever rendered. Some sit in a service or a
-guard, which the instrument these tables measure did not place; the current extractor places a
-service's navigation through the member-level call graph and a guard's on the routes that name
-it (Sections~\ref{sec:res-ablation} and~\ref{sec:approximations}), so the row records what the
-analysis lacked when the tables were measured. The rest are scoped successfully and have nowhere
-to go, because the target is computed at run time or names an address the graph holds no node
-for. Only the second kind was work the analysis as specified would do and the implementation did
-not.
+write either table. The reasons describe both limitations of the implemented analysis and limits of the
+source population. Some components have no recovered route or template path to a
+screen; this is an empty computed scope, not proof that the application never renders
+them. Some sites lie beyond the member-level call graph's supported receiver and
+provider forms. Other sites have a scope but a dynamic destination or a target for
+which the graph has no node. The final table records the reasons remaining after the
+implemented call graph, rather than losses measured before it was added.
 
 \subsection{Whether the scopes are right}
 \label{sec:res-scope}
@@ -360,11 +338,16 @@ computes for a site is the set that site fires from is a different question, and
 contribution turns on. The runtime method of Section~\ref{sec:protocol} answers one direction
 of it: navigate to each screen the graph holds, let it render, read the in-app links the page
 carries, and compare them with the edges the graph's per-screen query yields there.
-Table~\ref{tab:scope} reports it.
+Table~\ref{tab:scope} retains the recorded observations and graph predictions from
+an earlier evaluation. This browser experiment was not repeated, and its predictions
+were not recomputed for the final call graph. The section therefore documents what
+that earlier graph missed; the final-snapshot ground-truth and ablation comparisons
+below are separate measurements.
 
 \begin{table}[t]\small
-\caption{The scopes against the rendered interface, on the \ScopeApps{} applications this
-harness can serve. \emph{Judged} counts screens that rendered themselves rather than
+\caption{Recorded scope predictions of an earlier graph against the rendered
+interface, on the \ScopeApps{} applications the harness could serve. These predictions
+were not recomputed for the final call graph. \emph{Judged} counts screens that rendered themselves rather than
 redirecting to a sign-in page; the rest cannot be judged from what rendered, because a
 redirected screen shows another screen's links. \emph{Not predicted} is the only column that
 counts against the analysis; the other direction is reported in the text, because it can be
@@ -587,17 +570,19 @@ application without a wrong pair, after the one wrong scope it found had been re
 view. What it cannot establish is that the same holds on an application of six hundred
 screens.
 
-Scope attribution therefore raises coverage, and on the measure Chapter~\ref{ch:evaluation}
-defines for must-tier precision it does not lower it: the attributed tier of \MustWitnessEdges{}
-edges has \MustWitnessViolations{} witness-check failures, which meets the criterion RQ3 is answered
-by. That measure cannot see whether a construct runs on every input
-(Section~\ref{sec:res-round2}), and the tier is too small for the result to be a precision estimate
-beyond this corpus. Three qualifications belong with that answer, and all three are visible in the
+Scope attribution therefore raises measured recovery. Its attributed must tier has
+\MustWitnessViolations{} detected witness-check failures among \MustWitnessEdges{}
+edges, with \MustWitnessUnread{} unread destinations. This is limited evidence for
+RQ3's precision requirement: unread edges do not pass the comparison, and target
+agreement cannot establish execution on every input
+(Section~\ref{sec:res-round2}). Three qualifications belong with that answer, and all three are visible in the
 tables rather than hidden by them. The first is that the gain is overwhelmingly on the may
 tier, so what attribution mostly adds is navigation the graph says is possible, not
 navigation it says is certain. The second is that the scopes are tested in both
-directions on one application only. On \ScopeApps{} of the six applications the oracle above can
-refute a scope that is too small, and did so \ScopeUnpredicted{} times; it cannot refute one that is too large,
+directions on one application only. The recorded runtime check exposed
+\ScopeUnpredicted{} missing pairs on its earlier graph, across \ScopeApps{}
+applications. It is not a new check of the final call graph, and cannot establish
+whether a scope is too large,
 because at the screens it can observe the graph almost never claims a destination exactly, and
 because a link a template renders conditionally is absent for reasons that have nothing to do
 with the scope. The ground truth of Section~\ref{sec:res-groundtruth} does test both
@@ -609,13 +594,12 @@ the defect. The third is the
 width reported in Section~\ref{sec:res-width}: the computed scopes are narrower than the
 trivial attribution by a factor between \BaselineFactorMin{} and \BaselineFactorMax{}, and at
 the low end of that range a scope names most of the application. A site attributed to too
-many screens produces edges whose witnesses all pass, because the construct really is at that
+many screens can produce edges whose readable witnesses agree, because the construct really is at that
 location and really does name that target, so no witness-based method can find it. What this
-section establishes is that attribution recovers a large part of a loss class no other
-analysis here addresses, that it adds no deterministic transition the evidence does not
-support, and that where the
-rendered interface could judge it, the only scopes it showed to be too small were the
-\ScopeUnpredicted{} attribution left empty, at sites it declined to place. That the scopes are not
+section establishes is a measured recovery gain on the final snapshot, with the
+limited correctness evidence described above. The recorded rendered-interface
+comparison exposed \ScopeUnpredicted{} missing pairs at sites the earlier graph had
+left unplaced; it does not establish the corresponding error set of the final graph. That the scopes are not
 too large is not established, and Section~\ref{sec:limitations} states it as the sharpest
 limitation of the work.
 
@@ -801,25 +785,19 @@ application it appeared in, and each cause that turned out to be the extractor's
 fixed. The question asked of each one was the same, and it is the question the method
 exists to make askable --- is the navigation unreadable, or was it merely unread?
 
-Two things must be said about the figures before they are read. They are the same figures
-the rest of this chapter reports: when the repairs changed what the extractor recovers, the
-whole evaluation was re-run on the repaired commit rather than reported beside the earlier
-one, so Table~\ref{tab:conversion} and everything after it describe the instrument this
-section arrives at --- with one exception, which each affected caption names: the must tier
-changed again after the round's tables were generated, in the fourth correction of this
-section, and the figures that depend on it are given beside those tables from the current
-graphs rather than by regenerating tables whose other columns the correction does not move. What the earlier instrument measured is quoted here, where the
-comparison is the point, and the provenance line of each generated table names the commit it
-came from. And where the oracle shared a blind spot with the extractor it too was
-corrected. Those corrections are versioned in the harness manifest, which records
-what each round changed and why. Every after figure in this section was produced by
-rerunning the whole measurement chain at version \HarnessVersion{}. The before figures were
-not: they were measured by the oracle as it stood when the round began, and reproducing
-them under the current one would mean rebuilding the extractor at its pre-round commit,
-which is not done here. Where the two oracles disagree about how many screens an
-application declares, the declared column of Table~\ref{tab:round2nodes} prints both
-numbers, because a ratio whose denominator moved between two columns is two measurements
-and not a difference. Several of the
+The tables in this section report the final snapshot used for the main RQ1--RQ3
+comparison. Historical measurements appear only where explicitly named to explain a
+repair. Their extractor or review cohort is recorded with the corresponding
+artifact, and their counts are not substituted into the final tables. The generated
+files identify the extractor and harness snapshot that produced each table. Where an
+oracle shared a blind spot with the extractor, it too was corrected; the harness
+manifest records those corrections. Reproducing an earlier comparison requires its
+recorded results or its earlier toolchain, not a run of the final extractor.
+The final baseline and attributed runs use the same route denominator in
+Table~\ref{tab:round2nodes}. Earlier revisions of that denominator did change;
+Appendix~\ref{app:validation} records those historical disagreements separately,
+because a ratio whose denominator moved is not an isolated extractor improvement.
+Several of the
 oracle's corrections matter enough to name, because each one had been scoring the extractor
 against paths the oracle itself had failed to read: a route path written through a constant, an enum or
 Angular's \texttt{\$localize}; a first-party import resolved through the workspace's
@@ -870,6 +848,18 @@ lookup the component fills. Resolving these is what separates a link from a dead
 one qualification that cost a soundness violation before it was added: a field seeded with a
 literal is mutable state, not a constant, and following it turns a run-time value into a
 must edge.
+
+Node extraction is not the bottleneck it was when this work began. At an earlier snapshot
+the extractor completed on one application and left four of the six at coverage rates
+below 20\%. The repairs above brought every one to completion; the shift matters, because
+an analysis that decides where a navigation can fire depends on having a node for the
+screen it fires from, and a construct whose source screen has no node is a loss
+attribution cannot repair. That is the bind the lowest-coverage applications were in, and
+the threshold was crossed by resolving the constructs the route table was reached through
+rather than by inferring nodes the framework definition does not supply. The gaps that
+remain are limited to the spread routes and the deployment-time choice between tables;
+both are declared rather than inferred, and neither is a coverage defect the extractor
+could close on its own.
 
 \begin{table}[t]\small
 \caption{Declared screens that have a node, before and after the loss list was worked.
@@ -931,49 +921,46 @@ in-scope sites.}
 
 Of \RoundTwoInScope{} in-scope sites, \RoundTwoRecovered{} are recovered,
 \RoundTwoDynamic{} are accounted as dynamic and \RoundTwoUnplaced{} as unplaced, so
-\RoundTwoAccounted{} are accounted for in all. The comparable figure before the list was
-worked is \RoundTwoBefore{}. The reading that changes most is k8s dashboard, which recovers
-a sixth of its sites and looks like a failure until the second column is read: nearly three
-quarters of its navigation computes the destination at run time, and two of its sites are
-unexplained. The dynamic sites are not one central builder --- they are spread over \RoundTwoDynamicFiles{} files,
+\RoundTwoAccounted{} are accounted for in all, against \RoundTwoBefore{} in the final
+baseline with attribution disabled. This comparison holds the extractor snapshot and
+in-scope population fixed. k8s dashboard illustrates why recovered and dynamic must
+be reported separately: a low recovered fraction can coexist with many sites whose
+destination depends on runtime data. The dynamic sites are not one central builder --- they are spread over \RoundTwoDynamicFiles{} files,
 \RoundTwoDynamicFilesOne{} of them contributing a single site --- so what the column reports is a habit of the
 codebase rather than one place to fix.
 
 Two cautions belong with the corpus total. mifos supplies \RoundTwoMifosShare{} of the
 in-scope sites on its own, so the corpus figures are close to mifos's: without it, recovered
-is \RoundTwoNoMifosRecovered{} and accounted \RoundTwoNoMifosAccounted{}. And the before
-column of Table~\ref{tab:round2nodes} is measured against a denominator that itself moved,
-because the oracle had been unable to read some of the route tables it was scoring against;
-the declared column states both numbers wherever they differ.
+is \RoundTwoNoMifosRecovered{} and accounted \RoundTwoNoMifosAccounted{}. Historical
+changes to the route denominator are a separate concern and are recorded in
+Appendix~\ref{app:validation}; they do not supply a different denominator to this final
+attribution comparison.
 
 \subsection{What it cost the soundness property}
 
-A coverage gain that quietly loosened the must tier would not be a gain, so the witness check
-of Section~\ref{sec:protocol} was run again on all six applications.
-Table~\ref{tab:round2sound} reports it as the round left it, beside the conversion ratio RQ1 is
-defined on. A fourth correction, made after the table was measured, keeps \MustFateKept{} of the
-tier's edges, and is reported after the first three.
+A coverage gain must be assessed together with the evidence for the emitted edges.
+Table~\ref{tab:round2sound} reports the final snapshot's witness check beside RQ1's
+conversion ratio. An edge without a detected failure is not necessarily a pass: the
+checker can leave its cited destination unread, and the corpus total of those edges
+is \MustWitnessUnread{} of \MustWitnessEdges{}.
 
 \begin{table}[t]\small
-\caption{The witness check of the must tier, and must conversion, after the loss list was worked
-and before the fourth correction of this section, which keeps \MustFateKept{} of the tier's edges.
-A passing edge names the destination its constructs name, which Claim~\ref{claim:must} requires
-and does not reduce to. ``Not applicable'' means the application emits no must edge, so there is
-nothing to check.}
+\caption{Final-snapshot witness-check outcomes and must conversion after the repairs.
+The must count without detected failures includes unread destinations and therefore
+is not a precision estimate. Unread destinations are counted separately in the text.
+``Not applicable'' means the application emits no must edge.}
 \label{tab:round2sound}
 \TabRoundTwoSoundness
 \end{table}
 
-Of the \RoundTwoMustEdges{} must edges the round left in the corpus,
-\RoundTwoMustCleanCount{} pass the witness check and \RoundTwoMustViolations{} fail it. Passing is
-a necessary condition of Claim~\ref{claim:must} and not a sufficient one, and the fourth
-correction below shows how far apart the two are on this tier. The tier was small --- \RoundTwoMustEdges{} edges in a graph of \RoundTwoEdges{} ---
-and an earlier state of this extractor, commit \EarlierCommit{}, published one
-\EarlierMustFactor{} times larger: \EarlierMustEdges{} edges, of which \EarlierMustClean{}
-passed the check and \EarlierMustViolations{} failed it. Those figures are read from
-that commit's own generated results rather than re-measured, since the extractor has moved
-and running it now would measure a different tool. The difference is three corrections, and
-they are worth separating because each one was hidden by the one before.
+The correction sequence explains how the final rules were reached. An earlier
+extractor, commit \EarlierCommit{}, published \EarlierMustEdges{} must edges, with
+\EarlierMustViolations{} detected witness-check failures. Those figures are read
+from that commit's own generated results rather than measured with the final tool.
+The later source review examined a frozen intermediate cohort of \MustCtxEdges{}
+edges, not the final tier. Its recorded fates are retained to explain the fourth
+correction. Neither historical count supplies a row of the final-snapshot table.
+Three initial repairs are relevant to that sequence.
 
 The first is a guard the walk never reached. One application routes every feature table
 through a wrapper function that returns a route carrying an authentication guard, and the
@@ -1064,7 +1051,7 @@ condition rules of this chapter as the definition to apply, so the readings test
 extractor applies its rules as written and not whether the rules are the right ones. They were
 made after those rules had been corrected on these same constructs. And they judge only whether
 a construct runs every time its code does, and its destination: not the guards and self-loops that
-decide \MustFateGuard{} and \MustFateSelfLoop{} of the \RoundTwoMustEdges{} edges.
+decide \MustFateGuard{} and \MustFateSelfLoop{} of the \MustCtxEdges{} edges in the frozen review cohort.
 
 The edges that survive show why the third correction's rule had to go. realworld's tag page
 renders the home component, whose Global Feed link to the root runs whenever the page does.
@@ -1107,7 +1094,12 @@ navigation runs --- and the readings are kept in \path{results-must/tier-reading
 refuses to report a must construct that file does not list. Unlike the review of the round's
 tier, this reading was made once and with the extractor's decisions in view, so it is a check
 that each decision can be defended from the source, not an independent second reading. The
-witness check finds \MustWitnessViolations{} failures in the \MustWitnessEdges{}.
+witness check finds \MustWitnessViolations{} failures in the \MustWitnessEdges{} must
+edges and records \MustWitnessUnread{} edges whose cited destination it cannot read.
+The unread edges are not passes. The source reading above and the mechanical check
+are distinct evidence: the reading examines every construct the census reports, with
+the extractor's decision visible, whereas the checker resolves only the source forms
+it supports. Neither is an independent proof of Claim~\ref{claim:must}.
 
 What the tier measures needs saying plainly, because it is easy to read as a property of the
 applications. The extractor never evaluates a guard, so a guard that can refuse a navigation
@@ -1124,20 +1116,22 @@ application puts its guard decides how much of its navigation that is. A reader 
 static extraction to recover a large deterministic graph should take this as part of the answer:
 some of the transitions are there, behind guards a static reader does not evaluate.
 
-The cost is paid in the measure RQ1 is defined on. Must conversion over the corpus read
-\RoundTwoMustConv{} on the round's instrument, already below what it read before any of the
-corrections, because the earlier figure counted guarded transitions as deterministic ones and
-counted some of them on evidence it had not read. After the fourth, RQ1's numerator --- the
-constructs that earn must on their own --- is \CensusMustSites{} with attribution and
-\CensusBaseMustSites{} without. Each correction removed a claim the extractor could not support.
-Claim~\ref{claim:must} now ranges on this corpus over \MustWitnessEdges{} edges, which is too few to
-be a soundness result in any statistical sense. What the corrections establish is narrower: every
-must edge the corpus yields has been read, construct by construct, against the rules the claim
-rests on, and the rules themselves are each covered by a test that fails when the rule is deleted
-(\SweepMutants{} mutants, each deleting one rule or one term of a rule from a copy of the
-extractor at \texttt{\SweepCommit}; \SweepFirstPass{} were killed by the suite as it stood, and the
-\SweepAdded{} that survived, and \SweepExtra{} further mutants splitting a compound term, are killed by
-tests added after the sweep).
+The consequence for RQ1 is reported on the final snapshot rather than inferred from
+a historical conversion rate. The constructs that earn must on their own number
+\CensusMustSites{} with attribution and \CensusBaseMustSites{} without. Historical
+instruments counted guarded or conditional constructs as deterministic and sometimes
+counted every citation of a must edge as deterministic evidence. The final rule
+requires each counted construct to earn must itself.
+
+Claim~\ref{claim:must} ranges on this corpus over \MustWitnessEdges{} final must
+edges. The source review and the mechanical check provide different evidence:
+\MustWitnessUnread{} edges have a cited destination the mechanical checker cannot
+read, while the source review examines the constructs the census lists with the
+extractor's decisions in view. The implementation's demotion rules are also exercised
+by a mutation sweep (\SweepMutants{} mutants at \texttt{\SweepCommit}); that sweep
+measures whether the tests detect deletions of those rules, not whether the rules are
+a complete account of runtime navigation. These checks do not constitute a proof of
+soundness.
 
 Read over the whole graph rather than the must tier, the figures are counted per cited source
 location and not per edge, because that is what the check opens: the \RoundTwoEdges{} edges of
@@ -1176,17 +1170,12 @@ thesis claims. It is also an argument for a prefix floor: a site whose static pr
 tells the analysis nothing, and the model would lose nothing by recording it as a dynamic
 sink instead of as six hundred may edges.
 
-The second column is the more uncomfortable one. RQ1 defines conversion as the fraction of
-constructs witnessed by at least one \emph{must} edge --- on the current instrument, constructs that
-earn must themselves --- and by that definition
-\RoundTwoZeroMustApps{} of the six applications sat at zero after the round, because they
-emitted no must edge at all, and after the fourth correction \CensusZeroMustApps{} do: every
-edge they yield is a may or an unknown. The recovered column
-of Table~\ref{tab:round2acct} counts a site as recovered when any edge witnesses it,
-which is a weaker predicate than RQ1's. Both are reported because neither alone is honest:
-the weaker one measures whether the graph represents the navigation, the stricter one whether
-it commits to a destination, and the answer to the second is now \CensusMustSites{} constructs in
-the corpus.
+RQ1's conversion ratio and the recovered column of
+Table~\ref{tab:round2acct} answer different questions. Conversion counts constructs
+whose own witnesses earn must; recovered counts sites witnessed by an edge of any
+tier. In the final snapshot \CensusZeroMustApps{} of the six applications have no
+must edge, and \CensusMustSites{} constructs earn must across the corpus. The broader
+recovery measure therefore must not be read as deterministic recall.
 
 \begin{table}[t]\small
 \caption{The route configuration the framework holds, against the extractor's node set.
