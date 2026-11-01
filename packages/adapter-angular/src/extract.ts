@@ -859,9 +859,10 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             const guards = [guard, ...gate.guardTexts].filter((g): g is string => g != null)
             const guarded = guards.length > 0
             // This mode resolves no relative target, so one without a leading slash is matched as
-            // written and never trusted; the other demotions are the screen-level ones.
+            // written and never trusted; the other demotions are the screen-level ones, including
+            // routes below a conditional outlet (hiddenAbove).
             const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true ||
-              parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)
+              parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId) || hiddenAbove(route, route.componentFile.getFilePath())
             const confidence = gate.guarded ? gate.confidence : guard != null ? 0.6 : uncertain ? 0.5 : 1
             pushEdge(cId, target.nodeId, t, uncertain ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
             navEffects.add('navigate')
