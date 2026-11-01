@@ -39,6 +39,21 @@ const edges = graph.edges || []
 
 // ---------------------------------------------------------------- construct detection
 
+/**
+ * The address a commands array names, read from the text between its brackets: its string
+ * literals joined, and a `:param` appended for each element that is not one. An array with no
+ * literal segment at all (`[target]`, `['/', id]`) names no address this check can read, so it is
+ * null: `/:param` alone agrees with any one-segment destination, and reading it as an address
+ * passed a must witness against a destination whose target was never read.
+ */
+function arrayTarget(inner) {
+  const parts = [...inner.matchAll(/'([^']*)'|"([^"]*)"/g)].map((m) => m[1] ?? m[2])
+  const dyn = inner.split(',').filter((s) => s.trim()).length - parts.length
+  const p = parts.join('/').replace(/\/+/g, '/')
+  if (dyn > 0 && !p.replace(/\//g, '')) return null
+  return dyn > 0 ? p + '/:param'.repeat(dyn) : p
+}
+
 // Each rule says how to recognise its construct on a line, and how to read its target.
 const RULES = {
   'ng.router-link': {
@@ -47,7 +62,8 @@ const RULES = {
     /**
      * The address a routerLink names: a plain attribute, an array of literals (a segment that is
      * not a literal becomes a `:param`), or a bound string literal. Null for anything else, a
-     * method call or an expression, which this check cannot read and says so (TARGET_UNREAD).
+     * method call, an expression or an array with no literal segment, which this check cannot
+     * read and says so (TARGET_UNREAD).
      */
     target: (l) => {
       // routerLink="/a/b"  |  [routerLink]="['/a', x]"  |  [routerLink]="['/a', x, 'b']"
@@ -61,10 +77,7 @@ const RULES = {
         const lit = l.match(/\[routerLink\]\s*=\s*(?:"\s*'([^']*)'\s*"|'\s*"([^"]*)"\s*')/)
         return lit ? (lit[1] ?? lit[2]) : null
       }
-      const parts = [...arr[1].matchAll(/'([^']*)'|"([^"]*)"/g)].map((m) => m[1] ?? m[2])
-      const dyn = arr[1].split(',').length - parts.length
-      const p = parts.join('/').replace(/\/+/g, '/')
-      return dyn > 0 ? p + '/:param'.repeat(dyn) : p
+      return arrayTarget(arr[1])
     },
   },
   'ng.navigate': {
@@ -74,11 +87,7 @@ const RULES = {
       const url = l.match(/navigateByUrl\(\s*['"`]([^'"`]+)/)
       if (url) return url[1].split('?')[0]
       const arr = l.match(/navigate\(\s*\[([^\]]*)\]/)
-      if (!arr) return null
-      const parts = [...arr[1].matchAll(/'([^']*)'|"([^"]*)"/g)].map((m) => m[1] ?? m[2])
-      const dyn = arr[1].split(',').filter((s) => s.trim()).length - parts.length
-      const p = parts.join('/').replace(/\/+/g, '/')
-      return dyn > 0 ? p + '/:param'.repeat(dyn) : p
+      return arr ? arrayTarget(arr[1]) : null
     },
   },
 }
