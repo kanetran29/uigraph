@@ -45,6 +45,37 @@ export function resolveRelativeTarget(target: string, ownerPath: string | undefi
 }
 
 /**
+ * How many leading segments of `ownerPath` a relative target keeps as they are, matrix parameters
+ * included: all but those its leading `..` climb out of. An absolute target keeps none, and so
+ * does one fired from a node with no path of its own.
+ */
+export function keptSegments(target: string, ownerPath: string | undefined): number {
+  if (!ownerPath || target.startsWith('/') || target === '*') return 0
+  let kept = segments(ownerPath).length
+  for (const seg of segments(target)) {
+    if (seg === '.') continue
+    if (seg !== '..') break
+    kept -= 1
+  }
+  return Math.max(0, kept)
+}
+
+/**
+ * Whether a route pattern can match an address, segment by segment, where a parameter on either
+ * side matches anything. With `prefix` the address may go on past the pattern, as it does for a
+ * route with children or a redirect with `pathMatch: 'prefix'`; a trailing catch-all matches
+ * whatever is left.
+ */
+export function overlaps(address: string, pattern: string, prefix: boolean): boolean {
+  const a = segments(address)
+  const p = segments(pattern)
+  const wild = p[p.length - 1] === '*'
+  const fixed = wild ? p.slice(0, -1) : p
+  if (a.length < fixed.length || (!prefix && !wild && a.length > fixed.length)) return false
+  return fixed.every((seg, i) => seg === a[i] || seg.startsWith(':') || a[i]!.startsWith(':'))
+}
+
+/**
  * The path a URL string reaches in the primary outlet, read the way `navigateByUrl` parses it:
  * the query, the fragment and each segment's matrix parameters are not part of the path, and a
  * parenthesised group addresses an auxiliary outlet (`/inbox(popup:compose)`), which the adapter
