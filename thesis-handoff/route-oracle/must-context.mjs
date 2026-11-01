@@ -146,7 +146,9 @@ const fateCount = Object.fromEntries(fates.map((f) => [f, edgesOut.filter((r) =>
 const unexplained = edgesOut.filter((r) => r.fate === 'unexplained')
 if (unexplained.length) throw new Error(`${unexplained.length} edge(s) left the must tier for no reason this ledger knows: ${unexplained.map((r) => `${r.app} ${r.edge}`).join('; ')}`)
 if (fates.reduce((a, f) => a + fateCount[f], 0) !== total) throw new Error(`the fates do not account for all ${total} edges`)
-const reasons = ['after await', 'in a callback', 'in a helper method', 'under a branch', 'after early exit', 'in a catch clause', 'in a loop', 'control-flow block', 'structural directive', 'ng-template', 'ICU case', 'unreadable template']
+// Every condition callCondition and templateCondition can return; a construct with one this list
+// does not name stops the ledger below rather than being left out of the tally.
+const reasons = ['after await', 'in a callback', 'in a helper method', 'in a helper function', 'under a branch', 'after early exit', 'superseded by a later navigation', 'in a catch clause', 'in a loop', 'control-flow block', 'structural directive', 'ng-template', 'ICU case', 'lazy container', 'unreadable template']
 const reasonCount = Object.fromEntries(reasons.map((r) => [r, constructs.filter((c) => c.condition === r).length]))
 const conditional = constructs.filter((c) => c.condition !== null).length
 if (reasons.reduce((a, r) => a + reasonCount[r], 0) !== conditional) throw new Error('a construct carries a condition this ledger does not name')
@@ -191,7 +193,7 @@ if (tex) {
       `\\newcommand{\\MustReviewAgreeMin}{${Math.min(...Object.values(agreement).map((a) => a.agree))}}`,
       `\\newcommand{\\MustReviewAgreeMax}{${Math.max(...Object.values(agreement).map((a) => a.agree))}}`,
     ] : []),
-    `\\newcommand{\\MustWhyTemplate}{${reasonCount['control-flow block'] + reasonCount['structural directive'] + reasonCount['ng-template'] + reasonCount['ICU case']}}`,
+    `\\newcommand{\\MustWhyTemplate}{${reasonCount['control-flow block'] + reasonCount['structural directive'] + reasonCount['ng-template'] + reasonCount['ICU case'] + reasonCount['lazy container']}}`,
     // A longtable, since the ledger is taller than a page; the caption is the chapter's, passed in.
     '\\newcommand{\\TabMustLedger}[1]{{\\scriptsize',
     '\\begin{longtable}{@{}l>{\\raggedright\\arraybackslash}p{0.31\\textwidth}>{\\raggedright\\arraybackslash}p{0.33\\textwidth}>{\\raggedright\\arraybackslash}p{0.14\\textwidth}@{}}',
