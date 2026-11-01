@@ -862,7 +862,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             // written and never trusted; the other demotions are the screen-level ones, including
             // routes below a conditional outlet (hiddenAbove).
             const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true ||
-              parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId) || hiddenAbove(route, route.componentFile.getFilePath())
+              parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId) || hiddenAbove(route, sf.getFilePath())
             const confidence = gate.guarded ? gate.confidence : guard != null ? 0.6 : uncertain ? 0.5 : 1
             pushEdge(cId, target.nodeId, t, uncertain ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
             navEffects.add('navigate')

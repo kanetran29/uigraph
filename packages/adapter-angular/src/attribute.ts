@@ -199,9 +199,11 @@ function importedFiles(sf: SourceFile): Set<string> {
  * given, receives the sub-graph of the placements at least one of which sits outside every
  * template condition, read at the child's own tag so a directive on it counts. `only`, when
  * given, limits the scan to the template of that one file, which is all a caller asking about
- * one component's children needs.
+ * one component's children needs. `firmPlacements`, when given, receives each such placement as
+ * the list of components it may instantiate: one where the selector names a single component,
+ * several where it is ambiguous and the analysis joins over them.
  */
-export function nestingGraph(components: Map<string, ComponentInfo>, notes: SoundinessNote[], firm?: Map<string, Set<string>>, only?: string): Map<string, Set<string>> {
+export function nestingGraph(components: Map<string, ComponentInfo>, notes: SoundinessNote[], firm?: Map<string, Set<string>>, only?: string, firmPlacements?: Map<string, string[][]>): Map<string, Set<string>> {
   const bySelector = new Map<string, ComponentInfo[]>()
   for (const c of components.values()) for (const s of c.selectors) {
     const list = bySelector.get(s) ?? []
@@ -218,8 +220,10 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
   for (const a of only === undefined ? components.values() : [components.get(only)].filter((c) => c !== undefined)) {
     const kids = new Set<string>()
     const firmKids = new Set<string>()
+    const placements: string[][] = []
     graph.set(a.file, kids)
     firm?.set(a.file, firmKids)
+    firmPlacements?.set(a.file, placements)
     if (!a.template) continue
     const template = a.template
     const tagMatches = [...template.matchAll(/<([a-zA-Z][\w-]*)/g)]
@@ -237,6 +241,7 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
         else notes.push({ kind: 'ambiguous-selector', file: a.file, detail: `<${tag}> matches ${cands.length} components and none is imported directly; joined over all` })
       }
       for (const c of chosen) if (c.file !== a.file) { kids.add(c.file); if (firmTags.has(tag)) firmKids.add(c.file) }
+      if (firmTags.has(tag)) placements.push(chosen.map((c) => c.file).filter((f) => f !== a.file))
     }
     // A directive is applied as an attribute, so the template that carries the attribute is
     // what renders it. Bound and plain forms both count: `acaAction`, `[acaAction]`.
@@ -255,6 +260,7 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
           else notes.push({ kind: 'ambiguous-selector', file: a.file, detail: `attribute ${attr} matches ${cands.length} directives and none is imported directly; joined over all` })
         }
         for (const c of chosen) if (c.file !== a.file) { kids.add(c.file); if (firmAttrs.has(attr)) firmKids.add(c.file) }
+        if (firmAttrs.has(attr)) placements.push(chosen.map((c) => c.file).filter((f) => f !== a.file))
       }
     }
   }
@@ -356,11 +362,14 @@ export function outletHiddenAbove(routes: RouteInfo[], sfs: SourceFile[]): (rout
       firm.set(file, templateCondition(tpl.text, at + 1) === null)
       return firm.get(file)!
     }
-    // Only a component that holds no outlet of its own has its template scanned for the ones it places.
+    // Only a component that holds no outlet of its own has its template scanned for the ones it
+    // places. One firm placement is enough, but only if every component it may instantiate renders
+    // an outlet firmly: an ambiguous selector the analysis joins over may instantiate any of them.
+    // A component that places nothing firmly renders no outlet through a placement at all.
     components ??= collectComponents(sfs)
-    const firmKids = new Map<string, Set<string>>()
-    nestingGraph(components, [], firmKids, file)
-    const found = [...firmKids.get(file) ?? []].every((kid) => { const c = components!.get(kid); return c !== undefined && firmOutlet(c.sf) })
+    const placements = new Map<string, string[][]>()
+    nestingGraph(components, [], undefined, file, placements)
+    const found = (placements.get(file) ?? []).some((cands) => cands.length > 0 && cands.every((kid) => { const c = components!.get(kid); return c !== undefined && firmOutlet(c.sf) }))
     firm.set(file, found)
     return found
   }
