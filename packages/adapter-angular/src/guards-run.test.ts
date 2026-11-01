@@ -827,3 +827,29 @@ export const routes: Routes = [
     expect(edge?.modality).toBe('may')
   })
 })
+
+describe('firmOutlet ambiguous selector (round 4)', () => {
+  it('requires EVERY matching component to have firm outlet (not just some)', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { X } from './x.component'
+import { Y } from './y.component'
+import { P } from './p.component'
+export const routes: Routes = [
+  { path: 'x', component: X, children: [{ path: 'y', component: Y }] },
+  { path: 'p', component: P }
+]`,
+      '/app/x.component.ts': page('X', '<x-content></x-content>'),
+      '/app/y.component.ts': page('Y', '<a routerLink="/p">link</a>'),
+      '/app/p.component.ts': page('P'),
+      '/app/a/content.component.ts': `import { Component } from '@angular/core'
+@Component({ selector: 'x-content', standalone: true, template: '<router-outlet></router-outlet>' })
+export class ContentA {}`,
+      '/app/b/content.component.ts': `import { Component } from '@angular/core'
+@Component({ selector: 'x-content', standalone: true, template: 'no outlet' })
+export class ContentB {}`,
+    }), '/app', { attribution: true })
+    const edge = edgeOf(graph, '/x/y', '/p')
+    expect(edge?.modality).toBe('may')
+  })
+})
