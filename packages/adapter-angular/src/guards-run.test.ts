@@ -692,3 +692,31 @@ export const routes: Routes = [
     expect(edgeOf(graph, '/a', '/b')?.modality).toBe('may')
   })
 })
+
+describe('spread-address routes (round 4)', () => {
+  it('does not walk children of a route whose address is spread from another object', () => {
+    const BASE = { path: 'a' }
+    const { graph, soundiness } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { Shell } from './shell.component'
+import { B } from './b.component'
+import { D } from './d.component'
+import { S } from './s.component'
+const BASE = { path: 'a' }
+export const routes: Routes = [
+  { ...BASE, component: Shell, children: [{ path: 'b', component: B }] },
+  { path: 'a/:id', component: D },
+  { path: 's', component: S }
+]`,
+      '/app/shell.component.ts': page('Shell'),
+      '/app/b.component.ts': page('B'),
+      '/app/d.component.ts': page('D'),
+      '/app/s.component.ts': page('S', '<a routerLink="/a/b">link</a>'),
+    }), '/app')
+    // The spread route subtree is not read, so /a/b from S should have no must edge
+    const edge = edgeOf(graph, '/s', '/a/b')
+    expect(edge).toBeUndefined()
+    // Should emit incomplete-route-set note
+    expect(soundiness.some(n => n.kind === 'incomplete-route-set')).toBe(true)
+  })
+})

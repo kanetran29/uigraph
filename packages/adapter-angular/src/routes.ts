@@ -984,7 +984,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
       // that carries both, so one test counts each hole exactly once.
       // A record whose key or member the reader could not resolve may declare an address it
       // cannot see, so it counts as a path it could not read rather than as no route at all.
-      const declaresAddress = propNamed(obj, 'path') !== undefined || propNamed(obj, 'matcher') !== undefined || keyUnreadable(obj)
+      const declaresAddress = propNamed(obj, 'path') !== undefined || propNamed(obj, 'matcher') !== undefined || keyUnreadable(obj) || obj.getProperties().some((pr) => Node.isSpreadAssignment(pr))
       if (declaresAddress && unreadable) unreadable.paths.add(obj)
       continue
     }
