@@ -723,6 +723,21 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
     expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([ONE_UNPLACED])
   })
 
+  it.each([
+    ['a string', `'/home'`],
+    ['a function', `() => '/home'`],
+  ])('declares the table unplaced when its only route is a redirect to %s', (_name, to) => {
+    // The redirect declares /admin wherever it sends it, so a target the reader cannot fix loses that address from the route set as surely as one it can.
+    const project = inMemory({
+      ...adminApp,
+      '/app/admin/admin.routes.ts': `import type { Routes } from '@angular/router'\nexport const ADMIN_ROUTES: Routes = [{ path: 'admin', redirectTo: ${to} }]`,
+      '/app/menu.ts': `export const ENTRY = { path: 'x', loadChildren: () => import('./admin/admin.module').then((m) => m.AdminModule) }`,
+    })
+    project.compilerOptions.set({ baseUrl: '/' })
+    const { soundiness } = extractGraph(project, '/app')
+    expect(soundiness.filter((n) => n.kind === 'incomplete-route-set').map((n) => n.detail)).toEqual([ONE_UNPLACED])
+  })
+
   it('reads a lazy module whose loadChildren sits in an arrow-returned array that a call spreads', () => {
     // The spread branch used to refuse a call, so the lazy site inside the array viewRoutes()
     // returns was never walked while the pre-pass still claimed its target --- the file was then
