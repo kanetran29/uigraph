@@ -1057,8 +1057,6 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         // between the host and the child, and outletHiddenAbove needs the full chain to judge the outlet.
         const hostDepth = host.levels.length
         const levelsToAdd = levels.slice(hostDepth)
-        const firstLevel = levelsToAdd[0]
-        const lastLevel = levelsToAdd[levelsToAdd.length - 1]
         // The first such child renders its component on the host's address, unless a canMatch may refuse it there
         // or any wrapper level between host and child carries a canMatch.
         const hasIntermediateCanMatch = levelsToAdd.some((l) => l.canMatch.length > 0)

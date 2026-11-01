@@ -695,7 +695,7 @@ export const routes: Routes = [
 
 describe('spread-address routes (round 4)', () => {
   it('does not walk children of a route whose address is spread from another object', () => {
-    const BASE = { path: 'a' }
+    // const BASE = { path: 'a' }  // TODO: used when the spread walk reaches the spread object
     const { graph, soundiness } = extractGraph(inMemory({
       '/app/app.routes.ts': `import type { Routes } from '@angular/router'
 import { Shell } from './shell.component'
