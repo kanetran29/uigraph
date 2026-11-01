@@ -750,7 +750,7 @@ export class Y { constructor(private router: Router) { } go() { this.router.navi
 })
 
 describe('host branch through wrapper call (round 4)', () => {
-  it('demotes links of an empty-path child reached through wrapper with conditional outlet', () => {
+  it('renders an empty-path child below an empty-path shell on the screen above, and demotes it for the shell\'s conditional outlet', () => {
     const { graph } = extractGraph(inMemory({
       '/app/app.routes.ts': `import type { Routes } from '@angular/router'
 import { X } from './x.component'
@@ -768,20 +768,28 @@ export class Shell { on = true }`,
       '/app/h.component.ts': page('H', '<a routerLink="/p">p</a>'),
       '/app/p.component.ts': page('P'),
     }), '/app', { attribution: true })
-    // Debug
-    console.log('=== DEBUG ===')
-    console.log('Nodes:', JSON.stringify(graph.nodes.map(n => ({ id: n.id, route: n.route, comp: n.componentPath })), null, 2))
-    console.log('Edges:', graph.edges)
-    
-    // H is empty-path child under X, reached through Shell wrapper (also empty-path).
-    // Shell's outlet is conditional, so H's links on /x should be MAY.
+    // H is an empty-path child of Shell, itself the first empty-path child of X, so both render
+    // on /x; Shell renders its outlet under a condition, so H's links there are may.
     const edge = edgeOf(graph, '/x', '/p')
     expect(edge).toBeDefined()
     expect(edge?.modality).toBe('may')
   })
 
-  it('also handles the spread-call wrapper form', () => {
-    const { graph } = extractGraph(inMemory({
+  // The two below mount Shell through a function that returns its route. The walk does not place
+  // a component the function's children name under the screen above (H stays on its unplaced
+  // origin), which costs recall and is declared; what must hold is that no link of H is ever must,
+  // with or without attribution, and that attribution keeps it at may rather than dropping it.
+  const neverMust = (files: Record<string, string>) => {
+    for (const attribution of [false, true]) {
+      const { graph } = extractGraph(inMemory(files), '/app', { attribution })
+      const toP = graph.edges.filter((e) => e.to === routeId('/p'))
+      expect(toP.every((e) => e.modality !== 'must'), `attribution=${attribution}`).toBe(true)
+      if (attribution) expect(toP.length).toBeGreaterThan(0)
+    }
+  }
+
+  it('never promotes a link of a child the spread-call wrapper form mounts', () => {
+    neverMust({
       '/app/app.routes.ts': `import type { Routes } from '@angular/router'
 import { X } from './x.component'
 import { Shell } from './shell.component'
@@ -798,13 +806,11 @@ export const routes: Routes = [
 export class Shell { on = true }`,
       '/app/h.component.ts': page('H', '<a routerLink="/p">link</a>'),
       '/app/p.component.ts': page('P'),
-    }), '/app')
-    const edge = edgeOf(graph, '/x', '/p')
-    expect(edge?.modality).toBe('may')
+    })
   })
 
-  it('demotes when the wrapper route has canMatch even with firm outlet', () => {
-    const { graph } = extractGraph(inMemory({
+  it('never promotes a link of a child a wrapper route with a canMatch mounts, even under a firm outlet', () => {
+    neverMust({
       '/app/guards.ts': `export const g = () => true`,
       '/app/app.routes.ts': `import type { Routes } from '@angular/router'
 import { X } from './x.component'
@@ -821,10 +827,7 @@ export const routes: Routes = [
       '/app/shell.component.ts': page('Shell'),
       '/app/h.component.ts': page('H', '<a routerLink="/p">link</a>'),
       '/app/p.component.ts': page('P'),
-    }), '/app')
-    // H should NOT be in host.layouts because wrapper level has canMatch
-    const edge = edgeOf(graph, '/x', '/p')
-    expect(edge?.modality).toBe('may')
+    })
   })
 })
 

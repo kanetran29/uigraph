@@ -223,6 +223,12 @@ function entryGuards(levels: RouteLevel[]): GuardInfo[] {
 
 /** The screens whose own address a child at the empty path already answers, in declaration order. */
 const emptyPathAnswered = new WeakSet<RouteInfo>()
+/**
+ * For a screen whose address an empty-path child answers, the level of the deepest component known
+ * to render there: the first such child, then the first empty-path child below it, and so on. Null
+ * when the first child's canMatch may refuse it, since then which component renders is not known.
+ */
+const emptyPathTip = new WeakMap<RouteInfo, RouteLevel | null>()
 
 /**
  * The addresses an earlier route answers, per map of screens a walk fills, whether or not it mints
@@ -1052,19 +1058,16 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     const host = !auxHere && ownPath === '' && parentNodeId === nodeId ? out.get(nodeId) : undefined
     if (host) {
       if (!redirectDeclared) {
-        // Include ALL levels from the host's depth onward (wrapper levels included), not just the last one.
-        // When the empty-path child is reached through a wrapper call, the wrapper's route and Shell sit
-        // between the host and the child, and outletHiddenAbove needs the full chain to judge the outlet.
-        const hostDepth = host.levels.length
-        const levelsToAdd = levels.slice(hostDepth)
-        // The first such child renders its component on the host's address, unless a canMatch may refuse it there
-        // or any wrapper level between host and child carries a canMatch.
-        const hasIntermediateCanMatch = levelsToAdd.some((l) => l.canMatch.length > 0)
-        if (componentFile && !emptyPathAnswered.has(host) && !hasIntermediateCanMatch) host.layouts = [...host.layouts, componentFile]
-        host.levels = [...host.levels, ...levelsToAdd]
-        // Regenerate layouts from the updated levels to include wrapper components
-        host.layouts = host.levels.flatMap((l) => (l.layout ? [l.layout] : []))
-        host.guards = [...host.guards, ...entryGuards(levelsToAdd)]
+        const level = levels[levels.length - 1]!
+        // The first such child renders its component on the host's address, unless a canMatch may
+        // refuse it there; so does the first empty-path child below a component that renders there,
+        // in that component's outlet. A later sibling is reached only when an earlier one is refused.
+        const tip = emptyPathAnswered.has(host) ? emptyPathTip.get(host) : host.levels[host.levels.length - 1]
+        const renders = tip != null && levels[levels.length - 2] === tip && level.canMatch.length === 0
+        if (componentFile && renders) host.layouts = [...host.layouts, componentFile]
+        if (!emptyPathAnswered.has(host) || renders) emptyPathTip.set(host, renders ? level : null)
+        host.levels = [...host.levels, level]
+        host.guards = [...host.guards, ...entryGuards([level])]
         emptyPathAnswered.add(host)
       } else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = { to: redirectTarget, prefix: false, levels, relative, own: 0 }
     }
