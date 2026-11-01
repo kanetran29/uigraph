@@ -24,7 +24,7 @@
 set -u
 if [ $# -ne 2 ]; then echo "usage: regen-round.sh <work dir holding corpus/<app>> <out dir>" >&2; exit 2; fi
 W=$(cd "$1" && pwd) || exit 2
-case "$W" in /tmp/*|/private/tmp/*) echo "the work dir must not be under /tmp" >&2; exit 2;; esac
+case "$W" in /tmp|/tmp/*|/private/tmp|/private/tmp/*) echo "the work dir must not be under /tmp" >&2; exit 2;; esac
 mkdir -p "$2" || exit 2
 OUT=$(cd "$2" && pwd)
 HERE=$(cd "$(dirname "$0")" && pwd); REPO=$(cd "$HERE/../.." && pwd); TEX="$HERE/../thesis"
