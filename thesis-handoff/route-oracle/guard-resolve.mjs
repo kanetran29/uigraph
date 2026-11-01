@@ -117,9 +117,11 @@ export function guardedRoute(src, index) {
  * The guards a `canActivate: [...]` text lists, as the extractor writes them on an edge, and
  * whether every element could be named. An identifier is its own name; a factory call
  * `f(args)` is written `f()`, without its arguments, which is why two guards of one factory
- * print alike. Anything else, an inline arrow function, a member access or a spread, is written
- * from a hash or a source position the text does not give, so the list is then not `complete`
- * and a guard an edge loses cannot be attributed to the list by name.
+ * print alike. Anything else, an inline arrow function, a member access, a spread or a chained
+ * call, is written from a hash or a source position the text does not give (a chain
+ * `f(a).g(b)` is printed by the extractor as `f(a).g()`, which is no name this function can
+ * rebuild from the call's head), so the list is then not `complete` and a guard an edge loses
+ * cannot be attributed to the list by name.
  */
 export function namedGuards(listText) {
   const open = listText.indexOf('[')
@@ -145,10 +147,26 @@ export function namedGuards(listText) {
   for (const el of elements) {
     const call = /^([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*\(/.exec(el)
     if (/^[A-Za-z_$][\w$]*$/.test(el)) names.push(el)
-    else if (call && el.endsWith(')')) names.push(`${call[1]}()`)
+    else if (call && closesAtEnd(maskCode(el), call[0].length - 1)) names.push(`${call[1]}()`)
     else complete = false
   }
   return { names, complete }
+}
+
+/**
+ * Whether the parenthesis at `open` in `masked` is closed by the last character of the text, so
+ * that the call it opens is the whole element and nothing, a further member or call, follows it.
+ */
+function closesAtEnd(masked, open) {
+  let depth = 0
+  for (let i = open; i < masked.length; i += 1) {
+    if (masked[i] === '(') depth += 1
+    else if (masked[i] === ')') {
+      depth -= 1
+      if (depth === 0) return i === masked.length - 1
+    }
+  }
+  return false
 }
 
 /**

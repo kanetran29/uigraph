@@ -4,6 +4,10 @@
 // analysis? Seeds a known delta into the source, re-extracts, and compares the graph
 // against the predicted difference.
 //
+// The version below is recorded as `mutate 1.8.0`. This harness has its own numbering, and the
+// round harness run-all.mjs, whose version corpus.json holds, is also at 1.8.0: a bare "1.8.0" in
+// the thesis would name two instruments with different semantics.
+//
 // Harness 1.8.0. Change against 1.7.0: a REMOVE_GUARD mutant is detected only when the guard an
 // edge loses is one the removed list names. 1.7.0 passed when any edge lost any guard, so it did
 // not test that the guard lost is the one removed. The list is read as the extractor writes it:
@@ -98,6 +102,7 @@ const SEED = parseInt(flag('--seed', '20261021'), 10)
 const jsonOut = flag('--json', null)
 const MAP_CMD = process.env.UIGRAPH_MAP || flag('--map-cmd', 'uigraph')
 const DB = path.join(appDir, 'uigraph-mutate.db')
+const HARNESS_VERSION = 'mutate 1.8.0'
 
 /** Deterministic PRNG so that a reported sample can be reproduced exactly. */
 function mulberry32(a) {
@@ -459,7 +464,7 @@ console.log(`  ${'OVERALL'.padEnd(20)} detected ${tD}/${tN} = ${tN ? ((tD / tN) 
 
 if (jsonOut) {
   fs.writeFileSync(jsonOut, JSON.stringify({
-    harnessVersion: '1.8.0', extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
+    harnessVersion: HARNESS_VERSION, extractor: extractorStamp(), repoRoot, appDir, attribution: ATTRIBUTION, seed: SEED, quota: QUOTA,
     baseline: { nodes: baseline.nodes.length, edges: baseline.edges.length, routes: routes.length },
     discovered, sampled, perOperator,
     detectionRate: tN ? tD / tN : null, scored: tN, detected: tD, results,
