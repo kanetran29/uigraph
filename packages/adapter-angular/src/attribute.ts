@@ -23,8 +23,8 @@ import { Node, SyntaxKind } from 'ts-morph'
 import type { SourceFile } from 'ts-morph'
 import type { SoundinessNote } from '@ui-graph/core'
 import { inlineTemplate } from './templates'
-import type { RouteInfo } from './routes'
-import { declarationsOf, isInsideDir } from './resolve'
+import { callMount, componentFileOf, type RouteInfo, type RouteLevel } from './routes'
+import { declarationsOf, identifierProp, isInsideDir, propNamed } from './resolve'
 import { templateCondition } from './conditions'
 import { memberScopes, type MemberKey } from './callgraph'
 
@@ -197,9 +197,11 @@ function importedFiles(sf: SourceFile): Set<string> {
 /**
  * Nesting graph: component file -> component files its template instantiates. `firm`, when
  * given, receives the sub-graph of the placements at least one of which sits outside every
- * template condition, read at the child's own tag so a directive on it counts.
+ * template condition, read at the child's own tag so a directive on it counts. `only`, when
+ * given, limits the scan to the template of that one file, which is all a caller asking about
+ * one component's children needs.
  */
-export function nestingGraph(components: Map<string, ComponentInfo>, notes: SoundinessNote[], firm?: Map<string, Set<string>>): Map<string, Set<string>> {
+export function nestingGraph(components: Map<string, ComponentInfo>, notes: SoundinessNote[], firm?: Map<string, Set<string>>, only?: string): Map<string, Set<string>> {
   const bySelector = new Map<string, ComponentInfo[]>()
   for (const c of components.values()) for (const s of c.selectors) {
     const list = bySelector.get(s) ?? []
@@ -213,7 +215,7 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
     byAttribute.set(a, list)
   }
   const graph = new Map<string, Set<string>>()
-  for (const a of components.values()) {
+  for (const a of only === undefined ? components.values() : [components.get(only)].filter((c) => c !== undefined)) {
     const kids = new Set<string>()
     const firmKids = new Set<string>()
     graph.set(a.file, kids)
@@ -302,18 +304,86 @@ function loadedFiles(sfs: SourceFile[], projectDir: string): Set<string> {
  * Component files some route object names in its `component` property, whether or not the route
  * walk renders them on a screen: a route a wrapper function returns, or one the walk could not
  * read, mounts its component where the walk does not see it, so the component only looks
- * unrouted. A route is an object that declares an address, a `path` or a `matcher`; an object
- * that names a component and no address (a widget registry, a dialog's config) mounts nothing.
+ * unrouted. A route is an object that declares an address, a `path` or a `matcher`, or that
+ * spreads another object in (`{ ...BASE, component: Shell }`), which may carry the address; an
+ * object that names a component and no address (a widget registry, a dialog's config) mounts nothing.
  */
 function routeNamedComponents(sfs: SourceFile[]): Set<string> {
   const out = new Set<string>()
   for (const sf of sfs) for (const p of sf.getDescendantsOfKind(SyntaxKind.PropertyAssignment)) {
     if (p.getNameNode().getText() !== 'component') continue
     const route = p.getParentIfKind(SyntaxKind.ObjectLiteralExpression)
-    if (!route?.getProperty('path') && !route?.getProperty('matcher')) continue
+    if (!route?.getProperty('path') && !route?.getProperty('matcher') && !route?.getProperties().some((x) => Node.isSpreadAssignment(x))) continue
     for (const d of declarationsOf(p.getInitializer())) out.add(d.getSourceFile().getFilePath())
   }
   return out
+}
+
+/** The files of `sfs` that are part of the application: test hosts and stories declare components too, and are not. */
+export function appSourceFiles(sfs: SourceFile[]): SourceFile[] {
+  return sfs.filter((sf) => !/\.(spec|test|stories|cy|e2e)\.ts$/.test(sf.getFilePath()) && !/\/(testing|__tests__|e2e)\//.test(sf.getFilePath()))
+}
+
+/**
+ * Whether a component on a screen's chain of routes renders there only on some executions: a
+ * component above it on that chain (a route component, a layout, or the component a wrapper's
+ * route names, `withShell(...)`'s shell) renders its primary outlet only under a template
+ * condition, so what that outlet renders is absent whenever the condition fails, however the
+ * component's own template reads. The chain is read off the screen's levels, so a component is
+ * judged by the outlets above its own place and not by those of the routes it wraps.
+ *
+ * A component renders its outlet firmly when its own template holds it outside every condition,
+ * or, where its own template holds none, when it places outside every condition a component that
+ * renders one firmly (`<gf-page-tabs>` holding the outlet), through the nesting graph of `sfs`. A
+ * component in which no primary outlet is found at all renders nothing below it the reader can
+ * see, so what is below is taken as hidden, the safe side; so is what is below a level whose
+ * route names a component the reader cannot resolve, and a component the chain does not hold.
+ */
+export function outletHiddenAbove(routes: RouteInfo[], sfs: SourceFile[]): (route: RouteInfo, file: string) => boolean {
+  const componentOf = new Map<Node, SourceFile | undefined>(routes.map((r) => [r.routeObj, r.componentFile]))
+  let components: Map<string, ComponentInfo> | undefined
+  const firm = new Map<string, boolean>()
+  /** Whether the component in `sf` renders a primary outlet on every execution, in its own template or through a component it places. */
+  const firmOutlet = (sf: SourceFile): boolean => {
+    const file = sf.getFilePath()
+    const known = firm.get(file)
+    if (known !== undefined) return known
+    // A component that places itself renders no outlet through that placement.
+    firm.set(file, false)
+    const tpl = inlineTemplate(sf)
+    const at = tpl ? tpl.text.search(/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/) : -1
+    if (tpl && at >= 0) {
+      firm.set(file, templateCondition(tpl.text, at + 1) === null)
+      return firm.get(file)!
+    }
+    // Only a component that holds no outlet of its own has its template scanned for the ones it places.
+    components ??= collectComponents(sfs)
+    const firmKids = new Map<string, Set<string>>()
+    nestingGraph(components, [], firmKids, file)
+    const found = [...firmKids.get(file) ?? []].some((kid) => { const c = components!.get(kid); return c !== undefined && firmOutlet(c.sf) })
+    firm.set(file, found)
+    return found
+  }
+  /**
+   * The component a level renders (its layout, its minted route's component, or the one a
+   * wrapper's route names), undefined when its route names none, and null when it names one the
+   * reader cannot resolve.
+   */
+  const holderOf = (l: RouteLevel): SourceFile | null | undefined => {
+    const own = l.layout ?? componentOf.get(l.obj)
+    if (own) return own
+    const route = Node.isCallExpression(l.obj) ? callMount(l.obj)?.route : Node.isObjectLiteralExpression(l.obj) ? l.obj : undefined
+    if (!route || (propNamed(route, 'component') === undefined && propNamed(route, 'loadComponent') === undefined)) return undefined
+    const name = identifierProp(route, 'component')
+    return (name ? componentFileOf(route.getSourceFile(), route, name) : undefined) ?? null
+  }
+  const chains = new Map<RouteInfo, (SourceFile | null | undefined)[]>()
+  return (route, file) => {
+    const chain = chains.get(route) ?? route.levels.map(holderOf)
+    chains.set(route, chain)
+    const at = chain.findIndex((c) => c?.getFilePath() === file)
+    return at < 0 || chain.slice(0, at).some((c) => c === null || (c !== undefined && !firmOutlet(c)))
+  }
 }
 
 /**
@@ -328,14 +398,15 @@ function routeNamedComponents(sfs: SourceFile[]): Set<string> {
  * route nobody can see, so it is an indirect shell and not a firm one. A route whose address an
  * earlier route holds is no such route: its component renders on the screens it declares (the
  * route's `layouts`). The call graph reads the files the application loads, which `projectDir`
- * fixes when it is given.
+ * fixes when it is given. A component nested in a route component or layout is mounted firmly
+ * only on the screens where no outlet above that one is conditional (`hiddenAbove`, which a caller
+ * that already built it from `outletHiddenAbove` hands in rather than have it built again).
  */
-export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectDir?: string, layers: ScopeLayers = 'full'): ScopeResult {
+export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectDir?: string, layers: ScopeLayers = 'full', hiddenAbove = outletHiddenAbove(routes, appSourceFiles(sfs))): ScopeResult {
   const notes: SoundinessNote[] = []
   /** Whether `file` may be elected this application's shell: any file when `projectDir` is unset, otherwise only one inside it. */
   const mayBeShell = (file: string): boolean => !projectDir || isInsideDir(file, projectDir)
-  // Test hosts and stories declare components too; they are not part of the application.
-  const appFiles = sfs.filter((sf) => !/\.(spec|test|stories|cy|e2e)\.ts$/.test(sf.getFilePath()) && !/\/(testing|__tests__|e2e)\//.test(sf.getFilePath()))
+  const appFiles = appSourceFiles(sfs)
   const components = collectComponents(appFiles)
   const firmNesting = new Map<string, Set<string>>()
   const nesting = nestingGraph(components, notes, firmNesting)
@@ -381,10 +452,13 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // descent must descend from the route components' OWN screens instead; taking it out of
   // the returned map afterwards would leave it in every nested component's scope.
   const descentBase = layers === 'outlet' || layers === 'full' || layers === 'class' ? routeComponentScreens : ownScreens
+  // A component nested in a route component or layout is mounted firmly only where that one is.
+  const routeById = new Map(routes.map((r) => [r.nodeId, r]))
+  const firmBase = new Map([...descentBase].map(([f, ss]) => [f, new Set([...ss].filter((s) => !hiddenAbove(routeById.get(s)!, f)))]))
   const screensOf = new Map<string, Set<string>>()
   const firmScreensOf = new Map<string, Set<string>>()
-  for (const [graph, into] of [[nesting, screensOf], [firmNesting, firmScreensOf]] as const) {
-    for (const [f, screens] of descentBase) {
+  for (const [graph, into, base] of [[nesting, screensOf, descentBase], [firmNesting, firmScreensOf, firmBase]] as const) {
+    for (const [f, screens] of base) {
       for (const c of reach(graph, f)) {
         if (c === f || routeComponentScreens.has(c)) continue
         const set = into.get(c) ?? new Set<string>()
