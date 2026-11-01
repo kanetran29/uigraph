@@ -60,7 +60,7 @@
       "app": "realworld",
       "edge": "/profile/:username/favorites -> /",
       "event": "click:routerLink",
-      "fate": "condition",
+      "fate": "joined",
       "sites": 1,
       "unconditionalSites": 0
     },
@@ -417,9 +417,10 @@
   ],
   "fates": {
     "kept": 2,
+    "joined": 1,
     "guard": 10,
     "self-loop": 1,
-    "condition": 7,
+    "condition": 6,
     "retargeted": 0
   },
   "reasons": {

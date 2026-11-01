@@ -33,9 +33,10 @@ have.
 
 Table~\ref{tab:conversion} gives the second measure. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2},
 the extractor without the attribution pass recovers a small fraction of the navigation
-constructs as must edges; after it, the constructs it recovers as must edges number
-\CensusBaseMustSites{} in the whole corpus without attribution and \CensusMustSites{} with it, all in
-realworld, and none on the other \CensusZeroMustApps{} applications. Edge counts in that table
+constructs as must edges; after it, the constructs that earn must number
+\CensusBaseMustSites{} in the whole corpus without attribution and \CensusMustSites{} with it,
+in \CensusMustApps{} applications with attribution and none on the other \CensusZeroMustApps{};
+\CensusMustSitesMifos{} of them are cancel buttons and menu links in mifos. Edge counts in that table
 must be read per tier and not summed: the may column of the largest application is almost
 entirely one over-approximation from a single unresolvable call site, not that many distinct
 transitions.
@@ -44,8 +45,8 @@ transitions.
 \caption{Construct-to-transition conversion per application, baseline. Conversion is
 the fraction of constructs witnessed by a must edge (on this instrument, every construct a must
 edge cites); the edge columns count edges. Measured
-before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which conversion is
-zero on every application but realworld, where \CensusBaseMustSites{} construct converts.}
+before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which
+\CensusBaseMustSites{} constructs convert without attribution, in \CensusBaseMustApps{} applications.}
 \label{tab:conversion}
 \TabConversion
 \end{table}
@@ -127,12 +128,12 @@ Constant-valued route paths not resolved & route parser; node-count collapse & 1
 Table~\ref{tab:loss} and Figure~\ref{fig:loss} assign every navigation construct to one outcome using the rules
 of Table~\ref{tab:loss-rules}. Of the \RoundTwoInScopeAll{} constructs in the
 corpus, Table~\ref{tab:loss} shows how many convert onto each tier and why the rest do not; its
-must row is the instrument before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which that row holds \CensusBaseMustSites{} construct. Guard defects are measured separately (Section~\ref{sec:metrics}).
+must row is the instrument before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which that row holds \CensusBaseMustSites{} constructs. Guard defects are measured separately (Section~\ref{sec:metrics}).
 
 \begin{table}[t]\small
 \caption{Outcome of every navigation construct, baseline. Columns: realworld,
 alfresco, ghostfolio, k8s dashboard, bitwarden, mifos. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2},
-after which the \emph{Converted, must} row holds \CensusBaseMustSites{} construct, in realworld.}
+after which the \emph{Converted, must} row holds \CensusBaseMustSites{} constructs, in \CensusBaseMustApps{} applications.}
 \label{tab:loss}
 \TabLoss
 \end{table}
@@ -226,7 +227,7 @@ percentage points; must-tier edges that pass the witness check; constructs that 
 rules assigned to attribution in the baseline, and how many of them converted into must
 and into may edges. Conversions of constructs assigned to other classes are in
 Table~\ref{tab:recovery-source}. Measured before the fourth must-tier correction of Section~\ref{sec:res-round2}, which leaves
-\CensusBaseMust{} must edge without attribution and \CensusMust{} with it, all in realworld.}
+\CensusBaseMust{} must edges without attribution and \CensusMust{} with it.}
 \label{tab:before-after}
 \TabBeforeAfter
 \end{table}
@@ -243,16 +244,18 @@ measures disagree about, and the reason both are reported: on the instrument the
 measures, \AttrRecoveredMust{} of the recovered constructs convert onto the must tier and
 \AttrRecoveredMay{} onto the may tier. After the fourth must-tier correction of
 Section~\ref{sec:res-round2} the attributed run has \CensusMust{} must edges against
-\CensusBaseMust{} without attribution; the difference is realworld's header and footer logo
-links, which attribution places on every screen the shell renders, and everything else it
-recovers lands on may.
+\CensusBaseMust{} without attribution. The constructs that make the difference all sit in a
+shell, which attribution draws from every screen the shell renders: realworld's header and
+footer logo links, which take that application from \CensusBaseMustRealworld{} must edge to
+\CensusMustRealworld{}, and the logo link and the Create button of k8sdash's toolbar, which take
+it from none to \CensusMustKdash{}. Everything else attribution recovers lands on may.
 An application whose screens all sit behind a guard can gain a great deal of navigation and
 almost no \emph{deterministic} navigation, and Section~\ref{sec:res-round2} returns to why.
 
 On the instrument the table measures, precision on the must tier did not fall: the tier grew
 from \AttrMustBefore{} edges to \AttrMustAfter{}, and every edge in it passed the witness check in
 both runs. After the fourth must-tier correction of Section~\ref{sec:res-round2} the tier holds
-\CensusBaseMust{} edge without attribution and \CensusMust{} with it, and the witness check finds
+\CensusBaseMust{} edges without attribution and \CensusMust{} with it, and the witness check finds
 \MustWitnessViolations{} failures in the attributed tier, so attribution added must edges without
 adding a witness-check failure; the tier is too small for that to be a precision figure. No construct converted in the baseline is lost after attribution: following every
 construct by its identifier across the two runs finds \AttrRegressed{} that leave the converted
@@ -304,8 +307,8 @@ Table~\ref{tab:recovery-source} gives the same recovery by the class each constr
 the baseline, and on this instrument it says something the earlier one did not. Every
 conversion comes out of the two attribution classes: \AttrRecoveredMust{} onto the must tier
 and \AttrRecoveredMay{} onto the may tier on the instrument the table measures, all of them onto
-may after the fourth must-tier correction of Section~\ref{sec:res-round2} except realworld's
-logo links, with none out of the node classes at all. On the
+may after the fourth must-tier correction of Section~\ref{sec:res-round2} except the shell links
+of realworld and k8sdash, with none out of the node classes at all. On the
 extractor this evaluation began with --- commit \EarlierCommit{}, whose generated results
 these figures also come from --- \EarlierGainFromNode{} of \EarlierGainMust{} deterministic
 conversions, \EarlierGainFromNodeShare{}, came out of constructs the loss rules had assigned
@@ -322,7 +325,7 @@ whose nodes are complete the question stops being measurable from this table.
 assigned to the construct in the baseline; the columns give the tier it converted into
 after attribution. Constructs are followed by identity, not matched by source location. The
 must column is the instrument before the fourth must-tier correction of Section~\ref{sec:res-round2}, after which every conversion
-attribution makes lands on may except realworld's header and footer logo links.}
+attribution makes lands on may except the shell links of realworld and k8sdash.}
 \label{tab:recovery-source}
 \TabRecoverySource
 \end{table}
@@ -341,10 +344,13 @@ a reason is the \AttrLost{} the rules assigned, which the generator asserts befo
 write either table. The reasons are of three kinds. Some sites sit in a component no screen
 reaches, so the analysis computes the empty scope for them, which is the right answer:
 nothing in the source says that component is ever rendered. Some sit in a service or a
-guard, the two input relations Chapter~\ref{ch:analysis} specifies and this version does not
-implement. The rest are scoped successfully and have nowhere to go, because the target is
-computed at run time or names an address the graph holds no node for. Only the second kind
-is work the analysis as specified would do and this implementation does not.
+guard, which the instrument these tables measure did not place; the current extractor places a
+service's navigation through the member-level call graph and a guard's on the routes that name
+it (Sections~\ref{sec:res-ablation} and~\ref{sec:approximations}), so the row records what the
+analysis lacked when the tables were measured. The rest are scoped successfully and have nowhere
+to go, because the target is computed at run time or names an address the graph holds no node
+for. Only the second kind was work the analysis as specified would do and the implementation did
+not.
 
 \subsection{Whether the scopes are right}
 \label{sec:res-scope}
@@ -475,12 +481,11 @@ the mechanisms that produce it earn their place, and the answer is not the same 
 them. Table~\ref{tab:ablation} extracts the corpus at \AblationLevels{} nested levels, each
 withholding every mechanism above it. The withholding covers the stand-ins of
 Section~\ref{sec:implementation} as well as the implemented relations: a navigation inside a
-guard, attributed to the routes that name it, and an effect placed at the shell are
-approximations of the two relations the prototype does not implement, so a level below
-\emph{full} does not carry them either. Without that, the lowest level would not be the
-ownership baseline it is read as --- it credited direct ownership with sites that only the
-service and dispatch stand-ins place, and the service join's own contribution was correspondingly
-understated.
+guard, attributed to the routes that name it, and an effect placed at the shell stand in where
+the prototype implements no relation of the model, so a level below \emph{full} does not carry
+them either. Without that, the lowest level would not be the ownership baseline it is read as ---
+it credited direct ownership with sites that only the stand-ins place, and the contribution of the
+levels above it was correspondingly understated.
 
 \begin{table}[t]\footnotesize
 \caption{The corpus extracted at each attribution level. \emph{Sites} counts the source
@@ -497,10 +502,17 @@ full analysis places, and containment raises that only to \AblationNestingSites{
 rule is what changes the picture: \emph{rooted} places \AblationRootedSites{} sites,
 \AblationRootedSiteShare{} of the full figure, and carries the pair count from
 \AblationNestingPairs{} to \AblationRootedPairs{}. Everything this thesis adds on top of that
---- outlet descent and the injected-service join --- raises the site count from
-\AblationRootedSites{} to \AblationFullSites{}: outlet descent adds
-\AblationOutletAddedSites{} sites and the service join \AblationFullAddedSites{},
-\AblationFullAddedShare{} of the corpus total.
+--- outlet descent and the member-level call graph that places a service's navigation ---
+raises the site count from \AblationRootedSites{} to \AblationFullSites{}: outlet descent adds
+\AblationOutletAddedSites{} sites and the call graph \AblationFullAddedSites{},
+\AblationFullAddedShare{} of the corpus total. The call graph replaced a coarser rule, which joined
+a navigating service over every component that injects its class. Run beside the nested levels
+rather than among them, that class-level join places \AblationClassSites{} sites, and it differs
+from the call graph in pairs on \AblationClassChangedApps{} of the six applications:
+\AblationClassOnlyPairs{} pairs only the class join asserts and \AblationFullOnlyPairs{} only the
+call graph does. The class join reaches a service only from a component that injects it, so a
+service another service calls, or one bound to an injection token, is placed only by the call
+graph.
 
 That ordering matters for the comparison with earlier work, because the shell rule is not a
 mechanism this thesis introduced. Oshima and Kishi assemble their page information from the
@@ -532,49 +544,45 @@ the level has and the application does not.}
 \TabGroundTruth
 \end{table}
 
-Every level below the last is exactly precise: none of them attributes a single pair the
-application does not have. What separates them is how much they find. Direct ownership
+Every nested level is exactly precise: none of them attributes a single pair the application
+does not have. What separates them is how much they find. Direct ownership
 recovers \GTOwnedRecall{} and containment \GTNestingRecall{}, both far short. Adding the
 shell rule --- the level that stands for the prior work's reach --- recovers
 \GTRootedRecall{} at \GTRootedPrecision{} precision, leaving \GTRootedMissing{} pairs
 unfound and inventing none.
 
-The honest reading of the last two rows is therefore not the one an author would prefer.
-Against \emph{rooted}, everything this thesis adds buys \GTRootedMissing{} missing pairs
-reduced to \GTFullMissing{} --- five more correct attributions --- and introduces
-\GTFullExcess{} wrong ones, taking precision from \GTRootedPrecision{} to
-\GTFullPrecision{}. On this application the trade is negative: the additional mechanisms cost
-more in precision than they return in recall, and a reader who wanted the most accurate
-attribution of the five would choose \emph{outlet}, which recovers \GTOutletRecall{} with no
-excess at all.
-
-Both error sets reduce to a single cause, which is the useful part of the result. All
-\GTFullExcess{} excess pairs come from one site: the \texttt{navigate} inside
-\texttt{UserService.logout}. The service join attributes a navigating service to every screen
-whose components inject it. Ten components inject this one, the header among them, and the
-shell renders the header on every screen, so the site is attributed to every screen the
-application has; its only caller is a button on the settings screen. The analysis already treats that join as an over-approximation and caps edges
-from it at may (Section~\ref{sec:attribution}), so the model does not claim these ten
-transitions are certain --- but the scope is nine screens too wide, and this is the first
-measurement in the thesis that shows a computed scope to be too large rather than merely
-unverified. All \GTFullMissing{} missing pairs are the same screen,
+Against \emph{rooted}, everything this thesis adds reduces \GTRootedMissing{} missing pairs to
+\GTFullMissing{} and asserts no pair the application does not have. That was not true of the
+analysis before the call graph, and the last row, the class-level join the call graph replaced,
+shows where it failed: it asserts \GTClassExcess{} pairs the application does not have, all at
+one site, the \texttt{navigate} inside \texttt{UserService.logout}, taking precision to
+\GTClassPrecision{}. The class join attributes a navigating service to every screen whose
+components inject it. Ten components inject this one, the header among them, and the shell
+renders the header on every screen, so the site is attributed to every screen the application
+has; its only caller is a button on the settings screen. That was the first measurement in the
+thesis to show a computed scope too large rather than merely unverified, and the call graph,
+which follows the call from that button to the member, places the site on the settings screen
+alone. The order matters for how much the clean row is worth. The call graph was written after
+this ground truth had exposed the defect, and it is scored on the same ground truth, so the
+\GTFullPrecision{} precision is the repair confirmed and not an independent test of the call
+graph, whose remaining errors would sit where this application has nothing to test them. All \GTFullMissing{} missing pairs are
+the same screen,
 \path{/profile/:username}: its component is placed by a child route whose path is empty, so
 the child's address collapses onto its parent's, and the components that child renders are not
-attributed to the collapsed address. One cause each, and both are reportable as defects rather
-than as a rate.
+attributed to the collapsed address. One cause, reportable as a defect rather than as a rate.
 
 Two things follow for RQ3. The first is that most of the recovery attributed to this analysis
 is produced by a mechanism earlier work already had: \GTRootedRecall{} of the
 \GTPairs{} pairs are reached by the shell rule, and the mechanisms added here take that to
-\GTFullRecall{} while introducing the only wrong attributions any level makes. The second is
+\GTFullRecall{}. The second is
 that this is one application of six, the smallest, and the corpus-wide widths of
 Table~\ref{tab:scopebaseline} are not licensed by it --- on \BaselineBluntest{} the mean
 scope is \BaselineBluntestShare{} of the application, and no ground truth exists to say
-whether that width is earned. What the ground truth establishes is narrower than soundness, since it found errors in both
-directions: the additional mechanisms raise attribution recall on this annotated application,
-at a measured cost in precision, and the precision they cost is spent entirely on one known
-over-approximation. What it cannot establish is that the same holds on an application of six
-hundred screens.
+whether that width is earned. What the ground truth establishes is narrower than soundness, since it still finds scopes
+that are too small: the additional mechanisms raise attribution recall on this annotated
+application without a wrong pair, after the one wrong scope it found had been repaired with it in
+view. What it cannot establish is that the same holds on an application of six hundred
+screens.
 
 Scope attribution therefore raises coverage without lowering must-tier precision, which is
 what RQ3 asks. Three qualifications belong with that answer, and all three are visible in the
@@ -586,10 +594,11 @@ too small, and did so \ScopeUnpredicted{} times; it cannot refute one that is to
 because at the screens it can observe the graph almost never claims a destination exactly, and
 because a link a template renders conditionally is absent for reasons that have nothing to do
 with the scope. The ground truth of Section~\ref{sec:res-groundtruth} does test both
-directions: against the \GTPairs{} pairs it records, the analysis asserts \GTFullExcess{}
-that are not there, all at \GTFullExcessSites{} of the \GTSites{} sites, and misses
-\GTFullMissing{}, one each at \GTFullMissingSites{} further sites --- but on \GTApp{}, the
-smallest application of the six. The third is the
+directions: against the \GTPairs{} pairs it records, the analysis asserts none that are not
+there, where the class-level join it replaced asserted \GTClassExcess{} at one site, and misses
+\GTFullMissing{}, one each at \GTFullMissingSites{} of the \GTSites{} sites --- but on \GTApp{},
+the smallest application of the six, and with the repair made after the ground truth had shown
+the defect. The third is the
 width reported in Section~\ref{sec:res-width}: the computed scopes are narrower than the
 trivial attribution by a factor between \BaselineFactorMin{} and \BaselineFactorMax{}, and at
 the low end of that range a scope names most of the application. A site attributed to too
@@ -624,9 +633,9 @@ attributed graph detects \MutPairedDetected{} --- \MutPairedRate{} --- and the b
 \MutPairedBaseDetected{}, \MutPairedBaseRate{}. The two graphs disagree on
 \MutPairedDisagree{} of those mutants and \MutPairedAgainstAttribution{} of the
 disagreements go against attribution, so the effect is consistent in direction as well as
-positive in aggregate; four of the six are a change the attributed graph detected and the
-baseline did not respond to at all, and two are a change the attributed graph responded to
-with the wrong delta while the baseline did not respond. Outside the paired set,
+positive in aggregate. Each disagreement is a change the baseline did not respond to at all,
+which the attributed graph either detected or answered with a delta other than the predicted
+one. Outside the paired set,
 \MutAttributedOnly{} mutants are scorable only against the attributed graph and
 \MutBaselineOnly{} only against the baseline. A further \MutUnmatchedSites{} constructs are
 mutated in both runs but into different things, because the retargeting operator picks its new
@@ -678,7 +687,7 @@ quota, and mutants excluded as confounded with a coverage gap.}
 
 Table~\ref{tab:mutation} gives the detection rate per operator, and Figure~\ref{fig:mutation} shows the same outcomes summed over the applications. Renaming a route path
 was detected in all \MutRenameScored{} scored mutants of the three applications. Deleting a
-\texttt{routerLink} was detected in all six scored mutants of realworld, and over the corpus
+\texttt{routerLink} was detected in every scored mutant of realworld, and over the corpus
 \MutLinkWitnessOnly{} of these mutants moved the witness set rather than the edge set, because a
 second identical link in the same template still produces the edge. That is the
 behaviour the graph should have, and it is the reason detection is judged on witnesses as
@@ -727,8 +736,8 @@ three operators that can fail are detected in \MutFallibleDetected{} of their
 \texttt{navigate} calls, and \MutGuardDetected{} of \MutGuardScored{} removed guards.
 
 Every guard removal the run can score is detected: \MutGuardDetected{} of
-\MutGuardScored{}, on all three applications, each judged on the edges entering the screens
-its guarded route yields. Guards are what the corrections of
+\MutGuardScored{}, on all three applications, each judged by whether some edge loses a guard
+it carried. Guards are what the corrections of
 Section~\ref{sec:res-round2} were about, although no per-operator figure from the earlier
 instrument survives to put a number on the movement. It is also the operator whose exclusions
 are the most informative, because a guard
@@ -741,8 +750,10 @@ component and no populated children, so it yields no screen at all. Among the gu
 own path is the empty string are detected, the empty-path child of realworld's
 \texttt{editor} route among them, whose entering edge carries \texttt{requireAuth} on this
 instrument as the edge entering \path{/editor/:slug} does. What the operator cannot see is a
-guard whose removal leaves both the edge set and the guard text identical, and on this corpus
-there is no such case left once the unobservable guards are excluded.
+guard whose removal leaves both the edge set and the guard text identical. Two guards that print
+alike are not such a case, since the harness counts them rather than collecting them
+(Section~\ref{sec:corrections}), and on this corpus there is no such case left once the
+unobservable guards are excluded.
 
 The mutation run therefore does not confirm the defect class \emph{guards unreliable in
 both directions} of Section~\ref{sec:res-defects} on this instrument, and it does not
@@ -786,7 +797,10 @@ Two things must be said about the figures before they are read. They are the sam
 the rest of this chapter reports: when the repairs changed what the extractor recovers, the
 whole evaluation was re-run on the repaired commit rather than reported beside the earlier
 one, so Table~\ref{tab:conversion} and everything after it describe the instrument this
-section arrives at. What the earlier instrument measured is quoted here, where the
+section arrives at --- with one exception, which each affected caption names: the must tier
+changed again after the round's tables were generated, in the fourth correction of this
+section, and the figures that depend on it are given beside those tables from the current
+graphs rather than by regenerating tables whose other columns the correction does not move. What the earlier instrument measured is quoted here, where the
 comparison is the point, and the provenance line of each generated table names the commit it
 came from. And where the oracle shared a blind spot with the extractor it too was
 corrected. Those corrections are versioned in the harness manifest, which records
@@ -966,13 +980,15 @@ guard must never be the reason an edge is called deterministic.
 
 The third was invisible until the check itself was corrected. The extractor files the second
 and later constructs that yield an identical edge as further witnesses of it, and the witness
-check opened only the first, so the tier was being judged on about two thirds of the evidence
-it rests on. Judging every cited site found four edges in bitwarden whose later citations
+check opened only the first, so the tier was being judged on part of the evidence it rests on;
+over the current graphs \WitnessMergedShareAll{} of the sites the edges cite are such later
+citations, and \WitnessMergedShareMax{} in the application where the share is largest. Judging
+every cited site found edges in bitwarden whose later citations
 targeted \path{/vault}, an address that application declares no route for: the literal matches
 nothing, the catch-all redirects to the root, the site is correctly held at may --- and then
 merged into a must edge the root already had, and cited as evidence for it. The round answered
-this by giving an edge the weakest modality over every construct that cites it. All four moved
-to the may tier, which is why the witness check passes the tier in this table and did not
+this by giving an edge the weakest modality over every construct that cites it. All of them
+moved to the may tier, which is why the witness check passes the tier in this table and did not
 pass the tier of the round before it. That rule did not survive the next correction, for a
 reason given below.
 
@@ -981,10 +997,11 @@ compares the destination a cited construct names with the destination its edge n
 asks whether the construct runs every time its code does, nor whether the router lets the
 navigation through --- the half of Claim~\ref{claim:must} that Section~\ref{sec:model} assigns to
 the demotion rules. A review of the round's tier read every construct its \MustCtxEdges{} edges
-cite in the source, \MustCtxDistinct{} distinct constructs cited \MustCtxConstructs{} times, and two
+cite in the source, \MustCtxDistinct{} distinct constructs cited \MustCtxConstructs{} times, and
 red-team panels then attacked the corrected rules; the review and the panels were made with the
 assistant the declaration at the front of this thesis describes, and every defect they reported
-was reproduced against the code before it was repaired. Three defects explain the round's tier.
+was reproduced against the code before it was repaired. Three defects explain the round's tier,
+and the panels found a fourth in the repair of the second.
 
 The first is that the demotion rules were incomplete. They demoted a site for a guard on its
 target, a cap from attribution, a catch-all route or a target with holes, and for nothing else.
@@ -1003,9 +1020,20 @@ names was still unread. bitwarden's \texttt{redirectGuard()} does not sit on the
 the root: it sits on a child of that route with an empty path and no component, which Angular
 matches on every navigation to the root, and the guard set of a screen was assembled from the
 routes that render it. A guard on such a child now gates the screen above it, as do
-\texttt{canMatch} and \texttt{canActivateChild}, which were not read at all, and
+\texttt{canMatch}, \texttt{canActivateChild} and \texttt{canLoad}, which were not read at all, and
 \MustFateGuard{} edges, every one of bitwarden's, are guarded; each construct they cite also runs
-under a condition, so either correction alone moves them. The third is a navigation to the address
+under a condition, so either correction alone moves them. The repair first gated an edge on every
+guard its destination carries, and a panel showed that this demotes navigations the router lets
+through untouched: Angular does not run a guard again on a route a navigation keeps, so a
+navigation between two children of a guarded parent runs the children's guards and not the
+parent's, and gating it on the parent's treats every navigation as an entry from outside the
+application. The extractor now computes, for each source and destination, the guards the router
+runs: \texttt{canDeactivate} on the levels the navigation leaves, \texttt{canMatch} on every level
+it matches, \texttt{canActivate}, \texttt{canLoad} and the resolvers on the levels it enters, and
+\texttt{canActivateChild} on the levels above an entered one, where a level is kept when source and
+destination pass through the same route object, the level has no parameter the navigation could
+change, and it does not ask to run its guards on every navigation. A resolver the navigation awaits
+holds the edge at may, as a guard does, and a guard list the reader cannot name still gates. The third is a navigation to the address
 its source already displays. Angular's default configuration ignores it, and where the address
 differs only in a parameter or the query it runs only on some inputs, so it is not a navigation
 that occurs on every execution. A shell or anchor edge whose destination is one of the screens it
@@ -1036,27 +1064,47 @@ that earn must. The \path{/vault} citations of the third correction are recorded
 rule, which is what they are evidence for. Of the round's \MustCtxEdges{} edges,
 \MustCtxAllConditional{} have every construct they cite under a condition, \MustFateGuard{} of them
 also guarded; taking guard first, then self-loop, then condition, \MustFateGuard{} are guarded,
-\MustFateSelfLoop{} is a self-loop, \MustFateCondition{} are conditional, and \MustFateKept{} keep a
-construct that earns must: the Global Feed link, and the logo links of realworld's header and
-footer, which the shell renders on every screen. With these corrections the deterministic tier of
-the corpus is \CensusMust{} edges with attribution and \CensusBaseMust{} without it, all in realworld
-and all into its root, resting on \CensusMustSites{} constructs with attribution and
-\CensusBaseMustSites{} without; \CensusZeroMustApps{} of the \CensusApps{} applications have no must
-edge. The witness check finds \MustWitnessViolations{} failures in the \MustWitnessEdges{}.
+\MustFateSelfLoop{} is a self-loop, \MustFateCondition{} are conditional, \MustFateKept{} keep a
+construct that earns must --- the Global Feed link, and the logo links of realworld's header and
+footer, which the shell renders on every screen --- and \MustFateJoined{} is joined: its own
+construct earns may, and the edge stays must because the shell's logo links, now drawn per
+screen, yield it too.
+
+With these corrections the deterministic tier of the corpus is \CensusMust{} edges with
+attribution and \CensusBaseMust{} without it, resting on \CensusMustSites{} constructs with
+attribution and \CensusBaseMustSites{} without, in \CensusMustApps{} applications;
+\CensusZeroMustApps{} of the \CensusApps{} have no must edge. It is not the round's tier made
+smaller. Reading guards as the router runs them lets through the navigations between screens that
+share a guarded parent, and that is where most of the tier now is. realworld holds
+\CensusMustRealworld{} edges, its logo links and its Global Feed link into the root. k8sdash holds
+\CensusMustKdash{}: the logo link and the Create button of the toolbar its chrome component renders
+above every screen, drawn from every screen under that component except the root, which a
+redirect answers, the destination itself, and the screens whose \texttt{canDeactivate} guard runs
+when the user leaves them. mifos holds \CensusMustMifos{}, cancel and back buttons that return from
+a form to the section that opened it and the menu of its system page, and bitwarden
+\CensusMustBitwarden{}, a cancel button. Each of the \CensusMustSites{} constructs was read against
+the source --- the condition around it, the address Angular resolves it to, which for a relative
+link is the route's consumed segments less one per \texttt{../}, and the guards and resolvers its
+navigation runs --- and the readings are kept in \path{results-must/tier-reading.json}; the census
+refuses to report a must construct that file does not list. Unlike the review of the round's
+tier, this reading was made once and with the extractor's decisions in view, so it is a check
+that each decision can be defended from the source, not an independent second reading. The
+witness check finds \MustWitnessViolations{} failures in the \MustWitnessEdges{}.
 
 What the tier measures needs saying plainly, because it is easy to read as a property of the
 applications. The extractor never evaluates a guard, so a guard that can refuse a navigation
 demotes it whatever the guard would decide. Extracting the corpus again with every guard taken to
 let the navigation through, and every other rule kept, gives \GuardOnlyMust{} must edges in
-\GuardOnlyApps{} applications instead of \CensusMust{}: \GuardOnlyGuarded{} of them carry a guard on
-the destination, and for \GuardOnlySourceBehind{} of those the source screen is already behind
-every guard of the destination, read off the route configuration, so a user on that screen has
-passed them. The small tier therefore says what the extractor can prove without evaluating
-guards, and the round's edges arrived where that matters most: at the application root and the
-sign-in screen, the screens a navigation reaches once something has happened --- a request has
-returned, a sign-in has been checked. A reader who expected static extraction to recover a large
-deterministic graph should take this as the answer to the expectation: the transitions are
-there, mostly behind guards a static reader does not evaluate.
+\GuardOnlyApps{} applications instead of \CensusMust{}, resting on \GuardOnlySites{} constructs:
+\GuardOnlyGuarded{} of them run a guard, and for \GuardOnlySourceBehind{} of those every guard the
+navigation runs is one the source screen's own routes carry by name, read off the route
+configuration, so a user on that screen has passed it once already. \GuardOnlyGuardedGhostfolio{}
+of the guarded edges are ghostfolio's, which names its authentication guard on each route rather
+than once on a parent, so that a navigation between two signed-in screens runs it again. The small
+tier therefore says what the extractor can prove without evaluating guards, and where an
+application puts its guard decides how much of its navigation that is. A reader who expected
+static extraction to recover a large deterministic graph should take this as part of the answer:
+some of the transitions are there, behind guards a static reader does not evaluate.
 
 The cost is paid in the measure RQ1 is defined on. Must conversion over the corpus read
 \RoundTwoMustConv{} on the round's instrument, already below what it read before any of the

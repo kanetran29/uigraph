@@ -6,7 +6,7 @@ application can be recovered from its source code without running the applicatio
 explain where that recovery fails, and to repair the largest class of failure with an
 analysis that attributes a navigation site to the screens from which it can fire. The
 selection criteria for the corpus were fixed before any results were obtained. The
-protocol was corrected eight times while it was being developed, including the
+protocol was corrected ten times while it was being developed, including the
 definition of the conversion ratio and of its denominator
 (Section~\ref{sec:corrections}), and the result tables of Chapter~\ref{ch:results}
 come from the harness run on pinned commits.
@@ -20,8 +20,8 @@ addresses with no node at all, \ProbeMissedGhostfolio{} of them in the one appli
 paths a custom matcher computes, so only \ProbeExactApps{} of the six are complete against
 what the browser answers. Below that level almost no navigation construct becomes a
 deterministic transition once the demotion rules Claim~\ref{claim:must} rests on are applied:
-\CensusBaseMustSites{} construct without attribution and \CensusMustSites{} with it, all in
-realworld, and none on the other \CensusZeroMustApps{} applications. That measures what the
+\CensusBaseMustSites{} constructs without attribution and \CensusMustSites{} with it, in
+\CensusMustApps{} of the six applications and none on the other \CensusZeroMustApps{}. That measures what the
 extractor can prove without evaluating guards, which is little, rather than what the applications
 do: with every guard taken to let the navigation through, the tier would hold \GuardOnlyMust{}
 edges. Node extraction is not the
@@ -40,13 +40,14 @@ application in the corpus, roughly doubling the graph, from \CensusBaseEdges{} e
 \CensusEdges{} on the current graphs; and that almost all of those conversions are navigation the graph reports as
 possible rather than certain. After the fourth correction of Section~\ref{sec:res-round2} the
 attributed run holds \CensusMust{} must edges against \CensusBaseMust{} without attribution, the
-difference being realworld's header and footer logo links drawn from every screen the shell
-renders, and the witness check finds \MustWitnessViolations{} failures among them; the tier is too
-small for that to be a statement about precision in general. Whether the computed screen sets are correct is established on one application and
-not on the corpus: read site by site on \GTApp{}, the analysis names \GTFullRecall{} of the
-(site, screen) pairs the application really has at \GTFullPrecision{} precision, every wrong
-pair coming from a single over-approximating rule, and no method here can put that question
-to the other five.
+difference being the links of two application shells --- realworld's header and footer logos and
+k8sdash's toolbar --- drawn from every screen the shell renders, and the witness check finds
+\MustWitnessViolations{} failures among them; the tier is too small for that to be a statement
+about precision in general. Whether the computed screen sets are correct is established on one
+application and not on the corpus: read site by site on \GTApp{}, the analysis names
+\GTFullRecall{} of the (site, screen) pairs the application really has at \GTFullPrecision{}
+precision, after the one over-approximating rule that reading exposed had been replaced by the
+call graph, and no method here can put that question to the other five.
 
 The answer to RQ4 is that the graph is sensitive to authored source changes in the
 constructs it represents, with \MutDetected{} of \MutScored{} scored mutants detected
@@ -55,8 +56,8 @@ both the number of changes that can be scored at all and the rate at which a sco
 is detected. A route path rename is detected in every scored mutant, which is close to
 guaranteed by construction and tests node extraction rather than behaviour; of the
 \MutFallibleScored{} mutants from the three operators that can fail, \MutFallibleDetected{}
-are detected. Removing a guard is detected in every scored mutant, which is the operator the
-corrections of Chapter~\ref{ch:results} were about. \MutNoResponse{} mutant produces no
+are detected. Removing a guard is detected in \MutGuardDetected{} of \MutGuardScored{} scored
+mutants, which is the operator the corrections of Chapter~\ref{ch:results} were about. \MutNoResponse{} mutant produces no
 change in the graph at all, a retargeted call in a component the analysis could not place
 under any screen, so the graph holds no edge for it to move. The \MutExcludedGuard{} mutants
 that cannot be scored are guards the graph can record on no edge: for \MutExcludedUnreached{}
@@ -72,9 +73,9 @@ stated and mechanically tested, though not proved, over the declared route set a
 an explicit list of the constructs the analysis does not decide (Claim~\ref{claim:must},
 Section~\ref{sec:approximations}). It recovers \AttrRecoveredShare{} of the loss class it
 addresses, almost all of it onto the uncertain tier, and where the real (site, screen) pairs
-could be read by hand it raises recall from \GTRootedRecall{} to \GTFullRecall{} while taking
-precision from \GTRootedPrecision{} to \GTFullPrecision{} --- a trade rather than an
-improvement, and established on \GTApp{} alone. Nothing in its formulation depends on a particular
+could be read by hand it raises recall from \GTRootedRecall{} to \GTFullRecall{} at
+\GTFullPrecision{} precision --- after a repair that same reading prompted, and established on
+\GTApp{} alone. Nothing in its formulation depends on a particular
 extractor; what an extractor supplies is the screens and the navigation sites it ranges
 over, and Chapter~\ref{ch:results} shows that what the mechanism can recover is bounded
 by how completely those are read. The measurement is the part that stands on its own. Static navigation extraction is measured on a corpus of six Angular
@@ -121,31 +122,36 @@ address the running application answers --- the runtime method finds \ProbeMisse
 addresses with no node, \ProbeMissedGhostfolio{} of them in one application --- and
 \RoundTwoAccounted{} of the navigation sites that remain in scope are
 accounted for --- recovered as a transition, recorded as a destination only the run time
-knows, or anchored at a source the analysis cannot place. Three quarters of those sites are
-mifos's, so the corpus figure is close to one application's. The sites that remain each name
+knows, or anchored at a source the analysis cannot place. \RoundTwoMifosShare{} of those sites
+are mifos's, so the corpus figure is close to one application's. The sites that remain each name
 a reason, enforced by a check that fails when any does not, and some name a route the
 application never declares. What the repairs cost is reported with them, and it is not
 what one would hope for. The earlier instrument published a deterministic tier of
 \EarlierMustEdges{} edges with \EarlierMustViolations{} witness-check failures in it, and four corrections
-took it to \CensusMust{} edges, each correction hidden by the one before: a guard carried by a
+took it to \CensusMust{} edges, the first three each hidden by the one before: a guard carried by a
 route a wrapper function returns, a \texttt{canActivate} element that is a call rather than a
 name, an edge that several constructs cite taking the modality of the first of them, and gaps
 in the demotion rules --- a navigation that runs under a condition, guards the reader did not
 read (one on an empty-path child, \texttt{canMatch}, \texttt{canActivateChild}), and a
 navigation to the screen already displayed. The first three left \RoundTwoMustEdges{} edges with
 \RoundTwoMustViolations{} witness-check failures, which is not the same as satisfying the claim:
-the fourth kept a construct that earns must in only \MustFateKept{} of them
-(Section~\ref{sec:res-round2}). The others did not become correct targets; they stopped claiming
+the fourth, found by reading every construct the tier cited rather than by the check, kept a
+construct that earns must in only \MustFateKept{} of them (Section~\ref{sec:res-round2}). The others did not become correct targets; they stopped claiming
 to be deterministic, which they had no evidence for. The fourth correction also replaced the
 third's merge rule, which had demoted an edge whenever any construct citing it was uncertain: an
 edge is now as certain as the most certain construct that yields it, and that is why realworld's
-Global Feed and logo links remain. On \CensusZeroMustApps{} of the six applications there is no
-must edge, so RQ1's stricter measure reads zero there, and Claim~\ref{claim:must} ranges over
-\MustWitnessEdges{} edges in the corpus, with \MustWitnessViolations{} witness-check failures.
+Global Feed and logo links remain. Its guard rule, first written to gate an edge on every guard its
+destination carries, was corrected again to the guards the router runs on that navigation, and
+that is where most of the current tier comes from: cancel buttons, menus and toolbar links that
+move between screens under one guarded parent, in k8sdash, mifos and bitwarden. On
+\CensusZeroMustApps{} of the six applications there is no must edge, so RQ1's stricter measure reads
+zero there, and Claim~\ref{claim:must} ranges over \MustWitnessEdges{} edges in the corpus, with
+\MustWitnessViolations{} witness-check failures, every construct behind them read against the
+source.
 What the small tier measures is what the extractor can prove without evaluating a guard: taking
 every guard to let the navigation through gives \GuardOnlyMust{} must edges, and for
-\GuardOnlySourceBehind{} of the \GuardOnlyGuarded{} that carry a guard the source is already behind
-it. The exchange is the end of a sequence in which each claim that did not survive its own test
+\GuardOnlySourceBehind{} of the \GuardOnlyGuarded{} that run a guard, every guard the navigation
+runs is one the source screen's own routes carry, so the user has passed it once already. The exchange is the end of a sequence in which each claim that did not survive its own test
 was withdrawn.
 
 What they leave open is also specific. The dispatch relation is specified and not implemented,
@@ -161,12 +167,12 @@ against the computed scope, and shows the \ScopeUnpredicted{} it misses to be si
 attribution declined to place rather than sites it placed wrongly. What that cannot do is
 convict a scope of being too large: only \ScopeExact{} of the predictions at those screens
 name a destination exactly, so the direction is close to untestable by this method. Reading
-one application's sites by hand does convict it, and the verdict is specific and unflattering:
-against the \GTPairs{} pairs that application really has, the analysis asserts \GTFullExcess{}
-more that it does not have, all of them at \GTFullExcessSites{} of its \GTSites{} sites and all
-from the rule that joins a navigating service over its injectors; the level that stands for
-earlier work's reach recovers \GTRootedRecall{} of the real pairs while asserting nothing
-wrong at all, against \GTFullRecall{} for this analysis. It judged
+one application's sites by hand did convict one, and the verdict was specific: the rule that
+joined a navigating service over its injectors asserted \GTClassExcess{} pairs that application
+does not have, all at one site. The call graph that replaced the rule asserts none there, but it
+was written with that site in view, so the reading that convicted the old rule cannot acquit the
+new one; the level that stands for earlier work's reach recovers \GTRootedRecall{} of the real
+pairs while asserting nothing wrong at all, against \GTFullRecall{} for this analysis. It judged
 \ScopeJudged{} screens of \ScopeScreens{}, because without a backend the
 rest redirect to a sign-in page. Driving the applications into a signed-in state is the work
 that would decide the other half. Whether a graph of screens

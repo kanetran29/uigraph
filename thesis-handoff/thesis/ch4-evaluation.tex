@@ -159,7 +159,11 @@ root renders is attributed to every screen; since Oshima and Kishi assemble thei
 information from the root component as well as from the components beneath it
 (Section~\ref{sec:dynamic-spa}), that level, and not containment alone, is the one that
 measures how far the prior work reaches on this corpus. \emph{Outlet} adds router-outlet
-descent, and \emph{full} adds the injected-service join. The
+descent, and \emph{full} adds the member-level call graph, which places a service's navigation on
+the screens of the members that call it. A sixth level, \emph{class}, is run beside the nested
+ones rather than among them: it replaces the call graph with the rule the call graph superseded,
+which joins a navigating service over every component that injects its class, so that what the
+call graph changes can be measured. The nested
 levels are nested because the implementation withholds results rather than computing them
 differently, and the harness checks that on the real graphs rather than assuming it: a
 (site, screen) pair present at one level and absent at the next is a defect in the switch, and
@@ -475,7 +479,19 @@ instrument the run scored 68 of the 70 sampled mutants and detected 59, with 5 p
 change in the graph at all; Chapter~\ref{ch:results} reports what the corrected rule gives on
 the same seed and the same sample.
 
-Five of the eight corrections were found the same way, by a figure that looked too good
+The ninth and tenth corrections are to how a removed guard is judged, and both followed a change
+in the extractor rather than a figure. Once the extractor gated an edge only on the guards its
+navigation runs (Section~\ref{sec:res-round2}), a guard on a route that source and destination
+share no longer appeared on the edge between them, and the rule that a removal must change every
+edge entering the guarded screens scored such a removal as wrong although the graph had done what
+the model requires. A removal is now detected when some edge loses a guard it carried, and excluded
+when no baseline edge carries the guard at all, since then no edge enters the guarded route from
+outside it. The tenth is that the comparison counts guards instead of collecting them: the
+extractor writes a guard factory without its arguments, so two guards on one navigation can print
+alike, and removing one of three identical texts left a list that a comparison of sets read as
+unchanged. Neither changes which mutants are sampled; both change how a sampled one is scored.
+
+Five of the ten corrections were found the same way, by a figure that looked too good
 or too bad to believe: the conversion ratio that rose to 75.7\%, the precision that fell
 to 44.7\%, the coverage that reached 100\%, the construct count that tripled, and the
 detection rate that moved by more than twenty points. Each turned out to be a property of

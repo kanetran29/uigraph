@@ -5,42 +5,48 @@
       "must": 9,
       "unguarded": 9,
       "guarded": 0,
-      "sourceBehind": 0
+      "sourceBehind": 0,
+      "sites": 3
     },
     {
       "slug": "alfresco",
       "must": 1,
       "unguarded": 0,
       "guarded": 1,
-      "sourceBehind": 1
+      "sourceBehind": 1,
+      "sites": 1
     },
     {
       "slug": "ghostfolio",
       "must": 29,
       "unguarded": 0,
       "guarded": 29,
-      "sourceBehind": 29
+      "sourceBehind": 29,
+      "sites": 32
     },
     {
       "slug": "k8sdash",
-      "must": 130,
-      "unguarded": 0,
-      "guarded": 130,
-      "sourceBehind": 130
+      "must": 128,
+      "unguarded": 125,
+      "guarded": 3,
+      "sourceBehind": 0,
+      "sites": 2
     },
     {
       "slug": "bitwarden",
       "must": 9,
-      "unguarded": 0,
-      "guarded": 9,
-      "sourceBehind": 8
+      "unguarded": 1,
+      "guarded": 8,
+      "sourceBehind": 7,
+      "sites": 9
     },
     {
       "slug": "mifos",
-      "must": 191,
-      "unguarded": 0,
-      "guarded": 191,
-      "sourceBehind": 191
+      "must": 15,
+      "unguarded": 15,
+      "guarded": 0,
+      "sourceBehind": 0,
+      "sites": 19
     }
   ]
 }

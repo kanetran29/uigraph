@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "1.5.0",
-  "extractor": "% Extractor fd7b289, packages/ clean when generated.",
+  "harnessVersion": "1.7.0",
+  "extractor": "% Extractor 0027017, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "attribution": false,
@@ -239,7 +239,7 @@
       "file": "src/app/app.routes.ts",
       "line": 53,
       "subject": "path \":slug\"",
-      "predict": "the guard on edges entering /editor/:slug changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -260,9 +260,9 @@
       "file": "src/app/app.routes.ts",
       "line": 31,
       "subject": "path \"register\"",
-      "predict": "the guard on edges entering /login, /register changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 3,
+      "touched": 2,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -273,7 +273,6 @@
         "edgesRemoved": [],
         "guardChanged": [
           "/login -> /register: guard fn#ddb96242->null, modality may->may",
-          "/register -> /register: guard fn#ddb96242->null, modality may->may",
           "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may"
         ]
       }
@@ -283,9 +282,9 @@
       "file": "src/app/app.routes.ts",
       "line": 26,
       "subject": "path \"login\"",
-      "predict": "the guard on edges entering /login, /register changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 5,
+      "touched": 4,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -297,8 +296,8 @@
         "guardChanged": [
           "/ -> /login: guard fn#ddb96242->null, modality may->may",
           "/tag/:tag -> /login: guard fn#ddb96242->null, modality may->may",
-          "/login -> /login: guard fn#ddb96242->null, modality may->may",
-          "/register -> /login: guard fn#ddb96242->null, modality may->may"
+          "/register -> /login: guard fn#ddb96242->null, modality may->may",
+          "/article/:slug -> /login: guard fn#ddb96242->null, modality may->may"
         ]
       }
     },
@@ -307,7 +306,7 @@
       "file": "src/app/app.routes.ts",
       "line": 36,
       "subject": "path \"settings\"",
-      "predict": "the guard on edges entering /settings changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -328,7 +327,7 @@
       "file": "src/app/app.routes.ts",
       "line": 48,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering /editor/:slug changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "MISSED",
       "touched": 0,
       "delta": {

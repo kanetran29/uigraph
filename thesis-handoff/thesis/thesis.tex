@@ -109,27 +109,32 @@ the granularity of class members with provider bindings read application-wide, c
 fixpoint with a worklist, and stands in for the dispatch relation with an approximation it never
 reports as deterministic.
 It states a soundness property for the deterministic tier and tests it mechanically rather
-than proving it. Four corrections, each hidden by the one before, take that tier from the
-\EarlierMustEdges{} edges an earlier instrument published to \CensusMust{}: of the
-\RoundTwoMustEdges{} edges the first three left, the last keeps a construct that earns must in
-\MustFateKept{} and finds the others running under a condition --- after a request returns, in a
-branch, under a template condition ---, behind a guard the reader had missed, or pointing at the
-screen already displayed. Two independent readings of every construct behind those edges agree
-with the extractor at \MustReviewAgreeMin{} of the \MustCtxDistinct{}, and taking every guard to
-let the navigation through would give \GuardOnlyMust{} must edges instead, so the small tier
-measures what the extractor can prove without evaluating guards. The implemented part is evaluated on the same
+than proving it. Four corrections take that tier from the \EarlierMustEdges{} edges an earlier
+instrument published to \CensusMust{}. The first three were each hidden by the one before; the
+fourth was found by reading the tier construct by construct, and of the \RoundTwoMustEdges{} edges
+the first three left it keeps a construct that earns must in \MustFateKept{} and finds the others
+running under a condition --- after a request returns, in a branch, under a template condition
+---, behind a guard the reader had missed, or pointing at the screen already displayed. Two blind
+readings of every construct behind those edges agree with the extractor at \MustReviewAgreeMin{}
+of the \MustCtxDistinct{}. Reading guards as the router runs them then lets through navigations
+between screens that share a guarded parent, which is where most of the current tier lies, in
+\CensusMustApps{} of the six applications; taking every guard to let the navigation through would
+give \GuardOnlyMust{} must edges instead, so the tier measures what the extractor can prove
+without evaluating guards. The implemented part is evaluated on the same
 corpus. What it adds beyond the mechanism earlier
 work already has is small and measured: router-outlet descent leaves the number of placed sites
-unchanged on \AblationOutletSameSitesApps{} of the six applications, the injected-service join
+unchanged on \AblationOutletSameSitesApps{} of the six applications, the member-level call graph
 places \AblationFullAddedSites{} more, \AblationFullAddedShare{} of the corpus total, and the
 width they buy is checked in both directions on one application only. With attribution, \AttrRecoveredShare{} of the
-constructs that loss class holds are recovered, on every application in the corpus, all of it
-navigation the graph reports as possible rather than certain. On the one application small enough for the
+constructs that loss class holds are recovered, on every application in the corpus, almost all
+of it navigation the graph reports as possible rather than certain. On the one application small enough for the
 screens each navigation site fires from to be read off the sources by hand, the computed sets
 are right about \GTFullRecall{} of those attributions. Most of that is not new: attributing
 what the root component renders to every screen, which earlier work already does, reaches
-\GTRootedRecall{} of them and attributes nothing the application does not, while every wrong
-attribution any level makes comes from a rule this thesis adds. On the other five applications
+\GTRootedRecall{} of them and attributes nothing the application does not. The analysis adds the
+rest without a wrong attribution, but only after replacing a rule of its own that the same reading
+had caught attributing one service's navigation to every screen, so that application cannot test
+the replacement independently. On the other five applications
 the sets are checked in one direction only, which is the work's sharpest limitation.
 
 Mutation testing on three of the applications shows that the graph detects \MutDetected{}
@@ -153,11 +158,11 @@ as a source the analysis cannot place; the sites excluded from that scope, and t
 ground for each exclusion, are counted in Chapter~5. Every site that remains names its reason.
 Some of those reasons are dead links the graph finds without running the application, though
 the count of them is a candidate list: a route the tools fail to read is indistinguishable
-from one the application never declares. Little of the deterministic tier survives this
-scrutiny: of the round's must edges, which led to the application root and the sign-in screen,
-all but \MustFateKept{} run only once something has happened, behind a guard, or to the screen
-already displayed, and the transitions a static reader cannot certify are, for the most part,
-behind guards it does not evaluate.
+from one the application never declares. Little of the round's deterministic tier survived this
+scrutiny: of its must edges, which led to the application root and the sign-in screen, all but
+\MustFateKept{} run only once something has happened, behind a guard, or to the screen already
+displayed. The tier that remains is mostly cancel buttons, menus and toolbar links that move
+between screens under one guarded parent, which the router does not guard again.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page

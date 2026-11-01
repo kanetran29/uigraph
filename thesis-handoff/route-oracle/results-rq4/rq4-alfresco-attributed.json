@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "1.5.0",
-  "extractor": "% Extractor fd7b289, packages/ clean when generated.",
+  "harnessVersion": "1.7.0",
+  "extractor": "% Extractor 0027017, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco/projects/aca-content",
   "attribution": true,
@@ -158,7 +158,7 @@
       "file": "src/lib/aca-content.routes.ts",
       "line": 115,
       "subject": "path \"profile\"",
-      "predict": "the guard on edges entering /profile changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -170,7 +170,7 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "o_UserInfoComponent -> /profile: guard ExtensionsDataLoaderGuard,AuthGuard,ViewProfileRuleGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may"
+          "o_UserInfoComponent -> /profile: guard ExtensionsDataLoaderGuard,ViewProfileRuleGuard,AuthGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may"
         ]
       }
     },
@@ -179,7 +179,7 @@
       "file": "folder-rules/src/folder-rules.module.ts",
       "line": 37,
       "subject": "path \"rules\"",
-      "predict": "the guard on edges entering /nodes/:nodeId/rules changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -191,8 +191,8 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may",
-          "/nodes/:nodeId/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may"
+          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard,AuthGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may",
+          "/nodes/:nodeId/rules -> /nodes/:nodeId/rules: guard PluginEnabledGuard,AuthGuard->AuthGuard, modality may->may"
         ]
       }
     },
@@ -201,7 +201,7 @@
       "file": "src/lib/aca-content.routes.ts",
       "line": 348,
       "subject": "path \"shared\"",
-      "predict": "the guard text or modality of at least one edge changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "EXCLUDED",
       "reason": "no baseline edge enters any screen the guarded route yields (/shared)"
     },
@@ -210,9 +210,9 @@
       "file": "src/lib/aca-content.routes.ts",
       "line": 111,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering /profile, /personal-files, /personal-files/:folderId changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 37,
+      "touched": 4,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -222,10 +222,10 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->AuthGuard,PluginEnabledGuard, modality may->may",
-          "/profile -> /personal-files: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
-          "/personal-files -> /personal-files: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
-          "/personal-files/:folderId -> /personal-files/:folderId: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may"
+          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard,AuthGuard->PluginEnabledGuard,AuthGuard, modality may->may",
+          "/preview/s/:id -> *: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
+          "/rules -> *: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
+          "o_UserInfoComponent -> /profile: guard ExtensionsDataLoaderGuard,ViewProfileRuleGuard,AuthGuard->ViewProfileRuleGuard,AuthGuard, modality may->may"
         ]
       }
     },
