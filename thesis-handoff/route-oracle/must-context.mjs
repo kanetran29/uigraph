@@ -192,14 +192,22 @@ if (tex) {
       `\\newcommand{\\MustReviewAgreeMax}{${Math.max(...Object.values(agreement).map((a) => a.agree))}}`,
     ] : []),
     `\\newcommand{\\MustWhyTemplate}{${reasonCount['control-flow block'] + reasonCount['structural directive'] + reasonCount['ng-template'] + reasonCount['ICU case']}}`,
-    '\\newcommand{\\TabMustLedger}{%',
-    '\\begin{tabular}{@{}l>{\\raggedright\\arraybackslash}p{0.31\\textwidth}>{\\raggedright\\arraybackslash}p{0.33\\textwidth}>{\\raggedright\\arraybackslash}p{0.14\\textwidth}@{}}',
+    // A longtable, since the ledger is taller than a page; the caption is the chapter's, passed in.
+    '\\newcommand{\\TabMustLedger}[1]{{\\scriptsize',
+    '\\begin{longtable}{@{}l>{\\raggedright\\arraybackslash}p{0.31\\textwidth}>{\\raggedright\\arraybackslash}p{0.33\\textwidth}>{\\raggedright\\arraybackslash}p{0.14\\textwidth}@{}}',
+    '\\caption{#1}\\label{tab:mustledger}\\\\',
     '\\toprule',
     'Application & Edge & Construct & Condition read \\\\',
     '\\midrule',
-    ...constructs.map((c) => `${esc(c.app)} & ${c.edge.split(' -> ').map((x) => `\\path{${x}}`).join(' $\\to$ ')} & \\path{${c.site}} & ${c.condition ?? 'none'} \\\\`),
+    '\\endfirsthead',
+    '\\toprule',
+    'Application & Edge & Construct & Condition read \\\\',
+    '\\midrule',
+    '\\endhead',
     '\\bottomrule',
-    '\\end{tabular}}']
+    '\\endlastfoot',
+    ...constructs.map((c) => `${esc(c.app)} & ${c.edge.split(' -> ').map((x) => `\\path{${x}}`).join(' $\\to$ ')} & \\path{${c.site}} & ${c.condition ?? 'none'} \\\\`),
+    '\\end{longtable}}}']
   writeFileSync(tex, lines.join('\n') + '\n')
 }
 console.log(`must tier of the earlier instrument: ${total} edges citing ${constructs.length} constructs; fates ${JSON.stringify(fateCount)}; ${conditional} constructs conditional ${JSON.stringify(reasonCount)}`)
