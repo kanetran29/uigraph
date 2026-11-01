@@ -30,12 +30,13 @@ export function conversion(r) {
 }
 
 /**
- * The sites of a witness-check result on which the check reached a verdict about the target. Not
- * counted are the over-approximated sites, for which no target agreement is claimed, and the
- * must sites whose target the check could not read, which are neither a pass nor a failure. The
- * unread ones are out of the denominator of a clean share for the same reason the
- * over-approximated ones are: counting them there makes the share treat as a failure what the
- * must column of the same table treats as no failure.
+ * The sites of a witness-check result on which the check compared the construct's target with the
+ * edge's destination and reached a verdict. Not counted are the over-approximated sites, for which
+ * no target agreement is claimed, and every site whose target was not read (TARGET_UNREAD): a must,
+ * may or unknown site whose construct names no destination the check can read, or whose edge
+ * reaches a node that is no address. Such a site is neither a pass nor a failure, so it is out of
+ * both the numerator and the denominator of a clean share; the witness check records it as a
+ * finding and not as clean for that reason, which is what makes `b.clean` a count of compared sites.
  */
 export function judgedSites(b) {
   return b.sites - (b.tally?.OVER_APPROX ?? 0) - (b.tally?.TARGET_UNREAD ?? 0)

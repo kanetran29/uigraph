@@ -5,11 +5,15 @@
 // of the adapter and the suite's result; mutation-sweep.mjs writes it. A rule is covered when the
 // deletion fails a test, either at once or, in a file that records the sweep as it was first run,
 // after the test added for it. This refuses if any rule is still uncovered, if a mutant has no
-// recorded outcome, or if the file is the result of a partial run.
+// recorded outcome, if the file is the result of a partial run, and if the file is stale: if it
+// was recorded on a packages/adapter-angular/src other than HEAD's, whose rules and tests it then
+// says nothing about, or on a mutant list other than the one sweep-mutants.mjs holds.
 //
 // Usage: node sweep-to-latex.mjs [--in <file>] --tex <file>
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { adapterSrcTree } from './provenance.mjs'
+import { MUTANTS } from './sweep-mutants.mjs'
 
 /** The value following `name` on the command line, if the flag is given. */
 const flag = (name) => {
@@ -19,6 +23,22 @@ const flag = (name) => {
 const tex = flag('--tex')
 const r = JSON.parse(readFileSync(flag('--in') ?? path.join(import.meta.dirname, 'results-must', 'mutation-sweep.json'), 'utf8'))
 if (r.partial) throw new Error('the sweep file is the result of a partial run (--only), so some rules were never deleted')
+// A file from before the sweep recorded the tree is placed by its commit, which is what it names.
+const recorded = r.srcTree ?? adapterSrcTree(r.commit)
+if (!recorded) {
+  throw new Error(`the sweep records no tree of packages/adapter-angular/src and its commit ${r.commit} is not one this repository holds, so it cannot be placed: run mutation-sweep.mjs again at HEAD`)
+}
+const current = adapterSrcTree('HEAD')
+if (recorded !== current) {
+  throw new Error(`the sweep was recorded on packages/adapter-angular/src ${recorded} and HEAD holds ${current}: its rules or their tests have changed since, so run mutation-sweep.mjs again at HEAD`)
+}
+const listed = new Set(MUTANTS.map((m) => m.id))
+const swept = new Set(r.mutants.map((m) => m.id))
+const unswept = [...listed].filter((id) => !swept.has(id))
+const unlisted = [...swept].filter((id) => !listed.has(id))
+if (unswept.length || unlisted.length) {
+  throw new Error(`the sweep was run on another mutant list than sweep-mutants.mjs holds: not swept ${unswept.join(', ') || 'none'}; swept but no longer listed ${unlisted.join(', ') || 'none'}`)
+}
 const covered = (m) => m.survived === false || /^killed/.test(m.afterAddedTests ?? '')
 const open = [...r.mutants.filter((m) => !covered(m)), ...(r.extra ?? []).filter((m) => !/^killed/.test(m.result))]
 if (open.length) throw new Error(`rules no test covers: ${open.map((m) => m.id).join(', ')}`)

@@ -50,10 +50,15 @@ export const MUST_UNATTRIBUTED = 'must-unattributed'
  * whose recorded targets differ from the destinations of the must edges that cite it, are always
  * wrong. With `exact` (the default, for the graph the reading was made on) a listed construct
  * that earns no must edge is wrong too, so the file cannot go stale, and so is one listed as
- * must only without attribution that earns must here; without it the graph is one the reading
- * was not made on, such as the same corpus mapped without attribution, where the must edges are
- * fewer or different, so a `must` construct may be absent and its destinations a subset, and a
- * construct listed as must only without attribution is covered.
+ * must only without attribution that earns must here. Without it the graph is one the reading
+ * was not made on, the same corpus mapped without attribution, where the must edges are fewer or
+ * different: a `must` construct may be absent there and its destinations a subset, and it may
+ * reach, besides its `targets`, the addresses its row lists as `unattributedTargets`, which exist
+ * only there (listed in `targets` they would fail the exact check, and unlisted this one). Two
+ * kinds of row can be checked on that graph alone and so are checked exactly on it: a row listed
+ * as must only without attribution has to earn a must edge there and reach exactly its `targets`,
+ * and every `unattributedTargets` entry has to be reached by a must edge citing its construct, so
+ * that neither can outlive the construct or the address it records.
  */
 export function readingProblems(reading, slug, graph, { exact = true } = {}) {
   const rows = reading.sites.filter((r) => r.app === slug)
@@ -71,14 +76,20 @@ export function readingProblems(reading, slug, graph, { exact = true } = {}) {
     if (!r) continue
     const said = new Set(r.targets)
     const reach = [...targets].sort()
-    const missing = reach.filter((t) => !said.has(t))
+    const unattributedOnly = new Set(exact ? [] : r.unattributedTargets ?? [])
+    const missing = reach.filter((t) => !said.has(t) && !unattributedOnly.has(t))
     const extra = [...said].filter((t) => !targets.has(t))
-    if (missing.length || (exact && extra.length)) {
-      problems.push(`${k}: the reading says it reaches [${[...said].sort().join(', ')}] but the must edges citing it reach [${reach.join(', ')}]`)
+    const stale = [...unattributedOnly].filter((t) => !targets.has(t))
+    if (missing.length || ((exact || r.verdict === MUST_UNATTRIBUTED) && extra.length) || stale.length) {
+      problems.push(`${k}: the reading says it reaches [${[...said, ...unattributedOnly].sort().join(', ')}] but the must edges citing it reach [${reach.join(', ')}]`)
     }
   }
   if (exact) {
     for (const k of [...listed.keys()].filter((x) => !found.has(x))) problems.push(`${k} is listed but earns no must edge in this graph`)
+  } else {
+    for (const r of listed.values()) {
+      if (!found.has(r.site) && (r.verdict === MUST_UNATTRIBUTED || r.unattributedTargets?.length)) problems.push(`${r.site} is listed as earning must without attribution but earns no must edge in this graph`)
+    }
   }
   return problems
 }
