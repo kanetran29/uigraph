@@ -51,7 +51,11 @@ const RULES = {
       const plain = l.match(/routerLink\s*=\s*"([^"]*)"/)
       if (plain) return plain[1]
       const arr = l.match(/\[routerLink\]\s*=\s*"\[([^\]]*)\]"/)
-      if (!arr) return null
+      if (!arr) {
+        // A bound string literal, `[routerLink]="'/x'"`, names the address as plainly as `routerLink="/x"`.
+        const lit = l.match(/\[routerLink\]\s*=\s*(?:"\s*'([^']*)'\s*"|'\s*"([^"]*)"\s*')/)
+        return lit ? (lit[1] ?? lit[2]) : null
+      }
       const parts = [...arr[1].matchAll(/'([^']*)'|"([^"]*)"/g)].map((m) => m[1] ?? m[2])
       const dyn = arr[1].split(',').length - parts.length
       const p = parts.join('/').replace(/\/+/g, '/')
@@ -263,6 +267,9 @@ for (const { i, e, w, merged } of sites) {
     findings.push({ ...base, verdict: 'OFF_BY_N', detail: `construct is ${offBy > 0 ? '+' : ''}${offBy} lines from the witness` })
   } else if (agrees === false) {
     findings.push({ ...base, verdict: 'TARGET_MISMATCH', detail: `construct at the witness targets ${found}, edge claims ${toRoute}` })
+  } else if (agrees === null && e.modality === 'must' && witnessModality === 'must') {
+    // Not a pass: the construct names no destination this check can read, so the edge's was never compared with it.
+    findings.push({ ...base, verdict: 'TARGET_UNREAD', detail: `construct at the witness names no destination this check can read, so ${toRoute} was not compared with it` })
   } else {
     ok++
   }
@@ -295,12 +302,15 @@ edges.forEach((e, i) => {
   const ws = [e.witness, ...(e.mergedWitnesses || [])].filter(Boolean)
   if (ws.some((w) => w.modality !== undefined) && !ws.some((w) => w.modality === 'must')) findings.push({ verdict: 'NO_MUST_WITNESS', witnessModality: 'must', edgeIndex: i, edge: `${nodes.get(e.from)?.route || e.from} -> ${nodes.get(e.to)?.route || e.to}`, detail: 'a must edge cites no construct that earns must' })
 })
-const mustBad = findings.filter((f) => f.verdict !== 'OVER_APPROX' && mustIndexes.has(f.edgeIndex) && f.witnessModality === 'must')
+const mustBad = findings.filter((f) => f.verdict !== 'OVER_APPROX' && f.verdict !== 'TARGET_UNREAD' && mustIndexes.has(f.edgeIndex) && f.witnessModality === 'must')
 // Counted per edge: one edge can fail at several of the locations it cites.
 const mustBadEdges = new Set(mustBad.map((f) => f.edgeIndex)).size
-console.log(`MUST-TIER: ${mustEdges.length - mustBadEdges}/${mustEdges.length} clean` + (mustBad.length ? `  <-- ${mustBadEdges} EDGE(S) FAIL` : '  (every must edge names what its constructs name)'))
+// An unread target is neither a failure nor a pass, so the must edges that cite one are counted apart.
+const mustUnread = new Set(findings.filter((f) => f.verdict === 'TARGET_UNREAD' && mustIndexes.has(f.edgeIndex)).map((f) => f.edgeIndex)).size
+console.log(`MUST-TIER: ${mustEdges.length - mustBadEdges}/${mustEdges.length} clean` + (mustBad.length ? `  <-- ${mustBadEdges} EDGE(S) FAIL` : '  (no construct whose destination could be read names another)') +
+  (mustUnread ? `; ${mustUnread} edge(s) cite a must construct whose destination could not be read, which is neither a pass nor a failure` : ''))
 console.log(`witness outside the application directory: ${outsideApp} edge(s), ${outsideAppMust} of them must` + (decl ? '' : '  (pass --routes <C.json> to also test destinations)'))
-const order = ['NODE_NOT_DECLARED', 'NO_WITNESS', 'FILE_MISSING', 'LINE_OUT_OF_RANGE', 'NO_CONSTRUCT', 'WRONG_CONSTRUCT', 'TARGET_MISMATCH', 'OFF_BY_N', 'UNKNOWN_RULE', 'OVER_APPROX']
+const order = ['NODE_NOT_DECLARED', 'NO_WITNESS', 'FILE_MISSING', 'LINE_OUT_OF_RANGE', 'NO_CONSTRUCT', 'WRONG_CONSTRUCT', 'TARGET_MISMATCH', 'TARGET_UNREAD', 'OFF_BY_N', 'UNKNOWN_RULE', 'OVER_APPROX']
 for (const v of order) {
   const rows = findings.filter((f) => f.verdict === v)
   if (!rows.length) continue
@@ -312,4 +322,4 @@ for (const v of order) {
 // `mustBad` is written out as well as counted: the soundness violations are the findings the
 // thesis describes one by one, and a description read off `findings` would include the may
 // and unknown tiers the lemma says nothing about.
-if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: edges.length, sites: checked, sitesCited, mergedSites: sites.filter((x) => x.merged).length, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBadEdges, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))
+if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify({ appDir, dbPath, edges: edges.length, sites: checked, sitesCited, mergedSites: sites.filter((x) => x.merged).length, clean: ok, mustEdges: mustEdges.length, mustClean: mustEdges.length - mustBadEdges, mustUnread, outsideApp, outsideAppMust, destinationsChecked: Boolean(decl), tally, mustBad, findings }, null, 2))

@@ -25,7 +25,8 @@ done
 
 echo "== census"
 node graph-census.mjs --corpus "$W/corpus" --out results-census --tex "$TEX/generated-census.tex"
-node graph-census.mjs --corpus "$W/noattr" --prefix CensusBase --out results-census --tex "$TEX/generated-census-base.tex"
+# The recorded reading of the must tier was made on the attributed graphs, so the unattributed ones are checked against it as a subset.
+node graph-census.mjs --corpus "$W/noattr" --prefix CensusBase --reading-subset --out results-census --tex "$TEX/generated-census-base.tex"
 
 echo "== anchored edges against their expansion"
 pnpm -s exec tsx expansion-check.mts $(for p in $APPS; do a=${p%%:*}; s=${p#*:}; echo "$W/corpus/$a/$s/uigraph.db"; done) --tex > "$W/expansion.tex"
@@ -37,7 +38,7 @@ for p in $APPS; do a=${p%%:*}; s=${p#*:}
   # The independent parser's route set, against which each must edge's destination is tested.
   node index.mjs "$W/corpus/$a/$s" "$W/corpus/$a/$s/uigraph.db" --json "$W/C-$a.json" > /dev/null 2>&1
   node witness-check.mjs "$W/corpus/$a/$s" "$W/corpus/$a/$s/uigraph.db" --routes "$W/C-$a.json" --json "$W/wc-$a.json" > /dev/null 2>&1
-  node -e "const d=require('$W/wc-$a.json');const o={};for(const k of ['edges','sitesCited','mergedSites','mustEdges','mustClean','destinationsChecked','mustBad','tally'])o[k]=d[k];require('fs').writeFileSync('results-must/witness/$a.json',JSON.stringify(o,null,1)+'\n')"
+  node -e "const d=require('$W/wc-$a.json');const o={};for(const k of ['edges','sitesCited','mergedSites','mustEdges','mustClean','mustUnread','destinationsChecked','mustBad','tally'])o[k]=d[k];require('fs').writeFileSync('results-must/witness/$a.json',JSON.stringify(o,null,1)+'\n')"
 done
 node must-witness.mjs --dir results-must/witness --tex "$TEX/generated-must-witness.tex"
 
@@ -51,7 +52,7 @@ cp "$W/guard-only/guard-only.json" results-must/guard-only.json
 echo "== call graph resolution"
 pnpm -s -C "$REPO" exec tsx "$HERE/callgraph-stats.mjs" --corpus "$W/corpus" --out "$HERE/results-callgraph" --tex "$TEX/generated-callgraph.tex"
 
-echo "== ablation and ground truth"
+echo "== ablation, width table and ground truth"
 pnpm -s exec tsx scope-ablation.mjs --corpus "$W/corpus" --out "$W/ablation" --keep realworld --tex "$TEX/generated-ablation.tex"
 pnpm -s exec tsx score-ground-truth.mjs --truth ground-truth/realworld.json \
   $(for l in owned nesting rooted outlet full class; do echo --db $l="$W/ablation/realworld.$l.uigraph.db"; done) --tex "$TEX/generated-groundtruth.tex"
