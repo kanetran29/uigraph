@@ -11,7 +11,7 @@
 //
 // Usage: node earlier-instrument.mjs [--commit <sha>] [--tex <file>]
 import { execFileSync } from 'node:child_process'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 const argv = process.argv.slice(2)
@@ -55,9 +55,29 @@ if (fromAttribution.must + fromNode.must !== allGained.must) {
     `${fromAttribution.must} + ${fromNode.must} != ${allGained.must}`)
 }
 
-// How much larger that tier was than the one the thesis publishes, read from the current
-// generated file so the factor cannot drift away from the figure beside it.
-const nowEdges = Number(macro(readFileSync(path.join(repo, THESIS, 'generated-round2.tex'), 'utf8'), 'RoundTwoMustEdges'))
+// The round's tier as the round's own tables printed it: the must tier the first three
+// corrections left, which the chapters describe before the fourth. Those tables were regenerated
+// at the final commit, where the same macros now describe the final tier, so the round's figures
+// are read out of git at the last commit whose tables came from the round's runs. The runs
+// themselves were lost (results-round2/README.md), so these are the figures as printed, which is
+// what the chapters cite them as.
+const roundCommit = flag('--round-commit', '7d109c7')
+const atRound = (file) =>
+  execFileSync('git', ['show', `${roundCommit}:${THESIS}/${file}`], { cwd: repo, encoding: 'utf8' })
+const roundTables = atRound('generated-round2.tex')
+const roundMacro = (name) => {
+  const m = roundTables.match(new RegExp(`\\\\newcommand\\{\\\\${name}\\}\\{([^}]*)\\}`))
+  if (!m) throw new Error(`${name} is not defined at ${roundCommit}`)
+  return m[1]
+}
+const [roundClean, roundEdges] = roundMacro('RoundTwoMustClean').split('/').map(Number)
+const roundViolations = Number(roundMacro('RoundTwoMustViolations'))
+if (roundClean + roundViolations !== roundEdges) throw new Error(`${roundClean} clean and ${roundViolations} violations do not account for ${roundEdges} edges at ${roundCommit}`)
+const roundByApp = Object.fromEntries(['Realworld', 'Bitwarden', 'Mifos'].map((a) => [a, Number(roundMacro(`RoundTwoMustEdges${a}`))]))
+if (Object.values(roundByApp).reduce((a, b) => a + b, 0) !== roundEdges) throw new Error(`the round's per-application must edges do not sum to ${roundEdges} at ${roundCommit}`)
+const roundExtractor = atRound('generated-before-after.tex').match(/% Extractor ([0-9a-f]{7,8})/)?.[1]
+if (!roundExtractor) throw new Error(`the before-and-after table at ${roundCommit} names no extractor`)
+
 const share = (n, d) => {
   const v = (n / d) * 100
   if (!Number.isFinite(v) || v < 0 || v > 100) throw new Error(`${v} is not a share`)
@@ -69,11 +89,17 @@ out += `\\newcommand{\\EarlierCommit}{${commit}}\n`
 out += `\\newcommand{\\EarlierMustEdges}{${edges}}\n`
 out += `\\newcommand{\\EarlierMustClean}{${clean}}\n`
 out += `\\newcommand{\\EarlierMustViolations}{${violations}}\n`
-out += `\\newcommand{\\EarlierMustFactor}{${(edges / nowEdges).toFixed(0)}}\n`
 out += `\\newcommand{\\EarlierGainMust}{${allGained.must}}\n`
 out += `\\newcommand{\\EarlierGainFromNode}{${fromNode.must}}\n`
 out += `\\newcommand{\\EarlierGainFromAttribution}{${fromAttribution.must}}\n`
 out += `\\newcommand{\\EarlierGainFromNodeShare}{${share(fromNode.must, allGained.must)}}\n`
+out += `% The round's tier as its tables printed it at ${roundCommit}, from runs of extractor ${roundExtractor}.\n`
+out += `\\newcommand{\\RoundCommit}{${roundCommit}}\n`
+out += `\\newcommand{\\RoundExtractor}{${roundExtractor}}\n`
+out += `\\newcommand{\\RoundMustEdges}{${roundEdges}}\n`
+out += `\\newcommand{\\RoundMustClean}{${roundClean}/${roundEdges}}\n`
+out += `\\newcommand{\\RoundMustViolations}{${roundViolations}}\n`
+for (const [a, n] of Object.entries(roundByApp)) out += `\\newcommand{\\RoundMustEdges${a}}{${n}}\n`
 
 const tex = flag('--tex')
 if (tex) { writeFileSync(tex, out); console.error(`wrote ${tex}`) } else { process.stdout.write(out) }
