@@ -19,12 +19,12 @@
 // transfer function. Services (scope = join of callers) are not handled in this
 // version and are reported as a soundiness note.
 
-import { SyntaxKind } from 'ts-morph'
+import { Node, SyntaxKind } from 'ts-morph'
 import type { SourceFile } from 'ts-morph'
 import type { SoundinessNote } from '@ui-graph/core'
 import { inlineTemplate } from './templates'
 import type { RouteInfo } from './routes'
-import { isInsideDir } from './resolve'
+import { declarationsOf, isInsideDir } from './resolve'
 import { templateCondition } from './conditions'
 import { memberScopes, type MemberKey } from './callgraph'
 
@@ -57,8 +57,9 @@ export interface ComponentInfo {
  *            every descendant screen, because they render inside its outlet.
  *   full     plus the call graph: a navigation in a class that is not a component is
  *            attributed to the screens of the members that call the member holding it,
- *            transitively, through declared types and provider bindings, and where no caller is
- *            found, to every component that injects the class.
+ *            transitively, through the declarations the types and provider bindings name, and
+ *            where no caller is found, or a caller the graph cannot see also reaches it, to
+ *            every component that injects the class as well.
  *
  * `class` sits beside the chain rather than in it: it is `full` with the per-class join of an
  * earlier version in place of the call graph, kept so the two can be compared.
@@ -75,9 +76,11 @@ export interface ScopeResult {
   shell: Set<string>
   /**
    * Shell components found only indirectly: an unreferenced, unrouted component whose
-   * subtree holds the outlet. They are most likely mounted by a route the extractor
-   * cannot see (e.g. a helper that wraps routes), so their real scope may be smaller
-   * than top. Their edges are capped at may.
+   * subtree holds the outlet, or an outlet holder that a route names although the route walk
+   * dropped that route (it keeps one route per address). They are most likely mounted by a
+   * route the extractor cannot see (e.g. a helper that wraps routes), so their real scope may
+   * be smaller than top. Their edges are capped at may, and the call graph does not seed an
+   * outlet holder of the second kind, nor what it nests, at top.
    */
   indirectShell: Set<string>
   /** Extra screens on which a route component's own template is rendered (its descendants). */
@@ -116,6 +119,8 @@ export interface ScopeResult {
   memberScreens: Map<MemberKey, Set<string>>
   /** Members the call graph reaches from the shell. */
   memberTop: Set<MemberKey>
+  /** Members a caller the call graph cannot see may also reach: their scope is at least `memberScreens` and may be wider. */
+  memberUnseen: Set<MemberKey>
   /** How the call graph resolved the calls it followed. */
   memberResolved: { direct: number; bound: number; subclass: number; unresolved: number }
 }
@@ -265,6 +270,49 @@ function reach(graph: Map<string, Set<string>>, start: string): Set<string> {
 }
 
 /**
+ * Whether a file registers an NgRx effect, which the store keeps for the life of the application.
+ * Read from the syntax tree, not the text: a `createEffect(` inside a comment is not an effect.
+ */
+export function isEffectFile(sf: SourceFile): boolean {
+  return sf.getFullText().includes('createEffect') && sf.getDescendantsOfKind(SyntaxKind.CallExpression).some((c) => /(^|\.)createEffect$/.test(c.getExpression().getText()))
+}
+
+/**
+ * The files the application loads: those under `projectDir` and every file they import, re-export
+ * from or `import()` in turn. A workspace alias brings a sibling application's directory into the
+ * project, but a file of it that nothing here imports is never loaded, so what it provides runs nowhere.
+ */
+function loadedFiles(sfs: SourceFile[], projectDir: string): Set<string> {
+  const byPath = new Map(sfs.map((sf) => [sf.getFilePath(), sf]))
+  const seen = new Set(sfs.filter((sf) => isInsideDir(sf.getFilePath(), projectDir)).map((sf) => sf.getFilePath()))
+  const stack = [...seen]
+  while (stack.length) {
+    for (const lit of byPath.get(stack.pop()!)?.getImportStringLiterals() ?? []) {
+      for (const d of lit.getSymbol()?.getDeclarations() ?? []) {
+        if (!Node.isSourceFile(d) || seen.has(d.getFilePath()) || !byPath.has(d.getFilePath())) continue
+        seen.add(d.getFilePath())
+        stack.push(d.getFilePath())
+      }
+    }
+  }
+  return seen
+}
+
+/**
+ * Component files some route object names in its `component` property, whether or not the route
+ * walk kept that route: the walk keeps one route per address, so a second `{ path: '', component }`
+ * is dropped and its component looks unrouted.
+ */
+function routeNamedComponents(sfs: SourceFile[]): Set<string> {
+  const out = new Set<string>()
+  for (const sf of sfs) for (const p of sf.getDescendantsOfKind(SyntaxKind.PropertyAssignment)) {
+    if (p.getNameNode().getText() !== 'component') continue
+    for (const d of declarationsOf(p.getInitializer())) out.add(d.getSourceFile().getFilePath())
+  }
+  return out
+}
+
+/**
  * Compute scopes for every non-route component and descendant screens for route components.
  * `sfs` is every file the project holds, including a shared library a tsconfig alias brings in:
  * a library component the application renders is attributed to the screens that render it. When
@@ -272,6 +320,9 @@ function reach(graph: Map<string, Set<string>>, start: string): Set<string> {
  * indirect shell) -- an alias can also reach a sibling application whose root component holds a
  * `<router-outlet>`, and taking that for this application's shell attributed its navigations to
  * every screen at confidence 1. Being reached from this application's own shell is unaffected.
+ * An outlet holder that a route names but the route walk dropped is mounted by a route nobody can
+ * see, so it is an indirect shell and not a firm one. The call graph reads the files the
+ * application loads, which `projectDir` fixes when it is given.
  */
 export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectDir?: string, layers: ScopeLayers = 'full'): ScopeResult {
   const notes: SoundinessNote[] = []
@@ -337,12 +388,22 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // inside any routed component; everything they reach (except routed components) is top.
   const shell = new Set<string>()
   const firmShell = new Set<string>()
+  // An outlet holder that a route names but the route walk dropped is mounted by a route nobody
+  // can see: rendered on that route's screens, not on every one, so it is no shell.
+  const lostShell = new Set<string>()
+  let named: Set<string> | undefined
   for (const c of components.values()) {
     if (!mayBeShell(c.file) || routeComponentScreens.has(c.file) || screensOf.has(c.file)) continue
     if (!c.template || !/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/.test(c.template)) continue
+    named ??= routeNamedComponents(appFiles)
+    if (named.has(c.file)) {
+      for (const x of reach(nesting, c.file)) if (!routeComponentScreens.has(x)) lostShell.add(x)
+      continue
+    }
     for (const x of reach(nesting, c.file)) if (!routeComponentScreens.has(x)) shell.add(x)
     for (const x of reach(firmNesting, c.file)) if (!routeComponentScreens.has(x)) firmShell.add(x)
   }
+  for (const x of shell) lostShell.delete(x)
   // Indirect shells: components nobody references and no route renders, whose subtree
   // contains a component with the primary outlet.
   const referenced = new Set<string>()
@@ -355,6 +416,7 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
     if (![...r].some((x) => x !== c.file && hasOutlet(x))) continue
     for (const x of r) if (!routeComponentScreens.has(x) && !shell.has(x)) indirectShell.add(x)
   }
+  for (const x of lostShell) indirectShell.add(x)
   // A shell is top, which absorbs any screen set (join).
   for (const x of [...shell, ...indirectShell]) screensOf.delete(x)
 
@@ -390,13 +452,19 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   for (const f of serviceShell) serviceScreens.delete(f)
 
   // The call graph: every member of a component runs on the component's screens, and a member
-  // runs wherever a member that calls it does.
+  // runs wherever a member that calls it does. A component whose mounting route the walk lost is
+  // not seeded at top: it renders on that route's screens, and top would put what it calls on all
+  // of them. An effect is registered for the life of the application, so it is seeded at top.
   const seeds = new Map<string, Set<string> | null>()
   for (const c of components.values()) {
+    if (lostShell.has(c.file)) continue
     const s = shell.has(c.file) || indirectShell.has(c.file) ? null : (routeComponentScreens.get(c.file) ?? screensOf.get(c.file))
     if (s !== undefined) seeds.set(c.file, s)
   }
-  const members = layers === 'full' ? memberScopes(appFiles, seeds) : { screens: new Map<MemberKey, Set<string>>(), top: new Set<MemberKey>(), resolved: { direct: 0, bound: 0, subclass: 0, unresolved: 0 } }
+  for (const sf of appFiles) if (mayBeShell(sf.getFilePath()) && !components.has(sf.getFilePath()) && isEffectFile(sf)) seeds.set(sf.getFilePath(), null)
+  const members = layers === 'full'
+    ? memberScopes(appFiles, seeds, projectDir ? loadedFiles(appFiles, projectDir) : undefined)
+    : { screens: new Map<MemberKey, Set<string>>(), top: new Set<MemberKey>(), unseen: new Set<MemberKey>(), resolved: { direct: 0, bound: 0, subclass: 0, unresolved: 0 } }
 
   // The ablation withholds mechanisms rather than disabling them, so every level is a subset
   // of `full` by construction and no level can differ from it for any other reason.
@@ -413,7 +481,7 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
 
 
   return { screensOf, shell, indirectShell, descendantsOfRouteComponent, components, serviceScreens, serviceShell, notes, subtreeOf,
-    standIns: layers === 'full' || layers === 'class', firmScreensOf, firmShell, memberScreens: members.screens, memberTop: members.top, memberResolved: members.resolved }
+    standIns: layers === 'full' || layers === 'class', firmScreensOf, firmShell, memberScreens: members.screens, memberTop: members.top, memberUnseen: members.unseen, memberResolved: members.resolved }
 }
 
 /** Class names a component declares a dependency on: constructor parameter types and `inject(X)`. */
