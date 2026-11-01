@@ -16,13 +16,17 @@
 //              partial run (--only) will not overwrite, so it needs --out
 //   --only     run these mutants only; the result is marked partial and sweep-to-latex refuses it
 //   --dry-run  check that every mutant applies once, run nothing, write nothing
-// The sweep describes a commit, so it refuses to run with uncommitted changes under packages/.
+// A flag that needs a value and is given none is refused: `--only` read as absent ran the whole
+// sweep and overwrote the recorded one.
+// The sweep describes a commit, so it refuses to run with uncommitted changes under packages/, and
+// it records the tree of packages/adapter-angular/src it ran on (srcTree), which sweep-to-latex.mjs
+// compares with HEAD's so that a sweep of other rules is not published.
 // A full sweep runs the suite once per mutant, about twelve seconds each.
 import { execFileSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { MUTANTS, applyMutant, mutationProblems } from './sweep-mutants.mjs'
+import { MUTANTS, applyMutant, judge, mutationProblems, sweepRecord, unappliedIds } from './sweep-mutants.mjs'
 
 const REPO = path.resolve(import.meta.dirname, '..', '..')
 const PKG = 'packages/adapter-angular'
@@ -30,10 +34,16 @@ const SRC = path.join(REPO, PKG, 'src')
 const DEFAULT_OUT = path.join(import.meta.dirname, 'results-must', 'mutation-sweep.json')
 
 const argv = process.argv.slice(2)
-/** The value following `name` on the command line, if the flag is given. */
+/**
+ * The value following `name` on the command line; undefined if the flag is not given, and an
+ * error if it is given with no value after it, which would otherwise read as the flag being absent.
+ */
 const flag = (name) => {
   const i = argv.indexOf(name)
-  return i > -1 ? argv[i + 1] : undefined
+  if (i === -1) return undefined
+  const value = argv[i + 1]
+  if (value === undefined || value.startsWith('--')) throw new Error(`${name} needs a value`)
+  return value
 }
 const only = flag('--only')?.split(',')
 const out = flag('--out') ?? (only ? undefined : DEFAULT_OUT)
@@ -42,37 +52,23 @@ const dryRun = argv.includes('--dry-run')
 /** Runs git in the repository and returns what it printed. */
 const git = (...args) => execFileSync('git', ['-C', REPO, ...args], { encoding: 'utf8' })
 
-/**
- * What the suite said about one run: the `Tests` summary line, whether it passed whole, and the
- * name of the first test that failed. A run with no summary line (the suite did not start, or was
- * killed) is not a pass, but it is not a kill by a test either, and is reported as such.
- */
-function judge(output, baselineTests) {
-  const lines = output.replace(/\x1b\[[0-9;]*m/g, '').split('\n').map((l) => l.trim())
-  const summary = lines.find((l) => /^Tests\s/.test(l))
-  const firstFail = lines.find((l) => /^FAIL\s/.test(l))
-  if (!summary) return { result: 'no Tests line: the suite did not run', survived: false, killedBy: 'the suite did not run' }
-  const survived = !/failed/.test(summary) && summary.includes(`(${baselineTests})`)
-  return { result: summary, survived, killedBy: survived ? null : (firstFail ?? 'a test failed').replace(/^FAIL\s+/, '') }
-}
-
 /** Runs the adapter's suite in `cwd` and returns everything it printed. */
 function suite(cwd) {
   const r = spawnSync('pnpm', ['-s', 'exec', 'vitest', 'run'], { cwd, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 })
   return r.error?.code === 'ETIMEDOUT' ? 'timed out' : `${r.stdout}\n${r.stderr}`
 }
 
+const unknown = (only ?? []).filter((id) => !MUTANTS.some((m) => m.id === id))
+if (unknown.length) throw new Error(`no mutant with the id ${unknown.join(', ')}`)
 const chosen = only ? MUTANTS.filter((m) => only.includes(m.id)) : MUTANTS
-if (only && chosen.length !== only.length) {
-  throw new Error(`no mutant with the id ${only.filter((id) => !MUTANTS.some((m) => m.id === id)).join(', ')}`)
-}
 if (!out && !dryRun) throw new Error('a partial run does not overwrite the recorded sweep: give --out')
 
 // The whole list is checked, not only the chosen mutants, so that a stale find string is found
 // by the first run after the adapter changed and not by the one that reaches it.
 const problems = mutationProblems(MUTANTS, (f) => fs.readFileSync(path.join(SRC, f), 'utf8'))
 if (problems.length) {
-  console.error(`${problems.length} mutant(s) cannot be applied:\n  ${problems.join('\n  ')}`)
+  const stale = unappliedIds(MUTANTS, (f) => fs.readFileSync(path.join(SRC, f), 'utf8'))
+  console.error(`${stale.length} mutant(s) no longer apply to the adapter, ids: ${stale.join(', ')}\n  ${problems.join('\n  ')}`)
   process.exit(2)
 }
 console.log(`${MUTANTS.length} mutants, each applies exactly once; ${chosen.length} to run`)
@@ -129,11 +125,8 @@ try {
   if (git('status', '--porcelain', '-uall', '--', 'packages').trim()) throw new Error('packages/ changed while the sweep ran')
 
   const survivors = mutants.filter((m) => m.survived)
-  const note = `Each demotion rule the thesis lists deleted in turn from a copy of packages/adapter-angular at ${commit}, ` +
-    `the full adapter suite run against it by mutation-sweep.mjs; a mutant survives when the suite still passes. ` +
-    `${survivors.length} of ${mutants.length} survived.`
   if (out) {
-    fs.writeFileSync(out, JSON.stringify({ note, commit, baseline: base.result, ...(only ? { partial: true } : {}), mutants }, null, 1) + '\n')
+    fs.writeFileSync(out, JSON.stringify(sweepRecord({ commit, baseline: base.result, partial: Boolean(only), mutants }), null, 1) + '\n')
     console.log(`wrote ${out}`)
   }
   if (survivors.length) {
