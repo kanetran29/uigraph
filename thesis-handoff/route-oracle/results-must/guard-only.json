@@ -34,11 +34,11 @@
     },
     {
       "slug": "bitwarden",
-      "must": 9,
+      "must": 12,
       "unguarded": 1,
-      "guarded": 8,
-      "sourceBehind": 7,
-      "sites": 9
+      "guarded": 11,
+      "sourceBehind": 10,
+      "sites": 12
     },
     {
       "slug": "mifos",

@@ -1,6 +1,6 @@
 {
- "edges": 56,
- "sitesCited": 80,
+ "edges": 55,
+ "sitesCited": 79,
  "mergedSites": 24,
  "mustEdges": 0,
  "mustClean": 0,
@@ -8,6 +8,7 @@
  "destinationsChecked": true,
  "mustBad": [],
  "tally": {
+  "TARGET_UNREAD": 16,
   "OVER_APPROX": 40,
   "NO_CONSTRUCT": 13
  }

@@ -7,7 +7,7 @@ prose figures: 70 sampled (70 baseline), 5 failures, guard misses 0 in 0 apps (0
 [realworld] WRONG CHANGE_NAV_TARGET /article => /login at src/app/features/article/pages/editor/editor.component.ts:89
 [alfresco] detected 15/15 (100.0%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=0 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
 [alfresco] operators with no candidates: DELETE_ROUTERLINK
-[bitwarden] detected 24/27 (88.9%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=0 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
+[bitwarden] detected 24/27 (88.9%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=1 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
 [bitwarden] operators with no candidates: none
 [bitwarden] MISSED CHANGE_NAV_TARGET /organizations => /confirm-key-connector-domain at src/app/billing/organizations/change-plan-dialog.component.ts:833
 [bitwarden] WRONG CHANGE_NAV_TARGET /organizations => /reports/breach-report at src/app/billing/members/billing-constraint/billing-constraint.service.ts:155
