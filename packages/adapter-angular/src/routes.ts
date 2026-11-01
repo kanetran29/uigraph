@@ -1052,11 +1052,21 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     const host = !auxHere && ownPath === '' && parentNodeId === nodeId ? out.get(nodeId) : undefined
     if (host) {
       if (!redirectDeclared) {
-        const level = levels[levels.length - 1]!
-        // The first such child renders its component on the host's address, unless a canMatch may refuse it there.
-        if (componentFile && !emptyPathAnswered.has(host) && level.canMatch.length === 0) host.layouts = [...host.layouts, componentFile]
-        host.levels = [...host.levels, level]
-        host.guards = [...host.guards, ...entryGuards([level])]
+        // Include ALL levels from the host's depth onward (wrapper levels included), not just the last one.
+        // When the empty-path child is reached through a wrapper call, the wrapper's route and Shell sit
+        // between the host and the child, and outletHiddenAbove needs the full chain to judge the outlet.
+        const hostDepth = host.levels.length
+        const levelsToAdd = levels.slice(hostDepth)
+        const firstLevel = levelsToAdd[0]
+        const lastLevel = levelsToAdd[levelsToAdd.length - 1]
+        // The first such child renders its component on the host's address, unless a canMatch may refuse it there
+        // or any wrapper level between host and child carries a canMatch.
+        const hasIntermediateCanMatch = levelsToAdd.some((l) => l.canMatch.length > 0)
+        if (componentFile && !emptyPathAnswered.has(host) && !hasIntermediateCanMatch) host.layouts = [...host.layouts, componentFile]
+        host.levels = [...host.levels, ...levelsToAdd]
+        // Regenerate layouts from the updated levels to include wrapper components
+        host.layouts = host.levels.flatMap((l) => (l.layout ? [l.layout] : []))
+        host.guards = [...host.guards, ...entryGuards(levelsToAdd)]
         emptyPathAnswered.add(host)
       } else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = { to: redirectTarget, prefix: false, levels, relative, own: 0 }
     }

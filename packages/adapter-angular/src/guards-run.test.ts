@@ -720,3 +720,82 @@ export const routes: Routes = [
     expect(soundiness.some(n => n.kind === 'incomplete-route-set')).toBe(true)
   })
 })
+
+describe('host branch through wrapper call (round 4)', () => {
+  it('demotes links of an empty-path child reached through wrapper with conditional outlet', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { X } from './x.component'
+import { Shell } from './shell.component'
+import { H } from './h.component'
+import { P } from './p.component'
+export const routes: Routes = [
+  { path: 'x', component: X, children: [{ path: '', component: Shell, children: [{ path: '', component: H }] }] },
+  { path: 'p', component: P }
+]`,
+      '/app/x.component.ts': page('X'),
+      '/app/shell.component.ts': `import { Component } from '@angular/core'
+@Component({ selector: 'x-shell', standalone: true, template: '@if (on) { <router-outlet></router-outlet> }' })
+export class Shell { on = true }`,
+      '/app/h.component.ts': page('H', '<a routerLink="/p">p</a>'),
+      '/app/p.component.ts': page('P'),
+    }), '/app', { attribution: true })
+    // Debug
+    console.log('=== DEBUG ===')
+    console.log('Nodes:', JSON.stringify(graph.nodes.map(n => ({ id: n.id, route: n.route, comp: n.componentPath })), null, 2))
+    console.log('Edges:', graph.edges)
+    
+    // H is empty-path child under X, reached through Shell wrapper (also empty-path).
+    // Shell's outlet is conditional, so H's links on /x should be MAY.
+    const edge = edgeOf(graph, '/x', '/p')
+    expect(edge).toBeDefined()
+    expect(edge?.modality).toBe('may')
+  })
+
+  it('also handles the spread-call wrapper form', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { X } from './x.component'
+import { Shell } from './shell.component'
+import { H } from './h.component'
+import { P } from './p.component'
+function withShell(children: Routes): any { return { path: '', component: Shell, children } }
+export const routes: Routes = [
+  { path: 'x', component: X, children: [...withShell([{ path: '', component: H }])] },
+  { path: 'p', component: P }
+]`,
+      '/app/x.component.ts': page('X'),
+      '/app/shell.component.ts': `import { Component } from '@angular/core'
+@Component({ selector: 'x-shell', standalone: true, template: '@if (on) { <router-outlet></router-outlet> }' })
+export class Shell { on = true }`,
+      '/app/h.component.ts': page('H', '<a routerLink="/p">link</a>'),
+      '/app/p.component.ts': page('P'),
+    }), '/app')
+    const edge = edgeOf(graph, '/x', '/p')
+    expect(edge?.modality).toBe('may')
+  })
+
+  it('demotes when the wrapper route has canMatch even with firm outlet', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/guards.ts': `export const g = () => true`,
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { X } from './x.component'
+import { Shell } from './shell.component'
+import { H } from './h.component'
+import { P } from './p.component'
+import { g } from './guards'
+function withShell(children: Routes): any { return { path: '', component: Shell, children, canMatch: [g] } }
+export const routes: Routes = [
+  { path: 'x', component: X, children: [withShell([{ path: '', component: H }])] },
+  { path: 'p', component: P }
+]`,
+      '/app/x.component.ts': page('X'),
+      '/app/shell.component.ts': page('Shell'),
+      '/app/h.component.ts': page('H', '<a routerLink="/p">link</a>'),
+      '/app/p.component.ts': page('P'),
+    }), '/app')
+    // H should NOT be in host.layouts because wrapper level has canMatch
+    const edge = edgeOf(graph, '/x', '/p')
+    expect(edge?.modality).toBe('may')
+  })
+})
