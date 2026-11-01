@@ -293,9 +293,78 @@ describe('callers the graph reads beyond a component\'s own calls', () => {
     it.each([
       ['a guard class no route names', `import { Nav } from './services'\nexport class AuthGuard { constructor(private nav: Nav) {}\n  canActivate() { this.nav.goA(); return true } }`],
       ['a functional guard no route names', `import { inject } from '@angular/core'\nimport { Nav } from './services'\nexport const canGo = () => { inject(Nav).goA(); return true }`],
-    ])('adds no screen for %s, which runs nowhere the graph can name', (_name, guard) => {
+    ])('falls back to the class join for %s, which the graph cannot tell from an interceptor', (_name, guard) => {
       const { graph } = extractGraph(inMemory(navigating(guard)), '/app', { attribution: true })
-      expect(pairsTo(graph, 'services.ts')).toEqual([`${routeId('/x')}>${routeId('/a')}`, `${routeId('/y')}>${routeId('/b')}`])
+      expect(pairsTo(graph, 'services.ts')).toEqual([`${routeId('/x')}>${routeId('/a')}`, `${routeId('/y')}>${routeId('/a')}`, `${routeId('/y')}>${routeId('/b')}`])
+    })
+
+    /** X calls `goA` from a handler; Y injects Nav and calls nothing on it; `extra` adds the caller the graph cannot see. */
+    const unseen = (extra: Record<string, string>) => ({
+      '/app/app.routes.ts': routes([['x', 'X'], ['y', 'Y'], ['a', 'A']]),
+      '/app/services.ts': `${svcHead}export class Nav { constructor(private router: Router) {}\n  goA() { this.router.navigate(['/a']) } }`,
+      '/app/x.component.ts': page('X', 'Nav', 'goA'),
+      '/app/y.component.ts': comp('Y', `import { Nav } from './services'`, 'private nav: Nav', ''),
+      '/app/a.component.ts': leaf('A'),
+      ...extra,
+    })
+    it.each([
+      ['a functional HTTP interceptor', { '/app/interceptor.ts': `import { inject } from '@angular/core'\nimport { Nav } from './services'\nexport const auth = (req: unknown, next: (r: unknown) => unknown) => { inject(Nav).goA(); return next(req) }`,
+        '/app/app.config.ts': `import { provideHttpClient, withInterceptors } from '@angular/common/http'\nimport { auth } from './interceptor'\nexport const appConfig = { providers: [provideHttpClient(withInterceptors([auth]))] }` }],
+      ['an app initializer', { '/app/app.config.ts': `import { inject, provideAppInitializer } from '@angular/core'\nimport { Nav } from './services'\nexport const appConfig = { providers: [provideAppInitializer(() => inject(Nav).goA())] }` }],
+      ['a class interceptor a provider binds', { '/app/interceptor.ts': `import { Nav } from './services'\nexport class Auth { constructor(private nav: Nav) {}\n  intercept(req: unknown, next: { handle(r: unknown): unknown }) { this.nav.goA(); return next.handle(req) } }`,
+        '/app/app.config.ts': `import { HTTP_INTERCEPTORS } from '@angular/common/http'\nimport { Auth } from './interceptor'\nexport const appConfig = { providers: [{ provide: HTTP_INTERCEPTORS, useClass: Auth, multi: true }] }` }],
+      ['a service only another service injects', { '/app/y.component.ts': comp('Y', `import { Nav } from './services'\nimport { Svc2 } from './svc2'`, 'private nav: Nav, private s: Svc2', ''),
+        '/app/svc2.ts': `import { Boot } from './boot'\nexport class Svc2 { constructor(private boot: Boot) {} }`,
+        '/app/boot.ts': `import { Nav } from './services'\nexport class Boot { constructor(private nav: Nav) { this.nav.goA() } }` }],
+      ['the implementation a provider binds to a token a component injects', { '/app/y.component.ts': comp('Y', `import { Nav } from './services'\nimport { Prompt } from './prompt'`, 'private nav: Nav, private p: Prompt', ''),
+        '/app/prompt.ts': `export abstract class Prompt {}`,
+        '/app/web-prompt.ts': `import { Nav } from './services'\nimport { Prompt } from './prompt'\nexport class WebPrompt extends Prompt { constructor(private nav: Nav) { super(); this.nav.goA() } }`,
+        '/app/providers.ts': `import { Prompt } from './prompt'\nimport { WebPrompt } from './web-prompt'\nexport const p = [{ provide: Prompt, useClass: WebPrompt }]` }],
+    ])('falls back to the class join for %s, which nothing places but which runs', (_name, extra) => {
+      const { graph } = extractGraph(inMemory(unseen(extra)), '/app', { attribution: true })
+      expect(pairsTo(graph, 'services.ts')).toEqual([`${routeId('/x')}>${routeId('/a')}`, `${routeId('/y')}>${routeId('/a')}`])
+    })
+
+    it('falls back to top for a caller nothing places when the shell injects the class', () => {
+      const { graph } = extractGraph(inMemory(unseen({
+        '/app/main.ts': `import { bootstrapApplication } from '@angular/platform-browser'\nimport { App } from './app.component'\nbootstrapApplication(App)`,
+        '/app/app.component.ts': `import { Component } from '@angular/core'\nimport { Nav } from './services'\n@Component({ selector: 'app-root', template: '<router-outlet></router-outlet>' })\nexport class App { constructor(private nav: Nav) {} }`,
+        '/app/app.config.ts': `import { inject, provideAppInitializer } from '@angular/core'\nimport { Nav } from './services'\nexport const appConfig = { providers: [provideAppInitializer(() => inject(Nav).goA())] }`,
+      })), '/app', { attribution: true })
+      expect(pairsTo(graph, 'services.ts')).toEqual(['n_scope_shell>' + routeId('/a')])
+    })
+
+    /** Nav's `goC` is called by `Boot`'s constructor alone, which the graph cannot see; X injects Nav, `boot` decides who injects Boot. */
+    const onlyUnseen = (extra: Record<string, string>) => inMemory({
+      '/app/app.routes.ts': routes([['x', 'X'], ['y', 'Y'], ['c', 'C']]),
+      '/app/services.ts': `${svcHead}export class Nav { constructor(private router: Router) {}\n  goC() { this.router.navigate(['/c']) } }`,
+      '/app/boot.ts': `import { Nav } from './services'\nexport class Boot { constructor(private nav: Nav) { this.nav.goC() } }`,
+      '/app/x.component.ts': comp('X', `import { Nav } from './services'`, 'private nav: Nav', ''),
+      '/app/c.component.ts': leaf('C'),
+      ...extra,
+    })
+
+    it('adds the screens of an unseen caller to a member the graph does not place', () => {
+      const { graph } = extractGraph(onlyUnseen({ '/app/y.component.ts': comp('Y', `import { Boot } from './boot'`, 'private boot: Boot', '') }), '/app', { attribution: true })
+      expect(pairsTo(graph, 'services.ts')).toEqual([`${routeId('/x')}>${routeId('/c')}`, `${routeId('/y')}>${routeId('/c')}`])
+    })
+
+    it('places a member of a class no component injects on the screens of its unseen caller, and reports no loss for it', () => {
+      const { graph, soundiness } = extractGraph(onlyUnseen({
+        '/app/x.component.ts': leaf('X'),
+        '/app/y.component.ts': comp('Y', `import { Boot } from './boot'`, 'private boot: Boot', ''),
+      }), '/app', { attribution: true })
+      expect(pairsTo(graph, 'services.ts')).toEqual([`${routeId('/y')}>${routeId('/c')}`])
+      expect(soundiness.filter((n) => n.kind === 'unattributed-non-component' && n.file === 'services.ts')).toEqual([])
+    })
+
+    it('puts a member the graph does not place at top when the shell injects the class of its unseen caller', () => {
+      const { graph } = extractGraph(onlyUnseen({
+        '/app/y.component.ts': leaf('Y'),
+        '/app/main.ts': `import { bootstrapApplication } from '@angular/platform-browser'\nimport { App } from './app.component'\nbootstrapApplication(App)`,
+        '/app/app.component.ts': `import { Component } from '@angular/core'\nimport { Boot } from './boot'\n@Component({ selector: 'app-root', template: '<router-outlet></router-outlet>' })\nexport class App { constructor(private boot: Boot) {} }`,
+      }), '/app', { attribution: true })
+      expect(pairsTo(graph, 'services.ts')).toEqual(['n_scope_shell>' + routeId('/c')])
     })
 
     it('adds the screens of the routes that name a guard that calls it, where a parameter change runs the guard again', () => {
@@ -377,6 +446,170 @@ export const routes: Routes = [{ path: '', component: Frontend, children: [{ pat
   })
 })
 
+describe('a layout and the outlets above it', () => {
+  afterEach(() => { delete process.env.UIGRAPH_SCOPE_LAYERS })
+  /** A component with template `tpl`. */
+  const cmp = (cls: string, tpl: string) => `import { Component } from '@angular/core'\n@Component({ selector: 'x-${cls.toLowerCase()}', standalone: true, template: '${tpl}' })\nexport class ${cls} {}`
+  /** A route table over components named in `names`, each imported from its own file, with `head` before it. */
+  const table = (names: string[], body: string, head = '') => `import type { Routes } from '@angular/router'\n${names.map((n) => `import { ${n} } from './${n.toLowerCase()}.component'`).join('\n')}\n${head}export const routes: Routes = ${body}`
+  /** A layout that links to /p and holds the outlet. */
+  const layout = cmp('L', '<a routerLink="/p">p</a><router-outlet></router-outlet>')
+  /** Every (screen, destination, modality) a file's sites give, with anchored edges expanded to their screens. */
+  const expanded = (files: Record<string, string>, file: string) => {
+    const { graph } = extractGraph(inMemory(files), '/app', { attribution: true })
+    return expandAnchoredEdges(graph).edges.filter((e) => [e.witness, ...(e.mergedWitnesses ?? [])].some((w) => w?.file === file)).map((e) => `${e.from}>${e.to}:${e.modality}`).sort()
+  }
+
+  it('demotes the links of a layout whose host renders its outlet under a condition', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['X', 'L', 'Y', 'P'], `[{ path: 'x', component: X, children: [{ path: '', component: L, children: [{ path: 'y', component: Y }] }] }, { path: 'p', component: P }]`),
+      '/app/x.component.ts': cmp('X', '@if (on) { <router-outlet></router-outlet> }'), '/app/l.component.ts': layout,
+      '/app/y.component.ts': leaf('Y'), '/app/p.component.ts': leaf('P'),
+    }, 'l.component.ts')).toEqual([`${routeId('/x')}>${routeId('/p')}:may`, `${routeId('/x/y')}>${routeId('/p')}:may`])
+  })
+
+  it('demotes the links of a layout a sibling holds the address for, under a conditional outlet', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['S', 'F', 'L', 'V', 'P'], `[{ path: 's', component: S, children: [{ path: '', component: F }, { path: '', component: L, children: [{ path: 'v', component: V }] }] }, { path: 'p', component: P }]`),
+      '/app/s.component.ts': cmp('S', '@if (on) { <router-outlet></router-outlet> }'), '/app/f.component.ts': leaf('F'), '/app/l.component.ts': layout,
+      '/app/v.component.ts': leaf('V'), '/app/p.component.ts': leaf('P'),
+    }, 'l.component.ts')).toEqual([`${routeId('/s/v')}>${routeId('/p')}:may`])
+  })
+
+  it('demotes a route component\'s links on the screens below it when an outlet above it is conditional', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['X', 'L', 'Y', 'P'], `[{ path: 'x', component: X, children: [{ path: 'z', component: L, children: [{ path: 'y', component: Y }] }] }, { path: 'p', component: P }]`),
+      '/app/x.component.ts': cmp('X', '@if (on) { <router-outlet></router-outlet> }'), '/app/l.component.ts': layout,
+      '/app/y.component.ts': leaf('Y'), '/app/p.component.ts': leaf('P'),
+    }, 'l.component.ts')).toEqual([`${routeId('/x/z')}>${routeId('/p')}:may`, `${routeId('/x/z/y')}>${routeId('/p')}:may`])
+  })
+
+  it('demotes what a route component nests on its screen when an outlet above it is conditional', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['X', 'R', 'P'], `[{ path: 'x', component: X, children: [{ path: 'r', component: R }] }, { path: 'p', component: P }]`),
+      '/app/x.component.ts': cmp('X', '@if (on) { <router-outlet></router-outlet> }'), '/app/r.component.ts': cmp('R', '<x-c></x-c>'),
+      '/app/c.component.ts': cmp('C', '<a routerLink="/p">p</a>'), '/app/p.component.ts': leaf('P'),
+    }, 'c.component.ts')).toEqual([`${routeId('/x/r')}>${routeId('/p')}:may`])
+  })
+
+  it('renders the first empty-path child under a screen on that screen, at must', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['X', 'L', 'Y', 'P'], `[{ path: 'x', component: X, children: [{ path: '', component: L, children: [{ path: 'y', component: Y }] }] }, { path: 'p', component: P }]`),
+      '/app/x.component.ts': cmp('X', '<router-outlet></router-outlet>'), '/app/l.component.ts': layout,
+      '/app/y.component.ts': leaf('Y'), '/app/p.component.ts': leaf('P'),
+    }, 'l.component.ts')).toEqual([`${routeId('/x')}>${routeId('/p')}:must`, `${routeId('/x/y')}>${routeId('/p')}:must`])
+  })
+
+  it('keeps a later empty-path child off the screen an earlier one answers', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['X', 'F', 'L', 'Y', 'P'], `[{ path: 'x', component: X, children: [{ path: '', component: F }, { path: '', component: L, children: [{ path: 'y', component: Y }] }] }, { path: 'p', component: P }]`),
+      '/app/x.component.ts': cmp('X', '<router-outlet></router-outlet>'), '/app/f.component.ts': leaf('F'), '/app/l.component.ts': layout,
+      '/app/y.component.ts': leaf('Y'), '/app/p.component.ts': leaf('P'),
+    }, 'l.component.ts')).toEqual([`${routeId('/x/y')}>${routeId('/p')}:must`])
+  })
+
+  it('keeps an empty-path child a canMatch may refuse off the screen above it', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['X', 'L', 'Y', 'P'], `[{ path: 'x', component: X, children: [{ path: '', component: L, canMatch: [g], children: [{ path: 'y', component: Y }] }] }, { path: 'p', component: P }]`, `import { g } from './g'\n`),
+      '/app/g.ts': `export const g = () => Math.random() > 0.5`,
+      '/app/x.component.ts': cmp('X', '<router-outlet></router-outlet>'), '/app/l.component.ts': layout,
+      '/app/y.component.ts': leaf('Y'), '/app/p.component.ts': leaf('P'),
+    }, 'l.component.ts').filter((e) => e.startsWith(`${routeId('/x')}>`))).toEqual([])
+  })
+
+  it('mints no screen for a layout at an address a componentless route declared first answers', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['L', 'V', 'A', 'P'], `[{ path: '', children: [{ path: 'a', component: A }] }, { path: '', component: L, children: [{ path: 'v', component: V }] }, { path: 'p', component: P }]`),
+      '/app/l.component.ts': layout, '/app/v.component.ts': leaf('V'), '/app/a.component.ts': leaf('A'), '/app/p.component.ts': leaf('P'),
+    }, 'l.component.ts')).toEqual([`${routeId('/v')}>${routeId('/p')}:must`])
+  })
+
+  it('still mints the address for a later route when the componentless one has a canMatch', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': table(['L', 'V', 'A', 'P'], `[{ path: '', canMatch: [g], children: [{ path: 'a', component: A }] }, { path: '', component: L, children: [{ path: 'v', component: V }] }, { path: 'p', component: P }]`, `import { g } from './g'\n`),
+      '/app/g.ts': `export const g = () => Math.random() > 0.5`,
+      '/app/l.component.ts': layout, '/app/v.component.ts': leaf('V'), '/app/a.component.ts': leaf('A'), '/app/p.component.ts': leaf('P'),
+    }), '/app', { attribution: true })
+    expect(graph.nodes.some((n) => n.id === routeId('/'))).toBe(true)
+  })
+
+  it('reads a component imported through a barrel from its own file', () => {
+    expect(expanded({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { L, V, P } from './index'\nexport const routes: Routes = [{ path: 'x', component: L, children: [{ path: 'v', component: V }] }, { path: 'p', component: P }]`,
+      '/app/index.ts': `export * from './l.component'\nexport { V } from './v.component'\nexport * from './p.component'`,
+      '/app/l.component.ts': layout, '/app/v.component.ts': leaf('V'), '/app/p.component.ts': leaf('P'),
+    }, 'l.component.ts')).toEqual([`${routeId('/x')}>${routeId('/p')}:must`, `${routeId('/x/v')}>${routeId('/p')}:must`])
+  })
+
+  it('keeps a screen\'s own links at must when only a layout below it renders its outlet under a condition', () => {
+    expect(expanded({
+      '/app/app.routes.ts': table(['X', 'L', 'Y', 'P'], `[{ path: 'x', component: X, children: [{ path: '', component: L, children: [{ path: 'y', component: Y }] }] }, { path: 'p', component: P }]`),
+      '/app/x.component.ts': cmp('X', '<a routerLink="/p">p</a><router-outlet></router-outlet>'), '/app/l.component.ts': cmp('L', '@if (on) { <router-outlet></router-outlet> }'),
+      '/app/y.component.ts': leaf('Y'), '/app/p.component.ts': leaf('P'),
+    }, 'x.component.ts')).toEqual([`${routeId('/x')}>${routeId('/p')}:must`, `${routeId('/x/y')}>${routeId('/p')}:must`])
+  })
+
+  /** Routes under `X`, whose template is `x`; `Content` holds the outlet in template `content`. */
+  const nestedOutlet = (x: string, content: string) => ({
+    '/app/app.routes.ts': table(['X', 'Y', 'P'], `[{ path: 'x', component: X, children: [{ path: 'y', component: Y }] }, { path: 'p', component: P }]`),
+    '/app/x.component.ts': cmp('X', x), '/app/content.component.ts': cmp('Content', content),
+    '/app/y.component.ts': cmp('Y', '<a routerLink="/p">p</a>'), '/app/p.component.ts': leaf('P'),
+  })
+
+  it('reads the outlet a route component renders through a component it places', () => {
+    expect(expanded(nestedOutlet('<x-content></x-content>', '<router-outlet></router-outlet>'), 'y.component.ts')).toEqual([`${routeId('/x/y')}>${routeId('/p')}:must`])
+  })
+
+  it('demotes what is below when the component holding the outlet is placed under a condition', () => {
+    expect(expanded(nestedOutlet('@if (on) { <x-content></x-content> }', '<router-outlet></router-outlet>'), 'y.component.ts')).toEqual([`${routeId('/x/y')}>${routeId('/p')}:may`])
+  })
+
+  it('demotes what is below when the component it places holds the outlet under a condition', () => {
+    expect(expanded(nestedOutlet('<x-content></x-content>', '@if (on) { <router-outlet></router-outlet> }'), 'y.component.ts')).toEqual([`${routeId('/x/y')}>${routeId('/p')}:may`])
+  })
+
+  it('demotes what is below a route component in which no outlet is found', () => {
+    expect(expanded(nestedOutlet('<p>x</p>', '<router-outlet></router-outlet>'), 'y.component.ts')).toEqual([`${routeId('/x/y')}>${routeId('/p')}:may`])
+  })
+
+  it('demotes what is below a route whose component the reader cannot resolve', () => {
+    expect(expanded({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { X } from './missing'\nimport { Y } from './y.component'\nimport { P } from './p.component'\nexport const routes: Routes = [{ path: 'x', component: X, children: [{ path: 'y', component: Y }] }, { path: 'p', component: P }]`,
+      '/app/y.component.ts': cmp('Y', '<a routerLink="/p">p</a>'), '/app/p.component.ts': leaf('P'),
+    }, 'y.component.ts')).toEqual([`${routeId('/x/y')}>${routeId('/p')}:may`])
+  })
+
+  it('judges the outlet of the component a wrapper\'s route names', () => {
+    const files = (shell: string) => ({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { Shell } from './shell.component'\nimport { Y } from './y.component'\nimport { P } from './p.component'\nfunction withShell(children: Routes) { return { path: '', component: Shell, children } }\nexport const routes: Routes = [withShell([{ path: 'y', component: Y }]), { path: 'p', component: P }]`,
+      '/app/shell.component.ts': cmp('Shell', shell),
+      '/app/y.component.ts': cmp('Y', '<a routerLink="/p">p</a>'), '/app/p.component.ts': leaf('P'),
+    })
+    expect(expanded(files('<router-outlet></router-outlet>'), 'y.component.ts')).toEqual([`${routeId('/y')}>${routeId('/p')}:must`])
+    expect(expanded(files('@if (on) { <router-outlet></router-outlet> }'), 'y.component.ts')).toEqual([`${routeId('/y')}>${routeId('/p')}:may`])
+  })
+
+  it.each([
+    ['a redirect', `{ path: '', redirectTo: 'v', pathMatch: 'full' }`],
+    ['a route on a named outlet', `{ path: '', outlet: 'side', children: [{ path: 'a', component: A }] }`],
+  ])('still mints the address for a later route when %s is declared there first', (_name, first) => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': table(['L', 'V', 'A', 'P'], `[${first}, { path: '', component: L, children: [{ path: 'v', component: V }] }, { path: 'p', component: P }]`),
+      '/app/l.component.ts': layout, '/app/v.component.ts': leaf('V'), '/app/a.component.ts': leaf('A'), '/app/p.component.ts': leaf('P'),
+    }), '/app', { attribution: true })
+    expect(graph.nodes.some((n) => n.id === routeId('/'))).toBe(true)
+  })
+
+  it.each(['owned', 'nesting', 'rooted'])('emits a layout\'s sites from an unplaced origin at the %s level, which withholds the screens it wraps', (level) => {
+    process.env.UIGRAPH_SCOPE_LAYERS = level
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': table(['F', 'L', 'V', 'P'], `[{ path: '', component: F }, { path: '', component: L, children: [{ path: 'v', component: V }] }, { path: 'p', component: P }]`),
+      '/app/f.component.ts': leaf('F'), '/app/l.component.ts': layout, '/app/v.component.ts': leaf('V'), '/app/p.component.ts': leaf('P'),
+    }), '/app', { attribution: true })
+    expect(pairsTo(graph, 'l.component.ts')).toEqual([`o_L>${routeId('/p')}`])
+  })
+})
+
 describe('an outlet holder that a route names but no screen renders', () => {
   /** `Shell` holds the outlet and a nav that reaches a bound service; `routes` is the table, `extra` more files. */
   const shelled = (routes: string, extra: Record<string, string> = {}) => inMemory({
@@ -404,6 +637,16 @@ export const routes: Routes = [withShell([{ path: 'x', component: X }]), { path:
     expect(own.every((e) => e.modality === 'may')).toBe(true)
     expect(soundiness.some((s) => s.kind === 'indirect-shell')).toBe(true)
     expect(pairsTo(graph, 'web-prompt.ts')).toEqual(['n_scope_shell>' + routeId('/login')])
+  })
+
+  it('is taken from a route that spreads its address in, so its links stay at may', () => {
+    const { graph } = extractGraph(shelled(`import type { Routes } from '@angular/router'\nimport { Shell } from './shell.component'\nimport { X } from './x.component'\nimport { Login } from './login.component'\nconst BASE = { path: '' }\nexport const routes: Routes = [{ ...BASE, component: Shell, children: [] }, { path: 'x', component: X }, { path: 'login', component: Login }]`, {
+      '/app/main.ts': `import { bootstrapApplication } from '@angular/platform-browser'\nimport { App } from './app.component'\nbootstrapApplication(App)`,
+      '/app/app.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'app-root', standalone: true, template: '<router-outlet></router-outlet>' })\nexport class App {}`,
+    }), '/app', { attribution: true })
+    const own = graph.edges.filter((e) => e.witness?.file === 'shell.component.ts')
+    expect(own.length).toBeGreaterThan(0)
+    expect(own.every((e) => e.modality === 'may')).toBe(true)
   })
 
   it('is not taken from an object that names the component but declares no address', () => {

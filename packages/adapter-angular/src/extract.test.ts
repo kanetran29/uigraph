@@ -309,7 +309,7 @@ describe('extractGraph — modern Angular routing (lazy + nested + array links)'
     const { graph } = extractGraph(
       inMemory({
         '/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { V } from './v.component'\nimport { G } from './g.component'\nimport { E } from './e.component'\nexport const routes: Routes = [\n  { path: 'clients/:clientId', component: V, children: [\n    { path: 'general', component: G },\n    { path: 'edit', component: E },\n  ] },\n]`,
-        '/v.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a [routerLink]="[\\'./general\\']">g</a>' })\nexport class V {}`,
+        '/v.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a [routerLink]="[\\'./general\\']">g</a><router-outlet></router-outlet>' })\nexport class V {}`,
         '/g.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<a [routerLink]="[\\'../edit\\']">e</a>' })\nexport class G {}`,
         '/e.component.ts': `import { Component } from '@angular/core'\n@Component({ standalone: true, template: '<p>e</p>' })\nexport class E {}`,
       }),
