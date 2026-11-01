@@ -70,6 +70,57 @@ describe('commands and calls the router reads otherwise', () => {
   })
 })
 
+describe('a navigation code after it may cancel', () => {
+  const { graph } = extractGraph(inMemory({
+    '/app/app.routes.ts': routesTo(['a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'o']),
+    '/app/nav.service.ts': `import { Injectable } from '@angular/core'\nimport { Router } from '@angular/router'\n@Injectable({ providedIn: 'root' })\nexport class NavService { constructor(private router: Router) {}\n  away() { this.router.navigate(['/f']) } }`,
+    '/app/home.component.ts': `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'\nimport { NavService } from './nav.service'
+export function leave(router: Router) { router.navigate(['/n']) }
+@Component({ selector: 'x-home', standalone: true, template: '<b (click)="branch(1)"></b><b (click)="helper()"></b><b (click)="service()"></b><b (click)="nested()"></b><b (click)="fin()"></b><b (click)="moduleFn()"></b><b (click)="quiet()"></b><b (click)="awaited()"></b>' })
+export class Home { constructor(private router: Router, private nav: NavService) {}
+  branch(x: number) { this.router.navigate(['/a']); if (x) { this.router.navigate(['/b']) } }
+  helper() { this.router.navigate(['/c']); this.go() }
+  go() { this.router.navigate(['/d']) }
+  service() { this.router.navigate(['/e']); this.nav.away() }
+  nested() { { this.router.navigate(['/g']) } this.router.navigate(['/h']) }
+  fin() { try { this.router.navigate(['/i']) } finally { this.router.navigate(['/j']) } }
+  moduleFn() { this.router.navigate(['/o']); leave(this.router) }
+  quiet() { this.router.navigate(['/k']); this.log() }
+  log() { console.log('k') }
+  async awaited() { await this.router.navigate(['/l']); this.router.navigate(['/m']) } }`,
+    '/app/t.component.ts': leaf,
+  }), '/app')
+
+  it('holds a navigation at may when a later branch of its handler may navigate', () => {
+    expect(tier(graph, '/a')).toBe('may')
+  })
+  it('holds it at may when a later call to a member of the class navigates, and keeps that member\'s navigation', () => {
+    expect(tier(graph, '/c')).toBe('may')
+    expect(tier(graph, '/d')).toBe('must')
+  })
+  it('holds it at may when a later call into an injected service navigates', () => {
+    expect(tier(graph, '/e')).toBe('may')
+  })
+  it('holds it at may when a later module-level function of the file navigates', () => {
+    expect(tier(graph, '/o')).toBe('may')
+  })
+  it('looks past the block that holds it, to the statements after every enclosing block', () => {
+    expect(tier(graph, '/g')).toBe('may')
+    expect(tier(graph, '/h')).toBe('must')
+  })
+  it('counts a finally block as code that runs after it', () => {
+    expect(tier(graph, '/i')).toBe('may')
+    expect(tier(graph, '/j')).toBe('must')
+  })
+  it('keeps a navigation on must when what follows it cannot navigate', () => {
+    expect(tier(graph, '/k')).toBe('must')
+  })
+  it('keeps an awaited navigation on must, since it finishes before the next one starts', () => {
+    expect(tier(graph, '/l')).toBe('must')
+    expect(tier(graph, '/m')).toBe('may')
+  })
+})
+
 describe('a route component behind a conditional outlet', () => {
   it('holds its links at may, and keeps those of one behind a plain outlet', () => {
     const { graph } = extractGraph(inMemory({
