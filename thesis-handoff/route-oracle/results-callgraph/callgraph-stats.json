@@ -1,0 +1,46 @@
+{
+  "rows": [
+    {
+      "slug": "realworld",
+      "direct": 27,
+      "bound": 0,
+      "subclass": 0,
+      "unresolved": 0
+    },
+    {
+      "slug": "alfresco",
+      "direct": 239,
+      "bound": 2,
+      "subclass": 0,
+      "unresolved": 1
+    },
+    {
+      "slug": "ghostfolio",
+      "direct": 1198,
+      "bound": 4,
+      "subclass": 0,
+      "unresolved": 0
+    },
+    {
+      "slug": "k8sdash",
+      "direct": 244,
+      "bound": 0,
+      "subclass": 0,
+      "unresolved": 0
+    },
+    {
+      "slug": "bitwarden",
+      "direct": 3320,
+      "bound": 4735,
+      "subclass": 413,
+      "unresolved": 1367
+    },
+    {
+      "slug": "mifos",
+      "direct": 2158,
+      "bound": 795,
+      "subclass": 0,
+      "unresolved": 0
+    }
+  ]
+}

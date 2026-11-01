@@ -173,7 +173,7 @@ property is not proved, and on this corpus little is left for it to range over. 
 corrections --- to how a guard is read, to how an edge that several constructs cite is judged,
 and to whether a navigation runs under a condition, is refused by a guard or targets the screen
 already displayed --- each changed the deterministic tier, and after the last it holds
-\CensusMust{} edges, all in one of the six applications (Section~\ref{sec:res-round2}). Nearly every
+\CensusMust{} edges, in \CensusMustApps{} of the six applications (Section~\ref{sec:res-round2}). Nearly every
 transition the earlier instruments called deterministic turned out to run only once something had
 happened --- a request had returned, a branch had been taken, a template condition held --- or
 behind a guard the extractor does not evaluate; taking every guard to let the navigation through
@@ -191,16 +191,17 @@ that is too large cannot be, because at the screens that method can observe the 
 never claims a destination exactly. For one application the screens each site really fires
 from were read off the sources by hand, which gives both directions, and the result qualifies
 the contribution rather than confirming it: the analysis is right about \GTFullRecall{} of the
-attributions there, but the mechanism earlier work already has reaches \GTRootedRecall{} of
-them without a single wrong attribution, and all \GTFullExcess{} of the wrong ones this
-analysis makes come from one rule it adds (Section~\ref{sec:res-groundtruth}). The computed scopes are also
+attributions there and asserts none the application does not have, but the mechanism earlier
+work already has reaches \GTRootedRecall{} of them, and the precision is that of a repair --- the
+rule the call graph replaced attributed one service's navigation to every screen, this reading
+caught it, and the call graph was then scored on the same reading
+(Section~\ref{sec:res-groundtruth}). The computed scopes are also
 wide: narrower than attributing every site to every screen by a factor between
 \BaselineFactorMin{} and \BaselineFactorMax{}, which at the low end names most of an
 application (Section~\ref{sec:res-width}). What is established on the application that could be
-checked exhaustively is therefore a trade and not an improvement: the mechanism finds more of
-the real attributions than the simpler alternatives and is the only one that invents any, so
-which of them is preferable depends on whether recall or precision is wanted. Whether even
-that trade holds on the largest application is not established. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
+checked exhaustively is therefore a small gain in recall at no measured cost in precision, on an
+application whose one counter-example shaped the repair. Whether it holds on the largest
+application is not established. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
 has adapters for other frameworks, but all measurements reported here concern Angular
 applications.
 

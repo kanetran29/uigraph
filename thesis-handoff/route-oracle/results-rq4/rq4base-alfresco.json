@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "1.5.0",
-  "extractor": "% Extractor fd7b289, packages/ clean when generated.",
+  "harnessVersion": "1.7.0",
+  "extractor": "% Extractor 0027017, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco/projects/aca-content",
   "attribution": false,
@@ -142,7 +142,7 @@
       "file": "src/lib/aca-content.routes.ts",
       "line": 115,
       "subject": "path \"profile\"",
-      "predict": "the guard text or modality of at least one edge changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "EXCLUDED",
       "reason": "no baseline edge enters any screen the guarded route yields (/profile)"
     },
@@ -151,7 +151,7 @@
       "file": "folder-rules/src/folder-rules.module.ts",
       "line": 37,
       "subject": "path \"rules\"",
-      "predict": "the guard on edges entering /nodes/:nodeId/rules changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -163,8 +163,8 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may",
-          "/nodes/:nodeId/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may"
+          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard,AuthGuard->ExtensionsDataLoaderGuard,AuthGuard, modality may->may",
+          "/nodes/:nodeId/rules -> /nodes/:nodeId/rules: guard PluginEnabledGuard,AuthGuard->AuthGuard, modality may->may"
         ]
       }
     },
@@ -173,7 +173,7 @@
       "file": "src/lib/aca-content.routes.ts",
       "line": 348,
       "subject": "path \"shared\"",
-      "predict": "the guard text or modality of at least one edge changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "EXCLUDED",
       "reason": "no baseline edge enters any screen the guarded route yields (/shared)"
     },
@@ -182,9 +182,9 @@
       "file": "src/lib/aca-content.routes.ts",
       "line": 111,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering /personal-files, /personal-files/:folderId, /libraries/:folderId changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 7,
+      "touched": 1,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -194,10 +194,7 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,AuthGuard,PluginEnabledGuard->AuthGuard,PluginEnabledGuard, modality may->may",
-          "/profile -> /personal-files: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
-          "/personal-files -> /personal-files: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may",
-          "/personal-files/:folderId -> /personal-files/:folderId: guard ExtensionsDataLoaderGuard,AuthGuard->AuthGuard, modality may->may"
+          "/rules -> /nodes/:nodeId/rules: guard ExtensionsDataLoaderGuard,PluginEnabledGuard,AuthGuard->PluginEnabledGuard,AuthGuard, modality may->may"
         ]
       }
     },

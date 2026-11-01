@@ -1,11 +1,13 @@
 {
- "edges": 272,
- "sitesCited": 498,
- "mustEdges": 0,
- "mustClean": 0,
+ "edges": 253,
+ "sitesCited": 478,
+ "mergedSites": 225,
+ "mustEdges": 1,
+ "mustClean": 1,
+ "destinationsChecked": true,
  "mustBad": [],
  "tally": {
-  "TARGET_MISMATCH": 85,
-  "OVER_APPROX": 238
+  "TARGET_MISMATCH": 86,
+  "OVER_APPROX": 214
  }
 }

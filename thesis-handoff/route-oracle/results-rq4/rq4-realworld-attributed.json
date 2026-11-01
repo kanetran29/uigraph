@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "1.5.0",
-  "extractor": "% Extractor fd7b289, packages/ clean when generated.",
+  "harnessVersion": "1.7.0",
+  "extractor": "% Extractor 0027017, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "attribution": true,
@@ -333,7 +333,7 @@
       "file": "src/app/app.routes.ts",
       "line": 53,
       "subject": "path \":slug\"",
-      "predict": "the guard on edges entering /editor, /editor/:slug changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -354,7 +354,31 @@
       "file": "src/app/app.routes.ts",
       "line": 31,
       "subject": "path \"register\"",
-      "predict": "the guard on edges entering /login, /register changes",
+      "predict": "an edge that carried the guard loses it",
+      "verdict": "DETECTED",
+      "touched": 7,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": [
+          "/login -> /register: guard fn#ddb96242->null, modality may->may",
+          "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may",
+          "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may",
+          "/profile/:username/favorites -> /register: guard fn#ddb96242->null, modality may->may"
+        ]
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/app.routes.ts",
+      "line": 26,
+      "subject": "path \"login\"",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 8,
       "delta": {
@@ -366,34 +390,10 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/login -> /register: guard fn#ddb96242->null, modality may->may",
-          "/register -> /register: guard fn#ddb96242->null, modality may->may",
-          "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may",
-          "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may"
-        ]
-      }
-    },
-    {
-      "kind": "REMOVE_GUARD",
-      "file": "src/app/app.routes.ts",
-      "line": 26,
-      "subject": "path \"login\"",
-      "predict": "the guard on edges entering /login, /register changes",
-      "verdict": "DETECTED",
-      "touched": 9,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": [
           "/ -> /login: guard fn#ddb96242->null, modality may->may",
           "/tag/:tag -> /login: guard fn#ddb96242->null, modality may->may",
-          "/login -> /login: guard fn#ddb96242->null, modality may->may",
-          "/register -> /login: guard fn#ddb96242->null, modality may->may"
+          "/register -> /login: guard fn#ddb96242->null, modality may->may",
+          "/article/:slug -> /login: guard fn#ddb96242->null, modality may->may"
         ]
       }
     },
@@ -402,7 +402,7 @@
       "file": "src/app/app.routes.ts",
       "line": 36,
       "subject": "path \"settings\"",
-      "predict": "the guard on edges entering /settings changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 3,
       "delta": {
@@ -425,7 +425,7 @@
       "file": "src/app/app.routes.ts",
       "line": 48,
       "subject": "path \"\"",
-      "predict": "the guard on edges entering /editor, /editor/:slug changes",
+      "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 1,
       "delta": {
@@ -642,7 +642,7 @@
       "subject": "settings",
       "predict": "a node route containing \"settings\" becomes \"settings-mutated\"",
       "verdict": "DETECTED",
-      "touched": 14,
+      "touched": 16,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/profile/pages/profile/profile.component.html:23",
@@ -660,7 +660,8 @@
         "edgesAdded": [
           "/settings-mutated -> /profile/:username (navigate)",
           "/settings-mutated -> /profile/:username/favorites (navigate)",
-          "/settings-mutated -> / (click:routerLink)"
+          "/settings-mutated -> / (click:routerLink)",
+          "/settings-mutated -> / (navigate)"
         ],
         "edgesRemoved": [
           "/settings -> /profile/:username (navigate)",

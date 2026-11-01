@@ -70,23 +70,25 @@ there under any heading.
 The gap between the bound and what was recovered elsewhere is accounted for by
 Table~\ref{tab:remaining}, and three of its reasons are not attribution problems at
 all: the target screen has no node, the owning component is never reached from any
-screen, or the site sits in a service or a guard that this version does not analyse.
+screen, or the site sits in a service or a guard that the instrument those tables measure did not
+analyse.
 No construct that the baseline converted was lost, so the coverage gain was not bought by
 widening the must tier, and after the fourth correction of Section~\ref{sec:res-round2} the tier
-holds \CensusBaseMust{} edge without attribution and \CensusMust{} with it, the added edges being
-realworld's logo links placed on every screen the shell renders. On the
+holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, the added edges being
+the links of realworld's and k8sdash's shells placed on every screen the shell renders. On the
 instrument before that correction every must edge passed the witness check in both runs ---
 \RoundTwoMustClean{} after attribution --- so attribution introduced no edge that names the wrong
 destination; whether those edges occurred on every input is the question the fourth correction
 answered, and for most of them it was no.
 
-The part of the model that Chapter~\ref{ch:analysis} specifies but does not implement
-has a measurable price. Navigation sites in services, guards, interceptors, resolvers
+The part of the model that the instrument of those tables did not implement had a measurable
+price. Navigation sites in services, guards, interceptors, resolvers
 and effects are counted separately, and in absolute terms they are a small class across
 the corpus, yet they are not spread evenly: in one application they are almost as large
 as the shared-component class, and in another they are the only attribution loss left
-after the implemented pass has run. The call graph with dependency injection is thus
-required for applications that navigate from services.
+after the implemented pass had run. The call graph with dependency injection, which the current
+extractor implements (Section~\ref{sec:res-ablation}), was thus required for applications that
+navigate from services; the dispatch relation is still not implemented.
 
 RQ4 gives a conditional answer, and the condition is RQ1. Renaming a route path was
 detected in every scored mutant in all three applications that were mutated. Deleting
@@ -181,10 +183,12 @@ method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none 
 asked whether the set of screens attribution computes for a site is the set it fires from. Two
 methods can. The hand-built ground truth answers it fully, but for one application of six
 (Section~\ref{sec:res-groundtruth}): there the analysis finds \GTFullRecall{} of the
-(site, screen) pairs that application really has, at \GTFullPrecision{} precision, its
-\GTFullExcess{} wrong pairs all come from the injected-service join and all sit at
-\GTFullExcessSites{} of its \GTSites{} sites, and the level that stands for what earlier work
-reaches already recovers \GTRootedRecall{} of the real pairs with nothing wrong at all. Across the whole corpus only the runtime method
+(site, screen) pairs that application really has, at \GTFullPrecision{} precision; the rule the
+call graph replaced, which joined a navigating service over its injectors, asserted
+\GTClassExcess{} wrong pairs at one site, and the call graph was written after that finding and
+scored on the same ground truth, so the clean figure confirms the repair rather than testing the
+call graph independently. The level that stands for what earlier work reaches already recovers
+\GTRootedRecall{} of the real pairs with nothing wrong at all. Across the whole corpus only the runtime method
 applies, and it answers half of the question (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
 judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}
@@ -264,10 +268,10 @@ edge, and the extractor records the extra ones as merged witnesses so that each 
 traceable. For most of this work the conversion ratio credited a construct cited by any witness
 of an edge, primary or merged, while the witness check re-opened only the primary witness, so
 a construct could count towards the ratio on evidence the precision check never examined. On
-realworld rather more than a third of the citations in the attributed graph are merged ones,
-and the proportion is higher on the larger applications, so the gap was not a technicality:
-the check reported a clean deterministic tier over about two thirds of the evidence that tier
-rests on, and four wrong targets in bitwarden sat in the part it did not read
+realworld \WitnessMergedShareRealworld{} of the citations in the attributed graph are merged ones,
+and \WitnessMergedShareMax{} on the application where the share is largest, so the gap was not a
+technicality: the check reported a clean deterministic tier over part of the evidence that tier
+rests on, and wrong targets in bitwarden sat in the part it did not read
 (Section~\ref{sec:res-round2}). The check now judges every location an edge cites, each
 location records the modality it earns on its own, and the must tier is judged on the
 locations that earn must, so a construct counts towards the ratio only on evidence the check
@@ -609,6 +613,12 @@ that renders the projection only under a condition is read as unconditional; \te
 \texttt{mat-tab} are the only library containers read as rendering their content lazily. A route
 component behind a conditional outlet is conditional, but a component nested in it is judged by
 its own placement, and the application root's outlet is not read.
+\item \textbf{Activation with a modifier key.} A \texttt{routerLink} on an anchor leaves a
+click made with a modifier key held, or with a button other than the primary one, to the browser,
+which opens the address in a new browsing context rather than navigating the current one, and so
+does an anchor whose \texttt{target} names another context. The model reads every activation of a
+link as a navigation of the application, so a must edge from an anchor holds for a plain
+activation and not for these.
 \item \textbf{The order in which Angular matches routes.} The router takes the first route, in
 declaration order, that matches an address; the matcher prefers an exact path to a parameter
 route and consults a redirect only when no route matches. Wherever two declared routes, or a
@@ -779,8 +789,9 @@ future work.
 An oracle for the screen set on a \emph{large} application is now the cheapest addition
 that would strengthen the thesis most. The hand-built ground truth of
 Section~\ref{sec:res-groundtruth} supplies one for the smallest application in the corpus,
-and it was worth building: it convicted the injected-service join of attributing a site to
-nine screens it cannot fire from, which no other method here could do. What it cannot do is
+and it was worth building: it convicted the class-level service join of attributing a site to
+\GTClassExcess{} screens it cannot fire from, which no other method here could do, and the call
+graph that replaced the join was written in answer. What it cannot do is
 carry to an application of six hundred screens, where reading every site by hand is not
 practical, and that is exactly where the computed scopes are widest
 (Table~\ref{tab:scopebaseline}). Driving such an application into a signed-in state and

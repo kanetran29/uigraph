@@ -75,15 +75,15 @@
       "scopes": 0,
       "nonScreens": 7,
       "edges": 58,
-      "must": 0,
-      "may": 51,
+      "must": 1,
+      "may": 50,
       "unknown": 7,
       "sourceNotScreen": 0,
       "targetNotScreen": 7,
       "maySourceNotScreen": 0,
       "modalityDrift": 0,
-      "mustSites": 0,
-      "mustCitedSites": 0
+      "mustSites": 1,
+      "mustCitedSites": 1
     },
     {
       "slug": "mifos",
@@ -91,16 +91,16 @@
       "screens": 606,
       "scopes": 0,
       "nonScreens": 78,
-      "edges": 5661,
-      "must": 0,
-      "may": 5576,
+      "edges": 5667,
+      "must": 15,
+      "may": 5567,
       "unknown": 85,
       "sourceNotScreen": 0,
       "targetNotScreen": 85,
       "maySourceNotScreen": 0,
       "modalityDrift": 0,
-      "mustSites": 0,
-      "mustCitedSites": 0
+      "mustSites": 19,
+      "mustCitedSites": 23
     }
   ],
   "all": {
@@ -108,15 +108,15 @@
     "screens": 892,
     "scopes": 0,
     "nonScreens": 130,
-    "edges": 5859,
-    "must": 1,
-    "may": 5721,
+    "edges": 5865,
+    "must": 17,
+    "may": 5711,
     "unknown": 137,
     "sourceNotScreen": 0,
     "targetNotScreen": 137,
     "maySourceNotScreen": 0,
     "modalityDrift": 0,
-    "mustSites": 1,
-    "mustCitedSites": 2
+    "mustSites": 21,
+    "mustCitedSites": 26
   }
 }

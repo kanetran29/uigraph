@@ -1,8 +1,10 @@
 {
  "edges": 62,
  "sitesCited": 99,
+ "mergedSites": 37,
  "mustEdges": 9,
  "mustClean": 9,
+ "destinationsChecked": true,
  "mustBad": [],
  "tally": {
   "OVER_APPROX": 33,

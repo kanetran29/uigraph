@@ -465,7 +465,9 @@ produced it as witness.
 Scope attribution is implemented as a separate pass in the Angular adapter, enabled
 with the option \texttt{--attribution}. With the option off, the extractor produces
 exactly the baseline edge set; this was checked on every application in the corpus.
-The pass implements two of the four input relations of Section~\ref{sec:attribution}.
+The pass implements three of the four input relations of Section~\ref{sec:attribution}:
+component nesting, router outlets and, as the second departure below describes, the call graph.
+The dispatch relation is not implemented.
 
 \textbf{Component nesting.} Every component in the application, excluding test hosts
 and stories, is read with its element selectors and its template. An edge $A \to B$
