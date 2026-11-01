@@ -106,7 +106,8 @@ describe('a route a wrapper builds', () => {
     // the second shell's canActivate on a navigation that crosses between them.
     const { graph } = extractGraph(inMemory({
       '/app/guards.ts': `export const auth = () => true`,
-      '/app/shell.ts': `import { auth } from './guards'\nclass Shell {}\nexport class Route { static withShell(routes: any) { return { path: '', component: Shell, children: routes, canActivate: [auth] } } }`,
+      '/app/shell.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-shell', template: '<router-outlet></router-outlet>' })\nexport class Shell {}`,
+      '/app/shell.ts': `import { auth } from './guards'\nimport { Shell } from './shell.component'\nexport class Route { static withShell(routes: any) { return { path: '', component: Shell, children: routes, canActivate: [auth] } } }`,
       '/app/app.routes.ts': `import type { Routes } from '@angular/router'
 import { Route } from './shell'
 import { H } from './h.component'
