@@ -766,7 +766,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
          * Wire one navigation this control fires — from a traced (click) handler or
          * its own routerLink — to the declared route(s): a literal target is must/may
          * per the target's guards, a static-prefix template over-approximates to a may
-         * edge per matching route, a dynamic target is a soundiness note. `guard` is a
+         * edge per matching route, a dynamic target is a soundiness note, and so is an address
+         * only a redirect the reader does not follow answers, which is no dead link. `guard` is a
          * handler-level condition joined with the route gate; `what` names the source
          * in notes. A note cites `t.file` when set, because `t.loc` is then a line in that
          * external template and not in the component's `.ts`.
@@ -779,7 +780,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             const landed = land(primary, t.url !== true)
             const target = landed.target
             if (!target) {
-              soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `${what} target "${t.ti.value}" matches no declared route` })
+              const said = landed.unread ? 'is answered by a redirect the reader does not follow, so where it lands is not read' : 'matches no declared route'
+              soundiness.push({ kind: landed.unread ? 'dynamic-target' : 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `${what} target "${t.ti.value}" ${said}` })
               return
             }
             const run = runningGuards(route.nodeId, target.nodeId, 0, landed.tried)

@@ -280,8 +280,7 @@ export const routes: Routes = [
 
 describe('the sub-rules of a shared route being kept', () => {
   it('counts the segments the routes above a shared one consume, not only its own', () => {
-    // `x` consumes the segment and does not run again on a matrix change, but the empty-path route
-    // below it does: its parent's segment is part of what it compares, so /x;m=1/one -> /x/two runs `auth`.
+    // The empty-path route compares x's segment too, so /x;m=1/one -> /x/two runs `auth` though x itself is kept.
     const { graph } = extractGraph(inMemory({
       '/app/guards.ts': `export const auth = () => true`,
       '/app/app.routes.ts': `import type { Routes } from '@angular/router'
@@ -443,6 +442,15 @@ export const routes: Routes = [
       'literal target "/m/n" is answered by a redirect the reader does not follow, so where it lands is not read',
     ])
     expect(edgeOf(graph, '/a', '/items/:id')?.modality).toBe('must')
+  })
+
+  it('is not reported as matching no declared route from a control either', () => {
+    const { soundiness } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const routes: Routes = [{ path: 'a', component: A }, { path: 'x', redirectTo: () => '/a', pathMatch: 'full' }]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/x">x</a>'),
+    }), '/app', { controls: true })
+    expect(soundiness.filter((n) => n.kind === 'unresolved-target')).toEqual([])
+    expect(soundiness.filter((n) => n.kind === 'dynamic-target').map((n) => n.detail)).toEqual([expect.stringContaining('target "/x" is answered by a redirect the reader does not follow')])
   })
 })
 
