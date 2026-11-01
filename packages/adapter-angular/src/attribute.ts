@@ -57,9 +57,10 @@ export interface ComponentInfo {
  *            every descendant screen, because they render inside its outlet.
  *   full     plus the call graph: a navigation in a class that is not a component is
  *            attributed to the screens of the members that call the member holding it,
- *            transitively, through the declarations the types and provider bindings name, and
- *            where no caller is found, or a caller the graph cannot see also reaches it, to
- *            every component that injects the class as well.
+ *            transitively, through the declarations the types and provider bindings name;
+ *            where no caller is found, to every component that injects the class, and where a
+ *            caller the graph cannot see also reaches it, to every component that injects
+ *            that caller's class as well.
  *
  * `class` sits beside the chain rather than in it: it is `full` with the per-class join of an
  * earlier version in place of the call graph, kept so the two can be compared.
@@ -77,10 +78,9 @@ export interface ScopeResult {
   /**
    * Shell components found only indirectly: an unreferenced, unrouted component whose
    * subtree holds the outlet, or an outlet holder that a route names although the route walk
-   * dropped that route (it keeps one route per address). They are most likely mounted by a
-   * route the extractor cannot see (e.g. a helper that wraps routes), so their real scope may
-   * be smaller than top. Their edges are capped at may, and the call graph does not seed an
-   * outlet holder of the second kind, nor what it nests, at top.
+   * renders it on no screen (a route a wrapper function returns, say). They are most likely
+   * mounted by a route the extractor cannot see, so their real scope may be smaller than top.
+   * Their edges are capped at may.
    */
   indirectShell: Set<string>
   /** Extra screens on which a route component's own template is rendered (its descendants). */
@@ -119,8 +119,8 @@ export interface ScopeResult {
   memberScreens: Map<MemberKey, Set<string>>
   /** Members the call graph reaches from the shell. */
   memberTop: Set<MemberKey>
-  /** Members a caller the call graph cannot see may also reach: their scope is at least `memberScreens` and may be wider. */
-  memberUnseen: Set<MemberKey>
+  /** Members a caller the call graph cannot see may also reach, with the files of those callers: their scope is at least `memberScreens` and may be wider. */
+  memberUnseen: Map<MemberKey, Set<string>>
   /** How the call graph resolved the calls it followed. */
   memberResolved: { direct: number; bound: number; subclass: number; unresolved: number }
 }
@@ -300,13 +300,17 @@ function loadedFiles(sfs: SourceFile[], projectDir: string): Set<string> {
 
 /**
  * Component files some route object names in its `component` property, whether or not the route
- * walk kept that route: the walk keeps one route per address, so a second `{ path: '', component }`
- * is dropped and its component looks unrouted.
+ * walk renders them on a screen: a route a wrapper function returns, or one the walk could not
+ * read, mounts its component where the walk does not see it, so the component only looks
+ * unrouted. A route is an object that declares an address, a `path` or a `matcher`; an object
+ * that names a component and no address (a widget registry, a dialog's config) mounts nothing.
  */
 function routeNamedComponents(sfs: SourceFile[]): Set<string> {
   const out = new Set<string>()
   for (const sf of sfs) for (const p of sf.getDescendantsOfKind(SyntaxKind.PropertyAssignment)) {
     if (p.getNameNode().getText() !== 'component') continue
+    const route = p.getParentIfKind(SyntaxKind.ObjectLiteralExpression)
+    if (!route?.getProperty('path') && !route?.getProperty('matcher')) continue
     for (const d of declarationsOf(p.getInitializer())) out.add(d.getSourceFile().getFilePath())
   }
   return out
@@ -320,9 +324,11 @@ function routeNamedComponents(sfs: SourceFile[]): Set<string> {
  * indirect shell) -- an alias can also reach a sibling application whose root component holds a
  * `<router-outlet>`, and taking that for this application's shell attributed its navigations to
  * every screen at confidence 1. Being reached from this application's own shell is unaffected.
- * An outlet holder that a route names but the route walk dropped is mounted by a route nobody can
- * see, so it is an indirect shell and not a firm one. The call graph reads the files the
- * application loads, which `projectDir` fixes when it is given.
+ * An outlet holder that a route names but the route walk renders on no screen is mounted by a
+ * route nobody can see, so it is an indirect shell and not a firm one. A route whose address an
+ * earlier route holds is no such route: its component renders on the screens it declares (the
+ * route's `layouts`). The call graph reads the files the application loads, which `projectDir`
+ * fixes when it is given.
  */
 export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectDir?: string, layers: ScopeLayers = 'full'): ScopeResult {
   const notes: SoundinessNote[] = []
@@ -360,9 +366,13 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
     own.add(r.nodeId)
     ownScreens.set(f, own)
   }
+  for (const r of routes) for (const layout of r.layouts) {
+    const f = layout.getFilePath()
+    routeComponentScreens.set(f, new Set([...(routeComponentScreens.get(f) ?? []), r.nodeId]))
+  }
   const descendantsOfRouteComponent = new Map<string, Set<string>>()
   for (const [f, all] of routeComponentScreens) {
-    const extra = new Set([...all].filter((s) => !ownScreens.get(f)!.has(s)))
+    const extra = new Set([...all].filter((s) => !ownScreens.get(f)?.has(s)))
     if (extra.size) descendantsOfRouteComponent.set(f, extra)
   }
 
@@ -388,8 +398,8 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // inside any routed component; everything they reach (except routed components) is top.
   const shell = new Set<string>()
   const firmShell = new Set<string>()
-  // An outlet holder that a route names but the route walk dropped is mounted by a route nobody
-  // can see: rendered on that route's screens, not on every one, so it is no shell.
+  // An outlet holder that a route names but the route walk renders on no screen is mounted by a
+  // route nobody can see: rendered on that route's screens, not on every one, so it is no shell.
   const lostShell = new Set<string>()
   let named: Set<string> | undefined
   for (const c of components.values()) {
@@ -426,22 +436,14 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // Services: a class a component injects navigates on that component's behalf, so its scope
   // is the join over everything that injects it. Injection is read off constructor parameter
   // types and `inject(X)` calls, which is how an Angular component names its dependencies.
-  const fileOfClass = new Map<string, string>()
-  for (const sf of appFiles) {
-    if (components.has(sf.getFilePath())) continue
-    for (const cls of sf.getClasses()) {
-      const name = cls.getName()
-      if (name && !fileOfClass.has(name)) fileOfClass.set(name, sf.getFilePath())
-    }
-  }
+  const serviceFiles = new Set<string>(appFiles.map((sf) => sf.getFilePath()).filter((f) => !components.has(f)))
   const serviceScreens = new Map<string, Set<string>>()
   const serviceShell = new Set<string>()
   for (const c of components.values()) {
     const callerScreens = shell.has(c.file) || indirectShell.has(c.file) ? null : (routeComponentScreens.get(c.file) ?? screensOf.get(c.file))
     if (callerScreens === undefined) continue
-    for (const name of injectedClassNames(c.sf)) {
-      const file = fileOfClass.get(name)
-      if (!file) continue
+    for (const file of injectedClassFiles(c.sf)) {
+      if (!serviceFiles.has(file)) continue
       if (callerScreens === null) { serviceShell.add(file); continue }
       const set = serviceScreens.get(file) ?? new Set<string>()
       for (const s of callerScreens) set.add(s)
@@ -452,19 +454,18 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   for (const f of serviceShell) serviceScreens.delete(f)
 
   // The call graph: every member of a component runs on the component's screens, and a member
-  // runs wherever a member that calls it does. A component whose mounting route the walk lost is
-  // not seeded at top: it renders on that route's screens, and top would put what it calls on all
-  // of them. An effect is registered for the life of the application, so it is seeded at top.
+  // runs wherever a member that calls it does. An indirect shell is seeded at top, which holds
+  // whatever screens it really renders on. An effect is registered for the life of the
+  // application, so it is seeded at top.
   const seeds = new Map<string, Set<string> | null>()
   for (const c of components.values()) {
-    if (lostShell.has(c.file)) continue
     const s = shell.has(c.file) || indirectShell.has(c.file) ? null : (routeComponentScreens.get(c.file) ?? screensOf.get(c.file))
     if (s !== undefined) seeds.set(c.file, s)
   }
   for (const sf of appFiles) if (mayBeShell(sf.getFilePath()) && !components.has(sf.getFilePath()) && isEffectFile(sf)) seeds.set(sf.getFilePath(), null)
   const members = layers === 'full'
     ? memberScopes(appFiles, seeds, projectDir ? loadedFiles(appFiles, projectDir) : undefined)
-    : { screens: new Map<MemberKey, Set<string>>(), top: new Set<MemberKey>(), unseen: new Set<MemberKey>(), resolved: { direct: 0, bound: 0, subclass: 0, unresolved: 0 } }
+    : { screens: new Map<MemberKey, Set<string>>(), top: new Set<MemberKey>(), unseen: new Map<MemberKey, Set<string>>(), resolved: { direct: 0, bound: 0, subclass: 0, unresolved: 0 } }
 
   // The ablation withholds mechanisms rather than disabling them, so every level is a subset
   // of `full` by construction and no level can differ from it for any other reason.
@@ -484,21 +485,27 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
     standIns: layers === 'full' || layers === 'class', firmScreensOf, firmShell, memberScreens: members.screens, memberTop: members.top, memberUnseen: members.unseen, memberResolved: members.resolved }
 }
 
-/** Class names a component declares a dependency on: constructor parameter types and `inject(X)`. */
-function injectedClassNames(sf: SourceFile): Set<string> {
+/**
+ * Files declaring the classes a component declares a dependency on: constructor parameter types
+ * and `inject(X)`, each resolved through its import to the class it denotes, so a class of the
+ * same name in another file is never taken for it.
+ */
+function injectedClassFiles(sf: SourceFile): Set<string> {
   const out = new Set<string>()
+  /** Add the file of each class `n` denotes. */
+  const add = (n: Node | undefined): void => { for (const d of declarationsOf(n)) if (Node.isClassDeclaration(d)) out.add(d.getSourceFile().getFilePath()) }
   for (const cls of sf.getClasses()) {
     for (const ctor of cls.getConstructors()) {
       for (const p of ctor.getParameters()) {
-        const t = p.getTypeNode()?.getText()
-        if (t && /^[A-Z][\w$]*$/.test(t)) out.add(t)
+        const t = p.getTypeNode()
+        if (t && Node.isTypeReference(t) && /^[A-Z][\w$]*$/.test(t.getText())) add(t.getTypeName())
       }
     }
   }
   for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
     if (call.getExpression().getText() !== 'inject') continue
-    const arg = call.getArguments()[0]?.getText()
-    if (arg && /^[A-Z][\w$]*$/.test(arg)) out.add(arg)
+    const arg = call.getArguments()[0]
+    if (arg && /^[A-Z][\w$]*$/.test(arg.getText())) add(arg)
   }
   return out
 }

@@ -62,6 +62,15 @@ export interface RouteInfo {
    * (a function, a computed value): the screen is still never shown there.
    */
   redirectsTo?: string | null
+  /**
+   * The components of the routes above this screen that render it inside their outlet but mint no
+   * screen of their own, because a route declared before them holds their address: the second and
+   * third `{ path: '', component }` at one level, or an empty-path child with a component under a
+   * screen. Angular reaches a later sibling by backtracking out of an earlier one whose children
+   * cannot take the rest of the address, so the later one's component wraps the screens it
+   * declares and the earlier one's does not; the address itself stays with the earlier route.
+   */
+  layouts: SourceFile[]
 }
 
 /**
@@ -137,6 +146,8 @@ export interface RouteLevel {
   canDeactivate: GuardInfo[]
   /** Whether the route declares resolvers, a title resolver among them, which the router awaits before it activates it. */
   resolve: boolean
+  /** The route's component, when the route renders the screens below it but mints no screen itself (see `RouteInfo.layouts`). */
+  layout?: SourceFile
 }
 
 /**
@@ -844,7 +855,9 @@ function childrenExpression(obj: ObjectLiteralExpression): Node | undefined {
  * The body of `walkRouteArray`, split out so its one caller can add this array to the ancestor
  * set before the walk and take it out after. The set has to hold the arrays on the CURRENT
  * descent and nothing else: one kept across siblings is a visited set, which refuses the same
- * table under a second parent and cost one corpus application a third of its routes.
+ * table under a second parent and cost one corpus application a third of its routes. A route
+ * with a component whose address is already held mints no screen, but its children still render
+ * inside it: they keep it as a layout and hang under the screen above it, not under the holder.
  */
 function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: string, out: Map<string, RouteInfo>, loadedChildFiles: Set<string>, inheritedLevels: RouteLevel[], parentNodeId: string | null, redirects: Map<string, Redirect> | undefined, unreadable: UnreadableRoutes | undefined, consumedFiles: Set<string> | undefined, chain: Set<ArrayLiteralExpression>, auxAt: string | undefined): number {
   let placed = 0
@@ -1015,10 +1028,13 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // place. Counting only the winner told the caller this file had been read through only when
     // its routes happened to be new.
     if (isScreen) placed++
-    if (isScreen && !out.has(nodeId)) {
-      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, levels, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId })
+    const minted = isScreen && !out.has(nodeId)
+    if (minted) {
+      out.set(nodeId, { fullPath, nodeId, componentName: resolvedName, componentFile, guards, levels, routeObj: obj, parentNodeId: parentNodeId === nodeId ? null : parentNodeId, layouts: levels.flatMap((l) => (l.layout ? [l.layout] : [])) })
     }
-    const childParent = isScreen ? nodeId : parentNodeId
+    // A route whose address an earlier one holds still wraps its own children, under the screen above it.
+    if (isScreen && !minted && componentFile) levels[levels.length - 1]!.layout = componentFile
+    const childParent = minted ? nodeId : parentNodeId
     const childrenProp = propNamed(obj, 'children')
     if (childrenProp) {
       const childExpr = childrenExpression(obj)
