@@ -1,6 +1,6 @@
 \begin{algorithm}[t]
-\caption{Scope attribution as a worklist fixpoint over $\mathcal{P}(S)$. The loops marked \emph{model only} belong to the full analysis and are not implemented in the
-prototype evaluated in Chapter~\ref{ch:results}.}
+\caption{Scope attribution as a worklist fixpoint over $\mathcal{P}(S)$. The relations marked \emph{model only} belong to the full analysis and are not implemented in
+the prototype evaluated in Chapter~\ref{ch:results}.}
 \label{alg:attribution}
 \begin{algorithmic}[1]
 \Require routes $R$ with route tree, and the guards $\mathit{guards}(r)$ that route $r$ names
@@ -28,7 +28,7 @@ prototype evaluated in Chapter~\ref{ch:results}.}
   \ForAll{$y$ with $(x,y) \in N$} \Comment{$x$'s template renders $y$}
     \State \Call{Propagate}{$x, y$}
   \EndFor
-  \ForAll{$y$ with $(x,y) \in \mathit{CG} \cup D$} \Comment{\emph{model only}: DI calls, dispatch}
+  \ForAll{$y$ with $(x,y) \in \mathit{CG} \cup D$} \Comment{$\mathit{CG}$: member level, bindings read application-wide; $D$: \emph{model only}}
     \State \Call{Propagate}{$x, y$}
   \EndFor
 \EndWhile

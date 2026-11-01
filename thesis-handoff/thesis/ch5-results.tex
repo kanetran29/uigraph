@@ -58,11 +58,11 @@ declared screen has a node. Two things have to be said in the same breath, becau
 invites a reading neither supports. The denominator is the screens a \emph{static reader} can
 enumerate, and against the addresses the running framework actually mounts the same node set
 is \ProbeNodes{} of \ProbeScreens{} (Section~\ref{sec:res-probe}) --- the difference being
-almost entirely one unreadable construct in one application. And the two static readers
+almost entirely one construct in one application that the extractor declares unread. And the two static readers
 reached their agreement partly by being corrected against each other during this work, so
 their agreeing exactly is weaker evidence than it was when they were written independently;
-the runtime method is the external check for that reason, and it confirms the other direction,
-that no node sits at an address the framework mounts nothing at. That was not true
+the runtime method is the external check for that reason, and in the other direction it finds
+no node at an address the framework mounts nothing at. That was not true
 of the extractor this evaluation began with, which read one application as a single node for
 the \RoundTwoEarlierOracleGhostfolioDeclared{} screens it declares and the largest as under
 a tenth of its screens; Section~\ref{sec:res-round2} reports what had to be repaired to
@@ -531,10 +531,13 @@ which is the next subsection's subject.
 \subsection{Whether the scopes are the right ones}
 \label{sec:res-groundtruth}
 
-For \GTApp{} the screens each navigation site really fires from were read off the sources by
+For \GTApp{} the screens each navigation site fires from were read off the sources by
 hand (Section~\ref{sec:protocol}): \GTSites{} sites and \GTPairs{} (site, screen) pairs.
 Scoring every level against that gives the comparison no other method here can make, because
-it has both directions of the truth rather than one; Table~\ref{tab:groundtruth} reports it.
+it has both directions rather than one; Table~\ref{tab:groundtruth} reports it. The reading
+applies the analysis's own relations by hand, so it tests the implementation of those relations
+and not whether they describe what the running application renders
+(Section~\ref{sec:protocol}).
 
 \begin{table}[t]\small
 \caption{Each attribution level against the hand-built ground truth for \GTApp{}.
@@ -584,13 +587,17 @@ application without a wrong pair, after the one wrong scope it found had been re
 view. What it cannot establish is that the same holds on an application of six hundred
 screens.
 
-Scope attribution therefore raises coverage without lowering must-tier precision, which is
-what RQ3 asks. Three qualifications belong with that answer, and all three are visible in the
+Scope attribution therefore raises coverage, and on the measure Chapter~\ref{ch:evaluation}
+defines for must-tier precision it does not lower it: the attributed tier of \MustWitnessEdges{}
+edges has \MustWitnessViolations{} witness-check failures, which meets the criterion RQ3 is answered
+by. That measure cannot see whether a construct runs on every input
+(Section~\ref{sec:res-round2}), and the tier is too small for the result to be a precision estimate
+beyond this corpus. Three qualifications belong with that answer, and all three are visible in the
 tables rather than hidden by them. The first is that the gain is overwhelmingly on the may
 tier, so what attribution mostly adds is navigation the graph says is possible, not
 navigation it says is certain. The second is that the scopes are tested in both
-directions on one application only. Corpus-wide, the oracle above can refute a scope that is
-too small, and did so \ScopeUnpredicted{} times; it cannot refute one that is too large,
+directions on one application only. On \ScopeApps{} of the six applications the oracle above can
+refute a scope that is too small, and did so \ScopeUnpredicted{} times; it cannot refute one that is too large,
 because at the screens it can observe the graph almost never claims a destination exactly, and
 because a link a template renders conditionally is absent for reasons that have nothing to do
 with the scope. The ground truth of Section~\ref{sec:res-groundtruth} does test both
@@ -607,7 +614,8 @@ location and really does name that target, so no witness-based method can find i
 section establishes is that attribution recovers a large part of a loss class no other
 analysis here addresses, that it adds no deterministic transition the evidence does not
 support, and that where the
-rendered interface could judge it, it was not found to be too small. That the scopes are not
+rendered interface could judge it, the only scopes it showed to be too small were the
+\ScopeUnpredicted{} attribution left empty, at sites it declined to place. That the scopes are not
 too large is not established, and Section~\ref{sec:limitations} states it as the sharpest
 limitation of the work.
 
@@ -660,8 +668,8 @@ mutation result from the earlier instrument survives to compare against.
 
 Mutation testing requires the application to be extracted again once per mutant, so this
 part of the evaluation was run on three of the six applications: realworld and alfresco,
-which carry the earlier mutation figures, and bitwarden, which has the highest guard
-density in the corpus. Every figure in this section comes from the attributed graph with
+which carry the earlier mutation figures, and bitwarden, whose routes carry many guards,
+guard factories among them. Every figure in this section comes from the attributed graph with
 harness \HarnessVersionMutation{}, a fixed seed and a quota of eight mutants per operator. The corrections
 made to the mutation harness are described in Section~\ref{sec:corrections}.
 
@@ -831,9 +839,12 @@ denominator that shrinks is a coverage figure that rises for no reason the extra
 
 Every class but one resolved to a construct the extractor could read and did not. The exception
 is ghostfolio's custom \texttt{UrlMatcher}, which computes a route's path in a function and
-which no reader of a route table can resolve; it is the one place in the corpus where an
-application expresses a route in a way static analysis cannot follow, and both tools report it
-as a blind spot rather than as a route.
+which no reader of a route table can resolve, and both tools report it as a blind spot rather than
+as a route. The runtime method of Section~\ref{sec:res-probe} finds a second route the sources leave
+undecided, mifos's choice between two route tables by a value injected at deployment, and one
+construct the extractor could read and does not: ghostfolio's
+spread of computed routes, behind which \ProbeMissedGhostfolio{} of the \ProbeMissed{} answered
+addresses without a node sit.
 The causes fall into three groups.
 
 \emph{The route table was not reached.} An NgModule loaded by \texttt{loadChildren} keeps
@@ -1024,9 +1035,9 @@ routes that render it. A guard on such a child now gates the screen above it, as
 \MustFateGuard{} edges, every one of bitwarden's, are guarded; each construct they cite also runs
 under a condition, so either correction alone moves them. The repair first gated an edge on every
 guard its destination carries, and a panel showed that this demotes navigations the router lets
-through untouched: Angular does not run a guard again on a route a navigation keeps, so a
-navigation between two children of a guarded parent runs the children's guards and not the
-parent's, and gating it on the parent's treats every navigation as an entry from outside the
+through untouched: Angular does not run the \texttt{canActivate} or the resolvers of a route a
+navigation keeps again, so a navigation between two children of a parent guarded by
+\texttt{canActivate} runs the children's guards and not the parent's, and gating it on the parent's treats every navigation as an entry from outside the
 application. The extractor now computes, for each source and destination, the guards the router
 runs: \texttt{canDeactivate} on the levels the navigation leaves, \texttt{canMatch} on every level
 it matches, \texttt{canActivate}, \texttt{canLoad} and the resolvers on the levels it enters, and
@@ -1042,11 +1053,18 @@ rather than demoted whole, which a panel showed discards transitions that do occ
 
 Table~\ref{tab:mustledger} in Appendix~\ref{app:mustledger} records, construct by construct, the
 condition the extractor now reads. It is produced with the extractor's own readers, so it
-records the extractor's decisions rather than corroborating them. The corroboration is a recorded
-review: \MustReviewReaders{} readings of the \MustCtxDistinct{} constructs, each made by hand from
-the sources without the readers, are kept in \path{results-must/review.json}. The extractor agrees
-with the less favourable of them at \MustReviewAgreeMin{} of the \MustCtxDistinct{} constructs, and
-the two readings agree with each other at \MustReviewReadersAgree{}.
+records the extractor's decisions rather than corroborating them. What stands in for
+corroboration of the condition rules is a recorded review: \MustReviewReaders{} readings of the
+\MustCtxDistinct{} constructs, made separately by the assistant the declaration describes, from the
+sources and without the extractor's readers or results, kept in \path{results-must/review.json}.
+The extractor agrees with the less favourable of them at \MustReviewAgreeMin{} of the
+\MustCtxDistinct{} constructs, and the two readings agree with each other at
+\MustReviewReadersAgree{}. Three things limit what that agreement shows. Each reader was given the
+condition rules of this chapter as the definition to apply, so the readings test whether the
+extractor applies its rules as written and not whether the rules are the right ones. They were
+made after those rules had been corrected on these same constructs. And they judge only whether
+a construct runs every time its code does, and its destination: not the guards and self-loops that
+decide \MustFateGuard{} and \MustFateSelfLoop{} of the \RoundTwoMustEdges{} edges.
 
 The edges that survive show why the third correction's rule had to go. realworld's tag page
 renders the home component, whose Global Feed link to the root runs whenever the page does.

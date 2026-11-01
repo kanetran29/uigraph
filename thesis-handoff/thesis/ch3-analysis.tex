@@ -153,7 +153,9 @@ decides it. The routes the source and the target share are reused unless their p
 change or \texttt{runGuardsAndResolvers} asks otherwise, and a reused route's
 \texttt{canActivate} and resolvers do not run again. A navigation runs the \texttt{canMatch} of
 every route its address is matched through, the \texttt{canActivate}, \texttt{canLoad} and
-resolvers of every route it enters, the \texttt{canActivateChild} of every route above those, and
+resolvers of every route it enters and its \texttt{canLoad} until the route's code has been
+loaded, which the extractor, not knowing whether it has, takes as every time, the
+\texttt{canActivateChild} of every route above those, and
 the \texttt{canDeactivate} of every route it leaves; a child at the empty path that the target's
 own address resolves to is one of the routes it enters. A resolver is awaited by the router and
 demotes the edge as an \texttt{await} does, and a guard list the reader cannot bring back to an
@@ -348,10 +350,11 @@ transfer-function applications. Each application is a union of two subsets of $S
 costs $O(|S|)$ with scopes held as bit sets, so the running time is bounded by
 $O(|S|^2 \cdot (|N| + |\mathit{CG}| + |D|))$. This is the bound for the full model.
 
-The part of the analysis that is implemented, the nesting and outlet relations, is the
-full model with $\mathit{CG}$ and $D$ empty, so the bound above specialises to it. The
-implemented pass is cheaper than that specialisation, because reachability from each
-source needs no set-valued joins. Scopes are propagated along the component nesting
+The part of the analysis that is implemented, the nesting, outlet and call-graph relations, is
+the full model with $D$ empty, so the bound above specialises to it, and the call-graph pass, a
+worklist of set-valued joins along member call edges, is bounded by it. The nesting and outlet part
+is cheaper than that specialisation, because reachability from each source needs no set-valued
+joins. Scopes are propagated along the component nesting
 graph from the shell and from the component of each screen, which is plain reachability
 and costs
 \[
@@ -360,7 +363,7 @@ and costs
 one traversal of the nesting graph per screen, where $C$ is the set of components. What
 makes the propagation necessary in both cases is that scopes travel transitively and
 the scope of one node can rise more than once, once for each screen that reaches it.
-Cycles are not the reason. The nesting and outlet relations the prototype implements
+Cycles are not the reason. The nesting, outlet and call-graph relations the prototype implements
 may contain cycles, since mutually recursive templates are legal, and the worklist
 handles them; a cycle in $\mathit{CG}$ or $D$ likewise only means that a node can be
 re-examined after one of its own successors.
@@ -403,8 +406,9 @@ A guard that returns a \texttt{UrlTree} is itself a navigation: a redirect edge 
 $\mathit{subtree}(r)$, typically to a login screen. Treating guards only as labels on
 inbound edges misses this edge class entirely. Further, the guard of an edge is the
 conjunction of the conditions on the containment path from screen to call site
-(structural directives) with the guards of the target route. Reporting only the
-second part gives a weaker condition than the true one. In the baseline, for example,
+(structural directives) with the guards the router runs on that navigation
+(Section~\ref{sec:model}). Reporting only the second part gives a weaker condition than the true
+one. In the baseline, for example,
 a link that is rendered only inside \texttt{@if (isUser())} was labelled with the
 authentication guard of its target route. That guard is satisfied by any logged-in
 user, including users who are not the owner and who therefore never see the link.
@@ -525,7 +529,8 @@ used to test Claim~\ref{claim:expansion}.
 
 The dispatch relation is not implemented in this version, so a navigation in an NgRx effect has
 no scope from the model itself. Two approximations stand in where the model has no relation the
-pass implements, and Section~\ref{sec:res-round2} measures what they recover: a guard's scope is
+pass implements, and Section~\ref{sec:res-ablation} withholds them below the \emph{full} level, so
+no lower level counts their sites: a guard's scope is
 the set of routes that name it in \texttt{canActivate} or \texttt{canMatch}, which the route
 configuration states outright, and an effect, being registered for the lifetime of the
 application, is given $\top$. Edges from both are capped at \emph{may}. A class the call graph
