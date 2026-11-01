@@ -13,6 +13,11 @@
 // `t.relative === true` conjunct of the preserved-prefix computation changes nothing, since a target
 // that is not relative resolves against the base '/', for which keptSegments returns 0 however
 // many segments it climbs.
+// The pure helpers the sweep (mutation-sweep.mjs) and the tests share sit beside the list: the
+// checks that it applies (mutationProblems, unappliedIds), the edit (applyMutant), the reading of
+// a run (judge) and the file the sweep writes (sweepRecord).
+
+import { adapterSrcTree } from './provenance.mjs'
 
 /**
  * Why a mutant list cannot be run against the sources `read` returns, as sentences; empty when it
@@ -43,6 +48,47 @@ export function mutationProblems(mutants, read) {
     })
   }
   return problems
+}
+
+/**
+ * The ids of the mutants that cannot be applied to the sources `read` returns, in list order: the
+ * ones whose find string is gone or occurs twice, or whose edit changes nothing. When the adapter
+ * changes under the list, this is what names the mutants to bring up to it.
+ */
+export function unappliedIds(mutants, read) {
+  return mutants.filter((m) => mutationProblems([m], read).length > 0).map((m) => m.id)
+}
+
+/**
+ * What the suite said about one run of a mutant: the `Tests` summary line, whether it passed whole
+ * (survived), and the name of the first test that failed. A run with no summary line (the suite did
+ * not start, timed out or crashed) is not a kill by a test, so the mutant is counted as not killed:
+ * it is listed with the survivors, sweep-to-latex.mjs refuses it, and its result says that the
+ * suite did not run. `baselineTests` is the total the unmutated suite ran, which a run that passes
+ * with a different total did not match.
+ */
+export function judge(output, baselineTests) {
+  const lines = output.replace(/\x1b\[[0-9;]*m/g, '').split('\n').map((l) => l.trim())
+  const summary = lines.find((l) => /^Tests\s/.test(l))
+  const firstFail = lines.find((l) => /^FAIL\s/.test(l))
+  if (!summary) return { result: 'no Tests line: the suite did not run', survived: true, killedBy: null }
+  const survived = !/failed/.test(summary) && summary.includes(`(${baselineTests})`)
+  return { result: summary, survived, killedBy: survived ? null : (firstFail ?? 'a test failed').replace(/^FAIL\s+/, '') }
+}
+
+/**
+ * The file a sweep writes: the commit it ran at and the tree of packages/adapter-angular/src at
+ * HEAD (`srcTree`, which sweep-to-latex.mjs holds against HEAD's later; the sweep refuses to run
+ * on a dirty packages/, so HEAD's tree is the tree it ran on), the unmutated baseline and one entry
+ * per mutant, marked partial when only some of the list was run.
+ */
+export function sweepRecord({ commit, baseline, partial, mutants }) {
+  const srcTree = adapterSrcTree('HEAD')
+  const survivors = mutants.filter((m) => m.survived)
+  const note = `Each demotion rule the thesis lists deleted in turn from a copy of packages/adapter-angular at ${commit}, ` +
+    `the full adapter suite run against it by mutation-sweep.mjs; a mutant survives when the suite still passes. ` +
+    `${survivors.length} of ${mutants.length} survived or did not run.`
+  return { note, commit, srcTree, baseline, ...(partial ? { partial: true } : {}), mutants }
 }
 
 /**

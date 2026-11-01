@@ -14,6 +14,12 @@
 // edge claimed to reach /profile/:u/favorites while its witness line held a link to
 // /profile/:u. The witness pointed at a real construct, just the wrong one.
 //
+// A site on which question 3 cannot be asked, because the construct names no address this check
+// can read or the edge's destination is no address, is TARGET_UNREAD whatever its modality: it is
+// neither clean nor a failure, and the report counts it out of the sites it judged. It used to be
+// counted clean unless it was a must site, which let the unread may and unknown sites inflate the
+// clean share.
+//
 // Unlike an LLM audit this is reproducible and re-runnable, which is what thesis
 // evidence has to be.
 //
@@ -40,18 +46,93 @@ const edges = graph.edges || []
 // ---------------------------------------------------------------- construct detection
 
 /**
- * The address a commands array names, read from the text between its brackets: its string
- * literals joined, and a `:param` appended for each element that is not one. An array with no
- * literal segment at all (`[target]`, `['/', id]`) names no address this check can read, so it is
- * null: `/:param` alone agrees with any one-segment destination, and reading it as an address
- * passed a must witness against a destination whose target was never read.
+ * The elements of a commands array written between its brackets, split at the commas that are
+ * outside a string and outside a call or an object (a `]` ends the text the caller captured, so
+ * a bracket cannot be nested in it); null when a string is left open, which this check cannot
+ * read. Empty elements (a trailing comma) are dropped.
+ */
+function arrayElements(inner) {
+  const out = []
+  let cur = ''
+  let depth = 0
+  let quote = null
+  for (let i = 0; i < inner.length; i += 1) {
+    const ch = inner[i]
+    if (quote) {
+      cur += ch
+      if (ch === '\\') cur += inner[(i += 1)] ?? ''
+      else if (ch === quote) quote = null
+    } else if (ch === ',' && depth === 0) {
+      out.push(cur.trim())
+      cur = ''
+    } else {
+      if (ch === "'" || ch === '"' || ch === '`') quote = ch
+      else if ('({'.includes(ch)) depth += 1
+      else if (')}'.includes(ch)) depth -= 1
+      cur += ch
+    }
+  }
+  if (quote) return null
+  out.push(cur.trim())
+  return out.filter(Boolean)
+}
+
+/** The text of an element that is exactly one plain quoted string, or null when it is anything else. */
+function stringLiteral(element) {
+  const m = /^(?:'([^'\\]*)'|"([^"\\]*)")$/.exec(element)
+  return m ? (m[1] ?? m[2]) : null
+}
+
+/**
+ * The address a commands array names, read from the text between its brackets in the order
+ * Angular reads the commands (@angular/router 18.2.14, fesm2022/router.mjs): only the first
+ * command is split on `/`, a leading `/` makes it absolute, a leading `.` is skipped and a leading
+ * `..` goes up (computeNavigation, lines 963-1007); every later command is one segment as written
+ * (createNewSegmentGroup, lines 1178-1185), an object after a segment is its matrix parameters
+ * (1172-1185) and one with `outlets` opens a named outlet (1167-1169); a command that is not a
+ * string literal is one `:param` segment.
+ *
+ * Null, which the caller reports as TARGET_UNREAD, when the array cannot be read as an address:
+ *  - its first command is not a string literal, since it is a string only at run time and Angular
+ *    splits it on `/`, so it may be absolute, relative or climb (`[base, 'edit']`);
+ *  - it names no literal segment and holds a `:param` (`[target]`, `['/', id]`, `['./', id]`,
+ *    `['../', id]`): `/:param` alone agrees with any one-segment destination, so reading it as an
+ *    address passed a must witness against a destination whose target was never read;
+ *  - a later command holds a `/`, is empty or is a dot segment, or the array carries a named
+ *    outlet, none of which is a plain segment.
+ * A command object without `outlets` is matrix parameters, which add no segment. A dynamic command
+ * is assumed to be one segment, as a number or a string without a `/`; that is the one residual
+ * assumption of the reading.
  */
 function arrayTarget(inner) {
-  const parts = [...inner.matchAll(/'([^']*)'|"([^"]*)"/g)].map((m) => m[1] ?? m[2])
-  const dyn = inner.split(',').filter((s) => s.trim()).length - parts.length
-  const p = parts.join('/').replace(/\/+/g, '/')
-  if (dyn > 0 && !p.replace(/\//g, '')) return null
-  return dyn > 0 ? p + '/:param'.repeat(dyn) : p
+  const els = arrayElements(inner)
+  const head = els?.length ? stringLiteral(els[0]) : null
+  if (!head) return null
+  const absolute = head.startsWith('/')
+  const dots = []
+  const segs = []
+  for (const [i, p] of head.split('/').entries()) {
+    if (p === '' || (i === 0 && p === '.')) continue
+    if (p === '..' && !segs.length && !absolute) dots.push(p)
+    else if (p === '.' || p === '..') return null
+    else segs.push(p)
+  }
+  let dyn = 0
+  for (const e of els.slice(1)) {
+    const lit = stringLiteral(e)
+    if (lit !== null) {
+      if (lit === '' || lit === '.' || lit === '..' || lit.includes('/')) return null
+      segs.push(lit)
+    } else if (e.startsWith('{')) {
+      if (/\boutlets\b/.test(e)) return null
+    } else {
+      dyn += 1
+      segs.push(':param')
+    }
+  }
+  if (dyn > 0 && segs.length === dyn) return null
+  const body = [...dots, ...segs].join('/')
+  return absolute ? '/' + body : body || '.'
 }
 
 // Each rule says how to recognise its construct on a line, and how to read its target.
@@ -60,10 +141,10 @@ const RULES = {
     ext: '.html',
     detect: (l) => /\[?routerLink\]?\s*=/.test(l),
     /**
-     * The address a routerLink names: a plain attribute, an array of literals (a segment that is
-     * not a literal becomes a `:param`), or a bound string literal. Null for anything else, a
-     * method call, an expression or an array with no literal segment, which this check cannot
-     * read and says so (TARGET_UNREAD).
+     * The address a routerLink names: a plain attribute, a commands array (see arrayTarget: a
+     * segment that is not a literal becomes a `:param`), or a bound string literal. Null for
+     * anything else, a method call, an expression or an array arrayTarget cannot read, which this
+     * check cannot read and says so (TARGET_UNREAD).
      */
     target: (l) => {
       // routerLink="/a/b"  |  [routerLink]="['/a', x]"  |  [routerLink]="['/a', x, 'b']"
@@ -281,9 +362,9 @@ for (const { i, e, w, merged } of sites) {
     findings.push({ ...base, verdict: 'OFF_BY_N', detail: `construct is ${offBy > 0 ? '+' : ''}${offBy} lines from the witness` })
   } else if (agrees === false) {
     findings.push({ ...base, verdict: 'TARGET_MISMATCH', detail: `construct at the witness targets ${found}, edge claims ${toRoute}` })
-  } else if (agrees === null && e.modality === 'must' && witnessModality === 'must') {
-    // Not a pass: the construct names no destination this check can read, so the edge's was never compared with it.
-    findings.push({ ...base, verdict: 'TARGET_UNREAD', detail: `construct at the witness names no destination this check can read, so ${toRoute} was not compared with it` })
+  } else if (agrees === null) {
+    // Not a pass, whatever the modality: the construct names no readable destination or the edge's own is no address.
+    findings.push({ ...base, verdict: 'TARGET_UNREAD', detail: found ? `the edge's destination (${e.to}) is no address this check can compare ${found} with` : `construct at the witness names no destination this check can read, so ${toRoute ?? e.to} was not compared with it` })
   } else {
     ok++
   }
@@ -320,7 +401,7 @@ const mustBad = findings.filter((f) => f.verdict !== 'OVER_APPROX' && f.verdict 
 // Counted per edge: one edge can fail at several of the locations it cites.
 const mustBadEdges = new Set(mustBad.map((f) => f.edgeIndex)).size
 // An unread target is neither a failure nor a pass, so the must edges that cite one are counted apart.
-const mustUnread = new Set(findings.filter((f) => f.verdict === 'TARGET_UNREAD' && mustIndexes.has(f.edgeIndex)).map((f) => f.edgeIndex)).size
+const mustUnread = new Set(findings.filter((f) => f.verdict === 'TARGET_UNREAD' && mustIndexes.has(f.edgeIndex) && f.witnessModality === 'must').map((f) => f.edgeIndex)).size
 console.log(`MUST-TIER: ${mustEdges.length - mustBadEdges}/${mustEdges.length} clean` + (mustBad.length ? `  <-- ${mustBadEdges} EDGE(S) FAIL` : '  (no construct whose destination could be read names another)') +
   (mustUnread ? `; ${mustUnread} edge(s) cite a must construct whose destination could not be read, which is neither a pass nor a failure` : ''))
 console.log(`witness outside the application directory: ${outsideApp} edge(s), ${outsideAppMust} of them must` + (decl ? '' : '  (pass --routes <C.json> to also test destinations)'))

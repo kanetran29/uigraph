@@ -212,7 +212,7 @@ for (const r of rows) {
   if (b && b.sites === undefined) throw new Error(`${r.s}: its witness-check file predates the per-site judging and reports no site total, so a share over it cannot be computed`)
   if (b) { mE += b.mustEdges; mC += b.mustClean; aE += b.edges; aS += b.sites; aC += b.clean }
   const cell = b ? (b.mustEdges === 0 ? 'n/a' : `${b.mustClean}/${b.mustEdges}`) : '--'
-  // The sites the check reached a verdict on: over-approximated sites and must sites whose target it could not read are neither clean nor unclean.
+  // The sites the check reached a verdict on: over-approximated sites and sites, of any modality, whose target it could not read are neither clean nor unclean.
   const judged = b ? judgedSites(b) : 0
   if (b) { jS += judged; jC += b.clean }
   out.push(`${NAME[r.s]} & ${b ? b.edges : '--'} & ${b ? b.sites : '--'} & ${b ? judged : '--'} & ${b ? pc(b.clean, judged) : '--'} & ${cell} & ${pc(conv, r.l1.constructs)} \\\\`)
@@ -598,7 +598,7 @@ mac('RoundTwoJudgedClean', pc(jC, jS))
 mac('RoundTwoJudged', jS)
 mac('RoundTwoSites', aS)
 mac('RoundTwoOverApprox', pc(rows.reduce((a, r) => a + (r.b1?.tally?.OVER_APPROX ?? 0), 0), aS))
-// The cited must sites whose target the check could not read: out of the judged count above, so named beside it.
+// The cited sites, of any modality, whose target the check could not read: out of the judged count above, so named beside it.
 mac('RoundTwoUnreadSites', rows.reduce((a, r) => a + (r.b1?.tally?.TARGET_UNREAD ?? 0), 0))
 // Sites whose target names no route the application declares, counted from the extractor's
 // own notes rather than from the unexplained list, since a wildcard route resolves them.

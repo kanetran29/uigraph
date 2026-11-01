@@ -71,5 +71,7 @@ cp "$W/rq4.tex" "$TEX/generated-rq4.tex"
 node to-plots.mjs --rq4-only results-rq4/rq4-realworld-attributed.json results-rq4/rq4-alfresco-attributed.json results-rq4/rq4-bitwarden-attributed.json > "$TEX/generated-plots-rq4.tex"
 # results-must/mutation-sweep.json is written by mutation-sweep.mjs, which runs the adapter's suite once
 # per mutant (about half an hour); run it first, at a committed tree, whenever the adapter has changed.
+# sweep-to-latex.mjs refuses (and so ends this script) a sweep recorded on another packages/adapter-angular/src
+# or another mutant list than HEAD's, so a sweep of rules that have since changed cannot be published.
 node sweep-to-latex.mjs --tex "$TEX/generated-sweep.tex"
 echo "== done $(date +%H:%M:%S)"
