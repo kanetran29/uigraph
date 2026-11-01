@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { Project } from 'ts-morph'
+import { expandAnchoredEdges } from '@ui-graph/core'
 import { extractGraph } from './extract'
 import { memberScopes } from './callgraph'
 import { routeToNodeId as routeId } from './ids'
@@ -130,6 +131,19 @@ describe('a call lands on the declaration its name denotes, not on every class o
     expect(pairsTo(graph, 'a/svc.ts')).toEqual([`${routeId('/x')}>${routeId('/a')}`])
     expect(pairsTo(graph, 'b/svc.ts')).toEqual([`${routeId('/y')}>${routeId('/b')}`])
   })
+
+  it('joins a class no caller reaches over the components that inject it, not over those that inject a namesake', () => {
+    const svc = (to: string) => `${svcHead}export class Nav { constructor(private router: Router) {}\n  unused() { this.router.navigate(['/${to}']) } }`
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': routes([['x', 'X'], ['y', 'Y'], ['a', 'A'], ['b', 'B']]),
+      '/app/a/svc.ts': svc('a'), '/app/b/svc.ts': svc('b'),
+      '/app/x.component.ts': comp('X', `import { Nav } from './a/svc'`, 'private nav: Nav', ''),
+      '/app/y.component.ts': comp('Y', `import { Nav } from './b/svc'`, 'private nav: Nav', ''),
+      '/app/a.component.ts': leaf('A'), '/app/b.component.ts': leaf('B'),
+    }), '/app', { attribution: true })
+    expect(pairsTo(graph, 'a/svc.ts')).toEqual([`${routeId('/x')}>${routeId('/a')}`])
+    expect(pairsTo(graph, 'b/svc.ts')).toEqual([`${routeId('/y')}>${routeId('/b')}`])
+  })
 })
 
 describe('which provider bindings the call graph reads', () => {
@@ -182,6 +196,39 @@ describe('what the resolution counts count', () => {
   })
 })
 
+describe('the files and types the call graph reads', () => {
+  const seeds = new Map([['/app/x.component.ts', new Set(['S'])]])
+
+  it('reads no caller in a file the application does not load', () => {
+    const p = inMemory({
+      '/app/services.ts': `export class Nav { goA() {} }`,
+      '/app/x.component.ts': `import { Nav } from './services'\nexport class X { constructor(private nav: Nav) {}\n  run() { this.nav.goA() } }`,
+      '/sibling/bg.ts': `import { Nav } from '../app/services'\nexport class Bg { constructor(private nav: Nav) {}\n  run() { this.nav.goA() } }\nexport const boot = (nav: Nav) => nav.goA()`,
+    })
+    const { unseen, resolved } = memberScopes(p.getSourceFiles(), seeds, new Set(['/app/services.ts', '/app/x.component.ts']))
+    expect(unseen.has('/app/services.ts#Nav.goA')).toBe(false)
+    expect(resolved.direct).toBe(1)
+  })
+
+  it('resolves an abstract class to no subclass declared in a file the application does not load', () => {
+    const p = inMemory({
+      '/app/prompt.ts': `export abstract class Prompt { abstract upgrade(): void }\nexport class WebPrompt extends Prompt { upgrade() {} }`,
+      '/app/x.component.ts': `import { Prompt } from './prompt'\nexport class X { constructor(private prompt: Prompt) {}\n  run() { this.prompt.upgrade() } }`,
+      '/sibling/other.ts': `import { Prompt } from '../app/prompt'\nexport class OtherPrompt extends Prompt { upgrade() {} }`,
+    })
+    const { screens } = memberScopes(p.getSourceFiles(), seeds, new Set(['/app/prompt.ts', '/app/x.component.ts']))
+    expect([...screens.keys()].filter((k) => k.endsWith('.upgrade'))).toEqual(['/app/prompt.ts#WebPrompt.upgrade'])
+  })
+
+  it('reads no class from an array type, so a call on the array lands on no member of its element', () => {
+    const p = inMemory({
+      '/app/services.ts': `export class Nav { find() {} }`,
+      '/app/x.component.ts': `import { Nav } from './services'\nexport class X { constructor(private navs: Nav[]) {}\n  run() { this.navs.find(() => true) } }`,
+    })
+    expect(memberScopes(p.getSourceFiles(), seeds).screens.has('/app/services.ts#Nav.find')).toBe(false)
+  })
+})
+
 describe('callers the graph reads beyond a component\'s own calls', () => {
   const auth = `${svcHead}export class AuthService { constructor(private router: Router) {}\n  logout() { this.router.navigate(['/login']) } }`
 
@@ -218,14 +265,45 @@ describe('callers the graph reads beyond a component\'s own calls', () => {
       '/app/guard.ts': guard,
       '/app/a.component.ts': leaf('A'), '/app/b.component.ts': leaf('B'),
     })
+    /** The same service, with `boot` a file whose class `Boot` the component of /y also injects, and which calls `goA` where the graph cannot see a caller. */
+    const booted = (boot: string) => ({
+      ...navigating(''),
+      '/app/y.component.ts': comp('Y', `import { Nav } from './services'\nimport { Boot } from './boot'`, 'private svc: Nav, private boot: Boot', '  go() { this.svc.goB() }', '<b (click)="go()"></b>'),
+      '/app/boot.ts': boot,
+    })
     it.each([
-      ['a guard class', `import { Nav } from './services'\nexport class AuthGuard { constructor(private nav: Nav) {}\n  canActivate() { this.nav.goA(); return true } }`],
-      ['a functional guard', `import { inject } from '@angular/core'\nimport { Nav } from './services'\nexport const canGo = () => { inject(Nav).goA(); return true }`],
-      ['a functional guard holding it in a local', `import { inject } from '@angular/core'\nimport { Nav } from './services'\nexport const canGo = () => { const nav = inject(Nav); nav.goA(); return true }`],
-      ['a helper that is handed it', `import { Nav } from './services'\nexport function run(nav: Nav) { nav.goA() }`],
-    ])('takes the union with the class-level join when %s calls it', (_name, guard) => {
-      const { graph } = extractGraph(inMemory(navigating(guard)), '/app', { attribution: true })
+      ['the constructor the injector runs', `import { Nav } from './services'\nexport class Boot { constructor(private nav: Nav) { this.nav.goA() } }`],
+      ['a field initialised by calling it', `import { inject } from '@angular/core'\nimport { Nav } from './services'\nexport class Boot { private nav = inject(Nav)\n  ok = this.nav.goA() }`],
+      ['a local initialised with inject()', `import { inject } from '@angular/core'\nimport { Nav } from './services'\nexport class Boot { constructor() { const nav = inject(Nav); nav.goA() } }`],
+      ['a function its constructor hands it to', `import { Nav } from './services'\nexport function run(nav: Nav) { nav.goA() }\nexport class Boot { constructor(nav: Nav) { run(nav) } }`],
+    ])('adds the screens of the components that inject the class whose %s calls it', (_name, boot) => {
+      const { graph } = extractGraph(inMemory(booted(boot)), '/app', { attribution: true })
       expect(pairsTo(graph, 'services.ts')).toEqual([`${routeId('/x')}>${routeId('/a')}`, `${routeId('/y')}>${routeId('/a')}`, `${routeId('/y')}>${routeId('/b')}`])
+    })
+
+    it('puts it at top when the class of that caller is injected in the shell', () => {
+      const { graph } = extractGraph(inMemory({
+        ...booted(`import { Nav } from './services'\nexport class Boot { constructor(private nav: Nav) { this.nav.goA() } }`),
+        '/app/main.ts': `import { bootstrapApplication } from '@angular/platform-browser'\nimport { App } from './app.component'\nbootstrapApplication(App)`,
+        '/app/app.component.ts': `import { Component } from '@angular/core'\nimport { Boot } from './boot'\n@Component({ selector: 'app-root', template: '<router-outlet></router-outlet>' })\nexport class App { constructor(private boot: Boot) {} }`,
+      }), '/app', { attribution: true })
+      expect(pairsTo(graph, 'services.ts')).toEqual(['n_scope_shell>' + routeId('/a'), `${routeId('/y')}>${routeId('/b')}`])
+    })
+
+    it.each([
+      ['a guard class no route names', `import { Nav } from './services'\nexport class AuthGuard { constructor(private nav: Nav) {}\n  canActivate() { this.nav.goA(); return true } }`],
+      ['a functional guard no route names', `import { inject } from '@angular/core'\nimport { Nav } from './services'\nexport const canGo = () => { inject(Nav).goA(); return true }`],
+    ])('adds no screen for %s, which runs nowhere the graph can name', (_name, guard) => {
+      const { graph } = extractGraph(inMemory(navigating(guard)), '/app', { attribution: true })
+      expect(pairsTo(graph, 'services.ts')).toEqual([`${routeId('/x')}>${routeId('/a')}`, `${routeId('/y')}>${routeId('/b')}`])
+    })
+
+    it('adds the screens of the routes that name a guard that calls it, where a parameter change runs the guard again', () => {
+      const { graph } = extractGraph(inMemory({
+        ...navigating(`import { Nav } from './services'\nexport class AuthGuard { constructor(private nav: Nav) {}\n  canActivate() { this.nav.goA(); return true } }`),
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { X } from './x.component'\nimport { Y } from './y.component'\nimport { A } from './a.component'\nimport { B } from './b.component'\nimport { AuthGuard } from './guard'\nexport const routes: Routes = [{ path: 'x', component: X }, { path: 'y/:id', component: Y, canActivate: [AuthGuard] }, { path: 'a', component: A }, { path: 'b', component: B }]`,
+      }), '/app', { attribution: true })
+      expect(pairsTo(graph, 'services.ts')).toEqual([`${routeId('/x')}>${routeId('/a')}`, `${routeId('/y/:id')}>${routeId('/a')}`, `${routeId('/y/:id')}>${routeId('/b')}`])
     })
 
     it('keeps a member on its own callers when the other injectors only read fields or call other members', () => {
@@ -243,9 +321,14 @@ describe('callers the graph reads beyond a component\'s own calls', () => {
   })
 })
 
-describe('a shell elected from a component whose mounting route the walk lost', () => {
-  /** Two routes at the empty path, so the walk keeps the first and drops `UserLayout`, which holds an outlet and the nav that calls a bound service. */
-  const lost = () => inMemory({
+describe('a layout whose address an earlier route holds', () => {
+  /**
+   * Two routes at the empty path: `Frontend`, declared first, holds the address, and `UserLayout`
+   * wraps /vault, which Angular reaches by backtracking out of `Frontend`'s children. The layout
+   * renders `<x-nav>`, whose click calls a bound service that navigates; `vault` is Vault's
+   * template, and `extra` replaces or adds files.
+   */
+  const layouts = (opts: { layout?: string; vault?: string } = {}, extra: Record<string, string> = {}) => inMemory({
     '/app/app.routes.ts': `import type { Routes } from '@angular/router'
 import { Frontend } from './frontend.component'
 import { UserLayout } from './layout.component'
@@ -253,27 +336,82 @@ import { Login } from './login.component'
 import { Vault } from './vault.component'
 import { Premium } from './premium.component'
 export const routes: Routes = [{ path: '', component: Frontend, children: [{ path: 'login', component: Login }] }, { path: '', component: UserLayout, children: [{ path: 'vault', component: Vault }] }, { path: 'premium', component: Premium }]`,
-    '/app/frontend.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-frontend', standalone: true, template: '<router-outlet></router-outlet>' })\nexport class Frontend {}`,
-    '/app/layout.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-layout', standalone: true, template: '<x-nav></x-nav><a routerLink="/premium">p</a><router-outlet></router-outlet>' })\nexport class UserLayout {}`,
+    '/app/frontend.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-frontend', standalone: true, template: '<a routerLink="/login">in</a><router-outlet></router-outlet>' })\nexport class Frontend {}`,
+    '/app/layout.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-layout', standalone: true, template: '${opts.layout ?? '<x-nav></x-nav><a routerLink="/premium">p</a><router-outlet></router-outlet>'}' })\nexport class UserLayout {}`,
     '/app/nav.component.ts': comp('Nav', `import { Prompt } from './prompt'`, 'private prompt: Prompt', '  go() { this.prompt.upgrade() }', '<b (click)="go()"></b>'),
-    '/app/vault.component.ts': comp('Vault', `import { Prompt } from './prompt'`, 'private prompt: Prompt', '  go() { this.prompt.upgrade() }', '<b (click)="go()"></b>'),
+    '/app/vault.component.ts': comp('Vault', `import { Prompt } from './prompt'`, 'private prompt: Prompt', '  go() { this.prompt.upgrade() }', opts.vault ?? '<b (click)="go()"></b>'),
     '/app/prompt.ts': `export abstract class Prompt { abstract upgrade(): void }`,
     '/app/web-prompt.ts': `${svcHead}import { Prompt } from './prompt'\nexport class WebPrompt extends Prompt { constructor(private router: Router) { super() }\n  upgrade() { this.router.navigate(['/premium']) } }`,
     '/app/providers.ts': `import { Prompt } from './prompt'\nimport { WebPrompt } from './web-prompt'\nexport const p = [{ provide: Prompt, useClass: WebPrompt }]`,
     '/app/login.component.ts': leaf('Login'), '/app/premium.component.ts': leaf('Premium'),
+    ...extra,
   })
+  /** Every (screen, destination, modality) a file's sites give, with anchored edges expanded to their screens. */
+  const expanded = (graph: ReturnType<typeof extractGraph>['graph'], file: string) =>
+    expandAnchoredEdges(graph).edges.filter((e) => [e.witness, ...(e.mergedWitnesses ?? [])].some((w) => w?.file === file)).map((e) => `${e.from}>${e.to}:${e.modality}`).sort()
 
   it('does not put what it calls on every screen', () => {
-    const { graph } = extractGraph(lost(), '/app', { attribution: true })
+    const { graph } = extractGraph(layouts(), '/app', { attribution: true })
     expect(pairsTo(graph, 'web-prompt.ts')).toEqual([`${routeId('/vault')}>${routeId('/premium')}`])
   })
 
-  it('holds its own links at may and says that no route mounts it', () => {
-    const { graph, soundiness } = extractGraph(lost(), '/app', { attribution: true })
-    const own = graph.edges.filter((e) => e.witness?.file === 'layout.component.ts' && e.to === routeId('/premium'))
+  it('seeds what it nests with the screens it wraps, though no routed page calls it', () => {
+    const { graph } = extractGraph(layouts({}, { '/app/vault.component.ts': leaf('Vault') }), '/app', { attribution: true })
+    expect(pairsTo(graph, 'web-prompt.ts')).toEqual([`${routeId('/vault')}>${routeId('/premium')}`])
+  })
+
+  it('renders its own links on the screens it wraps, at must, and says no shell is indirect', () => {
+    const { graph, soundiness } = extractGraph(layouts(), '/app', { attribution: true })
+    expect(expanded(graph, 'layout.component.ts')).toEqual([`${routeId('/vault')}>${routeId('/premium')}:must`])
+    expect(soundiness.some((s) => s.kind === 'indirect-shell')).toBe(false)
+  })
+
+  it('keeps the first route\'s layout off the screens the second one wraps', () => {
+    const { graph } = extractGraph(layouts(), '/app', { attribution: true })
+    expect(expanded(graph, 'frontend.component.ts')).toEqual([`${routeId('/login')}>${routeId('/login')}:may`, `${routeId('/')}>${routeId('/login')}:must`])
+  })
+
+  it('demotes a page it wraps when its outlet is under a condition', () => {
+    const { graph } = extractGraph(layouts({ layout: '@if (on) { <router-outlet></router-outlet> }', vault: '<a routerLink="/premium">p</a>' }), '/app', { attribution: true })
+    expect(expanded(graph, 'vault.component.ts')).toEqual([`${routeId('/vault')}>${routeId('/premium')}:may`])
+  })
+})
+
+describe('an outlet holder that a route names but no screen renders', () => {
+  /** `Shell` holds the outlet and a nav that reaches a bound service; `routes` is the table, `extra` more files. */
+  const shelled = (routes: string, extra: Record<string, string> = {}) => inMemory({
+    '/app/app.routes.ts': routes,
+    '/app/shell.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-shell', standalone: true, template: '<x-nav></x-nav><a routerLink="/x">x</a><router-outlet></router-outlet>' })\nexport class Shell {}`,
+    '/app/nav.component.ts': comp('Nav', `import { Prompt } from './prompt'`, 'private prompt: Prompt', '  go() { this.prompt.upgrade() }', '<b (click)="go()"></b>'),
+    '/app/prompt.ts': `export abstract class Prompt { abstract upgrade(): void }`,
+    '/app/web-prompt.ts': `${svcHead}import { Prompt } from './prompt'\nexport class WebPrompt extends Prompt { constructor(private router: Router) { super() }\n  upgrade() { this.router.navigate(['/login']) } }`,
+    '/app/providers.ts': `import { Prompt } from './prompt'\nimport { WebPrompt } from './web-prompt'\nexport const p = [{ provide: Prompt, useClass: WebPrompt }]`,
+    '/app/x.component.ts': leaf('X'), '/app/login.component.ts': leaf('Login'),
+    ...extra,
+  })
+  /** A wrapper that mounts its argument under `Shell`, the shape of ngx-rocket's `Route.withShell`, and a login screen outside it. */
+  const wrapped = `import type { Routes } from '@angular/router'
+import { Shell } from './shell.component'
+import { X } from './x.component'
+import { Login } from './login.component'
+function withShell(children: Routes) { return { path: '', component: Shell, children } }
+export const routes: Routes = [withShell([{ path: 'x', component: X }]), { path: 'login', component: Login }]`
+
+  it('is an indirect shell: its links are held at may, and what it nests still reaches the call graph from top', () => {
+    const { graph, soundiness } = extractGraph(shelled(wrapped), '/app', { attribution: true })
+    const own = graph.edges.filter((e) => e.witness?.file === 'shell.component.ts')
     expect(own.length).toBeGreaterThan(0)
     expect(own.every((e) => e.modality === 'may')).toBe(true)
     expect(soundiness.some((s) => s.kind === 'indirect-shell')).toBe(true)
+    expect(pairsTo(graph, 'web-prompt.ts')).toEqual(['n_scope_shell>' + routeId('/login')])
+  })
+
+  it('is not taken from an object that names the component but declares no address', () => {
+    const { graph } = extractGraph(shelled(`import type { Routes } from '@angular/router'\nimport { X } from './x.component'\nimport { Login } from './login.component'\nexport const routes: Routes = [{ path: 'x', component: X }, { path: 'login', component: Login }]`, {
+      '/app/main.ts': `import { bootstrapApplication } from '@angular/platform-browser'\nimport { Shell } from './shell.component'\nbootstrapApplication(Shell)`,
+      '/app/widgets.ts': `import { Shell } from './shell.component'\nexport const widgets = [{ id: 'root', component: Shell }]`,
+    }), '/app', { attribution: true })
+    expect(graph.edges.filter((e) => e.witness?.file === 'shell.component.ts' && e.to === routeId('/x')).map((e) => `${e.from}:${e.modality}`).sort()).toEqual([`${routeId('/login')}:must`, `${routeId('/x')}:may`])
   })
 })
 

@@ -332,16 +332,17 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const routeByNodeId = new Map(routes.map((r) => [r.nodeId, r]))
   /**
    * Whether a route component renders only on some executions of the screens above it: the
-   * primary outlet of a route component above it sits under a template condition, so the route
-   * component is not on the screen however its own template reads.
+   * primary outlet of a route component or layout above it sits under a template condition, so
+   * the route component is not on the screen however its own template reads.
    */
   const behindHiddenOutlet = (route: (typeof routes)[number]): boolean => {
-    for (let p = route.parentNodeId ? routeByNodeId.get(route.parentNodeId) : undefined; p; p = p.parentNodeId ? routeByNodeId.get(p.parentNodeId) : undefined) {
-      const tpl = p.componentFile ? inlineTemplate(p.componentFile) : null
+    const holders = [...route.layouts]
+    for (let p = route.parentNodeId ? routeByNodeId.get(route.parentNodeId) : undefined; p; p = p.parentNodeId ? routeByNodeId.get(p.parentNodeId) : undefined) if (p.componentFile) holders.push(p.componentFile)
+    return holders.some((sf) => {
+      const tpl = inlineTemplate(sf)
       const at = tpl ? tpl.text.search(/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/) : -1
-      if (tpl && at >= 0 && templateCondition(tpl.text, at + 1) !== null) return true
-    }
-    return false
+      return tpl !== null && at >= 0 && templateCondition(tpl.text, at + 1) !== null
+    })
   }
   // The screens a scope anchor stands for, filled as anchors are minted, and every screen, which the shell stands for.
   const screenIds = new Set(routes.map((r) => r.nodeId))
@@ -657,10 +658,12 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // behalf of whatever calls the member that holds it, so its scope is the join over the
     // screens of those callers, which the call graph gives. Where the call graph reaches no
     // caller, the join is taken over every component that injects the class, which can be wider
-    // than the real scope; so it is for a member a caller the graph cannot see also reaches (a
-    // constructor the injector runs, a guard, an interceptor), which takes the union of the two.
-    // The calls on the way carry conditions the analysis does not follow, so the edges are capped
-    // at may. A class nothing reaches has no scope at all and is reported.
+    // than the real scope. A member a caller the graph cannot see also reaches (a constructor the
+    // injector runs, a guard, an interceptor) runs where that caller does, too, and the caller is
+    // placed the way an unreached member is: by the join of its own file, which adds nothing for
+    // a caller nothing injects and no route names. The calls on the way carry conditions the
+    // analysis does not follow, so the edges are capped at may. A class nothing reaches has no
+    // scope at all and is reported.
     for (const sf of project.getSourceFiles()) {
       const f = sf.getFilePath()
       if (scopes.components.has(f) || /\.(spec|test|stories)\.ts$/.test(f)) continue
@@ -677,15 +680,18 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         continue
       }
       // The call graph places what it reaches, member by member; the rest falls to the join below.
-      // A member some caller the graph cannot see also reaches runs wherever the join says, too.
+      // A member some caller the graph cannot see also reaches runs wherever that caller's join says, too.
       // The note of a site is recorded on the first screen it is emitted from, once however many follow.
       const keyOf = (t: RawTarget) => `${f}#${t.member}`
+      /** The screens the class join of file `g` gives: the components that inject its classes, and the routes that name it as a guard. */
+      const joinOf = (g: string) => [...(scopes.serviceScreens.get(g) ?? []), ...(scopes.standIns ? guardScreens.get(g) ?? [] : [])]
       const joinTop = scopes.serviceShell.has(f)
-      const joinScreens = new Set([...(scopes.serviceScreens.get(f) ?? []),
-        ...(scopes.standIns ? guardScreens.get(f) ?? [] : [])])
+      const joinScreens = new Set(joinOf(f))
+      /** The files of the callers the graph cannot see that reach the member holding `t`. */
+      const unseenFrom = (t: RawTarget) => [...(scopes.memberUnseen.get(keyOf(t)) ?? [])]
       /** Whether the call graph gives the member holding `t` at least one screen. */
       const placedAt = (t: RawTarget) => (scopes.memberScreens.get(keyOf(t))?.size ?? 0) > 0
-      const atTop = ts.filter((t) => t.member !== undefined && (scopes.memberTop.has(keyOf(t)) || (joinTop && placedAt(t) && scopes.memberUnseen.has(keyOf(t)))))
+      const atTop = ts.filter((t) => t.member !== undefined && (scopes.memberTop.has(keyOf(t)) || (placedAt(t) && unseenFrom(t).some((g) => scopes.serviceShell.has(g)))))
       const byMember = ts.filter((t) => t.member !== undefined && !atTop.includes(t) && placedAt(t))
       if (atTop.length > 0) {
         const before = edges.length
@@ -694,7 +700,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       }
       for (const t of byMember) {
         const own = scopes.memberScreens.get(keyOf(t))!
-        const screens = scopes.memberUnseen.has(keyOf(t)) ? new Set([...own, ...joinScreens]) : own
+        const screens = new Set([...own, ...unseenFrom(t).flatMap(joinOf)])
         for (const [i, s] of [...screens].sort().entries()) emitTargets(s, [t], file, i === 0, true)
       }
       const rest = ts.filter((t) => !atTop.includes(t) && !byMember.includes(t))
@@ -724,7 +730,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // navigation left no trace at all — even when its destination was perfectly readable.
     // Anchoring it at an unplaced origin keeps the destination, says plainly that the source
     // is unknown, and holds the edges at may.
-    const placed = new Set<string>([...scopes.screensOf.keys(), ...scopes.shell, ...scopes.indirectShell, ...routes.flatMap((r) => (r.componentFile ? [r.componentFile.getFilePath()] : []))])
+    const placed = new Set<string>([...scopes.screensOf.keys(), ...scopes.shell, ...scopes.indirectShell, ...routes.flatMap((r) => [...(r.componentFile ? [r.componentFile] : []), ...r.layouts].map((sf) => sf.getFilePath()))])
     for (const [f, c] of scopes.components) {
       if (placed.has(f)) continue
       const ts = targetsOf(c.sf)
