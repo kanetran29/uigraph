@@ -10,10 +10,16 @@
 // node set and the edge relation are stated over what is there.
 //
 // Usage: node graph-census.mjs --corpus <dir> [--out <dir>] [--tex <file>] [--prefix <Name>]
+//        [--reading-subset] [--reading <file>]  (default results-must/tier-reading.json beside this file)
 //        --prefix names the macros and the result file, so the graphs mapped without
 //        --attribution can be censused beside the published ones: map each application with
 //        `uigraph map <app> --adapter angular --out <dir>/<app>/<sub>/uigraph.db`, then run this
-//        with --corpus <dir> --prefix CensusBase.
+//        with --corpus <dir> --prefix CensusBase --reading-subset.
+//        --reading-subset relaxes the check against results-must/tier-reading.json for a graph
+//        the reading was not made on: a construct the reading lists may earn no must edge there,
+//        and reach fewer addresses, but one it does not list, or one that reaches an address the
+//        reading does not name, still refuses the census. Without it the reading and the graph
+//        must agree exactly.
 //
 // The census is written as a result file as well as a table, so the figures the thesis quotes
 // come from a recorded measurement rather than from a database that is not committed.
@@ -21,6 +27,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { extractorStamp } from './provenance.mjs'
+import { mustSiteTargets, readingProblems } from './tier-reading.mjs'
 
 const argv = process.argv.slice(2)
 const flag = (n, d) => { const i = argv.indexOf(n); return i > -1 ? argv[i + 1] : d }
@@ -78,16 +85,10 @@ function censusOf(dbPath) {
     modalityDrift: edges.filter((e) => (e.modality === 'unknown') !== (kind.get(e.to) !== 'screen')).length,
     // A must edge can cite constructs that earn only may on their own; these count the sites that
     // earn must, which is what RQ1's conversion counts, and every site the must edges cite.
-    mustSites: mustSiteKeys(edges).size,
+    mustSites: mustSiteTargets(g).size,
     mustCitedSites: new Set(edges.filter((e) => e.modality === 'must').flatMap((e) => [e.witness, ...(e.mergedWitnesses || [])])
       .filter(Boolean).map((w) => `${w.file}:${w.loc?.line}`)).size,
   }
-}
-
-/** The `file:line` of every construct that earns must on its own, the unit RQ1 counts. */
-function mustSiteKeys(edges) {
-  return new Set(edges.filter((e) => e.modality === 'must').flatMap((e) => [e.witness, ...(e.mergedWitnesses || [])])
-    .filter((w) => w && (w.modality ?? 'must') === 'must').map((w) => `${w.file}:${w.loc?.line}`))
 }
 
 /** Refuses rather than emitting a part that does not account for its whole. */
@@ -99,9 +100,9 @@ function expectSum(total, parts) {
 }
 
 // The chapter says every must construct was read against the source, so a census that finds one
-// the recorded reading does not list refuses to report the tier.
-const reading = new Set(JSON.parse(readFileSync(path.join(import.meta.dirname, 'results-must', 'tier-reading.json'), 'utf8'))
-  .sites.filter((r) => r.verdict === 'must').map((r) => `${r.app}:${r.site}`))
+// the recorded reading does not list, or one whose destinations are not the ones the reading
+// records, refuses to report the tier.
+const reading = JSON.parse(readFileSync(flag('--reading', path.join(import.meta.dirname, 'results-must', 'tier-reading.json')), 'utf8'))
 const rows = []
 for (const [slug, sub] of Object.entries(APPS)) {
   const db = path.join(corpus, slug, sub, 'uigraph.db')
@@ -117,8 +118,8 @@ for (const [slug, sub] of Object.entries(APPS)) {
     throw new Error(`${slug}: ${c.modalityDrift} edges where carrying the unknown modality and reaching a node that is not a screen do not coincide`)
   }
   const g = JSON.parse(new DatabaseSync(db).prepare("select json from docs where key='graph'").get()?.json || '{}')
-  const unread = [...mustSiteKeys(g.edges || [])].filter((k) => !reading.has(`${slug}:${k}`))
-  if (unread.length) throw new Error(`${slug}: ${unread.length} must construct(s) results-must/tier-reading.json does not list, e.g. ${unread[0]}`)
+  const problems = readingProblems(reading, slug, g, { exact: !argv.includes('--reading-subset') })
+  if (problems.length) throw new Error(`${slug}: ${problems.slice(0, 5).join('; ')}`)
   rows.push({ slug, ...c })
 }
 
