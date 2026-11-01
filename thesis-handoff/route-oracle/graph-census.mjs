@@ -19,7 +19,8 @@
 //        the reading was not made on: a construct the reading lists may earn no must edge there,
 //        and reach fewer addresses, but one it does not list, or one that reaches an address the
 //        reading does not name, still refuses the census. Without it the reading and the graph
-//        must agree exactly.
+//        must agree exactly. A construct that earns must only without attribution is listed
+//        with the verdict `must-unattributed`, which only the subset check counts as listed.
 //
 // The census is written as a result file as well as a table, so the figures the thesis quotes
 // come from a recorded measurement rather than from a database that is not committed.

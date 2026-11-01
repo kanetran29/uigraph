@@ -11,6 +11,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { conversion } from './report-counts.mjs'
 
 // One line naming the run a generated table came from, so two tables made from different
 // runs cannot be read as one measurement.
@@ -70,7 +71,7 @@ for (const b of B.results) {
   rows.push({
     slug: b.slug,
     constructs: b.totalConstructs,
-    convBefore: b.conversion, convAfter: a.conversion,
+    convBefore: conversion(b), convAfter: conversion(a),
     mustBefore: b.testB ? [b.testB.mustClean, b.testB.mustEdges] : null,
     mustAfter: a.testB ? [a.testB.mustClean, a.testB.mustEdges] : null,
     edgesBefore: b.graph?.edges, edgesAfter: a.graph?.edges,
@@ -78,8 +79,14 @@ for (const b of B.results) {
   })
 }
 
-const pct = (v) => (v == null ? '--' : `${(v * 100).toFixed(1)}\\%`)
-const pp = (a, b) => (a == null || b == null ? '--' : `${b - a >= 0 ? '+' : ''}${((b - a) * 100).toFixed(1)}`)
+/**
+ * A conversion cell, and the change between two of them in percentage points. Both take
+ * percentages from the ledgers' counts (report-counts.mjs), so these tables, to-latex.mjs and the
+ * figure round a conversion alike, and a fall of less than the four places results.json keeps is
+ * still a fall.
+ */
+const pct = (v) => (v == null ? '--' : `${v.toFixed(1)}\\%`)
+const pp = (a, b) => (a == null || b == null ? '--' : `${b - a >= 0 ? '+' : ''}${(b - a).toFixed(1)}`)
 const frac = (x) => (x && x[1] ? `${x[0]}/${x[1]}` : '--')
 const NAME = { realworld: 'realworld', alfresco: 'alfresco', ghostfolio: 'ghostfolio', k8sdash: 'k8s dashboard', bitwarden: 'bitwarden', mifos: 'mifos' }
 
