@@ -8,12 +8,12 @@ different communities. Sections~\ref{sec:android} to~\ref{sec:dynamic-spa} revie
 lines of prior work that
 are closest to this thesis: static extraction for Android, navigation models for web
 applications, and dynamic state models for single-page applications.
-Section~\ref{sec:formal}
-summarises the three formal ideas the analysis builds on. Section~\ref{sec:asttools} reviews
+Section~\ref{sec:asttools} reviews
 static
 analysis carried out over a source-level syntax tree, and what the type annotations of
 a TypeScript program do and do not contribute to it; this is the tooling style used by
-the analysis in Chapter~\ref{ch:analysis}. Section~\ref{sec:angular} introduces the Angular
+the analysis in Chapter~\ref{ch:analysis}. Section~\ref{sec:formal}
+summarises the three formal ideas the analysis builds on. Section~\ref{sec:angular} introduces the Angular
 mechanisms that the analysis has to deal with and the program analysis problem each of
 them raises, with dependency injection treated at length because it is the mechanism
 that hides the most control flow. Section~\ref{sec:reactive} reviews reactive programming and
@@ -210,69 +210,6 @@ loss quantified.
 The work reported here is located between these analyses and
 the dynamic tools described above.
 
-\section{Formal foundations}
-\label{sec:formal}
-
-The analysis builds on three ideas from the literature: a transition system in which
-edges carry a modality, a stated position on what soundness can mean for a practical
-analysis, and dataflow analysis as the computational framework.
-
-\subsection{Modal transition systems}
-
-The \emph{modal transition system} of Larsen and Thomsen labels each transition as
-either required (\emph{must}) or merely permitted (\emph{may})
-\cite{larsen1988modal}. The graph model in Chapter~\ref{ch:analysis} adopts this
-distinction and adds a third label, \emph{unknown}, for edges whose modality could not
-be determined. The distinction has practical
-consequences: the thesis makes a soundness claim about the must tier only, and the
-evaluation treats the tiers differently, since the evidence behind a may edge
-establishes less than the evidence behind a must edge.
-
-Carrying a modality on the edge also changes what an unresolved construct does to the
-graph. An analysis with a single edge kind has two options when it cannot decide
-whether a transition occurs: emit the edge and lose precision, or drop it and lose
-recall. With a modality the same situation produces an edge whose label records how
-much was established, and a consumer can select the tier it needs. The tiers are
-reported separately in Chapter~\ref{ch:results} for this reason.
-
-\subsection{Soundiness}
-
-Livshits et al.\ argue that practical static analyses are sound only with respect to a
-subset of the language, that this is unavoidable in practice, and that the appropriate
-response is to state explicitly which language features are approximated rather than
-to claim soundness in general \cite{livshits2015soundiness}. This thesis follows that
-recommendation: it states its soundness property only over a declared scope, lists the
-approximated
-Angular constructs with their measured frequency in the corpus, and measures recall
-empirically. The literature reviewed in Sections 2.6 to 2.8 gives the specific reasons
-why a general claim is not available for this setting. Type annotations in TypeScript
-are deliberately not guarantees, framework configuration decides which implementation
-a call reaches, and the firing condition of a reactive computation is not written in
-the program text.
-
-\subsection{Dataflow analysis and abstract interpretation}
-
-Kildall showed that many program analyses can be stated as the computation of a
-fixpoint over a lattice of abstract values, where information is combined with a join
-operation and propagated along the edges of a graph until nothing changes
-\cite{kildall1973unified}. If the lattice has finite height and the transfer functions
-are monotone, the computation terminates and its result does not depend on the order in
-which nodes are visited. Cousot and Cousot gave the general theory behind this approach
-as abstract interpretation \cite{cousot1977abstract}, and Nielson et al.\ give a
-textbook account \cite{nielson1999principles}. Scope attribution in
-Chapter~\ref{ch:analysis} is an instance of this framework. The abstract values are
-sets of screens, the graph is the call graph extended with component nesting, and the
-join is the union of scopes.
-
-The framework is independent of the language being analysed, and it has been applied
-to JavaScript as well; Section~\ref{sec:asttools} describes that work. What a
-particular instance needs is a lattice whose height is bounded and a propagation graph.
-Both are available here: the set of screens is finite, so the lattice of screen sets
-has a height equal to the number of screens, and the call graph with component nesting
-supplies the propagation graph. Where the propagation graph itself is
-incomplete, because a call could not be resolved, the result is incomplete in a way the
-framework does not detect, which is why the scope has to be declared.
-
 \section{Static analysis of JavaScript and TypeScript source}
 \label{sec:asttools}
 
@@ -373,6 +310,69 @@ different template language, a different component model and a different injecto
 template to the code that defines it, which Aurebesh solves for a consistency check.
 Aurebesh targets consistency between templates and controllers rather than
 navigation, and reports no transition graph.
+
+\section{Formal foundations}
+\label{sec:formal}
+
+The analysis builds on three ideas from the literature: a transition system in which
+edges carry a modality, a stated position on what soundness can mean for a practical
+analysis, and dataflow analysis as the computational framework.
+
+\subsection{Modal transition systems}
+
+The \emph{modal transition system} of Larsen and Thomsen labels each transition as
+either required (\emph{must}) or merely permitted (\emph{may})
+\cite{larsen1988modal}. The graph model in Chapter~\ref{ch:analysis} adopts this
+distinction and adds a third label, \emph{unknown}, for edges whose modality could not
+be determined. The distinction has practical
+consequences: the thesis makes a soundness claim about the must tier only, and the
+evaluation treats the tiers differently, since the evidence behind a may edge
+establishes less than the evidence behind a must edge.
+
+Carrying a modality on the edge also changes what an unresolved construct does to the
+graph. An analysis with a single edge kind has two options when it cannot decide
+whether a transition occurs: emit the edge and lose precision, or drop it and lose
+recall. With a modality the same situation produces an edge whose label records how
+much was established, and a consumer can select the tier it needs. The tiers are
+reported separately in Chapter~\ref{ch:results} for this reason.
+
+\subsection{Soundiness}
+
+Livshits et al.\ argue that practical static analyses are sound only with respect to a
+subset of the language, that this is unavoidable in practice, and that the appropriate
+response is to state explicitly which language features are approximated rather than
+to claim soundness in general \cite{livshits2015soundiness}. This thesis follows that
+recommendation: it states its soundness property only over a declared scope, lists the
+approximated
+Angular constructs with their measured frequency in the corpus, and measures recall
+empirically. The literature reviewed in Sections 2.5 to 2.7 gives the specific reasons
+why a general claim is not available for this setting. Type annotations in TypeScript
+are deliberately not guarantees, framework configuration decides which implementation
+a call reaches, and the firing condition of a reactive computation is not written in
+the program text.
+
+\subsection{Dataflow analysis and abstract interpretation}
+
+Kildall showed that many program analyses can be stated as the computation of a
+fixpoint over a lattice of abstract values, where information is combined with a join
+operation and propagated along the edges of a graph until nothing changes
+\cite{kildall1973unified}. If the lattice has finite height and the transfer functions
+are monotone, the computation terminates and its result does not depend on the order in
+which nodes are visited. Cousot and Cousot gave the general theory behind this approach
+as abstract interpretation \cite{cousot1977abstract}, and Nielson et al.\ give a
+textbook account \cite{nielson1999principles}. Scope attribution in
+Chapter~\ref{ch:analysis} is an instance of this framework. The abstract values are
+sets of screens, the graph is the call graph extended with component nesting, and the
+join is the union of scopes.
+
+The framework is independent of the language being analysed, and it has been applied
+to JavaScript as well; Section~\ref{sec:asttools} describes that work. What a
+particular instance needs is a lattice whose height is bounded and a propagation graph.
+Both are available here: the set of screens is finite, so the lattice of screen sets
+has a height equal to the number of screens, and the call graph with component nesting
+supplies the propagation graph. Where the propagation graph itself is
+incomplete, because a call could not be resolved, the result is incomplete in a way the
+framework does not detect, which is why the scope has to be declared.
 
 \section{Angular routing, dependency injection and reactive state}
 \label{sec:angular}
