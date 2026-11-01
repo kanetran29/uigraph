@@ -41,6 +41,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
+import { ts } from 'ts-morph'
 
 const appDir = path.resolve(process.argv[2])
 const dbPath = path.resolve(process.argv[3])
@@ -66,6 +67,47 @@ const files = walk(appDir)
 const cache = new Map()
 const read = (f) => { if (!cache.has(f)) { try { cache.set(f, fs.readFileSync(f, 'utf8')) } catch { cache.set(f, '') } } return cache.get(f) }
 const rel = (f) => path.relative(appDir, f)
+
+// Tokens after which a slash ends an expression (a division), so anywhere else it opens a regex.
+const ENDS_EXPRESSION = new Set([ts.SyntaxKind.Identifier, ts.SyntaxKind.NumericLiteral, ts.SyntaxKind.StringLiteral,
+  ts.SyntaxKind.CloseParenToken, ts.SyntaxKind.CloseBracketToken, ts.SyntaxKind.CloseBraceToken, ts.SyntaxKind.ThisKeyword,
+  ts.SyntaxKind.NoSubstitutionTemplateLiteral, ts.SyntaxKind.TemplateTail, ts.SyntaxKind.PlusPlusToken, ts.SyntaxKind.MinusMinusToken])
+
+/**
+ * `src` with its comments blanked, every character but a newline turned to a space, so offsets and
+ * line numbers stay where they were. A construct written in a comment is not a construct: the
+ * extractor reads neither an HTML comment nor a TypeScript one, and counting one put a link mifos
+ * commented out, and a sentence of a bitwarden comment that names `router.navigate(…)`, into the
+ * denominator as constructs the extractor had lost. HTML comments are blanked in templates and in
+ * inline ones alike; TypeScript comments with the compiler's own scanner, so a `//` inside a string
+ * or a template literal is not taken for one.
+ */
+function withoutComments(src, isTs) {
+  const blank = (s) => s.replace(/[^\n]/g, ' ')
+  const text = src.replace(/<!--[\s\S]*?-->/g, blank)
+  if (!isTs) return text
+  const scanner = ts.createScanner(ts.ScriptTarget.Latest, false, ts.LanguageVariant.Standard, text)
+  const spans = []
+  const substitutions = []
+  let depth = 0
+  let prev = ts.SyntaxKind.Unknown
+  for (let k = scanner.scan(); k !== ts.SyntaxKind.EndOfFileToken; k = scanner.scan()) {
+    if (k === ts.SyntaxKind.SingleLineCommentTrivia || k === ts.SyntaxKind.MultiLineCommentTrivia) { spans.push([scanner.getTokenPos(), scanner.getTextPos()]); continue }
+    if (k === ts.SyntaxKind.WhitespaceTrivia || k === ts.SyntaxKind.NewLineTrivia) continue
+    if ((k === ts.SyntaxKind.SlashToken || k === ts.SyntaxKind.SlashEqualsToken) && !ENDS_EXPRESSION.has(prev)) k = scanner.reScanSlashToken()
+    else if (k === ts.SyntaxKind.TemplateHead) substitutions.push(depth)
+    else if (k === ts.SyntaxKind.OpenBraceToken) depth += 1
+    else if (k === ts.SyntaxKind.CloseBraceToken) {
+      if (substitutions.at(-1) === depth) { k = scanner.reScanTemplateToken(false); if (k === ts.SyntaxKind.TemplateTail) substitutions.pop() }
+      else depth -= 1
+    }
+    prev = k
+  }
+  let out = ''
+  let at = 0
+  for (const [s, e] of spans) { out += text.slice(at, s) + blank(text.slice(s, e)); at = e }
+  return out + text.slice(at)
+}
 
 function resolveImport(fromFile, spec) {
   if (!spec.startsWith('.')) return null
@@ -194,7 +236,7 @@ const NAV = /\b[\w$]*[Rr]outer[\w$]*\s*\.\s*(navigate|navigateByUrl)\s*\(([^\n]*
 
 const constructs = []
 for (const f of files) {
-  const src = read(f)
+  const src = withoutComments(read(f), f.endsWith('.ts'))
   const lines = src.split('\n')
   const isHtml = f.endsWith('.html')
   lines.forEach((line, i) => {
