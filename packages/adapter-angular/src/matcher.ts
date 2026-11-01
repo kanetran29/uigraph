@@ -78,19 +78,25 @@ export function overlaps(address: string, pattern: string, prefix: boolean, ever
 }
 
 /**
- * Where a redirect declared at pattern `at` sends an address the pattern consumes whole, as
- * Angular applies `redirectTo`: each `:name` segment of `to` takes the segment the pattern binds
- * to that name. Null when segments are left over, whose fate turns on whether `to` was written
- * relative, which the full path does not keep, and when `to` names a parameter the pattern does
- * not bind, which Angular rejects.
+ * Where a redirect declared at pattern `at` sends an address it consumes whole, built the way
+ * Angular's applyRedirectCommands builds it (@angular/router 18.2.14 router.mjs:3567-3620). Each
+ * `:name` segment of `to` takes the segment that the redirect route's OWN path binds to that name,
+ * the last `own` segments of `at`: the router hands applyRedirectCommands the positional
+ * parameters of that route's match alone (:3902, :3922; match() :3651-3686), and a catch-all,
+ * which consumes whatever is left, binds none (:3687-3695). A `relative` target, which the walk
+ * joined to the parent's path, keeps the address's segments the parent consumed. Null when
+ * segments are left over, whose fate this does not read, and when `to` names a parameter the
+ * route's own path does not bind: Angular then throws RuntimeError 4001 (findPosParam, :3614-3620)
+ * and the navigation fails, so it lands nowhere.
  */
-export function redirectAddress(address: string, at: string, to: string): string | null {
+export function redirectAddress(address: string, at: string, to: string, own: number, relative: boolean): string | null {
   const a = segments(address)
   const p = segments(at)
-  if (a.length !== p.length || p.includes('*')) return null
-  const bound = new Map(p.flatMap((seg, i) => (seg.startsWith(':') ? [[seg, a[i]!] as const] : [])))
-  const out = to.split('/').map((seg) => (seg.startsWith(':') ? bound.get(seg) : seg))
-  return out.includes(undefined) ? null : out.join('/')
+  const base = p.length - own
+  if (p[p.length - 1] === '*' ? a.length < base : a.length !== p.length) return null
+  const bound = new Map(p.slice(base).flatMap((seg, i) => (seg.startsWith(':') ? [[seg, a[base + i]!] as const] : [])))
+  const out = segments(to).map((seg, i) => (relative && i < base ? a[i] : seg.startsWith(':') ? bound.get(seg) : seg))
+  return out.includes(undefined) ? null : '/' + out.join('/')
 }
 
 /**

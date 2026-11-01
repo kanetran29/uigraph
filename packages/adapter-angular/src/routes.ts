@@ -58,10 +58,10 @@ export interface RouteInfo {
    * Where a navigation to this screen's own address actually lands, when a child at the empty
    * path redirects it (`{ path: '', redirectTo: 'vault', pathMatch: 'full' }` under a layout):
    * Angular matches that child whenever the address is the layout's, so the layout is never
-   * the destination there. Null when the redirect's target is not a string the reader can fix
-   * (a function, a computed value): the screen is still never shown there.
+   * the destination there. Its `to` is null when the redirect's target is not a string the reader
+   * can fix (a function, a computed value): the screen is still never shown there.
    */
-  redirectsTo?: string | null
+  redirectsTo?: Redirect
   /**
    * The components of the routes above this screen that render it inside their outlet but mint no
    * screen of their own, because a route declared before them holds their address: the second and
@@ -75,14 +75,19 @@ export interface RouteInfo {
 
 /**
  * A redirect route, by the full path it is declared at: where it sends an address (null when its
- * `redirectTo` is not a string the reader can fix), whether it also answers every longer
- * address, as `pathMatch: 'prefix'`, Angular's default, does, and the routes from the root to it,
- * which say where in the tables the router meets it.
+ * `redirectTo` is not a string the reader can fix; a relative one joined to its parent's path),
+ * whether it also answers every longer address, as `pathMatch: 'prefix'`, Angular's default,
+ * does, and the routes from the root to it, which say where in the tables the router meets it.
+ * `relative` says `redirectTo` has no leading slash, so the router matches what it builds again in
+ * the redirect's own table; `own` is how many segments the route's own `path` declares, the only
+ * ones whose parameters `redirectTo` may name.
  */
 export interface Redirect {
   to: string | null
   prefix: boolean
   levels: RouteLevel[]
+  relative: boolean
+  own: number
 }
 
 /**
@@ -993,13 +998,14 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
     // Angular takes the first route that matches an address, so the first redirect declared at
     // it is the one that applies.
     const redirectTarget = redirectTo === null ? null : redirectTo.startsWith('/') ? redirectTo : joinRoutePath(parentPath, redirectTo)
+    const relative = redirectTo !== null && !redirectTo.startsWith('/')
     const redirectDeclared = propNamed(obj, 'redirectTo') !== undefined
     if (redirectDeclared && redirects && !auxHere) {
       if (redirectTarget !== null) placed++
       // `pathMatch` defaults to 'prefix', which answers every longer address as well.
       const prefix = stringProp(obj, 'pathMatch') !== 'full'
       const first = redirects.get(fullPath)
-      if (!first) redirects.set(fullPath, { to: redirectTarget, prefix, levels })
+      if (!first) redirects.set(fullPath, { to: redirectTarget, prefix, levels, relative, own: segments(ownPath).length })
       // A later prefix redirect answers the longer addresses the first leaves, from a place in the tables the first does not say.
       else if (prefix && !first.prefix) Object.assign(first, { prefix, levels: [] })
     }
@@ -1021,7 +1027,7 @@ function walkElements(arr: ArrayLiteralExpression, sf: SourceFile, parentPath: s
         host.levels = [...host.levels, level]
         host.guards = [...host.guards, ...entryGuards([level])]
         emptyPathAnswered.add(host)
-      } else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = redirectTarget
+      } else if (host.redirectsTo === undefined && !emptyPathAnswered.has(host)) host.redirectsTo = { to: redirectTarget, prefix: false, levels, relative, own: 0 }
     }
     // Counted whether or not the address is free: the walk read a route and reached an address,
     // and first-declared-wins is a choice between two routes, not a route the walk failed to
