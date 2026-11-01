@@ -44,6 +44,10 @@ out += `\\newcommand{\\TabConversion}{%\n\\begin{tabular}{@{}lrrrrr@{}}\n\\topru
 out += `Application & Constructs & Nodes & Must & May & Conversion \\\\\n\\midrule\n`
 for (const r of R) out += `${NAME[r.slug]} & ${r.totalConstructs} & ${r.graph?.nodes ?? '--'} & ${r.graph?.must ?? '--'} & ${r.graph?.may ?? '--'} & ${convCell(r)} \\\\\n`
 out += `\\bottomrule\n\\end{tabular}}\n\n`
+// The constructs column again, one macro per application, for the sentences that quote it.
+const MACRO = { realworld: 'Realworld', alfresco: 'Alfresco', ghostfolio: 'Ghostfolio', k8sdash: 'Kdash', bitwarden: 'Bitwarden', mifos: 'Mifos' }
+for (const r of R) if (MACRO[r.slug]) out += `\\newcommand{\\Constructs${MACRO[r.slug]}}{${r.totalConstructs}}\n`
+out += `\n`
 
 // ---------------------------------------------------------------- node coverage
 // The differential test disagrees in both directions. Reporting only the matched column
