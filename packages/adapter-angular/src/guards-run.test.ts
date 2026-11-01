@@ -477,3 +477,217 @@ export const routes: Routes = [
     expect(edgeOf(graph, '/a', '/b')?.guard).toContain('ca')
   })
 })
+
+describe('a redirect whose target names a parameter', () => {
+  const { graph, soundiness } = extractGraph(inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { P } from './p.component'
+import { U } from './u.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'p/:pid', children: [{ path: 'x', redirectTo: '/q/:pid', pathMatch: 'full' }] },
+  { path: 'r/:pid', children: [{ path: 'x', redirectTo: 'y/:pid', pathMatch: 'full' }, { path: 'y/:id', component: P }] },
+  { path: 's/:sid', children: [{ path: 'x/:n', redirectTo: 'y/:n', pathMatch: 'full' }, { path: 'y/:id', component: P }] },
+  { path: 'u/:id', component: U, children: [{ path: '', redirectTo: '/q/:id', pathMatch: 'full' }, { path: 'v', component: P }] },
+  { path: 'q/:id', component: P },
+]`,
+    '/app/a.component.ts': page('A', '<a routerLink="/p/7/x">p</a><a routerLink="/r/7/x">r</a><a routerLink="/s/7/x/3">s</a><a routerLink="/u/5">u</a>'),
+    '/app/p.component.ts': page('P'),
+    '/app/u.component.ts': page('U'),
+  }), '/app')
+
+  it('lands nowhere when the parameter is one only a route above the redirect matched, absolute or relative', () => {
+    // Angular passes applyRedirectCommands the positional parameters of the redirect route alone and throws 4001 for any other.
+    expect(edgeOf(graph, '/a', '/q/:id')).toBeUndefined()
+    expect(edgeOf(graph, '/a', '/r/:pid/y/:id')).toBeUndefined()
+    expect(edgeOf(graph, '/a', '/u/:id')).toBeUndefined()
+    const notes = soundiness.filter((n) => n.kind === 'dynamic-target').map((n) => n.detail)
+    for (const t of ['/p/7/x', '/r/7/x', '/u/5']) expect(notes).toContain(`literal target "${t}" is answered by a redirect the reader does not follow, so where it lands is not read`)
+  })
+
+  it('keeps the segments the parent matched for a relative redirect, and binds its own parameters', () => {
+    expect(edgeOf(graph, '/a', '/s/:sid/y/:id')?.modality).toBe('must')
+  })
+})
+
+describe('a redirect after another', () => {
+  const { graph, soundiness } = extractGraph(inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { P } from './p.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'item/:id', redirectTo: 'items/:id', pathMatch: 'full' },
+  { path: 'items/:id', redirectTo: '/products/:id', pathMatch: 'full' },
+  { path: 'products/:id', component: P },
+  { path: 'p', children: [{ path: 'old', redirectTo: 'new', pathMatch: 'full' }] },
+  { path: 'p', children: [{ path: 'new', component: P }] },
+  { path: 'old', redirectTo: 'new', pathMatch: 'full' },
+  { path: 'new', children: [{ path: '', redirectTo: 'x', pathMatch: 'full' }, { path: 'x', component: P }] },
+  { path: 'abs', redirectTo: '/mid', pathMatch: 'full' },
+  { path: 'mid', redirectTo: '/b', pathMatch: 'full' },
+  { path: 'b', component: P },
+  { path: 'twice', redirectTo: 'c', pathMatch: 'full' },
+  { path: 'twice', redirectTo: 'c' },
+  { path: 'c', component: P },
+]`,
+    '/app/a.component.ts': page('A', '<a routerLink="/item/5">i</a><a routerLink="/p/old">p</a><a routerLink="/old">o</a><a routerLink="/abs">b</a><a routerLink="/twice">t</a>'),
+    '/app/p.component.ts': page('P'),
+  }), '/app')
+
+  it('is not applied in the table a relative redirect re-enters, nor is a screen outside that table reached', () => {
+    // The router matches the rewritten address in the redirect's own table, with redirects off there.
+    expect(edgeOf(graph, '/a', '/products/:id')).toBeUndefined()
+    expect(edgeOf(graph, '/a', '/p/new')).toBeUndefined()
+    const notes = soundiness.filter((n) => n.kind === 'dynamic-target').map((n) => n.detail)
+    for (const t of ['/item/5', '/p/old']) expect(notes).toContain(`literal target "${t}" is answered by a redirect the reader does not follow, so where it lands is not read`)
+  })
+
+  it('is not followed from a relative redirect whose place in the tables is not read', () => {
+    // A full and a prefix redirect at one address are kept as one record that says no place.
+    expect(edgeOf(graph, '/a', '/c')).toBeUndefined()
+    expect(soundiness.filter((n) => n.kind === 'dynamic-target').map((n) => n.detail)).toContain('literal target "/twice" is answered by a redirect the reader does not follow, so where it lands is not read')
+  })
+
+  it('is applied below a route of that table', () => {
+    expect(edgeOf(graph, '/a', '/new/x')?.modality).toBe('must')
+  })
+
+  it('holds a chain through an absolute redirect at may, since Angular before 18 applies no redirect after one', () => {
+    expect(edgeOf(graph, '/a', '/b')?.modality).toBe('may')
+  })
+})
+
+describe('an address a nested catch-all answers', () => {
+  it('goes to the deepest catch-all whose parent matches it, not to the root one', () => {
+    const { graph, soundiness } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { P } from './p.component'
+import { NotFound } from './nf.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'adm', children: [{ path: 'x', component: P }, { path: '**', redirectTo: '/adm/x' }] },
+  { path: 'nf', children: [{ path: 'x', component: P }, { path: '**', component: NotFound }] },
+  { path: '**', redirectTo: '/a' },
+]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/adm/zzz">z</a><a routerLink="/adm/zzz/more">m</a><a routerLink="/nf/zzz">n</a>'),
+      '/app/p.component.ts': page('P'),
+      '/app/nf.component.ts': page('NotFound'),
+    }), '/app')
+    expect(edgeOf(graph, '/a', '/adm/x')?.modality).toBe('may')
+    expect(edgeOf(graph, '/a', '/nf/*')?.modality).toBe('may')
+    expect(edgeOf(graph, '/a', '/a')).toBeUndefined()
+    expect(soundiness.filter((n) => n.kind === 'wildcard-redirect' || n.kind === 'unresolved-target').map((n) => n.detail)).toEqual([
+      'literal target "/adm/zzz" matches no declared route and the wildcard route at /adm/* redirects it to /adm/x',
+      'literal target "/adm/zzz/more" matches no declared route and the wildcard route at /adm/* redirects it to /adm/x',
+      'literal target "/nf/zzz" matches no declared route and the wildcard route at /nf/* answers it with its own catch-all screen',
+    ])
+  })
+
+  it('does not put a catch-all screen in place of a catch-all redirect it cannot follow', () => {
+    const { graph } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { NotFound } from './nf.component'
+export const routes: Routes = [{ path: 'a', component: A }, { path: '**', redirectTo: () => '/a' }, { path: '**', component: NotFound }]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/zzz">z</a>'),
+      '/app/nf.component.ts': page('NotFound'),
+    }), '/app')
+    expect(edgeOf(graph, '/a', '*')).toBeUndefined()
+  })
+})
+
+describe('the sub-rules of a catch-all that hides a screen', () => {
+  const { graph } = extractGraph(inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { A } from './a.component'
+import { X } from './x.component'
+import { P } from './p.component'
+import { NotFound } from './nf.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'x', component: X, children: [{ path: 'k', component: P }, { path: '**', component: NotFound }] },
+  { path: 'p/7', children: [{ path: '**', component: NotFound }] },
+  { path: 'p/:id', children: [{ path: 'z', component: X }] },
+  { path: '**', component: NotFound },
+  { path: 'late', component: X },
+]`,
+    '/app/a.component.ts': page('A'),
+    '/app/x.component.ts': page('X', '<a routerLink="/a">a</a><router-outlet></router-outlet>'),
+    '/app/p.component.ts': page('P'),
+    '/app/nf.component.ts': page('NotFound'),
+  }), '/app')
+
+  it('does not hide a screen behind a catch-all screen below it, which renders inside it', () => {
+    expect(edgeOf(graph, '/x', '/a')?.modality).toBe('must')
+  })
+
+  it('hides a screen behind a catch-all screen the router meets first', () => {
+    expect(edgeOf(graph, '/late', '/a')?.modality).toBe('may')
+  })
+
+  it('hides a screen only behind a catch-all that answers every address it stands for', () => {
+    // /p/7/z goes to the catch-all under p/7, and /p/8/z still shows X.
+    expect(edgeOf(graph, '/p/:id/z', '/a')?.modality).toBe('must')
+  })
+})
+
+describe('the separately registered tables a catch-all is assumed to follow', () => {
+  it('records the assumption once for the application when it dismisses a rival catch-all', () => {
+    const { soundiness } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const ROOT: Routes = [{ path: 'a', component: A }, { path: '**', redirectTo: '/a' }]`,
+      '/app/feature.routes.ts': `import type { Routes } from '@angular/router'\nimport { P } from './p.component'\nexport const FEATURE: Routes = [{ path: 'b', component: P }, { path: 'c', component: P }]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/b">b</a><a routerLink="/c">c</a>'),
+      '/app/p.component.ts': page('P'),
+    }), '/app')
+    const notes = soundiness.filter((n) => n.kind === 'route-order')
+    expect(notes).toHaveLength(1)
+    expect(notes[0]!.detail).toContain('* (app.routes.ts)')
+  })
+
+  it('dismisses no other redirect of a table registered apart, and records nothing then', () => {
+    const { graph, soundiness } = extractGraph(inMemory({
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const ROOT: Routes = [{ path: 'a', component: A }, { path: 'b', redirectTo: '/a', pathMatch: 'full' }]`,
+      '/app/feature.routes.ts': `import type { Routes } from '@angular/router'\nimport { P } from './p.component'\nexport const FEATURE: Routes = [{ path: 'b', component: P }]`,
+      '/app/a.component.ts': page('A', '<a routerLink="/b">b</a>'),
+      '/app/p.component.ts': page('P'),
+    }), '/app')
+    expect(edgeOf(graph, '/a', '/b')?.modality).toBe('may')
+    expect(soundiness.filter((n) => n.kind === 'route-order')).toEqual([])
+  })
+})
+
+describe('the sub-rules of a named-outlet route run again', () => {
+  const run = (aux: string) => extractGraph(inMemory({
+    '/app/guards.ts': `export const ca = () => true\nexport const cac = () => true\nexport const leave = () => true\nexport class R { resolve() { return null } }`,
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { ca, cac, leave, R } from './guards'
+import { A } from './a.component'
+import { P } from './p.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'b', component: P },
+  ${aux}
+]`,
+    '/app/a.component.ts': page('A', '<a routerLink="/b">b</a>'),
+    '/app/p.component.ts': page('P', '<a routerLink="/p/2/y">y</a><router-outlet></router-outlet>'),
+  }), '/app').graph
+
+  it('runs the canActivate of one mounted below the root, whose parent a navigation may give new parameters', () => {
+    const graph = run(`{ path: 'p/:id', component: P, children: [{ path: 'x', component: P }, { path: 'y', component: P }, { path: 'chat', component: P, outlet: 'side', canActivate: [ca] }] },`)
+    expect(edgeOf(graph, '/p/:id/x', '/p/:id/y')?.modality).toBe('may')
+    expect(edgeOf(graph, '/p/:id/x', '/p/:id/y')?.guard).toContain('ca')
+  })
+
+  it('runs the canActivateChild above one that runs again', () => {
+    const graph = run(`{ path: 'chat', outlet: 'side', canActivateChild: [cac], children: [{ path: 'room', component: P, canDeactivate: [leave], runGuardsAndResolvers: 'always' }] },`)
+    expect(edgeOf(graph, '/a', '/b')?.guard).toContain('cac')
+  })
+
+  it('awaits the resolvers of one that runs again', () => {
+    const graph = run(`{ path: 'chat', component: P, outlet: 'side', resolve: { d: R }, runGuardsAndResolvers: 'always' },`)
+    expect(edgeOf(graph, '/a', '/b')?.modality).toBe('may')
+  })
+})
