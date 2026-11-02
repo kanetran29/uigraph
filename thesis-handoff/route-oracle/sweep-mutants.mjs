@@ -16,7 +16,9 @@
 // controls mode. Id 106 is retired with the redirect rework: a catch-all is now among the redirects
 // the router may meet, in declaration order, and 106a deletes the term that limits the order
 // assumption to catch-alls instead. Ids 162 to 164 delete the refusal of a relative target that
-// climbs above the root. Id 128 is retired as equivalent: an empty-path child's unreadable redirect is also
+// climbs above the root. Ids 165 to 172 delete the parts of the supersede reading that look past the
+// statements after a navigation: the rest of its expression, its function's callers, and the
+// lifecycle hooks Angular calls later. Id 128 is retired as equivalent: an empty-path child's unreadable redirect is also
 // registered in the redirect table at the same address, which hides the screen and makes the
 // address ambiguous whether or not the screen records it too. Id 110 is retired as equivalent: two distinct route levels share a parent
 // only as elements of one array (a spread, a `children` call and a named constant each give its
@@ -183,8 +185,8 @@ export const MUTANTS = [
     find: "if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue",
     replace: "if (templateCondition(tpl!.text, b.index) !== null) continue" },
   { id: "24", rule: "supersededAt always false", file: "conditions.ts",
-    find: "function supersededAt(call: CallExpression): boolean {\n",
-    replace: "function supersededAt(call: CallExpression): boolean {\n  return false\n" },
+    find: "function supersededAt(call: CallExpression, seen = new Set<Node>()): boolean {\n",
+    replace: "function supersededAt(call: CallExpression, seen = new Set<Node>()): boolean {\n  return false\n" },
   { id: "25", rule: "control-flow block returns null", file: "conditions.ts",
     find: "if (braces.includes('block')) return 'control-flow block'",
     replace: "if (braces.includes('block')) return null" },
@@ -581,8 +583,8 @@ export const MUTANTS = [
   { id: "155", rule: "supersededAt: finally block not read", file: "conditions.ts",
     find: "      if (fin && mayNavigate(fin, seen)) return true\n",
     replace: "" },
-  { id: "156", rule: "supersededAt: an awaited navigation taken as superseded", file: "conditions.ts",
-    find: "    if (navigates && Node.isAwaitExpression(parent)) return false\n",
+  { id: "156", rule: "supersededAt: an awaited navigation taken as superseded by what follows it", file: "conditions.ts",
+    find: "    if (awaited) continue\n",
     replace: "" },
   { id: "157", rule: "firmOutlet: one candidate of an ambiguous placement taken for all", file: "attribute.ts",
     find: "cands.length > 0 && cands.every(",
@@ -608,4 +610,28 @@ export const MUTANTS = [
   { id: "164", rule: "climbsAboveRoot always false", file: "matcher.ts",
     find: "  if (!ownerPath || target.startsWith('/') || target === '*') return false\n  const own = segments(ownerPath).length\n",
     replace: "  if (!ownerPath || target.startsWith('/') || target === '*') return false\n  const own = segments(ownerPath).length\n  return false && own > 0\n" },
+  { id: "165", rule: "laterInExpression: the body of a call the navigation is an argument of not counted", file: "conditions.ts",
+    find: " || (Node.isCallExpression(node) && calleeBodies(node).some((b) => mayNavigate(b, seen)))",
+    replace: "" },
+  { id: "166", rule: "laterInExpression: a right operand not counted", file: "conditions.ts",
+    find: "if (Node.isBinaryExpression(node)) return node.getLeft() === child && mayNavigate(node.getRight(), seen)",
+    replace: "if (Node.isBinaryExpression(node)) return false" },
+  { id: "167", rule: "laterInExpression: conditional branches not counted", file: "conditions.ts",
+    find: "if (Node.isConditionalExpression(node)) return node.getCondition() === child && (mayNavigate(node.getWhenTrue(), seen) || mayNavigate(node.getWhenFalse(), seen))",
+    replace: "if (Node.isConditionalExpression(node)) return false" },
+  { id: "168", rule: "laterInExpression: later array elements not counted", file: "conditions.ts",
+    find: "if (Node.isArrayLiteralExpression(node)) return after(node.getElements())",
+    replace: "if (Node.isArrayLiteralExpression(node)) return false" },
+  { id: "169", rule: "supersededAt: the rest of the expression not read", file: "conditions.ts",
+    find: "    if (laterInExpression(parent, node, seen)) return true\n",
+    replace: "" },
+  { id: "170", rule: "laterAfterReturn: callers in the class not followed", file: "conditions.ts",
+    find: "  return callers.some((c) => supersededAt(c, seen))",
+    replace: "  return callers.length < 0" },
+  { id: "171", rule: "laterAfterReturn: later lifecycle hooks not read", file: "conditions.ts",
+    find: "  const step = CREATION_ORDER.indexOf(name)",
+    replace: "  const step = -1 + 0 * CREATION_ORDER.length" },
+  { id: "172", rule: "supersededAt: an awaited navigation stops the walk before its callers", file: "conditions.ts",
+    find: "    if (navigates && node === call && Node.isAwaitExpression(parent)) awaited = true\n",
+    replace: "    if (navigates && node === call && Node.isAwaitExpression(parent)) return false\n" },
 ]
