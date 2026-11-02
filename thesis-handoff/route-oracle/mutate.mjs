@@ -59,6 +59,12 @@
 // keyed on the resolved screens rather than on a substring of the path literal; where no
 // screen resolves it falls back to any guard change, which the chapter states.
 //
+// Harness 1.9.1. Change against 1.9.0: a REMOVE_GUARD route's screens are matched by the file
+// its routing module imports each component class from, not by the class name alone. Bitwarden
+// declares two AccountComponent classes, and 1.9.0 counted edges into the user's /settings/account
+// as entering the organisation's, so it scored a guard whose screen no edge enters and called
+// the empty response a miss.
+//
 // Harness 1.9.0. Change against 1.8.0: CHANGE_NAV_TARGET replaces the whole command array with
 // the new destination instead of its first element, skips a site whose first element is not a
 // plain string, draws the destination from the declared routes alone so both configurations
@@ -93,7 +99,7 @@ import { execSync } from 'node:child_process'
 import { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
-import { guardedRoute, lostGuard, namedGuards } from './guard-resolve.mjs'
+import { guardedRoute, importedFrom, isModuleFile, lostGuard, namedGuards } from './guard-resolve.mjs'
 import { extractorStamp } from './provenance.mjs'
 
 const argv = process.argv.slice(2)
@@ -109,7 +115,7 @@ const SEED = parseInt(flag('--seed', '20261021'), 10)
 const jsonOut = flag('--json', null)
 const MAP_CMD = process.env.UIGRAPH_MAP || flag('--map-cmd', 'uigraph')
 const DB = path.join(appDir, 'uigraph-mutate.db')
-const HARNESS_VERSION = 'mutate 1.9.0'
+const HARNESS_VERSION = 'mutate 1.9.1'
 
 /** Deterministic PRNG so that a reported sample can be reproduced exactly. */
 function mulberry32(a) {
@@ -311,7 +317,7 @@ function discover(routes, screensOfRoute, rnd) {
 
     for (const m of src.matchAll(/\bcanActivate:\s*\[[^\]]*\],?/g)) {
       const route = guardedRoute(src, m.index)
-      const screens = route ? screensOfRoute(route) : []
+      const screens = route ? screensOfRoute(route, src, f) : []
       const reached = screens.filter((x) => x.entered).map((x) => x.route)
       // The guards the removed list names, as the extractor writes a named guard on an edge.
       const { names: named, complete } = namedGuards(m[0])
@@ -366,9 +372,15 @@ console.log(`             ${guardedTargets.length} screens are entered by at lea
 // class that renders it, but not the source location of the route entry that declares it, so
 // the classes and module paths a route's subtree names are what its screens are looked up by.
 const enteredIds = new Set(baseline.edges.map((e) => e.to))
-const screensOfRoute = (route) => baseline.nodes
+// A class the routing file imports by a relative path is matched by that file too, since two
+// classes may share a name (harness 1.9.1).
+const screensOfRoute = (route, src, file) => baseline.nodes
   .filter((n) => n.kind === 'screen' && n.route &&
-    (route.components.some((c) => (n.label || '').includes(c)) ||
+    (route.components.some((c) => {
+      if (!(n.label || '').includes(c)) return false
+      const mod = importedFrom(src, c, file, appDir)
+      return mod === null || !n.componentPath || isModuleFile(n.componentPath, mod)
+    }) ||
      route.modules.some((m) => (n.componentPath || '').endsWith(`${m.replace(/^\.\//, '')}.ts`))))
   .map((n) => ({ route: n.route, entered: enteredIds.has(n.id) }))
 

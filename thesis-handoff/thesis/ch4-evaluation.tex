@@ -101,8 +101,10 @@ corrections were made because it disagreed with the extractor. Attributes such a
 \texttt{routerLinkActive} are not constructs; counting them by substring was one of the
 corrections described in Section~\ref{sec:corrections}.
 
-\textbf{Conversion ratio (RQ1).} The conversion ratio is the fraction of navigation
-constructs that are witnessed by at least one must edge. When several constructs
+\textbf{Conversion ratio (RQ1).} The conversion ratio is the fraction of in-scope navigation
+constructs that are witnessed by at least one must edge; query-only navigations and the two
+exclusions of Table~\ref{tab:loss-rules} are left out of the denominator as well as the
+numerator. When several constructs
 produce the same edge, the extractor keeps the most certain as the edge's witness and records
 the others as merged witnesses, each with the modality it earns on its own, so every construct
 that yields an edge can be traced; on the current instrument a construct counts as converted
@@ -370,8 +372,9 @@ compared with the addresses the framework mounts. Nothing in this method re-read
 route files, which is the point: the answer comes from the application's own code. Which
 addresses in that configuration count as mounted is itself a reading, so it is checked
 against the framework's behaviour: the harness navigates the running application to a
-list of addresses and records what the recogniser made of each one, before any guard
-runs. &
+list of addresses and records what the recogniser made of each one, before any
+\texttt{canActivate} guard runs and after the \texttt{canLoad} and \texttt{canMatch} guards
+that take part in matching. &
 Requires the application to build and boot, which fixes the method to applications
 that can be built without their server. It reads the configuration rather than the
 rendered screen, so a route that a guard always refuses still counts as mounted, and a

@@ -1255,15 +1255,18 @@ applications, because an exclusion that drops a component should be shown to dro
 no address reaches rather than argued to. Navigating the primary address each of them sits
 under (\path{/personal-files} in alfresco; \path{/namespace}, \path{/event} and
 \path{/clusterrole} in k8s dashboard; \path{/login}, \path{/signup} and
-\path{/login-with-device} in bitwarden) activates the primary screen in every case and
-none of the outlet components. Addressing them directly in Angular's own compound form,
-\path{/personal-files(viewer:view/abc123)}, \path{/namespace(actionbar:)},
-\path{/login(secondary:)} and \path{/login(environment-selector:)}, is not recognised by
-the router at all: each is answered by a redirect to the sign-in screen. These entries are
-therefore regions the application activates programmatically, through a navigation that
-names the outlet, and not addresses a user can reach; the alfresco viewer's are the ones
-Section~\ref{sec:ownership} already declares outside the node set, and the rest are outside
-it for the same reason. Those navigations are the construct the ledger excludes as
+\path{/login-with-device} in bitwarden) is recognised as the primary screen in every case.
+The observer reads the primary outlet's chain only, so whether an outlet component is also
+activated at those addresses is not measured. Addressing the outlets directly in Angular's
+own compound form, \path{/personal-files(viewer:view/abc123)}, \path{/namespace(actionbar:)},
+\path{/login(secondary:)} and \path{/login(environment-selector:)}, produced no recognition
+event at all: the router stayed at the address it held before the attempt, which in all four
+was a sign-in screen. That shows the four compound addresses unmatched from a signed-out
+session, not that no address reaches an outlet, and the measurement does not settle how the
+applications reach them. The exclusion therefore rests on the ledger, not on the probe: the
+alfresco viewer's entries are the ones Section~\ref{sec:ownership} already declares outside the
+node set, and the rest are outside it for the same reason, a region filled by a navigation that
+names the outlet rather than by a primary address. Those navigations are the construct the ledger excludes as
 addressing a secondary outlet, so the two exclusions are the same fact seen from the two
 ends.
 

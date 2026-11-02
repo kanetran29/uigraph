@@ -14,7 +14,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterAll, describe, expect, it } from 'vitest'
-import { lostGuard, namedGuards } from './guard-resolve.mjs'
+import { importedFrom, isModuleFile, lostGuard, namedGuards } from './guard-resolve.mjs'
 import { adapterSrcTree, extractorStamp } from './provenance.mjs'
 import { conversion, judgedSites, pct1 } from './report-counts.mjs'
 import { MUTANTS, applyMutant, judge, mutationProblems, sweepRecord, unappliedIds } from './sweep-mutants.mjs'
@@ -661,6 +661,22 @@ describe('REMOVE_GUARD detection (code panel 33)', () => {
     expect(namedGuards('canActivate: [a.b(c)(d)],')).toEqual({ names: [], complete: false })
   })
 
+  it('tells two component classes of one name apart by the file the routing module imports (bitwarden AccountComponent)', () => {
+    const app = '/c/apps/web'
+    const file = `${app}/src/app/admin-console/organizations/settings/organization-settings-routing.module.ts`
+    const src = `import { NgModule } from "@angular/core";\nimport { AccountComponent } from "./account.component";\nimport { X as Y } from "../y";\n`
+    const mod = importedFrom(src, 'AccountComponent', file, app)
+    expect(mod).toBe('src/app/admin-console/organizations/settings/account.component')
+    expect(isModuleFile('src/app/admin-console/organizations/settings/account.component.ts', mod)).toBe(true)
+    expect(isModuleFile('src/app/auth/settings/account/account.component.ts', mod)).toBe(false)
+    expect(importedFrom(src, 'Y', file, app)).toBe('src/app/admin-console/organizations/y')
+    // A class from a package or declared in the file gives no file to match, so the name alone decides.
+    expect(importedFrom(src, 'NgModule', file, app)).toBe(null)
+    expect(importedFrom(src, 'Missing', file, app)).toBe(null)
+    // A directory specifier whose index re-exports the class.
+    expect(isModuleFile('src/app/x/policies/policies.component.ts', 'src/app/x/policies')).toBe(true)
+  })
+
   it('counts the lost guard only when the removed list names it', () => {
     expect(lostGuard([change('x,y', 'x')], ['y'])).toBe(true)
     // The edge lost y; the list removed z. That is some other change, not a detection.
@@ -701,8 +717,8 @@ describe('REMOVE_GUARD detection (code panel 33)', () => {
     run('mutate.mjs', [app, app, '--quota', '8', '--json', out], { env: { UIGRAPH_MAP: cli } })
     const r = JSON.parse(fs.readFileSync(out, 'utf8'))
     const guard = r.results.find((x) => x.kind === 'REMOVE_GUARD')
-    // Not '1.9.0' alone: the thesis prints this string as \HarnessVersionMutation.
-    expect(r.harnessVersion).toBe('mutate 1.9.0')
+    // Not '1.9.1' alone: the thesis prints this string as \HarnessVersionMutation.
+    expect(r.harnessVersion).toBe('mutate 1.9.1')
     expect(guard.verdict).toBe('DETECTED')
     expect(guard.delta.guardChanged).toHaveLength(5)
   }, 180000)
