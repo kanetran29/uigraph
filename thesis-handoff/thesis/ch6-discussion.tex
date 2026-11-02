@@ -58,12 +58,12 @@ The answer to RQ3 has to be read against what the loss rules can and cannot deli
 Because a lost construct is assigned to the first class that applies
 (Table~\ref{tab:loss-rules}), a construct inside a shared component that only appears
 in screens without nodes is counted as an attribution loss, although attribution alone
-cannot recover it. The measurement does not show the converse: every one of the
-\AttrRecovered{} conversions came out of a construct the rules had already assigned to an
-attribution class, and none out of a node class (Table~\ref{tab:recovery-source}). The
-misclassification therefore runs one way only on this instrument: the class can hold a
-construct attribution alone cannot recover, but nothing attribution recovered was classified
-elsewhere. The class is thus an upper bound on what attribution can repair and not a measure
+cannot recover it. The measurement shows the converse only in a small way: of the conversions attribution made,
+\AttrRecovered{} came out of a construct the rules had already assigned to an attribution class,
+none out of a node class, and two out of the residual class to which no rule applied
+(Table~\ref{tab:recovery-source}). The misclassification therefore runs mostly one way on this
+instrument: the class can hold a construct attribution alone cannot recover, and only two
+constructs attribution recovered were classified elsewhere, neither in a node class. The class is thus an upper bound on what attribution can repair and not a measure
 of it. On realworld attribution recovered every one of its
 attribution losses, must tier and may tier together
 (Table~\ref{tab:before-after}), and Table~\ref{tab:remaining} records no remaining loss
@@ -71,26 +71,26 @@ there under any heading.
 The gap between the bound and what was recovered elsewhere is accounted for by
 Table~\ref{tab:remaining}, and three of its reasons are not attribution problems at
 all: the target screen has no node, the owning component is never reached from any
-screen, or the site sits in a service or a guard that the instrument those tables measure did not
-analyse.
+screen, or the site sits in a service or a guard by a receiver or provider form the call graph does not
+resolve.
 No construct that the baseline converted was lost (\AttrRegressed{} leave the converted classes),
 so the coverage gain cost the baseline nothing. The gain does widen the must tier: after the
 fourth correction of Section~\ref{sec:res-round2} that tier holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, the added edges being
 the links of realworld's and k8sdash's shells placed on every screen the shell renders. On the
-instrument before that correction every must edge passed the witness check in both runs
-(\RoundMustClean{} after attribution, as the round's tables printed it), so attribution introduced
-no edge that names the wrong destination. Whether those edges occurred on every input is the
+instrument before that correction every must edge of the round's tier passed the witness check
+(\RoundMustClean{} after attribution, as the round's tables printed it), a tier that held none of
+k8sdash's edges, so that run says nothing of the edges attribution added there later. Whether those edges occurred on every input is the
 question the fourth correction answered, and for most of them the answer was no. On the final instrument
 the check finds \MustWitnessViolations{} failures among the \MustWitnessEdges{} must edges and
-cannot read the destination of \MustWitnessUnread{}.
+cannot read the destination of \MustWitnessUnread{}, all of them k8sdash's toolbar edges, so of
+that application's must edges only about half are read by the check.
 
-The part of the model that the instrument of those tables did not implement had a measurable
+The part of the model that an earlier instrument did not implement had a measurable
 price. Navigation sites in services, guards, interceptors, resolvers
 and effects are counted separately, and in absolute terms they are a small class across
 the corpus, yet they are not spread evenly: in one application they are almost as large
-as the shared-component class (Table~\ref{tab:loss}), and after the implemented pass had run they
-were the only remaining loss that the analysis as specified would have recovered
-(Table~\ref{tab:remaining}). The call graph with dependency injection, which the current
+as the shared-component class (Table~\ref{tab:loss}), and before the call graph was added they
+were the only remaining loss that the analysis as specified would have recovered. The call graph with dependency injection, which the current
 extractor implements (Section~\ref{sec:res-ablation}), was thus required for applications that
 navigate from services; the dispatch relation is still not implemented.
 
@@ -131,7 +131,8 @@ The distance between those two counts is where RQ1's coverage shows up in this e
 the constructs that attribution puts into the graph are largely the ones the baseline run had
 to exclude. Either count is a coverage result and not a sensitivity one. The
 conclusion is therefore conditional: given that a construct is represented in
-the graph, a change to it is almost always visible in the graph, and the probability
+the graph, every scored change to it was visible in the graph, for the operators sampled on three
+applications (\MutFallibleDetected{} of \MutFallibleScored{} fallible mutants), and the probability
 that it is represented at all is what RQ1 measures. For change impact analysis this form
 of claim is appropriate, because an impact query is only ever asked about the part of
 the application that the model represents, and the graph states which part that is
@@ -198,9 +199,11 @@ methods can. The hand-read structural reference answers it in both directions, b
 call graph replaced, which joined a navigating service over its injectors, asserted
 \GTClassExcess{} pairs outside it at one site, and the call graph was written after that finding and
 scored on the same ground truth, so the clean figure confirms the repair rather than testing the
-call graph independently. The level that stands for what earlier work reaches already recovers
-\GTRootedRecall{} of the reference pairs with none outside it. Beyond \GTApp{} only the runtime method
-applies, on \ScopeApps{} of the six applications, and it answers half of the question (Section~\ref{sec:res-scope}): of the
+call graph independently. The levels that stand for what earlier work reaches already recover
+\GTRootedRecall{} (shell rule) and \GTOutletRecall{} (with the enclosing routes) of the reference
+pairs with none outside it. Beyond \GTApp{} only the runtime method
+applies, on \ScopeApps{} of the six applications, and it answers half of the question, on an
+earlier graph than the final call graph and on \ScopeJudged{} of \ScopeScreens{} screens (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
 judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}
 that are not turn out to be sites attribution declined to place at all rather than sites it
@@ -363,8 +366,10 @@ by reading the application source, by the same person who wrote both implementat
 
 \textbf{Experimenter bias.} I wrote the extractor, and I also designed the evaluation,
 selected the corpus and defined the defect classes. The mitigations actually
-applied are the following. The selection criteria were fixed before any results were
-obtained, and the rejected candidates are reported with their reasons. The construct
+applied are the following. The six selection criteria were fixed before any results were
+obtained, and the rejected candidates are reported with their reasons; one rejection was on tool
+support, a ground outside the criteria, and two retained applications do not meet the test-suite
+criterion (Section~\ref{sec:corpus}). The construct
 counts and the declared screens come from a parser that shares no code with the
 extractor, with the qualification above: for the path forms added in Section~\ref{sec:res-round2}
 the two resolve the same constructs by the same rules, so that mitigation does not cover
@@ -383,7 +388,14 @@ worse. Several
 controls were not applied: there was no blinding, no second annotator for the
 loss classification and no independent audit of the residual constructs that were
 inspected by hand, and the defect classes were defined after the first observations
-rather than in advance. The requirement of two independent lines of evidence per
+rather than in advance. The source-level readings of the must tier, two of the round's 30
+constructs and one of the final 25, were made by the AI assistant declared at the front, which
+also helped write the extractor and the route parser, and the final reading was made with the
+extractor's decisions in view; no human second reader checked them, so their agreement with the
+extractor shows consistency with the stated rules and not independent correctness. The
+repairs of Section~\ref{sec:res-round2} were also found on, and are measured on, the same six
+applications, and no held-out application was measured, so the post-repair figures are fitted to
+this corpus. The requirement of two lines of evidence per
 defect class is the strongest control that was applied to that last point, and it is the
 reason one class is still reported as a candidate. It is a weaker control than it first
 appears: Table~\ref{tab:defects} shows that four of the five accepted classes are
@@ -854,8 +866,8 @@ supplied its scope would narrow the verdict further: the ground truth here shows
 \emph{sites} are wrong, and that would show which \emph{rule} made them wrong without having
 to re-extract once per rule.
 
-The two defects that cap the larger applications are the most urgent, because nothing else in the
-analysis can be evaluated properly while they stand. Both were repaired in the course of
+The two defects that capped the larger applications were the most urgent, because nothing else in
+the analysis could be evaluated properly while they stood. Both were repaired in the course of
 answering RQ5, so what follows describes what the work was rather than what remains:
 resolving constant-valued route paths means following a path expression to its definition
 and folding it, which is a local analysis over the route tables and turned the
@@ -925,7 +937,8 @@ Section~\ref{sec:limitations}, provided that applications the extractor handles 
 kept in the corpus rather than rejected. A case study on a proprietary industrial
 application, reporting only aggregate figures, is the most direct answer to the external
 validity threat, since an open-source corpus cannot show enterprise routing
-style. A minimum density of user interface tests should become an explicit
+style. A minimum density of user interface tests, rather than the presence of test configuration
+that criterion (4) of Section~\ref{sec:corpus} asked for, should become an explicit
 selection criterion whenever execution-based ground truth is needed, since the candidate
 pool showed that this density falls as applications grow, and without such a criterion a
 study ends up with its oracle and its scale on different applications.

@@ -3,14 +3,14 @@
 \newcommand{\TabBeforeAfter}{%
 \begin{tabular}{@{}lrrrrrrrr@{}}
 \toprule
- & \multicolumn{3}{c}{Conversion} & \multicolumn{2}{c}{Must-tier clean} & \multicolumn{3}{c}{Attribution losses, recovered} \\
+ & \multicolumn{3}{c}{Conversion} & \multicolumn{2}{c}{Must, read and passed} & \multicolumn{3}{c}{Attribution losses, recovered} \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-9}
 Application & Before & After & pp & Before & After & Before & must & may \\
 \midrule
 realworld & 2.6\% & 7.7\% & +5.1 & 1/1 & 9/9 & 22 & 2 & 20 \\
 alfresco & 0.0\% & 0.0\% & +0.0 & -- & -- & 18 & 0 & 4 \\
 ghostfolio & 0.0\% & 0.0\% & +0.0 & -- & -- & 72 & 0 & 32 \\
-k8s dashboard & 0.0\% & 2.9\% & +2.9 & -- & 125/125 & 56 & 0 & 8 \\
+k8s dashboard & 0.0\% & 2.9\% & +2.9 & -- & 63/125 & 56 & 0 & 8 \\
 bitwarden & 0.9\% & 0.9\% & +0.0 & 1/1 & 1/1 & 52 & 0 & 16 \\
 mifos & 1.4\% & 1.4\% & +0.0 & 15/15 & 15/15 & 234 & 0 & 210 \\
 \midrule
@@ -23,7 +23,7 @@ All & & & & & & 454 & 2 & 290 \\
 Reason & rw & alf & gf & k8s & bw & mif & Total \\
 \midrule
 Owner component not reached from any screen & 0 & 8 & 11 & 5 & 18 & 1 & 43 \\
-In a service or guard (not implemented) & 0 & 6 & 4 & 4 & 8 & 7 & 29 \\
+In a service or guard, not placed & 0 & 6 & 4 & 4 & 8 & 7 & 29 \\
 Scope found, target screen has no node & 0 & 0 & 23 & 2 & 6 & 3 & 34 \\
 Scope found, target fully dynamic & 0 & 0 & 2 & 37 & 2 & 13 & 54 \\
 Scope found, not explained & 0 & 0 & 0 & 0 & 2 & 0 & 2 \\

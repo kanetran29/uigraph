@@ -73,7 +73,7 @@ Major: & Computer Science \\
 A UI transition graph describes the screens of an application and the transitions a
 user can cause between them. Earlier work extracts such graphs statically from the route
 declarations of client-side web applications, but none that this review found
-measures what the extraction fails to read. This thesis makes that measurement on six
+classifies what the extraction fails to read across a corpus. This thesis makes that measurement on six
 open-source Angular applications with \RoundTwoRoutesRealworld{} to \RoundTwoRoutesMifos{}
 declared route entries, with four methods that read the sources and one that reads the
 running application.
@@ -83,7 +83,7 @@ soundness property rests on are applied, \CensusMustSites{} constructs yield \Ce
 must edges; \CensusMustSitesKdash{} of those constructs, one application's toolbar, account
 for \CensusMustKdash{} of the edges, and \RouteOrderResting{} edges rest on an assumption
 about route order the extractor does not read. The extractor mints a node for every
-declared screen two independent static readers find, but a runtime check of the route
+declared screen two separately written static readers find, but a runtime check of the route
 configuration finds \ProbeMissed{} mounted addresses with no node, \ProbeMissedGhostfolio{}
 of them in one application. Every lost construct is assigned to a defect class; after the
 node-level defects were repaired, attribution of a navigation site to the screens it fires
@@ -92,17 +92,15 @@ extractor could read and did not.
 
 The thesis therefore formulates scope attribution as a dataflow analysis over screen sets,
 a fixpoint over component nesting, router outlets and a call graph that accounts for
-dependency injection. Its contribution beyond earlier work is modest. Attributing what the
-root component renders to every screen, which earlier work already does, reaches
-\GTRootedRecall{} of the hand-read (site, screen) pairs on \GTApp{}, against \GTFullRecall{}
-for the full analysis. Across the corpus, the mechanisms above the shell rule add
-\AblationAboveRootedSites{} placed sites, \AblationAboveRootedShare{} of the total: outlet descent
-\AblationOutletAddedShare{}, and the call graph with its fallback join and stand-ins
-\AblationFullAddedShare{}, the call graph alone \AblationCallGraphNetShare{}. Attribution recovers \AttrRecoveredShare{} of the constructs in its
+dependency injection. Its contribution beyond earlier work is modest. The mechanisms
+earlier work has (the root component on every screen, plus the enclosing routes) reach
+\GTOutletRecall{} of a hand-read structural reference of (site, screen) pairs on \GTApp{}, against
+\GTFullRecall{} for the full analysis; across the corpus the call graph, its fallback join and
+stand-ins add \AblationFullAddedSites{} placed sites, \AblationFullAddedShare{} of the total. Attribution recovers \AttrRecoveredShare{} of the constructs in its
 class, almost all as possible rather than certain transitions.
-Scope precision is checked in both directions on \GTApp{} only, and that application also
-guided two repairs; elsewhere the running interface checks it in one direction, and the
-over-wide scopes this leaves untested also bear on the sources of must edges.
+Scopes are compared in both directions only on \GTApp{}, against a reference that applies the
+analysis's own relations and guided two repairs; elsewhere the final scopes are unchecked, which
+also bears on the sources of must edges.
 
 On three applications, the graph detects \MutFallibleDetected{} of \MutFallibleScored{}
 injected link deletions, retargets and guard removals; without attribution fewer changes can be

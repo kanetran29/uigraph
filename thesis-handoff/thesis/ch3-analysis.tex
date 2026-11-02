@@ -137,8 +137,13 @@ separate overlay. The tool's specification states this as an invariant, and the 
 \begin{claim}[Soundness of the must tier]
 \label{claim:must}
 Every must edge corresponds to a navigation that occurs, for every input on which the
-enclosing code executes, over the declared route set.
+enclosing code executes, over the declared route set, under the route-order assumption of
+Section~\ref{sec:approximations}, and for a site whose component is not placed by a join over an
+ambiguous selector.
 \end{claim}
+
+That assumption carries much of the tier: without it the must tier holds \RouteOrderMustWithout{}
+of its \RouteOrderMust{} edges, on \RouteOrderSitesWithout{} of \RouteOrderSites{} constructs.
 
 The evaluation tests a necessary condition of this claim rather than the claim itself,
 and the distinction decides how the figures of Chapter~\ref{ch:results} may be read. The
@@ -369,14 +374,15 @@ constraint system, and that solution does not depend on the order in which nodes
 the worklist. The transfer functions here are monotone because the only operation they
 apply to a scope is a join with another scope, and union is monotone in both arguments.
 
-A worklist solver re-examines a node once for each rise of one of its predecessors, and
+A worklist solver re-examines a node once for each rise of its own scope, and
 the work done for a node is proportional to its out-degree in $N \cup M \cup \mathit{CG}
 \cup D \cup T$, where $M$ links each component to its members and $T$ links each callable
 holding a navigation site to the entry guards that navigation runs. A run therefore makes at most
 \[
   O\bigl(|S| \cdot (|N| + |M| + |\mathit{CG}| + |D| + |T|)\bigr)
 \]
-transfer-function applications. Each application is a union of two subsets of $S$, which
+transfer-function applications, after an initialisation that seeds each routed component with
+$\mathit{subtree}(r)$ in $O(|R| \cdot |S|)$. Each application is a union of two subsets of $S$, which
 costs $O(|S|)$ with scopes held as bit sets, so the running time is bounded by
 $O(|S|^2 \cdot (|N| + |M| + |\mathit{CG}| + |D| + |T|))$. This is the bound for the full
 model. $|M|$ is the number of members of components and is at most the number of callables,
@@ -392,7 +398,8 @@ and costs
 \[
   O\bigl(|S| \cdot (|C| + |N|)\bigr),
 \]
-one traversal of the nesting graph per screen, where $C$ is the set of components. What
+one traversal of the nesting graph per routed component and per shell, where $C$ is the set of
+components and the number of such sources is at most $|S|$ plus the number of shells. What
 makes the propagation necessary in both cases is that scopes travel transitively and
 the scope of one node can rise more than once, once for each screen that reaches it.
 Cycles are not the reason. The nesting, outlet and call-graph relations the prototype implements
@@ -426,9 +433,9 @@ when an edge of $N$, $M$, $\mathit{CG}$, $D$ or $T$ carries it there, and scopes
 what the algorithm computes is the least solution of the constraint system that
 Table~\ref{tab:scopes} states. In the model a component that is both mounted by a route
 and rendered in the template of another component therefore holds the join of the two
-scopes. Section~\ref{sec:implementation} reports that the prototype does not propagate
-into a component that a route mounts, so it computes the least solution of a restricted
-system rather than of this one.
+scopes. Section~\ref{sec:implementation} reports where the prototype departs from this: it does not
+propagate into a component that a route mounts, and it adds fallbacks that are not constraints
+of the table, so its result is not the least solution of this system or of any restriction of it.
 
 \input{figures/alg-attribution}
 
@@ -513,13 +520,15 @@ and stories, is read with its element selectors and its template. An edge $A \to
 is added when $A$'s template contains an element with $B$'s selector. When a selector
 belongs to more than one component, the candidates are narrowed to those that $A$'s
 file imports; if none is imported, the analysis joins over all of them and records a
-note. An attribute selector is matched the same way: a directive is rendered by the
+note. Edges from such a join are not capped at \emph{may}, so a site in one of the candidates
+can be placed on a screen that renders another; Claim~\ref{claim:must} excludes such edges
+(Section~\ref{sec:approximations}); whether any corpus must edge comes from one was not measured. An attribute selector is matched the same way: a directive is rendered by the
 templates that carry its attribute, so it has a scope in the same way as a component does.
 
 \textbf{Router outlets.} The route tree is recorded during route extraction. A route
 component's template is rendered on its own screen and on every descendant screen, so
 its navigation sites get the scope $\mathit{subtree}(r)$. A component that is not
-routed, is not referenced by any template and holds the primary
+routed, is not placed on a screen by the nesting relation and holds the primary
 \texttt{<router-outlet>} is the application shell, and everything it renders gets the
 scope $\top$. A component that is not routed and not referenced, but whose subtree
 contains the outlet, is most likely mounted by a route the extractor cannot see, for
@@ -530,11 +539,11 @@ put at risk by a scope that may be too large.
 The pass departs from Algorithm~\ref{alg:attribution} in two respects. The first is that it does not
 propagate a scope into a component that a route mounts: a routed component keeps
 $\mathit{subtree}(r)$ and does not also receive the scope of a component whose template
-renders it. The prototype therefore computes the least solution of the system of
-Table~\ref{tab:scopes} with the template row restricted to targets that no route mounts.
-The result is contained in the solution the full system would give, so a navigation site
-in such a component can be attributed to fewer screens than the model allows, never to
-more. A scope that is too small loses edges and cannot invent them, which is why the
+renders it. Traversal does pass through a routed component, so a component nested beneath it still receives
+the scopes of the components above; only the routed component's own sites are left at
+$\mathit{subtree}(r)$. For the nesting and outlet relations the result is contained in the
+solution the full system would give, so a navigation site in a routed component can be
+attributed to fewer screens than the model allows, never to more. A scope that is too small loses edges and cannot invent them, which is why the
 restriction cannot put Claim~\ref{claim:must} at risk; what it costs is recall, and the
 constructs it strands are counted in Chapter~\ref{ch:results}.
 
@@ -552,8 +561,12 @@ injectors bind a token differently the join covers both; that can only widen a s
 pass cannot resolve (a factory provider, a value provider, a type declared outside the
 application) contributes no edge. A member no caller reaches falls back to the join over
 every component that injects its class, the per-class approximation an earlier version used for
-every service. Service sites are held at \emph{may} either way, because the calls on the way carry
-conditions the analysis does not follow.
+every service. That fallback is not a constraint of Table~\ref{tab:scopes} and is not
+monotone in the call graph: a member whose only caller is found receives that caller's screens
+instead of the wider join, so adding a call edge can narrow its scope. The service part of the
+result is therefore the least solution over the members the call graph reaches together with
+an over-approximation for those it does not. Service sites are held at \emph{may} either way,
+because the calls on the way carry conditions the analysis does not follow.
 
 \textbf{Anchored edges.} Edges with scope $\top$ are stored once at a node of kind
 \texttt{scope}. Edges whose screen set is exactly $\mathit{subtree}(r)$ are stored once
@@ -567,9 +580,10 @@ no scope from the model itself. Two approximations stand in where the model has 
 pass implements, and Section~\ref{sec:res-ablation} withholds them below the \emph{full} level, so
 no lower level counts their sites. The relation $T$ is not implemented, and a guard is given
 instead the screens of the routes that name it, as a bare identifier, in \texttt{canActivate},
-\texttt{canActivateChild}, \texttt{canMatch} or \texttt{canDeactivate}. For a
-\texttt{canDeactivate} guard that is within the model's scope; for an entry guard it is not
-the model's rule, since the redirect leaves the screen a navigation starts from, so the
+\texttt{canActivateChild}, \texttt{canMatch} or \texttt{canDeactivate}: the screen of each such
+route, not $\mathit{subtree}(r)$, and nothing for a route that is no screen, such as a
+componentless prefix. For a \texttt{canDeactivate} guard that is narrower than the model's
+scope; for an entry guard it is not the model's rule, since the redirect leaves the screen a navigation starts from, so the
 stand-in can be too small where navigations into the route start elsewhere and too large where
 they do not start at the route itself. An effect, being registered for the lifetime of the
 application, is given $\top$. Edges from both are capped at \emph{may}. A class the call graph

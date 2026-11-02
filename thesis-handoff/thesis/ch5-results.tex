@@ -105,14 +105,14 @@ candidate until a second method confirms it.
 
 \begin{table}[p]\footnotesize
 \caption{Defect classes and the evidence for each. A class is admitted on two
-independent lines of evidence, at least one from a named evaluation method; the methods
+lines of evidence, at least one from a named evaluation method; the methods
 column counts only those. This summary is compiled by hand; it is not harness output.}
 \label{tab:defects}
 \begin{tabularx}{\textwidth}{@{}lYrr@{}}
 \toprule
 Class & Evidence & Methods & All \\
 \midrule
-Attribution: navigation outside route components is invisible & mutation misses;
+Attribution: navigation outside route components is invisible & mutation misses (at commit \EarlierCommit{});
 multi-mount edge absent; manual audit; zero-edge applications & 1 & 4 \\
 Lazy module boundary not followed & route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & witness check at commit \EarlierCommit{}; source
@@ -177,7 +177,8 @@ the check reads and how an edge cited by several constructs is judged both chang
 course of this work, and the figure is not comparable across those changes.
 
 \begin{table}[t]\small
-\caption{Results of the witness check and the test-source cross-check, baseline. Mutation is
+\caption{Results of the witness check, on the final attributed tier, and of the test-source
+cross-check. Mutation is
 reported separately in Section~\ref{sec:res-mutation}, on the attributed graph. This
 summary is written by hand from the harness output rather than generated.}
 \label{tab:oracles}
@@ -229,11 +230,11 @@ edge after attribution.
 
 \begin{table}[t]\footnotesize
 \caption{Before and after scope attribution on the final evaluated snapshot.
-Conversion in percent and its change in percentage points; must-tier edges without a
-detected witness-check failure; and constructs assigned to attribution in the
+Conversion in percent and its change in percentage points; must-tier edges whose destination
+the witness check read and passed; and constructs assigned to attribution in the
 baseline that recover onto must or may. A construct's tier is the modality its own
-witness earns. Unread destinations are reported separately in the text and are not
-passes. Conversions from other baseline classes are in Table~\ref{tab:recovery-source}.}
+witness earns. The remaining must edges are unread destinations, all \MustWitnessUnread{} of them
+on k8sdash, which are neither passes nor failures; no edge failed. Conversions from other baseline classes are in Table~\ref{tab:recovery-source}.}
 \label{tab:before-after}
 \TabBeforeAfter
 \end{table}
@@ -497,7 +498,8 @@ the pairs, and the column falls short of the census's total by those screens.}
 \TabAblation
 \end{table}
 
-The levels are not evenly spaced, and the step with the largest effect is not one this thesis adds.
+The levels are not evenly spaced, and the step with the largest effect on (site, screen) pairs
+and on reference recall is not one this thesis adds.
 Direct ownership places \AblationOwnedSites{} sites, \AblationOwnedSiteShare{} of what the
 full analysis places, and containment raises that only to \AblationNestingSites{}. The shell
 rule is that step: \emph{rooted} places \AblationRootedSites{} sites,
@@ -530,7 +532,9 @@ those of its ancestor routes (Section~\ref{sec:dynamic-spa}), which is what \emp
 Both are baselines that reimplement those mechanisms inside this extractor, not runs of either
 tool, so the comparison measures what the added mechanisms place
 on the same inputs and does not show that the tools themselves would place fewer. A comparison
-drawn against containment alone would be a comparison with a method nobody proposed.
+drawn against containment alone would be a comparison with a method nobody proposed. Against
+the nearest of them, \emph{outlet}, what this thesis adds is the \emph{full} step alone:
+\AblationFullAddedSites{} sites, \AblationFullAddedShare{} of the corpus total.
 
 Outlet descent is the mechanism whose contribution is mostly width: it
 places \AblationOutletSites{} sites against rooted's \AblationRootedSites{}, the same count on
@@ -539,7 +543,7 @@ places \AblationOutletSites{} sites against rooted's \AblationRootedSites{}, the
 \AblationRootedPairs{} to \AblationOutletPairs{}. A table of counts cannot say whether that width is correct;
 the next subsection addresses that question.
 
-\subsection{Whether the scopes are the right ones}
+\subsection{Agreement with a structural reference}
 \label{sec:res-groundtruth}
 
 For \GTApp{} the screens each navigation site fires from were read off the sources by
@@ -548,7 +552,14 @@ Scoring every level against that gives the comparison no other method here can m
 it has both directions rather than one; Table~\ref{tab:groundtruth} reports it. The reading
 applies the analysis's own relations by hand, so it tests the implementation of those relations
 and not whether they describe what the running application renders
-(Section~\ref{sec:protocol}).
+(Section~\ref{sec:protocol}). It is also not independent of the graph: its first version was
+completed with nine header sites the scorer reported from the graph. And it is dominated by the
+shell: \GTShellSites{} of its \GTSites{} sites are placed on every screen and supply
+\GTShellPairs{} of the \GTPairs{} pairs, which every level from \emph{rooted} upward places
+trivially, so the pair-level recall of those levels rests mostly on them. Over the other
+\the\numexpr\GTPairs-\GTShellPairs\relax{} pairs, recall is \GTRootedRecallNonShell{} for
+\emph{rooted}, \GTOutletRecallNonShell{} for \emph{outlet} and \GTFullRecallNonShell{} for
+\emph{full}.
 
 \begin{table}[t]\small
 \caption{Each attribution level against the hand-read structural reference for \GTApp{}.
@@ -589,9 +600,10 @@ modality, which this scoring does not read. That rule, too, was corrected with t
 view, so the clean row confirms two repairs and tests neither independently.
 
 Two things follow for RQ3. The first is that most of the recovery attributed to this analysis
-is produced by a mechanism earlier work already had: \GTRootedRecall{} of the
-\GTPairs{} pairs are reached by the shell rule, and the mechanisms above it take that to
-\GTFullRecall{}. The second is
+is produced by mechanisms earlier work already had: \GTRootedRecall{} of the
+\GTPairs{} pairs are reached by the shell rule and \GTOutletRecall{} once the enclosing routes are
+added, so the call graph adds \GTOutletMissing{} pair on this application, and the mechanisms
+above the shell rule take recall to \GTFullRecall{}. The second is
 that this is one application of six, the smallest, and the corpus-wide widths of
 Table~\ref{tab:scopebaseline} are not licensed by it. On \BaselineBluntest{} the mean
 scope is \BaselineBluntestShare{} of the application, and no ground truth exists to say
@@ -956,8 +968,8 @@ is \MustWitnessUnread{} of \MustWitnessEdges{}.
 
 \begin{table}[t]\small
 \caption{Final-snapshot witness-check outcomes and must conversion after the repairs.
-The must count without detected failures includes unread destinations and therefore
-is not a precision estimate. Unread destinations are counted separately in the text.
+The must column counts edges whose destination was read and passed; the rest are unread
+destinations, neither passes nor failures, and no must edge failed.
 ``Not applicable'' means the application emits no must edge.}
 \label{tab:round2sound}
 \TabRoundTwoSoundness

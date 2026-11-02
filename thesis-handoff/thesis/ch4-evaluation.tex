@@ -17,10 +17,14 @@ Ten candidate applications were screened against six criteria. The criteria were
 applied in order of increasing cost, so that a candidate could be rejected cheaply
 before more expensive checks were made. The criteria were: (1) a real application rather than a library
 or template; (2) a nested, lazily-loaded route tree; (3) guards present, since guards
-are what produce conditional transitions; (4) an end-to-end test suite that drives a
-browser; (5) retrievable history in which tests and source change together; (6) an
-active repository. Six candidates satisfied all six criteria and were retained
-(Table~\ref{tab:corpus}). Each of them is fixed to a specific commit so that the
+are what produce conditional transitions; (4) end-to-end test configuration for a browser
+driver; (5) retrievable history in which tests and source change together; (6) an
+active repository. Six candidates were retained (Table~\ref{tab:corpus}). Criterion (4) was
+checked as configuration rather than as a usable suite: at the pinned commits only alfresco
+has specifications the test-source cross-check can read, so that method covers alfresco alone,
+and ghostfolio and bitwarden carry no browser-test configuration at all, so for them the
+criterion was not met. It was therefore not applied uniformly: \texttt{gravitee}, below, was
+rejected for a thin UI suite while two applications with none were kept. Each of them is fixed to a specific commit so that the
 measurements can be repeated on the same code.
 
 \begin{table}[t]\small
@@ -54,7 +58,8 @@ rejection, since the rejected candidates are part of the selection protocol.
 server and none of which drive the user interface. \texttt{gravitee} declares 618
 routes but has 14 UI specifications. \texttt{SAP/spartacus} has a large Cypress suite, but its routing is
 configuration-driven in a way that the extractor does not currently support, so it was
-set aside as a possible candidate for later work.
+set aside as a possible candidate for later work. That reason is tool support, which is not one
+of the six criteria, so this rejection was made on a ground added after screening began.
 
 The screening also produced an observation that influenced the design of the
 evaluation. Among the candidates examined, the size of the route tree and the density
@@ -77,8 +82,9 @@ proprietary enterprise applications in size, in routing style and in the mechani
 used for navigation. In addition, I selected the corpus and I wrote the
 extractor, which introduces a possible selection bias.
 
-Three measures address these threats. The selection protocol is reported in full, including the rejected candidates, and the
-criteria were fixed before any results were obtained. The corpus is also stratified
+Three measures address these threats. The selection protocol is reported in full, including the rejected candidates; the
+six criteria were fixed before any results were obtained, but one candidate was rejected on tool
+support and the test-suite criterion was not met by two of the retained applications. The corpus is also stratified
 across two orders of magnitude in the number of routes, so that any effect of application size is visible and not averaged away. Finally, the commits are fixed, and the evaluation harness is released with the thesis so that the measurement can be repeated rather than taken on trust. A fourth measure is planned: a case study on a proprietary Angular application from industry, reporting
 only aggregate figures; this would be the most direct response to the external validity
 threat, and it is discussed further in Chapter~\ref{ch:discussion}. There is also no standard benchmark corpus for single-page applications. The web
@@ -148,8 +154,9 @@ ghostfolio's per-locale build does not fit, since each of its bundles declares a
 its own. That application is measured by every other method here and by none of this one.
 
 \textbf{The ablation and the site--screen ground truth (RQ3).} Two further measurements
-answer a question the methods above leave open: whether the attribution computes a better set
-of screens than a simpler analysis, or only a larger one.
+answer a question the methods above leave open: whether the attribution computes a set of
+screens that agrees more closely with a structural reference than a simpler analysis does, or
+only a larger one.
 
 The first withholds the mechanisms of Section~\ref{sec:attribution} one at a time and extracts
 the whole corpus at each level. \emph{Owned} attributes a navigation site to the screen whose
@@ -222,9 +229,10 @@ a wrong guard mislabels an edge rather than removing it; they are measured by th
 witness check.
 
 \begin{table}[t]\small
-\caption{Rules that assign a lost construct to a defect class, in the order the harness
-tests them. The indented rules are the nested decision taken when the construct's owning
-route component has no node.}
+\caption{Rules that classify a construct, in the order the harness tests them. The first three
+rows take a construct out of the denominator, the next two count it as recovered, and the two
+after that as accounted for; only a construct that reaches the rows below is lost. The indented
+rules are the nested decision taken when the construct's owning route component has no node.}
 \label{tab:loss-rules}
 \begin{tabularx}{\textwidth}{@{}lY@{}}
 \toprule
@@ -234,6 +242,10 @@ Query only & changes only the query string of the current screen
 (\texttt{navigate([], \{queryParams\})}), so it is not a transition and is not counted as
 a loss \\
 Named outlet & targets an auxiliary outlet (\texttt{\{outlets: \ldots\}}) \\
+No commands & names no destination at all \\
+Converted, must or may & is cited as witness by an edge of that tier \\
+Accounted, dynamic & is cited by an edge into a sink whose destination only the run time knows \\
+Accounted, unplaced & is recorded by the extractor as a site it read but could not place \\
 Attribution, service & has no owning component, or its owner is a class that is not a
 component: a service, guard, interceptor, resolver or effect. A site in a template whose
 owner cannot be resolved falls to \emph{other} instead \\
@@ -282,7 +294,11 @@ application's lazily loaded reports module was read at the project root, so the 
 that address while the check reported the tier clean (Section~\ref{sec:corrections}). No count
 of those edges is given, because the defect is repaired and the graph that carried it no longer
 exists, so the figure cannot be re-measured against anything. RQ3 is answered positively only if coverage rises and
-must-tier precision does not fall.
+must-tier precision does not fall. Because an edge whose destination the check cannot read is
+neither a pass nor a failure, precision is stated as bounds: the share of must edges that
+pass, over all of them, as the lower bound, and the share that do not fail as the upper bound.
+The criterion is read as no detected failure in either run; it cannot be read as a precision
+that did not fall where the check reads only part of the tier.
 
 \textbf{Node-level recall.} The fraction of distinct URLs named in an application's
 own end-to-end test sources that have a matching node in the graph. It is a

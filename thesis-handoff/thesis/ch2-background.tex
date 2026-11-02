@@ -26,7 +26,6 @@ gap that the thesis addresses.
 A recent development related to this work is the emergence of large language model agents
 capable of navigating applications through their UI. Such agents rely on observable
 UI states and transitions, and a navigation graph can serve as a structured map for them.
-While this thesis predates those agents, the output format is compatible with that use.
 
 \section{UI transition graphs}
 \label{sec:terminology}
@@ -218,7 +217,9 @@ the compiled JavaScript bundle rather than the sources, take declared routes as 
 navigation calls as edges, and check an access-control policy against the screens reachable
 from an authorised one; their graph is declared an over-approximation and is not narrowed,
 and no navigation site is attributed to the screens it can fire from
-\cite{zhang2025veriflow}. This review found a measurement of extraction loss in neither. The
+\cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth built by hand for the applications they
+study, which measures what their extraction misses there; neither work classifies the losses by
+construct or measures them across a corpus. The
 problem addressed in this thesis is therefore neither new nor settled: the graph has been
 extracted statically for model checking, for test generation and for policy checking. Earlier
 work already attributes a site through containment, the shell and the enclosing routes, and
@@ -364,7 +365,7 @@ to claim soundness in general \cite{livshits2015soundiness}. This thesis follows
 recommendation: it states its soundness property only over a declared scope, lists the
 approximated
 Angular constructs with their measured frequency in the corpus, and measures recall
-empirically. The literature reviewed in Sections 2.5 to 2.7 gives the specific reasons
+empirically. The literature reviewed in Sections~\ref{sec:asttools} to~\ref{sec:angular} gives the specific reasons
 why a general claim is not available for this setting. Type annotations in TypeScript
 are deliberately not guarantees, framework configuration decides which implementation
 a call reaches, and the firing condition of a reactive computation is not written in
@@ -629,7 +630,9 @@ that is a data dependence in a reactive graph. The read set is visible in the so
 and the firing is not. Chapter~\ref{ch:analysis} therefore specifies the modality
 \emph{unknown} for such edges and keeps the read set as the symbolic guard, which is the
 treatment the soundiness position of Section~\ref{sec:formal} prescribes for a
-construct that cannot be decided. No pass in this version emits that modality.
+construct that cannot be decided. No pass in this version emits that modality for an effect or
+a subscription; the unknown edges it does emit are those whose destination it cannot resolve to a
+screen.
 
 \section{Mutation testing}
 \label{sec:mutation}
@@ -743,7 +746,7 @@ relative. It attributes navigation by resolving the owning object, and when that
 for shared code it falls back on runtime traces. A navigation site in a web application
 frequently has no owning object that could be resolved. In Android the owning object of a handler usually identifies the window, so the attribution problem studied here does not arise there in the same form, and an Android technique cannot simply be reused.
 
-The literature reviewed in Sections 2.6 to 2.9 fills in why the problem is open and
+The literature reviewed in Sections~\ref{sec:asttools} to~\ref{sec:mutation} fills in why the problem is open and
 what is available for addressing it. The analysis machinery is not missing: abstract
 interpretation of JavaScript is established \cite{jensen2009type}, source-level analysis
 over a typed syntax tree is a standard tooling style \cite{baxter1998clone,pawlak2016spoon},

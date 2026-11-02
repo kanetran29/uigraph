@@ -5,7 +5,9 @@ This thesis set out to measure how much of the navigation structure of an Angula
 application can be recovered from its source code without running the application, to
 explain where that recovery fails, and to repair the largest class of failure with an
 analysis that attributes a navigation site to the screens from which it can fire. The
-selection criteria for the corpus were fixed before any results were obtained. The
+selection criteria for the corpus were fixed before any results were obtained, though one
+candidate was rejected on tool support and two retained applications do not meet the test-suite
+criterion. The
 protocol was corrected eleven times while it was being developed, including the
 definition of the conversion ratio and of its denominator
 (Section~\ref{sec:corrections}), and the result tables of Chapter~\ref{ch:results}
@@ -29,7 +31,7 @@ tier's edges are one application's toolbar: \CensusMustSitesKdash{} constructs t
 edges also depend on an assumption about route-table order that the extractor does not read;
 without it the tier holds \RouteOrderMustWithout{} edges on \RouteOrderSitesWithout{} constructs.
 Evaluating
-guards would add little to it: with every guard taken to let the navigation through, the tier
+guards would widen it: with every guard taken to let the navigation through, the tier
 would hold \GuardOnlyMust{} edges on \GuardOnlySites{} constructs, of which only \GuardOnlyGuarded{}
 edges run a guard. Node extraction was the
 bottleneck when this work began and no longer is;
@@ -95,9 +97,10 @@ stated and mechanically tested, though not proved, over the declared route set a
 an explicit list of the constructs the analysis does not decide (Claim~\ref{claim:must},
 Section~\ref{sec:approximations}). It recovers \AttrRecoveredShare{} of the loss class it
 addresses, almost all of it onto the uncertain tier, and against the structural reference read
-by hand on one application it raises recall from \GTRootedRecall{} to \GTFullRecall{} at
-\GTFullPrecision{} precision. That result comes after two repairs the same reading prompted, and it
-is established on \GTApp{} alone. Nothing in its formulation depends on a particular
+by hand on one application it raises recall from \GTOutletRecall{}, where the mechanisms of
+earlier work leave it, to \GTFullRecall{} at
+\GTFullPrecision{} precision. That result comes after two repairs the same reading prompted and a completion of the reference
+from the graph's output, and it is established on \GTApp{} alone. Nothing in its formulation depends on a particular
 extractor; what an extractor supplies is the screens and the navigation sites it ranges
 over, and Chapter~\ref{ch:results} shows that what the mechanism can recover is bounded
 by how completely those are read. The measurement is the part that stands on its own. Static navigation extraction is measured on a corpus of six Angular
@@ -110,7 +113,7 @@ experiment whose ground truth is the authored change. That shared footing is als
 common weakness, since two readers of the same text can be wrong in the same way. The
 fifth reads the route configuration the framework itself holds at run time, and was
 added because the first four can agree on a wrong address. The failures are classified into defect classes that are
-admitted only on two independent lines of evidence, at least one from a named method, and every construct the extractor loses
+admitted only on two lines of evidence, at least one from a named method, and every construct the extractor loses
 is assigned to exactly one class, which makes the classes comparable within an
 application and across the corpus. The corpus and the harness are reusable artefacts:
 the evaluation re-runs with two scripts against pinned commits of the extractor and of
@@ -127,8 +130,8 @@ bound each other, so neither node extraction nor attribution can be improved int
 usable graph on its own, and scope attribution recovers every attribution loss on realworld and
 most of mifos's, and under half of them on the other four, where owners no screen reaches,
 targets only the run time knows and services the call graph does not place remain
-(Table~\ref{tab:remaining}). Where a construct is in the graph, a change
-to it is almost always visible in the graph, which is the property that change impact
+(Table~\ref{tab:remaining}). Where a construct is in the graph, every scored change to it was visible in the graph, for the
+operators sampled on three applications (\MutFallibleDetected{} of \MutFallibleScored{} fallible mutants), which is the property that change impact
 analysis and commit-time checking need; where it is not, no change to it is visible, and
 the coverage gap RQ1 measures is what the excluded mutants of RQ4 report a second time.
 
@@ -191,8 +194,8 @@ a guard is scoped to the routes that name it, an effect to $\top$, and a service
 reaches to the join over the components that inject its class. This is coarser than the
 model and leaves a class nothing reaches with no scope at all. One defect class still waits for its second
 confirmation. The main gap is in the evaluation rather than the
-analysis, though it is now half closed: asking the running applications which links they
-render confirms \ScopeConfirmed{} of the \ScopePairs{} rendered (screen, pattern) pairs
+analysis. Asking the running applications which links they render, on an earlier graph than the
+final call graph, confirmed \ScopeConfirmed{} of the \ScopePairs{} rendered (screen, pattern) pairs
 against the computed scope, and shows the \ScopeUnpredicted{} it misses to be sites
 attribution declined to place rather than sites it placed wrongly. What that cannot do is
 convict a scope of being too large: only \ScopeExact{} of the predictions at those screens
@@ -201,8 +204,9 @@ one application's sites by hand did convict one: the rule that
 joined a navigating service over its injectors asserted \GTClassExcess{} pairs outside that
 application's structural reference, all at one site. The call graph that replaced the rule asserts none there, but it
 was written with that site in view, so the reading that convicted the old rule cannot acquit the
-new one; the level that stands for earlier work's reach recovers \GTRootedRecall{} of the reference
-pairs while asserting none outside it, against \GTFullRecall{} for this analysis. It judged
+new one; the levels that stand for earlier work's reach recover \GTRootedRecall{} and
+\GTOutletRecall{} of the reference pairs while asserting none outside it, against \GTFullRecall{}
+for this analysis. It judged
 \ScopeJudged{} screens of \ScopeScreens{}, because without a backend the
 rest redirect to a sign-in page. Driving the applications into a signed-in state is the work
 that would decide the other half. Whether a graph of screens
