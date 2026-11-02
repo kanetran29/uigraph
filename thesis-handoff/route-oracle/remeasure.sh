@@ -49,6 +49,10 @@ echo "== must tier with every guard passing"
 pnpm -s -C "$REPO" exec tsx "$HERE/guard-only.mjs" --corpus "$W/corpus" --out "$W/guard-only" --tex "$TEX/generated-guard-only.tex"
 cp "$W/guard-only/guard-only.json" results-must/guard-only.json
 
+echo "== must tier without the route-order assumption"
+pnpm -s -C "$REPO" exec tsx "$HERE/route-order.mjs" --corpus "$W/corpus" --out "$W/route-order" --tex "$TEX/generated-route-order.tex"
+cp "$W/route-order/route-order.json" results-must/route-order.json
+
 echo "== call graph resolution"
 pnpm -s -C "$REPO" exec tsx "$HERE/callgraph-stats.mjs" --corpus "$W/corpus" --out "$HERE/results-callgraph" --tex "$TEX/generated-callgraph.tex"
 
