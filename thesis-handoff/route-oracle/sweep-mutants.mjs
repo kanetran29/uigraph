@@ -15,7 +15,10 @@
 // the empty-path chain that renders on the screen above, and the conditional-outlet term of
 // controls mode. Id 106 is retired with the redirect rework: a catch-all is now among the redirects
 // the router may meet, in declaration order, and 106a deletes the term that limits the order
-// assumption to catch-alls instead. Id 91 is retired: dropping the
+// assumption to catch-alls instead. Ids 162 to 164 delete the refusal of a relative target that
+// climbs above the root. Id 110 is retired as equivalent: two distinct route levels share a parent
+// only as elements of one array (a spread, a `children` call and a named constant each give its
+// own parent), so `before` cannot tell the route-table check from its absence. Id 91 is retired: dropping the
 // `t.relative === true` conjunct of the preserved-prefix computation changes nothing, since a target
 // that is not relative resolves against the base '/', for which keptSegments returns 0 however
 // many segments it climbs.
@@ -438,9 +441,6 @@ export const MUTANTS = [
   { id: "109", rule: "before: sibling check dropped", file: "extract.ts",
     find: "x.getParent() === y.getParent() && ",
     replace: "" },
-  { id: "110", rule: "before: route table check dropped", file: "extract.ts",
-    find: "Node.isArrayLiteralExpression(x.getParent()) && ",
-    replace: "" },
   { id: "111", rule: "land: own redirect counted as a rival", file: "extract.ts",
     find: "redirectsAt(path, first).filter(([a, r]) => !(target && a === target.fullPath && r.to === own?.to))",
     replace: "redirectsAt(path, first)" },
@@ -600,4 +600,13 @@ export const MUTANTS = [
   { id: "161", rule: "controls: hiddenAbove dropped", file: "extract.ts",
     find: " || hidden(route.nodeId) || hiddenAbove(route, sf.getFilePath())\n",
     replace: " || hidden(route.nodeId)\n" },
+  { id: "162", rule: "relative target climbing above the root not refused", file: "extract.ts",
+    find: "        if (t.relative === true && !baseUnknown && climbsAboveRoot(parsed.path, base)) {\n",
+    replace: "        if (false) {\n" },
+  { id: "163", rule: "climbsAboveRoot: a route with no segment not exempt", file: "matcher.ts",
+    find: "return own > 0 && segments(target)",
+    replace: "return segments(target)" },
+  { id: "164", rule: "climbsAboveRoot always false", file: "matcher.ts",
+    find: "  if (!ownerPath || target.startsWith('/') || target === '*') return false\n  const own = segments(ownerPath).length\n",
+    replace: "  if (!ownerPath || target.startsWith('/') || target === '*') return false\n  const own = segments(ownerPath).length\n  return false && own > 0\n" },
 ]
