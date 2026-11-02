@@ -13,7 +13,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { ledger, pct1 } from './report-counts.mjs'
+import { inScope, ledger, pct1 } from './report-counts.mjs'
 
 // One line naming the run a generated table came from, so two tables made from different
 // runs cannot be read as one measurement.
@@ -94,8 +94,8 @@ out += `  symbolic x coords={${sym}}, xtick=data, x tick label style={font=\\sma
 out += '  ymin=0, ymax=45, ylabel={conversion (\\%)}, bar width=9pt, enlarge x limits=0.1,\n'
 out += '  nodes near coords={\\pgfmathprintnumber[fixed,precision=1]{\\pgfplotspointmeta}}, nodes near coords style={font=\\tiny},\n'
 out += '  legend style={at={(0.5,1.03)}, anchor=south, legend columns=2, font=\\scriptsize, draw=none}, axis lines*=left, label style={font=\\small}]\n'
-out += `\\addplot[fill=mutedlight, draw=muted] coordinates {${B.map((r) => `(${NAME[r.slug]},${pct1(ledger(r).tally.CONVERTED_MUST || 0, ledger(r).constructs)})`).join(' ')}};\n\\addlegendentry{baseline}\n`
-out += `\\addplot[fill=accent!70, draw=accent] coordinates {${A.map((r) => `(${NAME[r.slug]},${pct1(ledger(r).tally.CONVERTED_MUST || 0, ledger(r).constructs)})`).join(' ')}};\n\\addlegendentry{with attribution}\n`
+out += `\\addplot[fill=mutedlight, draw=muted] coordinates {${B.map((r) => `(${NAME[r.slug]},${pct1(ledger(r).tally.CONVERTED_MUST || 0, inScope(ledger(r)))})`).join(' ')}};\n\\addlegendentry{baseline}\n`
+out += `\\addplot[fill=accent!70, draw=accent] coordinates {${A.map((r) => `(${NAME[r.slug]},${pct1(ledger(r).tally.CONVERTED_MUST || 0, inScope(ledger(r)))})`).join(' ')}};\n\\addlegendentry{with attribution}\n`
 out += '\\end{axis}\n\\end{tikzpicture}}\n\n'
 
 // The corpus plots above are drawn from result files an earlier harness produced; in

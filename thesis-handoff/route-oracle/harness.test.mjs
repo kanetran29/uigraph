@@ -701,10 +701,53 @@ describe('REMOVE_GUARD detection (code panel 33)', () => {
     run('mutate.mjs', [app, app, '--quota', '8', '--json', out], { env: { UIGRAPH_MAP: cli } })
     const r = JSON.parse(fs.readFileSync(out, 'utf8'))
     const guard = r.results.find((x) => x.kind === 'REMOVE_GUARD')
-    // Not '1.8.0' alone: run-all.mjs is at 1.8.0 too, and the thesis prints this string as \HarnessVersionMutation.
-    expect(r.harnessVersion).toBe('mutate 1.8.0')
+    // Not '1.9.0' alone: the thesis prints this string as \HarnessVersionMutation.
+    expect(r.harnessVersion).toBe('mutate 1.9.0')
     expect(guard.verdict).toBe('DETECTED')
     expect(guard.delta.guardChanged).toHaveLength(5)
+  }, 180000)
+
+  it('retargets the whole command array and scores the edited line (review of 2026-11-02, package 2)', () => {
+    // A navigation whose array carries a parameter: retargeting only its head would give
+    // /b/<id>, which no route declares, and an oracle asking for an edge to /b would call a
+    // correct graph wrong. A concatenated target is not mutated at all.
+    const app = dir('retargetapp')
+    put(app, {
+      'src/app.routes.ts': [
+        `import { Routes } from '@angular/router'`,
+        `import { HomeComponent } from './home.component'`,
+        `import { ItemComponent } from './item.component'`,
+        `export const routes: Routes = [`,
+        `  { path: '', component: HomeComponent },`,
+        `  { path: 'b', component: HomeComponent },`,
+        `  { path: 'item/:id', component: ItemComponent },`,
+        `]`,
+      ].join('\n'),
+      'src/home.component.ts': [
+        `import { Component } from '@angular/core'`,
+        `import { Router } from '@angular/router'`,
+        `@Component({ selector: 'app-home', template: '<button (click)="go()">go</button>' })`,
+        `export class HomeComponent {`,
+        `  constructor(private router: Router) {}`,
+        `  id = 'x'`,
+        `  go() { this.router.navigate(['/item', this.id]) }`,
+        `  other() { this.router.navigate(['/item/' + this.id]) }`,
+        `}`,
+      ].join('\n'),
+      'src/item.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'app-item', template: '' })\nexport class ItemComponent {}\n`,
+    })
+    const git = (...args) => execFileSync('/usr/bin/git', ['-C', app, '-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8' })
+    git('init', '-q')
+    git('add', '-A')
+    git('commit', '-q', '-m', 'init')
+    const out = path.join(app, 'rq4.json')
+    const cli = `pnpm -s --dir ${ROOT} exec tsx ${path.join(ROOT, 'packages', 'cli', 'src', 'cli.ts')}`
+    run('mutate.mjs', [app, app, '--quota', '8', '--json', out], { env: { UIGRAPH_MAP: cli } })
+    const r = JSON.parse(fs.readFileSync(out, 'utf8'))
+    const ret = r.results.filter((x) => x.kind === 'CHANGE_NAV_TARGET')
+    expect(ret).toHaveLength(1)
+    expect(ret[0].line).toBe(7)
+    expect(ret[0].verdict).toBe('DETECTED')
   }, 180000)
 
   describe('scores a removal by whether the lost guard is one the removed list names (review of code panel 33)', () => {
@@ -878,12 +921,13 @@ describe('to-latex (prose panel 38): the conversion table rounds the counts once
   const SLUGS = ['realworld', 'alfresco', 'ghostfolio', 'k8sdash', 'bitwarden', 'mifos']
 
   /** A results.json of the six applications, each with `must` of `all` constructs converted and a stale stored ratio. */
-  function results(must, all) {
+  function results(must, all, outOfScope = {}) {
     const d = dir('tables')
     fs.mkdirSync(path.join(d, 'raw'))
     const rows = SLUGS.map((slug) => {
       fs.writeFileSync(path.join(d, 'raw', `${slug}.C.json`), JSON.stringify({ comparison: { declaredScreens: 1, graphNodes: 1, matched: 1, coverage: 1, extraNodes: [] }, blindSpots: [] }))
-      const tally = { CONVERTED_MUST: must, LAZY_BOUNDARY: all - must }
+      const off = Object.values(outOfScope).reduce((a, n) => a + n, 0)
+      const tally = { CONVERTED_MUST: must, LAZY_BOUNDARY: all - must - off, ...outOfScope }
       return { slug, totalConstructs: all, conversion: +(must / all).toFixed(4), graph: { nodes: 1, must: 1, may: 1 }, loss: { constructs: all, tally } }
     })
     const file = path.join(d, 'results.json')
@@ -893,8 +937,15 @@ describe('to-latex (prose panel 38): the conversion table rounds the counts once
 
   it('prints 3.8 for 1 of 26, where rounding the stored 0.0385 again printed 3.9', () => {
     const out = run('to-latex.mjs', [results(1, 26)])
-    expect(out).toContain('realworld & 26 & 1 & 1 & 1 & 3.8\\% \\\\')
+    expect(out).toContain('realworld & 26 & 26 & 1 & 1 & 1 & 3.8\\% \\\\')
     expect(out).not.toContain('3.9')
+  })
+
+  it('divides by the in-scope constructs, leaving query-only navigations and both exclusions out (review of 2026-11-02, package 1)', () => {
+    // 3 of 40 is 7.5; with one query-only construct out of scope it is 3 of 39, 7.7.
+    expect(run('to-latex.mjs', [results(3, 40, { QUERY_ONLY: 1 })])).toContain('realworld & 40 & 39 & 1 & 1 & 1 & 7.7\\% \\\\')
+    expect(conversion({ loss: { constructs: 10, tally: { CONVERTED_MUST: 1, QUERY_ONLY: 2, EXCLUDED_NAMED_OUTLET: 2, EXCLUDED_NO_COMMANDS: 1 } } }).toFixed(1)).toBe('20.0')
+    expect(conversion({ loss: { constructs: 2, tally: { QUERY_ONLY: 2 } } })).toBeNull()
   })
 })
 

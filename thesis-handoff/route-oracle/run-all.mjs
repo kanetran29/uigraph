@@ -355,16 +355,17 @@ for (const r of repos) {
     slug: r.slug, repo: r.repo, sha: r.sha, appDir: r.appDir, role: r.role,
     mapOk, mapError: mapOk ? undefined : mapError,
     constructs, totalConstructs, graph,
-    // Construct-level conversion: the fraction of constructs witnessed by at least one must
-    // edge. Edge counts are not used, because attribution can store one construct as one
-    // anchored edge or as several per-screen edges.
-    conversion: testL && totalConstructs ? +((testL.tally?.CONVERTED_MUST || 0) / totalConstructs).toFixed(4) : null,
+    // Construct-level conversion: the fraction of in-scope constructs witnessed by at least one
+    // must edge, over the denominator report-counts.mjs's conversion() uses. Edge counts are not
+    // used, because attribution can store one construct as one anchored edge or as several
+    // per-screen edges.
+    conversion: testL?.inScope ? +((testL.tally?.CONVERTED_MUST || 0) / testL.inScope).toFixed(4) : null,
     edgeRatio: graph && totalConstructs ? +(graph.must / totalConstructs).toFixed(4) : null,
     testB: testB && { edges: testB.edges, clean: testB.clean, mustEdges: testB.mustEdges, mustClean: testB.mustClean, tally: testB.tally },
     testC: testC && { declaredScreens: testC.comparison?.declaredScreens, coverage: testC.comparison?.coverage, blindSpots: testC.blindSpots?.length },
     testD: testD && { urls: testD.rows?.length, recall: testD.recall },
     testF: testF && { tally: testF.tally },
-    loss: testL && { constructs: testL.constructs, lost: testL.lost, tally: testL.tally },
+    loss: testL && { constructs: testL.constructs, inScope: testL.inScope, lost: testL.lost, tally: testL.tally },
     why: testWhy && { total: testWhy.total, byReason: testWhy.byReason },
     notes: Array.isArray(testNotes) ? testNotes.length : null,
     toolStatus: Object.fromEntries(toolRuns.filter((t) => t.slug === r.slug).map((t) => [t.script, t.status])),

@@ -7,7 +7,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { conversion } from './report-counts.mjs'
+import { conversion, inScope } from './report-counts.mjs'
 
 const file = process.argv[2]
 const data = JSON.parse(fs.readFileSync(file, 'utf8'))
@@ -40,9 +40,9 @@ if (prov.enforcementFailures?.length) out += `% ENFORCEMENT FAILED -- do not pub
 out += `\n`
 
 // ---------------------------------------------------------------- conversion
-out += `\\newcommand{\\TabConversion}{%\n\\begin{tabular}{@{}lrrrrr@{}}\n\\toprule\n`
-out += `Application & Constructs & Nodes & Must & May & Conversion \\\\\n\\midrule\n`
-for (const r of R) out += `${NAME[r.slug]} & ${r.totalConstructs} & ${r.graph?.nodes ?? '--'} & ${r.graph?.must ?? '--'} & ${r.graph?.may ?? '--'} & ${convCell(r)} \\\\\n`
+out += `\\newcommand{\\TabConversion}{%\n\\begin{tabular}{@{}lrrrrrr@{}}\n\\toprule\n`
+out += `Application & Constructs & In scope & Nodes & Must & May & Conversion \\\\\n\\midrule\n`
+for (const r of R) out += `${NAME[r.slug]} & ${r.totalConstructs} & ${r.loss?.tally ? inScope(r.loss) : '--'} & ${r.graph?.nodes ?? '--'} & ${r.graph?.must ?? '--'} & ${r.graph?.may ?? '--'} & ${convCell(r)} \\\\\n`
 out += `\\bottomrule\n\\end{tabular}}\n\n`
 // The constructs column again, one macro per application, for the sentences that quote it.
 const MACRO = { realworld: 'Realworld', alfresco: 'Alfresco', ghostfolio: 'Ghostfolio', k8sdash: 'Kdash', bitwarden: 'Bitwarden', mifos: 'Mifos' }
