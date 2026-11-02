@@ -39,7 +39,7 @@ export class Home { flag = true; constructor(private router: Router) {}
   @HostListener('click') goH() { this.router.navigate(['/h']) }
   @Debounce() goD() { this.router.navigate(['/d']) }
   goE() { this.router.navigate(['/e']) }
-  maybe() { if (this.flag) { this.goD(); goC(this.router) } } }`,
+  maybe() { if (this.flag) { this.goD() } } }`,
       '/app/t.component.ts': leaf,
     }), '/app')
     expect(tier(graph, '/h')).toBe('must')
