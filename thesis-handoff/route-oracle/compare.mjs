@@ -110,7 +110,7 @@ if (arg('--json')) fs.writeFileSync(arg('--json'), JSON.stringify({ before: B.pr
 // Why the remaining attribution losses stay lost (from diagnose-attribution.mjs output).
 const DIAG = [
   ['no scope: component not reached from any route component or shell', 'Owner component not reached from any screen'],
-  ['service (not in this version)', 'In a service or guard (not implemented)'],
+  ['service (not in this version)', 'In a service or guard the call graph does not place'],
   ['scoped; target target-missing', 'Scope found, target screen has no node'],
   ['scoped; target dynamic', 'Scope found, target fully dynamic'],
   ['scoped; target resolves', 'Scope found, not explained'],
