@@ -102,11 +102,12 @@ extractor does not read. The mechanical witness check
 finds no wrong destination among the \MustWitnessEdges{} edges and cannot read the destination of
 \MustWitnessUnread{} of them.
 Before the defects this thesis identifies were repaired, two of the six yielded a list of
-routes with no transitions at all. The node result is bounded
-by what a reader of the route table can enumerate: a runtime probe that visits every
-address the applications answer finds \ProbeMissed{} mounted addresses with no node,
-\ProbeMissedGhostfolio{} of them in a single application, and only \ProbeExactApps{} of
-the six are exact against it.
+routes with no transitions at all. The node result is bounded by what the extractor's
+reader can enumerate from the route table. A runtime check reads the route
+configuration the applications hold, expands their lazy subtrees and checks that reading
+by navigating a chosen list of addresses; it finds \ProbeMissed{} mounted addresses with
+no node, \ProbeMissedGhostfolio{} of them in a single application. Only \ProbeExactApps{}
+of the six are exact against it.
 
 Every lost construct is assigned to one defect class, the first whose rule matches it, so the
 order of the rules is part of the measure. Under that order attribution is the largest
@@ -168,12 +169,12 @@ defect class is taken to its root cause and repaired where the cause is the extr
 Almost every defect class turned out to be a construct the extractor could read and did not,
 and the exceptions are decided outside the route table: one application computes a route's path
 in a custom matcher function, and another chooses between two route tables by a value injected at
-deployment. The largest single loss is neither: \ProbeMissedGhostfolio{} of the \ProbeMissed{}
-addresses the running applications answer without a node sit behind one spread of computed routes,
-which the extractor declares unread and does not repair. With the other readable classes repaired,
-\RoundTwoFullNodes{} of the six hold a node for every screen the static readers find
-declared, \ProbeExactApps{} of the six hold one for every address the running
-application answers, and \RoundTwoAccounted{} of the navigation sites that remain in
+deployment. The largest single loss is neither: of the \ProbeMissed{} mounted addresses the runtime
+configurations hold, \ProbeMissedGhostfolio{} have no node and sit behind one spread of
+computed routes, which the extractor declares unread and does not repair. With the other
+readable classes repaired, \RoundTwoFullNodes{} of the six hold a node for every screen the
+static readers find declared, \ProbeExactApps{} of the six hold one for every mounted
+address in the runtime configuration, and \RoundTwoAccounted{} of the navigation sites that remain in
 scope are accounted for, as a transition, as a destination only the run time knows, or
 as a source the analysis cannot place; the sites excluded from that scope, and the
 ground for each exclusion, are counted in Chapter~5. Every site that remains names its reason.

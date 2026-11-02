@@ -10,11 +10,11 @@ is complete on all six applications of the corpus against the readers of the rou
 configuration (Table~\ref{tab:coverage}): every screen those readers find declared has a
 node, and the runtime method finds no node at an address the framework mounts nothing at,
 which is the absence of a failure rather than a proof that none can occur. Completeness in that sense is bounded by what a route table can be read to
-declare, and the runtime method is also the method that bounds it: visiting the addresses
-the applications answer finds \ProbeMissed{} with no node, \ProbeMissedGhostfolio{} of them
-in ghostfolio alone, so \ProbeExactApps{} of the six are complete in the stronger sense of
-holding a node for every address the running application answers
-(Section~\ref{sec:res-probe}). Both readings are reported, because the weaker one is what
+declare, and the runtime method is also the method that bounds it: the route
+configuration it reads holds \ProbeMissed{} mounted addresses with no node,
+\ProbeMissedGhostfolio{} of them in ghostfolio alone, so \ProbeExactApps{} of the six are
+complete in the stronger sense of holding a node for every mounted address in the runtime
+configuration (Section~\ref{sec:res-probe}). Both readings are reported, because the weaker one is what
 the loss classification of this chapter is computed against and the stronger one is what a
 user of the graph would want. That was not so when this work began.
 Two defects of the extractor accounted for most of the corpus then: a route whose path is
@@ -172,10 +172,11 @@ Both uses stop at the same place, which is runtime dynamic routing. Where a navi
 target is computed from a value, where the route table is assembled at startup from
 configuration rather than declared, and where a user interface state is an overlay that
 no route describes, the static graph is either silent or over-approximates into the may
-tier, which carries no soundness claim. The graph is a lower bound on the
-navigation an application can perform, and it has to be consumed as one. A query that
-must not miss a transition cannot be answered from it alone, and the graph's own
-witnesses and declared approximations are what tell a consumer which queries those are.
+tier, which carries no soundness claim. The must tier is a lower bound on the
+navigation an application can perform; the may tier is not, and a may edge may name a
+transition the application cannot make. A query that must not miss a transition
+therefore cannot be answered from the graph alone, and the graph's own witnesses and
+declared approximations are what tell a consumer which queries those are.
 
 \section{Limitations and threats to validity}
 \label{sec:limitations}
@@ -227,18 +228,18 @@ that width.
 
 \textbf{Construct validity.} The conversion ratio divides the constructs witnessed by a
 deterministic edge by all navigation constructs that the independent parser finds in
-non-test source. That denominator over-counts in two ways that both push the ratio down.
+non-test source. That denominator over-counts in two ways.
 It contains constructs that no transition graph could convert, in particular calls that
 only change the query string of the current screen, which Chapter~\ref{ch:results}
 reports on a separate row rather than as a loss. It also contains constructs in code
 that the application never mounts, such as components whose selector no template uses,
-which the inspection of the remaining losses identified. Every reported conversion ratio
-is therefore a lower bound on the fraction of reachable navigation that the extractor
-recovers, and the true figure cannot be computed without deciding reachability for each
-construct by hand.
+which the inspection of the remaining losses identified. Those over-counts push the ratio
+down, but the denominator also under-counts, so the ratio is not a bound in either
+direction. The true figure cannot be computed without deciding reachability for each
+construct by hand and recognising every navigation form.
 
-The denominator also under-counts, and this threat is the more fundamental of the two
-because it bounds what the measurement can see at all. The parser recognises navigation
+The under-count is the more fundamental threat, because it bounds what the measurement
+can see at all. The parser recognises navigation
 by four syntactic patterns: a \texttt{routerLink} attribute or binding, and a call to
 \texttt{navigate} or \texttt{navigateByUrl} on a receiver whose name contains
 \emph{router}. Navigation expressed any other way is in neither the numerator nor the
