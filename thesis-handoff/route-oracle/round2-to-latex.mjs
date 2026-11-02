@@ -200,9 +200,9 @@ out.push('\\end{tabular}}')
 out.push('\\newcommand{\\TabRoundTwoSoundness}{%')
 out.push('\\begin{tabular}{lrrrrrr}')
 out.push('\\toprule')
-out.push('Application & Edges & \\shortstack[r]{Sites\\\\cited} & Judged & \\shortstack[r]{Clean of\\\\judged} & \\shortstack[r]{Must\\\\clean} & \\shortstack[r]{Must\\\\conversion} \\\\')
+out.push('Application & Edges & \\shortstack[r]{Sites\\\\cited} & Judged & \\shortstack[r]{Clean of\\\\judged} & \\shortstack[r]{Must read\\\\and passed} & \\shortstack[r]{Must\\\\conversion} \\\\')
 out.push('\\midrule')
-let mE = 0, mC = 0, mConv = 0, rawAll = 0, aS = 0, aC = 0, jS = 0, jC = 0, aE = 0
+let mE = 0, mC = 0, mR = 0, mConv = 0, rawAll = 0, aS = 0, aC = 0, jS = 0, jC = 0, aE = 0
 for (const r of rows) {
   const b = r.b1
   const conv = r.l1.tally.CONVERTED_MUST || 0
@@ -212,15 +212,17 @@ for (const r of rows) {
   // share. The must tier stays an edge count, because a finding at any citation condemns its
   // edge; everything judged per site is reported over the site total.
   if (b && b.sites === undefined) throw new Error(`${r.s}: its witness-check file predates the per-site judging and reports no site total, so a share over it cannot be computed`)
-  if (b) { mE += b.mustEdges; mC += b.mustClean; aE += b.edges; aS += b.sites; aC += b.clean }
-  const cell = b ? (b.mustEdges === 0 ? 'n/a' : `${b.mustClean}/${b.mustEdges}`) : '--'
+  if (b) { mE += b.mustEdges; mC += b.mustClean; mR += b.mustClean - (b.mustUnread ?? 0); aE += b.edges; aS += b.sites; aC += b.clean }
+  // Unread destinations are neither passes nor failures: the cell counts the must edges read and passed.
+  if (b && b.mustEdges && b.mustUnread === undefined) throw new Error(`${r.s}: its witness-check file reports no mustUnread`)
+  const cell = b ? (b.mustEdges === 0 ? 'n/a' : `${b.mustClean - (b.mustUnread ?? 0)}/${b.mustEdges}`) : '--'
   // The sites the check reached a verdict on: over-approximated sites and sites, of any modality, whose target it could not read are neither clean nor unclean.
   const judged = b ? judgedSites(b) : 0
   if (b) { jS += judged; jC += b.clean }
   out.push(`${NAME[r.s]} & ${b ? b.edges : '--'} & ${b ? b.sites : '--'} & ${b ? judged : '--'} & ${b ? pc(b.clean, judged) : '--'} & ${cell} & ${pc(conv, r.l1.inScope)} \\\\`)
 }
 out.push('\\midrule')
-out.push(`All & ${aE} & ${aS} & ${jS} & ${pc(jC, jS)} & ${mC}/${mE} & ${pc(mConv, rawAll)} \\\\`)
+out.push(`All & ${aE} & ${aS} & ${jS} & ${pc(jC, jS)} & ${mR}/${mE} & ${pc(mConv, rawAll)} \\\\`)
 out.push('\\bottomrule')
 out.push('\\end{tabular}}')
 

@@ -845,6 +845,7 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
       const must = cls.filter((c) => c === 'CONVERTED_MUST').length
       fs.mkdirSync(path.join(d, 'raw'), { recursive: true })
       fs.writeFileSync(path.join(d, 'raw', `${slug}.L.json`), JSON.stringify({ rows: cls.map((c, i) => ({ at: `f.ts:${i + 1}`, cls: c })) }))
+      fs.writeFileSync(path.join(d, 'raw', `${slug}.B.json`), JSON.stringify({ mustEdges: 1, mustClean: 1, mustUnread: over.unread ?? 0 }))
       if (withDiag) fs.writeFileSync(path.join(d, 'raw', `${slug}.diag.json`), JSON.stringify(DIAG[slug] ?? {}))
       const tally = Object.fromEntries([...new Set(cls)].map((c) => [c, cls.filter((x) => x === c).length]))
       return { slug, totalConstructs: cls.length, conversion: must / cls.length, loss: { constructs: cls.length, tally }, graph: { edges: 10 }, testB: { mustClean: 1, mustEdges: 1 }, ...over }
@@ -888,6 +889,15 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
     const out = fs.readFileSync(tex, 'utf8')
     expect(macro(out, 'AttrRemaining')).toBe('1')
     expect(macro(out, 'AttrRemainingUnexplained')).toBe('1')
+  })
+
+  it('counts an unread must edge as neither passed nor failed', () => {
+    const before = run1('before', RAW_CLASSES, false)
+    const after = run1('after', AFTER_CLASSES, true, { unread: 1 })
+    const tex = path.join(before, 'out.tex')
+    run('compare.mjs', [before, after, '--tex', tex])
+    const out = fs.readFileSync(tex, 'utf8')
+    expect(out).toMatch(/realworld & [^\n]* & 1\/1 & 0\/1 &/)
   })
 })
 
@@ -1164,8 +1174,9 @@ describe('round2-to-latex (review of harness 2): the Judged and Clean of judged 
   it('prints the judged count without the unread sites, and the clean share over it', () => {
     const out = generate(witness)
     // Counting the unread as judged gave 15 and 53.3 %; leaving out only the over-approximated is the pre-fix formula.
-    expect(out).toMatch(/realworld & 10 & 20 & 12 & 66\.7\\,\\% & 4\/4 &/)
-    expect(out).toMatch(/\nAll & 60 & 120 & 72 & 66\.7\\,\\% & 24\/24 &/)
+    // The must cell counts read and passed edges: one of the four is unread.
+    expect(out).toMatch(/realworld & 10 & 20 & 12 & 66\.7\\,\\% & 3\/4 &/)
+    expect(out).toMatch(/\nAll & 60 & 120 & 72 & 66\.7\\,\\% & 18\/24 &/)
     expect(macro(out, 'RoundTwoJudged')).toBe('72')
     expect(macro(out, 'RoundTwoJudgedClean')).toBe('66.7\\,\\%')
     expect(macro(out, 'RoundTwoUnreadSites')).toBe('18')
