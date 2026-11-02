@@ -277,6 +277,9 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const metFirst = (first: RouteLevel[] | undefined, at: string, levels: RouteLevel[]): boolean => {
     if (first === undefined) return false
     if (before(first, levels)) return true
+    // A measurement switch, not a product option: the thesis counts the must edges that rest on
+    // this assumption by extracting again without it.
+    if (process.env.UIGRAPH_ROUTE_ORDER === 'unread') return false
     if (!at.endsWith('*') || !apart(first, levels)) return false
     assumedOrder.set(at, levels)
     return true

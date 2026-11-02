@@ -109,18 +109,18 @@ describe('a route title the router awaits', () => {
     '/app/app.routes.ts': `import type { Routes } from '@angular/router'
 import { H } from './h.component'
 import { P } from './p.component'
-const TITLE = 'T'
+function count(): number { return 1 }
 function pick(): string | (() => string) { return 'U' }
 export const routes: Routes = [
   { path: 'home', component: H },
-  { path: 't', component: P, title: TITLE },
+  { path: 't', component: P, title: \`Item \${count()}\` },
   { path: 'u', component: P, title: pick() },
 ]`,
     '/app/h.component.ts': page('H', '<a routerLink="/t">t</a><a routerLink="/u">u</a>'),
     '/app/p.component.ts': page('P'),
   }), '/app').graph
 
-  it('is not one when a name the reader follows holds a string', () => {
+  it('is not one when it is a template string the reader cannot fold to a constant', () => {
     // 131: every non-literal title is a resolver
     expect(edgeOf(titled(), '/home', '/t')?.modality).toBe('must')
   })

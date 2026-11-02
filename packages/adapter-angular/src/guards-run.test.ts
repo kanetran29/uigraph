@@ -414,6 +414,21 @@ export const routes: Routes = [
     }), '/app')
     expect(edgeOf(graph, '/a', '/b')?.modality).toBe('must')
   })
+
+  it('makes no such assumption under the measurement switch, and holds the edge at may', () => {
+    process.env.UIGRAPH_ROUTE_ORDER = 'unread'
+    try {
+      const { graph } = extractGraph(inMemory({
+        '/app/app.routes.ts': `import type { Routes } from '@angular/router'\nimport { A } from './a.component'\nexport const ROOT: Routes = [{ path: 'a', component: A }, { path: '**', redirectTo: '/a' }]`,
+        '/app/feature.routes.ts': `import type { Routes } from '@angular/router'\nimport { P } from './p.component'\nexport const FEATURE: Routes = [{ path: 'b', component: P }]`,
+        '/app/a.component.ts': page('A', '<a routerLink="/b">b</a>'),
+        '/app/p.component.ts': page('P'),
+      }), '/app')
+      expect(edgeOf(graph, '/a', '/b')?.modality).toBe('may')
+    } finally {
+      delete process.env.UIGRAPH_ROUTE_ORDER
+    }
+  })
 })
 
 describe('an address only a redirect answers', () => {
