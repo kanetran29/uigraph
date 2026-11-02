@@ -59,6 +59,13 @@
 // keyed on the resolved screens rather than on a substring of the path literal; where no
 // screen resolves it falls back to any guard change, which the chapter states.
 //
+// Harness 1.9.0. Change against 1.8.0: CHANGE_NAV_TARGET replaces the whole command array with
+// the new destination instead of its first element, skips a site whose first element is not a
+// plain string, draws the destination from the declared routes alone so both configurations
+// patch each site alike, and is scored on the edited line's witnessed edges. In 1.8.0 every
+// retarget mutant the graph did not detect was an artefact of the operator: four multi-element
+// arrays retargeted to a path no route declares, and one concatenated target left dynamic.
+//
 // Harness 1.4.0. Change against 1.3.0: CHANGE_NAV_TARGET no longer counts a correct graph
 // response as wrong. Its check requires an ADDED edge to the new destination, but attribution
 // fans a navigation site over every screen it can be triggered from, and retargeting such a
@@ -102,7 +109,7 @@ const SEED = parseInt(flag('--seed', '20261021'), 10)
 const jsonOut = flag('--json', null)
 const MAP_CMD = process.env.UIGRAPH_MAP || flag('--map-cmd', 'uigraph')
 const DB = path.join(appDir, 'uigraph-mutate.db')
-const HARNESS_VERSION = 'mutate 1.8.0'
+const HARNESS_VERSION = 'mutate 1.9.0'
 
 /** Deterministic PRNG so that a reported sample can be reproduced exactly. */
 function mulberry32(a) {
@@ -228,15 +235,12 @@ const lineOf = (src, index) => src.slice(0, index).split('\n').length
  * scores the graph's response. A REMOVE_GUARD mutant is checked against the guards its own
  * removed list names, read by namedGuards.
  */
-function discover(routes, screensOfRoute, rnd, alreadyReached) {
+function discover(routes, screensOfRoute, rnd) {
   const muts = []
-  // The preference is only a preference: falling back to the whole pool keeps one rnd()
-  // draw per call either way, so the seeded sample of every other operator is unchanged.
-  const otherRoute = (orig, prefer = () => true) => {
-    const pool = routes.filter((r) => r !== orig && !r.includes(':'))
-    const liked = pool.filter(prefer)
-    const from = liked.length ? liked : pool
-    return from.length ? from[Math.floor(rnd() * from.length)] : null
+  const pool0 = [...new Set(routes)].filter((r) => !r.includes(':')).sort()
+  const otherRoute = (orig) => {
+    const pool = pool0.filter((r) => r !== orig)
+    return pool.length ? pool[Math.floor(rnd() * pool.length)] : null
   }
 
   for (const f of tsFiles(appDir)) {
@@ -271,26 +275,37 @@ function discover(routes, screensOfRoute, rnd, alreadyReached) {
       })
     }
 
-    for (const m of src.matchAll(/(router\.navigate\(\[\s*)(['"])(\/[\w/-]+)\2/g)) {
-      const orig = m[3].replace(/\/$/, '')
-      // Attribution fans one navigation site over every screen it can be triggered from, so the
-      // site draws one edge per screen. Retargeting it to a destination all of those screens
-      // already reach replaces each edge with one the graph already holds, which deduplicates:
-      // the mutant then removes the old edges and adds none, and a check that requires an added
-      // edge calls a correct response wrong. Prefer a destination at least one of the site's own
-      // screens does not already reach, and exclude the mutant when the application offers none.
-      const fileLine = `${rel}:${lineOf(src, m.index)}`
-      const dest = otherRoute(orig, (cand) => !alreadyReached(fileLine, cand))
+    // The whole command array is replaced, not its first element: retargeting only the head of
+    // ['/profile/', user.username] gives /register/<name>, which no declared route is, and a check
+    // that asks for an edge to /register then calls a correct graph wrong. A site whose head is
+    // not a plain string element (a concatenation, a variable) is not mutated, because the
+    // mutant would still be a dynamic target and the graph would have nothing to change.
+    for (const m of src.matchAll(/(router\.navigate\(\s*)\[([^\[\]]*)\]/g)) {
+      const head = m[2].match(/^\s*(['"])(\/[\w/-]*)\1\s*(,|$)/)
+      if (!head) continue
+      const orig = head[2].replace(/\/$/, '') || '/'
+      const line = lineOf(src, m.index)
+      const fileLine = `${rel}:${line}`
+      // The destination is drawn from the declared routes alone, so the attributed and the
+      // unattributed runs, which share the seed, patch every site identically and their paired
+      // comparison compares one mutant with itself.
+      const dest = otherRoute(orig)
       if (!dest) continue
+      const q = head[1]
       muts.push({
-        kind: 'CHANGE_NAV_TARGET', file: f, rel, line: lineOf(src, m.index),
-        index: m.index, find: m[0], replace: `${m[1]}${m[2]}${dest}${m[2]}`, subject: `${orig} => ${dest}`,
-        predict: `the edge to ${orig} is replaced by an edge to ${dest}`,
-        confound: () => alreadyReached(fileLine, dest)
-          ? `every screen this site is attributed to already reaches ${dest}, so a correct retarget adds no edge`
-          : null,
-        check: (d) => d.edgesRemoved.some((e) => e.includes(`-> ${orig} `)) &&
-          d.edgesAdded.some((e) => e.includes(`-> ${dest} `)),
+        kind: 'CHANGE_NAV_TARGET', file: f, rel, line,
+        index: m.index, find: m[0], replace: `${m[1]}[${q}${dest}${q}]`, subject: `${orig} => ${dest}`,
+        predict: `the edges this line witnesses go to ${dest} and no longer to where it led before`,
+        // Scored on the line that was edited: it must now witness an edge to the new destination
+        // and no longer witness one to a destination it reached before. An added edge is not
+        // required, since a screen that already reaches the destination merges the line into
+        // the edge it has.
+        check: (d, mut) => {
+          const before = new Set((siteEdges.get(fileLine) || []).map((e) => baseRouteOf.get(e.to)).filter((r) => r && r !== dest))
+          const mR = nodeRoutes(mut)
+          const after = new Set((witnessEdges(mut).get(fileLine) || []).map((e) => mR.get(e.to)))
+          return after.has(dest) && ![...before].some((r) => after.has(r))
+        },
       })
     }
 
@@ -360,14 +375,9 @@ const screensOfRoute = (route) => baseline.nodes
 // Which screens a navigation site belongs to is read back off the baseline graph: the edges a
 // source line witnesses are exactly the edges attribution drew for that site.
 const siteEdges = witnessEdges(baseline)
-const alreadyReached = (fileLine, dest) => {
-  const scopes = [...new Set((siteEdges.get(fileLine) || []).map((e) => e.from))]
-  return scopes.length > 0 && scopes.every((from) =>
-    baseline.edges.some((e) => e.from === from && baseRouteOf.get(e.to) === dest))
-}
 
 const rnd = mulberry32(SEED)
-const all = discover(routes, screensOfRoute, rnd, alreadyReached)
+const all = discover(routes, screensOfRoute, rnd)
 const discovered = {}
 for (const m of all) discovered[m.kind] = (discovered[m.kind] || 0) + 1
 console.log(`discovered ${all.length} candidate mutations ${JSON.stringify(discovered)}`)
@@ -417,7 +427,7 @@ for (const [i, m] of chosen.entries()) {
   else {
     d = delta(baseline, mut)
     if (d.touched === 0) verdict = 'MISSED'
-    else verdict = m.check(d) ? 'DETECTED' : 'WRONG'
+    else verdict = m.check(d, mut) ? 'DETECTED' : 'WRONG'
   }
   gitRestore()
 

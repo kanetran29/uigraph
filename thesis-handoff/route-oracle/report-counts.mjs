@@ -20,13 +20,26 @@ export function ledger(r) {
 }
 
 /**
+ * The ledger classes that are not transitions to count: a query-only navigation stays on its
+ * screen, and the two exclusions name no destination or a named outlet. The chapter's in-scope
+ * constructs are the ledger's constructs less these, the same set round2-to-latex.mjs and
+ * loss-breakdown.mjs call in scope.
+ */
+export const OUT_OF_SCOPE = ['QUERY_ONLY', 'EXCLUDED_NAMED_OUTLET', 'EXCLUDED_NO_COMMANDS']
+
+/** The in-scope constructs of a loss ledger. */
+export const inScope = (l) => l.constructs - OUT_OF_SCOPE.reduce((a, k) => a + (l.tally[k] || 0), 0)
+
+/**
  * An application's must conversion as a percentage, unrounded, from its ledger: the constructs
- * that earn a must edge over all of its constructs. Null when the result holds no ledger, which a
- * table prints as a dash rather than as a zero.
+ * that earn a must edge over its in-scope constructs. Null when the result holds no ledger, or no
+ * in-scope construct, which a table prints as a dash rather than as a zero.
  */
 export function conversion(r) {
   const l = r.loss
-  return l?.tally && l.constructs ? share(l.tally.CONVERTED_MUST || 0, l.constructs) : null
+  if (!l?.tally || !l.constructs) return null
+  const d = inScope(l)
+  return d > 0 ? share(l.tally.CONVERTED_MUST || 0, d) : null
 }
 
 /**

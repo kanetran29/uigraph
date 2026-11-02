@@ -204,7 +204,7 @@ let mE = 0, mC = 0, mConv = 0, rawAll = 0, aS = 0, aC = 0, jS = 0, jC = 0, aE = 
 for (const r of rows) {
   const b = r.b1
   const conv = r.l1.tally.CONVERTED_MUST || 0
-  mConv += conv; rawAll += r.l1.constructs
+  mConv += conv; rawAll += r.l1.inScope
   // The witness check judges every source location an edge cites, so `clean` and the verdict
   // tally count SITES while `edges` counts edges. Mixing the two is what produced a negative
   // share. The must tier stays an edge count, because a finding at any citation condemns its
@@ -215,7 +215,7 @@ for (const r of rows) {
   // The sites the check reached a verdict on: over-approximated sites and sites, of any modality, whose target it could not read are neither clean nor unclean.
   const judged = b ? judgedSites(b) : 0
   if (b) { jS += judged; jC += b.clean }
-  out.push(`${NAME[r.s]} & ${b ? b.edges : '--'} & ${b ? b.sites : '--'} & ${b ? judged : '--'} & ${b ? pc(b.clean, judged) : '--'} & ${cell} & ${pc(conv, r.l1.constructs)} \\\\`)
+  out.push(`${NAME[r.s]} & ${b ? b.edges : '--'} & ${b ? b.sites : '--'} & ${b ? judged : '--'} & ${b ? pc(b.clean, judged) : '--'} & ${cell} & ${pc(conv, r.l1.inScope)} \\\\`)
 }
 out.push('\\midrule')
 out.push(`All & ${aE} & ${aS} & ${jS} & ${pc(jC, jS)} & ${mC}/${mE} & ${pc(mConv, rawAll)} \\\\`)
