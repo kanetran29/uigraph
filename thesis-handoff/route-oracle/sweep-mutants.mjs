@@ -16,7 +16,9 @@
 // controls mode. Id 106 is retired with the redirect rework: a catch-all is now among the redirects
 // the router may meet, in declaration order, and 106a deletes the term that limits the order
 // assumption to catch-alls instead. Ids 162 to 164 delete the refusal of a relative target that
-// climbs above the root. Id 110 is retired as equivalent: two distinct route levels share a parent
+// climbs above the root. Id 128 is retired as equivalent: an empty-path child's unreadable redirect is also
+// registered in the redirect table at the same address, which hides the screen and makes the
+// address ambiguous whether or not the screen records it too. Id 110 is retired as equivalent: two distinct route levels share a parent
 // only as elements of one array (a spread, a `children` call and a named constant each give its
 // own parent), so `before` cannot tell the route-table check from its absence. Id 91 is retired: dropping the
 // `t.relative === true` conjunct of the preserved-prefix computation changes nothing, since a target
@@ -492,9 +494,6 @@ export const MUTANTS = [
   { id: "127", rule: "redirects: unreadable redirectTo not registered", file: "routes.ts",
     find: "const redirectDeclared = propNamed(obj, 'redirectTo') !== undefined",
     replace: "const redirectDeclared = redirectTarget !== null" },
-  { id: "128", rule: "empty-path redirect: unreadable target does not hide the screen", file: "routes.ts",
-    find: "host.redirectsTo = { to: redirectTarget,",
-    replace: "host.redirectsTo = redirectTarget === null ? undefined : { to: redirectTarget," },
   { id: "129", rule: "levelOf: title resolver ignored", file: "routes.ts",
     find: "resolve: propNamed(obj, 'resolve') !== undefined || titleResolves(obj),",
     replace: "resolve: propNamed(obj, 'resolve') !== undefined," },
