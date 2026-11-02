@@ -14,7 +14,7 @@ import { relative, join, dirname } from 'node:path'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import type { ExtractOptions, ExtractResult, GraphEdge, GraphNode, SoundinessNote } from '@ui-graph/core'
 import { edgeId, controlNodeId } from './ids'
-import { keptSegments, matchAll, matchLiteral, matchPrefix, overlaps, redirectAddress, resolveRelativeTarget, urlPath, type RouteLike } from './matcher'
+import { climbsAboveRoot, keptSegments, matchAll, matchLiteral, matchPrefix, overlaps, redirectAddress, resolveRelativeTarget, urlPath, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
 import { isBareCall, templateCondition } from './conditions'
 import { collectRoutes, type Redirect, type RouteLevel, type UnreadableRoutes } from './routes'
@@ -466,6 +466,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // A relative target resolves against the route of the component that holds the site, and
         // the emitting node's path is that route only when the node is the component's own route.
         const baseUnknown = !parsed.path.startsWith('/') && (t.baseUnknown === true || (t.relative === true && componentByNodeId.get(from) !== file))
+        // Angular throws on a command that climbs above the root, so the navigation never runs.
+        if (t.relative === true && !baseUnknown && climbsAboveRoot(parsed.path, base)) {
+          if (note) soundiness.push({ kind: 'relative-above-root', file: t.file ?? file, loc: t.loc, detail: `relative target "${parsed.path}" climbs above the root from ${base}, which Angular rejects (NG04005), so it navigates nowhere` })
+          continue
+        }
         const landed = land(value, t.url !== true)
         // An address a redirect answers is declared wherever the redirect sends it, so it is not the catch-all's.
         if (!landed.target && landed.unread) {
