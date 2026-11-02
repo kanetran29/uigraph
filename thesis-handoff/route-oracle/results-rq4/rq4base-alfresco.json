@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "mutate 1.8.0",
-  "extractor": "% Extractor 920e1aa, packages/ clean, harness clean when generated.",
+  "harnessVersion": "mutate 1.9.1",
+  "extractor": "% Extractor c42f220, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco/projects/aca-content",
   "attribution": false,
@@ -26,9 +26,9 @@
       "discovered": 4,
       "sampled": 4,
       "detected": 1,
-      "missed": 3,
+      "missed": 0,
       "wrong": 0,
-      "excluded": 0,
+      "excluded": 3,
       "broke": 0,
       "skip": 0
     },
@@ -53,16 +53,16 @@
       "skip": 0
     }
   },
-  "detectionRate": 0.7857142857142857,
-  "scored": 14,
+  "detectionRate": 1,
+  "scored": 11,
   "detected": 11,
   "results": [
     {
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/view-profile/view-profile.component.ts",
       "line": 141,
-      "subject": "/personal-files => /search-libraries",
-      "predict": "the edge to /personal-files is replaced by an edge to /search-libraries",
+      "subject": "/personal-files => /shared",
+      "predict": "the edges this line witnesses go to /shared and no longer to where it led before",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -72,7 +72,7 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/profile -> /search-libraries (navigate)"
+          "/profile -> /shared (navigate)"
         ],
         "edgesRemoved": [
           "/profile -> /personal-files (navigate)"
@@ -84,58 +84,28 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-navigation.service.ts",
       "line": 57,
-      "subject": "/personal-files => /recent-files",
-      "predict": "the edge to /personal-files is replaced by an edge to /recent-files",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
+      "subject": "/personal-files => /rules",
+      "predict": "the edges this line witnesses go to /rules and no longer to where it led before",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/lib/components/search/search-navigation.service.ts:57 is witnessed by no baseline edge"
     },
     {
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts",
       "line": 163,
-      "subject": "/search => /favorite/libraries",
-      "predict": "the edge to /search is replaced by an edge to /favorite/libraries",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
+      "subject": "/search => /profile",
+      "predict": "the edges this line witnesses go to /profile and no longer to where it led before",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts:163 is witnessed by no baseline edge"
     },
     {
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-navigation.service.ts",
       "line": 63,
-      "subject": "/search => /view",
-      "predict": "the edge to /search is replaced by an edge to /view",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
+      "subject": "/search => /",
+      "predict": "the edges this line witnesses go to / and no longer to where it led before",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/lib/components/search/search-navigation.service.ts:63 is witnessed by no baseline edge"
     },
     {
       "kind": "REMOVE_GUARD",

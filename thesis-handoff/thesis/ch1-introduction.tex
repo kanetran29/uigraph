@@ -70,15 +70,12 @@ the model to guide exploration towards coverage the test run has not reached
 \cite{llmdroid2025}. The approach
 has been applied to web interfaces with a vision-language model and curiosity-driven
 exploration \cite{wang2024leveraging}, and a survey of large language models in
-software testing covers the wider area \cite{wang2024software}. Coding agents lack the
-same kind of structure one level up, where the context is a repository rather than a
-screen: the SWE-bench issues typically require coordinated edits across functions,
-classes and files \cite{jimenez2024swebench}, agent performance depends strongly on the
-interface through which the repository is navigated \cite{yang2024sweagent}, and
-retrieving code from elsewhere in the repository improves completion over an in-file
-baseline \cite{zhang2023repocoder}. A graph that states which screens an application
-has and which transitions connect them is one source of such structure, and it can be
-produced without running the application.
+software testing covers the wider area \cite{wang2024software}. Coding agents working on
+a repository may also benefit from structure of this kind: the SWE-bench issues typically
+require coordinated edits across functions, classes and files \cite{jimenez2024swebench},
+and agent performance depends on the interface through which the repository is navigated
+\cite{yang2024sweagent}. Whether a navigation graph helps such tools is not tested here;
+these uses motivate the extraction but do not depend on the results of this thesis.
 
 This thesis carries out that measurement for Angular and proposes an analysis for the
 largest class of failures it finds. What is proposed is a method rather than a product:

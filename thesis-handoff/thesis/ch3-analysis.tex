@@ -53,7 +53,9 @@ defined on range over the edges whose source and target are both screens.
 \begin{table}[t]\small
 \caption{What the published graphs are made of: nodes by kind, where an anchor stands for a
 whole subtree of screens and \emph{other} counts unplaced origins and dynamic targets
-together, and edges by modality.}
+together, and edges by modality. These are the attributed graphs; the node column of
+Table~\ref{tab:conversion} counts the graphs of the same snapshot without attribution, which
+hold no anchors and fewer \emph{other} nodes.}
 \label{tab:census}
 \TabCensus
 \end{table}
@@ -146,50 +148,55 @@ edge whose construct that earns must names a different destination cannot satisf
 so a failure of the check there refutes it; agreement does not establish it. The other
 constructs a must edge cites are evidence for may and are not judged against the claim. Whether the navigation
 occurs \emph{for every input on which the enclosing code executes} is decided by the rules
-that place an edge in the must tier instead of the may tier. Their guard half is read off the
-route configuration and never evaluates a guard, so a guard the navigation runs demotes it
-whatever the guard would decide; which guards a navigation runs is decided the way the router
-decides it. The routes the source and the target share are reused unless their parameters can
-change or \texttt{runGuardsAndResolvers} asks otherwise, and a reused route's
-\texttt{canActivate} and resolvers do not run again. A navigation runs the \texttt{canMatch} of
-every route its address is matched through, the \texttt{canActivate}, \texttt{canLoad} and
-resolvers of every route it enters and its \texttt{canLoad} until the route's code has been
-loaded, which the extractor, not knowing whether it has, takes as every time, the
-\texttt{canActivateChild} of every route above those, and
-the \texttt{canDeactivate} of every route it leaves; a child at the empty path that the target's
-own address resolves to is one of the routes it enters. A resolver is awaited by the router and
-demotes the edge as an \texttt{await} does, and a guard list the reader cannot bring back to an
-array demotes it as a guard does. A site is also demoted when its target is the address its
-source already displays: the router ignores such a navigation in its default configuration, or
-follows it only when a parameter or the query differs, so the extractor holds it at may as a
-matter of policy, which is the safe side for an application that configures otherwise, and a
-shell or anchor edge is judged per screen and drawn per screen where the screens disagree. A site
-is demoted when its source is never displayed at its own address because a redirect answers it;
-when the address is one that two declared routes, or a route and a redirect, can answer, since
-Angular takes whichever it meets first; when the base a relative target resolves against cannot
-be read; when a URL names an auxiliary outlet, whose route the adapter does not read; and when it
-runs only on some executions of its own handler: under a template control-flow block, a
-structural directive, an \texttt{<ng-template>}, an ICU case or a container that renders its
-content lazily, under a branch, in a loop or a \texttt{catch} clause, in an optional call or a
-default value, inside a callback, after an \texttt{await}, an early \texttt{return} or
-\texttt{throw} or a \texttt{break} out of its block, before code that may start another
-navigation before its function returns, in a function declared at module level or a member of its class that no
-handler calls unconditionally, in a component mounted under a template condition on that screen,
-or in a route component behind a conditional outlet. A handler is a member the framework calls
-itself, a lifecycle hook or a member \texttt{@HostListener} registers, or one the template binds to
-an event as a bare call outside any template condition. The router cancels a navigation when
-another starts before it has finished, so a navigation is demoted when code that runs after it,
-before the event is handled, may navigate. That code is the rest of the expression that holds it
-(the body of a call it is an argument of, a right operand, a branch of a conditional whose
-condition it is), the statements after it in its block and in every block around it, a
-\texttt{finally} block around it, and what runs once its function returns: what each caller in
-the class does after calling that function, handler or not, and for a constructor or lifecycle
-hook the hooks Angular calls after it. Code there may navigate when it holds a navigation call, in
-a branch or a callback as much as at the top, or a call to a member of the class, a function of
-the file or a method of an injected service whose body does. An awaited navigation has finished
-before the rest of its function runs, so what follows it there does not count, but its callers go
-on as soon as the function first awaits, so what they do still counts. A call the reader cannot
-resolve to a body in the application is taken not to navigate (Section~\ref{sec:approximations}).
+that place an edge in the must tier instead of the may tier. A site is demoted to may in the
+following cases.
+\begin{itemize}
+\item \textbf{Guards and resolvers.} A guard the navigation runs demotes it, whatever the guard
+would decide, since the guard half of the rules is read off the route configuration and never
+evaluates a guard. Which guards a navigation runs is decided the way the router decides it. The
+routes the source and the target share are reused unless their parameters can change or
+\texttt{runGuardsAndResolvers} asks otherwise, and a reused route's \texttt{canActivate} and
+resolvers do not run again. A navigation runs the \texttt{canMatch} of every route its address
+is matched through; the \texttt{canActivate}, \texttt{canLoad} and resolvers of every route it
+enters, \texttt{canLoad} until the route's code has been loaded, which the extractor, not knowing
+whether it has, takes as every time; the \texttt{canActivateChild} of every route above those;
+and the \texttt{canDeactivate} of every route it leaves. A child at the empty path that the
+target's own address resolves to is one of the routes it enters. A resolver is awaited by the
+router and demotes the edge as an \texttt{await} does, and a guard list the reader cannot bring
+back to an array demotes it as a guard does.
+\item \textbf{Target and source addresses.} The target is the address the source already
+displays: the router ignores such a navigation in its default configuration, or follows it only
+when a parameter or the query differs, so the extractor holds it at may as a matter of policy,
+which is the safe side for an application that configures otherwise; a shell or anchor edge is
+judged per screen and drawn per screen where the screens disagree. The source is never displayed
+at its own address because a redirect answers it. The address is one that two declared routes,
+or a route and a redirect, can answer, since Angular takes whichever it meets first. The base a
+relative target resolves against cannot be read. The URL names an auxiliary outlet, whose route
+the adapter does not read.
+\item \textbf{Conditional execution.} The site runs only on some executions of its own handler:
+under a template control-flow block, a structural directive, an \texttt{<ng-template>}, an ICU
+case or a container that renders its content lazily; under a branch, in a loop or a
+\texttt{catch} clause, in an optional call or a default value, inside a callback; after an
+\texttt{await}, an early \texttt{return} or \texttt{throw} or a \texttt{break} out of its block;
+in a function declared at module level or a member of its class that no handler calls
+unconditionally; in a component mounted under a template condition on that screen; or in a route
+component behind a conditional outlet. A handler is a member the framework calls itself, a
+lifecycle hook or a member \texttt{@HostListener} registers, or one the template binds to an event
+as a bare call outside any template condition.
+\item \textbf{A later navigation may cancel it.} The router cancels a navigation when another
+starts before it has finished, so a navigation is demoted when code that runs after it, before
+the event is handled, may navigate. That code is the rest of the expression that holds it (the
+body of a call it is an argument of, a right operand, a branch of a conditional whose condition it
+is), the statements after it in its block and in every block around it, a \texttt{finally} block
+around it, and what runs once its function returns: what each caller in the class does after
+calling that function, handler or not, and for a constructor or lifecycle hook the hooks Angular
+calls after it. Code there may navigate when it holds a navigation call, in a branch or a callback
+as much as at the top, or a call to a member of the class, a function of the file or a method of
+an injected service whose body does. An awaited navigation has finished before the rest of its
+function runs, so what follows it there does not count, but its callers go on as soon as the
+function first awaits, so what they do still counts. A call the reader cannot resolve to a body
+in the application is taken not to navigate (Section~\ref{sec:approximations}).
+\end{itemize}
 An exception from an earlier synchronous
 call is not counted, since every call can throw; an \texttt{await} is, because a rejected request
 is an ordinary outcome of the code that awaits it. The router's own fetch of a lazily loaded

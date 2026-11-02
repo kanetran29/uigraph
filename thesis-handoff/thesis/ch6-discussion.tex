@@ -94,17 +94,19 @@ were the only remaining loss that the analysis as specified would have recovered
 extractor implements (Section~\ref{sec:res-ablation}), was thus required for applications that
 navigate from services; the dispatch relation is still not implemented.
 
-RQ4 gives a conditional answer, and the condition is RQ1. Renaming a route path was
-detected in every scored mutant in all three applications that were mutated. Deleting
-a \texttt{routerLink} was detected in every scored mutant, and retargeting a
-\texttt{Router.navigate} call in \MutRetargetDetected{} of its \MutRetargetScored{}
-(Table~\ref{tab:mutation}). Removing a guard was detected in every scored mutant of all
-three. Guards are what the first correction of Section~\ref{sec:res-round2} was about, but no
-per-operator result from the earlier instrument survives, so how far this operator moved cannot be
-said. The
-\MutNoResponse{} mutant that left the graph unchanged is a retargeted call in a component the
-analysis could not place under any screen, so the graph holds no edge for it to move
-(Section~\ref{sec:res-mutation}).
+RQ4 gives a conditional answer, and the condition is RQ1. Leaving aside the rename
+operator, whose detection is close to guaranteed by construction, the three operators that can
+fail are detected in \MutFallibleDetected{} of \MutFallibleScored{} scored mutants on the attributed
+graph: every deleted \texttt{routerLink}, \MutRetargetDetected{} of \MutRetargetScored{}
+retargeted \texttt{Router.navigate} calls and \MutGuardDetected{} of \MutGuardScored{} removed
+guards (Table~\ref{tab:mutation}). That clean result came only after two corrections to the
+harness, both found by reading the undetected mutants: a retarget that replaced only the head of
+its commands array, and a guard whose screen was matched by class name to a different class of
+the same name (Section~\ref{sec:res-mutation}). Each undetected mutant on the previous run was
+the harness's error rather than the graph's, which says the harness needed the reading; it does
+not show that the remaining operators would survive a larger or differently drawn sample. Guards
+are what the first correction of Section~\ref{sec:res-round2} was about, but no per-operator
+result from the earlier instrument survives, so how far this operator moved cannot be said.
 
 An earlier state of this extractor was read directly off the graph for this class: in
 realworld the edge entering \texttt{/editor} carried no guard although the route declares
@@ -225,19 +227,19 @@ every site to every screen by a factor between \BaselineFactorMin{} and
 \BaselineFactorMax{}, and on \BaselineBluntest{} the average site is attributed to
 \BaselineBluntestShare{} of the screens. A scope that wide says little about where a
 site fires, even if it is sound, and the coverage attribution recovers comes at the cost of
-that width.
+that width. The same untested direction bears on the must tier: a must edge's source is a screen
+the scope places its site on, so most of k8sdash's must edges, one per screen its toolbar is
+attributed to, are as right as that one scope.
 
 \textbf{Construct validity.} The conversion ratio divides the constructs witnessed by a
-deterministic edge by all navigation constructs that the independent parser finds in
-non-test source. That denominator over-counts in two ways.
-It contains constructs that no transition graph could convert, in particular calls that
-only change the query string of the current screen, which Chapter~\ref{ch:results}
-reports on a separate row rather than as a loss. It also contains constructs in code
-that the application never mounts, such as components whose selector no template uses,
-which the inspection of the remaining losses identified. Those over-counts push the ratio
-down, but the denominator also under-counts, so the ratio is not a bound in either
-direction. The true figure cannot be computed without deciding reachability for each
-construct by hand and recognising every navigation form.
+deterministic edge by the in-scope navigation constructs that the independent parser finds in
+non-test source. Query-only calls and the two exclusions of Table~\ref{tab:loss-rules} are
+taken out of the denominator, but it still over-counts: it contains constructs in code that
+the application never mounts, such as components whose selector no template uses, which the
+inspection of the remaining losses identified. That over-count pushes the ratio down, but the
+denominator also under-counts, so the ratio is not a bound in either direction. The true
+figure cannot be computed without deciding reachability for each construct by hand and
+recognising every navigation form.
 
 The under-count is the more fundamental threat, because it bounds what the measurement
 can see at all. The parser recognises navigation

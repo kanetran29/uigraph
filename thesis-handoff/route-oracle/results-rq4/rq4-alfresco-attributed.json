@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "mutate 1.8.0",
-  "extractor": "% Extractor 920e1aa, packages/ clean, harness clean when generated.",
+  "harnessVersion": "mutate 1.9.1",
+  "extractor": "% Extractor c42f220, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco/projects/aca-content",
   "attribution": true,
@@ -61,8 +61,8 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/view-profile/view-profile.component.ts",
       "line": 141,
-      "subject": "/personal-files => /search",
-      "predict": "the edge to /personal-files is replaced by an edge to /search",
+      "subject": "/personal-files => /shared",
+      "predict": "the edges this line witnesses go to /shared and no longer to where it led before",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -72,7 +72,7 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/profile -> /search (navigate)"
+          "/profile -> /shared (navigate)"
         ],
         "edgesRemoved": [
           "/profile -> /personal-files (navigate)"
@@ -84,8 +84,8 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-navigation.service.ts",
       "line": 57,
-      "subject": "/personal-files => /favorites",
-      "predict": "the edge to /personal-files is replaced by an edge to /favorites",
+      "subject": "/personal-files => /rules",
+      "predict": "the edges this line witnesses go to /rules and no longer to where it led before",
       "verdict": "DETECTED",
       "touched": 4,
       "delta": {
@@ -95,8 +95,8 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/search -> /favorites (navigate)",
-          "/search-libraries -> /favorites (navigate)"
+          "/search -> /rules (navigate)",
+          "/search-libraries -> /rules (navigate)"
         ],
         "edgesRemoved": [
           "/search -> /personal-files (navigate)",
@@ -109,8 +109,8 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts",
       "line": 163,
-      "subject": "/search => /favorite/libraries",
-      "predict": "the edge to /search is replaced by an edge to /favorite/libraries",
+      "subject": "/search => /profile",
+      "predict": "the edges this line witnesses go to /profile and no longer to where it led before",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -120,7 +120,7 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/saved-searches -> /favorite/libraries (navigate)"
+          "/saved-searches -> /profile (navigate)"
         ],
         "edgesRemoved": [
           "/saved-searches -> /search (navigate)"
@@ -132,8 +132,8 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/lib/components/search/search-navigation.service.ts",
       "line": 63,
-      "subject": "/search => /view",
-      "predict": "the edge to /search is replaced by an edge to /view",
+      "subject": "/search => /",
+      "predict": "the edges this line witnesses go to / and no longer to where it led before",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -143,7 +143,7 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "n_scope_shell -> /view (navigate)"
+          "n_scope_shell -> / (navigate)"
         ],
         "edgesRemoved": [
           "n_scope_shell -> /search (navigate)"

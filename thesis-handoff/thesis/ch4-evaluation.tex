@@ -457,7 +457,9 @@ only the witness that pointed at the deleted line. Detection is now judged on th
 witness set as well, which is the property change impact analysis actually needs. Three
 smaller changes followed from the same review. A retargeting mutant now points at
 another declared route instead of an invented one, so that it cannot be confused with a
-missing target. A guard mutant on a screen that no edge enters is excluded, because a
+missing target; a later correction replaces the whole commands array rather than its first
+element, since retargeting only the head of 	exttt{['/b', id]} composes an address no route
+declares, and scores the mutant on the edges the edited line witnesses. A guard mutant on a screen that no edge enters is excluded, because a
 guard is represented on the edges entering the screen it guards, so such a mutant can
 only repeat the edge-coverage gap already counted under RQ1. A rename mutant counts as
 detected when the renamed route appears in the graph, without also requiring the

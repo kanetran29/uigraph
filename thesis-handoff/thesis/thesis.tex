@@ -66,121 +66,47 @@ Supervisor: & Prof.\ Petri Vuorimaa \\
 Major: & Computer Science \\
 \end{tabular}
 \vfill
-{\small Revised version of 1 November 2026, for the supervisor's review. Seven chapters and one appendix. Every figure of the current
-instrument is generated from the results of the commit named at the head of its generated file,
-and figures of earlier instruments are read from their own recorded results, which the text names. The preamble is a preview; the
-official Aalto thesis class is applied before submission.\par}
 \end{titlepage}
 
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 A UI transition graph describes the screens of an application and the transitions a
-user can cause between them. Static extraction of such graphs is well established for
-Android, where each event handler can be attributed to the widget that registered it
-and thus to a single window. For web applications, navigation models have been built at design time, extracted statically from server-rendered applications, or obtained by crawling a running application. Earlier work extracts them
-statically from a client-side application's route declarations for three different
-purposes: model checking, restricted to applications that declare no nested routes, no
-route parameters and no data-bound navigation; end-to-end test generation; and
-access-control checking. In none of the three did this review find a measurement of
-what the extraction fails to read.
+user can cause between them. Earlier work extracts such graphs statically from the route
+declarations of client-side web applications, but none that this review found
+measures what the extraction fails to read. This thesis makes that measurement on six
+open-source Angular applications with \RoundTwoRoutesRealworld{} to \RoundTwoRoutesMifos{}
+declared route entries, with four methods that read the sources and one that reads the
+running application.
 
-This thesis measures static extraction on six open-source Angular applications with
-\RoundTwoRoutesRealworld{} declared route entries to \RoundTwoRoutesMifos{}, using a pinned corpus and five
-evaluation methods, four reading the applications' sources and one the running application. Measured at two levels, the extractor mints a node for
-every screen the route configuration declares, as two static readers that share no code but
-were corrected against each other enumerate it, and recovers almost no navigation construct as a
-deterministic transition once the demotion rules the soundness property rests on are applied:
-\CensusMustSites{} constructs behind \CensusMust{} edges, and taking every guard to let the
-navigation through raises that only to \GuardOnlySites{} constructs behind \GuardOnlyMust{} edges.
-The edge count makes this evidence look larger than it is: \CensusMustSitesKdash{} of the constructs, the
-links of one application's toolbar, yield \CensusMustKdash{} of the edges because the toolbar renders
-on almost every screen, and without that application the tier is
-\the\numexpr\CensusMust-\CensusMustKdash\relax{} edges on
-\the\numexpr\CensusMustSites-\CensusMustSitesKdash\relax{} constructs. \RouteOrderResting{} of the
-edges also rest on an assumption about the order of route tables registered apart, which the
-extractor does not read. The mechanical witness check
-finds no wrong destination among the \MustWitnessEdges{} edges and cannot read the destination of
-\MustWitnessUnread{} of them.
-Before the defects this thesis identifies were repaired, two of the six yielded a list of
-routes with no transitions at all. The node result is bounded by what the extractor's
-reader can enumerate from the route table. A runtime check reads the route
-configuration the applications hold, expands their lazy subtrees and checks that reading
-by navigating a chosen list of addresses; it finds \ProbeMissed{} mounted addresses with
-no node, \ProbeMissedGhostfolio{} of them in a single application. Only \ProbeExactApps{}
-of the six are exact against it.
+The main result is that the deterministic tier is nearly empty. Once the demotion rules the
+soundness property rests on are applied, \CensusMustSites{} constructs yield \CensusMust{}
+must edges; \CensusMustSitesKdash{} of those constructs, one application's toolbar, account
+for \CensusMustKdash{} of the edges, and \RouteOrderResting{} edges rest on an assumption
+about route order the extractor does not read. The extractor mints a node for every
+declared screen two independent static readers find, but a runtime check of the route
+configuration finds \ProbeMissed{} mounted addresses with no node, \ProbeMissedGhostfolio{}
+of them in one application. Every lost construct is assigned to a defect class; after the
+node-level defects were repaired, attribution of a navigation site to the screens it fires
+from is the largest class in every application, and almost every class traces to a construct the
+extractor could read and did not.
 
-Every lost construct is assigned to one defect class, the first whose rule matches it, so the
-order of the rules is part of the measure. Under that order attribution is the largest
-class in every application of the corpus once the
-node-level defects this thesis identifies are repaired. In a web application, a navigation site
-frequently has no single owning screen: it may be located in a shared component, in
-an injected service, or in a route guard. The thesis formulates attribution as a
-dataflow analysis over a lattice of screen sets, specified as a fixpoint over four input
-relations: component nesting, router outlets, a call graph that takes dependency injection into
-account, and a dispatch relation. The prototype implements the first three, the call graph at
-the granularity of class members with provider bindings read application-wide, computes the
-fixpoint with a worklist, and stands in for the dispatch relation with an approximation it never
-reports as deterministic.
-It states a soundness property for the deterministic tier and tests it mechanically rather
-than proving it. Four corrections take that tier from the \EarlierMustEdges{} edges an earlier
-instrument published to \CensusMust{}. The first three were each hidden by the one before; the
-fourth was found by reading the tier construct by construct, and of the \RoundMustEdges{} edges
-the first three left it finds a construct that earns must in \MustFateKept{}, holds \MustFateJoined{}
-more at must only through constructs it did not cite, and finds the others running under a
-condition (after a request returns, in a branch, under a template condition), behind a guard
-the reader had missed, or pointing at the screen already displayed. Two readings of whether each
-construct behind those edges runs every time its code does, made by the AI assistant from the
-sources with the extractor's condition rules as their definition, agree with it at
-\MustReviewAgreeMin{} of the \MustCtxDistinct{}; they show that the rules are applied as written, not
-that the rules are right. Reading guards as the router runs them then lets through navigations
-between screens under a parent whose \texttt{canActivate} the router does not run again, in
-\CensusMustApps{} of the six applications. The implemented part is evaluated on the same
-corpus. What it adds beyond the mechanism earlier
-work already has is small and measured: router-outlet descent leaves the number of placed sites
-unchanged on \AblationOutletSameSitesApps{} of the six applications, the level that adds the
-member-level call graph places \AblationFullAddedSites{} more, \AblationFullAddedShare{} of the
-corpus total, of which the call graph's own share over the rule it replaced is
-\AblationCallGraphNetSites{}, and the
-width they buy is checked in both directions on one application only. With attribution, \AttrRecoveredShare{} of the
-constructs that loss class holds are recovered, on every application in the corpus, almost all
-of it navigation the graph reports as possible rather than certain. On the one application small enough for the
-screens each navigation site fires from to be read off the sources by hand, \GTApp{} with
-\GTSites{} navigation sites, the computed sets are right about \GTFullRecall{} of its
-\GTPairs{} (site, screen) attributions. Most of that is not new: attributing
-what the root component renders to every screen, which earlier work already does, reaches
-\GTRootedRecall{} of them and attributes nothing the application does not. The analysis adds the
-rest without a wrong attribution, but only after replacing a rule of its own that the same reading
-had caught attributing one service's navigation to every screen, and correcting the route reader
-where it had shown one screen's attributions missing, so that application cannot test either
-repair independently. Elsewhere the sets are checked in one direction only, by the
-running interface on \ScopeApps{} of the \ProbeApps{} applications and \ScopeJudged{} of their
-\ScopeScreens{} screens, and ghostfolio's not at all, which is the most serious limitation of the work.
+The thesis therefore formulates scope attribution as a dataflow analysis over screen sets,
+a fixpoint over component nesting, router outlets and a call graph that accounts for
+dependency injection. Its contribution beyond earlier work is modest. Attributing what the
+root component renders to every screen, which earlier work already does, reaches
+\GTRootedRecall{} of the hand-read (site, screen) pairs on \GTApp{}, against \GTFullRecall{}
+for the full analysis. Outlet descent and the member-level call graph add
+\AblationFullAddedShare{} of the placed sites across the corpus, the call graph alone
+\AblationCallGraphNetShare{}. Attribution recovers \AttrRecoveredShare{} of the constructs in its
+class, almost all as possible rather than certain transitions.
+Scope precision is checked in both directions on \GTApp{} only, and that application also
+guided two repairs; elsewhere the running interface checks it in one direction, and the
+over-wide scopes this leaves untested also bear on the sources of must edges.
 
-Mutation testing on three of the applications shows that the graph detects \MutDetected{}
-of \MutScored{} injected source changes, against \MutBaseDetected{} of \MutBaseScored{}
-without attribution. Those two sets are not the same, because a change to a construct the
-baseline graph holds no edge for cannot be scored against it; on the \MutPaired{} mutants
-both graphs can score, the figures are \MutPairedDetected{} and \MutPairedBaseDetected{}.
-Attribution therefore raises both the number of changes that can be scored at all and,
-by the smaller paired margin, the rate at which a scored change is detected.
-
-Finally, the thesis asks whether the losses belong to the applications or to the tool. Each
-defect class is taken to its root cause and repaired where the cause is the extractor's.
-Almost every defect class turned out to be a construct the extractor could read and did not,
-and the exceptions are decided outside the route table: one application computes a route's path
-in a custom matcher function, and another chooses between two route tables by a value injected at
-deployment. The largest single loss is neither: of the \ProbeMissed{} mounted addresses the runtime
-configurations hold, \ProbeMissedGhostfolio{} have no node and sit behind one spread of
-computed routes, which the extractor declares unread and does not repair. With the other
-readable classes repaired, \RoundTwoFullNodes{} of the six hold a node for every screen the
-static readers find declared, \ProbeExactApps{} of the six hold one for every mounted
-address in the runtime configuration, and \RoundTwoAccounted{} of the navigation sites that remain in
-scope are accounted for, as a transition, as a destination only the run time knows, or
-as a source the analysis cannot place; the sites excluded from that scope, and the
-ground for each exclusion, are counted in Chapter~5. Every site that remains names its reason.
-Some of those reasons are dead links the graph finds without running the application, though
-the count of them is a candidate list: a route the tools fail to read is indistinguishable
-from one the application never declares.
+On three applications, the graph detects \MutFallibleDetected{} of \MutFallibleScored{}
+injected link deletions, retargets and guard removals; without attribution fewer changes can be
+scored at all, but on the \MutPaired{} both graphs score the rates are almost the same. The
+corpus is small and Angular-only, and the figures describe these six applications only.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page

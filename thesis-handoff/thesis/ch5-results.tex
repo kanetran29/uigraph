@@ -15,6 +15,15 @@ Historical results are identified separately in Section~\ref{sec:res-round2}; th
 explain the repairs rather than supplying a second population for the final
 comparison.
 
+Two conditions of the measurement hold for every figure below. The corpus source trees are
+extracted without their dependencies installed, so the TypeScript compiler cannot resolve
+types from the framework or third-party packages, and type-directed steps are weaker than in
+an installed project. The corpus was also selected with the tool in view:
+\texttt{SAP/spartacus} was rejected because its configuration-driven routing is not supported
+(Section~\ref{sec:corpus}). The figures therefore describe this configuration on these six
+applications, and are likely to be optimistic for Angular applications in general
+(Section~\ref{sec:limitations}).
+
 \section{The two levels of loss (RQ1)}
 \label{sec:res-baseline}
 
@@ -36,7 +45,7 @@ produce many over-approximated may edges.
 the fraction of in-scope constructs whose own witness earns must; the edge columns
 count edges. \emph{Nodes} counts every node of the baseline graph: the screens of
 Table~\ref{tab:coverage} together with its unplaced origins and dynamic targets
-(Table~\ref{tab:census}). The baseline and attributed graphs are extracted from the same final
+(Table~\ref{tab:census} counts the attributed graphs, which add anchors and more of the latter). The baseline and attributed graphs are extracted from the same final
 snapshot on identical corpus inputs.}
 \label{tab:conversion}
 \TabConversion
@@ -259,8 +268,7 @@ over-approximations, for which the check claims no agreement, and \RoundTwoTopFa
 corpus's edges come from one over-approximated call site in the largest application, seen one
 edge at a time (Section~\ref{sec:corrections}). The count grows with the may tier and says nothing about
 the must tier, which is why Chapter~\ref{ch:analysis} excludes it from the precision
-claim and why this paragraph gives no ratio for it: a ratio would invite the
-comparison the exclusion forbids.
+claim, and no ratio is given for it here.
 
 The anchored representation was checked on the same graphs.
 Claim~\ref{claim:expansion} requires the expansion of the anchored edge set to equal the
@@ -278,10 +286,13 @@ saves, and that saving is the reason the representation exists. On \ExpansionWid
 is \ExpansionWidestRatio{} times the size of what is stored. What the check exercises is the member walk and the deduplication
 key; the definition of a scope's membership is shared by both paths and is not tested by it,
 so the claim is supported on \ExpansionApps{} applications and on fixtures rather than
-proved. On two of
-the three the library's own materialisation function returns a larger set than either, which
-is the iteration difference the previous sentence predicts and not a disagreement about the
-edge set.
+proved. On \ExpansionLibraryLarger{} of
+the \ExpansionApps{} the library's own materialisation function returns a larger set than either,
+which is the iteration difference the previous sentence predicts and not a disagreement about the
+edge set. Where expansion makes two edges with the same source, target and event, they are
+joined into one, the strongest modality leading and the witnesses united, so that the result
+does not depend on the order the anchors are walked in; the check compares modality and
+witnesses as well as endpoints, and \ExpansionJoined{} such joins occur across the corpus.
 
 \begin{table}[t]\small
 \caption{The anchored edge set against its expansion. \emph{Anchored} is what the graph
@@ -395,8 +406,7 @@ declined to compute, which the running application then shows to be non-empty. T
 the \emph{unplaced} class of Table~\ref{tab:round2acct}, and this is the first measurement
 that any of them has a screen.
 
-The other direction is the one an earlier draft of this section reported as a single
-figure, and it does not support one. \ScopeUnrendered{} predictions run that way: the graph
+The other direction does not support a single figure. \ScopeUnrendered{} predictions run that way: the graph
 holds the edge and the page showed no link. Three causes are mixed in that count, and two of
 them are not defects. The first is interface state: realworld's header is wrapped in
 \texttt{@if (authState === 'authenticated')} and offers \emph{New Article}, \emph{Settings}
@@ -626,40 +636,36 @@ operator on realworld, where every candidate sits in the application shell and n
 them produces a baseline edge. Attribution widens the part of the source the graph
 responds to at all.
 
-The second was not expected, and it needs a comparison the two rates above cannot make.
-Of the mutants each graph can score, the attributed graph detects \MutDetected{} of
-\MutScored{} (\MutRate{}), against \MutBaseDetected{} of \MutBaseScored{} on the
-baseline (\MutBaseRate{}). Those two rates are taken over different mutant sets, so the
-difference between them mixes a detection effect with the eligibility effect of the
-paragraph above, and the gap it shows is larger than the detection effect alone. The
-comparison that isolates the detection effect is the paired one: of the \MutPaired{}
-mutants both graphs can score, identified by operator, file, line and subject, the
-attributed graph detects \MutPairedDetected{} (\MutPairedRate{}) and the baseline
-\MutPairedBaseDetected{} (\MutPairedBaseRate{}). The two graphs disagree on
-\MutPairedDisagree{} of those mutants and \MutPairedAgainstAttribution{} of the
-disagreements go against attribution, so the effect is consistent in direction as well as
-positive in aggregate. Each disagreement is a change the baseline did not respond to at all,
-which the attributed graph either detected or answered with a delta other than the predicted
-one. Outside the paired set,
-\MutAttributedOnly{} mutants are scorable only against the attributed graph and
-\MutBaselineOnly{} only against the baseline. A further \MutUnmatchedSites{} constructs are
-mutated in both runs but into different things, because the retargeting operator picks its new
-destination at random; those are two different mutants rather than evidence about either
-graph, and they are counted apart rather than as an eligibility difference. So attribution does raise the detection rate
-per scored change, \MutPairedRate{} against \MutPairedBaseRate{} on the paired set where the
-unpaired rates are \MutRate{} and \MutBaseRate{}, and most of its effect
-on this corpus is the widening of what can be scored at all. An earlier
-measurement of this corpus reported the opposite, that attribution widened the graph's
-reach without making it more sensitive per construct; that conclusion was an artefact of
-two defects in the apparatus rather than a property of the analysis. One was in the
-extractor, which did not read a guard carried by a route a wrapper function returns, so
-guard mutants on the applications that use that construct could not be detected. The other
-was in the mutation harness itself, whose retargeting operator required the graph to
-\emph{add} an edge to the new destination: attribution fans a navigation site over every
-screen it can fire from, so retargeting such a site to a destination those screens already
-reach removes the old edges and adds none, and a correct response was scored as a wrong
-one. Both are repaired. Which operator moved furthest cannot be said, since no per-operator
-mutation result from the earlier instrument survives to compare against.
+The second is the detection rate per scored change, and it needs a comparison the two rates
+above cannot make. Of the mutants each graph can score, the attributed graph detects
+\MutDetected{} of \MutScored{} (\MutRate{}), against \MutBaseDetected{} of \MutBaseScored{} on
+the baseline (\MutBaseRate{}). Those rates are taken over different mutant sets, so their
+difference mixes a detection effect with the eligibility effect above. The paired comparison
+isolates it: of the \MutPaired{} mutants both graphs can score, identified by operator, file,
+line and subject, the attributed graph detects \MutPairedDetected{} (\MutPairedRate{}) and the
+baseline \MutPairedBaseDetected{} (\MutPairedBaseRate{}). The graphs disagree on
+\MutPairedDisagree{} of them, a guard removal on realworld's empty-path \texttt{editor} child that
+the baseline run scores and misses, and Section~\ref{sec:res-mutation} shows that this
+disagreement comes from how the harness matches the guarded screen rather than from the graph.
+Outside the paired set, \MutAttributedOnly{} mutants are scorable only against the attributed
+graph and \MutBaselineOnly{} only against the baseline; \MutUnmatchedSites{} constructs are
+mutated in both runs into different things. On this corpus, then, attribution leaves the
+detection rate per scored change essentially unchanged, and its effect on change sensitivity is
+the widening of what can be scored at all.
+
+The paired gap has moved twice as the apparatus was corrected. The first measurement of this
+corpus found that attribution widened the graph's reach without making it more sensitive per
+construct, an artefact of two defects. One was in the extractor, which did not read a guard
+carried by a route a wrapper function returns. The other was in the mutation harness, whose
+retargeting operator required the graph to \emph{add} an edge to the new destination:
+attribution fans a navigation site over every screen it can fire from, so a retarget to a
+destination those screens already reach removes the old edges and adds none, and a correct
+response was scored as a wrong one. With both repaired, the previous run showed a paired gap in
+favour of attribution: six disagreements, five of them retarget mutants whose operator replaced
+only the head of the commands array, which the baseline graph did not respond to. With the
+operator corrected (Section~\ref{sec:res-mutation}) the baseline detects those five as well, and
+the gap is the single disagreement above, the one the two runs had in common.
+
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}
 
@@ -690,33 +696,37 @@ quota, and mutants excluded as confounded with a coverage gap.}
 \TabMutationSample
 \end{table}
 
-Table~\ref{tab:mutation} gives the detection rate per operator, and Figure~\ref{fig:mutation} shows the same outcomes summed over the applications. Renaming a route path
-was detected in all \MutRenameScored{} scored mutants of the three applications. Deleting a
-\texttt{routerLink} was detected in every scored mutant of realworld, and over the corpus
-\MutLinkWitnessOnly{} of these mutants moved the witness set rather than the edge set, because a
-second identical link in the same template still produces the edge. That is the
-behaviour the graph should have, and it is the reason detection is judged on witnesses as
-well as edges. The operator found no candidates in alfresco, which binds
-\texttt{[routerLink]} instead of writing a literal attribute. Against the graph without
-attribution the same sample yields only \MutLinkBaseScored{} scored mutants, of which
-\MutLinkBaseDetected{} are detected: every candidate in realworld is excluded, all of them
-links in the application shell, which produces no baseline edge, and the ones that can be
-scored at all are bitwarden's.
+Table~\ref{tab:mutation} gives the detection rate per operator, and Figure~\ref{fig:mutation}
+shows the same outcomes summed over the applications. The rename operator is set aside first,
+because its detection is close to guaranteed by construction: a rename mutant is excluded
+unless the baseline graph already holds a node for the segment it renames, and a screen is
+identified by its full path (Section~\ref{sec:model}), so a parsed literal path must yield a
+different node once renamed. It tests node extraction rather than the graph's response to a
+change in behaviour, and it supplies \MutRenameScored{} of the \MutScored{} scored mutants.
+The three operators that can fail are detected in \MutFallibleDetected{} of their
+\MutFallibleScored{} scored mutants: \MutLinkDetected{} of \MutLinkScored{} deleted
+\texttt{routerLink} bindings, \MutRetargetDetected{} of \MutRetargetScored{} retargeted
+\texttt{navigate} calls and \MutGuardDetected{} of \MutGuardScored{} removed guards. The
+samples are small, in single digits per operator and application, so the pattern says more
+than the rate.
 
-Retargeting a \texttt{navigate} call is the weakest operator and the one whose failures are
-most informative. \MutRetargetWrong{} of its \MutRetargetScored{} mutants moved the graph
-but not as predicted, and their deltas show two distinct mechanisms. In
-\MutRetargetWrongNoAdd{} of them the mutant removes the edges to the old target, as
-predicted, and adds none, because the retargeted commands array composes an address the
-application declares no route for, so there is no node for a new edge to reach. In the rest
-the composed address resolves to the application root, so an edge does arrive, at the wrong
-screen. A third case is excluded in advance: where the new target is an address the site's own
-screens already reach, a correct retarget adds no edge and would be called wrong for it, and
-the harness removes such a mutant where it can tell (Section~\ref{sec:corrections}). Where it
-cannot, the outcome is recorded as a change the graph made but not the predicted one, rather
-than counted as a detection. The \MutRetargetNoChange{} that moved the graph not at all is a
-call in a component the analysis could not place under any screen, so the only edge it draws
-joins two nodes that are not screens, and retargeting it leaves that edge as it was.
+Deleting a \texttt{routerLink} moved the witness set rather than the edge set in
+\MutLinkWitnessOnly{} of its mutants, because a second identical link in the same template
+still produces the edge. That is the behaviour the graph should have, and it is the reason
+detection is judged on witnesses as well as edges. The operator found no candidates in
+alfresco, which binds \texttt{[routerLink]} instead of writing a literal attribute. Against the
+graph without attribution the same sample yields only \MutLinkBaseScored{} scored mutants, of
+which \MutLinkBaseDetected{} are detected: the candidates in the application shells produce no
+baseline edge and are excluded.
+
+A retargeting mutant replaces the whole commands array of a \texttt{navigate} call with a
+declared route that names no parameter, and is detected when the edited line witnesses an edge
+to the new destination and none to a destination it reached before. Under the previous version
+of the harness every retarget the graph did not detect was an artefact of the operator: it
+replaced only the head of the array, so four mutants composed an address no route declares and
+one left its target dynamic (Section~\ref{sec:corrections}). The destination is now drawn from
+the declared routes alone, so both configurations patch each site alike and the paired
+comparison compares the same edit.
 
 \begin{table}[t]\small
 \caption{Detection rate per mutation operator on the attributed graph, as detected over
@@ -727,38 +737,26 @@ scored mutants. A dash means the operator found no candidate in that application
 \FigMutation
 
 
-The rename operator needs a caveat before these figures are read as change sensitivity.
-A rename mutant is excluded unless the baseline graph already holds a node for the path
-segment it renames, and it counts as detected when the renamed segment appears in the
-graph. A screen is identified by its full path (Section~\ref{sec:model}), so a literal
-path the extractor has already parsed must yield a different node once renamed, and
-detection for this operator is close to guaranteed by construction. It supplies \MutRenameScored{} of the
-\MutScored{} scored mutants and \MutRenameDetected{} of the \MutDetected{} detections. What
-it tests is node extraction rather than the graph's response to a change in behaviour. The
-three operators that can fail are detected in \MutFallibleDetected{} of their
-\MutFallibleScored{} scored mutants: \MutLinkDetected{} of \MutLinkScored{} deleted
-\texttt{routerLink} bindings, \MutRetargetDetected{} of \MutRetargetScored{} retargeted
-\texttt{navigate} calls, and \MutGuardDetected{} of \MutGuardScored{} removed guards.
-
 Every guard removal the run can score is detected: \MutGuardDetected{} of
 \MutGuardScored{}, on all three applications, each judged by whether some edge loses a guard
-it carried. Guards are what the corrections of
-Section~\ref{sec:res-round2} were about, although no per-operator figure from the earlier
-instrument survives to put a number on the movement. It is also the operator whose exclusions
-are the most informative, because a guard
-is recorded on the edges that enter the guarded screen, so removing it can be observed only
-where the graph both holds that screen and enters it. All \MutExcludedGuard{} exclusions are
-that condition failing, in two ways: for \MutExcludedUnreached{} of them the graph holds the
-screen and no edge enters it, and \MutExcludedNoScreen{} guards a route that declares no
-component and no populated children, so it yields no screen at all. Among the guards that are scored, the empty path makes no difference:
-\MutGuardEmptyPathDetected{} of the \MutGuardEmptyPathScored{} scored guards on a route whose
-own path is the empty string are detected. They include the empty-path child of realworld's
-\texttt{editor} route, whose entering edge carries \texttt{requireAuth} on this
-instrument as the edge entering \path{/editor/:slug} does. What the operator cannot see is a
-guard whose removal leaves both the edge set and the guard text identical. Two guards that print
-alike are not such a case, since the harness counts them rather than collecting them
-(Section~\ref{sec:corrections}), and on this corpus there is no such case left once the
-unobservable guards are excluded.
+the removed list names. A guard is recorded on the edges that enter the guarded screen, so
+removing it can be observed only where the graph both holds that screen and enters it. All
+\MutExcludedGuard{} exclusions are that condition failing: for \MutExcludedUnreached{} of them
+the graph holds the screen and no edge enters it, and \MutExcludedNoScreen{} guards a route that
+declares no component and no populated children. The harness finds a route's screens by the
+component it renders, and it now matches a class by the file the routing module imports it
+from: bitwarden declares two classes named \texttt{AccountComponent}, and matching by name alone
+had counted edges into the user's \path{/settings/account} as entering the organisation's, so a
+guard whose screen no edge enters was scored as a miss. Among the scored guards the empty path
+makes no difference: \MutGuardEmptyPathDetected{} of the \MutGuardEmptyPathScored{} on a route
+whose own path is the empty string are detected.
+
+One limit of the same matching remains, and it shows in the run without attribution. realworld's
+\texttt{editor} route has two children, at the empty path and at \texttt{:slug}, that load the
+same component file, so the harness cannot tell their screens apart. Without attribution no edge
+enters \path{/editor}, but one enters \path{/editor/:slug}, so the guard on the empty-path child is
+scored and missed rather than excluded. That is the one paired disagreement, and it is a limit
+of the harness rather than of the graph.
 
 The mutation run therefore does not confirm the defect class \emph{guards unreliable in
 both directions} of Section~\ref{sec:res-defects} on this instrument, and it does not
@@ -769,24 +767,16 @@ evidence for that class is what Section~\ref{sec:res-round2} records at commit
 \texttt{canActivate} element written as a call rather than as a name, neither read by the
 extractor as it stood then and both read now.
 
-\MutNoResponse{} mutant produced no change in the graph at all, and it is the retargeted
-\texttt{navigate} call described above rather than a guard.
+The three applications do not declare their routes in the same way: realworld and alfresco
+export route arrays, while bitwarden declares its routes inside NgModule routing modules
+through \texttt{RouterModule.forRoot} and \texttt{forChild}. No operator fails under either
+style, so nothing in this experiment distinguishes them.
 
-The \MutFailures{} failures are all retargeted \texttt{navigate} calls, and they divide by
-application as follows. \MutFailuresRealworld{} are in realworld,
-\MutFailuresBitwarden{} in bitwarden and \MutFailuresAlfresco{} in alfresco. The three
-applications do not declare their routes
-in the same way: realworld and alfresco export route arrays, while bitwarden declares
-its routes inside NgModule routing modules through \texttt{RouterModule.forRoot} and
-\texttt{forChild}. No operator fails under one style and not the other, so nothing in this
-experiment distinguishes them.
-
-
-Of the \MutScored{} scored mutants, \MutDetected{} were detected. The graph responds to changes in the
-constructs it represents. Where it does not respond at all, the construct is not
-represented: all \MutExcludedGuard{} excluded mutants are guards the graph can record on no
-edge, and the \MutRetargetNoChange{} silent retarget is a \texttt{navigate} call in a
-component the analysis could not place under any screen.
+Of the \MutScored{} scored mutants, \MutDetected{} were detected, and \MutBaseDetected{} of
+\MutBaseScored{} without attribution; on the \MutPaired{} mutants both graphs can score, the
+figures are \MutPairedDetected{} and \MutPairedBaseDetected{}. The graph responds to changes in
+the constructs it represents. A construct it does not represent cannot respond, and such
+mutants are excluded rather than scored, so the rate is conditional on RQ1's coverage.
 
 \section{What the repairs cost the claim (RQ5)}
 \label{sec:res-round2}
@@ -1110,6 +1100,11 @@ evidence the tier holds: \CensusMustSitesKdash{} constructs yield \CensusMustKda
 \the\numexpr\CensusMust-\CensusMustKdash\relax{} edges on
 \the\numexpr\CensusMustSites-\CensusMustSitesKdash\relax{} constructs in
 \the\numexpr\CensusMustApps-1\relax{} applications, which is why RQ1 is answered in constructs.
+Those \CensusMustKdash{} edges are also only as right as the scope of the chrome component: each
+source is a screen attribution places the toolbar on, and an over-wide scope there would add must
+edges from screens that do not render it. Over-wide scopes are not tested outside \GTApp{}
+(Section~\ref{sec:res-scope}), so the source side of these edges rests on the scope rather
+than on a check.
 The must edges also rest on an assumption about the order in which route tables registered
 apart are matched (Section~\ref{sec:approximations}): \RouteOrderResting{} of them, in
 \RouteOrderRestingApps{} applications (\RouteOrderRestingWhere{}). Without it the tier holds
@@ -1178,8 +1173,8 @@ The three figures answer three different questions. The first is the one that be
 Claim~\ref{claim:must}, and it bears on it in one direction: a must edge whose cited site
 named another destination would refute the claim, while the claim's quantification over
 inputs is carried by the demotion rules and not by this check
-(Section~\ref{sec:model}). The unit is kept explicit because dividing a count of locations by a
-count of edges is how an earlier draft of this paragraph published a negative percentage.
+(Section~\ref{sec:model}). The unit is kept explicit, since locations and edges are not
+counts of the same thing.
 
 One caveat belongs with the \RoundTwoOverApprox{} figure, because ``by design'' reads as a
 property of the method and most of it is a property of one line. Of the

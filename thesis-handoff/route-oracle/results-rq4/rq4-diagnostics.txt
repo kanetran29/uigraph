@@ -1,14 +1,9 @@
-paired 49: attributed 44 (89.8\,\%), baseline 40 (81.6\,\%), 6 disagree, 0 against attribution
-attributed 59/64 (92.2\,\%), 6 excluded; baseline 42/53 (79.2\,\%), 17 excluded
-prose figures: 70 sampled (70 baseline), 5 failures, guard misses 0 in 0 apps (0 empty path, 0 named call), excluded 5 unreached, 1 with no screen, 0 unwitnessed
-[realworld] detected 20/22 (90.9%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=4 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
+paired 51: attributed 51 (100.0\,\%), baseline 50 (98.0\,\%), 1 disagree, 0 against attribution
+attributed 67/67 (100.0\,\%), 6 excluded; baseline 50/51 (98.0\,\%), 22 excluded
+prose figures: 73 sampled (73 baseline), 0 failures, guard misses 0 in 0 apps (0 empty path, 0 named call), excluded 5 unreached, 1 with no screen, 0 unwitnessed
+[realworld] detected 25/25 (100.0%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=4 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
 [realworld] operators with no candidates: none
-[realworld] WRONG CHANGE_NAV_TARGET /profile => /register at src/app/features/settings/settings.component.ts:72
-[realworld] WRONG CHANGE_NAV_TARGET /article => /login at src/app/features/article/pages/editor/editor.component.ts:89
 [alfresco] detected 15/15 (100.0%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=0 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
 [alfresco] operators with no candidates: DELETE_ROUTERLINK
-[bitwarden] detected 24/27 (88.9%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=1 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
+[bitwarden] detected 27/27 (100.0%)  witness-only detections: RENAME_PATH=0 DELETE_ROUTERLINK=1 CHANGE_NAV_TARGET=0 REMOVE_GUARD=0
 [bitwarden] operators with no candidates: none
-[bitwarden] MISSED CHANGE_NAV_TARGET /organizations => /confirm-key-connector-domain at src/app/billing/organizations/change-plan-dialog.component.ts:833
-[bitwarden] WRONG CHANGE_NAV_TARGET /organizations => /reports/breach-report at src/app/billing/members/billing-constraint/billing-constraint.service.ts:155
-[bitwarden] WRONG CHANGE_NAV_TARGET /organizations => /login at src/app/dirt/event-logs/components/entity-events/entity-events.component.ts:169

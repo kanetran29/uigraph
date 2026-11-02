@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "mutate 1.8.0",
-  "extractor": "% Extractor 920e1aa, packages/ clean, harness clean when generated.",
+  "harnessVersion": "mutate 1.9.1",
+  "extractor": "% Extractor c42f220, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/bitwarden",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/bitwarden/apps/web",
   "attribution": true,
@@ -12,7 +12,7 @@
     "routes": 98
   },
   "discovered": {
-    "CHANGE_NAV_TARGET": 34,
+    "CHANGE_NAV_TARGET": 53,
     "REMOVE_GUARD": 78,
     "DELETE_ROUTERLINK": 11,
     "RENAME_PATH": 79
@@ -25,11 +25,11 @@
   },
   "perOperator": {
     "CHANGE_NAV_TARGET": {
-      "discovered": 34,
+      "discovered": 53,
       "sampled": 8,
-      "detected": 5,
-      "missed": 1,
-      "wrong": 2,
+      "detected": 8,
+      "missed": 0,
+      "wrong": 0,
       "excluded": 0,
       "broke": 0,
       "skip": 0
@@ -65,105 +65,17 @@
       "skip": 0
     }
   },
-  "detectionRate": 0.8888888888888888,
+  "detectionRate": 1,
   "scored": 27,
-  "detected": 24,
+  "detected": 27,
   "results": [
     {
       "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
-      "line": 52,
-      "subject": "/finish-signup => /setup-extension",
-      "predict": "the edge to /finish-signup is replaced by an edge to /setup-extension",
+      "file": "src/app/auth/organization-invite/accept-org-open-invite.component.ts",
+      "line": 217,
+      "subject": "/ => /lock",
+      "predict": "the edges this line witnesses go to /lock and no longer to where it led before",
       "verdict": "DETECTED",
-      "touched": 2,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/accept-families-for-enterprise -> /setup-extension (navigate)"
-        ],
-        "edgesRemoved": [
-          "/accept-families-for-enterprise -> /finish-signup (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/billing/organizations/change-plan-dialog.component.ts",
-      "line": 833,
-      "subject": "/organizations => /confirm-key-connector-domain",
-      "predict": "the edge to /organizations is replaced by an edge to /confirm-key-connector-domain",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
-      "line": 38,
-      "subject": "/setup/families-for-enterprise => /folders",
-      "predict": "the edge to /setup/families-for-enterprise is replaced by an edge to /folders",
-      "verdict": "DETECTED",
-      "touched": 2,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/accept-families-for-enterprise -> /folders (navigate)"
-        ],
-        "edgesRemoved": [
-          "/accept-families-for-enterprise -> /setup/families-for-enterprise (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/auth/organization-invite/accept-org-direct-invite.component.ts",
-      "line": 112,
-      "subject": "/login => /setup-extension",
-      "predict": "the edge to /login is replaced by an edge to /setup-extension",
-      "verdict": "DETECTED",
-      "touched": 2,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/accept-organization -> /setup-extension (navigate)"
-        ],
-        "edgesRemoved": [
-          "/accept-organization -> /login (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/billing/members/billing-constraint/billing-constraint.service.ts",
-      "line": 155,
-      "subject": "/organizations => /reports/breach-report",
-      "predict": "the edge to /organizations is replaced by an edge to /reports/breach-report",
-      "verdict": "WRONG",
       "touched": 1,
       "delta": {
         "witnessLinesRemoved": [],
@@ -171,19 +83,19 @@
         "nodesAdded": [],
         "nodesRemoved": [],
         "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [
-          "/organizations/:organizationId/members -> /organizations/:organizationId/billing/subscription (navigate)"
+        "edgesAdded": [
+          "/join/:organizationId/:inviteLinkCode -> /lock (navigate)"
         ],
+        "edgesRemoved": [],
         "guardChanged": []
       }
     },
     {
       "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/auth/settings/security/password-settings/password-settings.component.ts",
-      "line": 40,
-      "subject": "/settings/security/two-factor => /recover-2fa",
-      "predict": "the edge to /settings/security/two-factor is replaced by an edge to /recover-2fa",
+      "file": "src/app/dirt/event-logs/components/organization-events/events.component.ts",
+      "line": 324,
+      "subject": "/organizations => /remove-password",
+      "predict": "the edges this line witnesses go to /remove-password and no longer to where it led before",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -193,21 +105,50 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/settings/security/password -> /recover-2fa (navigate)"
+          "/organizations/:organizationId/reporting/events -> /remove-password (navigate)"
         ],
         "edgesRemoved": [
-          "/settings/security/password -> /settings/security/two-factor (navigate)"
+          "/organizations/:organizationId/reporting/events -> /organizations/:organizationId/members (navigate)"
         ],
         "guardChanged": []
       }
     },
     {
       "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/dirt/event-logs/components/entity-events/entity-events.component.ts",
-      "line": 169,
-      "subject": "/organizations => /login",
-      "predict": "the edge to /organizations is replaced by an edge to /login",
-      "verdict": "WRONG",
+      "file": "src/app/vault/components/coachmark/coachmark.service.ts",
+      "line": 228,
+      "subject": "/vault => /login-with-passkey",
+      "predict": "the edges this line witnesses go to /login-with-passkey and no longer to where it led before",
+      "verdict": "DETECTED",
+      "touched": 80,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/create-organization -> /login-with-passkey (navigate)",
+          "/folders -> /login-with-passkey (navigate)",
+          "/organizations/:organizationId/vault -> /login-with-passkey (navigate)",
+          "/reports -> /login-with-passkey (navigate)"
+        ],
+        "edgesRemoved": [
+          "/create-organization -> / (navigate)",
+          "/folders -> / (navigate)",
+          "/organizations/:organizationId/vault -> / (navigate)",
+          "/reports -> / (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
+      "line": 43,
+      "subject": "/login => /remove-password",
+      "predict": "the edges this line witnesses go to /remove-password and no longer to where it led before",
+      "verdict": "DETECTED",
       "touched": 2,
       "delta": {
         "witnessLinesRemoved": [],
@@ -216,10 +157,56 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "o_EntityEventsComponent -> / (navigate)"
+          "/accept-families-for-enterprise -> /remove-password (navigate)"
         ],
         "edgesRemoved": [
-          "o_EntityEventsComponent -> /organizations/:organizationId/members (navigate)"
+          "/accept-families-for-enterprise -> /login (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/auth/emergency-access/accept/accept-emergency.component.ts",
+      "line": 83,
+      "subject": "/finish-signup => /reports/unsecured-websites-report",
+      "predict": "the edges this line witnesses go to /reports/unsecured-websites-report and no longer to where it led before",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/accept-emergency -> /reports/unsecured-websites-report (navigate)"
+        ],
+        "edgesRemoved": [
+          "/accept-emergency -> /finish-signup (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/auth/sso/sso-login-failed.component.ts",
+      "line": 38,
+      "subject": "/login => /settings/sponsored-families",
+      "predict": "the edges this line witnesses go to /settings/sponsored-families and no longer to where it led before",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/sso-login-failed -> /settings/sponsored-families (navigate)"
+        ],
+        "edgesRemoved": [
+          "/sso-login-failed -> /login (navigate)"
         ],
         "guardChanged": []
       }
@@ -228,8 +215,8 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.ts",
       "line": 80,
-      "subject": "/create-organization => /browser-extension-prompt",
-      "predict": "the edge to /create-organization is replaced by an edge to /browser-extension-prompt",
+      "subject": "/create-organization => /settings/emergency-access",
+      "predict": "the edges this line witnesses go to /settings/emergency-access and no longer to where it led before",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
@@ -239,10 +226,102 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/request-sm-access -> /browser-extension-prompt (navigate)"
+          "/request-sm-access -> /settings/emergency-access (navigate)"
         ],
         "edgesRemoved": [
           "/request-sm-access -> /create-organization (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/admin-console/organizations/sponsorships/accept-family-sponsorship.component.ts",
+      "line": 52,
+      "subject": "/finish-signup => /login-with-passkey",
+      "predict": "the edges this line witnesses go to /login-with-passkey and no longer to where it led before",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/accept-families-for-enterprise -> /login-with-passkey (navigate)"
+        ],
+        "edgesRemoved": [
+          "/accept-families-for-enterprise -> /finish-signup (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.html",
+      "line": 27,
+      "subject": "/login",
+      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/admin-console/organizations/manage/verify-recover-delete-org.component.html:27"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/verify-recover-delete-org -> /login (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/auth/recover-delete.component.html",
+      "line": 12,
+      "subject": "/login",
+      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/auth/recover-delete.component.html:12"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/recover-delete -> /login (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/auth/verify-recover-delete.component.html",
+      "line": 12,
+      "subject": "/login",
+      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/auth/verify-recover-delete.component.html:12"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [
+          "/verify-recover-delete -> /login (click:routerLink)"
         ],
         "guardChanged": []
       }
@@ -265,29 +344,6 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/auth/recover-two-factor.component.html",
-      "line": 35,
-      "subject": "/login",
-      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
-      "verdict": "DETECTED",
-      "touched": 2,
-      "delta": {
-        "witnessLinesRemoved": [
-          "src/app/auth/recover-two-factor.component.html:35"
-        ],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [
-          "/recover-2fa -> /login (click:routerLink)"
-        ],
         "guardChanged": []
       }
     },
@@ -318,15 +374,15 @@
     },
     {
       "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/auth/recover-delete.component.html",
-      "line": 12,
+      "file": "src/app/auth/emergency-access/accept/accept-emergency.component.html",
+      "line": 22,
       "subject": "/login",
       "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
       "verdict": "DETECTED",
       "touched": 2,
       "delta": {
         "witnessLinesRemoved": [
-          "src/app/auth/recover-delete.component.html:12"
+          "src/app/auth/emergency-access/accept/accept-emergency.component.html:22"
         ],
         "witnessLinesAdded": [],
         "nodesAdded": [],
@@ -334,22 +390,22 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [
-          "/recover-delete -> /login (click:routerLink)"
+          "/accept-emergency -> /login (click:routerLink)"
         ],
         "guardChanged": []
       }
     },
     {
       "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/layouts/header/account-menu.component.html",
-      "line": 56,
-      "subject": "/settings/account",
-      "predict": "the graph stops citing this line, and the edge to /settings/account disappears unless another construct also produces it",
+      "file": "src/app/auth/recover-two-factor.component.html",
+      "line": 35,
+      "subject": "/login",
+      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
       "verdict": "DETECTED",
-      "touched": 63,
+      "touched": 2,
       "delta": {
         "witnessLinesRemoved": [
-          "src/app/layouts/header/account-menu.component.html:56"
+          "src/app/auth/recover-two-factor.component.html:35"
         ],
         "witnessLinesAdded": [],
         "nodesAdded": [],
@@ -357,75 +413,22 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [
-          "/create-organization -> /settings/account (click:routerLink)",
-          "/folders -> /settings/account (click:routerLink)",
-          "/organizations/:organizationId -> /settings/account (click:routerLink)",
-          "/organizations/:organizationId/billing/history -> /settings/account (click:routerLink)"
+          "/recover-2fa -> /login (click:routerLink)"
         ],
         "guardChanged": []
       }
     },
     {
       "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/tools/send/send-access/send-access-explainer.component.html",
-      "line": 13,
-      "subject": "/signup",
-      "predict": "the graph stops citing this line, and the edge to /signup disappears unless another construct also produces it",
-      "verdict": "DETECTED",
-      "touched": 3,
-      "delta": {
-        "witnessLinesRemoved": [
-          "src/app/tools/send/send-access/send-access-explainer.component.html:13"
-        ],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [
-          "o_SendAccessExplainerComponent"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [
-          "o_SendAccessExplainerComponent -> /signup (click:routerLink)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html",
-      "line": 24,
+      "file": "src/app/key-management/data-recovery/data-recovery.component.html",
+      "line": 77,
       "subject": "/vault",
       "predict": "the graph stops citing this line, and the edge to /vault disappears unless another construct also produces it",
       "verdict": "DETECTED",
-      "touched": 3,
-      "delta": {
-        "witnessLinesRemoved": [
-          "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:24"
-        ],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [
-          "o_AddExtensionLaterDialogComponent"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [
-          "o_AddExtensionLaterDialogComponent -> / (click:routerLink)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/auth/verify-recover-delete.component.html",
-      "line": 12,
-      "subject": "/login",
-      "predict": "the graph stops citing this line, and the edge to /login disappears unless another construct also produces it",
-      "verdict": "DETECTED",
       "touched": 2,
       "delta": {
         "witnessLinesRemoved": [
-          "src/app/auth/verify-recover-delete.component.html:12"
+          "src/app/key-management/data-recovery/data-recovery.component.html:77"
         ],
         "witnessLinesAdded": [],
         "nodesAdded": [],
@@ -433,7 +436,7 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [
-          "/verify-recover-delete -> /login (click:routerLink)"
+          "/settings/data-recovery -> / (click:routerLink)"
         ],
         "guardChanged": []
       }
@@ -441,76 +444,8 @@
     {
       "kind": "REMOVE_GUARD",
       "file": "src/app/oss-routing.module.ts",
-      "line": 684,
-      "subject": "path \"\"",
-      "predict": "an edge that carried the guard loses it",
-      "verdict": "DETECTED",
-      "touched": 48,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": [
-          "/accept-families-for-enterprise -> /setup/families-for-enterprise: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/recover-2fa -> /settings/security/two-factor: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/premium/checkout/success -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/billing/history -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/billing/payment-details -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/billing/subscription -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/groups -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/members -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/members/sponsored-families -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/events -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/reports -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/reports/exposed-passwords-report -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/reports/inactive-two-factor-report -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/reports/passkey-report -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/reports/reused-passwords-report -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/reports/unsecured-websites-report -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/reports/weak-passwords-report -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/settings/account -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/settings/policies -> /settings/account: guard deepLinkGuard(),authGuard,PoliciesDeactivateGuard->PoliciesDeactivateGuard, modality may->may",
-          "/organizations/:organizationId/settings/tools/export -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/settings/tools/import -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/settings/two-factor -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/vault -> /settings/account: guard deepLinkGuard(),authGuard->null, modality may->may",
-          "/organizations/:organizationId/reporting/reports -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/reporting/reports/exposed-passwords-report -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/reporting/reports/inactive-two-factor-report -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/reporting/reports/passkey-report -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/reporting/reports/reused-passwords-report -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/reporting/reports/unsecured-websites-report -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/reporting/reports/weak-passwords-report -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/settings/two-factor -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/vault -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/billing/history -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/billing/payment-details -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/billing/subscription -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/groups -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/members -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/members/sponsored-families -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/reporting/events -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/settings/account -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/settings/policies -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard,PoliciesDeactivateGuard->isSelfHosted,PoliciesDeactivateGuard, modality may->may",
-          "/organizations/:organizationId/settings/tools/export -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "/organizations/:organizationId/settings/tools/import -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "o_VaultSettingsComponent -> /folders: guard deepLinkGuard(),authGuard,canAccessFeature()->canAccessFeature(), modality may->may",
-          "o_VaultComponent -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may",
-          "o_CloudHostedAccountSubscriptionComponent -> /settings/subscription/premium: guard isSelfHosted,deepLinkGuard(),authGuard->isSelfHosted, modality may->may"
-        ]
-      }
-    },
-    {
-      "kind": "REMOVE_GUARD",
-      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
-      "line": 17,
-      "subject": "path \"\"",
+      "line": 735,
+      "subject": "path \"create-organization\"",
       "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
       "touched": 1,
@@ -523,36 +458,18 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/organizations/:organizationId/settings/two-factor -> /organizations/:organizationId/settings/policies: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard()->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may"
+          "/request-sm-access -> /create-organization: guard addPlanRedirectGuard->null, modality may->may"
         ]
       }
     },
     {
       "kind": "REMOVE_GUARD",
-      "file": "src/app/vault/individual-vault/vault-routing.module.ts",
-      "line": 45,
-      "subject": "canActivate: [\n      canAccessFeature(Fe",
-      "predict": "an edge that carried the guard loses it",
-      "verdict": "EXCLUDED",
-      "reason": "no baseline edge enters any screen the guarded route yields (/vault/:vaultId, /vault/:vaultId/my-items, /vault/:vaultId/shared-folders/:collectionId)"
-    },
-    {
-      "kind": "REMOVE_GUARD",
       "file": "src/app/oss-routing.module.ts",
-      "line": 695,
-      "subject": "path \"sends\"",
-      "predict": "an edge that carried the guard loses it",
-      "verdict": "EXCLUDED",
-      "reason": "no baseline edge enters any screen the guarded route yields (/sends)"
-    },
-    {
-      "kind": "REMOVE_GUARD",
-      "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
-      "line": 31,
-      "subject": "path \"payment-details\"",
+      "line": 585,
+      "subject": "path \"remove-password\"",
       "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 24,
+      "touched": 2,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -562,59 +479,256 @@
         "edgesAdded": [],
         "edgesRemoved": [],
         "guardChanged": [
-          "/organizations/:organizationId/vault -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/vault/:vaultId -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/vault/:vaultId/my-items -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/vault/:vaultId/shared-folders/:collectionId -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/billing/history -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/billing/payment-details -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/billing/subscription -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/groups -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/members -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/members/sponsored-families -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/reporting/events -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/reporting/reports -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/reporting/reports/exposed-passwords-report -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/reporting/reports/inactive-two-factor-report -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/reporting/reports/passkey-report -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/reporting/reports/reused-passwords-report -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/reporting/reports/unsecured-websites-report -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/reporting/reports/weak-passwords-report -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/settings/account -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/settings/policies -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged,PoliciesDeactivateGuard->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),PoliciesDeactivateGuard, modality may->may",
-          "/organizations/:organizationId/settings/tools/export -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/settings/tools/import -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may",
-          "/organizations/:organizationId/settings/two-factor -> /organizations/:organizationId/billing/payment-details: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(),organizationPermissionsGuard(),organizationIsUnmanaged->deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard(), modality may->may"
+          "n_scope_shell -> /remove-password: guard authGuard->null, modality may->may",
+          "o_AppComponent -> /remove-password: guard authGuard->null, modality may->may"
         ]
       }
     },
     {
       "kind": "REMOVE_GUARD",
-      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
-      "line": 85,
-      "subject": "path \"weak-passwords-report\"",
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 28,
+      "subject": "path \"account\"",
       "predict": "an edge that carried the guard loses it",
       "verdict": "EXCLUDED",
-      "reason": "no baseline edge enters any screen the guarded route yields (/reports/weak-passwords-report, /organizations/:organizationId/reporting/reports/weak-passwords-report)"
+      "reason": "no baseline edge enters any screen the guarded route yields (/organizations/:organizationId/settings/account)"
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/admin-console/organizations/members/members-routing.module.ts",
+      "line": 16,
+      "subject": "path \"\"",
+      "predict": "an edge that carried the guard loses it",
+      "verdict": "DETECTED",
+      "touched": 4,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": [
+          "/trial-initiation -> /organizations/:organizationId/members: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard()->deepLinkGuard(),authGuard,organizationPermissionsGuard(), modality may->may",
+          "/secrets-manager-trial-initiation -> /organizations/:organizationId/members: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard()->deepLinkGuard(),authGuard,organizationPermissionsGuard(), modality may->may",
+          "/organizations/:organizationId/reporting/events -> /organizations/:organizationId/members: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard()->deepLinkGuard(),authGuard,organizationPermissionsGuard(), modality may->may",
+          "o_EntityEventsComponent -> /organizations/:organizationId/members: guard deepLinkGuard(),authGuard,organizationPermissionsGuard(),organizationPermissionsGuard()->deepLinkGuard(),authGuard,organizationPermissionsGuard(), modality may->may"
+        ]
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/dirt/reports/reports-routing.module.ts",
+      "line": 71,
+      "subject": "path \"passkey-report\"",
+      "predict": "an edge that carried the guard loses it",
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters any screen the guarded route yields (/reports/passkey-report)"
     },
     {
       "kind": "REMOVE_GUARD",
       "file": "src/app/oss-routing.module.ts",
-      "line": 524,
-      "subject": "canActivate: [deepLinkGuard()],",
+      "line": 483,
+      "subject": "canActivate: [unauthGuardFn()],",
       "predict": "an edge that carried the guard loses it",
       "verdict": "EXCLUDED",
-      "reason": "no baseline edge enters any screen the guarded route yields (/accept-emergency)"
+      "reason": "no baseline edge enters any screen the guarded route yields (/recover-2fa)"
     },
     {
       "kind": "REMOVE_GUARD",
       "file": "src/app/admin-console/organizations/organization-routing.module.ts",
-      "line": 32,
+      "line": 53,
+      "subject": "path \"groups\"",
+      "predict": "an edge that carried the guard loses it",
+      "verdict": "EXCLUDED",
+      "reason": "no baseline edge enters any screen the guarded route yields (/organizations/:organizationId/groups)"
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/oss-routing.module.ts",
+      "line": 130,
       "subject": "path \"\"",
       "predict": "an edge that carried the guard loses it",
       "verdict": "EXCLUDED",
       "reason": "the guarded route declares no component and no populated children, so it yields no screen"
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 48,
+      "subject": "exposed-passwords-report",
+      "predict": "a node route containing \"exposed-passwords-report\" becomes \"exposed-passwords-report-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 14,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report-mutated",
+          "u_n_organizations_organizationId_reporting_reports_exposed-passwords-report-mutated"
+        ],
+        "nodesRemoved": [
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report",
+          "u_n_organizations_organizationId_reporting_reports_exposed-passwords-report"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report-mutated -> u_n_organizations_organizationId_reporting_reports_exposed-passwords-report-mutated (click:routerLink)",
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report-mutated -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report-mutated -> u_n_organizations_organizationId_reporting_reports_exposed-passwords-report-mutated (navigate)",
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report-mutated -> /settings/subscription/premium (navigate)"
+        ],
+        "edgesRemoved": [
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report -> u_n_organizations_organizationId_reporting_reports_exposed-passwords-report (click:routerLink)",
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report -> u_n_organizations_organizationId_reporting_reports_exposed-passwords-report (navigate)",
+          "/organizations/:organizationId/reporting/reports/exposed-passwords-report -> /settings/subscription/premium (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 101,
+      "subject": "events",
+      "predict": "a node route containing \"events\" becomes \"events-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 16,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/organizations/:organizationId/reporting/events-mutated",
+          "u_n_organizations_organizationId_reporting_events-mutated"
+        ],
+        "nodesRemoved": [
+          "/organizations/:organizationId/reporting/events",
+          "u_n_organizations_organizationId_reporting_events"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/organizations/:organizationId/reporting/events-mutated -> /organizations/:organizationId/members (navigate)",
+          "/organizations/:organizationId/reporting/events-mutated -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/reporting/events-mutated -> u_n_organizations_organizationId_reporting_events-mutated (click:routerLink)",
+          "/organizations/:organizationId/reporting/events-mutated -> /settings/subscription/premium (navigate)"
+        ],
+        "edgesRemoved": [
+          "/organizations/:organizationId/reporting/events -> /organizations/:organizationId/members (navigate)",
+          "/organizations/:organizationId/reporting/events -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/reporting/events -> u_n_organizations_organizationId_reporting_events (click:routerLink)",
+          "/organizations/:organizationId/reporting/events -> /settings/subscription/premium (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/billing/organizations/organization-billing-routing.module.ts",
+      "line": 29,
+      "subject": "payment-details",
+      "predict": "a node route containing \"payment-details\" becomes \"payment-details-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 54,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/organizations/:organizationId/billing/payment-details-mutated",
+          "u_n_organizations_organizationId_billing_payment-details-mutated"
+        ],
+        "nodesRemoved": [
+          "/organizations/:organizationId/billing/payment-details",
+          "u_n_organizations_organizationId_billing_payment-details"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/organizations/:organizationId/billing/payment-details-mutated -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/billing/payment-details-mutated -> u_n_organizations_organizationId_billing_payment-details-mutated (click:routerLink)",
+          "/organizations/:organizationId/billing/payment-details-mutated -> /settings/subscription/premium (navigate)",
+          "/organizations/:organizationId/billing/payment-details-mutated -> u_n_organizations_organizationId_billing_payment-details-mutated (navigate)"
+        ],
+        "edgesRemoved": [
+          "/organizations/:organizationId/vault -> /organizations/:organizationId/billing/payment-details (navigate)",
+          "/vault/:vaultId -> /organizations/:organizationId/billing/payment-details (navigate)",
+          "/vault/:vaultId/my-items -> /organizations/:organizationId/billing/payment-details (navigate)",
+          "/vault/:vaultId/shared-folders/:collectionId -> /organizations/:organizationId/billing/payment-details (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/admin-console/organizations/settings/organization-settings-routing.module.ts",
+      "line": 26,
+      "subject": "account",
+      "predict": "a node route containing \"account\" becomes \"account-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 16,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/organizations/:organizationId/settings/account-mutated",
+          "u_n_organizations_organizationId_settings_account-mutated"
+        ],
+        "nodesRemoved": [
+          "/organizations/:organizationId/settings/account",
+          "u_n_organizations_organizationId_settings_account"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/organizations/:organizationId/settings/account-mutated -> / (navigate)",
+          "/organizations/:organizationId/settings/account-mutated -> u_n_organizations_organizationId_settings_account-mutated (click:routerLink)",
+          "/organizations/:organizationId/settings/account-mutated -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/settings/account-mutated -> /settings/subscription/premium (navigate)"
+        ],
+        "edgesRemoved": [
+          "/organizations/:organizationId/settings/account -> / (navigate)",
+          "/organizations/:organizationId/settings/account -> u_n_organizations_organizationId_settings_account (click:routerLink)",
+          "/organizations/:organizationId/settings/account -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/settings/account -> /settings/subscription/premium (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/billing/individual/individual-billing-routing.module.ts",
+      "line": 32,
+      "subject": "user-subscription",
+      "predict": "a node route containing \"user-subscription\" becomes \"user-subscription-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 16,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/settings/subscription/user-subscription-mutated",
+          "u_n_settings_subscription_user-subscription-mutated"
+        ],
+        "nodesRemoved": [
+          "o_CloudHostedAccountSubscriptionComponent",
+          "u_o_CloudHostedAccountSubscriptionComponent"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/settings/subscription/user-subscription -> /settings/subscription/billing-history (navigate)",
+          "/settings/subscription/user-subscription -> /settings/subscription/payment-details (navigate)",
+          "/settings/subscription/user-subscription-mutated -> u_n_settings_subscription_user-subscription-mutated (click:routerLink)",
+          "/settings/subscription/user-subscription-mutated -> /settings/account (click:routerLink)"
+        ],
+        "edgesRemoved": [
+          "o_CloudHostedAccountSubscriptionComponent -> /settings/subscription/premium (navigate)",
+          "o_CloudHostedAccountSubscriptionComponent -> u_o_CloudHostedAccountSubscriptionComponent (navigate)",
+          "o_CloudHostedAccountSubscriptionComponent -> / (navigate)"
+        ],
+        "guardChanged": [
+          "/settings/subscription/premium -> /settings/subscription/user-subscription: guard isSelfHosted,hasPremiumPersonallyGuard->null, modality may->may",
+          "/settings/subscription/billing-history -> /settings/subscription/user-subscription: guard isSelfHosted,hasPremiumPersonallyGuard->null, modality may->may"
+        ]
+      }
     },
     {
       "kind": "RENAME_PATH",
@@ -650,244 +764,69 @@
     {
       "kind": "RENAME_PATH",
       "file": "src/app/oss-routing.module.ts",
-      "line": 728,
-      "subject": "request-sm-access",
-      "predict": "a node route containing \"request-sm-access\" becomes \"request-sm-access-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 18,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/request-sm-access-mutated",
-          "u_n_request-sm-access-mutated"
-        ],
-        "nodesRemoved": [
-          "/request-sm-access",
-          "u_n_request-sm-access"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/request-sm-access-mutated -> /sm-landing (click:routerLink)",
-          "/request-sm-access-mutated -> / (navigate)",
-          "/request-sm-access-mutated -> /create-organization (navigate)",
-          "/request-sm-access-mutated -> /settings/account (click:routerLink)"
-        ],
-        "edgesRemoved": [
-          "/request-sm-access -> /sm-landing (click:routerLink)",
-          "/request-sm-access -> / (navigate)",
-          "/request-sm-access -> /create-organization (navigate)",
-          "/request-sm-access -> /settings/account (click:routerLink)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/auth/settings/security/security-routing.module.ts",
-      "line": 26,
-      "subject": "password",
-      "predict": "a node route containing \"password\" becomes \"password-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 16,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/settings/security/password-mutated",
-          "u_n_settings_security_password-mutated"
-        ],
-        "nodesRemoved": [
-          "/settings/security/password",
-          "u_n_settings_security_password"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/settings/security/password-mutated -> /settings/security/two-factor (navigate)",
-          "/settings/security/password-mutated -> u_n_settings_security_password-mutated (click:routerLink)",
-          "/settings/security/password-mutated -> /settings/account (click:routerLink)",
-          "/settings/security/password-mutated -> u_n_settings_security_password-mutated (navigate)"
-        ],
-        "edgesRemoved": [
-          "/settings/security/password -> /settings/security/two-factor (navigate)",
-          "/settings/security/password -> u_n_settings_security_password (click:routerLink)",
-          "/settings/security/password -> /settings/account (click:routerLink)",
-          "/settings/security/password -> u_n_settings_security_password (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/admin-console/organizations/organization-routing.module.ts",
-      "line": 52,
-      "subject": "groups",
-      "predict": "a node route containing \"groups\" becomes \"groups-mutated\"",
+      "line": 767,
+      "subject": "add-plan",
+      "predict": "a node route containing \"add-plan\" becomes \"add-plan-mutated\"",
       "verdict": "DETECTED",
       "touched": 14,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/organizations/:organizationId/groups-mutated",
-          "u_n_organizations_organizationId_groups-mutated"
+          "/settings/add-plan-mutated",
+          "u_n_settings_add-plan-mutated"
         ],
         "nodesRemoved": [
-          "/organizations/:organizationId/groups",
-          "u_n_organizations_organizationId_groups"
+          "/settings/add-plan",
+          "u_n_settings_add-plan"
         ],
         "routeChanged": [],
         "edgesAdded": [
-          "/organizations/:organizationId/groups-mutated -> /settings/account (click:routerLink)",
-          "/organizations/:organizationId/groups-mutated -> u_n_organizations_organizationId_groups-mutated (click:routerLink)",
-          "/organizations/:organizationId/groups-mutated -> /settings/subscription/premium (navigate)",
-          "/organizations/:organizationId/groups-mutated -> u_n_organizations_organizationId_groups-mutated (navigate)"
+          "/settings/add-plan-mutated -> /settings/account (click:routerLink)",
+          "/settings/add-plan-mutated -> u_n_settings_add-plan-mutated (click:routerLink)",
+          "/settings/add-plan-mutated -> u_n_settings_add-plan-mutated (navigate)",
+          "/settings/add-plan-mutated -> /settings/subscription/premium (navigate)"
         ],
         "edgesRemoved": [
-          "/organizations/:organizationId/groups -> /settings/account (click:routerLink)",
-          "/organizations/:organizationId/groups -> u_n_organizations_organizationId_groups (click:routerLink)",
-          "/organizations/:organizationId/groups -> /settings/subscription/premium (navigate)",
-          "/organizations/:organizationId/groups -> u_n_organizations_organizationId_groups (navigate)"
+          "/settings/add-plan -> /settings/account (click:routerLink)",
+          "/settings/add-plan -> u_n_settings_add-plan (click:routerLink)",
+          "/settings/add-plan -> u_n_settings_add-plan (navigate)",
+          "/settings/add-plan -> /settings/subscription/premium (navigate)"
         ],
         "guardChanged": []
       }
     },
     {
       "kind": "RENAME_PATH",
-      "file": "src/app/auth/settings/security/security-routing.module.ts",
-      "line": 36,
-      "subject": "security-keys",
-      "predict": "a node route containing \"security-keys\" becomes \"security-keys-mutated\"",
+      "file": "src/app/admin-console/organizations/reporting/organization-reporting-routing.module.ts",
+      "line": 88,
+      "subject": "passkey-report",
+      "predict": "a node route containing \"passkey-report\" becomes \"passkey-report-mutated\"",
       "verdict": "DETECTED",
       "touched": 14,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [
-          "/settings/security/security-keys-mutated",
-          "u_n_settings_security_security-keys-mutated"
+          "/organizations/:organizationId/reporting/reports/passkey-report-mutated",
+          "u_n_organizations_organizationId_reporting_reports_passkey-report-mutated"
         ],
         "nodesRemoved": [
-          "/settings/security/security-keys",
-          "u_n_settings_security_security-keys"
+          "/organizations/:organizationId/reporting/reports/passkey-report",
+          "u_n_organizations_organizationId_reporting_reports_passkey-report"
         ],
         "routeChanged": [],
         "edgesAdded": [
-          "/settings/security/security-keys-mutated -> u_n_settings_security_security-keys-mutated (click:routerLink)",
-          "/settings/security/security-keys-mutated -> /settings/account (click:routerLink)",
-          "/settings/security/security-keys-mutated -> u_n_settings_security_security-keys-mutated (navigate)",
-          "/settings/security/security-keys-mutated -> /settings/subscription/premium (navigate)"
+          "/organizations/:organizationId/reporting/reports/passkey-report-mutated -> u_n_organizations_organizationId_reporting_reports_passkey-report-mutated (click:routerLink)",
+          "/organizations/:organizationId/reporting/reports/passkey-report-mutated -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/reporting/reports/passkey-report-mutated -> u_n_organizations_organizationId_reporting_reports_passkey-report-mutated (navigate)",
+          "/organizations/:organizationId/reporting/reports/passkey-report-mutated -> /settings/subscription/premium (navigate)"
         ],
         "edgesRemoved": [
-          "/settings/security/security-keys -> u_n_settings_security_security-keys (click:routerLink)",
-          "/settings/security/security-keys -> /settings/account (click:routerLink)",
-          "/settings/security/security-keys -> u_n_settings_security_security-keys (navigate)",
-          "/settings/security/security-keys -> /settings/subscription/premium (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/oss-routing.module.ts",
-      "line": 838,
-      "subject": "generator",
-      "predict": "a node route containing \"generator\" becomes \"generator-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 14,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/tools/generator-mutated",
-          "u_n_tools_generator-mutated"
-        ],
-        "nodesRemoved": [
-          "/tools/generator",
-          "u_n_tools_generator"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/tools/generator-mutated -> /settings/account (click:routerLink)",
-          "/tools/generator-mutated -> u_n_tools_generator-mutated (click:routerLink)",
-          "/tools/generator-mutated -> u_n_tools_generator-mutated (navigate)",
-          "/tools/generator-mutated -> /settings/subscription/premium (navigate)"
-        ],
-        "edgesRemoved": [
-          "/tools/generator -> /settings/account (click:routerLink)",
-          "/tools/generator -> u_n_tools_generator (click:routerLink)",
-          "/tools/generator -> u_n_tools_generator (navigate)",
-          "/tools/generator -> /settings/subscription/premium (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/oss-routing.module.ts",
-      "line": 762,
-      "subject": "domain-rules",
-      "predict": "a node route containing \"domain-rules\" becomes \"domain-rules-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 14,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/settings/domain-rules-mutated",
-          "u_n_settings_domain-rules-mutated"
-        ],
-        "nodesRemoved": [
-          "/settings/domain-rules",
-          "u_n_settings_domain-rules"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/settings/domain-rules-mutated -> u_n_settings_domain-rules-mutated (click:routerLink)",
-          "/settings/domain-rules-mutated -> /settings/account (click:routerLink)",
-          "/settings/domain-rules-mutated -> u_n_settings_domain-rules-mutated (navigate)",
-          "/settings/domain-rules-mutated -> /settings/subscription/premium (navigate)"
-        ],
-        "edgesRemoved": [
-          "/settings/domain-rules -> u_n_settings_domain-rules (click:routerLink)",
-          "/settings/domain-rules -> /settings/account (click:routerLink)",
-          "/settings/domain-rules -> u_n_settings_domain-rules (navigate)",
-          "/settings/domain-rules -> /settings/subscription/premium (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/admin-console/organizations/members/members-routing.module.ts",
-      "line": 22,
-      "subject": "sponsored-families",
-      "predict": "a node route containing \"sponsored-families\" becomes \"sponsored-families-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 14,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/organizations/:organizationId/members/sponsored-families-mutated",
-          "u_n_organizations_organizationId_members_sponsored-families-mutated"
-        ],
-        "nodesRemoved": [
-          "/organizations/:organizationId/members/sponsored-families",
-          "u_n_organizations_organizationId_members_sponsored-families"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/organizations/:organizationId/members/sponsored-families-mutated -> /settings/account (click:routerLink)",
-          "/organizations/:organizationId/members/sponsored-families-mutated -> u_n_organizations_organizationId_members_sponsored-families-mutated (click:routerLink)",
-          "/organizations/:organizationId/members/sponsored-families-mutated -> /settings/subscription/premium (navigate)",
-          "/organizations/:organizationId/members/sponsored-families-mutated -> u_n_organizations_organizationId_members_sponsored-families-mutated (navigate)"
-        ],
-        "edgesRemoved": [
-          "/organizations/:organizationId/members/sponsored-families -> /settings/account (click:routerLink)",
-          "/organizations/:organizationId/members/sponsored-families -> u_n_organizations_organizationId_members_sponsored-families (click:routerLink)",
-          "/organizations/:organizationId/members/sponsored-families -> /settings/subscription/premium (navigate)",
-          "/organizations/:organizationId/members/sponsored-families -> u_n_organizations_organizationId_members_sponsored-families (navigate)"
+          "/organizations/:organizationId/reporting/reports/passkey-report -> u_n_organizations_organizationId_reporting_reports_passkey-report (click:routerLink)",
+          "/organizations/:organizationId/reporting/reports/passkey-report -> /settings/account (click:routerLink)",
+          "/organizations/:organizationId/reporting/reports/passkey-report -> u_n_organizations_organizationId_reporting_reports_passkey-report (navigate)",
+          "/organizations/:organizationId/reporting/reports/passkey-report -> /settings/subscription/premium (navigate)"
         ],
         "guardChanged": []
       }

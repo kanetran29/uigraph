@@ -1,6 +1,6 @@
 {
-  "harnessVersion": "mutate 1.8.0",
-  "extractor": "% Extractor 920e1aa, packages/ clean, harness clean when generated.",
+  "harnessVersion": "mutate 1.9.1",
+  "extractor": "% Extractor c42f220, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "attribution": false,
@@ -14,23 +14,23 @@
   "discovered": {
     "RENAME_PATH": 6,
     "REMOVE_GUARD": 5,
-    "DELETE_ROUTERLINK": 6,
-    "CHANGE_NAV_TARGET": 5
+    "CHANGE_NAV_TARGET": 9,
+    "DELETE_ROUTERLINK": 6
   },
   "sampled": {
-    "CHANGE_NAV_TARGET": 5,
+    "CHANGE_NAV_TARGET": 8,
     "DELETE_ROUTERLINK": 6,
     "REMOVE_GUARD": 5,
     "RENAME_PATH": 6
   },
   "perOperator": {
     "CHANGE_NAV_TARGET": {
-      "discovered": 5,
-      "sampled": 5,
-      "detected": 1,
-      "missed": 2,
-      "wrong": 2,
-      "excluded": 0,
+      "discovered": 9,
+      "sampled": 8,
+      "detected": 5,
+      "missed": 0,
+      "wrong": 0,
+      "excluded": 3,
       "broke": 0,
       "skip": 0
     },
@@ -65,16 +65,48 @@
       "skip": 0
     }
   },
-  "detectionRate": 0.6875,
+  "detectionRate": 0.9375,
   "scored": 16,
-  "detected": 11,
+  "detected": 15,
   "results": [
     {
       "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/features/article/pages/home/home.component.ts",
-      "line": 53,
-      "subject": "/login => /settings",
-      "predict": "the edge to /login is replaced by an edge to /settings",
+      "file": "src/app/features/article/pages/article/article.component.ts",
+      "line": 117,
+      "subject": "/ => /settings",
+      "predict": "the edges this line witnesses go to /settings and no longer to where it led before",
+      "verdict": "DETECTED",
+      "touched": 2,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/article/:slug -> /settings (navigate)"
+        ],
+        "edgesRemoved": [
+          "/article/:slug -> / (navigate)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/features/profile/components/follow-button.component.ts",
+      "line": 59,
+      "subject": "/login => /editor",
+      "predict": "the edges this line witnesses go to /editor and no longer to where it led before",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/features/profile/components/follow-button.component.ts:59 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/features/article/pages/editor/editor.component.ts",
+      "line": 89,
+      "subject": "/article => /register",
+      "predict": "the edges this line witnesses go to /register and no longer to where it led before",
       "verdict": "DETECTED",
       "touched": 4,
       "delta": {
@@ -84,12 +116,12 @@
         "nodesRemoved": [],
         "routeChanged": [],
         "edgesAdded": [
-          "/ -> /settings (navigate)",
-          "/tag/:tag -> /settings (navigate)"
+          "/editor -> /register (navigate)",
+          "/editor/:slug -> /register (navigate)"
         ],
         "edgesRemoved": [
-          "/ -> /login (navigate)",
-          "/tag/:tag -> /login (navigate)"
+          "/editor -> /article/:slug (navigate)",
+          "/editor/:slug -> /article/:slug (navigate)"
         ],
         "guardChanged": []
       }
@@ -98,19 +130,19 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/app/features/settings/settings.component.ts",
       "line": 72,
-      "subject": "/profile => /register",
-      "predict": "the edge to /profile is replaced by an edge to /register",
-      "verdict": "WRONG",
+      "subject": "/profile => /login",
+      "predict": "the edges this line witnesses go to /login and no longer to where it led before",
+      "verdict": "DETECTED",
       "touched": 3,
       "delta": {
-        "witnessLinesRemoved": [
-          "src/app/features/settings/settings.component.ts:72"
-        ],
+        "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [],
         "nodesRemoved": [],
         "routeChanged": [],
-        "edgesAdded": [],
+        "edgesAdded": [
+          "/settings -> /login (navigate)"
+        ],
         "edgesRemoved": [
           "/settings -> /profile/:username (navigate)",
           "/settings -> /profile/:username/favorites (navigate)"
@@ -122,99 +154,69 @@
       "kind": "CHANGE_NAV_TARGET",
       "file": "src/app/features/article/components/favorite-button.component.ts",
       "line": 57,
-      "subject": "/register => /settings",
-      "predict": "the edge to /register is replaced by an edge to /settings",
-      "verdict": "MISSED",
-      "touched": 0,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": []
-      }
+      "subject": "/register => /editor",
+      "predict": "the edges this line witnesses go to /editor and no longer to where it led before",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/features/article/components/favorite-button.component.ts:57 is witnessed by no baseline edge"
     },
     {
       "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/features/article/pages/editor/editor.component.ts",
-      "line": 89,
-      "subject": "/article => /login",
-      "predict": "the edge to /article is replaced by an edge to /login",
-      "verdict": "WRONG",
-      "touched": 3,
-      "delta": {
-        "witnessLinesRemoved": [
-          "src/app/features/article/pages/editor/editor.component.ts:89"
-        ],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [
-          "/editor -> /article/:slug (navigate)",
-          "/editor/:slug -> /article/:slug (navigate)"
-        ],
-        "guardChanged": []
-      }
+      "file": "src/app/core/auth/services/user.service.ts",
+      "line": 86,
+      "subject": "/ => /editor",
+      "predict": "the edges this line witnesses go to /editor and no longer to where it led before",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/core/auth/services/user.service.ts:86 is witnessed by no baseline edge"
     },
     {
       "kind": "CHANGE_NAV_TARGET",
-      "file": "src/app/features/profile/components/follow-button.component.ts",
-      "line": 59,
+      "file": "src/app/features/article/pages/home/home.component.ts",
+      "line": 53,
       "subject": "/login => /editor",
-      "predict": "the edge to /login is replaced by an edge to /editor",
-      "verdict": "MISSED",
-      "touched": 0,
+      "predict": "the edges this line witnesses go to /editor and no longer to where it led before",
+      "verdict": "DETECTED",
+      "touched": 4,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
         "nodesAdded": [],
         "nodesRemoved": [],
         "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
+        "edgesAdded": [
+          "/ -> /editor (navigate)",
+          "/tag/:tag -> /editor (navigate)"
+        ],
+        "edgesRemoved": [
+          "/ -> /login (navigate)",
+          "/tag/:tag -> /login (navigate)"
+        ],
         "guardChanged": []
       }
     },
     {
-      "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/core/layout/header.component.html",
-      "line": 18,
-      "subject": "/register",
-      "predict": "the graph stops citing this line, and the edge to /register disappears unless another construct also produces it",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/core/layout/header.component.html:18 is witnessed by no baseline edge"
-    },
-    {
-      "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/core/layout/header.component.html",
-      "line": 71,
-      "subject": "/settings",
-      "predict": "the graph stops citing this line, and the edge to /settings disappears unless another construct also produces it",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/core/layout/header.component.html:71 is witnessed by no baseline edge"
-    },
-    {
-      "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/core/layout/header.component.html",
-      "line": 65,
-      "subject": "/editor",
-      "predict": "the graph stops citing this line, and the edge to /editor disappears unless another construct also produces it",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/core/layout/header.component.html:65 is witnessed by no baseline edge"
-    },
-    {
-      "kind": "DELETE_ROUTERLINK",
-      "file": "src/app/core/layout/header.component.html",
-      "line": 39,
-      "subject": "/settings",
-      "predict": "the graph stops citing this line, and the edge to /settings disappears unless another construct also produces it",
-      "verdict": "EXCLUDED",
-      "reason": "construct at src/app/core/layout/header.component.html:39 is witnessed by no baseline edge"
+      "kind": "CHANGE_NAV_TARGET",
+      "file": "src/app/core/auth/auth.component.ts",
+      "line": 76,
+      "subject": "/ => /register",
+      "predict": "the edges this line witnesses go to /register and no longer to where it led before",
+      "verdict": "DETECTED",
+      "touched": 4,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/login -> /register (navigate)",
+          "/register -> /register (navigate)"
+        ],
+        "edgesRemoved": [
+          "/login -> / (navigate)",
+          "/register -> / (navigate)"
+        ],
+        "guardChanged": []
+      }
     },
     {
       "kind": "DELETE_ROUTERLINK",
@@ -228,6 +230,33 @@
     {
       "kind": "DELETE_ROUTERLINK",
       "file": "src/app/core/layout/header.component.html",
+      "line": 39,
+      "subject": "/settings",
+      "predict": "the graph stops citing this line, and the edge to /settings disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/core/layout/header.component.html:39 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/core/layout/header.component.html",
+      "line": 71,
+      "subject": "/settings",
+      "predict": "the graph stops citing this line, and the edge to /settings disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/core/layout/header.component.html:71 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/core/layout/header.component.html",
+      "line": 18,
+      "subject": "/register",
+      "predict": "the graph stops citing this line, and the edge to /register disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/core/layout/header.component.html:18 is witnessed by no baseline edge"
+    },
+    {
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/core/layout/header.component.html",
       "line": 33,
       "subject": "/editor",
       "predict": "the graph stops citing this line, and the edge to /editor disappears unless another construct also produces it",
@@ -235,48 +264,13 @@
       "reason": "construct at src/app/core/layout/header.component.html:33 is witnessed by no baseline edge"
     },
     {
-      "kind": "REMOVE_GUARD",
-      "file": "src/app/app.routes.ts",
-      "line": 53,
-      "subject": "path \":slug\"",
-      "predict": "an edge that carried the guard loses it",
-      "verdict": "DETECTED",
-      "touched": 1,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": [
-          "/article/:slug -> /editor/:slug: guard requireAuth->null, modality may->may"
-        ]
-      }
-    },
-    {
-      "kind": "REMOVE_GUARD",
-      "file": "src/app/app.routes.ts",
-      "line": 31,
-      "subject": "path \"register\"",
-      "predict": "an edge that carried the guard loses it",
-      "verdict": "DETECTED",
-      "touched": 3,
-      "delta": {
-        "witnessLinesRemoved": [],
-        "witnessLinesAdded": [],
-        "nodesAdded": [],
-        "nodesRemoved": [],
-        "routeChanged": [],
-        "edgesAdded": [],
-        "edgesRemoved": [],
-        "guardChanged": [
-          "/login -> /register: guard fn#ddb96242->null, modality may->may",
-          "/register -> /register: guard fn#ddb96242->null, modality may->may",
-          "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may"
-        ]
-      }
+      "kind": "DELETE_ROUTERLINK",
+      "file": "src/app/core/layout/header.component.html",
+      "line": 65,
+      "subject": "/editor",
+      "predict": "the graph stops citing this line, and the edge to /editor disappears unless another construct also produces it",
+      "verdict": "EXCLUDED",
+      "reason": "construct at src/app/core/layout/header.component.html:65 is witnessed by no baseline edge"
     },
     {
       "kind": "REMOVE_GUARD",
@@ -306,6 +300,25 @@
     {
       "kind": "REMOVE_GUARD",
       "file": "src/app/app.routes.ts",
+      "line": 48,
+      "subject": "path \"\"",
+      "predict": "an edge that carried the guard loses it",
+      "verdict": "MISSED",
+      "touched": 0,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/app.routes.ts",
       "line": 36,
       "subject": "path \"settings\"",
       "predict": "an edge that carried the guard loses it",
@@ -327,11 +340,11 @@
     {
       "kind": "REMOVE_GUARD",
       "file": "src/app/app.routes.ts",
-      "line": 48,
-      "subject": "path \"\"",
+      "line": 31,
+      "subject": "path \"register\"",
       "predict": "an edge that carried the guard loses it",
-      "verdict": "MISSED",
-      "touched": 0,
+      "verdict": "DETECTED",
+      "touched": 3,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -340,6 +353,168 @@
         "routeChanged": [],
         "edgesAdded": [],
         "edgesRemoved": [],
+        "guardChanged": [
+          "/login -> /register: guard fn#ddb96242->null, modality may->may",
+          "/register -> /register: guard fn#ddb96242->null, modality may->may",
+          "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may"
+        ]
+      }
+    },
+    {
+      "kind": "REMOVE_GUARD",
+      "file": "src/app/app.routes.ts",
+      "line": 53,
+      "subject": "path \":slug\"",
+      "predict": "an edge that carried the guard loses it",
+      "verdict": "DETECTED",
+      "touched": 1,
+      "delta": {
+        "witnessLinesRemoved": [],
+        "witnessLinesAdded": [],
+        "nodesAdded": [],
+        "nodesRemoved": [],
+        "routeChanged": [],
+        "edgesAdded": [],
+        "edgesRemoved": [],
+        "guardChanged": [
+          "/article/:slug -> /editor/:slug: guard requireAuth->null, modality may->may"
+        ]
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/app.routes.ts",
+      "line": 34,
+      "subject": "settings",
+      "predict": "a node route containing \"settings\" becomes \"settings-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 8,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/features/profile/pages/profile/profile.component.html:23"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/settings-mutated"
+        ],
+        "nodesRemoved": [
+          "/settings"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/settings-mutated -> /profile/:username (navigate)",
+          "/settings-mutated -> /profile/:username/favorites (navigate)"
+        ],
+        "edgesRemoved": [
+          "/settings -> /profile/:username (navigate)",
+          "/settings -> /profile/:username/favorites (navigate)",
+          "/profile/:username -> /settings (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/app.routes.ts",
+      "line": 39,
+      "subject": "profile",
+      "predict": "a node route containing \"profile\" becomes \"profile-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 13,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/features/settings/settings.component.ts:72",
+          "src/app/features/profile/pages/profile/profile.component.html:42",
+          "src/app/features/profile/pages/profile/profile.component.html:52"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/profile-mutated/:username",
+          "/profile-mutated/:username/favorites"
+        ],
+        "nodesRemoved": [
+          "/profile/:username",
+          "/profile/:username/favorites"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/profile-mutated/:username -> /settings (click:routerLink)"
+        ],
+        "edgesRemoved": [
+          "/settings -> /profile/:username (navigate)",
+          "/settings -> /profile/:username/favorites (navigate)",
+          "/profile/:username -> /settings (click:routerLink)",
+          "/profile/:username -> /profile/:username (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/features/profile/profile.routes.ts",
+      "line": 17,
+      "subject": "favorites",
+      "predict": "a node route containing \"favorites\" becomes \"favorites-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 7,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/features/profile/pages/profile/profile.component.html:52"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/profile/:username/favorites-mutated"
+        ],
+        "nodesRemoved": [
+          "/profile/:username/favorites"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/settings -> /profile/:username/favorites-mutated (navigate)",
+          "/profile/:username -> /profile/:username/favorites-mutated (click:routerLink)"
+        ],
+        "edgesRemoved": [
+          "/settings -> /profile/:username/favorites (navigate)",
+          "/profile/:username -> /profile/:username/favorites (click:routerLink)"
+        ],
+        "guardChanged": []
+      }
+    },
+    {
+      "kind": "RENAME_PATH",
+      "file": "src/app/app.routes.ts",
+      "line": 43,
+      "subject": "editor",
+      "predict": "a node route containing \"editor\" becomes \"editor-mutated\"",
+      "verdict": "DETECTED",
+      "touched": 15,
+      "delta": {
+        "witnessLinesRemoved": [
+          "src/app/features/article/pages/article/article.component.html:19",
+          "src/app/features/article/pages/article/article.component.html:66"
+        ],
+        "witnessLinesAdded": [],
+        "nodesAdded": [
+          "/editor-mutated",
+          "/editor-mutated/:slug"
+        ],
+        "nodesRemoved": [
+          "/editor",
+          "/editor/:slug"
+        ],
+        "routeChanged": [],
+        "edgesAdded": [
+          "/editor-mutated -> / (navigate)",
+          "/editor-mutated -> /article/:slug (navigate)",
+          "/editor-mutated/:slug -> / (navigate)",
+          "/editor-mutated/:slug -> /article/:slug (navigate)"
+        ],
+        "edgesRemoved": [
+          "/editor -> / (navigate)",
+          "/editor -> /article/:slug (navigate)",
+          "/editor/:slug -> / (navigate)",
+          "/editor/:slug -> /article/:slug (navigate)"
+        ],
         "guardChanged": []
       }
     },
@@ -406,143 +581,6 @@
           "/register -> /login (click:routerLink)",
           "/register -> /register (click:routerLink)",
           "/register -> / (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/app.routes.ts",
-      "line": 39,
-      "subject": "profile",
-      "predict": "a node route containing \"profile\" becomes \"profile-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 13,
-      "delta": {
-        "witnessLinesRemoved": [
-          "src/app/features/settings/settings.component.ts:72",
-          "src/app/features/profile/pages/profile/profile.component.html:42",
-          "src/app/features/profile/pages/profile/profile.component.html:52"
-        ],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/profile-mutated/:username",
-          "/profile-mutated/:username/favorites"
-        ],
-        "nodesRemoved": [
-          "/profile/:username",
-          "/profile/:username/favorites"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/profile-mutated/:username -> /settings (click:routerLink)"
-        ],
-        "edgesRemoved": [
-          "/settings -> /profile/:username (navigate)",
-          "/settings -> /profile/:username/favorites (navigate)",
-          "/profile/:username -> /settings (click:routerLink)",
-          "/profile/:username -> /profile/:username (click:routerLink)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/app.routes.ts",
-      "line": 43,
-      "subject": "editor",
-      "predict": "a node route containing \"editor\" becomes \"editor-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 15,
-      "delta": {
-        "witnessLinesRemoved": [
-          "src/app/features/article/pages/article/article.component.html:19",
-          "src/app/features/article/pages/article/article.component.html:66"
-        ],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/editor-mutated",
-          "/editor-mutated/:slug"
-        ],
-        "nodesRemoved": [
-          "/editor",
-          "/editor/:slug"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/editor-mutated -> / (navigate)",
-          "/editor-mutated -> /article/:slug (navigate)",
-          "/editor-mutated/:slug -> / (navigate)",
-          "/editor-mutated/:slug -> /article/:slug (navigate)"
-        ],
-        "edgesRemoved": [
-          "/editor -> / (navigate)",
-          "/editor -> /article/:slug (navigate)",
-          "/editor/:slug -> / (navigate)",
-          "/editor/:slug -> /article/:slug (navigate)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/features/profile/profile.routes.ts",
-      "line": 17,
-      "subject": "favorites",
-      "predict": "a node route containing \"favorites\" becomes \"favorites-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 7,
-      "delta": {
-        "witnessLinesRemoved": [
-          "src/app/features/profile/pages/profile/profile.component.html:52"
-        ],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/profile/:username/favorites-mutated"
-        ],
-        "nodesRemoved": [
-          "/profile/:username/favorites"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/settings -> /profile/:username/favorites-mutated (navigate)",
-          "/profile/:username -> /profile/:username/favorites-mutated (click:routerLink)"
-        ],
-        "edgesRemoved": [
-          "/settings -> /profile/:username/favorites (navigate)",
-          "/profile/:username -> /profile/:username/favorites (click:routerLink)"
-        ],
-        "guardChanged": []
-      }
-    },
-    {
-      "kind": "RENAME_PATH",
-      "file": "src/app/app.routes.ts",
-      "line": 34,
-      "subject": "settings",
-      "predict": "a node route containing \"settings\" becomes \"settings-mutated\"",
-      "verdict": "DETECTED",
-      "touched": 8,
-      "delta": {
-        "witnessLinesRemoved": [
-          "src/app/features/profile/pages/profile/profile.component.html:23"
-        ],
-        "witnessLinesAdded": [],
-        "nodesAdded": [
-          "/settings-mutated"
-        ],
-        "nodesRemoved": [
-          "/settings"
-        ],
-        "routeChanged": [],
-        "edgesAdded": [
-          "/settings-mutated -> /profile/:username (navigate)",
-          "/settings-mutated -> /profile/:username/favorites (navigate)"
-        ],
-        "edgesRemoved": [
-          "/settings -> /profile/:username (navigate)",
-          "/settings -> /profile/:username/favorites (navigate)",
-          "/profile/:username -> /settings (click:routerLink)"
         ],
         "guardChanged": []
       }

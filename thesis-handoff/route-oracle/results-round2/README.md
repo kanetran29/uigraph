@@ -1,7 +1,9 @@
 # Round-two run outputs
 
-`final12.tgz` holds the outputs `regen-round.sh` left for the tables the thesis prints: two
-`run-all.mjs` runs over the extractor at 920e1aa, harness 1.9.0, made on 2026-11-02. `ctrl/` is
+`final14.tgz` holds the outputs `regen-round.sh` left for the tables the thesis prints: two
+`run-all.mjs` runs over the extractor at c42f220, harness 1.9.0 (mutation harness 1.9.1), made on
+2026-11-02. `final12.tgz` is the same pipeline at 920e1aa, before the in-scope conversion
+denominator and the joined expansion; it reproduces the tables of that commit, not the current ones. `ctrl/` is
 the run without attribution, `fin/` the run with it, and `round2/` holds the files
 `round2-to-latex.mjs` read (`results.json`, the per-application `.B`, `.C`, `.L`, `.notes`, `.why`
 and `.diag` files, and `raw/`); the staged tables are in `tex/`. `to-latex.mjs` reads
@@ -20,6 +22,6 @@ tables committed at the time: `to-latex.mjs` printed a different loss ledger fro
 attribution-shared constructs, not 63; bitwarden 40, not 38) and `round2-to-latex.mjs` refused it
 ("46/25 is 184.0 %"). The committed tables had come from another run whose files were lost. Those
 tables were therefore not carried forward: the pipeline was re-run at the final commit and every
-table regenerated from that run, which is what `final12.tgz` archives. `final7.tgz` remains in the
+table regenerated from that run, which is what `final12.tgz` archived and `final14.tgz` now does. `final7.tgz` remains in the
 repository's history. The figures the chapters cite for the round's own tier are read out of git
 at 7d109c7 by `earlier-instrument.mjs`, as the round's tables printed them.

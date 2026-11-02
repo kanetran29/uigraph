@@ -33,7 +33,30 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
-## State on 2 Nov 2026 (supersedes the sections below where they disagree)
+## State on 2 Nov 2026, afternoon (supersedes everything below where they disagree)
+
+- Extractor and harness final at `c42f220`. Every generated table is stamped `c42f220` (round tables
+  `c42f2204 (local-checkout)`), produced by `remeasure.sh` then `regen-round.sh` with nothing committed during
+  the runs; round runs archived as `route-oracle/results-round2/final14.tgz`. Harness 94/94, guard-resolve 13/13,
+  `pnpm -s check` GREEN. Sweep record unchanged at `920e1aa` (adapter src unchanged; `sweep-to-latex` accepted it).
+- `daad40d`: expanded edges that collide are joined (strongest modality leads, witnesses united;
+  `\ExpansionJoined` 1414); the conversion denominator is in-scope constructs; mutate 1.9.0 retargets the whole
+  commands array, draws the destination from declared routes alone and scores the edited line.
+- `c42f220`: mutate 1.9.1 matches a guarded route's screens by the file its routing module imports the component
+  from (bitwarden has two `AccountComponent`s; 1.9.0 scored an unreachable guard as a miss); the recovery table's
+  `OTHER` row is labelled. Remaining known harness limit: realworld's two `editor` children load one file, so the
+  baseline run scores and misses the empty-path guard (the single paired disagreement).
+- RQ4 now: attributed 67/67, fallible operators 45/45; baseline 50/51; paired 51 vs 50 of 51. Must tier, recovery,
+  ablation and ground-truth figures unchanged from the list below.
+- Thesis reframed after the review in `~/Downloads/thesis-review.md`: abstract cut to about 430 words and led by
+  the measurement and the near-empty must tier, with the 94.7 % rooted baseline and 2.0 % / 0.4 % mechanism shares;
+  page-1 supervisor note removed; §3.1 demotion rules as a list; ch1 agent motivation softened; ch5 gains the
+  installed-dependency and corpus-selection caveat, the k8sdash scope caveat on must sources, and rewritten RQ4
+  prose (non-rename operators first); Table 3.1/5.1 captions reconciled; ch5 meta-commentary trimmed.
+- Not done: a human re-reading of the must-tier verdicts (`review.json` is the assistant's); a signed-in runtime
+  check of rendered `routerLink`s per screen (would test scope width in both directions).
+
+## State on 2 Nov 2026, morning
 
 - `origin/main` is at `e7add5d`; the revision commits after it are local and not pushed (the student's go-ahead
   is needed). The earlier uncommitted work described below now sits in `stash@{0}` ("do not commit as-is"),
