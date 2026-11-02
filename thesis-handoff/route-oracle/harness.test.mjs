@@ -909,6 +909,25 @@ describe('expansion-check (prose panel 32)', () => {
   })
 })
 
+describe('score-ground-truth: the shell sites of the reference', () => {
+  it('counts the sites placed on every screen and the pairs they supply', () => {
+    const d = dir('gt')
+    const truth = path.join(d, 'truth.json')
+    fs.writeFileSync(truth, JSON.stringify({
+      app: 'demo', screens: ['/a', '/b', '/c'],
+      sites: [{ site: 'x.ts:1', screens: 'ALL' }, { site: 'y.ts:2', screens: ['/a'] }],
+    }))
+    const db = path.join(d, 'full.db')
+    writeGraph(db, { nodes: [{ id: 'a', kind: 'screen', route: '/a' }], edges: [] })
+    const tex = path.join(d, 'out.tex')
+    run('score-ground-truth.mjs', ['--truth', truth, '--db', `full=${db}`, '--tex', tex], { tsx: true })
+    const out = fs.readFileSync(tex, 'utf8')
+    expect(macro(out, 'GTPairs')).toBe('4')
+    expect(macro(out, 'GTShellSites')).toBe('1')
+    expect(macro(out, 'GTShellPairs')).toBe('3')
+  })
+})
+
 describe('to-plots (prose panel 38 and 39)', () => {
   const ledger = (tally) => ({ constructs: Object.values(tally).reduce((a, b) => a + b, 0), tally })
   const app = (slug, tally) => ({ slug, totalConstructs: ledger(tally).constructs, conversion: 0, loss: ledger(tally), testC: { coverage: 1 } })

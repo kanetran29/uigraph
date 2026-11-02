@@ -136,6 +136,11 @@ if (tex) {
   out += `\\newcommand{\\GTApp}{${truth.app}}\n`
   out += `\\newcommand{\\GTSites}{${wanted.size}}\n`
   out += `\\newcommand{\\GTPairs}{${[...wanted.values()].reduce((a, w) => a + w.screens.size, 0)}}\n`
+  // Sites the reference places on every screen: what dominates the pair counts, and what every level
+  // from the shell rule up places trivially.
+  const shell = truth.sites.filter((s) => s.screens === 'ALL')
+  out += `\\newcommand{\\GTShellSites}{${shell.length}}\n`
+  out += `\\newcommand{\\GTShellPairs}{${shell.length * ALL.length}}\n`
   for (const l of levels) {
     const cap = l.level[0].toUpperCase() + l.level.slice(1)
     out += `\\newcommand{\\GT${cap}Precision}{${pc(l.precision)}}\n`
