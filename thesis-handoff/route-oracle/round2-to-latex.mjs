@@ -94,7 +94,9 @@ const tot = rows.reduce((a, r) => {
   a.inScope += r.l1.inScope; a.rec += r.l1.recovered; a.lost += r.l1.lost
   a.dyn += r.l1.tally.ACCOUNTED_DYNAMIC || 0; a.unp += r.l1.tally.ACCOUNTED_UNPLACED || 0
   a.raw += r.l1.constructs; a.excl += r.l1.excluded
-  a.rec0 += r.l0 ? r.l0.constructs - r.l0.lost : 0; a.raw0 += r.l0 ? r.l0.constructs : 0
+  // The baseline share is over the baseline's own in-scope sites, the population
+  // \RoundTwoAccounted is over; dividing by every construct counted the excluded ones as accounted.
+  a.rec0 += r.l0 ? r.l0.inScope - r.l0.lost : 0; a.raw0 += r.l0 ? r.l0.inScope : 0
   return a
 }, { inScope: 0, rec: 0, lost: 0, dyn: 0, unp: 0, raw: 0, excl: 0, rec0: 0, raw0: 0 })
 

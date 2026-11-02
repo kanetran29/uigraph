@@ -1142,4 +1142,14 @@ describe('round2-to-latex (review of harness 2): the Judged and Clean of judged 
   it('still counts every site cited, unread ones included', () => {
     expect(macro(generate(witness), 'RoundTwoSites')).toBe('120')
   })
+
+  it('takes the baseline accounted share over the baseline in-scope sites, not every construct (review of e8ac256)', () => {
+    const d = archive()
+    let inScope = 0, lost = 0
+    for (const slug of SLUGS) {
+      const l0 = JSON.parse(fs.readFileSync(path.join(d, `${slug}.ctrl.L.json`), 'utf8'))
+      inScope += l0.inScope; lost += l0.lost
+    }
+    expect(macro(generate(witness), 'RoundTwoBefore')).toBe(`${(100 * (inScope - lost) / inScope).toFixed(1)}\\,\\%`)
+  })
 })

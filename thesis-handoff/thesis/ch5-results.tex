@@ -29,9 +29,10 @@ applications, and are likely to be optimistic for Angular applications in genera
 
 RQ1 is answered at two levels, and the two give very different answers. The first is
 whether the graph holds the screens the application declares at all; the second is how much
-of the application's navigation becomes a deterministic transition between them. The first
-bounds the second, because a transition cannot start or end at a screen the graph does not
-have.
+of the application's navigation becomes a deterministic transition between them. The first is
+a precondition of the second, because a transition cannot start or end at a screen the graph
+does not have, but not a numerical bound on it: one ratio counts screens and the other
+constructs, so a missing screen costs the second ratio only the constructs that name it.
 
 Table~\ref{tab:conversion} gives the second measure on the final snapshot. The
 constructs that earn must number \CensusBaseMustSites{} in the whole corpus without
@@ -188,7 +189,7 @@ Witness check, final attributed must tier & \MustWitnessViolations{} detected
 failures; \MustWitnessUnread{} edges have a destination the checker cannot read.
 Unread edges are not passes, and target agreement does not establish
 Claim~\ref{claim:must}. & \MustWitnessEdges{} \\
-Test-source cross-check, alfresco & \EtoERecallAlfresco{} of the visited URLs have a node; one
+Test-source cross-check, alfresco & \EtoERecallAlfresco{} of the URLs the specifications name have a node; one
 negative test excluded. & \EtoERowsAlfresco{} \\
 \bottomrule
 \end{tabularx}
@@ -525,7 +526,7 @@ root component as well as from the components beneath it
 stands for what they reach. A comparison drawn against containment alone would be a comparison
 with a method nobody proposed.
 
-Outlet descent is the one mechanism whose contribution is width without coverage at all: it
+Outlet descent is the mechanism whose contribution is mostly width: it
 places \AblationOutletSites{} sites against rooted's \AblationRootedSites{}, the same count on
 \AblationOutletSameSitesApps{} of the six applications and
 \AblationOutletAddedSites{} new sites over the corpus, while raising the pair count from

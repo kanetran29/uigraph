@@ -103,7 +103,9 @@ applications can static analysis recover as deterministic transitions?}
 without the screens it runs between. The first is node coverage: the fraction of the
 screens an application declares that the graph holds a node for. The second is the
 fraction of navigation constructs in the source code that are witnessed by at least one
-deterministic (\emph{must}) transition. The first bounds the second, and
+deterministic (\emph{must}) transition. The first is a precondition of the second rather than a
+numerical bound on it, since a transition needs a node at each end but the two ratios have
+different denominators, and
 Chapter~\ref{ch:results} reports both, with the warning
 Section~\ref{sec:limitations} carries: refusing to read part of an application raises its
 reported node coverage, so the figure is only meaningful together with the list of what was not

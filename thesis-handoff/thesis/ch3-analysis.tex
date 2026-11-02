@@ -339,7 +339,10 @@ route mounts (Section~\ref{sec:implementation}) \\
 member (method, property initialiser, lifecycle hook) of a component & the scope of the
 component \\
 method of an injectable service & join of the scopes of its callers \\
-\texttt{canActivate} or \texttt{canMatch} on route $r$ & $\mathit{subtree}(r)$ \\
+\texttt{canActivate}, \texttt{canActivateChild} or \texttt{canMatch} on route $r$ & join of the
+scopes of the navigation sites whose target lies in $\mathit{subtree}(r)$, the screens a
+navigation into $r$ starts from \\
+\texttt{canDeactivate} on route $r$ & $\mathit{subtree}(r)$ \\
 HTTP interceptor & $\top$ \\
 NgRx effect for action $a$ & join of the scopes of every dispatcher of $a$ \\
 \bottomrule
@@ -351,7 +354,8 @@ the join of the scopes of the places that call it, which may themselves be servi
 Attribution is therefore computed as a fixpoint over the input relations of
 Section~\ref{sec:inputs}. The outlet relation gives the initial scopes, and scopes are
 propagated along the component nesting relation $N$, from each component to its own members,
-along the call graph $\mathit{CG}$ and along the dispatch relation $D$, with $\mathcal{P}(S)$ as the abstract domain. This is a
+along the call graph $\mathit{CG}$, along the dispatch relation $D$, and from each navigation
+site to the entry guards of the routes its target lies under, with $\mathcal{P}(S)$ as the abstract domain. This is a
 monotone dataflow problem in the sense of Kildall
 \cite{kildall1973unified,nielson1999principles}, and two properties of it do separate
 work. Finite height gives termination. The height of $\mathcal{P}(S)$ is the number of
@@ -363,17 +367,20 @@ the worklist. The transfer functions here are monotone because the only operatio
 apply to a scope is a join with another scope, and union is monotone in both arguments.
 
 A worklist solver re-examines a node once for each rise of one of its predecessors, and
-the work done for a node is proportional to its out-degree in $N \cup \mathit{CG} \cup
-D$, so a run makes at most
+the work done for a node is proportional to its out-degree in $N \cup M \cup \mathit{CG}
+\cup D \cup T$, where $M$ links each component to its members and $T$ links each callable
+holding a navigation site to the entry guards that navigation runs. A run therefore makes at most
 \[
-  O\bigl(|S| \cdot (|N| + |\mathit{CG}| + |D|)\bigr)
+  O\bigl(|S| \cdot (|N| + |M| + |\mathit{CG}| + |D| + |T|)\bigr)
 \]
 transfer-function applications. Each application is a union of two subsets of $S$, which
 costs $O(|S|)$ with scopes held as bit sets, so the running time is bounded by
-$O(|S|^2 \cdot (|N| + |\mathit{CG}| + |D|))$. This is the bound for the full model.
+$O(|S|^2 \cdot (|N| + |M| + |\mathit{CG}| + |D| + |T|))$. This is the bound for the full
+model. $|M|$ is the number of members of components and is at most the number of callables,
+and $|T|$ is at most the number of navigation sites times the depth of the route tree.
 
-The part of the analysis that is implemented, the nesting, outlet and call-graph relations, is
-the full model with $D$ empty, so the bound above specialises to it, and the call-graph pass, a
+The part of the analysis that is implemented, the nesting, outlet, membership and call-graph
+relations, is the full model with $D$ and $T$ empty, so the bound above specialises to it, and the call-graph pass, a
 worklist of set-valued joins along member call edges, is bounded by it. The nesting and outlet part
 is cheaper than that specialisation, because reachability from each source needs no set-valued
 joins. Scopes are propagated along the component nesting
@@ -412,7 +419,7 @@ fixpoint.
 
 Algorithm~\ref{alg:attribution} gives the computation, and its propagation steps are
 the transfer-function applications bounded above. A step adds a screen to a scope only
-when an edge of $N$, a component's membership edge, or an edge of $\mathit{CG}$ or $D$ carries it there, and scopes only grow, so
+when an edge of $N$, $M$, $\mathit{CG}$, $D$ or $T$ carries it there, and scopes only grow, so
 what the algorithm computes is the least solution of the constraint system that
 Table~\ref{tab:scopes} states. In the model a component that is both mounted by a route
 and rendered in the template of another component therefore holds the join of the two
@@ -555,9 +562,13 @@ used to test Claim~\ref{claim:expansion}.
 The dispatch relation is not implemented in this version, so a navigation in an NgRx effect has
 no scope from the model itself. Two approximations stand in where the model has no relation the
 pass implements, and Section~\ref{sec:res-ablation} withholds them below the \emph{full} level, so
-no lower level counts their sites: a guard's scope is
-the set of routes that name it in \texttt{canActivate} or \texttt{canMatch}, which the route
-configuration states outright, and an effect, being registered for the lifetime of the
+no lower level counts their sites. The relation $T$ is not implemented, and a guard is given
+instead the screens of the routes that name it, as a bare identifier, in \texttt{canActivate},
+\texttt{canActivateChild}, \texttt{canMatch} or \texttt{canDeactivate}. For a
+\texttt{canDeactivate} guard that is within the model's scope; for an entry guard it is not
+the model's rule, since the redirect leaves the screen a navigation starts from, so the
+stand-in can be too small where navigations into the route start elsewhere and too large where
+they do not start at the route itself. An effect, being registered for the lifetime of the
 application, is given $\top$. Edges from both are capped at \emph{may}. A class the call graph
 does not reach and nothing injects still has no scope, and the evaluation counts those in the
 defect class ``Attribution, service'' of Table~\ref{tab:loss-rules}. The pass is
