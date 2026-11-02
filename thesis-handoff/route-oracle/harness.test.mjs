@@ -527,6 +527,17 @@ describe('scope-ablation (code panel 25 and prose panel 1)', () => {
     expect(macro(out, 'AblationCallGraphNetShare')).toBe('0.3\\,\\%')
   })
 
+  it('states what every level above rooted adds together, as a share of the full count', () => {
+    const r = row('realworld', 10, level(40, 183), level(40, 183))
+    r.levels.rooted = level(30, 100)
+    r.levels.outlet = level(32, 120)
+    const out = emit([r])
+    expect(macro(out, 'AblationAboveRootedSites')).toBe('10')
+    expect(macro(out, 'AblationAboveRootedShare')).toBe('25.0\\,\\%')
+    expect(macro(out, 'AblationOutletAddedSites')).toBe('2')
+    expect(macro(out, 'AblationFullAddedSites')).toBe('8')
+  })
+
   it('refuses rows measured before the site sets were compared', () => {
     const r = row('realworld', 10, level(39, 183), level(39, 183))
     delete r.fullOnlySites

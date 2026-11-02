@@ -246,6 +246,10 @@ if (tex) {
     out += `\\newcommand{\\Ablation${cap}AddedShare}{${((added / sum('full', 'sites')) * 100).toFixed(1)}\\,\\%}\n`
     out += `\\newcommand{\\Ablation${cap}SameSitesApps}{${same}}\n`
   }
+  // Everything above the shell rule together, the figure a sentence comparing with earlier work needs.
+  const aboveRooted = sum('full', 'sites') - sum('rooted', 'sites')
+  out += `\\newcommand{\\AblationAboveRootedSites}{${aboveRooted}}\n`
+  out += `\\newcommand{\\AblationAboveRootedShare}{${((aboveRooted / sum('full', 'sites')) * 100).toFixed(1)}\\,\\%}\n`
   out += `\\newcommand{\\AblationClassOnlyPairs}{${rows.reduce((a, r) => a + r.classOnly, 0)}}\n`
   out += `\\newcommand{\\AblationFullOnlyPairs}{${rows.reduce((a, r) => a + r.fullOnly, 0)}}\n`
   out += `\\newcommand{\\AblationClassChangedApps}{${rows.filter((r) => r.classOnly + r.fullOnly > 0).length}}\n`
