@@ -246,21 +246,76 @@ function mayNavigate(node: Node, seen: Set<Node>): boolean {
   return false
 }
 
+/** The order in which Angular calls a component's constructor and lifecycle hooks when it creates it. */
+const CREATION_ORDER = ['constructor', 'ngOnChanges', 'ngOnInit', 'ngDoCheck', 'ngAfterContentInit', 'ngAfterContentChecked', 'ngAfterViewInit', 'ngAfterViewChecked']
+
+/** Whether code `node` evaluates after its child `child` may start a navigation: the rest of the expression they belong to. */
+function laterInExpression(node: Node, child: Node, seen: Set<Node>): boolean {
+  const after = (list: Node[]) => list.slice(list.indexOf(child) + 1).some((n) => mayNavigate(n, seen))
+  if (Node.isCallExpression(node) || Node.isNewExpression(node)) {
+    const args = node.getArguments()
+    // A callee runs after its arguments, so its body is code that follows each of them.
+    if (args.includes(child as never)) return after(args) || (Node.isCallExpression(node) && calleeBodies(node).some((b) => mayNavigate(b, seen)))
+    return false
+  }
+  if (Node.isBinaryExpression(node)) return node.getLeft() === child && mayNavigate(node.getRight(), seen)
+  if (Node.isConditionalExpression(node)) return node.getCondition() === child && (mayNavigate(node.getWhenTrue(), seen) || mayNavigate(node.getWhenFalse(), seen))
+  if (Node.isArrayLiteralExpression(node)) return after(node.getElements())
+  if (Node.isObjectLiteralExpression(node)) return after(node.getProperties())
+  if (Node.isTemplateExpression(node)) return after(node.getTemplateSpans())
+  return false
+}
+
 /**
- * Whether code that runs after `call`, before the function holding it returns, may start a
- * navigation: the statements after it in its block and in every block around it up to that
- * function, and a finally block around it. A navigation started there begins before the one
- * `call` makes can finish, and the router cancels the first. A navigation call that is awaited
- * has finished by then, so it is not superseded; a call to anything else is not taken to cover
- * the navigations it makes, which it may not return.
+ * Whether code that runs once the function holding a navigation returns may start another: what
+ * each caller in the class does after calling it, and, for a constructor or lifecycle hook, the
+ * hooks Angular calls after it as it creates the component. `seen` stops a cycle of calls.
  */
-function supersededAt(call: CallExpression): boolean {
-  const seen = new Set<Node>()
+function laterAfterReturn(fn: Node, seen: Set<Node>): boolean {
+  if (seen.has(fn)) return false
+  seen.add(fn)
+  const holder = Node.isArrowFunction(fn) || Node.isFunctionExpression(fn) ? fn.getParent() : fn
+  const cls = holder?.getParentIfKind(SyntaxKind.ClassDeclaration)
+  if (!holder || !cls) return false
+  const name = Node.isConstructorDeclaration(holder) ? 'constructor' : Node.isMethodDeclaration(holder) || Node.isPropertyDeclaration(holder) ? holder.getName() : undefined
+  if (name === undefined) return false
+  const step = CREATION_ORDER.indexOf(name)
+  if (step >= 0) {
+    for (const later of CREATION_ORDER.slice(step + 1)) {
+      const body = cls.getMember(later)
+      if (body && mayNavigate(body, seen)) return true
+    }
+  }
+  const callers = cls.getDescendantsOfKind(SyntaxKind.CallExpression).filter((c) => {
+    const e = c.getExpression()
+    return Node.isPropertyAccessExpression(e) && e.getName() === name && e.getExpression().getKind() === SyntaxKind.ThisKeyword
+  })
+  return callers.some((c) => supersededAt(c, seen))
+}
+
+/**
+ * Whether code that runs after `call`, before the event that triggered it has been handled, may
+ * start a navigation: the rest of the expression and the statement that hold it, the statements
+ * after it in its block and in every block around it up to its function, a finally block around
+ * it, and then whatever runs once that function returns (`laterAfterReturn`). A navigation started
+ * there begins before the one `call` makes can finish, and the router cancels the first. A
+ * navigation call that is awaited has finished before anything after it in its function runs, but
+ * not before its function's callers go on, since an async function returns at its first await; a
+ * call to anything else is not taken to cover the navigations it makes, which it may not return.
+ */
+function supersededAt(call: CallExpression, seen = new Set<Node>()): boolean {
   const navigates = NAVIGATION.test(call.getExpression().getText())
+  let awaited = false
   let node: Node = call
   for (let parent = node.getParent(); parent; node = parent, parent = node.getParent()) {
-    if (Node.isFunctionLikeDeclaration(node) || Node.isArrowFunction(node) || Node.isFunctionExpression(node)) return false
-    if (navigates && Node.isAwaitExpression(parent)) return false
+    if (Node.isArrowFunction(node) || Node.isFunctionExpression(node)) {
+      // A callback runs when something calls it; only a class member's callers are followed.
+      return Node.isPropertyDeclaration(parent) ? laterAfterReturn(node, seen) : false
+    }
+    if (Node.isFunctionLikeDeclaration(node)) return laterAfterReturn(node, seen)
+    if (navigates && node === call && Node.isAwaitExpression(parent)) awaited = true
+    if (awaited) continue
+    if (laterInExpression(parent, node, seen)) return true
     if (Node.isBlock(parent) || Node.isSourceFile(parent) || Node.isCaseClause(parent) || Node.isDefaultClause(parent)) {
       const stmts = parent.getStatements()
       if (stmts.slice(stmts.indexOf(node as never) + 1).some((s) => mayNavigate(s, seen))) return true
