@@ -40,6 +40,12 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
   commit. Table 3.2 and Algorithm 1 now scope entry guards by the sources of navigations into the route
   (relation T, model only; the prototype's route-naming rule is described as a stand-in), and the complexity bound
   includes M (component → member) and T. Harness 95/95.
+- After the second review: the realworld hand reading is a *structural reference* (`scope^R`, ch3 §scope), not
+  true scope; precision/recall are agreement with it. Rima is compared against `approach.md` and `main.pdf` in
+  `softscanner-sw/softscanner_fa` (ancestor + bootstrap closure ≈ rooted/outlet; same-class helpers depth 1;
+  subscribe; no outlet modelling, no provider resolution, no service following). `scope-ablation.mjs` now emits
+  `\AblationAboveRooted{Sites,Share}` (50, 2.8 %), regenerated `--from ablation.json`; only the stamp and those two
+  macros changed. RQ3/RQ4 conclusions narrowed. Harness 96/96.
 
 - Extractor and harness final at `c42f220`. Every generated table is stamped `c42f220` (round tables
   `c42f2204 (local-checkout)`), produced by `remeasure.sh` then `regen-round.sh` with nothing committed during
