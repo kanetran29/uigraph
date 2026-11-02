@@ -153,7 +153,7 @@ declarative route table, and one URL could represent many states, because naviga
 was implemented by handlers that modified the DOM. The DOM was therefore the only
 observable that distinguished one state from another. Static analysis of the JavaScript
 of that period, with its dynamic dispatch and handlers constructed at run time, was in
-practice not feasible. So the dynamic approach was used because there was no static artefact to analyse.
+practice not feasible. The dynamic approach was therefore used because there was no static artefact to analyse.
 
 Client-side routing frameworks changed this situation. The route table is now a
 declared data structure in the source, a navigation is an attribute or a method call
@@ -173,7 +173,7 @@ each navigable path to the routed component that contains it. The problem addres
 this thesis is therefore not a new one. That attribution step is scope attribution: a
 navigable path is attributed to the routed component that contains it, and the root
 component's own paths to every page, computed statically from the router configuration.
-Section~\ref{sec:res-ablation} measures exactly that combination, as the \emph{rooted} level
+Section~\ref{sec:res-ablation} measures that combination, as the \emph{rooted} level
 of the analysis presented here.
 
 What distinguishes the present work is the input the method accepts and what it claims
@@ -197,7 +197,7 @@ takes as its subject.
 
 Two recent works read a client-side router configuration statically for other ends. Rima et
 al.\ parse Angular sources and templates to build a graph of navigation structure,
-interaction sites and the conditions --- guards among them --- that decide whether an
+interaction sites and the conditions (guards among them) that decide whether an
 interaction is executable, enumerate workflows over that graph, and compile each workflow
 into a browser test; the graph is a coverage denominator for generated end-to-end tests
 \cite{rima2026e2e}. That account is taken from the publisher's abstract and the project's

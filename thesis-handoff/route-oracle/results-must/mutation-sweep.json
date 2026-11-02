@@ -1,678 +1,1565 @@
 {
- "note": "Each demotion rule the thesis lists deleted in turn from a copy of packages/adapter-angular at a8c7480, the full adapter suite run against it; a mutant survives when the suite still passes. The six that survived were re-run against the suite of the commit that records this file, which adds tests for them, and each then failed the test named in afterAddedTests. The extra mutants split mutant 59 and the controls-mode hole term, which the sweep had not deleted alone, and were run against the same suite.",
- "commit": "a8c7480",
- "baseline": "Tests  345 passed (345)",
+ "note": "Each demotion rule the thesis lists deleted in turn from a copy of packages/adapter-angular at 920e1aa, the full adapter suite run against it by mutation-sweep.mjs; a mutant survives when the suite still passes. 0 of 173 survived or did not run.",
+ "commit": "920e1aa",
+ "srcTree": "bdbe98b2da05703a5a4f363cebe14f155d973abf",
+ "baseline": "Tests  498 passed (498)",
  "mutants": [
   {
    "id": "1",
    "rule": "if branch returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isIfStatement(parent) && parent.getExpression() !== node) return 'under a branch'\" -> 'if (Node.isIfStatement(parent) && parent.getExpression() !== node) return null'",
-   "result": "Tests  4 failed | 341 passed (345)",
+   "what": "\"if (Node.isIfStatement(parent) && parent.getExpression() !== node) return 'under a branch'\" -> \"if (Node.isIfStatement(parent) && parent.getExpression() !== node) return null\"",
+   "result": "Tests  4 failed | 494 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > treats a member the template does not bind as a helper, conditional unless a handler calls it unconditionally"
   },
   {
    "id": "2",
    "rule": "ternary branch removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isConditionalExpression(parent) && parent.getCondition() !== node) return 'under a branch'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (Node.isConditionalExpression(parent) && parent.getCondition() !== node) return 'under a branch'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call in a ternary arm, after && || ??, in a case clause, in a for loop and after a throw"
   },
   {
    "id": "3",
    "rule": "case/default clause removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) return 'under a branch'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (Node.isCaseClause(parent) || Node.isDefaultClause(parent)) return 'under a branch'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call in a ternary arm, after && || ??, in a case clause, in a for loop and after a throw"
   },
   {
    "id": "4",
    "rule": "catch clause removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isCatchClause(parent)) return 'in a catch clause'\" -> ''",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"if (Node.isCatchClause(parent)) return 'in a catch clause'\" -> \"\"",
+   "result": "Tests  2 failed | 496 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional > reports a call in a catch clause, which runs only when the try throws"
   },
   {
    "id": "5",
    "rule": "classic for removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isForStatement(parent) && parent.getInitializer() !== node) return 'in a loop'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (Node.isForStatement(parent) && parent.getInitializer() !== node) return 'in a loop'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call in a ternary arm, after && || ??, in a case clause, in a for loop and after a throw"
   },
   {
    "id": "6",
    "rule": "for-of/for-in removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if ((Node.isForOfStatement(parent) || Node.isForInStatement(parent)) && parent.getExpression() !== node) return 'in a loop'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if ((Node.isForOfStatement(parent) || Node.isForInStatement(parent)) && parent.getExpression() !== node) return 'in a loop'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional > reports a call in a loop body, which can run zero times"
   },
   {
    "id": "7",
    "rule": "while removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isWhileStatement(parent) && parent.getExpression() !== node) return 'in a loop'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (Node.isWhileStatement(parent) && parent.getExpression() !== node) return 'in a loop'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional > reports a call in a loop body, which can run zero times"
   },
   {
    "id": "8",
    "rule": "parameter initializer removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isParameterDeclaration(parent) && parent.getInitializer() === node) return 'under a branch'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (Node.isParameterDeclaration(parent) && parent.getInitializer() === node) return 'under a branch'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value"
   },
   {
    "id": "9",
    "rule": "optional-call argument removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isCallExpression(parent) && parent.getArguments().includes(node as never) && /\\\\?\\\\./.test(parent.getExpression().getText())) return 'under a branch'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (Node.isCallExpression(parent) && parent.getArguments().includes(node as never) && /\\\\?\\\\./.test(parent.getExpression().getText())) return 'under a branch'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value"
   },
   {
    "id": "10",
    "rule": "leading optional-chain check removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (/\\\\?\\\\./.test(call.getExpression().getText())) return 'under a branch'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (/\\\\?\\\\./.test(call.getExpression().getText())) return 'under a branch'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value"
   },
   {
    "id": "11",
    "rule": "&& removed from operator list",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "'[SyntaxKind.AmpersandAmpersandToken, SyntaxKind.BarBarToken,' -> '[SyntaxKind.BarBarToken,'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"[SyntaxKind.AmpersandAmpersandToken, SyntaxKind.BarBarToken,\" -> \"[SyntaxKind.BarBarToken,\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call in a ternary arm, after && || ??, in a case clause, in a for loop and after a throw"
   },
   {
    "id": "12",
    "rule": "logical-assignment tokens removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "'SyntaxKind.QuestionQuestionToken,\\n        SyntaxKind.AmpersandAmpersandEqualsToken, SyntaxKind.BarBarEqualsToken, SyntaxKind.QuestionQuestionEqualsToken].includes(op)' -> 'SyntaxKind.QuestionQuestionToken].includes(op)'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"SyntaxKind.QuestionQuestionToken,\\n        SyntaxKind.AmpersandAmpersandEqualsToken, SyntaxKind.BarBarEqualsToken, SyntaxKind.QuestionQuestionEqualsToken].includes(op)\" -> \"SyntaxKind.QuestionQuestionToken].includes(op)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value"
   },
   {
    "id": "13",
    "rule": "interruption await case removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (owned(SyntaxKind.AwaitExpression)) return 'after await'\" -> ''",
-   "result": "Tests  4 failed | 341 passed (345)",
+   "what": "\"if (owned(SyntaxKind.AwaitExpression)) return 'after await'\" -> \"\"",
+   "result": "Tests  5 failed | 493 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional > reports a call after an await in a class-property arrow function"
   },
   {
    "id": "14",
    "rule": "interruption return/throw case removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isReturnStatement(stmt) || Node.isThrowStatement(stmt) || owned(SyntaxKind.ReturnStatement) || owned(SyntaxKind.ThrowStatement)) return 'after early exit'\" -> ''",
-   "result": "Tests  4 failed | 341 passed (345)",
+   "what": "\"if (Node.isReturnStatement(stmt) || Node.isThrowStatement(stmt) || owned(SyntaxKind.ReturnStatement) || owned(SyntaxKind.ThrowStatement)) return 'after early exit'\" -> \"\"",
+   "result": "Tests  4 failed | 494 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional > reports a call after an early return, which skips it on some executions"
   },
   {
    "id": "15",
    "rule": "interruption break/continue case removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isBreakStatement(stmt) || Node.isContinueStatement(stmt) || jumps.some((x) => leavesBlock(x, stmt))) return 'after early exit'\" -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (Node.isBreakStatement(stmt) || Node.isContinueStatement(stmt) || jumps.some((x) => leavesBlock(x, stmt))) return 'after early exit'\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value"
   },
   {
    "id": "16",
    "rule": "arrow/function-expr callback returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"? memberCondition(cls, parent.getName(), seen) : 'in a callback'\" -> '? memberCondition(cls, parent.getName(), seen) : null'",
-   "result": "Tests  6 failed | 339 passed (345)",
+   "what": "\"? memberCondition(cls, parent.getName(), seen) : 'in a callback'\" -> \"? memberCondition(cls, parent.getName(), seen) : null\"",
+   "result": "Tests  6 failed | 492 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional > reports the next member of an observer object"
   },
   {
    "id": "17",
    "rule": "object-literal method returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isObjectLiteralExpression(parent)) return 'in a callback'\" -> 'if (Node.isObjectLiteralExpression(parent)) return null'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (Node.isObjectLiteralExpression(parent)) return 'in a callback'\" -> \"if (Node.isObjectLiteralExpression(parent)) return null\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional > reports a call in any callback, not only one passed to subscribe"
   },
   {
    "id": "18",
    "rule": "nested function declaration returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
    "what": "\"return Node.isSourceFile(parent) ? 'in a helper function' : 'in a callback'\" -> \"return Node.isSourceFile(parent) ? 'in a helper function' : null\"",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional at module level > reports a function declared inside another, which runs only when called"
   },
   {
    "id": "19",
    "rule": "memberCondition returns null first",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "'function memberCondition(cls: ClassDeclaration, name: string, seen: Set<string>): string | null {' -> 'function memberCondition(cls: ClassDeclaration, name: string, seen: Set<string>): string | null {\\n  return null'",
-   "result": "Tests  6 failed | 339 passed (345)",
+   "what": "\"function memberCondition(cls: ClassDeclaration, name: string, seen: Set<string>): string | null {\" -> \"function memberCondition(cls: ClassDeclaration, name: string, seen: Set<string>): string | null {\\n  return null\"",
+   "result": "Tests  6 failed | 492 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > treats a member the template does not bind as a helper, conditional unless a handler calls it unconditionally"
   },
   {
    "id": "20",
    "rule": "top-level helper returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())) return 'in a helper function'\" -> 'if (Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())) return null' ;; \"return Node.isSourceFile(parent) ? 'in a helper function' : 'in a callback'\" -> \"return Node.isSourceFile(parent) ? null : 'in a callback'\"",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"if (Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())) return 'in a helper function'\" -> \"if (Node.isVariableDeclaration(parent) && Node.isSourceFile(parent.getVariableStatement()?.getParent())) return null\" ;; \"return Node.isSourceFile(parent) ? 'in a helper function' : 'in a callback'\" -> \"return Node.isSourceFile(parent) ? null : 'in a callback'\"",
+   "result": "Tests  2 failed | 496 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callConditional at module level > takes a function declared at the top of a module for a helper, whose callers it does not follow"
   },
   {
    "id": "21",
    "rule": "handlersOf: any decorator is a handler",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"m.getDecorators().some((d) => d.getName() === 'HostListener')\" -> 'm.getDecorators().length > 0'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"m.getDecorators().some((d) => d.getName() === 'HostListener')\" -> \"m.getDecorators().length > 0\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/panel3.test.ts > which members are handlers > takes @HostListener for one, and neither another decorator, a data-on attribute nor a module function"
   },
   {
    "id": "22",
    "rule": "handlersOf: templateCondition check dropped",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "'if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue' -> 'if (!isBareCall(expr)) continue'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue\" -> \"if (!isBareCall(expr)) continue\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > treats a member bound only under a template condition, or bound with a guard, as conditional"
   },
   {
    "id": "23",
    "rule": "handlersOf: isBareCall check dropped",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "'if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue' -> 'if (templateCondition(tpl!.text, b.index) !== null) continue'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (!isBareCall(expr) || templateCondition(tpl!.text, b.index) !== null) continue\" -> \"if (templateCondition(tpl!.text, b.index) !== null) continue\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > the remaining fallbacks of the condition readers > does not take a binding that calls a member and then more for a bare call"
   },
   {
    "id": "24",
    "rule": "supersededAt always false",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "'function supersededAt(call: CallExpression): boolean {' -> 'function supersededAt(call: CallExpression): boolean {\\n  return false'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"function supersededAt(call: CallExpression, seen = new Set<Node>()): boolean {\" -> \"function supersededAt(call: CallExpression, seen = new Set<Node>()): boolean {\\n  return false\"",
+   "result": "Tests  14 failed | 484 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/panel3.test.ts > commands and calls the router reads otherwise > holds a navigation a later one in the same block supersedes at may, and keeps the later one"
   },
   {
    "id": "25",
    "rule": "control-flow block returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
    "what": "\"if (braces.includes('block')) return 'control-flow block'\" -> \"if (braces.includes('block')) return null\"",
-   "result": "Tests  8 failed | 337 passed (345)",
+   "result": "Tests  19 failed | 479 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/attribute.test.ts > scope attribution > anchors an uncertain shell navigation once at the scope node"
   },
   {
    "id": "26",
    "rule": "structural attribute never matches",
    "file": "packages/adapter-angular/src/conditions.ts",
    "what": "\"STRUCTURAL_ATTR.test(open.attrs) ? 'structural directive' : null\" -> \"false ? 'structural directive' : null\"",
-   "result": "Tests  9 failed | 336 passed (345)",
+   "result": "Tests  9 failed | 489 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > templateConditional > reports a structural directive on an ancestor, an application's own included"
   },
   {
    "id": "27",
    "rule": "ng-template arm removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"const structural = open.name === 'ng-template' ? 'ng-template' : LAZY_CONTAINERS.has(open.name)\" -> 'const structural = LAZY_CONTAINERS.has(open.name)'",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"const structural = open.name === 'ng-template' ? 'ng-template' : LAZY_CONTAINERS.has(open.name)\" -> \"const structural = LAZY_CONTAINERS.has(open.name)\"",
+   "result": "Tests  2 failed | 496 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > templateConditional > reports a link inside an ng-template, which renders only where something instantiates it"
   },
   {
    "id": "28",
    "rule": "ICU arm removed (always plain)",
    "file": "packages/adapter-angular/src/conditions.ts",
    "what": "\"braces.push(ICU_OPEN.test(t.slice(i, i + 200)) ? 'icu' : 'plain')\" -> \"braces.push('plain')\"",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > templateCondition on markup a scan can misread > reports a link inside an ICU case, where Angular instantiates no directive"
   },
   {
    "id": "29",
    "rule": "lazy container arm removed",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"LAZY_CONTAINERS.has(open.name) ? 'lazy container' : STRUCTURAL_ATTR\" -> 'STRUCTURAL_ATTR'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"LAZY_CONTAINERS.has(open.name) ? 'lazy container' : STRUCTURAL_ATTR\" -> \"STRUCTURAL_ATTR\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/panel3.test.ts > commands and calls the router reads otherwise > reads a link inside a lazy container as conditional"
   },
   {
    "id": "30",
    "rule": "unmatched brace returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (braces.length === 0) return 'unreadable template'\" -> 'if (braces.length === 0) return null'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (braces.length === 0) return 'unreadable template'\" -> \"if (braces.length === 0) return null\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > templateConditional > fails safe on a brace it cannot match"
   },
   {
    "id": "31",
    "rule": "unmatched close tag returns null",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "\"if (k < 0) return 'unreadable template'\" -> 'if (k < 0) return null'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (k < 0) return 'unreadable template'\" -> \"if (k < 0) return null\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > the remaining fallbacks of the condition readers > fails safe on a close tag it cannot match"
   },
   {
    "id": "32",
    "rule": "openTag ignores quotes",
    "file": "packages/adapter-angular/src/conditions.ts",
-   "what": "'if (ch === \\'\"\\' || ch === \"\\'\") { quote = ch; continue }' -> ''",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"if (ch === '\\\"' || ch === \\\"'\\\") { quote = ch; continue }\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/conditions.test.ts > templateCondition on markup a scan can misread > reads past a > inside a quoted attribute value"
   },
   {
    "id": "33",
    "rule": "withoutComments returns input",
    "file": "packages/adapter-angular/src/templates.ts",
-   "what": "\"return text.replace(/<!--[\\\\s\\\\S]*?-->/g, (m) => m.replace(/[^\\\\n]/g, ' '))\" -> 'return text'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"return text.replace(/<!--[\\\\s\\\\S]*?-->/g, (m) => m.replace(/[^\\\\n]/g, ' '))\" -> \"return text\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/panel3.test.ts > what a template comment hides > reads no link, binding or placed component inside a comment"
   },
   {
    "id": "34",
    "rule": "gated forced false",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "\"const gated = gate.guarded && process.env.UIGRAPH_IGNORE_GUARDS !== '1'\" -> 'const gated = false'",
-   "result": "Tests  19 failed | 326 passed (345)",
+   "what": "\"const gated = gate.guarded && process.env.UIGRAPH_IGNORE_GUARDS !== '1'\" -> \"const gated = false\"",
+   "result": "Tests  30 failed | 468 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — sample-angular-app golden (M3) > extracts the expected edge count and modality split"
   },
   {
    "id": "35",
    "rule": "run.resolves removed from verdict",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'const may = common || gated || run.resolves || src === target.nodeId' -> 'const may = common || gated || src === target.nodeId'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"const may = common || gated || run.resolves || src === target.nodeId\" -> \"const may = common || gated || src === target.nodeId\"",
+   "result": "Tests  5 failed | 493 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > awaits the resolvers of a route the navigation enters, and not those of one it reuses"
   },
   {
    "id": "36",
    "rule": "self-loop term removed from verdict",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'|| run.resolves || src === target.nodeId || (src !== undefined && hidden(src))' -> '|| run.resolves || (src !== undefined && hidden(src))'",
-   "result": "Tests  4 failed | 341 passed (345)",
+   "what": "\"|| run.resolves || src === target.nodeId || (src !== undefined && hidden(src))\" -> \"|| run.resolves || (src !== undefined && hidden(src))\"",
+   "result": "Tests  6 failed | 492 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/attribute.test.ts > scope attribution > draws a certain shell navigation per screen, with a may self-loop at its destination"
   },
   {
    "id": "37",
    "rule": "hidden(src) removed from verdict",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'|| src === target.nodeId || (src !== undefined && hidden(src))' -> '|| src === target.nodeId'",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"|| src === target.nodeId || (src !== undefined && hidden(src))\" -> \"|| src === target.nodeId\"",
+   "result": "Tests  6 failed | 492 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — targets read the way the router reads them > holds the edges of a screen never shown at its own address at may"
   },
   {
    "id": "38",
    "rule": "capMay removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'const common = capMay || viaWildcard ||' -> 'const common = viaWildcard ||'",
-   "result": "Tests  345 passed (345)",
-   "survived": true,
-   "afterAddedTests": "killed: the demotions no other rule happens to cover > holds a link in a shell no route visibly mounts at may although the link is unconditional"
+   "what": "\"const common = capMay || viaWildcard ||\" -> \"const common = viaWildcard ||\"",
+   "result": "Tests  11 failed | 487 passed (498)",
+   "survived": false,
+   "killedBy": "src/callgraph.test.ts > an outlet holder that a route names but no screen renders > is an indirect shell: its links are held at may, and what it nests still reaches the call graph from top"
   },
   {
    "id": "39",
    "rule": "viaWildcard removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'const common = capMay || viaWildcard || baseUnknown' -> 'const common = capMay || baseUnknown'",
-   "result": "Tests  4 failed | 341 passed (345)",
+   "what": "\"const common = capMay || viaWildcard || baseUnknown\" -> \"const common = capMay || baseUnknown\"",
+   "result": "Tests  4 failed | 494 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/regressions.test.ts > adapter regressions — a wrong destination is worse than none > follows a catch-all screen for a literal no route declares, at may and never at must"
   },
   {
    "id": "40",
    "rule": "baseUnknown removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'capMay || viaWildcard || baseUnknown || parsed.aux' -> 'capMay || viaWildcard || parsed.aux'",
-   "result": "Tests  4 failed | 341 passed (345)",
+   "what": "\"capMay || viaWildcard || baseUnknown || parsed.aux\" -> \"capMay || viaWildcard || parsed.aux\"",
+   "result": "Tests  3 failed | 495 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — a target whose base or primary path the reader cannot fix is never must > demotes a call whose options hide the base (attribution false)"
   },
   {
    "id": "41",
    "rule": "parsed.aux removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'baseUnknown || parsed.aux || landed.ambiguous || t.conditional' -> 'baseUnknown || landed.ambiguous || t.conditional'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"baseUnknown || parsed.aux || landed.ambiguous || t.conditional\" -> \"baseUnknown || landed.ambiguous || t.conditional\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — a URL naming an auxiliary outlet is never must on its own account > holds it at may even where only one route answers the primary path"
   },
   {
    "id": "42",
    "rule": "landed.ambiguous removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'parsed.aux || landed.ambiguous || t.conditional === true' -> 'parsed.aux || t.conditional === true'",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"parsed.aux || landed.ambiguous || t.conditional === true\" -> \"parsed.aux || t.conditional === true\"",
+   "result": "Tests  9 failed | 489 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — targets read the way the router reads them > holds an address two declared routes can answer at may, and keeps one only one answers"
   },
   {
    "id": "43",
    "rule": "t.conditional removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
    "what": "\"landed.ambiguous || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)\" -> \"landed.ambiguous || (t.ti.kind === 'literal' && t.ti.holes === true)\"",
-   "result": "Tests  13 failed | 332 passed (345)",
+   "result": "Tests  40 failed | 458 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/attribute.test.ts > scope attribution > anchors an uncertain shell navigation once at the scope node"
   },
   {
    "id": "44",
    "rule": "holes removed from common",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "\"|| t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)\" -> '|| t.conditional === true'",
-   "result": "Tests  345 passed (345)",
-   "survived": true,
-   "afterAddedTests": "killed: the demotions no other rule happens to cover > holds a commands array with a hole before a constant at may, and keeps a whole one on must"
+   "what": "\"|| t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)\" -> \"|| t.conditional === true\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > the demotions no other rule happens to cover > holds a commands array with a hole before a constant at may, and keeps a whole one on must"
   },
   {
    "id": "45",
    "rule": "anchored: single edge with first verdict",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'if (first && !members.has(target.nodeId) && each.every(({ v }) => v.modality === first.modality && v.guardText === first.guardText)) {' -> 'if (first) {'",
-   "result": "Tests  4 failed | 341 passed (345)",
+   "what": "\"if (first && !members.has(target.nodeId) && each.every(({ v }) => v.modality === first.modality && v.guardText === first.guardText)) {\" -> \"if (first) {\"",
+   "result": "Tests  5 failed | 493 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/attribute.test.ts > scope attribution > anchors an uncertain shell navigation once at the scope node"
   },
   {
    "id": "46",
-   "rule": "behindHiddenOutlet always false",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'const behindHiddenOutlet = (route: (typeof routes)[number]): boolean => {' -> 'const behindHiddenOutlet = (route: (typeof routes)[number]): boolean => {\\n    return false'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "rule": "outletHiddenAbove always false",
+   "file": "packages/adapter-angular/src/attribute.ts",
+   "what": "\"export function outletHiddenAbove(routes: RouteInfo[], sfs: SourceFile[]): (route: RouteInfo, file: string) => boolean {\" -> \"export function outletHiddenAbove(routes: RouteInfo[], sfs: SourceFile[]): (route: RouteInfo, file: string) => boolean {\\n  return () => false\"",
+   "result": "Tests  14 failed | 484 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/callgraph.test.ts > a layout whose address an earlier route holds > demotes a page it wraps when its outlet is under a condition"
   },
   {
    "id": "47",
-   "rule": "unsure screens emitted unmarked",
+   "rule": "unsure screens of a route component or layout emitted unmarked",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))' -> 'emitOver(unsure, ts, relative(projectDir, f))'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"const ts = targetsOf(sf)\\n      if (sure.size > 0) emitOver(sure, ts, relative(projectDir, f))\\n      if (unsure.size > 0) emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))\" -> \"const ts = targetsOf(sf)\\n      if (sure.size > 0) emitOver(sure, ts, relative(projectDir, f))\\n      if (unsure.size > 0) emitOver(unsure, ts, relative(projectDir, f))\"",
+   "result": "Tests  4 failed | 494 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/callgraph.test.ts > a layout and the outlets above it > demotes the links of a layout whose host renders its outlet under a condition"
   },
   {
    "id": "48",
    "rule": "shell emitted unmarked",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'emitTargets(SHELL_NODE_ID, scopes.firmShell.has(f) ? ts : ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f), true)' -> 'emitTargets(SHELL_NODE_ID, ts, relative(projectDir, f), true)'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"emitTargets(SHELL_NODE_ID, scopes.firmShell.has(f) ? ts : ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f), true)\" -> \"emitTargets(SHELL_NODE_ID, ts, relative(projectDir, f), true)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — a navigation to the address its source already displays is never must > holds the links of a component mounted under a template condition at may on that screen"
   },
   {
    "id": "49",
    "rule": "runningGuards: k = full target chain length",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'if (s) while (k < t.length && k < s.length && t[k]!.obj === s[k]!.obj && !t[k]!.params && !t[k]!.always) k += 1' -> 'if (s) k = t.length'",
-   "result": "Tests  24 failed | 321 passed (345)",
+   "what": "\"let consumed = 0\\n    while (s && k < t.length && k < s.length) {\" -> \"let consumed = 0\\n    if (s) k = t.length\\n    while (false) {\"",
+   "result": "Tests  34 failed | 464 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — sample-angular-app golden (M3) > extracts the expected edge count and modality split"
   },
   {
    "id": "50",
    "rule": "runningGuards: canDeactivate dropped",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "', ...(s ? s.slice(k).flatMap((l) => l.canDeactivate) : [])' -> ''",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\", ...(s ? s.slice(k).flatMap((l) => l.canDeactivate) : [])\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs canDeactivate on the route the navigation leaves, and not when it stays under it"
   },
   {
    "id": "51",
    "rule": "runningGuards: canActivateChild dropped",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'...(entered.length > 0 ? t.slice(0, -1).flatMap((l) => l.canActivateChild) : []), ...(s' -> '...(s'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"...(entered.length > 0 ? t.slice(0, -1).flatMap((l) => l.canActivateChild) : []), ...(s\" -> \"...(s\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — every guard that can refuse an address gates it > reads canActivateChild on an ancestor, canMatch on the target, and canActivate on an empty-path child with a component"
   },
   {
    "id": "52",
    "rule": "runningGuards: canMatch dropped",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'guards: [...t.flatMap((l) => l.canMatch), ...entered' -> 'guards: [...entered'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"guards: [...t.flatMap((l) => l.canMatch), ...entered\" -> \"guards: [...entered\"",
+   "result": "Tests  2 failed | 496 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — every guard that can refuse an address gates it > reads canActivateChild on an ancestor, canMatch on the target, and canActivate on an empty-path child with a component"
   },
   {
    "id": "53",
    "rule": "runningGuards: params check removed",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'&& !t[k]!.params && !t[k]!.always) k += 1' -> '&& !t[k]!.always) k += 1'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"l.obj !== s[k]!.obj || l.params || l.always || (l.matrix && consumed > preserved)\" -> \"l.obj !== s[k]!.obj || l.always || (l.matrix && consumed > preserved)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs a shared route's canActivate again when its parameters can change or it asks to always run"
   },
   {
    "id": "54",
    "rule": "runningGuards: always check removed",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'&& !t[k]!.params && !t[k]!.always) k += 1' -> '&& !t[k]!.params) k += 1'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"l.obj !== s[k]!.obj || l.params || l.always || (l.matrix && consumed > preserved)\" -> \"l.obj !== s[k]!.obj || l.params || (l.matrix && consumed > preserved)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs a shared route's canActivate again when its parameters can change or it asks to always run"
   },
   {
    "id": "55",
    "rule": "controls: controlConditional dropped",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'conditional: controlConditional || !bare || nav.conditional }' -> 'conditional: !bare || nav.conditional }' ;; \"ruleId: 'ng.control.router-link', loc, file: tplFile, conditional: controlConditional }\" -> \"ruleId: 'ng.control.router-link', loc, file: tplFile }\"",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"conditional: controlConditional || !bare || nav.conditional }\" -> \"conditional: !bare || nav.conditional }\" ;; \"ruleId: 'ng.control.router-link', loc, file: tplFile, conditional: controlConditional }\" -> \"ruleId: 'ng.control.router-link', loc, file: tplFile }\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — controls mode demotes a conditional control or handler > demotes a control under a structural directive and a handler that navigates in a callback"
   },
   {
    "id": "56",
    "rule": "controls: !bare dropped",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'conditional: controlConditional || !bare || nav.conditional }' -> 'conditional: controlConditional || nav.conditional }'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"conditional: controlConditional || !bare || nav.conditional }\" -> \"conditional: controlConditional || nav.conditional }\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — controls mode reads a guarded binding as conditional > holds a control whose binding guards the call at may, and keeps a bare one on must"
   },
   {
    "id": "57",
    "rule": "controls: !primary.startsWith('/') dropped",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "\"const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId\" -> 'const uncertain = guarded || t.conditional === true || target.nodeId'",
-   "result": "Tests  345 passed (345)",
-   "survived": true,
-   "afterAddedTests": "killed: controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
+   "what": "\"const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId\" -> \"const uncertain = guarded || t.conditional === true || target.nodeId\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
   },
   {
    "id": "58",
    "rule": "controls: target.nodeId === route.nodeId dropped",
    "file": "packages/adapter-angular/src/extract.ts",
    "what": "\"|| !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true\" -> \"|| !primary.startsWith('/') || t.ti.holes === true\"",
-   "result": "Tests  345 passed (345)",
-   "survived": true,
-   "afterAddedTests": "killed: controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
   },
   {
    "id": "59",
    "rule": "controls: run.resolves || hidden(route) dropped",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)' -> 'parsed.aux || landed.ambiguous'",
-   "result": "Tests  345 passed (345)",
-   "survived": true,
-   "afterAddedTests": "killed: controls mode, link by link > both tests"
+   "what": "\"parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId) || hiddenAbove(route, sf.getFilePath())\" -> \"parsed.aux || landed.ambiguous || hiddenAbove(route, sf.getFilePath())\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
+  },
+  {
+   "id": "59a",
+   "rule": "controls: run.resolves dropped alone",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)\" -> \"parsed.aux || landed.ambiguous || hidden(route.nodeId)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
+  },
+  {
+   "id": "59b",
+   "rule": "controls: hidden(route) dropped alone",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)\" -> \"parsed.aux || landed.ambiguous || run.resolves\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > controls mode, link by link > holds every link on a screen a redirect answers at may"
+  },
+  {
+   "id": "59c",
+   "rule": "controls: t.ti.holes dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"|| target.nodeId === route.nodeId || t.ti.holes === true ||\" -> \"|| target.nodeId === route.nodeId ||\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > controls mode, link by link > holds a relative link, a link to the control's own screen, one into a resolver and a commands array with a hole at may, and keeps a plain one on must"
   },
   {
    "id": "60",
    "rule": "levelOf: canLoad read as []",
    "file": "packages/adapter-angular/src/routes.ts",
-   "what": "\"canLoad: canActivateGuards(sf, obj, 'canLoad'),\" -> 'canLoad: [],'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"canLoad: canActivateGuards(sf, obj, 'canLoad'),\" -> \"canLoad: [],\"",
+   "result": "Tests  4 failed | 494 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs canLoad on a lazy route the navigation enters"
   },
   {
    "id": "61",
    "rule": "unreadable guard list returns []",
    "file": "packages/adapter-angular/src/routes.ts",
-   "what": "\"return [{ text: init?.getText() ?? name, kind: 'unreadable', async: false }]\" -> 'return []'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"return [{ text: init?.getText() ?? name, kind: 'unreadable', async: false }]\" -> \"return []\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > reads a guard list given by name, and gates on one it cannot read"
   },
   {
    "id": "62",
    "rule": "redirects: last declared wins",
    "file": "packages/adapter-angular/src/routes.ts",
-   "what": "'if (!redirects.has(fullPath)) redirects.set(fullPath, redirectTarget)' -> 'redirects.set(fullPath, redirectTarget)'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"if (!first) redirects.set(fullPath, {\" -> \"if (true) redirects.set(fullPath, {\"",
+   "result": "Tests  2 failed | 496 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/guards-run.test.ts > screens the router never shows at their own address > follows the first redirect declared at an address, and holds an address a sibling redirect shadows at may"
   },
   {
    "id": "63",
    "rule": "empty-path child guards not appended to host",
    "file": "packages/adapter-angular/src/routes.ts",
-   "what": "'host.levels = [...host.levels, level]\\n        host.guards = [...host.guards, ...entryGuards([level])]' -> ''",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"host.levels = [...host.levels, level]\\n        host.guards = [...host.guards, ...entryGuards([level])]\" -> \"\"",
+   "result": "Tests  3 failed | 495 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/callgraph.test.ts > a layout and the outlets above it > renders the first empty-path child under a screen on that screen, at must"
   },
   {
    "id": "64",
    "rule": "levelOf: resolve always false",
    "file": "packages/adapter-angular/src/routes.ts",
-   "what": "\"resolve: propNamed(obj, 'resolve') !== undefined,\" -> 'resolve: false,'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"resolve: propNamed(obj, 'resolve') !== undefined || titleResolves(obj),\" -> \"resolve: false,\"",
+   "result": "Tests  6 failed | 492 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > awaits the resolvers of a route the navigation enters, and not those of one it reuses"
   },
   {
    "id": "65",
    "rule": "later-command slash encoding removed",
    "file": "packages/adapter-angular/src/nav.ts",
    "what": "\"segs.push(i === 0 ? lit[1] ?? '' : (lit[1] ?? '').replace(/\\\\//g, '%2F'))\" -> \"segs.push(lit[1] ?? '')\"",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/panel3.test.ts > commands and calls the router reads otherwise > keeps a later command whole, so a slash in it reaches no nested route"
   },
   {
    "id": "66",
    "rule": "boundBase always false",
    "file": "packages/adapter-angular/src/nav.ts",
-   "what": "\"const boundBase = (at: number): boolean => /\\\\[relativeTo\\\\]\\\\s*=/.test(openTag(tpl.text, tpl.text.lastIndexOf('<', at))?.attrs ?? '')\" -> 'const boundBase = (at: number): boolean => false'",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"const boundBase = (at: number): boolean => /\\\\[relativeTo\\\\]\\\\s*=/.test(openTag(tpl.text, tpl.text.lastIndexOf('<', at))?.attrs ?? '')\" -> \"const boundBase = (at: number): boolean => false\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — a relative base is trusted only when it is the component's own route > holds a call relative to an alias of another route, and a link that binds relativeTo, at may"
   },
   {
    "id": "67",
    "rule": "isOwnRoute always true",
    "file": "packages/adapter-angular/src/nav.ts",
-   "what": "'function isOwnRoute(expr: Node | undefined): boolean {' -> 'function isOwnRoute(expr: Node | undefined): boolean {\\n  return true'",
-   "result": "Tests  3 failed | 342 passed (345)",
+   "what": "\"function isOwnRoute(expr: Node | undefined): boolean {\" -> \"function isOwnRoute(expr: Node | undefined): boolean {\\n  return true\"",
+   "result": "Tests  3 failed | 495 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — a target whose base or primary path the reader cannot fix is never must > demotes a call whose options hide the base (attribution false)"
   },
   {
    "id": "68",
    "rule": "closesAtEnd always true",
    "file": "packages/adapter-angular/src/nav.ts",
-   "what": "'function closesAtEnd(text: string): boolean {' -> 'function closesAtEnd(text: string): boolean {\\n  return true'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"function closesAtEnd(text: string): boolean {\" -> \"function closesAtEnd(text: string): boolean {\\n  return true\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — targets read the way the router reads them > does not read an array followed by a method call as the array"
   },
   {
    "id": "69",
    "rule": "staticLinkTarget always literal",
    "file": "packages/adapter-angular/src/nav.ts",
-   "what": "'function staticLinkTarget(value: string): TargetInfo {' -> \"function staticLinkTarget(value: string): TargetInfo {\\n  return { kind: 'literal', value }\"",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"function staticLinkTarget(value: string): TargetInfo {\" -> \"function staticLinkTarget(value: string): TargetInfo {\\n  return { kind: 'literal', value }\"",
+   "result": "Tests  1 failed | 497 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — an interpolated routerLink is a computed target > sends a fully interpolated link to the unknown sink and an interpolated tail to a prefix"
   },
   {
    "id": "70",
    "rule": "urlPath used for commands too (emitTargets)",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'const parsed = t.url ? urlPath(t.ti.value) : { path: t.ti.value, aux: false }\\n        if (parsed === null) continue' -> 'const parsed = urlPath(t.ti.value)\\n        if (parsed === null) continue'",
-   "result": "Tests  2 failed | 343 passed (345)",
+   "what": "\"const parsed = t.url ? urlPath(t.ti.value) : { path: t.ti.value, aux: false }\\n        if (parsed === null) continue\" -> \"const parsed = urlPath(t.ti.value)\\n        if (parsed === null) continue\"",
+   "result": "Tests  2 failed | 496 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/extract.test.ts > extractGraph — a target whose base or primary path the reader cannot fix is never must > reads an outlet group in a link as part of the segment, as Angular does (attribution false)"
   },
   {
    "id": "71",
    "rule": "firmTags = all tags",
    "file": "packages/adapter-angular/src/attribute.ts",
-   "what": "'const firmTags = new Set(tagMatches.filter((m) => templateCondition(template, m.index + 1) === null).map((m) => m[1] as string))' -> 'const firmTags = new Set(tagMatches.map((m) => m[1] as string))'",
-   "result": "Tests  1 failed | 344 passed (345)",
+   "what": "\"const firmTags = new Set(tagMatches.filter((m) => templateCondition(template, m.index + 1) === null).map((m) => m[1] as string))\" -> \"const firmTags = new Set(tagMatches.map((m) => m[1] as string))\"",
+   "result": "Tests  2 failed | 496 passed (498)",
    "survived": false,
-   "afterAddedTests": null
+   "killedBy": "src/callgraph.test.ts > a layout and the outlets above it > demotes what is below when the component holding the outlet is placed under a condition"
   },
   {
    "id": "72",
    "rule": "firmAttrs = all attributes",
    "file": "packages/adapter-angular/src/attribute.ts",
-   "what": "'const firmAttrs = new Set(attrMatches.filter((m) => templateCondition(template, m.index) === null).map((m) => m[1] as string))' -> 'const firmAttrs = new Set(attrMatches.map((m) => m[1] as string))'",
-   "result": "Tests  345 passed (345)",
-   "survived": true,
-   "afterAddedTests": "killed: the demotions no other rule happens to cover > reads a component placed by an attribute selector under a condition as conditionally mounted"
-  }
- ],
- "extra": [
-  {
-   "id": "59a",
-   "rule": "controls: run.resolves dropped alone",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)' -> 'parsed.aux || landed.ambiguous || hidden(route.nodeId)'",
-   "result": "killed: controls mode, link by link > holds a relative link, ... and keeps a plain one on must"
+   "what": "\"const firmAttrs = new Set(attrMatches.filter((m) => templateCondition(template, m.index) === null).map((m) => m[1] as string))\" -> \"const firmAttrs = new Set(attrMatches.map((m) => m[1] as string))\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > the demotions no other rule happens to cover > reads a component placed by an attribute selector under a condition as conditionally mounted"
   },
   {
-   "id": "59b",
-   "rule": "controls: hidden(route) dropped alone",
-   "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId)' -> 'parsed.aux || landed.ambiguous || run.resolves'",
-   "result": "killed: controls mode, link by link > holds every link on a screen a redirect answers at may"
+   "id": "73",
+   "rule": "logical assignment: &&= removed from the operator list",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"SyntaxKind.AmpersandAmpersandEqualsToken, SyntaxKind.BarBarEqualsToken,\" -> \"SyntaxKind.BarBarEqualsToken,\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value"
   },
   {
-   "id": "59c",
-   "rule": "controls: t.ti.holes dropped",
+   "id": "74",
+   "rule": "logical assignment: ||= removed from the operator list",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"SyntaxKind.BarBarEqualsToken, SyntaxKind.QuestionQuestionEqualsToken]\" -> \"SyntaxKind.QuestionQuestionEqualsToken]\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value"
+  },
+  {
+   "id": "75",
+   "rule": "logical assignment: ??= removed from the operator list",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"SyntaxKind.BarBarEqualsToken, SyntaxKind.QuestionQuestionEqualsToken].includes(op)\" -> \"SyntaxKind.BarBarEqualsToken].includes(op)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/conditions.test.ts > callCondition on the rest of the ways a call can be skipped > reports a call after a break that leaves its block, on the right of a logical assignment, in an optional call or a default value"
+  },
+  {
+   "id": "76",
+   "rule": "capMay: indirect shell not held at may",
    "file": "packages/adapter-angular/src/extract.ts",
-   "what": "'|| target.nodeId === route.nodeId || t.ti.holes === true ||' -> '|| target.nodeId === route.nodeId ||'",
-   "result": "killed: controls mode, link by link > holds a relative link, ... and keeps a plain one on must"
+   "what": "\"emitTargets(SHELL_NODE_ID, targetsOf(c.sf), relative(projectDir, f), true, true)\" -> \"emitTargets(SHELL_NODE_ID, targetsOf(c.sf), relative(projectDir, f), true)\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/callgraph.test.ts > an outlet holder that a route names but no screen renders > is an indirect shell: its links are held at may, and what it nests still reaches the call graph from top"
+  },
+  {
+   "id": "77",
+   "rule": "capMay: effect at the shell not held at may",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"emitTargets(SHELL_NODE_ID, ts, file, true, true)\" -> \"emitTargets(SHELL_NODE_ID, ts, file, true)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/maycap.test.ts > the may cap on a navigation placed by something other than its own screen > holds a navigation placed by an NgRx effect, at the shell at may"
+  },
+  {
+   "id": "78",
+   "rule": "capMay: member at top not held at may",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"emitTargets(SHELL_NODE_ID, atTop, file, true, true)\" -> \"emitTargets(SHELL_NODE_ID, atTop, file, true)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/maycap.test.ts > the may cap on a navigation placed by something other than its own screen > holds a navigation placed by the call graph, at the shell at may"
+  },
+  {
+   "id": "79",
+   "rule": "capMay: member by call-graph screens not held at may",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"const screens = new Set([...own, ...unseenScreens(t)])\\n        for (const [i, s] of [...screens].sort().entries()) emitTargets(s, [t], file, i === 0, true)\" -> \"const screens = new Set([...own, ...unseenScreens(t)])\\n        for (const [i, s] of [...screens].sort().entries()) emitTargets(s, [t], file, i === 0)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/maycap.test.ts > the may cap on a navigation placed by something other than its own screen > holds a navigation placed by the call graph, on the screens of the callers at may"
+  },
+  {
+   "id": "80",
+   "rule": "capMay: service at the shell not held at may",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"emitTargets(SHELL_NODE_ID, rest, file, true, true)\" -> \"emitTargets(SHELL_NODE_ID, rest, file, true)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/maycap.test.ts > the may cap on a navigation placed by something other than its own screen > holds a navigation placed by a service the shell injects at may"
+  },
+  {
+   "id": "81",
+   "rule": "capMay: service over its join not held at may",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"const screens = new Set([...joinScreens, ...unseenScreens(t)])\\n        for (const [i, s] of [...screens].sort().entries()) emitTargets(s, [t], file, i === 0, true)\" -> \"const screens = new Set([...joinScreens, ...unseenScreens(t)])\\n        for (const [i, s] of [...screens].sort().entries()) emitTargets(s, [t], file, i === 0)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/maycap.test.ts > the may cap on a navigation placed by something other than its own screen > holds a navigation placed by the join over the components that inject the class at may"
+  },
+  {
+   "id": "82",
+   "rule": "capMay: unplaced origin not held at may",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"emitTargets(id, ts, file, true, true)\" -> \"emitTargets(id, ts, file, true)\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > host branch through wrapper call (round 4) > never promotes a link of a child the spread-call wrapper form mounts"
+  },
+  {
+   "id": "83",
+   "rule": "runningGuards: matrix term removed",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"l.obj !== s[k]!.obj || l.params || l.always || (l.matrix && consumed > preserved)\" -> \"l.obj !== s[k]!.obj || l.params || l.always\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs a canActivate the navigation enters, and a shared route's again where an absolute link drops its matrix parameters"
+  },
+  {
+   "id": "84",
+   "rule": "runningGuards: shared route object check removed",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"l.obj !== s[k]!.obj || l.params || l.always || (l.matrix && consumed > preserved)\" -> \"l.params || l.always || (l.matrix && consumed > preserved)\"",
+   "result": "Tests  5 failed | 493 passed (498)",
+   "survived": false,
+   "killedBy": "src/extract.test.ts > extractGraph — an empty-path child with no component speaks for the screen above it > puts the guard of the empty-path child on every edge into the screen above it"
+  },
+  {
+   "id": "85",
+   "rule": "runningGuards: consumed segments not accumulated",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"consumed += l.consumes\" -> \"consumed = l.consumes\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the sub-rules of a shared route being kept > counts the segments the routes above a shared one consume, not only its own"
+  },
+  {
+   "id": "86",
+   "rule": "runningGuards: preserved prefix ignored",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"(l.matrix && consumed > preserved)\" -> \"(l.matrix && consumed > 0)\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs canDeactivate on the route the navigation leaves, and not when it stays under it"
+  },
+  {
+   "id": "87",
+   "rule": "runningGuards: matrix boundary off by one",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"(l.matrix && consumed > preserved)\" -> \"(l.matrix && consumed >= preserved)\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs canDeactivate on the route the navigation leaves, and not when it stays under it"
+  },
+  {
+   "id": "88",
+   "rule": "levelOf: matrix ignores runGuardsAndResolvers (never)",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"matrix: runMode !== 'pathParamsChange',\" -> \"matrix: false,\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs a canActivate the navigation enters, and a shared route's again where an absolute link drops its matrix parameters"
+  },
+  {
+   "id": "89",
+   "rule": "levelOf: matrix ignores runGuardsAndResolvers (always)",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"matrix: runMode !== 'pathParamsChange',\" -> \"matrix: true,\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > matrix parameters under the default runGuardsAndResolvers > keeps a shared route a relative link does not climb out of, and runs it again on one that does"
+  },
+  {
+   "id": "90",
+   "rule": "levelOf: one consumed segment per route",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"consumes: segments(own).length,\" -> \"consumes: 1,\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > a route a wrapper builds > gives each call of a wrapper its own route object, and shares it within one call"
+  },
+  {
+   "id": "92",
+   "rule": "preserved: baseUnknown check dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"t.relative === true && !baseUnknown && !landed.redirected ? keptSegments(parsed.path, base) : 0\" -> \"t.relative === true && !landed.redirected ? keptSegments(parsed.path, base) : 0\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-targets.test.ts > the segments a relative link keeps > keeps nothing when the base it would resolve against is only assumed"
+  },
+  {
+   "id": "93",
+   "rule": "preserved: redirected check dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"t.relative === true && !baseUnknown && !landed.redirected ? keptSegments(parsed.path, base) : 0\" -> \"t.relative === true && !baseUnknown ? keptSegments(parsed.path, base) : 0\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the sub-rules of a shared route being kept > keeps no segment of the source once a redirect rewrote the address"
+  },
+  {
+   "id": "94",
+   "rule": "keptSegments: absolute target keeps the prefix",
+   "file": "packages/adapter-angular/src/matcher.ts",
+   "what": "\"if (!ownerPath || target.startsWith('/') || target === '*') return 0\" -> \"if (!ownerPath || target === '*') return 0\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > runs a canActivate the navigation enters, and a shared route's again where an absolute link drops its matrix parameters"
+  },
+  {
+   "id": "95",
+   "rule": "keptSegments: climbs not subtracted",
+   "file": "packages/adapter-angular/src/matcher.ts",
+   "what": "\"kept -= 1\" -> \"\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > matrix parameters under the default runGuardsAndResolvers > keeps a shared route a relative link does not climb out of, and runs it again on one that does"
+  },
+  {
+   "id": "96",
+   "rule": "keptSegments: dot segment not skipped",
+   "file": "packages/adapter-angular/src/matcher.ts",
+   "what": "\"if (seg === '.') continue\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-targets.test.ts > the segments a relative link keeps > skips a leading dot before counting the segments it climbs out of"
+  },
+  {
+   "id": "97",
+   "rule": "keptSegments: negative count not clamped",
+   "file": "packages/adapter-angular/src/matcher.ts",
+   "what": "\"return Math.max(0, kept)\" -> \"return kept\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-targets.test.ts > the segments a relative link keeps > keeps none, and no fewer than none, when the route it starts from has no segment"
+  },
+  {
+   "id": "98",
+   "rule": "wrapper identity: route object stands for the level",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"levelOf(mount.route.getSourceFile(), mount.route, path, auxAt, call)\" -> \"levelOf(mount.route.getSourceFile(), mount.route, path, auxAt)\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > a route a wrapper builds > gives each call of a wrapper its own route object, and shares it within one call"
+  },
+  {
+   "id": "99",
+   "rule": "wrapper identity: array element call",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"wrapperLevels(mount, el, prefix, auxAt)\" -> \"wrapperLevels(mount, mount.route!, prefix, auxAt)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > a route a wrapper builds > gives each call of a wrapper its own route object, and shares it within one call"
+  },
+  {
+   "id": "100",
+   "rule": "wrapper identity: spread call",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"wrapperLevels(mount, spreadCall, joinRoutePath(parentPath, mount.segment), auxAt)\" -> \"wrapperLevels(mount, mount.route!, joinRoutePath(parentPath, mount.segment), auxAt)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > the identity of a route a wrapper returns > enters the route of a second spread call again, and runs its canActivate"
+  },
+  {
+   "id": "101",
+   "rule": "wrapper identity: children call",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"wrapperLevels(childMount, childCall!, childPrefix, auxOwn)\" -> \"wrapperLevels(childMount, childMount.route!, childPrefix, auxOwn)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > the identity of a route a wrapper returns > tries the route of each children call, and runs each one's canMatch"
+  },
+  {
+   "id": "102",
+   "rule": "redirects: pathMatch prefix never",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"const prefix = stringProp(obj, 'pathMatch') !== 'full'\" -> \"const prefix = false\"",
+   "result": "Tests  4 failed | 494 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > redirects the router meets before the screen > holds an address a prefix or parameter redirect also answers at may, and not one a full-path redirect elsewhere or a later sibling does"
+  },
+  {
+   "id": "103",
+   "rule": "redirects: pathMatch always prefix",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"const prefix = stringProp(obj, 'pathMatch') !== 'full'\" -> \"const prefix = true\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/extract.test.ts > extractGraph — an empty-path child with no component speaks for the screen above it > sends a link to a screen whose empty-path child redirects on to the redirect's destination"
+  },
+  {
+   "id": "104",
+   "rule": "redirects: later prefix redirect not recorded",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"else if (prefix && !first.prefix) Object.assign(first, { prefix, levels: [] })\" -> \"\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the sub-rules of a shared route being kept > lets a later prefix redirect at the same address answer the longer addresses a full one leaves"
+  },
+  {
+   "id": "105",
+   "rule": "redirectsAt: prefix redirect matches the exact address only",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"overlaps(path, at, r.prefix, every)\" -> \"overlaps(path, at, false, every)\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > redirects the router meets before the screen > holds an address a prefix or parameter redirect also answers at may, and not one a full-path redirect elsewhere or a later sibling does"
+  },
+  {
+   "id": "107",
+   "rule": "redirectsAt: declaration order ignored",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"&& !metFirst(first, at, r.levels)\" -> \"\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > redirects the router meets before the screen > holds an address a prefix or parameter redirect also answers at may, and not one a full-path redirect elsewhere or a later sibling does"
+  },
+  {
+   "id": "108",
+   "rule": "before: declaration order dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"&& x.getStart() < y.getStart()\" -> \"\"",
+   "result": "Tests  8 failed | 490 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > screens the router never shows at their own address > holds the edges of a screen a sibling redirect answers at may, also per screen of an anchor"
+  },
+  {
+   "id": "109",
+   "rule": "before: sibling check dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"x.getParent() === y.getParent() &&\" -> \"\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > a catch-all in declaration order > makes no such assumption under the measurement switch, and holds the edge at may"
+  },
+  {
+   "id": "111",
+   "rule": "land: own redirect counted as a rival",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"redirectsAt(path, first).filter(([a, r]) => !(target && a === target.fullPath && r.to === own?.to))\" -> \"redirectsAt(path, first)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/extract.test.ts > extractGraph — targets read the way the router reads them > follows a chain of empty-path redirects, trailing slash and all"
+  },
+  {
+   "id": "112",
+   "rule": "land: rivals not counted",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"matchAll(path, routeLikes).length + rivals.length + catchAllsAt(path, first).length > 1\" -> \"matchAll(path, routeLikes).length + catchAllsAt(path, first).length > 1\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > screens the router never shows at their own address > follows the first redirect declared at an address, and holds an address a sibling redirect shadows at may"
+  },
+  {
+   "id": "113",
+   "rule": "hidden: redirect at the same address only",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"redirectsAt(path, first, true).length\" -> \"(redirects.has(path) ? 1 : 0)\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the sub-rules of a shared route being kept > lets a later prefix redirect at the same address answer the longer addresses a full one leaves"
+  },
+  {
+   "id": "114",
+   "rule": "land: tried routes not collected",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"tried.push(...guarded.filter((l) => overlaps(path, l.path, true)))\" -> \"\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > canMatch on the routes the router tries on the way > runs the canMatch of an earlier route the address is tried against, and of the branch a redirect passes through"
+  },
+  {
+   "id": "115",
+   "rule": "land: tried routes at the exact path only",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"overlaps(path, l.path, true)\" -> \"overlaps(path, l.path, false)\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > canMatch on the routes the router tries on the way > runs the canMatch of an earlier route the address is tried against, and of the branch a redirect passes through"
+  },
+  {
+   "id": "116",
+   "rule": "runningGuards: tried routes on the chain not filtered",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"tried.filter((l) => !t.some((x) => x.obj === l.obj)).map((l) => [l.obj, l])\" -> \"tried.map((l) => [l.obj, l])\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > the routes the router tries on the way > does not run again the canLoad of a route on the chain the navigation keeps"
+  },
+  {
+   "id": "117",
+   "rule": "runningGuards: tried routes run canMatch only",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"...offChain.flatMap((l) => [...l.canMatch, ...l.canLoad])\" -> \"...offChain.flatMap((l) => [...l.canMatch])\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > the routes the router tries on the way > runs the canLoad of a route tried off the target chain"
+  },
+  {
+   "id": "118",
+   "rule": "runningGuards: tried routes run canLoad only",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"...offChain.flatMap((l) => [...l.canMatch, ...l.canLoad])\" -> \"...offChain.flatMap((l) => [...l.canLoad])\"",
+   "result": "Tests  5 failed | 493 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > canMatch on the routes the router tries on the way > runs the canMatch of an earlier route the address is tried against, and of the branch a redirect passes through"
+  },
+  {
+   "id": "119",
+   "rule": "tried: not passed to the conservative verdict",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"runningGuards(undefined, target.nodeId, 0, landed.tried)\" -> \"runningGuards(undefined, target.nodeId, 0)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > the routes the router tries on the way > names them on a shell link held at may for a reason every screen shares"
+  },
+  {
+   "id": "120",
+   "rule": "tried: not passed to the per-screen verdict",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"runningGuards(src, target.nodeId, preserved, landed.tried)\" -> \"runningGuards(src, target.nodeId, preserved)\"",
+   "result": "Tests  4 failed | 494 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > canMatch on the routes the router tries on the way > runs the canMatch of an earlier route the address is tried against, and of the branch a redirect passes through"
+  },
+  {
+   "id": "121",
+   "rule": "tried: not passed in controls mode",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"runningGuards(route.nodeId, target.nodeId, 0, landed.tried)\" -> \"runningGuards(route.nodeId, target.nodeId, 0)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > the routes the router tries on the way > names them on a control in controls mode"
+  },
+  {
+   "id": "122",
+   "rule": "levelOf: canMatch alone records a guarded level",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"aux === undefined ? level.canMatch.length + level.canLoad.length > 0 :\" -> \"aux === undefined ? level.canMatch.length > 0 :\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > the routes the router tries on the way > runs the canLoad of a route tried off the target chain"
+  },
+  {
+   "id": "123",
+   "rule": "levelOf: canLoad alone records a guarded level",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"aux === undefined ? level.canMatch.length + level.canLoad.length > 0 :\" -> \"aux === undefined ? level.canLoad.length > 0 :\"",
+   "result": "Tests  5 failed | 493 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > canMatch on the routes the router tries on the way > runs the canMatch of an earlier route the address is tried against, and of the branch a redirect passes through"
+  },
+  {
+   "id": "124",
+   "rule": "levelOf: guarded levels not recorded",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"if (offChain) guardedLevels?.push(level)\" -> \"\"",
+   "result": "Tests  18 failed | 480 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > canMatch on the routes the router tries on the way > runs the canMatch of an earlier route the address is tried against, and of the branch a redirect passes through"
+  },
+  {
+   "id": "125",
+   "rule": "land: unreadable redirect target not ambiguous",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"if (next === null) return { target: kept, ambiguous: true,\" -> \"if (next === null) return { target: kept, ambiguous,\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > a redirect whose target the reader cannot fix > never takes the address it answers for one a screen displays"
+  },
+  {
+   "id": "126",
+   "rule": "wildcard: unreadable redirect falls to the catch-all screen",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"wild.screen ?? (sent === null ? null : matchLiteral(sent, routeLikes))\" -> \"wild.screen ?? (sent === null ? catchAllScreens.find((c) => c.fullPath === '*') ?? null : matchLiteral(sent, routeLikes))\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > an address a nested catch-all answers > does not put a catch-all screen in place of a catch-all redirect it cannot follow"
+  },
+  {
+   "id": "127",
+   "rule": "redirects: unreadable redirectTo not registered",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"const redirectDeclared = propNamed(obj, 'redirectTo') !== undefined\" -> \"const redirectDeclared = redirectTarget !== null\"",
+   "result": "Tests  5 failed | 493 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > a redirect whose target the reader cannot fix > never takes the address it answers for one a screen displays"
+  },
+  {
+   "id": "129",
+   "rule": "levelOf: title resolver ignored",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"resolve: propNamed(obj, 'resolve') !== undefined || titleResolves(obj),\" -> \"resolve: propNamed(obj, 'resolve') !== undefined,\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > a title resolver > awaits a title that is a function or a class, and not one that is a string"
+  },
+  {
+   "id": "130",
+   "rule": "levelOf: explicit resolve ignored",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"resolve: propNamed(obj, 'resolve') !== undefined || titleResolves(obj),\" -> \"resolve: titleResolves(obj),\"",
+   "result": "Tests  4 failed | 494 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the guards a navigation runs > awaits the resolvers of a route the navigation enters, and not those of one it reuses"
+  },
+  {
+   "id": "131",
+   "rule": "titleResolves: every non-literal title is a resolver",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"return !stringValued(Node.isPropertyAssignment(prop) ? prop.getInitializer() : Node.isShorthandPropertyAssignment(prop) ? prop.getNameNode() : undefined)\" -> \"return true\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-targets.test.ts > a route title the router awaits > is not one when it is a template string the reader cannot fold to a constant"
+  },
+  {
+   "id": "132",
+   "rule": "stringValued: one string member makes a union static",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"(type.isUnion() ? type.getUnionTypes() : [type]).every(\" -> \"(type.isUnion() ? type.getUnionTypes() : [type]).some(\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-targets.test.ts > a route title the router awaits > is one when only some members of its type are strings"
+  },
+  {
+   "id": "133",
+   "rule": "aux outlets: none recorded",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"const auxLevels = guarded.filter((l) => l.aux !== undefined)\" -> \"const auxLevels: RouteLevel[] = []\"",
+   "result": "Tests  10 failed | 488 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > routes on a named outlet > runs the canDeactivate of an outlet the source can have open, and the guards of one an empty path opens"
+  },
+  {
+   "id": "134",
+   "rule": "aux outlets: closing never",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"fromPath === undefined ? [] : auxLevels.filter((l) => overlaps(fromPath, l.aux!, true))\" -> \"[]\"",
+   "result": "Tests  5 failed | 493 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > routes on a named outlet > runs the canDeactivate of an outlet the source can have open, and the guards of one an empty path opens"
+  },
+  {
+   "id": "135",
+   "rule": "aux outlets: closing at the exact mount only",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"overlaps(fromPath, l.aux!, true)\" -> \"overlaps(fromPath, l.aux!, false)\"",
+   "result": "Tests  5 failed | 493 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > routes on a named outlet > runs the canDeactivate of an outlet the source can have open, and the guards of one an empty path opens"
+  },
+  {
+   "id": "136",
+   "rule": "aux outlets: opening by any route under the mount",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"l.path === l.aux && overlaps(toPath, l.aux, true)\" -> \"overlaps(toPath, l.aux, true)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > an outlet the target opens by matching an empty path > does not count a route on an outlet that only a path of its own opens"
+  },
+  {
+   "id": "137",
+   "rule": "aux outlets: opening never",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"toPath === undefined ? [] : auxLevels.filter((l) => l.path === l.aux && overlaps(toPath, l.aux, true))\" -> \"[]\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > routes on a named outlet > runs the canDeactivate of an outlet the source can have open, and the guards of one an empty path opens"
+  },
+  {
+   "id": "138",
+   "rule": "aux outlets: opening at the exact mount only",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"overlaps(toPath, l.aux, true)\" -> \"overlaps(toPath, l.aux, false)\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > an outlet the target opens by matching an empty path > runs its canMatch on a candidate an over-approximated target reaches"
+  },
+  {
+   "id": "139",
+   "rule": "aux outlets: closing canDeactivate dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"...closing.flatMap((l) => [...l.canDeactivate, ...l.canMatch])\" -> \"...closing.flatMap((l) => l.canMatch)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > routes on a named outlet > runs the canDeactivate of an outlet the source can have open, and the guards of one an empty path opens"
+  },
+  {
+   "id": "140",
+   "rule": "aux outlets: opening canMatch dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"...opening.flatMap((l) => [...l.canMatch, ...l.canActivate, ...l.canActivateChild, ...l.canLoad])\" -> \"...opening.flatMap((l) => [...l.canActivate, ...l.canActivateChild, ...l.canLoad])\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > an outlet the target opens by matching an empty path > runs its canMatch on a candidate an over-approximated target reaches"
+  },
+  {
+   "id": "141",
+   "rule": "aux outlets: opening canActivate dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"...opening.flatMap((l) => [...l.canMatch, ...l.canActivate, ...l.canActivateChild, ...l.canLoad])\" -> \"...opening.flatMap((l) => [...l.canMatch, ...l.canActivateChild, ...l.canLoad])\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > routes on a named outlet > runs the canDeactivate of an outlet the source can have open, and the guards of one an empty path opens"
+  },
+  {
+   "id": "142",
+   "rule": "aux outlets: opening canActivateChild dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"...opening.flatMap((l) => [...l.canMatch, ...l.canActivate, ...l.canActivateChild, ...l.canLoad])\" -> \"...opening.flatMap((l) => [...l.canMatch, ...l.canActivate, ...l.canLoad])\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > an outlet the target opens by matching an empty path > runs its canActivateChild"
+  },
+  {
+   "id": "143",
+   "rule": "aux outlets: opening canLoad dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"...opening.flatMap((l) => [...l.canMatch, ...l.canActivate, ...l.canActivateChild, ...l.canLoad])\" -> \"...opening.flatMap((l) => [...l.canMatch, ...l.canActivate, ...l.canActivateChild])\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > an outlet the target opens by matching an empty path > runs its canLoad on a candidate an over-approximated target reaches"
+  },
+  {
+   "id": "144",
+   "rule": "aux outlets: opening resolver dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"|| opening.some((l) => l.resolve)\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-guards.test.ts > an outlet the target opens by matching an empty path > awaits its resolver"
+  },
+  {
+   "id": "145",
+   "rule": "levelOf: aux route resolver not recorded",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"entryGuards([level]).length + level.canDeactivate.length > 0 || level.resolve\" -> \"entryGuards([level]).length + level.canDeactivate.length > 0\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the sub-rules of a named-outlet route run again > awaits the resolvers of one that runs again"
+  },
+  {
+   "id": "146",
+   "rule": "levelOf: aux route canDeactivate not recorded",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"entryGuards([level]).length + level.canDeactivate.length > 0 || level.resolve\" -> \"entryGuards([level]).length > 0 || level.resolve\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > routes on a named outlet > runs the canDeactivate of an outlet the source can have open, and the guards of one an empty path opens"
+  },
+  {
+   "id": "147",
+   "rule": "levelOf: aux route entry guards not recorded",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"entryGuards([level]).length + level.canDeactivate.length > 0 || level.resolve\" -> \"level.canDeactivate.length > 0 || level.resolve\"",
+   "result": "Tests  10 failed | 488 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > routes on a named outlet > runs the canDeactivate of an outlet the source can have open, and the guards of one an empty path opens"
+  },
+  {
+   "id": "148",
+   "rule": "walkElements: unreadable outlet taken for the primary one",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"outletUnknown || (ownOutlet !== null && ownOutlet !== 'primary') ? parentPath : undefined\" -> \"(ownOutlet !== null && ownOutlet !== 'primary') ? parentPath : undefined\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/regressions.test.ts > what the fifth panel found in the repairs of the fourth > mints no screen when the outlet of a route is not a readable string"
+  },
+  {
+   "id": "149",
+   "rule": "walkElements: outlet not inherited by children",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"const auxOwn = auxAt ?? (\" -> \"const auxOwn = (\"",
+   "result": "Tests  4 failed | 494 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the sub-rules of a named-outlet route run again > runs the canActivateChild above one that runs again"
+  },
+  {
+   "id": "47a",
+   "rule": "unsure screens of a component placed under a condition emitted unmarked",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"const unsure = new Set([...screens].filter((x) => !firm.has(x)))\\n      if (sure.size > 0) emitOver(sure, ts, relative(projectDir, f))\\n      if (unsure.size > 0) emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))\" -> \"const unsure = new Set([...screens].filter((x) => !firm.has(x)))\\n      if (sure.size > 0) emitOver(sure, ts, relative(projectDir, f))\\n      if (unsure.size > 0) emitOver(unsure, ts, relative(projectDir, f))\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/callgraph.test.ts > a layout and the outlets above it > demotes what a route component nests on its screen when an outlet above it is conditional"
+  },
+  {
+   "id": "106a",
+   "rule": "metFirst: tables apart dismiss more than catch-alls",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"if (!at.endsWith('*') || !apart(first, levels)) return false\" -> \"if (!apart(first, levels)) return false\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > the separately registered tables a catch-all is assumed to follow > dismisses no other redirect of a table registered apart, and records nothing then"
+  },
+  {
+   "id": "150",
+   "rule": "supersededAt: a later navigation call not recognised",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (NAVIGATION.test(c.getExpression().getText())) return true\" -> \"\"",
+   "result": "Tests  14 failed | 484 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > commands and calls the router reads otherwise > holds a navigation a later one in the same block supersedes at may, and keeps the later one"
+  },
+  {
+   "id": "151",
+   "rule": "mayNavigate: callees not followed",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"for (const body of calleeBodies(c)) {\" -> \"for (const body of [] as Node[]) {\"",
+   "result": "Tests  6 failed | 492 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > a navigation code after it may cancel > holds it at may when a later call to a member of the class navigates, and keeps that member's navigation"
+  },
+  {
+   "id": "152",
+   "rule": "calleeBodies: members of the class not resolved",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (member) decls = [member]\" -> \"\"",
+   "result": "Tests  5 failed | 493 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > a navigation code after it may cancel > holds it at may when a later call to a member of the class navigates, and keeps that member's navigation"
+  },
+  {
+   "id": "153",
+   "rule": "calleeBodies: callees the checker resolves not followed",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"decls = (sym?.getAliasedSymbol() ?? sym)?.getDeclarations() ?? []\" -> \"\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > a navigation code after it may cancel > holds it at may when a later call into an injected service navigates"
+  },
+  {
+   "id": "154",
+   "rule": "supersededAt: only the innermost block read",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (stmts.slice(stmts.indexOf(node as never) + 1).some((s) => mayNavigate(s, seen))) return true\" -> \"if (stmts.slice(stmts.indexOf(node as never) + 1).some((s) => mayNavigate(s, seen))) return true\\n      return false\"",
+   "result": "Tests  4 failed | 494 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > a navigation code after it may cancel > looks past the block that holds it, to the statements after every enclosing block"
+  },
+  {
+   "id": "155",
+   "rule": "supersededAt: finally block not read",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (fin && mayNavigate(fin, seen)) return true\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > a navigation code after it may cancel > counts a finally block as code that runs after it"
+  },
+  {
+   "id": "156",
+   "rule": "supersededAt: an awaited navigation taken as superseded by what follows it",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (awaited) continue\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > a navigation code after it may cancel > keeps an awaited navigation on must, since it finishes before the next one starts"
+  },
+  {
+   "id": "157",
+   "rule": "firmOutlet: one candidate of an ambiguous placement taken for all",
+   "file": "packages/adapter-angular/src/attribute.ts",
+   "what": "\"cands.length > 0 && cands.every(\" -> \"cands.length > 0 && cands.some(\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > firmOutlet ambiguous selector (round 4) > requires EVERY matching component to have firm outlet (not just some)"
+  },
+  {
+   "id": "158",
+   "rule": "empty-path child below the rendering chain not rendered on the host",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"const renders = tip != null && levels[levels.length - 2] === tip && level.canMatch.length === 0\" -> \"const renders = !emptyPathAnswered.has(host) && level.canMatch.length === 0\"",
+   "result": "Tests  3 failed | 495 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > host branch through wrapper call (round 4) > renders an empty-path child below an empty-path shell on the screen above, and demotes it for the shell's conditional outlet"
+  },
+  {
+   "id": "159",
+   "rule": "later empty-path sibling rendered on the host",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"levels[levels.length - 2] === tip &&\" -> \"\"",
+   "result": "Tests  4 failed | 494 passed (498)",
+   "survived": false,
+   "killedBy": "src/callgraph.test.ts > a layout and the outlets above it > demotes the links of a layout a sibling holds the address for, under a conditional outlet"
+  },
+  {
+   "id": "160",
+   "rule": "empty-path child a canMatch may refuse rendered on the host",
+   "file": "packages/adapter-angular/src/routes.ts",
+   "what": "\"&& level.canMatch.length === 0\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/callgraph.test.ts > a layout and the outlets above it > keeps an empty-path child a canMatch may refuse off the screen above it"
+  },
+  {
+   "id": "161",
+   "rule": "controls: hiddenAbove dropped",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"|| hidden(route.nodeId) || hiddenAbove(route, sf.getFilePath())\" -> \"|| hidden(route.nodeId)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/guards-run.test.ts > controls mode + conditional outlets (round 4) > demotes control edges from routes below a conditional outlet"
+  },
+  {
+   "id": "162",
+   "rule": "relative target climbing above the root not refused",
+   "file": "packages/adapter-angular/src/extract.ts",
+   "what": "\"if (t.relative === true && !baseUnknown && climbsAboveRoot(parsed.path, base)) {\" -> \"if (false) {\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-targets.test.ts > a relative link that climbs above the root > draws no edge, since Angular rejects it, and says so"
+  },
+  {
+   "id": "163",
+   "rule": "climbsAboveRoot: a route with no segment not exempt",
+   "file": "packages/adapter-angular/src/matcher.ts",
+   "what": "\"return own > 0 && segments(target)\" -> \"return segments(target)\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-targets.test.ts > the segments a relative link keeps > keeps none, and no fewer than none, when the route it starts from has no segment"
+  },
+  {
+   "id": "164",
+   "rule": "climbsAboveRoot always false",
+   "file": "packages/adapter-angular/src/matcher.ts",
+   "what": "\"if (!ownerPath || target.startsWith('/') || target === '*') return false\\n  const own = segments(ownerPath).length\" -> \"if (!ownerPath || target.startsWith('/') || target === '*') return false\\n  const own = segments(ownerPath).length\\n  return false && own > 0\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/uncovered-targets.test.ts > a relative link that climbs above the root > draws no edge, since Angular rejects it, and says so"
+  },
+  {
+   "id": "165",
+   "rule": "laterInExpression: the body of a call the navigation is an argument of not counted",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"|| (Node.isCallExpression(node) && calleeBodies(node).some((b) => mayNavigate(b, seen)))\" -> \"\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > code that runs after a navigation outside the statements that follow it > counts the body of a call the navigation is an argument of, which runs after it"
+  },
+  {
+   "id": "166",
+   "rule": "laterInExpression: a right operand not counted",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (Node.isBinaryExpression(node)) return node.getLeft() === child && mayNavigate(node.getRight(), seen)\" -> \"if (Node.isBinaryExpression(node)) return false\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > code that runs after a navigation outside the statements that follow it > counts the right operand of an expression whose left operand it is"
+  },
+  {
+   "id": "167",
+   "rule": "laterInExpression: conditional branches not counted",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (Node.isConditionalExpression(node)) return node.getCondition() === child && (mayNavigate(node.getWhenTrue(), seen) || mayNavigate(node.getWhenFalse(), seen))\" -> \"if (Node.isConditionalExpression(node)) return false\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > code that runs after a navigation outside the statements that follow it > counts both branches of a conditional whose condition it is"
+  },
+  {
+   "id": "168",
+   "rule": "laterInExpression: later array elements not counted",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (Node.isArrayLiteralExpression(node)) return after(node.getElements())\" -> \"if (Node.isArrayLiteralExpression(node)) return false\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > code that runs after a navigation outside the statements that follow it > counts the elements of an array literal that follow it"
+  },
+  {
+   "id": "169",
+   "rule": "supersededAt: the rest of the expression not read",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (laterInExpression(parent, node, seen)) return true\" -> \"\"",
+   "result": "Tests  4 failed | 494 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > code that runs after a navigation outside the statements that follow it > counts the body of a call the navigation is an argument of, which runs after it"
+  },
+  {
+   "id": "170",
+   "rule": "laterAfterReturn: callers in the class not followed",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"return callers.some((c) => supersededAt(c, seen))\" -> \"return callers.length < 0\"",
+   "result": "Tests  2 failed | 496 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > code that runs after a navigation outside the statements that follow it > counts what a caller does after calling the member that holds it, even when the member is a handler too"
+  },
+  {
+   "id": "171",
+   "rule": "laterAfterReturn: later lifecycle hooks not read",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"const step = CREATION_ORDER.indexOf(name)\" -> \"const step = -1 + 0 * CREATION_ORDER.length\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > code that runs after a navigation outside the statements that follow it > counts a navigation in a lifecycle hook Angular calls later"
+  },
+  {
+   "id": "172",
+   "rule": "supersededAt: an awaited navigation stops the walk before its callers",
+   "file": "packages/adapter-angular/src/conditions.ts",
+   "what": "\"if (navigates && node === call && Node.isAwaitExpression(parent)) awaited = true\" -> \"if (navigates && node === call && Node.isAwaitExpression(parent)) return false\"",
+   "result": "Tests  1 failed | 497 passed (498)",
+   "survived": false,
+   "killedBy": "src/panel3.test.ts > code that runs after a navigation outside the statements that follow it > counts what a caller does after an async member returns, which is before an awaited navigation finishes"
   }
  ]
 }

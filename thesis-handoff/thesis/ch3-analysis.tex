@@ -66,7 +66,7 @@ third modality carries the destinations the analysis cannot name: an edge into t
 an event whose target only the run time knows. The pinned extractor does produce such edges:
 \CensusUnknown{} of the \CensusEdges{} edges in the corpus, in \CensusUnknownApps{} of the
 \CensusApps{} applications. Carrying this modality and reaching a node that is not a screen
-coincide exactly, on every edge of every corpus graph, and the census refuses to report a graph
+coincide on every edge of every corpus graph, and the census refuses to report a graph
 in which they come apart. The conversion ratio of RQ1 and the soundness property of
 Claim~\ref{claim:must} are defined over the other two tiers, so the unknown tier is counted in
 the edge totals and in no rate.
@@ -99,15 +99,15 @@ concatenates the paths of $r$ and of its ancestors. A route that declares
 Section~\ref{sec:angular} describes: it contributes no element of $S$, and its path is
 carried into the full paths of its children. A route whose only effect is a
 \texttt{redirectTo} renders nothing and likewise contributes no element of $S$. In Angular
-that case is exactly as narrow as it sounds: the router refuses a configuration that declares
+a redirecting route is only a redirect: the router refuses a configuration that declares
 \texttt{redirectTo} and \texttt{children} together, and likewise \texttt{redirectTo} with a
 \texttt{component}, so a redirecting route can never also be the layout under which a child
 renders. Both refusals were read off the router's own configuration validator in the version
 vendored with this work, Angular~18.2.14; no corpus repository is checked out where the
-invariant could be re-read, so the sentence is scoped to that version. The same is not true of every client-side router --
+invariant could be re-read, so the statement holds only for that version. The same is not true of every client-side router.
 Vue Router applies a record's redirect only when that record is the last one matched, so a
-redirecting parent does render its component for a matching child -- and
-Section~\ref{sec:transfer} returns to it, because the model's step from
+redirecting parent does render its component for a matching child.
+Section~\ref{sec:transfer} returns to this, because the model's step from
 ``redirects'' to ``renders nothing'' is a fact about Angular rather than about routers.
 Because
 $\mathit{screen}(r)$ is identified by the full path, the map $\mathit{screen}(\cdot)$ is
@@ -172,12 +172,25 @@ runs only on some executions of its own handler: under a template control-flow b
 structural directive, an \texttt{<ng-template>}, an ICU case or a container that renders its
 content lazily, under a branch, in a loop or a \texttt{catch} clause, in an optional call or a
 default value, inside a callback, after an \texttt{await}, an early \texttt{return} or
-\texttt{throw} or a \texttt{break} out of its block, before a later navigation in the same block
-that supersedes it, in a function declared at module level or a member of its class that no
+\texttt{throw} or a \texttt{break} out of its block, before code that may start another
+navigation before its function returns, in a function declared at module level or a member of its class that no
 handler calls unconditionally, in a component mounted under a template condition on that screen,
 or in a route component behind a conditional outlet. A handler is a member the framework calls
 itself, a lifecycle hook or a member \texttt{@HostListener} registers, or one the template binds to
-an event as a bare call outside any template condition. An exception from an earlier synchronous
+an event as a bare call outside any template condition. The router cancels a navigation when
+another starts before it has finished, so a navigation is demoted when code that runs after it,
+before the event is handled, may navigate. That code is the rest of the expression that holds it
+(the body of a call it is an argument of, a right operand, a branch of a conditional whose
+condition it is), the statements after it in its block and in every block around it, a
+\texttt{finally} block around it, and what runs once its function returns: what each caller in
+the class does after calling that function, handler or not, and for a constructor or lifecycle
+hook the hooks Angular calls after it. Code there may navigate when it holds a navigation call, in
+a branch or a callback as much as at the top, or a call to a member of the class, a function of
+the file or a method of an injected service whose body does. An awaited navigation has finished
+before the rest of its function runs, so what follows it there does not count, but its callers go
+on as soon as the function first awaits, so what they do still counts. A call the reader cannot
+resolve to a body in the application is taken not to navigate (Section~\ref{sec:approximations}).
+An exception from an earlier synchronous
 call is not counted, since every call can throw; an \texttt{await} is, because a rejected request
 is an ordinary outcome of the code that awaits it. The router's own fetch of a lazily loaded
 route is not counted either: a failed chunk load is a fault of the deployment rather than an
@@ -261,8 +274,8 @@ The empty computed scope is likewise two situations, and conflating them would h
 inside a property of the application. A site is \emph{unreachable} when
 $\mathit{scope}^{*}(x) = \varnothing$: the code exists and no screen can reach it, so
 contributing no edge is the correct answer. A site is \emph{unresolved} when
-$\mathit{scope}(x) = \varnothing$ because no rule of the analysis reaches it --- a navigation
-in a service nothing is known to inject, or behind a construct the reader could not follow ---
+$\mathit{scope}(x) = \varnothing$ because no rule of the analysis reaches it (a navigation
+in a service nothing is known to inject, or behind a construct the reader could not follow),
 and the true scope is simply unknown. Both yield $\bot$, so $\bot$ alone does not say which
 holds. The extractor therefore does not let an unresolved site vanish silently. A site in a
 component that no rule places is anchored at an unplaced origin, a node that carries the
@@ -430,7 +443,7 @@ If the result of attribution were stored explicitly, a single link in the applic
 shell would produce one edge for every screen, and the size of the graph would be
 bounded by $|S| \cdot |\mathit{sites}|$, where $\mathit{sites}$ is the set of navigation
 sites. For the largest application in
-the corpus this bound is $\RoundTwoEarlierOracleMifosNow{} \times 1344$. Instead, each edge is stored once, anchored
+the corpus this bound is $\RoundTwoEarlierOracleMifosNow{} \times \ConstructsMifos{}$. Instead, each edge is stored once, anchored
 at its scope, and the set of edges leaving a particular screen is computed when it is
 requested:
 \[
@@ -479,7 +492,7 @@ is added when $A$'s template contains an element with $B$'s selector. When a sel
 belongs to more than one component, the candidates are narrowed to those that $A$'s
 file imports; if none is imported, the analysis joins over all of them and records a
 note. An attribute selector is matched the same way: a directive is rendered by the
-templates that carry its attribute, so it has a scope exactly as a component does.
+templates that carry its attribute, so it has a scope in the same way as a component does.
 
 \textbf{Router outlets.} The route tree is recorded during route extraction. A route
 component's template is rendered on its own screen and on every descendant screen, so
@@ -506,16 +519,16 @@ constructs it strands are counted in Chapter~\ref{ch:results}.
 The second departure is in how the call graph of Section~\ref{sec:inputs} is read.
 Algorithm~\ref{alg:attribution} ranges over every component and callable, and the pass does too:
 its nodes are the members of classes, and a member of a component runs on that component's
-screens. A call \texttt{this.f.g()} is resolved through the declared type of \texttt{f} --- a
+screens. A call \texttt{this.f.g()}, where \texttt{f} is a
 constructor parameter, a typed field, a field initialised with \texttt{inject(T)}, or an
-\texttt{@Inject(TOKEN)} parameter --- to the class that type names, to the classes a provider
+\texttt{@Inject(TOKEN)} parameter, is resolved through the declared type of \texttt{f} to the class that type names, to the classes a provider
 declaration binds it to with \texttt{useClass} or \texttt{useExisting}, or, for an abstract class
 no provider binds, to its subclasses in the application, which is class hierarchy analysis
 \cite{dean1995cha} restricted to the declared type. The departure is that bindings are read across
 the whole application rather than relative to the injector that resolves them, so where two
 injectors bind a token differently the join covers both; that can only widen a scope. A call the
-pass cannot resolve --- a factory provider, a value provider, a type declared outside the
-application --- contributes no edge, and a member no caller reaches falls back to the join over
+pass cannot resolve (a factory provider, a value provider, a type declared outside the
+application) contributes no edge. A member no caller reaches falls back to the join over
 every component that injects its class, the per-class approximation an earlier version used for
 every service. Service sites are held at \emph{may} either way, because the calls on the way carry
 conditions the analysis does not follow.

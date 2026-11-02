@@ -1,14 +1,14 @@
 {
   "harnessVersion": "mutate 1.8.0",
-  "extractor": "% Extractor 5c4c709, packages/ clean, harness clean when generated.",
+  "extractor": "% Extractor 920e1aa, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/bitwarden",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/bitwarden/apps/web",
   "attribution": true,
   "seed": 20261021,
   "quota": 8,
   "baseline": {
-    "nodes": 251,
-    "edges": 530,
+    "nodes": 249,
+    "edges": 529,
     "routes": 98
   },
   "discovered": {

@@ -13,9 +13,9 @@ Table~\ref{tab:coverage} also reports the other direction of the same comparison
 the differential test produces and which an earlier version of the results chapter left out. Every
 figure in this section is the first round's, measured with the parser as it stood then;
 Section~\ref{sec:res-round2} repeats the comparison with both tools corrected and the
-numbers move a long way. As the first round measured it, the
+numbers change considerably. As the first round measured it, the
 parser holds no declared screen for 197 of the 338 nodes in the corpus, so node extraction
-is as inaccurate as it is incomplete. For k8s dashboard the figure is almost entirely the
+is inaccurate as well as incomplete. For k8s dashboard the figure is almost entirely the
 parser's own limit, 37 of its 38 unmatched nodes being the lazily loaded entries it cannot
 follow. Mifos is not explained that way: it has one blind spot and 120 unmatched nodes.
 Table~\ref{tab:node-audit} decomposes all 197 by the kinds of route the parser found at
@@ -33,7 +33,7 @@ have declared them, so those are the oracle's limit and not the extractor's, and
 43 are k8s dashboard. For 11 nodes the parser did find a route, but one it classifies as a
 path prefix or a redirect. Section~\ref{sec:model} admits only component-bearing routes
 into the screen set, so the implemented node set contains 11 elements the model excludes:
-one in realworld, two in alfresco, six in bitwarden and two in mifos. The clearest case is
+one in realworld, two in alfresco, six in bitwarden and two in mifos. An example is
 \texttt{/profile} in realworld, whose route declares \texttt{loadChildren} and no
 component. These nodes make $\mathit{screen}(r)$ answerable for a route the model treats
 as a path prefix only.
@@ -44,10 +44,10 @@ blind spot, and in bitwarden, which has 23. Either the extractor emits nodes for
 assembles differently from the parser, or the parser misses route tables it does not report
 as blind spots. The two methods disagree here without either being able to adjudicate, and
 at the close of the first round it was the largest single piece of unexplained behaviour
-the evaluation had found, sitting underneath every figure that counts nodes.
+the evaluation had found, and it underlay every figure that counts nodes.
 
-The second round resolved it, and the answer was the FIRST of the two explanations almost
-throughout --- the opposite of what an earlier draft concluded.
+The second round resolved it. For almost all of these nodes the first of the two explanations
+held, which is the opposite of what an earlier draft concluded.
 \RoundTwoFirstRoundTruncated{} of the \RoundTwoFirstRoundExtra{} sit at an address that is the
 tail of a route the parser had already declared in full: the extractor had reached the table
 without its parent prefix and minted \path{/premium} where the parser declared
@@ -55,18 +55,20 @@ without its parent prefix and minted \path{/premium} where the parser declared
 not the parser missing a table. The other \RoundTwoFirstRoundSynthetic{} are the catch-all
 each of those five applications declares, \texttt{path: '**'} with a component, which the
 extractor mints at the path \texttt{*} while the oracle's policy keeps it out of the screen
-set: there the two tools disagree by convention, not over a table either of them missed. Which way the group fell matters beyond the bookkeeping, because it is the
-difference between a measuring instrument that was wrong and a tool that was: the repairs of
-Section~\ref{sec:res-round2} are accordingly almost all in the extractor. The figures above are the first round's and are left standing as the record of
-what that round saw; Section~\ref{sec:res-round2} repeats the comparison with both tools
-corrected, and the corpus is then left with \RoundTwoExtraNodes{} nodes that no declared
+set: there the two tools disagree by convention, not over a table either of them missed. The
+direction the group fell in matters beyond the bookkeeping, because it decides whether the
+measuring instrument or the tool was wrong. The repairs of
+Section~\ref{sec:res-round2} are accordingly almost all in the extractor. The figures above
+are the first round's and are kept as the record of what that round saw.
+Section~\ref{sec:res-round2} repeats the comparison with both tools corrected. The corpus is
+then left with \RoundTwoExtraNodes{} nodes that no declared
 screen matches, of which \RoundTwoExtraNodesWildcard{} sit at the path \texttt{*}, where
-the extractor mints the catch-all the application declares and the oracle counts no screen. The parser had its own share of the
+the extractor mints the catch-all the application declares and the oracle counts no screen. The
+parser had the smaller share of the
 problem, counted in Section~\ref{sec:res-round2}: a route array behind a module it refused to
 follow, a path assembled from a constant it did not resolve, a lazily loaded table walked
-without its parent. It was the smaller share. Reporting the disagreement
-rather than attributing it was the right call at the time, and working it is what produced
-most of Section~\ref{sec:res-round2}.
+without its parent. Reporting the disagreement rather than attributing it was the right
+decision at the time, and investigating it produced most of Section~\ref{sec:res-round2}.
 
 So the baseline recovers a small fraction of the navigation, and loses it at two levels: some screens never become nodes, and most navigation sites of the screens that do are not turned into edges.
 
@@ -76,8 +78,8 @@ On the instrument the figures of Chapter~\ref{ch:results} are measured on, this
 disagreement is gone: the parser declares a screen for every node the extractor mints
 except the wildcard catch-all route, which it does not count as a screen, and the runtime
 method confirms that the framework mounts a component at every address the extractor
-claims. What this section records is therefore not a standing defect but the state the
-differential test was in when it was the only check available, and the reason a third,
+claims. This section therefore records a past state rather than a standing defect: the state
+the differential test was in when it was the only check available, and the reason a third,
 independent reader was added.
 
 \section{How the declared-screen set moved}
@@ -90,31 +92,31 @@ deserves more than a column of its own, because on this corpus the declared-scre
 turns out to be a poor summary of the declared-screen \emph{set}: between the oracle as it stood
 before this round and the oracle reported here, \RoundTwoSetMoved{} of the six applications'
 declared sets changed, and \RoundTwoSetMovedCountSame{} of those changed while the count stood
-still. A moving denominator is how a coverage figure is rigged without anyone intending it, and a
-denominator that holds its size while every address inside it changes is how the same thing
-happens without even the column moving. Each of the five is accounted for below, from the
-generated subtraction rather than from a sentence.
+still. A moving denominator can distort a coverage figure without anyone intending it. A
+denominator that keeps its size while every address inside it changes can do the same without
+the count column changing. Each of the five is accounted for below from the generated
+subtraction rather than from a hand-written statement.
 
-ghostfolio is the clearest case and the one that would have passed unnoticed. Its count did not
-move at all: \RoundTwoEarlierOracleGhostfolioDeclared{} declared screens before,
-\RoundTwoEarlierOracleGhostfolioNow{} after. Every single address in it changed.
+In ghostfolio the change could not have been noticed from the count. Its count did not
+move: \RoundTwoEarlierOracleGhostfolioDeclared{} declared screens before,
+\RoundTwoEarlierOracleGhostfolioNow{} after. Every address in it changed.
 \RoundTwoEarlierOracleGhostfolioInside{} paths left the set and
 \RoundTwoEarlierOracleGhostfolioAdded{} arrived, because the earlier oracle recorded the verbatim
-expression a route's path was written as rather than the address it resolves to ---
-\path{/internalRoutes.account.path} is what it stored, where the application mounts
-\path{/about} and its siblings. A reader comparing the two counts would have concluded that
-nothing about ghostfolio's route set had changed, and would have been wrong about all of it.
+expression a route's path was written as rather than the address it resolves to. It stored
+\path{/internalRoutes.account.path}, where the application mounts
+\path{/about} and its siblings. A reader comparing the two counts would have concluded, wrongly,
+that nothing about ghostfolio's route set had changed.
 
 k8s dashboard carries the largest move, and it was missing from this account until the
 provenance of the comparison was fixed. It went from \RoundTwoEarlierOracleKdashDeclared{}
 declared screens to \RoundTwoEarlierOracleKdashNow{}, with
 \RoundTwoEarlierOracleKdashAdded{} arriving and none leaving. The earlier oracle reported 37
-blind spots for this application, every one of them a \texttt{loadChildren} target it could not
-resolve, so it declared the two screens its two eagerly registered tables carry ---
-\path{/login} and the application root --- and nothing beneath any lazy module; the oracle
-reported here declares the whole tree with no blind spot. That the earlier figure was a near-vacuous denominator, and that
-coverage against it was therefore 100\,\% of almost nothing, is a fact about the measuring
-instrument and not about the application.
+blind spots for this application, each of them a \texttt{loadChildren} target it could not
+resolve. It therefore declared the two screens its two eagerly registered tables carry
+(\path{/login} and the application root) and nothing beneath any lazy module. The oracle
+reported here declares the whole tree with no blind spot. The earlier figure was a
+near-vacuous denominator, so coverage against it was 100\,\% of almost nothing. That is a fact
+about the measuring instrument and not about the application.
 
 bitwarden went from \RoundTwoEarlierOracleBitwardenDeclared{} declared screens to
 \RoundTwoEarlierOracleBitwardenNow{}. \RoundTwoEarlierOracleBitwardenStorybook{} were Storybook
@@ -122,31 +124,32 @@ fixtures, throwaway tables such as \path{/vault} and \path{/sm/:organizationId} 
 to render one component in isolation; neither tool reads them now, and the oracle reports how
 many files it set aside. \RoundTwoEarlierOracleBitwardenInside{} were inside the application.
 \RoundTwoEarlierOracleBitwardenInsideVerbatim{} of those left the count for ghostfolio's
-reason: they were recorded under a verbatim expression rather than an address ---
-\path{/AuthRoute.Login} is what the earlier run stored, because the enum behind it was
-unreadable --- so they leave that count and arrive in this one at the addresses they actually
+reason: they were recorded under a verbatim expression rather than an address. The earlier run
+stored \path{/AuthRoute.Login}, for instance, because the enum behind it was unreadable. These
+screens leave that count and arrive in this one at the addresses they actually
 mount. The rest are the mifos defect in miniature: the earlier run read their path segments
 correctly but placed them at the project root, as \path{/password} and
 \path{/session-timeout}, because it could not follow the lazy table that carries them; they are
 declared in this run at the addresses the application mounts, under
-\path{/settings/security/} and \path{/vault/}. Those are the same screens at a different
-address, not screens gained or lost, which is a distinction a count of the denominator cannot
-make and a diff of the set can. \RoundTwoEarlierOracleBitwardenAdded{} arrived, from two
+\path{/settings/security/} and \path{/vault/}. These are the same screens at a different
+address rather than screens gained or lost. A count of the denominator cannot make that
+distinction; a diff of the set can. \RoundTwoEarlierOracleBitwardenAdded{} arrived, from two
 causes: a route table wrapped in \texttt{Object.freeze} that both tools learned to read, and the
 report and member subtrees, which were declared at the application root until
 Section~\ref{sec:res-probe} showed the running router mounting them elsewhere. Against the
 \RoundTwoEarlierOracleBitwardenNow{} screens that remain, the graph holds a node for every one.
 
 An earlier draft reported bitwarden against 159 declared screens and decomposed
-that figure in detail, and the decomposition was wrong in every part. The 159 came from a file
+that figure in detail. This paragraph replaces that decomposition, which was wrong in every
+part. The 159 came from a file
 produced by a revision of the oracle from the middle of this round, dropped into the directory
 the tables are generated from and read as though it were the earlier oracle's output. Nothing in
-the generator could tell: the file is internally consistent, as every revision's output is, and
-an absent file was read as an application whose denominator did not move, in silence. The
+the generator could detect this: the file is internally consistent, as every revision's output
+is, and an absent file was silently read as an application whose denominator did not move. The
 comparison is now made against the earlier oracle's own committed output, read from the
 repository rather than from the directory the run writes into, so the revision each column
 belongs to is a fact about the repository and not about what a working directory happened to
-hold. The cost of not having done that is the paragraph this one replaces.
+hold.
 
 The two remaining moves are small and are printed for the same reason. alfresco went from
 \RoundTwoEarlierOracleAlfrescoDeclared{} declared screens to
@@ -159,44 +162,46 @@ because anything was set aside. mifos went from
 earlier run placed at the project root as \path{/}, \path{/:filter} and \path{/run/:name}
 because it would not follow a \texttt{baseUrl} import, now sit at \path{/reports} and beneath
 it. Fictitious addresses left the set and real ones took their place, and because more left
-than arrived the denominator moved down. The net change is too small to move any percentage in Chapter~\ref{ch:results},
-which is exactly why it is printed: a denominator that moves without being mentioned is how the
-previous figure survived three rounds of review, and the only defence that generalises is to
-generate every part of the subtraction and let it be checked.
+than arrived the denominator moved down. The net change is too small to move any percentage in
+Chapter~\ref{ch:results}, and that is why it is printed. A denominator that moves without being
+mentioned is how the previous figure survived three rounds of review, and the only defence that
+generalises is to generate every part of the subtraction so that it can be checked.
 
-One caveat of Chapter~\ref{ch:evaluation} can now be priced. The oracle and the extractor agree
-about an edge only where both read the same source, and \RoundTwoOutsideWitness{} edges across
-\RoundTwoOutsideWitnessApps{} applications --- \RoundTwoOutsideWitnessWorstN{} of them in
+One caveat of Chapter~\ref{ch:evaluation} can now be quantified. The oracle and the extractor
+agree about an edge only where both read the same source, and \RoundTwoOutsideWitness{} edges
+across \RoundTwoOutsideWitnessApps{} applications (\RoundTwoOutsideWitnessWorstN{} of them in
 \RoundTwoOutsideWitnessWorst{}, \RoundTwoOutsideWitnessWorstMust{} of those on the deterministic
-tier --- have their only witness in a file outside the application directory. What the check
-records is that the witness lies outside, not the route by which the file came to be read, so
-the figure is reported here and not explained; the files are of the kind a monorepo puts beside
-an application, a shared library and, in bitwarden, the repository's other front ends. Both tools read those files, so their agreeing there is not independent
+tier) have their only witness in a file outside the application directory. The check records
+that the witness lies outside but not the route by which the file came to be read, so the
+figure is reported here without an explanation. The files are of the kind a monorepo puts
+beside an application: a shared library and, in bitwarden, the repository's other front ends.
+Both tools read those files, so their agreeing there is not independent
 evidence of anything; the witness check reports the figure rather than excluding the edges. The
-reason is not that those edges are clicks in the application measured --- the files in
-\RoundTwoOutsideWitnessWorst{} belong to a sibling front end built from the same repository, and
-whether its components are reached in the application under measurement is not established here.
-It is that a precision figure is a claim about the edges this tool emitted, wherever it read them,
-and a reader who wants the figure over the measured directory alone can subtract the count. The
-dead-link census of Section~\ref{sec:deadlinks} takes the other decision for the other reason:
-calling a link dead asserts something about an application, and an accusation needs the link to be
-reached in the one being measured, so there it is the boundary that decides and not the count.
+edges are kept because a precision figure is a claim about the edges this tool emitted,
+wherever it read them, and a reader who wants the figure over the measured directory alone can
+subtract the count. They are not kept on the grounds that they are clicks in the application
+measured: the files in \RoundTwoOutsideWitnessWorst{} belong to a sibling front end built from
+the same repository, and whether its components are reached in the application under
+measurement is not established here. The dead-link census of Section~\ref{sec:deadlinks} makes
+the opposite decision for the opposite reason. Calling a link dead asserts something about an
+application, and such a claim needs the link to be reached in the application being measured,
+so there the boundary decides and not the count.
 
-The reason to distrust that last sentence is not in this application but in the mechanism, and
-this round supplied the illustration. Three of bitwarden's declared screens were, for most of
-this round, outside the denominator entirely: their paths are assembled inside a template
-literal from an exported constant, neither tool could read them, and a denominator counted
-without them gave this application a coverage of exactly 100\,\%. They were readable one
-exported constant away. Both tools read them now and the figure is honest, but nothing about
-the figure itself would have said otherwise: a screen neither tool can address is invisible to
-a coverage ratio in exactly the way a screen that does not exist is. The only defence is to
+The reason to distrust that last sentence lies in the mechanism rather than in this
+application, and this round supplied an illustration. Three of bitwarden's declared screens
+were, for most of this round, outside the denominator entirely. Their paths are assembled
+inside a template literal from an exported constant. Neither tool could read them, although
+resolving that one exported constant would have been enough, and a denominator counted without
+them gave this application a coverage of 100\,\%. Both tools read them now and the figure is
+correct, but the figure itself gave no sign of the earlier error: a coverage ratio cannot tell
+a screen neither tool can address from a screen that does not exist. The only defence is to
 report what was set aside, which is what the blind-spots column is for and why it is printed
 beside every coverage figure in Chapter~\ref{ch:results} rather than in a footnote.
 
-That so many reach every declared screen is a weaker result than it sounds, and the
-blind-spots column is why: it counts the routes a tool knows are there and cannot address,
-and reaching every screen one can see says the walk finds the route tables rather than that
-the graph is complete. What the graph does with the navigation is the accounting below.
+That so many reach every declared screen is a weaker result than it sounds, because of what the
+blind-spots column counts: the routes a tool knows are there and cannot address. Reaching every
+screen one can see shows that the walk finds the route tables, not that the graph is complete.
+The accounting below covers what the graph does with the navigation.
 
 
 \section{Every remaining site names a reason}
@@ -204,17 +209,20 @@ the graph is complete. What the graph does with the navigation is the accounting
 
 
 \RoundTwoUnexplained{} sites remain unexplained, and Table~\ref{tab:round2reasons} gives the
-reason for each. The reasons are produced by a script that exits non-zero if a single site
+reason for each. The reasons are produced by a script that exits non-zero if any site
 reaches the end of it without one, so a site the analysis cannot explain is a failing state
 rather than a silent remainder. The largest group, \RoundTwoUnplacedClass{} of the
-\RoundTwoUnexplained{}, is the attribution gap of Chapter~\ref{ch:analysis} showing through: a
-class the extractor parsed and found a navigation site in, and could place under no screen,
-because placing it needs the call graph with dependency injection that Section~\ref{sec:inputs}
-specifies and this implementation does not build. The reason is the extractor's own note and not
-this harness's inference, which matters because the alternative wording --- that nothing in the
-application injects the class --- would be a claim about the application where the truth is a
-claim about the tool. A second group concerns a target the extractor read and could not place: \RoundTwoTargetNoRoute{}
-sites whose target matched no route, split by what can actually be claimed of each ---
+\RoundTwoUnexplained{}, reflects the attribution gap of Chapter~\ref{ch:analysis}. Each is a
+class the extractor parsed and found a navigation site in but could place under no screen,
+because no relation the implementation builds reaches it. Either the call graph of
+Section~\ref{sec:inputs} resolves no call into it and no component it reads injects it, or it is
+an effect the stand-in for the unimplemented dispatch relation does not cover
+(Section~\ref{sec:approximations}). The reason given is the extractor's own note and not this
+harness's inference. This matters because the alternative wording, that nothing in the
+application injects the class, would be a claim about the application, whereas the correct
+claim is about the tool. A second group concerns a target the extractor read and could not
+place: \RoundTwoTargetNoRoute{} sites whose target matched no route. They are split by what can
+be claimed of each:
 \RoundTwoRelativeUnresolved{} a relative target with no base to resolve against,
 \RoundTwoUnderUnreadable{} inside a subtree one of the tools could not read,
 \RoundTwoNoRouteCaveated{} in an application whose route set is a lower bound, and
@@ -234,20 +242,21 @@ fails if any site has no reason.}
 \section{The four dead-link corrections}
 \label{app:deadlinkfixes}
 
-Four corrections belong with this finding, and all four came from having it attacked. Three
-of them are the same mistake made in three places, which is the more useful thing to report.
+Four corrections belong with this finding, and all four came from attempts to refute it. Three
+of them are the same mistake made in three places, and that repetition is the more useful
+result.
 
-A target no route declares is not a target that goes nowhere. An application with a
+A target that no route declares does not necessarily go nowhere. An application with a
 \texttt{**} route catches every unmatched URL, and it does so in one of two ways: a
 \texttt{redirectTo} forwards the URL to another screen, and a \texttt{component} renders one.
 The extractor follows both, holds the resulting edge at may, and records a note saying the
 target matched nothing and where the catch-all sent it. The third round followed only the
-redirecting flavour --- which is not the flavour either application the surviving count comes
-from uses, so the correction held for the one application it had been written against and
-failed for the two that needed it.
+redirecting flavour. Neither application the surviving count comes from uses that flavour, so
+the correction held for the one application it had been written against and failed for the two
+that needed it.
 
-Resolving the target is one claim and calling the link dead is another, and conflating them
-is how the first version of this finding went wrong. bitwarden declares its authentication
+Resolving the target and calling the link dead are separate claims, and the first version of
+this finding went wrong by conflating them. bitwarden declares its authentication
 paths through an enum the extractor had failed to read, so targets such as \texttt{/login}
 matched nothing for a reason that was the extractor's, and the wildcard then forwarded every
 one of them and raised that application's recovered figure by eight points.
@@ -257,13 +266,13 @@ An earlier version of this
 paragraph named three bitwarden paths assembled inside a template literal instead; those are
 read now, which is what moved its denominator, and what is left there is a boundary rather
 than a path. The note says which of the two it is, because a dropped subtree and an
-unreadable path are not the same loss. The edge is drawn either way --- Angular really does
-forward those URLs --- so what had to change was the claim attached to it, not the edge. The
+unreadable path are not the same loss. Angular does forward those URLs, so the edge is drawn
+either way and what had to change was the claim attached to it. The
 extractor counts the declared paths it could not read and records one note per application
 saying the route set is a lower bound, and that caveat is written into every wildcard note
 from that application.
 
-What the caveat then does to a candidate is the part this round changed. A single unreadable
+This round changed what the caveat does to a candidate. A single unreadable
 declaration used to void every claim of this kind across the whole application, which is
 severe and was deliberate: the alternative is a census that reports an extractor's blind spot
 as an application's defect. It is also a harder question than the census asks. Whether an
@@ -275,17 +284,17 @@ framework serves a screen at the target, which makes them a measurement of what 
 failed to read rather than of what the application got wrong; \RoundTwoFrameworkPrefix{} are
 withdrawn because the target is matched by a route that places no screen of its own, and
 \RoundTwoFrameworkRedirects{} because it is answered by a redirect. \RoundTwoWildcardCaveated{}
-sites keep the caveat. A matcher route leaves undecided only what it could claim --- the addresses
-under its own prefix --- and reading it as leaving the whole application undecided withheld twelve
-findings on a ground the harness's own navigation refutes, ghostfolio's matcher sitting at
-\path{/admin} and reaching nothing above it. Where the configuration still declines, a navigation
+sites keep the caveat. A matcher route leaves undecided only what it could claim, namely the
+addresses under its own prefix. Reading it as leaving the whole application undecided withheld
+twelve findings on a ground the harness's own navigation refutes: ghostfolio's matcher sits at
+\path{/admin} and reaches nothing above it. Where the configuration still declines, a navigation
 is asked instead: ghostfolio's \path{/admin/users} is behind that matcher, and the recogniser
 places a component there, so the three sites naming it are withdrawn rather than left undecided.
 What survives is a candidate whose target the framework answers with nothing but its catch-all.
 
-A route neither tool can read is indistinguishable, from a navigation site, from a route the
-application never declares --- and this thesis credited the difference to the application
-three times before the mechanism was general enough to stop it. A route array built by a
+From a navigation site, a route neither tool can read is indistinguishable from a route the
+application never declares. This thesis credited the difference to the application three
+times before the mechanism was general enough to stop it. A route array built by a
 spread (\texttt{children: [\ldots adminRoutes]}) was not followed, so the routes it carries
 were minted at the project root and links to them matched nothing. ghostfolio mounts its user
 administration screen with Angular's \texttt{matcher} property rather than \texttt{path}:
@@ -298,28 +307,28 @@ administration screen with Angular's \texttt{matcher} property rather than \text
 \noindent where \texttt{usersMatcher} consumes a URL whose first segment is \texttt{users}.
 Neither tool read the \texttt{matcher} property at all, so \texttt{/admin/users} appeared in
 no route set, and the previous round of this chapter published it as the one dead link it had
-confirmed by hand --- the hand check having searched the application for \texttt{path:
+confirmed by hand. The hand check had searched the application for \texttt{path:
 'users'}, which is not how that route is spelled. alfresco declares
 \texttt{nodes/:nodeId} and loads its children through a tsconfig \texttt{paths} alias, which
 neither tool resolved, so \texttt{/nodes/:nodeId/rules} was absent from both route sets and
-two live links to it were reported as dead. All three are now read. More to the point, both
-tools now record the holes they cannot read --- a matcher route, an unresolvable lazy
-boundary, a path expression that is not a literal --- and no claim that a path is undeclared
-is counted inside one. The discipline is what generalises; the three fixes are not.
+two live links to it were reported as dead. All three are now read. The three fixes are
+specific to their cases, but one rule generalises: both tools now record the holes they cannot
+read (a matcher route, an unresolvable lazy boundary, a path expression that is not a
+literal), and no claim that a path is undeclared is counted inside one.
 
-A prefix is not a target. The route-set test read only the first quoted segment of a commands
-array, so \texttt{['/nodes', id, 'rules']} was tested as the path \texttt{/nodes}, which
-alfresco declares no route at while \texttt{/nodes/:nodeId/rules} is exactly what it does
-declare. The whole array is now read as a pattern, its computed segments as holes, and
+The route-set test read only the first quoted segment of a commands array, so it tested a
+prefix as if it were the target: \texttt{['/nodes', id, 'rules']} was tested as the path
+\texttt{/nodes}. alfresco declares no route at that path, but it does declare
+\texttt{/nodes/:nodeId/rules}. The whole array is now read as a pattern, its computed segments as holes, and
 matched against the declared routes pattern to pattern. That correction cuts both ways: it
 cleared alfresco's two candidates and it found ten more sites in mifos that the first-segment
 test had passed over.
 
-What survives all four corrections is this. Of the \RoundTwoWildcardRescued{} sites a
-catch-all route answers, \RoundTwoWildcardCaveated{} come from an application whose route set is
-a lower bound and whose addresses no measurement can decide,
+After all four corrections, the \RoundTwoWildcardRescued{} sites a catch-all route answers
+divide as follows: \RoundTwoWildcardCaveated{} come from an application whose
+route set is a lower bound and whose addresses no measurement can decide,
 \RoundTwoFrameworkMountsIt{} have a target the framework's own configuration serves with a
-screen --- a defect, but the extractor's --- \RoundTwoFrameworkPrefix{} a target it matches with
+screen (a defect, but the extractor's), \RoundTwoFrameworkPrefix{} a target it matches with
 a route that places no screen, which could never have had a node, and
 \RoundTwoFrameworkRedirects{} a target it answers with a redirect. \RoundTwoWildcardNoNode{} name
 a route the application declares as a screen and the extractor minted no node for,
@@ -336,36 +345,36 @@ target named no route, \RoundTwoRelativeUnresolved{} are again a relative target
 from an application whose route set is a lower bound at all; \RoundTwoDeadLinkUnanswered{} remain.
 Those two residuals are the dead-link candidates: \RoundTwoDeadLinkCandidates{} sites at
 \RoundTwoDeadLinkLocations{} places in the source, \RoundTwoDeadLinkUrls{} distinct URLs, in
-\RoundTwoDeadLinkApps{} applications --- \RoundTwoDeadLinkWhere{}. The count is of sites rather than of defects: one wrong
+\RoundTwoDeadLinkApps{} applications (\RoundTwoDeadLinkWhere{}). The count is of sites rather
+than of defects: one wrong
 prefix written into a shared template is one mistake and several sites, and one site resolved
 against several owning routes is one place to go and look and several targets. Every category
 in the enumeration above except the last of each arm is a limit of one of the two tools rather
-than a defect of an application, which is the proportion worth remembering about this kind of
-finding: the residual is what is left after the tools stop accusing the applications of their
-own blind spots.
+than a defect of an application. The residual is therefore what is left once the tools no
+longer blame the applications for their own blind spots.
 
 One of those categories used to be unsettled, and is now measured. A route the application
 declares as a path prefix answers no URL of its own unless it also declares an empty-path
 child, and the previous round could not say which of the sites it excused on that ground
-addressed a prefix the application really answers. The framework's own configuration says, per
-address: of the \RoundTwoFrameworkPrefix{} sites now excused on that ground, every one has a
-target the framework matches with a route that places no screen of its own. A navigation to
+addressed a prefix the application really answers. The framework's own configuration answers
+this per address. Every one of the \RoundTwoFrameworkPrefix{} sites now excused on that ground
+has a target the framework matches with a route that places no screen of its own. A navigation to
 one of them, mifos's \path{/collections}, activates a last route carrying no component at all,
-so the address answers with the application's chrome and an empty outlet --- which is what the
-exclusion claimed all along, and is now a measurement rather than an inference.
+so the address answers with the application's chrome and an empty outlet. That is what the
+exclusion claimed from the start, and it is now a measurement rather than an inference.
 
-It is a candidate list rather than a verdict, because the preceding four corrections are
-evidence that the tools' blind spots are not yet all known, and a route both the extractor and
-the oracle fail to read looks, from the outside, exactly like a route that does not exist.
+The result is a candidate list rather than a verdict. The preceding four corrections are
+evidence that the tools' blind spots are not yet all known, and from the outside a route that
+both the extractor and the oracle fail to read looks the same as a route that does not exist.
 What can be said is narrower than the previous round claimed. Each candidate was checked
 against the application's own route files by hand, which is how the \texttt{appusers},
 \texttt{manage-jobs} and \texttt{configurations} mismatches above are quoted; no candidate was
 checked by navigating to it in a running application, which is the only check that would settle
 one. Half of the objection has since been answered, and not by the route files. Every
 candidate's target is put to the route configuration the framework itself holds, read out of
-the running application by the check of Section~\ref{sec:res-probe}, so the premise a dead-link
-claim rests on --- that the application mounts nothing at that address --- no longer rests on two
-readings of the same files. The classification that premise uses was itself held against what
+the running application by the check of Section~\ref{sec:res-probe}. The premise a dead-link
+claim rests on, that the application mounts nothing at that address, therefore no longer rests
+on two readings of the same files. The classification that premise uses was itself held against what
 the framework does, on \ProbeAnswerChecked{} navigated addresses, of which it agrees with
 \ProbeAnswerAgreed{}. That is what keeps the census from being empty: both applications it draws
 from declare part of their route set unread, which by the rule above would suppress every
@@ -373,7 +382,7 @@ candidate they carry. What is still unchecked is the other premise, that the lin
 run time at all, and one step below it: a target is matched against the framework's patterns
 rather than navigated to one address at a time, so a candidate's own URL has not been through
 the recogniser. What the
-method contributes is not the verdict but the list: a static transition graph puts every such
+method contributes is the list rather than a verdict: a static transition graph puts every such
 candidate on one page, with a file and a line each, instead of leaving them to be met at run
 time.
 
@@ -405,8 +414,8 @@ as mounted when the router's configuration places a component there on the prima
 whether or not a guard would admit a visitor or a resolver would find data. All \ProbeApps{}
 applications bootstrapped and \ProbeRoutes{} route entries were read, with \ProbeLazyFailures{}
 lazily loaded subtrees left unexpanded and \ProbePageErrorApps{} applications raising an uncaught
-error. \ProbeConsoleErrorApps{} logged errors to the console --- failed requests to the server
-that is not there, for the most part --- which is expected and does not bear on the route
+error. \ProbeConsoleErrorApps{} logged errors to the console, mostly failed requests to the
+server that is not there. This is expected and does not bear on the route
 configuration, since the configuration is assembled before any of those requests is made.
 \ProbeMatcherRoutes{} route in the corpus decides its address through a \texttt{UrlMatcher}; that
 route and anything beneath it have no address any of the three readers can resolve to a string,
@@ -416,27 +425,27 @@ Table~\ref{tab:probe} reports the result.
 Reading a configuration is itself a reading, and the one this comparison depends on is which of
 its entries answer an address with a screen. That reading is checked against what the framework
 does. The harness navigates a running application to an address and records the recogniser's
-verdict --- the event Angular emits when a URL has matched, which fires before any guard runs, so
-a guard sending every visitor to a sign-in page does not hide what was matched. Over
+verdict: the event Angular emits when a URL has matched. That event fires before any guard
+runs, so a guard sending every visitor to a sign-in page does not hide what was matched. Over
 \ProbeAnswerApps{} applications and \ProbeAnswerAddresses{} addresses, chosen to include every
 address this chapter names, the classification taken from the configuration agrees with the
 navigation on \ProbeAnswerAgreed{} of the \ProbeAnswerChecked{} it decides, and declines to decide
 \ProbeAnswerUndecided{}, which is the address the \texttt{UrlMatcher} route claims. The
-comparison of Table~\ref{tab:probe} does not use that classification --- it decides for itself
-which entries answer an address --- so the same navigations are held against its own list as well,
-on the two implications that bind it: an address the framework serves with a screen it must hold,
+comparison of Table~\ref{tab:probe} does not use that classification; it decides for itself
+which entries answer an address. The same navigations are therefore held against its own list
+as well, on the two implications that bind it: an address the framework serves with a screen it must hold,
 and an address answered only by the catch-all it must not. That agrees on
 \ProbeCmpAgreed{} of \ProbeCmpChecked{}. The addresses are those this chapter reasons about and
 not a sample of the corpus: the \ProbeMissed{} screens the extractor does not mint are
 \ProbeAnswerAddresses{} navigations away from being individually checked, and are not claimed to
-have been. Two of
-its answers are worth naming because the comparison turns on them. An address whose route carries
+have been. The comparison turns on two of
+its answers. First, an address whose route carries
 children places no screen of its own: a navigation to mifos's \path{/collections} activates a last
 route with no component at all, so the address answers with the application's chrome and an empty
-outlet. And an application with a catch-all answers every address, so the configuration mentioning
-an address is no evidence that anything is mounted there --- in mifos a URL that matches nothing
-reaches a not-found component, and in bitwarden and kubernetes/dashboard it is redirected to a
-screen.
+outlet. Second, an application with a catch-all answers every address, so the configuration
+mentioning an address is no evidence that anything is mounted there. In mifos a URL that matches
+nothing reaches a not-found component, and in bitwarden and kubernetes/dashboard it is
+redirected to a screen.
 
 \subsection{What the framework mounts and the extractor does not}
 
@@ -457,20 +466,20 @@ route tables, one for each identity provider the deployment may use, and chooses
 computed from \texttt{window.env}, injected into the page at deployment time, so no reader of the
 code can say which of the two tables the application mounts, and the extractor declares the
 subtree unread. The two tables happen to declare the same five addresses with different
-components, and reading either would have named those five addresses correctly --- which is what
-the extractor used to do, by walking a table the module does not register under the prefix at all.
+components, and reading either would have named those five addresses correctly. The extractor
+used to do so by walking a table the module does not register under the prefix at all.
 That it arrived at the right addresses was an accident of this application: the same reading gives
 every prefix every table a file holds, and where two tables differ it mints the cross product.
-The addresses are lost here and the loss is declared, which is the exchange this analysis is
-built to make.
+The addresses are lost here and the loss is declared, which is the trade-off this analysis is
+designed to make.
 
 \ProbeMissedAlfresco{} are in alfresco and no two of them share a cause. Two are outside the
 directory the measurement scopes to, though for different reasons: \path{/login} is declared by
 the shell application that composes the measured library, and
 \texttt{/view/\allowbreak{}authentication-\allowbreak{}confirmation} by an installed package
-that shell provides. The second is outside it by a design choice the extractor states --- it does
-not follow a dependency into a package directory, because a package declares no screen of the
-application under measurement.
+that shell provides. The second is outside it because of a design choice the extractor states:
+it does not follow a dependency into a package directory, because a package declares no screen
+of the application under measurement.
 
 The third is inside it, and \path{/about} is not declared in TypeScript at all. The library ships \path{about.plugin.json},
 whose single entry is
@@ -492,13 +501,13 @@ grounds, so no claim of completeness is made over it either way.
 The remaining \ProbeMissedBitwarden{} is bitwarden's vault, whose route is produced by a helper
 that chooses between two components by feature flag.
 
-One construct in ghostfolio therefore accounts for almost all of this column, and it is worth
-saying what that means and what it does not. It does not mean the graph is missing those
+One construct in ghostfolio therefore accounts for almost all of this column. This does not
+mean the graph is missing those
 screens by accident: the construct is one spread, the extractor says it could
 not read it, and the \ProbeMissedGhostfolio{} pages behind it are generated entries that differ
 only in a path segment and a data key. It does mean that the cost of a declared blind spot can be
-far larger than the number of blind spots suggests, which is a thing a count of notes cannot
-show and this comparison can.
+far larger than the number of blind spots suggests. A count of notes cannot show this, but this
+comparison can.
 
 \subsection{Nothing is missing that was not declared}
 
@@ -506,12 +515,12 @@ show and this comparison can.
 has no node for without the extractor having said that part of its route set was beyond it. Every
 application in Table~\ref{tab:probe} that has a missing screen is an application that declared
 one. The correspondence is per application and not per cause, which is the weaker of the two
-readings and the only one measured here: alfresco declares that it could not read ten spreads,
-and one of its \ProbeMissedAlfresco{} missing screens, \path{/about}, has nothing to do with a
-spread --- it is declared in a JSON manifest and in no route file at all. What the measurement
-supports is that no application is missing a screen while asserting that its route set is whole
---- not that every missing screen is behind the construct its application named. Until this
-measurement the thesis could assert neither.
+readings and the only one measured here. alfresco declares that it could not read ten spreads,
+but one of its \ProbeMissedAlfresco{} missing screens, \path{/about}, has nothing to do with a
+spread: it is declared in a JSON manifest and in no route file at all. The measurement supports
+the claim that no application is missing a screen while asserting that its route set is whole.
+It does not support the claim that every missing screen is behind the construct its application
+named. Until this measurement the thesis could assert neither.
 
 On this corpus the correspondence happens to hold in the other direction as well:
 \ProbeDeclaredButComplete{} applications declare part of the route set unread and turn out to be
@@ -527,22 +536,23 @@ Section~\ref{sec:deadlinks} can rest on. That census used to suppress every cand
 application whose route set is a declared lower bound, and a per-application licence was added to
 lift the suppression where this comparison found the declared set complete after all. On the
 figures above that licence lifts the suppression for \RoundTwoProbeLifted{} applications: both
-applications the census draws from are missing a screen of their own --- mifos
-\ProbeMissedMifos{} and bitwarden \ProbeMissedBitwarden{} --- so neither can be licensed. A licence of that shape asks a harder question than the census needs ---
-whether a whole route set is complete --- and loses the census of any application that misses one
+applications the census draws from are missing a screen of their own (mifos
+\ProbeMissedMifos{} and bitwarden \ProbeMissedBitwarden{}), so neither can be licensed. A
+licence of that shape asks a harder question than the census needs, namely whether a whole
+route set is complete, and it loses the census of any application that misses one
 screen anywhere. Section~\ref{sec:deadlinks} therefore asks the question per candidate instead,
 of the same framework configuration: a link whose target the framework serves nothing at is a dead
 link whether or not the rest of the route set was read, and one whose target it does serve is not
 a dead link however the extractor read it.
 
-The correspondence did not hold when this check was first run, and it was not a near miss. Two
+When this check was first run, the correspondence clearly failed. Two
 applications with unread route sources were asserting complete ones: alfresco, whose document
 viewer is assembled by a helper call spread into the table, and bitwarden, whose vault route is
-built the same way. Each spread was skipped without a word. Bitwarden's silence had already been
-paid for, because with its caveat absent that application's sites entered the dead-link census ---
-on a route set that was missing a screen. Both readers now record a spread they cannot follow as
+built the same way. Each spread was skipped silently. Bitwarden's silence had already had a
+cost: with its caveat absent, that application's sites entered the dead-link census on a route
+set that was missing a screen. Both readers now record a spread they cannot follow as
 a route source they did not read. Their rules for doing so are not the same: the extractor
-declares the spread whose expression it cannot resolve to an array, the independent parser
+declares the spread whose expression it cannot resolve to an array, and the independent parser
 declares every spread, since it follows none. The second is the more conservative of the two and
 neither is silent, which is what the property requires.
 
@@ -550,9 +560,9 @@ neither is silent, which is what the property requires.
 \label{sec:ownership}
 
 One assumption underlies every approximation in the reader of route tables, and the others are
-instances of it. A route table that no site in the application claims --- no
+instances of it. A route table that no site in the application claims (no
 \texttt{loadChildren} names it, no spread or \texttt{children} carries it, no registration call
-takes it --- is read as a table the application mounts at its root. The assumption is what lets
+takes it) is read as a table the application mounts at its root. The assumption is what lets
 either tool find an application's routes however they are declared, and it is an
 over-approximation: a table registered nowhere the compiled build reaches is mounted at no
 address at all, and reading it at the root puts its entries into the graph as screens. It is
@@ -568,11 +578,11 @@ closing it would refuse a construct the corpus actually uses.
 The first concerns which file owns a lazily loaded route array. An Angular module loaded
 through \texttt{loadChildren} usually keeps its routes in a separate routing module that it
 imports, so the reader follows one import to find them. Electing that owner no longer trusts
-the \emph{shape} of an array --- a menu or breadcrumb configuration carrying \texttt{path}
+the \emph{shape} of an array: a menu or breadcrumb configuration carrying \texttt{path}
 properties is never elected, and a file claimed beside an elected owner is reported as an
-incomplete route set rather than dropped in silence. But a \texttt{Routes}-typed array is
-evidence that its author declared it to some router, never that \emph{this} application mounts
-it. A sibling application's typed table, reached through a workspace alias and used as data,
+incomplete route set rather than dropped silently. However, a \texttt{Routes}-typed array is
+evidence only that its author declared it to some router, not that \emph{this} application
+mounts it. A sibling application's typed table, reached through a workspace alias and used as data,
 is therefore still elected and still minted under the lazy prefix, with a deterministic edge
 into it. Requiring the elected owner to lie inside the application directory closes that
 case and simultaneously refuses a lazily loaded route array that legitimately lives in a
@@ -582,12 +592,12 @@ construct that is known to occur.
 
 The second is the same boundary one step earlier: the \texttt{loadChildren} specifier itself
 is not bounded, so a loader whose import resolves into another project's alias root mounts
-that project's table under this application's prefix. The obvious guard --- requiring the
-loaded file to belong to the same project root as the route that loads it --- was applied
+that project's table under this application's prefix. The obvious guard would require the
+loaded file to belong to the same project root as the route that loads it. It was applied
 experimentally and refuses a lazily loaded module that one corpus application keeps in an
 alias root, turning several of its declared screens into declared blind spots and lowering
 its reported coverage. By path alone the analysis cannot tell a shared lazy library from
-another application's route table, and that is the honest statement of the limit.
+another application's route table, and that is the limit.
 
 The third is a reading, not a defect. A routing module imported by two lazily loaded modules
 and loaded by no route is read as a table of the project root rather than as children of both
@@ -596,16 +606,16 @@ another's table, which is how the first approximation above was reached; the con
 reading is taken, and it costs the affected routes their prefix.
 
 A fourth was found by asking what the test that keeps a lazy route from adopting the
-application's root table actually read, and it is reported here as a repair rather than as a
-limitation, because what the asking produced was a measurement no reading of the code would
-have given. What the test read was the candidate file's own call to \texttt{forRoot} on
-\texttt{RouterModule}, Angular's own discriminator for a root table, which is why it was sound
-where it fired. It is also why it fired nowhere. An application that registers its root with
+application's root table actually read. It is reported here as a repair rather than as a
+limitation, because the question produced a measurement that no reading of the code would
+have given. The test read the candidate file's own call to \texttt{forRoot} on
+\texttt{RouterModule}, Angular's own discriminator for a root table. That made it sound where
+it fired, and it is also why it fired nowhere. An application that registers its root with
 the standalone \texttt{provideRouter} API is not recognised at all, and two of the six have no
-\texttt{forRoot} call anywhere; an application that declares its root array in one file and
-registers it in another --- ghostfolio and kubernetes/dashboard both do --- is recognised in the
+\texttt{forRoot} call anywhere. An application that declares its root array in one file and
+registers it in another, as ghostfolio and kubernetes/dashboard both do, is recognised in the
 registering file, which holds no route, and not in the file a lazily loaded module could adopt.
-Instrumenting the predicate made the limit exact rather than arguable: it was asked 698 times
+Instrumenting the predicate turned the limit into a measurement: it was asked 698 times
 across the six applications in the independent parser and 2798 times in the extractor, and
 answered yes on none of them. A guard that never fires is worse than no guard, because a commit
 message and a chapter credit it with a property nothing has shown it to have.
@@ -614,32 +624,33 @@ Both tools now mark root tables per \emph{array}, taken from the argument of eit
 registration API and resolved through the name it is nearly always written as, which is what
 makes the question answerable in the shape applications actually write.
 
-Several repairs of the same reader stand on constructed fixtures and on nothing else, and that
-is worth saying plainly rather than leaving to be discovered. A file holding a menu beside an
+Several repairs of the same reader stand on constructed fixtures and on nothing else. A file
+holding a menu beside an
 imported routing module, a \texttt{forChild} given a table declared in another file, a
 conditional resolved inside a registration call, a root table a spread elsewhere also carries,
 and a wrapper that takes its own path as a parameter: each of these was reproduced, each
 produced either an address the application does not mount or a declared loss where nothing was
 lost, and each is now refused. None of the five occurs in this corpus. Every figure in
 Chapter~\ref{ch:results} is therefore identical with and without them, so no result here is
-evidence that they work --- their evidence is the fixtures, which fail when the rule each pins is
-removed on its own. The same holds of the refusals in the independent parser --- the test that stops a lazy route
+evidence that they work. Their evidence is the fixtures, which fail when the rule each pins is
+removed on its own. The same holds of the refusals in the independent parser. The test that
+stops a lazy route
 adopting a table another route owns is asked 174 times in the extractor and 3512 in the parser
-and answers yes in neither --- so for those the corpus is evidence about the reading the two
-tools share and not about the guards that bound it. The per-array root-table test is the
-exception, and the distinction matters: it is asked a few hundred times and answers yes eight
+and answers yes in neither, so for those refusals the corpus is evidence about the reading the
+two tools share and not about the guards that bound it. The per-array root-table test is the
+exception: it is asked a few hundred times and answers yes eight
 times in each reader, and one of those answers is what mints alfresco's \path{/rules}. A rule
 the corpus exercises and a rule only a fixture exercises are different kinds of claim, and this
-chapter says which each is. The reverse also holds and is the reason for the paragraph: a corpus of six
+chapter says which each is. The reverse also holds: a corpus of six
 applications is not a sample that makes an analysis sound, and five constructs it happens not to
 contain were enough to break two of the properties this thesis claims. One further case came
 with it: a table a feature library both hands to \texttt{provideRouter} and exports for lazy
 loading is mounted at the root \emph{and} under the prefix that loads it, so a claim on its
-file may not cover both mounts --- the root scan now mints a root-registered array whatever
-claims its file, which is alfresco's \path{/rules}.
+file may not cover both mounts. The root scan now mints a root-registered array whatever
+claims its file, and alfresco's \path{/rules} is such a case.
 
-A fifth is the mirror of the first, and worth stating because it is where a conservative
-refusal becomes an over-approximation. When the only site that loads a route table lies in a
+A fifth is the mirror of the first. It is the case in which a conservative refusal becomes an
+over-approximation. When the only site that loads a route table lies in a
 test specification, the analysis declines the claim and scans the table from the project root,
 so its routes are reported at the application's root address. The guard establishes that a site
 the walk cannot reach may not justify suppressing the root scan; it does not establish that the
@@ -648,11 +659,11 @@ top-level-\texttt{Routes} over-approximation declared above, and it occurs nowhe
 corpus.
 
 \label{sec:named-outlet}
-A sixth is the named outlet, and its history in this work is the clearest case of the difference
-between declaring an approximation and being sound over it. A route carrying
+A sixth is the named outlet. Its history in this work shows the difference between declaring an
+approximation and being sound over it. A route carrying
 \texttt{outlet: 'name'} is reached as \texttt{(name:path)}, so it contributes no screen on the
-primary outlet. The extractor refused such a route from the start --- but only the route that
-carries the property: where a named outlet opened a \texttt{children} subtree, the routes beneath
+primary outlet. The extractor refused such a route from the start, but only the route that
+carries the property. Where a named outlet opened a \texttt{children} subtree, the routes beneath
 it were still assembled against the primary path and minted there. alfresco mounts its document
 viewer that way, and the graph held \path{/view/:nodeId} and
 \path{/search-libraries/view/:nodeId}, two addresses that application serves only through the
@@ -661,21 +672,22 @@ viewer outlet. The independent route parser read the subtree the same way, so co
 was written down as an open case, on the reasoning that an approximation stated is an
 approximation a consumer can price.
 
-That reasoning was wrong, and the runtime check of Section~\ref{sec:res-probe} is what showed it.
+That reasoning was wrong, as the runtime check of Section~\ref{sec:res-probe} showed.
 A consumer reading the graph finds a node at \path{/view/:nodeId}; a navigation to that address in
 the built application is answered by the catch-all route. The declaration did not make the node
-true, and the must-tier property admits no exception that a sentence can buy back. An outlet is
+true, and the must-tier property admits no exception on the strength of a written caveat. An
+outlet is
 inherited, so nothing below a named-outlet route has a primary address either: the extractor now
 carries outlet context down the walk and mints no screen for such a subtree. What remains is a
-limitation on what the graph contains --- a screen reached only through a named outlet is not an
-element of the node set, and the transitions into it are not in the edge set --- which is a
-statement about recall and is the kind of approximation a declaration can honestly cover.
+limitation on what the graph contains: a screen reached only through a named outlet is not an
+element of the node set, and the transitions into it are not in the edge set. That is a
+statement about recall, and it is the kind of approximation a declaration can legitimately cover.
 
 One attribution of a blind spot to the component it hides is a filename heuristic and is
 labelled as one. Where a route prefix the analysis could not follow has literal segments, a
 component whose path carries all of them as whole directory names is reported as hidden behind
-that prefix. The heuristic answers the question a reader asks --- which screens are missing
-because of this hole --- and it is wrong in two directions that the harness now states rather
+that prefix. The heuristic answers the question a reader asks (which screens are missing
+because of this hole), and it is wrong in two directions that the harness now states rather
 than hides. A route prefix does not determine a directory name, so the components behind a hole
 whose directory is named differently are not attributed to it and are reported only as having no
 node; and a prefix made entirely of parameters has no literal segment, so it is attributed to no
@@ -684,12 +696,13 @@ read \path{/cluster} into \texttt{resourcelist/clusterrole/component.ts} and wou
 the extractor's own true note about that file with a tool blind spot that does not cover it.
 No count of the rows that satisfied the broader predicate is given, because the figure depends
 on which population it is taken over and nothing in this thesis rests on it. What does matter
-is why the attribution reaches the published reason table in neither form, and the obvious
-account of that is wrong: it is not that some earlier test answers those rows first. The attribution is asked of
+is why the attribution reaches the published reason table in neither form. The obvious
+explanation, that some earlier test answers those rows first, is wrong. The attribution is asked of
 all \RoundTwoUnexplained{} unaccounted rows in the corpus and declines every one of them on its
-own first two conditions --- \RoundTwoUnplacedClass{} because the owning file is not a component
-and the rest because the graph already witnesses an edge from that file --- so the comparison
-this paragraph is about is never reached on this corpus at all. What is recorded here is therefore a property of the rule and not
+own first two conditions: \RoundTwoUnplacedClass{} because the owning file is not a component,
+and the rest because the graph already witnesses an edge from that file. The comparison
+this paragraph is about is never reached on this corpus, so what is recorded here is a
+property of the rule and not
 of any figure in Chapter~\ref{ch:results}. The narrower rule is still the one to state, because
 the broader one was false wherever it was asked.
 

@@ -39,6 +39,7 @@
 \input{generated-must}
 \input{generated-must-witness}
 \input{generated-guard-only}
+\input{generated-route-order}
 \input{generated-sweep}
 \input{generated-callgraph}
 \input{figures/fig-plots}
@@ -65,7 +66,7 @@ Supervisor: & Prof.\ Petri Vuorimaa \\
 Major: & Computer Science \\
 \end{tabular}
 \vfill
-{\small Draft of 1 November 2026. Seven chapters and one appendix. Every figure of the current
+{\small Revised version of 1 November 2026, for the supervisor's review. Seven chapters and one appendix. Every figure of the current
 instrument is generated from the results of the commit named at the head of its generated file,
 and figures of earlier instruments are read from their own recorded results, which the text names. The preamble is a preview; the
 official Aalto thesis class is applied before submission.\par}
@@ -78,9 +79,9 @@ user can cause between them. Static extraction of such graphs is well establishe
 Android, where each event handler can be attributed to the widget that registered it
 and thus to a single window. For web applications, navigation models have been built at design time, extracted statically from server-rendered applications, or obtained by crawling a running application. Earlier work extracts them
 statically from a client-side application's route declarations for three different
-purposes --- model checking, restricted to applications that declare no nested routes, no
+purposes: model checking, restricted to applications that declare no nested routes, no
 route parameters and no data-bound navigation; end-to-end test generation; and
-access-control checking --- and in none of the three did this review find a measurement of
+access-control checking. In none of the three did this review find a measurement of
 what the extraction fails to read.
 
 This thesis measures static extraction on six open-source Angular applications with
@@ -91,6 +92,15 @@ were corrected against each other enumerate it, and recovers almost no navigatio
 deterministic transition once the demotion rules the soundness property rests on are applied:
 \CensusMustSites{} constructs behind \CensusMust{} edges, and taking every guard to let the
 navigation through raises that only to \GuardOnlySites{} constructs behind \GuardOnlyMust{} edges.
+The edge count makes this evidence look larger than it is: \CensusMustSitesKdash{} of the constructs, the
+links of one application's toolbar, yield \CensusMustKdash{} of the edges because the toolbar renders
+on almost every screen, and without that application the tier is
+\the\numexpr\CensusMust-\CensusMustKdash\relax{} edges on
+\the\numexpr\CensusMustSites-\CensusMustSitesKdash\relax{} constructs. \RouteOrderResting{} of the
+edges also rest on an assumption about the order of route tables registered apart, which the
+extractor does not read. The mechanical witness check
+finds no wrong destination among the \MustWitnessEdges{} edges and cannot read the destination of
+\MustWitnessUnread{} of them.
 Before the defects this thesis identifies were repaired, two of the six yielded a list of
 routes with no transitions at all. The node result is bounded
 by what a reader of the route table can enumerate: a runtime probe that visits every
@@ -98,7 +108,8 @@ address the applications answer finds \ProbeMissed{} mounted addresses with no n
 \ProbeMissedGhostfolio{} of them in a single application, and only \ProbeExactApps{} of
 the six are exact against it.
 
-Every lost construct is assigned to one defect class. Attribution is the largest
+Every lost construct is assigned to one defect class, the first whose rule matches it, so the
+order of the rules is part of the measure. Under that order attribution is the largest
 class in every application of the corpus once the
 node-level defects this thesis identifies are repaired. In a web application, a navigation site
 frequently has no single owning screen: it may be located in a shared component, in
@@ -112,10 +123,10 @@ reports as deterministic.
 It states a soundness property for the deterministic tier and tests it mechanically rather
 than proving it. Four corrections take that tier from the \EarlierMustEdges{} edges an earlier
 instrument published to \CensusMust{}. The first three were each hidden by the one before; the
-fourth was found by reading the tier construct by construct, and of the \RoundTwoMustEdges{} edges
+fourth was found by reading the tier construct by construct, and of the \RoundMustEdges{} edges
 the first three left it finds a construct that earns must in \MustFateKept{}, holds \MustFateJoined{}
 more at must only through constructs it did not cite, and finds the others running under a
-condition --- after a request returns, in a branch, under a template condition ---, behind a guard
+condition (after a request returns, in a branch, under a template condition), behind a guard
 the reader had missed, or pointing at the screen already displayed. Two readings of whether each
 construct behind those edges runs every time its code does, made by the AI assistant from the
 sources with the extractor's condition rules as their definition, agree with it at
@@ -125,20 +136,24 @@ between screens under a parent whose \texttt{canActivate} the router does not ru
 \CensusMustApps{} of the six applications. The implemented part is evaluated on the same
 corpus. What it adds beyond the mechanism earlier
 work already has is small and measured: router-outlet descent leaves the number of placed sites
-unchanged on \AblationOutletSameSitesApps{} of the six applications, the member-level call graph
-places \AblationFullAddedSites{} more, \AblationFullAddedShare{} of the corpus total, and the
+unchanged on \AblationOutletSameSitesApps{} of the six applications, the level that adds the
+member-level call graph places \AblationFullAddedSites{} more, \AblationFullAddedShare{} of the
+corpus total, of which the call graph's own share over the rule it replaced is
+\AblationCallGraphNetSites{}, and the
 width they buy is checked in both directions on one application only. With attribution, \AttrRecoveredShare{} of the
 constructs that loss class holds are recovered, on every application in the corpus, almost all
 of it navigation the graph reports as possible rather than certain. On the one application small enough for the
-screens each navigation site fires from to be read off the sources by hand, the computed sets
-are right about \GTFullRecall{} of those attributions. Most of that is not new: attributing
+screens each navigation site fires from to be read off the sources by hand, \GTApp{} with
+\GTSites{} navigation sites, the computed sets are right about \GTFullRecall{} of its
+\GTPairs{} (site, screen) attributions. Most of that is not new: attributing
 what the root component renders to every screen, which earlier work already does, reaches
 \GTRootedRecall{} of them and attributes nothing the application does not. The analysis adds the
 rest without a wrong attribution, but only after replacing a rule of its own that the same reading
-had caught attributing one service's navigation to every screen, so that application cannot test
-the replacement independently. Elsewhere the sets are checked in one direction only, by the
+had caught attributing one service's navigation to every screen, and correcting the route reader
+where it had shown one screen's attributions missing, so that application cannot test either
+repair independently. Elsewhere the sets are checked in one direction only, by the
 running interface on \ScopeApps{} of the \ProbeApps{} applications and \ScopeJudged{} of their
-\ScopeScreens{} screens, and ghostfolio's not at all, which is the work's sharpest limitation.
+\ScopeScreens{} screens, and ghostfolio's not at all, which is the most serious limitation of the work.
 
 Mutation testing on three of the applications shows that the graph detects \MutDetected{}
 of \MutScored{} injected source changes, against \MutBaseDetected{} of \MutBaseScored{}

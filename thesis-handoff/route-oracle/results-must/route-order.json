@@ -1,0 +1,52 @@
+{
+  "rows": [
+    {
+      "slug": "realworld",
+      "edges": 9,
+      "edgesWithout": 9,
+      "sites": 3,
+      "sitesWithout": 3,
+      "noted": false
+    },
+    {
+      "slug": "alfresco",
+      "edges": 0,
+      "edgesWithout": 0,
+      "sites": 0,
+      "sitesWithout": 0,
+      "noted": false
+    },
+    {
+      "slug": "ghostfolio",
+      "edges": 0,
+      "edgesWithout": 0,
+      "sites": 0,
+      "sitesWithout": 0,
+      "noted": false
+    },
+    {
+      "slug": "k8sdash",
+      "edges": 125,
+      "edgesWithout": 0,
+      "sites": 2,
+      "sitesWithout": 0,
+      "noted": true
+    },
+    {
+      "slug": "bitwarden",
+      "edges": 1,
+      "edgesWithout": 0,
+      "sites": 1,
+      "sitesWithout": 0,
+      "noted": true
+    },
+    {
+      "slug": "mifos",
+      "edges": 15,
+      "edgesWithout": 15,
+      "sites": 19,
+      "sitesWithout": 19,
+      "noted": true
+    }
+  ]
+}
