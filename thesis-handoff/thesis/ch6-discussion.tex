@@ -172,9 +172,10 @@ Both uses stop at the same place, which is runtime dynamic routing. Where a navi
 target is computed from a value, where the route table is assembled at startup from
 configuration rather than declared, and where a user interface state is an overlay that
 no route describes, the static graph is either silent or over-approximates into the may
-tier, which carries no soundness claim. The must tier is a lower bound on the
-navigation an application can perform; the may tier is not, and a may edge may name a
-transition the application cannot make. A query that must not miss a transition
+tier, which carries no soundness claim. Under the assumptions of Claim~\ref{claim:must},
+the must tier is a lower bound on the navigation an application can perform; the may tier
+is not, and a may edge may name a transition the application cannot make. A query that
+must not miss a transition
 therefore cannot be answered from the graph alone, and the graph's own witnesses and
 declared approximations are what tell a consumer which queries those are.
 
