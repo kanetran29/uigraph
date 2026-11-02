@@ -925,6 +925,8 @@ describe('score-ground-truth: the shell sites of the reference', () => {
     expect(macro(out, 'GTPairs')).toBe('4')
     expect(macro(out, 'GTShellSites')).toBe('1')
     expect(macro(out, 'GTShellPairs')).toBe('3')
+    // The graph places nothing, so recall over the one non-shell pair is zero.
+    expect(macro(out, 'GTFullRecallNonShell')).toBe('0.0\\,\\%')
   })
 })
 

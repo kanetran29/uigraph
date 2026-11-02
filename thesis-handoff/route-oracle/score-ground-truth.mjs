@@ -2,10 +2,10 @@
 // Scores each attribution level against a hand-built site-screen ground truth.
 //
 // The runtime scope oracle can refute a scope that is too small but almost never one that is
-// too large (Section 5), and the ablation compares the levels only with one another. Neither
-// says which level is RIGHT. This does: for one application, the screens each navigation site
-// really fires from were read off the sources by hand and recorded in ground-truth/<app>.json,
-// and every level is scored against that in both directions.
+// too large (Section 5), and the ablation compares the levels only with one another. This scores
+// every level in both directions against a structural reference: for one application, the screens
+// each navigation site is placed on by the analysis's own relations were read off the sources by
+// hand and recorded in ground-truth/<app>.json. Agreement with it is not correctness at run time.
 //
 //   missing   a (site, screen) the application has and the level does not: scope too small.
 //   excess    a (site, screen) the level has and the application does not: scope too large.
@@ -38,6 +38,8 @@ const wanted = new Map()
 for (const s of truth.sites) {
   wanted.set(key(s.site), { screens: new Set(s.screens === 'ALL' ? ALL : s.screens), why: s.why })
 }
+// Sites the reference places on every screen.
+const shellSites = new Set(truth.sites.filter((s) => s.screens === 'ALL').map((s) => key(s.site)))
 const excludedSites = new Set((truth.excluded ?? []).map((e) => key(e.site)))
 
 /** site -> set of screen routes the graph attributes it to. */
@@ -73,7 +75,7 @@ for (const spec of dbArgs) {
   const level = spec.slice(0, i)
   const got = attribution(spec.slice(i + 1))
 
-  let correct = 0, missing = 0, excess = 0, unplaced = 0
+  let correct = 0, missing = 0, excess = 0, unplaced = 0, correctNS = 0, missingNS = 0
   const worst = []
   for (const [site, { screens }] of wanted) {
     const have = got.get(site) ?? new Set()
@@ -82,6 +84,7 @@ for (const spec of dbArgs) {
     const m = screens.size - c
     const x = [...have].filter((s) => !screens.has(s)).length
     correct += c; missing += m; excess += x
+    if (!shellSites.has(site)) { correctNS += c; missingNS += m }
     if (x || m) worst.push({ site, want: screens.size, got: have.size, missing: m, excess: x })
   }
   // The ground truth's own blind spot: sites the graph places that it never listed.
@@ -99,6 +102,8 @@ for (const spec of dbArgs) {
     unplaced,
     precision: claimed ? correct / claimed : 0,
     recall: real ? correct / real : 0,
+    // Recall over the pairs of the sites the reference does not place on every screen.
+    recallNonShell: correctNS + missingNS ? correctNS / (correctNS + missingNS) : 0,
     unlisted: unlisted.length,
     unlistedExamples: unlisted.slice(0, 5),
     worst: worst.sort((a, b) => (b.excess + b.missing) - (a.excess + a.missing)).slice(0, 6),
@@ -147,6 +152,7 @@ if (tex) {
     out += `\\newcommand{\\GT${cap}Recall}{${pc(l.recall)}}\n`
     out += `\\newcommand{\\GT${cap}Excess}{${l.excess}}\n`
     out += `\\newcommand{\\GT${cap}Missing}{${l.missing}}\n`
+    out += `\\newcommand{\\GT${cap}RecallNonShell}{${pc(l.recallNonShell)}}\n`
     // How many SCOPES the pairs above are spread over. An excess of nine pairs at one site
     // and at nine sites are different defects, and prose that says "nine scopes" when the
     // count is one site nine screens too wide states the wrong one.
