@@ -35,6 +35,12 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 
 ## State on 2 Nov 2026, afternoon (supersedes everything below where they disagree)
 
+- `9fee9f5` (after review of `e8ac256`): `\RoundTwoBefore` is over baseline in-scope sites (71.3 %, was 71.9 %
+  over all constructs); no re-extraction, `final14.tgz` still reproduces all four round tables byte for byte at this
+  commit. Table 3.2 and Algorithm 1 now scope entry guards by the sources of navigations into the route
+  (relation T, model only; the prototype's route-naming rule is described as a stand-in), and the complexity bound
+  includes M (component → member) and T. Harness 95/95.
+
 - Extractor and harness final at `c42f220`. Every generated table is stamped `c42f220` (round tables
   `c42f2204 (local-checkout)`), produced by `remeasure.sh` then `regen-round.sh` with nothing committed during
   the runs; round runs archived as `route-oracle/results-round2/final14.tgz`. Harness 94/94, guard-resolve 13/13,
