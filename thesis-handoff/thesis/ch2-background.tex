@@ -200,17 +200,30 @@ al.\ parse Angular sources and templates to build a graph of navigation structur
 interaction sites and the conditions (guards among them) that decide whether an
 interaction is executable, enumerate workflows over that graph, and compile each workflow
 into a browser test; the graph is a coverage denominator for generated end-to-end tests
-\cite{rima2026e2e}. That account is taken from the publisher's abstract and the project's
-replication package, the chapter itself not having been available to this review. Zhang et al.\ parse
+\cite{rima2026e2e}. That account is taken from the publisher's abstract and from the
+operational specification in the project's replication package
+(\path{softscanner-sw/softscanner_fa}, \path{docs/paper/approach.md}), the chapter itself not
+having been available to this review; the specification may differ from the published chapter.
+It attributes more than containment. The components active at a route are the closure, over
+component composition, of the route's own component, those of its ancestor routes and the
+bootstrap components, which covers what the \emph{rooted} and \emph{outlet} levels of
+Section~\ref{sec:res-ablation} place. A handler is followed into helper methods of the same
+class to depth one and into the first callback of a \texttt{subscribe}, and the service a call
+names is resolved by the type of the constructor parameter. The specification excludes
+router-outlet modelling and provider resolution beyond module and root providers, and it does
+not follow a call into a service, so a navigation inside a service member is not placed on the
+screens of its callers. Zhang et al.\ parse
 the compiled JavaScript bundle rather than the sources, take declared routes as vertices and
 navigation calls as edges, and check an access-control policy against the screens reachable
 from an authorised one; their graph is declared an over-approximation and is not narrowed,
 and no navigation site is attributed to the screens it can fire from
 \cite{zhang2025veriflow}. This review found a measurement of extraction loss in neither. The
 problem addressed in this thesis is therefore neither new nor settled: the graph has been
-extracted statically for model checking, for test generation and for policy checking, and in
-none of those is the attribution of a site in shared code computed beyond containment or the
-loss quantified.
+extracted statically for model checking, for test generation and for policy checking. Earlier
+work already attributes a site through containment, the shell and the enclosing routes, and
+follows calls within a class; what none of these does is carry a navigation inside a service
+member to the screens of its callers across classes, with the provider that binds the
+injection, give the resulting transitions a modality, or quantify the loss.
 
 The work reported here is located between these analyses and
 the dynamic tools described above.
@@ -722,7 +735,7 @@ generated end-to-end suite \cite{rima2026e2e}, one as the reachability relation 
 access-control check, declared an over-approximation \cite{zhang2025veriflow}. What
 has not been covered by earlier work is that extraction without those restrictions:
 over nested and lazily loaded route trees, with guards carried onto each transition as a
-modality rather than onto a workflow as a feasibility verdict, with attribution that follows calls and dispatch as well as containment, and
+modality rather than onto a workflow as a feasibility verdict, with attribution that follows calls across classes and into services under their provider bindings, and
 with the resulting loss declared and measured on applications large enough for the
 difficult constructs to occur. The Android literature is the nearest static
 relative. It attributes navigation by resolving the owning object, and when that fails
@@ -739,8 +752,8 @@ explicitly to recover call edges that a general analysis loses
 client-side framework in order to recover navigation has been done, within the
 restrictions set out above \cite{oshima2018model} and, more recently, for test generation
 and for access-control checking \cite{rima2026e2e,zhang2025veriflow}; what this review found
-no instance of is an attribution that carries a navigation site in shared code beyond
-component containment, or a reported measurement of what the recovery fails to read. The other
+no instance of is an attribution that carries a navigation site inside a service to the screens
+of its callers across classes, or a reported measurement of what the recovery fails to read. The other
 peer-reviewed static analysis in the Angular family targets AngularJS 1.x and checks
 template and controller consistency rather than navigation \cite{ocariza2015detecting},
 and the type information that TypeScript adds narrows a dispatch without settling it,

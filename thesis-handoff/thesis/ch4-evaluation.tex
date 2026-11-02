@@ -162,7 +162,9 @@ information from the root component as well as from the components beneath it
 (Section~\ref{sec:dynamic-spa}), that level, and not containment alone, is the one that
 measures how far the prior work reaches on this corpus. \emph{Outlet} adds router-outlet
 descent, and \emph{full} adds the member-level call graph, which places a service's navigation on
-the screens of the members that call it. A sixth level, \emph{class}, is run beside the nested
+the screens of the members that call it, together with its fallback join and the stand-ins for
+guards and effects. Each level adds to the one before it in this fixed order, so a step measures
+what a mechanism adds given those below it, and the \emph{full} step is not one mechanism alone. A sixth level, \emph{class}, is run beside the nested
 ones rather than among them: it replaces the call graph with the rule the call graph superseded,
 which joins a navigating service over every component that injects its class, so that what the
 call graph changes can be measured. The nested
@@ -171,13 +173,14 @@ differently, and the harness checks that on the real graphs rather than assuming
 (site, screen) pair present at one level and absent at the next is a defect in the switch, and
 no table is written when one is found.
 
-The second supplies what no method above has: a ground truth. For one application the screens
-each navigation site fires from were read off the sources by hand, under the rules stated in
-the file's method field, and recorded, with the derivation for each site, in
-\path{route-oracle/ground-truth/realworld.json}. Every level
+The second supplies what no method above has: a reference scored in both directions. For one
+application the screens each navigation site fires from were read off the sources by hand, under
+the rules stated in the file's method field, and recorded, with the derivation for each site, in
+\path{route-oracle/ground-truth/realworld.json}. This is the structural reference of
+Section~\ref{sec:scope}, called the ground truth below for brevity. Every level
 is then scored against it in both directions, which is the comparison the runtime oracle cannot
-make: a pair the application has and the level does not is a scope too small, and a pair the
-level has and the application does not is a scope too large. Three limits belong with it.
+make: a pair the reference has and the level does not is a scope too small by the reference, and
+a pair the level has and the reference does not is a scope too large by it. Three limits belong with it.
 It is one application, chosen because it is small enough to read exhaustively. It is the
 author's reading, so it is not independent of the tool's author; it is published with its
 reasoning so that a reader can check it against the same sources. Its rules are the analysis's own
@@ -281,8 +284,8 @@ of those edges is given, because the defect is repaired and the graph that carri
 exists, so the figure cannot be re-measured against anything. RQ3 is answered positively only if coverage rises and
 must-tier precision does not fall.
 
-\textbf{Node-level recall.} The fraction of distinct URLs visited by an application's
-own passing end-to-end tests that have a matching node in the graph. It is a
+\textbf{Node-level recall.} The fraction of distinct URLs named in an application's
+own end-to-end test sources that have a matching node in the graph. It is a
 cross-check on node extraction, which all edges depend on.
 
 \textbf{Detection rate (RQ4).} The fraction of injected source changes that produce the

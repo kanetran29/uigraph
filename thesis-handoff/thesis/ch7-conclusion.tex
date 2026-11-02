@@ -56,15 +56,17 @@ k8sdash's toolbar), drawn from every screen the shell renders. The witness check
 \MustWitnessViolations{} failures among the must edges and cannot read the destination of
 \MustWitnessUnread{}; the tier is too small for that to be a statement about precision in general. Whether the computed screen sets are correct is established on one
 application and not on the corpus: read site by site on \GTApp{}, the analysis names
-\GTFullRecall{} of the (site, screen) pairs the application has under the ground truth's rules at \GTFullPrecision{}
-precision, after the one over-approximating rule that reading exposed had been replaced by the
+\GTFullRecall{} of the (site, screen) pairs of the hand-read structural reference at \GTFullPrecision{}
+precision against it, after the one over-approximating rule that reading exposed had been replaced by the
 call graph and the route reader corrected where it had shown one screen's attributions missing.
 Elsewhere the running interface puts half of that question to \ScopeApps{} of the
 six applications, and nothing here puts it to ghostfolio. The scopes are also wide: narrower than
 attributing every site to every screen by a factor between \BaselineFactorMin{} and
 \BaselineFactorMax{}, and on \BaselineBluntest{} the average site is attributed to
 \BaselineBluntestShare{} of the screens. A scope that wide says little about where the site
-fires, even if it is sound.
+fires, even if it is sound. RQ3 is therefore answered for coverage, which rises; that the
+transitions attribution adds are as precise as those it started from is not established on the
+corpus.
 
 The answer to RQ4, on the three applications that were mutated, is that the graph is sensitive
 to authored source changes in the constructs it represents. Of the \MutFallibleScored{} mutants
@@ -76,7 +78,10 @@ change to a construct the baseline graph holds no edge for cannot be scored agai
 \MutPaired{} mutants both graphs can score the figures are \MutPairedDetected{} and
 \MutPairedBaseDetected{}, and the one disagreement is a limit of the harness, not of the graph.
 Most of attribution's effect on this experiment is therefore the widening of what can be scored
-at all. The \MutExcludedGuard{} mutants that cannot be scored are guards the graph can record on
+at all; a gain in sensitivity on what both graphs represent is not shown. Responding to the
+measured changes is a property change impact analysis needs, not a measure of its accuracy:
+the experiment does not ask whether the graph names every affected screen, how many it names in
+excess, or how well it would select tests. The \MutExcludedGuard{} mutants that cannot be scored are guards the graph can record on
 no edge: for \MutExcludedUnreached{} of them no edge enters the screen, which is RQ1's coverage
 gap, and \MutExcludedNoScreen{} guards a route that yields no screen. The samples are small, and
 the full detection was reached only after the undetected mutants of the previous run were read
@@ -193,11 +198,11 @@ attribution declined to place rather than sites it placed wrongly. What that can
 convict a scope of being too large: only \ScopeExact{} of the predictions at those screens
 name a destination exactly, so the direction is close to untestable by this method. Reading
 one application's sites by hand did convict one: the rule that
-joined a navigating service over its injectors asserted \GTClassExcess{} pairs that application
-does not have, all at one site. The call graph that replaced the rule asserts none there, but it
+joined a navigating service over its injectors asserted \GTClassExcess{} pairs outside that
+application's structural reference, all at one site. The call graph that replaced the rule asserts none there, but it
 was written with that site in view, so the reading that convicted the old rule cannot acquit the
-new one; the level that stands for earlier work's reach recovers \GTRootedRecall{} of the real
-pairs while asserting nothing wrong at all, against \GTFullRecall{} for this analysis. It judged
+new one; the level that stands for earlier work's reach recovers \GTRootedRecall{} of the reference
+pairs while asserting none outside it, against \GTFullRecall{} for this analysis. It judged
 \ScopeJudged{} screens of \ScopeScreens{}, because without a backend the
 rest redirect to a sign-in page. Driving the applications into a signed-in state is the work
 that would decide the other half. Whether a graph of screens

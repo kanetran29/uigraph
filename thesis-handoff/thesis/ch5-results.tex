@@ -502,8 +502,9 @@ Direct ownership places \AblationOwnedSites{} sites, \AblationOwnedSiteShare{} o
 full analysis places, and containment raises that only to \AblationNestingSites{}. The shell
 rule is that step: \emph{rooted} places \AblationRootedSites{} sites,
 \AblationRootedSiteShare{} of the full figure, and carries the pair count from
-\AblationNestingPairs{} to \AblationRootedPairs{}. Everything this thesis adds on top of that
-(outlet descent and the member-level call graph that places a service's navigation)
+\AblationNestingPairs{} to \AblationRootedPairs{}. Everything above that level (outlet descent,
+which an ancestor-route closure in earlier work also covers, and the member-level call graph that
+places a service's navigation)
 raises the site count from \AblationRootedSites{} to \AblationFullSites{}: outlet descent adds
 \AblationOutletAddedSites{} sites, and the full level \AblationFullAddedSites{},
 \AblationFullAddedShare{} of the corpus total, which is the call graph, its fallback join and the
@@ -523,8 +524,12 @@ That ordering matters for the comparison with earlier work, because the shell ru
 mechanism this thesis introduced. Oshima and Kishi assemble their page information from the
 root component as well as from the components beneath it
 (Section~\ref{sec:dynamic-spa}), so \emph{rooted}, and not \emph{nesting}, is the level that
-stands for what they reach. A comparison drawn against containment alone would be a comparison
-with a method nobody proposed.
+stands for what they reach; Rima et al.'s specification also closes a route's components over
+those of its ancestor routes (Section~\ref{sec:dynamic-spa}), which is what \emph{outlet} adds.
+Both are baselines that reimplement those mechanisms inside this extractor, not runs of either
+tool, so the comparison measures what the added mechanisms place
+on the same inputs and does not show that the tools themselves would place fewer. A comparison
+drawn against containment alone would be a comparison with a method nobody proposed.
 
 Outlet descent is the mechanism whose contribution is mostly width: it
 places \AblationOutletSites{} sites against rooted's \AblationRootedSites{}, the same count on
@@ -545,24 +550,24 @@ and not whether they describe what the running application renders
 (Section~\ref{sec:protocol}).
 
 \begin{table}[t]\small
-\caption{Each attribution level against the hand-built ground truth for \GTApp{}.
-\emph{Missing} is a pair the application has and the level does not; \emph{excess} is a pair
-the level has and the application does not.}
+\caption{Each attribution level against the hand-read structural reference for \GTApp{}.
+\emph{Missing} is a pair the reference has and the level does not; \emph{excess} is a pair
+the level has and the reference does not. Precision and recall are agreement with that
+reference, not with what the running application renders.}
 \label{tab:groundtruth}
 \TabGroundTruth
 \end{table}
 
-Every nested level is fully precise: none of them attributes any pair the application
-does not have. What separates them is how much they find. Direct ownership
+No nested level attributes a pair the reference does not contain. What separates them is how much they find. Direct ownership
 recovers \GTOwnedRecall{} and containment \GTNestingRecall{}, both far short. Adding the
 shell rule, the level that stands for the prior work's reach, recovers
 \GTRootedRecall{} at \GTRootedPrecision{} precision, leaving \GTRootedMissing{} pairs
 unfound and inventing none.
 
-Against \emph{rooted}, everything this thesis adds reduces \GTRootedMissing{} missing pairs to
-\GTFullMissing{} and asserts no pair the application does not have. That was not true of the
+Against \emph{rooted}, everything above that level reduces \GTRootedMissing{} missing pairs to
+\GTFullMissing{} and asserts no pair outside the reference. That was not true of the
 analysis before the call graph, and the last row, the class-level join the call graph replaced,
-shows where it failed: it asserts \GTClassExcess{} pairs the application does not have, all at
+shows where it failed: it asserts \GTClassExcess{} pairs outside the reference, all at
 one site, the \texttt{navigate} inside \texttt{UserService.logout}, taking precision to
 \GTClassPrecision{}. The class join attributes a navigating service to every screen whose
 components inject it. Ten components inject this one, the header among them, and the shell
@@ -584,14 +589,14 @@ view, so the clean row confirms two repairs and tests neither independently.
 
 Two things follow for RQ3. The first is that most of the recovery attributed to this analysis
 is produced by a mechanism earlier work already had: \GTRootedRecall{} of the
-\GTPairs{} pairs are reached by the shell rule, and the mechanisms added here take that to
+\GTPairs{} pairs are reached by the shell rule, and the mechanisms above it take that to
 \GTFullRecall{}. The second is
 that this is one application of six, the smallest, and the corpus-wide widths of
 Table~\ref{tab:scopebaseline} are not licensed by it. On \BaselineBluntest{} the mean
 scope is \BaselineBluntestShare{} of the application, and no ground truth exists to say
 whether that width is earned. What the ground truth establishes is narrower than soundness: the
-additional mechanisms raise attribution recall on this annotated application without a wrong
-pair, after the one scope it found too large and the one screen it found missed had both been
+additional mechanisms raise agreement with the structural reference on this application without
+a pair outside it, after the one scope it found too large and the one screen it found missed had both been
 repaired with it in view. What it cannot establish is that the same holds on an application of
 six hundred screens.
 
@@ -611,8 +616,8 @@ whether a scope is too large,
 because at the screens it can observe the graph almost never claims a destination exactly, and
 because a link a template renders conditionally is absent for reasons that have nothing to do
 with the scope. The ground truth of Section~\ref{sec:res-groundtruth} does test both
-directions: against the \GTPairs{} pairs it records, the analysis asserts none that are not
-there, where the class-level join it replaced asserted \GTClassExcess{} at one site, and misses
+directions against the structural reference: of the \GTPairs{} pairs it records, the analysis
+asserts none outside it, where the class-level join it replaced asserted \GTClassExcess{} at one site, and misses
 \GTFullMissing{}. That result is for \GTApp{} alone, the smallest application of the six, and both repairs
 were made after the ground truth had shown the defects. The third is the
 width reported in Section~\ref{sec:res-width}: the computed scopes are narrower than the

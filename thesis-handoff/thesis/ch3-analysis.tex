@@ -270,12 +270,15 @@ Two different things are called a scope, and the rest of this thesis keeps them 
 Write $\mathit{scope}^{*}(x)$ for the \emph{true scope} of a site $x$, the set of screens
 from which $x$ really can fire, which is a property of the application and not of any
 analysis; and $\mathit{scope}(x)$ for the \emph{computed scope}, the set the fixpoint of
-Section~\ref{sec:inputs} returns. The two are measured against each other only where a true
-scope has been established by hand, which in this thesis is one application
-(Section~\ref{sec:res-groundtruth}): a screen in
+Section~\ref{sec:inputs} returns. A screen in
 $\mathit{scope}^{*}(x) \setminus \mathit{scope}(x)$ is a scope too small and a screen in
-$\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ is a scope too large. Everywhere else the
-thesis reports the computed scope and says so.
+$\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ is a scope too large. No true scope is
+established anywhere in this thesis. For one application a third set is read off the sources by
+hand, the \emph{structural reference} $\mathit{scope}^{R}(x)$, which applies the analysis's
+own relations without its implementation (Section~\ref{sec:res-groundtruth}). Agreement
+between $\mathit{scope}$ and $\mathit{scope}^{R}$ shows that the relations are implemented as
+stated; it does not show that either equals $\mathit{scope}^{*}$. Everywhere else the thesis
+reports the computed scope and says so.
 
 The empty computed scope is likewise two situations, and conflating them would hide a defect
 inside a property of the application. A site is \emph{unreachable} when

@@ -151,9 +151,10 @@ those edges leave and enter. This is the screen-level counterpart of what Chiant
 with atomic changes, affected tests and methods \cite{ren2004chianti}, and it sits in
 the impact analysis tradition that Arnold and Bohner describe
 \cite{arnold1993impact,bohner1996software,lehnert2011taxonomy}. RQ4 provides evidence that
-the mapping reacts to real edits: for the constructs
+the mapping reacts to the injected edits: for the constructs
 the graph represents, an authored change in the source produces the predicted change in
-the graph.
+the graph. That is a property such an analysis needs, not a measure of its accuracy, which would
+ask whether every affected screen is named and how many are named in excess.
 
 The other is checking in continuous integration at no execution cost. The graph is
 recomputed from source on each commit, the extraction is deterministic and carries no
@@ -191,14 +192,14 @@ support.
 \textbf{The scope is validated in both directions on one application only.} Every other
 method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none of them can be
 asked whether the set of screens attribution computes for a site is the set it fires from. Two
-methods can. The hand-built ground truth answers it fully, but for one application of six
+methods can. The hand-read structural reference answers it in both directions, but for one application of six and only as agreement with the analysis's own relations
 (Section~\ref{sec:res-groundtruth}): there the analysis finds \GTFullRecall{} of the
-(site, screen) pairs that application has under the ground truth's rules, at \GTFullPrecision{} precision; the rule the
+(site, screen) pairs of that reference, at \GTFullPrecision{} precision against it; the rule the
 call graph replaced, which joined a navigating service over its injectors, asserted
-\GTClassExcess{} wrong pairs at one site, and the call graph was written after that finding and
+\GTClassExcess{} pairs outside it at one site, and the call graph was written after that finding and
 scored on the same ground truth, so the clean figure confirms the repair rather than testing the
 call graph independently. The level that stands for what earlier work reaches already recovers
-\GTRootedRecall{} of the real pairs with nothing wrong at all. Beyond \GTApp{} only the runtime method
+\GTRootedRecall{} of the reference pairs with none outside it. Beyond \GTApp{} only the runtime method
 applies, on \ScopeApps{} of the six applications, and it answers half of the question (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
 judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}

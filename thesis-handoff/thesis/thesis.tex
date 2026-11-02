@@ -95,9 +95,9 @@ a fixpoint over component nesting, router outlets and a call graph that accounts
 dependency injection. Its contribution beyond earlier work is modest. Attributing what the
 root component renders to every screen, which earlier work already does, reaches
 \GTRootedRecall{} of the hand-read (site, screen) pairs on \GTApp{}, against \GTFullRecall{}
-for the full analysis. Outlet descent and the member-level call graph add
-\AblationFullAddedShare{} of the placed sites across the corpus, the call graph alone
-\AblationCallGraphNetShare{}. Attribution recovers \AttrRecoveredShare{} of the constructs in its
+for the full analysis. Across the corpus, outlet descent adds \AblationOutletAddedShare{} of the
+placed sites, and the call graph with its fallback join and stand-ins a further
+\AblationFullAddedShare{}, the call graph alone \AblationCallGraphNetShare{}. Attribution recovers \AttrRecoveredShare{} of the constructs in its
 class, almost all as possible rather than certain transitions.
 Scope precision is checked in both directions on \GTApp{} only, and that application also
 guided two repairs; elsewhere the running interface checks it in one direction, and the
