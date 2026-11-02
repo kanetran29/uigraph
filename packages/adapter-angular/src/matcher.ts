@@ -45,6 +45,19 @@ export function resolveRelativeTarget(target: string, ownerPath: string | undefi
 }
 
 /**
+ * Whether a relative target climbs above the root from `ownerPath`, which Angular rejects: it counts
+ * every `..` of the command and throws NG04005 when they outnumber the segments of the route it
+ * starts from (createPositionApplyingDoubleDots, @angular/router 18.2.14). A route with no segment
+ * of its own sits in the root group, where Angular resolves the command as absolute and ignores the
+ * `..`, so from there nothing climbs above the root.
+ */
+export function climbsAboveRoot(target: string, ownerPath: string | undefined): boolean {
+  if (!ownerPath || target.startsWith('/') || target === '*') return false
+  const own = segments(ownerPath).length
+  return own > 0 && segments(target).filter((seg) => seg === '..').length > own
+}
+
+/**
  * How many leading segments of `ownerPath` a relative target keeps as they are, matrix parameters
  * included: all but those its leading `..` climb out of. An absolute target keeps none, and so
  * does one fired from a node with no path of its own.
