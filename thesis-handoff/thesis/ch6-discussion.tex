@@ -17,21 +17,22 @@ holding a node for every address the running application answers
 (Section~\ref{sec:res-probe}). Both readings are reported, because the weaker one is what
 the loss classification of this chapter is computed against and the stronger one is what a
 user of the graph would want. That was not so when this work began.
-Two defects of the extractor accounted for most of the corpus then --- a route whose path is
-a constant reference, and a route table behind a lazy boundary it did not cross, each
-producing no node at all, so that every navigation site belonging to such a screen was lost
+Two defects of the extractor accounted for most of the corpus then: a route whose path is
+a constant reference, and a route table behind a lazy boundary it did not cross. Each
+produced no node at all, so that every navigation site belonging to such a screen was lost
 together with every site pointing at it. Section~\ref{sec:res-round2} reports what repairing
 them took; on the instrument every figure in this thesis is measured on, that class of loss
 is empty.
 
-What remains is lost at the edge, and it is the same everywhere: the navigation sites exist
-in the source, the screens they would connect exist in the graph, and the extractor cannot
-decide which screens a site belongs to. That is the loss class scope attribution addresses,
+What remains is lost at the edge, and it is mostly the same everywhere: the navigation sites
+exist in the source, the screens they would connect exist in the graph, and the extractor cannot
+decide which screens a site belongs to. The exceptions are the sites whose target screen has no
+node, most of them in ghostfolio (Table~\ref{tab:remaining}). That is the loss class scope attribution addresses,
 and it is the largest in every application of the corpus (Table~\ref{tab:loss}). The
-structural relation between the two levels survives the repair --- attribution still cannot
+structural relation between the two levels survives the repair. Attribution still cannot
 draw an edge into a screen that has no node, which is why the chapter reports the two levels
-separately --- but the ranking between them is a fact about an extractor and not a limit of
-the approach, and should be read that way.
+separately. The ranking between them, however, is a fact about an extractor and not a limit of
+the approach.
 
 The two failures cap each other, and that is the structural result of the measurement.
 Attribution cannot draw an edge into a screen that has no node, so node extraction
@@ -46,8 +47,8 @@ The ranking of the defect classes used to depend on which unit the corpus is cou
 it no longer does. Attribution is the largest class both per application and over the corpus
 total (Table~\ref{tab:loss}); on the extractor this evaluation began with, node defects
 dominated the total because the largest application contributed most of the constructs and
-lost them at the node level. That the two views once disagreed is still worth recording,
-because it is the general hazard: one large application can dominate anything that is
+lost them at the node level. The earlier disagreement between the two views shows a
+general hazard: one large application can dominate anything that is
 aggregated, so the per-application view says what a developer would hit on a given codebase
 and the corpus view says where engineering effort pays off across codebases. Reporting only
 the total would have hidden the attribution problem that most applications show, and
@@ -60,10 +61,10 @@ in screens without nodes is counted as an attribution loss, although attribution
 cannot recover it. The measurement does not show the converse: every one of the
 \AttrRecovered{} conversions came out of a construct the rules had already assigned to an
 attribution class, and none out of a node class (Table~\ref{tab:recovery-source}). The
-misclassification therefore runs one way only on this instrument --- the class can hold a
+misclassification therefore runs one way only on this instrument: the class can hold a
 construct attribution alone cannot recover, but nothing attribution recovered was classified
-elsewhere --- so the class bounds what attribution can repair from above and does not measure
-it. On realworld, whose node extraction is complete, attribution recovered every one of its
+elsewhere. The class is thus an upper bound on what attribution can repair and not a measure
+of it. On realworld attribution recovered every one of its
 attribution losses, must tier and may tier together
 (Table~\ref{tab:before-after}), and Table~\ref{tab:remaining} records no remaining loss
 there under any heading.
@@ -72,14 +73,16 @@ Table~\ref{tab:remaining}, and three of its reasons are not attribution problems
 all: the target screen has no node, the owning component is never reached from any
 screen, or the site sits in a service or a guard that the instrument those tables measure did not
 analyse.
-No construct that the baseline converted was lost --- \AttrRegressed{} leave the converted classes
---- so the coverage gain cost the baseline nothing. The gain does widen the must tier: after the
+No construct that the baseline converted was lost (\AttrRegressed{} leave the converted classes),
+so the coverage gain cost the baseline nothing. The gain does widen the must tier: after the
 fourth correction of Section~\ref{sec:res-round2} that tier holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, the added edges being
 the links of realworld's and k8sdash's shells placed on every screen the shell renders. On the
-instrument before that correction every must edge passed the witness check in both runs ---
-\RoundTwoMustClean{} after attribution --- so attribution introduced no edge that names the wrong
-destination; whether those edges occurred on every input is the question the fourth correction
-answered, and for most of them it was no.
+instrument before that correction every must edge passed the witness check in both runs
+(\RoundMustClean{} after attribution, as the round's tables printed it), so attribution introduced
+no edge that names the wrong destination. Whether those edges occurred on every input is the
+question the fourth correction answered, and for most of them the answer was no. On the final instrument
+the check finds \MustWitnessViolations{} failures among the \MustWitnessEdges{} must edges and
+cannot read the destination of \MustWitnessUnread{}.
 
 The part of the model that the instrument of those tables did not implement had a measurable
 price. Navigation sites in services, guards, interceptors, resolvers
@@ -118,35 +121,35 @@ wrapper function returns and a \texttt{canActivate} element written as a call; t
 run neither confirms nor refutes it.
 
 Detection is conditional on coverage in a second sense, which the exclusion rule makes
-visible --- although far less of it than on the instrument this work began with. Against the
+visible, though to a far smaller extent than on the instrument this work began with. Against the
 attributed graph only \MutExcluded{} of the sampled mutants cannot be scored at all, all of
 them guards the graph can record on no edge
 (Table~\ref{tab:mutation-sample}); against the baseline graph \MutBaseExcluded{} cannot.
 The distance between those two counts is where RQ1's coverage shows up in this experiment:
 the constructs that attribution puts into the graph are largely the ones the baseline run had
 to exclude. Either count is a coverage result and not a sensitivity one. The
-defensible statement is therefore conditional: given that a construct is represented in
+conclusion is therefore conditional: given that a construct is represented in
 the graph, a change to it is almost always visible in the graph, and the probability
-that it is represented at all is what RQ1 measures. For change impact analysis this is
-the right shape of claim, because an impact query is only ever asked about the part of
+that it is represented at all is what RQ1 measures. For change impact analysis this form
+of claim is appropriate, because an impact query is only ever asked about the part of
 the application that the model represents, and the graph states which part that is
 through its witnesses.
 
 The three mutated applications do not declare their routes the same way, two as standalone
 arrays and one in NgModule routing modules, and no operator fails under one style and not the
-other (Section~\ref{sec:res-mutation}). That is the whole of the comparison the measurements support. The corpus
+other (Section~\ref{sec:res-mutation}). The measurements support no comparison beyond this. The corpus
 was not stratified by routing style and the other three applications were not mutated,
 so nothing more general about the two styles follows from this thesis.
 
 Two uses of the extracted graph are supported by what was measured. One is change
 impact analysis. Every edge carries the file and line of the construct that produced it,
-as an invariant of the model rather than as a convenience, so a set of changed lines can
+as an invariant of the model, so a set of changed lines can
 be mapped to the edges whose witnesses fall inside them and from there to the screens
 those edges leave and enter. This is the screen-level counterpart of what Chianti does
 with atomic changes, affected tests and methods \cite{ren2004chianti}, and it sits in
 the impact analysis tradition that Arnold and Bohner describe
-\cite{arnold1993impact,bohner1996software,lehnert2011taxonomy}. RQ4 is the evidence that
-the mapping reacts to real edits rather than only existing on paper: for the constructs
+\cite{arnold1993impact,bohner1996software,lehnert2011taxonomy}. RQ4 provides evidence that
+the mapping reacts to real edits: for the constructs
 the graph represents, an authored change in the source produces the predicted change in
 the graph.
 
@@ -159,8 +162,8 @@ has at least one inbound deterministic transition, that a screen that was reacha
 the shell still is, that a route path a test depends on has not been renamed. A guard
 assertion is the one obvious member of that list the graph cannot yet carry, because a guard
 is recorded on the edges entering the guarded screen, so for a screen that no edge enters
-there is nothing for such an assertion to read (Section~\ref{sec:res-mutation}), and an
-assertion is worth less than nothing if it passes for the wrong reason.
+there is nothing for such an assertion to read (Section~\ref{sec:res-mutation}). An
+assertion that passes for the wrong reason is worse than no assertion.
 A dynamically built model cannot be used this way at the same cost, because it needs a
 running application, test data and an exploration budget, and it has to be rebuilt for
 each version \cite{crawljax2012,feedex2013,websurvey2025}.
@@ -198,19 +201,19 @@ judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpr
 that are not turn out to be sites attribution declined to place at all rather than sites it
 placed wrongly.
 
-What remains unvalidated is the other half and the reach. A site attributed to too MANY
+What remains unvalidated is the other half and the reach. A site attributed to too \emph{many}
 screens produces edges whose witnesses all pass, because the construct really is at that
 location and really does name that target; the oracle cannot convict it, because a predicted
 link missing from the DOM is equally well a link the template renders only to a signed-in
-user. The count of predictions it could in principle convict --- those naming a destination
-exactly, rather than over-approximating to every address a static prefix admits --- is
-\ScopeExact{} on the screens it could judge, against \ScopeApprox{} that over-approximate, so the
-direction is not merely unrefuted but close to untestable by this method. And the oracle
+user. The predictions it could in principle convict are those that name a destination
+exactly, rather than over-approximating to every address a static prefix admits. There are
+\ScopeExact{} of them on the screens it could judge, against \ScopeApprox{} that over-approximate, so the
+direction is unrefuted but also close to untestable by this method. And the oracle
 judged \ScopeJudged{} screens of \ScopeScreens{}: without a backend,
 \ScopeUnjudged{} of them redirect to a sign-in page and render another screen's links.
-Driving the applications far enough to render their interiors --- seeding a backend, signing
-in, and visiting a guarded screen in a known state --- is what would lift both limits, and it
-is the single piece of future work that would most change what this thesis can claim about
+Both limits would be lifted by driving the applications far enough to render their interiors,
+that is, by seeding a backend, signing in, and visiting a guarded screen in a known state. Of
+the possible future work, this would do most to change what this thesis can claim about
 its own contribution. The shell rule is capped at \emph{may} where the mounting route is
 invisible (Section~\ref{sec:implementation}), which limits what an over-large scope can claim,
 but that is a design precaution and not a measurement. What can be measured without a
@@ -218,9 +221,9 @@ running application is the width of the scopes rather than their truth, and
 Section~\ref{sec:res-width} measures it: the computed attribution is narrower than assigning
 every site to every screen by a factor between \BaselineFactorMin{} and
 \BaselineFactorMax{}, and on \BaselineBluntest{} the average site is attributed to
-\BaselineBluntestShare{} of the screens. A scope that wide is a weak statement about where a
-site fires even if it is sound, and the coverage attribution recovers is bought at that
-width.
+\BaselineBluntestShare{} of the screens. A scope that wide says little about where a
+site fires, even if it is sound, and the coverage attribution recovers comes at the cost of
+that width.
 
 \textbf{Construct validity.} The conversion ratio divides the constructs witnessed by a
 deterministic edge by all navigation constructs that the independent parser finds in
@@ -239,7 +242,7 @@ because it bounds what the measurement can see at all. The parser recognises nav
 by four syntactic patterns: a \texttt{routerLink} attribute or binding, and a call to
 \texttt{navigate} or \texttt{navigateByUrl} on a receiver whose name contains
 \emph{router}. Navigation expressed any other way is in neither the numerator nor the
-denominator, so it is not a loss and not a success; it is absent. An application that
+denominator, so it is counted as neither a loss nor a success. An application that
 wraps navigation in a helper, so that its components call \texttt{this.nav.goHome()},
 contributes one construct at the wrapped call site and none at the places that invoke it.
 An assignment to \texttt{location.href}, a redirect driven by a server response, and
@@ -250,18 +253,18 @@ proxy is not itself measured. The test-source cross-check is the only method tha
 it, because a URL that a passing test visits is a screen that exists whatever the source
 looks like, and it covers one application of the six.
 
-Node coverage carries a sharper version of the same threat, and it points the opposite way.
+Node coverage carries a stronger form of the same threat, and it points the opposite way.
 Its denominator is the screens the independent parser can address, so a screen whose path
 neither tool can read is outside the ratio rather than counted against it: refusing to read
 more of an application raises its reported coverage. The effect is not hypothetical. Three
 of one application's declared screens assemble their paths inside a template literal from an
-exported constant; while neither tool read them, that application's coverage was exactly
+exported constant; while neither tool read them, that application's coverage was
 complete, and reading them is what moved its denominator
 (Section~\ref{sec:res-round2}). Nothing in the ratio itself would have said so. The defence
 adopted here is that every coverage figure in this thesis is printed beside the count of
 routes the parser knows are there and cannot address, in the same table, so that a figure
-bought by refusing to look is visible as one; a coverage ratio reported on its own, for this
-kind of analysis, should not be believed.
+bought by refusing to look is visible as one. For this kind of analysis, a coverage ratio
+reported on its own cannot be taken at face value.
 
 The two units also stand in a many-to-many relation, which the metrics handle unevenly.
 One construct in a component that many screens render yields one anchored edge that
@@ -272,14 +275,14 @@ traceable. For most of this work the conversion ratio credited a construct cited
 of an edge, primary or merged, while the witness check re-opened only the primary witness, so
 a construct could count towards the ratio on evidence the precision check never examined. On
 realworld \WitnessMergedCitationShareRealworld{} of the citations in the attributed graph are merged ones,
-and \WitnessMergedCitationShareMax{} on the application where the share is largest, so the gap was not a
-technicality: the check reported a clean deterministic tier over part of the evidence that tier
+and \WitnessMergedCitationShareMax{} on the application where the share is largest, so the gap had
+practical consequences: the check reported a clean deterministic tier over part of the evidence that tier
 rests on, and wrong targets in bitwarden sat in the part it did not read
 (Section~\ref{sec:res-round2}). The check now judges every location an edge cites, each
 location records the modality it earns on its own, and the must tier is judged on the
 locations that earn must, so a construct counts towards the ratio only on evidence the check
-has read. What remains is that the ratio and the precision figure still answer different
-questions, and the chapter reports them separately for that reason rather than this one.
+has read. The ratio and the precision figure still answer different questions, and that,
+rather than the former gap, is why the chapter reports them separately.
 
 Merging also costs guard information. An edge holds one guard, so when several constructs
 under different conditions produce one edge, the edge can represent the condition of at
@@ -337,17 +340,17 @@ that argument is not a measurement.
 
 \textbf{Oracle independence.} The route parser shares no code with the extractor, which
 makes it independent and says nothing about whether it is right. That independence is also
-partial, and Section~\ref{sec:res-round2} says where it stops: for the route-path forms the
-second round added --- a table behind a freezing call, a path assembled from constants, a
-module reached through a workspace alias --- the two tools were taught the same rules
-because each was wrong in the same place, so their agreeing about such a path is weaker
+partial, and Section~\ref{sec:res-round2} says where it stops. For the route-path forms the
+second round added (a table behind a freezing call, a path assembled from constants, a
+module reached through a workspace alias), the two tools were taught the same rules
+because each was wrong in the same place. Their agreeing about such a path is therefore weaker
 evidence than their agreeing about a path each reads its own way. Its first version did not look
 inside wrapper calls, did not follow a lazily loaded module to the routing module it
 imports, and walked lazily loaded tables without their prefix, and it therefore reported
 that every declared screen of mifos had a node; after the correction it finds a far
 larger set of declared screens of which under a tenth have a node, with the extractor
-unchanged in both runs (Section~\ref{sec:corrections}). The number that moved was the
-oracle's, not the tool's. A differential test also only shows that two implementations
+unchanged in both runs (Section~\ref{sec:corrections}). The change in the figure came from
+the oracle. A differential test also only shows that two implementations
 disagree, never which of them is right, and each disagreement in this study was resolved
 by reading the application source, by the same person who wrote both implementations.
 
@@ -362,15 +365,15 @@ them. The witness check is mechanical and re-parses the source at the claimed
 location, which makes it a check on the witness and not on the address: an edge whose
 target node sits at a path the application does not mount satisfies it. The mutation oracle is the authored delta, so it does not consult the tool's
 output to decide what the expected change is. The corpus commits, the extractor commit
-and the harness version are pinned, the whole evaluation re-runs with one command, and
-the conversion, coverage, loss, remaining-loss, before-and-after and mutation tables of
-Chapter~\ref{ch:results} are generated from the results file instead of being entered
-by hand. The defect-class table, the oracle table and the inspection of the unreached
+and the harness version are pinned, the evaluation re-runs with two scripts at one commit of the
+extractor (Section~\ref{sec:protocol}), and the conversion, coverage, loss, remaining-loss,
+before-and-after and mutation tables of Chapter~\ref{ch:results} are generated from their result
+files instead of being entered by hand. The defect-class table, the oracle table and the inspection of the unreached
 components are written by hand. Determinism and the absence of accumulated state were checked
-before any measurement. Ten protocol corrections are reported in full
+before any measurement. Eleven protocol corrections are reported in full
 (Section~\ref{sec:corrections}), including the three that made the reported figures
-worse. What
-was not done is equally relevant: there was no blinding, no second annotator for the
+worse. Several
+controls were not applied: there was no blinding, no second annotator for the
 loss classification and no independent audit of the residual constructs that were
 inspected by hand, and the defect classes were defined after the first observations
 rather than in advance. The requirement of two independent lines of evidence per
@@ -393,21 +396,21 @@ each case, because Angular removes the debug surface the method reads when an ap
 declares itself in production mode, and a production configuration can differ from a development
 one in ways a route table does not show. Fourth, where a workspace application composes the
 library a measurement is scoped to, the framework's set is a superset of the library's by
-construction, and part of any difference is scope rather than reading; two of alfresco's three
-differences are that --- \path{/login}, declared by the shell application, and
-\path{/view/authentication-confirmation}, declared by a package that shell installs --- and the
+construction, and part of any difference is scope rather than reading. Two of alfresco's three
+differences are of this kind: \path{/login}, declared by the shell application, and
+\path{/view/authentication-confirmation}, declared by a package that shell installs. The
 third is not: \path{/about} is declared inside the measured library, in a JSON plugin manifest
 that no reader of the code can see.
 
-The first draft of this paragraph closed by saying that none of these weakens the claim the check
-is used for, because none could make a mounted address look unmounted. That has the direction
-backwards. The claim is that an address the extractor mints is one the framework mounts, and it
+It might seem that none of these weakens the claim the check is used for, because none could
+make a mounted address look unmounted. That reasoning has the direction backwards.
+The claim is that an address the extractor mints is one the framework mounts, and it
 is established by finding the extractor's set inside the framework's. Every threat listed above
-makes the framework's set LARGER than the set of addresses a visitor can actually reach --- a
-route behind a guard that always refuses is counted mounted, so is one whose component throws,
+makes the framework's set \emph{larger} than the set of addresses a visitor can actually reach. A
+route behind a guard that always refuses is counted as mounted, as is one whose component throws,
 and a development build may carry routes a production build drops. A larger containing set makes
-containment easier to satisfy, so these threats weaken the no-invented-address claim rather than
-leaving it alone. What they cannot do is manufacture the failures the check did report: the two
+containment easier to satisfy, so these threats do weaken the no-invented-address claim.
+What they cannot do is manufacture the failures the check did report: the two
 alfresco addresses are minted by the extractor and absent from even this generous reading of what
 the framework mounts, and the same is true of the ten the comparison returns against the route set
 as it stood before this round. A finding of an invented address is therefore sound under every
@@ -423,8 +426,8 @@ silent rather than approximate.
 
 A route may be declared outside the language. alfresco's about page is registered by a JSON
 manifest that names a path and an identifier, which an extension registry binds to a component
-class at run time. No reader of the application's TypeScript can see such a route, and this one
-raises no note, because nothing in the code is unreadable --- there is simply nothing in the code.
+class at run time. No reader of the application's TypeScript can see such a route. This one
+raises no note, because nothing in the code is unreadable: the route is not in the code at all.
 A tool that wanted to cover it would have to read the framework's plugin format as a second
 source language, which is a different undertaking from reading a router configuration and is not
 attempted here.
@@ -432,9 +435,9 @@ attempted here.
 Which of several tables a prefix mounts may be decided outside the sources. mifos holds two route
 tables for its users module, one per identity provider, and selects between them with a constant
 assembled from \texttt{window.env}, a value injected into the page when the application is
-deployed. The extractor reads a conditional whose condition the sources fix --- a flag written in
-an environment file is resolved and the arm it selects is read --- and declares the subtree unread
-when they do not, which is this case. The loss is declared and it is \ProbeMissedMifos{} screens wide, which is
+deployed. Where the sources fix the condition of a conditional, the extractor reads it: a flag
+written in an environment file is resolved and the arm it selects is read. Where they do not, as
+in this case, it declares the subtree unread. The loss is declared and it is \ProbeMissedMifos{} screens wide, which is
 the price of the rule that decides the question: the table a prefix mounts is the one its route
 names, or the one the module registers with \texttt{forChild}, or the only one in the file, and
 otherwise none. Reading every table a file holds instead would have given this prefix the right
@@ -506,9 +509,14 @@ the source, and attribution is what makes it resolvable: the analysis resolves i
 screen the edge is emitted from. A template \texttt{routerLink}, and a \texttt{Router.navigate}
 call whose options are an object literal with a \texttt{relativeTo} key, are resolved against the
 path of that screen, applying a leading run of \texttt{.} and \texttt{..} segments; a call
-without \texttt{relativeTo}, and \texttt{navigateByUrl}, are resolved against the root. The base
-is right only when the screen is the route of the component that holds the site, and only then
-can the edge be must. Everywhere else it is held at may: for a component rendered under a route
+without \texttt{relativeTo}, and \texttt{navigateByUrl}, are resolved against the root. A
+target with more \texttt{..} segments than the route it starts from has segments is one Angular
+rejects with an error, so it yields no edge and a note; from a route with no segment of its own
+Angular resolves the target as absolute, and the extractor does the same. Angular also applies a
+\texttt{..} that follows another segment, as in \texttt{a/../b}, where the extractor keeps it as a
+literal segment; such a target then names an address no route declares, and the edge falls to the
+catch-all or to a note rather than to a wrong screen. The base is right only when the screen is the route of the component that holds the site,
+and only then can the edge be must. Everywhere else it is held at may: for a component rendered under a route
 it does not own, whose own route the analysis does not track; for \texttt{relativeTo} written in
 shorthand, passed through an options variable, or given a route other than the component's
 own, such as \texttt{this.route.parent}, none of which the reader evaluates, which is to say
@@ -560,8 +568,8 @@ be enumerated statically in general, and the analysis treats it according to the
 contains. A target with no static part, a \texttt{routerLink} whose value is an interpolation
 among them, is recorded as an edge of modality \emph{unknown} and confidence 0 into the
 \texttt{u\_}\,sink of the node it fires from. A target with a static
-leading part --- the head of a template literal, the left operand of a string concatenation, or
-the constant elements before a trailing variable element of a commands array --- is
+leading part (the head of a template literal, the left operand of a string concatenation, or
+the constant elements before a trailing variable element of a commands array) is
 over-approximated into the \emph{may} tier, with one edge to every declared route that extends
 that prefix by at least one segment. An empty prefix therefore connects the site to every
 declared route except the root, as one of the protocol corrections showed
@@ -582,7 +590,7 @@ factory or value provider (\texttt{useFactory}, \texttt{useValue}) and a provide
 function returns from outside the application bind nothing the pass can follow, so a call through
 such a token contributes no edge, and the member it would have reached falls back to the join
 over every component that injects its class, or to no scope at all if none does. And a receiver
-that is not a field --- a local variable, a parameter, a value returned by another call --- is not
+that is not a field (a local variable, a parameter, a value returned by another call) is not
 resolved. Over the corpus the pass resolved \CGDirect{} calls on application types to the class
 the type names, \CGBound{} through a provider binding and \CGSubclass{} to subclasses, and left
 \CGUnresolved{} unresolved, in \CGUnresolvedApps{} of the six applications.
@@ -603,11 +611,12 @@ account. The independent parser behaves identically on each of these forms, whic
 two readers agree on routes neither can see. This approximation bounds the corpus as well as
 the tool, since it is why one candidate application was rejected (Section~\ref{sec:corpus}).
 \item \textbf{Guards that would let the navigation through.} A guard is a function of the
-application's state, and the extractor does not evaluate it: a guard the navigation runs ---
+application's state, and the extractor does not evaluate it. A guard the navigation runs holds
+the edge at \emph{may}, even when the guard would always pass. The guards a navigation runs are
 the \texttt{canMatch} of a route its address is matched through, the \texttt{canActivate},
-\texttt{canLoad} or resolver of a route it enters, the \texttt{canActivateChild} above those, the
-\texttt{canDeactivate} of a route it leaves --- holds the edge at \emph{may}, even when the guard
-would always pass. A route the source and target share is taken to be reused unless its path has
+\texttt{canLoad} or resolver of a route it enters, the \texttt{canActivateChild} above those, and the
+\texttt{canDeactivate} of a route it leaves.
+A route the source and target share is taken to be reused unless its path has
 a parameter or \texttt{runGuardsAndResolvers} is set, which a parameter that does not in fact change
 makes too cautious. A guard is identified by the text of its expression, so two guards that
 compute the same thing are two guards. Content a component projects through
@@ -616,6 +625,27 @@ that renders the projection only under a condition is read as unconditional; \te
 \texttt{mat-tab} are the only library containers read as rendering their content lazily. A route
 component behind a conditional outlet is conditional, but a component nested in it is judged by
 its own placement, and the application root's outlet is not read.
+\item \textbf{Navigations a later one may cancel.} A navigation is demoted when code that runs
+after it, before the event is handled, may start another (Section~\ref{sec:model}). Whether that code may
+navigate is read through the calls the reader can resolve to a body in the application: a member
+of the class, a function of the file, a method the checker resolves on a typed receiver. A call
+into a library, through a receiver the checker cannot type, or into code the application loads at
+run time is taken not to navigate, so a navigation followed by such a call can be published as
+must although the call cancels it. The reader does not follow a navigation a handler schedules for
+later (a timer, a promise it does not await), which is the same approximation in time rather than
+in the call graph. Nor does it read the other listeners one event reaches: a click handler on an
+ancestor that the event bubbles to, or a \texttt{(click)} binding that navigates on the same
+element as a \texttt{routerLink}, either of which can start a second navigation. Callers are
+followed within the class; a member another class calls is not. An earlier version of the rule
+read only the statement right after the navigation, and only when that statement was itself a
+navigation call; the one call in the corpus's must tier is a single-statement handler, so the
+rule's widening left that tier as it was.
+\item \textbf{Children of a route a function returns, mounted at the empty path.} The first
+empty-path child under a screen, and the first empty-path child below that one, render on the
+screen's own address, and their links are drawn from it. Where the empty-path route is written
+inside a function that returns it, as \texttt{withShell([\ldots])} does, the walk does not place
+the component the function's children name under the screen above: its links stay on an unplaced
+origin at \emph{may}. The graph loses those edges and asserts nothing false about them.
 \item \textbf{Activation with a modifier key.} A \texttt{routerLink} on an anchor leaves a
 click made with a modifier key held, or with a button other than the primary one, to the browser,
 which opens the address in a new browsing context rather than navigating the current one, and so
@@ -626,13 +656,23 @@ activation and not for these.
 declaration order, that matches an address; the matcher prefers an exact path to a parameter
 route and consults a redirect only when no route matches. Wherever two declared routes, or a
 route and a redirect, can answer an address, the edge is held at \emph{may} rather than decided,
-and it may name the route Angular does not take.
+and it may name the route Angular does not take. One exception rests on an assumption. Route
+tables an application registers apart are joined in the order their providers
+are registered, which the extractor does not read. It takes a catch-all in one such table to be
+matched after every route of the others, the order Angular's documentation recommends and the one
+the corpus applications appear to keep, and it names each catch-all it dismissed this way in a
+note. Extracted again without the assumption, the must tier holds \RouteOrderMustWithout{} edges on
+\RouteOrderSitesWithout{} constructs instead of \RouteOrderMust{} on \RouteOrderSites{}: the other
+\RouteOrderResting{} edges, on \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{}
+applications (\RouteOrderRestingWhere{}), rest on it.
 \item \textbf{Ambiguous selectors in the nesting relation.} When a selector belongs to more
 than one component, the candidates are narrowed to those the rendering file imports; where none
 is imported, the analysis joins over all of them and records a note. Such a join can attribute a
 site to screens on which the component it belongs to is never rendered. Attribute selectors are
 matched as element selectors are, so a directive is in the nesting graph wherever its attribute
-appears.
+appears. When the question is whether a component renders an outlet through a component it places,
+an ambiguous placement counts only if every candidate renders one, since the reader cannot say
+which candidate the build instantiates.
 \end{itemize}
 
 Table~\ref{tab:approx-counts} gives the prevalence of the approximated constructs in the
@@ -655,10 +695,11 @@ Chapter~\ref{ch:results}, which comes from the route-oracle parser.}
 \end{table}
 
 Two things follow from the counts. Set against the construct denominators of
-Table~\ref{tab:conversion}, which are 40, 34 and 132 for these three applications, the
+Table~\ref{tab:conversion}, which are \ConstructsRealworld{}, \ConstructsAlfresco{} and
+\ConstructsBitwarden{} for these three applications, the
 approximated kinds are few in realworld and bitwarden, so the approximations do not
 explain the coverage figures of Chapter~\ref{ch:results} for those two. In alfresco the
-approximated sites outnumber the 34 constructs, almost entirely through
+approximated sites outnumber the \ConstructsAlfresco{} constructs, almost entirely through
 \texttt{createEffect}, so for that application the approximations cannot be set aside.
 The two numbers are not the same unit, since the denominator counts navigation
 constructs while the \texttt{createEffect} figure counts effect declarations, whether or
@@ -751,9 +792,9 @@ route has neither a layout nor a component to lose and the model's step from ``r
 ``renders nothing'' costs nothing. Vue Router applies a record's redirect only when that record
 is the last one matched, so a redirecting parent with children does render its component for a
 matching child. Carrying the Angular reading into the Vue extractor dropped those components;
-the extractor now keeps the component of a redirecting record that has children, and declares
-the residue --- that navigating to the parent's own address lands on the redirect target with
-that component unmounted --- as a note at the parent rather than modelling it as an edge. The
+the extractor now keeps the component of a redirecting record that has children. It declares
+one residue as a note at the parent rather than modelling it as an edge: navigating to the
+parent's own address lands on the redirect target with that component unmounted. The
 same porting exposed a second Vue-only hazard with no Angular counterpart: a table that mixes
 the Vue~2 catch-all \texttt{'*'} with the Vue~3 form
 \texttt{'/:pathMatch(.*)*'} folds both to one address, and the extractor keeps the record
@@ -796,8 +837,10 @@ and it was worth building: it convicted the class-level service join of attribut
 \GTClassExcess{} screens it cannot fire from, which no other method here could do, and the call
 graph that replaced the join was written in answer. What it cannot do is
 carry to an application of six hundred screens, where reading every site by hand is not
-practical, and that is exactly where the computed scopes are widest
-(Table~\ref{tab:scopebaseline}). Driving such an application into a signed-in state and
+practical and where most of the corpus's (site, screen) attributions are made
+(Table~\ref{tab:scopebaseline}); the scopes widest relative to their application are
+\BaselineBluntest{}'s, where the average site is attributed to \BaselineBluntestShare{} of the
+screens, and no reading by hand covers those either. Driving such an application into a signed-in state and
 reading its rendered links, or annotating a stratified sample of its sites rather than all of
 them, are the two ways to get there. Recording, for each attributed site, the relation that
 supplied its scope would narrow the verdict further: the ground truth here shows which
@@ -835,12 +878,13 @@ complexity bound already cover it. Guards that return a
 navigation site and not only a label.
 
 The witness check exposed a defect in how the guard set of a screen was assembled from the
-route chain: the assembly ignored a guard carried by a route a wrapper function returns ---
-the construct through which one application in the corpus
+route chain: the assembly ignored a guard carried by a route a wrapper function returns,
+which is the construct through which one application in the corpus
 routes every one of its feature tables. Reading it is what took that application's
-deterministic tier from an order of magnitude more edges down to
-\RoundTwoMustEdgesMifos{}, and took the corpus tier from \EarlierMustViolations{} witness-check
-failures to \RoundTwoMustViolations{}; the demotion rules that followed found that most of the
+deterministic tier down to \RoundMustEdgesMifos{} on the round's instrument, and took the corpus
+tier from \EarlierMustViolations{} witness-check failures to \RoundMustViolations{}. Under the
+router's own guard semantics, which came later, the same guard no longer gates navigations between
+the screens below it, and mifos holds \CensusMustMifos{} must edges again. The demotion rules that followed found that most of the
 edges that passed did not occur on every input either (Section~\ref{sec:res-round2}). The mutation
 operator that removes a guard is the obvious second test for it, and on this corpus it
 reaches only the guards the graph already records on an edge
@@ -863,7 +907,7 @@ comes from firing events on a running application
 \cite{crawljax2012,feedex2013,fraggen2022}, would answer the question this thesis cannot:
 how much of what a crawler finds the static graph already contains, and how much of what
 the static graph contains a crawler never reaches. The Android work has the same
-structure, falling back on runtime traces exactly where static attribution of shared code
+structure, falling back on runtime traces where static attribution of shared code
 fails \cite{yang2015wtg}.
 
 The corpus needs to grow in three directions. An automated search pipeline over a larger
@@ -873,8 +917,8 @@ hand-screened set of ten candidates and would weaken the tool-driven selection b
 Section~\ref{sec:limitations}, provided that applications the extractor handles badly are
 kept in the corpus rather than rejected. A case study on a proprietary industrial
 application, reporting only aggregate figures, is the most direct answer to the external
-validity threat, since enterprise routing style is exactly what an open-source corpus
-cannot show. A minimum density of user interface tests should become an explicit
+validity threat, since an open-source corpus cannot show enterprise routing
+style. A minimum density of user interface tests should become an explicit
 selection criterion whenever execution-based ground truth is needed, since the candidate
 pool showed that this density falls as applications grow, and without such a criterion a
 study ends up with its oracle and its scale on different applications.

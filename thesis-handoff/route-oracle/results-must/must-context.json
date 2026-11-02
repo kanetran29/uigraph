@@ -293,7 +293,7 @@
       "edge": "/verify-email -> /",
       "site": "src/app/auth/verify-email-token.component.ts:53",
       "kind": "call",
-      "condition": "after await"
+      "condition": "superseded by a later navigation"
     },
     {
       "app": "bitwarden",
@@ -356,7 +356,7 @@
       "edge": "/setup/families-for-enterprise -> /",
       "site": "src/app/admin-console/organizations/sponsorships/families-for-enterprise-setup.component.ts:86",
       "kind": "call",
-      "condition": "under a branch"
+      "condition": "superseded by a later navigation"
     },
     {
       "app": "bitwarden",
@@ -424,17 +424,20 @@
     "retargeted": 0
   },
   "reasons": {
-    "after await": 5,
+    "after await": 4,
     "in a callback": 3,
     "in a helper method": 0,
-    "under a branch": 11,
+    "in a helper function": 0,
+    "under a branch": 10,
     "after early exit": 3,
+    "superseded by a later navigation": 2,
     "in a catch clause": 1,
     "in a loop": 0,
     "control-flow block": 7,
     "structural directive": 2,
     "ng-template": 0,
     "ICU case": 0,
+    "lazy container": 0,
     "unreadable template": 0
   },
   "review": {

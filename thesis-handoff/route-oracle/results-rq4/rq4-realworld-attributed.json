@@ -1,6 +1,6 @@
 {
   "harnessVersion": "mutate 1.8.0",
-  "extractor": "% Extractor 5c4c709, packages/ clean, harness clean when generated.",
+  "extractor": "% Extractor 920e1aa, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "attribution": true,
@@ -8,7 +8,7 @@
   "quota": 8,
   "baseline": {
     "nodes": 12,
-    "edges": 62,
+    "edges": 65,
     "routes": 10
   },
   "discovered": {
@@ -125,7 +125,7 @@
       "subject": "/register => /editor",
       "predict": "the edge to /register is replaced by an edge to /editor",
       "verdict": "DETECTED",
-      "touched": 8,
+      "touched": 10,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -134,15 +134,15 @@
         "routeChanged": [],
         "edgesAdded": [
           "/article/:slug -> /editor (navigate)",
+          "/profile/:username -> /editor (navigate)",
           "/profile/:username/favorites -> /editor (navigate)",
-          "/ -> /editor (navigate)",
-          "/tag/:tag -> /editor (navigate)"
+          "/ -> /editor (navigate)"
         ],
         "edgesRemoved": [
           "/article/:slug -> /register (navigate)",
+          "/profile/:username -> /register (navigate)",
           "/profile/:username/favorites -> /register (navigate)",
-          "/ -> /register (navigate)",
-          "/tag/:tag -> /register (navigate)"
+          "/ -> /register (navigate)"
         ],
         "guardChanged": []
       }
@@ -356,7 +356,7 @@
       "subject": "path \"register\"",
       "predict": "an edge that carried the guard loses it",
       "verdict": "DETECTED",
-      "touched": 8,
+      "touched": 9,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -370,6 +370,7 @@
           "/register -> /register: guard fn#ddb96242->null, modality may->may",
           "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may",
           "/article/:slug -> /register: guard fn#ddb96242->null, modality may->may",
+          "/profile/:username -> /register: guard fn#ddb96242->null, modality may->may",
           "/profile/:username/favorites -> /register: guard fn#ddb96242->null, modality may->may",
           "/ -> /register: guard fn#ddb96242->null, modality may->may",
           "/tag/:tag -> /register: guard fn#ddb96242->null, modality may->may",
@@ -494,7 +495,7 @@
       "subject": "register",
       "predict": "a node route containing \"register\" becomes \"register-mutated\"",
       "verdict": "DETECTED",
-      "touched": 19,
+      "touched": 20,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/core/auth/auth.component.html:12",
@@ -530,14 +531,14 @@
       "subject": "profile",
       "predict": "a node route containing \"profile\" becomes \"profile-mutated\"",
       "verdict": "DETECTED",
-      "touched": 46,
+      "touched": 52,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/settings/settings.component.ts:72",
           "src/app/features/profile/pages/profile/profile.component.html:42",
-          "src/app/features/profile/pages/profile/profile.component.html:52",
           "src/app/features/article/components/article-meta.component.ts:11",
           "src/app/features/article/components/article-meta.component.ts:16",
+          "src/app/features/profile/pages/profile/profile.component.html:52",
           "src/app/features/article/components/article-comment.component.ts:21",
           "src/app/features/article/components/article-comment.component.ts:25",
           "src/app/core/layout/header.component.html:46"
@@ -557,8 +558,8 @@
         "edgesAdded": [
           "/profile-mutated/:username -> /settings (click:routerLink)",
           "n_scope_subtree__n_profile-mutated_username -> /settings (click:routerLink)",
-          "/profile-mutated/:username/favorites -> / (click:routerLink)",
-          "/profile-mutated/:username/favorites -> /article/:slug (click:routerLink)"
+          "n_scope_subtree__n_profile-mutated_username -> / (click:routerLink)",
+          "/profile-mutated/:username -> /article/:slug (click:routerLink)"
         ],
         "edgesRemoved": [
           "/settings -> /profile/:username (navigate)",
@@ -633,13 +634,13 @@
           "/settings -> /profile/:username/favorites-mutated (navigate)",
           "/profile/:username -> /profile/:username/favorites-mutated (click:routerLink)",
           "n_scope_subtree__n_profile_username -> /profile/:username/favorites-mutated (click:routerLink)",
-          "/profile/:username/favorites-mutated -> / (click:routerLink)"
+          "/profile/:username/favorites-mutated -> /article/:slug (click:routerLink)"
         ],
         "edgesRemoved": [
           "/settings -> /profile/:username/favorites (navigate)",
           "/profile/:username -> /profile/:username/favorites (click:routerLink)",
           "n_scope_subtree__n_profile_username -> /profile/:username/favorites (click:routerLink)",
-          "/profile/:username/favorites -> / (click:routerLink)"
+          "/profile/:username/favorites -> /article/:slug (click:routerLink)"
         ],
         "guardChanged": []
       }

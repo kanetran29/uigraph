@@ -1,6 +1,6 @@
 {
   "harnessVersion": "mutate 1.8.0",
-  "extractor": "% Extractor 5c4c709, packages/ clean, harness clean when generated.",
+  "extractor": "% Extractor 920e1aa, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/alfresco/projects/aca-content",
   "attribution": false,

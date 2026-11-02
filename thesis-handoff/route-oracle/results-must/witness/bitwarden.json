@@ -1,15 +1,15 @@
 {
- "edges": 530,
- "sitesCited": 1273,
- "mergedSites": 743,
+ "edges": 529,
+ "sitesCited": 1282,
+ "mergedSites": 753,
  "mustEdges": 1,
  "mustClean": 1,
  "mustUnread": 0,
  "destinationsChecked": true,
  "mustBad": [],
  "tally": {
-  "TARGET_UNREAD": 52,
+  "TARGET_UNREAD": 51,
   "TARGET_MISMATCH": 82,
-  "OVER_APPROX": 1020
+  "OVER_APPROX": 1030
  }
 }

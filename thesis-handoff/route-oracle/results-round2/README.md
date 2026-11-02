@@ -1,24 +1,25 @@
 # Round-two run outputs
 
-`final7.tgz` holds the outputs of two `run-all.mjs` runs over extractor eb9dab80, harness 1.8.0,
-made on 2026-10-30: `ctrl/` without attribution, `fin/` with it, and `round2/` as
-`round2-to-latex.mjs` read them (`results.json`, the per-application `.B`, `.C`, `.L`, `.notes`
-and `.diag` files, and `raw/`). `to-latex.mjs` reads `ctrl/results.json` for
-`generated-tables.tex`, `compare.mjs` reads both runs for `generated-before-after.tex`, and
-`round2-to-latex.mjs` reads `round2/` for `generated-round2.tex`. They are archived here because
-the working copies were under `/tmp`, which the operating system prunes.
+`final12.tgz` holds the outputs `regen-round.sh` left for the tables the thesis prints: two
+`run-all.mjs` runs over the extractor at 920e1aa, harness 1.9.0, made on 2026-11-02. `ctrl/` is
+the run without attribution, `fin/` the run with it, and `round2/` holds the files
+`round2-to-latex.mjs` read (`results.json`, the per-application `.B`, `.C`, `.L`, `.notes`, `.why`
+and `.diag` files, and `raw/`); the staged tables are in `tex/`. `to-latex.mjs` reads
+`ctrl/results.json` for `generated-tables.tex`, `compare.mjs` reads both runs for
+`generated-before-after.tex`, `round2-to-latex.mjs` reads `round2/` for `generated-round2.tex`, and
+`to-plots.mjs` reads both results files and the mutation results for `generated-plots.tex`.
 
-**They do not reproduce the tables committed in `thesis/`.** Checked on 2026-11-01 against the
-tables of 7d109c7:
+To check that the archive is the one the thesis prints, unpack it and run the first three
+generators on it; each writes the file committed in `thesis/` byte for byte. `generated-plots.tex`
+also takes its mutation figures from `results-rq4/` beside this directory.
 
-- `to-latex.mjs ctrl/results.json` prints a different loss ledger. ghostfolio holds 65
-  attribution-shared constructs, not 63, and 7 query-only, not 11; bitwarden holds 40
-  attribution-shared and 16 query-only, not 38 and 19. `compare.mjs` then closes on 459 lost
-  constructs where `generated-before-after.tex` says 455.
-- `round2-to-latex.mjs round2` refuses the archive ("46/25 is 184.0 %"): for one application the
-  witness check's `clean` exceeds the sites it judged.
+## The archive this one replaces
 
-So the archive is one run of the pipeline and the committed tables are the output of another, whose
-files were lost, and neither can stand in for the other. `regen-round.sh <work dir> <out dir>`
-re-runs the pipeline at the current commit and rewrites the four tables from its own output;
-replace `final7.tgz` with an archive of the `<out dir>` it leaves.
+`final7.tgz` held two runs over extractor eb9dab80 (2026-10-30). It did not reproduce the round
+tables committed at the time: `to-latex.mjs` printed a different loss ledger from it (ghostfolio 65
+attribution-shared constructs, not 63; bitwarden 40, not 38) and `round2-to-latex.mjs` refused it
+("46/25 is 184.0 %"). The committed tables had come from another run whose files were lost. Those
+tables were therefore not carried forward: the pipeline was re-run at the final commit and every
+table regenerated from that run, which is what `final12.tgz` archives. `final7.tgz` remains in the
+repository's history. The figures the chapters cite for the round's own tier are read out of git
+at 7d109c7 by `earlier-instrument.mjs`, as the round's tables printed them.

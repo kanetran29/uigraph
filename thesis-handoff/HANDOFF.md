@@ -33,7 +33,47 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
-## State at a glance
+## State on 2 Nov 2026 (supersedes the sections below where they disagree)
+
+- `origin/main` is at `e7add5d`; the revision commits after it are local and not pushed (the student's go-ahead
+  is needed). The earlier uncommitted work described below now sits in `stash@{0}` ("do not commit as-is"),
+  untouched; `stash@{1}` is older and also untouched.
+- Extractor and harness are final at `920e1aa`. Adapter suite 498/498, `tsc` and `eslint` clean; harness suite
+  91/91 (plus the two script checks, 13 and 12).
+- Every generated table is produced at that one commit: `remeasure.sh` and `regen-round.sh` were run there,
+  with nothing committed during the runs (an earlier attempt mixed stamps by committing mid-run, and
+  `rq4-to-latex.mjs` refused it). The round-two runs at `920e1aa` are archived as
+  `route-oracle/results-round2/final12.tgz`, which reproduces the committed round tables byte for byte;
+  `final7.tgz` did not and was replaced (see the README there).
+- Fixes in this revision: a navigation that later code may cancel is demoted (the old supersede rule read
+  only the next statement; the new one reads the rest of the navigation's expression, the statements and
+  blocks after it, a finally block, what each caller in the class does after the call, and later lifecycle
+  hooks, after a review reproduced `this.consume(this.router.navigate(['/a']))`); the round-four regressions are undone (`firmOutlet`'s vacuous `.every`, which made
+  a component with no outlet count as rendering one, and `host.layouts` overwritten in `8d95262`); a relative
+  link that climbs above the root yields no edge (Angular throws NG04005); harness 1.9.0 no longer counts
+  constructs inside comments. None of these moved the must tier.
+- Figures: must 150 edges / 25 constructs (17 / 21 without attribution); without k8sdash 25 / 23; 126 edges on 3
+  constructs (k8sdash, bitwarden) rest on the route-order assumption, 24 / 22 without it (`route-order.mjs`,
+  `\RouteOrder*`); witness check 0 failures, 62 unread (all k8sdash's toolbar link); guard-only 194 / 69, 44
+  guarded; attribution recovers 292 of 454 (64.3 %); ground truth on realworld full recall and precision 100 %
+  after two repairs made with it in view (call graph, empty-path chain); RQ4 59/64 and 42/53, paired 44 vs 40
+  of 49.
+- Sweep: the first run of the revision (`results-must/mutation-sweep-c8eec9b.json`) had 20 survivors. Tests now
+  kill 18 (`uncovered-guards.test.ts`, `uncovered-targets.test.ts`); 110 and 128 are retired as equivalent (the
+  reasons are in the header of `sweep-mutants.mjs`). The full sweep at `920e1aa` is the published record.
+- Prose: the "final snapshot" labels now hold; "one command" became the two scripts; the k8sdash concentration,
+  the 62 unread destinations, the route-order assumption and the rule order behind RQ2 are stated; an
+  eleventh protocol correction (constructs in comments) is reported; every em-dash was removed and the
+  AI-sounding phrasing rewritten across the thesis.
+- Still open: a component mounted through a wrapper call at the empty path is not placed on the screen above
+  (declared in Section 6.3, recall only); the resolver keeps a `..` that follows another segment literally where
+  Angular applies it (declared); whether each application registers its tables in the assumed order is not read
+  (declared, and measured); the supersede reading does not follow callers in other classes, a navigation a
+  handler schedules for later, or other listeners of the same event (bubbling, a `(click)` beside a
+  `routerLink`) (declared; none occurs in the current must tier); commit messages of this revision lack the session `Co-Authored-By` line, which cannot
+  be added now without orphaning the commits the generated tables name; the admin items at the end.
+
+## State at a glance (1 Nov, partly stale)
 
 - `main` is at `469b210`, 48 commits ahead of `origin/main` (`5eb2864`). Nothing after `5eb2864` is pushed.
 - Adapter suite at `469b210`: 453 tests pass, `tsc` clean. Harness suite: 2 of 91 fail, both the mutation-sweep

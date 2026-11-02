@@ -21,7 +21,7 @@ are what produce conditional transitions; (4) an end-to-end test suite that driv
 browser; (5) retrievable history in which tests and source change together; (6) an
 active repository. Six candidates satisfied all six criteria and were retained
 (Table~\ref{tab:corpus}). Each of them is fixed to a specific commit so that the
-measurements can be repeated on exactly the same code.
+measurements can be repeated on the same code.
 
 \begin{table}[t]\small
 \caption{The corpus. Routes are the route entries reached by the independent route
@@ -124,8 +124,8 @@ graph's own per-screen query yields at that screen.
 
 The two directions are not equally decidable. A link the application renders at a screen that
 the graph does not have leaving it is unambiguous: the link is there, so either the site was
-attributed to too few screens or it was never read. The opposite --- an edge the graph has and
-the DOM does not show --- is weaker in two ways. A template renders links conditionally and
+attributed to too few screens or it was never read. The opposite case, an edge the graph has and
+the DOM does not show, is weaker in two ways. A template renders links conditionally and
 this harness signs in to nothing, so an absent link may be correctly attributed and merely
 unreachable in the state observed. And where the analysis could not resolve a site's target to
 a single address it contributes every address the static prefix admits, recording the edge at
@@ -173,9 +173,9 @@ The second supplies what no method above has: a ground truth. For one applicatio
 each navigation site fires from were read off the sources by hand, under the rules stated in
 the file's method field, and recorded, with the derivation for each site, in
 \path{route-oracle/ground-truth/realworld.json}. Every level
-is then scored against it in both directions --- a pair the application has and the level does
-not is a scope too small, a pair the level has and the application does not is a scope too
-large --- which is the comparison the runtime oracle cannot make. Three limits belong with it.
+is then scored against it in both directions, which is the comparison the runtime oracle cannot
+make: a pair the application has and the level does not is a scope too small, and a pair the
+level has and the application does not is a scope too large. Three limits belong with it.
 It is one application, chosen because it is small enough to read exhaustively. It is the
 author's reading, so it is not independent of the tool's author; it is published with its
 reasoning so that a reader can check it against the same sources. Its rules are the analysis's own
@@ -195,7 +195,7 @@ something over something, and more than one of them has been called coverage in 
 literature this thesis builds on. They are not interchangeable, and on this corpus they
 differ by a factor of fifty, so each is named here with the population it is a fraction of.
 \emph{Node coverage} is declared screens that have a node, over the screens the independent
-parser declares --- a figure that rises if less of an application is read, which is why the
+parser declares. This figure rises if less of an application is read, which is why the
 blind-spot count is printed beside it. The same quantity over the addresses the running
 framework mounts is a different and smaller figure, reported separately in
 Section~\ref{sec:res-probe}. The \emph{conversion ratio} is navigation constructs witnessed
@@ -203,9 +203,9 @@ by a \emph{must} edge, over all in-scope constructs; a construct a must edge cit
 for may does not count, as the definition above states. \emph{Recovered} is the same numerator
 widened to an edge of any tier, and on an application whose screens sit behind guards the two
 are far apart: almost every transition such an application has is conditional, so a corpus
-can be most of the way recovered and almost nowhere deterministic. \emph{Accounted} is
+can be mostly recovered while almost none of it is deterministic. \emph{Accounted} is
 recovered plus the sites that name a reason for not being recovered, and it is the only one
-of these that is a claim about honesty rather than about reach. Where this thesis says
+of these that measures whether the losses are declared rather than how much is recovered. Where this thesis says
 coverage without qualifying it, it means node coverage; every other figure is named.
 
 \textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness
@@ -271,8 +271,8 @@ target, \emph{and} whose destination node sits at an address the independent rou
 declares. The second half of that test was added late and is the reason it is stated
 here in two parts: asking only whether the witness agrees with the edge's destination
 takes the destination for granted, so a node minted at an address the application never
-mounts passes every question the check asks. One application's lazily loaded reports
-module was read at the project root for exactly that reason, so the graph held
+mounts passes every question the check asks. This is how one defect went unnoticed: one
+application's lazily loaded reports module was read at the project root, so the graph held
 \path{/:filter} where the application mounts \path{/reports/:filter}, and edges pointed at
 that address while the check reported the tier clean (Section~\ref{sec:corrections}). No count
 of those edges is given, because the defect is repaired and the graph that carried it no longer
@@ -294,7 +294,7 @@ conditional on coverage, and the number of excluded mutants is reported alongsid
 
 Five methods are used. None establishes correctness alone, so Table~\ref{tab:methods} states what each can show and where it is blind. Figure~\ref{fig:oracles} shows which part of the graph each method checks and where its ground truth comes from.
 
-Four of the five read the application's sources. That shared footing is their common weakness: two readers of the same text can be wrong in the same way, and an agreement between them is then evidence of nothing. The fifth was added for that reason and is described last.
+Four of the five read the application's sources. That shared footing is their common weakness: two readers of the same text can be wrong in the same way, and an agreement between them then provides no evidence. The fifth was added for that reason and is described last.
 
 \input{figures/fig-oracles}
 
@@ -397,7 +397,7 @@ for a mutant could be affected by the earlier baseline run.
 \subsection{Corrections made to the protocol}
 \label{sec:corrections}
 
-Ten corrections were made to the protocol while it was being developed. They are
+Eleven corrections were made to the protocol while it was being developed. They are
 described here because each of them would otherwise have led to an incorrect figure
 in this thesis, and because the underlying mistakes are general ones. Every figure
 quoted below is the one a superseded instrument produced, recorded so that the
@@ -427,7 +427,7 @@ category.
 The first denominator of the conversion ratio counted
 the substring \texttt{routerLink} in templates, which also matches the attributes
 \texttt{routerLink\-Active} and \texttt{routerLink\-Active\-Options}. For alfresco this
-counted 113 constructs where the parser finds 34. Constructs are now counted by the
+counted 113 constructs where the parser finds \ConstructsAlfresco{}. Constructs are now counted by the
 parser that also produces the loss breakdown, so the ratio and the breakdown share one
 definition.
 
@@ -440,7 +440,7 @@ screens, of which 58 have a node. The extractor was the same in both runs.
 The conversion ratio itself was first defined as the number of
 must edges divided by the number of constructs. After attribution, this ratio rose
 from 5.1\% to 75.7\% for mifos, because a construct in a component rendered on many
-screens produced one edge per screen. So the rise came from how edges were stored. It is now computed per construct, and edges whose screen set is a whole
+screens produced one edge per screen. The rise therefore came from how edges were stored. It is now computed per construct, and edges whose screen set is a whole
 subtree are stored once (Section~\ref{sec:attribution}).
 
 The mutation harness patched the source by searching for the text of the
@@ -477,9 +477,9 @@ as misses, which the discussion then explained as a defect in how the graph repr
 guard; three of them guard screens no baseline edge enters and the fourth a route that yields
 no screen. The rule now matches the braces of the enclosing object literal to find the route,
 over a copy of the source with comment and string contents blanked so that a brace inside
-either cannot close the object early, reads what its subtree renders --- a component class, or
-the module a \texttt{loadComponent} imports --- and looks those up against the class and file
-each screen node carries; a route that declares no component and no populated children is excluded
+either cannot close the object early. It reads what the route's subtree renders (a component class, or
+the module a \texttt{loadComponent} imports) and looks those up against the class and file
+each screen node carries. A route that declares no component and no populated children is excluded
 as well, since it yields no screen for a guard to be recorded on, and the detection check is
 keyed on the same screens rather than on a substring of a path literal. On the superseded
 instrument the run scored 68 of the 70 sampled mutants and detected 59, with 5 producing no
@@ -498,21 +498,45 @@ extractor writes a guard factory without its arguments, so two guards on one nav
 alike, and removing one of three identical texts left a list that a comparison of sets read as
 unchanged. Neither changes which mutants are sampled; both change how a sampled one is scored.
 
-Five of the ten corrections were found the same way, by a figure that looked too good
-or too bad to believe: the conversion ratio that rose to 75.7\%, the precision that fell
+The eleventh is to the construct denominator, and it was found by a generator that refused to
+write rather than by a figure. The parser took a construct off any line its pattern matched, so a
+link inside an HTML comment, and a sentence of a code comment that names
+\texttt{router.navigate}, were constructs, and the extractor, which reads neither kind of
+comment, could only lose them. The loss classifier found no reason for the first, a link mifos had
+commented out, and the run that regenerates the round-two tables stopped on it. Comments are now
+blanked before the parser reads a line, with the compiler's own scanner for TypeScript so that a
+\texttt{//} inside a string is not taken for one; over the corpus that removes those two
+constructs, one in bitwarden and one in mifos, and nothing else.
+
+Five of the eleven corrections were found the same way, by a figure that looked implausibly
+good or bad: the conversion ratio that rose to 75.7\%, the precision that fell
 to 44.7\%, the coverage that reached 100\%, the construct count that tripled, and the
 detection rate that moved by more than twenty points. Each turned out to be a property of
-the measurement rather than of the extractor. A figure that is surprising is therefore
-checked against its inputs before it is written down, which is how the remaining figures
-in this thesis were arrived at.
+the measurement rather than of the extractor. A surprising figure is therefore checked
+against its inputs before it is written down, and the remaining figures in this thesis were
+checked in this way.
 
 \subsection{Reproducibility}
 
-The four methods that read the sources are re-run by one command,
-\texttt{run-all.mjs}, which fetches each application at its fixed commit rather than from a
-branch, runs the extraction twice --- with the attribution pass disabled and enabled ---
-and writes a results file together with the raw output of each method. It needs two things
-the command itself cannot supply: the dependencies of the harness directory, which is
+The four methods that read the sources are re-run by two scripts, run at one commit of the
+extractor, each of which refuses to start while the extractor's packages carry uncommitted
+changes. \texttt{regen-round.sh} runs \texttt{run-all.mjs} twice (with the attribution pass
+disabled and enabled), which checks each application out at its fixed commit rather than from
+a branch and writes a results file together with the raw output of each method; the conversion,
+coverage, loss, remaining-loss, before-and-after and round-two tables are generated from those
+two runs. \texttt{remeasure.sh} maps the corpus again and generates what is read off the graphs
+themselves: the census, the expansion check, the witness check of the must tier, the ledger of the
+round's tier, the guard-only run, the call-graph counts, the ablation with its width table and the
+ground truth, and the mutation run. It ends by publishing the sweep of the demotion rules, which a
+third script, \texttt{mutation-sweep.mjs}, records apart because it runs the adapter's test suite
+once per rule (about forty minutes), and which is refused if it was recorded on other rules than the
+commit's. Every table of Chapter~\ref{ch:results} that describes the final instrument comes out of
+these scripts at one commit; the few that describe an earlier instrument are generated from that
+instrument's own recorded results, and the runtime method's from its own, as below. An
+earlier set of the round-two tables did not: the runs they were generated from were lost, the
+archived runs of the same commit gave a different loss ledger, and those tables were replaced by
+a regeneration rather than carried forward. The scripts need two things
+they cannot supply: the dependencies of the harness directory, which is
 outside the workspace and is installed with \texttt{npm ci} there, and a checkout of the
 extractor at the evaluated commit, which is passed to it. The extractor is run from its
 TypeScript source rather than from a build. An earlier arrangement built it instead, which
@@ -523,7 +547,7 @@ the repository. Running from source removes it.
 
 The fifth method, the runtime route oracle, is re-run by its own documented command,
 because it needs each application built in its development configuration and served to a
-browser, which is a step the first command cannot take on a machine that has not built
+browser, which is a step the two scripts cannot take on a machine that has not built
 them. Its result files record no commit or runtime version, unlike the others, so the
 provenance guarantee below does not extend to them.
 
@@ -538,7 +562,7 @@ and the buckets sum to the route total, and the before-and-after comparison will
 unless every construct assigned to the attribution class is either recovered or carries a
 reason.
 
-Two limits of this arrangement should be stated rather than discovered. The evaluated
+This arrangement has two limits. The evaluated
 commit of the extractor must be one a reader can fetch, so the figures are reproducible
 only once that commit is published; and the version of the harness decides several figures
 independently of the extractor, so a result file is only comparable with another made by
