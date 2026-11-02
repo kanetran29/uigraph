@@ -52,6 +52,34 @@ export const routes: Routes = [
     expect(e?.modality).toBe('may')
     expect(guardsOn(e?.guard)).toEqual([])
   })
+  /** The same routes, reached from /a by a URL only the static prefix of which is read. */
+  const openingOver = (side: string) => {
+    const { graph } = extractGraph(inMemory({
+      '/app/guards.ts': `export const gate = () => true`,
+      '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { gate } from './guards'
+import { H } from './h.component'
+import { A } from './a.component'
+import { Pop } from './pop.component'
+export const routes: Routes = [
+  { path: 'a', component: A },
+  { path: 'c', children: [{ path: '', component: H }, { path: 'x', component: H }, { path: '', outlet: 'side', component: Pop, ${side} }] },
+]`,
+      '/app/h.component.ts': page('H'),
+      '/app/pop.component.ts': page('Pop'),
+      '/app/a.component.ts': `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'\n@Component({ selector: 'x-a', standalone: true, template: '<b (click)="go(id)"></b>' })\nexport class A { id = 'x'; constructor(private router: Router) {}\n  go(id: string) { this.router.navigateByUrl(\`/c/\${id}\`) } }`,
+    }), '/app')
+    return graph.edges.find((e) => e.from === routeId('/a') && e.to === routeId('/c/x'))
+  }
+  it('runs its canMatch on a candidate an over-approximated target reaches', () => {
+    // 140: opening canMatch dropped (a candidate is gated with no routes tried on the way)
+    expect(guardsOn(openingOver('canMatch: [gate]')?.guard)).toContain('gate')
+  })
+  it('runs its canLoad on a candidate an over-approximated target reaches', () => {
+    // 143: opening canLoad dropped
+    expect(guardsOn(openingOver('canLoad: [gate]')?.guard)).toContain('gate')
+  })
+
   it('opens it for an address below the mount as well', () => {
     // 138: opening at the exact mount only
     expect(guardsOn(edgeOf(opening('canActivate: [gate]', '/c/x'), '/a', '/c/x')?.guard)).toContain('gate')
