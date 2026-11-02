@@ -155,6 +155,7 @@ const CLS_LABEL = {
   LAZY_BOUNDARY: 'Lazy boundary', CONSTANT_PATH: 'Constant path',
   COMPONENT_UNLINKED: 'Component unlinked', NODE_MISS: 'Node missing', CONSTANT_TARGET: 'Constant target',
   EXCLUDED_NO_COMMANDS: 'Excluded in the baseline: named no destination',
+  OTHER: 'Other, no class rule applied',
 }
 let tex3 = `\n\\newcommand{\\TabRecoverySource}{%\n\\begin{tabular}{@{}lrrr@{}}\n\\toprule\nBaseline class of the construct & must & may & total \\\\\n\\midrule\n`
 const gt = { attribution: { must: 0, may: 0 }, node: { must: 0, may: 0 }, other: { must: 0, may: 0 } }
@@ -173,7 +174,7 @@ for (const cls of OTHER_CLS) {
 if (OTHER_CLS.length) tex3 += `\\addlinespace\n`
 tex3 += `\\midrule\nOut of the attribution classes & ${gt.attribution.must} & ${gt.attribution.may} & ${gt.attribution.must + gt.attribution.may} \\\\\n`
 tex3 += `Out of the node classes & ${gt.node.must} & ${gt.node.may} & ${gt.node.must + gt.node.may} \\\\\n`
-if (OTHER_CLS.length) tex3 += `Out of the excluded classes & ${gt.other.must} & ${gt.other.may} & ${gt.other.must + gt.other.may} \\\\\n`
+if (OTHER_CLS.length) tex3 += `Out of the remaining classes & ${gt.other.must} & ${gt.other.may} & ${gt.other.must + gt.other.may} \\\\\n`
 {
   const m = gt.attribution.must + gt.node.must + gt.other.must
   const y = gt.attribution.may + gt.node.may + gt.other.may

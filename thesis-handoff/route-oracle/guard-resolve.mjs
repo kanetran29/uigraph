@@ -3,6 +3,8 @@
 // Split out of mutate.mjs so that it can be checked without running the harness, which
 // extracts a corpus at import time. guard-resolve.test.mjs is that check.
 
+import path from 'node:path'
+
 /**
  * A same-length copy of the source with the contents of comments and string literals replaced
  * by spaces, so that braces inside them cannot be mistaken for structure. Indices into the
@@ -111,6 +113,32 @@ export function guardedRoute(src, index) {
     declaresTarget: /\b(?:component|loadComponent|loadChildren)\s*:/.test(struct) ||
       /\bchildren\s*:\s*\[\s*[^\]\s]/.test(struct),
   }
+}
+
+/**
+ * Where a routing file imports a class from, as a path relative to `appDir` without extension,
+ * or null when the class is not imported by a relative specifier (declared in the file, or
+ * imported through an alias or a package). Two classes may share a name: bitwarden declares an
+ * `AccountComponent` for the user's settings and another for an organisation's, and matching a
+ * screen by class name alone counts edges into the one as entering the other.
+ */
+export function importedFrom(src, cls, file, appDir) {
+  for (const m of src.matchAll(/import\s*(?:type\s+)?\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g)) {
+    const names = m[1].split(',').map((s) => s.trim().split(/\s+as\s+/).pop())
+    if (!names.includes(cls)) continue
+    if (!m[2].startsWith('./') && !m[2].startsWith('../')) return null
+    return path.relative(appDir, path.join(path.dirname(file), m[2])).replace(/\.ts$/, '')
+  }
+  return null
+}
+
+/**
+ * Whether a screen node's component file is the module `mod` names: the file itself, or a file
+ * under it when the specifier names a directory whose index re-exports the class.
+ */
+export function isModuleFile(componentPath, mod) {
+  if (!componentPath || !mod) return false
+  return componentPath === `${mod}.ts` || componentPath.startsWith(`${mod}/`)
 }
 
 /**

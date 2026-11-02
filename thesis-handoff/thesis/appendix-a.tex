@@ -425,8 +425,11 @@ Table~\ref{tab:probe} reports the result.
 Reading a configuration is itself a reading, and the one this comparison depends on is which of
 its entries answer an address with a screen. That reading is checked against what the framework
 does. The harness navigates a running application to an address and records the recogniser's
-verdict: the event Angular emits when a URL has matched. That event fires before any guard
-runs, so a guard sending every visitor to a sign-in page does not hide what was matched. Over
+verdict: the event Angular emits when a URL has matched. That event fires before any
+\texttt{canActivate} guard runs, so such a guard sending every visitor to a sign-in page does not
+hide what was matched; \texttt{canLoad} and \texttt{canMatch} guards run earlier, during matching,
+and one that refuses removes its route from the match, so the verdict is the match those guards
+allow. Over
 \ProbeAnswerApps{} applications and \ProbeAnswerAddresses{} addresses, chosen to include every
 address this chapter names, the classification taken from the configuration agrees with the
 navigation on \ProbeAnswerAgreed{} of the \ProbeAnswerChecked{} it decides, and declines to decide

@@ -288,13 +288,13 @@ Three elements of the domain are named, because attribution anchors edges at the
 Writing $r' \succeq r$ for the reflexive ancestor relation on routes, that is $r'$ is
 $r$ itself or an ancestor of $r$ in the route tree, they are
 \[
-  \mathit{screen}(r), \qquad
+  \{\mathit{screen}(r)\}, \qquad
   \mathit{subtree}(r) \;=\; \{\, \mathit{screen}(r'') \in S \;\mid\; r \succeq r'' \,\},
   \qquad \top \;=\; S ,
 \]
 and they form the chain
 \[
-  \bot \;\sqsubseteq\; \mathit{screen}(r) \;\sqsubseteq\; \mathit{subtree}(r)
+  \bot \;\sqsubseteq\; \{\mathit{screen}(r)\} \;\sqsubseteq\; \mathit{subtree}(r)
   \;\sqsubseteq\; \top .
 \]
 The chain is stated for a route $r$ with $\mathit{component}(r)$ defined. For a prefix
@@ -329,6 +329,8 @@ $\mathit{subtree}(r_1) \sqcup \cdots \sqcup \mathit{subtree}(r_k)$ \\
 component rendered in the template of another component & join of the scopes of the
 components that render it. The prototype applies this row only to components that no
 route mounts (Section~\ref{sec:implementation}) \\
+member (method, property initialiser, lifecycle hook) of a component & the scope of the
+component \\
 method of an injectable service & join of the scopes of its callers \\
 \texttt{canActivate} or \texttt{canMatch} on route $r$ & $\mathit{subtree}(r)$ \\
 HTTP interceptor & $\top$ \\
@@ -341,8 +343,8 @@ The row for services is why a simple traversal of the component tree is not enou
 the join of the scopes of the places that call it, which may themselves be services.
 Attribution is therefore computed as a fixpoint over the input relations of
 Section~\ref{sec:inputs}. The outlet relation gives the initial scopes, and scopes are
-propagated along the component nesting relation $N$, the call graph $\mathit{CG}$ and
-the dispatch relation $D$, with $\mathcal{P}(S)$ as the abstract domain. This is a
+propagated along the component nesting relation $N$, from each component to its own members,
+along the call graph $\mathit{CG}$ and along the dispatch relation $D$, with $\mathcal{P}(S)$ as the abstract domain. This is a
 monotone dataflow problem in the sense of Kildall
 \cite{kildall1973unified,nielson1999principles}, and two properties of it do separate
 work. Finite height gives termination. The height of $\mathcal{P}(S)$ is the number of
@@ -403,7 +405,7 @@ fixpoint.
 
 Algorithm~\ref{alg:attribution} gives the computation, and its propagation steps are
 the transfer-function applications bounded above. A step adds a screen to a scope only
-when an edge of $N$, $\mathit{CG}$ or $D$ carries it there, and scopes only grow, so
+when an edge of $N$, a component's membership edge, or an edge of $\mathit{CG}$ or $D$ carries it there, and scopes only grow, so
 what the algorithm computes is the least solution of the constraint system that
 Table~\ref{tab:scopes} states. In the model a component that is both mounted by a route
 and rendered in the template of another component therefore holds the join of the two
@@ -415,8 +417,11 @@ system rather than of this one.
 
 \subsection{Guards as program points}
 
-A guard that returns a \texttt{UrlTree} is itself a navigation: a redirect edge from
-$\mathit{subtree}(r)$, typically to a login screen. Treating guards only as labels on
+A guard that returns a \texttt{UrlTree} is itself a navigation, typically to a login screen.
+Its source is not the guarded route: a \texttt{canActivate} or \texttt{canMatch} guard on $r$
+runs while the router leaves the screen the navigation started from, so the redirect edge
+leaves that screen, the origin of an edge into $\mathit{subtree}(r)$, and only a
+\texttt{canDeactivate} guard redirects from a screen of $\mathit{subtree}(r)$ itself. Treating guards only as labels on
 inbound edges misses this edge class entirely. Further, the guard of an edge is the
 conjunction of the conditions on the containment path from screen to call site
 (structural directives) with the guards the router runs on that navigation
@@ -448,7 +453,7 @@ at its scope, and the set of edges leaving a particular screen is computed when 
 requested:
 \[
   \mathit{edgesFrom}(r) \;=\; E_\top \;\cup\; \bigcup_{r' \succeq r}
-  E_{\mathit{subtree}(r')} \;\cup\; E_{\mathit{screen}(r)},
+  E_{\mathit{subtree}(r')} \;\cup\; E_{\{\mathit{screen}(r)\}},
 \]
 where $E_X$ is the set of edges anchored at scope $X$ and $r' \succeq r$ is the
 reflexive ancestor relation on routes introduced above, so that the term for
@@ -456,7 +461,7 @@ $r' = r$ contributes $E_{\mathit{subtree}(r)}$ itself. The query is made for a s
 so $\mathit{component}(r)$ is defined, while $r'$ ranges over all ancestors of $r$,
 prefix routes included. An edge whose scope is some other
 screen set is stored at each of its screens and reaches $\mathit{edgesFrom}(r)$ through
-the $E_{\mathit{screen}(r)}$ term.
+the $E_{\{\mathit{screen}(r)\}}$ term.
 Figure~\ref{fig:anchored} contrasts the two representations.
 
 \input{figures/fig-anchored}

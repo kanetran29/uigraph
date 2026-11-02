@@ -6,7 +6,8 @@ the prototype evaluated in Chapter~\ref{ch:results}.}
 \Require routes $R$ with route tree, and the guards $\mathit{guards}(r)$ that route $r$ names
   in \texttt{canActivate} or \texttt{canMatch}; components $C$; nesting $N \subseteq C \times C$;
   HTTP interceptors $I$; call graph $\mathit{CG}$; dispatch relation $D$
-\Ensure $\mathit{scope}(x) \in \mathcal{P}(S)$ for every component and callable $x$
+\Ensure $\mathit{scope}(x) \in \mathcal{P}(S)$ for every component and callable $x$; the
+  callables include the members of components and of services
 \ForAll{$x$} $\mathit{scope}(x) \gets \varnothing$ \EndFor
 \ForAll{$r \in R$ with $\mathit{component}(r) = c$}
   \State $\mathit{scope}(c) \gets \mathit{scope}(c) \cup \mathit{subtree}(r)$
@@ -27,6 +28,9 @@ the prototype evaluated in Chapter~\ref{ch:results}.}
   \State take $x$ from $W$
   \ForAll{$y$ with $(x,y) \in N$} \Comment{$x$'s template renders $y$}
     \State \Call{Propagate}{$x, y$}
+  \EndFor
+  \ForAll{members $m$ of $x$, if $x$ is a component} \Comment{a member runs where its component is shown}
+    \State \Call{Propagate}{$x, m$}
   \EndFor
   \ForAll{$y$ with $(x,y) \in \mathit{CG} \cup D$} \Comment{$\mathit{CG}$: member level, bindings read application-wide; $D$: \emph{model only}}
     \State \Call{Propagate}{$x, y$}
