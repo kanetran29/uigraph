@@ -56,7 +56,7 @@ attributed run holds \CensusMust{} must edges against \CensusBaseMust{} without 
 difference is the links of two application shells (realworld's header and footer logos and
 k8sdash's toolbar), drawn from every screen the shell renders. The witness check finds
 \MustWitnessViolations{} failures among the must edges and cannot read the destination of
-\MustWitnessUnread{}; the tier is too small for that to be a statement about precision in general. Whether the computed screen sets are correct is established on one
+\MustWitnessUnread{}; the tier is too small for that to be a statement about precision in general. The computed screen sets were checked in both directions on one
 application and not on the corpus: read site by site on \GTApp{}, the analysis names
 \GTFullRecall{} of the (site, screen) pairs of the hand-read structural reference at \GTFullPrecision{}
 precision against it, after the one over-approximating rule that reading exposed had been replaced by the
@@ -100,7 +100,7 @@ addresses, almost all of it onto the uncertain tier, and against the structural 
 by hand on one application it raises recall from \GTOutletRecall{}, where the mechanisms of
 earlier work leave it, to \GTFullRecall{} at
 \GTFullPrecision{} precision. That result comes after two repairs the same reading prompted and a completion of the reference
-from the graph's output, and it is established on \GTApp{} alone. Nothing in its formulation depends on a particular
+from the graph's output, and it was measured on \GTApp{} alone. Nothing in its formulation depends on a particular
 extractor; what an extractor supplies is the screens and the navigation sites it ranges
 over, and Chapter~\ref{ch:results} shows that what the mechanism can recover is bounded
 by how completely those are read. The measurement is the part that stands on its own. Static navigation extraction is measured on a corpus of six Angular
@@ -181,7 +181,7 @@ the shell attribution as well as this rule, and how much either contributes alon
 zero there, and Claim~\ref{claim:must} ranges over \MustWitnessEdges{} edges in the corpus, with
 \MustWitnessViolations{} witness-check failures and \MustWitnessUnread{} destinations the check
 cannot read, every construct behind them read against the source.
-What the small tier measures is what the extractor can prove without evaluating a guard: taking
+What the small tier measures is what the extractor can assert without evaluating a guard: taking
 every guard to let the navigation through gives \GuardOnlyMust{} must edges, and for
 \GuardOnlySourceBehind{} of the \GuardOnlyGuarded{} that run a guard, every guard the navigation
 runs is one the source screen's own routes carry, so the user has passed it once already. The exchange is the end of a sequence in which each claim that did not survive its own test

@@ -591,3 +591,47 @@ commit of the extractor must be one a reader can fetch, so the figures are repro
 only once that commit is published; and the version of the harness decides several figures
 independently of the extractor, so a result file is only comparable with another made by
 the same harness version, which is why each one records it.
+
+Table~\ref{tab:provenance} lists, for each group of generated tables, the extractor commit and
+harness version its inputs were measured with and the recorded data it is regenerated from. All
+figures of the final instrument were measured at extractor commit \texttt{c42f220}, harness 1.9.0
+and mutation harness 1.9.1; the source of the Angular adapter is identical at \texttt{920e1aa},
+where the sweep of the demotion rules was recorded. Three groups are historical by design and
+are labelled as such where they are printed: the first-round node audit of
+Appendix~\ref{app:validation}, the round's own must tier, and the runtime scope check. The
+runtime route check records no extractor commit; its node total equals the final screen count,
+but that agreement is the only link to the final graph. The construct prevalence counts read the application sources only and do not depend on
+the extractor. They were not re-measured on the final instrument, and the
+figures taken from them describe the instrument or graph named in the table.
+
+\begin{table}[t]\footnotesize
+\caption{Provenance of the generated tables. \emph{Final} means measured on the instrument
+every other figure describes; \emph{historical} means measured on an earlier instrument or graph
+and printed as a record of it.}
+\label{tab:provenance}
+\begin{tabularx}{\textwidth}{@{}Y>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{3.6cm}@{}}
+\toprule
+Tables & Status & Measured with & Regenerated from \\
+\midrule
+Loss ledger, before and after, round two, plots & final & \texttt{c42f220}, harness 1.9.0 &
+\path{results-round2/final14.tgz} \\
+Census, must tier, witness check, guard-only, route order, call graph, expansion & final &
+\texttt{c42f220} & the corpus graphs, via \texttt{remeasure.sh} \\
+Ablation, structural reference & final & \texttt{c42f220} &
+\path{results-ablation/ablation.tgz} \\
+Mutation (RQ4) & final & \texttt{c42f220}, mutate 1.9.1 & \path{results-rq4/} \\
+Demotion-rule sweep & final & \texttt{920e1aa}, same adapter source &
+\path{results-must/mutation-sweep.json} \\
+Earlier instrument and the round's must tier & historical & \texttt{eb9dab80} and before &
+tables read from git at \texttt{f17a302} and \texttt{7d109c7} \\
+Runtime scope check (Table~\ref{tab:scope}) & historical & an earlier graph, before the call
+graph; probe 1.1.0 & \path{route-probe/results/} \\
+Runtime route check (Tables~\ref{tab:probe}, \ref{tab:probe-closure}) & recorded 30--31 Oct &
+probe 1.1.0; extractor commit not recorded & \path{route-probe/results/} \\
+First-round node audit (Table~\ref{tab:node-audit}) & historical & harness 1.2.0; extractor
+commit not recoverable & committed table only \\
+Construct prevalence (Table~\ref{tab:approx-counts}) & no extractor & pinned corpus commits &
+\texttt{approx-counts.mjs} over the sources \\
+\bottomrule
+\end{tabularx}
+\end{table}

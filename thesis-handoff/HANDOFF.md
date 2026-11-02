@@ -1,4 +1,4 @@
-# Thesis handoff (1 Nov 2026)
+# Thesis handoff (2 Nov 2026, evening)
 
 Read this first. It is written for a Claude Code session continuing the work. Everything below was
 checked against the repository on 1 Nov 2026; anything not checked says so.
@@ -29,11 +29,37 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/panel4/` | the fourth Opus panel and the three fix rounds that followed it, as JSON: `prose-panel.json` (68 prose findings, each with a verifier verdict; 62 real), `code-panel.json` (36 code findings, 31 real), `round1-fixes.json`, `round2-followups.json`, `round3.json` (each: what a fix branch did, and an Opus review of it). |
 | `~/personal/uigraph-corpus/` | the six corpus applications at their pinned SHAs (`fetch.sh` re-creates them). |
 | `~/personal/uigraph-work/` | work dir: `corpus` symlinks to the durable corpus; `noattr/`, `ablation/`, `guard-only/`, `corpus-rq4/`, `final7/`, logs. Never use `/tmp` for this: macOS pruned a corpus `.git` there once, and `remeasure.sh` refuses it. |
-| `thesis-handoff/route-oracle/results-round2/final7.tgz` | archived inputs of the round-two tables (extractor eb9dab80). They do not reproduce the committed round tables exactly. |
+| `thesis-handoff/route-oracle/results-round2/final14.tgz` | the two run-all.mjs runs at `c42f220`; reproduces tables, before-after and round-two byte for byte (stamps aside). `final7.tgz` (eb9dab80) does not. |
+| `thesis-handoff/route-oracle/results-ablation/ablation.tgz` | `ablation.json` and the six realworld level DBs; reproduces the ablation and ground-truth tables. |
+| `thesis-handoff/REPRODUCE.md` | grader-facing reproduction guide: versions, corpus pins, regeneration from archives, full re-measurement, build. |
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
-## State on 2 Nov 2026, afternoon (supersedes everything below where they disagree)
+## State on 2 Nov 2026, evening (supersedes everything below where they disagree)
+
+- Commits after `35ca3cf`: witness tables count must edges *read and passed* (k8sdash 63/125, corpus 88/150;
+  unread edges are neither); non-shell recall (rooted 82.8 %, outlet 98.3 %, full 100 %); outlet is the
+  earlier-work baseline (99.5 %), the thesis adds `full` (36 sites, 2.0 %).
+- Final content pass: claims of proof softened to what the evidence supports (ch1, ch5, ch6, ch7); ch5
+  subsection now "Checking the scopes against the running interface"; VeriFlow guards cell "unverified" with a
+  footnote (full text not retrieved) and the Zhang paragraph qualified as the abstract's description.
+- New `tab:provenance` in ch4 §Reproducibility: which tables are final (`c42f220`, sweep `920e1aa` with the same
+  adapter tree `bdbe98b2`) and which are historical (earlier instrument `f17a302`/`7d109c7`, runtime scope check on
+  an earlier graph, node audit `4505fd2a` not recoverable). The route probe records no extractor commit and is
+  labelled "recorded 30–31 Oct", not "earlier graph" (its 892 nodes equal `\CensusScreens`). Captions of
+  tab:probe and tab:node-audit point to it.
+- Reproduction: `corpus.json` `evalTag` is now `thesis-eval-final`, a LOCAL tag at `c42f220`. The pushed tag
+  `thesis-eval` (dd28cc2) is left in place and documented as superseded. From the committed archives alone,
+  generated tables, before-after, round2, groundtruth, ablation, rq4, plots-rq4, sweep, must-witness and probe
+  regenerate identically apart from `%` stamp lines (checked 2 Nov). Steps in `thesis-handoff/REPRODUCE.md`.
+- PDF 147 pages, 0 errors, 0 undefined refs, 0 overfull boxes. Harness 98/98.
+- Open: (1) push a new branch and `thesis-eval-final` so graders can fetch `c42f220` (needs the student's word);
+  `gh` is logged in as `kanetran-jaakko`, which cannot see `kanetran29/uigraph`, so check the repo's visibility
+  before giving graders a link. (2) Human re-reading of the must-tier verdicts (`review.json`, `tier-reading.json`
+  are the assistant's). (3) `harness.zip` and `thesis-latex.zip` date from 25 Oct and are stale; replace them with
+  a `git archive` of the final commit if a zip is wanted.
+
+## State on 2 Nov 2026, afternoon
 
 - `9fee9f5` (after review of `e8ac256`): `\RoundTwoBefore` is over baseline in-scope sites (71.3 %, was 71.9 %
   over all constructs); no re-extraction, `final14.tgz` still reproduces all four round tables byte for byte at this

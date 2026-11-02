@@ -73,9 +73,12 @@ FeedEx, FRAGGEN \cite{feedex2013,fraggen2022} & DOM states & no & no & coverage 
 Kurant \cite{kurant2025} & React components & yes & n/a & F1, no routing \\
 Oshima and Kishi \cite{oshima2018model} & Angular pages & yes & no & 6 apps, faults \\
 Rima et al.\ \cite{rima2026e2e} & Angular workflows & yes & conditions & 7 apps, tests run \\
-Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & yes & no & 2 apps, policy paths \\
+Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & yes & unverified$^{a}$ & 2 apps, policy paths \\
 \bottomrule
 \end{tabularx}
+
+\smallskip\footnotesize $^{a}$\,The full text could not be retrieved; the abstract does not say
+whether guards are represented, so the cell is left unverified.
 \end{table}
 
 \section{Static extraction for Android}
@@ -212,7 +215,7 @@ class to depth one and into the first callback of a \texttt{subscribe}, and the 
 names is resolved by the type of the constructor parameter. The specification excludes
 router-outlet modelling and provider resolution beyond module and root providers, and it does
 not follow a call into a service, so a navigation inside a service member is not placed on the
-screens of its callers. Zhang et al.\ parse
+screens of its callers. As their abstract describes the work, Zhang et al.\ parse
 the compiled JavaScript bundle rather than the sources, take declared routes as vertices and
 navigation calls as edges, and check an access-control policy against the screens reachable
 from an authorised one; their graph is declared an over-approximation and is not narrowed,

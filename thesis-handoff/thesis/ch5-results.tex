@@ -348,7 +348,7 @@ provider forms. Other sites have a scope but a dynamic destination or a target f
 which the graph has no node. The final table records the reasons remaining after the
 implemented call graph, rather than losses measured before it was added.
 
-\subsection{Whether the scopes are right}
+\subsection{Checking the scopes against the running interface}
 \label{sec:res-scope}
 
 Everything above measures what attribution recovers. Whether the \emph{set of screens} it
@@ -413,9 +413,9 @@ holds the edge and the page showed no link. Three causes are mixed in that count
 them are not defects. The first is interface state: realworld's header is wrapped in
 \texttt{@if (authState === 'authenticated')} and offers \emph{New Article}, \emph{Settings}
 and the profile link only to a signed-in user, and this harness signs in to nothing, so the
-graph is correct and the probe cannot see those links. The second is data: a tag page navigated to with a
+probe cannot see those links and the absence says nothing about the graph. The second is data: a tag page navigated to with a
 placeholder segment lists no articles, so it renders none of the article links the graph
-correctly attributes to it. The third is target over-approximation, which is a property of
+attributes to it. The third is target over-approximation, which is a property of
 the destination rather than of the scope. realworld's
 \texttt{[routerLink]="['/profile', article.author.username]"} resolves to
 \path{/profile/:username} and to \path{/profile/:username/favorites}, because a two-segment
@@ -589,7 +589,7 @@ thesis to show a computed scope too large rather than merely unverified, and the
 which follows the call from that button to the member, places the site on the settings screen
 alone. The order of these steps limits what the clean row shows. The call graph was written after
 this ground truth had exposed the defect, and it is scored on the same ground truth, so the
-\GTFullPrecision{} precision confirms the repair and is not an independent test of the call
+\GTFullPrecision{} precision is consistent with the repair and is not an independent test of the call
 graph, whose remaining errors would sit where this application has nothing to test them. The
 same holds for recall. Until the last corrections to the rule that places an empty-path child on
 the screen above it (Section~\ref{sec:approximations}), \emph{full} missed five pairs, all at one
@@ -597,7 +597,7 @@ screen, \path{/profile/:username}, whose article list is placed by a child route
 path and renders on the parent's address; at the final commit it misses \GTFullMissing{}. Of the
 changes between the two runs, only that rule moves a (site, screen) pair; the others change a
 modality, which this scoring does not read. That rule, too, was corrected with the defect in
-view, so the clean row confirms two repairs and tests neither independently.
+view, so the clean row is consistent with two repairs and tests neither independently.
 
 Two things follow for RQ3. The first is that most of the recovery attributed to this analysis
 is produced by mechanisms earlier work already had: \GTRootedRecall{} of the
@@ -1152,7 +1152,7 @@ navigation runs is one the source screen's own routes carry by name, read off th
 configuration, so a user on that screen has passed it once already. \GuardOnlyGuardedGhostfolio{}
 of the guarded edges are ghostfolio's, which names its authentication guard on each route rather
 than once on a parent, so that a navigation between two signed-in screens runs it again. The small
-tier therefore says what the extractor can prove without evaluating guards. Evaluating them would
+tier therefore says what the extractor can assert without evaluating guards. Evaluating them would
 move \GuardOnlyGuarded{} edges from may to must, those on which the navigation runs a guard. A reader who expected
 static extraction to recover a large deterministic graph should take this as part of the answer:
 some of the transitions are there, behind guards a static reader does not evaluate.
@@ -1224,7 +1224,8 @@ must edge, and \CensusMustSites{} constructs earn must across the corpus. The br
 recovery measure therefore must not be read as deterministic recall.
 
 \begin{table}[t]\footnotesize
-\caption{The route configuration the framework holds, against the extractor's node set.
+\caption{The route configuration the framework holds, against the extractor's node set, as
+recorded by the runtime probe of 30 and 31 October (Table~\ref{tab:provenance}).
 \emph{Routes} counts the route entries the configuration holds once every lazy subtree is
 expanded, and \emph{mounted} the addresses among them at which the router places a component on
 the primary outlet. \emph{Not mounted} counts nodes the extractor declares at an address the
