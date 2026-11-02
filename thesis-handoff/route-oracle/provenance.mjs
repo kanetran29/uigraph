@@ -18,7 +18,7 @@ const repo = path.resolve(import.meta.dirname, '..', '..')
  * directory pin the ts-morph that the independent parser (index.mjs) reads routes with, and so
  * the destinations the witness check compares.
  */
-const INPUTS = ['results-must/tier-reading.json', 'results-must/review.json', 'results-must/mutation-sweep.json',
+const INPUTS = ['results-must/tier-reading.json', 'results-must/review.json', 'results-must/mutation-sweep.json', 'results-must/mutation-sweep-c8eec9b.json',
   'ground-truth', 'corpus.json', 'round-two-graphs', 'package.json', 'package-lock.json']
 const HARNESS = 'thesis-handoff/route-oracle'
 /**
