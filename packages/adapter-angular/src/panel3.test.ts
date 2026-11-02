@@ -121,6 +121,57 @@ export class Home { constructor(private router: Router, private nav: NavService)
   })
 })
 
+describe('code that runs after a navigation outside the statements that follow it', () => {
+  const { graph } = extractGraph(inMemory({
+    '/app/app.routes.ts': routesTo(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n']),
+    '/app/home.component.ts': `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'
+@Component({ selector: 'x-home', standalone: true, template: '<b (click)="arg()"></b><b (click)="operand()"></b><b (click)="then()"></b><b (click)="go()"></b><b (click)="h()"></b><b (click)="slow()"></b><b (click)="h2()"></b><b (click)="cond()"></b><b (click)="list()"></b>' })
+export class Home { constructor(private router: Router) {}
+  cond() { return this.router.navigate(['/m']) ? this.leave() : 0 }
+  list() { return [this.router.navigate(['/n']), this.leave()] }
+  arg() { this.consume(this.router.navigate(['/a'])) }
+  consume(p: unknown) { this.router.navigate(['/b']) }
+  operand() { this.router.navigate(['/c']) || this.leave() }
+  leave() { this.router.navigate(['/d']) }
+  then() { this.router.navigate(['/e']).then(() => this.router.navigate(['/f'])) }
+  go() { this.router.navigate(['/g']) }
+  h() { this.go(); this.router.navigate(['/h']) }
+  async slow() { await this.router.navigate(['/i']) }
+  h2() { this.slow(); this.router.navigate(['/j']) }
+  ngOnInit() { this.router.navigate(['/k']) }
+  ngAfterViewInit() { this.router.navigate(['/l']) } }`,
+    '/app/t.component.ts': leaf,
+  }), '/app')
+  const navigate = (to: string) => graph.edges.find((e) => e.from === routeId('/home') && e.to === routeId(to) && e.event === 'navigate')?.modality
+
+  it('counts the body of a call the navigation is an argument of, which runs after it', () => {
+    expect(navigate('/a')).toBe('may')
+  })
+  it('counts the right operand of an expression whose left operand it is', () => {
+    expect(navigate('/c')).toBe('may')
+  })
+  it('counts both branches of a conditional whose condition it is', () => {
+    expect(navigate('/m')).toBe('may')
+  })
+  it('counts the elements of an array literal that follow it', () => {
+    expect(navigate('/n')).toBe('may')
+  })
+  it('does not count a callback the navigation\'s own promise runs once it has finished', () => {
+    expect(navigate('/e')).toBe('must')
+  })
+  it('counts what a caller does after calling the member that holds it, even when the member is a handler too', () => {
+    expect(navigate('/g')).toBe('may')
+    expect(navigate('/h')).toBe('must')
+  })
+  it('counts what a caller does after an async member returns, which is before an awaited navigation finishes', () => {
+    expect(navigate('/i')).toBe('may')
+  })
+  it('counts a navigation in a lifecycle hook Angular calls later', () => {
+    expect(navigate('/k')).toBe('may')
+    expect(navigate('/l')).toBe('must')
+  })
+})
+
 describe('a route component behind a conditional outlet', () => {
   it('holds its links at may, and keeps those of one behind a plain outlet', () => {
     const { graph } = extractGraph(inMemory({
