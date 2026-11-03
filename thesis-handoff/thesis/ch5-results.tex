@@ -387,8 +387,15 @@ applications render on the screens that could be judged, \ScopeConfirmed{} are p
 the scope the analysis computed (\ScopeConfirmedShare{}), and behind these predictions stand
 \ScopeAnchors{} raw anchors. On realworld, which renders most of its screens without a
 backend, every rendered pair on every judged screen is predicted; the pairs that are not
-predicted are all bitwarden's. That is evidence that, outside those four, the computed scopes are not too
-small on what could be observed. The evidence is limited in size: it covers \ScopeJudged{} screens of
+predicted are all bitwarden's. The unit of this check is the screen and the destination, not the
+site: the graph's edges leaving a screen are pooled into one set of destination patterns and set
+against the links the screen renders, and neither the witness nor the site enters the match. Two
+sites on one screen that name the same destination are therefore one pair, and a site attribution
+left off that screen is hidden whenever another site supplies the same destination. A confirmed
+pair shows that the screen's outgoing destinations cover what it renders; it does not show that
+each site behind them was attributed to that screen. An unpredicted pair is not affected by the
+pooling, since no edge of the screen reaches that destination at all, so the \ScopeUnpredicted{}
+are direct evidence of scopes that are too small. The evidence is limited in size: it covers \ScopeJudged{} screens of
 \ScopeScreens{}, because \ScopeUnjudged{} redirect to a sign-in page when there is no backend
 behind them, and \ScopeApps{} of the six applications are measured at all. ghostfolio is the
 one left out: it builds a separate bundle per locale, each declaring a base path of its own,
@@ -464,9 +471,9 @@ runs from \BaselineMeanScopeMin{} to \BaselineMeanScopeMax{} screens.
 Two things follow, and the second is the less favourable to the analysis. The first is that the trivial
 baseline is not a competitor for the must tier: an unguarded site in a shared component
 attributed to every screen would yield a must edge from screens that never render it, so
-Claim~\ref{claim:must} would fail by construction rather than be tested, and the result that
-attribution costs the deterministic tier nothing is only meaningful because the attribution is
-narrow. The second is that on part of this corpus it is not very narrow. A scope that names three
+Claim~\ref{claim:must} would fail by construction rather than be tested, and the finding that
+no must edge attribution added fails the witness check is only meaningful because the attribution
+is narrow. The second is that on part of this corpus it is not very narrow. A scope that names three
 fifths of an application is a weak statement about where a site fires, and the coverage RQ3
 reports is bought with scopes of that width. Nothing in the evaluation shows those wide scopes
 to be wrong, since the oracle above could not test the direction in which they would be wrong.
@@ -877,9 +884,10 @@ screen it fires from, and a construct whose source screen has no node is a loss
 attribution cannot repair. That is the bind the lowest-coverage applications were in, and
 the threshold was crossed by resolving the constructs the route table was reached through
 rather than by inferring nodes the framework definition does not supply. The gaps that
-remain are limited to the custom matcher, the spread routes and the deployment-time choice
-between tables; all three are declared rather than inferred, and none is a coverage defect the extractor
-could close on its own.
+remain are of two kinds, and both are declared rather than inferred. The custom matcher and the
+deployment-time choice between tables depend on information a static reader of the sources does
+not have. The spread of computed routes does not: its routes are in the source, and the extractor
+does not yet read them, so it is an unsupported construct the extractor could close.
 
 \begin{table}[t]\small
 \caption{Declared screens that have a node, before and after the loss list was worked.

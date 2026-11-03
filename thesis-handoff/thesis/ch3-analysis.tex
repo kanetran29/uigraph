@@ -141,8 +141,17 @@ separate overlay. The tool's specification states this as an invariant, and the 
 Every must edge corresponds to a navigation that occurs, for every input on which the
 enclosing code executes, over the declared route set, under the route-order assumption of
 Section~\ref{sec:approximations}, and for a site whose component is not placed by a join over an
-ambiguous selector.
+ambiguous selector, within the following execution model: the event is a plain primary
+activation that navigates the current browsing context, no other listener the event reaches
+starts a navigation, and no call the reader cannot resolve to a body in the application, nor any
+work the handler schedules for later, starts one.
 \end{claim}
+
+\noindent The execution model is part of the claim and not a detail of the implementation.
+Section~\ref{sec:approximations} lists the cases it excludes: a call into a library that cancels
+the navigation by starting another, a second listener on the element or an ancestor, and an
+activation with a modifier key or into another browsing context. On such an execution a must edge
+can name a navigation that does not complete, and the claim says nothing about it.
 
 That assumption carries much of the tier: without it the must tier holds \RouteOrderMustWithout{}
 of its \RouteOrderMust{} edges, on \RouteOrderSitesWithout{} of \RouteOrderSites{} constructs.
@@ -449,11 +458,16 @@ Its source is not the guarded route: a \texttt{canActivate} or \texttt{canMatch}
 runs while the router leaves the screen the navigation started from, so the redirect edge
 leaves that screen, the origin of an edge into $\mathit{subtree}(r)$, and only a
 \texttt{canDeactivate} guard redirects from a screen of $\mathit{subtree}(r)$ itself. Treating guards only as labels on
-inbound edges misses this edge class entirely. Further, the guard of an edge is the
+inbound edges misses this edge class entirely. Further, the guard of an edge in the model is the
 conjunction of the conditions on the containment path from screen to call site
 (structural directives) with the guards the router runs on that navigation
 (Section~\ref{sec:model}). Reporting only the second part gives a weaker condition than the true
-one. In the baseline, for example,
+one. The prototype does not materialise that conjunction. A structural condition in a template
+demotes the edge to may but is not written into its guard, which for a template link holds only
+the router's guards; a navigation call in a handler carries the condition of an enclosing
+\texttt{if} or conditional expression as source text, together with the router's guards. The
+graph evaluated in Chapter~\ref{ch:results} therefore records that a template link is
+conditional without recording the condition. In the baseline, for example,
 a link that is rendered only inside \texttt{@if (isUser())} was labelled with the
 authentication guard of its target route. That guard is satisfied by any logged-in
 user, including users who are not the owner and who therefore never see the link.

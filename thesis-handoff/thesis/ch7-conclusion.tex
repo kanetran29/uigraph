@@ -57,9 +57,10 @@ attributed run holds \CensusMust{} must edges against \CensusBaseMust{} without 
 difference is the links of two application shells (realworld's header and footer logos and
 k8sdash's toolbar), drawn from every screen the shell renders. The witness check finds
 \MustWitnessViolations{} failures among the must edges and cannot read the destination of
-\MustWitnessUnread{}; the tier is too small for that to be a statement about precision in general. On the criterion
-RQ3 set, no construct left the deterministic tier when attribution was enabled
-(\AttrRegressed{} regressions). The computed screen sets were checked in both directions on one
+\MustWitnessUnread{}; the tier is too small for that to be a statement about precision in general. Separately, no
+construct the baseline converted lost its conversion when attribution was enabled
+(\AttrRegressed{}), and none was moved from must to may (\AttrDemoted{}); that is retention of
+what the baseline represented, not precision of what attribution added. The computed screen sets were checked in both directions on one
 application and not on the corpus: read site by site on \GTApp{}, the analysis names
 \GTFullRecall{} of the (site, screen) pairs of the hand-read structural reference at \GTFullPrecision{}
 precision against it, after the one over-approximating rule that reading exposed had been replaced by the
@@ -69,9 +70,11 @@ six applications, and nothing here puts it to ghostfolio. The scopes are also wi
 attributing every site to every screen by a factor between \BaselineFactorMin{} and
 \BaselineFactorMax{}, and on \BaselineBluntest{} the average site is attributed to
 \BaselineBluntestShare{} of the screens. A scope that wide says little about where the site
-fires, even if it is sound. RQ3 is therefore answered for coverage, which rises, and for the deterministic tier, which does
-not lose a construct; whether the scopes attribution adds are too wide was tested on \GTApp{}
-alone.
+fires, even if it is sound. RQ3 is therefore answered in part. Coverage rises and the baseline's conversions are retained.
+Whether must-tier precision holds is not established: the check finds no failure among the edges
+it can read, but it cannot read the destination of \MustWitnessUnread{} of the
+\MustWitnessEdges{}, and whether the scopes
+attribution adds are too wide was tested on \GTApp{} alone.
 
 The answer to RQ4, on the three applications that were mutated, is that the graph responds
 to authored source changes in the constructs it represents. Of the \MutFallibleScored{} mutants
@@ -139,13 +142,18 @@ analysis and commit-time checking need; where it is not, a change to it cannot b
 the excluded mutants of RQ4 restate the coverage gap RQ1 measures.
 
 RQ5 asked whether the losses belong to the applications or to the tool, and the answer is
-that almost every loss belongs to the tool. One defect class does not: ghostfolio computes a
+that almost every loss belongs to the tool. The causes fall into three groups: defects of the
+extractor that were repaired, a construct whose information is in the source but which the
+extractor does not yet support, and information that is fixed only at run time or lies outside
+the route abstraction. One defect class does not: ghostfolio computes a
 route's path in a custom \texttt{UrlMatcher}, which no static reader of a route table can
 resolve. The runtime method adds a second case outside a static reader's reach, mifos's choice
 between two route tables by a value injected at deployment; both stay declared blind spots
-rather than repairs. The largest single loss of nodes, ghostfolio's spread of computed routes,
-is a failure of the tool on a construct it could read, and the extractor declares it unread.
-Every other defect class likewise resolved to a construct the extractor could read and did not:
+rather than repairs. The second group has one member, and it is the largest single loss of
+nodes: ghostfolio's spread of computed routes, a construct the tool could read and does not,
+which the extractor declares unread and the round did not repair.
+The first group holds every other defect class, each a construct the extractor could read and
+did not:
 a route table reached through an NgModule, a route factory, a path named by a constant, an
 enum or an i18n segment, a workspace alias, a loader that references its module instead of
 importing it. With those repaired, \RoundTwoFullNodes{} of the six applications hold a node
@@ -190,7 +198,12 @@ every guard to let the navigation through gives \GuardOnlyMust{} must edges, and
 \GuardOnlySourceBehind{} of the \GuardOnlyGuarded{} that run a guard, every guard the navigation
 runs is one the source screen's own routes carry, so the user has passed it at least once on the way to that screen. That trade, a small tier
 in place of unsupported claims, is the end of a sequence in which each claim that did not
-survive its own test was withdrawn.
+survive its own test was withdrawn. The size of the tier is bound to the choices that produced it:
+a navigation must occur on every execution the claim ranges over, the demotion rules decide which
+uncertainty removes it, and the approximations of Section~\ref{sec:approximations} decide what
+the extractor reads. Under another semantics, demotion
+policy or extractor the tier would be another size, so the result is not a limit of static
+navigation analysis in general.
 
 What they leave open is also specific. The dispatch relation is specified and not implemented,
 and the call graph is implemented without the injector hierarchy, reading every provider binding
@@ -200,8 +213,9 @@ reaches to the join over the components that inject its class. This is coarser t
 model and leaves a class nothing reaches with no scope at all. One defect class still waits for its second
 confirmation. The main gap is in the evaluation rather than the
 analysis. Asking the running applications which links they render, on an earlier graph than the
-final call graph, confirmed \ScopeConfirmed{} of the \ScopePairs{} rendered (screen, pattern) pairs
-against the computed scope, and shows the \ScopeUnpredicted{} it misses to be sites
+final call graph, found \ScopeConfirmed{} of the \ScopePairs{} rendered (screen, pattern) pairs among
+the destinations of the edges leaving each screen, which checks pooled destinations and not each
+site's scope, and shows the \ScopeUnpredicted{} it misses to be sites
 attribution declined to place rather than sites it placed wrongly. What that cannot do is
 convict a scope of being too large: only \ScopeExact{} of the predictions at those screens
 name a destination exactly, so the direction is close to untestable by this method. Reading

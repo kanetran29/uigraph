@@ -204,7 +204,8 @@ pairs with none outside it. Beyond \GTApp{} only the runtime method
 applies, on \ScopeApps{} of the six applications, and it answers half of the question, on an
 earlier graph than the final call graph and on \ScopeJudged{} of \ScopeScreens{} screens (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
-judge, \ScopeConfirmed{} are predicted by the computed scope, and the \ScopeUnpredicted{}
+judge, \ScopeConfirmed{} are predicted by the edges leaving that screen, a test of the screen's
+pooled outgoing destinations rather than of each site's scope, and the \ScopeUnpredicted{}
 that are not turn out to be sites attribution declined to place at all rather than sites it
 placed wrongly.
 
@@ -295,7 +296,10 @@ rather than the former gap, is why the chapter reports them separately.
 
 Merging also costs guard information. An edge holds one guard, so when several constructs
 under different conditions produce one edge, the edge can represent the condition of at
-most one of them. The graph is in that respect a weaker object than the source it came
+most one of them. Part of that information is gone before any merge: a structural condition in
+a template demotes a link to may but is not written into its guard
+(Section~\ref{sec:attribution}), so the guard field of a template link names only the router's
+guards. The graph is in that respect a weaker object than the source it came
 from, and a consumer that reads a guard off a merged edge is reading one branch of
 several. The loss breakdown has a second construct threat. The rules assign
 each lost construct to the first class that matches, so the precedence order is part of
@@ -643,7 +647,9 @@ that renders the projection only under a condition is read as unconditional; \te
 \texttt{mat-tab} are the only library containers read as rendering their content lazily. A route
 component behind a conditional outlet is conditional, but a component nested in it is judged by
 its own placement, and the application root's outlet is not read.
-\item \textbf{Navigations a later one may cancel.} A navigation is demoted when code that runs
+\item \textbf{Navigations a later one may cancel.} This item and the next one are the
+execution model of Claim~\ref{claim:must}: the claim holds only on executions they do not
+describe. A navigation is demoted when code that runs
 after it, before the event is handled, may start another (Section~\ref{sec:model}). Whether that code may
 navigate is read through the calls the reader can resolve to a body in the application: a member
 of the class, a function of the file, a method the checker resolves on a typed receiver. A call

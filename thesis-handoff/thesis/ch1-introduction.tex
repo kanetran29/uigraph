@@ -142,8 +142,8 @@ the tool?}
 
 \noindent A defect class names where extraction failed; it does not say whether the
 navigation was unreadable or merely unread. Each class of RQ2 is therefore taken to its
-root cause in the source of the application it appeared in, every cause that is the
-extractor's is repaired, and the corpus is measured again. A site that still yields no
+root cause in the source of the application it appeared in, the causes that are the
+extractor's are repaired where the round could repair them, and the corpus is measured again. A site that still yields no
 transition must then name the reason, and the script that produces those reasons fails if
 any site has none, so an unexplained remainder cannot pass silently. One kind of reason is
 a target the application never declares, which makes the graph a way of finding dead links
@@ -158,8 +158,9 @@ differ, though not so that they are independent. RQ3 is addressed by formulating
 dataflow analysis over a lattice of screen sets, implementing it, and evaluating the
 result on the same corpus with the same methods. RQ4 is answered on the graph produced
 after attribution has been applied. RQ5 asks whose the remaining losses are, and it is
-what decides which instrument the other four questions are answered on: every cause that
-was traced to the extractor was repaired, and the figures reported throughout
+what decides which instrument the other four questions are answered on: the causes traced
+to the extractor were repaired except one, ghostfolio's spread of computed routes, which the
+extractor declares unread, and the figures reported throughout
 Chapter~\ref{ch:results} are those of the repaired instrument. Section~\ref{sec:res-round2}
 reports what the repairs cost the soundness property, and what the earlier instrument
 measured is kept there for comparison rather than as a second set of results.
@@ -200,7 +201,7 @@ analysis was then scored on the same reading (Section~\ref{sec:res-groundtruth})
 wide: narrower than attributing every site to every screen by a factor between
 \BaselineFactorMin{} and \BaselineFactorMax{}, which at the low end names most of an
 application (Section~\ref{sec:res-width}). What the application that could be
-checked exhaustively supports is therefore a small gain in agreement with a structural reference at no measured cost in precision against it, on an
+checked exhaustively supports is therefore a small gain in agreement with a structural reference, with no pair outside that reference, on an
 application whose one counter-example shaped the repair. Whether it holds on the largest
 application was not tested. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
 has adapters for other frameworks, but all measurements reported here concern Angular

@@ -35,6 +35,23 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
+## Examiner-critique round, 3 Nov 2026 (later the same day)
+
+Five argument fixes, no new experiment. Each was checked against the code first.
+- Claim 3.1 (ch3) now names its execution model: plain primary activation, no other listener
+  navigates, no unresolved call or scheduled work navigates. ch6's approximation items are tied to it.
+- RQ3 (ch7, ch5, ch1): retention (`AttrRegressed`, `AttrDemoted`) is no longer read as precision.
+  RQ3 is answered in part, and must-tier precision is not established (62 of 150 destinations unread).
+- Runtime scope check (ch5, ch6, ch7): `scope-check.mjs` pools destinations per screen with no site
+  identity, so 29/33 is aggregate outgoing-destination coverage. The unpredicted pairs remain direct evidence.
+- Guards (ch3, ch6): the prototype does not materialise template conditions into `edge.guard`. They only
+  demote to may. Handler navigations carry if/ternary text.
+- RQ5 (ch1, ch5, ch7, abstract): three groups (repaired; ghostfolio spread, unsupported but readable;
+  runtime/out of abstraction). "Every extractor cause repaired" is gone.
+- ch7: the near-empty must tier is bound to the semantics, demotion policy and approximations.
+- PDF 149 pages, 0 errors, 0 undefined, 0 overfull.
+- Optional, not done: a held-out site–screen evaluation, especially of service/DI cases.
+
 ## State on 3 Nov 2026 (supersedes everything below where they disagree)
 
 - Examiner-style review of every chapter, every finding checked against the source, data or paper before it
