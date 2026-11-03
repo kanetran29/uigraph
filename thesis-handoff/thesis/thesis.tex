@@ -93,7 +93,8 @@ extractor could read and did not; all but one of those were repaired.
 The thesis therefore formulates scope attribution as a dataflow analysis over screen sets,
 a fixpoint over component nesting, router outlets and a call graph that resolves injected
 services, reading every provider binding as if it applied everywhere. Its contribution beyond earlier work is modest. The mechanisms
-earlier work has (the root component on every screen, plus the enclosing routes) reach
+earlier work has (the root component on every screen, plus the enclosing routes), reimplemented
+in the same extractor, reach
 \GTOutletRecall{} of a hand-read structural reference of (site, screen) pairs on \GTApp{}, partly
 completed from the graph's output, against
 \GTFullRecall{} for the full analysis; across the corpus the call graph, its fallback join and

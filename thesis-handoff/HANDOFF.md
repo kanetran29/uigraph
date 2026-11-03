@@ -35,6 +35,20 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
+## Authentication and static-plus-dynamic framing, 3 Nov 2026
+
+- Student asked that the thesis say plainly that most real applications are used signed in, behind
+  guards, and that the static graph can be combined with dynamic measurement to complete it.
+- ch1 motivation: new paragraph, the two approaches complement each other; combination discussed in
+  `sec:future`, not measured.
+- ch6 findings: paragraph after the runtime-routing one; \ScopeUnjudged/\ScopeScreens redirect to
+  sign-in, \CensusMust → \GuardOnlyMust with every guard passing, ghostfolio's per-route guard.
+- ch6 future work: GoalExplorer cited as static-guides-dynamic precedent; paragraph on what each side
+  supplies; an observation witness is evidence for a may edge, not a promotion to must.
+- ch7: one sentence after the sign-in limitation pointing to `sec:future`.
+- Abstract: "reimplemented in the same extractor" added to the earlier-work sentence (matches ch5:544).
+- No numbers changed; prose only, no re-run.
+
 ## Data and figure audit, 3 Nov 2026
 
 - 20 of 21 `generated-*.tex` regenerated and identical (comment lines aside): 11 from the archives

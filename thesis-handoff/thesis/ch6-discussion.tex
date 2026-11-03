@@ -183,6 +183,18 @@ must not miss a transition
 therefore cannot be answered from the graph alone, and the graph's own witnesses and
 declared approximations are what tell a consumer which queries those are.
 
+Authentication bounds the deterministic tier in a way the corpus makes visible. Most of the
+screens of its applications are reached signed in: without a backend, \ScopeUnjudged{} of the \ScopeScreens{}
+screens the runtime method visited in \ScopeApps{} applications redirect to a sign-in page
+(Section~\ref{sec:res-scope}). Much of the navigation therefore runs behind an authentication
+guard, and a guard decides on state the source does not fix, so a reader that keeps
+Claim~\ref{claim:must} demotes it. The small must tier is in part this fact and not a defect of
+the extractor: taking every guard to let the navigation through raises the tier from
+\CensusMust{} to \GuardOnlyMust{} edges, and \GuardOnlyGuardedGhostfolio{} of the
+\GuardOnlyGuarded{} added edges are ghostfolio's, whose authentication guard sits on each route
+(Section~\ref{sec:res-round2}). A consumer that knows its user is signed in may read those edges
+under that assumption, which then belongs to the consumer and not to the graph.
+
 \section{Limitations and threats to validity}
 \label{sec:limitations}
 
@@ -951,7 +963,20 @@ comes from firing events on a running application
 how much of what a crawler finds the static graph already contains, and how much of what
 the static graph contains a crawler never reaches. The Android work has the same
 structure, combining static analysis with runtime traces where the static window transition
-graph is imprecise \cite{promal2022}.
+graph is imprecise \cite{promal2022}, and GoalExplorer uses a static screen graph to steer
+dynamic exploration towards a target \cite{goalexplorer2019}.
+
+For applications used signed in, such a combination is also the way to complete the graph. The
+static side supplies what a crawler lacks: every declared screen, the candidate transitions of
+the may tier with a witness each, and the guards and conditions they wait on, so it can tell an
+explorer which screens remain unvisited and which state, a signed-in user or a seeded record,
+each needs. A run signed in against a seeded backend supplies what the static reader lacks:
+which may edges occur in that state, which addresses computed routes mount, and which links a
+guarded screen renders. An observed transition would gain an observation witness beside its
+source witness. That is evidence that the may edge exists, not a promotion to must, since a must
+edge asserts the transition on every execution the claim ranges over and one run shows it on
+one; a candidate never observed stays may. The combination can therefore add evidence to the
+graph without weakening Claim~\ref{claim:must}. This thesis neither builds nor measures it.
 
 The corpus needs to grow in three directions. An automated search pipeline over a larger
 pool of repositories, with the published filters for repository quality applied

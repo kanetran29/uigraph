@@ -29,6 +29,13 @@ recomputed on each commit without a running system, but it is limited to what ca
 decided from the source, and it must over-approximate wherever a target cannot be
 resolved.
 
+The two limitations complement each other. Applications of the kind studied here are mostly used
+signed in, so much of their navigation runs behind an authentication guard whose outcome only a
+running system decides, while a crawler reaches only the states its data and credentials open. A
+static graph can name the screens and candidate transitions a crawler should look for and the
+guards each waits on, and a run can confirm which of them occur. This thesis measures the static
+side; the combination is discussed in Section~\ref{sec:future} and is not measured.
+
 For Android, static extraction is a well-established technique. The window transition
 graph work derives windows and the transitions between them from bytecode, and
 resolves the control flow of callbacks to the widget that registered each handler
