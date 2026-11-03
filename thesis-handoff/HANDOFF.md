@@ -35,6 +35,19 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
+## Data and figure audit, 3 Nov 2026
+
+- 20 of 21 `generated-*.tex` regenerated and identical (comment lines aside): 11 from the archives
+  (REPRODUCE section 1 plus probe), 7 from the c42f220 corpus graphs in `uigraph-work/corpus` and
+  `noattr` (census, census-base, expansion, must, guard-only, route-order, callgraph), earlier
+  from git, approx from the sources. `packages/` is identical to c42f220. node-audit (4505fd2a,
+  historical) cannot be regenerated. `expansion-check.mts` failed once with SQLITE "unable to open"
+  and succeeded on rerun.
+- Figures: alg-attribution now marks the canDeactivate seed model only, seeds layouts, points to
+  the implementation departures; lst-angular declares `session`; fig-scopes and fig-anchored
+  notes match `extract.ts:549-564` (one stored edge only if conditional, or target outside the
+  subtree); fig-loss caption says "Converted" is must or may, unlike the conversion ratio.
+
 ## Deep self-review, round 2, 3 Nov 2026
 
 Prose only; no code or input changed, so no re-run. The five main generated tables were rebuilt

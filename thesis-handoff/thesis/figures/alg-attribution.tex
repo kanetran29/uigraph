@@ -1,6 +1,8 @@
 \begin{algorithm}[t]
 \caption{Scope attribution as a worklist fixpoint over $\mathcal{P}(S)$. The relations marked \emph{model only} belong to the full analysis and are not implemented in
-the prototype evaluated in Chapter~\ref{ch:results}.}
+the prototype evaluated in Chapter~\ref{ch:results}; the prototype's other departures, among
+them the stand-ins for guards and effects and the rule for routed components, are listed in
+Section~\ref{sec:implementation}.}
 \label{alg:attribution}
 \begin{algorithmic}[1]
 \Require routes $R$ with route tree; for each route $r$ its entry guards $\mathit{entry}(r)$,
@@ -12,7 +14,7 @@ the prototype evaluated in Chapter~\ref{ch:results}.}
 \Ensure $\mathit{scope}(x) \in \mathcal{P}(S)$ for every component and callable $x$; the
   callables include the members of components and of services
 \ForAll{$x$} $\mathit{scope}(x) \gets \varnothing$ \EndFor
-\ForAll{$r \in R$ with $\mathit{component}(r) = c$}
+\ForAll{$r \in R$ and $c$ the component of $r$ or a layout wrapping it}
   \State $\mathit{scope}(c) \gets \mathit{scope}(c) \cup \mathit{subtree}(r)$
   \Comment{own screen and outlet descendants}
 \EndFor
@@ -21,7 +23,7 @@ the prototype evaluated in Chapter~\ref{ch:results}.}
 \EndFor
 \ForAll{$r \in R$ and $g \in \mathit{leave}(r)$}
   \State $\mathit{scope}(g) \gets \mathit{scope}(g) \cup \mathit{subtree}(r)$
-  \Comment{runs as the user leaves $r$}
+  \Comment{\emph{model only}: runs as the user leaves $r$}
 \EndFor
 \ForAll{HTTP interceptor $i \in I$} \Comment{\emph{model only}: registered for the application}
   \State $\mathit{scope}(i) \gets S$

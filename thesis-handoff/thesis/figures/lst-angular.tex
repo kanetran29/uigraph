@@ -22,6 +22,7 @@ export const routes: Routes = [
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
+  private session = inject(SessionStore);
   logout(): void {
     this.session.clear();
     this.router.navigate(['/login']);

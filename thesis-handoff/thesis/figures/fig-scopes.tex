@@ -29,9 +29,9 @@
   \end{scope}
 
   % legend notes
-  \node[font=\scriptsize, align=left, anchor=west] at ($(header.east)+(4mm,0)$) {links here: scope $\top$,\\stored once};
+  \node[font=\scriptsize, align=left, anchor=west] at ($(header.east)+(4mm,0)$) {links here: scope $\top$;\\stored once if conditional};
   \node[font=\scriptsize, align=center, anchor=north, text=warm] at ($(card.south)+(0,-6mm)$) {links here: scope $\{\text{/}, \text{/feed}\}$,\\one edge per screen};
-  \node[font=\scriptsize, align=left, anchor=west, text=accent] at ($(profile.east)+(3mm,-6mm)$) {links in the settings\\template: anchored at the\\subtree, stored once};
+  \node[font=\scriptsize, align=left, anchor=west, text=accent] at ($(profile.east)+(3mm,-6mm)$) {links in the settings\\template: anchored at the\\subtree, stored once\\unless the target is in it};
 \end{tikzpicture}
 \caption{Scopes in a small application. The header is rendered next to the outlet, so its
 links fire from every screen. The card is rendered inside two unrelated screens, so its
