@@ -131,8 +131,8 @@ inputs, with the attribution pass disabled and enabled, so that nothing but the 
 differs between the two runs. Coverage is the change in recovered
 transitions. Precision is checked on the deterministic tier, which must not decrease.
 
-\medskip\noindent\textbf{RQ4.} \emph{Is the extracted graph sensitive enough to source
-changes to support change impact analysis?}
+\medskip\noindent\textbf{RQ4.} \emph{Does the extracted graph respond to source changes
+in the constructs it represents, as change impact analysis requires?}
 
 \noindent This is measured with mutation testing. Known changes are inserted into the
 source, and the graph is checked for the expected difference.
@@ -177,14 +177,15 @@ transition the earlier instruments called deterministic turned out to run only o
 happened (a request had returned, a branch had been taken, a template condition held) or
 behind a guard the extractor does not evaluate. Taking every guard to let the navigation through
 would leave \GuardOnlyMust{} must edges instead. Chapter~\ref{ch:results} reports each correction
-rather than only its result. The four corrections took the deterministic tier from the \EarlierMustEdges{} edges of the instrument this work began with to \CensusMust{}, and they leave RQ1's stricter measure \CensusMustSites{} constructs in the corpus, \CensusBaseMustSites{} without attribution; the chapter reports that rather than a favourable half.
+rather than only its result. The four corrections took the deterministic tier from the \EarlierMustEdges{} edges of the instrument this work began with to \CensusMust{}, and they leave RQ1's stricter measure \CensusMustSites{} constructs in the corpus, \CensusBaseMustSites{} without attribution; the chapter reports both figures, not
+only the more favourable one.
 This follows the position of Livshits et al., who argue that a practical static
 analysis should be described as sound modulo an explicit list of the language features
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement
 would require a controlled experiment and is left for future work. A third limit matters most for the
 contribution: the screen sets attribution computes are validated in both directions on one
 application only. On \ScopeApps{} of the \ProbeApps{} applications, all but ghostfolio, a scope that
-is too small can be refuted by the rendered interface, and Section~\ref{sec:res-scope} refutes \ScopeUnpredicted{} of them, all in bitwarden, on an
+is too small can be refuted by the rendered interface, and Section~\ref{sec:res-scope} finds \ScopeUnpredicted{} rendered links the graph does not predict, all in bitwarden and all at sites attribution left unplaced, on an
 earlier graph and on \ScopeJudged{} of \ScopeScreens{} screens, while a scope
 that is too large cannot be, because at the screens that method can observe the graph almost
 never claims a destination exactly. For one application the screens each site fires

@@ -35,7 +35,35 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
-## State on 2 Nov 2026, evening (supersedes everything below where they disagree)
+## State on 3 Nov 2026 (supersedes everything below where they disagree)
+
+- Examiner-style review of every chapter, every finding checked against the source, data or paper before it
+  was applied. Major fixes:
+  - VeriFlow is open access (mdpi-res PDF). It evaluates 4 apps (Casdoor, iTrust, OpenRMF, DVWA) against ZAP and
+    does not represent guards, so the tab:rw cell is now "no", "4 apps, vs. ZAP", and the footnote is gone.
+  - Yang 2015 already models the window stack, so 2018 is cited as the journal version.
+  - ProMal's diagnosis is aliasing and data-flow imprecision, not shared dialogs (ch2, ch6).
+  - Rima et al. already read nested and lazy routes and attach guards to edges. The novelty claim is narrowed to
+    cross-class/service attribution, modality, and loss classified by construct across a corpus.
+  - The RQ4 wording is now "responds to source changes in the constructs it represents" (ch1, ch2, ch7).
+  - The abstract's DI claim now says "reading every provider binding as if it applied everywhere".
+  - tab:provenance:
+    - the scope check is 1.3.0;
+    - the route check is 29–30 Oct, probe 1.0.0 and comparison 1.1.0;
+    - node audit `4505fd2a` is absent from the repo;
+    - a sweep footnote says `packages/core` differs at `920e1aa`.
+  - fraggen2022 is TSE 49(3) 2023.
+  - The ch3 member relation is renamed `Mem`, and E carries the strongest modality.
+  - ch5 judged-locations arithmetic now excludes the 535 unread.
+- REPRODUCE.md section 1 was run by a grader-style agent in a clean worktree. It needs a root
+  `pnpm install --frozen-lockfile`, which is now in the guide. All 11 generated files are then identical.
+- PDF 148 pages, 0 errors, 0 undefined refs, 0 overfull boxes.
+- Pushed to branch `thesis-final-2026-11` (not main), with tag `thesis-eval-final` → `c42f220`. `thesis-eval` is
+  unchanged.
+- Still open: human re-reading of the must-tier verdicts; graders' access to the repo (check that it is
+  public); stale `harness.zip` and `thesis-latex.zip`.
+
+## State on 2 Nov 2026, evening
 
 - Commits after `35ca3cf`: witness tables count must edges *read and passed* (k8sdash 63/125, corpus 88/150;
   unread edges are neither); non-shell recall (rooted 82.8 %, outlet 98.3 %, full 100 %); outlet is the

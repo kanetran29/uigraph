@@ -72,7 +72,7 @@ Major: & Computer Science \\
 \addcontentsline{toc}{chapter}{Abstract}
 A UI transition graph describes the screens of an application and the transitions a
 user can cause between them. Earlier work extracts such graphs statically from the route
-declarations of client-side web applications, but none that this review found
+declarations of client-side web applications, but none found in the literature reviewed here
 classifies what the extraction fails to read across a corpus. This thesis makes that measurement on six
 open-source Angular applications with \RoundTwoRoutesRealworld{} to \RoundTwoRoutesMifos{}
 declared route entries, with four methods that read the sources and one that reads the
@@ -91,20 +91,22 @@ from is the largest class in every application, and almost every class traces to
 extractor could read and did not.
 
 The thesis therefore formulates scope attribution as a dataflow analysis over screen sets,
-a fixpoint over component nesting, router outlets and a call graph that accounts for
-dependency injection. Its contribution beyond earlier work is modest. The mechanisms
+a fixpoint over component nesting, router outlets and a call graph that resolves injected
+services, reading every provider binding as if it applied everywhere. Its contribution beyond earlier work is modest. The mechanisms
 earlier work has (the root component on every screen, plus the enclosing routes) reach
 \GTOutletRecall{} of a hand-read structural reference of (site, screen) pairs on \GTApp{}, against
 \GTFullRecall{} for the full analysis; across the corpus the call graph, its fallback join and
 stand-ins add \AblationFullAddedSites{} placed sites, \AblationFullAddedShare{} of the total. Attribution recovers \AttrRecoveredShare{} of the constructs in its
 class, almost all as possible rather than certain transitions.
 Scopes are compared in both directions only on \GTApp{}, against a reference that applies the
-analysis's own relations and guided two repairs; elsewhere the final scopes are unchecked, which
-also bears on the sources of must edges.
+analysis's own relations and guided two repairs; elsewhere the final scopes are unchecked, so the
+\CensusMustKdash{} must edges drawn from k8sdash's toolbar rest on an untested scope.
 
 On three applications, the graph detects \MutFallibleDetected{} of \MutFallibleScored{}
 injected link deletions, retargets and guard removals; without attribution fewer changes can be
-scored at all, but on the \MutPaired{} both graphs score the rates are almost the same. The
+scored at all, but on the \MutPaired{} mutants both graphs can score, \MutPairedDetected{} and
+\MutPairedBaseDetected{} are detected. Full detection was reached after errors of the harness
+found in an earlier run had been corrected. The
 corpus is small and Angular-only, and the figures describe these six applications only.
 
 \vspace{1em}

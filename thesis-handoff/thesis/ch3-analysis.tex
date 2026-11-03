@@ -30,8 +30,9 @@ asserts an edge, and never denotes a screen, a route or a navigation target. An 
 $(s, \sigma, g, m, s') \in E$ reads: at screen $s$, event $\sigma$ under guard $g$ leads
 to screen $s'$, asserted with confidence $m$. Both the source $s$ and the target $s'$
 are elements of $S$, namely the first and the last component of the tuple. Constructs
-in the source that agree on source, event kind, guard and target yield the same edge,
-and the paragraph on witnesses below says how they are traced.
+in the source that agree on source, event kind, guard and target yield the same edge, which
+carries the strongest modality among them, so $E$ holds at most one modality for each
+$(s, \sigma, g, s')$; the paragraph on witnesses below says how the constructs are traced.
 \end{definition}
 
 \textbf{What the materialised graph carries beyond the model.} The extractor emits two node
@@ -47,8 +48,8 @@ reach a dynamic target. A further \CensusMaySourceNotScreen{} edges leave an unp
 and are held at \emph{may}, so they sit inside a tier Chapter~\ref{ch:results} reports while
 their source is not a screen. An edge that reaches a dynamic target asserts that the screen it
 leaves has an outgoing navigation whose destination the analysis could not name, and asserts
-nothing about which screen is reached. Claim~\ref{claim:must} and the conversion ratio RQ1 is
-defined on range over the edges whose source and target are both screens.
+nothing about which screen is reached. Claim~\ref{claim:must} and the conversion ratio on which RQ1 is
+defined range over the edges whose source and target are both screens.
 
 \begin{table}[t]\small
 \caption{What the published graphs are made of: nodes by kind, where an anchor stands for a
@@ -63,7 +64,8 @@ hold no anchors and fewer \emph{other} nodes.}
 A \emph{must} edge is claimed to fire for every input on which the enclosing code
 executes; a \emph{may} edge is possible but
 conditional; \emph{unknown} marks an edge whose modality could not be determined. The
-third modality carries the destinations the analysis cannot name: an edge into the
+third modality carries the destinations the analysis cannot name. It labels only edges of the
+materialised graph that lie outside $E$, namely edges into the
 \texttt{u\_}\,sink of Section~\ref{sec:res-round2}, which records that a screen is left by
 an event whose target only the run time knows. The pinned extractor does produce such edges:
 \CensusUnknown{} of the \CensusEdges{} edges in the corpus, in \CensusUnknownApps{} of the
@@ -79,8 +81,8 @@ state.
 
 Alongside the modality the artefact records a numeric \emph{confidence} on each edge, which is
 not part of the model and carries no claim this thesis makes. It is a finer version of the same
-ordering: $1$ for a must edge; where a guard applies, $0.6$, or $0.5$ when the guard is
-asynchronous; $0.5$ for every other may edge, whatever demoted it; and $0$ for an edge into a
+ordering: $1$ for a must edge; $0.6$ for a guarded edge with a literal target, or $0.5$ when
+the guard is asynchronous; at most $0.5$ for every other may edge, whatever demoted it; and $0$ for an edge into a
 dynamic target. Where several constructs yield one edge, the edge carries the modality and the
 confidence of the most certain of them, and each construct it cites records the modality it
 earns on its own, so the edge is as certain as the best evidence for it and no construct is cited
@@ -375,18 +377,19 @@ the worklist. The transfer functions here are monotone because the only operatio
 apply to a scope is a join with another scope, and union is monotone in both arguments.
 
 A worklist solver re-examines a node once for each rise of its own scope, and
-the work done for a node is proportional to its out-degree in $N \cup M \cup \mathit{CG}
-\cup D \cup T$, where $M$ links each component to its members and $T$ links each callable
+the work done for a node is proportional to its out-degree in $N \cup \mathit{Mem} \cup \mathit{CG}
+\cup D \cup T$, where $\mathit{Mem}$ links each component to its members and $T$ links each callable
 holding a navigation site to the entry guards that navigation runs. A run therefore makes at most
 \[
-  O\bigl(|S| \cdot (|N| + |M| + |\mathit{CG}| + |D| + |T|)\bigr)
+  O\bigl(|S| \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|)\bigr)
 \]
 transfer-function applications, after an initialisation that seeds each routed component with
 $\mathit{subtree}(r)$ in $O(|R| \cdot |S|)$. Each application is a union of two subsets of $S$, which
 costs $O(|S|)$ with scopes held as bit sets, so the running time is bounded by
-$O(|S|^2 \cdot (|N| + |M| + |\mathit{CG}| + |D| + |T|))$. This is the bound for the full
-model. $|M|$ is the number of members of components and is at most the number of callables,
-and $|T|$ is at most the number of navigation sites times the depth of the route tree.
+$O(|S|^2 \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|))$. This is the bound for the full
+model. $|\mathit{Mem}|$ is the number of members of components and is at most the number of callables,
+and $|T|$ is at most the number of navigation sites times the depth of the route tree times
+the largest number of entry guards on one route.
 
 The part of the analysis that is implemented, the nesting, outlet, membership and call-graph
 relations, is the full model with $D$ and $T$ empty, so the bound above specialises to it, and the call-graph pass, a
@@ -429,7 +432,7 @@ fixpoint.
 
 Algorithm~\ref{alg:attribution} gives the computation, and its propagation steps are
 the transfer-function applications bounded above. A step adds a screen to a scope only
-when an edge of $N$, $M$, $\mathit{CG}$, $D$ or $T$ carries it there, and scopes only grow, so
+when an edge of $N$, $\mathit{Mem}$, $\mathit{CG}$, $D$ or $T$ carries it there, and scopes only grow, so
 what the algorithm computes is the least solution of the constraint system that
 Table~\ref{tab:scopes} states. In the model a component that is both mounted by a route
 and rendered in the template of another component therefore holds the join of the two
@@ -495,6 +498,9 @@ Figure~\ref{fig:anchored} contrasts the two representations.
 The expansion of the anchored edge set equals the materialised edge set.
 \end{claim}
 
+\noindent The claim is tested rather than proved: Section~\ref{sec:res-after} compares the two
+sets on the corpus and on fixtures.
+
 \section{Implementation}
 \label{sec:implementation}
 
@@ -557,9 +563,9 @@ declaration binds it to with \texttt{useClass} or \texttt{useExisting}, or, for 
 no provider binds, to its subclasses in the application, which is class hierarchy analysis
 \cite{dean1995cha} restricted to the declared type. The departure is that bindings are read across
 the whole application rather than relative to the injector that resolves them, so where two
-injectors bind a token differently the join covers both; that can only widen a scope. A call the
-pass cannot resolve (a factory provider, a value provider, a type declared outside the
-application) contributes no edge. A member no caller reaches falls back to the join over
+injectors bind a token differently the join covers both; that can only widen a scope. A factory or value provider is not read: a call on its token resolves to the token's own
+class if the application declares one, and a call on a type declared outside the application
+contributes no edge. A member no caller reaches falls back to the join over
 every component that injects its class, the per-class approximation an earlier version used for
 every service. That fallback is not a constraint of Table~\ref{tab:scopes} and is not
 monotone in the call graph: a member whose only caller is found receives that caller's screens

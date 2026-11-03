@@ -8,8 +8,8 @@ Static extraction of a transition graph from Angular source fails in two differe
 and the first of them turned out to be the tool's rather than the method's. Node extraction
 is complete on all six applications of the corpus against the readers of the route
 configuration (Table~\ref{tab:coverage}): every screen those readers find declared has a
-node, and the runtime method finds no node at an address the framework mounts nothing at,
-which is the absence of a failure rather than a proof that none can occur. Completeness in that sense is bounded by what a route table can be read to
+node, and the runtime method observes no node placed at an address where the framework mounts
+nothing, which shows that no such error was observed, not that none can occur. Completeness in that sense is bounded by what a route table can be read to
 declare, and the runtime method is also the method that bounds it: the route
 configuration it reads holds \ProbeMissed{} mounted addresses with no node,
 \ProbeMissedGhostfolio{} of them in ghostfolio alone, so \ProbeExactApps{} of the six are
@@ -34,12 +34,11 @@ draw an edge into a screen that has no node, which is why the chapter reports th
 separately. The ranking between them, however, is a fact about an extractor and not a limit of
 the approach.
 
-The two failures cap each other, and that is the structural result of the measurement.
-Attribution cannot draw an edge into a screen that has no node, so node extraction
-bounds what attribution can achieve. Node extraction cannot place a navigation site
-that lives outside the component its route renders, so attribution bounds what better
-node extraction would yield. Neither level can be repaired into a usable graph on its
-own. An evaluation that reported only one of the two would have described a tool that
+The two levels are not independent. Attribution cannot draw an edge into a screen that has
+no node, so node extraction bounds what attribution can achieve. A complete set of nodes, in
+turn, yields few transitions while the navigation sites that live outside the component a
+route renders stay unattributed, which is the state the baseline of Table~\ref{tab:loss} is
+in. An evaluation that reported only one of the two would have described a tool that
 works better than it does, which is why Chapter~\ref{ch:results} reports node coverage
 beside the conversion ratio instead of the ratio alone.
 
@@ -74,7 +73,7 @@ all: the target screen has no node, the owning component is never reached from a
 screen, or the site sits in a service or a guard by a receiver or provider form the call graph does not
 resolve.
 No construct that the baseline converted was lost (\AttrRegressed{} leave the converted classes),
-so the coverage gain cost the baseline nothing. The gain does widen the must tier: after the
+so no conversion of the baseline was lost. The gain does widen the must tier: after the
 fourth correction of Section~\ref{sec:res-round2} that tier holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, the added edges being
 the links of realworld's and k8sdash's shells placed on every screen the shell renders. On the
 instrument before that correction every must edge of the round's tier passed the witness check
@@ -388,7 +387,7 @@ worse. Several
 controls were not applied: there was no blinding, no second annotator for the
 loss classification and no independent audit of the residual constructs that were
 inspected by hand, and the defect classes were defined after the first observations
-rather than in advance. The source-level readings of the must tier, two of the round's 30
+rather than in advance. The source-level readings of the must tier, two readings of the round's 30
 constructs and one of the final 25, were made by the AI assistant declared at the front, which
 also helped write the extractor and the route parser, and the final reading was made with the
 extractor's decisions in view; no human second reader checked them, so their agreement with the
@@ -398,9 +397,9 @@ applications, and no held-out application was measured, so the post-repair figur
 this corpus. The requirement of two lines of evidence per
 defect class is the strongest control that was applied to that last point, and it is the
 reason one class is still reported as a candidate. It is a weaker control than it first
-appears: Table~\ref{tab:defects} shows that four of the five accepted classes are
-carried to two by an observation rather than by a second instrument, so for those four
-the control is one method plus a judgement I made myself.
+appears: Table~\ref{tab:defects} shows that four of the five accepted classes rest on
+one named method, the rest of their evidence being observations rather than a second instrument,
+so for those four the control is one method plus judgements I made myself.
 
 The runtime check of Section~\ref{sec:res-probe} removes one threat and introduces others of its
 own. It removes the one that mattered most, which is that two readers of the same route files can
@@ -439,7 +438,7 @@ failure rather than as a proof of its impossibility.
 \section{Declared approximations}
 \label{sec:approximations}
 
-Two of these were found by the runtime check of Section~\ref{sec:res-probe} rather than by
+Two of the approximations this section declares were found by the runtime check of Section~\ref{sec:res-probe} rather than by
 reading the analysis, and they are stated first because both are places where the analysis is
 silent rather than approximate.
 
@@ -733,7 +732,7 @@ aggregate.
 The call-site counts also understate the structural cost of an approximation. A handful
 of \texttt{dialog.open} call sites can open many different components. The inspection
 of the owner components that attribution never reaches found about sixty components
-across the corpus that are opened programmatically, most as dialogs, whereas the grep
+across the corpus that are opened programmatically, most as dialogs, whereas \texttt{approx-counts.mjs}
 finds three \texttt{dialog.open} call sites, all in alfresco, in the three applications
 it covered. The two figures cover different scopes and are not directly comparable. The
 right unit for the cost of this particular approximation is the number of
@@ -742,9 +741,9 @@ components and navigation sites it strands, not the number of calls that strand 
 \section{Transfer to other frameworks}
 \label{sec:transfer}
 
-All measurements in this thesis concern Angular. How much of the approach would carry over to React with React Router and to Vue with Vue Router \cite{reactrouterdocs,vuerouterdocs} is argued below without measurement.
+All measurements in this thesis concern Angular. How much of the approach would carry over to React with React Router and to Vue with Vue Router \cite{reactrouterdocs,vuerouterdocs} is argued below.
 
-What follows is a qualitative theoretical analysis and not a measurement. It compares the
+What follows is a qualitative analysis and not a measurement. It compares the
 documented behaviour of the three routers with the input relations that the analysis
 needs, and what it yields are hypotheses about where the work would move, at the level of
 evidence of a design argument. Nothing in it shows that the approach performs on React or
@@ -876,7 +875,7 @@ screen. Following lazy boundaries means
 resolving a \texttt{loadChildren} or \texttt{loadComponent} specifier to the file it
 names and continuing route extraction there, including through a routing module that a
 lazily loaded module imports. The independent route parser follows lazy boundaries after its correction
-(Section~\ref{sec:corrections}), and it finds 84 declared screens in ghostfolio, where
+(Section~\ref{sec:corrections}), and it finds \RoundTwoEarlierOracleGhostfolioNow{} declared screens in ghostfolio, where
 every route path is a constant reference (Table~\ref{tab:coverage}), so the work is
 known to be feasible on this corpus, and the parser's output gives the expected result
 to check against. The gain is not limited to the nodes
@@ -926,8 +925,8 @@ comes from firing events on a running application
 \cite{crawljax2012,feedex2013,fraggen2022}, would answer the question this thesis cannot:
 how much of what a crawler finds the static graph already contains, and how much of what
 the static graph contains a crawler never reaches. The Android work has the same
-structure, falling back on runtime traces where static attribution of shared code
-fails \cite{yang2015wtg}.
+structure, combining static analysis with runtime traces where the static window transition
+graph is imprecise \cite{promal2022}.
 
 The corpus needs to grow in three directions. An automated search pipeline over a larger
 pool of repositories, with the published filters for repository quality applied

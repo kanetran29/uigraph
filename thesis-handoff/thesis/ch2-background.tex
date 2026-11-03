@@ -23,10 +23,6 @@ which is
 the method used in Chapter~\ref{ch:evaluation} to answer RQ4. Section~\ref{sec:gap} states the
 gap that the thesis addresses.
 
-A recent development related to this work is the emergence of large language model agents
-capable of navigating applications through their UI. Such agents rely on observable
-UI states and transitions, and a navigation graph can serve as a structured map for them.
-
 \section{UI transition graphs}
 \label{sec:terminology}
 
@@ -43,9 +39,8 @@ graph, and each uses its own terminology. In Android static analysis it is calle
 graph} \cite{goalexplorer2019}. In the Ajax crawling literature the term is \emph{state
 flow graph}, where a state is an abstraction of the DOM \cite{crawljax2012}. In web
 engineering the usual terms are \emph{navigation model} and \emph{navigation state
-machine} \cite{riccatonella2001,sitehopper2013}. Recent work on software agents uses
-the term \emph{UI transition graph}. This thesis uses the last of these and treats the
-others as equivalent for its purposes, while noting that they differ in what is counted
+machine} \cite{riccatonella2001,sitehopper2013}. This thesis uses the term \emph{UI transition graph} and treats the
+other terms as equivalent for its purposes, while noting that they differ in what is counted
 as a state and in how the graph is constructed.
 
 More important than the naming is how the graph is obtained: \emph{statically}, from source code or binaries without executing the application, or \emph{dynamically}, by running and observing it. It also matters whether the graph represents \emph{guards}, that is, whether each edge records the condition under which the transition is available or only that the transition exists. Table~\ref{tab:rw} classifies the work reviewed in the following
@@ -59,10 +54,10 @@ guard representation, and the ground truth used for evaluation.}
 \toprule
 Work & Target & Static & Guards & Ground truth \\
 \midrule
-Yang et al.\ \cite{yang2015wtg,yang2018wtg} & Android windows & yes & callbacks & manual, 6 apps \\
+Yang et al.\ \cite{yang2015wtg,yang2018wtg} & Android windows & yes & no & manual, 6 apps \\
 Yang et al.\ \cite{yang2015callbacks} & Android callbacks & yes & context & manual vs.\ dynamic \\
 StoryDroid \cite{storydroid2019} & Android activities & yes & no & hand-built, 10 apps \\
-GoalExplorer \cite{goalexplorer2019} & Android screens & hybrid & intents & manual, 36 apps \\
+GoalExplorer \cite{goalexplorer2019} & Android screens & hybrid & no & manual, 36 apps \\
 ProMal \cite{promal2022} & Android windows & hybrid & no & 40 apps, F1 \\
 UI-CTX \cite{uictx2025} & Android widgets & yes & branches & 2000 labelled widgets \\
 Ricca and Tonella \cite{riccatonella2001} & server-rendered pages & semi & yes & manual \\
@@ -73,12 +68,9 @@ FeedEx, FRAGGEN \cite{feedex2013,fraggen2022} & DOM states & no & no & coverage 
 Kurant \cite{kurant2025} & React components & yes & n/a & F1, no routing \\
 Oshima and Kishi \cite{oshima2018model} & Angular pages & yes & no & 6 apps, faults \\
 Rima et al.\ \cite{rima2026e2e} & Angular workflows & yes & conditions & 7 apps, tests run \\
-Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & yes & unverified$^{a}$ & 2 apps, policy paths \\
+Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & yes & no & 4 apps, vs.\ ZAP \\
 \bottomrule
 \end{tabularx}
-
-\smallskip\footnotesize $^{a}$\,The full text could not be retrieved; the abstract does not say
-whether guards are represented, so the cell is left unverified.
 \end{table}
 
 \section{Static extraction for Android}
@@ -87,8 +79,8 @@ whether guards are represented, so the cell is left unverified.
 The largest body of static work on transition graphs concerns Android. Yang et al.\
 introduced the window transition graph, in which the nodes are windows (activities,
 dialogs and menus) and the edges are transitions caused by callbacks that run on the
-UI thread \cite{yang2015wtg}. A later version of the same work adds an explicit window
-stack so that the behaviour of the back button can be modelled \cite{yang2018wtg}. A
+UI thread; the analysis models the stack of active windows, so that the effect of the back
+button is captured \cite{yang2015wtg}, and a journal version extends the work \cite{yang2018wtg}. A
 related analysis by the same group constructs a callback control-flow graph whose
 nodes are pairs of a handler and the widget it belongs to \cite{yang2015callbacks}.
 StoryDroid builds an activity transition graph from \texttt{startActivity} calls and
@@ -98,7 +90,7 @@ transition graph with dynamic exploration and evaluates the result against manua
 produced ground truth for 36 applications \cite{goalexplorer2019}. UI-CTX identifies
 the problem of finding the correct code context for a widget's behaviour as its first
 challenge and solves it with a backward data-flow analysis from the handler to the
-place where the widget is created \cite{uictx2025}.
+call that retrieves the widget and its identifier \cite{uictx2025}.
 
 These approaches have in common the way a navigation is attributed to a screen. In
 Android, an event handler is registered on a widget object, and at run time that
@@ -109,8 +101,12 @@ of the \texttt{getId()} call, and the window is then known
 model guarantees a single owner.
 
 The limits of this approach become visible in ProMal. Its authors report that a purely
-static window transition graph loses precision on user-interface code that is shared
-between contexts, such as a dialog that several activities reuse. They address this by combining the static analysis with runtime traces and a learned model \cite{promal2022}. This is the case in which no single owning window exists, and here the Android work moves away from static analysis.
+static window transition graph contains infeasible transitions, because imprecision in the
+reference analysis makes several widgets aliases of one another and the over-approximated
+data flow then attaches a handler to the wrong window. They address this by combining the
+static analysis with runtime traces and a learned model \cite{promal2022}. Where the owning
+object cannot be resolved precisely, the Android work therefore turns to dynamic evidence
+rather than refining the static attribution.
 
 \section{Navigation models for web applications}
 \label{sec:webmodels}
@@ -129,8 +125,8 @@ are referenced but do not exist \cite{tkachuk2013patent}. On the verification si
 Haydar et al.\ model a web application as a system of communicating automata derived
 from recorded browsing sessions \cite{haydar2004}, and SiteHopper builds abstracted
 navigation state machines on the fly for model checking \cite{sitehopper2013}. In
-addition, design-time notations such as OOHDM, WebML and UWE describe the navigation
-structure of a site before it is implemented rather than extracting it from code.
+addition, design-time notations describe the navigation structure of a site before it is
+implemented rather than extracting it from code.
 
 This work shows that navigation models, including guards, have been extracted statically from web applications. The models reviewed in this section all concern server-rendered frameworks, where a page corresponds to a file and a link to an anchor element, and none of them deals with a client-side router, a component tree, or
 dependency injection; Section~\ref{sec:dynamic-spa} turns to the work that does.
@@ -146,11 +142,11 @@ work in this line changed the exploration strategy but not the source of the mod
 FeedEx uses feedback from the graph built so far to direct further exploration
 \cite{feedex2013}, and FRAGGEN abstracts states as hierarchies of DOM fragments in
 order to generate better tests \cite{fraggen2022}. The survey by Kertusha et al.\
-covers the model-based web testing tools of the past decade \cite{websurvey2025}. Of the
+reviews web testing research from 2014 to 2025 \cite{websurvey2025}. Of the model-based
 tools it lists, every one whose model construction was examined for this thesis builds
 that model by executing the application.
 
-The explanation for this seems to be historical. In an Ajax application there was no
+The reason is largely historical. In an Ajax application there was no
 declarative route table, and one URL could represent many states, because navigation
 was implemented by handlers that modified the DOM. The DOM was therefore the only
 observable that distinguished one state from another. Static analysis of the JavaScript
@@ -206,8 +202,8 @@ into a browser test; the graph is a coverage denominator for generated end-to-en
 operational specification in the project's replication package
 (\path{softscanner-sw/softscanner_fa}, \path{docs/paper/approach.md}) and from the anonymised
 manuscript in the same repository (\path{docs/paper/main.pdf}), the published chapter itself not
-having been available to this review; either may differ from it. Both attribute more than
-containment. In the manuscript the components active at a route are those activated by the route
+having been available to this review, so the published chapter may differ from both. Both
+documents describe attribution beyond containment. In the manuscript the components active at a route are those activated by the route
 and its ancestor routes, closed under composition, and the specification adds the bootstrap
 components to that seed, which covers what the \emph{rooted} and \emph{outlet} levels of
 Section~\ref{sec:res-ablation} place. A handler is followed into helper methods of the same
@@ -215,11 +211,12 @@ class to depth one and into the first callback of a \texttt{subscribe}, and the 
 names is resolved by the type of the constructor parameter. The specification excludes
 router-outlet modelling and provider resolution beyond module and root providers, and it does
 not follow a call into a service, so a navigation inside a service member is not placed on the
-screens of its callers. As their abstract describes the work, Zhang et al.\ parse
+screens of its callers. Zhang et al.\ parse
 the compiled JavaScript bundle rather than the sources, take declared routes as vertices and
 navigation calls as edges, and check an access-control policy against the screens reachable
 from an authorised one; their graph is declared an over-approximation and is not narrowed,
-and no navigation site is attributed to the screens it can fire from
+and no navigation site is attributed to the screens it can fire from; the authors note that
+the graph may contain paths a guard would block, because guards are not represented
 \cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth built by hand for the applications they
 study, which measures what their extraction misses there; neither work classifies the losses by
 construct or measures them across a corpus. The
@@ -425,7 +422,7 @@ Routes may also have guards, namely \texttt{canMatch}, \texttt{canLoad}, \texttt
 \texttt{canActivateChild} and \texttt{canDeactivate}, which are functions or injectable classes
 that return either a boolean or a \texttt{UrlTree} representing a redirect, and resolvers, which
 fetch data the router awaits before it activates the route; \texttt{runGuardsAndResolvers}
-decides when a route a navigation keeps runs them again. Route paths are strings, but
+controls whether they run again when a navigation keeps the route active. Route paths are strings, but
 they are not necessarily string literals. Applications that keep their route table in
 one place often write \texttt{path: routes.about.path}, and resolving such a path
 requires following the constant to its definition.
@@ -640,8 +637,8 @@ screen.
 \section{Mutation testing}
 \label{sec:mutation}
 
-RQ4 asks whether the extracted graph is sensitive enough to changes in the source to
-be useful for change impact analysis. The method used to answer it is mutation
+RQ4 asks whether the extracted graph responds to source changes in the constructs it
+represents, as change impact analysis requires. The method used to answer it is mutation
 testing, applied in an unusual direction: the mutants are inserted into the
 application source, and the artefact whose reaction is measured is the extracted graph
 rather than a test suite. This section reviews the technique, the evidence for the
@@ -739,14 +736,14 @@ own paths, with no modality
 on the transitions, and with no measurement of what the extraction fails to read. The other
 two put the graph to work without narrowing it: one as the coverage denominator of a
 generated end-to-end suite \cite{rima2026e2e}, one as the reachability relation of an
-access-control check, declared an over-approximation \cite{zhang2025veriflow}. What
-has not been covered by earlier work is that extraction without those restrictions:
-over nested and lazily loaded route trees, with guards carried onto each transition as a
-modality rather than onto a workflow as a feasibility verdict, with attribution that follows calls across classes and into services under their provider bindings, and
-with the resulting loss declared and measured on applications large enough for the
-difficult constructs to occur. The Android literature is the nearest static
-relative. It attributes navigation by resolving the owning object, and when that fails
-for shared code it falls back on runtime traces. A navigation site in a web application
+access-control check, declared an over-approximation \cite{zhang2025veriflow}. Rima et al.\ already read nested and lazily loaded route trees and attach guards to
+edges as constraints. What earlier work has not combined is attribution that follows calls
+across classes and into services under their provider bindings, a modality on each transition
+that separates what is unconditionally available from what a guard or an unresolved scope
+makes uncertain, and a measurement of the resulting loss, classified by construct, on
+applications large enough for the difficult constructs to occur. The Android literature is the nearest static
+relative. It attributes navigation by resolving the owning object, and when that
+resolution is imprecise it falls back on runtime traces. A navigation site in a web application
 frequently has no owning object that could be resolved. In Android the owning object of a handler usually identifies the window, so the attribution problem studied here does not arise there in the same form, and an Android technique cannot simply be reused.
 
 The literature reviewed in Sections~\ref{sec:asttools} to~\ref{sec:mutation} fills in why the problem is open and
@@ -760,7 +757,8 @@ client-side framework in order to recover navigation has been done, within the
 restrictions set out above \cite{oshima2018model} and, more recently, for test generation
 and for access-control checking \cite{rima2026e2e,zhang2025veriflow}; what this review found
 no instance of is an attribution that carries a navigation site inside a service to the screens
-of its callers across classes, or a reported measurement of what the recovery fails to read. The other
+of its callers across classes, or a measurement of the loss classified by construct across a
+corpus. The other
 peer-reviewed static analysis in the Angular family targets AngularJS 1.x and checks
 template and controller consistency rather than navigation \cite{ocariza2015detecting},
 and the type information that TypeScript adds narrows a dispatch without settling it,
@@ -769,6 +767,6 @@ boundary of the approach lies, since the firing of a reactive computation is dec
 a graph the runtime builds and not by the program text
 \cite{cooper2006embedding,banken2018debugging}. Mutation testing supplies a method for
 asking whether an extracted model reacts to source changes
-\cite{jia2011mutation,papadakis2019mutation}, and the question of how a statically
-extracted navigation graph behaves under that method has not been answered for any
-client-side framework.
+\cite{jia2011mutation,papadakis2019mutation}, and for a statically extracted navigation graph of a client-side framework it has been
+applied only to faults injected by hand into constructed applications \cite{oshima2018model};
+an operator-level mutation study of such a graph was not found in this review.
