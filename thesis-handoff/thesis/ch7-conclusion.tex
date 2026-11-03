@@ -62,11 +62,11 @@ construct the baseline converted lost its conversion when attribution was enable
 (\AttrRegressed{}), and none was moved from must to may (\AttrDemoted{}); that is retention of
 what the baseline represented, not precision of what attribution added. The computed screen sets were checked in both directions on one
 application and not on the corpus: read site by site on \GTApp{}, the analysis names
-\GTFullRecall{} of the (site, screen) pairs of the hand-read structural reference at \GTFullPrecision{}
-precision against it, after the one over-approximating rule that reading exposed had been replaced by the
+\GTFullRecall{} of the (site, screen) pairs of the hand-read structural reference with no pair
+outside it, a reference partly completed from the graph's output, after the one over-approximating rule that reading exposed had been replaced by the
 call graph and the route reader corrected where it had shown one screen's attributions missing.
 Elsewhere the running interface puts half of that question to \ScopeApps{} of the
-six applications, and nothing here puts it to ghostfolio. The scopes are also wide: narrower than
+six applications, of which two rendered any judged link, and nothing here puts it to ghostfolio. The scopes are also wide: narrower than
 attributing every site to every screen by a factor between \BaselineFactorMin{} and
 \BaselineFactorMax{}, and on \BaselineBluntest{} the average site is attributed to
 \BaselineBluntestShare{} of the screens. A scope that wide says little about where the site
@@ -103,8 +103,8 @@ stated and mechanically tested, though not proved, over the declared route set a
 an explicit list of the constructs the analysis does not decide (Claim~\ref{claim:must},
 Section~\ref{sec:approximations}). It recovers \AttrRecoveredShare{} of the loss class it
 addresses, almost all of it onto the uncertain tier, and against the structural reference read
-by hand on one application it finds the one pair (of \GTPairs{}) that a reimplementation of
-earlier work's mechanisms misses, taking recall from \GTOutletRecall{} to \GTFullRecall{} at
+by hand on one application its full step, the call graph with its fallbacks, finds the one pair
+(of \GTPairs{}) that a reimplementation of earlier work's mechanisms misses, taking recall from \GTOutletRecall{} to \GTFullRecall{} at
 \GTFullPrecision{} precision. That result comes after two repairs the same reading prompted and a completion of the reference
 from the graph's output, and it was measured on \GTApp{} alone. Nothing in its formulation depends on a particular
 extractor; what an extractor supplies is the screens and the navigation sites it ranges
@@ -164,7 +164,8 @@ mounted addresses with no node, \ProbeMissedGhostfolio{} of them in one applicat
 accounted for: recovered as a transition, recorded as a destination only the run time
 knows, or anchored at a source the analysis cannot place. \RoundTwoMifosShare{} of those sites
 are mifos's, so the corpus figure is close to one application's. The sites that remain each name
-a reason, enforced by a check that fails when any does not, and some name a route the
+a reason, enforced by a check that fails when any does not, though the check enforces that a
+reason is recorded and not that it is correct, and some name a route the
 application never declares. The repairs also had an unwelcome cost, which is reported
 with them. The earlier instrument published a deterministic tier of
 \EarlierMustEdges{} edges with \EarlierMustViolations{} witness-check failures in it, and four corrections

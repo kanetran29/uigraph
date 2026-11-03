@@ -31,7 +31,8 @@ $(s, \sigma, g, m, s') \in E$ reads: at screen $s$, event $\sigma$ under guard $
 to screen $s'$, asserted with confidence $m$. Both the source $s$ and the target $s'$
 are elements of $S$, namely the first and the last component of the tuple. Constructs
 in the source that agree on source, event kind, guard and target yield the same edge, which
-carries the strongest modality among them, so $E$ holds at most one modality for each
+carries the strongest modality among them, with $M$ ordered
+$\mathit{unknown} < \mathit{may} < \mathit{must}$, so $E$ holds at most one modality for each
 $(s, \sigma, g, s')$; the paragraph on witnesses below says how the constructs are traced.
 \end{definition}
 
@@ -64,8 +65,8 @@ hold no anchors and fewer \emph{other} nodes.}
 A \emph{must} edge is claimed to fire for every input on which the enclosing code
 executes; a \emph{may} edge is possible but
 conditional; \emph{unknown} marks an edge whose modality could not be determined. The
-third modality carries the destinations the analysis cannot name. It labels only edges of the
-materialised graph that lie outside $E$, namely edges into the
+third modality carries the destinations the analysis cannot name. In the materialised graph it
+labels only edges that lie outside $E$, namely edges into the
 \texttt{u\_}\,sink of Section~\ref{sec:res-round2}, which records that a screen is left by
 an event whose target only the run time knows. The pinned extractor does produce such edges:
 \CensusUnknown{} of the \CensusEdges{} edges in the corpus, in \CensusUnknownApps{} of the
@@ -73,7 +74,9 @@ an event whose target only the run time knows. The pinned extractor does produce
 coincide on every edge of every corpus graph, and the census refuses to report a graph
 in which they come apart. The conversion ratio of RQ1 and the soundness property of
 Claim~\ref{claim:must} are defined over the other two tiers, so the unknown tier is counted in
-the edge totals and in no rate.
+the edge totals and in no rate. The model also assigns \emph{unknown} to navigations inside
+signal effects (Section~\ref{sec:boundary}), which may have a screen as target and so lie in
+$E$; no pass of this version emits one, so in the measured graphs the two still coincide.
 Guards are stored as source text and are never evaluated by the tool. A consumer of
 the graph can read a guard, but is not expected to decide whether it holds. This keeps
 the set $G$ opaque and means that the model does not need to represent application
@@ -359,8 +362,8 @@ member (method, property initialiser, lifecycle hook) of a component & the scope
 component \\
 method of an injectable service & join of the scopes of its callers \\
 \texttt{canActivate}, \texttt{canActivateChild} or \texttt{canMatch} on route $r$ & join of the
-scopes of the navigation sites whose target lies in $\mathit{subtree}(r)$, the screens a
-navigation into $r$ starts from \\
+scopes of the navigation sites with a known target in $\mathit{subtree}(r)$, an approximation of
+the screens a navigation into $r$ starts from \\
 \texttt{canDeactivate} on route $r$ & $\mathit{subtree}(r)$ \\
 HTTP interceptor & $\top$ \\
 NgRx effect for action $a$ & join of the scopes of every dispatcher of $a$ \\
@@ -392,19 +395,22 @@ holding a navigation site to the entry guards that navigation runs. A run theref
 \[
   O\bigl(|S| \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|)\bigr)
 \]
-transfer-function applications, after an initialisation that seeds each routed component with
-$\mathit{subtree}(r)$ in $O(|R| \cdot |S|)$. Each application is a union of two subsets of $S$, which
+transfer-function applications, after an initialisation that seeds the routed components, the
+shell, the \texttt{canDeactivate} guards and the interceptors in $O(k \cdot |S|)$, where $k$ is
+the number of seeded nodes. Each application is a union of two subsets of $S$, which
 costs $O(|S|)$ with scopes held as bit sets, so the running time of the solver, initialisation
 included, is bounded by
-$O(|R| \cdot |S| + |S|^2 \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|))$. This is the bound for the full
+$O(k \cdot |S| + |S|^2 \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|))$. This is the bound for the full
 model, and it covers the solver only: building the relations it runs over, which includes parsing
 the sources and resolving calls, is a separate cost not bounded here. $|\mathit{Mem}|$ is the number of members of components and is at most the number of callables,
-and $|T|$ is at most the number of navigation sites times the depth of the route tree times
-the largest number of entry guards on one route.
+and $|T|$ is at most the sum over navigation sites of the number of their targets, times the
+depth of the route tree times the largest number of entry guards on one route.
 
-The part of the analysis that is implemented, the nesting, outlet, membership and call-graph
-relations, is the full model with $D$ and $T$ empty, so the bound above specialises to it, and the call-graph pass, a
-worklist of set-valued joins along member call edges, is bounded by it. The nesting and outlet part
+The part of the analysis that is implemented runs over the nesting, outlet, membership and
+call-graph relations only, so its worklist is bounded by the bound above with $D$ and $T$ empty;
+it is not the full model restricted to those relations, since the restrictions, fallbacks and
+stand-ins of Section~\ref{sec:implementation} are computed outside the worklist. The call-graph
+pass, a worklist of set-valued joins along member call edges, is bounded by it. The nesting and outlet part
 is cheaper than that specialisation, because reachability from each source needs no set-valued
 joins. Scopes are propagated along the component nesting
 graph from the shell and from the component of each screen, which is plain reachability
@@ -412,8 +418,9 @@ and costs
 \[
   O\bigl(|S| \cdot (|C| + |N|)\bigr),
 \]
-one traversal of the nesting graph per routed component and per shell, where $C$ is the set of
-components and the number of such sources is at most $|S|$ plus the number of shells. What
+for the traversals, one of the nesting graph per routed component, layout and shell, where $C$ is
+the set of components and the number of such sources is taken as $O(|S|)$; adding the source's
+screen set to each component reached costs a further $O(|C| \cdot |S|)$ per source. What
 makes the propagation necessary in both cases is that scopes travel transitively and
 the scope of one node can rise more than once, once for each screen that reaches it.
 Cycles are not the reason. The nesting, outlet and call-graph relations the prototype implements
@@ -572,9 +579,13 @@ propagate a scope into a component that a route mounts: a routed component keeps
 $\mathit{subtree}(r)$ and does not also receive the scope of a component whose template
 renders it. Traversal does pass through a routed component, so a component nested beneath it still receives
 the scopes of the components above; only the routed component's own sites are left at
-$\mathit{subtree}(r)$. For the nesting and outlet relations the result is contained in the
-solution the full system would give, so a navigation site in a routed component can be
-attributed to fewer screens than the model allows, never to more. A scope that is too small loses edges and cannot invent them, which is why the
+$\mathit{subtree}(r)$. Taken alone, this restriction can only shrink a routed component's scope
+relative to the full system, so through it a navigation site in a routed component can be
+attributed to fewer screens than the model allows, never to more. Two other rules of the pass
+can enlarge a scope beyond the model's: components that nothing references and no route renders
+but whose subtree holds the primary outlet are treated as shell and given $\top$, with their
+edges capped at may, and an ambiguous selector that no candidate's import resolves joins over
+all candidates, which Claim~\ref{claim:must} excludes. A scope that is too small loses edges and cannot invent them, which is why the
 restriction cannot put Claim~\ref{claim:must} at risk; what it costs is recall, and the
 constructs it strands are counted in Chapter~\ref{ch:results}.
 
@@ -605,8 +616,10 @@ members as well as for unreached ones, and not the least solution of the constra
 because the calls on the way carry conditions the analysis does not follow.
 
 \textbf{Anchored edges.} Edges with scope $\top$ are stored once at a node of kind
-\texttt{scope}. Edges whose screen set is exactly $\mathit{subtree}(r)$ are stored once
-at a scope node that lists the members of that subtree. Other screen sets are stored
+\texttt{scope}. Edges whose screen set is exactly $\mathit{subtree}(r)$ for a screen $r$ with at least one
+descendant are stored once at a scope node that lists the members of that subtree; the prototype
+does not anchor at a prefix route that is not itself a screen, whose screen sets are stored per
+screen. Other screen sets are stored
 as one edge per screen. The core library provides the expansion query
 $\mathit{edgesFrom}(r)$ and a function that materialises all anchored edges, which is
 used to test Claim~\ref{claim:expansion}.

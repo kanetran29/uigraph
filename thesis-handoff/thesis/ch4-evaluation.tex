@@ -85,7 +85,7 @@ extractor, which introduces a possible selection bias.
 Three measures address these threats. The selection protocol is reported in full, including the rejected candidates; the
 six criteria were fixed before any results were obtained, but one candidate was rejected on tool
 support and the test-suite criterion was not met by two of the retained applications. The corpus is also stratified
-across nearly two orders of magnitude in the number of routes, so that any effect of application size is visible and not averaged away. Finally, the commits are fixed, and the evaluation harness is released with the thesis so that the measurement can be repeated rather than taken on trust. A fourth measure is planned: a case study on a proprietary Angular application from industry, reporting
+across nearly two orders of magnitude in the number of routes, so that any effect of application size is visible and not averaged away. Finally, the commits are fixed, and the evaluation harness is released with the thesis so that the measurement can be repeated rather than taken on trust. None of these addresses a further threat: the repairs of the second round were found on this corpus and are measured on it, with no held-out application (Section~\ref{sec:limitations}), so the figures after the repairs are fitted to it. A fourth measure is planned: a case study on a proprietary Angular application from industry, reporting
 only aggregate figures; this would be the most direct response to the external validity
 threat, and it is discussed further in Chapter~\ref{ch:discussion}. There is also no standard benchmark corpus for single-page applications. The web
 testing survey confirms that evaluations in this area are carried out on collections of
@@ -108,7 +108,10 @@ corrections were made because it disagreed with the extractor. Attributes such a
 corrections described in Section~\ref{sec:corrections}.
 
 \textbf{Conversion ratio (RQ1).} The conversion ratio is the fraction of in-scope navigation
-constructs that are witnessed by at least one must edge; query-only navigations and the two
+constructs that are witnessed by at least one must edge. A construct is matched to a witness on
+its own line or on the line either side, to absorb offsets in the extractor's locations, so two
+constructs on adjacent lines can both be credited by one witness, and the ratio is an upper
+bound at line granularity. Query-only navigations and the two
 exclusions of Table~\ref{tab:loss-rules} are left out of the denominator as well as the
 numerator. When several constructs
 produce the same edge, the extractor keeps the most certain as the edge's witness and records
@@ -222,12 +225,16 @@ of these that measures whether the losses are declared rather than how much is r
 coverage without qualifying it, it means node coverage; every other figure is named.
 
 \textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness
-cites it. A construct with no such edge is \emph{lost}, and it is assigned to exactly
+cites it. A construct that is in scope, cited by no must or may edge and not accounted for is
+\emph{lost}, and it is assigned to exactly
 one defect class by the first rule in Table~\ref{tab:loss-rules} that applies. Because
 the rules are ordered, the classes partition the lost constructs and their sizes can
 be compared within each application. Guard defects do not appear in this table, since
-a wrong guard mislabels an edge rather than removing it; they are measured by the
-witness check.
+a wrong guard mislabels an edge rather than removing it. No method here checks a guard
+label directly: the witness check compares the construct, its target and the destination of a
+must edge, not whether the transition is unconditional, so a must edge that should have been
+conditional passes it. Guard handling is exercised only by the guard-removal mutation operator
+and by the source review of Section~\ref{sec:res-round2}.
 
 \begin{table}[t]\small
 \caption{Rules that classify a construct, in the order the harness tests them. The first three
@@ -269,6 +276,11 @@ Other & matches none of the above; inspected by hand \\
 \end{tabularx}
 \end{table}
 
+The class \emph{other} is reached in unrelated ways: a template site whose owner cannot be
+resolved, a route component whose route has a node elsewhere, and a construct no rule matches.
+The harness tallies them as one class, so its size counts constructs left for inspection by
+hand and is not the size of one cause.
+
 The nested branch decides a class from the state of the construct's \emph{owning} route
 component. A construct can therefore be assigned to one of the node classes and still be
 converted once attribution gives it a scope through the shell or a subtree, because the
@@ -294,12 +306,14 @@ application's lazily loaded reports module was read at the project root, so the 
 \path{/:filter} where the application mounts \path{/reports/:filter}, and edges pointed at
 that address while the check reported the tier clean (Section~\ref{sec:corrections}). No count
 of those edges is given, because the defect is repaired and the graph that carried it no longer
-exists, so the figure cannot be re-measured against anything. RQ3 is answered positively only if coverage rises and
-must-tier precision does not fall. Because an edge whose destination the check cannot read is
+exists, so the figure cannot be re-measured against anything. RQ3 is answered positively only if the recovered share and the conversion ratio, both over the
+same construct denominator, do not fall and the recovered share rises, and must-tier precision
+does not fall. Because an edge whose destination the check cannot read is
 neither a pass nor a failure, precision is stated as bounds: the share of must edges that
 pass, over all of them, as the lower bound, and the share that do not fail as the upper bound.
 The criterion is read as no detected failure in either run; it cannot be read as a precision
-that did not fall where the check reads only part of the tier.
+that did not fall where the check reads only part of the tier, and the two runs' bounds are
+shares of different sets of must edges, so they are not compared as rates.
 
 \textbf{Node-level recall.} The fraction of distinct URLs named in an application's
 own end-to-end test sources that have a matching node in the graph. It is a

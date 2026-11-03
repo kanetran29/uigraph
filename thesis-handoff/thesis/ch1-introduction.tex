@@ -148,7 +148,8 @@ extractor's are repaired where the round could repair them, and the corpus is me
 transition must then name the reason, and the script that produces those reasons fails if
 any site has none, so an unexplained remainder cannot pass silently. One kind of reason is
 a target the application never declares, which makes the graph a way of finding dead links
-without running anything; it is reported as a candidate list and not as a count, because a
+statically, each candidate then checked against the route configuration the runtime probe
+recorded; it is reported as a candidate list with counts and not as a defect rate, because a
 route the readers fail to read is indistinguishable from one the application does not have.
 
 \medskip

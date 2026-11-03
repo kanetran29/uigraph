@@ -16,7 +16,7 @@ the prototype evaluated in Chapter~\ref{ch:results}.}
   \State $\mathit{scope}(c) \gets \mathit{scope}(c) \cup \mathit{subtree}(r)$
   \Comment{own screen and outlet descendants}
 \EndFor
-\ForAll{$c$ on the nesting path from the root component to the holder of the primary outlet}
+\ForAll{$c$ on the nesting path from the root component to the holder of the root-level primary outlet}
   \State $\mathit{scope}(c) \gets S$ \Comment{application shell, $\top$}
 \EndFor
 \ForAll{$r \in R$ and $g \in \mathit{leave}(r)$}

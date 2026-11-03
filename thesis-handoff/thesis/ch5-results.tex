@@ -246,7 +246,10 @@ assign to it, \AttrRecoveredShare{} of that class, and takes the graphs from
 \AttrEdgesBefore{} edges to \AttrEdgesAfter{}. Measured instead by RQ1's deterministic
 conversion ratio the gain is far smaller: \AttrRecoveredMust{} of the recovered constructs
 earn must and \AttrRecoveredMay{} earn may, and \AttrAppsGained{} of the six applications gain
-any conversion at all. These are different measures of recovery, which is why both are
+any conversion at all. The must constructs rise from \CensusBaseMustSites{} to
+\CensusMustSites{}: besides those two recoveries, both on realworld, two k8s dashboard
+constructs that the baseline already converted at may are raised to must, which the recovery
+count does not include. These are different measures of recovery, which is why both are
 reported: a gain in represented navigation need not be a gain in deterministic transitions when
 targets or execution conditions remain uncertain. Counted in edges the must tier grows from
 \AttrMustBefore{} to \AttrMustAfter{}, and the edges added are the links of two application shells
@@ -472,8 +475,10 @@ Two things follow, and the second is the less favourable to the analysis. The fi
 baseline is not a competitor for the must tier: an unguarded site in a shared component
 attributed to every screen would yield a must edge from screens that never render it, so
 Claim~\ref{claim:must} would fail by construction rather than be tested, and the finding that
-no must edge attribution added fails the witness check is only meaningful because the attribution
-is narrow. The second is that on part of this corpus it is not very narrow. A scope that names three
+none of the readable must edges attribution added fails the witness check is only meaningful
+where the attribution is narrow. Of the \the\numexpr\AttrMustAfter-\AttrMustBefore\relax{}
+must edges it added, \MustWitnessUnread{} are unread, all on \BaselineBluntest{}, where the
+scopes are widest. The second is that on part of this corpus it is not very narrow. A scope that names three
 fifths of an application is a weak statement about where a site fires, and the coverage RQ3
 reports is bought with scopes of that width. Nothing in the evaluation shows those wide scopes
 to be wrong, since the oracle above could not test the direction in which they would be wrong.
@@ -581,7 +586,8 @@ No nested level attributes a pair the reference does not contain. What separates
 recovers \GTOwnedRecall{} and containment \GTNestingRecall{}, both far short. Adding the
 shell rule, the level that stands for the prior work's reach, recovers
 \GTRootedRecall{} at \GTRootedPrecision{} precision, leaving \GTRootedMissing{} pairs
-unfound and inventing none.
+unfound and inventing none. Precision here is against a reference whose header sites were
+added from the graph's output, so it is weakest as evidence exactly where the shell dominates.
 
 Against \emph{rooted}, everything above that level reduces \GTRootedMissing{} missing pairs to
 \GTFullMissing{} and asserts no pair outside the reference. That was not true of the
@@ -609,7 +615,8 @@ view, so the clean row is consistent with two repairs and tests neither independ
 Two things follow for RQ3. The first is that most of the recovery attributed to this analysis
 is produced by mechanisms earlier work already had: \GTRootedRecall{} of the
 \GTPairs{} pairs are reached by the shell rule and \GTOutletRecall{} once the enclosing routes are
-added, so the call graph adds \GTOutletMissing{} pair on this application, and the \emph{full}
+added, so the \emph{full} step, the call graph with its fallback join and stand-ins, adds
+\GTOutletMissing{} pair on this application, and the \emph{full}
 level takes recall to \GTFullRecall{}. The second is
 that this is one application of six, the smallest, and the corpus-wide widths of
 Table~\ref{tab:scopebaseline} are not licensed by it. On \BaselineBluntest{} the mean
@@ -630,8 +637,8 @@ tables. The first is that the great majority of the gain is on the may
 tier, so what attribution mostly adds is navigation the graph says is possible, not
 navigation it says is certain. The second is that the scopes are tested in both
 directions on one application only. The recorded runtime check exposed
-\ScopeUnpredicted{} missing pairs on its earlier graph, across \ScopeApps{}
-applications. It is not a new check of the final call graph, and cannot establish
+\ScopeUnpredicted{} missing pairs on its earlier graph, all on bitwarden; of the \ScopeApps{}
+applications it served, only realworld and bitwarden rendered any judged pair. It is not a new check of the final call graph, and cannot establish
 whether a scope is too large,
 because at the screens it can observe the graph almost never claims a destination exactly, and
 because a link a template renders conditionally is absent for reasons that have nothing to do
@@ -706,8 +713,12 @@ of them under the quota and scored \MutScored{}. \MutExcluded{} were excluded: f
 \MutExcludedUnreached{} of them no baseline edge enters any screen the guarded route yields,
 and \MutExcludedNoScreen{} guards a route that declares neither a component nor children, so
 it yields no screen for a guard to be recorded on. An excluded mutant carries no information
-about sensitivity: it either repeats a coverage gap that RQ1 has already counted or acts on a
-route that declares no screen for RQ1 to have missed. The exclusions are few on the attributed
+about sensitivity: it acts on a screen no extracted edge enters, which may be a coverage gap or a
+screen reached only by its address, or on a route that declares no screen. The exclusions are
+not spread across operators: all \MutExcluded{} are guard removals, so \MutGuardScored{} of the
+\the\numexpr\MutGuardScored+\MutExcludedGuard\relax{} sampled guard mutants are scored, and the
+rule removes exactly the cases in which a removal could not be observed. The guard rate below is
+therefore conditional on the graph entering the guarded screen. The exclusions are few on the attributed
 graph but not on the graph without attribution: of the \MutBaseSampled{} mutants sampled against the graph produced
 without attribution, \MutBaseExcluded{} are excluded and \MutBaseScored{} remain, which is
 the same coverage gap seen from the mutation side. Where the quota capped an operator, the candidates left
@@ -727,8 +738,12 @@ unless the baseline graph already holds a node for the segment it renames, and a
 identified by its full path (Section~\ref{sec:model}), so a parsed literal path must yield a
 different node once renamed. It tests node extraction rather than the graph's response to a
 change in behaviour, and it supplies \MutRenameScored{} of the \MutScored{} scored mutants.
-The three operators that can fail are detected in \MutFallibleDetected{} of their
-\MutFallibleScored{} scored mutants: \MutLinkDetected{} of \MutLinkScored{} deleted
+The three other operators are detected in \MutFallibleDetected{} of their
+\MutFallibleScored{} scored mutants, and they are not equally informative. A deleted
+\texttt{routerLink} is sampled only on a line a baseline edge cites and is detected when that
+line stops being cited, which, once the attribute text is gone, fails only if the extractor
+misreads its own input; the evidence for RQ4 rests mainly on the retargets and the guard
+removals. The counts are \MutLinkDetected{} of \MutLinkScored{} deleted
 \texttt{routerLink} bindings, \MutRetargetDetected{} of \MutRetargetScored{} retargeted
 \texttt{navigate} calls and \MutGuardDetected{} of \MutGuardScored{} removed guards. The
 samples are small, in single digits per operator and application, so the pattern says more
@@ -909,7 +924,8 @@ backend or a history entry; the graph then records the transition as an edge int
 that screen's \texttt{u\_}\,sink, with modality unknown, rather than dropping it or
 guessing. It is \emph{unplaced} when the destination is readable but the screen it fires
 from is not, in which case the edge is anchored at an \texttt{o\_}\,origin node that says so.
-What is left is unexplained. \RoundTwoExcluded{} sites leave the denominator entirely, on three grounds, none of which is
+What is left carries a recorded reason but no transition; the check
+enforces that a reason is recorded, not that it is correct. \RoundTwoExcluded{} sites leave the denominator entirely, on three grounds, none of which is
 a transition between screens: \RoundTwoExcludedQueryOnly{} pass an empty commands array and
 so change the query of the route they are already on,
 \RoundTwoExcludedOutlet{} navigate a secondary outlet, which the model represents as a
@@ -1084,7 +1100,9 @@ corroboration of the condition rules is a recorded review: \MustReviewReaders{} 
 sources and without the extractor's readers or results, kept in \path{results-must/review.json}.
 The extractor agrees with the less favourable of them at \MustReviewAgreeMin{} of the
 \MustCtxDistinct{} constructs, and the two readings agree with each other at
-\MustReviewReadersAgree{} of them. Three things limit what that agreement shows. Each reader was given the
+\MustReviewReadersAgree{} of them. The two readings are two runs of one model, not independent
+raters, so their agreement measures consistency and not correctness, and the cohort they read is
+the round's tier, not the final one. Three further things limit what that agreement shows. Each reader was given the
 condition rules of this chapter as the definition to apply, so the readings test whether the
 extractor applies its rules as written and not whether the rules are the right ones. They were
 made after those rules had been corrected on these same constructs. And they judge only whether
@@ -1149,7 +1167,10 @@ tier, this reading was made once and with the extractor's decisions in view, so 
 that each decision can be defended from the source, not an independent second reading. The
 witness check finds \MustWitnessViolations{} failures in the \MustWitnessEdges{} must
 edges and records \MustWitnessUnread{} edges whose cited destination it cannot read.
-The unread edges are not passes. The source reading above and the mechanical check
+The unread edges are not passes. All \MustWitnessUnread{} of them are k8s dashboard toolbar
+edges, the same edges whose source side rests on the chrome component's scope and on the
+route-order assumption, so these weaknesses fall on one set of edges and are not independent;
+outside k8s dashboard every must edge was read and passed. The source reading above and the mechanical check
 are distinct evidence: the reading examines every construct the census reports, with
 the extractor's decision visible, whereas the checker resolves only the source forms
 it supports. Neither is an independent proof of Claim~\ref{claim:must}.
@@ -1260,8 +1281,9 @@ route set was beyond it.}
 Across the corpus the extractor declares \ProbeInvented{} screens that the framework mounts
 nothing at. Over \ProbeApps{} applications, \ProbeRoutes{} route entries and \ProbeNodes{} nodes,
 every address the extractor claims is an address the framework's own configuration mounts. This is
-external evidence for one half of the must-tier property, namely that no node is minted at an address
-the application does not mount. The two static readers could not produce this evidence,
+external evidence that no node is minted at an address the application does not mount, which is a
+precondition of the must-tier property rather than part of it; since an address behind a guard
+that always refuses still counts as mounted, the probe could not expose such a node either. The two static readers could not produce this evidence,
 because an address both of them place at the wrong prefix is an address they agree on.
 
 That evidence is bounded by what a census keyed on addresses can represent, and the bound
@@ -1357,11 +1379,12 @@ a denominator that carried the same eight wrong addresses. Both now follow the c
 bounded at three hops and refusing at every hop a file the route itself sits in, a file another
 route loads, and a file whose every table is registered at the application root.
 
-\section{Dead links, found without running anything}
+\section{Dead links, found from the source}
 \label{sec:deadlinks}
 
 A site whose target the application mounts nothing at is a dead link, and the method
-finds such links at no extra cost. The clearest case is mifos. A
+finds candidates for such links at no extra cost. The candidates are found statically; each is
+then checked against the route configuration the runtime probe recorded before it is reported. The clearest case is mifos. A
 transactions tab links to a journal entry with
 
 \begin{quote}

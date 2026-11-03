@@ -35,6 +35,23 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
+## Deep self-review (correctness, logic), 3 Nov 2026
+
+Prose and formula exposition only. No code or data changed, no corpus or sweep re-run. Each finding was checked against code or data first.
+- ch3: pass can exceed the model (indirect/lost shells get top, attribute.ts:500–514; unimported ambiguous selector join);
+  unknown may lie in E for effect navigations (none emitted); M ordered; solver init counts all seeds; |T| times targets;
+  implemented pass is not "full model with D, T empty"; entry-guard row is an approximation; no prefix-route anchors
+  (subtreeAnchor size >= 2); "root-level primary outlet" in alg-attribution.
+- ch4: witness check reads no guard (witness-check.mjs); ±1-line witness tolerance (loss-breakdown.mjs:196) makes conversion an
+  upper bound; "lost" definition; RQ3 criterion over one construct denominator; no held-out app; "Other" tallies several causes.
+- ch5/ch7 RQ1–RQ3: must constructs 21→25 = 2 recoveries + 2 k8sdash may→must (final14 L.json rows); 62 of 133 added must edges
+  unread; structural-reference precision qualified (completed from graph); +1 pair is the full step; scope check rendered pairs
+  only on realworld and bitwarden.
+- ch5 RQ4–RQ5: all 6 exclusions are guard mutants (11/17 scored); DELETE_ROUTERLINK near-guaranteed; review readers are one model;
+  62 unread = k8sdash toolbar edges (same as scope/route-order weakness); probe zero is a precondition, not half the must claim;
+  dead links checked against probe config; remaining sites carry a recorded reason, not a verified one.
+- PDF 151 pages, 0 errors, 0 undefined, 0 overfull.
+
 ## Consolidated review of 964034a (C01–C11, E01–E04), 3 Nov 2026
 
 Prose, figures and bib only. No code or data changed, and no corpus or sweep re-run. Each finding was checked against code or data first.
