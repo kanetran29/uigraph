@@ -99,7 +99,7 @@ object belongs to exactly one window. Attribution can therefore be treated as an
 resolution problem: the widget identifier is resolved, usually by constant propagation
 of the \texttt{getId()} call, and the window is then known
 \cite{yang2015callbacks}. The problem is well defined because the platform's object
-model guarantees a single owner.
+model gives a widget instance a single owning window.
 
 The limits of this approach become visible in ProMal. Its authors report that a purely
 static window transition graph contains infeasible transitions, because imprecision in the
@@ -193,7 +193,8 @@ carries no modality, so a navigation that is always available and one that is av
 only if a guard admits it are represented identically. The evaluation applies the tool
 to four constructed applications and to two published ones of 1824 and 6893 lines, with
 six and twenty-three pages, and reports whether the intended model was produced and
-whether injected transition faults were detected. What the extraction loses on an
+whether transition faults, injected by hand into constructed variants of the first sample
+application, were detected; the published applications were checked without injection. What the extraction loses on an
 application it cannot fully read is not measured, which is the question this thesis
 takes as its subject.
 
@@ -421,10 +422,14 @@ objects. Each route has a \texttt{path} pattern and, in addition, either a
 and does not itself correspond to a screen. Routes can be loaded lazily using
 \texttt{loadChildren} or \texttt{loadComponent}; in that case the child routes or the
 component are defined in another module or file, which the bundler resolves when the
-application is built and the router fetches when a navigation first matches the route.
-Routes may also have guards, namely \texttt{canMatch}, \texttt{canLoad}, \texttt{canActivate},
-\texttt{canActivateChild} and \texttt{canDeactivate}, which are functions or injectable classes
-that return either a boolean or a \texttt{UrlTree} representing a redirect, and resolvers, which
+application is built and the router fetches when a navigation first matches the route, or
+earlier if a preloading strategy is configured.
+Routes may also have guards, namely \texttt{canMatch}, \texttt{canActivate},
+\texttt{canActivateChild} and \texttt{canDeactivate}, with \texttt{canLoad} still accepted but
+deprecated in favour of \texttt{canMatch}. Guards are functions or injectable classes that return
+a boolean, a \texttt{UrlTree} or \texttt{RedirectCommand} representing a redirect, or a Promise or
+Observable of one; a \texttt{canMatch} that returns false makes the router try the next matching
+route rather than cancel the navigation. Routes may also have resolvers, which
 fetch data the router awaits before it activates the route; \texttt{runGuardsAndResolvers}
 controls whether they run again when a navigation keeps the route active. Route paths are strings, but
 they are not necessarily string literals. Applications that keep their route table in
@@ -742,14 +747,17 @@ on the transitions, and with no measurement of what the extraction fails to read
 two put the graph to work without narrowing it: one as the coverage denominator of a
 generated end-to-end suite \cite{rima2026e2e}, one as the reachability relation of an
 access-control check, declared an over-approximation \cite{zhang2025veriflow}. Rima et al.\ already read nested and lazily loaded route trees and attach guards to
-edges as constraints. What earlier work has not combined is attribution that follows calls
+edges as constraints. What this review found no earlier work combining is attribution that follows calls
 across classes and into services under their provider bindings, a modality on each transition
 that separates what is unconditionally available from what a guard or an unresolved scope
 makes uncertain, and a measurement of the resulting loss, classified by construct, on
 applications large enough for the difficult constructs to occur. The Android literature is the nearest static
 relative. It attributes navigation by resolving the owning object, and when that
 resolution is imprecise it falls back on runtime traces. A navigation site in a web application
-frequently has no owning object that could be resolved. In Android the owning object of a handler usually identifies the window, so the attribution problem studied here does not arise there in the same form, and an Android technique cannot simply be reused.
+frequently has no owning object that could be resolved. In Android the owning object of a handler usually identifies the window, so attribution reduces
+to object resolution in the common case; fragments, background tasks and aliased widgets are the
+exceptions, and the Android work handles them with dynamic evidence. That is why an Android
+technique cannot simply be reused.
 
 The literature reviewed in Sections~\ref{sec:asttools} to~\ref{sec:mutation} fills in why the problem is open and
 what is available for addressing it. The analysis machinery is not missing: abstract

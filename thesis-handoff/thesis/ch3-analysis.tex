@@ -172,10 +172,10 @@ following cases.
 \begin{itemize}
 \item \textbf{Guards and resolvers.} A guard the navigation runs demotes it, whatever the guard
 would decide, since the guard half of the rules is read off the route configuration and never
-evaluates a guard. Which guards a navigation runs is decided the way the router decides it. The
-routes the source and the target share are reused unless their parameters can change or
-\texttt{runGuardsAndResolvers} asks otherwise, and a reused route's \texttt{canActivate} and
-resolvers do not run again. A navigation runs the \texttt{canMatch} of every route its address
+evaluates a guard. Which guards a navigation runs is decided the way the router decides it. A route
+the source and the target share stays active, and its \texttt{canActivate} and resolvers run again
+only if its path or matrix parameters can change (the default \texttt{paramsChange}) or its
+\texttt{runGuardsAndResolvers} policy otherwise directs. A navigation runs the \texttt{canMatch} of every route its address
 is matched through; the \texttt{canActivate}, \texttt{canLoad} and resolvers of every route it
 enters, \texttt{canLoad} until the route's code has been loaded, which the extractor, not knowing
 whether it has, takes as every time; the \texttt{canActivateChild} of every route above those;

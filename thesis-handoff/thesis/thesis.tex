@@ -78,7 +78,7 @@ open-source Angular applications with \RoundTwoRoutesRealworld{} to \RoundTwoRou
 declared route entries, with four methods that read the sources and one that reads the
 running application.
 
-The main result is that the deterministic tier is nearly empty. Once the demotion rules the
+The measurement is the main contribution, and its main result is that the deterministic tier is nearly empty. Once the demotion rules the
 soundness property rests on are applied, \CensusMustSites{} constructs yield \CensusMust{}
 must edges; \CensusMustSitesKdash{} of those constructs, one application's toolbar, account
 for \CensusMustKdash{} of the edges, and \RouteOrderResting{} edges rest on an assumption
@@ -94,7 +94,8 @@ The thesis therefore formulates scope attribution as a dataflow analysis over sc
 a fixpoint over component nesting, router outlets and a call graph that resolves injected
 services, reading every provider binding as if it applied everywhere. Its contribution beyond earlier work is modest. The mechanisms
 earlier work has (the root component on every screen, plus the enclosing routes) reach
-\GTOutletRecall{} of a hand-read structural reference of (site, screen) pairs on \GTApp{}, against
+\GTOutletRecall{} of a hand-read structural reference of (site, screen) pairs on \GTApp{}, partly
+completed from the graph's output, against
 \GTFullRecall{} for the full analysis; across the corpus the call graph, its fallback join and
 stand-ins add \AblationFullAddedSites{} placed sites, \AblationFullAddedShare{} of the total. Attribution recovers \AttrRecoveredShare{} of the constructs in its
 class, almost all as possible rather than certain transitions.
@@ -103,7 +104,8 @@ analysis's own relations and guided two repairs; elsewhere the final scopes are 
 \CensusMustKdash{} must edges drawn from k8sdash's toolbar rest on an untested scope.
 
 On three applications, the graph detects \MutFallibleDetected{} of \MutFallibleScored{}
-injected link deletions, retargets and guard removals; without attribution fewer changes can be
+injected link deletions, retargets and guard removals, the deletions almost by construction;
+without attribution fewer changes can be
 scored at all, but on the \MutPaired{} mutants both graphs can score, \MutPairedDetected{} and
 \MutPairedBaseDetected{} are detected. Full detection was reached after errors of the harness
 found in an earlier run had been corrected. The
@@ -137,7 +139,8 @@ corrections that followed are reported in Chapter~\ref{ch:results} as correction
 are also part of the evaluation itself: the two readings of the round's must tier in
 \path{results-must/review.json} and the reading of the final tier in
 \path{results-must/tier-reading.json} were made by the assistant, and Chapter~\ref{ch:results} says
-of each what it can and cannot show, given who made it.
+of each what it can and cannot show, given who made it; the two readings are two runs of one
+model, so their agreement measures consistency, not correctness.
 
 The assistant was also used during the literature search, to locate candidate sources and
 to summarise them. No source is cited on the strength of such a summary. Every entry in

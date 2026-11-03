@@ -431,9 +431,10 @@ that no reader of the code can see.
 It might seem that none of these weakens the claim the check is used for, because none could
 make a mounted address look unmounted. That reasoning has the direction backwards.
 The claim is that an address the extractor mints is one the framework mounts, and it
-is tested by finding the extractor's set inside the framework's. Two of the threats make the
-framework's set \emph{larger} than the set of addresses a visitor can actually reach: a route
-behind a guard that always refuses is counted as mounted, as is one whose component throws. A
+is tested by finding the extractor's set inside the framework's. Three of the threats make the
+framework's set \emph{larger} than the set of addresses a visitor can reach in the measured scope:
+a route behind a guard that always refuses is counted as mounted, as is one whose component throws,
+and a route the composing shell or its packages declare outside the measured library. A
 larger containing set makes containment easier to satisfy, so these weaken the
 no-invented-address claim. The build configuration is a different kind of threat, because a
 production configuration can add routes as well as drop them, so it does not move the set in one
@@ -570,14 +571,14 @@ Section~\ref{sec:transfer} identifies for JSX.
 \item \textbf{Dispatch through NgRx effects and router event subscriptions.} The
 dispatch relation is specified in Chapter~\ref{ch:analysis} and not implemented, so the screen
 that dispatched an action is never recovered. The extractor stands in for it at the
-\emph{full} attribution level only: every navigation call in a file inside the application
+levels that keep the call graph or its class join, \emph{full} and \emph{class}: every navigation call in a file inside the application
 directory that contains a \texttt{createEffect} call is given $\top$ and offered from the shell
 at \emph{may}, or into the shell's \texttt{u\_}\,sink when its target is fully dynamic. This is
 sound and coarse, since an effect can fire on any screen and the edge is drawn from the shell
-rather than from the screen that dispatched the action. With attribution disabled, at any level
-below \emph{full}, for an effect outside the application directory, and for an effect declared
-with the older \texttt{@Effect} decorator, the navigation is attributed to no screen, contributes
-no edge, and is recorded as a note. A subscription to \texttt{Router.events} is not treated as
+rather than from the screen that dispatched the action. At the levels below those, the stand-in is not applied. For an effect outside the application
+directory, or one declared with the older \texttt{@Effect} decorator, the navigation is treated as
+any service call: it is placed by the call graph or the class join where they reach it, and
+recorded as a note where nothing does. A subscription to \texttt{Router.events} is not treated as
 dispatch: a navigation inside it is attributed to the scope of the class that contains it, as
 any other call site is, and because it runs in a callback the subscription invokes, it is held
 at \emph{may} (Section~\ref{sec:res-round2}).
@@ -647,8 +648,10 @@ the \texttt{canMatch} of a route its address is matched through, the \texttt{can
 \texttt{canLoad} or resolver of a route it enters, the \texttt{canActivateChild} above those, and the
 \texttt{canDeactivate} of a route it leaves.
 A route the source and target share is taken to be reused unless its path has
-a parameter or \texttt{runGuardsAndResolvers} is set, which a parameter that does not in fact change
-makes too cautious. A guard is identified by the text of its expression, so two guards that
+a parameter, \texttt{runGuardsAndResolvers} asks for more than a parameter change, or, under the
+default mode, the navigation does not keep the segments the route or one above it consumes, since a
+matrix parameter there may change; a parameter or matrix parameter that does not in fact change
+makes this too cautious. A guard is identified by the text of its expression, so two guards that
 compute the same thing are two guards. Content a component projects through
 \texttt{<ng-content>} is read as its host template places it, so a link projected into a component
 that renders the projection only under a condition is read as unconditional; \texttt{mat-menu} and
@@ -736,7 +739,7 @@ approximated sites outnumber the \ConstructsAlfresco{} constructs, almost entire
 The two numbers are not the same unit, since the denominator counts navigation
 constructs while the \texttt{createEffect} figure counts effect declarations, whether or
 not they navigate. The approximated kinds are also concentrated: auxiliary outlets
-appear in one application of the three, reactive effects only in that same application,
+appear in one application of the three, NgRx effects (\texttt{createEffect}) only in that same application,
 templates passed as values mostly in another, and relative navigation everywhere but in
 small numbers. An
 approximation that costs nothing on one application can therefore be the dominant one on
@@ -830,20 +833,22 @@ parent's own address lands on the redirect target with that component unmounted.
 same porting exposed a second Vue-only hazard with no Angular counterpart: a table that mixes
 the Vue~2 catch-all \texttt{'*'} with the Vue~3 form
 \texttt{'/:pathMatch(.*)*'} folds both to one address, and the extractor keeps the record
-declared first, which under Vue Router~4 is the invalid one. The surviving component is then the
-wrong one. The collision is declared, so the graph says that a record was dropped at that
+declared first; where that is the Vue~2 form, which Vue Router~4 rejects when the router is
+created, the surviving component is the wrong one. The collision is declared, so the graph says that a record was dropped at that
 address; which of the two it should have kept is not something the table alone determines.
 
-Guards move to different scopes. A redirect thrown from a React Router loader
-fires when its route, or any route below it, is matched, during the navigation that is trying
-to reach it. It plays the role of \texttt{canActivate}, and as for an Angular entry guard its
+Guards move to different scopes. A redirect thrown or returned from a React Router loader
+runs when its route is entered, during the navigation that is trying to reach it, and again when
+its params or the search change or after an action revalidates it; a parent whose match is
+unchanged is by default not revalidated on a navigation between its children, the analogue of
+Angular's route reuse. It plays the role of \texttt{canActivate}, and as for an Angular entry guard its
 source is the screen being left, not the loader's route: a navigation from \texttt{/public} to
 \texttt{/admin} that the loader redirects to \texttt{/login} leaves \texttt{/public}. Its scope
 is therefore the join of the origins of the navigations that may run the loader, as the relation
 $T$ gives for entry guards, and not $\mathit{subtree}(r)$; where those origins are not recovered,
 the conservative scope is $\top$. Vue's global
-\texttt{beforeEach} guard has no direct Angular counterpart. A redirect from it is
-anchored at $\top$, which the lattice already contains.
+\texttt{beforeEach} guard corresponds most closely to a \texttt{canActivateChild} on a root route
+with no component; a redirect from it is anchored at $\top$, which the lattice already contains.
 
 Component nesting is harder in React. Angular and Vue keep templates in a
 separate language, so the nesting relation can be read from element names. In React,
@@ -898,9 +903,10 @@ lazily loaded module imports. The independent route parser follows lazy boundari
 every route path is a constant reference (Table~\ref{tab:coverage}), so the work is
 known to be feasible on this corpus, and the parser's output gives the expected result
 to check against. The gain is not limited to the nodes
-recovered. A large part of the attribution losses that remain after attribution are
-constructs whose scope was found but whose target screen has no node, and those are
-repaired by node extraction rather than by any change to the attribution pass.
+recovered. Some of the attribution losses that remain, most of them in ghostfolio
+(Table~\ref{tab:remaining}), are constructs whose scope was found but whose target screen has no
+node because no reader can address it, and those would be repaired by reading more of the route
+configuration rather than by any change to the attribution pass.
 
 The part of the model that Chapter~\ref{ch:analysis} specifies and the prototype leaves out
 comes next: the dispatch relations that carry NgRx effects and router event subscriptions, and

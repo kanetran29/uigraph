@@ -35,6 +35,28 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
+## Deep self-review, round 2, 3 Nov 2026
+
+Prose only; no code or input changed, so no re-run. The five main generated tables were rebuilt
+from `final14.tgz` and are identical to the thesis copies.
+
+- Abstract, ch1, ch7, AI declaration: qualifiers from 26fee8e carried up (witness check reads no
+  guard; conversion ratio an upper bound at line granularity; reference partly completed from the
+  graph; only realworld and bitwarden rendered judged pairs; 21→25 decomposed; 62 unread are k8sdash
+  toolbar edges; deletions near-guaranteed, 11/17 guard mutants scored; two readings are one model;
+  no held-out application; measurement framed as the main contribution).
+- ch2: Angular guard list (canLoad deprecated, RedirectCommand/Promise/Observable, canMatch false
+  tries the next route, preloading); Android single-owner claim softened; "found no earlier work";
+  Oshima & Kishi faults were injected only into sample-app variants (checked in the SEKE PDF).
+- ch3: route reuse vs guard re-run wording aligned with `paramsChange` and `extract.ts:223`.
+- ch6: reuse rule includes the matrix condition; effects stand-in at full and class
+  (`attribute.ts:568`) and the `@Effect`/outside-dir path goes through the call graph; three threats
+  enlarge the framework set; React loader revalidation; Vue catch-all order; beforeEach analogue;
+  "NgRx effects"; remaining no-node losses described as "some", matching l.27-30.
+- appendix-a: orphan baseline sentence removed; 698/2798, 174/3512 and "eight" labelled as measured
+  at c0fe3b1, not re-measured on the final extractor (no recorded file or macro holds them).
+- Not verified: tab:rw sample sizes (Yang, GoalExplorer, StoryDroid, ProMal, UI-CTX); PDFs blocked.
+
 ## Deep self-review (correctness, logic), 3 Nov 2026
 
 Prose and formula exposition only. No code or data changed, no corpus or sweep re-run. Each finding was checked against code or data first.

@@ -104,7 +104,8 @@ applications can static analysis recover as deterministic transitions?}
 without the screens it runs between. The first is node coverage: the fraction of the
 screens an application declares that the graph holds a node for. The second is the
 fraction of navigation constructs in the source code that are witnessed by at least one
-deterministic (\emph{must}) transition. The first is a precondition of the second rather than a
+deterministic (\emph{must}) transition, matched at line granularity, so that this fraction is
+an upper bound. The first is a precondition of the second rather than a
 numerical bound on it, since a transition needs a node at each end but the two ratios have
 different denominators, and
 Chapter~\ref{ch:results} reports both, with the warning
@@ -129,8 +130,10 @@ precision of static navigation analysis?}
 site that does not belong to any single screen, it computes the set of screens from
 which the site can be triggered. One commit of the instrument is run twice on the same
 inputs, with the attribution pass disabled and enabled, so that nothing but the pass
-differs between the two runs. Coverage is the change in recovered
-transitions. Precision is checked on the deterministic tier, which must not decrease.
+differs between the two runs. Coverage is the recovered share and the conversion ratio, over
+the same construct denominator. Precision is checked on the deterministic tier, as far as the
+witness check can read it, and must not decrease; the computed screen sets are also compared
+with a hand-read structural reference on one application.
 
 \medskip\noindent\textbf{RQ4.} \emph{Does the extracted graph respond to source changes
 in the constructs it represents, as change impact analysis requires?}
@@ -146,7 +149,8 @@ navigation was unreadable or merely unread. Each class of RQ2 is therefore taken
 root cause in the source of the application it appeared in, the causes that are the
 extractor's are repaired where the round could repair them, and the corpus is measured again. A site that still yields no
 transition must then name the reason, and the script that produces those reasons fails if
-any site has none, so an unexplained remainder cannot pass silently. One kind of reason is
+any site has none, so no site can be left without a recorded reason, though the script checks
+that a reason is recorded, not that it is correct. One kind of reason is
 a target the application never declares, which makes the graph a way of finding dead links
 statically, each candidate then checked against the route configuration the runtime probe
 recorded; it is reported as a candidate list with counts and not as a defect rate, because a
@@ -165,12 +169,15 @@ to the extractor were repaired except one, ghostfolio's spread of computed route
 extractor declares unread, and the figures reported throughout
 Chapter~\ref{ch:results} are those of the repaired instrument. Section~\ref{sec:res-round2}
 reports what the repairs cost the soundness property, and what the earlier instrument
-measured is kept there for comparison rather than as a second set of results.
+measured is kept there for comparison rather than as a second set of results. The repairs were
+found on this corpus and are measured on it; no held-out application tests how far they
+generalise.
 
 The thesis has four limits of scope. It does not claim completeness. When a navigation target is computed at run time, the full set of
 transitions cannot be determined statically in general. The thesis therefore states a
-conditional soundness property over a declared scope, tests it mechanically against the
-source at every deterministic edge it produces, and measures recall empirically. The
+conditional soundness property over a declared scope, tests it mechanically at each
+deterministic edge whose destination the checker can read, comparing the construct, its target
+and its destination but not its guard, and measures recall empirically. The
 property is not proved, and on this corpus little is left for it to range over. Four
 corrections each changed the deterministic tier. They concern how a guard is read, how an edge
 that several constructs cite is judged, and whether a navigation runs under a condition, is
@@ -185,16 +192,18 @@ only the more favourable one.
 This follows the position of Livshits et al., who argue that a practical static
 analysis should be described as sound modulo an explicit list of the language features
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement
-would require a controlled experiment and is left for future work. A third limit matters most for the
-contribution: the screen sets attribution computes are validated in both directions on one
+would require a controlled experiment and is left for future work. A third limit bears on the proposed
+analysis: the screen sets attribution computes are checked in both directions on one
 application only. On \ScopeApps{} of the \ProbeApps{} applications, all but ghostfolio, a scope that
-is too small can be refuted by the rendered interface, and Section~\ref{sec:res-scope} finds \ScopeUnpredicted{} rendered links the graph does not predict, all in bitwarden and all at sites attribution left unplaced, on an
+is too small can be refuted by the rendered interface, though only realworld and bitwarden
+rendered any judged pair, and Section~\ref{sec:res-scope} finds \ScopeUnpredicted{} rendered links the graph does not predict, all in bitwarden and all at sites attribution left unplaced, on an
 earlier graph and on \ScopeJudged{} of \ScopeScreens{} screens, while a scope
 that is too large cannot be, because at the screens that method can observe the graph almost
 never claims a destination exactly. For one application the screens each site fires
 from were read off the sources by hand, which gives both directions, and the result qualifies
 the contribution rather than confirming it: the analysis agrees with \GTFullRecall{} of the
-pairs of that structural reference and asserts none outside it, but the shell rule earlier
+pairs of that structural reference, whose header sites were partly completed from the graph's
+output, and asserts none outside it, but the shell rule earlier
 work already has reaches \GTRootedRecall{} of them, and with the enclosing routes, which earlier
 work also follows, \GTOutletRecall{}. Both figures are those of repairs: the
 rule the call graph replaced attributed one service's navigation to every screen, and the route
@@ -221,19 +230,22 @@ used for transition graphs in different research communities, reviews static
 extraction for Android, navigation models for web applications and dynamic state
 models for single-page applications, and describes the Angular mechanisms the analysis
 has to handle together with the program analysis ideas it builds on.
-Chapter~\ref{ch:analysis} presents the contribution: the graph model and its soundness
-claim, the scope attribution analysis, and its implementation.
+Chapter~\ref{ch:analysis} presents the graph model and its soundness claim, the scope
+attribution analysis proposed as a modest extension, and its implementation; the measurement,
+which is the main contribution, is set up in Chapter~\ref{ch:evaluation} and reported in
+Chapter~\ref{ch:results}.
 Chapter~\ref{ch:evaluation} describes the evaluation setup: the corpus and why it can
 be considered valid, the metrics, and the five evaluation methods.
 Chapter~\ref{ch:results} presents the results for each research question: node extraction
 and the ceiling it sets, then scope attribution and what it recovers, then the defect
 classes taken to their causes, change sensitivity, what the repairs cost the soundness
-property, and the dead links the graph finds without being run.
+property, and the dead-link candidates the graph finds statically, each then checked against the route
+configuration the runtime probe recorded.
 Appendix~\ref{app:validation} holds the validation of the measuring instruments: the
 disagreements between the two static readers, how the declared-screen set moved under the
 corrections, the case-by-case account of asking the running framework, and the record that
-every remaining site names a reason. It is kept apart from the results because it
-establishes that the instruments measure what they claim, not what the analysis recovers.
+every remaining site names a reason, recorded rather than verified. It is kept apart from the
+results because it records the checks made on the instruments, not what the analysis recovers.
 Chapter~\ref{ch:discussion} discusses the results, the limitations of the study, the
 constructs the analysis approximates, how the approach transfers to other frameworks,
 and future work. Chapter~\ref{ch:conclusion} concludes the thesis.

@@ -71,8 +71,6 @@ follow, a path assembled from a constant it did not resolve, a lazily loaded tab
 without its parent. Reporting the disagreement rather than attributing it was the right
 decision at the time, and investigating it produced most of Section~\ref{sec:res-round2}.
 
-So the baseline recovers a small fraction of the navigation, and loses it at two levels: some screens never become nodes, and most navigation sites of the screens that do are not turned into edges.
-
 
 
 On the instrument the figures of Chapter~\ref{ch:results} are measured on, this
@@ -619,7 +617,8 @@ the standalone \texttt{provideRouter} API is not recognised at all, and two of t
 \texttt{forRoot} call anywhere. An application that declares its root array in one file and
 registers it in another, as ghostfolio and kubernetes/dashboard both do, is recognised in the
 registering file, which holds no route, and not in the file a lazily loaded module could adopt.
-Instrumenting the predicate turned the limit into a measurement: it was asked 698 times
+Instrumenting the predicate turned the limit into a measurement. When this repair was made
+(commit \texttt{c0fe3b1}, before the final extractor, and not re-measured on it), it was asked 698 times
 across the six applications in the independent parser and 2798 times in the extractor, and
 answered yes on none of them. A guard that never fires is worse than no guard, because a commit
 message and a chapter credit it with a property nothing has shown it to have.
@@ -639,10 +638,10 @@ Chapter~\ref{ch:results} is therefore identical with and without them, so no res
 evidence that they work. Their evidence is the fixtures, which fail when the rule each pins is
 removed on its own. The same holds of the refusals in the independent parser. The test that
 stops a lazy route
-adopting a table another route owns is asked 174 times in the extractor and 3512 in the parser
+adopting a table another route owns was asked, at the same commit, 174 times in the extractor and 3512 in the parser
 and answers yes in neither, so for those refusals the corpus is evidence about the reading the
 two tools share and not about the guards that bound it. The per-array root-table test is the
-exception: it is asked a few hundred times and answers yes eight
+exception: at that commit it was asked a few hundred times and answered yes eight
 times in each reader, and one of those answers is what mints alfresco's \path{/rules}. A rule
 the corpus exercises and a rule only a fixture exercises are different kinds of claim, and this
 chapter says which each is. The reverse also holds: a corpus of six

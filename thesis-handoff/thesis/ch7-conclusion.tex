@@ -23,7 +23,8 @@ addresses with no node at all, \ProbeMissedGhostfolio{} of them behind one sprea
 routes in ghostfolio that the extractor declares unread, so only \ProbeExactApps{} of the six are complete against
 the runtime configuration. Below that level almost no navigation construct becomes a
 deterministic transition once the demotion rules Claim~\ref{claim:must} rests on are applied:
-\CensusBaseMustSites{} constructs without attribution and \CensusMustSites{} with it, in
+\CensusBaseMustSites{} constructs without attribution and \CensusMustSites{} with it (two
+recoveries on realworld and two k8s dashboard constructs raised from may to must), in
 \CensusMustApps{} of the six applications and none on the other \CensusZeroMustApps{}. Most of the
 tier's edges are one application's toolbar: \CensusMustSitesKdash{} constructs there yield
 \CensusMustKdash{} of the \CensusMust{} edges, and the rest of the corpus holds
@@ -57,7 +58,9 @@ attributed run holds \CensusMust{} must edges against \CensusBaseMust{} without 
 difference is the links of two application shells (realworld's header and footer logos and
 k8sdash's toolbar), drawn from every screen the shell renders. The witness check finds
 \MustWitnessViolations{} failures among the must edges and cannot read the destination of
-\MustWitnessUnread{}; the tier is too small for that to be a statement about precision in general. Separately, no
+\MustWitnessUnread{}, all k8s dashboard toolbar edges added by attribution, the same edges that
+rest on the shell scope and on route order; it reads no guard, so an edge that should be
+conditional would pass it. The tier is too small for that to be a statement about precision in general. Separately, no
 construct the baseline converted lost its conversion when attribution was enabled
 (\AttrRegressed{}), and none was moved from must to may (\AttrDemoted{}); that is retention of
 what the baseline represented, not precision of what attribution added. The computed screen sets were checked in both directions on one
@@ -79,7 +82,10 @@ attribution adds are too wide was tested on \GTApp{} alone.
 The answer to RQ4, on the three applications that were mutated, is that the graph responds
 to authored source changes in the constructs it represents. Of the \MutFallibleScored{} mutants
 from the three operators that can fail, \MutFallibleDetected{} are detected, removed guards
-\MutGuardDetected{} of \MutGuardScored{} among them; the rename operator, close to guaranteed by
+\MutGuardDetected{} of \MutGuardScored{} among them; a deleted \texttt{routerLink} is detected
+almost by construction, so the evidence rests mainly on the retargets and guard removals, and
+all \MutExcluded{} exclusions are guard mutants, so \MutGuardScored{} of the
+\the\numexpr\MutGuardScored+\MutExcludedGuard\relax{} sampled are scored. The rename operator, close to guaranteed by
 construction, brings the total to \MutDetected{} of \MutScored{}. Without attribution
 \MutBaseDetected{} of \MutBaseScored{} are detected. Those two sets are not the same, because a
 change to a construct the baseline graph holds no edge for cannot be scored against it; on the
@@ -103,9 +109,9 @@ stated and mechanically tested, though not proved, over the declared route set a
 an explicit list of the constructs the analysis does not decide (Claim~\ref{claim:must},
 Section~\ref{sec:approximations}). It recovers \AttrRecoveredShare{} of the loss class it
 addresses, almost all of it onto the uncertain tier, and against the structural reference read
-by hand on one application its full step, the call graph with its fallbacks, finds the one pair
-(of \GTPairs{}) that a reimplementation of earlier work's mechanisms misses, taking recall from \GTOutletRecall{} to \GTFullRecall{} at
-\GTFullPrecision{} precision. That result comes after two repairs the same reading prompted and a completion of the reference
+by hand on one application its full step, the call graph with its fallback join and stand-ins,
+finds the one pair (of \GTPairs{}) that a reimplementation of earlier work's mechanisms misses,
+taking recall from \GTOutletRecall{} to \GTFullRecall{} with no pair outside the reference. That result comes after two repairs the same reading prompted and a completion of the reference
 from the graph's output, and it was measured on \GTApp{} alone. Nothing in its formulation depends on a particular
 extractor; what an extractor supplies is the screens and the navigation sites it ranges
 over, and Chapter~\ref{ch:results} shows that what the mechanism can recover is bounded
@@ -137,7 +143,7 @@ attributed; with node extraction repaired, the remaining loss is mostly attribut
 most of mifos's, and under half of them on the other four, where owners no screen reaches,
 targets only the run time knows and services the call graph does not place remain
 (Table~\ref{tab:remaining}). Where a construct is in the graph, every scored change to it was visible in the graph, for the
-operators sampled on three applications (\MutFallibleDetected{} of \MutFallibleScored{} fallible mutants), which is a property that change impact
+operators sampled on three applications and with the deletions near-guaranteed (\MutFallibleDetected{} of \MutFallibleScored{} fallible mutants), which is a property that change impact
 analysis and commit-time checking need; where it is not, a change to it cannot be scored, and
 the excluded mutants of RQ4 restate the coverage gap RQ1 measures.
 
@@ -193,7 +199,9 @@ the shell attribution as well as this rule, and how much either contributes alon
 zero there, and Claim~\ref{claim:must} ranges over \MustWitnessEdges{} edges in the corpus, with
 \MustWitnessViolations{} witness-check failures and \MustWitnessUnread{} destinations the check
 cannot read, every construct behind them read against the source by the AI assistant
-(Section~\ref{sec:res-round2}), which is not an independent proof of the claim.
+(Section~\ref{sec:res-round2}), which is not an independent proof of the claim; the two readings
+of the round's tier are two runs of one model, so their agreement measures consistency, not
+correctness.
 What the small tier measures is what the extractor can assert without evaluating a guard: taking
 every guard to let the navigation through gives \GuardOnlyMust{} must edges, and for
 \GuardOnlySourceBehind{} of the \GuardOnlyGuarded{} that run a guard, every guard the navigation
@@ -212,7 +220,8 @@ as if it applied everywhere. Where the model has no implemented relation, approx
 a guard is scoped to the routes that name it, an effect to $\top$, and a service member no caller
 reaches to the join over the components that inject its class. This is coarser than the
 model and leaves a class nothing reaches with no scope at all. One defect class still waits for its second
-confirmation. The main gap is in the evaluation rather than the
+confirmation. The repairs were found on this corpus and fitted to it, and no held-out
+application measures how they generalise. The main gap is in the evaluation rather than the
 analysis. Asking the running applications which links they render, on an earlier graph than the
 final call graph, found \ScopeConfirmed{} of the \ScopePairs{} rendered (screen, pattern) pairs among
 the destinations of the edges leaving each screen, which checks pooled destinations and not each
