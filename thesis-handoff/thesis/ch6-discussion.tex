@@ -21,7 +21,7 @@ Two defects of the extractor accounted for most of the corpus then: a route whos
 a constant reference, and a route table behind a lazy boundary it did not cross. Each
 produced no node at all, so that every navigation site belonging to such a screen was lost
 together with every site pointing at it. Section~\ref{sec:res-round2} reports what repairing
-them took; on the instrument every figure in this thesis is measured on, that class of loss
+them took; on the final instrument used for the main RQ1--RQ3 results, that class of loss
 is empty.
 
 What remains is lost at the edge, and it is mostly the same everywhere: the navigation sites
@@ -68,7 +68,7 @@ hold constructs attribution cannot recover, and the recovery is not contained in
 attribution losses, must tier and may tier together
 (Table~\ref{tab:before-after}), and Table~\ref{tab:remaining} records no remaining loss
 there under any heading.
-The gap between the bound and what was recovered elsewhere is accounted for by
+The attribution-class losses that remain in the other applications are accounted for by
 Table~\ref{tab:remaining}, and three of its reasons are not attribution problems at
 all: the target screen has no node, the owning component is never reached from any
 screen, or the site sits in a service or a guard by a receiver or provider form the call graph does not
@@ -835,8 +835,13 @@ wrong one. The collision is declared, so the graph says that a record was droppe
 address; which of the two it should have kept is not something the table alone determines.
 
 Guards move to different scopes. A redirect thrown from a React Router loader
-fires when its route, or any route below it, is matched. It plays the role of
-\texttt{canActivate} and is anchored at $\mathit{subtree}(r)$. Vue's global
+fires when its route, or any route below it, is matched, during the navigation that is trying
+to reach it. It plays the role of \texttt{canActivate}, and as for an Angular entry guard its
+source is the screen being left, not the loader's route: a navigation from \texttt{/public} to
+\texttt{/admin} that the loader redirects to \texttt{/login} leaves \texttt{/public}. Its scope
+is therefore the join of the origins of the navigations that may run the loader, as the relation
+$T$ gives for entry guards, and not $\mathit{subtree}(r)$; where those origins are not recovered,
+the conservative scope is $\top$. Vue's global
 \texttt{beforeEach} guard has no direct Angular counterpart. A redirect from it is
 anchored at $\top$, which the lattice already contains.
 

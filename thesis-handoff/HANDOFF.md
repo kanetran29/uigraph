@@ -51,6 +51,9 @@ Prose, figures and bib only. No code or data changed, and no corpus or sweep re-
 - C07: ch6 build configuration is not a superset threat. The findings are bounded to the recorded dev configuration.
 - C08: AutoDroid UTG memory; JS static analysis exists (TAJS cited); effects "not determined exactly / not attempted";
   Oshima literal-only qualified. New bib entry `angulareffects`.
+- C09: ch6 React loader redirect source is the origin of the incoming navigation (join via T, or top), not subtree(r).
+- Closure pass (e12e39b review): C02 "constraints in tab:scopes", C04 "bound" wording removed, C06 "final instrument
+  used for the main RQ1--RQ3 results", C09 above.
 - C10: fig-anchored uses a uniform may example plus the self case. fig-utg-example labels the effect edge as unrealised.
 - C11: caption and label fixes (round2nodes off/on; current vs superseded must counting; "next one"; final tier;
   compare closure; "Evaluation basis").

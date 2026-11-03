@@ -601,7 +601,7 @@ fallback is a constraint of Table~\ref{tab:scopes}, and the first is not
 monotone in the call graph: a member whose only caller is found receives that caller's screens
 instead of the wider join, so adding a call edge can narrow its scope. The emitted service
 scopes are therefore the least call-graph solution widened by these fallbacks, for reached
-members as well as for unreached ones, and not the least solution of any constraint system. Service sites are held at \emph{may} either way,
+members as well as for unreached ones, and not the least solution of the constraints in Table~\ref{tab:scopes}. Service sites are held at \emph{may} either way,
 because the calls on the way carry conditions the analysis does not follow.
 
 \textbf{Anchored edges.} Edges with scope $\top$ are stored once at a node of kind
