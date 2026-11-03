@@ -171,8 +171,8 @@ The \AttrLost{} constructs the attribution classes hold are therefore
 neither a floor nor a ceiling on what scope attribution recovers.
 Section~\ref{sec:res-after} measures both directions.
 
-Table~\ref{tab:oracles} reports the witness check and the test-source cross-check on this
-baseline. Section~\ref{sec:res-round2} gives the must tier its own treatment, because what
+Table~\ref{tab:oracles} reports the witness check on the final attributed tier and the
+test-source cross-check. Section~\ref{sec:res-round2} gives the must tier its own treatment, because what
 the check reads and how an edge cited by several constructs is judged both changed in the
 course of this work, and the figure is not comparable across those changes.
 
@@ -809,7 +809,8 @@ The defect classes of Section~\ref{sec:res-defects} are a diagnosis, and the val
 diagnosis lies in the repair it leads to. This section reports what happened when the list was
 treated as a worklist: every class was taken to its root cause in the source of the
 application it appeared in, and each cause that turned out to be the extractor's was
-fixed. The same question was asked of each one, and the method exists to make it possible
+fixed, with one exception, ghostfolio's spread of computed routes, which the extractor declares
+unread. The same question was asked of each one, and the method exists to make it possible
 to ask: is the navigation unreadable, or was it merely unread?
 
 The tables in this section report the final snapshot used for the main RQ1--RQ3
@@ -890,7 +891,8 @@ not have. The spread of computed routes does not: its routes are in the source, 
 does not yet read them, so it is an unsupported construct the extractor could close.
 
 \begin{table}[t]\small
-\caption{Declared screens that have a node, before and after the loss list was worked.
+\caption{Declared screens that have a node on the final extractor, with scope attribution off
+(Before) and on (After); the repairs of the loss list are in both columns.
 A blind spot is a route the oracle knows is there and cannot address: a lazy boundary whose
 route array it could not find, a path expression it could not resolve to a literal, a route
 whose path is computed by a custom matcher, or a route source spread into a table from a call
@@ -1010,9 +1012,13 @@ check opened only the first, so the tier was being judged on part of the evidenc
 over the current graphs \WitnessMergedCitationShareAll{} of the sites the edges cite are such later
 citations, and \WitnessMergedCitationShareMax{} in the application where the share is largest. Judging
 every cited site found edges in bitwarden whose later citations
-targeted \path{/vault}, an address that application declares no route for. The literal matches
-nothing, the catch-all redirects to the root, and the site is correctly held at may; it was then
-merged into a must edge the root already had, and cited as evidence for it. The round answered
+targeted \path{/vault}. The running router places a component there, through a route a helper
+produces, and neither redirects nor falls through to its catch-all
+(Section~\ref{sec:res-probe}). The extractor of that round did not read that route, matched the
+literal to nothing it had read, and fell back to the catch-all's redirect to the root, so it held
+the site at may; it then merged it into a must edge the root already had, and cited it as
+evidence for it. The address the edge led to was the extractor's fallback, not the
+application's behaviour. The round answered
 this by giving an edge the weakest modality over every construct that cites it. All of them
 moved to the may tier, which is why the witness check found no failure in that round's tier and
 did not pass the tier of the round before it. That rule did not survive the next correction, for a

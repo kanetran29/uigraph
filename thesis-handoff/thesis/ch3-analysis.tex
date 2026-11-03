@@ -394,9 +394,11 @@ holding a navigation site to the entry guards that navigation runs. A run theref
 \]
 transfer-function applications, after an initialisation that seeds each routed component with
 $\mathit{subtree}(r)$ in $O(|R| \cdot |S|)$. Each application is a union of two subsets of $S$, which
-costs $O(|S|)$ with scopes held as bit sets, so the running time is bounded by
-$O(|S|^2 \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|))$. This is the bound for the full
-model. $|\mathit{Mem}|$ is the number of members of components and is at most the number of callables,
+costs $O(|S|)$ with scopes held as bit sets, so the running time of the solver, initialisation
+included, is bounded by
+$O(|R| \cdot |S| + |S|^2 \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|))$. This is the bound for the full
+model, and it covers the solver only: building the relations it runs over, which includes parsing
+the sources and resolving calls, is a separate cost not bounded here. $|\mathit{Mem}|$ is the number of members of components and is at most the number of callables,
 and $|T|$ is at most the number of navigation sites times the depth of the route tree times
 the largest number of entry guards on one route.
 
@@ -462,11 +464,13 @@ inbound edges misses this edge class entirely. Further, the guard of an edge in 
 conjunction of the conditions on the containment path from screen to call site
 (structural directives) with the guards the router runs on that navigation
 (Section~\ref{sec:model}). Reporting only the second part gives a weaker condition than the true
-one. The prototype does not materialise that conjunction. A structural condition in a template
-demotes the edge to may but is not written into its guard, which for a template link holds only
-the router's guards; a navigation call in a handler carries the condition of an enclosing
-\texttt{if} or conditional expression as source text, together with the router's guards. The
-graph evaluated in Chapter~\ref{ch:results} therefore records that a template link is
+one. The prototype does not materialise that conjunction in the graph that is measured. There,
+a structural condition in a template, or an enclosing \texttt{if} or conditional expression
+around a navigation call, demotes the edge to may but is not written into its guard, so the guard
+of a screen-to-screen edge holds only the router's guards. Only the optional mode that anchors
+navigations at the controls that trigger them, which no table of Chapter~\ref{ch:results} uses,
+keeps the enclosing condition of a handler's navigation as source text beside the router's guards.
+The graph evaluated in Chapter~\ref{ch:results} therefore records that a navigation is
 conditional without recording the condition. In the baseline, for example,
 a link that is rendered only inside \texttt{@if (isUser())} was labelled with the
 authentication guard of its target route. That guard is satisfied by any logged-in
@@ -486,10 +490,17 @@ limit explicitly instead of giving a result that looks more precise than it is.
 \label{sec:anchored}
 
 If the result of attribution were stored explicitly, a single link in the application
-shell would produce one edge for every screen, and the size of the graph would be
-bounded by $|S| \cdot |\mathit{sites}|$, where $\mathit{sites}$ is the set of navigation
-sites. For the largest application in
-the corpus this bound is $\RoundTwoEarlierOracleMifosNow{} \times \ConstructsMifos{}$. Instead, each edge is stored once, anchored
+shell would produce one edge for every screen. Where every site has a single target, the size of
+the graph would then be bounded by $|S| \cdot |\mathit{sites}|$, where $\mathit{sites}$ is the
+set of navigation sites; for the largest application in
+the corpus that bound is $\RoundTwoEarlierOracleMifosNow{} \times \ConstructsMifos{}$. A site
+whose target is only partly known can reach several screens, so in general
+\[
+  |E_{\mathit{expanded}}| \;\le\; \sum_{x \in \mathit{sites}} |\mathit{scope}(x)| \cdot |\mathit{Targets}(x)|,
+\]
+which is $O(|S|^2 \cdot |\mathit{sites}|)$ when a site of scope $\top$ reaches every screen.
+Anchoring removes the factor that comes from the source scope, not the one that comes from the
+targets. Instead, each edge is stored once, anchored
 at its scope, and the set of edges leaving a particular screen is computed when it is
 requested:
 \[
@@ -579,13 +590,18 @@ no provider binds, to its subclasses in the application, which is class hierarch
 the whole application rather than relative to the injector that resolves them, so where two
 injectors bind a token differently the join covers both; that can only widen a scope. A factory or value provider is not read: a call on its token resolves to the token's own
 class if the application declares one, and a call on a type declared outside the application
-contributes no edge. A member no caller reaches falls back to the join over
+contributes no edge. The seeded call-graph iteration on its own reaches the least solution of
+its constraints. The scopes the extractor emits for service sites add two fallbacks to that
+solution. A member no caller reaches falls back to the join over
 every component that injects its class, the per-class approximation an earlier version used for
-every service. That fallback is not a constraint of Table~\ref{tab:scopes} and is not
+every service. A member the iteration does reach can still receive more screens: where a caller
+the graph does not see, one that nothing calls and nothing seeds, reaches the member, the join of
+that caller's class is added, or this class's own join if nothing places the caller. Neither
+fallback is a constraint of Table~\ref{tab:scopes}, and the first is not
 monotone in the call graph: a member whose only caller is found receives that caller's screens
-instead of the wider join, so adding a call edge can narrow its scope. The service part of the
-result is therefore the least solution over the members the call graph reaches together with
-an over-approximation for those it does not. Service sites are held at \emph{may} either way,
+instead of the wider join, so adding a call edge can narrow its scope. The emitted service
+scopes are therefore the least call-graph solution widened by these fallbacks, for reached
+members as well as for unreached ones, and not the least solution of any constraint system. Service sites are held at \emph{may} either way,
 because the calls on the way carry conditions the analysis does not follow.
 
 \textbf{Anchored edges.} Edges with scope $\top$ are stored once at a node of kind

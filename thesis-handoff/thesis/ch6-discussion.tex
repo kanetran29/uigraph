@@ -62,8 +62,9 @@ cannot recover it. The measurement shows the converse only in a small way: of th
 none out of a node class, and two out of the residual class to which no rule applied
 (Table~\ref{tab:recovery-source}). The misclassification therefore runs mostly one way on this
 instrument: the class can hold a construct attribution alone cannot recover, and only two
-constructs attribution recovered were classified elsewhere, neither in a node class. The class is thus an upper bound on what attribution can repair and not a measure
-of it. On realworld attribution recovered every one of its
+constructs attribution recovered were classified elsewhere, neither in a node class. The class is
+thus a diagnostic partition of the losses and not a bound on what attribution recovers: it can
+hold constructs attribution cannot recover, and the recovery is not contained in it. On realworld attribution recovered every one of its
 attribution losses, must tier and may tier together
 (Table~\ref{tab:before-after}), and Table~\ref{tab:remaining} records no remaining loss
 there under any heading.
@@ -294,14 +295,14 @@ locations that earn must, so a construct counts towards the ratio only on eviden
 has read. The ratio and the precision figure still answer different questions, and that,
 rather than the former gap, is why the chapter reports them separately.
 
-Merging also costs guard information. An edge holds one guard, so when several constructs
-under different conditions produce one edge, the edge can represent the condition of at
-most one of them. Part of that information is gone before any merge: a structural condition in
-a template demotes a link to may but is not written into its guard
-(Section~\ref{sec:attribution}), so the guard field of a template link names only the router's
-guards. The graph is in that respect a weaker object than the source it came
-from, and a consumer that reads a guard off a merged edge is reading one branch of
-several. The loss breakdown has a second construct threat. The rules assign
+The graph also loses guard information, though not where merging happens. Constructs are merged
+into one edge only when their recorded guard texts are equal, since the guard is part of the
+edge's identity, so a merge never discards a recorded guard. The loss comes earlier: a structural
+condition in a template, or a condition around a navigation call, demotes the edge to may but is
+not written into its guard (Section~\ref{sec:attribution}), so the guard of a screen-to-screen
+edge names only the router's guards. The graph is in that respect a weaker object than the source
+it came from, and a consumer that reads a guard off an edge learns which router guards run, not
+under what condition in the application the navigation is reached. The loss breakdown has a second construct threat. The rules assign
 each lost construct to the first class that matches, so the precedence order is part of
 the measure. A construct in a shared component that is used only inside screens with no
 node is an attribution loss under the present order and a node loss under the reverse
@@ -344,10 +345,13 @@ configuration-driven in a way the extractor does not support
 the tool already handles, and a figure measured on it is likely to be optimistic with
 respect to the population of Angular applications. The candidate pool also showed an
 inverse relation between application size and end-to-end test density, so no application
-offers both a large route tree and execution-based ground truth. The consequence runs
-through the whole evaluation: the execution-grounded evidence comes from a medium-sized
-application, while the findings about scale come from applications that have no execution
-oracle at all. The results are Angular results. The graph model and the lattice
+offers both a large route tree and a dense test suite. The evidence from outside the extractor's
+own reading is of three kinds and is not spread evenly: URLs named in end-to-end test sources,
+which are read and not run, come from alfresco alone, a medium-sized application; the router
+configuration that the running application holds was read on all \ProbeApps{} applications; and
+the links rendered on screens were observed, on an earlier graph and in part, on \ScopeApps{} of
+them. The findings about scale therefore rest on the runtime router configuration and on the
+extractor's own reading, and on no test that was observed to visit an address. The results are Angular results. The graph model and the lattice
 do not mention Angular, and Section~\ref{sec:transfer} argues about other routers, but
 that argument is not a measurement.
 
@@ -427,17 +431,19 @@ that no reader of the code can see.
 It might seem that none of these weakens the claim the check is used for, because none could
 make a mounted address look unmounted. That reasoning has the direction backwards.
 The claim is that an address the extractor mints is one the framework mounts, and it
-is tested by finding the extractor's set inside the framework's. Every threat listed above
-makes the framework's set \emph{larger} than the set of addresses a visitor can actually reach. A
-route behind a guard that always refuses is counted as mounted, as is one whose component throws,
-and a development build may carry routes a production build drops. A larger containing set makes
-containment easier to satisfy, so these threats do weaken the no-invented-address claim.
-What they cannot do is manufacture the failures the check did report: the two
-alfresco addresses are minted by the extractor and absent from even this generous reading of what
-the framework mounts, and the same is true of the ten the comparison returns against the route set
-as it stood before this round. A finding of an invented address is therefore sound under every
-threat here; a finding of none is weaker than it looks, and is reported as the absence of a
-failure rather than as a proof of its impossibility.
+is tested by finding the extractor's set inside the framework's. Two of the threats make the
+framework's set \emph{larger} than the set of addresses a visitor can actually reach: a route
+behind a guard that always refuses is counted as mounted, as is one whose component throws. A
+larger containing set makes containment easier to satisfy, so these weaken the
+no-invented-address claim. The build configuration is a different kind of threat, because a
+production configuration can add routes as well as drop them, so it does not move the set in one
+direction. Both results of the check are therefore statements about the development router
+configuration that was recorded, under the abstraction of Section~\ref{sec:res-probe}. On that
+configuration, the failures the earlier cohort showed are real: the two alfresco addresses of the
+first comparison, and the \ProbeBeforeNotMounted{} the comparison returns against the static
+readers' route set as it stood before this round, are absent from the recorded configuration.
+The final extractor mints \ProbeInvented{} such addresses, which is reported as the absence of a
+failure on that configuration rather than as a proof of its impossibility.
 
 \section{Declared approximations}
 \label{sec:approximations}
@@ -611,8 +617,10 @@ differently both implementations are joined, which widens a scope and never narr
 factory or value provider (\texttt{useFactory}, \texttt{useValue}) and a provider array a
 function returns from outside the application bind nothing the pass can follow, so a call through
 such a token contributes no edge, and the member it would have reached falls back to the join
-over every component that injects its class, or to no scope at all if none does. And a receiver
-that is not a field (a local variable, a parameter, a value returned by another call) is not
+over every component that injects its class, or to no scope at all if none does. A receiver is
+resolved when it is a field of the class, an \texttt{inject(T)} call, or a local variable or
+parameter that is initialised with \texttt{inject(T)} or declared of an application type; a
+receiver of any other form, such as a value returned by another call or an untyped local, is not
 resolved. Over the corpus the pass resolved \CGDirect{} calls on application types to the class
 the type names, \CGBound{} through a provider binding and \CGSubclass{} to subclasses, and left
 \CGUnresolved{} unresolved, in \CGUnresolvedApps{} of the six applications.
@@ -647,9 +655,9 @@ that renders the projection only under a condition is read as unconditional; \te
 \texttt{mat-tab} are the only library containers read as rendering their content lazily. A route
 component behind a conditional outlet is conditional, but a component nested in it is judged by
 its own placement, and the application root's outlet is not read.
-\item \textbf{Navigations a later one may cancel.} This item and the next one are the
-execution model of Claim~\ref{claim:must}: the claim holds only on executions they do not
-describe. A navigation is demoted when code that runs
+\item \textbf{Navigations a later one may cancel.} This item and the one on activation
+with a modifier key, two below, are the execution model of Claim~\ref{claim:must}: the claim
+holds only on executions they do not describe. A navigation is demoted when code that runs
 after it, before the event is handled, may start another (Section~\ref{sec:model}). Whether that code may
 navigate is read through the calls the reader can resolve to a body in the application: a member
 of the class, a function of the file, a method the checker resolves on a typed receiver. A call

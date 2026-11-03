@@ -35,6 +35,28 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
 
+## Consolidated review of 964034a (C01–C11, E01–E04), 3 Nov 2026
+
+Prose, figures and bib only. No code or data changed, and no corpus or sweep re-run. Each finding was checked against code or data first.
+- C01: the measured graph's guard holds router guards only. Enclosing `if` text is kept only in `--controls` mode.
+  The guard is part of the edge ID, so a merge never drops a recorded guard (ch3, ch6).
+- C02: the emitted service scopes are the least CG solution widened by fallbacks. Reached members also get unseen-caller
+  joins (extract.ts:752–772). The ch6 receiver forms now match callgraph.ts:160–168.
+- C03: the solver bound includes initialisation and excludes relation building. The size bound gives single-target vs the
+  sum over scope × targets.
+- C04: ch5 RQ5 has the spread exception. The ch6 loss class is a diagnostic partition, not a bound.
+- C05: fig-oracles is "test-source cross-check". ch6 separates test sources (alfresco), runtime config (6) and rendered
+  links (5, historical).
+- C06: ch5 /vault is now the extractor's fallback, not the router's (bitwarden.answer.json: recognised, no redirect).
+- C07: ch6 build configuration is not a superset threat. The findings are bounded to the recorded dev configuration.
+- C08: AutoDroid UTG memory; JS static analysis exists (TAJS cited); effects "not determined exactly / not attempted";
+  Oshima literal-only qualified. New bib entry `angulareffects`.
+- C10: fig-anchored uses a uniform may example plus the self case. fig-utg-example labels the effect edge as unrealised.
+- C11: caption and label fixes (round2nodes off/on; current vs superseded must counting; "next one"; final tier;
+  compare closure; "Evaluation basis").
+- E01–E04 done. Bierman was checked against the paper PDF, and the TLDR note was removed.
+- PDF 150 pages, 0 errors, 0 undefined, 0 overfull.
+
 ## Examiner-critique round, 3 Nov 2026 (later the same day)
 
 Five argument fixes, no new experiment. Each was checked against the code first.

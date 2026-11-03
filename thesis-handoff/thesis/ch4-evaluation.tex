@@ -114,8 +114,9 @@ numerator. When several constructs
 produce the same edge, the extractor keeps the most certain as the edge's witness and records
 the others as merged witnesses, each with the modality it earns on its own, so every construct
 that yields an edge can be traced; on the current instrument a construct counts as converted
-only where it earns must itself, while the round-two tables of Chapter~\ref{ch:results}, measured
-before witnesses carried a modality, count every construct a must edge cites.
+only where it earns must itself, and that is how the current tables of
+Chapter~\ref{ch:results} count. The superseded round tables quoted there, measured before
+witnesses carried a modality, counted every construct a must edge cites.
 The ratio is computed over constructs rather than edges because the number of edges
 depends on representation: the same construct can be stored as one anchored edge or
 as one edge per screen (Section~\ref{sec:attribution}). An earlier version of this
@@ -230,8 +231,8 @@ witness check.
 
 \begin{table}[t]\small
 \caption{Rules that classify a construct, in the order the harness tests them. The first three
-rows take a construct out of the denominator, the next two count it as recovered, and the two
-after that as accounted for; only a construct that reaches the rows below is lost. The indented
+rows take a construct out of the denominator, the next one counts it as recovered, in the tier
+that cites it, and the two after that as accounted for; only a construct that reaches the rows below is lost. The indented
 rules are the nested decision taken when the construct's owning route component has no node.}
 \label{tab:loss-rules}
 \begin{tabularx}{\textwidth}{@{}lY@{}}
@@ -582,8 +583,9 @@ generated macro the table does, so a regeneration cannot leave a sentence behind
 generators refuse to write at all rather than emit a figure they cannot account for: the
 census will not print its table unless every route entry falls in exactly one named bucket
 and the buckets sum to the route total, and the before-and-after comparison will not print
-unless every construct assigned to the attribution class is either recovered or carries a
-reason.
+unless every construct assigned to the attribution class is either recovered or appears in the
+classification of the remaining losses. That ensures the accounting closes; it does not ensure
+that each class it lands in explains the construct's cause.
 
 This arrangement has two limits. The evaluated
 commit of the extractor must be one a reader can fetch, so the figures are reproducible

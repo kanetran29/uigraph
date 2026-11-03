@@ -48,11 +48,12 @@ sections according to both distinctions.
 
 \begin{table}[t]\small
 \caption{Prior work closest to this thesis, classified by target, extraction mode,
-guard representation, and the ground truth used for evaluation.}
+guard representation, and the evaluation basis each reports, which is a reference, a metric or
+the tool it was compared with, as the work states it.}
 \label{tab:rw}
 \begin{tabularx}{\textwidth}{@{}lYlll@{}}
 \toprule
-Work & Target & Static & Guards & Ground truth \\
+Work & Target & Static & Guards & Evaluation basis \\
 \midrule
 Yang et al.\ \cite{yang2015wtg,yang2018wtg} & Android windows & yes & no & manual, 6 apps \\
 Yang et al.\ \cite{yang2015callbacks} & Android callbacks & yes & context & manual vs.\ dynamic \\
@@ -148,10 +149,12 @@ that model by executing the application.
 
 The reason is largely historical. In an Ajax application there was no
 declarative route table, and one URL could represent many states, because navigation
-was implemented by handlers that modified the DOM. The DOM was therefore the only
-observable that distinguished one state from another. Static analysis of the JavaScript
-of that period, with its dynamic dispatch and handlers constructed at run time, was in
-practice not feasible. The dynamic approach was therefore used because there was no static artefact to analyse.
+was implemented by handlers that modified the DOM. The DOM was therefore the observable
+that most directly distinguished one state from another. The source was there to analyse,
+and static analysis of JavaScript was developed for it \cite{jensen2009type}, but with dynamic
+dispatch, handlers constructed at run time and the DOM itself to model, recovering navigation
+from it was hard, and nothing in the source represented the routes explicitly. The dynamic
+approach was used because it observed directly what the source represented only implicitly.
 
 Client-side routing frameworks changed this situation. The route table is now a
 declared data structure in the source, a navigation is an attribute or a method call
@@ -177,9 +180,10 @@ of the analysis presented here.
 What distinguishes the present work is the input the method accepts and what it claims
 about its output. The authors state that the applications they handle must not use the
 \texttt{children} attribute or route parameters in the routing declarations, and that
-navigations arising from data binding are not treated as page transitions. Those three
-exclusions remove nested route trees, parameterised addresses, and every navigation
-whose destination is an expression rather than a literal. A screen is identified by the
+changes arising from data binding are not treated as page transitions. Those exclusions
+remove nested route trees and parameterised addresses; how the method treats a navigation whose
+destination is an expression rather than a literal is not stated in the paper, and is not
+assumed here. A screen is identified by the
 name of its routed component rather than by an address, so path composition does not
 arise, and guards, lazy loading and named outlets are not part of the model. The
 attribution follows component containment together with the root component's own paths, so a
@@ -318,7 +322,7 @@ too late \cite{madsen2015static}. An Angular application has the same shape of p
 with the router, template event bindings and observable subscriptions in place of the
 Node.js event emitter.
 
-Two peer-reviewed static analyses of a framework in the Angular family bear on this work.
+Two further static analyses of a framework in the Angular family bear on this work.
 The one that addresses navigation is Oshima and Kishi's, discussed in
 Section~\ref{sec:dynamic-spa}. The other, which does not, is
 Aurebesh, by Ocariza et al.\ \cite{ocariza2015detecting}. It defines a consistency
@@ -557,9 +561,9 @@ implementation, all of them are considered.
 
 Recent versions of Angular include signals and effects. A
 signal is a value that changes over time, and an effect is a computation that runs
-again whenever a signal it read changes. This is an instance of reactive programming,
+again whenever a signal it read changes \cite{angulareffects}. This is an instance of reactive programming,
 which goes back to functional reactive programming \cite{elliott1997frp} and has been
-surveyed by Bainomugisha et al.\ \cite{bainomugisha2013survey}. In reactive systems the dependencies between values are recorded at run time, and the runtime propagates updates without explicit calls in the program text. So when a navigation call is placed inside an effect, the condition under which it fires is a data dependence in a reactive graph and not a control-flow condition. A static analysis can find which signals the effect reads, but not when the effect runs. Angular applications also use
+surveyed by Bainomugisha et al.\ \cite{bainomugisha2013survey}. In reactive systems the dependencies between values are recorded at run time, and the runtime propagates updates without explicit calls in the program text. So when a navigation call is placed inside an effect, the condition under which it fires is a data dependence in a reactive graph and not a control-flow condition. A static analysis can find which signals the effect reads; when the effect runs is not determined by the source in general, and the analysis of this thesis does not attempt to bound it. Angular applications also use
 RxJS observables for the same purpose, in router event subscriptions, HTTP responses
 and state containers. Section~\ref{sec:reactive} reviews what the reactive programming
 literature establishes about this boundary.
@@ -594,8 +598,9 @@ The consequence for a static analysis is that the order in which reactive comput
 run is a property of the graph that the runtime builds, and the graph is built from the
 reads that actually happen. The set of signals a given effect may read can be
 over-approximated from the source. The number of times the effect runs, and the state
-of the application when it runs, cannot be, because that depends on which writes occur
-and in what order.
+of the application when it runs, depend on which writes occur and in what order, so they cannot
+in general be determined exactly from the source; a static analysis could still over-approximate
+them, and the one presented here does not try.
 
 \subsection{Reactive code and the tools developers have}
 
@@ -626,8 +631,8 @@ at 36.4\% of the posts \cite{zimmerle2022mining}.
 
 An analysis that aims to recover navigation from an Angular application inherits this
 boundary. A navigation placed in an effect or in a subscription has a firing condition
-that is a data dependence in a reactive graph. The read set is visible in the source
-and the firing is not. Chapter~\ref{ch:analysis} therefore specifies the modality
+that is a data dependence in a reactive graph. The read set is visible in the source;
+the firing is not determined by it exactly, and this analysis does not approximate it. Chapter~\ref{ch:analysis} therefore specifies the modality
 \emph{unknown} for such edges and keeps the read set as the symbolic guard, which is the
 treatment the soundiness position of Section~\ref{sec:formal} prescribes for a
 construct that cannot be decided. No pass in this version emits that modality for an effect or

@@ -15,8 +15,10 @@
 \end{tikzpicture}
 \caption{A small UI transition graph in the model of this thesis. Each edge carries an
 event, an optional guard in brackets, and a modality. A \emph{must} edge always fires when
-its code runs, a \emph{may} edge is conditional, here on a route guard or on a target that
-is only partly known, and an \emph{unknown} edge is one whose firing condition cannot be
-determined statically, such as a navigation inside a signal effect.}
+its code runs, and a \emph{may} edge is conditional, here on a route guard or on a target that
+is only partly known. The dotted \emph{unknown} edge shows the model's treatment of a navigation
+inside a signal effect, whose firing condition cannot be determined statically; the prototype
+does not implement it (Section~\ref{sec:boundary}). In the measured graphs the unknown modality
+marks only edges into a sink for destinations that only the run time knows.}
 \label{fig:utg-example}
 \end{figure}
