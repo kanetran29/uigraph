@@ -172,6 +172,15 @@ The results are measurements of one tool, on one corpus, with five methods and a
 on two applications, performed by the person who wrote the tool.
 Each of those four choices limits what the figures support.
 
+\textbf{The tool was developed together with this evaluation, on the same corpus.} uigraph was built
+for this thesis and corrected while it was evaluated (Table~\ref{tab:repairs}). Every figure
+measured on the six applications is therefore in-sample: the extractor, the independent route
+parser, the mutation harness and the structural reference were corrected against the applications
+they are then scored on. The end-to-end check comes closest to an out-of-sample test. The extractor
+was fixed at its final commit before the suites' logs were read, and nothing was repaired after;
+the archive cannot corroborate that order, since the preregistration and the logs were committed
+together. No held-out application measures how far the corrections generalise.
+
 \textbf{The scope is compared in both directions on one application only, and only against the analysis's own relations.}
 Every other method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none can be
 asked whether the set of screens attribution computes for a site is the set it fires from.
