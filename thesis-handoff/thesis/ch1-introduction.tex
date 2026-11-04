@@ -1,7 +1,7 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-A user interface transition graph is a model of an application in which the nodes
+A user interface (UI) transition graph is a model of an application in which the nodes
 are the screens a user can see and the edges are the transitions a user action can
 cause between them. For each edge, the graph records the event that triggers it, the
 condition under which the transition is available, and the screen it leads to. A graph
@@ -44,7 +44,7 @@ been extracted statically from server-rendered frameworks, in which pages and li
 are declared in templates and configuration files
 \cite{riccatonella2001,webuml2004,tkachuk2013patent}. Modern single-page applications,
 however, have almost always been modelled by executing them. Crawljax builds its state
-flow graph by firing events against the DOM of a running application
+flow graph by firing events against the Document Object Model (DOM) of a running application
 \cite{crawljax2012}, and later tools in the same line improve the exploration strategy
 without changing where the model comes from \cite{feedex2013,fraggen2022}. A survey of web
 testing covering 2014 to 2025 collects the model-based tools of the past decade
@@ -66,7 +66,7 @@ navigation to those routes through template attributes and service calls, and at
 guards to routes as named functions \cite{angulardocs}. The artefact needed for static analysis now exists, but how well static extraction works on real applications built with these frameworks, and where it fails, has been measured only against hand-built references on the applications each work evaluated, and not construct by construct.
 
 A statically extracted graph also has consumers outside model-based testing. Tools that
-drive a graphical user interface with a large language model either explore an application
+drive a graphical user interface (GUI) with a large language model either explore an application
 without a model of its navigation structure or build one by exploring it. GPTDroid treats mobile GUI testing as a
 question-and-answer loop, passing the current screen to the model and replaying the
 action it returns, and reports higher activity coverage and more bugs than the best
@@ -102,7 +102,7 @@ method and of this instantiation, which Chapter~\ref{ch:discussion} separates.
 \section{Research questions and scope}
 \label{sec:rqs}
 
-The thesis addresses five research questions. This section states what each asks and how it
+The thesis addresses five research questions (RQs). This section states what each asks and how it
 is answered; the exact measures are defined in Section~\ref{sec:metrics}, and the answers are
 given in Chapter~\ref{ch:results}.
 
@@ -119,9 +119,9 @@ constructs in the source that yield at least one deterministic (\emph{must}) tra
 \noindent The observed failures are grouped into defect classes. A class is accepted only if
 at least two lines of evidence confirm it, and at least one of them must come from an
 evaluation method of Section~\ref{sec:protocol}. Each construct that is not recovered is
-assigned to one class, so the classes can be compared by size.
+assigned to one loss category, so the categories can be compared by size.
 
-\medskip\noindent\textbf{RQ3.} \emph{How does scope attribution affect the coverage and
+\medskip\noindent\textbf{RQ3.} \emph{How does scope attribution affect the recovered share and
 precision of static navigation analysis?}
 
 \noindent Scope attribution is the analysis this thesis proposes. For a navigation site that
@@ -187,7 +187,7 @@ Chapter~\ref{ch:results} presents the results for each research question: node e
 and the ceiling it sets, then scope attribution and what it recovers, then the defect
 classes taken to their causes, change sensitivity, what the repairs cost the soundness
 property, and the dead-link candidates the graph finds statically, each then checked against the route
-configuration the runtime probe recorded.
+configuration the runtime route oracle recorded.
 Appendix~\ref{app:validation} holds the validation of the measuring instruments: the
 disagreements between the two static readers, how the declared-screen set moved under the
 corrections, the case-by-case account of asking the running framework, and the record that

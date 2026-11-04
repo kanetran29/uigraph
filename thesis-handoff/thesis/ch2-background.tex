@@ -1,29 +1,21 @@
 \chapter{Background}
 \label{ch:background}
 
-This chapter provides the background needed for the rest of the thesis.
-Section~\ref{sec:terminology}
-fixes the terminology, since the same kind of graph is called by different names in
-different communities. Sections~\ref{sec:android} to~\ref{sec:dynamic-spa} review the three
-lines of prior work that
-are closest to this thesis: static extraction for Android, navigation models for web
-applications, and dynamic state models for single-page applications.
-Section~\ref{sec:asttools} reviews
-static
-analysis carried out over a source-level syntax tree, and what the type annotations of
-a TypeScript program do and do not contribute to it; this is the tooling style used by
-the analysis in Chapter~\ref{ch:analysis}. Section~\ref{sec:formal}
-summarises the three formal ideas the analysis builds on. Section~\ref{sec:angular} introduces the Angular
-mechanisms that the analysis has to deal with and the program analysis problem each of
-them raises, with dependency injection treated at length because it is the mechanism
-that hides the most control flow. Section~\ref{sec:reactive} reviews reactive programming and
-the
-boundary it puts on a static analysis. Section~\ref{sec:mutation} reviews mutation testing,
-which is
-the method used in Chapter~\ref{ch:evaluation} to answer RQ4. Section~\ref{sec:gap} states the
-gap that the thesis addresses.
+This chapter gives the background needed for the rest of the thesis and ends by stating the gap the thesis addresses.
+Section~\ref{sec:terminology} fixes the terminology, since the same kind of graph is called by
+different names in different communities. Sections~\ref{sec:android} to~\ref{sec:dynamic-spa}
+review the three lines of prior work closest to this thesis: static extraction for Android,
+navigation models for web applications, and dynamic state models for single-page applications (SPAs).
+Section~\ref{sec:asttools} reviews static analysis over a source-level syntax tree, the tooling
+style of Chapter~\ref{ch:analysis}, and what the type annotations of a TypeScript program do and
+do not contribute to it. Section~\ref{sec:formal} summarises the three formal ideas the analysis
+builds on. Section~\ref{sec:angular} introduces the Angular mechanisms the analysis has to deal
+with, dependency injection at length because it hides the most control flow.
+Section~\ref{sec:reactive} reviews reactive programming and the boundary it puts on a static
+analysis. Section~\ref{sec:mutation} reviews mutation testing, the method Chapter~\ref{ch:evaluation}
+uses to answer RQ4. Section~\ref{sec:gap} states the gap.
 
-\section{UI transition graphs}
+\section{User-interface transition graphs}
 \label{sec:terminology}
 
 A UI transition graph is a directed graph in which the nodes represent user-visible
@@ -36,7 +28,7 @@ cause between those states. Figure~\ref{fig:utg-example} shows a small example i
 graph, and each uses its own terminology. In Android static analysis it is called a
 \emph{window transition graph} \cite{yang2015wtg}, or, at a finer level of detail, an
 \emph{activity transition graph} \cite{storydroid2019} or a \emph{screen transition
-graph} \cite{goalexplorer2019}. In the Ajax crawling literature the term is \emph{state
+graph} \cite{goalexplorer2019}. In the crawling literature for Ajax (asynchronous JavaScript and XML) applications the term is \emph{state
 flow graph}, where a state is an abstraction of the DOM \cite{crawljax2012}. In web
 engineering the usual terms are \emph{navigation model} and \emph{navigation state
 machine} \cite{riccatonella2001,sitehopper2013}. This thesis uses the term \emph{UI transition graph} and treats the
@@ -63,7 +55,7 @@ ProMal \cite{promal2022} & Android windows & hybrid & no & 40 apps, F1 \\
 UI-CTX \cite{uictx2025} & Android widgets & yes & branches & 2000 labelled widgets \\
 Ricca and Tonella \cite{riccatonella2001} & server-rendered pages & semi & yes & manual \\
 WebUml \cite{webuml2004} & server-rendered pages & hybrid & yes & case study \\
-Tkachuk and Rajan \cite{tkachuk2013patent} & Struts/JSP & yes & outcome & not stated \\
+Tkachuk and Rajan \cite{tkachuk2013patent} & Struts, JavaServer Pages (JSP) & yes & outcome & not stated \\
 Crawljax \cite{crawljax2012} & Ajax DOM states & no & no & manual \\
 FeedEx, FRAGGEN \cite{feedex2013,fraggen2022} & DOM states & no & no & coverage \\
 Kurant \cite{kurant2025} & React components & yes & n/a & F1, no routing \\
@@ -98,8 +90,7 @@ Android, an event handler is registered on a widget object, and at run time that
 object belongs to exactly one window. Attribution can therefore be treated as an object
 resolution problem: the widget identifier is resolved, usually by constant propagation
 of the \texttt{getId()} call, and the window is then known
-\cite{yang2015callbacks}. The problem is well defined because the platform's object
-model gives a widget instance a single owning window.
+\cite{yang2015callbacks}.
 
 The limits of this approach become visible in ProMal. Its authors report that a purely
 static window transition graph contains infeasible transitions, because imprecision in the
@@ -118,16 +109,14 @@ application as a set of pages, frames and forms connected by links and form
 submissions. Their model includes conditional edges that carry a boolean condition on
 input values, and it was derived semi-automatically using a crawler together with
 annotations by an analyst \cite{riccatonella2001}. WebUml recovers a state diagram from
-HTML, script and server-side pages by combining static source analysis with
+Hypertext Markup Language (HTML), script and server-side pages by combining static source analysis with
 mutation-driven execution, and derives guards by control-flow analysis of the server
 code \cite{webuml2004}. A patent assigned to Fujitsu describes a fully static method
 for extracting a navigation model from Struts and JSP sources, including pages that
 are referenced but do not exist \cite{tkachuk2013patent}. On the verification side,
 Haydar et al.\ model a web application as a system of communicating automata derived
 from recorded browsing sessions \cite{haydar2004}, and SiteHopper builds abstracted
-navigation state machines on the fly for model checking \cite{sitehopper2013}. In
-addition, design-time notations describe the navigation structure of a site before it is
-implemented rather than extracting it from code.
+navigation state machines on the fly for model checking \cite{sitehopper2013}.
 
 This work shows that navigation models, including guards, have been extracted statically from web applications. The models reviewed in this section all concern server-rendered frameworks, where a page corresponds to a file and a link to an anchor element, and none of them deals with a client-side router, a component tree, or
 dependency injection; Section~\ref{sec:dynamic-spa} turns to the work that does.
@@ -148,7 +137,7 @@ tools it lists, every one whose model construction was examined for this thesis 
 that model by executing the application.
 
 The reason is largely historical. In an Ajax application there was no
-declarative route table, and one URL could represent many states, because navigation
+declarative route table, and one uniform resource locator (URL) could represent many states, because navigation
 was implemented by handlers that modified the DOM. The DOM was therefore the observable
 that most directly distinguished one state from another. The source was there to analyse,
 and static analysis of JavaScript was developed for it \cite{jensen2009type}, but with dynamic
@@ -170,12 +159,11 @@ extraction reads the transition information from the route declarations in
 \texttt{RouterModule}, reads the navigable paths from every component rather than only
 from the routed ones, and then resolves the parent--child relationships among the root
 component, the routed component and the custom child components in order to attribute
-each navigable path to the routed component that contains it. The problem addressed in
-this thesis is therefore not a new one. That attribution step is scope attribution: a
+each navigable path to the routed component that contains it. That attribution step is scope attribution: a
 navigable path is attributed to the routed component that contains it, and the root
 component's own paths to every page, computed statically from the router configuration.
 Section~\ref{sec:res-ablation} measures that combination, as the \emph{rooted} level
-of the analysis presented here.
+of the analysis presented here (the levels are defined in Section~\ref{sec:protocol}).
 
 What distinguishes the present work is the input the method accepts and what it claims
 about its output. The authors state that the applications they handle must not use the
@@ -225,12 +213,7 @@ the graph may contain paths a guard would block, because guards are not represen
 \cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth built by hand for the applications they
 study, which measures what their extraction misses there; neither work classifies the losses by
 construct or measures them across a corpus. The
-problem addressed in this thesis is therefore neither new nor settled: the graph has been
-extracted statically for model checking, for test generation and for policy checking. Earlier
-work already attributes a site through containment, the shell and the enclosing routes, and
-follows calls within a class; what none of these does is carry a navigation inside a service
-member to the screens of its callers across classes, with the provider that binds the
-injection, give the resulting transitions a modality, or classify the loss by construct across a corpus.
+problem addressed in this thesis is therefore neither new nor settled; Section~\ref{sec:gap} states what none of these works does.
 
 The work reported here is located between these analyses and
 the dynamic tools described above.
@@ -239,7 +222,7 @@ the dynamic tools described above.
 \label{sec:asttools}
 
 The analysis in Chapter~\ref{ch:analysis} reads Angular source with the TypeScript
-compiler API, so it works on a source-level abstract syntax tree rather than on a
+compiler application programming interface (API), so it works on a source-level abstract syntax tree rather than on a
 compiled artefact. This section reviews that tooling style, the abstract interpretation
 work that put lattice-based analysis of JavaScript on a formal footing, what the type
 annotations of a TypeScript program contribute, and the evidence that frameworks rather
@@ -272,10 +255,8 @@ sound type information for JavaScript, covering the full language including its 
 model and the built-in functions, and propose it as a foundation for developer tools
 \cite{jensen2009type}. The work shows that the framework of Section~\ref{sec:formal}
 applies to JavaScript at the level of individual values, which is a considerably harder
-problem than the one addressed in this thesis. Scope attribution uses the same
-machinery over a much coarser domain. Its elements are sets of screens, not abstractions
-of heap objects, so the height of the lattice is the number of screens and does not
-depend on the structure of the heap.
+problem than the one addressed in this thesis. Scope attribution (Section~\ref{sec:scope}) uses the same
+machinery over a much coarser domain than heap objects.
 
 \subsection{What TypeScript's types contribute}
 
@@ -327,14 +308,12 @@ Two further static analyses of a framework in the Angular family bear on this wo
 The one that addresses navigation is Oshima and Kishi's, discussed in
 Section~\ref{sec:dynamic-spa}. The other, which does not, is
 Aurebesh, by Ocariza et al.\ \cite{ocariza2015detecting}. It defines a consistency
-model for web applications built on an MVC framework and detects identifier and type
+model for web applications built on a model--view--controller (MVC) framework and detects identifier and type
 inconsistencies between models, views and controllers, reporting a recall of 96.1\%
 and a precision of 100\%, and finding 15 real bugs. The work concerns AngularJS 1.x,
 which is a different framework from the Angular versions this thesis analyses, with a
 different template language, a different component model and a different injector. What the two have in common is the problem of relating an identifier in a
 template to the code that defines it, which Aurebesh solves for a consistency check.
-Aurebesh targets consistency between templates and controllers rather than
-navigation, and reports no transition graph.
 
 \section{Formal foundations}
 \label{sec:formal}
@@ -367,11 +346,8 @@ reported separately in Chapter~\ref{ch:results} for this reason.
 Livshits et al.\ argue that practical static analyses are sound only with respect to a
 subset of the language, that this is unavoidable in practice, and that the appropriate
 response is to state explicitly which language features are approximated rather than
-to claim soundness in general \cite{livshits2015soundiness}. This thesis follows that
-recommendation: it states its soundness property only over a declared scope, lists the
-approximated
-Angular constructs with their measured frequency in the corpus, and measures recall
-empirically. The literature reviewed in Sections~\ref{sec:asttools} to~\ref{sec:angular} gives the specific reasons
+to claim soundness in general \cite{livshits2015soundiness}. The thesis
+states its own position in Section~\ref{sec:model}. The literature reviewed in Sections~\ref{sec:asttools} to~\ref{sec:angular} gives the specific reasons
 why a general claim is not available for this setting. Type annotations in TypeScript
 are deliberately not guarantees, framework configuration decides which implementation
 a call reaches, and the firing condition of a reactive computation is not written in
@@ -387,18 +363,13 @@ are monotone, the computation terminates and its result does not depend on the o
 which nodes are visited. Cousot and Cousot gave the general theory behind this approach
 as abstract interpretation \cite{cousot1977abstract}, and Nielson et al.\ give a
 textbook account \cite{nielson1999principles}. Scope attribution in
-Chapter~\ref{ch:analysis} is an instance of this framework. The abstract values are
-sets of screens, the graph is the call graph extended with component nesting, and the
-join is the union of scopes.
+Chapter~\ref{ch:analysis} is an instance of this framework; its abstract values and join are defined in Section~\ref{sec:scope}.
 
 The framework is independent of the language being analysed, and it has been applied
 to JavaScript as well; Section~\ref{sec:asttools} describes that work. What a
-particular instance needs is a lattice whose height is bounded and a propagation graph.
-Both are available here: the set of screens is finite, so the lattice of screen sets
-has a height equal to the number of screens, and the call graph with component nesting
-supplies the propagation graph. Where the propagation graph itself is
-incomplete, because a call could not be resolved, the result is incomplete in a way the
-framework does not detect, which is why the scope has to be declared.
+particular instance needs is a lattice of bounded height and a propagation graph. Where the
+propagation graph is incomplete, because a call could not be resolved, the result is
+incomplete in a way the framework does not detect.
 
 \section{Angular routing, dependency injection and reactive state}
 \label{sec:angular}
@@ -556,11 +527,9 @@ resolve to different implementations depending on where the injection happens.
 Resolution is relative to an injector rather than global, which makes the provider
 hierarchy part of the input to the analysis.
 
-The analysis in Chapter~\ref{ch:analysis} follows the advice this literature converges
-on, which is to model the framework explicitly rather than to treat its configuration
-as ordinary code. It reads Angular's provider declarations and resolves an injected type
-in the style of class hierarchy analysis. Where a token can be bound to more than one
-implementation, all of them are considered.
+The analysis follows the advice this literature converges on, which is to model the
+framework explicitly rather than to treat its configuration as ordinary code
+(Section~\ref{sec:inputs}).
 
 \subsection{Reactive state}
 \label{sec:signals}
@@ -570,7 +539,7 @@ signal is a value that changes over time, and an effect is a computation that ru
 again whenever a signal it read changes \cite{angulareffects}. This is an instance of reactive programming,
 which goes back to functional reactive programming \cite{elliott1997frp} and has been
 surveyed by Bainomugisha et al.\ \cite{bainomugisha2013survey}. In reactive systems the dependencies between values are recorded at run time, and the runtime propagates updates without explicit calls in the program text. So when a navigation call is placed inside an effect, the condition under which it fires is a data dependence in a reactive graph and not a control-flow condition. A static analysis can find which signals the effect reads; when the effect runs is not determined by the source in general, and the analysis of this thesis does not attempt to bound it. Angular applications also use
-RxJS observables for the same purpose, in router event subscriptions, HTTP responses
+observables from Reactive Extensions for JavaScript (RxJS) for the same purpose, in router event subscriptions, Hypertext Transfer Protocol (HTTP) responses
 and state containers. Section~\ref{sec:reactive} reviews what the reactive programming
 literature establishes about this boundary.
 
@@ -704,14 +673,9 @@ thesis rather than delegated to a tool's defaults.
 
 Papadakis et al.\ also give best-practice advice on the use of mutation in empirical
 studies of testing \cite{papadakis2019mutation}. Chapter~\ref{ch:evaluation} follows it
-by stating the operator set it uses, how the mutants were produced and sampled, which
+by stating the operator set, how the mutants were produced and sampled, which
 mutants were excluded and why, and the detection rate for each operator separately
-instead of one aggregate figure. The operators it uses change the navigation structure
-of the application: renaming a route path, removing a guard, deleting a
-\texttt{routerLink} and retargeting a \texttt{Router.navigate} call. The oracle is the
-difference between the graph extracted before the mutation and the graph extracted
-after it, compared against the change that was authored, so the expected outcome is
-known without reference to the tool's own output.
+instead of one aggregate figure.
 
 This use of mutation puts the thesis in the change impact analysis tradition rather
 than in test adequacy measurement. Arnold and Bohner define a framework for comparing
@@ -766,13 +730,7 @@ interpretation of JavaScript is established \cite{jensen2009type}, source-level 
 over a typed syntax tree is a standard tooling style \cite{baxter1998clone,pawlak2016spoon},
 and the Java literature has shown repeatedly that framework behaviour can be modelled
 explicitly to recover call edges that a general analysis loses
-\cite{sridharan2011f4f,antoniadis2020enterprise,chen2022jasmine}. Applying this to a
-client-side framework in order to recover navigation has been done, within the
-restrictions set out above \cite{oshima2018model} and, more recently, for test generation
-and for access-control checking \cite{rima2026e2e,zhang2025veriflow}; what this review found
-no instance of is an attribution that carries a navigation site inside a service to the screens
-of its callers across classes, or a measurement of the loss classified by construct across a
-corpus. The other
+\cite{sridharan2011f4f,antoniadis2020enterprise,chen2022jasmine}. The other
 peer-reviewed static analysis in the Angular family targets AngularJS 1.x and checks
 template and controller consistency rather than navigation \cite{ocariza2015detecting},
 and the type information that TypeScript adds narrows a dispatch without settling it,

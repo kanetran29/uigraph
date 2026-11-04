@@ -17,20 +17,20 @@ transition: \CensusMustSites{} constructs yield \CensusMust{} must edges, and
 \CensusMustKdash{} of those edges come from one application's toolbar.
 
 \paragraph{RQ2: where extraction fails.} The failures fall into five defect classes and one
-candidate class (Table~\ref{tab:defects}). Every lost construct is assigned to the first class
+candidate class (Table~\ref{tab:defects}). Every lost construct is assigned to the first loss category
 whose rule matches. Under the order in which the rules are applied, attribution is the largest
-class in every application. The ranking depends on that order: if the target were tested
-before the owner, the target class would be the larger one on \AttrOrderFlipWhere{}
+loss category in every application. The ranking depends on that order: if the target were tested
+before the owner, the target category would be the larger one on \AttrOrderFlipWhere{}
 (Section~\ref{sec:res-defects}).
 
 \paragraph{RQ3: what scope attribution adds.} Scope attribution recovers \AttrRecovered{} of
-the \AttrLost{} constructs in its class (\AttrRecoveredShare{}), almost all as possible rather
+the \AttrLost{} constructs in its loss categories (\AttrRecoveredShare{}), almost all as possible rather
 than certain transitions. No construct the baseline recovered was lost. On the one application
 whose screen sets were read by hand, the analysis finds \GTFullRecall{} of the reference pairs
 and none outside them; that reference was partly completed from the graph's output and
 guided two repairs. A reimplementation of the mechanisms of earlier work reaches
 \GTOutletRecall{}, so the gain is small. The computed scopes are also wide. RQ3 is therefore
-answered only in part: coverage rises, but whether the added scopes are too wide was tested on
+answered only in part: the recovered share rises, but whether the added scopes are too wide was tested on
 one application only.
 
 \paragraph{RQ4: whether the graph responds to change.} On three applications, the graph
@@ -55,14 +55,15 @@ itself: a corpus of six pinned applications, five evaluation methods with differ
 spots, and a classification of every lost construct. The second is the apparatus that makes it
 checkable: the result tables are generated from the harness's result files, and the
 evaluation re-runs from pinned commits. The third is scope attribution, specified as a
-dataflow analysis over screen sets and implemented over three of its four input relations
+dataflow analysis over screen sets and implemented over three of its four input relations: the
+dispatch relation is specified but not implemented, and a stand-in replaces the guard relation
 (Section~\ref{sec:attribution}).
 
-\paragraph{What remains open.} The dispatch relation is specified but not implemented, and the
-call graph ignores the injector hierarchy. The screen sets were checked in both directions on
+\paragraph{What remains open.} The dispatch relation is specified but not implemented, the guard relation is replaced by a
+stand-in, and the call graph ignores the injector hierarchy. The screen sets were checked in both directions on
 one application only, and the repairs were found on the same corpus they are measured on. The
 readings of the must tier were made by the AI assistant, and two readings by one model measure
-consistency rather than correctness. The runtime check judged only the screens that are
+consistency rather than correctness. The rendered-interface check judged only the screens that are
 reachable without signing in; driving the applications into a signed-in state is the work that
 would test the rest (Section~\ref{sec:future}). Finally, whether such a graph helps the
 consumers that motivated the work, such as agents that drive a user interface or automated
