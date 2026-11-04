@@ -27,7 +27,8 @@ before the owner, the target category would be the larger one on \AttrOrderFlipW
 
 \paragraph{RQ3: what scope attribution adds.} Scope attribution recovers \AttrRecovered{} of
 the \AttrLost{} constructs in its loss categories (\AttrRecoveredShare{}), almost all as possible rather
-than certain transitions. No construct the baseline recovered was lost. On the one application
+than certain transitions. Most of them are on mifos: without it the share is
+\AttrRecoveredShareNoMifos{}, and \AttrUnderHalfApps{} of the six applications recover under half. No construct the baseline recovered was lost. On the one application
 whose screen sets were read by hand, the analysis finds \GTFullRecall{} of the reference pairs
 and none outside them; that reference was partly completed from the graph's output and
 guided two repairs. A reimplementation of the mechanisms of earlier work reaches
@@ -42,21 +43,26 @@ without attribution. Of the mifos misses,
 
 \paragraph{RQ4: whether the graph responds to change.} On three applications, the graph
 detects \MutFallibleDetected{} of \MutFallibleScored{} injected link deletions, retargets and
-guard removals. Deletions are detected almost by construction, so the evidence rests mainly on
-the other two operators. The harness was corrected after its earlier misses had been read, and
+guard removals. Every operator is scored only at constructs the graph already represents, in the
+simplest form the extractor reads, so detection is close to guaranteed for each. The harness was corrected after its earlier misses had been read, and
 the final sample shares \MutOverlap{} of its \MutSampled{} mutants with that run, so the rate is
 not an independent test; the samples are small. Without attribution fewer changes can be scored at all. On the
 \MutPaired{} mutants both graphs can score, the attributed graph detects \MutPairedDetected{}
 and the baseline \MutPairedBaseDetected{}. The experiment shows that the graph responds to
 change; it does not show how well the graph would select tests.
 
-\paragraph{RQ5: whose the losses are.} Every defect class traces to the extractor, and almost
-every cause behind them is a construct the extractor could read and did not. This is a
+\paragraph{RQ5: whose the losses are.} The defect classes name failures of extraction, so the
+answer lies in their causes: almost every cause the source review found is a construct the
+extractor could read and did not. This is a
 statement about classes, not about every lost construct: destinations only the run time knows
-are counted apart (Table~\ref{tab:loss}). The node-level classes were repaired. Of the causes
-behind the defect classes, two remain in the tool: named router outlets, which the model
+are counted apart (Table~\ref{tab:loss}). The node-level classes were repaired. Of the causes the
+source review found, these remain in the tool: named router outlets, which the model
 represents as a second mount and the extractor does not implement, and one application's
-spread of computed routes, which the extractor declares unread. Two further causes lie outside the reach of any static reader of a route table: a
+spread of computed routes, which the extractor declares unread. The end-to-end check adds target forms the extractor
+does not read (Section~\ref{sec:res-e2e}). For the attribution class the answer holds for the
+part the analysis recovers; the unrecovered remainder (Table~\ref{tab:remaining}) mixes gaps of
+the tool with components that no screen may render, and no measurement separates them. Two
+further causes, which no defect class names, lie outside the reach of any static reader of a route table: a
 route path computed in a custom \texttt{UrlMatcher}, and a choice between two route tables made
 at deployment. Every site that still yields no transition carries a recorded label, and
 \AttrRemainingUnexplained{} of them say that no reason was found. A check enforces that a label is
@@ -64,18 +70,20 @@ recorded, but not that it is correct.
 
 \paragraph{Contributions.} The thesis contributes three things. The first is the measurement
 itself: a corpus of six pinned applications, five evaluation methods with different blind
-spots, and a classification of every lost construct. The second is the apparatus that makes it
-checkable: the result tables are generated from the harness's result files, and the
-evaluation re-runs from pinned commits. The third is scope attribution, specified as a
+spots, four further checks of the scopes, and a classification of every lost construct. The second is the apparatus that makes it
+checkable: the result tables are generated from the harness's result files, and the methods
+that read the sources re-run from pinned commits. The runtime route oracle re-runs only in part,
+the realworld end-to-end check depends on an unpinned public backend, and superseded figures
+cannot be regenerated. The third is scope attribution, specified as a
 dataflow analysis over screen sets and implemented over three of its four input relations
 (Section~\ref{sec:attribution}).
 
 \paragraph{What remains open.} The dispatch relation is specified but not implemented, the guard relation is replaced by a
 stand-in, and the call graph ignores the injector hierarchy. The screen sets were checked in both directions on
-one application only, and the repairs were found on the same corpus they are measured on. The
-end-to-end check on mifos found tool defects that are not repaired: a relative link in a
-template shared with child tabs is resolved against the child's address, and some targets are
-written in forms the extractor does not read (Section~\ref{sec:res-e2e}). The
+one application only, against a reference that applies the analysis's own relations, and the repairs were found on the same corpus they are measured on. The
+end-to-end check on mifos found transitions lost to a declared approximation, a relative link
+in a template shared with child tabs resolved against the child's address, and to target forms
+the extractor does not read; none is repaired (Section~\ref{sec:res-e2e}). The
 readings of the must tier were made by the AI assistant, and two readings by one model measure
 consistency rather than correctness. The rendered-interface check judged only the screens that are
 reachable without signing in; driving the applications into a signed-in state is the work that

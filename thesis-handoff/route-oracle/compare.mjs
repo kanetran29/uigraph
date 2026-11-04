@@ -229,6 +229,13 @@ const order = B.results.map((b) => {
 T.nonLiteral = order.reduce((a, o) => a + o.attrNonLit, 0)
 T.orderFlips = order.filter((o) => o.flips).length
 T.orderFlipWhere = order.filter((o) => o.flips).map((o) => NAME[o.slug]).join(' and ') || 'none'
+// The corpus share is dominated by the largest application, so state how many applications
+// recover under half of their attribution losses and what the share is without mifos.
+const rec = (r) => r.recoveredMust + r.recoveredMay
+T.underHalf = rows.filter((r) => r.attrBefore > 0 && rec(r) * 2 < r.attrBefore).length
+const noMifos = rows.filter((r) => r.slug !== 'mifos')
+T.noMifosRec = noMifos.reduce((a, r) => a + rec(r), 0)
+T.noMifosLost = noMifos.reduce((a, r) => a + r.attrBefore, 0)
 const recovered = T.must + T.may
 if (recovered + T.remaining !== T.lost) {
   throw new Error(`attribution losses do not close: ${recovered} recovered + ${T.remaining} classified != ${T.lost} assigned. One of the two tables is measuring a different population.`)
@@ -242,6 +249,7 @@ for (const [k, v] of [
   ['AttrMustBefore', T.mustBefore], ['AttrMustAfter', T.mustAfter], ['AttrAppsGained', T.gained],
   ['AttrAppsFell', T.fell], ['AttrFellWhere', T.fellWhere], ['AttrDemoted', T.demoted],
   ['AttrNonLiteral', T.nonLiteral], ['AttrOrderFlips', T.orderFlips], ['AttrOrderFlipWhere', T.orderFlipWhere],
+  ['AttrUnderHalfApps', T.underHalf], ['AttrRecoveredShareNoMifos', pc(T.noMifosRec, T.noMifosLost)],
 ]) tex4 += `\\newcommand{\\${k}}{${v}}\n`
 // held back until every check below has passed; see the single write at the end
 console.log(`\nRQ3: ${recovered} of ${T.lost} recovered (${T.must} must, ${T.may} may), ${T.remaining} classified (${T.unexplained} unexplained), ${T.regressed} regressed, ${T.demoted} demoted from must to may (conversion fell on ${T.fell}: ${T.fellWhere}); edges ${T.edgesBefore} -> ${T.edgesAfter}, must ${T.mustBefore} -> ${T.mustAfter}`)

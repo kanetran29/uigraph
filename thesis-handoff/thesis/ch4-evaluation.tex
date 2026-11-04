@@ -119,14 +119,15 @@ Name & Numerator & Denominator & RQ & Reported in \\
 \midrule
 Node coverage & declared screens that have a node & screens the independent route parser declares & RQ1 & \ref{sec:res-baseline} \\
 Must conversion & in-scope constructs witnessed by a must edge & in-scope constructs & RQ1 & \ref{sec:res-baseline} \\
-Recovered share & in-scope constructs witnessed by an edge of any tier & in-scope constructs & RQ1, RQ3 & \ref{sec:res-baseline}, \ref{sec:res-after} \\
-Accounted share & recovered constructs plus in-scope constructs that name a reason for not being recovered & in-scope constructs & RQ2 & \ref{sec:res-defects} \\
+Recovered share & in-scope constructs witnessed by an edge of any tier & in-scope constructs & RQ1, RQ3 & \ref{sec:res-after}, \ref{sec:res-round2} \\
+Accounted share & recovered constructs plus in-scope constructs recorded as dynamic or unplaced & in-scope constructs & RQ2 & \ref{sec:res-defects} \\
 Must-tier precision & must edges whose witness passes (lower bound) or does not fail (upper bound) & all must edges & RQ3 & \ref{sec:res-soundness} \\
 Node-level recall & distinct URLs named in an application's end-to-end test sources that have a node & distinct URLs so named & RQ1 & \ref{sec:res-baseline} \\
 Structural-reference recall and precision & (site, screen) pairs the reference and a level share & pairs in the reference (recall) or pairs the level places (precision) & RQ3 & \ref{sec:res-groundtruth} \\
 End-to-end containment & observed screen pairs joined by an edge of the graph & observed screen pairs & RQ3 & \ref{sec:res-e2e} \\
 Scope width & mean screens a site is attributed to & the same when every site is assigned to every screen & RQ3 & \ref{sec:res-width} \\
 Detection rate & injected changes that produce the predicted change in the graph & injected changes the graph can score (excluded mutants reported) & RQ4 & \ref{sec:res-mutation} \\
+Cause trace & defect classes traced to a cause in the source, by kind (unread, unreadable, not implemented); no ratio & defect classes & RQ5 & \ref{sec:res-round2} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -321,7 +322,7 @@ a loss \\
 Named outlet & targets an auxiliary outlet (\texttt{\{outlets: \ldots\}}) \\
 No commands & names no destination at all \\
 Converted, must or may & is cited as witness by an edge of that tier \\
-Accounted, dynamic & is cited by an edge into a sink whose destination only the run time knows \\
+Accounted, dynamic & is cited by an edge into a sink: the extractor records its destination as unresolved \\
 Accounted, unplaced & is recorded by the extractor as a site it read but could not place \\
 Attribution, service & has no owning component, or its owner is a class that is not a
 component: a service, guard, interceptor, resolver or effect. A site in a template whose
@@ -388,7 +389,7 @@ recovery, and the number of excluded mutants is reported alongside it.
 \section{Evaluation methods}
 \label{sec:protocol}
 
-Five methods are used. None establishes correctness alone, so Table~\ref{tab:methods} states what
+Five methods are used; RQ3 adds four further checks (the rendered-interface check, the ablation, the structural reference and the end-to-end check), which Table~\ref{tab:methods} does not list. None establishes correctness alone, so Table~\ref{tab:methods} states what
 each can show and where it is blind. Figure~\ref{fig:oracles} shows which part of the graph each
 method checks and where its ground truth comes from.
 
@@ -494,9 +495,7 @@ looked implausibly good or bad, and each such figure proved a property of the me
 the extractor. A surprising figure is therefore checked against its inputs before it is written down.
 
 The mutation run of the superseded harness used the same seed as the final run but a partly
-different sample: \MutOverlap{} of its \MutEarlierSampled{} mutants are among the \MutSampled{}
-of the final run, and \MutEarlierFailuresAbsent{} of its \MutEarlierFailures{} misses are not in
-the final sample. The new mutants come from the same seed and quota but not from the same graph: the earlier run records no extractor commit, and its baseline graphs differ from the final ones. The harness
+different sample: \MutOverlap{} of its \MutEarlierSampled{} mutants are at the same location (operator, file and line) as one of the \MutSampled{} of the final run, though the destinations may differ, and \MutEarlierFailuresAbsent{} of its \MutEarlierFailures{} misses are at no location of the final sample. The new mutants come from the same seed and quota but not from the same graph: the earlier run records no extractor commit, and its baseline graphs differ from the final ones. The harness
 rules were corrected after the earlier misses had been read, so the final run is not an independent test.
 The corrections are listed in Appendix~\ref{app:repairs}.
 

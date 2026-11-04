@@ -88,8 +88,7 @@ and agent performance depends on the interface through which the repository is n
 \cite{yang2024sweagent}. Whether a navigation graph helps such tools is not tested here;
 these uses motivate the extraction but do not depend on the results of this thesis.
 
-This thesis carries out that measurement for Angular and proposes an analysis for the
-largest class of failures it finds. What is proposed is a method rather than a product:
+This thesis carries out that measurement for Angular and proposes an analysis for the largest class of failures it finds under the order of its loss rules. What is proposed is a method rather than a product:
 scope attribution is stated as a dataflow analysis over a lattice of screen sets, and
 nothing in its formulation depends on a particular extractor.
 
@@ -144,12 +143,11 @@ the tool?}
 \noindent A defect class names where extraction failed, but not whether the navigation was
 unreadable or merely unread. Each class is therefore traced to its cause in the source. The
 causes that lie in the extractor are repaired where possible, and the corpus is measured
-again. Every site that still yields no transition must name a reason.
+again. Every site that still yields no transition must carry a recorded label.
 
 \medskip
 The questions are answered on a corpus of six open-source Angular applications pinned to
-fixed commits (Chapter~\ref{ch:evaluation}). Five evaluation methods are used, chosen so that
-their blind spots differ. The figures in Chapter~\ref{ch:results} are those of the extractor
+fixed commits (Chapter~\ref{ch:evaluation}). Five evaluation methods are used, and RQ3 adds four further measurements; the methods are chosen so that their blind spots differ. The figures in Chapter~\ref{ch:results} are those of the extractor
 after the repairs of RQ5; the history of those repairs is summarised in
 Appendix~\ref{app:validation}.
 
@@ -160,8 +158,7 @@ The thesis has the following limits of scope.
   soundness property over a declared scope and lists what it approximates, following the
   soundiness position (Section~\ref{sec:soundiness}). The property is tested, not proved.
 \item It does not measure the effect of the graph on coding agents or any other consumer.
-\item The screen sets that scope attribution computes are checked in both directions on one
-  application only.
+\item The screen sets that scope attribution computes are compared in both directions on one application only, against a reference that applies the analysis's own relations.
 \item The repairs were found on this corpus, and no held-out application tests how far they
   generalise.
 \item All measurements concern Angular. The graph model does not depend on the framework,
@@ -186,11 +183,7 @@ which is the main contribution, is set up in Chapter~\ref{ch:evaluation} and rep
 Chapter~\ref{ch:results}.
 Chapter~\ref{ch:evaluation} describes the evaluation setup: the corpus and why it can
 be considered valid, the metrics, and the five evaluation methods.
-Chapter~\ref{ch:results} presents the results for each research question: node extraction
-and the ceiling it sets, then scope attribution and what it recovers, then the defect
-classes taken to their causes, change sensitivity, what the repairs cost the soundness
-property, and the dead-link candidates the graph finds statically, each then checked against the route
-configuration the runtime route oracle recorded.
+Chapter~\ref{ch:results} presents the results for each research question: the two levels of loss (RQ1), the defect classes (RQ2), scope attribution and what it recovers (RQ3), change sensitivity (RQ4) and what the repairs found and cost the soundness property (RQ5), followed by the dead-link candidates the graph finds statically, each checked against the route configuration the runtime route oracle recorded.
 Appendix~\ref{app:validation} holds the validation of the measuring instruments: the
 disagreements between the two static readers, how the declared-screen set moved under the
 corrections, the case-by-case account of asking the running framework, and the record that

@@ -7,8 +7,7 @@
 This chapter reports what the harness of Section~\ref{sec:protocol} measured on the corpus of
 Section~\ref{sec:corpus}, one research question at a time. Section~\ref{sec:res-baseline}
 answers RQ1, Section~\ref{sec:res-defects} RQ2, Section~\ref{sec:res-after} RQ3 and
-Section~\ref{sec:res-mutation} RQ4. Section~\ref{sec:res-round2} asks what the repairs did to the
-claim (RQ5), and Section~\ref{sec:deadlinks} reports the dead links the method found as a
+Section~\ref{sec:res-mutation} RQ4. Section~\ref{sec:res-round2} asks what the losses were and what the repairs did to the claim (RQ5), and Section~\ref{sec:deadlinks} reports the dead links the method found as a
 by-product.
 
 The numerical tables are generated from the harness result files. The summaries compiled by hand
@@ -85,8 +84,7 @@ commit was not recorded. Its only link to the final graph is the equal node tota
 applications.
 \end{itemize}
 
-Completeness here is a claim about the screens the readers can \emph{see}. The blind-spot column
-bounds it: a route entry neither reader can resolve to an address is outside the denominator, and
+Completeness here is a claim about the screens the readers can \emph{see}. The blind-spot column marks where it is incomplete but does not bound it: one route entry neither reader can resolve can hide many screens (Section~\ref{sec:res-probe}). Such an entry is outside the denominator, and
 the applications that have such entries say so in their own soundiness notes. Refusing to read
 more of an application would raise this column, not lower it. It is printed beside the coverage
 figure for that reason.
@@ -94,8 +92,7 @@ figure for that reason.
 \begin{table}[t]\footnotesize
 \caption{Node extraction against the independent route parser, in both directions: declared
 screens that have a matching node, and nodes for which the independent route parser holds no declared
-screen. The blind-spot column counts route entries the independent route parser could not follow, which
-bounds what either direction can show. A blind spot is a route the independent route parser
+screen. The blind-spot column counts route entries the independent route parser could not follow, which marks where either direction is incomplete. A blind spot is a route the independent route parser
 knows is there and cannot address: a lazy boundary whose route array it could not find, a path
 expression it could not resolve to a literal, a route whose path is computed by a custom matcher, or a
 route source spread into a table from a call it does not follow; the last kind now accounts for most of
@@ -161,10 +158,9 @@ final snapshot with attribution disabled.}
 \end{table}
 \FigLoss
 
-Attribution is the largest loss category in every application, and by a wide margin. Of the
+Under the order in which the loss rules test a construct, attribution is the largest loss category in every application. Of the
 \RoundTwoInScopeAll{} constructs, the two attribution categories hold \AttrLost{} between them,
-and no other loss category holds a tenth as many. The destinations only the run time knows are no
-defect of the extractor, and the table counts them apart. They come to about a third as many.
+and no other loss category holds a tenth as many. The constructs whose destination the extractor records as unresolved are counted apart; some are run-time values and some are references the extractor declines to follow. They come to about a third as many.
 Most of the attribution categories come from components that several screens render, not from
 services.
 
@@ -246,7 +242,7 @@ on k8sdash, which are neither passes nor failures; no edge failed. Constructs co
 \FigBeforeAfter
 
 Attribution recovers \AttrRecovered{} of the \AttrLost{} constructs the loss rules assign to it,
-\AttrRecoveredShare{} of them. It takes the graphs from \AttrEdgesBefore{} edges to
+\AttrRecoveredShare{} of them, which this thesis calls the attribution recovery. Most of them are on mifos: without mifos the share is \AttrRecoveredShareNoMifos{}, and \AttrUnderHalfApps{} of the six applications recover under half. It takes the graphs from \AttrEdgesBefore{} edges to
 \AttrEdgesAfter{}.
 
 Measured by RQ1's must conversion, the gain is far smaller. Of the recovered
@@ -446,7 +442,7 @@ added fails the witness check is meaningful only where the attribution is narrow
 \the\numexpr\AttrMustAfter-\AttrMustBefore\relax{} must edges it added, \MustWitnessUnread{} are
 unread, all on \BaselineBluntest{}, where the scopes are widest.
 \item On part of this corpus the attribution is not very narrow. A scope that names three fifths of
-an application is a weak statement about where a site fires, and the recovered share RQ3 reports is bought
+an application is a weak statement about where a site fires, and the attribution recovery RQ3 reports is bought
 with scopes of that width. Nothing in the evaluation shows those wide scopes to be wrong, because the
 rendered-interface check could not test the direction in which they would be wrong. Nothing shows
 them to be right either. The recovered share of Table~\ref{tab:round2acct} should be read together
@@ -589,8 +585,7 @@ It cannot establish that the same holds on an application of six hundred screens
 \label{sec:res-e2e}
 
 The end-to-end check of Section~\ref{sec:metrics} puts part of the question to the running
-applications, with a reference that does not pass through the analysis's relations. All three validity
-checks hold on both applications. A hit is any edge between the two screens, not the edge of the site
+applications, with a reference that does not pass through the analysis's relations. The second and third validity checks hold on both applications, and the first on mifos, whose uninstrumented run fails the same tests; for realworld only instrumented runs were recorded, none of them with a failure. A hit is any edge between the two screens, not the edge of the site
 the test used, so the check does not test the scope of an individual site.
 
 \paragraph{realworld.} The suite completes \EtoERealworldEnds{} navigations, which reduce to
@@ -610,7 +605,7 @@ redirected navigation is compared on the address it asked for. \EtoEMifosRedirec
 redirected, and \EtoEMifosHitRedirect{} of those are hits. Under the scorer's first,
 non-preregistered rule the figure was \EtoEMifosHitAfterRedirects{} of
 \EtoEMifosPairsAfterRedirects{} (Table~\ref{tab:repairs}, row 32). Without attribution the graph contains
-\EtoEMifosHitNoattr{}. None of the matched pairs is a must edge, as predicted. Some hits rest only on
+\EtoEMifosHitNoattr{}. None of the matched pairs is a must edge, as predicted. \EtoEMifosHitRedirect{} hits, those of the redirect bucket, rest only on
 a site whose target prefix was over-approximated to many routes, so they show that the target is
 reachable in the graph and not that the site was resolved. No other pre-registered prediction is
 reported here.
@@ -633,7 +628,7 @@ reader treats that element as a variable and records the target as unresolved
 (Section~\ref{sec:approximations}), although the text is static up to the action name. In the loan
 view, \texttt{relativeTo} is passed through an options variable the reader does not evaluate, so the
 relative prefix is matched from the root and names no route.
-\item \EtoEMifosMissBase{} misses are classed \emph{base}, and are errors of the analysis. The client
+\item \EtoEMifosMissBase{} misses are classed \emph{base}, and are losses of a declared approximation, not repaired. The client
 view's template holds three relative links, to the personal data tab and to the forms for a new loan
 and a new savings account. From the client screen the graph resolves them correctly. The template is
 rendered with each child tab, though, and attributed to the subtree scope of that screen its links
@@ -643,8 +638,7 @@ such a link against the route of the component that holds it. This is the base r
 Section~\ref{sec:deadlinks} names as this analysis's gap.
 \end{itemize}
 
-All of the base and dynamic misses are defects of the tool, none is a target only the run time knows,
-and none was repaired. No other application with a runnable suite remains to test a repair, and a
+The base misses are losses of a declared approximation and the dynamic misses are forms the extractor does not read; none is a target only the run time knows, and none was repaired. No other application with a runnable suite remains to test a repair, and a
 repair fitted to this check would be untested by it.
 
 \subsection{What the RQ3 evidence supports}
@@ -658,7 +652,7 @@ pass the comparison and target agreement cannot establish execution on every inp
 \begin{enumerate}
 \item The great majority of the gain is on the may tier: attribution mostly adds navigation the graph
 says is possible, not navigation it says is certain.
-\item The scopes are tested in both directions on one application only. The recorded rendered-interface check
+\item The scopes are compared in both directions on one application only, against a reference that applies the analysis's own relations. The recorded rendered-interface check
 exposed \ScopeUnpredicted{} missing pairs on its earlier graph, all on bitwarden, and cannot establish
 whether a scope is too large. The ground truth tests both directions against the structural
 reference, but for \GTApp{} alone, and both repairs were made after it had shown the defects. The
@@ -711,7 +705,7 @@ made to the mutation harness are listed in Table~\ref{tab:repairs}.
 
 Table~\ref{tab:mutation-sample} shows how the sample was drawn. The harness found \MutCandidates{}
 candidate mutations, sampled \MutSampled{} under the quota and scored \MutScored{}. \MutExcluded{}
-were excluded, all of them guard removals: for \MutExcludedUnreached{} no baseline edge enters any
+were excluded, all of them guard removals: for \MutExcludedUnreached{} no edge of the unmutated graph enters any
 screen the guarded route yields, and \MutExcludedNoScreen{} guards a route that declares neither a
 component nor children. An excluded mutant carries no information about sensitivity. The rule removes
 exactly the cases in which a removal could not be observed, so \MutGuardScored{} of the
@@ -723,23 +717,20 @@ from the mutation side.
 
 \begin{table}[t]\small
 \caption{Mutation sample. Candidates found, mutants sampled under the per-operator
-quota, and mutants excluded as confounded with a coverage gap.}
+quota, and mutants excluded as confounded with a recovery gap.}
 \label{tab:mutation-sample}
 \TabMutationSample
 \end{table}
 
 Table~\ref{tab:mutation} gives the detection rate per operator, and Figure~\ref{fig:mutation} the
 outcomes summed over the applications. The rename operator is set aside first, because its detection
-is close to guaranteed by construction: a rename mutant is excluded unless the baseline graph already
+is close to guaranteed by construction: a rename mutant is excluded unless the unmutated graph already
 holds a node for the segment it renames, and a screen is identified by its full path
 (Section~\ref{sec:model}). It tests node extraction and supplies \MutRenameScored{} of the
 \MutScored{} scored mutants. The three other operators are detected in \MutFallibleDetected{} of
 their \MutFallibleScored{} scored mutants: \MutLinkDetected{} of \MutLinkScored{} deleted
 \texttt{routerLink} bindings, \MutRetargetDetected{} of \MutRetargetScored{} retargeted
-\texttt{navigate} calls and \MutGuardDetected{} of \MutGuardScored{} removed guards. A deleted
-\texttt{routerLink} is sampled only on a line a baseline edge cites, so it is missed only if the
-extractor misreads its own input, and the evidence for RQ4 rests mainly on the retargets and the
-guard removals. The samples are small, in single digits per operator and application, so the pattern
+\texttt{navigate} calls and \MutGuardDetected{} of \MutGuardScored{} removed guards. A deleted \texttt{routerLink} is sampled only on a line an edge of the unmutated graph cites, so it is missed only if the extractor misreads its own input. The other two operators are constrained in the same way: a retarget is generated only for a \texttt{navigate} call whose first element is a plain absolute string at a line the graph already cites, and writes one declared route as a literal; a guard removal is scored only where an edge already carries that guard and enters the guarded screen. RQ4 therefore tests whether the graph re-reads constructs it already represents, not its sensitivity to harder edits. The samples are small, in single digits per operator and application, so the pattern
 says more than the rate.
 
 \begin{table}[t]\small
@@ -793,10 +784,10 @@ Of the \MutScored{} scored mutants, \MutDetected{} were detected, and \MutBaseDe
 figures are \MutPairedDetected{} and \MutPairedBaseDetected{}. In this sample the graph responded to
 every scored change in the constructs it represents. A construct it does not represent cannot
 respond, and such mutants are excluded rather than scored, so the rate is conditional on RQ1's
-recovered share. The final sample shares \MutOverlap{} of its \MutSampled{} mutants with the earlier run, whose
+recovered share. The final sample has \MutOverlap{} of its \MutSampled{} mutants at the same location (operator, file and line) as the earlier run, with possibly other destinations, whose
 misses guided the corrections to the harness, so the rate is not an independent test.
 
-\section{What the repairs cost the claim (RQ5)}
+\section{What the losses were and what the repairs cost (RQ5)}
 \label{sec:res-round2}
 
 The defect classes of Section~\ref{sec:res-defects} are a diagnosis, and a diagnosis is worth the
@@ -841,7 +832,7 @@ method of Section~\ref{sec:res-probe} finds and the sources leave undecided.
 
 Every other cause was a construct the extractor could read and did not, and all were repaired
 except the one behind the named-outlet class, which the model represents and the extractor does not
-implement. With the spread of computed routes, two readable causes therefore remain unrepaired. The node-extraction
+implement. Beyond the spread of computed routes, the end-to-end check exposed readable forms that remain unrepaired: a template literal inside a commands array, \texttt{relativeTo} passed through a variable, and the base resolution of a template shared with child tabs (Section~\ref{sec:res-e2e}). The node-extraction
 defects fall into three groups.
 
 \begin{sloppypar}
@@ -888,8 +879,7 @@ runs use the same route denominator (Table~\ref{tab:coverage}).
 
 Table~\ref{tab:round2acct} gives the construct accounting in four parts, because a single ratio cannot
 separate three different things. A site is \emph{recovered} when it becomes a transition with a
-destination. It is \emph{dynamic} when the destination is one only the run time knows, such as a value
-from the backend or a history entry; the graph then records an edge into that screen's
+destination. It is \emph{dynamic} when the extractor records the destination as unresolved: a value from the backend or a history entry, but also a field it treats as mutable although the route table initialises it, or a template literal inside a commands array (Section~\ref{sec:approximations}); the graph then records an edge into that screen's
 \texttt{u\_}\,sink with modality unknown, rather than dropping or guessing. It is \emph{unplaced} when
 the destination is readable but the screen it fires from is not, and the edge is anchored at an
 \texttt{o\_}\,origin node that says so. What is left carries a recorded reason but no transition; the
@@ -917,7 +907,7 @@ Of \RoundTwoInScope{} in-scope sites, \RoundTwoRecovered{} are recovered, \Round
 accounted as dynamic and \RoundTwoUnplaced{} as unplaced, so \RoundTwoAccounted{} are accounted for in
 all, against \RoundTwoBefore{} in the final baseline. k8s dashboard shows why recovered and dynamic
 must be reported separately: a low recovered fraction can coexist with many sites whose destination
-depends on runtime data. The dynamic sites are spread over \RoundTwoDynamicFiles{} files,
+depends on runtime data. Its dynamic sites are spread over \RoundTwoDynamicFiles{} files,
 \RoundTwoDynamicFilesOne{} of which contribute a single site, so the column reports a habit of the
 codebase and not one place to fix. mifos supplies \RoundTwoMifosShare{} of the in-scope sites on its
 own and pulls the corpus figures towards its own: without it, recovered is \RoundTwoNoMifosRecovered{}
@@ -1182,11 +1172,11 @@ route set was beyond it.}
 \subsection{Nodes at addresses the application does not mount}
 \label{sec:res-unmounted}
 
-Across the corpus the extractor declares \ProbeInvented{} screens that the framework mounts nothing
+Across the corpus the compared graph declares \ProbeInvented{} screens that the framework mounts nothing
 at. Over \ProbeApps{} applications, \ProbeRoutes{} route entries and \ProbeNodes{} nodes, every
 address the extractor claims is an address the framework's own configuration mounts. This is
 external evidence about these six applications that no node is minted at an address the application
-does not mount. It is a precondition of the must-tier property and not part of it. An address behind
+does not mount. It was measured on an earlier graph with the same node total (Table~\ref{tab:provenance}), after the repairs this check had itself prompted. It is a precondition of the must-tier property and not part of it. An address behind
 a guard that always refuses still counts as mounted, so the runtime route oracle could not expose such a node. The
 two static readers could not produce this evidence, because an address both of them place at the
 wrong prefix is an address they agree on.

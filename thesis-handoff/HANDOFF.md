@@ -1,7 +1,7 @@
-# Thesis handoff (4 Nov 2026)
+# Thesis handoff (5 Nov 2026)
 
 Read this first. It is written for a Claude Code session continuing the work. Sections are dated and the
-newest come first; the section "Current state, 4 Nov 2026" was checked against the repository on 4 Nov and
+newest come first; the section "Current state, 5 Nov 2026" was checked against the repository on 5 Nov and
 supersedes every older section where they disagree.
 
 ## Who and what
@@ -20,6 +20,65 @@ supersedes every older section where they disagree.
   generated macro file, never typed by hand.
 - Run an Opus red-team panel on finished work before calling it done; verify the panel's own claims before acting.
 - Before a striking headline, check it adversarially. Verify the referent, not the nearest proxy.
+
+## Current state, 5 Nov 2026
+
+- **What happened on 4-5 Nov.** The supervisor's email of 4 Nov (thesis far too long, repetitive, long sentences;
+  one-page abstract; precise AI-use statement; list of abbreviations; Section 1.2 without results; Fig 1.1 lacks
+  RQ5?; Fig 5.1, Table 5.1 header, Table 5.3 layout, Table 5.16; Section 5.5.3 title; three-of-four relations at the
+  start of 3.2; a table of all ratios in 4.2; presentation must precede submission, 23.11 vs 31.12 deadline) and the
+  4 Nov review were worked in the order the student approved: harness/macros first, then the cut, then the review's
+  prose fixes on what survived, then a verified panel.
+- **Commits on `main` (not pushed; nothing tagged).** `bb9c1f0` the student's working tree as found (prose, `e2e-nav/`,
+  review), kept apart from the assistant's changes; `0172867` harness: preregistered redirect rule in
+  `e2e-nav/score.mjs` (mifos 12/22, was 15/22 on landed targets) plus comparison graphs, rule-order macros
+  (`AttrNonLiteral`, `AttrOrderFlips/Where`), mutation sample overlap (`MutOverlap` 46/73, `rq4earlier-*` = 583a72c),
+  node-audit scalar macros; `b846112` one-page abstract, aims-only 1.2, short ch7; `3e725ab`, `340cbb6` "must
+  conversion" in Table 5.1, the before-after table and the plot axis; `47cd2ee` chapters 2-6 and Appendix A cut, one
+  home per concept, repair history as Appendix A Table `tab:repairs` (`app:repairs`), `tab:ratios` in 4.2,
+  abbreviations list, terminology fixed (node coverage, must conversion, recovered share, loss category vs defect
+  class, independent route parser, runtime route oracle, rendered-interface check, starting/intermediate/final
+  instrument), review A1-A5, B7-B14 and most of C applied; `f69cf5f` the verified findings of the 5 Nov panel (3
+  Sonnet lenses + Opus gate: 37 findings, 21 confirmed, 11 partly, 5 refuted; JSON in the session scratchpad only).
+- **Regeneration.** Every regenerated file was diffed against the committed one: only the added macros or the renamed
+  header/axis label differ. Tests: harness vitest 101/101 (the two node scripts run separately: guard-resolve 13/13,
+  template-context 12/12; vitest's "2 failed files" for them is pre-existing), `e2e-nav` `node --test score.test.mjs`
+  3/3.
+- **Size.** Build 152 pages (was 155), 0 errors, 0 undefined references, 0 overfull boxes; abstract on one page; body
+  ch1-ch7 57.3k -> ~47k words (ch1 2.9k->2.0k, ch5 15.7k->13.8k, ch6 12.7k->10.0k, ch7 3.3k->0.8k); Appendix A grew
+  (tab:repairs, 32 rows). The body still runs p7-p118. A further cut would mean dropping content (5.3.2-5.3.4 detail,
+  the must-tier review detail, the probe subsection, 2.x background, 6.4 transfer, 5.6 dead links): the student's
+  call.
+- **Left for the student (not decided by the assistant):** Q2 guard defect class: demote to candidate or state an
+  exception (the text now credits red-team panels, not the witness check; the class row's "Methods" count is
+  unchanged); Q3 AI-use facts (who drew the diagrams, who read the realworld reference, that the assistant ran the
+  evaluation, which prose the student wrote — the supervisor asks exactly this); Q4 cohort b7926b7 edge-by-edge or
+  total, why the alfresco/k8sdash suites were not run, whether the title can change; Fig 1.1 without RQ5 (intentional?);
+  which of 698/2798 belongs to the parser (`route-oracle/index.mjs:1223` vs appendix; dated to `d40c8dc`); typed
+  counts with no generated source (e.g. "nine header sites", "five pairs"; disclosed as a kind in the AI statement).
+- **Logic panel, 5 Nov (landed).** 4 Sonnet lenses (circularity, argument chain, numbers recomputed from final14 /
+  e2e / rq4 data, overclaim) + Opus gate: 35 findings, 20 confirmed, 15 partly, 0 refuted; 5 major. The assistant
+  re-checked the two largest itself (ghostfolio's 50 "dynamic" constructs are fields initialised from the constant
+  route table; mifos supplies 210 of the 292 recovered, 82/220 elsewhere). Applied in the last commit: the
+  "Accounted, dynamic" bucket is "destination recorded as unresolved", not "only the run time knows"; every RQ4
+  operator is scored only where the graph already reads the construct; attribution recovery stated with
+  `AttrRecoveredShareNoMifos` (37.3 %) and `AttrUnderHalfApps` (4) (new compare.mjs macros, test-first); RQ5 answered
+  at cause level (classes name extraction failures by definition); mifos base misses are losses of a declared
+  approximation, dynamic misses are forms the extractor does not read; "validated" dropped; reproducibility limits in
+  ch7; dangling refs fixed. Findings JSON: session scratchpad only (`logic-panel.json`, `panel.json`); not committed.
+- **Left for the student from the logic panel:** C1 recount the guard and attribution rows of tab:defects (the
+  attribution row's only method line restates the loss ledger; the guard row has no named method) — this is Q2;
+  C2 restating RQ5 as a partition of causes with counts (needs new macros); C5 the preregistration's timing cannot be
+  corroborated from the archive (same commit/birth time for prereg and logs) and P1-P4/PM1-PM3 are not reported (H2);
+  A2 ch4:74-75 vs the mifos e2e run, ch4:28-30 mifos has Playwright specs; H3 whether the e2e check belongs in the
+  abstract; H9 name the independent route parser in the AI statement.
+- **Harness bug found, not fixed:** `route-oracle/diagnose-attribution.mjs:22-28` treats a bare-identifier target as a
+  literal path, so TabRemaining's "Scope found, target screen has no node" row also counts targets held in a field
+  (all 23 in ghostfolio). The text now qualifies the row; fixing it needs a regen-round run (DBs + diagnose). Also
+  optional: split the dynamic bucket by target form, and an accounted-share decomposition (recoveries vs relabelling),
+  both as new round2-to-latex macros.
+- **Final build (5 Nov):** 152 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; body ch1-ch7 ~47.6k
+  words. Stashes and worktrees as below, untouched. Nothing pushed.
 
 ## Current state, 4 Nov 2026
 

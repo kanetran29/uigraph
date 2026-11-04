@@ -38,7 +38,7 @@ $(s, \sigma, g, s')$. The paragraph on witnesses below says how the constructs a
 \textbf{Nodes outside the model.} The extractor emits two node kinds that are not screens, and
 the edge relation does not range over them. An \emph{unplaced origin} stands for a component,
 with the navigation sites in it, that the analysis could not place under any screen. A
-\emph{dynamic target} stands for a destination only the run time knows. Both are kept, because
+\emph{dynamic target} stands for a destination the extractor records as unresolved. Both are kept, because
 an unplaced site is a loss Chapter~\ref{ch:results} has to count and a destination the analysis
 cannot name is one the run time could still take. Table~\ref{tab:census} reports how much of each
 graph they are: \CensusOtherNodes{} of the \CensusNodes{} nodes in the corpus, \CensusOtherNodeShare{}
@@ -63,8 +63,7 @@ hold no anchors and fewer \emph{other} nodes.}
 enclosing code executes. A \emph{may} edge is possible but conditional. \emph{Unknown} marks an
 edge whose modality could not be determined, and carries the destinations the analysis cannot
 name. In the materialised graph it labels only edges outside $E$, namely edges into the
-\texttt{u\_}\,sink of Section~\ref{sec:res-round2}, which records that a screen is left by an
-event whose target only the run time knows. The pinned extractor produces \CensusUnknown{} such
+\texttt{u\_}\,sink of Section~\ref{sec:res-round2}, which records that a screen is left by an event whose target the extractor records as unresolved. The pinned extractor produces \CensusUnknown{} such
 edges of the \CensusEdges{} in the corpus, in \CensusUnknownApps{} of the \CensusApps{}
 applications. Carrying this modality and reaching a node that is not a screen coincide on every
 edge of every corpus graph, and the census refuses to report a graph in which they come apart.

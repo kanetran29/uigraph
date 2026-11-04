@@ -8,7 +8,7 @@ declares what the analysis does not decide.
 Section~\ref{sec:transfer} argues how far the approach would carry to other routers, and
 Section~\ref{sec:future} says what should come next.
 The thread running through the chapter is that the extractor loses transitions in two places, at
-the nodes and at the edges, and that each level bounds what the other can achieve.
+the nodes and at the edges, and that each level limits what the other can achieve.
 
 \section{Key findings}
 \label{sec:findings}
@@ -33,9 +33,9 @@ instrument those losses are empty.
 \paragraph{What remains is lost at the edge.}
 The navigation sites exist in the source and the screens they would connect exist in the graph,
 but the extractor cannot decide which screens a site belongs to.
-The exceptions are sites whose target screen has no node, most of them in ghostfolio
+The exceptions are sites that the diagnosis labels as having a target screen with no node (the label also covers targets held in a field), most of them in ghostfolio
 (Table~\ref{tab:remaining}).
-Scope attribution addresses the first loss.
+Scope attribution addresses this loss at the edge.
 Under the order in which the loss rules are applied it is the largest loss category in every application
 (Table~\ref{tab:loss}), but that order is part of the measure (Section~\ref{sec:limitations}), and
 the ranking is a fact about an extractor, not a limit of the approach.
@@ -58,8 +58,7 @@ the rest out of the residual category to which no rule applied (Table~\ref{tab:r
 The categories are a diagnostic partition of the losses, not a bound on what attribution recovers.
 On realworld attribution recovered every one of its attribution losses
 (Table~\ref{tab:before-after}), and Table~\ref{tab:remaining} records no remaining loss there.
-Elsewhere, two of the remaining reasons are not attribution problems: a target screen with no node
-is a node-level loss, and a fully dynamic target lies outside any attribution.
+Elsewhere, two of the remaining reasons are not attribution problems: a target screen with no node, as the diagnosis labels it (the label also covers targets held in a field), is a node-level loss, and a fully dynamic target lies outside any attribution.
 Two others are limits of the implemented analysis.
 An owning component that is never reached gives an empty computed scope that the analysis cannot
 tell from unreachable code.
@@ -68,15 +67,14 @@ needs relations (dispatch, the guard relation $T$) that are specified in Chapter
 and not implemented; a stand-in replaces $T$.
 
 No construct that the baseline converted was lost (\AttrRegressed{} leave the converted categories).
-The gain does widen the must tier: after the fourth correction of Section~\ref{sec:res-round2} it
+The gain does widen the must tier: under the demotion rules (Table~\ref{tab:repairs}, rows 14 to 18) it
 holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, mostly the links of
 realworld's and k8sdash's shells placed on every screen the shell renders.
 On the intermediate instrument every must edge passed the witness check (\RoundMustClean{} after
 attribution), but only as the tables were printed then: the runs behind them were lost and an
 archived re-run did not reproduce them.
 That tier held none of k8sdash's edges, so it says nothing of the edges attribution added there.
-Whether those edges occur on every input is what the fourth correction decided, and for most the
-answer was no.
+Whether those edges occur on every input is what the demotion rules decide; \CensusMustKdash{} of them are kept at must.
 On the final instrument the check finds \MustWitnessViolations{} failures among the
 \MustWitnessEdges{} must edges, but cannot read the destination of \MustWitnessUnread{}, all of
 them k8sdash's toolbar edges, so only about half of that application's must edges are read.
@@ -92,8 +90,7 @@ Applications that navigate from services therefore need an injection relation of
 the dispatch relation is still not implemented.
 
 \paragraph{RQ4 is conditional, and the condition is RQ1.}
-Leaving aside the rename operator, whose detection is close to guaranteed by construction, the
-three operators that can fail are detected in \MutFallibleDetected{} of \MutFallibleScored{} scored
+Leaving aside the rename operator, whose detection is close to guaranteed by construction, the other three operators, each generated or scored only at constructs the graph already represents in the simplest form the extractor reads, are detected in \MutFallibleDetected{} of \MutFallibleScored{} scored
 mutants on the attributed graph: every deleted \texttt{routerLink}, \MutRetargetDetected{} of
 \MutRetargetScored{} retargeted calls and \MutGuardDetected{} of \MutGuardScored{} removed guards
 (Table~\ref{tab:mutation}).
@@ -102,8 +99,7 @@ mutants (Appendix~\ref{app:repairs}).
 Each undetected mutant on the previous run was the harness's error rather than the graph's, which
 says the harness needed the reading; it does not show that the remaining operators would survive a
 larger or differently drawn sample.
-The final sample is partly different from the earlier one (\MutOverlap{} of \MutSampled{} mutants
-shared with the \MutEarlierSampled{} of the earlier run), so the runs share a seed and not a
+The final sample is partly different from the earlier one (\MutOverlap{} of \MutSampled{} mutants at the same location, by operator, file and line, as the \MutEarlierSampled{} of the earlier run, destinations possibly differing), so the runs share a seed and not a
 sample.
 The three mutated applications use different routing styles, and no operator fails under one
 style and not the other (Section~\ref{sec:res-mutation}); the corpus was not stratified by style,
@@ -176,7 +172,7 @@ The results are measurements of one tool, on one corpus, with five methods and a
 on two applications, performed by the person who wrote the tool.
 Each of those four choices limits what the figures support.
 
-\textbf{The scope is validated in both directions on one application only.}
+\textbf{The scope is compared in both directions on one application only, and only against the analysis's own relations.}
 Every other method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none can be
 asked whether the set of screens attribution computes for a site is the set it fires from.
 Three methods bear on it, each partly.
@@ -402,7 +398,7 @@ abstraction of Section~\ref{sec:res-probe}.
 On that configuration the failures of the earlier cohort are real: the two alfresco addresses of the
 first comparison, and the \ProbeBeforeNotMounted{} the comparison returns against the static readers'
 earlier route set, are absent from the recorded configuration.
-The final extractor mints \ProbeInvented{} such addresses, which is the absence of a failure on that
+The compared graph mints \ProbeInvented{} such addresses, which is the absence of a failure on that
 configuration and not a proof of its impossibility.
 
 \section{Declared approximations}
@@ -413,8 +409,8 @@ can tell which queries it may ask.
 The thesis claims soundness only for the deterministic tier and only over the declared route set
 (Claim~\ref{claim:must}), and pairs that claim with this list in the soundiness position of
 Section~\ref{sec:soundiness} \cite{livshits2015soundiness}.
-The list separates constructs in scope, where a failure is a defect that Chapter~\ref{ch:results}
-counts, from constructs out of scope, where no completeness is claimed.
+The list separates constructs read exactly, where a failure is a defect that Chapter~\ref{ch:results}
+counts, from constructs approximated, where no completeness is claimed. Constructs of the approximated group still count in the construct denominator of Table~\ref{tab:ratios}, where they appear as dynamic, unplaced or attribution losses. A declared approximation can still cost transitions that the suites take; the end-to-end check measures that cost on mifos (Section~\ref{sec:res-e2e}).
 Two of the approximations were found by the runtime route oracle of Section~\ref{sec:res-probe} and not by
 reading the analysis, and they come first because both are places where the analysis is silent
 rather than approximate.
@@ -449,7 +445,7 @@ build fixes differently selects a different arm there.
 The measurements are taken over the sources as checked out, and the runtime route oracle reads a
 development build for the same reason, so the two agree about which configuration is measured.
 
-\textbf{In scope} are the following, and everything in this group is the analysis's
+\textbf{Read exactly} are the following, and everything in this group is the analysis's
 responsibility.
 \begin{itemize}[nosep]
 \item Route entries whose path is a string literal, together with the component they render.
@@ -465,7 +461,7 @@ constant route paths, lazy boundaries and unlinked nodes (Section~\ref{sec:res-d
 They were bugs with known causes and not approximations to be declared away, which is why RQ5
 could repair them (Section~\ref{sec:res-round2}).
 
-\textbf{Out of scope} are the following constructs, each with the reason it is approximated and
+\textbf{Approximated} are the following constructs, each with the reason it is approximated and
 the effect on the graph.
 
 \begin{itemize}[nosep]

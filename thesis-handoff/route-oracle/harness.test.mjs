@@ -907,6 +907,9 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
     expect(macro(out, 'AttrNonLiteral')).toBe('2')
     expect(macro(out, 'AttrOrderFlips')).toBe('1')
     expect(macro(out, 'AttrOrderFlipWhere')).toBe('bitwarden')
+    // Review 5 Nov, H1: the corpus share is mostly mifos's; say how many applications recover under half, and the share without mifos.
+    expect(macro(out, 'AttrUnderHalfApps')).toBe('1')
+    expect(macro(out, 'AttrRecoveredShareNoMifos')).toBe('66.7\\,\\%')
   })
 
   it('counts an unread must edge as neither passed nor failed', () => {
