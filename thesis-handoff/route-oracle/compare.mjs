@@ -12,6 +12,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { conversion } from './report-counts.mjs'
+import { isLiteralTarget } from './literal-target.mjs'
 
 // One line naming the run a generated table came from, so two tables made from different
 // runs cannot be read as one measurement.
@@ -214,6 +215,20 @@ const T = {
   demoted: rows.reduce((a, r) => a + r.demoted, 0),
   unexplained: diag.reduce((a, d) => a + (d[UNEXPLAINED] || 0), 0),
 }
+// The loss rules test ownership before the target, so a construct with no owning screen is filed
+// as attribution whatever its target. Count those whose target is not literal, and the
+// applications on which testing the target first would make the target class (every attribution
+// or node-class construct with a non-literal target) larger than what attribution keeps.
+const order = B.results.map((b) => {
+  const lost = raw(beforeDir, b.slug).rows.filter((r) => ATTR_CLS.includes(r.cls) || NODE_CLS.includes(r.cls))
+  const nonLit = lost.filter((r) => !isLiteralTarget(r))
+  const attrNonLit = nonLit.filter((r) => ATTR_CLS.includes(r.cls)).length
+  const attrKept = lost.filter((r) => ATTR_CLS.includes(r.cls)).length - attrNonLit
+  return { slug: b.slug, attrNonLit, flips: nonLit.length > attrKept }
+})
+T.nonLiteral = order.reduce((a, o) => a + o.attrNonLit, 0)
+T.orderFlips = order.filter((o) => o.flips).length
+T.orderFlipWhere = order.filter((o) => o.flips).map((o) => NAME[o.slug]).join(' and ') || 'none'
 const recovered = T.must + T.may
 if (recovered + T.remaining !== T.lost) {
   throw new Error(`attribution losses do not close: ${recovered} recovered + ${T.remaining} classified != ${T.lost} assigned. One of the two tables is measuring a different population.`)
@@ -226,6 +241,7 @@ for (const [k, v] of [
   ['AttrRemaining', T.remaining], ['AttrRemainingUnexplained', T.unexplained], ['AttrEdgesBefore', T.edgesBefore], ['AttrEdgesAfter', T.edgesAfter],
   ['AttrMustBefore', T.mustBefore], ['AttrMustAfter', T.mustAfter], ['AttrAppsGained', T.gained],
   ['AttrAppsFell', T.fell], ['AttrFellWhere', T.fellWhere], ['AttrDemoted', T.demoted],
+  ['AttrNonLiteral', T.nonLiteral], ['AttrOrderFlips', T.orderFlips], ['AttrOrderFlipWhere', T.orderFlipWhere],
 ]) tex4 += `\\newcommand{\\${k}}{${v}}\n`
 // held back until every check below has passed; see the single write at the end
 console.log(`\nRQ3: ${recovered} of ${T.lost} recovered (${T.must} must, ${T.may} may), ${T.remaining} classified (${T.unexplained} unexplained), ${T.regressed} regressed, ${T.demoted} demoted from must to may (conversion fell on ${T.fell}: ${T.fellWhere}); edges ${T.edgesBefore} -> ${T.edgesAfter}, must ${T.mustBefore} -> ${T.mustAfter}`)

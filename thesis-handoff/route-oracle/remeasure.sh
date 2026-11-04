@@ -69,8 +69,10 @@ for p in realworld:. alfresco:projects/aca-content bitwarden:apps/web; do a=${p%
   node mutate.mjs "$W/corpus-rq4/$a" "$W/corpus-rq4/$a/$s" --attribution --quota 8 --seed 20261021 --json "results-rq4/rq4-$a-attributed.json" > "$W/rq4-$a.log" 2>&1
   node mutate.mjs "$W/corpus-rq4/$a" "$W/corpus-rq4/$a/$s" --quota 8 --seed 20261021 --json "results-rq4/rq4base-$a.json" > "$W/rq4base-$a.log" 2>&1
 done
+# rq4earlier-* are the attributed runs at 583a72c (same seed), tracked to report how far the samples overlap.
 node rq4-to-latex.mjs results-rq4/rq4-realworld-attributed.json results-rq4/rq4-alfresco-attributed.json results-rq4/rq4-bitwarden-attributed.json \
-  results-rq4/rq4base-realworld.json results-rq4/rq4base-alfresco.json results-rq4/rq4base-bitwarden.json > "$W/rq4.tex" 2> results-rq4/rq4-diagnostics.txt
+  results-rq4/rq4base-realworld.json results-rq4/rq4base-alfresco.json results-rq4/rq4base-bitwarden.json \
+  results-rq4/rq4earlier-realworld.json results-rq4/rq4earlier-alfresco.json results-rq4/rq4earlier-bitwarden.json > "$W/rq4.tex" 2> results-rq4/rq4-diagnostics.txt
 cp "$W/rq4.tex" "$TEX/generated-rq4.tex"
 node to-plots.mjs --rq4-only results-rq4/rq4-realworld-attributed.json results-rq4/rq4-alfresco-attributed.json results-rq4/rq4-bitwarden-attributed.json > "$TEX/generated-plots-rq4.tex"
 # results-must/mutation-sweep.json is written by mutation-sweep.mjs, which runs the adapter's suite once

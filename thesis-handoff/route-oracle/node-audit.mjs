@@ -58,7 +58,7 @@ for (const slug of SLUGS) {
     if (!byPath.has(k)) byPath.set(k, new Set())
     byPath.get(k).add(r.kind)
   }
-  const c = { noRoute: 0, blind: 0, outsideS: 0, screen: 0, total: 0 }
+  const c = { noRoute: 0, blind: 0, outsideS: 0, screen: 0, total: 0, graphNodes: j.comparison.graphNodes, declared: j.comparison.declaredScreens, matched: j.comparison.matched, blindSpots: j.blindSpots.length }
   for (const e of j.comparison.extraNodes) {
     c.total++
     const kinds = byPath.get(norm(e.route))
@@ -95,5 +95,12 @@ if (!tex) {
   }
   out += `\\midrule\nUnmatched nodes & ${slugs.map((s) => per[s].total).join(' & ')} & ${sum('total')} \\\\\n`
   out += `\\bottomrule\n\\end{tabular}}\n`
+  // One macro per cell and per first-round count, so the prose never retypes a number the table holds.
+  const TAG = { realworld: 'Realworld', alfresco: 'Alfresco', ghostfolio: 'Ghostfolio', k8sdash: 'Kdash', bitwarden: 'Bitwarden', mifos: 'Mifos' }
+  const FIELDS = { noRoute: 'NoRoute', blind: 'Blind', outsideS: 'OutsideS', screen: 'Screen', total: 'Unmatched', graphNodes: 'GraphNodes', declared: 'Declared', matched: 'Matched', blindSpots: 'BlindSpots' }
+  for (const [k, name] of Object.entries(FIELDS)) {
+    for (const s of slugs) out += `\\newcommand{\\NodeAudit${name}${TAG[s]}}{${per[s][k]}}\n`
+    out += `\\newcommand{\\NodeAudit${name}All}{${sum(k)}}\n`
+  }
   process.stdout.write(out)
 }

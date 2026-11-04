@@ -42,6 +42,7 @@ import { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import path from 'node:path'
 import { ts } from 'ts-morph'
+import { isLiteralTarget } from './literal-target.mjs'
 
 const appDir = path.resolve(process.argv[2])
 const dbPath = path.resolve(process.argv[3])
@@ -265,17 +266,6 @@ for (const f of files) {
 }
 
 // ---------------------------------------------------------------- classify
-
-const isLiteralTarget = (c) => {
-  const t = c.target
-  if (c.kind === 'routerLink') {
-    // plain attribute routerLink="/a/b" is a literal; a bound array of quoted parts plus
-    // simple variables is literal enough for the extractor to build a pattern.
-    if (!/^\s*\[/.test(t) && !/[.()]/.test(t)) return true
-    return !/\b[a-zA-Z_]\w*\.(?!id\b|slug\b|username\b|name\b)\w+/.test(t.replace(/'[^']*'|"[^"]*"/g, ''))
-  }
-  return /^\s*\[\s*['"`]/.test(t) || /^\s*['"`]/.test(t)
-}
 
 const tally = {}
 // Match a construct in an inline template to an edge citing the template's start line,

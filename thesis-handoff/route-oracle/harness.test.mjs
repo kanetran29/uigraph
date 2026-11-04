@@ -891,6 +891,24 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
     expect(macro(out, 'AttrRemainingUnexplained')).toBe('1')
   })
 
+  it('counts the attribution-class constructs whose target is not literal, and where a target-first order flips the ranking (review 4 Nov, circularity-01)', () => {
+    const before = run1('before', RAW_CLASSES, false)
+    const after = run1('after', AFTER_CLASSES, true)
+    const rich = (slug, targets) => {
+      const f = path.join(before, 'raw', `${slug}.L.json`)
+      const rows = JSON.parse(fs.readFileSync(f, 'utf8')).rows.map((r, i) => ({ ...r, ...targets[i] }))
+      fs.writeFileSync(f, JSON.stringify({ rows }))
+    }
+    rich('realworld', [{ kind: 'routerLink', target: '/a' }, { kind: 'navigate', target: 'this.next' }])
+    rich('bitwarden', [{}, {}, {}, { kind: 'navigate', target: 'this.next' }])
+    const tex = path.join(before, 'out.tex')
+    run('compare.mjs', [before, after, '--tex', tex])
+    const out = fs.readFileSync(tex, 'utf8')
+    expect(macro(out, 'AttrNonLiteral')).toBe('2')
+    expect(macro(out, 'AttrOrderFlips')).toBe('1')
+    expect(macro(out, 'AttrOrderFlipWhere')).toBe('bitwarden')
+  })
+
   it('counts an unread must edge as neither passed nor failed', () => {
     const before = run1('before', RAW_CLASSES, false)
     const after = run1('after', AFTER_CLASSES, true, { unread: 1 })
@@ -1194,5 +1212,34 @@ describe('round2-to-latex (review of harness 2): the Judged and Clean of judged 
       inScope += l0.inScope; lost += l0.lost
     }
     expect(macro(generate(witness), 'RoundTwoBefore')).toBe(`${(100 * (inScope - lost) / inScope).toFixed(1)}\\,\\%`)
+  })
+})
+
+describe('rq4-to-latex.mjs sample overlap (review 4 Nov, numbers-01)', () => {
+  it('counts the final mutants that were in the earlier sample (583a72c), and the earlier misses the final sample lacks', () => {
+    const f = (n) => path.join(HERE, 'results-rq4', n)
+    const apps = ['realworld', 'alfresco', 'bitwarden']
+    const out = run('rq4-to-latex.mjs', [...apps.map((a) => f(`rq4-${a}-attributed.json`)), ...apps.map((a) => f(`rq4base-${a}.json`)), ...apps.map((a) => f(`rq4earlier-${a}.json`))])
+    expect(macro(out, 'MutSampled')).toBe('73')
+    expect(macro(out, 'MutEarlierSampled')).toBe('70')
+    expect(macro(out, 'MutOverlap')).toBe('46')
+    expect(macro(out, 'MutOverlapBitwarden')).toBe('8')
+    expect(macro(out, 'MutEarlierFailures')).toBe('9')
+    expect(macro(out, 'MutEarlierFailuresAbsent')).toBe('6')
+  })
+})
+
+describe('node-audit.mjs scalar macros (review 4 Nov, numbers-07)', () => {
+  it('emits the cells, totals and first-round node counts the appendix prose states', () => {
+    const out = run('node-audit.mjs', [path.join(HERE, 'results-before'), '--tex'])
+    expect(macro(out, 'NodeAuditUnmatchedAll')).toBe('197')
+    expect(macro(out, 'NodeAuditGraphNodesAll')).toBe('338')
+    expect(macro(out, 'NodeAuditBlindKdash')).toBe('37')
+    expect(macro(out, 'NodeAuditUnmatchedKdash')).toBe('38')
+    expect(macro(out, 'NodeAuditNoRouteMifos')).toBe('117')
+    expect(macro(out, 'NodeAuditOutsideSAll')).toBe('11')
+    expect(macro(out, 'NodeAuditDeclaredMifos')).toBe('610')
+    expect(macro(out, 'NodeAuditMatchedMifos')).toBe('58')
+    expect(macro(out, 'NodeAuditBlindSpotsMifos')).toBe('1')
   })
 })

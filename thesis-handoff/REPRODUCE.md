@@ -102,7 +102,10 @@ The runtime probe needs each application built in its development configuration;
 `route-probe/README.md`.
 
 The end-to-end navigation check (`e2e-nav/`) is scored from its archived logs and the
-corpus graphs at `c42f220`, both under `e2e-nav/results/<app>/`:
+corpus graphs at `c42f220`, both under `e2e-nav/results/<app>/`. The comparison graphs beside
+them, `graph-noattr.json.gz` (mapped without `--attribution` by `remeasure.sh`) and
+`graph-rooted.json.gz` (the realworld *rooted* level from `results-ablation/ablation.tgz`), are
+scored on the same pairs. `node --test score.test.mjs` checks the scorer.
 
 ```bash
 cd thesis-handoff/e2e-nav
