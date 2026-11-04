@@ -36,7 +36,7 @@ for a thin UI suite while two applications with none were kept.
 parser of Section~\ref{sec:protocol}, as it stands after the corrections of
 Section~\ref{sec:res-round2}. A count marked $\geq$ is a lower bound: the independent route parser records a
 blind spot for that application, so the entries behind it are not in the figure, and
-Table~\ref{tab:round2nodes} gives how many blind spots each application has. At extractor commit
+Table~\ref{tab:coverage} gives how many blind spots each application has. At extractor commit
 \EarlierCommit{} the independent route parser could not follow the lazily loaded modules of kubernetes/dashboard and
 gave a lower bound there; it now reaches them. The marks that remain are on
 \RoundTwoLowerBoundWhere{}, on these grounds: \RoundTwoLowerBoundReasons{}.}
@@ -125,6 +125,7 @@ Must-tier precision & must edges whose witness passes (lower bound) or does not 
 Node-level recall & distinct URLs named in an application's end-to-end test sources that have a node & distinct URLs so named & RQ1 & \ref{sec:res-baseline} \\
 Structural-reference recall and precision & (site, screen) pairs the reference and a level share & pairs in the reference (recall) or pairs the level places (precision) & RQ3 & \ref{sec:res-groundtruth} \\
 End-to-end containment & observed screen pairs joined by an edge of the graph & observed screen pairs & RQ3 & \ref{sec:res-e2e} \\
+Scope width & mean screens a site is attributed to & the same when every site is assigned to every screen & RQ3 & \ref{sec:res-width} \\
 Detection rate & injected changes that produce the predicted change in the graph & injected changes the graph can score (excluded mutants reported) & RQ4 & \ref{sec:res-mutation} \\
 \bottomrule
 \end{tabularx}
@@ -270,10 +271,10 @@ on mifos. It now applies the preregistered rule, and the earlier figure is not u
 
 A missed pair is classified from the graph alone, by rules over the graph so that no assignment is
 made by hand. The classes are tested in this order and the first match wins: \emph{redirect} (the
-navigation was redirected; preregistered), \emph{base} (the target is reached from a screen above the
-source but not from the source, as a relative link resolved against the wrong route appears), and
+navigation was redirected and the graph holds the pair on the address it landed on; the preregistered redirect class), \emph{base} (the target is reached from a screen above the
+source but not from the source, as a relative link resolved against the wrong route appears),
 \emph{dynamic} (the source screen's routed component, or one above it, holds a site whose target the
-extractor records as unresolved). The base and dynamic classes were defined after the misses had been
+extractor records as unresolved), and \emph{other} (none of these). The base and dynamic classes were defined after the misses had been
 read. Because of the order, the dynamic count is what is left after base. On mifos every miss meets
 the dynamic test whatever the order, so that count says little alone, and
 Section~\ref{sec:res-e2e} names the sites.
@@ -483,16 +484,8 @@ earlier baseline run.
 \label{sec:corrections}
 
 The protocol was corrected several times while it was developed, because each mistake would
-otherwise have led to an incorrect figure. The corrections were of four kinds:
-\begin{itemize}
-\item matching rules that credited what they should not (URL parameters against literal route
-segments, attribute names by substring, comments read as source);
-\item a denominator over the wrong unit (edges where constructs were meant), and a first independent route parser
-that did not read whole forms of route table;
-\item a precision figure inflated by counting over-approximated may edges as errors;
-\item defects of the mutation harness: patching the first of several identical constructs, judging
-detection without witnesses, and the rules that exclude and compare guard mutants.
-\end{itemize}
+otherwise have led to an incorrect figure. The corrections concerned matching rules, denominators,
+a precision figure and the mutation harness, and are listed in Table~\ref{tab:repairs}.
 The final figures are those of the corrected protocol. The figures of the superseded instruments
 cannot be regenerated with the shipped harness and none is cited as a result; the few comparisons
 elsewhere that rest on an earlier extractor name its commit and read their figures from that commit's
@@ -503,8 +496,8 @@ the extractor. A surprising figure is therefore checked against its inputs befor
 The mutation run of the superseded harness used the same seed as the final run but a partly
 different sample: \MutOverlap{} of its \MutEarlierSampled{} mutants are among the \MutSampled{}
 of the final run, and \MutEarlierFailuresAbsent{} of its \MutEarlierFailures{} misses are not in
-the final sample. The new mutants come from the same seed and the same graph, and the harness
-rules were corrected after the earlier misses had been read, so they are not an independent test.
+the final sample. The new mutants come from the same seed and quota but not from the same graph: the earlier run records no extractor commit, and its baseline graphs differ from the final ones. The harness
+rules were corrected after the earlier misses had been read, so the final run is not an independent test.
 The corrections are listed in Appendix~\ref{app:repairs}.
 
 \subsection{Reproducibility}

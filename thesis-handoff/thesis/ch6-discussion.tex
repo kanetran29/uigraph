@@ -195,14 +195,13 @@ own suites perform. On realworld it does not discriminate: the shell-rule level,
 earlier work, already contains all \EtoERealworldPairs{} observed pairs (\EtoERealworldHitRooted{}),
 among \EtoERealworldPossiblePairs{} possible ordered pairs of which the attributed graph holds
 \EtoERealworldGraphPairs{}. On mifos the graph contains \EtoEMifosHit{} of \EtoEMifosPairs{}
-transitions, against \EtoEMifosHitNoattr{} without attribution. All \EtoEMifosMiss{} misses are
-defects of the tool and none is repaired: \EtoEMifosMissRedirect{} fall in the preregistered
-redirect class, \EtoEMifosMissBase{} are a relative link in a template shared by a screen and its
+transitions, against \EtoEMifosHitNoattr{} without attribution. Of the \EtoEMifosMiss{} misses, \EtoEMifosMissRedirect{} fall in the preregistered
+redirect class, where the graph holds the pair on the address the navigation landed on. The other
+\the\numexpr\EtoEMifosMissBase+\EtoEMifosMissDynamic\relax{} are defects of the tool and none is repaired:
+\EtoEMifosMissBase{} are a relative link in a template shared by a screen and its
 child tabs, resolved against the child's address, and \EtoEMifosMissDynamic{} sit at places the
 extractor fails to read (a template literal inside a commands array, \texttt{relativeTo} passed
-through a variable). The scorer first compared redirected navigations on the landed address,
-against the preregistration; it now applies the preregistered rule, and the earlier figure is
-\EtoEMifosHitAfterRedirects{} of \EtoEMifosPairsAfterRedirects{}.
+through a variable).
 \item The rendered-interface check covers \ScopeApps{} of the six applications, answers half of the question,
 and ran on an earlier graph than the final call graph and on \ScopeJudged{} of \ScopeScreens{}
 screens (Section~\ref{sec:res-scope}). Of the \ScopePairs{} (screen, target pattern) pairs the
@@ -230,9 +229,7 @@ The same untested direction bears on the must tier: most of k8sdash's must edges
 toolbar is attributed to, are as right as that one scope.
 
 \textbf{Construct validity.}
-Must conversion divides the constructs witnessed by a must edge by the in-scope
-navigation constructs the independent route parser finds in non-test source (Section~\ref{sec:metrics}).
-The denominator over-counts, since it contains constructs in code the application never mounts,
+The denominator of must conversion (Section~\ref{sec:metrics}) over-counts, since it contains constructs in code the application never mounts,
 and it under-counts, as follows, so the figure is not a bound in either direction.
 The independent route parser recognises navigation by four syntactic patterns: a \texttt{routerLink} attribute or
 binding, and a call to \texttt{navigate} or \texttt{navigateByUrl} on a receiver whose name contains
@@ -314,10 +311,11 @@ The selection is tool-driven: \texttt{SAP/spartacus} was rejected because its ro
 configuration-driven in a way the extractor does not support (Section~\ref{sec:corpus}), so figures
 measured on the corpus are likely optimistic for Angular applications at large.
 The candidate pool also showed an inverse relation between application size and end-to-end test density.
-The evidence from outside the extractor's own reading is uneven: URLs named in end-to-end test sources
-(read and not run) come from alfresco alone; the runtime router configuration was read on all
-\ProbeApps{} applications; rendered links were observed, on an earlier graph and in part, on
-\ScopeApps{}; and the end-to-end suites were observed on realworld and mifos, covering
+The evidence from outside the extractor's own reading is uneven.
+URLs named in end-to-end test sources (read and not run) come from alfresco alone.
+The runtime router configuration was read on all \ProbeApps{} applications.
+Rendered links were observed, on an earlier graph and in part, on \ScopeApps{}.
+The end-to-end suites were observed on realworld and mifos, covering
 \EtoEMifosPairs{} distinct transitions of an application with \RoundTwoRoutesMifos{} route entries.
 The findings about scale therefore rest mainly on the runtime configuration and the extractor's own
 reading.
@@ -350,8 +348,8 @@ witness and not the address: an edge whose target node sits at a path the applic
 satisfies it.
 \item The mutation oracle is the authored delta, so it does not consult the tool's output.
 \item Commits and harness version are pinned, determinism was checked before any measurement, and the
-result tables are generated from result files (Section~\ref{sec:protocol}); the defect-class table, the
-oracle table and the inspection of the unreached components are written by hand.
+result tables are generated from result files (Section~\ref{sec:protocol}); the two tables compiled by
+hand are the defect-class table and the table of the witness check and the test-source cross-check.
 \item The protocol corrections are reported in full, including those that made the figures worse
 (Appendix~\ref{app:repairs}).
 \end{itemize}
@@ -362,9 +360,9 @@ residual constructs inspected by hand;
 \item the defect classes were defined after the first observations, not in advance;
 \item the source-level readings of the must tier (\MustReviewReaders{} readings of the intermediate
 tier's \MustCtxDistinct{} constructs, and one of the final \CensusMustSites{}) were made by the artificial intelligence (AI)
-assistant declared at the front, which also helped write the extractor and the independent route parser; the final
-reading was made with the extractor's decisions in view and no human second reader checked them, so
-their agreement shows consistency with the stated rules and not independent correctness;
+assistant declared at the front, which also helped write the extractor and the independent route parser.
+The final reading was made with the extractor's decisions in view and no human second reader checked them.
+Their agreement therefore shows consistency with the stated rules and not independent correctness;
 \item the repairs of Section~\ref{sec:res-round2} were found on, and are measured on, the same six
 applications, with no held-out application, so the post-repair figures are fitted to this corpus.
 \end{itemize}

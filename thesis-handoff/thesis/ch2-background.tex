@@ -207,8 +207,8 @@ not follow a call into a service, so a navigation inside a service member is not
 screens of its callers. Zhang et al.\ parse
 the compiled JavaScript bundle rather than the sources, take declared routes as vertices and
 navigation calls as edges, and check an access-control policy against the screens reachable
-from an authorised one; their graph is declared an over-approximation and is not narrowed,
-and no navigation site is attributed to the screens it can fire from; the authors note that
+from an authorised one. Their graph is declared an over-approximation and is not narrowed, and no
+navigation site is attributed to the screens it can fire from. The authors note that
 the graph may contain paths a guard would block, because guards are not represented
 \cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth built by hand for the applications they
 study, which measures what their extraction misses there; neither work classifies the losses by
@@ -292,10 +292,10 @@ difference between the must tier and the may tier.
 
 The practical obstacle to analysing a client-side application is the framework around
 the code, not the language. Madsen et al.\ observe that JavaScript applications depend
-on large frameworks and libraries whose behaviour a static analysis has to know, that
-hand-written models of them are tedious to produce, incomplete and sometimes wrong, and
-that the alternative is to infer library behaviour from the way the application uses
-it; they combine pointer analysis with such a \emph{use analysis} and evaluate it on 25
+on large frameworks and libraries whose behaviour a static analysis has to know. Hand-written
+models of them are tedious to produce, incomplete and sometimes wrong, and the alternative is to
+infer library behaviour from the way the application uses it. They combine pointer analysis with
+such a \emph{use analysis} and evaluate it on 25
 Windows 8 JavaScript applications \cite{madsen2013practical}. A later analysis by Madsen et al.\
 addresses implicit control flow directly. Their \emph{event-based call graph} for
 Node.js represents listeners that run when an event fires, and the analyses that build it find
@@ -478,9 +478,9 @@ Java literature has measured what this costs a general analysis and what recover
 and Table~\ref{tab:framework-models} lists the analyses that model framework behaviour
 explicitly. Sridharan et al.\ report that the heavy use of reflection in frameworks
 makes static taint analysis ineffective, and that adding support for one framework at a
-time does not scale; their tool instead generates a specification of framework
+time does not scale. Their tool instead generates a specification of framework
 behaviour from the application code and its configuration files, which an unmodified
-taint engine then consumes, and this found 525 new issues across nine benchmarks
+taint engine then consumes. This found 525 new issues across nine benchmarks
 \cite{sridharan2011f4f}. Antoniadis et al.\ report that major Java analysis frameworks
 offer almost no support for enterprise applications, capture the concepts those
 frameworks share, such as components and entry points, in a declarative and largely
@@ -685,16 +685,16 @@ edited by Bohner and Arnold is the standard reference for the area, covering
 source-code dependency analysis and traceability analysis \cite{bohner1996software}.
 Chianti is the classic tool of this kind: it decomposes the difference between two
 versions of a program into atomic changes and reports, for each affected test, the
-changes that affect it; on a year of version history from one project it found that an
+changes that affect it. On a year of version history from one project it found that an
 average of 52\% of the unit tests were affected, each by only 3.95\% of the atomic
 changes \cite{ren2004chianti}. Lehnert's taxonomy classifies impact analysis approaches
-along more detailed criteria than the earlier frameworks and is useful for placing a
+along more detailed criteria than the earlier frameworks. It is useful for placing a
 new one, although it appeared at a workshop \cite{lehnert2011taxonomy}. A transition
 graph whose edges carry source witnesses supports the same kind of query at the level of
 screens, and the mutation experiment measures whether the graph changes when the source
 it was derived from changes.
 
-\section{The gap}
+\section{Summary and the gap}
 \label{sec:gap}
 
 Static extraction of navigation models from web applications has been directed largely at

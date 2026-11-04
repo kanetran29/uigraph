@@ -95,7 +95,12 @@ figure for that reason.
 \caption{Node extraction against the independent route parser, in both directions: declared
 screens that have a matching node, and nodes for which the independent route parser holds no declared
 screen. The blind-spot column counts route entries the independent route parser could not follow, which
-bounds what either direction can show.}
+bounds what either direction can show. A blind spot is a route the independent route parser
+knows is there and cannot address: a lazy boundary whose route array it could not find, a path
+expression it could not resolve to a literal, a route whose path is computed by a custom matcher, or a
+route source spread into a table from a call it does not follow; the last kind now accounts for most of
+the column. The node set is the same with scope attribution off and on, since attribution mints no
+nodes.}
 \label{tab:coverage}
 \TabCoverage
 \end{table}
@@ -117,7 +122,7 @@ component that renders it. It is confirmed only by the comparison between the in
 graph, so it is reported as a candidate until a second method confirms it. It is empty on the
 final instrument.
 
-\begin{table}[p]\footnotesize
+\begin{table}[tbp]\footnotesize
 \caption{Defect classes and the evidence for each. A class is admitted on two
 lines of evidence, at least one from a named evaluation method; the methods
 column counts only those. This summary is compiled by hand; it is not harness output.}
@@ -131,7 +136,7 @@ multi-mount edge absent; manual audit; an application with nodes and no edges at
 Lazy module boundary not followed & independent route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & red-team panels and a source survey of the guard factory and the call-form \texttt{canActivate}, after commit \EarlierCommit{}
 (Section~\ref{sec:res-soundness}) & 1 & 2 \\
-Named router outlets not modelled & test-source cross-check; source survey & 1 & 2 \\
+Named router outlets not implemented & test-source cross-check; source survey & 1 & 2 \\
 Constant-valued route paths not resolved & independent route parser; node-count collapse & 1 & 2 \\
 \addlinespace
 \emph{Candidate:} node not linked to its component & independent route parser against graph & 1 & 1 \\
@@ -158,7 +163,7 @@ final snapshot with attribution disabled.}
 
 Attribution is the largest loss category in every application, and by a wide margin. Of the
 \RoundTwoInScopeAll{} constructs, the two attribution categories hold \AttrLost{} between them,
-and no other category holds a tenth as many. The destinations only the run time knows are no
+and no other loss category holds a tenth as many. The destinations only the run time knows are no
 defect of the extractor, and the table counts them apart. They come to about a third as many.
 Most of the attribution categories come from components that several screens render, not from
 services.
@@ -602,10 +607,9 @@ agreement is with the transitions the suite takes and not with the graph.
 \paragraph{mifos.} The suite completes \EtoEMifosEnds{} navigations, \EtoEMifosPairs{} distinct pairs,
 and the graph contains \EtoEMifosHit{} of them. This count applies the pre-registered rule: a
 redirected navigation is compared on the address it asked for. \EtoEMifosRedirect{} pairs were
-redirected, and \EtoEMifosHitRedirect{} of those are hits. The scorer first compared redirected
-navigations on the landed address, against the pre-registration, and reported
-\EtoEMifosHitAfterRedirects{} of \EtoEMifosPairsAfterRedirects{}. It now applies the pre-registered
-rule, and that earlier figure is superseded. Without attribution the graph contains
+redirected, and \EtoEMifosHitRedirect{} of those are hits. Under the scorer's first,
+non-preregistered rule the figure was \EtoEMifosHitAfterRedirects{} of
+\EtoEMifosPairsAfterRedirects{} (Table~\ref{tab:repairs}, row 32). Without attribution the graph contains
 \EtoEMifosHitNoattr{}. None of the matched pairs is a must edge, as predicted. Some hits rest only on
 a site whose target prefix was over-approximated to many routes, so they show that the target is
 reachable in the graph and not that the site was resolved. No other pre-registered prediction is
@@ -691,12 +695,9 @@ mutants are scorable only against the attributed graph and \MutBaselineOnly{} on
 baseline. On this corpus, then, attribution leaves the detection rate per scored change essentially
 unchanged, and its effect on change sensitivity is the widening of what can be scored at all.
 
-An earlier harness run (Appendix~\ref{app:repairs}) used the same seed on a partly different sample:
-\MutOverlap{} of its \MutEarlierSampled{} mutants are among the \MutSampled{} of the final run. It
-showed six paired disagreements in favour of attribution, five of them retarget mutants whose operator
-replaced only the head of the commands array. With the operator corrected
-(Section~\ref{sec:res-mutation}) the baseline detects those five too, and the single disagreement
-above remains.
+An earlier harness run used the same seed on a partly different sample, and its disagreements in
+favour of attribution came from an operator artefact that has since been corrected
+(Table~\ref{tab:repairs}, row 7). The single disagreement above remains.
 
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}
@@ -792,7 +793,8 @@ Of the \MutScored{} scored mutants, \MutDetected{} were detected, and \MutBaseDe
 figures are \MutPairedDetected{} and \MutPairedBaseDetected{}. In this sample the graph responded to
 every scored change in the constructs it represents. A construct it does not represent cannot
 respond, and such mutants are excluded rather than scored, so the rate is conditional on RQ1's
-recovered share.
+recovered share. The final sample shares \MutOverlap{} of its \MutSampled{} mutants with the earlier run, whose
+misses guided the corrections to the harness, so the rate is not an independent test.
 
 \section{What the repairs cost the claim (RQ5)}
 \label{sec:res-round2}
@@ -837,8 +839,9 @@ method of Section~\ref{sec:res-probe} finds and the sources leave undecided.
 \ProbeMissedGhostfolio{} of the \ProbeMissed{} mounted addresses without a node sit behind it.
 \end{itemize}
 
-Every other cause resolved to a construct the extractor could read and did not. All were repaired
-except two: ghostfolio's spread of computed routes and the named router outlets. The node-extraction
+Every other cause was a construct the extractor could read and did not, and all were repaired
+except the one behind the named-outlet class, which the model represents and the extractor does not
+implement. With the spread of computed routes, two readable causes therefore remain unrepaired. The node-extraction
 defects fall into three groups.
 
 \begin{sloppypar}
@@ -867,9 +870,8 @@ the component fills. Resolving these is what separates a link from a dead end. O
 cost a soundness violation before it was added: a field seeded with a literal is mutable state,
 not a constant, and following it turns a run-time value into a must edge.
 
-Node extraction is therefore no longer the bottleneck. At the starting instrument the extractor
-completed on one application and left four of the six at coverage rates below 20\%. The repairs
-brought every one to completion. An analysis that decides where a navigation can fire needs a node
+Node extraction is therefore no longer the bottleneck. The repairs
+brought every application to completion. An analysis that decides where a navigation can fire needs a node
 for the screen it fires from, and a construct whose source screen has no node is a loss attribution
 cannot repair. The threshold was crossed by resolving the constructs the route table was reached
 through, not by inferring nodes the framework definition does not supply. The gaps that remain are
@@ -877,29 +879,10 @@ declared rather than inferred. The custom matcher and the deployment-time choice
 information a static reader does not have. The spread of computed routes does not: its routes are in
 the source, and the extractor does not yet read them.
 
-The independent route parser was itself corrected several times, because each defect had scored the
-extractor against paths the independent route parser failed to read (Appendix~\ref{app:validation}). The correction
-that matters most concerned a path held in a route table wrapped in \texttt{Object.freeze}. The
-alternative considered first was to drop those routes from the denominator as unreadable. They were
-readable one call away, and shrinking the denominator would have raised the coverage figure without
-any improvement in the extractor. The final baseline and attributed runs use the same route
-denominator in Table~\ref{tab:round2nodes}.
-
-Table~\ref{tab:round2nodes} reports declared screens that have a node on the final extractor. Its
-Before and After columns are identical, because every declared screen has a node in both runs: Before is the run with scope
-attribution off and After the run with it on, and attribution does not mint nodes. The columns that
-carry information are the declared count and the blind spots.
-
-\begin{table}[t]\small
-\caption{Declared screens that have a node on the final extractor, with scope attribution off
-(Before) and on (After). The repairs of the loss list are in both columns, so the two are identical.
-A blind spot is a route the independent route parser knows is there and cannot address: a lazy boundary whose route
-array it could not find, a path expression it could not resolve to a literal, a route whose path is
-computed by a custom matcher, or a route source spread into a table from a call the independent route parser does not
-follow. The last kind now accounts for most of the column.}
-\label{tab:round2nodes}
-\TabRoundTwoNodes
-\end{table}
+The independent route parser was itself corrected several times
+(Appendix~\ref{app:validation}); the correction that matters most, for a route table wrapped in
+\texttt{Object.freeze}, is row 20 of Table~\ref{tab:repairs}. The final baseline and attributed
+runs use the same route denominator (Table~\ref{tab:coverage}).
 
 \subsection{Construct accounting}
 
@@ -986,11 +969,16 @@ review read the \MustCtxDistinct{} distinct constructs, cited \MustCtxConstructs
 \MustCtxEdges{} edges of a frozen intermediate tier cite.
 
 \paragraph{Conditions on the construct.} A site is demoted when it does not run every time its code
-does: under a guard on the target, a cap from attribution, a catch-all route or a target with holes;
-under \texttt{*ngIf}, \texttt{@if}, a component mounted under a template condition or an ICU case; in
-a branch, a callback, a \texttt{catch} clause, after an \texttt{await} or an early \texttt{return};
-in a member no handler calls unconditionally; at an address two declared routes can answer; or before
-code that may start another navigation. Of the \MustCtxConstructs{} citations in the intermediate
+does. The conditions are:
+\begin{itemize}
+\item under a guard on the target, a cap from attribution, a catch-all route or a target with holes;
+\item under \texttt{*ngIf}, \texttt{@if}, a component mounted under a template condition or an ICU case;
+\item in a branch, a callback, a \texttt{catch} clause, after an \texttt{await} or an early \texttt{return};
+\item in a member no handler calls unconditionally;
+\item at an address two declared routes can answer;
+\item before code that may start another navigation.
+\end{itemize}
+Of the \MustCtxConstructs{} citations in the intermediate
 tier, \MustCtxConditional{} run under such a condition: \MustWhyUnderABranch{} under a branch,
 \MustWhyTemplate{} under a template condition (realworld's own \texttt{*ifAuthenticated} directive
 among them), \MustWhyAfterAwait{} after an \texttt{await}, \MustWhyInACallback{} in a callback,
@@ -1098,14 +1086,8 @@ Each of the \CensusMustSites{} constructs was read against the source for the co
 the address Angular resolves it to (for a relative link, the route's consumed segments less one per
 \texttt{../}), and the guards and resolvers its navigation runs. The readings are kept in
 \path{results-must/tier-reading.json}, and the census refuses to report a must construct that file
-does not list. Unlike the review of the intermediate tier, this reading was made once and with the
-extractor's decisions in view. It is a check that each decision can be defended from the source, not
-an independent second reading.
-
-Each of the \CensusMustSites{} constructs was read against the source for the condition around it,
-the address Angular resolves it to, and the guards and resolvers its navigation runs
-(\path{results-must/tier-reading.json}; the census refuses to report a must construct that file does
-not list). This reading was made once and with the extractor's decisions in view, so it shows that
+does not list. Unlike the review of the intermediate tier, this reading was made once, by the AI assistant the
+declaration at the front describes, and with the extractor's decisions in view. It is a check that
 each decision can be defended from the source, not an independent second reading.
 
 The witness check finds \MustWitnessViolations{} failures in the \MustWitnessEdges{} must edges and
@@ -1361,8 +1343,9 @@ finds no node where the framework mounts nothing. Scope attribution recovers a m
 constructs the loss rules assign to it, most of them at the may tier, and gains little in
 must conversion. Its scopes are narrower than the trivial attribution by a factor that is
 small on some applications, and the evidence that they are not too large is limited to one
-application's structural reference and a suite that does not discriminate on realworld. The
-mutation experiment shows the graph responds to every change in the constructs it represents. The
+application's structural reference, and the end-to-end suites test only the missing direction. In
+the sampled mutants on three applications the graph responded to every scored change in the
+constructs it represents; mutants on constructs it does not represent are excluded. The
 repairs closed the node-extraction defects except two, and left a small deterministic tier that
 rests on a source reading and a mechanical check and is not proved. The corrections are listed in
 Appendix~\ref{app:repairs}, and Chapter~\ref{ch:discussion} discusses what the results mean for
