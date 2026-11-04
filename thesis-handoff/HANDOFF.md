@@ -1,7 +1,8 @@
-# Thesis handoff (2 Nov 2026, evening)
+# Thesis handoff (4 Nov 2026)
 
-Read this first. It is written for a Claude Code session continuing the work. Everything below was
-checked against the repository on 1 Nov 2026; anything not checked says so.
+Read this first. It is written for a Claude Code session continuing the work. Sections are dated and the
+newest come first; the section "Current state, 4 Nov 2026" was checked against the repository on 4 Nov and
+supersedes every older section where they disagree.
 
 ## Who and what
 
@@ -20,12 +21,61 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 - Run an Opus red-team panel on finished work before calling it done; verify the panel's own claims before acting.
 - Before a striking headline, check it adversarially. Verify the referent, not the nearest proxy.
 
+## Current state, 4 Nov 2026
+
+- **Branches and tags.** Local `main` is `204f325`, the same commit as `origin/thesis-final-2026-11` (pushed).
+  `origin/main` is still `e7add5d` (2 Nov). On origin, tag `thesis-eval-final` points at `c42f220`, the evaluated
+  extractor; `thesis-eval` (`dd28cc2`) is superseded.
+- **Code.** `packages/` is identical to `c42f220`. Generated tables are stamped `c42f220` (round tables
+  `c42f2204 (local-checkout)`), except ablation (`c5f2fe5`) and ground truth (`7338774`), which are harness-only
+  commits on the same extractor, and the historical earlier instrument (`f17a302`) and node audit (`4505fd2a`).
+- **Checks run on 4 Nov on the working tree.** Adapter `vitest --maxWorkers=2` 498/498; harness vitest 98/98,
+  `node guard-resolve.test.mjs --corpus ~/personal/uigraph-work/corpus` 13/13, `node template-context.test.mjs`
+  12/12; the thesis builds from a scratch copy at 155 pages with 0 errors, 0 undefined references, 0 overfull boxes.
+- **Uncommitted in the working tree** (the student's work after `204f325`): prose in `thesis.tex`, `ch1`..`ch7`,
+  `appendix-a.tex`, `references.bib`, `REPRODUCE.md`, this file (the "Rigour ..." and "End-to-end ..." sections
+  below) and `thesis.pdf`; new `e2e-nav/` (`PREREGISTRATION.txt`, `collector.mjs`, `nav-trace.ts`, `score.mjs`,
+  `results/{realworld,mifos}`) and `thesis/generated-e2e.tex`; new `reviews/review-2026-11-04-vi.md` and
+  `review-2026-11-04.json`.
+- **Headline figures the thesis prints** (all through macros): must tier 150 edges on 25 constructs, 17 on 21
+  without attribution; 126 must edges on 3 constructs (k8sdash, bitwarden) rest on the route-order assumption,
+  24 edges on 22 constructs without it; witness check 0 failures, 62 must edges unread (k8sdash's toolbar link);
+  guard-only 194 must edges, 44 of them guarded; attribution recovers 292 of 454 constructs (64.3%); full adds 36
+  sites over outlet, of which the call graph's own net contribution is 7; structural reference on realworld 100%
+  precision and recall; RQ4 attributed 67/67, baseline 50/51, paired 51 vs 50 of 51; sweep 173 mutants;
+  end-to-end navigations realworld 19/19 pairs in the graph, mifos 15/22 (7 misses: 4 dynamic, 3 base).
+- **Open: the 4 Nov review** (`reviews/review-2026-11-04-vi.md`, details in `review-2026-11-04.json`): 62
+  findings, 44 confirmed in full and 18 in part, none fixed yet; the student decides. To fix before the text goes
+  to the supervisor (section A):
+  1. `e2e-nav/score.mjs` does not apply the preregistered redirect rule; applied, mifos is 12/22, not 15/22.
+  2. "same seed and same sample" is false.
+  3. The witness check is credited with finding the guard defect, which it did not.
+  4. mifos's 4 "dynamic" misses are extractor read failures.
+  5. "all but one were repaired" is false.
+  Then section B (items 6-14: must-tier history wording, rule-order dependence of "attribution is the largest
+  class", the realworld e2e not discriminating, ch6:72, "most" of 88.2%, ch5:168 "none remains", the AI-use
+  claims) and the minor batch C. The file ends with five questions for the student (fix `score.mjs` or only
+  disclose; the guard class; facts for the AI-use declaration; cohort, unrun suites and title; new macros for
+  items 7, 8 and 12).
+- **Stashes.** `stash@{0}` holds the 1 Nov work of unknown origin plus execution-prep docs, labelled "review found
+  defects, do not commit as-is"; `stash@{1}` is older. Leave both untouched.
+- **Worktrees.** Nine merged fix-round worktrees under `.claude/worktrees/` can be removed with
+  `git worktree remove`. `~/personal/uigraph-work/thesis-repair-20261101/extractor` (branch
+  `codex/thesis-repair-evaluation`, at `469b210`) belongs to another tool; ask before removing it.
+- **Still open from earlier sections:** a human re-reading of the must-tier verdicts (`review.json` and
+  `tier-reading.json` are the assistant's); graders' access to `kanetran29/uigraph` (check its visibility);
+  stale `harness.zip` and `thesis-latex.zip`; the admin items at the end.
+- **Limits.** Check usage (`get_usage`) and `memory_pressure` before any fan-out; see the memory rule under
+  "Rules that have held".
+
 ## Where things are
 
 | path | what |
 |---|---|
-| `thesis-handoff/thesis/` | LaTeX sources. `thesis.tex` (abstract, AI-use declaration) + `ch1`..`ch7`, `appendix-a.tex`, `figures/`, `references.bib`. `generated-*.tex` are written by the harness, never by hand. Build: `latexmk -pdf -interaction=nonstopmode thesis.tex` (the build checked at `3ebbf35` was 141 pages). |
-| `thesis-handoff/route-oracle/` | measurement harness (Node 22+, `node:sqlite`). Its own tests: `npx vitest run harness.test.mjs` (plus `guard-resolve.test.mjs`, `template-context.test.mjs`). |
+| `thesis-handoff/thesis/` | LaTeX sources. `thesis.tex` (abstract, AI-use declaration) + `ch1`..`ch7`, `appendix-a.tex`, `figures/`, `references.bib`. `generated-*.tex` are written by the harness, never by hand. Build: `latexmk -pdf -interaction=nonstopmode thesis.tex` (155 pages on 4 Nov). |
+| `thesis-handoff/route-oracle/` | measurement harness (Node 22+, `node:sqlite`). Its own tests: `npx vitest run --maxWorkers=2` (98), `node guard-resolve.test.mjs --corpus <corpus>` (13), `node template-context.test.mjs` (12). |
+| `thesis-handoff/e2e-nav/` | end-to-end navigation check (uncommitted): preregistration, collector, `score.mjs`, results for realworld and mifos; writes `thesis/generated-e2e.tex`. |
+| `thesis-handoff/reviews/review-2026-11-04-vi.md` | the open 4 Nov review (Vietnamese summary; full findings in `review-2026-11-04.json`). |
 | `thesis-handoff/reviews/panel4/` | the fourth Opus panel and the three fix rounds that followed it, as JSON: `prose-panel.json` (68 prose findings, each with a verifier verdict; 62 real), `code-panel.json` (36 code findings, 31 real), `round1-fixes.json`, `round2-followups.json`, `round3.json` (each: what a fix branch did, and an Opus review of it). |
 | `~/personal/uigraph-corpus/` | the six corpus applications at their pinned SHAs (`fetch.sh` re-creates them). |
 | `~/personal/uigraph-work/` | work dir: `corpus` symlinks to the durable corpus; `noattr/`, `ablation/`, `guard-only/`, `corpus-rq4/`, `final7/`, logs. Never use `/tmp` for this: macOS pruned a corpus `.git` there once, and `remeasure.sh` refuses it. |
@@ -34,6 +84,50 @@ checked against the repository on 1 Nov 2026; anything not checked says so.
 | `thesis-handoff/REPRODUCE.md` | grader-facing reproduction guide: versions, corpus pins, regeneration from archives, full re-measurement, build. |
 | `thesis-handoff/reviews/wip-2026-11-01.json` | the Opus review of the uncommitted working-tree changes (46 findings, each with a verifier verdict; 45 real). |
 | `~/personal/uigraph-work/wip-review/` | snapshot of those changes (`wip.patch`, `untracked/`), the six corpus graphs mapped with HEAD and with the working tree (`maps/head`, `maps/wip`, `maps/diff.json`), and the working-tree PDF text. |
+
+## Rigour, circularity and concealment review, 3 Nov 2026
+
+- Five-reviewer pass over the whole text; 26 ranked items, all approved by the student and applied.
+  Prose only: no harness, generator or `packages/` change. `packages/` is still identical to `c42f220`.
+- Verified against code or data before the text was changed:
+  - `outlet` already covers Rima et al.'s same-class helper following: a navigation call anywhere in a
+    component class is emitted at that component's screens (`extract.ts` 626, 667-677). On realworld the
+    outlet→full difference is exactly `user.service.ts:86`. ch5 says so.
+  - Ambiguous-selector joins: no must edge cites a construct placed through one (k8sdash must edges cite
+    `chrome/component.ts` and `template.html`; bitwarden's cites `request-sm-access`, route-mounted at
+    `oss-routing.module.ts:729`). ch3 states it without a hand-typed count.
+  - 0 of 22 mifos e2e pairs are must edges (realworld 5 of 19).
+  - Bib: `websurvey2025` and `llmdroid2025` checked on Crossref (DOIs `10.1016/j.scico.2026.103473`,
+    `10.1145/3715763`): venue, volume, pages, authors, year all match the rendered entries.
+  - tab:defects attribution row: at `f17a302` the six realworld `DELETE_ROUTERLINK` mutants (all in
+    `header.component.html`) are EXCLUDED on the baseline graph ("witnessed by no baseline edge") and
+    DETECTED on the attributed one (`results-rq4/rq4base-realworld.json`, `rq4-realworld-attributed.json`).
+    Row now says "mutants excluded on the baseline graph", not "mutation misses" (MISSED is a different verdict).
+  - ch6 "before the call graph was added they were the only remaining loss the analysis as specified would
+    have recovered" was unsupported: `TabRemaining` has 17 "scope found, not explained" at `f17a302` and 2 at
+    `296f4bd`. Replaced with the ablation macros (`\AblationFullAddedSites`, `\AblationCallGraphNetSites`).
+- Reviewer claims rejected: Yang "6 apps" (now "20 apps; manual on 6"); the Expansion tautology and the
+  ground-truth circularity are already disclosed (ch5); `\RoundTwoDeadLinkUnanswered` is decided via the
+  oracle (appendix-a). `\RoundTwoMustClean` kept: unused in prose but read by `earlier-instrument.mjs`.
+- Disclosed instead of done: baselines are in-tool reimplementations; no fresh-seed mutation run; the e2e
+  miss classes were defined after the misses were read and the preregistered M3 classes were not scored.
+
+## End-to-end navigation check, 3 Nov 2026
+
+- New measurement (RQ3): router navigations logged while each app's own Playwright suite runs,
+  scored against the c42f220 graphs. Rules, validity checks and predictions in
+  `e2e-nav/PREREGISTRATION.txt`, written before any log was read (mifos as Addendum A).
+- realworld: 123/123 pass, 19 distinct pairs, all in the graph (3 via the shell scope only).
+- mifos (local Fineract, digest-pinned): 86 pass / 5 skip in all runs, 22 pairs, 15 in the graph.
+  Misses: 4 dynamic (`navigate([`actions/${name}`], {relativeTo})`, declared unresolved in the
+  soundiness ledger), 3 base (relative links in `clients-view.component.html` 264/267/420 resolved
+  against the child tab's address on the subtree scope, giving edges to `*`). Not repaired on the
+  student's decision: no held-out app; wait for the supervisor's review.
+- Miss classes are rules over the graph in `score.mjs`, defined after the misses were read; ch4 says so.
+- Text: ch4 `sec:metrics` paragraph and provenance row; ch5 RQ3 paragraph after the ground truth and a
+  sentence in the qualifications; ch6 `sec:limitations`; ch7 RQ3 answer and open gaps; ch1; abstract.
+- Macros from `generated-e2e.tex`; regenerate with the command in REPRODUCE.md.
+- Alfresco has a suite but needs ACS on Kubernetes with registry credentials; not run.
 
 ## Authentication and static-plus-dynamic framing, 3 Nov 2026
 
@@ -270,71 +364,13 @@ Five argument fixes, no new experiment. Each was checked against the code first.
   `routerLink`) (declared; none occurs in the current must tier); commit messages of this revision lack the session `Co-Authored-By` line, which cannot
   be added now without orphaning the commits the generated tables name; the admin items at the end.
 
-## State at a glance (1 Nov, partly stale)
+## Earlier state (1 Nov), removed
 
-- `main` is at `469b210`, 48 commits ahead of `origin/main` (`5eb2864`). Nothing after `5eb2864` is pushed.
-- Adapter suite at `469b210`: 453 tests pass, `tsc` clean. Harness suite: 2 of 91 fail, both the mutation-sweep
-  anchor tests (the sweep's mutant list no longer matches the adapter code; see Open work 3).
-- **Uncommitted changes of unknown origin are in the working tree.** Files modified between 07:45 and 07:48 on
-  1 Nov, after this session's last commit and not made by it: `packages/adapter-angular/src/conditions.ts`
-  (a rewrite of the superseded-navigation rule), new `packages/adapter-angular/src/supersession.test.ts`,
-  new `route-oracle/merge-sweeps.mjs` and `merge-sweeps.test.mjs`, edits to `route-oracle/{compare,
-  diagnose-attribution,round2-to-latex,sweep-mutants}.mjs`, `harness.test.mjs`, `corpus.json`, and prose in
-  `thesis.tex`, `ch1`, `ch3`..`ch7`, `figures/alg-attribution.tex` (about 600 lines, 16 files). They are still
-  uncommitted and untouched; the student has not decided what to keep.
-  **Reviewed on 1 Nov** (`reviews/wip-2026-11-01.json`). Mechanically they pass: `tsc` clean, adapter suite
-  475/475, harness suite 104/104 (their new mutant anchors fix the two red sweep tests), the thesis builds at
-  140 pages, and the six corpus graphs are edge-for-edge and modality-for-modality identical to HEAD's. The
-  review (4 critical, 21 major, 20 minor confirmed) found:
-  - **Prose: do not commit as it is.** It relabels the eb9dab80 round-two tables (conversion, loss,
-    before/after, round2 soundness) as the "final snapshot" although no `generated-*.tex` was regenerated, so
-    the PDF prints contradictions (Table 5.1 baseline must 7/10/1 beside the census's 1/1/15; Table 5.18
-    "Final-snapshot" over the 20-edge round tier with k8sdash n/a). It undoes the panel-4 provenance
-    corrections, leaves the `**` route-order assumption (126 of the 150 must edges) and the known open
-    false-must paths undeclared, still blames guards for the small tier, credits the call graph with 35 sites
-    instead of its own 6, and overstates the sweep's coverage.
-  - **`corpus.json`: do not commit as it is.** It bumps the harness to 1.8.1 with the changelog entry "Final
-    repair measurement. Re-runs ..." for a measurement that never ran.
-  - **Harness code:** the new mutant list has no mutant for the soundness-side router rules of the fix rounds
-    (rerun, catch-all rivals, `within`, `apart`), and some supersession mutants point the wrong way;
-    `merge-sweeps.mjs` checks less than its note claims.
-  - **Extractor (`conditions.ts`, wider supersession rule):** mostly more conservative, but one regression
-    makes a false must (a navigation in a getter called as `this.x()` goes from may to must); a callback
-    registered before the site is ignored while one registered after it demotes; `mayNavigate` is exponential
-    without memoisation; ch3 still describes the old same-block rule. The corpus exercises none of the new
-    must-preserving sub-rules, so the identical graphs are no evidence for them.
-- Worktrees under `.claude/worktrees/`: 13. The nine of rounds one to three are merged into `main`; the three of
-  round four (`wf_f4a7a38a-07e-*`) are empty (round four was stopped before it committed). All can be removed with
-  `git worktree remove`.
+The 1 Nov "State at a glance", "Figures the thesis currently prints" (at `0027017`) and its six-step open-work
+list are done or superseded by the sections above; they are in git at `681c286`
+(`git show 681c286:thesis-handoff/HANDOFF.md`).
 
-## Figures the thesis currently prints, and how current they are
-
-Generated at extractor `0027017` (the last full `remeasure.sh`), before fix rounds one to three:
-
-- Must tier: 150 edges / 25 constructs with attribution (realworld 9, k8sdash 125, bitwarden 1, mifos 15;
-  alfresco and ghostfolio 0); 17 edges / 21 constructs without. Witness check: 0 failures, and 62 must edges
-  (k8sdash's toolbar logo link) whose cited target the checker cannot read (`\MustWitnessUnread`).
-- Every one of the 25 must constructs has a recorded reading in `route-oracle/results-must/tier-reading.json`
-  (made once by the assistant, with the extractor's decisions in view; the census refuses a must construct that
-  file does not list).
-- Guard-only counterfactual: 191 must edges; 41 run a guard, 37 of them source-behind.
-- Ground truth (realworld): call graph 100% precision, 97.3% recall; the class-level join it replaced 95.3%
-  precision (9 excess pairs, all at `UserService.logout`). The call graph was written after the ground truth
-  exposed that error and is scored on the same ground truth.
-- RQ4 (mutation harness 1.7.0 at that time): 59/64 attributed, 42/53 baseline; paired 44 vs 40 of 49, none
-  against attribution; guard removal 11/11.
-- Sweep macros (`generated-sweep.tex`): the 72-mutant sweep at `a8c7480`. Stale (see Open work 3).
-
-Each fix branch of rounds one to three re-mapped the corpus read-only and found the must tier unchanged:
-the same 150 edges, sources, targets and witnesses. May edges, (site, screen) pairs, call-graph resolution
-counts and ablation figures did change (details in the round JSONs). Mapped on 1 Nov with the code at
-`469b210` (`wip-review/maps/head`), the attributed graphs hold realworld 65, alfresco 55, ghostfolio 406,
-k8sdash 309, bitwarden 529 and mifos 10811 edges (the thesis prints the `0027017` counts: 62, 56, 402, 309,
-253, 10819). `remeasure.sh` has not been run since,
-and the round-two tables (`generated-{tables,before-after,round2,plots}.tex`) still come from extractor
-`eb9dab80`, before the call graph and the router-guard rule. They must be regenerated (Open work 4).
-
-## What changed since the last handoff (21 Oct)
+## What changed between 21 Oct and 1 Nov
 
 - Router guard semantics: an edge is gated only on the guards Angular runs for that navigation
   (canDeactivate on levels left, canMatch on levels matched and on routes tried on the way, canActivate,
@@ -353,53 +389,6 @@ and the round-two tables (`generated-{tables,before-after,round2,plots}.tex`) st
 - Prose: two passes after the fourth panel (`4d96296`, `72ccfa4`) rewrote the AI-use declaration, the
   readings' description, the ground-truth framing, scope-validation statements, Angular background facts,
   the correction count (ten), and the matcher exception.
-
-## Open work, in order
-
-1. **Decide the uncommitted working-tree changes** (above) with the student. On the review's evidence the
-   prose and the `corpus.json` changelog should not go in as they are; the extractor, test and harness parts
-   can be kept only after the listed defects are fixed and the mutant list covers every rule.
-2. **Round four (was stopped).** The open review problems are in `reviews/panel4/round3.json`. Fix the
-   false-must ones first:
-   - `routes.ts` host branch: the first empty-path child reached through a wrapper call (new false must).
-   - `heldEmpty` versus `land()`: an address a componentless route declared first answers can land at must on a
-     later parameter pattern (new false must).
-   - Controls mode never consults the conditional-outlet rule (`hiddenAbove`); pre-existing false must.
-   - A route that spreads its address in (`{...BASE, component, children}`) is dropped silently: declare the
-     subtree unread and demote links into it; pre-existing.
-   - The bootstrap component's root outlet under a condition; `firmOutlet` `.some` over a joined selector.
-   - Witness check: `arrayTarget` making `['../', id]` unread hides certain mismatches; `navigate([...])`
-     capture stops at the first nested `]`.
-   Then the regressions (realworld precision via `edgesFrom` dedupe, `catchAllFor` on the original literal,
-   recall after a relative redirect), the untested sub-rules, and the sweep record's source-tree timing.
-   Whatever is left unfixed must emit a soundiness note and appear in the thesis's approximation list
-   (ch6, Section `sec:approximations`). Each round so far has found new false-must paths in the previous
-   round's fixes, so keep reviewing until a round finds none.
-3. **Sweep.** Update the anchors in `sweep-mutants.mjs` to the code at the final commit, add mutants for every
-   rule the fix rounds added, run `node route-oracle/mutation-sweep.mjs` in full (about 20 minutes), write an
-   adapter test for every survivor (a triage at round two found 28), and regenerate
-   `results-must/mutation-sweep.json` and `generated-sweep.tex`. The harness tests must pass again.
-4. **Re-measure at the final commit.** `bash route-oracle/remeasure.sh ~/personal/uigraph-work` (packages/ must be
-   committed; about an hour), then `bash route-oracle/regen-round.sh ~/personal/uigraph-work
-   ~/personal/uigraph-work/final8` for the round-two tables. Re-check `tier-reading.json` against the new
-   must tier (the census refuses unlisted or changed constructs).
-5. **Prose.** At committed `HEAD`, these prose-panel findings (`reviews/panel4/prose-panel.json`) are still
-   open. The uncommitted diff touches many of them but, per its review, closes three with new defects and
-   leaves about fifteen open, so do not take it as their fix:
-   guards blamed for the small tier (ch7, ch5); "cost RQ1's stricter measure almost everything" (ch1);
-   "move at all", "ratios over the same", "node classes are now empty", "carries a reason", "two of the
-   three", "is a smaller one now", "Each correction removed a claim", "An application whose screens all sit
-   behind a guard", "keeps \MustFateKept{}", hand-typed "nearly three quarters" and "the oracle saw 2" (ch5);
-   guard-only edges counted as constructs (ch5); "the call graph \AblationFullAddedSites" (use
-   `\AblationCallGraphNetSites`); "The call graph replaced a coarser rule" (it remains the fallback); canLoad and
-   "same route object" wording (ch5); "exactly where the computed scopes are widest", "40, 34 and 132", "an
-   order of magnitude more edges" (ch6); "where node defects limit it", "toolbar links" (ch7); the FigLoss caption
-   (`figures/fig-plots.tex`). Also cite `\MustWitnessUnread` wherever `\MustWitnessViolations` is used as
-   evidence, describe the residual approximations from step 2, and update every sentence the router and
-   call-graph changes make false (each round JSON lists them under `thesisProseToChange`).
-6. **Build, check, panel.** `pnpm -s check` at the repo root, the harness tests, a clean LaTeX build with no
-   undefined macro or overfull float, then a final Opus panel (code, tier re-reading, harness, prose) and its
-   verification. Commit straight to `main`; push only on the student's word.
 
 ## How to run things
 
