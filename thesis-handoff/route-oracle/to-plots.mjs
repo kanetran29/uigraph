@@ -91,7 +91,7 @@ out += '\\end{axis}\n\\end{tikzpicture}}\n\n'
 // ------------------------------------------------------------ before / after conversion
 out += '\\newcommand{\\PlotBeforeAfter}{%\n\\begin{tikzpicture}\n\\begin{axis}[ybar, width=0.92\\textwidth, height=5.6cm,\n'
 out += `  symbolic x coords={${sym}}, xtick=data, x tick label style={font=\\small, rotate=20, anchor=north east},\n`
-out += '  ymin=0, ymax=45, ylabel={conversion (\\%)}, bar width=9pt, enlarge x limits=0.1,\n'
+out += '  ymin=0, ymax=45, ylabel={must conversion (\\%)}, bar width=9pt, enlarge x limits=0.1,\n'
 out += '  nodes near coords={\\pgfmathprintnumber[fixed,precision=1]{\\pgfplotspointmeta}}, nodes near coords style={font=\\tiny},\n'
 out += '  legend style={at={(0.5,1.03)}, anchor=south, legend columns=2, font=\\scriptsize, draw=none}, axis lines*=left, label style={font=\\small}]\n'
 out += `\\addplot[fill=mutedlight, draw=muted] coordinates {${B.map((r) => `(${NAME[r.slug]},${pct1(ledger(r).tally.CONVERTED_MUST || 0, inScope(ledger(r)))})`).join(' ')}};\n\\addlegendentry{baseline}\n`

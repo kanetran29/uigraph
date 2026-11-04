@@ -974,6 +974,8 @@ describe('to-plots (prose panel 38 and 39)', () => {
     const tex = run('to-plots.mjs', [write('b.json', [mifos]), write('a.json', [mifos])])
     expect(tex).toContain('(mifos,0.1)')
     expect(tex).not.toContain('(mifos,0.2)')
+    // Supervisor, 4 Nov: the axis is the must conversion, not a generic conversion.
+    expect(tex).toContain('ylabel={must conversion (\\%)}')
   })
 
   it('draws every outcome, so the bars of the loss plot reach 100 per cent', () => {

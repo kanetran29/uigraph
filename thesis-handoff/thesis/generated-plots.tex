@@ -39,7 +39,7 @@
 \begin{tikzpicture}
 \begin{axis}[ybar, width=0.92\textwidth, height=5.6cm,
   symbolic x coords={realworld,alfresco,ghostfolio,k8s dashboard,bitwarden,mifos}, xtick=data, x tick label style={font=\small, rotate=20, anchor=north east},
-  ymin=0, ymax=45, ylabel={conversion (\%)}, bar width=9pt, enlarge x limits=0.1,
+  ymin=0, ymax=45, ylabel={must conversion (\%)}, bar width=9pt, enlarge x limits=0.1,
   nodes near coords={\pgfmathprintnumber[fixed,precision=1]{\pgfplotspointmeta}}, nodes near coords style={font=\tiny},
   legend style={at={(0.5,1.03)}, anchor=south, legend columns=2, font=\scriptsize, draw=none}, axis lines*=left, label style={font=\small}]
 \addplot[fill=mutedlight, draw=muted] coordinates {(realworld,2.6) (alfresco,0.0) (ghostfolio,0.0) (k8s dashboard,0.0) (bitwarden,0.9) (mifos,1.4)};
