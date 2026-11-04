@@ -41,7 +41,7 @@ out += `\n`
 
 // ---------------------------------------------------------------- conversion
 out += `\\newcommand{\\TabConversion}{%\n\\begin{tabular}{@{}lrrrrrr@{}}\n\\toprule\n`
-out += `Application & Constructs & In scope & Nodes & Must & May & Conversion \\\\\n\\midrule\n`
+out += `Application & Constructs & In scope & Nodes & Must & May & Must conversion \\\\\n\\midrule\n`
 for (const r of R) out += `${NAME[r.slug]} & ${r.totalConstructs} & ${r.loss?.tally ? inScope(r.loss) : '--'} & ${r.graph?.nodes ?? '--'} & ${r.graph?.must ?? '--'} & ${r.graph?.may ?? '--'} & ${convCell(r)} \\\\\n`
 out += `\\bottomrule\n\\end{tabular}}\n\n`
 // The constructs column again, one macro per application, for the sentences that quote it.

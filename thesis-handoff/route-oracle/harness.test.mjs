@@ -1015,6 +1015,8 @@ describe('to-latex (prose panel 38): the conversion table rounds the counts once
     const out = run('to-latex.mjs', [results(1, 26)])
     expect(out).toContain('realworld & 26 & 26 & 1 & 1 & 1 & 3.8\\% \\\\')
     expect(out).not.toContain('3.9')
+    // Supervisor, 4 Nov: "Conversion" alone is misleading; the column is the must conversion.
+    expect(out).toContain('& Must conversion \\\\')
   })
 
   it('divides by the in-scope constructs, leaving query-only navigations and both exclusions out (review of 2026-11-02, package 1)', () => {
