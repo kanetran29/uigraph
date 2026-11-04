@@ -72,54 +72,37 @@ Major: & Computer Science \\
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 A UI transition graph describes the screens of an application and the transitions a
-user can cause between them. Earlier work extracts such graphs statically from the route
-declarations of client-side web applications, but none found in the literature reviewed here
-classifies what the extraction fails to read across a corpus. This thesis makes that measurement on six
-open-source Angular applications with \RoundTwoRoutesRealworld{} to \RoundTwoRoutesMifos{}
-declared route entries, with four methods that read the sources and one that reads the
-running application, and checks the attribution against the applications' own end-to-end suites
-on two of them.
+user can cause between them. For single-page web applications such graphs are usually
+built by running the application. Client-side routing frameworks now declare routes in the
+source code, which makes static extraction possible. How well static extraction works on
+real applications, and why it fails, has not been measured construct by construct.
 
-The measurement is the main contribution, and its main result is that the deterministic tier is nearly empty. Once the demotion rules the
-soundness property rests on are applied, \CensusMustSites{} constructs yield \CensusMust{}
-must edges; \CensusMustSitesKdash{} of those constructs, one application's toolbar, account
-for \CensusMustKdash{} of the edges, and \RouteOrderResting{} edges rest on an assumption
-about route order the extractor does not read. The extractor mints a node for every
-declared screen that two static readers find, readers partly corrected against each other, but a runtime check of the route
-configuration finds \ProbeMissed{} mounted addresses with no node, \ProbeMissedGhostfolio{}
-of them in one application. Every lost construct is assigned to a defect class; after the
-node-level defects were repaired, attribution of a navigation site to the screens it fires
-from is the largest class in every application under the order the loss rules are applied in, and almost every class traces to a construct the
-extractor could read and did not; all but one of those were repaired.
+This thesis makes that measurement. It extracts transition graphs from six open-source
+Angular applications and checks them with five methods: four read the source code and one
+reads the route configuration of the running application. Every navigation construct the
+extractor does not recover is assigned to a defect class and traced to its cause. The
+largest class is navigation that belongs to no single screen, such as a link in a shared
+header. For this class the thesis proposes scope attribution, a dataflow analysis that
+computes the set of screens from which each navigation site can fire.
 
-The thesis therefore formulates scope attribution as a dataflow analysis over screen sets,
-a fixpoint over component nesting, router outlets and a call graph that resolves injected
-services, reading every provider binding as if it applied everywhere. Its contribution beyond earlier work is modest. The mechanisms
-earlier work has (the root component on every screen, plus the enclosing routes), reimplemented
-in the same extractor, reach
-\GTOutletRecall{} of a hand-read structural reference of (site, screen) pairs on \GTApp{}, partly
-completed from the graph's output, against
-\GTFullRecall{} for the full analysis; across the corpus the call graph, its fallback join and
-stand-ins add \AblationFullAddedSites{} placed sites, \AblationFullAddedShare{} of the total. Attribution recovers \AttrRecoveredShare{} of the constructs in its
-class, almost all as possible rather than certain transitions.
-Scopes are compared in both directions only on \GTApp{}, against a reference that applies the
-analysis's own relations and guided two repairs. Against the navigations the applications' own
-test suites perform, the graph holds all \EtoERealworldPairs{} distinct transitions on \GTApp{}
-but \EtoEMifosHit{} of \EtoEMifosPairs{} on mifos; the graphs hold \EtoERealworldGraphPairs{} and
-\EtoEMifosGraphPairs{} (screen, screen) pairs, so this is containment in an over-approximating graph,
-not precision. Of the mifos misses, \EtoEMifosMissDynamic{} have a target the extractor declares
-unresolved and \EtoEMifosMissBase{} are a relative link resolved against the wrong route. The scopes
-of the other four applications are unchecked, so the
-\CensusMustKdash{} must edges drawn from k8sdash's toolbar rest on an untested scope.
+Three results stand out. First, almost no navigation can be extracted as a deterministic
+transition: the corpus yields \CensusMust{} such edges from \CensusMustSites{} constructs,
+most of them from one application's toolbar. Second, every defect class traces to the
+extractor rather than to the applications: the information was in the source, and the
+extractor did not read it. Most node-level defects were repaired before the final
+measurement. Third, scope attribution recovers \AttrRecoveredShare{} of the constructs in
+its class, almost all as possible rather than certain transitions. On the one application
+whose screen sets were read by hand, in a reference partly completed from the graph's output,
+it finds \GTFullRecall{} of the reference pairs and
+none outside them, against \GTOutletRecall{} for a reimplementation of earlier mechanisms.
+Mutation testing on three applications shows that the graph responds to injected changes in
+the constructs it represents.
 
-On three applications, the graph detects \MutFallibleDetected{} of \MutFallibleScored{}
-injected link deletions, retargets and guard removals, the deletions almost by construction;
-without attribution fewer changes can be
-scored at all, but on the \MutPaired{} mutants both graphs can score, \MutPairedDetected{} and
-\MutPairedBaseDetected{} are detected. Full detection was reached after errors of the harness
-had been corrected, and those errors were found by reading the misses of the same seeded sample
-that was then scored again. The
-corpus is small and Angular-only, and the figures describe these six applications only.
+The conclusion is that a declared route table is a usable starting point for static
+navigation extraction, but not a sufficient one. Scope attribution adds a modest gain over
+earlier mechanisms, and its screen sets were checked in both directions on one application
+only. The corpus is small and Angular-only, and the results describe these six
+applications.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page

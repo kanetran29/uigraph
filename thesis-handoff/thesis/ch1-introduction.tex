@@ -100,138 +100,70 @@ analysis recovers when realised this way, and the limits they expose are limits 
 method and of this instantiation, which Chapter~\ref{ch:discussion} separates.
 
 \section{Research questions and scope}
+\label{sec:rqs}
 
-The thesis addresses five research questions.  The exact measures are defined in
-Section~\ref{sec:metrics}.
+The thesis addresses five research questions. This section states what each asks and how it
+is answered; the exact measures are defined in Section~\ref{sec:metrics}, and the answers are
+given in Chapter~\ref{ch:results}.
 
 \medskip\noindent\textbf{RQ1.} \emph{How much of the navigation in Angular
 applications can static analysis recover as deterministic transitions?}
 
-\noindent This is measured at two levels, because a transition cannot be recovered
-without the screens it runs between. The first is node coverage: the fraction of the
-screens an application declares that the graph holds a node for. The second is the
-fraction of navigation constructs in the source code that are witnessed by at least one
-deterministic (\emph{must}) transition, matched at line granularity, so that this fraction is
-an upper bound. The first is a precondition of the second rather than a
-numerical bound on it, since a transition needs a node at each end but the two ratios have
-different denominators, and
-Chapter~\ref{ch:results} reports both, with the warning
-Section~\ref{sec:limitations} carries: refusing to read part of an application raises its
-reported node coverage, so the figure is only meaningful together with the list of what was not
-read.
+\noindent This is measured at two levels, because a transition cannot be recovered without
+the screens it runs between. The first level is node coverage: the share of the screens an
+application declares that the graph holds a node for. The second is the share of navigation
+constructs in the source that yield at least one deterministic (\emph{must}) transition.
 
 \medskip\noindent\textbf{RQ2.} \emph{Where does static extraction fail, and why?}
 
-\noindent The observed failures are grouped into defect classes. A class is accepted only
-if at least two lines of evidence confirm it, of which at least one comes from
-one of the evaluation methods of Section~\ref{sec:protocol}. Chapter~\ref{ch:results}
-reports, for each class, which of its confirmations are methods and which are
-observations, because the two are not equally strong. Each construct that
-is not recovered is then assigned to one class, so the classes can be compared by size
-within each application.
+\noindent The observed failures are grouped into defect classes. A class is accepted only if
+at least two lines of evidence confirm it, and at least one of them must come from an
+evaluation method of Section~\ref{sec:protocol}. Each construct that is not recovered is
+assigned to one class, so the classes can be compared by size.
 
 \medskip\noindent\textbf{RQ3.} \emph{How does scope attribution affect the coverage and
 precision of static navigation analysis?}
 
-\noindent Scope attribution is the analysis proposed in this thesis. For a navigation
-site that does not belong to any single screen, it computes the set of screens from
-which the site can be triggered. One commit of the instrument is run twice on the same
-inputs, with the attribution pass disabled and enabled, so that nothing but the pass
-differs between the two runs. Coverage is the recovered share and the conversion ratio, over
-the same construct denominator. Precision is checked on the deterministic tier, as far as the
-witness check can read it, and must not decrease; the computed screen sets are also compared
-with a hand-read structural reference on one application.
+\noindent Scope attribution is the analysis this thesis proposes. For a navigation site that
+belongs to no single screen, it computes the set of screens from which the site can fire.
+The same extractor is run with the analysis disabled and enabled, so that nothing else
+differs between the two runs.
 
 \medskip\noindent\textbf{RQ4.} \emph{Does the extracted graph respond to source changes
 in the constructs it represents, as change impact analysis requires?}
 
-\noindent This is measured with mutation testing. Known changes are inserted into the
-source, and the graph is checked for the expected difference.
+\noindent This is measured with mutation testing: known changes are inserted into the source,
+and the graph is checked for the expected difference.
 
 \medskip\noindent\textbf{RQ5.} \emph{Are the losses a property of the applications or of
 the tool?}
 
-\noindent A defect class names where extraction failed; it does not say whether the
-navigation was unreadable or merely unread. Each class of RQ2 is therefore taken to its
-root cause in the source of the application it appeared in, the causes that are the
-extractor's are repaired where the round could repair them, and the corpus is measured again. A site that still yields no
-transition must then name the reason, and the script that produces those reasons fails if
-any site has none, so no site can be left without a recorded reason, though the script checks
-that a reason is recorded, not that it is correct. One kind of reason is
-a target the application never declares, which makes the graph a way of finding dead links
-statically, each candidate then checked against the route configuration the runtime probe
-recorded; it is reported as a candidate list with counts and not as a defect rate, because a
-route the readers fail to read is indistinguishable from one the application does not have.
+\noindent A defect class names where extraction failed, but not whether the navigation was
+unreadable or merely unread. Each class is therefore traced to its cause in the source. The
+causes that lie in the extractor are repaired where possible, and the corpus is measured
+again. Every site that still yields no transition must name a reason.
 
 \medskip
-RQ1 and RQ2 are answered by measuring the extractor on a corpus of six open-source
-Angular applications. The applications are pinned to specific commits and range from
-\RoundTwoRoutesRealworld{} declared route entries to \RoundTwoRoutesMifos{}. Five evaluation methods are used, chosen so that their blind spots
-differ, though not so that they are independent; for RQ3 the applications' own end-to-end suites
-are also run on two applications. RQ3 is addressed by formulating attribution as a
-dataflow analysis over a lattice of screen sets, implementing it, and evaluating the
-result on the same corpus with the same methods. RQ4 is answered on the graph produced
-after attribution has been applied. RQ5 asks whose the remaining losses are, and it is
-what decides which instrument the other four questions are answered on: the causes traced
-to the extractor were repaired except one, ghostfolio's spread of computed routes, which the
-extractor declares unread, and the figures reported throughout
-Chapter~\ref{ch:results} are those of the repaired instrument. Section~\ref{sec:res-round2}
-reports what the repairs cost the soundness property, and what the earlier instrument
-measured is kept there for comparison rather than as a second set of results. The repairs were
-found on this corpus and are measured on it; no held-out application tests how far they
-generalise.
+The questions are answered on a corpus of six open-source Angular applications pinned to
+fixed commits (Chapter~\ref{ch:evaluation}). Five evaluation methods are used, chosen so that
+their blind spots differ. The figures in Chapter~\ref{ch:results} are those of the extractor
+after the repairs of RQ5; the history of those repairs is summarised in
+Appendix~\ref{app:validation}.
 
-The thesis has four limits of scope. It does not claim completeness. When a navigation target is computed at run time, the full set of
-transitions cannot be determined statically in general. The thesis therefore states a
-conditional soundness property over a declared scope, tests it mechanically at each
-deterministic edge whose destination the checker can read, comparing the construct, its target
-and its destination but not its guard, and measures recall empirically. The
-property is not proved, and on this corpus little is left for it to range over. Four
-corrections each changed the deterministic tier. They concern how a guard is read, how an edge
-that several constructs cite is judged, and whether a navigation runs under a condition, is
-refused by a guard or targets the screen already displayed. After the last of them the tier holds
-\CensusMust{} edges, in \CensusMustApps{} of the six applications (Section~\ref{sec:res-round2}). Nearly every
-transition the earlier instruments called deterministic turned out to run only once something had
-happened (a request had returned, a branch had been taken, a template condition held) or
-behind a guard the extractor does not evaluate. Taking every guard to let the navigation through
-would leave \GuardOnlyMust{} must edges instead. Chapter~\ref{ch:results} reports each correction
-rather than only its result. The four corrections took the deterministic tier from the \EarlierMustEdges{} edges of the instrument this work began with to \CensusMust{}. RQ1's stricter measure, constructs rather than edges, is \CensusMustSites{} constructs in the corpus with attribution and \CensusBaseMustSites{} without it, and the chapter reports both figures.
-This follows the position of Livshits et al., who argue that a practical static
-analysis should be described as sound modulo an explicit list of the language features
-it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement
-would require a controlled experiment and is left for future work. A third limit bears on the proposed
-analysis: the screen sets attribution computes are checked in both directions on one
-application only. A scope that is too small can be refuted by the rendered interface on
-\ScopeApps{} of the \ProbeApps{} applications, all but ghostfolio, though only realworld and
-bitwarden rendered any judged pair. That check ran on an earlier graph and judged \ScopeJudged{}
-of \ScopeScreens{} screens; it finds \ScopeUnpredicted{} rendered links the graph does not
-predict, all in bitwarden and all at sites attribution left unplaced
-(Section~\ref{sec:res-scope}). A scope that is too large cannot be refuted this way, because at
-the screens that method can observe the graph almost never claims a destination exactly. For one application the screens each site fires
-from were read off the sources by hand, which gives both directions, and the result qualifies
-the contribution rather than confirming it: the analysis agrees with \GTFullRecall{} of the
-pairs of that structural reference, whose header sites were partly completed from the graph's
-output, and asserts none outside it, but the shell rule earlier
-work already has reaches \GTRootedRecall{} of them, and with the enclosing routes, which earlier
-work also follows, \GTOutletRecall{}. Both figures are those of repairs: the
-rule the call graph replaced attributed one service's navigation to every screen, and the route
-reader left one screen's empty-path child off it; this reading caught both, and the repaired
-analysis was then scored on the same reading (Section~\ref{sec:res-groundtruth}). Against the
-navigations the applications' own test suites perform, the graph contains all
-\EtoERealworldPairs{} distinct transitions on realworld but \EtoEMifosHit{} of
-\EtoEMifosPairs{} on mifos, where \EtoEMifosMissDynamic{} misses have a target the extractor
-declares unresolved and \EtoEMifosMissBase{} are a relative link resolved against the wrong route,
-a defect found and not repaired. The two graphs hold \EtoERealworldGraphPairs{} and
-\EtoEMifosGraphPairs{} (screen, screen) pairs, so this measures containment in an
-over-approximating graph and not precision. The computed scopes are also
-wide: narrower than attributing every site to every screen by a factor between
-\BaselineFactorMin{} and \BaselineFactorMax{}, which at the low end names most of an
-application (Section~\ref{sec:res-width}). What the application that could be
-checked exhaustively supports is therefore a small gain in agreement with a structural reference, with no pair outside that reference, on an
-application whose one counter-example shaped the repair. Whether it holds on the largest
-application was not tested. Finally, the results apply to Angular only. The graph model does not depend on the framework, and the tool
-has adapters for other frameworks, but all measurements reported here concern Angular
-applications.
+The thesis has the following limits of scope.
+\begin{itemize}
+\item It does not claim completeness. Where a navigation target is computed at run time, the
+  transitions cannot in general be determined statically. The thesis instead states a
+  soundness property over a declared scope and lists what it approximates, following the
+  soundiness position (Section~\ref{sec:soundiness}). The property is tested, not proved.
+\item It does not measure the effect of the graph on coding agents or any other consumer.
+\item The screen sets that scope attribution computes are checked in both directions on one
+  application only.
+\item The repairs were found on this corpus, and no held-out application tests how far they
+  generalise.
+\item All measurements concern Angular. The graph model does not depend on the framework,
+  but no other framework is evaluated.
+\end{itemize}
 
 \section{Thesis structure}
 

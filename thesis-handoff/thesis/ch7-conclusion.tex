@@ -1,270 +1,72 @@
 \chapter{Conclusion}
 \label{ch:conclusion}
 
-This thesis set out to measure how much of the navigation structure of an Angular
-application can be recovered from its source code without running the application, to
-explain where that recovery fails, and to repair the largest class of failure with an
-analysis that attributes a navigation site to the screens from which it can fire. The
-selection criteria for the corpus were fixed before any results were obtained, though one
-candidate was rejected on tool support and two retained applications do not meet the test-suite
-criterion. The
-protocol was corrected eleven times while it was being developed, including the
-definition of the conversion ratio and of its denominator
-(Section~\ref{sec:corrections}), and the result tables of Chapter~\ref{ch:results}
-come from the harness run on pinned commits.
+This thesis measured how much of the navigation structure of an Angular application can be
+recovered from its source code without running it. It explained where the recovery fails, and
+it proposed an analysis for the largest class of failure. This chapter summarises the answers
+to the five research questions, the contributions, and what remains open. The repairs made on
+the way are not retold here; Section~\ref{sec:res-round2} and
+Appendix~\ref{app:validation} record them.
 
-The answer to RQ1 is that the loss happens at two levels: node extraction is complete against
-the routes a static reader can read and incomplete against the runtime configuration, mostly in
-one application, whereas almost no navigation construct becomes a deterministic transition.
-In all \RoundTwoFullNodes{} applications every screen the static readers find declared has a
-node, and the runtime method, which could observe a node placed at an address where the
-framework mounts nothing, observes none. That completeness is over the route set a static reader can read, and not over
-the addresses the framework mounts: the same runtime method finds \ProbeMissed{} mounted
-addresses with no node at all, \ProbeMissedGhostfolio{} of them behind one spread of computed
-routes in ghostfolio that the extractor declares unread, so only \ProbeExactApps{} of the six are complete against
-the runtime configuration. Below that level almost no navigation construct becomes a
-deterministic transition once the demotion rules Claim~\ref{claim:must} rests on are applied:
-\CensusBaseMustSites{} constructs without attribution and \CensusMustSites{} with it (two
-recoveries on realworld and two k8s dashboard constructs raised from may to must), in
-\CensusMustApps{} of the six applications and none on the other \CensusZeroMustApps{}. Most of the
-tier's edges are one application's toolbar: \CensusMustSitesKdash{} constructs there yield
-\CensusMustKdash{} of the \CensusMust{} edges, and the rest of the corpus holds
-\the\numexpr\CensusMust-\CensusMustKdash\relax{} on
-\the\numexpr\CensusMustSites-\CensusMustSitesKdash\relax{} constructs. \RouteOrderResting{} of the
-edges also depend on an assumption about route-table order that the extractor does not read;
-without it the tier holds \RouteOrderMustWithout{} edges on \RouteOrderSitesWithout{} constructs.
-Evaluating
-guards would widen it: with every guard taken to let the navigation through, the tier
-would hold \GuardOnlyMust{} edges on \GuardOnlySites{} constructs, of which only \GuardOnlyGuarded{}
-edges run a guard. Node extraction was the
-bottleneck when this work began and is not the bottleneck it was, except in ghostfolio;
-Section~\ref{sec:res-round2} records what repairing it took.
+\paragraph{RQ1: how much is recovered.} Loss happens at two levels. At the level of nodes,
+every screen the static readers find declared has a node in all \RoundTwoFullNodes{}
+applications. Against the routes the framework mounts at run time, \ProbeExactApps{} of the six
+are complete, and most of the missing addresses lie behind one construct the extractor declares
+unread. At the level of transitions, almost no navigation construct becomes a deterministic
+transition: \CensusMustSites{} constructs yield \CensusMust{} must edges, and
+\CensusMustKdash{} of those edges come from one application's toolbar.
 
-The answer to RQ2 is that the failures fall into five defect classes, each with at least two
-lines of evidence of which at least one is a named evaluation method; for four of them,
-including attribution, the second line is an observation rather than a second instrument
-(Table~\ref{tab:defects}), so for those four the two-line requirement is a weaker control than
-the count suggests. There is also one candidate class that has a single confirmation.
-Assigning every lost construct to exactly one class, the first whose rule matches, makes
-attribution the largest class in every application of the corpus once the node defects are
-repaired; a different order of the rules would move constructs between classes, so that ranking
-holds under the order the loss rules state (Section~\ref{sec:limitations}).
+\paragraph{RQ2: where extraction fails.} The failures fall into five defect classes and one
+candidate class (Table~\ref{tab:defects}). Every lost construct is assigned to the first class
+whose rule matches. Under the order in which the rules are applied, attribution is the largest
+class in every application. The ranking depends on that order: if the target were tested
+before the owner, the target class would be the larger one on \AttrOrderFlipWhere{}
+(Section~\ref{sec:res-defects}).
 
-The answer to RQ3 is that scope attribution recovers \AttrRecovered{} of the \AttrLost{}
-constructs the loss rules assign to it, \AttrRecoveredShare{} of that class, with some recovered on every
-application in the corpus; the edge count rises from \CensusBaseEdges{} to \CensusEdges{}, a
-figure that depends on how scoped edges are stored and is therefore not the measure of the
-effect; and that almost all of those conversions are navigation the graph reports as
-possible rather than certain. After the fourth correction of Section~\ref{sec:res-round2} the
-attributed run holds \CensusMust{} must edges against \CensusBaseMust{} without attribution. The
-difference is the links of two application shells (realworld's header and footer logos and
-k8sdash's toolbar), drawn from every screen the shell renders. The witness check finds
-\MustWitnessViolations{} failures among the must edges and cannot read the destination of
-\MustWitnessUnread{}, all k8s dashboard toolbar edges added by attribution, the same edges that
-rest on the shell scope and on route order; it reads no guard, so an edge that should be
-conditional would pass it. The tier is too small for that to be a statement about precision in general. Separately, no
-construct the baseline converted lost its conversion when attribution was enabled
-(\AttrRegressed{}), and none was moved from must to may (\AttrDemoted{}); that is retention of
-what the baseline represented, not precision of what attribution added. The computed screen sets were checked in both directions on one
-application and not on the corpus: read site by site on \GTApp{}, the analysis names
-\GTFullRecall{} of the (site, screen) pairs of the hand-read structural reference with no pair
-outside it, a reference partly completed from the graph's output, after the one over-approximating rule that reading exposed had been replaced by the
-call graph and the route reader corrected where it had shown one screen's attributions missing.
-Elsewhere the running interface puts half of that question to \ScopeApps{} of the
-six applications, of which two rendered any judged link, and nothing here puts it to ghostfolio. The scopes are also wide: narrower than
-attributing every site to every screen by a factor between \BaselineFactorMin{} and
-\BaselineFactorMax{}, and on \BaselineBluntest{} the average site is attributed to
-\BaselineBluntestShare{} of the screens. A scope that wide says little about where the site
-fires, even if it is sound. RQ3 is therefore answered in part. Coverage rises and the baseline's conversions are retained.
-Whether must-tier precision holds is not established: the check finds no failure among the edges
-it can read, but it cannot read the destination of \MustWitnessUnread{} of the
-\MustWitnessEdges{}, and whether the scopes
-attribution adds are too wide was tested on \GTApp{} alone.
+\paragraph{RQ3: what scope attribution adds.} Scope attribution recovers \AttrRecovered{} of
+the \AttrLost{} constructs in its class (\AttrRecoveredShare{}), almost all as possible rather
+than certain transitions. No construct the baseline recovered was lost. On the one application
+whose screen sets were read by hand, the analysis finds \GTFullRecall{} of the reference pairs
+and none outside them; that reference was partly completed from the graph's output and
+guided two repairs. A reimplementation of the mechanisms of earlier work reaches
+\GTOutletRecall{}, so the gain is small. The computed scopes are also wide. RQ3 is therefore
+answered only in part: coverage rises, but whether the added scopes are too wide was tested on
+one application only.
 
-The answer to RQ4, on the three applications that were mutated, is that the graph responds
-to authored source changes in the constructs it represents. Of the \MutFallibleScored{} mutants
-from the three operators that can fail, \MutFallibleDetected{} are detected, removed guards
-\MutGuardDetected{} of \MutGuardScored{} among them; a deleted \texttt{routerLink} is detected
-almost by construction, so the evidence rests mainly on the retargets and guard removals, and
-all \MutExcluded{} exclusions are guard mutants, so \MutGuardScored{} of the
-\the\numexpr\MutGuardScored+\MutExcludedGuard\relax{} sampled are scored. The rename operator, close to guaranteed by
-construction, brings the total to \MutDetected{} of \MutScored{}. Without attribution
-\MutBaseDetected{} of \MutBaseScored{} are detected. Those two sets are not the same, because a
-change to a construct the baseline graph holds no edge for cannot be scored against it; on the
-\MutPaired{} mutants both graphs can score the figures are \MutPairedDetected{} and
-\MutPairedBaseDetected{}, and the one disagreement is a limit of the harness, not of the graph.
-Most of attribution's effect on this experiment is therefore the widening of what can be scored
-at all; a gain in sensitivity on what both graphs represent is not shown. Responding to the
-measured changes is a property change impact analysis needs, not a measure of its accuracy:
-the experiment does not ask whether the graph names every affected screen, how many it names in
-excess, or how well it would select tests. The \MutExcludedGuard{} mutants that cannot be scored are guards the graph can record on
-no edge: for \MutExcludedUnreached{} of them no edge enters the screen, which is RQ1's coverage
-gap, and \MutExcludedNoScreen{} guards a route that yields no screen. The samples are small, and
-the full detection was reached only after the undetected mutants of the previous run were read
-and found to be errors of the harness, and the corrected harness was scored on the same seed and
-the same sample, so the figure is not an independent test of the corrected harness.
+\paragraph{RQ4: whether the graph responds to change.} On three applications, the graph
+detects \MutFallibleDetected{} of \MutFallibleScored{} injected link deletions, retargets and
+guard removals. Deletions are detected almost by construction, so the evidence rests mainly on
+the other two operators. Without attribution fewer changes can be scored at all. On the
+\MutPaired{} mutants both graphs can score, the attributed graph detects \MutPairedDetected{}
+and the baseline \MutPairedBaseDetected{}. The experiment shows that the graph responds to
+change; it does not show how well the graph would select tests.
 
-The thesis contributes a measurement and the apparatus that makes it checkable, and a
-mechanism whose specification outruns its evidence. The mechanism is scope attribution,
-specified as a dataflow analysis over the powerset lattice of screen sets and implemented over
-three of its four input relations, with a soundness property for the deterministic tier that is
-stated and mechanically tested, though not proved, over the declared route set and paired with
-an explicit list of the constructs the analysis does not decide (Claim~\ref{claim:must},
-Section~\ref{sec:approximations}). It recovers \AttrRecoveredShare{} of the loss class it
-addresses, almost all of it onto the uncertain tier, and against the structural reference read
-by hand on one application its full step, the call graph with its fallback join and stand-ins,
-finds the one pair (of \GTPairs{}) that a reimplementation of earlier work's mechanisms misses,
-taking recall from \GTOutletRecall{} to \GTFullRecall{} with no pair outside the reference. That result comes after two repairs the same reading prompted and a completion of the reference
-from the graph's output, and it was measured on \GTApp{} alone. Against the navigations the
-applications' own test suites perform, the graph contains all \EtoERealworldPairs{} distinct
-transitions on \GTApp{} and \EtoEMifosHit{} of \EtoEMifosPairs{} on mifos, where
-\EtoEMifosMissDynamic{} of the misses have a target the extractor declares unresolved and
-\EtoEMifosMissBase{} come from a relative link resolved against the wrong route. The graphs hold
-\EtoERealworldGraphPairs{} and \EtoEMifosGraphPairs{} (screen, screen) pairs, so the check
-measures containment in an over-approximating graph, not precision. Nothing in its formulation depends on a particular
-extractor; what an extractor supplies is the screens and the navigation sites it ranges
-over, and Chapter~\ref{ch:results} shows that what the mechanism can recover is bounded
-by how completely those are read. The measurement is the part that stands on its own. Static navigation extraction is measured on a corpus of six Angular
-applications pinned to fixed commits, with five methods, and checked on two applications
-against their own end-to-end suites. Four of the methods read the
-applications' sources: a witness check that re-parses the source at each claimed
-location, a differential test against an independently written route parser, a
-cross-check against the URL literals in the applications' own end-to-end
-specifications, and a mutation
-experiment whose ground truth is the authored change. That shared footing is also their
-common weakness, since two readers of the same text can be wrong in the same way. The
-fifth reads the route configuration the framework itself holds at run time, and was
-added because the first four can agree on a wrong address. The failures are classified into defect classes that are
-admitted only on two lines of evidence, at least one from a named method, and every construct the extractor loses
-is assigned to exactly one class, which makes the classes comparable within an
-application and across the corpus. The corpus and the harness are reusable artefacts:
-the evaluation re-runs with two scripts against pinned commits of the extractor and of
-every application, and the conversion, coverage, loss, remaining-loss, before-and-after and mutation tables
-of Chapter~\ref{ch:results} are generated from their result files. The few figures that
-compare the present instrument with the one the work began with are generated too, but from
-that earlier commit's own results read out of version control, since re-running the extractor
-now would measure a different tool. The defect-class table,
-the oracle table and the inspection of the unreached components are written by hand.
+\paragraph{RQ5: whose the losses are.} Every defect class traces to the extractor: the
+information is in the source, and the extractor did not read it. The node-level classes were
+repaired. Two causes remain in the tool: named router outlets, which the model does not
+represent, and one application's spread of computed routes, which the extractor declares
+unread. Two further causes lie outside the reach of any static reader of a route table: a
+route path computed in a custom \texttt{UrlMatcher}, and a choice between two route tables made
+at deployment. Every site that still yields no transition names a reason. A check enforces
+that a reason is recorded, but not that it is correct.
 
-What the measurements establish is that a declared route table is a usable starting
-point for static navigation extraction and not a sufficient one. Node extraction is a
-precondition for attribution, since a construct whose source screen has no node cannot be
-attributed; with node extraction repaired, the remaining loss is mostly attribution, and scope attribution recovers every attribution loss on realworld and
-most of mifos's, and under half of them on the other four, where owners no screen reaches,
-targets only the run time knows and services the call graph does not place remain
-(Table~\ref{tab:remaining}). Where a construct is in the graph, every scored change to it was visible in the graph, for the
-operators sampled on three applications and with the deletions near-guaranteed (\MutFallibleDetected{} of \MutFallibleScored{} fallible mutants), which is a property that change impact
-analysis and commit-time checking need; where it is not, a change to it cannot be scored, and
-the excluded mutants of RQ4 restate the coverage gap RQ1 measures.
+\paragraph{Contributions.} The thesis contributes three things. The first is the measurement
+itself: a corpus of six pinned applications, five evaluation methods with different blind
+spots, and a classification of every lost construct. The second is the apparatus that makes it
+checkable: the result tables are generated from the harness's result files, and the
+evaluation re-runs from pinned commits. The third is scope attribution, specified as a
+dataflow analysis over screen sets and implemented over three of its four input relations
+(Section~\ref{sec:attribution}).
 
-RQ5 asked whether the losses belong to the applications or to the tool, and the answer is
-that every defect class but one traces to the tool. That is a statement about classes and not
-about every lost construct: destinations only the run time knows, about a third as many
-constructs as the attribution class (Table~\ref{tab:loss}), are counted apart because they are no
-defect of the extractor, and some of the attribution losses that remain have a fully dynamic
-target (Table~\ref{tab:remaining}). The causes fall into three groups: defects of the
-extractor that were repaired, a construct whose information is in the source but which the
-extractor does not yet support, and information that is fixed only at run time or lies outside
-the route abstraction. One defect class does not: ghostfolio computes a
-route's path in a custom \texttt{UrlMatcher}, which no static reader of a route table can
-resolve. The runtime method adds a second case outside a static reader's reach, mifos's choice
-between two route tables by a value injected at deployment; both stay declared blind spots
-rather than repairs. The second group has one member, and it is the largest single loss of
-nodes: ghostfolio's spread of computed routes, a construct the tool could read and does not,
-which the extractor declares unread and the round did not repair.
-The first group holds every other defect class, each a construct the extractor could read and
-did not:
-a route table reached through an NgModule, a route factory, a path named by a constant, an
-enum or an i18n segment, a workspace alias, a loader that references its module instead of
-importing it. With those repaired, \RoundTwoFullNodes{} of the six applications hold a node
-for every screen the static readers find declared, \ProbeExactApps{} hold one for every
-mounted address in the runtime configuration (the runtime method finds \ProbeMissed{}
-mounted addresses with no node, \ProbeMissedGhostfolio{} of them in one application), and
-\RoundTwoAccounted{} of the navigation sites that remain in scope are
-accounted for: recovered as a transition, recorded as a destination only the run time
-knows, or anchored at a source the analysis cannot place. \RoundTwoMifosShare{} of those sites
-are mifos's, so the corpus figure is pulled towards one application's. The sites that remain each name
-a reason, enforced by a check that fails when any does not, though the check enforces that a
-reason is recorded and not that it is correct, and some name a route the
-application never declares. Among the attribution losses that remain, \AttrRemainingUnexplained{}
-are recorded as having a scope and a destination with no reason found, and that label passes the
-check. The repairs also had an unwelcome cost, which is reported
-with them. The earlier instrument published a deterministic tier of
-\EarlierMustEdges{} edges with \EarlierMustViolations{} witness-check failures in it, and four corrections
-changed it to \CensusMust{} edges, each of the first three defects masked by the one before it: a guard carried by a
-route a wrapper function returns; a \texttt{canActivate} element that is a call rather than a
-name; an edge that several constructs cite taking the modality of the first of them; and gaps
-in the demotion rules, namely a navigation that runs under a condition, guards the reader did not
-read (one on an empty-path child, \texttt{canMatch}, \texttt{canActivateChild}), and a
-navigation to the screen already displayed. The first three left \RoundMustEdges{} edges with
-\RoundMustViolations{} witness-check failures, as the round's tables printed them, which is not
-the same as satisfying the claim:
-the fourth correction was found by reading every construct the tier cited rather than by the
-check. In only \MustFateKept{} of those edges did the cited construct earn must, and
-\MustFateJoined{} more stayed must only because a construct the edge had not cited yields it
-(Section~\ref{sec:res-round2}). The others did not become correct targets; they stopped claiming
-to be deterministic, which they had no evidence for. The fourth correction also replaced the
-third's merge rule, which had demoted an edge whenever any construct citing it was uncertain: an
-edge is now as certain as the most certain construct that yields it, and that is why realworld's
-Global Feed and logo links remain. Its guard rule, first written to gate an edge on every guard its
-destination carries, was corrected again to the guards the router runs on that navigation, and
-the rest of the current tier needs it: the logo link and Create button of k8sdash's toolbar, drawn
-from every screen under its shell but the root, the destination itself and the screens whose
-\texttt{canDeactivate} runs; the cancel and back buttons and the system menu of mifos; and a cancel
-button in bitwarden, each moving between screens under one guarded parent. The k8sdash edges need
-the shell attribution as well as this rule, and how much either contributes alone is not measured. On
-\CensusZeroMustApps{} of the six applications there is no must edge, so RQ1's stricter measure reads
-zero there, and Claim~\ref{claim:must} ranges over \MustWitnessEdges{} edges in the corpus, with
-\MustWitnessViolations{} witness-check failures and \MustWitnessUnread{} destinations the check
-cannot read, every construct behind them read against the source by the AI assistant
-(Section~\ref{sec:res-round2}), which is not an independent proof of the claim; the two readings
-of the round's tier are two runs of one model, so their agreement measures consistency, not
-correctness.
-What the small tier measures is what the extractor can assert without evaluating a guard: taking
-every guard to let the navigation through gives \GuardOnlyMust{} must edges, and for
-\GuardOnlySourceBehind{} of the \GuardOnlyGuarded{} that run a guard, every guard the navigation
-runs is one the source screen's own routes carry, so the user has passed it at least once on the way to that screen, which does not mean it lets this navigation through. That trade, a small tier
-in place of unsupported claims, is the end of a sequence in which each claim that did not
-survive its own test was withdrawn. The size of the tier is bound to the choices that produced it:
-a navigation must occur on every execution the claim ranges over, the demotion rules decide which
-uncertainty removes it, and the approximations of Section~\ref{sec:approximations} decide what
-the extractor reads. Under another semantics, demotion
-policy or extractor the tier would be another size, so the result is not a limit of static
-navigation analysis in general.
+\paragraph{What remains open.} The dispatch relation is specified but not implemented, and the
+call graph ignores the injector hierarchy. The screen sets were checked in both directions on
+one application only, and the repairs were found on the same corpus they are measured on. The
+readings of the must tier were made by the AI assistant, and two readings by one model measure
+consistency rather than correctness. The runtime check judged only the screens that are
+reachable without signing in; driving the applications into a signed-in state is the work that
+would test the rest (Section~\ref{sec:future}). Finally, whether such a graph helps the
+consumers that motivated the work, such as agents that drive a user interface or automated
+test generation, is not measured here.
 
-What they leave open is also specific. The dispatch relation is specified and not implemented,
-and the call graph is implemented without the injector hierarchy, reading every provider binding
-as if it applied everywhere. Where the model has no implemented relation, approximations stand in:
-a guard is scoped to the routes that name it, an effect to $\top$, and a service member no caller
-reaches to the join over the components that inject its class. This is coarser than the
-model and leaves a class nothing reaches with no scope at all. One defect class still waits for its second
-confirmation. The repairs were found on this corpus and fitted to it, and no held-out
-application measures how they generalise. The main gap is in the evaluation rather than the
-analysis. Asking the running applications which links they render, on an earlier graph than the
-final call graph, found \ScopeConfirmed{} of the \ScopePairs{} rendered (screen, pattern) pairs among
-the destinations of the edges leaving each screen, which checks pooled destinations and not each
-site's scope, and shows the \ScopeUnpredicted{} it misses to be sites
-attribution declined to place rather than sites it placed wrongly. What that cannot do is
-convict a scope of being too large: only \ScopeExact{} of the predictions at those screens
-name a destination exactly, so the direction is close to untestable by this method. Reading
-one application's sites by hand did convict one: the rule that
-joined a navigating service over its injectors asserted \GTClassExcess{} pairs outside that
-application's structural reference, all at one site. The call graph that replaced the rule asserts none there, but it
-was written with that site in view, so the reading that convicted the old rule cannot acquit the
-new one; the levels that stand for earlier work's reach, reimplemented in this extractor, recover \GTRootedRecall{} and
-\GTOutletRecall{} of the reference pairs while asserting none outside it, against \GTFullRecall{}
-for this analysis. Running mifos's own suite against a local backend showed what that one
-application could not: \EtoEMifosMissBase{} transitions are missing because a relative link in a
-template shared with child tabs is resolved against the child's address. The defect is known
-and not repaired, since no remaining application could test a repair. The runtime method judged
-\ScopeJudged{} screens of \ScopeScreens{}, because without a backend the
-rest redirect to a sign-in page. Driving the applications into a signed-in state is the work
-that would decide the other half. Since most of these applications are used signed in, the same
-work would complete the graph: the static graph names the screens, the candidate transitions
-and the guards they wait on, and a signed-in run confirms which of them occur, as
-Section~\ref{sec:future} describes. Whether a graph of screens
-and guarded transitions, recomputed from source and carrying a witness on every edge,
-helps the consumers that motivated the work, agents that drive a user interface or a
-repository and automated test generation, is not measured here; the extractor, the
-corpus and the harness are what such a measurement would start from, and the defects
-quantified in Chapter~\ref{ch:results} are what it would have to control for.
+What the measurements establish is that a declared route table is a usable starting point for
+static navigation extraction, but not a sufficient one.
