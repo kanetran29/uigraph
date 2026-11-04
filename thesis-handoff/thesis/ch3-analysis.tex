@@ -1,7 +1,7 @@
 \chapter{Static navigation analysis and scope attribution}
 \label{ch:analysis}
 
-This chapter presents the analysis that is the main contribution of the thesis.
+This chapter presents the graph model the measurement uses and the analysis the thesis proposes.
 Section~\ref{sec:model} defines the graph model and states the soundness property
 claimed for it. Section~\ref{sec:attribution} presents scope attribution, the analysis
 proposed in answer to RQ3. Section~\ref{sec:implementation} describes how both are
@@ -163,7 +163,7 @@ The evaluation tests a necessary condition of this claim rather than the claim i
 and the distinction decides how the figures of Chapter~\ref{ch:results} may be read. The
 witness check of Section~\ref{sec:protocol} re-reads the source at every location an edge
 cites and asks whether the construct found there names the destination the edge names. A must
-edge whose construct that earns must names a different destination cannot satisfy the claim,
+edge cannot satisfy the claim if the construct that makes it must names a different destination,
 so a failure of the check there refutes it; agreement does not establish it. The other
 constructs a must edge cites are evidence for may and are not judged against the claim. Whether the navigation
 occurs \emph{for every input on which the enclosing code executes} is decided by the rules
@@ -288,8 +288,10 @@ a site that fires from no screen at all. The greatest element is $\top = S$, eve
 Two different things are called a scope, and the rest of this thesis keeps them apart.
 Write $\mathit{scope}^{*}(x)$ for the \emph{true scope} of a site $x$, the set of screens
 from which $x$ really can fire, which is a property of the application and not of any
-analysis; and $\mathit{scope}(x)$ for the \emph{computed scope}, the set the fixpoint of
-Section~\ref{sec:inputs} returns. A screen in
+analysis; and $\mathit{scope}(x)$ for the \emph{computed scope}, the set of screens the
+extractor emits edges from for $x$. In the model that set is the fixpoint of
+Section~\ref{sec:inputs}; the prototype widens it with fallbacks that are not constraints of the
+model (Section~\ref{sec:implementation}). A screen in
 $\mathit{scope}^{*}(x) \setminus \mathit{scope}(x)$ is a scope too small and a screen in
 $\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ is a scope too large. No true scope is
 established anywhere in this thesis. For one application a third set is read off the sources by
@@ -560,7 +562,9 @@ belongs to more than one component, the candidates are narrowed to those that $A
 file imports; if none is imported, the analysis joins over all of them and records a
 note. Edges from such a join are not capped at \emph{may}, so a site in one of the candidates
 can be placed on a screen that renders another; Claim~\ref{claim:must} excludes such edges
-(Section~\ref{sec:approximations}); whether any corpus must edge comes from one was not measured. An attribute selector is matched the same way: a directive is rendered by the
+(Section~\ref{sec:approximations}). The corpus has such joins in k8sdash and bitwarden, and no must edge of the final graphs cites a construct placed through one: the
+k8sdash must edges cite the component whose template holds the ambiguous element, not either
+candidate, and the bitwarden must edge cites a component a route mounts. An attribute selector is matched the same way: a directive is rendered by the
 templates that carry its attribute, so it has a scope in the same way as a component does.
 
 \textbf{Router outlets.} The route tree is recorded during route extraction. A route

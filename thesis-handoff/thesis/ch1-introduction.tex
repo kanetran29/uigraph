@@ -47,7 +47,7 @@ however, have almost always been modelled by executing them. Crawljax builds its
 flow graph by firing events against the DOM of a running application
 \cite{crawljax2012}, and later tools in the same line improve the exploration strategy
 without changing where the model comes from \cite{feedex2013,fraggen2022}. A survey of web
-testing published in 2025 collects the model-based tools of the past decade
+testing covering 2014 to 2025 collects the model-based tools of the past decade
 \cite{websurvey2025}. Of the tools it lists, every one whose model construction was examined for this thesis
 builds that model by executing the application. Static analyses of a modern client-side framework are few. One
 builds a component dependency graph for React and does not address routing
@@ -63,7 +63,7 @@ here.
 When the dynamic approach was developed, a single-page application had no declarative route table, so its navigation had no explicit representation in the source and was hard to recover from it, and the DOM was the observable the tools used (Section~\ref{sec:dynamic-spa}). Client-side routing frameworks changed this. Angular,
 React Router and Vue Router all declare routes as data in the source code, connect
 navigation to those routes through template attributes and service calls, and attach
-guards to routes as named functions \cite{angulardocs}. The artefact needed for static analysis now exists, but how well static extraction works on real applications built with these frameworks, and where it fails, has been measured only against hand-built references for the applications each tool was built on, and not construct by construct.
+guards to routes as named functions \cite{angulardocs}. The artefact needed for static analysis now exists, but how well static extraction works on real applications built with these frameworks, and where it fails, has been measured only against hand-built references on the applications each work evaluated, and not construct by construct.
 
 A statically extracted graph also has consumers outside model-based testing. Tools that
 drive a graphical user interface with a large language model either explore an application
@@ -167,7 +167,8 @@ route the readers fail to read is indistinguishable from one the application doe
 RQ1 and RQ2 are answered by measuring the extractor on a corpus of six open-source
 Angular applications. The applications are pinned to specific commits and range from
 \RoundTwoRoutesRealworld{} declared route entries to \RoundTwoRoutesMifos{}. Five evaluation methods are used, chosen so that their blind spots
-differ, though not so that they are independent. RQ3 is addressed by formulating attribution as a
+differ, though not so that they are independent; for RQ3 the applications' own end-to-end suites
+are also run on two applications. RQ3 is addressed by formulating attribution as a
 dataflow analysis over a lattice of screen sets, implementing it, and evaluating the
 result on the same corpus with the same methods. RQ4 is answered on the graph produced
 after attribution has been applied. RQ5 asks whose the remaining losses are, and it is
@@ -194,19 +195,19 @@ transition the earlier instruments called deterministic turned out to run only o
 happened (a request had returned, a branch had been taken, a template condition held) or
 behind a guard the extractor does not evaluate. Taking every guard to let the navigation through
 would leave \GuardOnlyMust{} must edges instead. Chapter~\ref{ch:results} reports each correction
-rather than only its result. The four corrections took the deterministic tier from the \EarlierMustEdges{} edges of the instrument this work began with to \CensusMust{}, and they leave RQ1's stricter measure \CensusMustSites{} constructs in the corpus, \CensusBaseMustSites{} without attribution; the chapter reports both figures, not
-only the more favourable one.
+rather than only its result. The four corrections took the deterministic tier from the \EarlierMustEdges{} edges of the instrument this work began with to \CensusMust{}. RQ1's stricter measure, constructs rather than edges, is \CensusMustSites{} constructs in the corpus with attribution and \CensusBaseMustSites{} without it, and the chapter reports both figures.
 This follows the position of Livshits et al., who argue that a practical static
 analysis should be described as sound modulo an explicit list of the language features
 it approximates \cite{livshits2015soundiness}. It also does not measure the effect of the graph on coding agents or on any other consumer. Such a measurement
 would require a controlled experiment and is left for future work. A third limit bears on the proposed
 analysis: the screen sets attribution computes are checked in both directions on one
-application only. On \ScopeApps{} of the \ProbeApps{} applications, all but ghostfolio, a scope that
-is too small can be refuted by the rendered interface, though only realworld and bitwarden
-rendered any judged pair, and Section~\ref{sec:res-scope} finds \ScopeUnpredicted{} rendered links the graph does not predict, all in bitwarden and all at sites attribution left unplaced, on an
-earlier graph and on \ScopeJudged{} of \ScopeScreens{} screens, while a scope
-that is too large cannot be, because at the screens that method can observe the graph almost
-never claims a destination exactly. For one application the screens each site fires
+application only. A scope that is too small can be refuted by the rendered interface on
+\ScopeApps{} of the \ProbeApps{} applications, all but ghostfolio, though only realworld and
+bitwarden rendered any judged pair. That check ran on an earlier graph and judged \ScopeJudged{}
+of \ScopeScreens{} screens; it finds \ScopeUnpredicted{} rendered links the graph does not
+predict, all in bitwarden and all at sites attribution left unplaced
+(Section~\ref{sec:res-scope}). A scope that is too large cannot be refuted this way, because at
+the screens that method can observe the graph almost never claims a destination exactly. For one application the screens each site fires
 from were read off the sources by hand, which gives both directions, and the result qualifies
 the contribution rather than confirming it: the analysis agrees with \GTFullRecall{} of the
 pairs of that structural reference, whose header sites were partly completed from the graph's
@@ -215,7 +216,14 @@ work already has reaches \GTRootedRecall{} of them, and with the enclosing route
 work also follows, \GTOutletRecall{}. Both figures are those of repairs: the
 rule the call graph replaced attributed one service's navigation to every screen, and the route
 reader left one screen's empty-path child off it; this reading caught both, and the repaired
-analysis was then scored on the same reading (Section~\ref{sec:res-groundtruth}). The computed scopes are also
+analysis was then scored on the same reading (Section~\ref{sec:res-groundtruth}). Against the
+navigations the applications' own test suites perform, the graph contains all
+\EtoERealworldPairs{} distinct transitions on realworld but \EtoEMifosHit{} of
+\EtoEMifosPairs{} on mifos, where \EtoEMifosMissDynamic{} misses have a target the extractor
+declares unresolved and \EtoEMifosMissBase{} are a relative link resolved against the wrong route,
+a defect found and not repaired. The two graphs hold \EtoERealworldGraphPairs{} and
+\EtoEMifosGraphPairs{} (screen, screen) pairs, so this measures containment in an
+over-approximating graph and not precision. The computed scopes are also
 wide: narrower than attributing every site to every screen by a factor between
 \BaselineFactorMin{} and \BaselineFactorMax{}, which at the low end names most of an
 application (Section~\ref{sec:res-width}). What the application that could be

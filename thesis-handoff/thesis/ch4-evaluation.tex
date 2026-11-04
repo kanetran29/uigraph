@@ -157,7 +157,7 @@ bound is the corpus: the harness serves one built directory at the server root, 
 ghostfolio's per-locale build does not fit, since each of its bundles declares a base path of
 its own. That application is measured by every other method here and by none of this one.
 
-\textbf{The ablation and the site--screen ground truth (RQ3).} Two further measurements
+\textbf{The ablation and the site--screen ground truth (RQ3).} Three further measurements
 answer a question the methods above leave open: whether the attribution computes a set of
 screens that agrees more closely with a structural reference than a simpler analysis does, or
 only a larger one.
@@ -206,10 +206,37 @@ does not list, which is the ground truth's own blind spot. That check found nine
 from its first version, because the search that enumerated them discarded every line carrying
 \texttt{routerLinkActive} and this application writes both attributes on one anchor.
 
+\textbf{The end-to-end navigation check (RQ3).} The structural reference applies the analysis's
+own relations, so it cannot show that those relations miss a navigation the application
+performs. The third measurement takes its reference from execution instead. Two applications
+ship an end-to-end suite that can be run here: realworld, against the public demonstration
+backend, which is not pinned, and mifos, against a local Fineract server started from the
+repository's own compose file with the image pinned by digest. A small module added to each
+application logs every navigation the router completes while the suite runs, with the route
+patterns of the screen left and the screen reached, and nothing else in either application is
+changed. An observed pair is such a source and target pattern for a navigation the application
+itself triggered; navigations by the browser's back button, and the first screen after a full
+page load, are excluded, so a pair never spans a reload. The pair is in the graph if any edge,
+must or may, joins the two screens once scope nodes are expanded to their members, with
+parameter names ignored; an edge to an unknown target never counts. A missed pair is classified
+from the graph alone: as \emph{dynamic} if the routed component of the source screen or of one
+above it holds a site whose target the extractor records as unresolved, and as \emph{base} if
+the target is reached from a screen above the source but not from the source itself, which is
+how a relative link resolved against the wrong route appears. The counting rules, three
+validity checks and predictions for each application were written down before any log was
+read; the two classes were not, and were defined after the misses had been read, as rules over
+the graph so that the assignment is not made by hand. The checks are that the instrumented and the plain suite pass and fail the same
+tests, that at least ten distinct pairs are observed, and that a second instrumented run
+observes the same pair set. The check measures recall on the transitions the suite exercises
+and nothing else, and since the graph is an over-approximation that recall is containment: its
+weight depends on how many (screen, screen) pairs the graph holds, which is reported beside it. A graph edge no test takes is not an error, so it cannot measure precision,
+and one run cannot refute a must edge, so it says nothing about the soundness property.
+
 \textbf{Which ratio is ``coverage''.} Several of the measures below are fractions of
 something over something, and more than one of them has been called coverage in the
 literature this thesis builds on. They are not interchangeable, and on this corpus they
-differ by a factor of fifty, so each is named here with the population it is a fraction of.
+differ by more than an order of magnitude (\RoundTwoAccounted{} of sites accounted for against
+\RoundTwoMustConv{} converted to must, for example), so each is named here with the population it is a fraction of.
 \emph{Node coverage} is declared screens that have a node, over the screens the independent
 parser declares. This figure rises if less of an application is read, which is why the
 blind-spot count is printed beside it. The same quantity over the addresses the running
@@ -638,6 +665,8 @@ Census, must tier, witness check, guard-only, route order, call graph, expansion
 Ablation, structural reference & final & \texttt{c42f220}; generated at later commits with identical \texttt{packages/} &
 \path{results-ablation/ablation.tgz} \\
 Mutation (RQ4) & final & \texttt{c42f220}, mutate 1.9.1 & \path{results-rq4/} \\
+End-to-end navigation check & final & \texttt{c42f220} graphs; suites run 3 Nov &
+\path{e2e-nav/results/}, via \texttt{score.mjs} \\
 Demotion-rule sweep & final & \texttt{920e1aa}, same adapter source$^{a}$ &
 \path{results-must/mutation-sweep.json} \\
 Earlier instrument and the round's must tier & historical & \texttt{eb9dab80} and before &

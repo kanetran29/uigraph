@@ -55,7 +55,7 @@ the tool it was compared with, as the work states it.}
 \toprule
 Work & Target & Static & Guards & Evaluation basis \\
 \midrule
-Yang et al.\ \cite{yang2015wtg,yang2018wtg} & Android windows & yes & no & manual, 6 apps \\
+Yang et al.\ \cite{yang2015wtg,yang2018wtg} & Android windows & yes & no & 20 apps; manual on 6 \\
 Yang et al.\ \cite{yang2015callbacks} & Android callbacks & yes & context & manual vs.\ dynamic \\
 StoryDroid \cite{storydroid2019} & Android activities & yes & no & hand-built, 10 apps \\
 GoalExplorer \cite{goalexplorer2019} & Android screens & hybrid & no & manual, 36 apps \\
@@ -106,8 +106,8 @@ static window transition graph contains infeasible transitions, because imprecis
 reference analysis makes several widgets aliases of one another and the over-approximated
 data flow then attaches a handler to the wrong window. They address this by combining the
 static analysis with runtime traces and a learned model \cite{promal2022}. Where the owning
-object cannot be resolved precisely, the Android work therefore turns to dynamic evidence
-rather than refining the static attribution.
+object cannot be resolved precisely, ProMal therefore turns to dynamic evidence rather than
+refining the static attribution.
 
 \section{Navigation models for web applications}
 \label{sec:webmodels}
@@ -203,11 +203,11 @@ al.\ parse Angular sources and templates to build a graph of navigation structur
 interaction sites and the conditions (guards among them) that decide whether an
 interaction is executable, enumerate workflows over that graph, and compile each workflow
 into a browser test; the graph is a coverage denominator for generated end-to-end tests
-\cite{rima2026e2e}. That account is taken from the publisher's abstract and from the
+\cite{rima2026e2e}. This account is taken from three sources: the publisher's abstract, the
 operational specification in the project's replication package
-(\path{softscanner-sw/softscanner_fa}, \path{docs/paper/approach.md}) and from the anonymised
-manuscript in the same repository (\path{docs/paper/main.pdf}), the published chapter itself not
-having been available to this review, so the published chapter may differ from both. Both
+(\path{softscanner-sw/softscanner_fa}, \path{docs/paper/approach.md}), and the anonymised
+manuscript in the same repository (\path{docs/paper/main.pdf}). The published chapter was not
+available to this review and may differ from both documents. Both
 documents describe attribution beyond containment. In the manuscript the components active at a route are those activated by the route
 and its ancestor routes, closed under composition, and the specification adds the bootstrap
 components to that seed, which covers what the \emph{rooted} and \emph{outlet} levels of
@@ -230,7 +230,7 @@ extracted statically for model checking, for test generation and for policy chec
 work already attributes a site through containment, the shell and the enclosing routes, and
 follows calls within a class; what none of these does is carry a navigation inside a service
 member to the screens of its callers across classes, with the provider that binds the
-injection, give the resulting transitions a modality, or quantify the loss.
+injection, give the resulting transitions a modality, or classify the loss by construct across a corpus.
 
 The work reported here is located between these analyses and
 the dynamic tools described above.

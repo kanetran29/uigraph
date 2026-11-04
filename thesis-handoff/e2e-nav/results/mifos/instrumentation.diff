@@ -1,0 +1,94 @@
+src/app/app.module.ts --- 1/2 --- TypeScript
+ 7  7  */
+ 8  8 
+ 9  9 /** Angular Imports */
+10 10 import { APP_INITIALIZER, inject, NgModule } from '@angular/core';
+.. 11 import { Router } from '@angular/router';
+.. 12 import { startNavTrace } from './nav-trace';
+11 13 import { BrowserModule } from '@angular/platform-browser';
+12 14 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+13 15 import { HttpBackend, HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
+
+src/app/app.module.ts --- 2/2 --- TypeScript
+80 82     },
+81 83     provideLottieOptions({
+82 84       player: () => import('lottie-web')
+83 85     }),
+.. 86     {
+.. 87       provide: APP_INITIALIZER,
+.. 88       multi: true,
+.. 89       useFactory: () => {
+.. 90         const r = inject(Router);
+.. 91         return () => startNavTrace(r);
+.. 92       }
+.. 93     }
+84 94   ]
+85 95 })
+86 96 export class AppModule {}
+
+src/app/nav-trace.ts --- TypeScript
+Renamed from /dev/null to src/app/nav-trace.ts
+ 1 import { Router, Event, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, ActivatedRouteSnapshot } from '@angular/router';
+ 2 
+ 3 const ENDPOINT = 'http://127.0.0.1:4599/log';
+ 4 
+ 5 function patternOf(router: Router): string {
+ 6   const parts: string[] = [];
+ 7   let node: ActivatedRouteSnapshot | null = router.routerState.snapshot.root;
+ 8   while (node) {
+ 9     const p = node.routeConfig?.path;
+10     if (p) parts.push(p);
+11     node = node.firstChild;
+12   }
+13   return '/' + parts.join('/');
+14 }
+15 
+16 export function startNavTrace(router: Router): void {
+17   let prev: { url: string; pattern: string } | null = null;
+18   let current: { id: number; trigger: string | null; replaceUrl: boolean | undefined; skipLocationChange: boolean | undefined } | null = null;
+19 
+20   const post = (rec: Record<string, unknown>) =>
+21     fetch(ENDPOINT, {
+22       method: 'POST',
+23       headers: { 'content-type': 'application/json' },
+24       body: JSON.stringify(rec),
+25       keepalive: true,
+26     }).catch(() => {});
+27 
+28   router.events.subscribe((e: Event) => {
+29     const testTitle = (window as any).__testTitle ?? null;
+30     if (e instanceof NavigationStart) {
+31       const extras = router.getCurrentNavigation()?.extras;
+32       current = {
+33         id: e.id,
+34         trigger: e.navigationTrigger ?? null,
+35         replaceUrl: extras?.replaceUrl,
+36         skipLocationChange: extras?.skipLocationChange,
+37       };
+38       post({ type: 'NavigationStart', id: e.id, url: e.url, trigger: e.navigationTrigger ?? null, replaceUrl: extras?.replaceUrl ?? null, skipLocationChange: extras?.skipLocationChange ?? null, ts: Date.now(), testTitle });
+39     } else if (e instanceof NavigationEnd) {
+40       const pattern = patternOf(router);
+41       post({
+42         type: 'NavigationEnd',
+43         id: e.id,
+44         url: e.url,
+45         urlAfterRedirects: e.urlAfterRedirects,
+46         trigger: current?.trigger ?? null,
+47         replaceUrl: current?.replaceUrl ?? null,
+48         skipLocationChange: current?.skipLocationChange ?? null,
+49         fromUrl: prev?.url ?? null,
+50         fromPattern: prev?.pattern ?? null,
+51         pattern,
+52         ts: Date.now(),
+53         testTitle,
+54       });
+55       prev = { url: e.urlAfterRedirects, pattern };
+56     } else if (e instanceof NavigationCancel) {
+57       post({ type: 'NavigationCancel', id: e.id, url: e.url, code: e.code, reason: e.reason, trigger: current?.trigger ?? null, ts: Date.now(), testTitle });
+58     } else if (e instanceof NavigationError) {
+59       post({ type: 'NavigationError', id: e.id, url: e.url, error: String(e.error), trigger: current?.trigger ?? null, ts: Date.now(), testTitle });
+60     }
+61   });
+62 }
+63 
+

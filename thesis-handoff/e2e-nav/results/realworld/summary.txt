@@ -1,0 +1,52 @@
+COMMANDS (cwd noted)
+1. git clone -q /Users/kanetran29/personal/uigraph-work/corpus/realworld $W/app
+2. git checkout -q dd99ed2                                  (in app)
+3. git config submodule.realworld.url https://github.com/realworld-apps/realworld.git
+4. git submodule update --init                              (in app)
+5. bun install; bunx ng build                               (in app; build OK after fixing a TS strict-null error in nav-trace.ts)
+6. node collector.mjs (background, 127.0.0.1:4599)
+7. bunx playwright install chromium                         (in app)
+8. : > navlog.jsonl  (cleared; an earlier aborted full run via `bun run test:e2e` was discarded from the log)
+9. bunx playwright test --grep-invert @security --workers=1 --reporter=line   (in app; spawns npm run start on :4200)
+
+SUBMODULE: realworld @ ffbd690089f05193733b20ee4ee98087892f714e
+APP COMMIT: dd99ed2 (detached)
+
+PLAYWRIGHT: 123 passed, 0 failed, 0 skipped, 0 flaky  (exit 0; log: run2.log)
+NOTE: an earlier full run (bun run test:e2e, 123 passed, 1 flaky: null-fields.spec.ts:153 'author avatars should render on other user articles in feed') was run before the clean run; its navlog records were discarded.
+
+NAVLOG: navlog.jsonl, 758 lines
+COUNTS BY TYPE: NavigationStart 379, NavigationEnd 374, NavigationCancel 5, NavigationError 0
+NavigationEnd with non-null fromPattern: 141
+TRIGGERS: all 'imperative' (no popstate/hashchange observed)
+
+TRIPLES (fromPattern -> pattern [trigger]: count):
+  /register -> /  [imperative]: 59
+  /editor -> /article/:slug  [imperative]: 27
+  /login -> /  [imperative]: 10
+  /settings -> /profile/:username  [imperative]: 9
+  / -> /article/:slug  [imperative]: 5
+  / -> /  [imperative]: 4
+  /tag/:tag -> /tag/:tag  [imperative]: 4
+  / -> /settings  [imperative]: 3
+  /settings -> /  [imperative]: 3
+  /profile/:username -> /profile/:username/favorites  [imperative]: 3
+  /editor/:slug -> /article/:slug  [imperative]: 2
+  /article/:slug -> /  [imperative]: 2
+  / -> /editor  [imperative]: 2
+  / -> /login  [imperative]: 2
+  / -> /profile/:username  [imperative]: 2
+  /login -> /register  [imperative]: 1
+  /editor -> /settings  [imperative]: 1
+  / -> /tag/:tag  [imperative]: 1
+  /tag/:tag -> /  [imperative]: 1
+
+NAVIGATION CANCEL/ERROR RECORDS:
+  NavigationCancel url=/editor code=0 reason=NavigationCancelingError: Redirecting to "/login" error=None
+  NavigationCancel url=/settings code=0 reason=NavigationCancelingError: Redirecting to "/login" error=None
+  NavigationCancel url=/editor code=0 reason=NavigationCancelingError: Redirecting to "/login" error=None
+  NavigationCancel url=/settings code=0 reason=NavigationCancelingError: Redirecting to "/login" error=None
+  NavigationCancel url=/settings code=0 reason=NavigationCancelingError: Redirecting to "/login" error=None
+  (NavigationError: none)
+
+FILES: navlog.jsonl, summary.txt, instrumentation.diff (git diff of app), run2.log

@@ -42,6 +42,7 @@
 \input{generated-route-order}
 \input{generated-sweep}
 \input{generated-callgraph}
+\input{generated-e2e}
 \input{figures/fig-plots}
 
 \begin{document}
@@ -76,18 +77,19 @@ declarations of client-side web applications, but none found in the literature r
 classifies what the extraction fails to read across a corpus. This thesis makes that measurement on six
 open-source Angular applications with \RoundTwoRoutesRealworld{} to \RoundTwoRoutesMifos{}
 declared route entries, with four methods that read the sources and one that reads the
-running application.
+running application, and checks the attribution against the applications' own end-to-end suites
+on two of them.
 
 The measurement is the main contribution, and its main result is that the deterministic tier is nearly empty. Once the demotion rules the
 soundness property rests on are applied, \CensusMustSites{} constructs yield \CensusMust{}
 must edges; \CensusMustSitesKdash{} of those constructs, one application's toolbar, account
 for \CensusMustKdash{} of the edges, and \RouteOrderResting{} edges rest on an assumption
 about route order the extractor does not read. The extractor mints a node for every
-declared screen two separately written static readers find, but a runtime check of the route
+declared screen that two static readers find, readers partly corrected against each other, but a runtime check of the route
 configuration finds \ProbeMissed{} mounted addresses with no node, \ProbeMissedGhostfolio{}
 of them in one application. Every lost construct is assigned to a defect class; after the
 node-level defects were repaired, attribution of a navigation site to the screens it fires
-from is the largest class in every application, and almost every class traces to a construct the
+from is the largest class in every application under the order the loss rules are applied in, and almost every class traces to a construct the
 extractor could read and did not; all but one of those were repaired.
 
 The thesis therefore formulates scope attribution as a dataflow analysis over screen sets,
@@ -101,7 +103,13 @@ completed from the graph's output, against
 stand-ins add \AblationFullAddedSites{} placed sites, \AblationFullAddedShare{} of the total. Attribution recovers \AttrRecoveredShare{} of the constructs in its
 class, almost all as possible rather than certain transitions.
 Scopes are compared in both directions only on \GTApp{}, against a reference that applies the
-analysis's own relations and guided two repairs; elsewhere the final scopes are unchecked, so the
+analysis's own relations and guided two repairs. Against the navigations the applications' own
+test suites perform, the graph holds all \EtoERealworldPairs{} distinct transitions on \GTApp{}
+but \EtoEMifosHit{} of \EtoEMifosPairs{} on mifos; the graphs hold \EtoERealworldGraphPairs{} and
+\EtoEMifosGraphPairs{} (screen, screen) pairs, so this is containment in an over-approximating graph,
+not precision. Of the mifos misses, \EtoEMifosMissDynamic{} have a target the extractor declares
+unresolved and \EtoEMifosMissBase{} are a relative link resolved against the wrong route. The scopes
+of the other four applications are unchecked, so the
 \CensusMustKdash{} must edges drawn from k8sdash's toolbar rest on an untested scope.
 
 On three applications, the graph detects \MutFallibleDetected{} of \MutFallibleScored{}
@@ -109,7 +117,8 @@ injected link deletions, retargets and guard removals, the deletions almost by c
 without attribution fewer changes can be
 scored at all, but on the \MutPaired{} mutants both graphs can score, \MutPairedDetected{} and
 \MutPairedBaseDetected{} are detected. Full detection was reached after errors of the harness
-found in an earlier run had been corrected. The
+had been corrected, and those errors were found by reading the misses of the same seeded sample
+that was then scored again. The
 corpus is small and Angular-only, and the figures describe these six applications only.
 
 \vspace{1em}

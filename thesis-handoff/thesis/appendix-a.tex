@@ -210,7 +210,9 @@ The accounting below covers what the graph does with the navigation.
 \RoundTwoUnexplained{} sites remain unexplained, and Table~\ref{tab:round2reasons} gives the
 reason for each. The reasons are produced by a script that exits non-zero if any site
 reaches the end of it without one, so a site the analysis cannot explain is a failing state
-rather than a silent remainder. The largest group, \RoundTwoUnplacedClass{} of the
+rather than a silent remainder. The check is on these sites only. The remaining attribution
+losses of Table~\ref{tab:remaining} include \AttrRemainingUnexplained{} recorded as having a scope
+and a destination with no reason found, and that label is accepted rather than failed. The largest group, \RoundTwoUnplacedClass{} of the
 \RoundTwoUnexplained{}, reflects the attribution gap of Chapter~\ref{ch:analysis}. Each is a
 class the extractor parsed and found a navigation site in but could place under no screen,
 because no relation the implementation builds reaches it. Either the call graph of

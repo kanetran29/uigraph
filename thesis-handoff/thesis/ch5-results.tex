@@ -112,7 +112,7 @@ column counts only those. This summary is compiled by hand; it is not harness ou
 \toprule
 Class & Evidence & Methods & All \\
 \midrule
-Attribution: navigation outside route components is invisible & mutation misses (at commit \EarlierCommit{});
+Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph (at commit \EarlierCommit{});
 multi-mount edge absent; manual audit; zero-edge applications & 1 & 4 \\
 Lazy module boundary not followed & route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & witness check at commit \EarlierCommit{}; source
@@ -160,7 +160,7 @@ Table~\ref{tab:loss} because the causes were found and repaired; what that cost,
 evidence that the repairs were genuine, are reported in Section~\ref{sec:res-round2}. The ranking matters
 because it justifies spending an analysis on attribution rather than on any other
 class: once the extractor reads what the applications declare, the navigation it still cannot
-place is almost entirely navigation with no single owning screen. 
+place is mostly navigation with no single owning screen (Table~\ref{tab:loss}). 
 
 The classes also interact, and the interaction runs both ways. A construct in a shared
 component that is only used inside screens which have no node is counted as attribution,
@@ -543,10 +543,15 @@ stands for what they reach; Rima et al.'s specification also closes a route's co
 those of its ancestor routes (Section~\ref{sec:dynamic-spa}), which is what \emph{outlet} adds.
 Both are baselines that reimplement those mechanisms inside this extractor, not runs of either
 tool, so the comparison measures what the added mechanisms place
-on the same inputs and does not show that the tools themselves would place fewer. A comparison
-drawn against containment alone would be a comparison with a method nobody proposed. Against
+on the same inputs and does not show that the tools themselves would place fewer. Containment
+alone is not a baseline any earlier work proposed, so it is not used as one. Against
 the nearest of them, \emph{outlet}, what this thesis adds is the \emph{full} step alone:
-\AblationFullAddedSites{} sites, \AblationFullAddedShare{} of the corpus total.
+\AblationFullAddedSites{} sites, \AblationFullAddedShare{} of the corpus total. Every one of them
+lies outside a component, in a service, guard or effect. Rima et al.\ also follow a handler into
+same-class helpers and into a \texttt{subscribe} callback, but that following is already inside
+\emph{outlet} here, because the extractor places every navigation call in a component's class at
+that component's screens whichever member holds it, so it is not counted among the sites
+\emph{full} adds.
 
 Outlet descent is the mechanism whose contribution is mostly width: it
 places \AblationOutletSites{} sites against rooted's \AblationRootedSites{}, the same count on
@@ -627,6 +632,38 @@ a pair outside it, after the one scope it found too large and the one screen it 
 repaired with it in view. What it cannot establish is that the same holds on an application of
 six hundred screens.
 
+The end-to-end check of Section~\ref{sec:metrics} puts part of that question to the running
+applications, with a reference that does not pass through the analysis's relations. All three
+validity checks hold on both applications. On realworld the suite completes \EtoERealworldEnds{}
+navigations from one screen to another, which reduce to \EtoERealworldPairs{} distinct pairs,
+and the graph contains all \EtoERealworldHit{} of them: \EtoERealworldHitScreen{} through an
+edge from the source screen or from a scope that names it, and \EtoERealworldHitTop{} only through
+the shell scope, which names every screen. The suite exercises \EtoERealworldPairs{} of the
+\EtoERealworldGraphPairs{} pairs the expanded graph contains, so the agreement is with the
+transitions it takes and not with the graph. On mifos the suite completes \EtoEMifosEnds{} such
+navigations, \EtoEMifosPairs{} distinct pairs, and the graph contains \EtoEMifosHit{} of them,
+\EtoEMifosHitTop{} only through the shell scope. None of the matched pairs on mifos is a must
+edge, as predicted. At least one miss was predicted too, from relative navigation, and the
+\EtoEMifosMiss{} misses are all of that kind. The pre-registration had also fixed five classes
+for a miss and predicted that misses would be mostly a scope too narrow or a site not read. The
+classification reported here does not use those five; it uses two classes defined after the
+misses had been read, which cover all of them, so that prediction is not scored. \EtoEMifosMissDynamic{} are \emph{dynamic}: the clients, groups,
+savings and loan account views open an action screen with
+\texttt{navigate([\textasciigrave{}actions/\$\{name\}\textasciigrave{}], \{relativeTo\})} or its array form, whose target the
+extractor records as unresolved (Section~\ref{sec:approximations}), so the graph declares that
+it does not know where the site leads. \EtoEMifosMissBase{} are \emph{base}, and they are
+errors of the analysis rather than declared gaps. The client view's template holds three relative
+links, to the personal data tab and to the forms for a new loan and a new savings account. From
+the client screen itself the graph resolves them correctly. The template is rendered with each
+child tab, though, and when its sites are attributed to the subtree scope of that screen the
+links are resolved against the child's address, where they name nothing mounted, and the edges
+lead to the not-found screen. Angular resolves such a link against the route of the component
+that holds it. The graph therefore lacks the edge the suite takes from the general tab and
+holds one to the not-found screen that no run can take. This is the base resolution
+Section~\ref{sec:deadlinks} names as this analysis's gap, now observed at a navigation the
+application performs. It was not repaired. No other application with a runnable suite remains to
+test a repair, and a repair fitted to this check would be untested by it.
+
 Scope attribution therefore raises measured recovery. Its attributed must tier has
 \MustWitnessViolations{} detected witness-check failures among \MustWitnessEdges{}
 edges, with \MustWitnessUnread{} unread destinations. This is limited evidence for
@@ -646,7 +683,11 @@ with the scope. The ground truth of Section~\ref{sec:res-groundtruth} does test 
 directions against the structural reference: of the \GTPairs{} pairs it records, the analysis
 asserts none outside it, where the class-level join it replaced asserted \GTClassExcess{} at one site, and misses
 \GTFullMissing{}. That result is for \GTApp{} alone, the smallest application of the six, and both repairs
-were made after the ground truth had shown the defects. The third is the
+were made after the ground truth had shown the defects. The end-to-end check tests the
+missing direction on a second application, against execution rather than the analysis's
+relations, and only on the transitions a suite exercises: it finds none missing on \GTApp{}
+and \EtoEMifosMiss{} of \EtoEMifosPairs{} missing on mifos, \EtoEMifosMissBase{} of them through
+a relative link resolved against the wrong route. The third is the
 width reported in Section~\ref{sec:res-width}: the computed scopes are narrower than the
 trivial attribution by a factor between \BaselineFactorMin{} and \BaselineFactorMax{}, and at
 the low end of that range a scope names most of the application. A site attributed to too
@@ -976,7 +1017,7 @@ destination depends on runtime data. The dynamic sites do not come from one cent
 codebase rather than one place to fix.
 
 Two cautions belong with the corpus total. mifos supplies \RoundTwoMifosShare{} of the
-in-scope sites on its own, so the corpus figures are close to mifos's: without it, recovered
+in-scope sites on its own, so the corpus figures are pulled towards mifos's: without it, recovered
 is \RoundTwoNoMifosRecovered{} and accounted \RoundTwoNoMifosAccounted{}. Historical
 changes to the route denominator are a separate concern and are recorded in
 Appendix~\ref{app:validation}; they do not supply a different denominator to this final

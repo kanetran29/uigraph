@@ -28,7 +28,8 @@ What remains is lost at the edge, and it is mostly the same everywhere: the navi
 exist in the source, the screens they would connect exist in the graph, and the extractor cannot
 decide which screens a site belongs to. The exceptions are the sites whose target screen has no
 node, most of them in ghostfolio (Table~\ref{tab:remaining}). That is the loss class scope attribution addresses,
-and it is the largest in every application of the corpus (Table~\ref{tab:loss}). The
+and it is the largest in every application of the corpus under the order the loss rules are
+applied in (Table~\ref{tab:loss}). The
 structural relation between the two levels survives the repair. Attribution still cannot
 draw an edge into a screen that has no node, which is why the chapter reports the two levels
 separately. The ranking between them, however, is a fact about an extractor and not a limit of
@@ -89,10 +90,12 @@ The part of the model that an earlier instrument did not implement had a measura
 price. Navigation sites in services, guards, interceptors, resolvers
 and effects are counted separately, and in absolute terms they are a small class across
 the corpus, yet they are not spread evenly: in one application they are almost as large
-as the shared-component class (Table~\ref{tab:loss}), and before the call graph was added they
-were the only remaining loss that the analysis as specified would have recovered. The call graph with dependency injection, which the current
-extractor implements (Section~\ref{sec:res-ablation}), was thus required for applications that
-navigate from services; the dispatch relation is still not implemented.
+as the shared-component class (Table~\ref{tab:loss}). Placing them takes the full level of
+Section~\ref{sec:res-ablation}, which adds \AblationFullAddedSites{} sites to the outlet level,
+all outside a component, although the call graph with dependency injection places only
+\AblationCallGraphNetSites{} more sites than the coarser per-class join it replaced. Applications
+that navigate from services therefore need an injection relation of some form; the dispatch
+relation is still not implemented.
 
 RQ4 gives a conditional answer, and the condition is RQ1. Leaving aside the rename
 operator, whose detection is close to guaranteed by construction, the three operators that can
@@ -144,7 +147,8 @@ other (Section~\ref{sec:res-mutation}). The measurements support no comparison b
 was not stratified by routing style and the other three applications were not mutated,
 so nothing more general about the two styles follows from this thesis.
 
-Two uses of the extracted graph are supported by what was measured. One is change
+Two uses of the extracted graph follow from what was measured, one with measured support and
+one resting on properties that were checked. The first is change
 impact analysis. Every edge carries the file and line of the construct that produced it,
 as an invariant of the model, so a set of changed lines can
 be mapped to the edges whose witnesses fall inside them and from there to the screens
@@ -157,7 +161,7 @@ the graph represents, an authored change in the source produces the predicted ch
 the graph. That is a property such an analysis needs, not a measure of its accuracy, which would
 ask whether every affected screen is named and how many are named in excess.
 
-The other is checking in continuous integration at no execution cost. The graph is
+The second, which was not itself measured, is checking in continuous integration at no execution cost. The graph is
 recomputed from source on each commit, the extraction is deterministic and carries no
 state between runs (Section~\ref{sec:protocol}), and nothing has to be installed,
 served, authenticated against or crawled. Properties of the navigation structure can
@@ -198,7 +202,7 @@ under that assumption, which then belongs to the consumer and not to the graph.
 \section{Limitations and threats to validity}
 \label{sec:limitations}
 
-The results are measurements of one tool, on one corpus, with five methods, performed by
+The results are measurements of one tool, on one corpus, with five methods and an end-to-end check on two applications, performed by
 the person who wrote the tool. Each of those four choices limits what the figures
 support.
 
@@ -211,9 +215,15 @@ methods can. The hand-read structural reference answers it in both directions, b
 call graph replaced, which joined a navigating service over its injectors, asserted
 \GTClassExcess{} pairs outside it at one site, and the call graph was written after that finding and
 scored on the same ground truth, so the clean figure is consistent with the repair but does not test
-the call graph independently. The levels that stand for what earlier work reaches already recover
+the call graph independently. The levels that stand for what earlier work reaches, reimplemented
+in this extractor rather than runs of either tool, already recover
 \GTRootedRecall{} (shell rule) and \GTOutletRecall{} (with the enclosing routes) of the reference
-pairs with none outside it. Beyond \GTApp{} only the runtime method
+pairs with none outside it. The end-to-end check asks the same half of the question of the
+navigations two applications' own suites perform, and on the larger one the answer is negative:
+mifos's suite takes \EtoEMifosMiss{} of \EtoEMifosPairs{} transitions the graph lacks,
+\EtoEMifosMissBase{} of them because a relative link in a template shared by a screen and its
+child tabs is resolved against the child's address, a defect that was found and not repaired
+(Section~\ref{sec:res-groundtruth}). Beyond these, only the runtime method
 applies, on \ScopeApps{} of the six applications, and it answers half of the question, on an
 earlier graph than the final call graph and on \ScopeJudged{} of \ScopeScreens{} screens (Section~\ref{sec:res-scope}): of the
 \ScopePairs{} (screen, target pattern) pairs the applications render on the screens it could
@@ -274,7 +284,9 @@ proxy is not itself measured. The test-source cross-check is the only method tha
 it, because a URL the application's own end-to-end specifications name is an address its authors
 expect to exist, whatever the source looks like. It reads the specifications without running
 them, so a URL there is named rather than observed to be reached, and it covers one application
-of the six.
+of the six. The end-to-end check of Section~\ref{sec:res-groundtruth} runs two applications'
+suites and observes the navigations they complete, but it tests whether the graph contains those
+transitions, not whether the construct count covers the application's navigation.
 
 Node coverage carries a stronger form of the same threat, and it points the opposite way.
 Its denominator is the screens the independent parser can address, so a screen whose path
@@ -358,12 +370,14 @@ the tool already handles, and a figure measured on it is likely to be optimistic
 respect to the population of Angular applications. The candidate pool also showed an
 inverse relation between application size and end-to-end test density, so no application
 offers both a large route tree and a dense test suite. The evidence from outside the extractor's
-own reading is of three kinds and is not spread evenly: URLs named in end-to-end test sources,
+own reading is of four kinds and is not spread evenly: URLs named in end-to-end test sources,
 which are read and not run, come from alfresco alone, a medium-sized application; the router
-configuration that the running application holds was read on all \ProbeApps{} applications; and
+configuration that the running application holds was read on all \ProbeApps{} applications;
 the links rendered on screens were observed, on an earlier graph and in part, on \ScopeApps{} of
-them. The findings about scale therefore rest on the runtime router configuration and on the
-extractor's own reading, and on no test that was observed to visit an address. The results are Angular results. The graph model and the lattice
+them; and the navigations completed by the end-to-end suites of realworld and mifos were
+observed, which on mifos covers \EtoEMifosPairs{} distinct transitions of an application with
+\RoundTwoRoutesMifos{} route entries. The findings about scale therefore rest mainly on the runtime
+router configuration and on the extractor's own reading. The results are Angular results. The graph model and the lattice
 do not mention Angular, and Section~\ref{sec:transfer} argues about other routers, but
 that argument is not a measurement.
 
@@ -917,8 +931,10 @@ known to be feasible on this corpus, and the parser's output gives the expected 
 to check against. The gain is not limited to the nodes
 recovered. Some of the attribution losses that remain, most of them in ghostfolio
 (Table~\ref{tab:remaining}), are constructs whose scope was found but whose target screen has no
-node because no reader can address it, and those would be repaired by reading more of the route
-configuration rather than by any change to the attribution pass.
+node. Those behind the spread of computed routes could be recovered by reading more of the route
+configuration rather than by any change to the attribution pass, which has not been tried; any
+behind the custom \texttt{UrlMatcher} could not, because no static reader of a route table can
+address that screen.
 
 The part of the model that Chapter~\ref{ch:analysis} specifies and the prototype leaves out
 comes next: the dispatch relations that carry NgRx effects and router event subscriptions, and
@@ -936,8 +952,10 @@ The witness check exposed a defect in how the guard set of a screen was assemble
 route chain: the assembly ignored a guard carried by a route a wrapper function returns,
 which is the construct through which one application in the corpus
 routes every one of its feature tables. Reading it is what took that application's
-deterministic tier down to \RoundMustEdgesMifos{} on the round's instrument, and took the corpus
-tier from \EarlierMustViolations{} witness-check failures to \RoundMustViolations{}. Under the
+deterministic tier down to \RoundMustEdgesMifos{} on the round's instrument; the corpus tier went
+from \EarlierMustViolations{} witness-check failures to \RoundMustViolations{} only once the third
+correction had moved every edge with an uncertain citing construct to may
+(Section~\ref{sec:res-round2}). Under the
 router's own guard semantics, which came later, the same guard no longer gates navigations between
 the screens below it, and mifos holds \CensusMustMifos{} must edges again. The demotion rules that followed found that most of the
 edges that passed did not occur on every input either (Section~\ref{sec:res-round2}). The mutation

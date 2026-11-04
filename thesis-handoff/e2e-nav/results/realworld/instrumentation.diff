@@ -1,0 +1,92 @@
+src/app/app.config.ts --- 1/3 --- TypeScript
+ 1 import { ApplicationConfig, inject, provideAppInitializer, provideZonelessChangeDetection } from '@angular/core';
+ 2 import { Router, provideRouter } from '@angular/router';
+ 3 
+ 4 import { routes } from './app.routes';
+ 5 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+
+src/app/app.config.ts --- 2/3 --- TypeScript
+10 10 import { errorInterceptor } from './core/interceptors/error.interceptor';
+11 11 import { EMPTY } from 'rxjs';
+12 12 import { User } from './core/auth/user.model';
+.. 13 import { startNavTrace } from './nav-trace';
+13 14 
+14 15 /**
+15 16  * Debug interface for testing - exposes app state in a framework-agnostic way.
+
+src/app/app.config.ts --- 3/3 --- TypeScript
+71 72     provideZonelessChangeDetection(),
+72 73     provideRouter(routes),
+73 74     provideHttpClient(withInterceptors([apiInterceptor, tokenInterceptor, errorInterceptor])),
+.. 75     provideAppInitializer(() => {
+.. 76       startNavTrace(inject(Router));
+.. 77     }),
+74 78     provideAppInitializer(() => {
+75 79       const initializerFn = initAuth(inject(JwtService), inject(UserService));
+76 80       return initializerFn();
+
+src/app/nav-trace.ts --- TypeScript
+ 1 import { Router, Event, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, ActivatedRouteSnapshot } from '@angular/router';
+ 2 
+ 3 const ENDPOINT = 'http://127.0.0.1:4599/log';
+ 4 
+ 5 function patternOf(router: Router): string {
+ 6   const parts: string[] = [];
+ 7   let node: ActivatedRouteSnapshot | null = router.routerState.snapshot.root;
+ 8   while (node) {
+ 9     const p = node.routeConfig?.path;
+10     if (p) parts.push(p);
+11     node = node.firstChild;
+12   }
+13   return '/' + parts.join('/');
+14 }
+15 
+16 export function startNavTrace(router: Router): void {
+17   let prev: { url: string; pattern: string } | null = null;
+18   let current: { id: number; trigger: string | null; replaceUrl: boolean | undefined; skipLocationChange: boolean | undefined } | null = null;
+19 
+20   const post = (rec: Record<string, unknown>) =>
+21     fetch(ENDPOINT, {
+22       method: 'POST',
+23       headers: { 'content-type': 'application/json' },
+24       body: JSON.stringify(rec),
+25       keepalive: true,
+26     }).catch(() => {});
+27 
+28   router.events.subscribe((e: Event) => {
+29     const testTitle = (window as any).__testTitle ?? null;
+30     if (e instanceof NavigationStart) {
+31       const extras = router.getCurrentNavigation()?.extras;
+32       current = {
+33         id: e.id,
+34         trigger: e.navigationTrigger ?? null,
+35         replaceUrl: extras?.replaceUrl,
+36         skipLocationChange: extras?.skipLocationChange,
+37       };
+38       post({ type: 'NavigationStart', id: e.id, url: e.url, trigger: e.navigationTrigger ?? null, replaceUrl: extras?.replaceUrl ?? null, skipLocationChange: extras?.skipLocationChange ?? null, ts: Date.now(), testTitle });
+39     } else if (e instanceof NavigationEnd) {
+40       const pattern = patternOf(router);
+41       post({
+42         type: 'NavigationEnd',
+43         id: e.id,
+44         url: e.url,
+45         urlAfterRedirects: e.urlAfterRedirects,
+46         trigger: current?.trigger ?? null,
+47         replaceUrl: current?.replaceUrl ?? null,
+48         skipLocationChange: current?.skipLocationChange ?? null,
+49         fromUrl: prev?.url ?? null,
+50         fromPattern: prev?.pattern ?? null,
+51         pattern,
+52         ts: Date.now(),
+53         testTitle,
+54       });
+55       prev = { url: e.urlAfterRedirects, pattern };
+56     } else if (e instanceof NavigationCancel) {
+57       post({ type: 'NavigationCancel', id: e.id, url: e.url, code: e.code, reason: e.reason, trigger: current?.trigger ?? null, ts: Date.now(), testTitle });
+58     } else if (e instanceof NavigationError) {
+59       post({ type: 'NavigationError', id: e.id, url: e.url, error: String(e.error), trigger: current?.trigger ?? null, ts: Date.now(), testTitle });
+60     }
+61   });
+62 }
+63 
+

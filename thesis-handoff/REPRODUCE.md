@@ -101,6 +101,24 @@ needed if `packages/adapter-angular/src` changes.
 The runtime probe needs each application built in its development configuration; see
 `route-probe/README.md`.
 
+The end-to-end navigation check (`e2e-nav/`) is scored from its archived logs and the
+corpus graphs at `c42f220`, both under `e2e-nav/results/<app>/`:
+
+```bash
+cd thesis-handoff/e2e-nav
+node score.mjs --app realworld=results/realworld --app mifos=results/mifos \
+  --tex ../thesis/generated-e2e.tex
+```
+
+To re-run the suites: copy `nav-trace.ts` into the application's `src/app/`, call
+`startNavTrace(router)` once at start-up (the applied change is `results/<app>/instrumentation.diff`),
+run `collector.mjs` on 127.0.0.1:4599, and run the application's own Playwright suite with one
+worker. Realworld (`dd99ed2`, submodule `ffbd690`) uses `--grep-invert @security` against the
+public backend, which is not pinned. Mifos (`7f78179`) needs `docker compose -f
+docker-compose.e2e.yml up -d db fineract` and the projects `setup` and `chromium`; the exact
+commands and environment are in `results/mifos/summary.txt`. The rules were fixed beforehand in
+`PREREGISTRATION.txt`.
+
 ## 3. Build the PDF
 
 ```bash

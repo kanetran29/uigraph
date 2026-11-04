@@ -1,0 +1,92 @@
+Pre-registration: e2e navigation check on realworld (method 2)
+Written 3 Nov 2026, before any navlog.jsonl result was read. Thesis HEAD 204f325.
+
+Question
+  Of the screen-to-screen navigations realworld's own Playwright e2e suite performs, how many
+  does the static graph (corpus/realworld/uigraph.db, c42f220 instrument) contain?
+  Ground truth = Angular Router events in the running app; it does not pass through the extractor.
+
+Unit and counting rules (fixed now)
+  - Observed transition: NavigationEnd with non-null fromPattern, trigger 'imperative'.
+    popstate/hashchange (browser back) and full page loads (fromUrl null, i.e. page.goto) are excluded.
+  - Pair = (fromPattern, pattern), patterns from routeConfig.path; deduplicated.
+  - Redirect: NavigationStart url pattern != pattern after redirects. Counted in its own bucket,
+    compared on the pre-redirect target, never silently dropped.
+  - Graph side: the per-screen query the harness already uses (scope nodes expanded to screens).
+    A pair is "in the graph" if any edge from->to exists, must or may.
+
+Measures
+  M1 recall on observed pairs = pairs in graph / observed pairs.
+  M2 modality of matched pairs: must / may, and for may, the demotion reason (guard, condition,
+     after-await, computed target).
+  M3 every missed pair classified into exactly one of:
+     (a) attribution too narrow: the site is read, its scope lacks the source screen
+     (b) site not read: no construct for it in the graph
+     (c) redirect/guard artefact
+     (d) navigation not through a router construct (window.location, plain href, history API)
+     (e) other, with a written reason
+  Not measured: precision. A graph edge the tests never take is not evidence of an error.
+  Not measured: must soundness. An observation cannot refute a must edge.
+
+Validity checks (run before any number is used)
+  V1 Instrumentation inert: ng build succeeds, and the failing-test set equals that of an
+     uninstrumented run of the same suite.
+  V2 Volume: at least 10 distinct observed pairs. Below that, no ratio is reported.
+  V3 Stability: a second instrumented run gives the same pair set. The public backend
+     (api.realworld.show) is not pinned, so any difference is reported, not averaged away.
+
+Predictions (to be scored after the run)
+  P1 Most observed pairs come from login/register/editor/settings form submits and are
+     Router.navigate after an await, so they match MAY edges with reason after-await.
+  P2 No miss of class (a). The hand-read reference gave 100 % with no pair outside it.
+  P3 Misses, if any, are mostly (c) or (d).
+  P4 Few or no observed pairs match a MUST edge (realworld's must tier is the logo and
+     Global Feed links).
+
+Outcomes and what each does to the thesis
+  S1 V1-V3 pass, M1 = 100 %, no (a):
+     add to ch5 RQ3 as an extractor-independent check of realworld's scopes on the exercised
+     transitions; state it covers only what the suite exercises, one app, no precision.
+  S2 V1-V3 pass, misses only in (c)/(d)/(e):
+     report M1 with the classified misses; (d) goes to sec:approximations as out of the route
+     abstraction; no claim changes.
+  S3 any miss of class (a) or (b):
+     the 100 % ground-truth recall must be qualified in abstract, ch1, ch5, ch7: the hand-read
+     reference missed it, which is the circularity risk already stated. Report, do not repair
+     before submission (no held-out app; a repair fitted to this check would be untested).
+  F1 V2 fails (suite or backend broken, too few pairs):
+     no number enters the thesis; at most one sentence in sec:future that the check was set up
+     and why it did not yield a measurement.
+  F2 V1 fails (instrumentation changes behaviour): result discarded, same as F1.
+  F3 V3 fails (unstable pairs): report the union and intersection with the instability stated,
+     and mark the figure as not regenerable from pinned inputs (like node-audit 4505fd2a).
+  In every outcome: numbers go through a generator macro; the log and the scorer are archived;
+  REPRODUCE.md says the backend is public and unpinned.
+
+=====================================================================
+Addendum A: mifos (written 3 Nov 2026, after realworld scored S1, before any mifos run)
+=====================================================================
+Graph: corpus/mifos/uigraph.db (c42f220): 606 screen nodes, 14 scope nodes (13 subtree, 1 top),
+204 unknown nodes, 10811 edges (15 must, 10590 may, 206 unknown).
+Backend: repo's docker-compose.e2e.yml (postgres 18.4-alpine + apache/fineract pinned by digest),
+local, seeded by the tests' own API fixtures. App served by ng serve with the same instrumentation.
+
+Rules: same as realworld, plus
+  - edges to/from 'unknown' nodes never count as a hit (target unknown is not a pair).
+  - pattern match by route template; mifos route params named differently from the graph
+    (e.g. :id vs :clientId) count as the same pattern only if the path segments agree.
+  - report hits via the top scope separately from hits via a per-screen or subtree edge.
+  - full reloads (page.goto) start a new chain; a pair never spans a reload.
+
+Predictions
+  PM1 fewer than 60 distinct observed pairs (87 tests, mostly client/loan forms).
+  PM2 at least one miss. mifos has the most computed and relative routerLinks in the corpus,
+      and the dead-link section found relative-link base errors in this analysis.
+  PM3 misses, if any, mostly class (a) or (b) from relative routerLink / navigate with
+      relativeTo, not (d).
+  PM4 no observed pair matches a must edge.
+
+Outcomes: same S1/S2/S3/F1-F3 table. Difference: an S3 on mifos does not touch the realworld
+100 % ground-truth claim (that is realworld-only); it is reported as an RQ3 result on mifos and
+cross-referenced from sec:limitations. F1 additionally covers: Fineract does not boot on arm64,
+or more than half the tests fail for backend reasons.

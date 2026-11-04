@@ -1,0 +1,90 @@
+Mifos X web app: Playwright e2e run with nav-trace instrumentation
+Source: /Users/kanetran29/personal/uigraph-work/corpus/mifos @ 7f78179 (cloned to work dir, read-only source untouched)
+
+ENVIRONMENT
+- Node: v24.14.0 (from PATH; CI pins 24.16.0)
+- Playwright: 1.62.0 (npx); Chromium headless shell 151.0.7922.34 (chromium_headless_shell-1234)
+- OS: macOS arm64
+- Backend: docker compose -p uigraph-mifos-e2e -f docker-compose.e2e.yml up -d db fineract
+  - fineract: apache/fineract:7ac780192@sha256:c3722d8475e140949b6bbec505833f0b5e5a6c27f8f8bd8d2ac38ff7df20fa05 (pinned digest, container healthy)
+  - db: postgres:18.4-alpine
+- Frontend: npm ci --cache <work>/npm-cache ; npm run start:local (ng serve --proxy-config proxy.localhost.conf.js, proxies /fineract-provider to https://localhost:8443), http://localhost:4200
+- Collector: node collector.mjs (127.0.0.1:4599), writes navlog.jsonl
+
+COMMANDS (runs 1 and 2 and plain)
+CI=true E2E_BASE_URL=http://localhost:4200 E2E_FINERACT_URL=https://localhost:8443 E2E_USERNAME=mifos E2E_PASSWORD=password E2E_TENANT_ID=default NODE_TLS_REJECT_UNAUTHORIZED=0 npx playwright test --project=setup --project=chromium --workers=1 --retries=0 --reporter=line
+
+RESULTS (line reporter; 91 tests total: setup + chromium; unit/integration excluded)
+- run1 (instrumented): 86 passed, 5 skipped, 0 failed, 0 flaky  (2.7m)
+- run2 (instrumented): 86 passed, 5 skipped, 0 failed, 0 flaky  (2.7m)
+- run-plain (uninstrumented): 86 passed, 5 skipped, 0 failed, 0 flaky  (2.5m)
+- Failed test titles: run1 none; run2 none; plain none. Failure sets equal (all empty).
+- "cleanupGuard ... deleter(s) failed" warnings: 42 lines in each run (not test failures).
+
+NAV LOG (navlog-run1.jsonl, navlog-run2.jsonl)
+- run1: 324 lines = NavigationStart 162, NavigationEnd 162; NavigationCancel 0; NavigationError 0
+- run2: 324 lines = NavigationStart 162, NavigationEnd 162; NavigationCancel 0; NavigationError 0
+- Trigger counts (NavigationEnd, run1): imperative 158, popstate 4
+- Run-plain produced 0 new lines (navlog stayed at 324 lines during the uninstrumented run).
+- Triple sets run1 vs run2: EQUAL (44 distinct (fromPattern -> pattern, trigger) triples each, same keys)
+
+DISTINCT TRIPLES, run1 (count  fromPattern -> pattern, trigger). "null" = no prior navigation in that browser context.
+20 null -> /login, imperative
+14 null -> /clients/:clientId/general, imperative
+10 /clients/:clientId/general -> /clients/:clientId/actions/:name, imperative
+9 null -> /clients/:clientId/notes, imperative
+8 /clients/:clientId/actions/:name -> /clients/:clientId/general, imperative
+8 null -> /clients/create, imperative
+7 null -> /home, imperative
+6 null -> /groups/:groupId/actions/:action, imperative
+6 null -> /clients/:clientId/savings-accounts/:savingAccountId/general, imperative
+6 /clients/:clientId/savings-accounts/:savingAccountId/general -> /clients/:clientId/savings-accounts/:savingAccountId/actions/:name, imperative
+5 null -> /clients/:clientId/loans-accounts/:loanId/general, imperative
+5 /clients/:clientId/loans-accounts/:loanId/general -> /clients/:clientId/loans-accounts/:loanId/actions/:action, imperative
+5 /clients/:clientId/loans-accounts/:loanId/actions/:action -> /clients/:clientId/loans-accounts/:loanId/general, imperative
+5 /clients/:clientId/savings-accounts/:savingAccountId/actions/:name -> /clients/:clientId/savings-accounts/:savingAccountId/transactions, imperative
+3 /login -> /home, imperative
+3 null -> /clients/:clientId/charges/:chargeId, imperative
+3 /clients/:clientId/general -> /clients/:clientId/personal-data, imperative
+3 null -> /groups/create, imperative
+3 null -> /clients/:clientId/family-members/add, imperative
+3 /clients/:clientId/family-members/add -> /clients/:clientId/family-members, imperative
+3 null -> /clients/:clientId/savings-accounts/create, imperative
+2 null -> /clients/:clientId/actions/:name, imperative
+2 null -> /clients/:clientId/identities, imperative
+2 null -> /clients/:clientId/loans-accounts/create, imperative
+2 /clients/:clientId/savings-accounts/create -> /clients/:clientId/savings-accounts/:savingAccountId/general, imperative
+1 /clients/:clientId/charges/:chargeId -> /clients/:clientId/charges/:chargeId/pay, popstate
+1 /clients/:clientId/charges/:chargeId/pay -> /clients/:clientId/general, imperative
+1 /clients/:clientId/charges/:chargeId -> /clients/:clientId/general, imperative
+1 null -> /clients/:clientId/charges/overview, imperative
+1 null -> /clients, imperative
+1 /clients -> /clients/create, imperative
+1 /clients/create -> /clients/:clientId/general, imperative
+1 /clients/:clientId/personal-data -> /clients/:clientId/general, popstate
+1 /clients/:clientId/actions/:name -> /clients/:clientId/general, popstate
+1 /groups/create -> /groups/:groupId/general, imperative
+1 null -> /groups/:groupId/general, imperative
+1 /groups/:groupId/general -> /groups/:groupId/actions/:action, imperative
+1 /clients/:clientId/family-members -> /clients/:clientId/family-members/:familyMemberId/edit, imperative
+1 /clients/:clientId/family-members/:familyMemberId/edit -> /clients/:clientId/family-members, imperative
+1 /clients/:clientId/general -> /clients/:clientId/loans-accounts/create, imperative
+1 /clients/:clientId/loans-accounts/create -> /clients/:clientId/loans-accounts/:loanId/general, imperative
+1 /clients/:clientId/general -> /clients/:clientId/savings-accounts/create, imperative
+1 /clients/:clientId/savings-accounts/:savingAccountId/transactions -> /clients/:clientId/savings-accounts/:savingAccountId/general, popstate
+1 /clients/:clientId/savings-accounts/:savingAccountId/actions/:name -> /clients/:clientId/savings-accounts/:savingAccountId/general, imperative
+
+INSTRUMENTATION (see instrumentation.diff; nav-trace.ts copied here)
+- src/app/nav-trace.ts (new; verbatim copy of e2e-nav/nav-trace.ts, no import changes needed for Angular 20.3.24)
+- src/app/app.module.ts: imports APP_INITIALIZER, inject, Router, startNavTrace; adds APP_INITIALIZER provider calling startNavTrace(inject(Router)).
+- No CSP found in src/index.html, nginx.conf.template, config/, customHttp.yml, rewrites.json.
+
+DEVIATIONS / NOTES
+- npm ci with default cache failed (EACCES in ~/.npm/_cacache); reran with --cache in work dir (user cache untouched).
+- First run1 attempt aborted at auth setup: Chromium had not finished downloading. Reinstalled chromium, reran; that aborted attempt's log was overwritten.
+- Dev server: plain run initially failed in global-setup because the dev server had died after kill/stash; restarted and reran plain run (its final log is run-plain.log).
+- git stash pop was blocked by playwright/sleeps.json, which the test runs rewrite; reset that file in the work copy and popped the stash. instrumentation.diff covers only app.module.ts and nav-trace.ts, excluding sleeps.json.
+- Config: CI=true used so global-setup runs; webServer is skipped in CI mode, so the dev server was started manually.
+- Reporter overridden to --reporter=line (config's html/list reporters not used).
+- Work dir deleted after copying outputs.
+- Docker: only project uigraph-mifos-e2e was touched; torn down with down -v.
