@@ -653,46 +653,77 @@ Section~\ref{sec:deadlinks} names as this analysis's gap.
 The base misses are losses of a declared approximation and the dynamic misses are forms the extractor does not read; none is a target only the run time knows, and none was repaired. No other application with a runnable suite remains to test a repair, and a
 repair fitted to this check would be untested by it.
 
-\subsection{Against earlier work}
+\subsection{What scope attribution adds}
 \label{sec:res-earlier}
 
-Table~\ref{tab:earlier} gathers, in one place, what the corpus shows about the earlier static
-extractions of Angular navigation (Section~\ref{sec:dynamic-spa}) and about this thesis. Their tools
-were not run. The input restrictions are those the authors state, applied to the route tables the
-independent route parser reads. The other rows reimplement their mechanisms inside uigraph, on
-uigraph's own node extraction, so they measure the mechanisms and not the tools. Every row is
-measured on the corpus uigraph was developed on (Section~\ref{sec:limitations}).
+This subsection gathers the RQ3 evidence in one place. Table~\ref{tab:earlier} sets three graphs side
+by side: without attribution, with the mechanism of earlier work, and with the full analysis. The
+earlier tools were not run. The first row applies the input restrictions Oshima and Kishi state to the
+route tables the independent parser reads. The \emph{rooted} column reimplements their mechanism inside
+uigraph, on uigraph's own node extraction (Section~\ref{sec:res-ablation}). Every figure is in-sample.
 
 \begin{table}[t]\footnotesize
-\caption{Earlier work and this thesis on the corpus. The first row applies the earlier method's
-stated restrictions. The other rows run uigraph at three levels: with the attribution mechanism of
-Oshima and Kishi (\emph{rooted}), with the enclosing routes Rima et al.\ add (\emph{outlet}), and
-with this thesis's full analysis. They are not results of the earlier tools, which were not run.
-A dash marks a figure not measured. All cells are generated figures.}
+\caption{The graph without attribution, with the mechanism of earlier work (\emph{rooted}) and with
+the full analysis. \emph{Suite transitions} are the distinct pairs of screens the application's own
+end-to-end suite navigates between (Section~\ref{sec:res-e2e}); \emph{graph pairs} are those the
+graph holds. The mifos \emph{rooted} graph was mapped for this comparison after the suites had been
+scored, and is not part of the end-to-end preregistration. A dash marks a figure that does not
+apply. All cells are generated figures.}
 \label{tab:earlier}
 \begin{tabularx}{\textwidth}{@{}Yrrr@{}}
 \toprule
- & rooted & outlet & full \\
+ & no attribution & rooted & full \\
 \midrule
-Applications the stated input restrictions admit (Oshima and Kishi) & \EarlierWorkAdmittedApps{} of \EarlierWorkApps{} & -- & \EarlierWorkApps{} of \EarlierWorkApps{} \\
-Sites placed beyond the rooted level, corpus & -- & \AblationOutletAddedSites{} & \AblationAboveRootedSites{} \\
-Structural-reference recall, \GTApp{} & \GTRootedRecall{} & \GTOutletRecall{} & \GTFullRecall{} \\
-End-to-end pairs in the graph, \GTApp{} & \EtoERealworldHitRooted{} of \EtoERealworldPairs{} & -- & \EtoERealworldHit{} of \EtoERealworldPairs{} \\
+Corpus applications the method can be applied to & -- & \EarlierWorkAdmittedApps{} of \EarlierWorkApps{} & \EarlierWorkApps{} of \EarlierWorkApps{} \\
+Suite transitions in the graph, realworld & \EtoERealworldHitNoattr{} of \EtoERealworldPairs{} & \EtoERealworldHitRooted{} of \EtoERealworldPairs{} & \EtoERealworldHit{} of \EtoERealworldPairs{} \\
+Suite transitions in the graph, mifos & \EtoEMifosHitNoattr{} of \EtoEMifosPairs{} & \EtoEMifosHitRooted{} of \EtoEMifosPairs{} & \EtoEMifosHit{} of \EtoEMifosPairs{} \\
+Graph pairs, realworld & \EtoERealworldGraphPairsNoattr{} & \EtoERealworldGraphPairsRooted{} & \EtoERealworldGraphPairs{} \\
+Graph pairs, mifos & \EtoEMifosGraphPairsNoattr{} & \EtoEMifosGraphPairsRooted{} & \EtoEMifosGraphPairs{} \\
+Sites placed on at least one screen, corpus & -- & \AblationRootedSites{} & \AblationFullSites{} \\
+Structural-reference recall, \GTApp{} & -- & \GTRootedRecall{} & \GTFullRecall{} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Two things follow. The restrictions Oshima and Kishi state exclude every application in the corpus:
-all \EarlierWorkParamApps{} declare a route parameter, and all \EarlierWorkNestedApps{} a nested route
-tree. Against their method, the difference is first what it accepts. Against the mechanisms of both
-works, applied inside uigraph, the full analysis adds little: \AblationAboveRootedSites{} sites over the
-rooted level, \AblationAboveRootedShare{} of the corpus, and on \GTApp{} the rooted level already
-holds every observed end-to-end pair. What the corpus does not show is how the earlier tools
-themselves read these applications, since neither was run; Rima et al.\ state no restriction of
-this kind in the sources read (Section~\ref{sec:dynamic-spa}).
+Three things follow.
 
-Table~\ref{tab:world} puts the same comparison in terms of what can be done without this thesis
-and with it, on this corpus.
+\begin{itemize}
+\item \emph{Attribution puts into the graph the transitions the suites take.} Without it, the graph
+  holds \EtoERealworldHitNoattr{} of the \EtoERealworldPairs{} pairs realworld's suite takes and
+  \EtoEMifosHitNoattr{} of mifos's \EtoEMifosPairs{}. With it, it holds \EtoERealworldHit{} and
+  \EtoEMifosHit{}. The extractor was fixed before the suites' logs were read.
+\item \emph{The gain is reached at the rooted level, the mechanism of earlier work.} That mechanism
+  could not be applied to these applications before: the restrictions its authors state admit none of
+  them, because all \EarlierWorkParamApps{} declare route parameters and all \EarlierWorkNestedApps{}
+  nested route trees. Inside scope attribution it is
+  one level of an analysis over the whole route tree, and that is what lets it run on all six.
+\item \emph{The levels above rooted add little.} They place \AblationAboveRootedSites{} more sites,
+  \AblationAboveRootedShare{} of the corpus. \AblationFullAddedSites{} of them come from the
+  injected-service join that only this thesis adds, all in services, guards and effects. On \GTApp{}
+  the call graph removes the one scope the class-level rule made too large
+  (Section~\ref{sec:res-groundtruth}). On the two applications with suites, these levels add no
+  transition the suites take.
+\end{itemize}
+
+What limits the result is not the width of the scopes. Of the \AttrLost{} constructs the loss rules
+assign to attribution, it recovers \AttrRecovered{} (\AttrRecoveredShare{}), \AttrRecoveredMay{} of
+them at the may tier. The may tier is mostly the applications' own decisions, not the extractor's
+uncertainty (Table~\ref{tab:mayreasons}). The attributed must tier has \MustWitnessViolations{}
+witness-check failures among \MustWitnessEdges{} edges, with \MustWitnessUnread{} destinations unread.
+
+Two limits remain. Whether a scope is too large is tested in both directions only on \GTApp{}, against
+a reference that applies the analysis's own relations; Section~\ref{sec:limitations} states this as
+the most serious limitation of the work. A scope that is too large still yields edges whose witnesses
+agree, so no witness-based method can find it. The suites test only the missing direction, and only on
+the transitions they take. Attribution also widens what a source change can be scored against:
+\MutBaseExcluded{} mutants cannot be scored without it, against \MutExcluded{} with it, and on the
+\MutPaired{} mutants both graphs can score, detection is \MutPairedRate{} with attribution and
+\MutPairedBaseRate{} without. The \MutPairedDisagree{} mutant they disagree on comes from how the
+harness matches a guarded screen, not from the graph (Section~\ref{sec:res-mutation}), so the
+detection rate per scored change is essentially unchanged.
+
+Table~\ref{tab:world} puts the comparison in terms of what can be done without this thesis and with
+it, on this corpus.
 
 \begin{table}[t]\footnotesize
 \caption{What the corpus shows can be done without this thesis and with it. The dynamic row is this
@@ -711,54 +742,6 @@ Response to a source change & -- & \MutFallibleDetected{} of \MutFallibleScored{
 \bottomrule
 \end{tabularx}
 \end{table}
-
-\subsection{What the RQ3 evidence supports}
-
-Scope attribution raises measured recovery. Its attributed must tier has \MustWitnessViolations{}
-detected witness-check failures among \MustWitnessEdges{} edges, with \MustWitnessUnread{} unread
-destinations. This is limited evidence for RQ3's precision requirement, because unread edges do not
-pass the comparison and target agreement cannot establish execution on every input
-(Section~\ref{sec:res-round2}). Three qualifications belong with that answer.
-
-\begin{enumerate}
-\item The great majority of the gain is on the may tier: attribution mostly adds navigation the graph
-says is possible, not navigation it says is certain.
-\item The scopes are compared in both directions on one application only, against a reference that applies the analysis's own relations. The recorded rendered-interface check
-exposed \ScopeUnpredicted{} missing pairs on its earlier graph, all on bitwarden, and cannot establish
-whether a scope is too large. The ground truth tests both directions against the structural
-reference, but for \GTApp{} alone, and both repairs were made after it had shown the defects. The
-end-to-end check tests the missing direction on a second application and only on the transitions a
-suite exercises: it finds none missing on realworld and \EtoEMifosMiss{} of \EtoEMifosPairs{} missing
-on mifos, \EtoEMifosMissBase{} of them through a relative link resolved against the wrong route.
-\item The computed scopes are narrower than the trivial attribution by a factor between
-\BaselineFactorMin{} and \BaselineFactorMax{} (Section~\ref{sec:res-width}), and at the low end a scope
-names most of the application. A site attributed to too many screens can produce edges whose readable
-witnesses agree, because the construct is at that location and does name that target, so no
-witness-based method can find it.
-\end{enumerate}
-
-That the scopes are not too large is not established, and Section~\ref{sec:limitations} states it as
-the most serious limitation of the work.
-
-The same mutants were also run against the baseline graph, to ask whether attribution changes how
-sensitive the graph is to a source change. Many mutants cannot be scored against the baseline at all,
-because the construct they change produces no baseline edge: \MutBaseExcluded{} are excluded there
-against \MutExcluded{} on the attributed graph. The clearest case is the link-deletion operator on
-realworld, where every candidate sits in the application shell. Attribution widens the part of the
-source the graph responds to at all.
-
-The raw detection rates, \MutDetected{} of \MutScored{} (\MutRate{}) with attribution and
-\MutBaseDetected{} of \MutBaseScored{} (\MutBaseRate{}) without, are taken over different mutant
-sets, so their difference mixes a detection effect with that eligibility effect. The paired comparison
-isolates the detection effect. Of the \MutPaired{} mutants both graphs can score, identified by
-operator, file, line and subject, the attributed graph detects \MutPairedDetected{}
-(\MutPairedRate{}) and the baseline \MutPairedBaseDetected{} (\MutPairedBaseRate{}). They disagree on
-\MutPairedDisagree{}, a guard removal on realworld's empty-path \texttt{editor} child that the
-baseline run scores and misses, and Section~\ref{sec:res-mutation} shows that this comes from how the
-harness matches the guarded screen, not from the graph. Outside the paired set, \MutAttributedOnly{}
-mutants are scorable only against the attributed graph and \MutBaselineOnly{} only against the
-baseline. On this corpus, then, attribution leaves the detection rate per scored change essentially
-unchanged, and its effect on change sensitivity is the widening of what can be scored at all.
 
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}
