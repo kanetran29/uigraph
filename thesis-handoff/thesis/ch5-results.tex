@@ -45,6 +45,34 @@ earn must number \CensusBaseMustSites{} in the whole corpus without attribution 
 other \CensusZeroMustApps{} have none. Edge counts must be read per tier and not summed as
 distinct constructs, because one unresolved site can produce many over-approximated may edges.
 
+Why the tier is small is measured directly. A measurement switch of the final version records, at
+every may witness, each condition that held it at may, at the extractor's own decision points; with
+the switch off the output is unchanged, which was checked on all six applications
+(Section~\ref{sec:reproducibility}). Table~\ref{tab:mayreasons} groups the reasons of the
+\MayOnlyConstructs{} constructs that yield may edges and no must edge. \MayAppAny{} of them sit behind
+at least one decision of the application itself that the extractor reads: a guard or resolver, a
+branch, a callback or a template condition. Only \MayToolOnly{} are held at may by the extractor's
+own uncertainty alone, so a better reader could lift at most those to must. The small must tier is
+therefore mostly a property of how these applications navigate, not of the extractor. Three limits
+apply.
+\begin{itemize}
+\item A guard that always lets the navigation through still counts as a guard: the census says the
+  application decides, not that the navigation is conditional at run time.
+\item Mifos holds \MayOnlyConstructsMifos{} of the \MayOnlyConstructs{} constructs, so every share is
+  mostly its own.
+\item The families overlap; only the \emph{sole} column counts single causes.
+\end{itemize}
+
+\begin{table}[t]\footnotesize
+\caption{Why the constructs that yield only may edges are may, by family of reason. \emph{Any}
+counts the constructs with at least one reason of the family, \emph{Sole} those whose every may
+witness has that one reason only. The application's own decisions are the async, branch, template
+and guard families; reader, attribution and target are the extractor's uncertainty; same screen
+is neither.}
+\label{tab:mayreasons}
+\TabMayReasons
+\end{table}
+
 \begin{table}[t]\small
 \caption{Must conversion per application, baseline. Must conversion is
 the fraction of in-scope constructs whose own witness earns must; the edge columns

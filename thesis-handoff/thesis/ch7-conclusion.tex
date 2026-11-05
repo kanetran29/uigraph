@@ -16,7 +16,10 @@ transition: \CensusMustSites{} constructs yield \CensusMust{} must edges, and
 \CensusMustKdash{} of those edges come from one application's toolbar. Most of the tier rests
 on an assumption about route order the extractor does not read (\RouteOrderResting{} edges;
 \RouteOrderMustWithout{} without it), the toolbar's scope is untested, and the witness check
-cannot read the destination of \MustWitnessUnread{} edges.
+cannot read the destination of \MustWitnessUnread{} edges. The tier is small mostly because of the
+applications: \MayAppAny{} of the \MayOnlyConstructs{} constructs that yield only may edges sit behind a
+guard, branch, callback or template condition of the application, and \MayToolOnly{} are held at
+may by the extractor's uncertainty alone (Table~\ref{tab:mayreasons}).
 
 \paragraph{RQ2: where extraction fails.} The failures fall into five defect classes and one
 candidate class (Table~\ref{tab:defects}). Every lost construct is assigned to the first loss category

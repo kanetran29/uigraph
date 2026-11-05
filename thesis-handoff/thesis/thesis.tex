@@ -45,6 +45,7 @@
 \input{generated-e2e}
 \input{generated-earlier-work}
 \input{generated-heldout}
+\input{generated-may-reasons}
 \input{figures/fig-plots}
 
 \begin{document}
@@ -89,7 +90,7 @@ attribution, a dataflow analysis that computes the set of screens from which eac
 site can fire.
 
 Three results stand out. First, almost no navigation can be extracted as a deterministic
-transition. The corpus yields \CensusMust{} such edges from \CensusMustSites{} constructs. Most
+transition, mostly because the applications' own guards and branches decide it. The corpus yields \CensusMust{} such edges from \CensusMustSites{} constructs. Most
 of them come from one toolbar whose screen set is untested, and most rest on an assumption
 about route order that the extractor does not read. Second, almost every cause of loss traced in the source is a construct a static reader can
 read, so the loss was the tool's; the final version reads most of them, and two lie beyond any
@@ -104,8 +105,7 @@ read, so the test is not independent.
 
 The conclusion is that a declared route table is a usable starting point for static
 navigation extraction, but not a sufficient one. Scope attribution adds a modest gain over
-earlier mechanisms, and its screen sets were checked in both directions on one application
-only. The tool was developed on the corpus; on two applications outside it, the frozen extractor
+earlier mechanisms. The tool was developed on the corpus; on two applications outside it, the frozen extractor
 finds \HeldoutNodesPeertube{} screens of one and no route of the other.
 
 \vspace{1em}
