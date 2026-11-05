@@ -1311,6 +1311,61 @@ merely unestablished but false. The route set these sites would be judged agains
 and publishing them would report one application's valid links as another's defects. They are
 counted here and left out of the census.
 
+\section{Held-out applications}
+\label{sec:res-heldout}
+
+Every figure above is measured on the six applications uigraph was developed on. To see how far the
+final version carries to applications it has never been run on, two more were measured with the
+extractor frozen at its final commit and nothing repaired afterwards. The selection rule, the
+measures and the predictions were committed before either application was cloned
+(\path{heldout/PREREGISTRATION.txt}). The rule walks a GitHub search for Angular repositories in
+order of stars and takes the first two that are deployable applications with nested and lazily
+loaded routes and route guards, and that were not among the candidates screened for the corpus.
+It gave PeerTube, a federated video platform, and angular-spotify, a Spotify web client.
+
+\begin{table}[t]\footnotesize
+\caption{The frozen final version on the two held-out applications. Node coverage is against the
+independent route parser; the other ratios are those of Table~\ref{tab:ratios}. A dash marks a
+ratio whose denominator is zero.}
+\label{tab:heldout}
+\begin{tabularx}{\textwidth}{@{}Yrr@{}}
+\toprule
+ & PeerTube & angular-spotify \\
+\midrule
+Extraction completes & \HeldoutCompletedPeertube{} & \HeldoutCompletedSpotify{} \\
+Declared screens with a node & \HeldoutNodesPeertube{} & \HeldoutNodesSpotify{} \\
+Blind spots of the independent route parser & \HeldoutBlindSpotsPeertube{} & \HeldoutBlindSpotsSpotify{} \\
+In-scope navigation constructs & \HeldoutConstructsPeertube{} & \HeldoutConstructsSpotify{} \\
+Must conversion & \HeldoutMustConversionPeertube{} & \HeldoutMustConversionSpotify{} \\
+Recovered share & \HeldoutRecoveredSharePeertube{} & \HeldoutRecoveredShareSpotify{} \\
+Must edges & \HeldoutMustEdgesPeertube{} & \HeldoutMustEdgesSpotify{} \\
+Attribution losses recovered & \HeldoutAttrRecoveredPeertube{} of \HeldoutAttrLostPeertube{} & \HeldoutAttrRecoveredSpotify{} of \HeldoutAttrLostSpotify{} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Table~\ref{tab:heldout} shows that the final version does not carry over. Both extractions complete,
+but on PeerTube the graph holds a node for \HeldoutNodesPeertube{} declared screens, and on
+angular-spotify neither static reader finds a route at all. Two route-declaration forms that the
+corpus did not contain account for this.
+\begin{itemize}
+\item PeerTube loads each lazy route file by its default export,
+  \texttt{loadChildren: () => import('./+admin/routes')}. Neither reader follows it: the independent
+  route parser records it as a blind spot each time.
+\item angular-spotify provides its router with \texttt{provideRouter(\ldots)} inside a module of an Nx
+  library rather than of the application. Neither reader looks for the route table there.
+\end{itemize}
+Without screens there is little to convert, so the must conversion and the attribution recovery
+are zero as well. Of the four predictions, three held: both extractions complete, coverage falls
+below the corpus's, and the must tier is small (empty). The fourth, that Oshima and Kishi's
+restrictions exclude both applications, can be applied only to PeerTube, which they exclude; on
+angular-spotify no route was read.
+
+The result is the out-of-sample measure the corpus could not give. The extractor's coverage of the six
+applications is a property of the version fitted to them, and the first two applications outside
+them use declaration forms it does not read. The analysis of Chapter~\ref{ch:analysis} does not
+depend on these forms; the extractor's route reader does.
+
 \section{Summary}
 
 Node extraction is complete against what a static reader can see, and the one-sided runtime route oracle

@@ -44,6 +44,7 @@
 \input{generated-callgraph}
 \input{generated-e2e}
 \input{generated-earlier-work}
+\input{generated-heldout}
 \input{figures/fig-plots}
 
 \begin{document}
@@ -104,7 +105,8 @@ read, so the test is not independent.
 The conclusion is that a declared route table is a usable starting point for static
 navigation extraction, but not a sufficient one. Scope attribution adds a modest gain over
 earlier mechanisms, and its screen sets were checked in both directions on one application
-only. The corpus is small and Angular-only, and the tool was developed on it.
+only. The tool was developed on the corpus; on two applications outside it, the frozen extractor
+finds \HeldoutNodesPeertube{} screens of one and no route of the other.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
