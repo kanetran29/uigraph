@@ -32,7 +32,7 @@ for (const line of readFileSync(join(here, 'apps.txt'), 'utf8').split('\n')) {
   const byDecl = [...viaDecl].filter((p) => ours.has(p)).length
   out[slug] = { theirs: paths.size, byPath, byDecl, ours: ours.size }
   tot.theirs += paths.size; tot.byPath += byPath; tot.byDecl += byDecl; tot.ours += ours.size
-  const N = slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+  const N = slug.replace(/\d/g, (d) => ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'][d]).split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')
   for (const [k, v] of Object.entries(out[slug])) tex += `\\newcommand{\\HHRoutes${N}${k.charAt(0).toUpperCase() + k.slice(1)}}{${v}}\n`
   console.log(slug.padEnd(26), JSON.stringify(out[slug]))
 }

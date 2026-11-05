@@ -639,7 +639,7 @@ Screens checked without signing in & a browser run renders \ScopeJudged{}/\Scope
 Dead links found from the source & -- & \RoundTwoDeadLinkCandidates{} candidate sites in \RoundTwoDeadLinkWhere{}, checked against the runtime route oracle (Section~\ref{sec:deadlinks}) \\
 Transitions on \GTApp{} & its own suite takes \EtoERealworldPairs{} pairs & the graph holds \EtoERealworldGraphPairs{}, an over-approximation \\
 Response to a source change & -- & \MutFallibleDetected{}/\MutFallibleScored{} mutants, at constructs the graph represents \\
-Transitions of Rima et al.'s seven subjects & their pipeline enumerates the workflows their reference annotates & the graph holds \RimaHitFull{}/\RimaPairs{} of their reference pairs as this thesis's preregistered rule counts them, \RimaHitOutlet{} at their specification's rule \\
+Transitions on thirteen applications, Rima et al.'s seven and the corpus & their tool finds \HHAllTheirsRecall{} of the real pairs either tool finds, at \HHAllTheirsPrecision{} precision & this extractor finds \HHAllOursRecall{}, at \HHAllOursPrecision{} (Section~\ref{sec:res-h2h}) \\
 \bottomrule
 \end{tabularx}
 \par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; the earlier tools were not run; every figure is in-sample except the last row (Section~\ref{sec:res-rima}). All cells are generated figures.}
@@ -733,6 +733,78 @@ the \RimaPairs{} pairs and \RimaRepExtra{} other pairs: the repaired graph gains
 the three airbus pairs from the sign-in screen, which Rima et al.'s reference lists when read per start
 route although the source holds no such transition. These figures are post hoc, and none of their pairs
 was read again.
+
+\subsection{The tool of Rima et al.\ on the same applications}
+\label{sec:res-h2h}
+
+The comparison above measures this extractor against a reference that Rima et al.'s tool generated. This
+one runs their tool. Their static stages, extraction and workflow enumeration, were run from their
+repository on their seven subjects and on the six corpus applications; their test stages need running
+backends and were not run. It was preregistered before their output on the corpus was read. On their
+subjects their tool reproduces their reference exactly, workflow for workflow. Each tool's output is
+turned into pairs of different screens: for their tool, every workflow's start routes paired with its
+terminal route; for this extractor, the graph's edges with scopes expanded. The union is split per
+application into pairs both tools find and pairs only one finds. Each stratum, or a seeded sample of 12
+where it is larger, was read from the source without the reader being told which tool proposed a pair.
+Precision is a tool's share of real pairs among those it finds; relative recall is its share of the real
+pairs either tool finds.
+
+Their tool records a route path declared through a constant as the expression's text. On ghostfolio
+none of the \HHRoutesGhostfolioTheirs{} paths it records names a declared route; on bitwarden
+\HHRoutesBitwardenByPath{} of \HHRoutesBitwardenTheirs{} do, and it reads \HHRoutesMifosByDecl{} of
+mifos's \HHRoutesMifosOurs{} screens. So that a pair is not lost to its name alone, routes were
+identified by where they are declared, a choice made after their output was read and one that can only
+help their tool.
+
+\newcommand{\hhrow}[2]{#1 & \csname HH#2TheirsPairs\endcsname & \csname HH#2TheirsPrecision\endcsname & \csname HH#2TheirsRecall\endcsname & \csname HH#2OursPairs\endcsname & \csname HH#2OursPrecision\endcsname & \csname HH#2OursRecall\endcsname \\}
+\begin{table}[t]\footnotesize
+\caption{Rima et al.'s tool and this extractor on the same thirteen applications.}
+\label{tab:h2h}
+\begin{tabularx}{\textwidth}{@{}Yrrrrrr@{}}
+\toprule
+ & \multicolumn{3}{c}{Rima et al.'s tool} & \multicolumn{3}{c}{This extractor} \\
+\cmidrule(lr){2-4}\cmidrule(l){5-7}
+Application & pairs & precision & recall & pairs & precision & recall \\
+\midrule
+\hhrow{posts-users}{PostsUsersUiNg}
+\hhrow{heroes}{HeroesAngular}
+\hhrow{airbus}{AirbusInventory}
+\hhrow{petclinic}{SpringPetclinicAngular}
+\hhrow{traduora}{EverTraduora}
+\hhrow{jumpstart}{AngularJumpstart}
+\hhrow{event-booking}{EventBookingMean}
+\midrule
+\hhrow{realworld}{Realworld}
+\hhrow{alfresco}{Alfresco}
+\hhrow{ghostfolio}{Ghostfolio}
+\hhrow{k8sdash}{KEightsdash}
+\hhrow{bitwarden}{Bitwarden}
+\hhrow{mifos}{Mifos}
+\midrule
+\hhrow{Their seven subjects}{Rima}
+\hhrow{Corpus}{Corpus}
+\hhrow{Corpus without mifos}{CorpusNoMifos}
+\bottomrule
+\end{tabularx}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Recall} is relative: the share of the real pairs either tool finds. Real pairs are estimated per stratum from a reading of at most 12 pairs, so a figure over a large stratum is an estimate. Routes are identified by declaration site (post hoc). All cells are generated figures.}
+\end{table}
+
+Table~\ref{tab:h2h} gives the result. On their seven subjects the two tools are close: theirs finds
+\HHRimaTheirsRecall{} of the real pairs at \HHRimaTheirsPrecision{} precision, this extractor
+\HHRimaOursRecall{} at \HHRimaOursPrecision{}. On the corpus this extractor finds \HHCorpusOursRecall{} of the
+real pairs either finds and theirs \HHCorpusTheirsRecall{}. Its precision there, \HHCorpusOursPrecision{}
+against \HHCorpusTheirsPrecision{}, is set by mifos, where the shell's notifications tray reaches every
+account screen below the one it names (Section~\ref{sec:res-e2e}); without mifos it is
+\HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}, at a recall of
+\HHCorpusNoMifosOursRecall{} against \HHCorpusNoMifosTheirsRecall{}. Of the three preregistered predictions
+one held: this extractor's recall on the corpus is the higher. Two failed: on their subjects its
+precision is the higher, not theirs, and their tool ran on every application. The real pairs only their
+tool finds, on petclinic, traduora and event-booking, were not classified by cause.
+
+The readings were made by the AI assistant under the rules of the first comparison: \HHRead{} pairs, of which
+a stronger model re-read \HHGated{} and changed \HHGateChanged{}; \HHCorrected{} reading, made under a
+mistyped start screen, was supplied by hand. The samples are small, so a stratum's estimate can move by
+several points with one verdict.
 
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}

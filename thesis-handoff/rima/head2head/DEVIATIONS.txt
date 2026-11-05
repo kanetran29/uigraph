@@ -1,0 +1,15 @@
+Deviations from PREREGISTRATION.txt (head-to-head), recorded 5 Nov 2026 after the results were read
+
+1. Their tool's run (run-theirs.sh) finished before the preregistration was committed (5bd2de2); its
+   output on the corpus was not read until after that commit.
+2. Routes identified by declaration site. Their tool records a route path declared through a constant as
+   the expression's text (all of ghostfolio, 23 of bitwarden's paths), so the preregistered path match
+   would have dropped their pairs for their names alone. route-decls.mts maps each of their routes to ours
+   by the file and start line of the route object; where that fails (most of k8sdash, whose lines differ
+   by the tool's convention) their path text is kept. The strata by path (results/strata-by-path.json) are
+   kept. The mapping can only help their tool.
+3. One reading supplied by hand (results/corrections.json): a reader returned a mifos pair under a
+   mistyped start screen; its evidence concerned the target, which no code navigates to.
+4. Group "corpus without mifos" added to the pooled figures after reading, because mifos's pair count
+   (161k of 163k for this extractor) decides the pooled precision.
+5. The real pairs only their tool finds were not classified by cause.

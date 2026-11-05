@@ -50,6 +50,8 @@
 \input{generated-rima}
 \input{generated-rima-verdicts}
 \input{generated-rimarep}
+\input{generated-h2h}
+\input{generated-h2h-routes}
 \input{figures/fig-plots}
 
 \begin{document}
@@ -107,8 +109,8 @@ output and guided two repairs. Mutation testing on three applications shows that
 changes in constructs it already represents; its harness was corrected after its misses were
 read, so the test is not independent.
 
-A declared route table is thus a usable starting point for static
-navigation extraction, but not a sufficient one. The tool's figures are in-sample, except on seven applications of prior work, where it holds \RimaHitFull{} of \RimaPairs{} preregistered reference transitions.
+A declared route table is a usable but insufficient basis for static navigation
+extraction. The figures are in-sample; beside Rima et al.'s tool on thirteen applications it finds \HHAllOursRecall{} of the real transitions either finds, against \HHAllTheirsRecall{}, less precisely.
 
 \vspace{0.5em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
