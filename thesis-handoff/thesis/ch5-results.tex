@@ -898,9 +898,9 @@ A site whose target the application mounts nothing at is a dead link. The method
 for such links at no extra cost. The candidates are found statically, and each is then checked
 against the route configuration the runtime route oracle recorded before it is reported. The result is a candidate list and not a verdict: no candidate was navigated to in a running application, so that a link is reached at run time is not established.
 
-The clearest case is mifos, where a transactions tab links to \path{/journal-entry/view/:id} although the application declares that screen at
-\path{/accounting/}\allowbreak\path{journal-entry/view/:id}. The link omits the parent
-prefix, and mifos's catch-all route renders the not-found screen, which a user can mistake for missing data rather than a broken link.
+{\sloppy The clearest case is mifos, where a transactions tab links to \path{/journal-entry/}\allowbreak\path{view/:id} although the application declares that screen at
+\path{/accounting/}\allowbreak\path{journal-entry/}\allowbreak\path{view/:id}. The link omits the parent
+prefix, and mifos's catch-all route renders the not-found screen, which a user can mistake for missing data rather than a broken link.\par}
 
 The list is not one defect class, and the split matters for what each part is worth.
 
