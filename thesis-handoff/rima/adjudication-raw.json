@@ -1,0 +1,2111 @@
+{
+ "readers": [
+  {
+   "kind": "extra",
+   "from": "/new-post",
+   "to": "/new-user",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:10",
+   "reason": "app.component.html renders <app-header> above the router-outlet, so it is on every screen. It has routerLink '/new-user', and that route exists in app.module.ts.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/new-post",
+   "to": "/user-availability-schedule",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:12",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/user-availability-schedule', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/new-post",
+   "to": "/user-search",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/user-search', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/new-post",
+   "to": "/users",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/users', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/new-user",
+   "to": "/new-post",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:8",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/new-post', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/new-user",
+   "to": "/posts",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:7",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/posts', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/new-user",
+   "to": "/user-availability-schedule",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:12",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/user-availability-schedule', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/new-user",
+   "to": "/user-search",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/user-search', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/new-user",
+   "to": "/users",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/users', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/posts",
+   "to": "/new-post",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:8",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/new-post', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/posts",
+   "to": "/new-user",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:10",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/new-user', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/posts",
+   "to": "/user-availability-schedule",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:12",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/user-availability-schedule', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/posts",
+   "to": "/user-search",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/user-search', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/posts",
+   "to": "/users",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/users', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-availability-schedule",
+   "to": "/new-post",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:8",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/new-post', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-availability-schedule",
+   "to": "/new-user",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:10",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/new-user', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-availability-schedule",
+   "to": "/posts",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:7",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/posts', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-availability-schedule",
+   "to": "/user-search",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The shell header, rendered on every screen, has a routerLink to '/user-search', and the route exists.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-availability-schedule",
+   "to": "/users",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The header is in app.component.html above the router-outlet, so it renders on every screen. Its routerLink '/users' (line 9) fires on /user-availability-schedule.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-search",
+   "to": "/new-post",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:8",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/new-post' (line 8) is clickable on /user-search.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-search",
+   "to": "/new-user",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:10",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/new-user' (line 10) is clickable on /user-search.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-search",
+   "to": "/posts",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:7",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/posts' (line 7) is clickable on /user-search.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-search",
+   "to": "/user-availability-schedule",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:12",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/user-availability-schedule' (line 12) is clickable on /user-search.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/user-search",
+   "to": "/users",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/users' (line 9) is clickable on /user-search.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users",
+   "to": "/new-post",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:8",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/new-post' (line 8) is clickable on /users.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users",
+   "to": "/new-user",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:10",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/new-user' (line 10) is clickable on /users.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users",
+   "to": "/posts",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:7",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/posts' (line 7) is clickable on /users.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users",
+   "to": "/user-availability-schedule",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:12",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/user-availability-schedule' (line 12) is clickable on /users.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users",
+   "to": "/user-search",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The app-shell header renders on all routes. Its routerLink '/user-search' (line 11) is clickable on /users.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users/:id",
+   "to": "/new-post",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:8",
+   "reason": "The app-shell header renders on all routes, including /users/:id. Its routerLink '/new-post' (line 8) is clickable there.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users/:id",
+   "to": "/new-user",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:10",
+   "reason": "The app-shell header renders on all routes, including /users/:id. Its routerLink '/new-user' (line 10) is clickable there.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users/:id",
+   "to": "/posts",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:7",
+   "reason": "The app-shell header renders on all routes, including /users/:id. Its routerLink '/posts' (line 7) is clickable there.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users/:id",
+   "to": "/user-availability-schedule",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:12",
+   "reason": "The app-shell header renders on all routes, including /users/:id. Its routerLink '/user-availability-schedule' (line 12) is clickable there.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users/:id",
+   "to": "/user-search",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The app-shell header renders on all routes, including /users/:id. Its routerLink '/user-search' (line 11) is clickable there.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "/users/:id",
+   "to": "/users",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The app-shell header renders on all routes, including /users/:id. Its routerLink '/users' (line 9) is clickable there.",
+   "slug": "posts-users-ui-ng",
+   "dir": "anonbnr__posts-users-ui-ng"
+  },
+  {
+   "kind": "extra",
+   "from": "*",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:16",
+   "reason": "app.component.html renders <app-nav> outside <router-outlet>, so the nav is on every screen; its routerLink=\"/about\" matches the 'about' route in router.ts.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "*",
+   "to": "/heroes",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:10",
+   "reason": "The shell <app-nav> is on every screen; routerLink=\"/heroes\" matches the lazy 'heroes' route in router.ts.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "*",
+   "to": "/villains",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:13",
+   "reason": "The shell <app-nav> is on every screen; routerLink=\"/villains\" matches the lazy 'villains' route in router.ts.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/about",
+   "to": "/heroes",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:10",
+   "reason": "AboutComponent is routed inside the shell's <router-outlet>, so <app-nav> is rendered on /about; its link /heroes is a route.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/about",
+   "to": "/villains",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:13",
+   "reason": "The shell nav is rendered on /about; its routerLink=\"/villains\" lands on the villains route.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/heroes",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:16",
+   "reason": "The shell nav is rendered on /heroes (HeroesComponent sits in the shell outlet); routerLink=\"/about\" lands on the about route.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/heroes",
+   "to": "/villains",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:13",
+   "reason": "The shell nav is rendered on /heroes; routerLink=\"/villains\" lands on the villains route.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/villains",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:16",
+   "reason": "The shell nav is rendered on /villains; routerLink=\"/about\" lands on the about route.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/villains",
+   "to": "/heroes",
+   "verdict": "real",
+   "site": "src/app/core/components/nav.component.ts:10",
+   "reason": "The shell nav is rendered on /villains; routerLink=\"/heroes\" lands on the heroes route.",
+   "slug": "heroes-angular",
+   "dir": "johnpapa__heroes-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/add",
+   "to": "/getAllProducts",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:19",
+   "reason": "AddProductComponent's template wraps its content in <app-main-nav>, so the sidenav link routerLink=\"/getAllProducts\" is rendered on /add.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/add",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "The logout control in the main-nav toolbar has routerLink=\"/login\" and is rendered on /add via <app-main-nav>.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/add",
+   "to": "/productByCategory",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:11",
+   "reason": "The main-nav sidenav link routerLink=\"/productByCategory\" is rendered on /add.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/dashboard",
+   "to": "/add",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:26",
+   "reason": "/dashboard routes to GetAllProductsComponent, whose template wraps content in <app-main-nav>, so the /add link is rendered.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/dashboard",
+   "to": "/getAllProducts",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:19",
+   "reason": "The main-nav link routerLink=\"/getAllProducts\" is rendered on /dashboard, which shows GetAllProductsComponent inside app-main-nav.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/dashboard",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "The main-nav logout control with routerLink=\"/login\" is rendered on /dashboard.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/dashboard",
+   "to": "/productByCategory",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:11",
+   "reason": "The main-nav link routerLink=\"/productByCategory\" is rendered on /dashboard.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/getAllProducts",
+   "to": "/add",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:26",
+   "reason": "GetAllProductsComponent renders <app-main-nav>, which contains routerLink=\"/add\".",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/getAllProducts",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "The main-nav logout control with routerLink=\"/login\" is rendered on /getAllProducts.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/getAllProducts",
+   "to": "/productByCategory",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:11",
+   "reason": "The main-nav link routerLink=\"/productByCategory\" is rendered on /getAllProducts.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/login",
+   "to": "/add",
+   "verdict": "spurious",
+   "site": "src/app/main-nav/main-nav.component.html:26",
+   "reason": "/login renders LoginPageComponent, whose template does not include <app-main-nav>; app.component.html holds only a router-outlet, so the nav is never rendered on /login. LoginPageComponent only navigates to the dashboard.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/login",
+   "to": "/getAllProducts",
+   "verdict": "spurious",
+   "site": "src/app/services/router.service.ts:20",
+   "reason": "The main-nav link is not rendered on /login. routeToAllProduct is called only from the successful and unsuccessful dialogs and the guard calls routeToLogin; login only calls routeToDashboard.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/login",
+   "to": "/productByCategory",
+   "verdict": "spurious",
+   "site": "src/app/main-nav/main-nav.component.html:11",
+   "reason": "The main-nav is not rendered on /login (no <app-main-nav> in the login template or the app shell), so the link is not available.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/productByCategory",
+   "to": "/add",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:26",
+   "reason": "GetProductByCategoryComponent wraps its content in <app-main-nav>, which contains routerLink=\"/add\".",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/productByCategory",
+   "to": "/getAllProducts",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:19",
+   "reason": "The main-nav link routerLink=\"/getAllProducts\" is rendered on /productByCategory.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/productByCategory",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "The main-nav logout control with routerLink=\"/login\" is rendered on /productByCategory.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/update",
+   "to": "/add",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:26",
+   "reason": "UpdateProductComponent wraps its content in <app-main-nav>, which contains routerLink=\"/add\".",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/update",
+   "to": "/getAllProducts",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:19",
+   "reason": "The main-nav link routerLink=\"/getAllProducts\" is rendered on /update.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/update",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "The main-nav logout control with routerLink=\"/login\" is rendered on /update.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "extra",
+   "from": "/update",
+   "to": "/productByCategory",
+   "verdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:11",
+   "reason": "The main-nav link routerLink=\"/productByCategory\" is rendered on /update.",
+   "slug": "airbus-inventory",
+   "dir": "Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+  },
+  {
+   "kind": "miss",
+   "from": "/pets",
+   "to": "/**",
+   "verdict": "e",
+   "site": "src/app/app.component.html:35",
+   "reason": "Cited triggers (app.component.html:35 and :47) are the Owners and Veterinarians dropdown-toggle anchors, which have only a (click) logger and no routerLink or href, so they navigate nowhere. A '**' PageNotFound route does exist, but nothing in the source links or navigates to an unknown URL.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "miss",
+   "from": "/pettypes",
+   "to": "/pettypes/add",
+   "verdict": "e",
+   "site": "src/app/pettypes/pettype-add/pettype-add.component.ts:31",
+   "reason": "PettypeAddComponent has no Router. Its onSubmit only emits newPetType, and pettype-list embeds it inline via <app-pettype-add> behind an isInsert toggle. No routerLink or navigate to /pettypes/add exists anywhere in the app.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "miss",
+   "from": "/visits/add",
+   "to": "/pets/1/visits/add",
+   "verdict": "e",
+   "site": "src/app/visits/visit-add/visit-add.component.ts:102",
+   "reason": "VisitAddComponent's only navigation, after a successful add, is gotoOwnerDetail(), which goes to /owners/:id. Nothing navigates to /pets/:id/visits/add; the only code that does is pet-list.component.ts:67, from /pets.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "*",
+   "to": "/vets/add",
+   "verdict": "real",
+   "site": "src/app/app.component.html:54",
+   "reason": "The navbar in AppComponent sits above the router-outlet and renders on every URL, including the '**' route. It holds routerLink=\"/vets/add\".",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "*",
+   "to": "/welcome",
+   "verdict": "real",
+   "site": "src/app/app.component.html:28",
+   "reason": "The shell's Home link is routerLink=\"welcome\". AppComponent is the root component, so it resolves to /welcome, and it renders on the wildcard screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/",
+   "to": "/owners",
+   "verdict": "real",
+   "site": "src/app/app.component.html:40",
+   "reason": "The shell navbar renders on '/' and has routerLink=\"/owners\".",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/",
+   "to": "/welcome",
+   "verdict": "real",
+   "site": "src/app/app.component.html:28",
+   "reason": "The shell Home link, routerLink=\"welcome\", resolves to /welcome and renders on '/'. '/' is a separate WelcomeComponent route, not a redirect.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/owners/:id/edit",
+   "to": "/owners/:id/pets/add",
+   "verdict": "spurious",
+   "site": "src/app/owners/owner-edit/owner-edit.component.ts:70",
+   "reason": "The cited navigate is router.navigate(['/owners', owner.id]), which lands on /owners/:id (owner detail), not /owners/:id/pets/add. Owner-edit's template has no routerLink, and the shell links to no pets/add URL.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/owners/:id/pets/add",
+   "to": "/owners",
+   "verdict": "real",
+   "site": "src/app/app.component.html:40",
+   "reason": "The shell navbar renders on every routed screen and has routerLink=\"/owners\".",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/owners/:id/pets/add",
+   "to": "/owners/:id/edit",
+   "verdict": "spurious",
+   "site": "src/app/pets/pet-add/pet-add.component.ts:90",
+   "reason": "gotoOwnerDetail() calls router.navigate(['/owners', currentOwner.id]), which lands on /owners/:id (detail), not /owners/:id/edit. No other trigger rendered on this screen links to the edit route.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/owners/:id/pets/add",
+   "to": "/pettypes",
+   "verdict": "real",
+   "site": "src/app/app.component.html:59",
+   "reason": "The shell navbar has routerLink=\"/pettypes\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/owners/add",
+   "to": "/vets",
+   "verdict": "real",
+   "site": "src/app/app.component.html:52",
+   "reason": "The shell navbar has routerLink=\"/vets\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pets/:id/edit",
+   "to": "/vets",
+   "verdict": "real",
+   "site": "src/app/app.component.html:52",
+   "reason": "The shell navbar has routerLink=\"/vets\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pets/:id/visits/add",
+   "to": "/owners/:id/pets/add",
+   "verdict": "spurious",
+   "site": "src/app/visits/visit-add/visit-add.component.ts:102",
+   "reason": "The visit-add navigate goes to ['/owners', currentOwner.id], which is /owners/:id (detail), not .../pets/add. The pets/add link is in owner-detail.component.ts:64, and that component is not rendered on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pets/:id/visits/add",
+   "to": "/specialties",
+   "verdict": "real",
+   "site": "src/app/app.component.html:65",
+   "reason": "The shell navbar has routerLink=\"/specialties\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pets/:id/visits/add",
+   "to": "/welcome",
+   "verdict": "real",
+   "site": "src/app/app.component.html:28",
+   "reason": "The shell Home link, routerLink=\"welcome\", resolves to /welcome and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pets/add",
+   "to": "/vets/add",
+   "verdict": "real",
+   "site": "src/app/app.component.html:54",
+   "reason": "The shell navbar has routerLink=\"/vets/add\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pettypes",
+   "to": "/owners",
+   "verdict": "real",
+   "site": "src/app/app.component.html:40",
+   "reason": "The shell navbar has routerLink=\"/owners\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pettypes",
+   "to": "/vets",
+   "verdict": "real",
+   "site": "src/app/app.component.html:52",
+   "reason": "The shell navbar has routerLink=\"/vets\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pettypes/add",
+   "to": "/owners",
+   "verdict": "real",
+   "site": "src/app/app.component.html:40",
+   "reason": "The shell navbar has routerLink=\"/owners\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/pettypes/add",
+   "to": "/vets/add",
+   "verdict": "real",
+   "site": "src/app/app.component.html:54",
+   "reason": "The shell navbar has routerLink=\"/vets/add\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/specialties/:id/edit",
+   "to": "/owners/add",
+   "verdict": "real",
+   "site": "src/app/app.component.html:42",
+   "reason": "The shell navbar has routerLink=\"/owners/add\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/vets",
+   "to": "/owners",
+   "verdict": "real",
+   "site": "src/app/app.component.html:40",
+   "reason": "The shell navbar has routerLink=\"/owners\" and renders on this screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/vets",
+   "to": "/owners/add",
+   "verdict": "real",
+   "site": "src/app/app.component.html:42",
+   "reason": "Navbar routerLink=\"/owners/add\" is in AppComponent shell, outside the router-outlet, so it is rendered on every screen including /vets.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/vets",
+   "to": "/specialties",
+   "verdict": "real",
+   "site": "src/app/app.component.html:65",
+   "reason": "Shell navbar routerLink=\"/specialties\" is always rendered above the router-outlet.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/vets/:id/edit",
+   "to": "/owners/add",
+   "verdict": "real",
+   "site": "src/app/app.component.html:42",
+   "reason": "Shell navbar link to /owners/add is rendered on all routed screens.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/vets/:id/edit",
+   "to": "/pettypes",
+   "verdict": "real",
+   "site": "src/app/app.component.html:59",
+   "reason": "Shell navbar routerLink=\"/pettypes\" is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/vets/:id/edit",
+   "to": "/welcome",
+   "verdict": "real",
+   "site": "src/app/app.component.html:28",
+   "reason": "Shell navbar routerLink=\"welcome\" at root level resolves to /welcome and is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/vets/add",
+   "to": "/pettypes",
+   "verdict": "real",
+   "site": "src/app/app.component.html:59",
+   "reason": "Shell navbar link to /pettypes is rendered on every screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/vets/add",
+   "to": "/welcome",
+   "verdict": "real",
+   "site": "src/app/app.component.html:28",
+   "reason": "Shell navbar home link (routerLink=\"welcome\") is rendered on every screen.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits",
+   "to": "/pettypes",
+   "verdict": "real",
+   "site": "src/app/app.component.html:59",
+   "reason": "Shell navbar link to /pettypes is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits",
+   "to": "/specialties",
+   "verdict": "real",
+   "site": "src/app/app.component.html:65",
+   "reason": "Shell navbar link to /specialties is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits",
+   "to": "/vets",
+   "verdict": "real",
+   "site": "src/app/app.component.html:52",
+   "reason": "Shell navbar 'Veterinarians > All' routerLink=\"/vets\" is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits/:id/edit",
+   "to": "/owners",
+   "verdict": "real",
+   "site": "src/app/app.component.html:40",
+   "reason": "Shell navbar 'Owners > Search' routerLink=\"/owners\" is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits/:id/edit",
+   "to": "/owners/:id/edit",
+   "verdict": "spurious",
+   "site": "src/app/visits/visit-edit/visit-edit.component.ts:98",
+   "reason": "gotoOwnerDetail() navigates to ['/owners', id], i.e. route owners/:id (OwnerDetail), not owners/:id/edit; no other trigger in visits/ or the shell targets /owners/:id/edit.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits/:id/edit",
+   "to": "/pettypes",
+   "verdict": "real",
+   "site": "src/app/app.component.html:59",
+   "reason": "Shell navbar link to /pettypes is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits/:id/edit",
+   "to": "/welcome",
+   "verdict": "real",
+   "site": "src/app/app.component.html:28",
+   "reason": "Shell navbar home link resolves to /welcome and is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits/add",
+   "to": "/owners/:id/edit",
+   "verdict": "spurious",
+   "site": "src/app/visits/visit-add/visit-add.component.ts:102",
+   "reason": "gotoOwnerDetail() navigates to ['/owners', id], which is the owners/:id detail route, not owners/:id/edit; no trigger on this screen reaches the edit route.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits/add",
+   "to": "/pettypes",
+   "verdict": "real",
+   "site": "src/app/app.component.html:59",
+   "reason": "Shell navbar link to /pettypes is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits/add",
+   "to": "/specialties",
+   "verdict": "real",
+   "site": "src/app/app.component.html:65",
+   "reason": "Shell navbar link to /specialties is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/visits/add",
+   "to": "/vets/add",
+   "verdict": "real",
+   "site": "src/app/app.component.html:54",
+   "reason": "Shell navbar 'Veterinarians > Add New' routerLink=\"/vets/add\" is always rendered.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/welcome",
+   "to": "/specialties",
+   "verdict": "real",
+   "site": "src/app/app.component.html:65",
+   "reason": "Shell navbar link to /specialties is always rendered, including on /welcome.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "extra",
+   "from": "/welcome",
+   "to": "/vets",
+   "verdict": "real",
+   "site": "src/app/app.component.html:52",
+   "reason": "Shell navbar link to /vets is always rendered, including on /welcome.",
+   "slug": "spring-petclinic-angular",
+   "dir": "parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+  },
+  {
+   "kind": "miss",
+   "from": "/projects/:projectId/translations",
+   "to": "/projects/:projectId/translations/:localeCode",
+   "verdict": "b",
+   "site": "src/app/projects/components/project-locales/project-locales.component.html:17",
+   "reason": "ProjectLocalesComponent has [routerLink]=\"[locale.locale.code]\", a relative array-form link with a dynamic segment inside an ng-template (#searchResultsItem) projected into app-search. The graph has no edge for it from any scope, so the construct was not read.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "miss",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/translations/:localeCode",
+   "verdict": "b",
+   "site": "src/app/projects/components/project-locales/project-locales.component.html:17",
+   "reason": "Same trigger as the translations pair. /projects/:projectId redirects to translations, where ProjectLocalesComponent renders. The link is a dynamic relative array routerLink in an ng-template that the graph has no edge for, so the failure is the construct (b), not scope.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/labels",
+   "to": "/projects/:projectId/team",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:57",
+   "reason": "ProjectContainerComponent is the parent of all :projectId children and its sidebar has routerLink=\"team\"; it is rendered on the labels screen.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/labels",
+   "to": "/projects/:projectId/translations",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:41",
+   "reason": "Container sidebar link routerLink=\"translations\" is rendered on every child route including labels.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/settings",
+   "to": "/projects/:projectId",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-settings/project-settings.component.html:46",
+   "reason": "Cancel button [routerLink]=['/projects', project.id] lands on :projectId, which is only a redirectTo 'translations' route (counted real via redirect).",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/settings",
+   "to": "/projects/:projectId/export",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:74",
+   "reason": "Container sidebar link routerLink=\"export\" is rendered on settings. The settings.html:46 witness is wrong (it goes to :projectId), but the container link holds.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/settings",
+   "to": "/projects/:projectId/import",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:65",
+   "reason": "Container sidebar routerLink=\"import\" is rendered on settings; the disabled class is CSS only, and CanGuard only gates by role, which can be admin/editor.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/settings",
+   "to": "/projects/:projectId/labels",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:50",
+   "reason": "Container sidebar routerLink=\"labels\" is rendered on settings.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/settings",
+   "to": "/projects/:projectId/translations/:localeCode",
+   "verdict": "spurious",
+   "site": "src/app/projects/components/project-settings/project-settings.component.html:46",
+   "reason": "The only witness is the Cancel link to ['/projects', project.id], which resolves to :projectId and redirects to 'translations', not translations/:localeCode. Settings has no other routerLink or navigate, and the sidebar has no localeCode link.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/settings",
+   "to": "/user-settings",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+   "reason": "The app shell app-bar is rendered when authenticated (always true on settings) and has the Account Settings dropdown item with routerLink=\"/user-settings\".",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/team",
+   "to": "/projects/:projectId/api",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:84",
+   "reason": "Container sidebar routerLink=\"api\" is rendered on the team child route.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/team",
+   "to": "/projects/:projectId/settings",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:93",
+   "reason": "Container sidebar routerLink=\"settings\" is rendered on the team child route.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/terms",
+   "to": "/projects/:projectId/import",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:65",
+   "reason": "Container sidebar routerLink=\"import\" is rendered on terms.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/terms",
+   "to": "/projects/:projectId/settings",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:93",
+   "reason": "Container sidebar routerLink=\"settings\" is rendered on terms.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/terms",
+   "to": "/projects/:projectId/translations",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:41",
+   "reason": "Container sidebar routerLink=\"translations\" is rendered on terms.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/translations",
+   "to": "/projects",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:2",
+   "reason": "App shell app-bar (authenticated) has a Projects button with routerLink=\"/projects\" (the brand link '/' also redirects there); rendered above the router-outlet on translations.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/translations",
+   "to": "/projects/:projectId/import",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:65",
+   "reason": "Container sidebar routerLink=\"import\" is rendered on the translations child route.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/translations",
+   "to": "/projects/:projectId/labels",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:50",
+   "reason": "Container sidebar routerLink=\"labels\" is rendered on translations.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/translations",
+   "to": "/projects/:projectId/settings",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:93",
+   "reason": "Container sidebar routerLink=\"settings\" is rendered on translations.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/translations/:localeCode",
+   "to": "/projects",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:2",
+   "reason": "App-bar Projects button routerLink=\"/projects\" is rendered on every authenticated screen including this one.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/translations/:localeCode",
+   "to": "/projects/:projectId/import",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:65",
+   "reason": "Container sidebar routerLink=\"import\" is rendered on this child route.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/signup",
+   "to": "/projects",
+   "verdict": "spurious",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:2",
+   "reason": "app-bar is rendered only under *ngIf isAuthenticated$ (and user$), while /signup is guarded by NoAuthGuard, which redirects authenticated users to '/'. A user on /signup is unauthenticated, so the app-bar link is not rendered. Only a transient moment right after signup success exists, and navigation follows automatically.",
+   "slug": "ever-traduora",
+   "dir": "parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+  },
+  {
+   "kind": "extra",
+   "from": "/about",
+   "to": "/customers",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:11",
+   "reason": "cm-navbar is in app.component.html above the router-outlet, so it renders on every screen; routerLink=\"/customers\" (brand link and Customers tab) goes to the route.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/about",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "Shell navbar's login/logout item calls loginOrOut(), which calls redirectToLogin() and router.navigate(['/login']); the navbar renders on /about.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/about",
+   "to": "/orders",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:17",
+   "reason": "Shell navbar has routerLink=\"/orders\", rendered on every screen including /about.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:18",
+   "reason": "Shell navbar has routerLink=\"/about\", rendered on /customers.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "Shell navbar loginOrOut() navigates to /login (also when logged in, since the redirect runs unconditionally after the logout subscribe); navbar renders on /customers.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers",
+   "to": "/orders",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:17",
+   "reason": "Shell navbar routerLink=\"/orders\" is rendered on /customers.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:18",
+   "reason": "Shell navbar routerLink=\"/about\" is rendered on every route, including /customers/:id.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id",
+   "to": "/customers/:id/details",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:10",
+   "reason": "CustomerComponent (path '' of the customers/:id route) is rendered on /customers/:id and has a relative routerLink=\"details\", which resolves to /customers/:id/details.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id",
+   "to": "/customers/:id/edit",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:22",
+   "reason": "CustomerComponent has routerLink=\"edit\" with no *ngIf, so it resolves to /customers/:id/edit. The route has canActivate/canDeactivate guards, but they can pass.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id",
+   "to": "/customers/:id/orders",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:16",
+   "reason": "CustomerComponent has relative routerLink=\"orders\", which resolves to /customers/:id/orders.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "Shell navbar loginOrOut() calls router.navigate(['/login']); the navbar is rendered on /customers/:id.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/details",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:18",
+   "reason": "Shell navbar routerLink=\"/about\" is rendered on every route, including /customers/:id/details.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/details",
+   "to": "/customers/:id/edit",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:22",
+   "reason": "CustomerComponent is the parent of the details child and stays rendered; its relative link \"edit\" resolves to a sibling of the current child, so /customers/:id/edit.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/details",
+   "to": "/customers/:id/orders",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:16",
+   "reason": "CustomerComponent stays rendered above the details child; its routerLink=\"orders\" resolves to /customers/:id/orders.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/details",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "Shell navbar loginOrOut() navigates to /login; the navbar is rendered on /customers/:id/details.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/edit",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:18",
+   "reason": "Navbar is in the app shell (app.component.html, above the router-outlet) and has routerLink=\"/about\"; it is rendered on every screen.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/edit",
+   "to": "/customers/:id/details",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:10",
+   "reason": "CustomerComponent is the parent of the edit child route (customer/routes.ts) and has the relative routerLink=\"details\", which resolves to /customers/:id/details. A canDeactivate guard may prompt but does not remove the trigger.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/edit",
+   "to": "/customers/:id/orders",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:16",
+   "reason": "The parent CustomerComponent renders on the edit screen and has the relative routerLink=\"orders\", which resolves to /customers/:id/orders.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/edit",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell navbar's (click)=loginOrOut() handler (html:19) calls redirectToLogin(), which runs router.navigate(['/login']). It does so in both the logged-in and logged-out branches.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/orders",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:18",
+   "reason": "The shell navbar has routerLink=\"/about\" and is rendered on every screen.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/orders",
+   "to": "/customers/:id/details",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:10",
+   "reason": "The parent CustomerComponent renders on the orders screen and has the relative routerLink=\"details\".",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/orders",
+   "to": "/customers/:id/edit",
+   "verdict": "real",
+   "site": "src/app/customer/customer.component.html:22",
+   "reason": "The parent CustomerComponent has routerLink=\"edit\". The canActivate guard may redirect, but a user can still trigger the navigation.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/customers/:id/orders",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell navbar's loginOrOut() ends in redirectToLogin(), which calls router.navigate(['/login']).",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/login",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:18",
+   "reason": "The shell navbar is rendered on /login and has routerLink=\"/about\".",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/login",
+   "to": "/customers",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:11",
+   "reason": "The shell navbar has routerLink=\"/customers\" (brand link at line 11 and the Customers link). login.component.ts:56 also navigates to /customers after a successful login.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/login",
+   "to": "/orders",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:17",
+   "reason": "The shell navbar has routerLink=\"/orders\" and is rendered on /login.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/orders",
+   "to": "/about",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:18",
+   "reason": "The shell navbar has routerLink=\"/about\" and is rendered on every screen.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/orders",
+   "to": "/customers",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:11",
+   "reason": "The shell navbar has routerLink=\"/customers\". The logout handler at navbar.component.ts:48 also navigates there.",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/orders",
+   "to": "/login",
+   "verdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell navbar's loginOrOut() calls redirectToLogin(), which runs router.navigate(['/login']).",
+   "slug": "angular-jumpstart",
+   "dir": "DanWahlin__Angular-JumpStart"
+  },
+  {
+   "kind": "extra",
+   "from": "/",
+   "to": "/Contact",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:16",
+   "reason": "LayoutComponent renders app-header on all four children of the '' route, including '/'. The header has a plain routerLink=\"/Contact\" with no condition, and Contact is a child route.",
+   "slug": "event-booking-mean",
+   "dir": "bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+  },
+  {
+   "kind": "extra",
+   "from": "/",
+   "to": "/create-event",
+   "verdict": "real",
+   "site": "src/app/welcome/welcome.component.html:9",
+   "reason": "HomeComponent at '/' includes app-welcome, which has [routerLink]=\"['/create-event']\". The route has canActivate AuthGuardService, but a guard that can pass still counts.",
+   "slug": "event-booking-mean",
+   "dir": "bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+  },
+  {
+   "kind": "extra",
+   "from": "/",
+   "to": "/my-Events",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:28",
+   "reason": "The header, rendered at '/', holds routerLink=\"/my-Events\" in the dropdown, which shows when isLoggedIn is true. That condition can be true.",
+   "slug": "event-booking-mean",
+   "dir": "bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+  },
+  {
+   "kind": "extra",
+   "from": "/Contact",
+   "to": "/my-Events",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:28",
+   "reason": "Contact is a layout child, so the header with the my-Events link is rendered there. The link is behind isLoggedIn, which can be true.",
+   "slug": "event-booking-mean",
+   "dir": "bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+  },
+  {
+   "kind": "extra",
+   "from": "/create-event",
+   "to": "/Contact",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:16",
+   "reason": "The header is rendered on /create-event and holds an unconditional routerLink=\"/Contact\".",
+   "slug": "event-booking-mean",
+   "dir": "bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+  },
+  {
+   "kind": "extra",
+   "from": "/create-event",
+   "to": "/my-Events",
+   "verdict": "real",
+   "site": "src/app/create-event/create-event.component.ts:74",
+   "reason": "After createEvent and addToMyEvents succeed, create-event.component.ts calls router.navigate(['/my-Events']). The header link also reaches it.",
+   "slug": "event-booking-mean",
+   "dir": "bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+  },
+  {
+   "kind": "extra",
+   "from": "/login",
+   "to": "/",
+   "verdict": "real",
+   "site": "src/app/user/login/login.component.ts:33",
+   "reason": "LoginComponent calls router.navigate(['/']) on a successful login response. '/' is the Home child route under the layout.",
+   "slug": "event-booking-mean",
+   "dir": "bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+  },
+  {
+   "kind": "extra",
+   "from": "/my-Events",
+   "to": "/Contact",
+   "verdict": "real",
+   "site": "src/app/header/header.component.html:16",
+   "reason": "/my-Events is a layout child, so the header with the unconditional routerLink=\"/Contact\" is rendered there.",
+   "slug": "event-booking-mean",
+   "dir": "bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+  }
+ ],
+ "gate": [
+  {
+   "items": [
+    {
+     "slug": "posts-users-ui-ng",
+     "kind": "extra",
+     "from": "/new-post",
+     "to": "/new-user",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/header/header.component.html:10",
+     "reason": "app.component.html:1 renders <app-header> unconditionally above the only <router-outlet> (line 4), so the header is on /new-post. Header line 10 has [routerLink]=\"'/new-user'\", which matches the 'new-user' route (app.module.ts:39). RouterModule.forRoot is imported in AppModule, which declares HeaderComponent, so the directive is active."
+    },
+    {
+     "slug": "posts-users-ui-ng",
+     "kind": "extra",
+     "from": "/new-user",
+     "to": "/user-availability-schedule",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/header/header.component.html:12",
+     "reason": "The shell header is rendered unconditionally on every screen (app.component.html:1, above router-outlet). Line 12 has [routerLink]=\"'/user-availability-schedule'\", which matches the route at app.module.ts:47."
+    },
+    {
+     "slug": "posts-users-ui-ng",
+     "kind": "extra",
+     "from": "/posts",
+     "to": "/user-search",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/header/header.component.html:11",
+     "reason": "The shell header is rendered unconditionally on every screen, including /posts. Line 11 has [routerLink]=\"'/user-search'\", which matches the route at app.module.ts:43."
+    },
+    {
+     "slug": "posts-users-ui-ng",
+     "kind": "extra",
+     "from": "/user-availability-schedule",
+     "to": "/users",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/header/header.component.html:9",
+     "reason": "The shell header is rendered on /user-availability-schedule. Line 9 has [routerLink]=\"'/users'\", which matches the single-segment 'users' route (app.module.ts:34), not 'users/:id'."
+    },
+    {
+     "slug": "posts-users-ui-ng",
+     "kind": "extra",
+     "from": "/users",
+     "to": "/new-post",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/header/header.component.html:8",
+     "reason": "The shell header is rendered unconditionally on /users. Line 8 has [routerLink]=\"'/new-post'\", which matches the route at app.module.ts:30."
+    },
+    {
+     "slug": "posts-users-ui-ng",
+     "kind": "extra",
+     "from": "/users/:id",
+     "to": "/new-user",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/header/header.component.html:10",
+     "reason": "/users/:id renders UserProfileComponent in the root router-outlet. The shell header sits above that outlet, so it is on this screen too. Line 10 has [routerLink]=\"'/new-user'\", which matches the route at app.module.ts:39."
+    }
+   ],
+   "notes": "I re-derived all six from the source, and all six are real; the reader's verdicts hold. The evidence: app.component.html renders <app-header> with no *ngIf, directly above the app's only <router-outlet>. All routes are flat in AppModule (forRoot), and nothing redirects except '' to 'posts'. Each routerLink in the header is a static absolute string that resolves to a declared route. One small inaccuracy in the reader's work: for /new-post -> /new-user, the reader cited the route as being 'in app.module.ts' without giving the line (39). That does not change the verdict."
+  },
+  {
+   "items": [
+    {
+     "slug": "heroes-angular",
+     "kind": "extra",
+     "from": "*",
+     "to": "/heroes",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/core/components/nav.component.ts:9",
+     "reason": "<app-nav> is rendered unconditionally in the app shell (src/app/app.component.html:4), next to the only root <router-outlet> (line 6), so it is on every screen. Its anchor routerLink=\"/heroes\" (nav.component.ts:9; the graph cites line 10, the span inside it) matches the lazy 'heroes' route in src/app/router.ts:8."
+    },
+    {
+     "slug": "heroes-angular",
+     "kind": "extra",
+     "from": "/villains",
+     "to": "/about",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/core/components/nav.component.ts:15",
+     "reason": "/villains renders in the root <router-outlet> of the app shell (app.component.html:6, through VillainsModule's '' child route), so the shell <app-nav> (app.component.html:4) is shown there. Its anchor routerLink=\"/about\" (nav.component.ts:15; the graph cites line 16) matches { path: 'about', component: AboutComponent } in src/app/router.ts:17. No redirect is involved."
+    }
+   ],
+   "notes": "The reader's verdicts hold for both pairs. The reader cited line 10 and line 16, which are the graph's witness lines. Those lines hold the <span> inside each anchor. The routerLink attributes are on lines 9 and 15, so I corrected the sites. The shell nav is rendered without any *ngIf, so the '*' (every screen) attribution is correct."
+  },
+  {
+   "items": [
+    {
+     "slug": "airbus-inventory",
+     "kind": "extra",
+     "from": "/dashboard",
+     "to": "/getAllProducts",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/main-nav/main-nav.component.html:19",
+     "reason": "The 'dashboard' route renders GetAllProductsComponent (app.module.ts:44-46). Its template is wrapped in <app-main-nav> (get-all-products.component.html:1), which has routerLink=\"/getAllProducts\" at line 19. The success and failure dialogs opened from this component also call routeToAllProduct (router.service.ts:20)."
+    },
+    {
+     "slug": "airbus-inventory",
+     "kind": "extra",
+     "from": "/login",
+     "to": "/add",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/main-nav/main-nav.component.html:26",
+     "reason": "/login renders only LoginPageComponent. Neither its template nor the app shell includes <app-main-nav>: app.component.html holds only <router-outlet>, and index.html holds only <app-root>. So the routerLink=\"/add\" at line 26 is never rendered on /login. LoginPageComponent's only navigation is routeToDashboard (login-page.component.ts:63)."
+    },
+    {
+     "slug": "airbus-inventory",
+     "kind": "extra",
+     "from": "/login",
+     "to": "/getAllProducts",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/services/router.service.ts:20",
+     "reason": "main-nav, with routerLink /getAllProducts at line 19, is not rendered on /login. routeToAllProduct (router.service.ts:20) is called only from SuccessfulDialogComponent and UnSuccessfulDialogComponent. Those dialogs are opened only from GetAllProductsComponent and UpdateProductComponent, never from the login page. The login page navigates only to /dashboard."
+    },
+    {
+     "slug": "airbus-inventory",
+     "kind": "extra",
+     "from": "/login",
+     "to": "/productByCategory",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/main-nav/main-nav.component.html:11",
+     "reason": "The routerLink=\"/productByCategory\" is only in MainNavComponent. MainNavComponent is not included by LoginPageComponent or by the app shell (app.component.html is just <router-outlet>), so no trigger for /productByCategory exists on /login."
+    },
+    {
+     "slug": "airbus-inventory",
+     "kind": "extra",
+     "from": "/productByCategory",
+     "to": "/add",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/main-nav/main-nav.component.html:26",
+     "reason": "The 'productByCategory' route renders GetProductByCategoryComponent. Its template wraps its content in <app-main-nav> at line 2, with no *ngIf around it, and that nav renders routerLink=\"/add\" at line 26."
+    },
+    {
+     "slug": "airbus-inventory",
+     "kind": "extra",
+     "from": "/update",
+     "to": "/productByCategory",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/main-nav/main-nav.component.html:11",
+     "reason": "The 'update' route renders UpdateProductComponent. Its template is wrapped in <app-main-nav> (update-product.component.html:1), which renders routerLink=\"/productByCategory\" at line 11."
+    }
+   ],
+   "notes": "I agree with the reader on all six verdicts. Every pair turns on MainNavComponent: it is not part of the app shell (app.component.html is only <router-outlet>). Each guarded page component (GetAllProducts, GetProductByCategory, Add, Update, Dashboard) includes it through <app-main-nav> content projection, but LoginPageComponent does not. Two other facts matter: /dashboard renders GetAllProductsComponent, not DashboardComponent, and the '' route redirects to login. The graph shows the /login extras with fromNode 'screen'. That points to an attribution bug, where main-nav's links are given to every screen, /login included, rather than only to screens whose component includes <app-main-nav>. The same over-attribution probably creates other /login -> X extras that are not in this batch. Note that rtk's cat -n output stripped blank lines and shifted the main-nav line numbers. grep -n confirms lines 11, 19 and 26 for the three links, matching the graph and the reader."
+  },
+  {
+   "items": [
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "miss",
+     "from": "/pets",
+     "to": "/**",
+     "readerVerdict": "e",
+     "verdict": "e",
+     "site": "src/app/app.component.html:35",
+     "reason": "Both cited triggers, app.component.html:35 (Owners) and :47 (Veterinarians), are Bootstrap dropdown toggles: <a data-toggle=\"dropdown\"> with only a (click)=\"log(...)\" handler, and no routerLink or href. AppComponent's log() only logs. On /pets (PetListComponent plus the shell), every shell link points to a defined route (welcome, /owners, /owners/add, /vets, /vets/add, /pettypes, /specialties), and the navbar-brand href=\"#\" resolves against <base href=\"/petclinic\"> to the app root, not to an unknown URL. The '**' PageNotFound route exists (app-routing.module.ts:31), but nothing on /pets reaches an unmatched URL. The graph also lacks a '**' screen (c), but the miss would remain even if it had one."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "miss",
+     "from": "/pettypes",
+     "to": "/pettypes/add",
+     "readerVerdict": "e",
+     "verdict": "e",
+     "site": "src/app/pettypes/pettype-add/pettype-add.component.ts:33",
+     "reason": "The cited triggers (form ngSubmit at pettype-add.component.html:22, submit button at :34) call onSubmit. After the HTTP add, onSubmit only emits newPetType (ts:33); PettypeAddComponent has no Router. On /pettypes the component is embedded inline as <app-pettype-add> behind *ngIf=\"isInsert\" (pettype-list.component.html:43-44). The emit is handled by onNewPettype, which only toggles isInsert. Nothing in the app navigates or links to /pettypes/add; the only navigations from pettype-list go to /pettypes/:id/edit and /welcome."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "miss",
+     "from": "/visits/add",
+     "to": "/pets/1/visits/add",
+     "readerVerdict": "e",
+     "verdict": "e",
+     "site": "src/app/visits/visit-add/visit-add.component.ts:102",
+     "reason": "The cited form submit (visit-add.component.html:43) calls onSubmit. On HTTP success that calls gotoOwnerDetail(), which runs router.navigate(['/owners', currentOwner.id]) and lands on /owners/:id. The only other component on this screen is the embedded app-visit-list, which navigates only to /visits/:id/edit. The only navigation to /pets/:id/visits/add in the app is pet-list.component.ts:67, and PetListComponent is not rendered on /visits/add."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/owners/:id/edit",
+     "to": "/owners/:id/pets/add",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/owners/owner-edit/owner-edit.component.ts:70",
+     "reason": "The witness navigate is router.navigate(['/owners', owner.id]), reached from the Back button and from submit success. That is two segments and matches only owners/:id (OwnerDetailComponent). A non-first command is never split on '/', so no id value can produce /owners/:id/pets/add. The owner-edit template has no routerLink and embeds no component. The pets/add navigate is owner-detail.component.ts:64, and OwnerDetailComponent is not rendered on /owners/:id/edit. The shell has no pets/add link."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/owners/:id/pets/add",
+     "to": "/owners/:id/edit",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/pets/pet-add/pet-add.component.ts:90",
+     "reason": "gotoOwnerDetail(), used by the Back button (pet-add.component.html:87) and after submit success, calls router.navigate(['/owners', currentOwner.id]). That lands on owners/:id (detail), not owners/:id/edit. The pet-add template has no routerLink and embeds no component with a navigate to the edit route. The only /owners/:id/edit navigate is owner-detail.component.ts:60, which is not rendered here."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/owners/:id/pets/add",
+     "to": "/pettypes",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/app.component.html:59",
+     "reason": "The AppComponent shell navbar has <a routerLink=\"/pettypes\">. It sits outside the <router-outlet> (line 77), so it renders on every screen, including /owners/:id/pets/add. The pettypes route exists (pettypes-routing.module.ts:31)."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/pets/:id/visits/add",
+     "to": "/owners/:id/pets/add",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/visits/visit-add/visit-add.component.ts:102",
+     "reason": "VisitAddComponent's only navigate is router.navigate(['/owners', currentOwner.id]), from the Back button and after submit. That is owners/:id (detail), not owners/:id/pets/add. The embedded app-visit-list navigates only to /visits/:id/edit. The pets/add navigate lives in owner-detail.component.ts:64, and OwnerDetailComponent is not rendered on this screen."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/pettypes",
+     "to": "/owners",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/app.component.html:40",
+     "reason": "The shell navbar Owners dropdown has <a routerLink=\"/owners\"> (Search). It renders on every screen, outside the router-outlet. Bootstrap JS is loaded (angular.json scripts), so the dropdown opens."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/vets",
+     "to": "/owners/add",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/app.component.html:42",
+     "reason": "The shell navbar Owners dropdown has <a routerLink=\"/owners/add\"> (Add New). AppComponent renders above the router-outlet on /vets. Bootstrap JS is loaded (angular.json), so the dropdown menu can be opened. The route owners/add exists (owners-routing.module.ts:33) and is declared before 'owners/:id'."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/vets/add",
+     "to": "/welcome",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/app.component.html:28",
+     "reason": "The shell Home link has routerLink=\"welcome\". It is relative to AppComponent's root ActivatedRoute, so it resolves to /welcome (app-routing.module.ts:29). It is rendered on every screen, including /vets/add."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/visits/:id/edit",
+     "to": "/owners/:id/edit",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/visits/visit-edit/visit-edit.component.ts:98",
+     "reason": "gotoOwnerDetail() (Back button, and after the update succeeds) calls router.navigate(['/owners', currentOwner.id]). That lands on owners/:id (detail), not owners/:id/edit. The visit-edit template embeds no other component and has no routerLink. The shell has no link to an owner's edit route."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/visits/:id/edit",
+     "to": "/welcome",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/app.component.html:28",
+     "reason": "The shell Home link (routerLink=\"welcome\") resolves to /welcome and renders outside the router-outlet on every screen, including /visits/:id/edit."
+    },
+    {
+     "slug": "spring-petclinic-angular",
+     "kind": "extra",
+     "from": "/visits/add",
+     "to": "/owners/:id/edit",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/visits/visit-add/visit-add.component.ts:102",
+     "reason": "gotoOwnerDetail() calls router.navigate(['/owners', currentOwner.id]), which is owners/:id (detail), not owners/:id/edit. The embedded app-visit-list navigates only to /visits/:id/edit. The shell has no owner-edit link, so nothing on /visits/add reaches /owners/:id/edit."
+    }
+   ],
+   "notes": "All 13 reader verdicts were confirmed from source; none changed. The reader's one imprecise site was the pettype-add miss: it cited pettype-add.component.ts:31, a line inside the subscribe callback, while the emit that settles the case is on line 33. I cited :33.\n\nSystematic graph pattern behind the 5 spurious extras: every navigate of the form router.navigate(['/owners', x]) (owner-edit.ts:70, pet-add.ts:90, visit-add.ts:102, visit-edit.ts:98) is recorded as a 'may' edge to longer owners/:id/* routes (edit, pets/add) as well as to owners/:id. Angular never splits a non-first command on '/', so those targets are unreachable from these calls. The extractor seems to treat a two-segment array with a dynamic tail as a prefix wildcard; it should be an exact-length match.\n\nReference pattern: the 3 'e' misses come from Rima's GT attributing a transition to the route that a component is registered under (PettypeAddComponent -> pettypes/add, VisitAddComponent -> pets/:id/visits/add) or to '**', not to where the trigger actually navigates.\n\n/pets -> /** could also be read as c, because the graph has no '**' screen. I chose e because no trigger on /pets reaches an unmatched URL, so the miss would remain even if '**' were modelled.\n\nSide observation: index.html has <base href=\"/petclinic\"> with no trailing slash. Combined with the navbar-brand's plain href=\"#\", this gives a full page load to the app root, which is a non-router navigation. It does not affect any item here."
+  },
+  {
+   "items": [
+    {
+     "slug": "ever-traduora",
+     "kind": "miss",
+     "from": "/projects/:projectId/translations",
+     "to": "/projects/:projectId/translations/:localeCode",
+     "readerVerdict": "b",
+     "verdict": "f",
+     "site": "src/app/projects/components/project-locales/project-locales.component.html:17",
+     "reason": "The reader's premise is false: the graph has an edge for this construct. It is attributed to the correct start screen: n_projects_projectId_translations -> u_n_projects_projectId_translations ('dynamic target from /projects/:projectId/translations', kind unknown, modality unknown), witness project-locales.component.html:17:36. The soundiness file also records it as 'fully dynamic navigation target'. The site was read and its scope is right, so this is neither (b), which preregistration defines as 'no construct for it in the graph', nor (a). Both screens exist, so it is not (c). The real cause is unresolved target resolution. The relative one-element array [routerLink]=\"[locale.locale.code]\" sits in the #searchResultsItem ng-template under ProjectLocalesComponent (route 'translations', not an empty path, so legacy relativeLinkResolution does not apply). It resolves to translations/<code>, which matches translations/:localeCode. The extractor sent it to an unknown node, and the scorer does not count edges into non-screen nodes."
+    },
+    {
+     "slug": "ever-traduora",
+     "kind": "miss",
+     "from": "/projects/:projectId",
+     "to": "/projects/:projectId/translations/:localeCode",
+     "readerVerdict": "b",
+     "verdict": "f",
+     "site": "src/app/projects/components/project-locales/project-locales.component.html:17",
+     "reason": "Same trigger and the same primary cause as the translations pair. The graph holds an edge for project-locales.component.html:17, but only into the unknown node u_n_projects_projectId_translations, because the dynamic relative target [locale.locale.code] is left unresolved. That is not (b). A second factor exists: /projects/:projectId is a redirect-only route (projects.module.ts:48, '' redirectTo 'translations', pathMatch full). ProjectLocalesComponent is routed only on /projects/:projectId/translations, so the edge starts at the translations screen and not at the :projectId screen. Even with the target resolved, the pair would need the redirect source to be credited with its redirect target's triggers. The miss therefore has two causes, an unresolved dynamic target plus a redirect-only start route, which the single-cause classes do not fit."
+    },
+    {
+     "slug": "ever-traduora",
+     "kind": "extra",
+     "from": "/projects/:projectId/labels",
+     "to": "/projects/:projectId/team",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/projects/components/project-container/project-container.component.html:57",
+     "reason": "ProjectContainerComponent is the routed component of ':projectId' (projects.module.ts:45-47), and 'labels' is its child. Its sidebar, rendered under *ngIf project$, has routerLink=\"team\" at line 57. That link is relative to the non-empty ':projectId' route, so it resolves to /projects/:projectId/team. The container is rendered on the labels screen."
+    },
+    {
+     "slug": "ever-traduora",
+     "kind": "extra",
+     "from": "/projects/:projectId/settings",
+     "to": "/projects/:projectId/translations/:localeCode",
+     "readerVerdict": "spurious",
+     "verdict": "spurious",
+     "site": "src/app/projects/components/project-settings/project-settings.component.html:46",
+     "reason": "The witness is the Cancel button [routerLink]=\"['/projects', project.id]\". It resolves to exactly /projects/:projectId, which redirects to 'translations' (projects.module.ts:48), never to translations/:localeCode. The graph over-approximated the non-literal prefix '/projects/' to 10 routes, as the soundiness file shows. No other trigger on settings reaches this route. Settings' onSubmit dispatches UpdateProject. onDelete dispatches DeleteProject, which navigates to /projects (projects.state.ts:156). The container sidebar links only terms, translations, labels, team, import, export, api and settings. The app-bar links only '/', '/projects' and '/user-settings'. The only navigations to translations/:code are in translations-list.component.ts:161 and import-locale.component.ts:48, and neither is rendered on settings."
+    },
+    {
+     "slug": "ever-traduora",
+     "kind": "extra",
+     "from": "/projects/:projectId/settings",
+     "to": "/user-settings",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+     "reason": "AppComponent renders <app-bar *ngIf=\"isAuthenticated$\"> above the root router-outlet (app.component.html:3). A user who stays on a project route is authenticated, because AuthGuard dispatches MustLogin, which sends unauthenticated users to /login. Inside *ngIf user$, the ngbDropdown menu has an 'Account Settings' button with routerLink=\"/user-settings\" (line 21). That is the auth module route user-settings, under AuthGuard."
+    },
+    {
+     "slug": "ever-traduora",
+     "kind": "extra",
+     "from": "/projects/:projectId/translations",
+     "to": "/projects",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/shared/components/app-bar/app-bar.component.html:9",
+     "reason": "The shell app-bar is rendered when the user is authenticated, which holds on translations. It has a Projects button with routerLink=\"/projects\" (line 9, inside *ngIf user$). The graph's witness is the brand link routerLink=\"/\" (line 2). That link reaches /projects only through the root redirect ('' redirectTo 'projects', app.module.ts:43-45). Either link makes the pair real."
+    },
+    {
+     "slug": "ever-traduora",
+     "kind": "extra",
+     "from": "/signup",
+     "to": "/projects",
+     "readerVerdict": "spurious",
+     "verdict": "real",
+     "site": "src/app/auth/components/signup/signup.component.html:11",
+     "reason": "The reader is right that the graph's witness, the app-bar at line 2, is not rendered for a user on /signup. But another trigger rendered on /signup does reach /projects. SignupComponent's form (ngSubmit)=\"onSubmit()\" dispatches the Signup action through the injected NGXS Store (signup.component.ts:48). On HTTP success, AuthState.signup dispatches ReceiveAPIAccessToken (auth.state.ts:181). That action dispatches the router-plugin Navigate([redirect || '/']) (auth.state.ts:262), and the root route sends '/' on to 'projects' through redirectTo (app.module.ts:43-45). This is an event handler on s that navigates after HTTP success through an injected service, and t is reached through a redirectTo route. When the stored redirectTo is unset, which is the normal signup case, the user lands on /projects."
+    }
+   ],
+   "notes": "I changed three of the reader's seven verdicts and confirmed the other four.\n\n1. Both misses: the reader said b, but the graph does have an edge for this construct. I checked the frozen graph (graphs/ever-traduora.full.json.gz, extractor 2aac284). It holds n_projects_projectId_translations -> u_n_projects_projectId_translations, an unknown dynamic-target node, with witness project-locales.component.html:17. The soundiness file (ever-traduora.soundiness.json.gz) lists the same site as 'dynamic-target'. Preregistration defines (b) as 'no construct for it in the graph', so (b) does not apply. The site was read and attributed to the right screen. The failure is that the relative array routerLink [locale.locale.code] was never resolved to a screen. That kind of failure has no letter of its own in a\u2013e, so I classed both as f.\n\n2. The second miss has an extra factor. Its start screen is the redirect-only route /projects/:projectId. Even with the target resolved, the edge would start at the translations screen, so this pair would also need a redirect source to be credited with its target's triggers.\n\n3. /signup -> /projects: the reader judged only the graph's witness, the app-bar link, and missed a real trigger. The signup form submit leads, after HTTP success, through NGXS to Navigate('/'), and '/' redirects to /projects. So the pair is real even though the graph's own witness for it is wrong. This is a systematic risk: readers who check only the listed witness can mark a real pair spurious when NGXS Navigate actions trigger the navigation.\n\n4. For translations -> /projects, I cited the direct link (app-bar line 9) instead of the graph's redirect-based witness (line 2). Both are valid.\n\nThe other verdicts (labels -> team real, settings -> translations/:localeCode spurious, settings -> /user-settings real) match the source. The settings over-approximation is recorded in the soundiness file."
+  },
+  {
+   "items": [
+    {
+     "slug": "angular-jumpstart",
+     "kind": "extra",
+     "from": "/about",
+     "to": "/customers",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/core/navbar/navbar.component.html:11",
+     "reason": "AppComponent (app.component.html:2) renders <cm-navbar> above the root <router-outlet>, so NavbarComponent appears on /about. Its brand link (line 11) and its Customers tab (line 16) both use routerLink=\"/customers\", which matches the 'customers' route (routes.ts:6)."
+    },
+    {
+     "slug": "angular-jumpstart",
+     "kind": "extra",
+     "from": "/customers/:id",
+     "to": "/about",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/core/navbar/navbar.component.html:18",
+     "reason": "The shell navbar is above the root outlet (app.component.html:2-4), so it renders on /customers/:id, where CustomerComponent sits under the '' route of CUSTOMER_ROUTES. Its routerLink=\"/about\" matches the 'about' route (routes.ts:8)."
+    },
+    {
+     "slug": "angular-jumpstart",
+     "kind": "extra",
+     "from": "/customers/:id/details",
+     "to": "/customers/:id/edit",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/customer/customer.component.html:22",
+     "reason": "CustomerComponent is the parent route ('' under customers/:id, customer/routes.ts:11-13), so it stays rendered while the 'details' child is active. Its relative routerLink=\"edit\" resolves against CustomerComponent's own route (URL /customers/:id) and gives /customers/:id/edit. The reader called the target a sibling of the current child; it is really a child of the parent route, but the URL is the same. The edit route has CanActivateGuard (redirects to /login if not authenticated). A guard is allowed under 'possibly behind a guard'."
+    },
+    {
+     "slug": "angular-jumpstart",
+     "kind": "extra",
+     "from": "/customers/:id/edit",
+     "to": "/login",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/core/navbar/navbar.component.ts:58",
+     "reason": "The shell navbar renders on every screen. Its Login/Logout item (navbar.component.html:19, (click)=\"loginOrOut()\") calls this.redirectToLogin() at ts:54 on every click: when logged in, the logout subscription is asynchronous and the call still follows. redirectToLogin() runs router.navigate(['/login']) (ts:58), which matches the 'login' route (routes.ts:9). Leaving /edit goes through CanDeactivateGuard (component.canDeactivate()), which is allowed as a guard."
+    },
+    {
+     "slug": "angular-jumpstart",
+     "kind": "extra",
+     "from": "/login",
+     "to": "/customers",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/core/navbar/navbar.component.html:11",
+     "reason": "The shell navbar renders on /login, and its routerLink=\"/customers\" (brand link at line 11 and Customers tab at line 16) reaches the customers route. LoginComponent.submit() also calls router.navigate(['/customers']) after a successful login with no redirectUrl (login.component.ts:56)."
+    }
+   ],
+   "notes": "I confirmed all five reader verdicts from the source. One flaw is in the reader's reasoning for item 3, not its verdict: it says the relative link 'edit' resolves to a sibling of the current child. In fact, the routerLink in CustomerComponent resolves against CustomerComponent's own ActivatedRoute (the '' route under customers/:id), so 'edit' is a child of that route. The URL, /customers/:id/edit, is the same either way. Also left out of the reader's reasons: CanActivateGuard on /edit sends unauthenticated users to /login (customer/guards/can-activate.guard.ts:19). This is guard-driven navigation, not a user trigger, so it does not affect these items."
+  },
+  {
+   "items": [
+    {
+     "slug": "event-booking-mean",
+     "kind": "extra",
+     "from": "/",
+     "to": "/create-event",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/welcome/welcome.component.html:10",
+     "reason": "'/' renders LayoutComponent (app-header, which holds the child <router-outlet>) with HomeComponent as its child. home.component.html:3 includes <app-welcome>, and welcome.component.html:10 has [routerLink]=\"['/create-event']\". The 'create-event' child route has canActivate AuthGuardService, which returns true when authService.isLoggedIn(), so the trigger can land on /create-event. The reader cited line 9; the link is on line 10."
+    },
+    {
+     "slug": "event-booking-mean",
+     "kind": "extra",
+     "from": "/my-Events",
+     "to": "/Contact",
+     "readerVerdict": "real",
+     "verdict": "real",
+     "site": "src/app/header/header.component.html:17",
+     "reason": "'my-Events' is a child of the '' LayoutComponent route. layout.component.html:1 renders <app-header>, and header.component.html holds the <router-outlet> that the children render into, so the header is part of the shell on /my-Events. header.component.html:17 has an unconditional <a routerLink=\"/Contact\">, and 'Contact' is a sibling child route with no guard. The reader cited line 16; the link is on line 17."
+    }
+   ],
+   "notes": "I confirmed both verdicts from the source. The reader's site line numbers are one short in both cases: welcome is at :10, not :9, and header is at :17, not :16. The graph's evidence has the correct lines. This looks like a line-numbering slip, for example a numbered cat view that drops or shifts a line. The verdicts are not affected. One unusual structure: <router-outlet> sits inside HeaderComponent, not inside LayoutComponent. A reader who looks only for the outlet in layout.component.html could misattribute the shell. Here the header is still rendered on every '' child route."
+  }
+ ]
+}

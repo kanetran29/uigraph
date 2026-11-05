@@ -69,3 +69,12 @@ test('the adjudication sample keeps every item up to the cap and a fixed seeded 
   assert.deepEqual(a, sample([...items].reverse()))
   assert.deepEqual(a, [...a].sort((x, y) => `${x.from} ${x.to}`.localeCompare(`${y.from} ${y.to}`)))
 })
+
+test('verdicts: the gate overrides the reader, and a pair with no reading is an error', async () => {
+  const { merge } = await import('./verdicts.mjs')
+  const input = { app: { misses: [{ from: '/a', to: '/b' }], extras: [{ from: '/a', to: '/c', top: false }, { from: '/b', to: '/c', top: true }] } }
+  const runs = [{ slug: 'app', readers: [{ kind: 'miss', from: '/a', to: '/b', verdict: 'b' }, { kind: 'extra', from: '/a', to: '/c', verdict: 'spurious' }, { kind: 'extra', from: '/b', to: '/c', verdict: 'real' }], gateItems: [{ kind: 'extra', from: '/a', to: '/c', verdict: 'real' }] }]
+  const out = merge(runs, input)
+  assert.deepEqual(out.map((x) => `${x.kind} ${x.from} ${x.to} ${x.verdict} ${x.gated}`), ['miss /a /b b false', 'extra /a /c real true', 'extra /b /c real false'])
+  assert.throws(() => merge([{ slug: 'app', readers: runs[0].readers.slice(1), gateItems: [] }], input), /no reading/)
+})

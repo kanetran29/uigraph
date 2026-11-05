@@ -554,7 +554,7 @@ application with a runnable suite remains to test them.
 This subsection gathers the RQ3 evidence in one place. Table~\ref{tab:earlier} sets three graphs side
 by side: without attribution, with the mechanism of earlier work, and with the full analysis. The
 earlier tools were not run. The \emph{rooted} column reimplements their mechanism inside
-this thesis's extractor, on its own node extraction (Section~\ref{sec:res-ablation}). Every figure is in-sample.
+this thesis's extractor, on its own node extraction (Section~\ref{sec:res-ablation}). Every figure is in-sample except those for Rima et al.'s subjects (Section~\ref{sec:res-rima}).
 
 \begin{table}[t]\footnotesize
 \caption{The graph without attribution, with the mechanism of earlier work (\emph{rooted}), and with the full analysis.}
@@ -574,10 +574,11 @@ Structural-reference recall off the shell, alfresco & -- & \GTAlfRootedRecallNon
 Structural-reference precision, alfresco & -- & \GTAlfRootedPrecision{} & \GTAlfFullPrecision{} \\
 Structural-reference precision, \GTApp{} & -- & \GTRootedPrecision{} & \GTFullPrecision{} \\
 Navigation inside services, constructs lost at baseline and recovered & -- & -- & \AttrServiceRecovered{}/\AttrServiceLost{} \\
+Rima et al.'s reference pairs, their seven subjects & \RimaHitNoattr{}/\RimaPairs{} & \RimaHitRooted{}/\RimaPairs{} & \RimaHitFull{}/\RimaPairs{} \\
 Sites placed in services, guards and effects & -- & -- & \AblationFullAddedSites{} \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Suite transitions} are the distinct pairs of screens the application's own end-to-end suite navigates between (Section~\ref{sec:res-e2e}); \emph{graph pairs} are those the graph holds. Only the full column of the suite rows was preregistered. The no-attribution graphs and realworld's rooted graph come from existing measurements; the mifos rooted graph was mapped for this comparison after the suites had been scored. A dash marks a figure not measured. All cells are generated figures.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Suite transitions} are the distinct pairs of screens the application's own end-to-end suite navigates between (Section~\ref{sec:res-e2e}); \emph{graph pairs} are those the graph holds. Only the full column of the suite rows was preregistered. The no-attribution graphs and realworld's rooted graph come from existing measurements; the mifos rooted graph was mapped for this comparison after the suites had been scored. The row for Rima et al.'s subjects is out-of-sample (Section~\ref{sec:res-rima}). A dash marks a figure not measured. All cells are generated figures.}
 \end{table}
 
 Three things follow, with the figures in Table~\ref{tab:earlier}.
@@ -638,10 +639,73 @@ Screens checked without signing in & a browser run renders \ScopeJudged{}/\Scope
 Dead links found from the source & -- & \RoundTwoDeadLinkCandidates{} candidate sites in \RoundTwoDeadLinkWhere{}, checked against the runtime route oracle (Section~\ref{sec:deadlinks}) \\
 Transitions on \GTApp{} & its own suite takes \EtoERealworldPairs{} pairs & the graph holds \EtoERealworldGraphPairs{}, an over-approximation \\
 Response to a source change & -- & \MutFallibleDetected{}/\MutFallibleScored{} mutants, at constructs the graph represents \\
+Transitions of Rima et al.'s seven subjects & their pipeline enumerates the workflows their reference annotates & the graph holds \RimaHitValidFull{}/\RimaPairsValid{} source-confirmed pairs, and \RimaRealNewTarget{} read transitions to screens the reference never reaches \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; the earlier tools were not run; every figure is in-sample. All cells are generated figures.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; the earlier tools were not run; every figure is in-sample except the last row (Section~\ref{sec:res-rima}). All cells are generated figures.}
 \end{table}
+
+\subsection{On the applications of Rima et al.}
+\label{sec:res-rima}
+
+Rima et al.\ publish their seven Angular subjects and, for each, a ground truth: the workflows their
+pipeline enumerated, annotated by hand with start and terminal routes \cite{rima2026e2e}. None of the
+seven was used to develop the extractor, so this is the thesis's only out-of-sample measurement. It was
+preregistered, and the extractor was frozen before any subject was mapped. Each subject was taken at
+its last commit before the date of its ground truth, since their registry pins none; the independent
+route parser found every declared screen in the graph on all seven. A reference pair is a start route and a
+different terminal route of one entry. The reference was generated from their tool's output, so their tool
+holds every pair by construction, and their own figure on this set is test-execution success, not graph
+recall. The comparison therefore shows how much of what their pipeline finds this graph holds, and what it
+holds beyond that; it does not rank the two tools.
+
+\newcommand{\rimarow}[2]{#1 & \csname Rima#2Pairs\endcsname & \csname Rima#2HitNoattr\endcsname & \csname Rima#2HitRooted\endcsname & \csname Rima#2HitOutlet\endcsname & \csname Rima#2HitFull\endcsname & \csname Rima#2Extra\endcsname & \csname Rima#2Real\endcsname/\csname Rima#2Judged\endcsname \\}
+\begin{table}[t]\footnotesize
+\caption{Rima et al.'s reference pairs held at each attribution level, and the graph's pairs beyond them.}
+\label{tab:rima}
+\begin{tabularx}{\textwidth}{@{}Yrrrrrrr@{}}
+\toprule
+ & & \multicolumn{4}{c}{Reference pairs held} & \multicolumn{2}{c}{Pairs beyond} \\
+\cmidrule(lr){3-6}\cmidrule(l){7-8}
+Subject & Pairs & none & rooted & outlet & full & all & real/read \\
+\midrule
+\rimarow{posts-users}{PostsUsersUiNg}
+\rimarow{heroes}{HeroesAngular}
+\rimarow{airbus}{AirbusInventory}
+\rimarow{petclinic}{SpringPetclinicAngular}
+\rimarow{traduora}{EverTraduora}
+\rimarow{jumpstart}{AngularJumpstart}
+\rimarow{event-booking}{EventBookingMean}
+\midrule
+All & \RimaPairs{} & \RimaHitNoattr{} & \RimaHitRooted{} & \RimaHitOutlet{} & \RimaHitFull{} & \RimaExtra{} & \RimaJudgedReal{}/\RimaJudged{} \\
+Source-confirmed & \RimaPairsValid{} & \RimaRecallValidNoattr{} & \RimaRecallValidRooted{} & \RimaRecallValidOutlet{} & \RimaRecallValidFull{} & & \\
+\bottomrule
+\end{tabularx}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{none} is the graph without attribution; \emph{rooted} and \emph{outlet} are the rules of Oshima and Kishi and of Rima et al.'s specification (Section~\ref{sec:res-ablation}). heroes has no pair: its entries are external links or stay on their start screen. \emph{Read}: pairs judged from the source, all of them where a subject has at most 40 and a seeded sample of 40 otherwise. \emph{Source-confirmed} leaves out the reference pairs the source does not hold. All cells are generated figures.}
+\end{table}
+
+Table~\ref{tab:rima} gives the result. The full level holds \RimaHitFull{} of the \RimaPairs{} reference pairs.
+Of the \RimaMissed{} it misses, the source holds \RimaMissE{} as no transition at all: a dropdown toggle
+with no link, a form whose component has no router, and a form that returns to the owner's page. The
+other \RimaMissF{} come from one relative link whose only segment is an expression; the extractor leaves
+its target unknown, although the route it reaches can be read. Against the \RimaPairsValid{} pairs the
+source confirms, the levels hold \RimaRecallValidNoattr{}, \RimaRecallValidRooted{},
+\RimaRecallValidOutlet{} and \RimaRecallValidFull{}. The step from \emph{outlet} to \emph{full} is
+\the\numexpr\RimaHitFull-\RimaHitOutlet\relax{} pairs, all on airbus, where the navigation runs inside an
+injected router service, the construct the specification's rule does not follow
+(Section~\ref{sec:dynamic-spa}).
+
+Beyond the reference the graph holds \RimaExtra{} pairs. Of the \RimaJudged{} read from the source,
+\RimaJudgedReal{} are transitions the application has, and \RimaRealNewTarget{} of those reach a screen
+that no reference pair reaches. \RimaJudgedSpurious{} are not:
+\RimaSpuriousTarget{} come from a navigation whose target is matched to longer routes than its command can
+produce, and \RimaSpuriousAttribution{} from a navigation placed on the sign-in screen, where neither the
+component nor the service caller holding it is rendered. All \RimaJudgedSpurious{} are at the may tier;
+\RimaSpuriousMust{} has a must edge. The readings were made by the AI assistant. A stronger model of the same
+assistant re-read every miss, every pair not judged real and every sixth real one, \RimaGated{} in all,
+and changed \RimaGateChanged{} verdicts; a script checked that every cited site exists and holds a
+navigation construct. The three defects found
+here are not repaired in these figures.
 
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}

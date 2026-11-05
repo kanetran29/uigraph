@@ -1,0 +1,201 @@
+{
+ "readers": [
+  {
+   "kind": "extra",
+   "from": "/404",
+   "to": "/user-settings",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+   "reason": "app-bar sits in app.component above the root router-outlet, shown when isAuthenticated$ is true; /404 (NotFoundComponent) has no guard, so an authenticated user on /404 sees the Account Settings routerLink to /user-settings."
+  },
+  {
+   "kind": "extra",
+   "from": "/forgot-password",
+   "to": "/projects",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:9",
+   "reason": "app-bar is rendered above the outlet when isAuthenticated$ is true and has routerLink=/projects (line 9; line 2 is brand link to / which redirects to projects). Caveat: NoAuthGuard blocks /forgot-password for authenticated users, so the bar is visible there only transiently (auth state flips true while on the page); counted real because the ngIf can be true."
+  },
+  {
+   "kind": "extra",
+   "from": "/forgot-password",
+   "to": "/user-settings",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+   "reason": "Same shell app-bar Account Settings link as the /projects case; visible only when authenticated, which NoAuthGuard makes transient on this route, but the ngIf can be true."
+  },
+  {
+   "kind": "extra",
+   "from": "/login",
+   "to": "/user-settings",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+   "reason": "Shell app-bar routerLink to /user-settings is rendered while authenticated; on /login this holds in the window after ReceiveAPIAccessToken sets isAuthenticated (and GetUserInfo loads user) before the Navigate completes. Weak/transient since NoAuthGuard blocks authenticated direct visits, but the ngIf can be true."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/import",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:65",
+   "reason": "ProjectContainerComponent is routed at :projectId and renders the sidebar with relative routerLink=import; the link has only a disabled CSS class when the user lacks ImportTranslation, and the CanGuard allows Admin/Editor."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/labels",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:50",
+   "reason": "Sidebar routerLink=labels in the container rendered at :projectId (which itself redirects to translations, but the container stays rendered)."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/terms",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:34",
+   "reason": "Sidebar routerLink=terms in the container rendered at :projectId."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId",
+   "to": "/user-settings",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+   "reason": "Authenticated shell app-bar is above the router-outlet on all project screens; Account Settings link goes to /user-settings."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/api",
+   "to": "/projects/:projectId/export",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:74",
+   "reason": "Container sidebar is rendered on every child route including api; relative routerLink=export resolves to /projects/:projectId/export."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/api",
+   "to": "/projects/:projectId/import",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:65",
+   "reason": "Sidebar link import is always rendered; disabled class applies only without ImportTranslation permission, and it can be true for Admin/Editor."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/api",
+   "to": "/projects/:projectId/labels",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:50",
+   "reason": "Container sidebar link routerLink=labels rendered on the api child route."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/api",
+   "to": "/projects/:projectId/settings",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:93",
+   "reason": "Container sidebar link routerLink=settings rendered on the api child route."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/api",
+   "to": "/user-settings",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+   "reason": "Authenticated shell app-bar Account Settings link, above the outlet on all project screens."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/export",
+   "to": "/projects/:projectId/settings",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:93",
+   "reason": "Container sidebar link settings rendered on the export child route."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/export",
+   "to": "/projects/:projectId/team",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:57",
+   "reason": "Container sidebar link team rendered on the export child route."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/import",
+   "to": "/projects",
+   "verdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:9",
+   "reason": "Shell app-bar Projects button routerLink=/projects (line 9; graph cites line 2, the brand link to / which redirects to projects, also valid) rendered while authenticated."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/import",
+   "to": "/projects/:projectId/api",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:84",
+   "reason": "Container sidebar link api rendered on import child route; disabled class only without ViewProjectClients permission, which can be satisfied."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/import",
+   "to": "/projects/:projectId/export",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:74",
+   "reason": "Container sidebar link export rendered on import child route."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/import",
+   "to": "/projects/:projectId/settings",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:93",
+   "reason": "Container sidebar link settings rendered on import child route."
+  },
+  {
+   "kind": "extra",
+   "from": "/projects/:projectId/labels",
+   "to": "/projects/:projectId/api",
+   "verdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:84",
+   "reason": "Container sidebar link api rendered on labels child route; permission-disabled class can be false."
+  }
+ ],
+ "gate": {
+  "items": [
+   {
+    "from": "/404",
+    "to": "/user-settings",
+    "readerVerdict": "real",
+    "verdict": "real",
+    "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+    "reason": "app.component.html renders <app-bar *ngIf=isAuthenticated$> above the root <router-outlet>. The '404' route (app.module.ts) has no guard, and '**' redirects to it. A user with a valid token gets isAuthenticated=true and user loaded (auth.state.ts CheckAuth, then GetUserInfo), so the app-bar *ngIf=user$ block shows. Its 'Account Settings' button has routerLink=\"/user-settings\", which resolves to the auth module route 'user-settings' (UserSettingsComponent). That route's AuthGuard always returns true."
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/terms",
+    "readerVerdict": "real",
+    "verdict": "real",
+    "site": "src/app/projects/components/project-container/project-container.component.html:34",
+    "reason": "ProjectContainerComponent is the routed component of ':projectId' (projects.module.ts), so it is rendered on s. Its sidebar (inside *ngIf=project$, true once the project loads) has routerLink=\"terms\". That link is relative to the container's route and resolves to /projects/:projectId/terms (TermsListComponent). Caveat: the bare URL /projects/X does not stay put. The child '' redirectTo 'translations' sends it on to /projects/X/translations, but the same container and link are still shown."
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/user-settings",
+    "readerVerdict": "real",
+    "verdict": "real",
+    "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+    "reason": "/projects is behind AuthGuard, and a user on it with a valid session is authenticated, so app.component shows <app-bar> above the root outlet. Its Account Settings button has routerLink=\"/user-settings\", which goes to UserSettingsComponent."
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/settings",
+    "readerVerdict": "real",
+    "verdict": "real",
+    "site": "src/app/projects/components/project-container/project-container.component.html:93",
+    "reason": "The 'import' child (ImportContainerComponent) is behind CanGuard, which lets Admin and Editor roles in, so a user can be on it. It renders inside ProjectContainerComponent's <router-outlet> (line 102). That container's sidebar has routerLink=\"settings\", relative to the ':projectId' route, which resolves to /projects/:projectId/settings (ProjectSettingsComponent)."
+   }
+  ],
+  "notes": "I read all four from the source and agree with the reader: all four are real. App directory: /Users/kanetran29/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp. Files checked: app.module.ts and projects.module.ts (routes), app.component.html (shell), app-bar.component.html and .ts, project-container.component.html, auth.guard.ts, auth.state.ts. One caveat: the source screen /projects/:projectId redirects ('' redirectTo 'translations') to its translations child, so that URL never stays in the address bar. Under the preregistered definition the routed container is still rendered on s, so the Terms link counts as real. The target is not reached through a redirect in any of the four pairs."
+ }
+}
