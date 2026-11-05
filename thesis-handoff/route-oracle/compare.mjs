@@ -238,6 +238,12 @@ T.orderFlipWhere = order.filter((o) => o.flips).map((o) => NAME[o.slug]).join(' 
 // recover under half of their attribution losses and what the share is without mifos.
 const rec = (r) => r.recoveredMust + r.recoveredMay
 T.underHalf = rows.filter((r) => r.attrBefore > 0 && rec(r) * 2 < r.attrBefore).length
+// Per-application recovery shares: the median is the primary summary, the pooled share is dominated by mifos.
+const shares = rows.filter((r) => r.attrBefore > 0).map((r) => rec(r) / r.attrBefore).sort((a, b) => a - b)
+const mid = shares.length >> 1
+T.recMedian = shares.length % 2 ? shares[mid] : (shares[mid - 1] + shares[mid]) / 2
+T.recMin = shares[0]
+T.recMax = shares[shares.length - 1]
 const noMifos = rows.filter((r) => r.slug !== 'mifos')
 T.noMifosRec = noMifos.reduce((a, r) => a + rec(r), 0)
 T.noMifosLost = noMifos.reduce((a, r) => a + r.attrBefore, 0)
@@ -255,6 +261,7 @@ for (const [k, v] of [
   ['AttrAppsFell', T.fell], ['AttrFellWhere', T.fellWhere], ['AttrDemoted', T.demoted],
   ['AttrNonLiteral', T.nonLiteral], ['AttrOrderFlips', T.orderFlips], ['AttrOrderFlipWhere', T.orderFlipWhere],
   ['AttrUnderHalfApps', T.underHalf], ['AttrRecoveredShareNoMifos', pc(T.noMifosRec, T.noMifosLost)],
+  ['AttrRecoveredMedian', pc(T.recMedian, 1)], ['AttrRecoveredRange', `${pc(T.recMin, 1)}--${pc(T.recMax, 1)}`],
   ['AttrServiceLost', T.serviceLost], ['AttrServiceRecovered', T.serviceRecovered],
 ]) tex4 += `\\newcommand{\\${k}}{${v}}\n`
 // held back until every check below has passed; see the single write at the end

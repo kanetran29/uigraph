@@ -36,16 +36,17 @@ A construct inside a shared component that appears only in screens without nodes
 counted as an attribution loss, although attribution alone cannot recover it:
 the categories partition the losses diagnostically and do not bound what attribution recovers.
 
-The demotion rules decide whether the edges attribution added at k8sdash (its toolbar edges,
+The demotion rules decide whether the edges attribution added at k8s dashboard (its toolbar edges,
 Section~\ref{sec:res-soundness}) occur on every input.
 \CensusMustKdash{} of them are kept at must.
 The demotion rules were written during development, in part in response to objections from red-team panels run with the AI assistant.
 The witness check finds \MustWitnessViolations{} failures among the \MustWitnessEdges{} must edges.
-It cannot read the destination of \MustWitnessUnread{}, all of them k8sdash's toolbar edges.
+It cannot read the destination of \MustWitnessUnread{}, all of them k8s dashboard's toolbar edges.
 So only about half of that application's must edges are read.
 
-\paragraph{RQ4 is conditional, and the condition is RQ1.}
-Leave aside the rename operator, whose detection is close to guaranteed by construction.
+\paragraph{RQ4 is a sanity check, and it is conditional on RQ1.}
+The test checks that the witness mapping reacts to injected edits; it is not evidence of change-impact accuracy.
+Leave aside the rename operator (\MutRenameDetected{}/\MutRenameScored{}), whose detection is close to guaranteed by construction; the denominator of the other three operators is \MutFallibleScored{}, with rename excluded.
 The other three operators are generated or scored only at constructs the graph already
 represents in the simplest form the extractor reads.
 They are detected in \MutFallibleDetected{} of \MutFallibleScored{} scored mutants on the attributed
@@ -68,13 +69,16 @@ The probability that it is represented at all is what RQ1 measures.
 This form of claim suits change impact analysis, whose queries concern only the part of the application that the model represents.
 
 \paragraph{Two uses of the graph.}
-The first, with measured support, is change impact analysis.
+The first is change impact analysis, supported only by a sanity check of the witness mapping.
 Every edge carries the file and line of the construct that produced it, so changed lines map to the
 edges whose witnesses fall inside them and from there to the screens those edges leave and enter.
 This is the screen-level counterpart of Chianti \cite{ren2004chianti}, in the impact analysis
 tradition of Arnold and Bohner \cite{arnold1993impact,bohner1996software,lehnert2011taxonomy}.
-RQ4 shows that the mapping reacts to the injected edits for the constructs the graph represents.
+RQ4 shows only that the mapping reacts to the injected edits for the constructs the graph represents, in a test that could hardly fail.
 That is a property such an analysis needs, not a measure of its accuracy (whether every affected screen is named, and how many in excess).
+
+Neither use was tried by a consumer: consumer use is not measured.
+The may tier is a candidate generator; only the must tier (\CensusMustSites{} constructs) is meant to give transitions that hold under the assumptions of Claim~\ref{claim:must}.
 
 The second, not itself measured, is checking in continuous integration at no execution cost.
 The graph is recomputed from source on each commit, deterministically and without installing, serving or crawling anything (Section~\ref{sec:protocol}).
@@ -87,8 +91,8 @@ Both stop at runtime dynamic routing: a target computed from a value, a route ta
 startup from configuration, and an overlay no route describes.
 There the static graph is silent or over-approximates into the may tier, which carries no soundness
 claim.
-Under the assumptions of Claim~\ref{claim:must} only the must tier is a lower bound on the navigation an
-application can perform, so a query that must not miss a transition cannot be answered from the graph alone.
+Only the must tier is meant as a lower bound on the navigation an
+application can perform, and only relative to the assumptions of Claim~\ref{claim:must} (route order, ambiguous selector joins, the unresolved-call rule, the execution model), each with a class of counterexample; Section~\ref{sec:model} counts the edges resting on the first two, so a query that must not miss a transition cannot be answered from the graph alone.
 Authentication bounds the deterministic tier in the same way: a guard decides on state the source does not fix, so a reader that keeps Claim~\ref{claim:must}
 demotes it.
 The small must tier is largely this fact, a matter of definition rather than a defect of the extractor.
@@ -228,6 +232,8 @@ Corpus and selection
 size, routing style and navigation mechanisms \cite{kalliamvakou2014promises,kalliamvakou2016indepth}.
 The selection is tool-driven: \texttt{SAP/spartacus} was rejected because its routing is
 configuration-driven in a way the extractor does not support (Section~\ref{sec:corpus}).
+Selection was not tool-blind: the rejection came after screening began.
+Pooled percentages are dominated by the largest application, mifos, so the per-application median, \AttrRecoveredMedian{}, is the primary summary.
 Figures are likely optimistic for Angular applications at large.
 & The six selection criteria were fixed before any results, and rejected candidates are reported with
 their reasons.
@@ -262,7 +268,7 @@ Experimenter bias
 of the witness check and the test-source cross-check.
 The protocol corrections are reported in full, including those that made the figures worse
 (Section~\ref{app:repairs}).
-& No blinding, no second annotator for the loss classification, and no independent audit of the residual
+& No blinding of the experimenter, no second annotator for the loss classification, and no independent audit of the residual
 constructs inspected by hand; the defect classes were defined after the first observations, not in
 advance. \\
 AI-assistant reading of the final must tier
@@ -273,7 +279,8 @@ It was made with the extractor's decisions in view.
 & --
 & No human second reader checked it.
 Its agreement with the extractor shows consistency with the stated rules, not independent
-correctness. \\
+correctness.
+The readings of both comparisons with Rima et al.'s tool come from one model family, whose second pass changed \RimaGateChanged{} of \RimaGated{} and \HHGateChanged{} of \HHGated{}; in the corpus comparison the model was not told which tool proposed a pair, and the experimenter was not blind. My own \HHAuthorSample{} re-reads agreed in \HHAuthorAgree{} of \HHAuthorJudged{} cases (Wilson 95\,\% interval \HHAuthorAgreeRange{}), with the model's verdict in view [author: state whether the proposing tool was shown]. \\
 Two lines of evidence per defect class
 & This requirement is the strongest control on the fitting threat and the reason one class is still a
 candidate, but it is weaker than it appears: four of the five
@@ -330,8 +337,8 @@ reading the analysis; both are places where the analysis is silent rather than a
 \subsection{Why the may tier is incomplete}
 \label{sec:may-incomplete}
 
-The may tier is read as an upper bound (Section~\ref{sec:model}), so a transition the application
-takes and the graph lacks is its defect, while an excess may edge is not. Table~\ref{tab:ceiling}
+The may tier is meant as an over-approximation (design intent, Section~\ref{sec:model}), not a proved upper bound: some rules do not over-approximate (first route, one segment, catch-all order, dispatch, dialogs). A transition the application
+takes and the graph lacks is therefore a defect, while an excess may edge is not. Table~\ref{tab:ceiling}
 sorts every transition still missing in the two suites (Section~\ref{sec:res-e2e}) and the two
 structural references (Section~\ref{sec:res-groundtruth}) by where its destination is fixed.
 \emph{Inside} the static boundary, the frontend source, a library under \texttt{node\_modules} or

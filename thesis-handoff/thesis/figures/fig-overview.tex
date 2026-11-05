@@ -9,7 +9,7 @@
   \node[box, below=3mm of cons, minimum width=34mm, hl] (attr) {scope attribution\\[-2pt]{\footnotesize (Chapter~\ref{ch:analysis})}};
   \begin{scope}[on background layer]
     \node[draw=muted, rounded corners=4pt, fit=(routes)(cons)(attr), inner sep=5pt,
-      label={[font=\footnotesize\itshape, text=muted]above:uigraph extractor}] (ext) {};
+      label={[font=\footnotesize\itshape, text=muted]above:extractor}] (ext) {};
   \end{scope}
   \node[box, right=12mm of cons, minimum width=28mm] (graph) {UI transition graph\\[-2pt]{\footnotesize must / may / unknown}\\[-3pt]{\footnotesize + witnesses}};
   \draw[->, thick] (src.east) -- (src.east -| ext.west);

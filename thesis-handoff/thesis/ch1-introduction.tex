@@ -83,11 +83,12 @@ This thesis builds a static extractor for Angular and carries out that measureme
 It also proposes an analysis for the largest loss it finds under the order of its loss rules. The analysis,
 scope attribution, is stated as a dataflow analysis over a lattice of screen sets. Nothing in
 its formulation depends on this extractor.
+The measurement is the main contribution and scope attribution a modest extension: most of what attribution recovers comes from mechanisms of earlier work, which it contains as levels, and its one new step, the service join, adds \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) over the outlet level (Section~\ref{sec:res-ablation}).
 
 A method of this kind cannot be assessed without being instantiated, because the
 questions asked here are empirical. They ask how much of the navigation in real applications it
 recovers, where it fails, and whether the resulting graph responds to a change in the
-source. The extractor is an open-source static analyser for Angular built in this
+source. The extractor is a static analyser for Angular built in this
 thesis. It is part of the contribution, not an existing tool. It reads nested, parameterised and
 lazily loaded route trees; the stated restrictions of an earlier Angular extraction exclude the
 first two (Section~\ref{sec:res-earlier}). It also implements scope attribution. Its development
@@ -118,7 +119,7 @@ Chapter~\ref{ch:results}.
 
 The questions are answered on six open-source Angular applications pinned to fixed commits
 (Chapter~\ref{ch:evaluation}), with the final version of the extractor. The thesis does not claim
-completeness: it states a soundness property over a declared scope and lists what it approximates
+completeness: it states a soundness property for the must tier that holds only relative to stated assumptions (Claim~\ref{claim:must}) and lists what it approximates
 (Section~\ref{sec:soundiness}). It does not measure the graph's effect on any consumer, it evaluates
 Angular only, and its figures on the corpus are in-sample, since the extractor was developed on it.
 

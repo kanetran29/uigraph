@@ -106,6 +106,8 @@ The route-order assumption of Claim~\ref{claim:must} carries much of the tier: w
 must tier holds \RouteOrderMustWithout{} of its \RouteOrderMust{} edges, on
 \RouteOrderSitesWithout{} of \RouteOrderSites{} constructs.
 
+The must tier is therefore a lower bound only relative to four assumptions, each with a class of counterexample. \emph{A1, route order:} a catch-all in a separately registered route table is matched after every route of the others; another registration order breaks it, and \RouteOrderResting{} must edges, on \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications, rest on it. \emph{A2, selectors:} no component is placed by a join over an ambiguous selector; no final must edge rests on such a join (Section~\ref{sec:inputs}). \emph{A3, calls:} a call with no body in the application starts no navigation; a library call that navigates breaks it. \emph{A4, execution model:} the plain primary activation above; a modifier key, a second listener or another browsing context breaks it. The edges resting on A3 and A4 are not counted, and neither is checked against a run.
+
 \textbf{What the evaluation tests.} The evaluation tests a necessary condition of this claim
 rather than the claim itself. The distinction decides how the figures of
 Chapter~\ref{ch:results} may be read. The witness check of Section~\ref{sec:protocol} re-reads
@@ -201,9 +203,11 @@ meaningful question for must edges, and for may edges whose target is a literal.
 meaningful question for edges the extractor produced by over-approximation. Treating it as
 one leads to spurious failures (Section~\ref{app:repairs}, Table~\ref{tab:repairs}).
 
-\textbf{The may tier as an upper bound.} As in a modal transition system \cite{larsen1988modal}, the
-may tier is read as an over-approximation. The must and may edges together are meant to contain every
-transition the application can take between its declared screens. An excess may edge, one the
+\textbf{The may tier as a design intent.} As in a modal transition system \cite{larsen1988modal}, the
+may tier is meant as an over-approximation: the must and may edges together are meant to contain every
+transition the application can take between its declared screens. This is a design intent and not a
+property that holds. Some rules under-approximate: the rules that take the first matching route, read an interpolation as one path segment, order a catch-all route last, and place dispatch and dialogs, and the rule that a call with no body in
+the application navigates nowhere. The graph can lack a transition it was meant to contain. An excess may edge, one the
 application never takes, is admitted by this reading and costs only precision. A transition the
 application takes and the graph lacks is the defect. No completeness theorem is claimed. The
 end-to-end check (Section~\ref{sec:res-e2e}) measures how far the graph falls short of the transitions
@@ -215,21 +219,17 @@ boundary.
 \section{Scope attribution}
 \label{sec:attribution}
 
-Scope attribution is specified here as a fixpoint over four \emph{input relations}:
+Scope attribution is specified here over three \emph{input relations}. The analysis that is evaluated
+implements all three, and adds fallbacks after the fixpoint, one of which is not monotone; termination and the least-solution property hold for the fixpoint core
+only:
 \begin{itemize}
 \item component nesting ($N$): which component's template instantiates which;
 \item router outlets: which components lie on the path from the root to an outlet, and below a
 route's component;
-\item the call graph with dependency injection ($\mathit{CG}$);
-\item dispatch ($D$): the relations that carry NgRx effects (NgRx is the Angular state-management
-library) and router event subscriptions.
+\item the call graph with dependency injection ($\mathit{CG}$).
 \end{itemize}
-The fixpoint also uses two derived relations. $\mathit{Mem}$ links each component to its
-members. $T$ links each callable that holds a navigation site to the entry guards that
-navigation runs. The prototype implements nesting, outlets and the call graph. The dispatch
-relation $D$ and the guard relation $T$ are not implemented, and stand-ins replace them
-(Section~\ref{sec:implementation}). The evaluation of Chapter~\ref{ch:evaluation} therefore
-measures this three-relation prototype and not the full model.
+The fixpoint also uses the derived relation $\mathit{Mem}$, which links each component to its
+members. Two further relations, dispatch ($D$) and guards ($T$), are defined in Section~\ref{sec:extensions}; the prototype does not implement them, and the evaluation of Chapter~\ref{ch:evaluation} measures the three-relation analysis with two stand-ins and a post-pass of fallbacks.
 
 Guards that return a \texttt{UrlTree}, the injector hierarchy, and navigation inside signal effects and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) belong to the model only. The extractor approximates or omits them as Section~\ref{sec:approximations} lists. A site that no implemented relation reaches contributes no edge and is counted in the loss category ``Attribution, service'' of Table~\ref{tab:loss-rules}.
 
@@ -321,23 +321,20 @@ route mounts (Section~\ref{sec:implementation}) \\
 member (method, property initialiser, lifecycle hook) of a component & the scope of the
 component \\
 method of an injectable service & join of the scopes of its callers \\
-\texttt{canActivate}, \texttt{canActivateChild} or \texttt{canMatch} on route $r$ & join of the
-scopes of the navigation sites with a known target in $\mathit{subtree}(r)$, an approximation of
-the screens a navigation into $r$ starts from \\
 \texttt{canDeactivate} on route $r$ & $\mathit{subtree}(r)$ \\
 HTTP interceptor & $\top$ \\
-NgRx effect for action $a$ & join of the scopes of every dispatcher of $a$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \textbf{Computing the scopes.} The row for services is why a simple traversal of the component
 tree is not enough. A service has no scope of its own: its scope is the join of the scopes of the
-places that call it, which may themselves be services. Attribution is therefore computed as a
+places that call it, which may themselves be services. In the model attribution is computed as a
 fixpoint over the relations of Section~\ref{sec:inputs}. The outlet relation gives the initial
-scopes, which propagate along $N$, $\mathit{Mem}$, $\mathit{CG}$, $D$ and, from each navigation site to the entry guards of the routes its target lies under, $T$.
-This is a monotone dataflow problem in the sense of Kildall
-\cite{kildall1973unified,nielson1999principles}, and two properties of it do separate work.
+scopes, which propagate along $N$, $\mathit{Mem}$ and $\mathit{CG}$.
+This fixpoint core is a monotone dataflow problem in the sense of Kildall
+\cite{kildall1973unified,nielson1999principles}, and two properties of it do separate work. They
+do not extend to the fallbacks of Section~\ref{sec:implementation}.
 \begin{itemize}
 \item Finite height gives termination. The height of $\mathcal{P}(S)$ is $|S|$, so the scope of
 one node can rise at most $|S|$ times before it reaches $\top$.
@@ -352,7 +349,7 @@ The relations may contain cycles, since mutually recursive templates are legal, 
 \subsection{Input relations}
 \label{sec:inputs}
 
-Four relations, in order of increasing difficulty, provide the input to the fixpoint.
+Three relations, in order of increasing difficulty, provide the input to the fixpoint.
 \begin{itemize}
 \item \emph{Component nesting.} $A \to B$ when $A$'s template instantiates $B$'s selector,
 resolved within the correct import scope. Matching selector text globally is unsound, since two
@@ -368,12 +365,10 @@ of bindings, as the framework-modelling literature recommends
 \cite{sridharan2011f4f,antoniadis2020enterprise}. Where a token admits
 several implementations the analysis joins over all of them, which is one source of \emph{may}
 modality.
-\item \emph{Dispatch relations} (not implemented). A dispatch is treated as a call-graph edge from every
-dispatcher to every handler, which admits NgRx effects and router event subscriptions.
 \end{itemize}
 
 Algorithm~\ref{alg:attribution} gives the computation. A step adds a screen to a scope only when an edge
-of $N$, $\mathit{Mem}$, $\mathit{CG}$, $D$ or $T$ carries it there, and scopes only grow, so the
+of $N$, $\mathit{Mem}$ or $\mathit{CG}$ carries it there, and scopes only grow, so the
 algorithm computes the least solution of the constraint system that
 Table~\ref{tab:scopes} states. In the model a component that is both mounted by a route and
 rendered in the template of another component holds the join of the two scopes.
@@ -434,10 +429,15 @@ $\mathit{holder}(s, c)$. Where no route on that chain renders $c$, as for a comp
 template, a full target's base is not read and its edge is held at may (Table~\ref{tab:demotion}); a
 target prefix falls back to the address of $s$, and its edges are may edges as every prefix edge is.
 
+\subsection{Extensions not evaluated}
+\label{sec:extensions}
+
+Two further input relations belong to the model and not to the prototype, and the parts of the attribution that use them were not evaluated. \emph{Dispatch} ($D$): a dispatch is treated as a call-graph edge from every dispatcher to every handler, which admits NgRx effects (NgRx is the Angular state-management library) and router event subscriptions; an NgRx effect for action $a$ takes the join of the scopes of every dispatcher of $a$. \emph{Guards} ($T$): $T$ links each callable that holds a navigation site to the entry guards that navigation runs; a \texttt{canActivate}, \texttt{canActivateChild} or \texttt{canMatch} guard on route $r$ takes the join of the scopes of the navigation sites with a known target in $\mathit{subtree}(r)$, an approximation of the screens a navigation into $r$ starts from. With both relations the fixpoint propagates along $N$, $\mathit{Mem}$, $\mathit{CG}$, $D$ and $T$ and remains a monotone problem; stand-ins replace them in the prototype (Section~\ref{sec:implementation}).
+
 \section{Implementation}
 \label{sec:implementation}
 
-The extractor was built for this thesis and is available as open source. It consists of a framework-independent core, which defines the graph model and the operations over graphs, and one adapter per framework that maps source constructs onto the shared model. The Angular adapter reads route configuration, templates and class code with the TypeScript compiler API and emits screens and edges for \texttt{routerLink} attributes and \texttt{Router.navigate} calls, each with the rule identifier and source location that produced it as witness.
+The extractor was built for this thesis and is in the accompanying repository, evaluated at commit \texttt{a9d29df} (Chapter~\ref{ch:evaluation}). It consists of a framework-independent core, which defines the graph model and the operations over graphs, and one adapter per framework that maps source constructs onto the shared model. The Angular adapter reads route configuration, templates and class code with the TypeScript compiler API and emits screens and edges for \texttt{routerLink} attributes and \texttt{Router.navigate} calls, each with the rule identifier and source location that produced it as witness.
 
 Scope attribution is a separate pass in the Angular adapter, enabled with the option \texttt{-{}-attribution}. With the option off, the extractor produces exactly the baseline edge set, as checked on every application in the corpus. The pass implements component nesting, router outlets and the call graph; stand-ins replace $D$ and $T$ (below).
 
@@ -466,7 +466,7 @@ The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-abl
 \end{tikzpicture}
 \caption{Attribution levels: ownership and containment baselines $\subset \dots \subset$ service join.}
 \label{fig:lattice}
-\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what only this thesis adds; \emph{class} is the per-class variant of the service join.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what only this thesis adds; \emph{class} is the per-class variant of the service join. The levels nest by construction: each withholds every mechanism above it (Section~\ref{sec:res-ablation}).}
 \end{figure}
 
 \textbf{Component nesting.} Every component in the application, excluding test hosts and stories,
@@ -475,7 +475,7 @@ contains an element with $B$'s selector. When a selector belongs to more than on
 candidates are narrowed to those that $A$'s file imports. If none is imported, the analysis joins
 over all of them and records a note. Edges from such a join are not capped at \emph{may}, so a
 site in one candidate can be placed on a screen that renders another. Claim~\ref{claim:must}
-excludes such edges (Section~\ref{sec:approximations}). The corpus has such joins in k8sdash and
+excludes such edges (Section~\ref{sec:approximations}). The corpus has such joins in k8s dashboard and
 bitwarden. No must edge of the final graphs cites a construct placed through one. An attribute
 selector is matched the same way, so a directive has a scope as a component does.
 

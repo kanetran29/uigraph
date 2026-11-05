@@ -61,6 +61,8 @@ mkdirSync(outDir, { recursive: true })
 
 // Where each application's database lives under the corpus. The same layout the other
 // harnesses use; a workspace application keeps its database beside the project it maps.
+/** Display name of a corpus application in the generated LaTeX. */
+const display = (s) => (s === 'k8sdash' ? 'k8s dashboard' : s)
 const APPS = {
   realworld: '.',
   alfresco: 'projects/aca-content',
@@ -122,17 +124,17 @@ function baselineTex(rows) {
   let out = '\\newcommand{\\TabScopeBaseline}{%\n\\begin{tabular}{@{}lrrrrr@{}}\n\\toprule\n'
   out += 'Application & Screens & Sites & \\shortstack[r]{Attributed\\\\pairs} & '
   out += '\\shortstack[r]{Mean\\\\scope} & \\shortstack[r]{All-screens\\\\pairs} \\\\\n\\midrule\n'
-  for (const r of b) out += `${r.slug} & ${r.screens} & ${r.sites} & ${r.attributed} & ${(r.attributed / r.sites).toFixed(2)} & ${r.trivial} \\\\\n`
+  for (const r of b) out += `${display(r.slug)} & ${r.screens} & ${r.sites} & ${r.attributed} & ${(r.attributed / r.sites).toFixed(2)} & ${r.trivial} \\\\\n`
   out += '\\bottomrule\n\\end{tabular}}\n'
   const mean = (r) => r.attributed / r.sites
   out += `\\newcommand{\\BaselineApps}{${b.length}}\n`
   out += `\\newcommand{\\BaselineFactorMin}{${fac(bluntest).toFixed(1)}}\n`
   out += `\\newcommand{\\BaselineFactorMax}{${fac(sharpest).toFixed(1)}}\n`
-  out += `\\newcommand{\\BaselineBluntest}{${bluntest.slug}}\n`
+  out += `\\newcommand{\\BaselineBluntest}{${display(bluntest.slug)}}\n`
   out += `\\newcommand{\\BaselineBluntestScope}{${mean(bluntest).toFixed(1)}}\n`
   out += `\\newcommand{\\BaselineBluntestScreens}{${bluntest.screens}}\n`
   out += `\\newcommand{\\BaselineBluntestShare}{${((mean(bluntest) / bluntest.screens) * 100).toFixed(0)}\\,\\%}\n`
-  out += `\\newcommand{\\BaselineSharpest}{${sharpest.slug}}\n`
+  out += `\\newcommand{\\BaselineSharpest}{${display(sharpest.slug)}}\n`
   out += `\\newcommand{\\BaselineSharpestAttributed}{${sharpest.attributed}}\n`
   out += `\\newcommand{\\BaselineSharpestTrivial}{${sharpest.trivial}}\n`
   out += `\\newcommand{\\BaselineMeanScopeMin}{${Math.min(...b.map(mean)).toFixed(1)}}\n`
@@ -226,7 +228,7 @@ if (tex) {
   out += `\\cmidrule(l){3-${LEVELS.length + 2}}\n`
   out += 'Application & Screens & ' + LEVELS.join(' & ') + ' \\\\\n\\midrule\n'
   for (const r of rows) {
-    out += `${r.slug} & ${r.screens} & ` + LEVELS.map((l) => `${r.levels[l].sites}\\,/\\,${r.levels[l].pairs}`).join(' & ') + ' \\\\\n'
+    out += `${display(r.slug)} & ${r.screens} & ` + LEVELS.map((l) => `${r.levels[l].sites}\\,/\\,${r.levels[l].pairs}`).join(' & ') + ' \\\\\n'
   }
   out += '\\midrule\nAll & ' + rows.reduce((a, r) => a + r.screens, 0) + ' & '
   out += LEVELS.map((l) => `${sum(l, 'sites')}\\,/\\,${sum(l, 'pairs')}`).join(' & ') + ' \\\\\n'

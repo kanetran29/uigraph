@@ -5,15 +5,13 @@
   \node[screen, right=of home] (settings) {/settings};
   \node[screen, above=of home] (login) {/login};
   \node[screen, below=of home] (article) {/article/:slug};
-  \node[screen, right=of article] (profile) {/profile/:user};
 
   \draw[mustedge] (home) -- node[lbl, left] {\texttt{click} $\cdot$ must} (login);
   \draw[mayedge] (home.15) -- node[lbl, above=1mm] {\texttt{click} [\textit{requireAuth}] $\cdot$ may} (settings.165);
   \draw[mustedge] (settings.195) -- node[lbl, below=1mm] {\texttt{navigate} $\cdot$ must} (home.345);
   \draw[mayedge] (home) -- node[lbl, left] {\texttt{click} $\cdot$ may} (article);
-  \draw[->, thick, dotted] (article) -- node[lbl, above] {\texttt{effect} $\cdot$ unknown} (profile);
 \end{tikzpicture}
-\caption{A small UI transition graph in the model of this thesis, with must, may and unknown edges.}
+\caption{A small UI transition graph in the model of this thesis, with must and may edges.}
 \label{fig:utg-example}
-\par\smallskip{\footnotesize\noindent\emph{Note.} Each edge carries an event, an optional guard in brackets, and a modality: \emph{must} always fires when its code runs, \emph{may} is conditional (here on a route guard or a partly known target). The dotted \emph{unknown} edge shows the model's treatment of a navigation inside a signal effect, whose firing condition cannot be determined statically; the prototype does not implement it (Section~\ref{sec:boundary}). In the measured graphs the unknown modality marks only edges into a sink for destinations that only the run time knows.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Each edge carries an event, an optional guard in brackets, and a modality: \emph{must} always fires when its code runs, \emph{may} is conditional (here on a route guard or a partly known target). In the measured graphs the unknown modality marks only edges into a sink for destinations that only the run time knows.}
 \end{figure}

@@ -64,7 +64,7 @@
 {\large School of Science\par}
 {\large Master's Programme in Computer, Communication and Information Sciences\par}
 \vfill
-{\LARGE\bfseries Scope Attribution for Static UI Transition\\[0.3em] Graph Extraction in Single-Page Applications\par}
+{\LARGE\bfseries Measuring Static UI Transition Graph\\[0.3em] Extraction in Single-Page Applications,\\[0.3em] with Scope Attribution\par}
 \vfill
 {\large Duy Khanh Tran\par}
 % Student number 103503394 (needed in MyStudies; the aaltothesis class has no field for it)
@@ -97,20 +97,9 @@ Few transitions are certain. The corpus yields \RouteOrderMust{} edges that alwa
 without an assumed route order and \GuardOnlyMust{} if every guard admits the user; this is largely a
 matter of definition, since \MayAppAny{} of the \MayOnlyConstructs{} constructs that stay merely possible
 sit behind a guard or branch of the application. Most causes of loss traced in the source are
-constructs a static reader can read. Scope attribution recovers \AttrRecoveredShare{} of the
-constructs assigned to it, mostly on one application and almost all as possible transitions, and places
-navigation inside services, which the published rules of earlier work do not. Its screen sets are
-\BaselineFactorMin{} to \BaselineFactorMax{} times narrower than putting every site on every screen, but
-against a reference read from one application's source its precision is \GTAlfFullPrecision{}. Beside
-Rima et al.'s tool, on five corpus applications it finds \HHCorpusNoMifosOursRecall{} of the real
-transitions either finds, against \HHCorpusNoMifosTheirsRecall{}, at precision
-\HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}, a grouping chosen after reading;
-on the largest application its precision is \HHMifosOursPrecision{}. Mutation testing shows that the graph
-responds to changes in constructs it represents, though not independently of the tool.
+constructs a static reader can read. Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to it (\AttrRecoveredShareNoMifos{} without the largest application), almost all as possible transitions; its one new step, placing navigation inside services, adds \AblationFullAddedShare{} of the sites. Its screen sets are \BaselineFactorMin{} to \BaselineFactorMax{} times narrower than all screens, but its precision against a reference read from one application's source is \GTAlfFullPrecision{}. Beside Rima et al.'s tool, on five applications grouped after reading, its relative recall (share of real transitions either finds, as an AI model read them) is \HHCorpusNoMifosOursRecall{} against \HHCorpusNoMifosTheirsRecall{}, at precision \HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}; on the largest application, most of whose pairs only the shell reaches, precision is \HHMifosOursPrecision{}, and the pooled comparison does not rank the tools. Mutation testing only sanity-checks the witness mapping.
 
-A declared route table is a usable but insufficient basis for static navigation extraction. The tool was
-developed on this corpus, so the figures are in-sample, and whether the graph helps its intended
-consumers is not measured.
+A declared route table is a starting point but an insufficient basis for static navigation extraction. The tool was developed on this corpus, so the figures are in-sample; consumer use is not measured.
 
 \vspace{0.5em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
@@ -171,6 +160,7 @@ made here is mine.
 
 \begin{tabular}{@{}ll@{}}
 AI & artificial intelligence \\
+Ajax & asynchronous JavaScript and XML \\
 API & application programming interface \\
 DOM & Document Object Model \\
 GUI & graphical user interface \\
@@ -180,12 +170,14 @@ ICU & International Components for Unicode (message format) \\
 JSON & JavaScript Object Notation \\
 JSP & JavaServer Pages \\
 JSX & JavaScript XML, the markup syntax of React \\
-MVC & model--view--controller \\
+NgRx & Angular state-management library built on RxJS \\
 RQ & research question \\
 RxJS & Reactive Extensions for JavaScript \\
 SPA & single-page application \\
+SPIN & model checker for Promela models \\
 UI & user interface \\
 URL & Uniform Resource Locator \\
+ZAP & Zed Attack Proxy, a web security scanner \\
 \end{tabular}
 
 \tableofcontents

@@ -52,7 +52,7 @@ if (tex) {
     `\\newcommand{\\RouteOrderSitesWithout}{${sum('sitesWithout')}}`,
     `\\newcommand{\\RouteOrderRestingSites}{${sum('sites') - sum('sitesWithout')}}`,
     `\\newcommand{\\RouteOrderRestingApps}{${resting.length}}`,
-    `\\newcommand{\\RouteOrderRestingWhere}{${resting.map((r) => r.slug).join(', ') || 'none'}}`,
+    `\\newcommand{\\RouteOrderRestingWhere}{${resting.map((r) => (r.slug === 'k8sdash' ? 'k8s dashboard' : r.slug)).join(', ') || 'none'}}`,
     `\\newcommand{\\RouteOrderNotedApps}{${rows.filter((r) => r.noted).length}}`].join('\n') + '\n')
 }
 console.log(JSON.stringify(rows))

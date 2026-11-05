@@ -63,7 +63,7 @@ the running framework mounts, the same node set is \ProbeNodes{}/\ProbeScreens{}
 (Section~\ref{sec:res-probe}). Almost all of the difference is one construct in one application
 that the extractor declares unread.
 \item The two static readers were partly corrected against each other, so their agreement is weaker evidence
-(Section~\ref{sec:limitations}). The runtime method is the external
+(Section~\ref{sec:limitations}). The runtime route oracle is the external
 check, and it finds no node at an address where the framework mounts nothing
 (Section~\ref{sec:res-unmounted}).
 \end{itemize}
@@ -178,13 +178,13 @@ edge after attribution.
 \label{tab:before-after}
 \setlength{\tabcolsep}{4pt}
 \TabBeforeAfter
-\par\smallskip{\footnotesize\noindent\emph{Note.} First, the constructs assigned to attribution in the baseline and how many recover onto must or may, the measure of RQ3. Then must conversion (RQ1) in per cent and its change in percentage points, and must-tier edges whose destination the witness check read and passed; a construct's tier is the modality its own witness earns. The remaining must edges are unread destinations, all \MustWitnessUnread{} of them on k8sdash, which are neither passes nor failures; no edge failed. Constructs converted from other baseline categories are in Table~\ref{tab:recovery-source}.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} First, the constructs assigned to attribution in the baseline and how many recover onto must or may, the measure of RQ3. Then must conversion (RQ1) in per cent and its change in percentage points, and must-tier edges whose destination the witness check read and passed; a construct's tier is the modality its own witness earns. The remaining must edges are unread destinations, all \MustWitnessUnread{} of them on k8s dashboard, which are neither passes nor failures; no edge failed. Constructs converted from other baseline categories are in Table~\ref{tab:recovery-source}.}
 \end{table}
 \FigBeforeAfter
 
 Attribution recovers \AttrRecovered{} of the \AttrLost{} constructs the loss rules assign to it.
-This is \AttrRecoveredShare{} of them, which this thesis calls the attribution recovery. Most of them are on mifos. Without mifos the share is \AttrRecoveredShareNoMifos{}, and \AttrUnderHalfApps{} of the six applications recover under half. It takes the graphs from \AttrEdgesBefore{} edges to
-\AttrEdgesAfter{}.
+Per application the median recovery is \AttrRecoveredMedian{} (range \AttrRecoveredRange{}); pooled over the six applications, this is \AttrRecoveredShare{} of them, which this thesis calls the attribution recovery. Most of them are on mifos. Without mifos the share is \AttrRecoveredShareNoMifos{}, and \AttrUnderHalfApps{} of the six applications recover under half. It takes the graphs from \AttrEdgesBefore{} edges to
+\AttrEdgesAfter{}. Most of the recovery comes from mechanisms earlier work already had; the new step, the service join, adds \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) over the \emph{outlet} level (Section~\ref{sec:res-ablation}).
 
 Measured by RQ1's must conversion, the gain is far smaller. Of the recovered
 constructs, \AttrRecoveredMust{} earn must and \AttrRecoveredMay{} earn may, and \AttrAppsGained{}
@@ -482,7 +482,7 @@ matched pairs is a must edge, as predicted. One of the \EtoEMifosHitRedirect{} h
 rests only on the notifications tray, a shell site whose target keeps two leading parameters and so reaches every account screen from every screen. Such a
 hit shows that the target is reachable in the graph and not that the site was resolved. The same site
 makes the graph wide: it holds \EtoEMifosGraphPairsUnfixed{} $\to$ \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} possible pairs,
-before $\to$ after the repairs below, so a hit discriminates less than it did. No other preregistered prediction is reported here.
+before $\to$ after the repairs below, so a hit discriminates less than it did. A graph of that density would hold \EtoEMifosChanceHits{} of the \EtoEMifosPairs{} pairs by chance (realworld: \EtoERealworldChanceHits{} of \EtoERealworldPairs{}), so the hits show coverage more than discrimination. No other preregistered prediction is reported here.
 \item \emph{mifos, misses.} Only the redirect class was preregistered, and its misses are not classified
 further. The other classes were defined after the misses had been read, before the repairs below. Every
 remaining miss is in the redirect class (\EtoEMifosMissRedirect{}/\EtoEMifosMiss{}): the graph holds
@@ -624,7 +624,7 @@ placed on a sign-in or password-reset screen where the component holding it is n
 route, Rima et al.'s reference lists all five of these pairs too. All
 \RimaJudgedSpurious{} are at the may tier; \RimaSpuriousMust{} has a must edge.
 
-The readings were made by the AI assistant: one model read each pair, and a stronger model of the same
+The readings were made by the AI assistant, one model family throughout, so the figures that rest on them measure consistency and not correctness. One model read each pair, and a stronger model of the same
 assistant re-read every miss, every pair not judged real and every sixth real one, \RimaGated{} in all, and
 changed \RimaGateChanged{}. One batch was read twice because the first run returned none of its 20 other pairs.
 A later adversarial review found that the second run had counted a shell bar as shown on sign-in and
@@ -646,7 +646,7 @@ subjects their tool yields as many workflows as their reference has entries, wit
 terminal routes on the six whose reference is written in the same form. A workflow claims a transition only
 when its trigger resolves to a navigation; otherwise their enumerator records the start route as the
 terminal, and such workflows are left out. Each claimed transition is paired with each of its start routes;
-for this extractor the pairs are the graph's edges with scopes expanded. The union is split per application
+for this extractor the pairs are the graph's edges with scopes expanded. Relative recall is a share of that union, not recall against all real pairs, and a tool that proposes many pairs enlarges the union it is measured against. The union is split per application
 into pairs both tools find and pairs only one finds, and an only-ours stratum of more than 1000 pairs into
 those only the shell reaches and the rest. Each stratum, or a seeded sample of 12 where it is larger, was
 read from the source without the reader being told which tool proposed a pair. Precision is a tool's share
@@ -679,7 +679,7 @@ Application & pairs & precision & recall & pairs & precision & recall \\
 \hhrow{realworld}{Realworld}
 \hhrow{alfresco}{Alfresco}
 \hhrow{ghostfolio}{Ghostfolio}
-\hhrow{k8sdash}{KEightsdash}
+\hhrow{k8s dashboard}{KEightsdash}
 \hhrow{bitwarden}{Bitwarden}
 \hhrow{mifos}{Mifos}
 \midrule
@@ -693,14 +693,14 @@ Application & pairs & precision & recall & pairs & precision & recall \\
 
 Table~\ref{tab:h2h} gives the point estimates. On their seven subjects the two tools are close: theirs finds
 \HHRimaTheirsRecall{} of the real pairs at \HHRimaTheirsPrecision{} precision, this extractor
-\HHRimaOursRecall{} at \HHRimaOursPrecision{}. On the five corpus applications other than mifos this extractor
+\HHRimaOursRecall{} at \HHRimaOursPrecision{}. On the five corpus applications other than mifos, a grouping formed after the results were read, this extractor
 finds \HHCorpusNoMifosOursRecall{} of the real pairs either finds, their tool \HHCorpusNoMifosTheirsRecall{},
-at similar precision (\HHCorpusNoMifosOursPrecision{} and \HHCorpusNoMifosTheirsPrecision{}). Setting each
+at precisions of \HHCorpusNoMifosOursPrecision{} and \HHCorpusNoMifosTheirsPrecision{}; the tools propose \HHCorpusNoMifosOursPairs{} and \HHCorpusNoMifosTheirsPairs{} pairs, of which an estimated \HHCorpusNoMifosOursReal{} and \HHCorpusNoMifosTheirsReal{} are real. Setting each
 stratum's real rate to the ends of its Wilson interval leaves these recalls apart:
 \HHCorpusNoMifosOursRecallRange{} against \HHCorpusNoMifosTheirsRecallRange{}. On mifos this extractor holds
-\HHMifosOursPairs{} pairs, most of them reached only from the shell (Section~\ref{sec:res-e2e}); its precision there is
+\HHMifosOursPairs{} pairs (theirs \HHMifosTheirsPairs{}, found by both \HHMifosBoth{}), most of them reached only from the shell (Section~\ref{sec:res-e2e}); its precision there is
 \HHMifosOursPrecision{} against \HHMifosTheirsPrecision{}, and the pooled corpus figures, which mifos decides,
-span \HHCorpusOursRecallRange{} against \HHCorpusTheirsRecallRange{} in recall, so they do not rank the tools.
+span \HHCorpusOursRecallRange{} against \HHCorpusTheirsRecallRange{} in recall, so the pooled comparison does not rank the tools. The intervals treat the sampled pairs as independent, although pairs cluster by site.
 Of the three preregistered predictions, the first (this extractor's recall on the corpus is the higher) holds
 at the point estimate, and its bounds separate only without mifos, a group formed after reading; the second (their precision on their subjects is at least this extractor's) and the
 third (their tool fails on some application) did not hold.
@@ -708,7 +708,7 @@ third (their tool fails on some application) did not hold.
 The readings follow the rules of the first comparison: \HHRead{} pairs, of which
 a stronger model re-read \HHGated{} and changed \HHGateChanged{}. I re-read a seeded sample of \HHAuthorSample{}
 of the readings behind the five-application figures, three per stratum, against the source, with the
-reading's verdict in view, so not blind; of the \HHAuthorJudged{} I judged, \HHAuthorAgree{} agreed with it. A first pass had also paired the start routes of workflows that do not navigate;
+reading's verdict in view, so not blind to it, and consistency with the model is not correctness; of the \HHAuthorJudged{} I judged, \HHAuthorAgree{} agreed with it (Wilson 95\,\% interval \HHAuthorAgreeRange{}). A first pass had also paired the start routes of workflows that do not navigate;
 it was withdrawn, its readings were re-used where its pairs remain, and 108 pairs new to the samples were
 read. The mifos estimates re-use those samples, restricted to the pairs that remain once moves across
 mounts are left out. Deviations from the preregistration are recorded with the results.
@@ -721,7 +721,7 @@ carry the earlier mutation figures, and bitwarden, whose routes carry many guard
 \HarnessVersionMutation{}, a fixed seed and a quota of eight mutants per operator. The corrections
 made to the mutation harness are listed in Table~\ref{tab:repairs}.
 
-Table~\ref{tab:mutsummary} gives the sample, the exclusions and the detections on the attributed graph and without attribution; Table~\ref{tab:mutation} gives the detection rate per operator and application, and Figure~\ref{fig:mutation} the outcomes summed over the applications.
+Table~\ref{tab:mutsummary} gives the sample, the exclusions and the detections on the attributed graph and without attribution; Table~\ref{tab:mutation} (Appendix~\ref{app:mutation}) gives the detection rate per operator and application, and Figure~\ref{fig:mutation} the outcomes summed over the applications.
 
 \begin{table}[t]\footnotesize
 \caption{Mutants sampled, excluded, scored and detected, with scope attribution on and off.}
@@ -747,15 +747,8 @@ Paired mutants, detected & \MutPairedDetected{}/\MutPaired{} & \MutPairedBaseDet
 \par\smallskip{\footnotesize\noindent\emph{Note.} An excluded mutant carries no information about sensitivity. All exclusions are guard removals: for the first kind no edge of the unmutated graph enters any screen the guarded route yields, and the second guards a route that declares neither a component nor children. \emph{Paired} counts the mutants both graphs can score. A dash means the figure is not reported for that graph. Operator rows are detected over scored.}
 \end{table}
 
-The rename operator is set aside first, because its detection is close to guaranteed by construction: a rename mutant is excluded unless the unmutated graph already holds a node for the segment it renames, and a screen is identified by its full path (Section~\ref{sec:model}). The other three operators are constrained in the same way. A deleted \texttt{routerLink} is sampled only on a line an edge of the unmutated graph cites. A retarget is generated only for a \texttt{navigate} call whose first element is a plain absolute string at a line the graph already cites. A guard removal is scored only where an edge already carries that guard and enters the guarded screen, so the guard rate is conditional on the graph entering it. The exclusions are few on the attributed graph but not on the graph without attribution. The samples are small (Section~\ref{sec:limitations}), so the pattern says more than the rate.
+The rename operator is set aside first, because its detection is close to guaranteed by construction: a rename mutant is excluded unless the unmutated graph already holds a node for the segment it renames, and a screen is identified by its full path (Section~\ref{sec:model}). The other three operators are constrained in the same way. A deleted \texttt{routerLink} is sampled only on a line an edge of the unmutated graph cites. A retarget is generated only for a \texttt{navigate} call whose first element is a plain absolute string at a line the graph already cites. A guard removal is scored only where an edge already carries that guard and enters the guarded screen, so the guard rate is conditional on the graph entering it. The exclusions are few on the attributed graph but not on the graph without attribution. The samples are small (Section~\ref{sec:limitations}), so the pattern says more than the rate. RQ4 is therefore a sanity check that witnesses map to source lines, not evidence that the graph detects the impact of a change: the test can fail only where the graph already cites the line, and the harness was corrected after its misses were read (Table~\ref{tab:repairs}). The one denominator used for the headline is the scored mutants, \MutDetected{}/\MutScored{}; the paired row counts only mutants both graphs can score.
 
-\begin{table}[t]\small
-\caption{Detection rate per mutation operator on the attributed graph.}
-\label{tab:mutation}
-\TabMutation
-\par\smallskip{\footnotesize\noindent\emph{Note.} Detected over scored mutants. A dash means the operator found no candidate in that application.}
-\end{table}
-\FigMutation
 
 Each guard removal is judged by whether some edge loses a guard the removed list names, and all \MutExcludedGuard{} guard exclusions are the condition above failing. One limit of the harness's matching of a class by the file its routing module imports it from shows in the run without attribution: realworld's
 \texttt{editor} route has two children, at the empty path and at \texttt{:slug}, that load the same
@@ -763,7 +756,7 @@ component file, so the harness cannot tell their screens apart. Without attribut
 and missed rather than excluded; that is the one paired disagreement, a limit of the
 harness, not of the graph.
 
-The mutation run neither confirms nor contradicts the defect class \emph{guards unreliable in both directions}; Chapter~\ref{ch:discussion} gives the reading. In this sample the graph responded to every scored change in the constructs it represents.
+The mutation run neither confirms nor contradicts the defect class \emph{guards unreliable in both directions}; Chapter~\ref{ch:discussion} gives the reading. In this sample the graph responded to every scored change (\MutDetected{}/\MutScored{}) in the constructs it represents, a result the construction makes close to certain.
 
 \section{What the losses were (RQ5)}
 \label{sec:res-round2}
@@ -778,6 +771,8 @@ The cause trace of Section~\ref{sec:metrics} defines the three outcomes used bel
 This section keeps two words apart: a \emph{class} is a row of Table~\ref{tab:defects}, and a
 \emph{cause} is what the source review found behind a class.
 
+RQ5 is answered in three parts, not by one claim that the loss was the tool's. That holds only for the classes found and fixed, which the first part lists; it is not shown for constructs in general. Constructs held at may by the application's own decisions (\MayAppAny{} of \MayOnlyConstructs{}, Table~\ref{tab:mayreasons}) are the application's. The lists below count causes, not constructs; the construct counts are those of Tables~\ref{tab:remaining} and~\ref{tab:round2acct}, where \AttrRemainingUnexplained{} of the \AttrRemaining{} remaining attribution constructs have no recorded reason.
+
 \paragraph{Read by the final version.} The information was in the source, so the loss was the
 tool's.
 
@@ -791,7 +786,7 @@ semantics (Section~\ref{sec:model}).
 \item Three forms that the end-to-end check exposed (Section~\ref{sec:res-e2e}, Table~\ref{tab:repairs}).
 \end{itemize}
 
-\paragraph{Still not read.} The final version does not read these causes.
+\paragraph{Still not read (open).} The final version does not read these causes.
 
 \begin{itemize}
 \item \emph{Attribution}: \AttrRecoveredShare{} of its constructs are recovered. The remainder is in
@@ -811,7 +806,7 @@ entries).
 \item ghostfolio's custom \texttt{UrlMatcher} computes a route's path in a function. No reader of a
 route table can resolve it, and both tools report it as a blind spot.
 \item mifos chooses between two route tables by a value injected at deployment, which the runtime
-method of Section~\ref{sec:res-probe} finds and the sources leave undecided.
+route oracle of Section~\ref{sec:res-probe} finds and the sources leave undecided.
 \end{itemize}
 
 The causes the final version reads fall into three groups. \emph{The route table was not reached:} a module loaded by
@@ -874,7 +869,7 @@ the destination its edge names; it does not ask whether the construct runs every
 lets the navigation through, which the demotion rules cover. Neither the source reading of the must tier (Section~\ref{sec:limitations}) nor the mechanical check is an
 independent proof of Claim~\ref{claim:must}.
 
-\paragraph{The whole graph.} Over the whole graph the check says much less. The \RoundTwoEdges{} edges cite \RoundTwoSites{} locations, and only \RoundTwoGraphClean{} are clean, because \RoundTwoOverApprox{} are over-approximations for which the check claims no target agreement. \RoundTwoTopFanoutShare{} of all edges (\RoundTwoTopFanoutEdges{}) come from one call site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, a \texttt{navigateByUrl} to a template literal with an empty static prefix. Of the \RoundTwoJudged{} locations the check judges, \RoundTwoJudgedClean{} are clean, and none of the rest is cited by a must edge. A precision figure for the must tier is not one for the graph.
+\paragraph{The whole graph.} Over the whole graph the check says much less. The \RoundTwoEdges{} edges cite \RoundTwoSites{} locations, and only \RoundTwoGraphClean{} are clean, because \RoundTwoOverApprox{} are over-approximations for which the check claims no target agreement. \RoundTwoTopFanoutShare{} of all edges (\RoundTwoTopFanoutEdges{}) come from one call site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, a \texttt{navigateByUrl} to a template literal with an empty static prefix. mifos holds \RoundTwoMifosEdgeShare{} of all edges, so figures pooled over the corpus are mostly mifos's. Of the \RoundTwoJudged{} locations the check judges, \RoundTwoJudgedClean{} are clean, and none of the rest is cited by a must edge. A precision figure for the must tier is not one for the graph.
 
 \paragraph{The node set.} Across the corpus the compared graph declares \ProbeInvented{} screens at
 addresses the framework mounts nothing at. Every address the extractor claims is an address the

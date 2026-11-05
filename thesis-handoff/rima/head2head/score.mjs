@@ -128,6 +128,7 @@ function main() {
       const r = rates(p[t], p.all)
       const T = t === 'theirs' ? 'Theirs' : 'Ours'
       m(`${g}${T}Pairs`, p[t].pairs)
+      m(`${g}${T}Real`, Math.round(p[t].real))
       m(`${g}${T}Precision`, pct(r.precision))
       m(`${g}${T}Recall`, pct(r.recall))
       m(`${g}${T}PrecisionRange`, `${pct(b[t].precision[0])}--${pct(b[t].precision[1])}`)

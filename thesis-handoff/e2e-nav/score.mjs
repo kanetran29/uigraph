@@ -212,7 +212,7 @@ for (const spec of a.app) {
   const r = score(dir)
   console.log(app, JSON.stringify(r, null, 1))
   const N = 'EtoE' + name(app)
-  for (const [k, v] of Object.entries({ Pairs: r.pairs, Ends: r.ends, Hit: r.hit, HitTop: r.hitTop, HitScreen: r.hit - r.hitTop, Redirect: r.redirect, HitRedirect: r.hitRedirect, Miss: r.miss, MissRedirect: r.missRedirect, MissBase: r.base, MissDynamic: r.dynamic, MissOther: r.other, MissBaseAny: r.baseAny, MissDynamicAny: r.dynamicAny, PairsAfterRedirects: r.pairsAfterRedirects, HitAfterRedirects: r.hitAfterRedirects, GraphPairs: r.graphPairs, PossiblePairs: r.possiblePairs }))
+  for (const [k, v] of Object.entries({ Pairs: r.pairs, Ends: r.ends, Hit: r.hit, HitTop: r.hitTop, HitScreen: r.hit - r.hitTop, Redirect: r.redirect, HitRedirect: r.hitRedirect, Miss: r.miss, MissRedirect: r.missRedirect, MissBase: r.base, MissDynamic: r.dynamic, MissOther: r.other, MissBaseAny: r.baseAny, MissDynamicAny: r.dynamicAny, PairsAfterRedirects: r.pairsAfterRedirects, HitAfterRedirects: r.hitAfterRedirects, GraphPairs: r.graphPairs, PossiblePairs: r.possiblePairs, ChanceHits: (r.pairs * r.graphPairs / r.possiblePairs).toFixed(1) }))
     tex += `\\newcommand{\\${N}${k}}{${v}}\n`
   for (const [v, x] of Object.entries(r.variants)) {
     tex += `\\newcommand{\\${N}Hit${name(v)}}{${x.hit}}\n`

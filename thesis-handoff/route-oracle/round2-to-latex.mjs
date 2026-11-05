@@ -753,7 +753,7 @@ mac('RoundTwoEdges', aE)
 mac('RoundTwoTopFanoutEdges', top ? top[1] : 0)
 mac('RoundTwoTopFanoutShare', top ? pc(top[1], aE) : '--')
 mac('RoundTwoTopFanoutApp', top ? NAME[top[0].split('\u0000')[0]] : '--')
-mac('RoundTwoTopFanoutSite', top ? `\\texttt{${tex(top[0].split('\u0000')[1].replace(/^.*\//, ''))}}` : '--')
+mac('RoundTwoTopFanoutSite', top ? `\\texttt{${tex(top[0].split('\u0000')[1].replace(/^.*\//, '')).replace(/([.-])/g, '$1\\allowbreak ')}}` : '--')
 const mifosEdges = rows.find((r) => r.s === 'mifos')?.b1?.edges ?? 0
 mac('RoundTwoMifosEdgeShare', pc(mifosEdges, aE))
 

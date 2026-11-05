@@ -29,19 +29,20 @@ and the other methods to all six.
 \begin{table}[t]\small
 \caption{The corpus: commit, route count and role in the study of each application.}
 \label{tab:corpus}
-\begin{tabularx}{\textwidth}{@{}lYrY@{}}
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}lllrY@{}}
 \toprule
-Application & Commit & Routes & Role in the study \\
+Application & Commit & Licence & Routes & Role in the study \\
 \midrule
-gothinkster/angular-realworld-example-app & \texttt{dd99ed2c} & \RoundTwoRoutesRealworld{} & size floor; all literal paths \\
-alfresco/alfresco-content-app & \texttt{b88d47f4} & \RoundTwoRoutesAlfresco{} & 87 Playwright specs including a navigation suite \\
-ghostfolio/ghostfolio & \texttt{9884fa0b} & \RoundTwoRoutesGhostfolio{} & constant-valued route paths; self-hostable \\
-kubernetes/dashboard & \texttt{0ba796d9} & \RoundTwoRoutesKdash{} & mid-size control \\
-bitwarden/clients (web) & \texttt{e40ce6f0} & \RoundTwoRoutesBitwarden{} & many guards, guard factories among them \\
-openMF/web-app & \texttt{7f781796} & \RoundTwoRoutesMifos{} & size ceiling \\
+gothinkster/angular-realworld-example-app & \texttt{dd99ed2c} & MIT & \RoundTwoRoutesRealworld{} & size floor; all literal paths \\
+alfresco/alfresco-content-app & \texttt{b88d47f4} & LGPL-3.0 & \RoundTwoRoutesAlfresco{} & 87 Playwright specs including a navigation suite \\
+ghostfolio/ghostfolio & \texttt{9884fa0b} & AGPL-3.0 & \RoundTwoRoutesGhostfolio{} & constant-valued route paths; self-hostable \\
+kubernetes/dashboard & \texttt{0ba796d9} & Apache-2.0 & \RoundTwoRoutesKdash{} & mid-size control \\
+bitwarden/clients (web) & \texttt{e40ce6f0} & GPL-3.0$^{\ddagger}$ & \RoundTwoRoutesBitwarden{} & many guards, guard factories among them \\
+openMF/web-app & \texttt{7f781796} & MPL-2.0 & \RoundTwoRoutesMifos{} & size ceiling \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} Routes are the route entries reached by the independent route parser of Section~\ref{sec:protocol}, as it stands in the final version (Section~\ref{sec:res-round2}). A count marked $\geq$ is a lower bound: the parser records a blind spot for that application, so the entries behind it are not in the figure; Table~\ref{tab:coverage} gives how many blind spots each application has. The marks are on \RoundTwoLowerBoundWhere{}, on these grounds: \RoundTwoLowerBoundReasons{}.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Licences are read from the local checkouts (confirm at the pinned commits); $^{\ddagger}$the \texttt{bitwarden\_license/} directory is under the Bitwarden License. Routes are the route entries reached by the independent route parser of Section~\ref{sec:protocol}, as it stands in the final version (Section~\ref{sec:res-round2}). A count marked $\geq$ is a lower bound: the parser records a blind spot for that application, so the entries behind it are not in the figure; Table~\ref{tab:coverage} gives how many blind spots each application has. The marks are on \RoundTwoLowerBoundWhere{}, on these grounds: \RoundTwoLowerBoundReasons{}.}
 \end{table}
 
 
@@ -59,7 +60,10 @@ Kalliamvakou et al.\ recommend filtering candidate repositories by explicit crit
 them \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, which the selection above does. The
 remaining threats are external validity (open-source applications may differ from proprietary ones)
 and a possible selection bias, since I selected the corpus and wrote the extractor; the departures
-from the criteria are the two stated above. The corpus spans nearly two orders of magnitude in
+from the criteria are the two stated above. Selection was not blind to the tool: one candidate was
+rejected on a ground added after screening began, the extractor's own support. Pooled percentages
+are dominated by the largest application, mifos, so per-application figures are the primary summary
+where the chapters give them. The corpus spans nearly two orders of magnitude in
 routes, and the commits and harness are released so the measurement can be repeated.
 
 A further threat is not addressed by this. The extractor was developed on this corpus and is measured
@@ -82,7 +86,7 @@ share of navigation constructs that yield at least one must transition. For RQ2,
 grouped into defect classes, a class being accepted only on two lines of evidence, at least one from an
 evaluation method of Section~\ref{sec:protocol}, and every construct not recovered is assigned to one loss
 category. RQ3 is measured with the analysis disabled and enabled on the same extractor, and by the references below.
-RQ4 is measured by mutation testing. For RQ5 each defect class of Table~\ref{tab:defects} is traced to its
+RQ4 is a sanity check of witness mapping by mutation testing, not an independent test. For RQ5 each defect class of Table~\ref{tab:defects} is traced to its
 cause in the source and recorded as read by the final version (the loss was the tool's and not the
 application's), still unread although a static reader could, or beyond a static reader of a route
 table; the result is a list of causes, not a ratio, and every site that still yields no transition
@@ -237,7 +241,9 @@ plain suite pass and fail the same tests, that at least ten distinct pairs are o
 second instrumented run observes the same pair set. The check measures recall on the transitions
 the suite exercises and nothing else. The graph is an over-approximation, so that recall is
 containment, and its weight depends on how many (screen, screen) pairs the graph holds, which is
-reported beside it. A graph edge no test takes is not an error, so the check cannot measure
+reported beside it: realworld's graph holds \EtoERealworldGraphPairs{} of \EtoERealworldPossiblePairs{} possible pairs
+and mifos's \EtoEMifosGraphPairs{} of \EtoEMifosPossiblePairs{}, against hits of \EtoERealworldHit{} of \EtoERealworldPairs{} and \EtoEMifosHit{} of \EtoEMifosPairs{}. A hit
+rate is read only against that share, since a denser graph contains more pairs by chance; by chance alone the graphs would hold \EtoERealworldChanceHits{} and \EtoEMifosChanceHits{} of those pairs. A graph edge no test takes is not an error, so the check cannot measure
 precision, and one run cannot refute a must edge.
 
 \textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness cites it. A
@@ -317,7 +323,10 @@ the attribution's output alone, namely the two structural references, the applic
 the comparison with Rima et al.'s tool (Section~\ref{sec:res-earlier}). The must tier's precision bounds
 are reported for both runs, but they cover different sets of must edges and are not compared as rates.
 
-\textbf{Detection rate (RQ4).} The detection rate is the fraction of injected source changes
+\textbf{Detection rate (RQ4).} This is a sanity check of the mapping from a source change to its
+witness in the graph, not evidence of change-impact detection. It is close to guaranteed by
+construction, since the sample is drawn from the graph, and the harness was tuned on its misses
+(Section~\ref{sec:corrections}). The detection rate is the fraction of injected source changes
 that produce the predicted change in the graph, reported per mutation operator with its $n$. A
 change whose construct the graph does not contain is excluded and not counted as a miss, since it
 can only repeat a recovery gap that the loss tables measure. The rate is therefore conditional on
@@ -428,6 +437,8 @@ may differ. \MutEarlierFailuresAbsent{} of the \MutEarlierFailures{} misses that
 location of the final sample.
 
 Appendix~\ref{app:corrections} lists every correction, one row each, in Table~\ref{tab:repairs}.
+
+\textbf{Availability.} The extractor and harness are in the accompanying repository under the MIT licence [author: archive DOI; a repository URL would name the extractor]. Rima et al.'s tool was run from its public repository at commit \texttt{f33003f}; it carried no licence when checked [author: confirm, per rima/PREREGISTRATION.txt:27], so it is not redistributed.
 
 \subsection{Reproducibility}
 \label{sec:reproducibility}
