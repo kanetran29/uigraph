@@ -36,6 +36,7 @@ sections according to both distinctions.
 \begin{table}[t]\small
 \caption{Prior work closest to this thesis, by target, extraction mode, guard representation and evaluation basis.}
 \label{tab:rw}
+\setlength{\tabcolsep}{4pt}
 \begin{tabularx}{\textwidth}{@{}lYlll@{}}
 \toprule
 Work & Target & Static & Guards & Evaluation basis \\
@@ -54,7 +55,7 @@ FeedEx, FRAGGEN \cite{feedex2013,fraggen2022} & DOM states & \xmark & \xmark & c
 Kurant \cite{kurant2025} & React components & \checkmark & n/a & F1, no routing \\
 Oshima and Kishi \cite{oshima2018model} & Angular pages & \checkmark & \xmark & 6 apps, faults \\
 Rima et al.\ \cite{rima2026e2e} & Angular workflows & \checkmark & conditions & 7 apps, tests run \\
-Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & \checkmark & \xmark & 4 apps, vs.\ ZAP \\
+Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & \checkmark & \xmark & 4 apps (2 SPA), vs.\ ZAP \\
 \bottomrule
 \end{tabularx}
 \par\smallskip{\footnotesize\noindent\emph{Note.} Evaluation basis is a reference, a metric or the tool compared with, as each work states it.}
@@ -99,12 +100,13 @@ application as a set of pages, frames and forms connected by links and form
 submissions. Their model includes conditional edges that carry a boolean condition on
 input values, and was derived semi-automatically with a crawler and
 annotations by an analyst \cite{riccatonella2001}. WebUml recovers a state diagram from
-Hypertext Markup Language (HTML), script and server-side pages, deriving guards by control-flow analysis of the server
-code \cite{webuml2004}. A patent assigned to Fujitsu describes a fully static method
+Hypertext Markup Language (HTML), script and server-side pages by static analysis combined with
+runs against the server, deriving guards by control-flow analysis of the server code
+\cite{webuml2004}. A patent assigned to Fujitsu describes a fully static method
 for extracting a navigation model from Struts and JSP sources \cite{tkachuk2013patent}. For verification, SiteHopper builds abstracted
 navigation state machines on the fly for model checking \cite{sitehopper2013}.
 
-This work shows that navigation models, including guards, have been extracted statically from web applications. The models reviewed in this section all concern server-rendered frameworks, where a page corresponds to a file and a link to an anchor element. None of them deals with a client-side router, a component tree, or
+This work shows that navigation models, including guards, have been extracted from web applications with the help of a crawler or of runs against the server, and that a fully static method has been described in a patent. The models reviewed in this section all concern server-rendered frameworks, where a page corresponds to a file and a link to an anchor element. None of them deals with a client-side router, a component tree, or
 dependency injection. Section~\ref{sec:dynamic-spa} turns to the work that does.
 
 \section{Dynamic state models for single-page applications}
@@ -145,8 +147,8 @@ Section~\ref{sec:res-ablation} measures that combination, as the \emph{rooted} l
 of the analysis presented here (the levels are defined in Section~\ref{sec:metrics}).
 
 What distinguishes the present work is the input the method accepts and what it claims
-about its output. The authors state that the applications they handle must not use the
-\texttt{children} attribute or route parameters in the routing declarations. They also state that
+about its output. The authors list restrictions on the applications they handle, among them that the
+routing declarations must not use the \texttt{children} attribute or route parameters. They also state that
 changes arising from data binding are not treated as page transitions. Those exclusions
 remove nested route trees and parameterised addresses. How the method treats a navigation whose
 destination is an expression rather than a literal is not stated in the paper, and it is not
@@ -184,8 +186,9 @@ not follow a call into a service, so a navigation inside a service member is not
 screens of its callers. Zhang et al.\ parse
 the compiled JavaScript bundle rather than the sources, taking declared routes as vertices and
 navigation calls as edges, and check an access-control policy against the screens reachable
-from an authorised one. Their graph is declared an over-approximation and is not narrowed; no
-navigation site is attributed to the screens it can fire from, and guards are not represented
+from an authorised one. Two of their four subjects are multi-page applications, which are crawled instead. The graph is declared an over-approximation
+and is not narrowed. The paper does not describe how the source screen of a navigation call is
+determined, and guards appear only as runtime conditions the graph does not model
 \cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth built by hand for the applications they
 study. Neither work classifies the losses by
 construct or measures them across a corpus. The
@@ -592,9 +595,9 @@ this thesis found three static extractions of a client-side navigation graph, tw
 framework's own sources and one from a compiled bundle, each
 building its graph for a different consumer. Oshima and Kishi's is the one that fixes the
 terms of the problem addressed here
-(Section~\ref{sec:dynamic-spa}). It does so, however, only for
-applications that declare no nested routes, no route parameters and no data-bound
-navigation. Its attribution is computed over component containment and the root component's
+(Section~\ref{sec:dynamic-spa}). It does so, however, under stated restrictions, among them that the routing
+declarations use no \texttt{children} attribute and no route parameters, and it does not treat
+data-binding changes as page transitions. Its attribution is computed over component containment and the root component's
 own paths. It puts no modality
 on the transitions. It makes no measurement of what the extraction fails to read. The other
 two put the graph to work without narrowing it. One uses it as the coverage denominator of a

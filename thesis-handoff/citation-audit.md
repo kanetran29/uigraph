@@ -47,6 +47,8 @@ Vue Router 5.3.1 and Stryker pages all check out. `johnson1988reusable` could no
 
 ## Claims to fix: overstated, wrong or unverifiable
 
+**Status (5 Nov 2026):** items 1–7 are fixed in the commit that adds this line, after an Opus review of the wording that also caught the uncited restatement at ch2:597, the lazy-loading claim at ch1:90 and the WebUml/patent wording. Item 8 (AI-use statement) is the author's to change. Items 9–10 are open.
+
 Ordered by importance. The locations are where the sentence starts.
 
 1. **ch1-introduction.tex:45–46 (Oshima and Kishi).** "accepting only applications that declare no

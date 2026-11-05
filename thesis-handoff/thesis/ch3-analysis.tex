@@ -377,8 +377,9 @@ $\mathit{subtree}(r)$. A named outlet carries a second mount, which makes auxili
 representable without separate treatment.
 \item \emph{Call graph with dependency injection.} A call links to a method only after resolving
 the receiver's type and its binding in the relevant injector. Resolution follows class hierarchy
-analysis \cite{dean1995cha}, with Angular's provider declarations as the source of bindings, as
-recommended for framework-heavy code \cite{antoniadis2020enterprise}. Where a token admits
+analysis \cite{dean1995cha}. Angular's provider declarations are modelled explicitly as the source
+of bindings, as the framework-modelling literature recommends
+\cite{sridharan2011f4f,antoniadis2020enterprise}. Where a token admits
 several implementations the analysis joins over all of them, which is one source of \emph{may}
 modality.
 \item \emph{Dispatch relations.} A dispatch is treated as a call-graph edge from every

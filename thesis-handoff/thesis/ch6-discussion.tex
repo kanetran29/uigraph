@@ -173,8 +173,9 @@ Type-directed steps such as narrowing an injected receiver are weaker.
 Mutation experiment
 & Small samples per operator, in single digits for several operator and application pairs.
 The exclusion rule uses the graph itself, which couples the sample to the tool's own recovery.
-& Mutants were drawn with a seeded quota, so the pattern of which operators are detected is more
-trustworthy than the rates \cite{papadakis2019mutation}.
+& Mutants were drawn with a seeded quota, and operator choice is known to affect mutation
+results \cite{papadakis2019mutation}. This thesis therefore reads the pattern of which operators
+are detected as more trustworthy than the rates.
 The excluded mutants are reported.
 & The sample is not independent of the artefact under test. \\
 Test-source cross-check
@@ -638,7 +639,7 @@ placeholder where the matched child is inserted. The components above the placeh
 form a shell that is present on every child screen, so the scopes $\top$ and
 $\mathit{subtree}(r)$ have the same meaning.
 
-The call graph is easier in React and Vue, because a hook or composable gives every navigation site an owning component and no injector needs to be resolved. Code that imports the router instance directly is the analogue of Angular's service case and can be resolved by ordinary import resolution, as in the JavaScript call graphs of Feldthaus et al.\ \cite{feldthaus2013jscg}.
+The call graph is easier in React and Vue, because a hook or composable gives every navigation site an owning component and no injector needs to be resolved. Code that imports the router instance directly is the analogue of Angular's service case and can be resolved by ordinary import resolution.
 
 Redirects do not transfer, and the asymmetry was found by porting the model's reading. Angular's validator refuses a route that declares
 \texttt{redirectTo} beside \texttt{children} or a \texttt{component}.
@@ -694,8 +695,9 @@ Chapter~\ref{ch:analysis} specifies two things the prototype leaves out.
 \item The injector hierarchy that the implemented call graph reads past, since it takes every
 provider binding as applying application-wide (Section~\ref{sec:approximations}). Reading
 bindings relative to the injector that resolves them would narrow the scopes, and the fixpoint
-already covers it. The call graph follows class hierarchy analysis in the style the
-framework-modelling literature recommends \cite{dean1995cha,sridharan2011f4f,antoniadis2020enterprise}.
+already covers it. The call graph follows class hierarchy analysis \cite{dean1995cha}. It models the provider
+declarations explicitly, as the framework-modelling literature recommends
+\cite{sridharan2011f4f,antoniadis2020enterprise}.
 \end{itemize}
 Guards that return a \texttt{UrlTree} belong to the same group, since a redirecting guard is itself
 a navigation site and not only a label.

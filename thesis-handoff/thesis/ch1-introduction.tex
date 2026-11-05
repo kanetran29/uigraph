@@ -29,9 +29,10 @@ For Android, static extraction is a well-established technique. The window trans
 graph work derives windows and the transitions between them from bytecode. It also
 resolves the control flow of callbacks to the widget that registered each handler
 \cite{yang2015wtg,yang2015callbacks,yang2018wtg}. For the web, navigation models have
-been extracted statically from server-rendered frameworks, in which pages and links
-are declared in templates and configuration files
-\cite{riccatonella2001,webuml2004,tkachuk2013patent}. Modern single-page applications,
+been extracted from server-rendered frameworks, in which pages and links are declared in
+templates and configuration files, with the help of a crawler or of runs against the server
+\cite{riccatonella2001,webuml2004}; a patent describes a fully static method
+\cite{tkachuk2013patent}. Modern single-page applications,
 however, have almost always been modelled by executing them. Crawljax builds its state
 flow graph by firing events against the Document Object Model (DOM) of a running application
 \cite{crawljax2012}. Later tools in the same line improve the exploration strategy
@@ -42,8 +43,9 @@ builds that model by executing the application. Static analyses of a modern clie
 builds a component dependency graph for React and does not address routing
 \cite{kurant2025}. Three extract navigation, each for a different consumer:
 \begin{itemize}
-\item one from Angular in order to model-check it, accepting only applications that declare no
-nested routes, no route parameters and no data-bound navigation \cite{oshima2018model};
+\item one from Angular in order to model-check it, under stated restrictions, among them that the
+application declare no nested routes and no route parameters, and without treating data-binding changes as page
+transitions \cite{oshima2018model};
 \item one from Angular sources in order to enumerate the workflows a generated end-to-end suite
 should cover \cite{rima2026e2e};
 \item one from the compiled JavaScript bundle of a single-page application in order to check an
@@ -87,8 +89,8 @@ questions asked here are empirical. They ask how much of the navigation in real 
 recovers, where it fails, and whether the resulting graph responds to a change in the
 source. The extractor is an open-source static analyser for Angular built in this
 thesis. It is part of the contribution, not an existing tool. It reads nested, parameterised and
-lazily loaded route trees, which an earlier Angular extraction excludes by its stated
-restrictions (Section~\ref{sec:res-earlier}). It also implements scope attribution. Its development
+lazily loaded route trees; the stated restrictions of an earlier Angular extraction exclude the
+first two (Section~\ref{sec:res-earlier}). It also implements scope attribution. Its development
 versions and the corrections between them are listed in Section~\ref{app:repairs}. Because the same person built the
 tool and measured it, on the same corpus, the figures describe what this extractor recovers on
 these applications. Section~\ref{sec:limitations} discusses what that means for them.
