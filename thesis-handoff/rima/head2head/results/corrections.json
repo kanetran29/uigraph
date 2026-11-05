@@ -1,0 +1,4 @@
+{
+ "_note": "Readings supplied or corrected by hand after the gate, each checked against the source. The mifos pair below was judged under a mistyped start screen (transactions/:id/edit instead of charges); the reader's and the gate's evidence is about the target, which no code navigates to: the shell's notifications tray (notifications-tray.component.ts:198) goes to an account view's root, and no other navigation names a loan's transfer-funds/create-standing-instructions.",
+ "mifos|/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/charges|/groups/:groupId/loans-accounts/:loanId/transfer-funds/create-standing-instructions": { "verdict": "spurious", "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:198", "reason": "On the charges screen the shell's tray navigates only to an account view's root; nothing navigates to a loan's create-standing-instructions screen." }
+}

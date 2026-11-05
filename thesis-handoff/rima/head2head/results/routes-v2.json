@@ -1,0 +1,80 @@
+{
+ "posts-users-ui-ng": {
+  "theirs": 7,
+  "byPath": 7,
+  "byDecl": 7,
+  "ours": 7
+ },
+ "heroes-angular": {
+  "theirs": 3,
+  "byPath": 3,
+  "byDecl": 3,
+  "ours": 3
+ },
+ "airbus-inventory": {
+  "theirs": 6,
+  "byPath": 6,
+  "byDecl": 6,
+  "ours": 6
+ },
+ "spring-petclinic-angular": {
+  "theirs": 23,
+  "byPath": 22,
+  "byDecl": 22,
+  "ours": 22
+ },
+ "ever-traduora": {
+  "theirs": 19,
+  "byPath": 18,
+  "byDecl": 18,
+  "ours": 18
+ },
+ "angular-jumpstart": {
+  "theirs": 8,
+  "byPath": 8,
+  "byDecl": 8,
+  "ours": 8
+ },
+ "event-booking-mean": {
+  "theirs": 6,
+  "byPath": 6,
+  "byDecl": 6,
+  "ours": 6
+ },
+ "realworld": {
+  "theirs": 11,
+  "byPath": 10,
+  "byDecl": 10,
+  "ours": 10
+ },
+ "alfresco": {
+  "theirs": 30,
+  "byPath": 25,
+  "byDecl": 25,
+  "ours": 26
+ },
+ "ghostfolio": {
+  "theirs": 88,
+  "byPath": 0,
+  "byDecl": 82,
+  "ours": 84
+ },
+ "k8sdash": {
+  "theirs": 39,
+  "byPath": 37,
+  "byDecl": 37,
+  "ours": 67
+ },
+ "bitwarden": {
+  "theirs": 99,
+  "byPath": 40,
+  "byDecl": 76,
+  "ours": 98
+ },
+ "mifos": {
+  "theirs": 89,
+  "byPath": 18,
+  "byDecl": 119,
+  "ours": 605
+ }
+}
