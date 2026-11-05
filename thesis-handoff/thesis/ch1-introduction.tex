@@ -1,13 +1,8 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-A user interface (UI) transition graph is a model of an application in which the nodes
-are the screens a user can see and the edges are the transitions a user action can
-cause between them. For each edge, the graph records the event that triggers it, the
-condition under which the transition is available, and the screen it leads to. A graph
-of this kind makes it possible to answer questions that are difficult to answer from
-the code alone, for example which screens are reachable from a given screen, or which
-parts of the user interface are affected when a particular component changes.
+A user interface (UI) transition graph is a model of an application. The nodes are the screens a user can see, and the edges are the transitions a user action can cause between them. For each edge, the graph records the event that triggers it, the
+condition under which the transition is available, and the screen it leads to. A graph of this kind makes it possible to answer questions that are difficult to answer from the code alone. One example is which screens are reachable from a given screen. Another is which parts of the user interface are affected when a particular component changes.
 
 Transition graphs have been used in automated testing for a long time. In the Android
 domain they are used for test generation and for guiding exploration
@@ -17,27 +12,21 @@ useful for change impact analysis \cite{arnold1993impact,bohner1996software}, be
 each transition can be traced back to the code that implements it, and from there to
 the tests that cover it.
 
+This chapter explains why a static transition graph for single-page applications is worth measuring
+and what is not yet known about it. It then states the research questions and the limits of scope, and
+ends with the structure of the thesis.
+
 \section{Motivation}
 
 There are two general ways to obtain a transition graph. A dynamic approach executes
 the application and records the states and transitions it observes. A static approach
-reads the source code and derives the graph without running anything. Their limitations differ. A dynamically built graph contains only the
-states the crawler managed to reach, which depends on the available test data,
-authentication, and the exploration budget, and the graph has to be rebuilt for every
-new version. A statically built graph covers everything the source declares and can be
-recomputed on each commit without a running system, but it is limited to what can be
-decided from the source, and it must over-approximate wherever a target cannot be
-resolved.
+reads the source code and derives the graph without running anything. Their limitations differ. A dynamically built graph contains only the states the crawler managed to reach. Which states those are depends on the available test data, authentication, and the exploration budget. The graph also has to be rebuilt for every new version. A statically built graph covers everything the source declares. It can be recomputed on each commit without a running system. It is limited, however, to what can be decided from the source, and it must over-approximate wherever a target cannot be resolved.
 
-The two limitations complement each other. Applications of the kind studied here are mostly used
-signed in, so much of their navigation runs behind an authentication guard whose outcome only a
-running system decides, while a crawler reaches only the states its data and credentials open. A
-static graph can name the screens and candidate transitions a crawler should look for and the
-guards each waits on, and a run can confirm which of them occur. This thesis measures the static
+The two limitations complement each other. Applications of the kind studied here are mostly used signed in. Much of their navigation therefore runs behind an authentication guard whose outcome only a running system decides. A crawler, for its part, reaches only the states its data and credentials open. A static graph can name the screens and candidate transitions a crawler should look for, and the guards each waits on. A run can confirm which of them occur. This thesis measures the static
 side; the combination is discussed in Section~\ref{sec:future} and is not measured.
 
 For Android, static extraction is a well-established technique. The window transition
-graph work derives windows and the transitions between them from bytecode, and
+graph work derives windows and the transitions between them from bytecode. It also
 resolves the control flow of callbacks to the widget that registered each handler
 \cite{yang2015wtg,yang2015callbacks,yang2018wtg}. For the web, navigation models have
 been extracted statically from server-rendered frameworks, in which pages and links
@@ -45,7 +34,7 @@ are declared in templates and configuration files
 \cite{riccatonella2001,webuml2004,tkachuk2013patent}. Modern single-page applications,
 however, have almost always been modelled by executing them. Crawljax builds its state
 flow graph by firing events against the Document Object Model (DOM) of a running application
-\cite{crawljax2012}, and later tools in the same line improve the exploration strategy
+\cite{crawljax2012}. Later tools in the same line improve the exploration strategy
 without changing where the model comes from \cite{feedex2013,fraggen2022}. A survey of web
 testing covering 2014 to 2025 collects the model-based tools of the past decade
 \cite{websurvey2025}. Of the tools it lists, every one whose model construction was examined for this thesis
@@ -63,16 +52,16 @@ access-control policy against the screens it can reach \cite{zhang2025veriflow}.
 Section~\ref{sec:dynamic-spa} compares them with the work reported
 here.
 
-When the dynamic approach was developed, a single-page application had no declarative route table, so its navigation had no explicit representation in the source and was hard to recover from it, and the DOM was the observable the tools used (Section~\ref{sec:dynamic-spa}). Client-side routing frameworks changed this. Angular,
-React Router and Vue Router all declare routes as data in the source code, connect
-navigation to those routes through template attributes and service calls, and attach
-guards to routes as named functions \cite{angulardocs}. The artefact needed for static analysis now exists, but how well static extraction works on real applications built with these frameworks, and where it fails, has been measured only against hand-built references on the applications each work evaluated, and not construct by construct.
+When the dynamic approach was developed, a single-page application had no declarative route table. Its navigation therefore had no explicit representation in the source and was hard to recover from it. The DOM was the observable the tools used (Section~\ref{sec:dynamic-spa}). Client-side routing frameworks changed this. Angular,
+React Router and Vue Router all declare routes as data in the source code. They connect
+navigation to those routes through template attributes and service calls. They also attach
+guards to routes as named functions \cite{angulardocs}. The artefact needed for static analysis now exists. How well static extraction works on real applications built with these frameworks, and where it fails, has been measured only against hand-built references on the applications each work evaluated. It has not been measured construct by construct.
 
 A statically extracted graph also has consumers outside model-based testing. Tools that
 drive a graphical user interface (GUI) with a large language model either explore an application
 without a model of its navigation structure or build one by exploring it. GPTDroid treats mobile GUI testing as a
 question-and-answer loop, passing the current screen to the model and replaying the
-action it returns, and reports higher activity coverage and more bugs than the best
+action it returns. It reports higher activity coverage and more bugs than the best
 baseline on 93 applications \cite{liu2024make}. AutoDroid gives the model
 application-specific knowledge in addition to its commonsense knowledge, held as a UI
 transition graph that it builds by automated dynamic exploration offline
@@ -82,27 +71,27 @@ the model to guide exploration towards coverage the test run has not reached
 has been applied to web interfaces with a vision-language model and curiosity-driven
 exploration \cite{wang2024leveraging}, and a survey of large language models in
 software testing covers the wider area \cite{wang2024software}. Coding agents working on
-a repository may also benefit from structure of this kind: the SWE-bench issues typically
-require coordinated edits across functions, classes and files \cite{jimenez2024swebench},
-and agent performance depends on the interface through which the repository is navigated
-\cite{yang2024sweagent}. Whether a navigation graph helps such tools is not tested here;
-these uses motivate the extraction but do not depend on the results of this thesis.
+a repository may also benefit from structure of this kind. The SWE-bench issues typically
+require coordinated edits across functions, classes and files \cite{jimenez2024swebench}.
+Agent performance also depends on the interface through which the repository is navigated
+\cite{yang2024sweagent}. Whether a navigation graph helps such tools is not tested here.
+These uses motivate the extraction but do not depend on the results of this thesis.
 
-This thesis builds a static extractor for Angular, carries out that measurement with it, and
-proposes an analysis for the largest loss it finds under the order of its loss rules. The analysis,
-scope attribution, is stated as a dataflow analysis over a lattice of screen sets, and nothing in
+This thesis builds a static extractor for Angular and carries out that measurement with it.
+It also proposes an analysis for the largest loss it finds under the order of its loss rules. The analysis,
+scope attribution, is stated as a dataflow analysis over a lattice of screen sets. Nothing in
 its formulation depends on this extractor.
 
 A method of this kind cannot be assessed without being instantiated, because the
-questions asked here are empirical: how much of the navigation in real applications it
+questions asked here are empirical. They ask how much of the navigation in real applications it
 recovers, where it fails, and whether the resulting graph responds to a change in the
 source. The extractor is \emph{uigraph}, an open-source static analyser for Angular built in this
-thesis. It is part of the contribution, not an existing tool: it reads nested, parameterised and
+thesis. It is part of the contribution, not an existing tool. It reads nested, parameterised and
 lazily loaded route trees, which an earlier Angular extraction excludes by its stated
-restrictions (Section~\ref{sec:res-earlier}), and it implements scope attribution. Its development
+restrictions (Section~\ref{sec:res-earlier}). It also implements scope attribution. Its development
 versions and the corrections between them are listed in Appendix~\ref{app:repairs}. Because the same person built the
 tool and measured it, on the same corpus, the figures describe what this extractor recovers on
-these applications; Section~\ref{sec:limitations} discusses what that means for them, and
+these applications. Section~\ref{sec:limitations} discusses what that means for them.
 Chapter~\ref{ch:discussion} separates the limits of the method from those of this
 implementation.
 
@@ -110,7 +99,7 @@ implementation.
 \label{sec:rqs}
 
 The thesis addresses five research questions (RQs). This section states what each asks and how it
-is answered; the exact measures are defined in Section~\ref{sec:metrics}, and the answers are
+is answered. The exact measures are defined in Section~\ref{sec:metrics}. The answers are
 given in Chapter~\ref{ch:results}.
 
 \medskip\noindent\textbf{RQ1.} \emph{How much of the navigation in Angular
@@ -124,7 +113,7 @@ constructs in the source that yield at least one deterministic (\emph{must}) tra
 \medskip\noindent\textbf{RQ2.} \emph{Where does static extraction fail, and why?}
 
 \noindent The observed failures are grouped into defect classes. A class is accepted only if
-at least two lines of evidence confirm it, and at least one of them must come from an
+at least two lines of evidence confirm it. At least one of them must come from an
 evaluation method of Section~\ref{sec:protocol}. Each construct that is not recovered is
 assigned to one loss category, so the categories can be compared by size.
 
@@ -162,7 +151,7 @@ The thesis has the following limits of scope.
 \begin{itemize}
 \item It does not claim completeness. Where a navigation target is computed at run time, the
   transitions cannot in general be determined statically. The thesis instead states a
-  soundness property over a declared scope and lists what it approximates, following the
+  soundness property over a declared scope and lists what it approximates. This follows the
   soundiness position (Section~\ref{sec:soundiness}). The property is tested, not proved.
 \item It does not measure the effect of the graph on coding agents or any other consumer.
 \item The screen sets that scope attribution computes are compared in both directions on two applications only, against references that apply the analysis's own relations.
@@ -180,19 +169,19 @@ Figure~\ref{fig:overview} shows how the parts of the study fit together.
 
 
 Chapter~\ref{ch:background} presents the background. It introduces the terminology
-used for transition graphs in different research communities, reviews static
+used for transition graphs in different research communities. It reviews static
 extraction for Android, navigation models for web applications and dynamic state
-models for single-page applications, and describes the Angular mechanisms the analysis
-has to handle together with the program analysis ideas it builds on.
+models for single-page applications. It also describes the Angular mechanisms the analysis
+has to handle, together with the program analysis ideas it builds on.
 Chapter~\ref{ch:analysis} presents the graph model and its soundness claim, the scope
-attribution analysis proposed as a modest extension, and its implementation; the measurement,
+attribution analysis proposed as a modest extension, and its implementation. The measurement,
 which is the main contribution, is set up in Chapter~\ref{ch:evaluation} and reported in
 Chapter~\ref{ch:results}.
 Chapter~\ref{ch:evaluation} describes the evaluation setup: the corpus and why it can
 be considered valid, the metrics, and the five evaluation methods.
-Chapter~\ref{ch:results} presents the results for each research question: the two levels of loss (RQ1), the defect classes (RQ2), scope attribution and what it recovers (RQ3), change sensitivity (RQ4) the causes of the losses and the soundness of the must tier (RQ5), followed by the dead-link candidates the graph finds statically, each checked against the route configuration the runtime route oracle recorded.
+Chapter~\ref{ch:results} presents the results for each research question. These are the two levels of loss (RQ1), the defect classes (RQ2), scope attribution and what it recovers (RQ3), change sensitivity (RQ4), and the causes of the losses and the soundness of the must tier (RQ5). The chapter then reports the dead-link candidates the graph finds statically. Each is checked against the route configuration the runtime route oracle recorded.
 Appendix~\ref{app:validation} lists the development versions of uigraph and the corrections between
-them, and holds the validation of the measuring instruments: the
+them. It also holds the validation of the measuring instruments. This covers the
 disagreements between the two static readers, how the declared-screen set moved under the
 corrections, the case-by-case account of asking the running framework, and the record that
 every remaining site names a reason, recorded rather than verified. It is kept apart from the

@@ -142,6 +142,14 @@ supersedes every older section where they disagree.
   precision drop; the shell sentence corrected ("all but at most one" pair; shell filled through the extension
   registry); displayPreview (an undetermined site placed on every screen at full and class) disclosed; ch3/ch4 "one
   application" updated; macro stamps regenerated clean. Abstract trimmed by one method clause to stay on one page.
+- **Readability pass (supervisor 4 Nov: "split such sentences ... one idea per sentence"):** 7 Sonnet agents proposed
+  374 sentence splits in ch1-ch7 (appendix not done); a script applied them only where macros, refs/cites/labels,
+  digits, math and hedge-word counts were unchanged (5 rejected). An Opus gate checked all ch5/ch7 edits and a sample
+  (7 drifts of 154 fixed); 5 Sonnet agents then checked the other 225 (5 drifts fixed: 2 claim-level in ch6). Macros,
+  refs and digits per chapter verified identical before/after. Sentences over 35 words in ch1-ch7: 291 -> 111; mean
+  length about 23 -> 18 words. ch1 gained a two-sentence roadmap. Also: "Section limitations states this as the most
+  serious limitation" was unsupported (ch6 never says it) and now reads "discusses both as a limitation". 153 pages.
+  Remaining: appendix-a has 68 sentences over 35 words; ch3 still 33.
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 
