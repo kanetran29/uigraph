@@ -42,3 +42,21 @@ Predictions (written now)
 What each outcome does to the thesis
   Every outcome is reported in the thesis with generated macros, including a crash. A low figure is not repaired before
   submission; it is reported as the out-of-sample result.
+
+=====================================================================
+Addendum A (5 Nov 2026, after walking the first 60, before cloning any further repository)
+=====================================================================
+Walk of the first 60, in order (skipped repositories and the criterion they failed):
+  frameworks, libraries, tools, generators, templates, starters (S1): angular/angular, storybook, ionic-framework, nx,
+  angular-cli, NativeScript, rxdb, generator-jhipster, ag-grid, mitosis, primeng, linnovate/mean, graphql-code-generator,
+  gridstack.js, ng-zorro-antd, tsparticles, BuilderIO/builder, sentry-javascript, ngrx/platform, intl-tel-input,
+  ng-bootstrap, nebular, angularfire, zhongsp/TypeScript, lightGallery, TanStack/form, orval, docx, angular-electron,
+  ngx-bootstrap, ui-grid, OverlayScrollbars, keen-slider, survey-library, i18n-ally, searchkit, happy-dom,
+  ngx-datatable, ngx-translate/core, ng-alain, angular-seed, ngx-charts, compodoc, taiga-ui, virtua, figma-html,
+  ngxs/store, dockview, revogrid, openapi-typescript-codegen, ng-select;
+  corpus or screened (S5): angular/components, bitwarden/clients, ghostfolio, realworld-apps/angular-realworld-example-app;
+  no @angular/router in the application (S2): openreplay (React), tolgee-platform, ShapeShifter;
+  no lazily loaded route and no guard (S2, S3): altair.
+  Taken: Chocobozzz/PeerTube (client/), 4b859fe1542b22f0c003bd480f4687e49d2b47b6.
+Only one of the first 60 qualifies, so the walk continues, by the same rule, over the next 60 of the same search
+(--limit 120, positions 61-120), and takes the first that qualifies. If none does, the check runs on PeerTube alone.
