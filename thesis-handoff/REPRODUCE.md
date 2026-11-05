@@ -2,8 +2,7 @@
 
 Every number in the thesis comes from a generated file in `thesis/generated-*.tex`. Each file
 names the script that wrote it on its first line and, where it depends on the extractor, the
-extractor commit on its second. The provenance table in Chapter 4 (section Reproducibility,
-`tab:provenance`) lists which tables are final and which are historical.
+extractor commit on its second. The versions are stated in Chapter 4's Reproducibility subsection.
 
 ## Versions
 

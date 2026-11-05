@@ -211,7 +211,7 @@ their members, with parameter names ignored. An edge to an unknown target never 
 such edge, not the edge of the site the test used, so the check does not test the scope of an
 individual site. Redirected navigations are compared on the address they asked for, as
 preregistered. The scorer's first departure from this rule is listed in
-Appendix~\ref{app:repairs}, and its figure is not used.
+Table~\ref{tab:repairs}, and its figure is not used.
 
 A missed pair is classified from the graph alone, by rules over the graph so that no assignment is
 made by hand. The classes are tested in this order, and the first match wins:
@@ -326,9 +326,11 @@ Every site that yields no transition still carries a recorded reason (Section~\r
 \section{Evaluation methods}
 \label{sec:protocol}
 
-Five methods are used; RQ3 adds four further checks (the rendered-interface check, the ablation, the structural reference and the end-to-end check), which Table~\ref{tab:methods} does not list. None establishes correctness alone, so Table~\ref{tab:methods} states what
+Figure~\ref{fig:pipeline} shows where the methods act on the extraction pipeline. Five methods are used; RQ3 adds four further checks (the rendered-interface check, the ablation, the structural reference and the end-to-end check), which Table~\ref{tab:methods} does not list. None establishes correctness alone, so Table~\ref{tab:methods} states what
 each can show and where it is blind. Figure~\ref{fig:oracles} shows which part of the graph each
 method checks and where its ground truth comes from.
+
+\input{figures/fig-pipeline}
 
 Four of the five read the application's sources, and two readers of the same text can be wrong in
 the same way. The fifth, the runtime route oracle, was added for that reason.
@@ -411,10 +413,10 @@ Without them, differences seen in mutation testing could not be told from noise.
 
 \subsection{Corrections made to the protocol}
 \label{sec:corrections}
+\label{app:repairs}
+\label{app:validation}
 
-The final figures are those of the final version of the protocol. The development versions of uigraph
-and the corrections between them are listed in Appendix~\ref{app:repairs}. The figures of superseded
-instruments cannot be regenerated with the shipped harness, and none is cited as a result. A surprising
+The final figures are those of the final version of the protocol. uigraph was developed within this thesis, and three versions are named: the \emph{early development version} (commit \EarlierCommit{}), before the corrections the evaluation prompted; the \emph{intermediate version} (extractor \RoundExtractor{}, with a must tier of \RoundMustEdges{} edges, tables as printed at \RoundCommit{}); and the \emph{final version}, which the chapters present. Of the intermediate version only the must-tier figures are cited, as printed; the runs behind the printed tables were lost, and an archived re-run of the same extractor gave a different loss ledger. The figures of superseded instruments cannot be regenerated with the shipped harness, and none is cited as a result. A surprising
 figure is checked against its inputs before it is written down, since such a figure has more than
 once proved a property of the measurement and not of the extractor.
 
@@ -425,11 +427,172 @@ but a partly different sample. \MutOverlap{} of its \MutSampled{} mutants are at
 may differ. \MutEarlierFailuresAbsent{} of the \MutEarlierFailures{} misses that were read are at no
 location of the final sample.
 
+Table~\ref{tab:repairs} lists every correction, one row each, in the order the chapters record them; the full record with commit hashes is in the accompanying repository. In the first column, \emph{figure} marks a correction made after an implausible or unwelcome figure was seen, \emph{panel} one from a red-team panel, \emph{review} one from a source review made with the assistant, and \emph{harness} one that changed the mutation harness. The reviews and panels were made with the AI assistant that the declaration at the front of this thesis describes, and every defect they reported was reproduced against the code before it was repaired.
+
+\begingroup\footnotesize\setlength{\tabcolsep}{2.5pt}
+\begin{xltabular}{\textwidth}{@{}YYYY@{}}
+\caption{The corrections made to the instruments. \emph{Found by} names the method as the main
+text does; \emph{figure}, \emph{panel}, \emph{review} and \emph{harness} are explained in the text above.}
+\label{tab:repairs}\\
+\toprule
+Found by & What was wrong & What changed & Effect on the figures \\
+\midrule
+\endfirsthead
+\toprule
+Found by & What was wrong & What changed & Effect on the figures \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\multicolumn{4}{@{}l}{\emph{Protocol and harness}} \\
+One application's recall fell when the rule was tightened.
+  & Test-source cross-check: a URL parameter in a test could match a literal route segment.
+  & A parameter no longer matches a literal segment; a negative test is excluded.
+  & The earlier recall cannot be regenerated; end-to-end recall there is now \EtoERateAlfresco{}. \\
+\emph{Figure}: inspection of the flagged edges.
+  & The first witness check showed a low precision for one application; all flagged edges were may edges from one over-approximated call site.
+  & No extractor change. Over-approximated sites are reported apart.
+  & The low figure described the measurement; the must tier had no failing edge. \\
+\emph{Harness}: not stated beyond one application's misses.
+  & A mutant whose target is absent from the baseline graph repeats a recovery gap counted elsewhere.
+  & Such mutants form a separate category.
+  & Most of that application's misses left the detection rate. \\
+\emph{Figure}: a construct count that tripled.
+  & The construct denominator counted the substring \texttt{routerLink}, which also matches \texttt{routerLinkActive}.
+  & Constructs are counted by the independent route parser, so ratio and loss breakdown share one definition.
+  & alfresco: the independent route parser finds \ConstructsAlfresco{}; the substring count was about three times larger. \\
+\emph{Figure}: coverage reached 100 per cent (mifos).
+  & The first independent route parser skipped wrapper calls, did not follow a lazily loaded module to its routing module, and dropped the prefix of lazy tables.
+  & It reads wrapper calls, follows the routing module, and keeps the prefix.
+  & mifos has \RoundTwoEarlierOracleMifosDeclared{} declared screens, \NodeAuditMatchedMifos{} with a node; the extractor was the same in both runs. \\
+\emph{Figure}: a ratio that rose implausibly after attribution (mifos).
+  & Must conversion was first must edges divided by constructs.
+  & Computed per construct; edges whose screen set is a subtree are stored once (Section~\ref{sec:attribution}).
+  & The rise came from how edges were stored, not from evidence. Definition: Section~\ref{sec:metrics}. \\
+\emph{Harness}, \emph{review}, \emph{figure}: a review of the harness, and a detection rate that moved by more than twenty points.
+  & The mutation harness patched the first textual match, judged detection on node and edge sets alone, and retargeted only the head of a commands array.
+  & Patches at the construct's offset; detection also on the witness set; retargeting points at another declared route; guard mutants on a screen no edge enters are excluded; a rename counts when the renamed route appears.
+  & realworld's detection rose sharply. Same seed, not the same sample: \MutEarlierSampled{} mutants earlier, \MutSampled{} in the final run, \MutOverlap{} at one location (operator, file, line; destinations may differ); \MutEarlierFailuresAbsent{} of \MutEarlierFailures{} earlier misses are not in the final sample. In the earlier run six paired disagreements favoured attribution; five were retarget mutants whose operator replaced only the head of the commands array, and with it corrected the baseline detects them too. \\
+\emph{Harness}: reading the graph at the sites the rule let through.
+  & The guard exclusion rule located a route by the nearest path literal before \texttt{canActivate}, which fails for children, empty paths, constants and template literals.
+  & The route is found by brace-matching over source with comments and strings blanked; a route yielding no screen is excluded.
+  & Four unobservable guard mutants had been scored as misses and explained as a defect of the graph; they are now excluded. The superseded run sampled \MutEarlierSampled{} mutants. \\
+\emph{Harness}: a change in the extractor, not a figure.
+  & Removed guards were misjudged: a child of a guarded parent lost the parent's guard, and a set comparison read three identical guard texts as unchanged.
+  & A removal is detected when some edge loses a guard, excluded when no baseline edge carries it; guards are counted.
+  & The sampled mutants are unchanged; how a sampled mutant is scored changes. \\
+A table script stopped.
+  & The construct denominator took constructs from commented-out links and code comments.
+  & Comments are blanked before parsing, with the compiler's scanner for TypeScript.
+  & One construct leaves the denominator in each of bitwarden and mifos; nothing else changes. \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{The extractor and the deterministic tier}} \\
+\emph{Panel}: red-team panels reading graph and source after commit \EarlierCommit{}; the witness check missed it.
+  & A guard on a route a wrapper function returns was not read, so everything below was published as unconditional.
+  & The guard set of a screen also reads routes a function returns.
+  & At \EarlierCommit{}: \EarlierMustEdges{} must edges with \EarlierMustViolations{} witness failures, read from that commit's results. Reading the guard cut mifos to \RoundMustEdgesMifos{} on the intermediate version. \\
+\emph{Panel}, as above.
+  & A \texttt{canActivate} element that is a call, such as a guard factory, was skipped.
+  & An element the reader cannot name gates the edge anyway.
+  & bitwarden's deterministic edges into its root no longer read as unconditional. \\
+Correcting the witness check itself.
+  & It opened only the first of several constructs yielding one edge; later citations in bitwarden targeted \path{/vault}, which the extractor had not read.
+  & It opens every cited site. An edge took the weakest modality of its constructs (replaced below).
+  & Later citations are \WitnessMergedCitationShareAll{} of cited sites, \WitnessMergedCitationShareMax{} in the largest application. The intermediate tier held \RoundMustEdges{} must edges, \RoundMustClean{} passing, \RoundMustViolations{} failing. \\
+\emph{Review}, then \emph{panel}: a review of every construct the intermediate tier cites (\MustCtxEdges{} edges, \MustCtxDistinct{} distinct constructs, cited \MustCtxConstructs{} times). The witness check cannot find this: it compares destinations, not whether a construct runs every time.
+  & The demotion rules were incomplete: a link under \texttt{*ngIf}, in \texttt{@if}, a callback, a \texttt{catch}, or after \texttt{await} or an early return was must.
+  & Demotion under every condition of Section~\ref{sec:model}; the panels added members no handler calls unconditionally, components under a template condition, ICU cases and addresses two routes can answer; a later review added code after a navigation that may start another.
+  & \MustCtxConditional{} of the \MustCtxConstructs{} citations ran under such a condition. \\
+\emph{Review}, as above.
+  & A guard on an empty-path child without a component was not read, and \texttt{canMatch}, \texttt{canActivateChild} and \texttt{canLoad} not at all.
+  & Such a guard gates the screen above; the other three kinds are read.
+  & \MustFateGuard{} of the intermediate tier's edges, all of bitwarden's, are guarded. \\
+\emph{Panel}: a red-team panel.
+  & The repair above gated an edge on every guard of its destination, demoting navigations the router lets through.
+  & The extractor computes the guards the router runs for each source and destination: levels left, matched, entered, kept.
+  & Navigations between screens under a shared guarded parent pass; mifos holds \CensusMustMifos{} must edges again. \\
+\emph{Review}, as above.
+  & A navigation to the address its source already displays was treated as occurring on every execution.
+  & Such an edge is drawn per screen: must from the others, a may self-loop at the destination.
+  & \MustFateSelfLoop{} of the intermediate tier's edges is such a self-loop. \\
+Reading the edges that survived.
+  & The weakest-modality rule discarded a certainty the edge had (realworld's Global Feed link runs whenever its page does).
+  & An edge takes the modality of its most certain construct, its witness; other constructs record their own, and the witness check judges the must tier only on constructs that earn must.
+  & The final tier is \CensusMust{} edges on \CensusMustSites{} constructs, a different set from the intermediate tier, not a smaller one. Superseded tables counted every cited construct as converted; current ones count a construct only where it earns must. \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{The independent route parser and the denominators}} \\
+The disagreements of the first node audit; each gap had scored the extractor against paths the independent route parser had not read.
+  & It did not read a path written through a constant, an enum or \texttt{\$localize}, a first-party import through \texttt{baseUrl}, or a named route array.
+  & It reads all three forms.
+  & Before the last, it saw almost none of kubernetes/dashboard's screens and scored nearly every node the extractor minted there as unmatched. \\
+The dead-link corrections.
+  & It read Storybook fixtures as screens, a sibling application's tables via a tsconfig alias as this application's, and a path in an \texttt{Object.freeze} table as unresolvable.
+  & It sets Storybook aside, ignores the sibling's tables, reads the frozen table. Dropping the frozen routes as unreadable was considered and rejected: they were readable one call away.
+  & Declared sets moved in \RoundTwoSetMoved{} of \CensusApps{} applications; in \RoundTwoSetMovedCountSame{} of them the count stayed the same. \\
+Fixing the provenance of the comparison.
+  & A file from an interim revision of the parser, dropped into the table directory, was read as the earlier parser's output; the script could not detect this, and an absent file read as a denominator that did not move.
+  & The earlier parser's own committed output is read from the repository.
+  & The bitwarden decomposition built on that file is withdrawn. \\
+Resolving the first node audit's disagreement.
+  & The first-audit extractor reached route tables without their parent prefix and minted a node at \texttt{*} per catch-all.
+  & The loss-list repairs: a table not reached, a path or destination named and not written (Section~\ref{sec:res-defects}).
+  & Of \RoundTwoFirstRoundExtra{} nodes with no declared route, \RoundTwoFirstRoundTruncated{} were the tail of a declared route and \RoundTwoFirstRoundSynthetic{} catch-alls. The final version has \RoundTwoExtraNodes{} nodes matching no declared screen, \RoundTwoExtraNodesWildcard{} at \texttt{*}. \\
+\emph{Not stated}; the check was made after the graph had been consulted.
+  & The grounds that exclude a construct from the denominator were tested after the graph had been consulted.
+  & The grounds are decided from the construct's own text first; the comparison refuses to print if a construct changes ground between runs.
+  & The after column had been over more sites than the before column; both are now over the same \RoundTwoInScope{} sites. \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{Findings of the runtime route oracle}} \\
+The oracle returned two alfresco addresses the framework answers with its catch-all; both static readers read the subtree alike, so 100 per cent coverage hid it.
+  & A route with a named outlet could take the primary address from a sibling, and routes beneath it were minted at the primary address.
+  & Outlet context is carried down the walk; no screen is minted beneath a named outlet.
+  & The extractor declares \ProbeInvented{} screens at addresses the framework mounts nothing at. What remains limits recall. \\
+The oracle against the route set as the static readers held it; both readers had arrived at the defect independently.
+  & A lazy route naming a module through a barrel was followed one hop only, and the table scanned at the root.
+  & Both follow the chain to the table, bounded, refusing at each hop a file the route sits in, a file another route loads, and a file whose tables are registered at the root.
+  & \ProbeBeforeNotMounted{} addresses in \ProbeBeforeWhere{} were wrong, the two alfresco ones among them. Node coverage had been 100 per cent against a denominator with the same wrong addresses. \\
+Instrumenting the predicate (commit \texttt{d40c8dc}).
+  & The test keeping a lazy route from adopting the application's root table read \texttt{RouterModule.\allowbreak forRoot}, so it fired nowhere in the corpus.
+  & Both tools mark root tables per array, from the argument of either registration API.
+  & A guard that never fires had been credited with a property nothing showed it had. \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{The dead-link census}} \\
+\emph{Refutation attempts} on the dead-link finding.
+  & An earlier correction followed only the redirecting kind of catch-all route.
+  & Both kinds are followed, the edge is held at may, and where the catch-all sent the URL is recorded.
+  & The correction held for the application it was written against and failed for the two needing the other kind. \\
+\emph{Refutation attempts}.
+  & Resolving a target and calling a link dead were conflated; bitwarden's authentication paths went through an unread enum, so the wildcard forwarded them all.
+  & The enum and wrapper call are read; each application notes when its route set is a lower bound; each caveated candidate is put to the framework's route configuration.
+  & The wildcard had raised that application's recovered figure. Withdrawn: \RoundTwoFrameworkMountsIt{} (the framework serves a screen), \RoundTwoFrameworkPrefix{} (the matching route places none), \RoundTwoFrameworkRedirects{} (a redirect answers); \RoundTwoWildcardCaveated{} keep the caveat. \\
+\emph{Refutation attempts}.
+  & Unreadable routes were taken as undeclared: a spread-built array, ghostfolio's \texttt{matcher}, alfresco's tsconfig \texttt{paths} alias.
+  & Both tools record the holes they cannot read; no undeclared claim is counted inside one.
+  & ghostfolio's \path{/admin/users} had been reported as a confirmed dead link, and two live alfresco links as dead; all three constructs are read now. \\
+\emph{Refutation attempts}.
+  & The route-set test read only the first quoted segment of a commands array, testing a prefix as the target.
+  & The whole array is read as a pattern, computed segments as holes, matched pattern to pattern.
+  & It cleared alfresco's two candidates and found further sites in mifos; the census holds \RoundTwoDeadLinkCandidates{} candidate sites. \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{Mutation sweep and end-to-end check}} \\
+\emph{Mutation sweep} of the demotion rules, at commit \SweepEarlierCommit{}.
+  & On its first run in the final revision the sweep found rules the router fixes had added without a test.
+  & Tests were written for most survivors; the rest were retired as equivalent, since no input tells them from their absence.
+  & \SweepEarlierSurvived{} of \SweepEarlierMutants{} mutants survived; \SweepEarlierCovered{} now have tests, \SweepEarlierRetired{} were retired. At \SweepCommit{} every one of \SweepMutants{} deletions fails some test. The tests exposed a relative link that climbs above the root. \\
+\emph{Panel}: a review panel checking the scorer against the preregistration.
+  & The end-to-end scorer compared a redirected navigation on the landed address, against the preregistration.
+  & The scorer applies the preregistered rule.
+  & mifos scores \EtoEMifosHit{} of \EtoEMifosPairs{} pairs; \EtoEMifosRedirect{} were redirected, \EtoEMifosHitRedirect{} of them hit. The earlier, landed-target figure was \EtoEMifosHitAfterRedirects{} of \EtoEMifosPairsAfterRedirects{}. \\
+\end{xltabular}
+\endgroup
+
+Several corrections in the protocol and harness group were found by a figure that looked implausibly good or bad (marked \emph{figure}); each proved a property of the measurement and not of the extractor.
+
 \subsection{Reproducibility}
+\label{sec:reproducibility}
 
 Every figure is generated by scripts at one commit of the extractor and written into the thesis as a
-macro. Appendix~\ref{sec:reproducibility} lists the scripts, and Table~\ref{tab:provenance} gives the
-commit each table comes from.
+macro. \texttt{REPRODUCE.md} in the repository lists the scripts and the commit each table comes from. The version evaluated throughout is extractor commit \texttt{c42f220} with harness 1.9.0 and mutation harness 1.9.1. The demotion-rule sweep and the may-reason census were recorded at \texttt{d05227c}, which adds only a measurement switch; with it off the graphs are unchanged on all six applications. Two groups are historical and were not re-measured: the rendered-interface check (Table~\ref{tab:scope}), and the runtime route oracle, run on 29 and 30 October against a graph whose extractor commit was not recorded and whose node total is its only link to the final graph.
 
 \section{Summary}
 
@@ -437,4 +600,4 @@ The corpus is six applications at pinned commits, selected by explicit criteria 
 applied uniformly, and uigraph was developed on it. Every ratio has one name and one definition in
 Table~\ref{tab:ratios}. The five methods are each blind where the others see; the reproducibility
 arrangements cover the first four fully and the fifth, the runtime route oracle, only in part. The
-corrections that led to the final protocol are listed in Appendix~\ref{app:repairs}.
+corrections that led to the final protocol are listed in Table~\ref{tab:repairs}.

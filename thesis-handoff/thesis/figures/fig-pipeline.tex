@@ -1,0 +1,28 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\scriptsize, >=Stealth,
+  stage/.style={draw=ink, rounded corners=2pt, fill=white, align=center, text width=22mm, minimum height=10mm, inner sep=2pt},
+  opt/.style={stage, dashed, text width=27mm},
+  check/.style={draw=ink, rounded corners=2pt, fill=mutedlight, align=left, inner sep=4pt, text width=42mm}]
+  \node[stage] (a) at (0,5mm) {Angular\\source};
+  \node[stage] (b) at (34mm,14mm) {route\\reader};
+  \node[stage] (c) at (68mm,14mm) {screen\\nodes};
+  \node[stage] (n) at (34mm,-4mm) {navigation\\sites};
+  \node[stage, fill=accentlight] (e) at (68mm,-4mm) {edges: must, may,\\unknown};
+  \node[opt] (s) at (68mm,-22mm) {scope attribution\\(optional pass)};
+  \node[check] (m) at (112mm,10mm) {\textbf{Evaluation methods} (Table~\ref{tab:methods})\\[1pt]
+    independent route parser $\cdot$ witness check $\cdot$ \mbox{test-source} cross-check $\cdot$ mutation testing $\cdot$ runtime route oracle};
+  \node[check] (r) at (112mm,-20mm) {\textbf{RQ3 checks}\\[1pt] rendered-interface check $\cdot$ ablation $\cdot$ structural references $\cdot$ end-to-end suites};
+  \draw[->] (a.east) -- ++(5mm,0) |- (b.west);
+  \draw[->] (a.east) -- ++(5mm,0) |- (n.west);
+  \draw[->] (b) -- (c);
+  \draw[->] (n) -- (e);
+  \draw[->, dashed] (s) -- (e);
+  \draw[->, muted] (c.east) -- ([yshift=4mm]m.west);
+  \draw[->, muted] (e.east) -- ++(7mm,0) |- ([yshift=-4mm]m.west);
+  \draw[->, muted] (e.east) -- ++(7mm,0) |- ([yshift=4mm]r.west);
+  \draw[->, muted] (s.east) -- ([yshift=-4mm]r.west -| s.east) -- ([yshift=-4mm]r.west);
+\end{tikzpicture}
+\caption{What is evaluated. The extractor reads route tables into screen nodes and navigation sites into edges, tiered must, may or unknown by the demotion rules; scope attribution, an optional pass, places sites that belong to no single screen. The five evaluation methods of Table~\ref{tab:methods} check nodes and edges against independent readings; the RQ3 checks examine the attribution.}
+\label{fig:pipeline}
+\end{figure}

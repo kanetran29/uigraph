@@ -67,3 +67,11 @@
 }
 
 \renewcommand{\lstlistingname}{Listing}
+
+% Tables: no paragraph skip inside cells (the body's \parskip opened uneven gaps between rows),
+% a little more row height, and ragged-right text so narrow columns are not stretched.
+\usepackage{etoolbox}
+\AtBeginEnvironment{tabular}{\setlength{\parskip}{0pt}}
+\AtBeginEnvironment{tabularx}{\setlength{\parskip}{0pt}}
+\AtBeginEnvironment{xltabular}{\setlength{\parskip}{0pt}}
+\renewcommand{\arraystretch}{1.15}

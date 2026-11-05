@@ -161,6 +161,22 @@ supersedes every older section where they disagree.
   RQ answer table, tab:earlier-only numbers, one structural-reference table for both apps, ablation, RQ4, e2e, ch6
   threats table, ch3 demotion-conditions table, RQ5 accounting), add a pipeline diagram and a lattice diagram, drop
   Fig 5.1.
+- **Appendices removed; prose -> tables/diagrams (5 Nov, committed after f82acd1):** appendix-a/b moved to
+  `supplementary/` (not built); labels re-homed (tab:repairs etc. -> ch4 compact corrections table with all 32 rows
+  and figure/panel/review/harness tags; sec:approximations -> ch6 table; res-soundness/unmounted/probe -> ch5).
+  New tables: ch3 tab:demotion, ch5 tab:groundtruth (both apps), tab:mutsummary, tab:e2e, ch6 threats, ch7
+  tab:rqanswers; new figures fig:pipeline, fig:lattice (redrawn after the student found overlaps). Table spacing
+  fixed globally (figures-preamble: no \parskip in cells, arraystretch 1.15). Two Opus gates; all blockers and
+  should-fixes applied (incl. whole-graph witness figures restored, evaluated commit stated in ch4 Reproducibility,
+  three disclosures restored). 118 pages total, body about 98, 0 overfull, 0 undefined. Not done: AI-use statement
+  still says diagrams drawn by hand (student's to word; new TikZ figures were drafted with the assistant).
+- **Student decisions pending (5 Nov):** may tier = over-approximation (MTS upper bound): excess may edges acceptable,
+  missing ones are the defect; student's position: everything determined by frontend source/static config must be
+  extractable, only backend-provided routes are outside. Proposed: ch6 table "why the may tier is incomplete" with an
+  inside/outside-static-boundary column. Student leans to fixing three general tool gaps (template literal in a
+  commands array; relativeTo via a variable; relative-link base resolution by the holder component's route) in a new
+  version, re-measure everything, and disclose in Table 4.5 that the e2e check found them (agreed this is evidential
+  weight, not dishonesty). Not started; do it in a fresh session with a plan.
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 

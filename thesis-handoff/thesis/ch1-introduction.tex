@@ -89,7 +89,7 @@ source. The extractor is \emph{uigraph}, an open-source static analyser for Angu
 thesis. It is part of the contribution, not an existing tool. It reads nested, parameterised and
 lazily loaded route trees, which an earlier Angular extraction excludes by its stated
 restrictions (Section~\ref{sec:res-earlier}). It also implements scope attribution. Its development
-versions and the corrections between them are listed in Appendix~\ref{app:repairs}. Because the same person built the
+versions and the corrections between them are listed in Section~\ref{app:repairs}. Because the same person built the
 tool and measured it, on the same corpus, the figures describe what this extractor recovers on
 these applications. Section~\ref{sec:limitations} discusses what that means for them.
 Chapter~\ref{ch:discussion} separates the limits of the method from those of this
@@ -145,7 +145,7 @@ recorded label.
 The questions are answered on a corpus of six open-source Angular applications pinned to
 fixed commits (Chapter~\ref{ch:evaluation}). Five evaluation methods are used, and RQ3 adds four further measurements; the methods are chosen so that their blind spots differ. The figures in Chapter~\ref{ch:results} are those of the final version of the extractor.
 Its development versions and the corrections between them are listed in
-Appendix~\ref{app:repairs}.
+Section~\ref{app:repairs}.
 
 The thesis has the following limits of scope.
 \begin{itemize}
@@ -178,14 +178,8 @@ attribution analysis proposed as a modest extension, and its implementation. The
 which is the main contribution, is set up in Chapter~\ref{ch:evaluation} and reported in
 Chapter~\ref{ch:results}.
 Chapter~\ref{ch:evaluation} describes the evaluation setup: the corpus and why it can
-be considered valid, the metrics, and the five evaluation methods.
+be considered valid, the metrics, and the five evaluation methods, and lists in Table~\ref{tab:repairs} every correction made to the extractor and the instruments during development.
 Chapter~\ref{ch:results} presents the results for each research question. These are the two levels of loss (RQ1), the defect classes (RQ2), scope attribution and what it recovers (RQ3), change sensitivity (RQ4), and the causes of the losses and the soundness of the must tier (RQ5). The chapter then reports the dead-link candidates the graph finds statically. Each is checked against the route configuration the runtime route oracle recorded.
-Appendix~\ref{app:validation} lists the development versions of uigraph and the corrections between
-them. It also holds the validation of the measuring instruments. This covers the
-disagreements between the two static readers, how the declared-screen set moved under the
-corrections, the case-by-case account of asking the running framework, and the record that
-every remaining site names a reason, recorded rather than verified. It is kept apart from the
-results because it records the checks made on the instruments, not what the analysis recovers.
 Chapter~\ref{ch:discussion} discusses the results, the limitations of the study, the
 constructs the analysis approximates, how the approach transfers to other frameworks,
 and future work. Chapter~\ref{ch:conclusion} concludes the thesis.

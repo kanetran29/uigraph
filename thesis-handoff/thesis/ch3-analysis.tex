@@ -120,65 +120,68 @@ judged against the claim.
 
 \textbf{Demotion conditions.} Whether the navigation occurs \emph{for every input on which the
 enclosing code executes} is decided by the rules that place an edge in the must tier instead of
-the may tier. A site is demoted to may in each of the following cases.
-\begin{itemize}
-\item \textbf{Guards and resolvers.} The navigation runs a guard or resolver, whatever it would
-decide, because the rules read the route configuration and never evaluate a guard. A navigation
-runs the guards the router runs. These are the \texttt{canMatch} of every route its address is matched
-through. They are also the \texttt{canActivate}, \texttt{canLoad} and resolvers of every route it enters
-(\texttt{canLoad} is taken as run every time). Next come the \texttt{canActivateChild} of every route above
-those. Last come the \texttt{canDeactivate} of every route it leaves. A route the source and the target
-share is re-run only if its parameters can change or its \texttt{runGuardsAndResolvers} policy
-directs. A resolver demotes the edge as an \texttt{await} does. A guard list the reader
-cannot bring back to an array demotes it as a guard does.
-\item \textbf{Target and source addresses.} The edge is demoted when any of the following holds:
-  \begin{itemize}
-  \item the target is the address the source already displays, which the router ignores or follows
-  only when a parameter or the query differs (held at may as a matter of policy, the safe side);
-  \item the source is never displayed at its own address because a redirect answers it;
-  \item two declared routes, or a route and a redirect, can answer the address;
-  \item the base a relative target resolves against cannot be read;
-  \item the URL names an auxiliary outlet, whose route the adapter
-  does not read.
-  \end{itemize}
-A shell or anchor edge is judged per screen and drawn per screen where the screens disagree.
-\item \textbf{Conditional execution.} The site runs only on some executions of its own handler.
-This covers a site:
-  \begin{itemize}
-  \item under a template control-flow block, a structural directive or a container that renders
-  its content lazily;
-  \item inside an \texttt{<ng-template>} or an International Components for Unicode (ICU) case;
-  \item under a branch, in a loop or a \texttt{catch} clause, in an optional call or a default
-  value, or inside a callback;
-  \item after an \texttt{await}, an early \texttt{return} or \texttt{throw}, or a \texttt{break}
-  out of its block;
-  \item in a function declared at module level, or a member of its class, that no handler calls
-  unconditionally;
-  \item in a component mounted under a template condition on that screen, or in a route
-  component behind a conditional outlet.
-  \end{itemize}
+the may tier. Table~\ref{tab:demotion} lists every condition that demotes a site to may.
+
+{\footnotesize
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\caption{Conditions that demote a navigation from the must tier to the may tier. Every condition yields may.}
+\label{tab:demotion}\\
+\toprule
+Group & Condition & Example construct \\
+\midrule
+\endfirsthead
+\toprule
+Group & Condition & Example construct \\
+\midrule
+\endhead
+Guards and resolvers & The navigation runs a guard or resolver, whatever it would decide &
+\texttt{canActivate} on a route it enters; a resolver, which demotes as an \texttt{await} does \\
+& The guard list cannot be brought back to an array & a guard list built at run time \\
+\midrule
+Target and source addresses & The target is the address the source already displays & navigating to the current
+URL, which the router ignores or follows only when a parameter or the query differs (held at may as a matter of policy, the safe side) \\
+& The source is never displayed at its own address & a redirect answers the source's address \\
+& Two declared routes, or a route and a redirect, can answer the address & two routes matching one path \\
+& The base a relative target resolves against cannot be read & a relative target with an unreadable base \\
+& The URL names an auxiliary outlet & a URL with a named-outlet segment, whose route the adapter does not read \\
+\midrule
+Conditional execution & The site is under a template control-flow construct & a control-flow block, a structural directive, a container that renders lazily \\
+& The site is in a template fragment that need not render & \texttt{<ng-template>}, an International Components for Unicode (ICU) case \\
+& The site is under a branch, loop or fallback in code & a branch, a loop, a \texttt{catch} clause, an optional call, a default value, a callback \\
+& The site follows an exit in its block & after an \texttt{await}, an early \texttt{return} or \texttt{throw}, a \texttt{break} out of its block \\
+& No handler calls the enclosing function unconditionally & a module-level function, or a member of its class \\
+& The component is mounted conditionally & a component under a template condition on that screen; a route component behind a conditional outlet \\
+\midrule
+A later navigation may cancel it & Code that runs after the site, before the event is handled, may navigate &
+the rest of the expression holding the navigation (the body of a call it is an argument of, a right operand, a branch of a conditional whose condition it is) \\
+& &
+the statements after it in its block and in every block around it, and a \texttt{finally} block around it \\
+& &
+what runs once its function returns: what each caller in the class does after calling it, handler or not; for a constructor or lifecycle hook, the hooks Angular calls after it \\
+\bottomrule
+\end{xltabular}
+}
+
+\noindent A navigation runs the guards the router runs. These are the \texttt{canMatch} of every
+route its address is matched through. They are also the \texttt{canActivate}, \texttt{canLoad} and
+resolvers of every route it enters (\texttt{canLoad} is taken as run every time). Next come the
+\texttt{canActivateChild} of every route above those. Last come the \texttt{canDeactivate} of every
+route it leaves. A route the source and the target share is re-run only if its parameters can
+change or its \texttt{runGuardsAndResolvers} policy directs. A shell or anchor edge is judged per
+screen and drawn per screen where the screens disagree.
+
 A handler is a member that the framework calls itself: a lifecycle hook, or a member that
 \texttt{@HostListener} registers. A handler is also a member that the template binds to an event as a bare call outside
 any template condition.
-\item \textbf{A later navigation may cancel it.} The router cancels a navigation when another
-starts before it has finished. A navigation is therefore demoted when code that runs after it,
-before the event is handled, may navigate. That code is:
-  \begin{itemize}
-  \item the rest of the expression that holds the navigation (the body of a call it is an
-  argument of, a right operand, a branch of a conditional whose condition it is);
-  \item the statements after it in its block and in every block around it, and a \texttt{finally}
-  block around it;
-  \item what runs once its function returns: what each caller in the class does after calling
-  that function, handler or not, and for a constructor or lifecycle hook the hooks Angular calls
-  after it.
-  \end{itemize}
-Such code may navigate when it holds a navigation call, in a branch or a callback as much as at
+
+The router cancels a navigation when another starts before it has finished. Code that runs after
+a site may navigate when it holds a navigation call, in a branch or a callback as much as at
 the top, or a call to a member of the class, a function of the file or a method of an injected
 service whose body does. An awaited navigation has finished before the rest of its function runs,
 so what follows it there does not count, but its callers go on as soon as the function first
 awaits, so what they do still counts. A call the reader cannot resolve to a body in the
 application is taken not to navigate (Section~\ref{sec:approximations}).
-\end{itemize}
+
 An exception from an earlier synchronous call is not counted, since every call can throw; an \texttt{await} is counted, because a rejected request is an ordinary outcome. The router's fetch of a lazily loaded route is not counted: a failed chunk load is a fault of the deployment.
 
 \textbf{How far the rules are checked.} Unit tests cover each rule in both directions, and a
@@ -188,7 +191,7 @@ second classifier re-derives them. The constructs of the final must tier were re
 source by the assistant the declaration describes, with the extractor's decisions in view; this
 checks that each decision can be defended and is not an independent second reading
 (Section~\ref{sec:res-round2}). Some defects in the condition rules were found by an earlier review
-of a development version's tier and not by the witness check (Appendix~\ref{app:repairs}). What the witness check establishes is therefore narrower than the
+of a development version's tier and not by the witness check (Section~\ref{app:repairs}). What the witness check establishes is therefore narrower than the
 claim. It establishes that every cited site exists in the source and agrees on its target. The stronger half of
 the claim rests on the demotion rules and is not independently verified.
 
@@ -199,7 +202,7 @@ source, not that the transition is ever taken. This difference matters for the e
 Whether the target found at a witness location agrees with the target of the edge is a
 meaningful question for must edges, and for may edges whose target is a literal. It is not a
 meaningful question for edges the extractor produced by over-approximation. Treating it as
-one leads to spurious failures (Appendix~\ref{app:repairs}, Table~\ref{tab:repairs}).
+one leads to spurious failures (Section~\ref{app:repairs}, Table~\ref{tab:repairs}).
 
 \section{Scope attribution}
 \label{sec:attribution}
@@ -437,6 +440,33 @@ The extractor, \emph{uigraph}, was built for this thesis and is available as ope
 
 Scope attribution is a separate pass in the Angular adapter, enabled with the option \texttt{-{}-attribution}. With the option off, the extractor produces exactly the baseline edge set, as checked on every application in the corpus. The pass implements component nesting, router outlets and the call graph; $D$ and $T$ are not implemented, and stand-ins replace them (below).
 
+The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-ablation}), at the levels of Figure~\ref{fig:lattice}. Each level adds to the one before it, and the figure marks which levels stand for earlier work and which only this thesis adds.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\scriptsize, >=Stealth,
+  lvl/.style={draw=ink, rounded corners=2pt, fill=white, align=center, minimum width=21mm, minimum height=8mm, inner sep=2pt},
+  lbl/.style={align=center, text width=26mm, inner sep=1pt}]
+  \node[lvl] (own) at (0,0) {owned};
+  \node[lvl] (nest) at (30mm,0) {nesting};
+  \node[lvl, fill=accentlight] (root) at (60mm,0) {rooted};
+  \node[lvl, fill=accentlight] (out) at (90mm,0) {outlet};
+  \node[lvl, fill=warmlight] (full) at (120mm,0) {full};
+  \foreach \x/\y in {own/nest,nest/root,root/out,out/full} \path (\x) -- node{$\subset$} (\y);
+  \node[lbl, below=2mm of own] {the routed\\component's own file};
+  \node[lbl, below=2mm of nest] {+ template\\containment};
+  \node[lbl, below=2mm of root] {+ shell rule\\(Oshima and Kishi)};
+  \node[lbl, below=2mm of out] {+ outlet descent\\(Rima et al.)};
+  \node[lbl, below=2mm of full, text width=30mm] {+ \mbox{injected-service} join\\by member-level\\call graph (this thesis)};
+  \node[lvl, fill=warmlight] (cls) at (120mm,15mm) {class};
+  \draw[->] (out.north) |- node[above, pos=0.8]{$\subset$} (cls.west);
+  \draw[dashed, muted] (cls) -- (full);
+  \node[lbl, above=1mm of cls, text width=26mm] {beside \emph{full}: service join per class};
+\end{tikzpicture}
+\caption{Attribution levels. Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what only this thesis adds; \emph{class} is the per-class variant of the service join.}
+\label{fig:lattice}
+\end{figure}
+
 \textbf{Component nesting.} Every component in the application, excluding test hosts and stories,
 is read with its element selectors and template. An edge $A \to B$ is added when $A$'s template
 contains an element with $B$'s selector. When a selector belongs to more than one component, the
@@ -513,7 +543,7 @@ provides the query $\mathit{edgesFrom}(r)$ and a function that materialises all 
 \textbf{Stand-ins for $D$ and $T$.} A navigation in an NgRx effect has no scope from the model
 itself, because $D$ is not implemented. Two approximations stand in where the model has a
 relation the pass does not implement. Section~\ref{sec:res-ablation} withholds them below the
-\emph{full} level, so no lower level counts their sites.
+\emph{full} level of Figure~\ref{fig:lattice}, so no lower level counts their sites.
 \begin{itemize}
 \item \emph{Guards (for $T$).} A guard is given the screens of the routes that name it, as a
 bare identifier, in \texttt{canActivate}, \texttt{canActivateChild}, \texttt{canMatch} or

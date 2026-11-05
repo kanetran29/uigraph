@@ -2,7 +2,7 @@
 \label{ch:results}
 % Numerical tables are generated. Each generated file identifies its evaluated snapshot.
 % The main RQ1--RQ3 tables use the final snapshot with attribution off and on.
-% Development versions appear only in Appendix A (app:repairs).
+% Development versions appear only in the corrections table of Chapter 4 (tab:repairs).
 
 This chapter reports what the harness of Section~\ref{sec:protocol} measured on the corpus of
 Section~\ref{sec:corpus}, one research question at a time. Section~\ref{sec:res-baseline}
@@ -10,7 +10,7 @@ answers RQ1, Section~\ref{sec:res-defects} RQ2, Section~\ref{sec:res-after} RQ3 
 Section~\ref{sec:res-mutation} RQ4. Section~\ref{sec:res-round2} asks what the losses were and what the cause of each says about the claim (RQ5). Section~\ref{sec:deadlinks} reports the dead links the method found as a
 by-product.
 
-The numerical tables are generated from the harness result files; summaries compiled by hand are marked as such. The main tables describe the final extractor snapshot, with scope attribution off (the baseline) and on. The development versions and the corrections between them are listed in Appendix~\ref{app:repairs}.
+The numerical tables are generated from the harness result files; summaries compiled by hand are marked as such. The main tables describe the final extractor snapshot, with scope attribution off (the baseline) and on. The development versions and the corrections between them are listed in Section~\ref{app:repairs}.
 
 Two conditions hold for every figure below. The source trees are extracted without their dependencies installed, and the corpus was selected with the tool in view. Section~\ref{sec:limitations} discusses both. The second makes the figures likely to be optimistic for Angular applications in general.
 
@@ -65,7 +65,7 @@ Table~\ref{tab:coverage} gives the first measure. It compares the nodes the extr
 the screens the independent route parser finds declared. Against that denominator node
 extraction is complete: on all six applications every declared screen has a node.
 
-Appendix~\ref{app:readers} lists the handful of addresses the two readers still disagree about. Two qualifications apply.
+The two readers still disagree about a handful of addresses. Two qualifications apply.
 
 \begin{itemize}
 \item The denominator is the screens a \emph{static reader} can enumerate. Against the addresses
@@ -112,7 +112,7 @@ column counts only those. This summary is compiled by hand; it is not harness ou
 \toprule
 Class & Evidence & Methods & All \\
 \midrule
-Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph; multi-mount edge absent; manual audit; an application with nodes and no edges on a development version (k8s dashboard; Appendix~\ref{app:repairs}) & 1 & 4 \\
+Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph; multi-mount edge absent; manual audit; an application with nodes and no edges on a development version (k8s dashboard; Section~\ref{app:repairs}) & 1 & 4 \\
 Lazy module boundary not followed & independent route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & red-team panels and a source survey of the guard factory and the call-form \texttt{canActivate}
 (Section~\ref{sec:res-losses}) & 1 & 2 \\
@@ -163,7 +163,7 @@ constructs are therefore neither a floor nor a ceiling on what scope attribution
 (Section~\ref{sec:res-after}).
 
 Table~\ref{tab:oracles} reports the witness check on the final attributed tier and the
-test-source cross-check. Section~\ref{sec:res-round2} treats the must tier separately.
+test-source cross-check. Section~\ref{sec:res-round2} treats the must tier separately. \RoundTwoOutsideWitness{} edges in \RoundTwoOutsideWitnessApps{} applications have their only witness outside the application directory; both tools read those files, so their agreement there is not independent evidence.
 
 \begin{table}[t]\small
 \caption{Results of the witness check, on the final attributed tier, and of the test-source
@@ -413,19 +413,7 @@ the pairs, and the column falls short of the census's total by those screens.}
 \TabAblation
 \end{table}
 
-The levels are not evenly spaced. Direct ownership places \AblationOwnedSites{} sites, \AblationOwnedSiteShare{} of what the
-full analysis places, and containment adds \AblationNestingAddedSites{}, the largest gain in
-sites of any step, for a total of \AblationNestingSites{}. The shell rule is the largest step in (site, screen) pairs and in reference recall, and this
-thesis does not add it: \emph{rooted} places \AblationRootedSites{} sites,
-\AblationRootedSiteShare{} of the full figure, and carries the pair count from
-\AblationNestingPairs{} to \AblationRootedPairs{}. Everything above that level raises the site count from \AblationRootedSites{} to
-\AblationFullSites{}, that is \AblationAboveRootedShare{} of
-the corpus total. Outlet descent adds
-\AblationOutletAddedSites{} of those sites and mostly width, raising the pair count from \AblationRootedPairs{} to \AblationOutletPairs{}; a table of
-counts cannot say whether that width is correct, which the next subsection addresses. The full level adds \AblationFullAddedSites{},
-\AblationFullAddedShare{} of the corpus total: the member-level call graph that places a
-service's navigation, its fallback join and the stand-ins for guards and effects together, all of
-which only that level carries. The call graph's own share is smaller. Against the coarser class-level
+The levels are not evenly spaced. Containment adds the most sites of any step, the shell rule, which this thesis does not add, is the largest step in (site, screen) pairs and in reference recall, and outlet descent adds mostly width, which a table of counts cannot show to be correct (the next subsection addresses it). The full level adds the member-level call graph that places a service's navigation, its fallback join and the stand-ins for guards and effects, all of which only that level and its per-class variant carry. The call graph's own share is smaller. Against the coarser class-level
 rule it replaced, it places \AblationCallGraphNetSites{} more sites, \AblationCallGraphNetShare{} of the
 corpus total, and \AblationCallGraphNetPairs{} more pairs. That rule remains as the fallback for a member
 no caller reaches.
@@ -443,81 +431,80 @@ total, every one outside a component, in a service, guard or effect.
 \label{sec:res-groundtruth}
 
 For \GTApp{} the screens each navigation site fires from were read off the sources by hand
-(Section~\ref{sec:metrics}): \GTSites{} sites and \GTPairs{} (site, screen) pairs. Scoring every
-level against that reading gives a comparison no other method here can make, because it has both
-directions rather than one. Table~\ref{tab:groundtruth} reports it.
+(Section~\ref{sec:metrics}): \GTSites{} sites and \GTPairs{} (site, screen) pairs. A second reference
+was built for alfresco, where navigation inside services occurs; realworld has one such navigation and barely exercises the step
+only this thesis adds: \GTAlfSites{} sites and \GTAlfPairs{} pairs. Scoring every level against such a
+reading gives a comparison no other method here can make, because it has both directions rather than
+one. Table~\ref{tab:groundtruth} reports both.
 
-Two limits qualify the reading beyond those of Section~\ref{sec:metrics}.
-\begin{itemize}
-\item It is not independent of the graph. Its first version was completed
-with nine header sites the scorer reported from the graph.
-\item It is dominated by the shell. \GTShellSites{} of its \GTSites{} sites are placed on every screen and supply \GTShellPairs{} of the
-\GTPairs{} pairs. Every level from \emph{rooted} upward places these pairs trivially.
-\end{itemize} Over the other
-\the\numexpr\GTPairs-\GTShellPairs\relax{} pairs, recall is \GTRootedRecallNonShell{} for
-\emph{rooted}, \GTOutletRecallNonShell{} for \emph{outlet} and \GTFullRecallNonShell{} for
-\emph{full}.
-
-\begin{table}[t]\small
-\caption{Each attribution level against the hand-read structural reference for \GTApp{}.
-\emph{Missing} is a pair the reference has and the level does not; \emph{excess} is a pair
-the level has and the reference does not. Precision and recall are agreement with that
-reference, not with what the running application renders.}
+\begin{table}[t]\footnotesize
+\caption{Each attribution level against the hand-read structural reference of each application.
+\emph{Precision} and \emph{recall} are agreement with that reference, not with what the running
+application renders. \emph{Off shell} is recall over the pairs outside the shell, where attribution
+decides. \emph{class} is the class-level join that the call graph of \emph{full} refines.}
 \label{tab:groundtruth}
-\TabGroundTruth
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+ & \multicolumn{3}{c}{\GTApp{}} & \multicolumn{3}{c}{alfresco} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Level & Precision & Recall & Off shell & Precision & Recall & Off shell \\
+\midrule
+owned & \GTOwnedPrecision{} & \GTOwnedRecall{} & \GTOwnedRecallNonShell{} & \GTAlfOwnedPrecision{} & \GTAlfOwnedRecall{} & \GTAlfOwnedRecallNonShell{} \\
+nesting & \GTNestingPrecision{} & \GTNestingRecall{} & \GTNestingRecallNonShell{} & \GTAlfNestingPrecision{} & \GTAlfNestingRecall{} & \GTAlfNestingRecallNonShell{} \\
+rooted & \GTRootedPrecision{} & \GTRootedRecall{} & \GTRootedRecallNonShell{} & \GTAlfRootedPrecision{} & \GTAlfRootedRecall{} & \GTAlfRootedRecallNonShell{} \\
+outlet & \GTOutletPrecision{} & \GTOutletRecall{} & \GTOutletRecallNonShell{} & \GTAlfOutletPrecision{} & \GTAlfOutletRecall{} & \GTAlfOutletRecallNonShell{} \\
+full & \GTFullPrecision{} & \GTFullRecall{} & \GTFullRecallNonShell{} & \GTAlfFullPrecision{} & \GTAlfFullRecall{} & \GTAlfFullRecallNonShell{} \\
+class & \GTClassPrecision{} & \GTClassRecall{} & \GTClassRecallNonShell{} & \GTAlfClassPrecision{} & \GTAlfClassRecall{} & \GTAlfClassRecallNonShell{} \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-The table is produced only if each level's pairs are a subset of the next, and the
-full level asserts no pair outside the reference. No lower level can then assert one either, so the
-levels differ only in recall. Direct ownership recovers \GTOwnedRecall{} and containment
-\GTNestingRecall{}, both far short. The shell rule, the level that stands for the prior work's
-reach, recovers \GTRootedRecall{} at \GTRootedPrecision{} precision and leaves \GTRootedMissing{}
-pairs unfound. Precision is measured against a reference whose header sites were added from the
-graph's output, so it is weakest as evidence where the shell dominates. Everything above \emph{rooted} reduces
-\GTRootedMissing{} missing pairs to \GTFullMissing{}. The
-last row, the class-level join that the call graph refines, asserts \GTClassExcess{} pairs outside the
-reference, all at one site, the \texttt{navigate} inside \texttt{UserService.logout}, which takes
-precision to \GTClassPrecision{}. The class join attributes a navigating service to every screen
-whose components inject it, while its only caller is a button on the settings screen, where the call
-graph places it alone.
+On \GTApp{} the table is produced only if each level's pairs are a subset of the next, and the full
+level asserts no pair outside the reference, so the levels differ only in recall. Most of the
+recovery is produced by mechanisms earlier work already had: the shell rule (\emph{rooted}) and the
+enclosing routes (\emph{outlet}), and the \emph{full} step adds the remaining \GTOutletMissing{} pair. On alfresco the gain
+over the levels of earlier work comes from the service join, and the precision order reverses: the
+full analysis is less precise than both the lower levels and the class join.
 
-The clean row has one limit. The structural reference guided two repairs of the analysis. One is the call
-graph, written after the reference exposed the class-level defect. The other is the rule that places an
-empty-path child on the screen above it (Section~\ref{sec:approximations}). The \GTFullPrecision{}
-precision and the recall of \emph{full} are scored on the same reference, so they are consistent with
-the two repairs and test neither independently.
-
-On realworld most of the recovery is produced by mechanisms earlier work already had:
-\GTRootedRecall{} of the \GTPairs{} pairs are reached by the shell rule and \GTOutletRecall{} once the
-enclosing routes are added. The \emph{full} step adds \GTOutletMissing{} pair and takes recall to
-\GTFullRecall{}. realworld has one navigation inside a service, so it barely exercises the step only
-this thesis adds.
-
-\paragraph{A second application.} A second reference was therefore built for alfresco, where
-navigation inside services occurs. Its protocol, the same rules as realworld's, was committed before
-the reference was built or any level was scored (\path{ground-truth/ALFRESCO-PROTOCOL.txt}). The AI
-assistant built it from the sources alone, without the graph. It places \GTAlfSites{} sites and leaves
-\GTAlfUndetermined{} undetermined, which are not scored. Four lines the scorer then reported as placed by the graph and absent
-from the reference were read afterwards under the same rules, given only the line numbers and not the
-graph's placements. None is a navigation site, and they were added as excluded, where the protocol
-provided only for adding a missed site; no figure depends on it, since unlisted lines are not scored.
-
-\GTAlfShellSites{} of the sites, \GTAlfShellPairs{} of the \GTAlfPairs{} pairs, sit in the shell, which the
-application takes from a library outside its sources. No level
-reads it, so every level misses all but at most one of these pairs. Overall recall is therefore
-\GTAlfOutletRecall{} at the levels of earlier work and \GTAlfFullRecall{} for the full analysis. Over the other pairs, where attribution decides, the levels that stand for earlier work recall
-\GTAlfOutletRecallNonShell{}, the class-level join \GTAlfClassRecallNonShell{} and the full analysis
-\GTAlfFullRecallNonShell{}; the gain is the service join. The two sites of \texttt{navigateBack} are placed exactly on the two search screens their only caller renders. The full analysis asserts
-\GTAlfFullExcess{} pairs outside the reference, all at \GTAlfFullExcessSites{} site,
-\texttt{navigateToSearch}, whose only caller is an effect triggered by a toolbar button declared in the
-extension configuration, which the analysis does not read, so it places the site on every screen at
-the may tier. Most of the pairs the full analysis adds over \emph{outlet} come from this placement. These
-excess pairs take precision to \GTAlfFullPrecision{}, against \GTAlfOutletPrecision{} for the lower levels and
-\GTAlfClassPrecision{} for the class join, whose \GTAlfClassExcess{} excess pairs are at the same site. The full and
-class levels also place one undetermined site on every screen, whose action no source dispatches. It is not
-scored; scored as firing from nowhere, it would add to the excess of both. Of the protocol's predictions, the first,
-that the full level recalls more than \emph{outlet}, held. The second, that its precision is at least
-the class join's, did not.
+\begin{itemize}
+\item \emph{The reference is not independent of the graph.} The \GTApp{} reference was completed in its
+  first version with nine header sites the scorer reported from the graph. Its precision is therefore
+  weakest as evidence where the shell dominates.
+\item \emph{The shell dominates.} On \GTApp{}, \GTShellSites{} of the \GTSites{} sites are placed on every
+  screen and supply \GTShellPairs{} of the \GTPairs{} pairs, and every level from \emph{rooted} upward places
+  them trivially. On alfresco, \GTAlfShellSites{} of the sites, \GTAlfShellPairs{} of the \GTAlfPairs{}
+  pairs, sit in a shell that the application takes from a library outside its sources. No level reads
+  it, so every level misses all but at most one of those pairs. The off-shell column is the one where
+  attribution decides.
+\item \emph{Two repairs were guided by the reference.} One is the call graph, written after the \GTApp{}
+  reference exposed the class-level defect. The other is the rule that places an empty-path child on the
+  screen above it (Section~\ref{sec:approximations}). The \GTFullPrecision{} precision and the recall of
+  \emph{full} are scored on the same reference, so they are consistent with the two repairs and test neither
+  independently.
+\item \emph{The class join's excess on \GTApp{}} is \GTClassExcess{} pairs, all at one site, the
+  \texttt{navigate} inside \texttt{UserService.logout}. The class join attributes a navigating service to
+  every screen whose components inject it, while its only caller is a button on the settings screen, where
+  the call graph places it alone.
+\item \emph{The alfresco reference was built without the graph, by an AI assistant.} Its protocol, the same rules as
+  realworld's, was committed before the reference was built or any level was scored
+  (\path{ground-truth/ALFRESCO-PROTOCOL.txt}). The assistant built it from the sources alone, without the
+  graph, and left \GTAlfUndetermined{} sites undetermined, which are not scored.
+\item \emph{Four lines were excluded after scoring.} The scorer reported them as placed by the graph and
+  absent from the reference; they were read afterwards under the same rules, given only the line numbers and
+  not the graph's placements. None is a navigation site, and they were added as excluded, where the protocol
+  provided only for adding a missed site. No figure depends on it, since unlisted lines are not scored.
+\item \emph{All of the full level's excess on alfresco is one config-driven site.} The \GTAlfFullExcess{} excess
+  pairs are at \GTAlfFullExcessSites{} site, \texttt{navigateToSearch}, whose only caller is an effect
+  triggered by a toolbar button declared in the extension configuration, which the analysis does not
+  read, so it places the site on every screen at the may tier. Most of the pairs the full analysis adds over
+  \emph{outlet} come from this placement. The class join's \GTAlfClassExcess{} excess pairs are at the same
+  site. The two sites of \texttt{navigateBack} are placed exactly on the two search screens their only caller
+  renders.
+\item \emph{One undetermined site is placed on every screen} by the full and class levels, because no source
+  dispatches its action. It is not scored; scored as firing from nowhere, it would add to the excess of both.
+\item \emph{The protocol's predictions.} The first (A1), that the full level recalls more than \emph{outlet},
+  held. The second (A2), that its precision is at least the class join's, did not.
+\end{itemize}
 
 What the two references establish is narrower than soundness. Both apply the analysis's own relations,
 and neither licenses the corpus-wide widths of Table~\ref{tab:scopebaseline} on an application of six
@@ -529,35 +516,58 @@ hundred screens.
 The end-to-end check of Section~\ref{sec:metrics} puts part of the question to the running
 applications, with a reference that does not pass through the analysis's relations. The second and third validity checks hold on both applications, and the first on mifos, whose uninstrumented run fails the same tests. For realworld only instrumented runs were recorded, none of them with a failure.
 
-\paragraph{realworld.} The suite completes \EtoERealworldEnds{} navigations, which reduce to
-\EtoERealworldPairs{} distinct pairs, and the graph contains all \EtoERealworldHit{} of them:
-\EtoERealworldHitScreen{} through an edge from the source screen or from a scope that names it, and
-\EtoERealworldHitTop{} only through the shell scope, which names every screen. This result does not
-bear on what the levels above \emph{rooted} add, because the \emph{rooted} level, which stands for earlier work's
-mechanism, already contains \EtoERealworldHitRooted{} of the pairs, that is all of them. Without
-attribution the graph contains \EtoERealworldHitNoattr{}. The suite exercises \EtoERealworldPairs{}
-of the \EtoERealworldGraphPairs{} pairs the expanded graph contains, out of
-\EtoERealworldPossiblePairs{} possible ordered pairs of screens including self-pairs. The
-agreement is therefore with the transitions the suite takes and not with the graph.
+Table~\ref{tab:e2e} gives the figures for both applications.
 
-\paragraph{mifos.} The suite completes \EtoEMifosEnds{} navigations, \EtoEMifosPairs{} distinct pairs,
-and the graph contains \EtoEMifosHit{} of them. This count applies the pre-registered rule: a
-redirected navigation is compared on the address it asked for. \EtoEMifosRedirect{} pairs were
-redirected, and \EtoEMifosHitRedirect{} of those are hits. The scorer's
-departure from this rule during development is listed in Table~\ref{tab:repairs}. Without attribution the graph contains
-\EtoEMifosHitNoattr{}. None of the matched pairs is a must edge, as predicted. \EtoEMifosHitRedirect{} hits, those of the redirect bucket, rest only on
-a site whose target prefix was over-approximated to many routes. They therefore show that the target is
-reachable in the graph and not that the site was resolved. No other pre-registered prediction is
-reported here.
+\begin{table}[t]\footnotesize
+\caption{The graph against the pairs of screens the applications' own end-to-end suites navigate
+between. A redirected navigation is compared on the address it asked for (the preregistered rule).
+\emph{Rooted} is the level that stands for earlier work's mechanism. The miss classes after
+\emph{redirect} were defined after the misses had been read, and are tested in the order redirect, base,
+dynamic, first match winning. All cells are generated figures.}
+\label{tab:e2e}
+\begin{tabularx}{\textwidth}{@{}Yrr@{}}
+\toprule
+ & realworld & mifos \\
+\midrule
+Navigations completed & \EtoERealworldEnds{} & \EtoEMifosEnds{} \\
+Distinct pairs & \EtoERealworldPairs{} & \EtoEMifosPairs{} \\
+Pairs in the graph (hits) & \EtoERealworldHit{} & \EtoEMifosHit{} \\
+\quad through the source screen or a scope that names it & \EtoERealworldHitScreen{} & \EtoEMifosHitScreen{} \\
+\quad only through the shell scope & \EtoERealworldHitTop{} & \EtoEMifosHitTop{} \\
+Hits without attribution & \EtoERealworldHitNoattr{} & \EtoEMifosHitNoattr{} \\
+Hits at the rooted level & \EtoERealworldHitRooted{} & \EtoEMifosHitRooted{} \\
+Pairs redirected (redirect bucket) & \EtoERealworldRedirect{} & \EtoEMifosRedirect{} \\
+\quad of which hits & \EtoERealworldHitRedirect{} & \EtoEMifosHitRedirect{} \\
+Pairs the expanded graph contains & \EtoERealworldGraphPairs{} & \EtoEMifosGraphPairs{} \\
+Possible ordered pairs of screens, self-pairs included & \EtoERealworldPossiblePairs{} & \EtoEMifosPossiblePairs{} \\
+Misses & \EtoERealworldMiss{} & \EtoEMifosMiss{} \\
+\quad redirect & \EtoERealworldMissRedirect{} & \EtoEMifosMissRedirect{} \\
+\quad base & \EtoERealworldMissBase{} & \EtoEMifosMissBase{} \\
+\quad dynamic & \EtoERealworldMissDynamic{} & \EtoEMifosMissDynamic{} \\
+\quad other & \EtoERealworldMissOther{} & \EtoEMifosMissOther{} \\
+Misses that meet the dynamic test in any order & \EtoERealworldMissDynamicAny{} & \EtoEMifosMissDynamicAny{} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-\paragraph{The mifos misses.} Of the \EtoEMifosMiss{} misses, \EtoEMifosMissRedirect{} fall in the
-pre-registered redirect class and are not classified further. The other classes were defined after the
-misses had been read, and are tested in the order redirect, base, dynamic, first match winning. Every
-one of the \EtoEMifosMiss{} misses meets the dynamic test whatever the order. The dynamic count is
-therefore only what is left after the others. The test fires on any unresolved site in the
-source component or above it, so it does not show that the missed navigation is that site. The pre-registered
-five-class scheme and its prediction that misses would be mostly a scope too narrow or a site not read
-are not scored.
+\begin{itemize}
+\item \emph{realworld.} The agreement is with the transitions the suite takes and not with the graph. The
+result does not bear on what the levels above \emph{rooted} add, because the \emph{rooted} level already
+contains every pair.
+\item \emph{mifos, hits.} The preregistered rule compares a redirected navigation on the address it asked
+for. The scorer's departure from this rule during development is listed in Table~\ref{tab:repairs}. None of the
+matched pairs is a must edge, as predicted. The hits of the redirect bucket rest only on a site whose target
+prefix was over-approximated to many routes, so they show that the target is reachable in the graph and not
+that the site was resolved. No other preregistered prediction is reported here.
+\item \emph{mifos, misses.} Only the redirect class was preregistered, and its misses are not classified
+further. The other classes were defined after the misses had been read. Every miss meets the dynamic test
+whatever the order, so the dynamic count is only what is left after the others. The test fires on any
+unresolved site in the source component or above it, so it does not show that the missed navigation is that
+site. The preregistered five-class scheme and its prediction that misses would be mostly a scope too narrow
+or a site not read are not scored.
+\end{itemize}
+
+The two post-hoc classes read as follows.
 
 \begin{itemize}
 \item \EtoEMifosMissDynamic{} misses are classed \emph{dynamic}: places the extractor does
@@ -605,40 +615,30 @@ Structural-reference recall, \GTApp{} & -- & \GTRootedRecall{} & \GTFullRecall{}
 Structural-reference recall, alfresco & -- & \GTAlfRootedRecall{} & \GTAlfFullRecall{} \\
 Structural-reference recall off the shell, alfresco & -- & \GTAlfRootedRecallNonShell{} & \GTAlfFullRecallNonShell{} \\
 Structural-reference precision, alfresco & -- & \GTAlfRootedPrecision{} & \GTAlfFullPrecision{} \\
+Structural-reference precision, \GTApp{} & -- & \GTRootedPrecision{} & \GTFullPrecision{} \\
+Navigation inside services, constructs lost at baseline and recovered & -- & -- & \AttrServiceRecovered{} of \AttrServiceLost{} \\
+Sites placed in services, guards and effects & -- & -- & \AblationFullAddedSites{} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Three things follow.
+Three things follow, with the figures in Table~\ref{tab:earlier}.
 
 \begin{itemize}
-\item \emph{Attribution puts more of the suites' transitions into the graph, in a wider graph.} Without
-  it, the graph holds \EtoERealworldHitNoattr{} of the \EtoERealworldPairs{} pairs realworld's suite
-  takes and \EtoEMifosHitNoattr{} of mifos's \EtoEMifosPairs{}. With it, it holds \EtoERealworldHit{}
-  and \EtoEMifosHit{}. The pairs the graph holds grow from \EtoERealworldGraphPairsNoattr{} to
-  \EtoERealworldGraphPairs{} and from \EtoEMifosGraphPairsNoattr{} to \EtoEMifosGraphPairs{}. The
+\item \emph{Attribution puts more of the suites' transitions into the graph, in a wider graph.} The
   extractor was fixed before the suites' logs were read (Section~\ref{sec:limitations}).
 \item \emph{The gain is already reached at the rooted level, the mechanism of earlier work.} Oshima and
-  Kishi's stated restrictions admit none of these applications: all \EarlierWorkParamApps{} declare
-  route parameters and all \EarlierWorkNestedApps{} nested route trees. Rima et al.\ state no such
-  restriction, and their specification covers this level (Section~\ref{sec:dynamic-spa}). Neither tool
-  was run, so how they read these applications is not shown. Inside uigraph the level runs on all six
-  because uigraph's route extraction reads parameters and nested trees, with or without attribution.
-\item \emph{The service join places navigation no earlier mechanism can place.} A navigation call
-  inside an injected service belongs to no component, so the levels up to \emph{outlet} cannot place
-  it on any screen. The corpus has \AttrServiceLost{} such constructs at the baseline, on every one of
-  the six applications (Table~\ref{tab:loss}). The service join, which only this thesis adds,
-  recovers \AttrServiceRecovered{} of them and places \AblationFullAddedSites{} sites in services,
-  guards and effects. On \GTApp{} its member-level call graph is also more precise than a class-level
-  join: the class join asserts \GTClassExcess{} pairs outside the reference (\GTClassPrecision{}), the
-  call graph none (\GTFullPrecision{}). On alfresco, where such navigation occurs, it raises recall off
-  the shell from \GTAlfOutletRecallNonShell{} at the levels of earlier work to \GTAlfFullRecallNonShell{}
-  (overall \GTAlfOutletRecall{} to \GTAlfFullRecall{}). However, the precision order reverses:
-  \GTAlfFullPrecision{} against \GTAlfClassPrecision{} for the class join
-  (Section~\ref{sec:res-groundtruth}). With the enclosing routes, the levels
-  above \emph{rooted} find the \GTRootedMissing{} reference pairs rooted misses
-  (Section~\ref{sec:res-groundtruth}). On the two applications with suites, they add no transition the
-  suites take.
+  Kishi's stated restrictions admit none of these applications, which declare route parameters and nested
+  route trees. Rima et al.\ state no such restriction, and their specification covers this level
+  (Section~\ref{sec:dynamic-spa}). Neither tool was run, so how they read these applications is not shown.
+  Inside uigraph the level runs on all six because uigraph's route extraction reads parameters and nested
+  trees, with or without attribution.
+\item \emph{The service join places navigation no earlier mechanism can place.} A navigation call inside an
+  injected service belongs to no component, so the levels up to \emph{outlet} cannot place it on any screen,
+  on every application of the corpus (Table~\ref{tab:loss}). The member-level call graph is more precise than
+  a class-level join on \GTApp{}, but on alfresco the precision order reverses
+  (Table~\ref{tab:groundtruth}). The levels above \emph{rooted} find the reference pairs rooted misses, and on
+  the two applications with suites they add no transition the suites take.
 \end{itemize}
 
 Of the \AttrLost{} constructs the loss rules assign to attribution, it recovers \AttrRecovered{}
@@ -687,27 +687,36 @@ carry the earlier mutation figures, and bitwarden, whose routes carry many guard
 \HarnessVersionMutation{}, a fixed seed and a quota of eight mutants per operator. The corrections
 made to the mutation harness are listed in Table~\ref{tab:repairs}.
 
-The harness found \MutCandidates{}
-candidate mutations, sampled \MutSampled{} under the quota and scored \MutScored{}. \MutExcluded{}
-were excluded, all of them guard removals: for \MutExcludedUnreached{} no edge of the unmutated graph enters any
-screen the guarded route yields, and \MutExcludedNoScreen{} guards a route that declares neither a
-component nor children. An excluded mutant carries no information about sensitivity, so \MutGuardScored{} of the
-\the\numexpr\MutGuardScored+\MutExcludedGuard\relax{} sampled guard mutants are scored, and the guard
-rate is conditional on the graph entering the guarded screen. The exclusions are few on the
-attributed graph but not on the graph without attribution: of the \MutBaseSampled{} mutants sampled
-against it, \MutBaseExcluded{} are excluded and \MutBaseScored{} remain, the same recovery gap seen
-from the mutation side.
+Table~\ref{tab:mutsummary} gives the sample, the exclusions and the detections on the attributed graph and without attribution; Table~\ref{tab:mutation} gives the detection rate per operator and application, and Figure~\ref{fig:mutation} the outcomes summed over the applications.
 
-Table~\ref{tab:mutation} gives the detection rate per operator, and Figure~\ref{fig:mutation} the
-outcomes summed over the applications. The rename operator is set aside first, because its detection
-is close to guaranteed by construction: a rename mutant is excluded unless the unmutated graph already
-holds a node for the segment it renames, and a screen is identified by its full path
-(Section~\ref{sec:model}). It tests node extraction and supplies \MutRenameScored{} of the
-\MutScored{} scored mutants. The three other operators are detected in \MutFallibleDetected{} of
-their \MutFallibleScored{} scored mutants: \MutLinkDetected{} of \MutLinkScored{} deleted
-\texttt{routerLink} bindings, \MutRetargetDetected{} of \MutRetargetScored{} retargeted
-\texttt{navigate} calls and \MutGuardDetected{} of \MutGuardScored{} removed guards. A deleted \texttt{routerLink} is sampled only on a line an edge of the unmutated graph cites, so it is missed only if the extractor misreads its own input. The other two operators are constrained in the same way. A retarget is generated only for a \texttt{navigate} call whose first element is a plain absolute string at a line the graph already cites, and it writes one declared route as a literal. A guard removal is scored only where an edge already carries that guard and enters the guarded screen. The samples are small, in single digits per operator and application, so the pattern
-says more than the rate.
+\begin{table}[t]\footnotesize
+\caption{Mutants sampled, excluded, scored and detected, with scope attribution on and off. An excluded
+mutant carries no information about sensitivity. All exclusions are guard removals: for the first kind no
+edge of the unmutated graph enters any screen the guarded route yields, and the second guards a route that
+declares neither a component nor children. \emph{Paired} counts the mutants both graphs can score. A dash
+means the figure is not reported for that graph. Operator rows are detected over scored.}
+\label{tab:mutsummary}
+\begin{tabularx}{\textwidth}{@{}Yrr@{}}
+\toprule
+ & attributed graph & without attribution \\
+\midrule
+Candidate mutations found & \MutCandidates{} & -- \\
+Sampled under the quota & \MutSampled{} & \MutBaseSampled{} \\
+Excluded & \MutExcluded{} & \MutBaseExcluded{} \\
+\quad guard: graph enters no screen the route yields & \MutExcludedUnreached{} & -- \\
+\quad guard on a route with no component and no children & \MutExcludedNoScreen{} & -- \\
+Scored & \MutScored{} & \MutBaseScored{} \\
+Detected & \MutDetected{} & \MutBaseDetected{} \\
+\quad rename a route path & \MutRenameDetected{} of \MutRenameScored{} & -- \\
+\quad delete a \texttt{routerLink} & \MutLinkDetected{} of \MutLinkScored{} & \MutLinkBaseDetected{} of \MutLinkBaseScored{} \\
+\quad retarget a \texttt{navigate} & \MutRetargetDetected{} of \MutRetargetScored{} & -- \\
+\quad remove a guard & \MutGuardDetected{} of \MutGuardScored{} & -- \\
+Paired mutants, detected & \MutPairedDetected{} of \MutPaired{} & \MutPairedBaseDetected{} of \MutPaired{} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The rename operator is set aside first, because its detection is close to guaranteed by construction: a rename mutant is excluded unless the unmutated graph already holds a node for the segment it renames, and a screen is identified by its full path (Section~\ref{sec:model}). It tests node extraction. The other three operators are constrained in the same way. A deleted \texttt{routerLink} is sampled only on a line an edge of the unmutated graph cites, so it is missed only if the extractor misreads its own input. A retarget is generated only for a \texttt{navigate} call whose first element is a plain absolute string at a line the graph already cites, and it writes one declared route as a literal. A guard removal is scored only where an edge already carries that guard and enters the guarded screen, so the guard rate is conditional on the graph entering the guarded screen. The exclusions are few on the attributed graph but not on the graph without attribution, the same recovery gap seen from the mutation side. The samples are small, in single digits per operator and application, so the pattern says more than the rate.
 
 \begin{table}[t]\small
 \caption{Detection rate per mutation operator on the attributed graph, as detected over
@@ -717,23 +726,14 @@ scored mutants. A dash means the operator found no candidate in that application
 \end{table}
 \FigMutation
 
-Every guard removal the run can score is detected: \MutGuardDetected{} of \MutGuardScored{}, on all
-three applications, each judged by whether some edge loses a guard the removed list names. A guard is
-recorded on the edges that enter the guarded screen, so a removal can be observed only where the graph
-holds that screen and enters it. All \MutExcludedGuard{} exclusions are that condition failing.
-One limit of the harness's matching of a class by the file its routing module imports it from shows in the run without attribution. realworld's
+Each guard removal is judged by whether some edge loses a guard the removed list names, and all \MutExcludedGuard{} guard exclusions are the condition above failing. One limit of the harness's matching of a class by the file its routing module imports it from shows in the run without attribution. realworld's
 \texttt{editor} route has two children, at the empty path and at \texttt{:slug}, that load the same
 component file, so the harness cannot tell their screens apart. Without attribution no edge enters
 \path{/editor}, but one enters \path{/editor/:slug}, so the guard on the empty-path child is scored
 and missed rather than excluded. That is the one paired disagreement, and it is a limit of the
 harness, not of the graph.
 
-The mutation run neither confirms nor contradicts the defect class \emph{guards unreliable in both directions}; Chapter~\ref{ch:discussion} gives the reading.
-
-Of the \MutScored{} scored mutants, \MutDetected{} were detected, and \MutBaseDetected{} of
-\MutBaseScored{} without attribution. On the \MutPaired{} mutants both graphs can score, the
-figures are \MutPairedDetected{} and \MutPairedBaseDetected{}. In this sample the graph responded to
-every scored change in the constructs it represents.
+The mutation run neither confirms nor contradicts the defect class \emph{guards unreliable in both directions}; Chapter~\ref{ch:discussion} gives the reading. In this sample the graph responded to every scored change in the constructs it represents.
 
 \section{What the losses were (RQ5)}
 \label{sec:res-round2}
@@ -756,7 +756,7 @@ tool's.
 read by the final version, and empty in Table~\ref{tab:loss}.
 \item \emph{Guards}: the two unread forms (a guard on a route a wrapper returns, a
 \texttt{canActivate} element written as a call) are read, and the guard rule is the router's own
-semantics (Section~\ref{sec:res-soundness}).
+semantics (Section~\ref{sec:model}).
 \item The candidate class \emph{node not linked to its component}: empty on the final version.
 \end{itemize}
 
@@ -841,16 +841,13 @@ in-scope sites.}
 \TabRoundTwoAccounting
 \end{table}
 
-Of \RoundTwoInScope{} in-scope sites, \RoundTwoRecovered{} are recovered, \RoundTwoDynamic{} are
-accounted as dynamic and \RoundTwoUnplaced{} as unplaced, so \RoundTwoAccounted{} are accounted for in
-all. k8s dashboard shows why recovered and dynamic
-must be reported separately: a low recovered fraction can coexist with many sites whose destination
+k8s dashboard shows why recovered and dynamic must be reported separately: a low recovered fraction can coexist with many sites whose destination
 depends on runtime data. Its dynamic sites are spread over \RoundTwoDynamicFiles{} files,
 \RoundTwoDynamicFilesOne{} of which contribute a single site, so the column reports a habit of the
 codebase and not one place to fix. mifos supplies \RoundTwoMifosShare{} of the in-scope sites on its
 own and pulls the corpus figures towards its own: without it, recovered is \RoundTwoNoMifosRecovered{}
 and accounted \RoundTwoNoMifosAccounted{}. Changes to the route denominator are recorded in
-Appendix~\ref{app:validation}.
+Section~\ref{app:validation}.
 
 The named-outlet restriction is enforced on the route side as well: a route that declares a named
 \texttt{outlet} is reached as \texttt{(name:path)} and never at the primary address, so it contributes
@@ -859,19 +856,41 @@ were minted at the primary address, which Angular reaches only as \texttt{(viewe
 expose it, and the runtime route oracle of Section~\ref{sec:res-probe} was needed.
 
 \subsection{The final tier and the node set}
+\label{sec:res-soundness}
+\label{sec:res-unmounted}
 
-The attributed must tier has \MustWitnessViolations{} witness-check failures among \MustWitnessEdges{}
-edges, with \MustWitnessUnread{} destinations unread; Appendix~\ref{sec:res-soundness} reports the
-soundness property construct by construct. Across the corpus the compared graph declares
-\ProbeInvented{} screens at addresses the framework mounts nothing at
-(Appendix~\ref{sec:res-unmounted}).
+\paragraph{The final tier.} The attributed must tier has \MustWitnessViolations{} witness-check failures among \MustWitnessEdges{}
+edges, with \MustWitnessUnread{} destinations unread, which are neither passes nor failures. The unread
+destinations are the toolbar edges of one application, whose source side rests on the scope of its chrome
+component and on the route-order assumption. The witness check compares the destination a construct names with
+the destination its edge names; it does not ask whether the construct runs every time or whether the router
+lets the navigation through, which the demotion rules cover. Neither the source reading of the must tier,
+made once by the AI assistant with the extractor's decisions in view, nor the mechanical check is an
+independent proof of Claim~\ref{claim:must}.
+
+\paragraph{The whole graph.} Over the whole graph the check says much less. The \RoundTwoEdges{} edges cite \RoundTwoSites{} locations, and only \RoundTwoGraphClean{} are clean, because \RoundTwoOverApprox{} are over-approximations for which the check claims no target agreement. \RoundTwoTopFanoutShare{} of all edges (\RoundTwoTopFanoutEdges{}) come from one call site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, a \texttt{navigateByUrl} to a template literal with an empty static prefix. Of the \RoundTwoJudged{} locations the check judges, \RoundTwoJudgedClean{} are clean, and none of the rest is cited by a must edge. A precision figure for the must tier is not one for the graph.
+
+\paragraph{The node set.} Across the corpus the compared graph declares \ProbeInvented{} screens at
+addresses the framework mounts nothing at. Every address the extractor claims is an address the
+framework's own configuration mounts, which is external evidence about these six applications that the two
+static readers could not produce, since an address both place at the wrong prefix is one they agree on. The
+evidence is a precondition of the must-tier property and not part of it, and it is bounded by what a census
+keyed on addresses can represent: entries on a named outlet or decided by a \texttt{UrlMatcher}
+(\ProbeUnaddressableScreens{} route entries) are counted in neither column.
+
+\paragraph{The runtime route oracle.}\label{sec:res-probe} The oracle loads each application, built in its
+development configuration, in a headless browser, reads the live router's route configuration after expanding
+every lazily loaded subtree, and counts an address as mounted when the configuration places a component there
+on the primary outlet. No route file is parsed. Against the \ProbeScreens{} addresses it mounts, the node set
+is \ProbeNodes{} of \ProbeScreens{}. The oracle ran on an earlier graph (29--30 October) with the same node
+total, one corrected using earlier findings of this check. The oracle's classification was itself checked by navigation and agrees on \ProbeAnswerAgreed{} of \ProbeAnswerChecked{} addresses; the \ProbeMissed{} unminted addresses are not individually checked.
 
 \section{Dead links, found from the source}
 \label{sec:deadlinks}
 
 A site whose target the application mounts nothing at is a dead link. The method finds candidates
 for such links at no extra cost. The candidates are found statically, and each is then checked
-against the route configuration the runtime route oracle recorded before it is reported.
+against the route configuration the runtime route oracle recorded before it is reported. The result is a candidate list and not a verdict: no candidate was navigated to in a running application, so that a link is reached at run time is not established.
 
 The clearest case is mifos. A transactions tab links to a journal entry at the address
 \path{/journal-entry/view/:id}. The application declares that screen at
