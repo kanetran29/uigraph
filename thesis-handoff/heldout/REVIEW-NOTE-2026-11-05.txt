@@ -1,0 +1,27 @@
+Review note (5 Nov 2026, after the second round and the sensitivity case were measured). The preregistration and its
+addenda are not edited; this note records what two reviews of them found and what was checked.
+
+Example and template exclusions of Addendum D that Addendum E does not list (S2-S4 read after the fact):
+  107 ng-matero/ng-matero (admin template, S1): GitHub code search finds children, loadChildren and canActivate;
+      pushed 2026-11-01. Meets S2-S4; excluded by S1 as a template. The inconsistency Addendum E answers concerns
+      samples (the corpus contains a sample application), not templates, so it stays excluded.
+  109 jhipster/jhipster-sample-app (sample, S1): shallow clone 6b000b5d23a36c45e01472471b84a44fa2464044 has lazy routes
+      (9 files) and canActivate guards (8 files) under src/main/webapp, but no route declares children; fails S2.
+  110, 120, 136, 146: fail S4 as well (pushed 2019-05-26, 2022-09-07, 2023-02-04, 2023-01-06).
+  111 tomalaforge/angular-challenges (course, S1): a set of exercises, not one application; S2-S3 not checked (the
+      GitHub code search rate limit was reached).
+Addendum E says "two have the route features of S2-S3" and then that 82 fails S2: 82 has lazy routes and guards but
+no nested route, so only 147 has all of them.
+
+Timing: the sensitivity clone's directory birth time equals the Addendum E commit to the second (10:18:36), so the
+file system cannot order them. Clone birth times of the other four follow their addenda (peertube 02:27:00,
+spotify 02:27:22 after 6b0d723 at 02:26:04; electronmail 10:09:28, nestdocs 10:09:33 after ea7a579 at 10:09:16).
+Why positions 84, 95 and 97 were opened before Addendum B is not recorded.
+
+Harness freeze: heldout.sh checks that packages/ equals c42f220 but does not check the route-oracle scripts. The ones
+the measures run (index.mjs, witness-check.mjs, loss-breakdown.mjs, literal-target.mjs, report-counts.mjs) were last
+changed in 0172867 (5 Nov 2026 00:03 +0200), before the original preregistration.
+
+Witness check: target agreement is literal (witness-check.mjs applies no redirect). The sensitivity case's 8 must-edge
+failures are all routerLink="/" at navbar.component.html:3 against the redirect '' -> 'home' (pathMatch 'full') that
+the extractor follows. Not repaired, per the preregistration.

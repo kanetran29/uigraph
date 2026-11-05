@@ -85,9 +85,8 @@ This thesis builds uigraph, a static extractor for Angular, and makes that measu
 it on six open-source applications. uigraph reads nested and parameterised route trees, which
 the stated restrictions of an earlier Angular extraction exclude in every one of them. Five
 methods check the graphs: four read the source, one the running application's route
-configuration. Each construct the extractor does not
-recover is assigned to a loss category. Under the order of the loss rules, the largest loss is navigation that belongs to
-no single screen, such as a link in a shared header. For this loss the thesis proposes scope
+configuration. Each construct the extractor does not recover is assigned to a loss category; under
+the order of the loss rules, the largest is navigation that belongs to no single screen, such as a link in a shared header. For this loss the thesis proposes scope
 attribution, a dataflow analysis that computes the set of screens from which each navigation
 site can fire.
 
@@ -106,9 +105,10 @@ changes in constructs it already represents; its harness was corrected after its
 read, so the test is not independent.
 
 The conclusion is that a declared route table is a usable starting point for static
-navigation extraction, but not a sufficient one. Scope attribution adds a modest gain over
-earlier mechanisms. The tool was developed on the corpus; of four applications outside it, the frozen
-extractor reads one whole (\HeldoutNodesNestdocs{} screens) and few or no screens of the other three.
+navigation extraction, but not a sufficient one. Scope attribution adds a modest gain over earlier
+mechanisms on the corpus and none outside it. Of four preregistered applications outside the corpus it
+was developed on, the frozen extractor reads every declared screen of one, a documentation site, and
+few or none of the other three.
 
 \vspace{1em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page

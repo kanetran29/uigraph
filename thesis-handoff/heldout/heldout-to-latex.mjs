@@ -41,6 +41,7 @@ for (const spec of a.apps.split(',')) {
     Nodes: `${C.comparison.matched} of ${C.comparison.declaredScreens}`,
     NodeCoverage: pc(C.comparison.matched, C.comparison.declaredScreens),
     BlindSpots: (C.blindSpots ?? []).length,
+    LazyBlindSpots: (C.blindSpots ?? []).filter((b) => /^lazy module has no discoverable route array/.test(b.reason ?? '')).length,
     Constructs: L.inScope,
     MustConversion: conv === null ? '--' : `${conv.toFixed(1)}\\,\\%`,
     RecoveredShare: pc(L.recovered, L.inScope),

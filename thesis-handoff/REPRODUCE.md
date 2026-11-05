@@ -143,18 +143,18 @@ The held-out applications, preregistered in `heldout/PREREGISTRATION.txt`: the f
 git worktree add --detach <wt> <a commit whose packages/ equals c42f220> && (cd <wt> && pnpm install --frozen-lockfile)
 thesis-handoff/heldout/heldout.sh <work dir> <wt>
 thesis-handoff/heldout/heldout.sh <work dir> <wt> thesis-handoff/heldout/apps-round2.txt thesis-handoff/heldout/results-round2
-cd thesis-handoff/heldout
-node heldout-to-latex.mjs --dir results --apps peertube=Peertube,spotify=Spotify --tex ../thesis/generated-heldout.tex
-node heldout-to-latex.mjs --dir results-round2 --apps electronmail=Electronmail,nestdocs=Nestdocs \
-  --tex ../thesis/generated-heldout2.tex
+(cd thesis-handoff/heldout &&
+  node heldout-to-latex.mjs --dir results --apps peertube=Peertube,spotify=Spotify --tex ../thesis/generated-heldout.tex &&
+  node heldout-to-latex.mjs --dir results-round2 --apps electronmail=Electronmail,nestdocs=Nestdocs \
+    --tex ../thesis/generated-heldout2.tex)
 ```
 
 The sensitivity case of Addendum E (`apps-sensitivity.txt`, `results-sensitivity/`, `generated-heldout-sens.tex`):
 
 ```bash
 thesis-handoff/heldout/heldout.sh <work dir> <wt> thesis-handoff/heldout/apps-sensitivity.txt thesis-handoff/heldout/results-sensitivity
-cd thesis-handoff/heldout && node heldout-to-latex.mjs --dir results-sensitivity --apps conduit=Conduit \
-  --tex ../thesis/generated-heldout-sens.tex
+(cd thesis-handoff/heldout && node heldout-to-latex.mjs --dir results-sensitivity --apps conduit=Conduit \
+  --tex ../thesis/generated-heldout-sens.tex)
 ```
 
 ## 3. Build the PDF

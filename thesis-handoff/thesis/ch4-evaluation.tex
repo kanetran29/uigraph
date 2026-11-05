@@ -92,8 +92,9 @@ size is visible and not averaged away.
 repeated rather than taken on trust.
 \end{itemize}
 None of these addresses a further threat: uigraph was developed on this corpus
-and is measured on it, with no held-out application (Section~\ref{sec:limitations}), so the figures
-are fitted to it. A case study on a proprietary Angular application, reporting only
+and is measured on it (Section~\ref{sec:limitations}), so the figures are fitted to it. Four
+applications outside the corpus, measured with the frozen extractor, test how far they carry over
+(Section~\ref{sec:res-heldout}); on three of them they do not. A case study on a proprietary Angular application, reporting only
 aggregate figures, is planned as the most direct response (Chapter~\ref{ch:discussion}). There is
 no standard benchmark corpus for single-page applications either; evaluations in this area use
 collections chosen for each study \cite{websurvey2025}. The corpus and its manifest are therefore
@@ -424,7 +425,9 @@ destination node's address is tested against the independent route set. &
 Cannot see missing edges. Target agreement is invalid for over-approximated may
 edges, whose witness proves only that the call site exists. The destination test is
 only as good as the route set: where both tools read a table at the wrong prefix, they
-agree on a wrong address; Section~\ref{sec:res-probe} records such addresses. \\
+agree on a wrong address; Section~\ref{sec:res-probe} records such addresses. Target agreement is
+literal: a construct whose address a redirect rewrites is compared with the address written, so an
+edge to the screen the navigation lands on is reported as a failure (Section~\ref{sec:res-heldout}). \\
 \addlinespace
 Differential test & Disagreements with a separately written route-configuration
 parser. &

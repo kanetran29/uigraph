@@ -48,14 +48,14 @@ supersedes every older section where they disagree.
   `generated-heldout2.tex`. Result: docs.nestjs.com 163/163 screens, 0 blind spots, 161 must edges all witnessed (all
   from one `routerLink="/support"` in the page frame); ElectronMail 0/9: every route on a named outlet, which by design
   gets no primary node; the parser's 9 come from the settings module read at the root because its 3 async-body lazy
-  loads are unresolved. Predictions: P5, P8 held; P6 first part held, second not (named outlets are in the corpus);
-  P7 not judgeable. Table `tab:heldout` now has 4 columns; abstract, ch1, ch4 provenance, ch5 `tab:world` caption, ch6,
+  loads are unresolved. Predictions: P5, P8 held; P6 first part held (on the parser's artefact), second not (named
+  outlets are in the corpus); P7 did not hold (see the full review below). Table `tab:heldout` now has 4 columns; abstract, ch1, ch4 provenance, ch5 `tab:world` caption, ch6,
   ch7 updated. Harness scripts unchanged between rounds (checked). A third round would need its own addendum, e.g. a
   lower star threshold, written before screening.
 - **Panel on round two (2 Sonnet lenses, claims checked by hand):** no blockers. Fixed in prose: commit-order caveat,
   round-1 walk extension (60 -> 72) and search end at 150, ElectronMail opened in round 1, docs site's only guard is
   an external redirect, "carries over" narrowed to the route reader, ElectronMail's 9 are a parser artefact (not
-  primary addresses), P7 undecided (1 of 5 constructs but 161 edges > corpus `\AttrMustAfter`=150), P5/P8 over two.
+  primary addresses), P5/P8 over two (P7 later rescored, see below).
   S1 "sample" exclusion was stricter than the corpus (which has RealWorld): Addendum E (`772970e`, before cloning)
   measures #147 stefanoslig/angular-ngrx-nx-realworld-example-app (apps/conduit) as a labelled sensitivity case
   (#82 fails S2 anyway: no `children`). Result: 9/9 screens, attribution 8 of 8, but its 8 must edges all fail the
@@ -77,7 +77,21 @@ supersedes every older section where they disagree.
   figure is c42f220 (packages identical except the switch).
 - **Ablation idea (student, later):** per-feature ablation of the final version's extraction (lazy boundaries,
   constant paths, ...) with measurement flags, like `UIGRAPH_IGNORE_GUARDS`; attribution levels and guard-only exist.
-- **Build after round two and the sensitivity case:** 157 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
+- **Full ARS review (`academic-paper-reviewer`, 5 seats Sonnet blind Phase 1 + Phase 2, Opus synthesizer) + an Opus
+  gate, both on `593c26e`:** decision major revision (F3: D1, D2, D3, D6 at warn; no block, no DA critical). All
+  surviving items applied after checking them against the data: construct counts are app-directory only (angular-spotify
+  0 in the app, all in libs; RealWorld's 8 are the navbar); PeerTube's cause is an inline `export default [...]` (the
+  corpus's `export default routes;` is read), `\HeldoutLazyBlindSpotsPeertube`=17 (new macro, test first); spotify's
+  cause stated as untested (`provideRouter(webShellRoutes)`, `Route[]`, async loaders); P3 vacuous, P2/P4 PeerTube
+  only; P7 did not hold (docs must conversion 20 % > corpus max 7.7 %, 161 > 150 edges, one layout link); sensitivity
+  predictions not blind; attribution untested out of sample (0 recovered on all four); witness check is literal (ch4
+  limits cell); stale ch4:94 "no held-out application" fixed; abstract, ch1, ch6, ch7, ch5 Summary, tab:world caption
+  aligned; table gains the Oshima-Kishi row from macros. Review note `heldout/REVIEW-NOTE-2026-11-05.txt` (S2-S4 of the
+  unlisted example/template exclusions; clone-time tie; harness freeze). Rejected by the synthesizer with reasons:
+  rescoring P6 or blanking ElectronMail's cell, a counterfactual strict-S1 table. **For the student:** ch5 now says
+  the held-out causes "were read ... by the AI assistant and re-read by AI reviewers" (REV-19); confirm or adjust with
+  the AI-use statement (Q3).
+- **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 
 ## Current state, 5 Nov 2026

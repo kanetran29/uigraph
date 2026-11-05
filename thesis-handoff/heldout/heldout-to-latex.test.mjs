@@ -13,7 +13,7 @@ test('derives the held-out figures with the corpus definitions', () => {
   const d = mkdtempSync(join(tmpdir(), 'heldout-'))
   const w = (f, o) => writeFileSync(join(d, f), typeof o === 'string' ? o : JSON.stringify(o))
   w('provenance.txt', 'extractor x\napp a b c d\napp map-attr exit=0 seconds=1\napp map-noattr exit=0 seconds=1\n')
-  w('app.C.json', { comparison: { declaredScreens: 4, matched: 3 }, blindSpots: [{}], routes: [{ path: '/a/:id', kind: 'SCREEN' }, { path: '/b', kind: 'PREFIX' }] })
+  w('app.C.json', { comparison: { declaredScreens: 4, matched: 3 }, blindSpots: [{ reason: 'lazy module has no discoverable route array' }, { reason: 'matcher route: path not statically knowable' }], routes: [{ path: '/a/:id', kind: 'SCREEN' }, { path: '/b', kind: 'PREFIX' }] })
   w('app.B.json', { mustEdges: 5, mustClean: 3, mustUnread: 1 })
   const rows = [{ at: 'x:1', cls: 'CONVERTED_MUST' }, { at: 'x:2', cls: 'CONVERTED_MAY' }, { at: 'x:3', cls: 'CONVERTED_MAY' }, { at: 'x:4', cls: 'ACCOUNTED_DYNAMIC' }, { at: 'x:5', cls: 'QUERY_ONLY' }]
   w('app.L.json', { constructs: 5, inScope: 4, recovered: 3, accounted: 1, lost: 0, tally: { CONVERTED_MUST: 1, CONVERTED_MAY: 2, ACCOUNTED_DYNAMIC: 1, QUERY_ONLY: 1 }, rows })
@@ -25,7 +25,8 @@ test('derives the held-out figures with the corpus definitions', () => {
   assert.equal(m('HeldoutCompletedApp'), 'yes')
   assert.equal(m('HeldoutNodesApp'), '3 of 4')
   assert.equal(m('HeldoutNodeCoverageApp'), '75.0\\,\\%')
-  assert.equal(m('HeldoutBlindSpotsApp'), '1')
+  assert.equal(m('HeldoutBlindSpotsApp'), '2')
+  assert.equal(m('HeldoutLazyBlindSpotsApp'), '1')
   assert.equal(m('HeldoutMustConversionApp'), '25.0\\,\\%')
   assert.equal(m('HeldoutRecoveredShareApp'), '75.0\\,\\%')
   assert.equal(m('HeldoutAccountedShareApp'), '100.0\\,\\%')
