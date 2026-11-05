@@ -1,0 +1,41 @@
+% DRAFT for the author (REV-10, REV-13, citation audit item 8). Not \input by thesis.tex.
+% The AI-use statement is the author's own text: rewrite in your words, keep what is true,
+% and confirm the items marked [CONFIRM] before replacing the chapter in thesis.tex.
+
+\chapter*{Use of AI tools}
+\addcontentsline{toc}{chapter}{Use of AI tools}
+
+Aalto University asks that the use of artificial intelligence (AI) tools in a thesis be declared. I used
+one AI coding assistant, Claude Code by Anthropic, running Claude Opus and Claude Sonnet models
+(Opus~5.5 and Sonnet~5.5 in the final weeks; [CONFIRM the versions used earlier in the work]), between
+[CONFIRM start month] and November 2026. I am responsible for the whole of the result. The assistant was
+used in the following ways.
+
+\paragraph{Code.} The extractor and the evaluation harness were written with the assistant. Every change
+to the extractor's behaviour was made test first, and the corrections are listed in
+Table~\ref{tab:repairs}. The result tables and plots of Chapter~\ref{ch:results} are generated from the
+harness's result files, except the tables marked as compiled by hand.
+
+\paragraph{Readings of source code.} The assistant read application sources in three roles. As a
+reviewer it read the constructs behind an edge and reported disagreements with the extractor. In
+red-team panels it attacked the extractor, the harness and this text; several demotion rules of
+Section~\ref{sec:res-round2} were written in response. As an annotator it judged, from the source, the
+pairs of screens read in the comparisons with Rima et al.\ (Sections~\ref{sec:res-rima}
+and~\ref{sec:res-h2h}): one model (Sonnet) read each pair, a stronger model (Opus) re-read a share of
+them, and the readers were not told which tool had proposed a pair. I re-read a seeded sample of
+\HHAuthorSample{} of the readings behind the head-to-head figures against the source and agreed with
+\HHAuthorAgree{}; my reading saw the assistant's verdict, so it was not blind. Every defect the
+assistant reported was reproduced against the code before anything was changed. All these readings
+come from one model family, so their agreement measures consistency, not independent correctness.
+
+\paragraph{Literature.} The assistant located candidate sources and summarised them. Every bibliography
+entry was checked field by field against the publisher page, Crossref, arXiv or DBLP, and a citation
+audit compared each citing sentence with the source; for most entries the claim was checked against the
+abstract, for the compared works against the full text. [The earlier sentence about a separate block of
+unchecked sources was wrong: no such block exists. Two entries are in the bibliography file but not
+cited.]
+
+\paragraph{Figures and prose.} The diagrams were drafted as TikZ code with the assistant and revised by
+me. The assistant drafted and edited prose, which I revised. The research questions and the
+interpretation of the results are my own; the analysis and the evaluation protocol were revised in
+response to the reviews and panels described above, as Table~\ref{tab:repairs} records.

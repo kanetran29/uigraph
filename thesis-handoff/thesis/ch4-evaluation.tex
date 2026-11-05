@@ -76,6 +76,17 @@ an output of the thesis.
 \section{Metrics}
 \label{sec:metrics}
 
+Each research question is measured as follows. RQ1 is measured at two levels, since a transition cannot be
+recovered without the screens it runs between: the share of declared screens that have a node, and the
+share of navigation constructs that yield at least one must transition. For RQ2, observed failures are
+grouped into defect classes, a class being accepted only on two lines of evidence, at least one from an
+evaluation method of Section~\ref{sec:protocol}, and every construct not recovered is assigned to one loss
+category. For RQ3 the same extractor runs with the analysis disabled and enabled, so that nothing else
+differs. RQ4 is measured by mutation testing. For RQ5 each defect class is traced to its cause in the
+source and recorded as read by the final version, still unread, or beyond a static reader; every site that
+still yields no transition must carry a recorded label.
+
+
 Each research question is answered with one main measure. Table~\ref{tab:ratios} lists every ratio
 the thesis reports, and the paragraphs after it define the terms the table uses.
 

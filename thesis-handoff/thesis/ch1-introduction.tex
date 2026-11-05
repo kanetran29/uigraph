@@ -100,68 +100,27 @@ implementation.
 \section{Research questions and scope}
 \label{sec:rqs}
 
-The thesis addresses five research questions (RQs). This section states what each asks and how it
-is answered. The exact measures are defined in Section~\ref{sec:metrics}. The answers are
-given in Chapter~\ref{ch:results}.
+The aim is to measure how far static extraction of a UI transition graph gets on real Angular
+applications, why it fails where it does, and what scope attribution adds. Five research questions
+(RQs) follow from it; the measures are defined in Section~\ref{sec:metrics} and answered in
+Chapter~\ref{ch:results}.
 
-\medskip\noindent\textbf{RQ1.} \emph{How much of the navigation in Angular
-applications can static analysis recover as deterministic transitions?}
+\begin{description}[nosep,leftmargin=2.6em,labelwidth=2.2em]
+\item[RQ1] How much of the navigation in Angular applications can static analysis recover as
+  deterministic transitions?
+\item[RQ2] Where does static extraction fail, and why?
+\item[RQ3] How does scope attribution affect the recovered share and precision of static
+  navigation analysis?
+\item[RQ4] Does the extracted graph respond to source changes in the constructs it represents, as
+  change impact analysis requires?
+\item[RQ5] Are the losses a property of the applications or of the tool?
+\end{description}
 
-\noindent This is measured at two levels, because a transition cannot be recovered without
-the screens it runs between. The first level is node coverage: the share of the screens an
-application declares that the graph holds a node for. The second is the share of navigation
-constructs in the source that yield at least one deterministic (\emph{must}) transition.
-
-\medskip\noindent\textbf{RQ2.} \emph{Where does static extraction fail, and why?}
-
-\noindent The observed failures are grouped into defect classes. A class is accepted only if
-at least two lines of evidence confirm it. At least one of them must come from an
-evaluation method of Section~\ref{sec:protocol}. Each construct that is not recovered is
-assigned to one loss category, so the categories can be compared by size.
-
-\medskip\noindent\textbf{RQ3.} \emph{How does scope attribution affect the recovered share and
-precision of static navigation analysis?}
-
-\noindent Scope attribution is the analysis this thesis proposes. For a navigation site that
-belongs to no single screen, it computes the set of screens from which the site can fire.
-The same extractor is run with the analysis disabled and enabled, so that nothing else
-differs between the two runs.
-
-\medskip\noindent\textbf{RQ4.} \emph{Does the extracted graph respond to source changes
-in the constructs it represents, as change impact analysis requires?}
-
-\noindent This is measured with mutation testing: known changes are inserted into the source,
-and the graph is checked for the expected difference.
-
-\medskip\noindent\textbf{RQ5.} \emph{Are the losses a property of the applications or of
-the tool?}
-
-\noindent A defect class names where extraction failed, but not whether the navigation was
-unreadable or merely unread. Each class is therefore traced to its cause in the source, and for
-each cause the thesis records whether the final version reads it. If it does, the information
-was in the source and the loss was the tool's. The causes that are still not read, and those
-beyond a static reader, are named. Every site that still yields no transition must carry a
-recorded label.
-
-\medskip
-The questions are answered on a corpus of six open-source Angular applications pinned to
-fixed commits (Chapter~\ref{ch:evaluation}). Five evaluation methods are used, and RQ3 adds four further measurements; the methods are chosen so that their blind spots differ. The figures in Chapter~\ref{ch:results} are those of the final version of the extractor.
-Its development versions and the corrections between them are listed in
-Section~\ref{app:repairs}.
-
-The thesis has the following limits of scope.
-\begin{itemize}
-\item It does not claim completeness. Where a navigation target is computed at run time, the
-  transitions cannot in general be determined statically. The thesis instead states a
-  soundness property over a declared scope and lists what it approximates. This follows the
-  soundiness position (Section~\ref{sec:soundiness}). The property is tested, not proved.
-\item It does not measure the effect of the graph on coding agents or any other consumer.
-\item The screen sets that scope attribution computes are compared in both directions on two applications only, against references that apply the analysis's own relations.
-\item The extractor was developed on this corpus, so every figure on it is in-sample and is not an estimate for
-  other applications. One comparison, on seven applications of earlier work, is out-of-sample (Section~\ref{sec:res-rima}).
-\item All measurements concern Angular. The graph model does not depend on the framework,
-  but no other framework is evaluated.
-\end{itemize}
+The questions are answered on six open-source Angular applications pinned to fixed commits
+(Chapter~\ref{ch:evaluation}), with the final version of the extractor. The thesis does not claim
+completeness: it states a soundness property over a declared scope and lists what it approximates
+(Section~\ref{sec:soundiness}). It does not measure the graph's effect on any consumer, it evaluates
+Angular only, and its figures on the corpus are in-sample, since the extractor was developed on it.
 
 \section{Thesis structure}
 
