@@ -65,7 +65,7 @@ but one candidate was rejected on tool support and two retained applications do 
 test-suite criterion. The corpus spans nearly two orders of magnitude in routes, and the commits
 and harness are released so the measurement can be repeated.
 
-None of this addresses a further threat. uigraph was developed on this corpus and is measured on it
+None of this addresses a further threat. The extractor was developed on this corpus and is measured on it
 (Section~\ref{sec:limitations}), so the figures are fitted to it. A case study on a proprietary
 Angular application, reporting only aggregate figures, is planned as the most direct response
 (Chapter~\ref{ch:discussion}). There is no standard benchmark corpus for single-page applications
@@ -408,7 +408,7 @@ Without them, differences seen in mutation testing could not be told from noise.
 \label{app:repairs}
 \label{app:validation}
 
-The final figures are those of the final version of the protocol. uigraph was developed within this thesis, and three versions are named: the \emph{early development version} (commit \EarlierCommit{}), before the corrections the evaluation prompted; the \emph{intermediate version} (extractor \RoundExtractor{}, with a must tier of \RoundMustEdges{} edges, tables as printed at \RoundCommit{}); and the \emph{final version}, which the chapters present. Of the intermediate version only the must-tier figures are cited, as printed; the runs behind the printed tables were lost, and an archived re-run of the same extractor gave a different loss ledger. The figures of superseded instruments cannot be regenerated with the shipped harness, and none is cited as a result. A surprising
+The final figures are those of the final version of the protocol. The extractor was developed within this thesis, and three versions are named: the \emph{early development version} (commit \EarlierCommit{}), before the corrections the evaluation prompted; the \emph{intermediate version} (extractor \RoundExtractor{}, with a must tier of \RoundMustEdges{} edges, tables as printed at \RoundCommit{}); and the \emph{final version}, which the chapters present. Of the intermediate version only the must-tier figures are cited, as printed; the runs behind the printed tables were lost, and an archived re-run of the same extractor gave a different loss ledger. The figures of superseded instruments cannot be regenerated with the shipped harness, and none is cited as a result. A surprising
 figure is checked against its inputs before it is written down, since such a figure has more than
 once proved a property of the measurement and not of the extractor.
 
@@ -605,7 +605,7 @@ macro. \texttt{REPRODUCE.md} in the repository lists the scripts and the commit 
 \section{Summary}
 
 The corpus is six applications at pinned commits, selected by explicit criteria that were not
-applied uniformly, and uigraph was developed on it. Every ratio has one name and one definition in
+applied uniformly, and the extractor was developed on it. Every ratio has one name and one definition in
 Table~\ref{tab:ratios}. The five methods are each blind where the others see; the reproducibility
 arrangements cover the first four fully and the fifth, the runtime route oracle, only in part. The
 corrections that led to the final protocol are listed in Table~\ref{tab:repairs}.

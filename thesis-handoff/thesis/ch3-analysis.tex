@@ -455,7 +455,7 @@ target prefix falls back to the address of $s$, and its edges are may edges as e
 \section{Implementation}
 \label{sec:implementation}
 
-The extractor, \emph{uigraph}, was built for this thesis and is available as open source. It consists of a framework-independent core, which defines the graph model and the operations over graphs, and one adapter per framework that maps source constructs onto the shared model. The Angular adapter reads route configuration, templates and class code with the TypeScript compiler API and emits screens and edges for \texttt{routerLink} attributes and \texttt{Router.navigate} calls, each with the rule identifier and source location that produced it as witness.
+The extractor was built for this thesis and is available as open source. It consists of a framework-independent core, which defines the graph model and the operations over graphs, and one adapter per framework that maps source constructs onto the shared model. The Angular adapter reads route configuration, templates and class code with the TypeScript compiler API and emits screens and edges for \texttt{routerLink} attributes and \texttt{Router.navigate} calls, each with the rule identifier and source location that produced it as witness.
 
 Scope attribution is a separate pass in the Angular adapter, enabled with the option \texttt{-{}-attribution}. With the option off, the extractor produces exactly the baseline edge set, as checked on every application in the corpus. The pass implements component nesting, router outlets and the call graph; $D$ and $T$ are not implemented, and stand-ins replace them (below).
 

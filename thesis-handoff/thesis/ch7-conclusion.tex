@@ -44,9 +44,9 @@ RQ5: whose the losses are
 \endgroup
 
 \paragraph{Contributions.} The thesis contributes four things. The first is the extractor,
-uigraph, built in this work. It accepts nested and parameterised route trees, which the stated
+built in this work. It accepts nested and parameterised route trees, which the stated
 restrictions of an earlier Angular extraction exclude. Those restrictions admit \EarlierWorkAdmittedApps{} of the
-\EarlierWorkApps{} corpus applications (Section~\ref{sec:res-earlier}). uigraph extracts all of them. The second is
+\EarlierWorkApps{} corpus applications (Section~\ref{sec:res-earlier}). The extractor extracts all of them. The second is
 the measurement itself: a corpus of six pinned applications, five evaluation methods with different blind
 spots, four further checks of the scopes, and a classification of every lost construct. The third is the apparatus that makes it
 checkable. The result tables are generated from the harness's result files. The methods
@@ -59,7 +59,7 @@ lack, the placement of navigation inside services (Section~\ref{sec:res-earlier}
 
 \paragraph{What remains open.} The dispatch relation is specified but not implemented, the guard relation is replaced by a
 stand-in, and the call graph ignores the injector hierarchy. The screen sets were checked in both directions on
-two applications only, against references that apply the analysis's own relations. Further, uigraph was developed on the same corpus it is measured on. The
+two applications only, against references that apply the analysis's own relations. Further, the extractor was developed on the same corpus it is measured on. The
 end-to-end check on mifos found transitions lost to target forms the extractor did not read and to a
 relative link resolved against the child tab's address rather than the route that holds it. They were
 repaired after the check, so its final mifos figure is in-sample (Section~\ref{sec:res-e2e}). The

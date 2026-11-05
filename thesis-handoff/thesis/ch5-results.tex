@@ -554,7 +554,7 @@ application with a runnable suite remains to test them.
 This subsection gathers the RQ3 evidence in one place. Table~\ref{tab:earlier} sets three graphs side
 by side: without attribution, with the mechanism of earlier work, and with the full analysis. The
 earlier tools were not run. The \emph{rooted} column reimplements their mechanism inside
-uigraph, on uigraph's own node extraction (Section~\ref{sec:res-ablation}). Every figure is in-sample.
+this thesis's extractor, on its own node extraction (Section~\ref{sec:res-ablation}). Every figure is in-sample.
 
 \begin{table}[t]\footnotesize
 \caption{The graph without attribution, with the mechanism of earlier work (\emph{rooted}), and with the full analysis.}
@@ -596,7 +596,7 @@ Three things follow, with the figures in Table~\ref{tab:earlier}.
   Kishi's stated restrictions admit none of these applications, which declare route parameters and nested
   route trees. Rima et al.\ state no such restriction, and their specification covers this level
   (Section~\ref{sec:dynamic-spa}). Neither tool was run, so how they read these applications is not shown.
-  Inside uigraph the level runs on all six because uigraph's route extraction reads parameters and nested
+  Inside this thesis's extractor the level runs on all six because its route extraction reads parameters and nested
   trees, with or without attribution.
 \item \emph{The service join places navigation no earlier mechanism can place.} A navigation call inside an
   injected service belongs to no component, so the levels up to \emph{outlet} cannot place it on any screen,
@@ -631,7 +631,7 @@ it, on this corpus.
 \label{tab:world}
 \begin{tabularx}{\textwidth}{@{}YYY@{}}
 \toprule
- & Without this thesis & With uigraph \\
+ & Without this thesis & With this thesis \\
 \midrule
 Static extraction of the corpus applications & Oshima and Kishi's restrictions admit \EarlierWorkAdmittedApps{}/\EarlierWorkApps{} & extracts all \EarlierWorkApps{} \\
 Screens checked without signing in & a browser run renders \ScopeJudged{}/\ScopeScreens{}; the rest redirect to sign-in & every screen the static readers find declared has a node; nothing is run \\

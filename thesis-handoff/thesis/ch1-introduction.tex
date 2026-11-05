@@ -85,7 +85,7 @@ its formulation depends on this extractor.
 A method of this kind cannot be assessed without being instantiated, because the
 questions asked here are empirical. They ask how much of the navigation in real applications it
 recovers, where it fails, and whether the resulting graph responds to a change in the
-source. The extractor is \emph{uigraph}, an open-source static analyser for Angular built in this
+source. The extractor is an open-source static analyser for Angular built in this
 thesis. It is part of the contribution, not an existing tool. It reads nested, parameterised and
 lazily loaded route trees, which an earlier Angular extraction excludes by its stated
 restrictions (Section~\ref{sec:res-earlier}). It also implements scope attribution. Its development
@@ -155,7 +155,7 @@ The thesis has the following limits of scope.
   soundiness position (Section~\ref{sec:soundiness}). The property is tested, not proved.
 \item It does not measure the effect of the graph on coding agents or any other consumer.
 \item The screen sets that scope attribution computes are compared in both directions on two applications only, against references that apply the analysis's own relations.
-\item uigraph was developed on this corpus, so every figure is in-sample and is not an estimate for
+\item The extractor was developed on this corpus, so every figure is in-sample and is not an estimate for
   other applications.
 \item All measurements concern Angular. The graph model does not depend on the framework,
   but no other framework is evaluated.
