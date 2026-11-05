@@ -100,7 +100,12 @@ out += `\\newcommand{\\CeilMissing}{${all}}\n`
 out += `\\newcommand{\\CeilInside}{${allInside}}\n`
 out += `\\newcommand{\\CeilOutside}{${all - allInside}}\n`
 out += `\\newcommand{\\CeilInsideShare}{${pc(allInside, all)}}\n`
-const rows = [...gaps.values()].map((g) => `${esc(g.gap)} & \\texttt{${esc(g.example)}} & ${g.boundary} & ${esc(g.fix)} & ${g.pairs} \\\\`)
+/** An example site set with \\path, which breaks it at slashes; the characters \\path cannot carry in a macro argument are refused. */
+const site = (t) => {
+  if (/[{}%#\\]/.test(t)) throw new Error(`example "${t}" holds a character \\path cannot carry`)
+  return `\\path{${t}}`
+}
+const rows = [...gaps.values()].map((g) => `${esc(g.gap)} & ${site(g.example)} & ${g.boundary} & ${esc(g.fix)} & ${g.pairs} \\\\`)
 out += `\\newcommand{\\TabCeilGaps}{${rows.join('\n')}}\n`
 
 const tex = flag('--tex')
