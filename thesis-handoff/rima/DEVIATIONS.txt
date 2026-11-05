@@ -7,8 +7,10 @@ Deviations from PREREGISTRATION.txt, recorded 5 Nov 2026 after the results were 
    counted the traduora app bar as shown on /login and /forgot-password, whose NoAuthGuard keeps its
    *ngIf false; the first run and its gate had held that a condition must be satisfiable while the user
    stays on the start screen. Two verdicts became spurious and one real verdict was re-cited to the
-   login redirect (auth.state.ts:258-262). The rule as preregistered ("an *ngIf that can be true") did not
-   settle transient states; the stricter reading is applied to every verdict.
+   login redirect (auth.state.ts:258-262). The reading instructions ("an *ngIf that can be true"), not the
+   preregistration, left transient states open; the preregistered definition ("a UI path from s to t exists
+   in the source") is now read as requiring the trigger to be shown while the user stays on s, for every
+   verdict.
 3. Two post-hoc measures, reported beside the preregistered one and marked as such:
    - recall without the 3 reference pairs the source shows to be absent (class e). Only missed pairs were
      read, so this measure can only rise;

@@ -639,7 +639,7 @@ Screens checked without signing in & a browser run renders \ScopeJudged{}/\Scope
 Dead links found from the source & -- & \RoundTwoDeadLinkCandidates{} candidate sites in \RoundTwoDeadLinkWhere{}, checked against the runtime route oracle (Section~\ref{sec:deadlinks}) \\
 Transitions on \GTApp{} & its own suite takes \EtoERealworldPairs{} pairs & the graph holds \EtoERealworldGraphPairs{}, an over-approximation \\
 Response to a source change & -- & \MutFallibleDetected{}/\MutFallibleScored{} mutants, at constructs the graph represents \\
-Transitions of Rima et al.'s seven subjects & their pipeline enumerates the workflows their reference annotates & the graph holds \RimaHitFull{}/\RimaPairs{} of their preregistered reference pairs, \RimaHitOutlet{} at their specification's rule \\
+Transitions of Rima et al.'s seven subjects & their pipeline enumerates the workflows their reference annotates & the graph holds \RimaHitFull{}/\RimaPairs{} of their reference pairs as this thesis's preregistered rule counts them, \RimaHitOutlet{} at their specification's rule \\
 \bottomrule
 \end{tabularx}
 \par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; the earlier tools were not run; every figure is in-sample except the last row (Section~\ref{sec:res-rima}). All cells are generated figures.}
@@ -688,8 +688,9 @@ Per start route$^{\dagger}$ & \RimaPsPairs{} & \RimaPsRecallNoattr{} & \RimaPsRe
 
 Table~\ref{tab:rima} gives the result. The full level holds \RimaHitFull{} of the \RimaPairs{} reference
 pairs and the \emph{outlet} level \RimaHitOutlet{}. Two of the four preregistered predictions held: the full level
-holds at least 90\,\%, and the \emph{outlet} level is within five points of it. Two failed: no miss is a
-route the graph lacks or a navigation outside the router, and only \RimaExtraTop{} of the \RimaExtra{} other
+holds at least 90\,\%, and the \emph{outlet} level is within five points of it. Two failed: no miss was classed
+as a route the graph lacks or a navigation outside the router (the wildcard pair, whose route matches no
+screen, was classed as absent from the source), and only \RimaExtraTop{} of the \RimaExtra{} other
 pairs are reached only from the shell scope. \RimaRoutesHeld{} of the \RimaRoutes{} reference routes match a screen; the
 other two are the wildcard.
 
@@ -709,18 +710,23 @@ Besides the counted pairs the graph holds \RimaExtra{} others; \RimaExtraInPs{} 
 entries the preregistered rule drops. Of the \RimaJudged{} read from the source, \RimaJudgedReal{} are transitions the
 application has. \RimaJudgedSpurious{} are not: \RimaSpuriousTarget{} come from a navigation whose target is
 matched to longer routes than its command can produce, and \RimaSpuriousAttribution{} from a navigation
-placed on a sign-in screen where the component holding it is not shown: a navigation bar that only the other
-pages include, a service method called only from dialogs, and a shell bar hidden by a condition the screen's
-guard keeps false. Rima et al.'s reference lists the three airbus pairs too. All
+placed on a sign-in or password-reset screen where the component holding it is not shown: a navigation bar
+that only the other pages include, a service method called only from dialogs, and a shell bar hidden by a
+condition the screen's guard keeps false. Read per start route, Rima et al.'s reference lists all five of
+these pairs too. All
 \RimaJudgedSpurious{} are at the may tier; \RimaSpuriousMust{} has a must edge.
 
 The readings were made by the AI assistant: one model read each pair, and a stronger model of the same
 assistant re-read every miss, every pair not judged real and every sixth real one, \RimaGated{} in all, and
-changed \RimaGateChanged{}. One batch was read twice because the first run returned none of its pairs. A
-later adversarial review found that the second run had counted a shell bar as shown on sign-in screens whose
-guard hides it; \RimaCorrected{} verdicts were corrected and \RimaRecited{} re-cited by hand. A script
+changed \RimaGateChanged{}. One batch was read twice because the first run returned none of its 20 other pairs.
+A later adversarial review found that the second run had counted a shell bar as shown on sign-in and
+password-reset screens whose guard hides it; \RimaCorrected{} verdicts were corrected and \RimaRecited{} re-cited by hand. A script
 checked that every cited site exists and holds a navigation construct, which cannot show that the construct
-is rendered on the start screen. The three defects found here are not repaired in these figures.
+is rendered on the start screen. Four defects found here are not repaired in these figures: a relative link whose only segment is an
+expression; a fixed-length command matched as a route prefix; a navigation bar that pages include taken
+for the shell; and a service method called only from dialogs placed on the screens of the components
+that inject the service, not of those that open the dialogs. The hidden shell bar follows from the guard
+stand-in (Section~\ref{sec:approximations}).
 
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}
