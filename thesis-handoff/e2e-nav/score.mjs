@@ -40,7 +40,7 @@ function args(argv) {
   return out
 }
 
-const norm = (p) => (p ?? '').replace(/:[^/]+/g, ':_')
+export const norm = (p) => (p ?? '').replace(/:[^/]+/g, ':_')
 
 /**
  * Reads one navigation log and returns its observed pairs. A navigation whose requested address
@@ -81,7 +81,7 @@ const stripUrl = (url) => url.split(/[?#]/)[0].replace(/;[^/]*/g, '')
  * several match, the one with most literal segments wins, as a literal route shadows a
  * parameterised one in practice. Wildcard routes never match.
  */
-function urlMatcher(routes) {
+export function urlMatcher(routes) {
   const cands = [...new Set(routes)].filter((r) => !r.includes('*')).map((r) => [r, r.split('/').filter(Boolean)])
   return (url) => {
     const segs = stripUrl(url).split('/').filter(Boolean)
@@ -105,7 +105,7 @@ const readGz = (file) => JSON.parse(gunzipSync(readFileSync(file)).toString())
  * the screens by id and a map from each normalised pair to the kinds of source that reach it
  * ('top' for the shell scope, 'screen' otherwise).
  */
-function graphHits(g) {
+export function graphHits(g) {
   const byId = new Map(g.nodes.map((n) => [n.id, n]))
   const screens = new Map(g.nodes.filter((n) => n.kind === 'screen').map((n) => [n.id, n.route]))
   const expand = (id) => {
