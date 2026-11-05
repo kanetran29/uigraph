@@ -90,16 +90,16 @@ site can fire.
 Three results stand out. First, almost no navigation can be extracted as a deterministic
 transition. The corpus yields \CensusMust{} such edges from \CensusMustSites{} constructs. Most
 of them come from one toolbar whose screen set is untested, and most rest on an assumption
-about route order that the extractor does not read. Second, almost every cause of loss the source
-review found was a construct the extractor could read and did not; most were repaired, and
-two lie beyond any static reader of a route table. Third, scope attribution recovers
+about route order that the extractor does not read. Second, almost every cause of loss traced in the source is a construct a static reader can
+read, so the loss was the tool's; the final version reads most of them, and two lie beyond any
+static reader of a route table. Third, scope attribution recovers
 \AttrRecoveredShare{} of the constructs the loss rules assign to it, most of them on one
 application and almost all as possible rather than certain transitions. On the one application whose screen sets were read by hand,
 it adds almost nothing to a reimplementation of earlier mechanisms. That reference applies the
 analysis's own relations, was partly completed from the graph's output and guided two
 repairs. Mutation testing on three applications shows that the graph responds to injected
-changes in constructs it already represents, after the harness was corrected on its earlier
-misses.
+changes in constructs it already represents; its harness was corrected after its misses were
+read, so the test is not independent.
 
 The conclusion is that a declared route table is a usable starting point for static
 navigation extraction, but not a sufficient one. Scope attribution adds a modest gain over
@@ -139,11 +139,12 @@ them. In red-team panels it attacked the extractor, the harness and this text. S
 demotion rules of Section~\ref{sec:res-round2} were written in response to its objections, among
 them the rule by which the extractor decides which guards a navigation runs. Every defect it
 reported in either role was reproduced against the code before anything was changed, and the
-corrections that followed are reported in Chapter~\ref{ch:results} as corrections. Its readings
-are also part of the evaluation itself. The two readings of the intermediate version's must
+corrections that followed are listed in Appendix~\ref{app:repairs}. Its readings
+are also part of the evaluation itself. The two readings of a development version's must
 tier in \path{results-must/review.json} and the reading of the final tier in
-\path{results-must/tier-reading.json} were made by the assistant. Chapter~\ref{ch:results} says of
-each what it can and cannot show, given who made it. The two readings are two runs of one model,
+\path{results-must/tier-reading.json} were made by the assistant. Chapter~\ref{ch:results} says what
+the reading of the final tier can and cannot show, and Table~\ref{tab:repairs} what the review of
+the development version's tier found. The two readings are two runs of one model,
 so their agreement measures consistency, not correctness.
 
 The assistant was also used during the literature search, to locate candidate sources and
@@ -156,7 +157,7 @@ cited anywhere in the text.
 Finally, the assistant was used to draft and edit prose, which I then revised. The
 research questions and the interpretation of the results are my own; the analysis and the
 evaluation protocol were revised in the course of the work in response to the reviews and panels
-described above, as Chapter~\ref{ch:results} records, and the responsibility for every claim
+described above, as Appendix~\ref{app:repairs} records, and the responsibility for every claim
 made here is mine.
 
 \chapter*{Abbreviations}

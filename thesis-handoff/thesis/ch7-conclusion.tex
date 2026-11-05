@@ -4,8 +4,8 @@
 This thesis measured how much of the navigation structure of an Angular application can be
 recovered from its source code without running it. It explained where the recovery fails, and
 it proposed an analysis for the largest loss. This chapter summarises the answers
-to the five research questions, the contributions, and what remains open. The repairs made on
-the way are not retold here; Table~\ref{tab:repairs} records them.
+to the five research questions, the contributions, and what remains open. The development versions of
+uigraph and the corrections between them are listed in Appendix~\ref{app:repairs}.
 
 \paragraph{RQ1: how much is recovered.} Loss happens at two levels. At the level of nodes,
 every screen the static readers find declared has a node in all \RoundTwoFullNodes{}
@@ -44,19 +44,19 @@ without attribution. Of the mifos misses,
 \paragraph{RQ4: whether the graph responds to change.} On three applications, the graph
 detects \MutFallibleDetected{} of \MutFallibleScored{} injected link deletions, retargets and
 guard removals. Every operator is scored only at constructs the graph already represents, in the
-simplest form the extractor reads, so detection is close to guaranteed for each. The harness was corrected after its earlier misses had been read, and
-the final sample shares \MutOverlap{} of its \MutSampled{} mutants with that run, so the rate is
+simplest form the extractor reads, so detection is close to guaranteed for each. The mutation harness was corrected during development after its misses had been read, and
+the final sample shares \MutOverlap{} of its \MutSampled{} mutants with the run whose misses were read, so the rate is
 not an independent test; the samples are small. Without attribution fewer changes can be scored at all. On the
 \MutPaired{} mutants both graphs can score, the attributed graph detects \MutPairedDetected{}
 and the baseline \MutPairedBaseDetected{}. The experiment shows that the graph responds to
 change; it does not show how well the graph would select tests.
 
 \paragraph{RQ5: whose the losses are.} The defect classes name failures of extraction, so the
-answer lies in their causes: almost every cause the source review found is a construct the
-extractor could read and did not. This is a
-statement about classes, not about every lost construct: destinations only the run time knows
-are counted apart (Table~\ref{tab:loss}). The node-level classes were repaired. Of the causes the
-source review found, these remain in the tool: named router outlets, which the model
+answer lies in their causes, traced in the source. Almost every cause is a construct a static
+reader can read, so the information was in the source and the loss was the tool's and not the
+application's. The final version reads most of them.
+This is a statement about classes, not about every lost construct: destinations only the run time knows
+are counted apart (Table~\ref{tab:loss}). The causes still not read are named router outlets, which the model
 represents as a second mount and the extractor does not implement, and one application's
 spread of computed routes, which the extractor declares unread. The end-to-end check adds target forms the extractor
 does not read (Section~\ref{sec:res-e2e}). For the attribution class the answer holds for the
@@ -83,7 +83,7 @@ dataflow analysis over screen sets and implemented over three of its four input 
 
 \paragraph{What remains open.} The dispatch relation is specified but not implemented, the guard relation is replaced by a
 stand-in, and the call graph ignores the injector hierarchy. The screen sets were checked in both directions on
-one application only, against a reference that applies the analysis's own relations, and the repairs were found on the same corpus they are measured on. The
+one application only, against a reference that applies the analysis's own relations, and uigraph was developed on the same corpus it is measured on. The
 end-to-end check on mifos found transitions lost to a declared approximation, a relative link
 in a template shared with child tabs resolved against the child's address, and to target forms
 the extractor does not read; none is repaired (Section~\ref{sec:res-e2e}). The

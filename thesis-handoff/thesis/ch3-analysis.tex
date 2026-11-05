@@ -225,11 +225,11 @@ takes the code as deployed.
 \textbf{How far the rules are checked.} Unit tests cover each rule in both directions, and a
 mutation sweep deletes each rule in turn and checks that some test fails
 (Section~\ref{sec:res-round2}). The tests share the extractor's reading of each construct, and no
-second classifier re-derives them. What stands in for one, for the condition rules, is a review in
-which the assistant the declaration describes read the constructs behind the intermediate version's must tier in
-the source, twice and separately, without the extractor's readers
-(Section~\ref{sec:res-round2}; the corrections are in Table~\ref{tab:repairs}; some were found by this review
-and not by the witness check). What the witness check establishes is therefore narrower than the
+second classifier re-derives them. The constructs of the final must tier were read against the
+source by the assistant the declaration describes, with the extractor's decisions in view; this
+checks that each decision can be defended and is not an independent second reading
+(Section~\ref{sec:res-round2}). Some defects in the condition rules were found by an earlier review
+of a development version's tier and not by the witness check (Appendix~\ref{app:repairs}). What the witness check establishes is therefore narrower than the
 claim: that every cited site exists in the source and agrees on its target. The stronger half of
 the claim rests on the demotion rules and is not independently verified.
 
@@ -273,7 +273,7 @@ category ``Attribution, service'' of Table~\ref{tab:loss-rules}.
 
 \subsection{The defect being addressed}
 
-In the early development version of uigraph, a navigation site is attributed to a screen only if it
+Without scope attribution, a navigation site is attributed to a screen only if it
 occurs directly in the component that the route for that screen renders. Navigation sites
 anywhere else are attributed to no screen. This one cause explains three symptoms:
 \begin{itemize}
@@ -282,8 +282,8 @@ next to the router outlet and not inside the subtree of any screen;
 \item a component mounted at several routes contributes one edge instead of one per route;
 \item navigations from injected services yield no edges.
 \end{itemize}
-The symptoms are those of the early development version. On the final baseline no application is
-without edges.
+These are the symptoms of the baseline, the extractor with the attribution pass disabled
+(Section~\ref{sec:implementation}). On it no application is without edges.
 
 \subsection{Scope}
 \label{sec:scope}
@@ -497,7 +497,7 @@ If the result of attribution were stored explicitly, a single link in the applic
 would produce one edge for every screen. Where every site has a single target, the size of the
 graph would then be bounded by $|S| \cdot |\mathit{sites}|$, where $\mathit{sites}$ is the set of
 navigation sites. For the largest application in the corpus that bound is
-$\RoundTwoEarlierOracleMifosNow{} \times \ConstructsMifos{}$. A site whose target is only partly
+the product of its screens (Table~\ref{tab:conversion}) and its \ConstructsMifos{} constructs. A site whose target is only partly
 known can reach several screens, so in general
 \[
   |E_{\mathit{expanded}}| \;\le\; \sum_{x \in \mathit{sites}} |\mathit{scope}(x)| \cdot |\mathit{Targets}(x)|,
@@ -602,7 +602,8 @@ The seeded call-graph iteration on its own reaches the least solution of its con
 scopes emitted for service sites add two fallbacks to it:
 \begin{itemize}
 \item a member no caller reaches falls back to the join over every component that injects its
-class, the per-class approximation an earlier version used for every service;
+class, the per-class approximation that the \emph{class} level of the ablation applies to every service
+(Section~\ref{sec:res-ablation});
 \item a member the iteration does reach receives more screens where a caller the graph does not
 see reaches it: the join of that caller's class is added, or this class's own join if nothing
 places the caller.

@@ -7,6 +7,24 @@ This appendix holds the records of how the measuring instruments were checked an
 \section{History of the corrections}
 \label{app:repairs}
 
+uigraph was developed within this thesis, and three of its versions are named in this appendix, each by one label.
+\begin{itemize}
+\item The \emph{early development version}: commit \EarlierCommit{}, before the corrections the evaluation
+  prompted. On it k8s dashboard had nodes and no edges (Table~\ref{tab:defects}).
+\item The \emph{intermediate version}: extractor \RoundExtractor{}, with its
+\RoundMustEdges{}-edge must tier and the tables as printed at \RoundCommit{}.
+\item The \emph{final version}: extractor commit \texttt{c42f220}, harness 1.9.0 and mutation
+harness 1.9.1. The source of the Angular adapter is identical at \texttt{920e1aa}, where the
+sweep of the demotion rules was recorded.
+\end{itemize}
+The chapters present only the final version, whose tables of Section~\ref{sec:res-round2} were regenerated at its commit.
+Of the intermediate version only the must-tier figures are cited (Table~\ref{tab:repairs}), as printed at \RoundCommit{}; the runs behind
+the printed tables were lost, and an archived re-run of the same extractor gave a different loss ledger.
+The figures of the early development version and of the intermediate must tier are historical: they were measured with
+\texttt{eb9dab80} and before and are read from git at \texttt{f17a302} and \texttt{7d109c7}. The first node audit
+(Table~\ref{tab:node-audit}) is historical too: harness 1.2.0, recorded extractor \texttt{4505fd2a}, absent from the
+repository, committed table only.
+
 The results of Chapter~\ref{ch:results} are those of the corrected instrument. Table~\ref{tab:repairs} records how the instrument got there: what was wrong, how it was found, what was changed, and what the change did to the reported figures. The figures of superseded instruments cannot be regenerated with the harness this thesis ships. Each is either read from a named commit's own generated results, or taken from the output of an earlier run that was not kept. Where an earlier figure cannot be regenerated, the row describes the effect in words. The rows follow the order in which the chapters record the corrections; they are not a dated log. The reviews and red-team panels named in the table were made with the AI assistant that the declaration at the front of this thesis describes, and every defect they reported was reproduced against the code before it was repaired.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{2.5pt}

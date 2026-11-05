@@ -2,21 +2,19 @@
 \label{ch:results}
 % Numerical tables are generated. Each generated file identifies its evaluated snapshot.
 % The main RQ1--RQ3 tables use the final snapshot with attribution off and on.
-% Historical evidence is retained only where explicitly identified in the text.
+% Development versions appear only in Appendix A (app:repairs).
 
 This chapter reports what the harness of Section~\ref{sec:protocol} measured on the corpus of
 Section~\ref{sec:corpus}, one research question at a time. Section~\ref{sec:res-baseline}
 answers RQ1, Section~\ref{sec:res-defects} RQ2, Section~\ref{sec:res-after} RQ3 and
-Section~\ref{sec:res-mutation} RQ4. Section~\ref{sec:res-round2} asks what the losses were and what the repairs did to the claim (RQ5), and Section~\ref{sec:deadlinks} reports the dead links the method found as a
+Section~\ref{sec:res-mutation} RQ4. Section~\ref{sec:res-round2} asks what the losses were and what the cause of each says about the claim (RQ5), and Section~\ref{sec:deadlinks} reports the dead links the method found as a
 by-product.
 
 The numerical tables are generated from the harness result files. The summaries compiled by hand
 are marked as such. The main must-conversion, loss, before-and-after and graph-composition tables
 describe the final extractor snapshot. The baseline is that code without scope attribution, and the
-attributed version is the same code with the pass enabled. Historical results are identified
-where they appear. They explain the repairs and are not a second population for the final
-comparison. The corrections that led to the final snapshot are listed in
-Appendix~\ref{app:repairs}.
+attributed version is the same code with the pass enabled. The development versions of uigraph
+and the corrections between them are listed in Appendix~\ref{app:repairs}.
 
 Two conditions of the measurement hold for every figure below.
 
@@ -62,10 +60,8 @@ Table~\ref{tab:coverage} gives the first measure. It compares the nodes the extr
 the screens the independent route parser finds declared. Against that denominator node
 extraction is complete: on all six applications every declared screen has a node.
 
-That was not true of the early development version of uigraph. It read one application as a
-single node for the \RoundTwoEarlierOracleGhostfolioDeclared{} screens it declares, and the
-largest as under a tenth of its screens. Section~\ref{sec:res-round2} reports what had to be
-repaired, and Appendix~\ref{app:readers} the handful of addresses the two readers still disagree
+Section~\ref{sec:res-round2} gives the causes of the node-extraction defects the final version
+reads, and Appendix~\ref{app:readers} the handful of addresses the two readers still disagree
 about.
 
 Two qualifications apply, because the figure invites a reading that neither supports.
@@ -80,8 +76,8 @@ Their agreement is therefore weaker evidence than if they had stayed independent
 method is the external check for that reason, and it finds no node at an address where the
 framework mounts nothing. That check ran on 29 and 30 October against a graph whose extractor
 commit was not recorded. Its only link to the final graph is the equal node total
-(Table~\ref{tab:provenance}), and it followed repairs that the same check had prompted on these
-applications.
+(Table~\ref{tab:provenance}), and the graph had been corrected using earlier findings of the same
+check on these applications.
 \end{itemize}
 
 Completeness here is a claim about the screens the readers can \emph{see}. The blind-spot column marks where it is incomplete but does not bound it: one route entry neither reader can resolve can hide many screens (Section~\ref{sec:res-probe}). Such an entry is outside the denominator, and
@@ -113,7 +109,7 @@ lazy-boundary class rests on three methods. The attribution class leans most on 
 it is the class the analysis of Chapter~\ref{ch:analysis} addresses. Its observations are not weak
 in themselves, but they are not independent instruments.
 
-The five classes were found at the early development version, and each has at least two confirmations.
+The five classes were found during development, and each has at least two confirmations.
 The quantitative breakdown revealed a sixth candidate: a node that exists but is not linked to the
 component that renders it. It is confirmed only by the comparison between the independent route parser and the
 graph, so it is reported as a candidate until a second method confirms it. It is empty on the
@@ -128,10 +124,9 @@ column counts only those. This summary is compiled by hand; it is not harness ou
 \toprule
 Class & Evidence & Methods & All \\
 \midrule
-Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph (at commit \EarlierCommit{});
-multi-mount edge absent; manual audit; an application with nodes and no edges at the early development version (k8s dashboard) & 1 & 4 \\
+Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph; multi-mount edge absent; manual audit; an application with nodes and no edges on a development version (k8s dashboard; Appendix~\ref{app:repairs}) & 1 & 4 \\
 Lazy module boundary not followed & independent route parser; test-source cross-check; mutation & 3 & 3 \\
-Guards unreliable in both directions & red-team panels and a source survey of the guard factory and the call-form \texttt{canActivate}, after commit \EarlierCommit{}
+Guards unreliable in both directions & red-team panels and a source survey of the guard factory and the call-form \texttt{canActivate}
 (Section~\ref{sec:res-soundness}) & 1 & 2 \\
 Named router outlets not implemented & test-source cross-check; source survey & 1 & 2 \\
 Constant-valued route paths not resolved & independent route parser; node-count collapse & 1 & 2 \\
@@ -170,11 +165,9 @@ target. Of the attribution constructs, \AttrNonLiteral{} have a target that the 
 literal test does not accept. If the target were tested first, the target category would be
 larger than attribution on \AttrOrderFlipWhere{}.
 
-The ranking is also a result of the repair campaign, not of the baseline. When this evaluation
-began, two node-extraction defects dominated the corpus: constant route paths and lazy module
-boundaries, with a further group of screens whose nodes had no link to the component that renders
-them (Section~\ref{sec:res-losses} explains all three once). They are empty in Table~\ref{tab:loss}
-because the causes were found and repaired. The ranking justifies spending an analysis on
+Constant route paths, lazy module boundaries and nodes with no link to the component that renders
+them are empty in Table~\ref{tab:loss}, because the final extractor reads their causes
+(Section~\ref{sec:res-losses} explains all three once). The ranking justifies spending an analysis on
 attribution: once the extractor reads what the applications declare, the navigation it still
 cannot place is mostly navigation with no single owning screen, under the order caveat above.
 
@@ -293,11 +286,7 @@ Table~\ref{tab:recovery-source} gives the recovery by the loss category each con
 baseline and by the modality its own witness earns. Of the recoveries from the attribution categories,
 \AttrRecoveredMust{} earn must and \AttrRecoveredMay{} earn may. The loss categories are not
 independent causes: a shared component can be assigned to attribution even when a missing target
-node prevents its recovery. On the early development version of uigraph (commit \EarlierCommit{}),
-\EarlierGainFromNode{} of \EarlierGainMust{} constructs converted to must, \EarlierGainFromNodeShare{},
-came out of node-related categories against \EarlierGainFromAttribution{} from attribution categories.
-Those figures come from that commit's recorded results and supply no counts for the final
-comparison.
+node prevents its recovery.
 
 \begin{table}[t]\small
 \caption{Where recovered constructs came from on the final snapshot. Rows are their
@@ -400,7 +389,7 @@ address.
 Only predictions that name a destination exactly can be refuted by a page not linking there. There
 are \ScopeExact{} of them across the judged screens, against \ScopeApprox{} over-approximated, and
 \ScopeOverAttributed{} of the \ScopeExact{} were not rendered. A denominator of \ScopeExact{}
-supports no rate, and reporting one would repeat the error of the first witness check, which read a low precision off a denominator of over-approximated edges (Table~\ref{tab:repairs}). The over-attribution direction was therefore not refuted on this
+supports no rate. The over-attribution direction was therefore not refuted on this
 corpus, because the graph almost never claims an exact destination at a screen this check can
 observe. The measure is reported as several numbers, not a precision figure, so that the two
 directions stay separate.
@@ -552,24 +541,20 @@ pairs unfound. Precision is measured against a reference whose header sites were
 graph's output, so it is weakest as evidence exactly where the shell dominates.
 
 Everything above \emph{rooted} reduces \GTRootedMissing{} missing pairs to \GTFullMissing{} and
-asserts no pair outside the reference. That was not true of the analysis before the call graph. The
-last row, the class-level join the call graph replaced, asserts \GTClassExcess{} pairs outside the
+asserts no pair outside the reference. The
+last row, the class-level join that the call graph refines, asserts \GTClassExcess{} pairs outside the
 reference, all at one site, the \texttt{navigate} inside \texttt{UserService.logout}, which takes
 precision to \GTClassPrecision{}. The class join attributes a navigating service to every screen
 whose components inject it. Ten components inject this one, the header among them, and the shell
 renders the header on every screen, so the site was attributed to every screen although its only
-caller is a button on the settings screen. This was the first measurement in the thesis to show a
-computed scope too large rather than merely unverified. The call graph follows the call from that
+caller is a button on the settings screen. The call graph follows the call from that
 button and places the site on the settings screen alone.
 
-The clean row has two limits. The call graph was written after this ground truth had exposed the
-defect and is scored on the same ground truth, so the \GTFullPrecision{} precision is consistent
-with the repair and is not an independent test of it. The same holds for recall: until the last
-corrections to the rule that places an empty-path child on the screen above it
-(Section~\ref{sec:approximations}), \emph{full} missed five pairs, all at \path{/profile/:username},
-whose article list is placed by a child route at the empty path and renders on the parent's address.
-At the final commit it misses \GTFullMissing{}. Only that rule moves a (site, screen) pair between
-the two runs. The clean row is consistent with two repairs and tests neither independently.
+The clean row has one limit. The structural reference guided two repairs of the analysis: the call
+graph, written after the reference exposed the class-level defect, and the rule that places an
+empty-path child on the screen above it (Section~\ref{sec:approximations}). The \GTFullPrecision{}
+precision and the recall of \emph{full} are scored on the same reference, so they are consistent with
+the two repairs and test neither independently.
 
 For RQ3 two things follow. First, most of the recovery attributed to this analysis is produced by
 mechanisms earlier work already had: \GTRootedRecall{} of the \GTPairs{} pairs are reached by the
@@ -602,9 +587,8 @@ agreement is with the transitions the suite takes and not with the graph.
 \paragraph{mifos.} The suite completes \EtoEMifosEnds{} navigations, \EtoEMifosPairs{} distinct pairs,
 and the graph contains \EtoEMifosHit{} of them. This count applies the pre-registered rule: a
 redirected navigation is compared on the address it asked for. \EtoEMifosRedirect{} pairs were
-redirected, and \EtoEMifosHitRedirect{} of those are hits. Under the scorer's first,
-non-preregistered rule the figure was \EtoEMifosHitAfterRedirects{} of
-\EtoEMifosPairsAfterRedirects{} (Table~\ref{tab:repairs}, row 32). Without attribution the graph contains
+redirected, and \EtoEMifosHitRedirect{} of those are hits. The scorer's
+departure from this rule during development is listed in Table~\ref{tab:repairs}. Without attribution the graph contains
 \EtoEMifosHitNoattr{}. None of the matched pairs is a must edge, as predicted. \EtoEMifosHitRedirect{} hits, those of the redirect bucket, rest only on
 a site whose target prefix was over-approximated to many routes, so they show that the target is
 reachable in the graph and not that the site was resolved. No other pre-registered prediction is
@@ -727,10 +711,6 @@ mutants are scorable only against the attributed graph and \MutBaselineOnly{} on
 baseline. On this corpus, then, attribution leaves the detection rate per scored change essentially
 unchanged, and its effect on change sensitivity is the widening of what can be scored at all.
 
-An earlier harness run used the same seed on a partly different sample, and its disagreements in
-favour of attribution came from an operator artefact that has since been corrected
-(Table~\ref{tab:repairs}, row 7). The single disagreement above remains.
-
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}
 
@@ -812,82 +792,98 @@ The mutation run does not confirm the defect class \emph{guards unreliable in bo
 Section~\ref{sec:res-defects} on this instrument, and it does not contradict it either. Every
 guard it could observe behaved as the model requires, and the \MutExcludedGuard{} it could not
 observe carry no information about guard representation. The evidence for that class is the pair of
-defects found by red-team panels and a source survey after commit \EarlierCommit{}
-(Section~\ref{sec:res-soundness}): a guard carried by a route a wrapper function returns, and a
-\texttt{canActivate} element written as a call rather than as a name. The extractor of that commit
-read neither, and both are read now.
+defects found by red-team panels and a source survey (Section~\ref{sec:res-soundness}): a guard
+carried by a route a wrapper function returns, and a \texttt{canActivate} element written as a call
+rather than as a name. The final extractor reads both.
 
 Of the \MutScored{} scored mutants, \MutDetected{} were detected, and \MutBaseDetected{} of
 \MutBaseScored{} without attribution. On the \MutPaired{} mutants both graphs can score, the
 figures are \MutPairedDetected{} and \MutPairedBaseDetected{}. In this sample the graph responded to
 every scored change in the constructs it represents. A construct it does not represent cannot
 respond, and such mutants are excluded rather than scored, so the rate is conditional on RQ1's
-recovered share. The final sample has \MutOverlap{} of its \MutSampled{} mutants at the same location (operator, file and line) as the earlier run, with possibly other destinations, whose
-misses guided the corrections to the harness, so the rate is not an independent test.
+recovered share. The mutation harness was corrected during development after the misses of an earlier run were read. The final sample shares \MutOverlap{} of its \MutSampled{} mutants (same operator, file and line, possibly other destinations) with that run, so the rate is not an independent test.
 
-\section{What the losses were and what the repairs cost (RQ5)}
+\section{What the losses were (RQ5)}
 \label{sec:res-round2}
 
-The defect classes of Section~\ref{sec:res-defects} are a diagnosis, and a diagnosis is worth the
-repair it leads to. This section reports what happened when the list was treated as a worklist.
-Each class was taken to its root cause in the source of the application it appeared in. The same
-question was asked of each cause: is the navigation unreadable, or was it merely unread? The tables
-report the final snapshot used for the main RQ1--RQ3 comparison. Historical measurements appear
-only where named, and their counts are never substituted into the final tables. The sequence of
-corrections that led to the final snapshot is in Appendix~\ref{app:repairs}.
+The defect classes of Section~\ref{sec:res-defects} are a diagnosis. RQ5 asks what lies behind each
+class and what that says about the claim, and it is answered by cause analysis on the final version.
+For each class the cause was traced in the source of the application it appears in. The same
+question was asked of each cause: is the navigation unreadable, or is it merely unread? If the
+final version reads the cause, the information was in the source and the loss was the tool's. The
+causes it does not read, and the causes beyond a static reader, are listed apart. The tables report
+the final snapshot used for the main RQ1--RQ3 comparison. The development versions and the
+corrections between them are listed in Appendix~\ref{app:repairs}.
 
 \subsection{What the losses were}
 \label{sec:res-losses}
 
 This section keeps two words apart: a \emph{class} is a row of Table~\ref{tab:defects}, and a
-\emph{cause} is what the source review found behind a class. The classes stand as follows.
+\emph{cause} is what the source review found behind a class.
+
+\paragraph{Read by the final version.} The information was in the source, so the loss was the
+tool's.
 
 \begin{itemize}
 \item \emph{Lazy module boundary} and \emph{constant-valued route paths}: causes in the extractor,
-repaired, and empty in Table~\ref{tab:loss}.
-\item \emph{Guards}: the two unread forms (a guard on a route a wrapper returns, a \texttt{canActivate}
-element written as a call) were repaired, and the guard rule was replaced by the router's own
+read by the final version, and empty in Table~\ref{tab:loss}.
+\item \emph{Guards}: the two unread forms (a guard on a route a wrapper returns, a
+\texttt{canActivate} element written as a call) are read, and the guard rule is the router's own
 semantics (Section~\ref{sec:res-soundness}).
-\item \emph{Attribution}: partly recovered (\AttrRecoveredShare{}). The remainder is in
-Table~\ref{tab:remaining}, including sites that no relation the prototype implements reaches.
-\item \emph{Named router outlets}: a construct the model represents and the extractor does not
-implement, and not repaired. Its navigations are excluded from the denominator
-(\RoundTwoExcludedOutlet{} sites) and its screens left out of the runtime route oracle's mounted set
-(\ProbeOutletScreens{} route entries).
 \item The candidate class \emph{node not linked to its component}: empty on the final version.
 \end{itemize}
 
-The source review also found three causes that no class row names.
+\paragraph{Still not read.} The final version does not read these causes.
+
+\begin{itemize}
+\item \emph{Attribution}: \AttrRecoveredShare{} of its constructs are recovered. The remainder is in
+Table~\ref{tab:remaining}, including sites that no relation the prototype implements reaches. It mixes gaps of the tool with
+components that no screen may render, and no measurement separates them.
+\item \emph{Named router outlets}: a construct the model represents and the extractor does not
+implement. Its navigations are excluded from the denominator (\RoundTwoExcludedOutlet{} sites) and
+its screens left out of the runtime route oracle's mounted set (\ProbeOutletScreens{} route
+entries).
+\item ghostfolio's spread of computed routes is a construct the extractor could read and does not.
+\ProbeMissedGhostfolio{} of the \ProbeMissed{} mounted addresses without a node sit behind it.
+\item Three readable forms that the end-to-end check exposed: a template literal inside a commands
+array, \texttt{relativeTo} passed through a variable, and the base resolution of a template shared
+with child tabs (Section~\ref{sec:res-e2e}).
+\end{itemize}
+
+\paragraph{Beyond a static reader of a route table.} No reader of a route table can resolve these.
 
 \begin{itemize}
 \item ghostfolio's custom \texttt{UrlMatcher} computes a route's path in a function. No reader of a
 route table can resolve it, and both tools report it as a blind spot.
 \item mifos chooses between two route tables by a value injected at deployment, which the runtime
 method of Section~\ref{sec:res-probe} finds and the sources leave undecided.
-\item ghostfolio's spread of computed routes is a construct the extractor could read and does not.
-\ProbeMissedGhostfolio{} of the \ProbeMissed{} mounted addresses without a node sit behind it.
 \end{itemize}
 
-Every other cause was a construct the extractor could read and did not, and all were repaired
-except the one behind the named-outlet class, which the model represents and the extractor does not
-implement. Beyond the spread of computed routes, the end-to-end check exposed readable forms that remain unrepaired: a template literal inside a commands array, \texttt{relativeTo} passed through a variable, and the base resolution of a template shared with child tabs (Section~\ref{sec:res-e2e}). The node-extraction
-defects fall into three groups.
+The causes the final version reads fall into three groups, traced here in the source.
 
 \begin{sloppypar}
-\paragraph{The route table was not reached.} This is the lazy-boundary defect. An NgModule loaded by
+\paragraph{The route table was not reached.} This is the lazy-boundary cause. An NgModule loaded by
 \texttt{loadChildren} keeps its routes in a separate \texttt{*-routing.module} that it imports.
-Stopping at the module file found nothing, and the routing module was then scanned at the project
-root, where every screen in it was minted at its own relative path. Four further forms hid a table: a
-route array held inline by \texttt{RouterModule.forChild([\ldots])}, whose elements may name routes
-(\texttt{[ERROR\_ROUTE]}) rather than write them; a loader that references its module directly
+A reader that stops at the module file finds nothing, and if the routing module is then scanned at
+the project root, every screen in it is minted at its own relative path. Four further forms hide a
+table: a route array held inline by \texttt{RouterModule.forChild([\ldots])}, whose elements may name
+routes (\texttt{[ERROR\_ROUTE]}) rather than write them; a loader that references its module directly
 (\texttt{loadChildren: () => VaultModule}); a barrel that re-exports the route array; and a wrapper
-such as mifos's \texttt{Route.withShell([\ldots])}, a call whose array argument was skipped whole. A
-related defect left nodes with no link to the component that renders them. It is the candidate class
-and is empty on the final version.
+such as mifos's \texttt{Route.withShell([\ldots])}, a call whose array argument is skipped whole.
+A lazy route may also name a module through a barrel that re-exports a feature module, which imports
+the routing module that holds the table. A reader that follows one hop finds no table and places the
+screens at the application root (\path{/breach-report}), where the running router mounts them deeper
+(\path{/reports/breach-report}). Both static readers shared this cause, so their agreement could not
+expose it and the runtime route oracle did. The final extractor follows the chain to the table,
+bounded at three hops, refusing at every hop a file the route itself sits in, a file another route
+loads, and a file whose every table is registered at the application root. A related cause left nodes
+with no link to the component that renders them. It is the candidate class and is empty on the final
+version.
 \end{sloppypar}
 
-\paragraph{The path was named, not written.} This is the constant-path defect. In one application every
-route path was a reference into a constant table, which collapsed its graph to a single node.
+\paragraph{The path was named, not written.} This is the constant-path cause. In one application every
+route path is a reference into a constant table, which collapses its graph to a single node when it
+is not followed.
 \texttt{path: internalRoutes.account.path} is a compile-time string, and so are an enum member and a
 \texttt{\$localize} segment. Following the name needs the workspace's \texttt{paths} aliases, because
 the table commonly lives in a library outside the application directory, and the destructuring a route
@@ -895,23 +891,20 @@ file reaches it through.
 
 \paragraph{The destination was named, not written.} A target may be a field, a dotted chain into
 the route table, an element of a commands array, the return of a builder, or a value in a lookup
-the component fills. Resolving these is what separates a link from a dead end. One qualification
-cost a soundness violation before it was added: a field seeded with a literal is mutable state,
-not a constant, and following it turns a run-time value into a must edge.
+the component fills. Resolving these is what separates a link from a dead end. A field seeded with a
+literal is mutable state, not a constant, and the reader does not follow it, because following it
+would turn a run-time value into a must edge.
 
-Node extraction is therefore no longer the bottleneck. The repairs
-brought every application to completion. An analysis that decides where a navigation can fire needs a node
+Node extraction is therefore not the bottleneck on the final version: every application is complete
+against the readers' denominator. An analysis that decides where a navigation can fire needs a node
 for the screen it fires from, and a construct whose source screen has no node is a loss attribution
-cannot repair. The threshold was crossed by resolving the constructs the route table was reached
-through, not by inferring nodes the framework definition does not supply. The gaps that remain are
-declared rather than inferred. The custom matcher and the deployment-time choice depend on
-information a static reader does not have. The spread of computed routes does not: its routes are in
-the source, and the extractor does not yet read them.
+cannot repair. The gaps that remain are declared rather than inferred. The custom matcher and the
+deployment-time choice depend on information a static reader does not have. The spread of computed
+routes does not: its routes are in the source, and the extractor does not yet read them.
 
-The independent route parser was itself corrected several times
-(Appendix~\ref{app:validation}); the correction that matters most, for a route table wrapped in
-\texttt{Object.freeze}, is row 20 of Table~\ref{tab:repairs}. The final baseline and attributed
-runs use the same route denominator (Table~\ref{tab:coverage}).
+The corrections to the independent route parser are listed in Appendix~\ref{app:validation} and
+Table~\ref{tab:repairs}. The final baseline and attributed runs use the same route denominator
+(Table~\ref{tab:coverage}).
 
 \subsection{Construct accounting}
 
@@ -943,7 +936,7 @@ in-scope sites.}
 
 Of \RoundTwoInScope{} in-scope sites, \RoundTwoRecovered{} are recovered, \RoundTwoDynamic{} are
 accounted as dynamic and \RoundTwoUnplaced{} as unplaced, so \RoundTwoAccounted{} are accounted for in
-all, against \RoundTwoBefore{} in the final baseline. k8s dashboard shows why recovered and dynamic
+all. k8s dashboard shows why recovered and dynamic
 must be reported separately: a low recovered fraction can coexist with many sites whose destination
 depends on runtime data. Its dynamic sites are spread over \RoundTwoDynamicFiles{} files,
 \RoundTwoDynamicFilesOne{} of which contribute a single site, so the column reports a habit of the
@@ -963,9 +956,9 @@ reaches a named outlet's \emph{subtree} too. alfresco mounts its viewer as
 address, \path{/view/:nodeId} and \path{/search-libraries/view/:nodeId}, which Angular reaches only as
 \texttt{(viewer:\ldots)}. Both tools read the subtree the same way, so the coverage figure could not
 expose it, and the runtime route oracle of Section~\ref{sec:res-probe} was needed. Neither tool mints such
-addresses now.
+addresses.
 
-\subsection{What it cost the soundness property}
+\subsection{The soundness property of the final tier}
 \label{sec:res-soundness}
 
 A gain in recovered share must be assessed together with the evidence for the emitted edges.
@@ -975,7 +968,7 @@ cited destination unread. The corpus total of such edges is \MustWitnessUnread{}
 \MustWitnessEdges{}.
 
 \begin{table}[t]\small
-\caption{Final-snapshot witness-check outcomes and must conversion after the repairs.
+\caption{Final-snapshot witness-check outcomes and must conversion.
 The must column counts edges whose destination was read and passed; the rest are unread
 destinations, neither passes nor failures, and no must edge failed.
 ``Not applicable'' means the application emits no must edge. \emph{Sites cited} counts the source
@@ -985,16 +978,15 @@ locations the edges cite, \emph{Judged} counts those less the over-approximated 
 \TabRoundTwoSoundness
 \end{table}
 
-\subsubsection{The rules the must tier now follows}
+\subsubsection{The rules the must tier follows}
 
 The witness check compares the destination a cited construct names with the destination its edge
 names. It never asks whether the construct runs every time its code does, nor whether the router lets
 the navigation through, which are the two halves of Claim~\ref{claim:must} that
-Section~\ref{sec:model} assigns to the demotion rules. These rules were corrected by a source review
-and by red-team panels, made with the assistant the declaration at the front of this thesis
-describes. Every defect they reported was reproduced against the code before it was repaired. The
-review read the \MustCtxDistinct{} distinct constructs, cited \MustCtxConstructs{} times, that the
-\MustCtxEdges{} edges of a frozen intermediate tier cite.
+Section~\ref{sec:model} assigns to the demotion rules. These rules were written during development, partly in response to
+the objections of a source review and of red-team panels made with the assistant the declaration at
+the front of this thesis describes. Every defect those reported was reproduced against the code
+before it was repaired.
 
 \paragraph{Conditions on the construct.} A site is demoted when it does not run every time its code
 does. The conditions are:
@@ -1006,13 +998,8 @@ does. The conditions are:
 \item at an address two declared routes can answer;
 \item before code that may start another navigation.
 \end{itemize}
-Of the \MustCtxConstructs{} citations in the intermediate
-tier, \MustCtxConditional{} run under such a condition: \MustWhyUnderABranch{} under a branch,
-\MustWhyTemplate{} under a template condition (realworld's own \texttt{*ifAuthenticated} directive
-among them), \MustWhyAfterAwait{} after an \texttt{await}, \MustWhyInACallback{} in a callback,
-\MustWhyAfterEarlyExit{} after an early exit, \MustWhyInACatchClause{} in a \texttt{catch} clause and
-\MustWhySupersededByALaterNavigation{} before code that may cancel them. A construct under more than
-one condition is filed under the first the reader finds.
+A construct under more than one condition is filed under the first the reader finds. The template
+conditions include realworld's own \texttt{*ifAuthenticated} directive.
 
 \paragraph{Guards as the router runs them.} For each source and destination the extractor computes
 the guards the router runs: \texttt{canDeactivate} on the levels the navigation leaves,
@@ -1030,8 +1017,7 @@ every navigation as an entry from outside the application. Further rules complet
 be the reason an edge is called deterministic.
 \item A guard on a child route with an empty path and no component gates the screen above it,
 because Angular matches such a child on every navigation to its parent. bitwarden's
-\texttt{redirectGuard()} sits on such a child. \MustFateGuard{} edges, every one of bitwarden's, are
-guarded.
+\texttt{redirectGuard()} sits on such a child.
 \item A guard carried by a route a wrapper function returns is read.
 \end{itemize}
 
@@ -1055,32 +1041,9 @@ citations are recorded as may, which is what they are evidence for.
 
 \subsubsection{The deterministic tier and its evidence}
 
-Table~\ref{tab:mustledger} in Appendix~\ref{app:mustledger} records, construct by construct, the
-condition the extractor now reads. It is produced with the extractor's own readers, so it records
-their decisions and does not corroborate them. What stands in for corroboration is a recorded review
-of \MustReviewReaders{} readings of the \MustCtxDistinct{} constructs, made separately by the
-assistant the declaration describes, from the sources and without the extractor's readers or results
-(\path{results-must/review.json}). The extractor agrees with the less favourable reading at
-\MustReviewAgreeMin{} of the \MustCtxDistinct{} constructs, and the two readings agree with each
-other at \MustReviewReadersAgree{} of them. Four limits qualify that agreement.
-
-\begin{itemize}
-\item The two readings are two runs of one model, not independent raters, so the agreement measures
-consistency and not correctness.
-\item The cohort they read is the intermediate tier, not the final one.
-\item Each reader was given this chapter's condition rules as the definition to apply, after those
-rules had been corrected on the same constructs. The readings test whether the extractor applies its
-rules as written, not whether the rules are right.
-\item They judge only whether a construct runs every time its code does, and its destination, not
-the guards and self-loops that decide \MustFateGuard{} and \MustFateSelfLoop{} of the \MustCtxEdges{}
-edges in the frozen cohort.
-\end{itemize}
-
-Of those \MustCtxEdges{} edges, \MustCtxAllConditional{} have every cited construct under a
-condition. Taking guard first, then self-loop, then condition, \MustFateGuard{} are guarded,
-\MustFateSelfLoop{} is a self-loop, \MustFateCondition{} are conditional, \MustFateKept{} keep a
-construct that earns must, and \MustFateJoined{} is joined: its own construct earns may, and the edge
-stays must because the shell's logo links, drawn per screen, yield it too.
+Table~\ref{tab:mustledger} in Appendix~\ref{app:mustledger} records, for each construct a
+development version's must tier cites, the condition the final extractor reads. It is produced with the extractor's own readers, so it records their
+decisions and does not corroborate them.
 
 With these rules the deterministic tier is \CensusMust{} edges with attribution and \CensusBaseMust{}
 without it, resting on \CensusMustSites{} constructs with attribution and \CensusBaseMustSites{}
@@ -1114,7 +1077,7 @@ Each of the \CensusMustSites{} constructs was read against the source for the co
 the address Angular resolves it to (for a relative link, the route's consumed segments less one per
 \texttt{../}), and the guards and resolvers its navigation runs. The readings are kept in
 \path{results-must/tier-reading.json}, and the census refuses to report a must construct that file
-does not list. Unlike the review of the intermediate tier, this reading was made once, by the AI assistant the
+does not list. This reading was made once, by the AI assistant the
 declaration at the front describes, and with the extractor's decisions in view. It is a check that
 each decision can be defended from the source, not an independent second reading.
 
@@ -1125,11 +1088,8 @@ chrome component's scope and on the route-order assumption, so these weaknesses 
 Outside k8s dashboard every must edge was read and passed. Neither the source reading nor the
 mechanical check is an independent proof of Claim~\ref{claim:must}. The demotion rules are also
 exercised by a mutation sweep (\SweepMutants{} mutants at \texttt{\SweepCommit}) in which every
-deletion fails some test. On the sweep's first run in the final revision, at
-\texttt{\SweepEarlierCommit}, \SweepEarlierSurvived{} of \SweepEarlierMutants{} mutants survived, all
-rules the router fixes had added without a test; tests now cover \SweepEarlierCovered{} of them, and
-the other \SweepEarlierRetired{} were retired as equivalent, each deleting a condition already implied
-by the shape of a route table or by another check. The sweep measures whether the tests detect
+one of the \SweepMutants{} deletions fails some test. \SweepEarlierRetired{} further deletions are not
+swept: they were retired as equivalent, each deleting a condition already implied by the shape of a route table or by another check. The sweep measures whether the tests detect
 deletions of the rules, not whether the rules are a complete account of runtime navigation. These
 checks do not constitute a proof of soundness.
 
@@ -1214,7 +1174,7 @@ Across the corpus the compared graph declares \ProbeInvented{} screens that the 
 at. Over \ProbeApps{} applications, \ProbeRoutes{} route entries and \ProbeNodes{} nodes, every
 address the extractor claims is an address the framework's own configuration mounts. This is
 external evidence about these six applications that no node is minted at an address the application
-does not mount. It was measured on an earlier graph with the same node total (Table~\ref{tab:provenance}), after the repairs this check had itself prompted. It is a precondition of the must-tier property and not part of it. An address behind
+does not mount. It was measured on an earlier graph with the same node total (Table~\ref{tab:provenance}), which had been corrected using earlier findings of this check. It is a precondition of the must-tier property and not part of it. An address behind
 a guard that always refuses still counts as mounted, so the runtime route oracle could not expose such a node. The
 two static readers could not produce this evidence, because an address both of them place at the
 wrong prefix is an address they agree on.
@@ -1277,28 +1237,15 @@ Neither limit moves a published number, because the census counts addresses and 
 pair are leaves. Both are reasons to read Table~\ref{tab:probe} as a statement about the route
 configuration and not about the rendered interface.
 
-The runtime route oracle also moved two things. In alfresco it returned \path{/view/:nodeId} and
-\path{/search-libraries/view/:nodeId}, a blind spot the two static readers held in common: both
-assembled the routes beneath a named outlet against the primary path, and node coverage was 100\,\%
-over a set that contained them. Section~\ref{sec:named-outlet} had declared the construct as an open
-case, but declaring it is not the same as being sound over it, since a consumer reading the graph finds
-a node at an address the built application answers with its catch-all. The extractor now carries the
-outlet down the walk and mints no screen for such a subtree, a loss and no longer a claim.
-
-The check also found a case nobody had declared. Against the route set as the independent route parser
-(the reader whose per-application sets are committed) held it before the repairs, the same comparison
-returns \ProbeBeforeNotMounted{} addresses in \ProbeBeforeWhere{}: the two in alfresco, and eight in
-bitwarden, seven report screens and a member screen. Both readers placed them at the application root
-(\path{/breach-report}, \path{/sponsored-families}), where the running router mounts the first at
-\path{/reports/breach-report} and the second three segments deeper, under
-\path{/organizations/:organizationId/members/}. The cause was the same in both readers, arrived at
-independently. A lazy route names a module through a barrel, the barrel re-exports a feature module,
-and the feature module imports the routing module that holds the table. Each reader followed one hop,
-found no table, and left the file to the scan that reads unclaimed tables at the root. Neither could
-have caught the other, and the coverage both reported was 100\,\% over a denominator carrying the
-same eight wrong addresses. Both now follow the chain to the table, bounded at three hops, refusing at
-every hop a file the route itself sits in, a file another route loads, and a file whose every table is
-registered at the application root.
+The runtime route oracle also exposes causes that the two static readers share, which their agreement
+cannot show. In alfresco it returned \path{/view/:nodeId} and \path{/search-libraries/view/:nodeId},
+a blind spot the two readers held in common: both assembled the routes beneath a named outlet
+against the primary path, and node coverage was 100\,\% over a set that contained them. Section~\ref{sec:named-outlet} declares the
+construct as an open case, but declaring it is not the same as being sound over it, since a consumer
+reading the graph finds a node at an address the built application answers with its catch-all. The
+final extractor carries the outlet down the walk and mints no screen for such a subtree, so the construct
+is a loss and not a claim. The second shared cause, a lazy route reached through a barrel, is described with the
+other causes of the unreached route table (Section~\ref{sec:res-losses}).
 
 \section{Dead links, found from the source}
 \label{sec:deadlinks}
@@ -1374,7 +1321,8 @@ small on some applications, and the evidence that they are not too large is limi
 application's structural reference, and the end-to-end suites test only the missing direction. In
 the sampled mutants on three applications the graph responded to every scored change in the
 constructs it represents; mutants on constructs it does not represent are excluded. The
-repairs closed the node-extraction defects except two, and left a small deterministic tier that
-rests on a source reading and a mechanical check and is not proved. The corrections are listed in
-Appendix~\ref{app:repairs}, and Chapter~\ref{ch:discussion} discusses what the results mean for
+final version reads the causes behind the node-extraction defects except those that
+Section~\ref{sec:res-losses} lists as not read or beyond a static reader. Its deterministic tier is
+small, rests on a source reading and a mechanical check, and is not proved. The development versions
+and the corrections between them are listed in Appendix~\ref{app:repairs}, and Chapter~\ref{ch:discussion} discusses what the results mean for
 the claim.

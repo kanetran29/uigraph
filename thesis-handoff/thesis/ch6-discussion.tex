@@ -26,9 +26,8 @@ The runtime route oracle also bounds the first claim: the route configuration it
 sense of a node for every mounted address.
 Both readings are reported: the weaker is what the loss classification is computed against, and
 the stronger is what a user of the graph would want.
-The node defects of the early development version (constant paths, lazy boundaries) are described in
-Section~\ref{sec:res-defects} and were repaired in Section~\ref{sec:res-round2}; on the final
-instrument those losses are empty.
+The node defects (constant paths, lazy boundaries) are traced in Section~\ref{sec:res-defects}.
+The final version reads their causes (Section~\ref{sec:res-round2}), and those losses are empty.
 
 \paragraph{What remains is lost at the edge.}
 The navigation sites exist in the source and the screens they would connect exist in the graph,
@@ -70,12 +69,9 @@ No construct that the baseline converted was lost (\AttrRegressed{} leave the co
 The gain does widen the must tier: under the demotion rules (Table~\ref{tab:repairs}, rows 14 to 18) it
 holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, mostly the links of
 realworld's and k8sdash's shells placed on every screen the shell renders.
-On the intermediate version every must edge passed the witness check (\RoundMustClean{} after
-attribution), but only as the tables were printed then: the runs behind them were lost and an
-archived re-run did not reproduce them.
-That tier held none of k8sdash's edges, so it says nothing of the edges attribution added there.
-Whether those edges occur on every input is what the demotion rules decide; \CensusMustKdash{} of them are kept at must.
-On the final version the check finds \MustWitnessViolations{} failures among the
+Whether the edges attribution added at k8sdash occur on every input is what the demotion rules decide; \CensusMustKdash{} of them are kept at must.
+The demotion rules were written during development, in part in response to objections from red-team panels run with the AI assistant.
+The witness check finds \MustWitnessViolations{} failures among the
 \MustWitnessEdges{} must edges, but cannot read the destination of \MustWitnessUnread{}, all of
 them k8sdash's toolbar edges, so only about half of that application's must edges are read.
 
@@ -85,7 +81,7 @@ but in one application they are almost as large as the shared-component category
 (Table~\ref{tab:loss}).
 Placing them takes the full level of Section~\ref{sec:res-ablation}, which adds
 \AblationFullAddedSites{} sites to the outlet level; the call graph places only
-\AblationCallGraphNetSites{} more than the per-class join it replaced.
+\AblationCallGraphNetSites{} more than the per-class join.
 Applications that navigate from services therefore need an injection relation of some form, and
 the dispatch relation is still not implemented.
 
@@ -94,13 +90,11 @@ Leaving aside the rename operator, whose detection is close to guaranteed by con
 mutants on the attributed graph: every deleted \texttt{routerLink}, \MutRetargetDetected{} of
 \MutRetargetScored{} retargeted calls and \MutGuardDetected{} of \MutGuardScored{} removed guards
 (Table~\ref{tab:mutation}).
-The clean result came only after corrections to the harness, found by reading the undetected
-mutants (Appendix~\ref{app:repairs}).
-Each undetected mutant on the previous run was the harness's error rather than the graph's, which
-says the harness needed the reading; it does not show that the remaining operators would survive a
-larger or differently drawn sample.
-The final sample is partly different from the earlier one (\MutOverlap{} of \MutSampled{} mutants at the same location, by operator, file and line, as the \MutEarlierSampled{} of the earlier run, destinations possibly differing), so the runs share a seed and not a
-sample.
+The mutation harness was corrected during development after its misses had been read
+(Appendix~\ref{app:repairs}), so the clean result is not an independent test.
+It does not show that the remaining operators would survive a larger or differently drawn sample.
+The final sample shares \MutOverlap{} of its \MutSampled{} mutants with the run whose misses were read
+(Section~\ref{sec:corrections}), so the two runs share a seed and not a sample.
 The three mutated applications use different routing styles, and no operator fails under one
 style and not the other (Section~\ref{sec:res-mutation}); the corpus was not stratified by style,
 so nothing more general follows.
@@ -173,10 +167,10 @@ on two applications, performed by the person who wrote the tool.
 Each of those four choices limits what the figures support.
 
 \textbf{The tool was developed together with this evaluation, on the same corpus.} uigraph was built
-for this thesis and corrected while it was evaluated (Table~\ref{tab:repairs}). Every figure
+for this thesis and corrected while it was evaluated (Appendix~\ref{app:repairs}). Every figure
 measured on the six applications is therefore in-sample: the extractor, the independent route
 parser, the mutation harness and the structural reference were corrected against the applications
-they are then scored on. The end-to-end check comes closest to an out-of-sample test. The extractor
+they are scored on. The structural reference guided two repairs of the extractor. The end-to-end check comes closest to an out-of-sample test. The extractor
 was fixed at its final commit before the suites' logs were read, and nothing was repaired after;
 the archive cannot corroborate that order, since the preregistration and the logs were committed
 together. No held-out application measures how far the corrections generalise.
@@ -189,8 +183,8 @@ Three methods bear on it, each partly.
 \item The hand-read structural reference (Section~\ref{sec:res-groundtruth}) answers in both
 directions, but for one application of six and only as agreement with the analysis's own
 relations. The analysis finds \GTFullRecall{} of its (site, screen) pairs at \GTFullPrecision{}
-precision. The rule the call graph replaced asserted \GTClassExcess{} pairs outside it at one
-site; the call graph was written after that finding and scored on the same ground truth, so the
+precision. The \emph{class} level, the per-class rule the call graph replaced, asserts \GTClassExcess{} pairs outside it at one
+site; the call graph was written after that finding and is scored on the same ground truth, so the
 clean figure is consistent with the repair but does not test it independently. The levels that
 stand for earlier work, reimplemented in this extractor, recover \GTRootedRecall{} (shell rule) and
 \GTOutletRecall{} (with the enclosing routes) of the pairs and, being nested inside the full level,
@@ -259,17 +253,17 @@ transitions, not whether the construct count covers the application's navigation
 Node coverage carries a stronger form of the threat, in the opposite direction.
 Its denominator is the screens the independent route parser can address, so a screen whose path neither tool can read
 is outside the ratio and not counted against it; refusing to read more raises reported coverage.
-Three of one application's declared screens assemble their paths inside a template literal from an
-exported constant, and while neither tool read them that application's coverage was complete
-(Section~\ref{sec:res-round2}).
-Nothing in the ratio would have said so.
+Screens whose paths are assembled inside a template literal from an exported constant, as three of one
+application's declared screens are, fall outside the ratio when neither tool reads them, and coverage can
+then read as complete (Section~\ref{sec:res-round2}).
+Nothing in the ratio would say so.
 Every coverage figure is therefore printed beside the count of routes the independent route parser knows are there and
 cannot address.
 
 The two units stand in a many-to-many relation, which is why the ratio counts constructs and not edges
 (Section~\ref{sec:metrics}).
 Several constructs can yield one edge, the extra ones recorded as merged witnesses.
-The witness check now judges every location an edge cites, so a construct counts towards the ratio
+The witness check judges every location an edge cites, so a construct counts towards the ratio
 only on evidence the check has read; merged citations are \WitnessMergedCitationShareRealworld{} of
 those in realworld's attributed graph and \WitnessMergedCitationShareMax{} where the share is largest
 (Section~\ref{sec:res-round2}).
@@ -330,14 +324,12 @@ Section~\ref{sec:transfer} argues about other routers, but that argument is not 
 \textbf{Oracle independence.}
 The independent route parser shares no code with the extractor, which makes it independent and says nothing about
 whether it is right.
-The independence is also partial (Table~\ref{tab:repairs}): for the route-path forms added later
+The independence is also partial (Table~\ref{tab:repairs}): for the route-path forms added during development
 (a table behind a freezing call, a path assembled from constants, a module reached through a workspace
-alias), the two tools were taught the same rules because each was wrong in the same place.
+alias), the two tools apply the same rules.
 Their agreeing about such a path is weaker evidence than their agreeing about a path each reads its own
 way.
-The independent route parser's own errors mattered: it first reported that every declared screen of mifos had a node, and
-after correction finds a far larger set, of which under a tenth have a node, with the extractor unchanged
-(Table~\ref{tab:repairs}).
+The corrections of the independent route parser are listed in Table~\ref{tab:repairs}.
 A differential test only shows that two implementations disagree, never which is right, and each
 disagreement was resolved by reading the source, by the person who wrote both implementations.
 
@@ -363,13 +355,12 @@ Several controls were not applied:
 \item no blinding, no second annotator for the loss classification, and no independent audit of the
 residual constructs inspected by hand;
 \item the defect classes were defined after the first observations, not in advance;
-\item the source-level readings of the must tier (\MustReviewReaders{} readings of the intermediate
-tier's \MustCtxDistinct{} constructs, and one of the final \CensusMustSites{}) were made by the artificial intelligence (AI)
+\item the source-level reading of the final must tier (its \CensusMustSites{} constructs) was made by the artificial intelligence (AI)
 assistant declared at the front, which also helped write the extractor and the independent route parser.
-The final reading was made with the extractor's decisions in view and no human second reader checked them.
-Their agreement therefore shows consistency with the stated rules and not independent correctness;
-\item the repairs of Section~\ref{sec:res-round2} were found on, and are measured on, the same six
-applications, with no held-out application, so the post-repair figures are fitted to this corpus.
+It was made with the extractor's decisions in view and no human second reader checked it.
+Its agreement with the extractor therefore shows consistency with the stated rules, not independent correctness;
+\item uigraph was developed on, and is measured on, the same six
+applications, with no held-out application, so the figures are fitted to this corpus.
 \end{itemize}
 The requirement of two lines of evidence per defect class is the strongest control on the last point,
 and the reason one class is still a candidate.
@@ -404,9 +395,7 @@ Threat 3 moves the set in no fixed direction, since a production configuration c
 drop them.
 Both results are statements about the development router configuration that was recorded, under the
 abstraction of Section~\ref{sec:res-probe}.
-On that configuration the failures of the earlier cohort are real: the two alfresco addresses of the
-first comparison, and the \ProbeBeforeNotMounted{} the comparison returns against the static readers'
-earlier route set, are absent from the recorded configuration.
+The oracle ran on an earlier graph whose node total equals the final one (Section~\ref{sec:reproducibility}).
 The compared graph mints \ProbeInvented{} such addresses, which is the absence of a failure on that
 configuration and not a proof of its impossibility.
 
@@ -465,10 +454,9 @@ scope.
 \item The primary \texttt{<router-outlet>} with the shell rule that follows from it.
 \item Guards named on a route, as labels on the edges entering that route's subtree.
 \end{itemize}
-The failures measured on the early development version of uigraph were failures inside this group:
-constant route paths, lazy boundaries and unlinked nodes (Section~\ref{sec:res-defects}).
-They were bugs with known causes and not approximations to be declared away, which is why RQ5
-could repair them (Section~\ref{sec:res-round2}).
+The defects of Section~\ref{sec:res-defects} (constant route paths, lazy boundaries, unlinked nodes) lie inside this group.
+They are bugs with known causes and not approximations to be declared away, which is why the cause
+analysis of RQ5 can say that the final version reads them (Section~\ref{sec:res-round2}).
 
 \textbf{Approximated} are the following constructs, each with the reason it is approximated and
 the effect on the graph.
@@ -797,7 +785,7 @@ applications is left for future work (Section~\ref{sec:future}).
 \section{Future work}
 \label{sec:future}
 
-This section looks forward; what was repaired is reported in Section~\ref{sec:res-round2} and
+This section looks forward; the development versions and the corrections between them are listed in
 Appendix~\ref{app:repairs}.
 The topics are listed in the order of how much each would change what the thesis can claim.
 
@@ -813,7 +801,7 @@ further, since it would show which \emph{rule} made a site wrong without re-extr
 rule.
 
 \paragraph{The remaining node-level losses.}
-The node defects of the early development version are repaired (Section~\ref{sec:res-defects}).
+The final version reads the causes of the node defects of Section~\ref{sec:res-defects}.
 Some attribution losses that remain, most of them in ghostfolio (Table~\ref{tab:remaining}), are
 constructs whose scope was found but whose target screen has no node.
 Those behind the spread of computed routes could be recovered by reading more of the route
@@ -888,7 +876,7 @@ The defect class ``node not linked to its component'' has one confirmation, from
 between the independent route parser and the graph, and the rule adopted in Chapter~\ref{ch:results} admits a
 class only with two.
 The class is empty on the final version (Table~\ref{tab:loss}), so its standing matters only for
-the record of the early development version.
+the record of the development versions (Appendix~\ref{app:repairs}).
 A second method would have to reach it independently, and the test-source cross-check is the
 natural candidate: a screen whose node exists but carries no component link should still be
 visited by tests while contributing no outbound edges.

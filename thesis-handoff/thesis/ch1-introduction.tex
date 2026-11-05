@@ -99,8 +99,8 @@ recovers, where it fails, and whether the resulting graph responds to a change i
 source. The extractor is \emph{uigraph}, an open-source static analyser for Angular built in this
 thesis. It is part of the contribution, not an existing tool: it reads nested, parameterised and
 lazily loaded route trees, which an earlier Angular extraction excludes by its stated
-restrictions (Section~\ref{sec:res-earlier}), and it implements scope attribution. It was
-corrected during the evaluation (Table~\ref{tab:repairs}). Because the same person built the
+restrictions (Section~\ref{sec:res-earlier}), and it implements scope attribution. Its development
+versions and the corrections between them are listed in Appendix~\ref{app:repairs}. Because the same person built the
 tool and measured it, on the same corpus, the figures describe what this extractor recovers on
 these applications; Section~\ref{sec:limitations} discusses what that means for them, and
 Chapter~\ref{ch:discussion} separates the limits of the method from those of this
@@ -146,15 +146,17 @@ and the graph is checked for the expected difference.
 the tool?}
 
 \noindent A defect class names where extraction failed, but not whether the navigation was
-unreadable or merely unread. Each class is therefore traced to its cause in the source. The
-causes that lie in the extractor are repaired where possible, and the corpus is measured
-again. Every site that still yields no transition must carry a recorded label.
+unreadable or merely unread. Each class is therefore traced to its cause in the source, and for
+each cause the thesis records whether the final version reads it. If it does, the information
+was in the source and the loss was the tool's. The causes that are still not read, and those
+beyond a static reader, are named. Every site that still yields no transition must carry a
+recorded label.
 
 \medskip
 The questions are answered on a corpus of six open-source Angular applications pinned to
-fixed commits (Chapter~\ref{ch:evaluation}). Five evaluation methods are used, and RQ3 adds four further measurements; the methods are chosen so that their blind spots differ. The figures in Chapter~\ref{ch:results} are those of the extractor
-after the repairs of RQ5; the history of those repairs is summarised in
-Appendix~\ref{app:validation}.
+fixed commits (Chapter~\ref{ch:evaluation}). Five evaluation methods are used, and RQ3 adds four further measurements; the methods are chosen so that their blind spots differ. The figures in Chapter~\ref{ch:results} are those of the final version of the extractor.
+Its development versions and the corrections between them are listed in
+Appendix~\ref{app:repairs}.
 
 The thesis has the following limits of scope.
 \begin{itemize}
@@ -164,8 +166,8 @@ The thesis has the following limits of scope.
   soundiness position (Section~\ref{sec:soundiness}). The property is tested, not proved.
 \item It does not measure the effect of the graph on coding agents or any other consumer.
 \item The screen sets that scope attribution computes are compared in both directions on one application only, against a reference that applies the analysis's own relations.
-\item The repairs were found on this corpus, and no held-out application tests how far they
-  generalise.
+\item uigraph was developed on this corpus, and no held-out application tests how far its
+  results generalise.
 \item All measurements concern Angular. The graph model does not depend on the framework,
   but no other framework is evaluated.
 \end{itemize}
@@ -188,8 +190,9 @@ which is the main contribution, is set up in Chapter~\ref{ch:evaluation} and rep
 Chapter~\ref{ch:results}.
 Chapter~\ref{ch:evaluation} describes the evaluation setup: the corpus and why it can
 be considered valid, the metrics, and the five evaluation methods.
-Chapter~\ref{ch:results} presents the results for each research question: the two levels of loss (RQ1), the defect classes (RQ2), scope attribution and what it recovers (RQ3), change sensitivity (RQ4) and what the repairs found and cost the soundness property (RQ5), followed by the dead-link candidates the graph finds statically, each checked against the route configuration the runtime route oracle recorded.
-Appendix~\ref{app:validation} holds the validation of the measuring instruments: the
+Chapter~\ref{ch:results} presents the results for each research question: the two levels of loss (RQ1), the defect classes (RQ2), scope attribution and what it recovers (RQ3), change sensitivity (RQ4) the causes of the losses and the soundness of the must tier (RQ5), followed by the dead-link candidates the graph finds statically, each checked against the route configuration the runtime route oracle recorded.
+Appendix~\ref{app:validation} lists the development versions of uigraph and the corrections between
+them, and holds the validation of the measuring instruments: the
 disagreements between the two static readers, how the declared-screen set moved under the
 corrections, the case-by-case account of asking the running framework, and the record that
 every remaining site names a reason, recorded rather than verified. It is kept apart from the
