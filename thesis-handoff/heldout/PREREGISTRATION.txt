@@ -75,3 +75,36 @@ angular-ngrx-material-starter (starter, S1; pushed 2022, S4), webosbrew/dev-mana
 The two held-out applications are therefore:
   peertube   Chocobozzz/PeerTube        4b859fe1542b22f0c003bd480f4687e49d2b47b6  appDir client
   spotify    trungvose/angular-spotify  57585bbd46767d5aa1c3d939e7131109aafc620b  appDir apps/angular-spotify
+
+=====================================================================
+Addendum C (5 Nov 2026, after the results of PeerTube and angular-spotify, before any further repository is
+screened, cloned or mapped)
+=====================================================================
+Why
+  On the two applications above the frozen extractor read 1 of 45 declared screens (PeerTube) and no route
+  (angular-spotify), because each declares its routes in a way the route reader does not follow. Two applications
+  cannot say whether that is typical. This addendum adds a second round of held-out applications. It does not replace
+  the first: PeerTube and angular-spotify stay in the thesis with their results, and nothing in either round is
+  repaired.
+
+Selection rule (fixed now; the same criteria S1-S5 as above, applied further down the same search)
+  The search of the selection rule is run again now with --limit 180 and its output is kept in
+  heldout/search-round2.txt. Walk it from position 73 in that order, skipping the two applications already taken, and
+  take the first four repositories that meet S1-S5. If fewer than four qualify by position 180, the round runs on
+  those that did. No criterion about how an application declares its routes is added: an application is not skipped
+  because its declarations look like the ones the extractor missed. Positions 84, 95 and 97 were opened before this
+  addendum (Addendum B) and are walked like the others.
+  The pin is the default branch HEAD at the time of cloning; the SHA is recorded in heldout/apps-round2.txt.
+
+Measures
+  H1-H6 as above, with the same scripts (heldout.sh, heldout-to-latex.mjs) at the same frozen extractor.
+
+Predictions (written now, knowing the first round)
+  P5 The extractor completes on all four (H1).
+  P6 Node coverage is below the corpus's on at least one of the four, and on at least one the reader misses most
+     declared screens for a declaration form the corpus did not contain.
+  P7 Where routes are read, the must tier is small, as on the corpus.
+  P8 Oshima and Kishi's restrictions admit none of the four.
+
+What each outcome does to the thesis
+  As above: every outcome of both rounds is reported with generated macros; nothing is repaired before submission.
