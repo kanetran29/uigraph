@@ -1,0 +1,4194 @@
+{
+ "apps": {
+  "posts-users-ui-ng": {
+   "strata": {
+    "both": {
+     "size": 39,
+     "read": 12,
+     "real": 12,
+     "unclear": 0,
+     "est": 39,
+     "lo": 29.54247045752954,
+     "hi": 38.99999999999999,
+     "ci": [
+      0.7574992425007574,
+      0.9999999999999998
+     ]
+    },
+    "theirs": {
+     "size": 0,
+     "read": 0,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 0,
+     "ci": [
+      0,
+      1
+     ]
+    },
+    "ours": {
+     "size": 0,
+     "read": 0,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 0,
+     "ci": [
+      0,
+      1
+     ]
+    }
+   },
+   "all": 39,
+   "theirs": {
+    "pairs": 39,
+    "real": 39,
+    "lo": 29.54247045752954,
+    "hi": 38.99999999999999
+   },
+   "ours": {
+    "pairs": 39,
+    "real": 39,
+    "lo": 29.54247045752954,
+    "hi": 38.99999999999999
+   },
+   "own": {
+    "theirs": {
+     "lo": 0,
+     "hi": 0
+    },
+    "ours": {
+     "lo": 0,
+     "hi": 0
+    },
+    "both": {
+     "lo": 29.54247045752954,
+     "hi": 38.99999999999999
+    }
+   }
+  },
+  "heroes-angular": {
+   "strata": {
+    "both": {
+     "size": 6,
+     "read": 6,
+     "real": 6,
+     "unclear": 0,
+     "est": 6,
+     "lo": 3.6579417980816125,
+     "hi": 6,
+     "ci": [
+      0.6096569663469354,
+      1
+     ]
+    },
+    "theirs": {
+     "size": 0,
+     "read": 0,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 0,
+     "ci": [
+      0,
+      1
+     ]
+    },
+    "ours": {
+     "size": 0,
+     "read": 0,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 0,
+     "ci": [
+      0,
+      1
+     ]
+    }
+   },
+   "all": 6,
+   "theirs": {
+    "pairs": 6,
+    "real": 6,
+    "lo": 3.6579417980816125,
+    "hi": 6
+   },
+   "ours": {
+    "pairs": 6,
+    "real": 6,
+    "lo": 3.6579417980816125,
+    "hi": 6
+   },
+   "own": {
+    "theirs": {
+     "lo": 0,
+     "hi": 0
+    },
+    "ours": {
+     "lo": 0,
+     "hi": 0
+    },
+    "both": {
+     "lo": 3.6579417980816125,
+     "hi": 6
+    }
+   }
+  },
+  "airbus-inventory": {
+   "strata": {
+    "both": {
+     "size": 20,
+     "read": 12,
+     "real": 12,
+     "unclear": 0,
+     "est": 20,
+     "lo": 15.149984850015148,
+     "hi": 19.999999999999996,
+     "ci": [
+      0.7574992425007574,
+      0.9999999999999998
+     ]
+    },
+    "theirs": {
+     "size": 3,
+     "read": 3,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 1.6845182413470532,
+     "ci": [
+      0,
+      0.5615060804490177
+     ]
+    },
+    "ours": {
+     "size": 0,
+     "read": 0,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 0,
+     "ci": [
+      0,
+      1
+     ]
+    }
+   },
+   "all": 20,
+   "theirs": {
+    "pairs": 23,
+    "real": 20,
+    "lo": 15.149984850015148,
+    "hi": 21.68451824134705
+   },
+   "ours": {
+    "pairs": 20,
+    "real": 20,
+    "lo": 15.149984850015148,
+    "hi": 19.999999999999996
+   },
+   "own": {
+    "theirs": {
+     "lo": 0,
+     "hi": 1.6845182413470532
+    },
+    "ours": {
+     "lo": 0,
+     "hi": 0
+    },
+    "both": {
+     "lo": 15.149984850015148,
+     "hi": 19.999999999999996
+    }
+   }
+  },
+  "spring-petclinic-angular": {
+   "strata": {
+    "both": {
+     "size": 163,
+     "read": 12,
+     "real": 12,
+     "unclear": 0,
+     "est": 163,
+     "lo": 123.47237652762345,
+     "hi": 162.99999999999997,
+     "ci": [
+      0.7574992425007574,
+      0.9999999999999998
+     ]
+    },
+    "theirs": {
+     "size": 6,
+     "read": 6,
+     "real": 5,
+     "unclear": 0,
+     "est": 5,
+     "lo": 2.6189433806181235,
+     "hi": 5.819684484769617,
+     "ci": [
+      0.4364905634363539,
+      0.9699474141282696
+     ]
+    },
+    "ours": {
+     "size": 2,
+     "read": 2,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 1.3152560942207614,
+     "ci": [
+      0,
+      0.6576280471103807
+     ]
+    }
+   },
+   "all": 168,
+   "theirs": {
+    "pairs": 169,
+    "real": 168,
+    "lo": 126.09131990824157,
+    "hi": 168.8196844847696
+   },
+   "ours": {
+    "pairs": 165,
+    "real": 163,
+    "lo": 123.47237652762345,
+    "hi": 164.31525609422073
+   },
+   "own": {
+    "theirs": {
+     "lo": 2.6189433806181235,
+     "hi": 5.819684484769617
+    },
+    "ours": {
+     "lo": 0,
+     "hi": 1.3152560942207614
+    },
+    "both": {
+     "lo": 123.47237652762345,
+     "hi": 162.99999999999997
+    }
+   }
+  },
+  "ever-traduora": {
+   "strata": {
+    "both": {
+     "size": 112,
+     "read": 12,
+     "real": 12,
+     "unclear": 0,
+     "est": 112,
+     "lo": 84.83991516008483,
+     "hi": 111.99999999999997,
+     "ci": [
+      0.7574992425007574,
+      0.9999999999999998
+     ]
+    },
+    "theirs": {
+     "size": 1,
+     "read": 1,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 0.7934567085261071,
+     "ci": [
+      0,
+      0.7934567085261071
+     ]
+    },
+    "ours": {
+     "size": 1,
+     "read": 1,
+     "real": 1,
+     "unclear": 0,
+     "est": 1,
+     "lo": 0.20654329147389294,
+     "hi": 1,
+     "ci": [
+      0.20654329147389294,
+      1
+     ]
+    }
+   },
+   "all": 113,
+   "theirs": {
+    "pairs": 113,
+    "real": 112,
+    "lo": 84.83991516008483,
+    "hi": 112.79345670852608
+   },
+   "ours": {
+    "pairs": 113,
+    "real": 113,
+    "lo": 85.04645845155872,
+    "hi": 112.99999999999997
+   },
+   "own": {
+    "theirs": {
+     "lo": 0,
+     "hi": 0.7934567085261071
+    },
+    "ours": {
+     "lo": 0.20654329147389294,
+     "hi": 1
+    },
+    "both": {
+     "lo": 84.83991516008483,
+     "hi": 111.99999999999997
+    }
+   }
+  },
+  "angular-jumpstart": {
+   "strata": {
+    "both": {
+     "size": 30,
+     "read": 12,
+     "real": 12,
+     "unclear": 0,
+     "est": 30,
+     "lo": 22.724977275022724,
+     "hi": 29.999999999999993,
+     "ci": [
+      0.7574992425007574,
+      0.9999999999999998
+     ]
+    },
+    "theirs": {
+     "size": 0,
+     "read": 0,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 0,
+     "ci": [
+      0,
+      1
+     ]
+    },
+    "ours": {
+     "size": 10,
+     "read": 10,
+     "real": 10,
+     "unclear": 0,
+     "est": 10,
+     "lo": 7.224598312333834,
+     "hi": 10,
+     "ci": [
+      0.7224598312333834,
+      1
+     ]
+    }
+   },
+   "all": 40,
+   "theirs": {
+    "pairs": 30,
+    "real": 30,
+    "lo": 22.724977275022724,
+    "hi": 29.999999999999993
+   },
+   "ours": {
+    "pairs": 40,
+    "real": 40,
+    "lo": 29.949575587356556,
+    "hi": 39.99999999999999
+   },
+   "own": {
+    "theirs": {
+     "lo": 0,
+     "hi": 0
+    },
+    "ours": {
+     "lo": 7.224598312333834,
+     "hi": 10
+    },
+    "both": {
+     "lo": 22.724977275022724,
+     "hi": 29.999999999999993
+    }
+   }
+  },
+  "event-booking-mean": {
+   "strata": {
+    "both": {
+     "size": 16,
+     "read": 12,
+     "real": 11,
+     "unclear": 0,
+     "est": 14.666666666666666,
+     "lo": 10.337825251222474,
+     "hi": 15.762164648787623,
+     "ci": [
+      0.6461140782014047,
+      0.9851352905492264
+     ]
+    },
+    "theirs": {
+     "size": 4,
+     "read": 4,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 1.9596000816159966,
+     "ci": [
+      0,
+      0.48990002040399916
+     ]
+    },
+    "ours": {
+     "size": 1,
+     "read": 1,
+     "real": 1,
+     "unclear": 0,
+     "est": 1,
+     "lo": 0.20654329147389294,
+     "hi": 1,
+     "ci": [
+      0.20654329147389294,
+      1
+     ]
+    }
+   },
+   "all": 15.666666666666666,
+   "theirs": {
+    "pairs": 20,
+    "real": 14.666666666666666,
+    "lo": 10.337825251222474,
+    "hi": 17.72176473040362
+   },
+   "ours": {
+    "pairs": 17,
+    "real": 15.666666666666666,
+    "lo": 10.544368542696368,
+    "hi": 16.762164648787625
+   },
+   "own": {
+    "theirs": {
+     "lo": 0,
+     "hi": 1.9596000816159966
+    },
+    "ours": {
+     "lo": 0.20654329147389294,
+     "hi": 1
+    },
+    "both": {
+     "lo": 10.337825251222474,
+     "hi": 15.762164648787623
+    }
+   }
+  },
+  "realworld": {
+   "strata": {
+    "both": {
+     "size": 63,
+     "read": 12,
+     "real": 12,
+     "unclear": 0,
+     "est": 63,
+     "lo": 47.72245227754772,
+     "hi": 62.999999999999986,
+     "ci": [
+      0.7574992425007574,
+      0.9999999999999998
+     ]
+    },
+    "theirs": {
+     "size": 3,
+     "read": 3,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 1.6845182413470532,
+     "ci": [
+      0,
+      0.5615060804490177
+     ]
+    },
+    "ours": {
+     "size": 0,
+     "read": 0,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 0,
+     "ci": [
+      0,
+      1
+     ]
+    }
+   },
+   "all": 63,
+   "theirs": {
+    "pairs": 66,
+    "real": 63,
+    "lo": 47.72245227754772,
+    "hi": 64.68451824134704
+   },
+   "ours": {
+    "pairs": 63,
+    "real": 63,
+    "lo": 47.72245227754772,
+    "hi": 62.999999999999986
+   },
+   "own": {
+    "theirs": {
+     "lo": 0,
+     "hi": 1.6845182413470532
+    },
+    "ours": {
+     "lo": 0,
+     "hi": 0
+    },
+    "both": {
+     "lo": 47.72245227754772,
+     "hi": 62.999999999999986
+    }
+   }
+  },
+  "alfresco": {
+   "strata": {
+    "both": {
+     "size": 2,
+     "read": 2,
+     "real": 2,
+     "unclear": 0,
+     "est": 2,
+     "lo": 0.6847439057792386,
+     "hi": 2,
+     "ci": [
+      0.3423719528896193,
+      1
+     ]
+    },
+    "theirs": {
+     "size": 21,
+     "read": 12,
+     "real": 10,
+     "unclear": 0,
+     "est": 17.5,
+     "lo": 11.591236494921874,
+     "hi": 20.01375290008873,
+     "ci": [
+      0.5519636426153274,
+      0.9530358523851776
+     ]
+    },
+    "ours": {
+     "size": 27,
+     "read": 12,
+     "real": 12,
+     "unclear": 0,
+     "est": 27,
+     "lo": 20.45247954752045,
+     "hi": 26.999999999999993,
+     "ci": [
+      0.7574992425007574,
+      0.9999999999999998
+     ]
+    }
+   },
+   "all": 46.5,
+   "theirs": {
+    "pairs": 23,
+    "real": 19.5,
+    "lo": 12.275980400701114,
+    "hi": 22.01375290008873
+   },
+   "ours": {
+    "pairs": 29,
+    "real": 29,
+    "lo": 21.13722345329969,
+    "hi": 28.999999999999993
+   },
+   "own": {
+    "theirs": {
+     "lo": 11.591236494921874,
+     "hi": 20.01375290008873
+    },
+    "ours": {
+     "lo": 20.45247954752045,
+     "hi": 26.999999999999993
+    },
+    "both": {
+     "lo": 0.6847439057792386,
+     "hi": 2
+    }
+   }
+  },
+  "ghostfolio": {
+   "strata": {
+    "both": {
+     "size": 3,
+     "read": 3,
+     "real": 3,
+     "unclear": 0,
+     "est": 3,
+     "lo": 1.3154817586529466,
+     "hi": 3,
+     "ci": [
+      0.4384939195509822,
+      1
+     ]
+    },
+    "theirs": {
+     "size": 7,
+     "read": 7,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 2.480371900826446,
+     "ci": [
+      0,
+      0.35433884297520657
+     ]
+    },
+    "oursShell": {
+     "size": 801,
+     "read": 12,
+     "real": 8,
+     "unclear": 0,
+     "est": 534,
+     "lo": 312.8846875054887,
+     "hi": 690.3676102422136,
+     "ci": [
+      0.3906175873976139,
+      0.8618821601026386
+     ]
+    },
+    "oursOther": {
+     "size": 235,
+     "read": 12,
+     "real": 8,
+     "unclear": 0,
+     "est": 156.66666666666666,
+     "lo": 91.79513303843926,
+     "hi": 202.54230762412007,
+     "ci": [
+      0.3906175873976139,
+      0.8618821601026386
+     ]
+    }
+   },
+   "all": 693.6666666666666,
+   "theirs": {
+    "pairs": 10,
+    "real": 3,
+    "lo": 1.3154817586529466,
+    "hi": 5.480371900826446
+   },
+   "ours": {
+    "pairs": 1039,
+    "real": 693.6666666666666,
+    "lo": 405.9953023025809,
+    "hi": 895.9099178663337
+   },
+   "own": {
+    "theirs": {
+     "lo": 0,
+     "hi": 2.480371900826446
+    },
+    "ours": {
+     "lo": 404.679820543928,
+     "hi": 892.9099178663337
+    },
+    "both": {
+     "lo": 1.3154817586529466,
+     "hi": 3
+    }
+   }
+  },
+  "k8sdash": {
+   "strata": {
+    "both": {
+     "size": 3,
+     "read": 3,
+     "real": 0,
+     "unclear": 0,
+     "est": 0,
+     "lo": 0,
+     "hi": 1.6845182413470532,
+     "ci": [
+      0,
+      0.5615060804490177
+     ]
+    },
+    "theirs": {
+     "size": 2,
+     "read": 2,
+     "real": 2,
+     "unclear": 0,
+     "est": 2,
+     "lo": 0.6847439057792386,
+     "hi": 2,
+     "ci": [
+      0.3423719528896193,
+      1
+     ]
+    },
+    "ours": {
+     "size": 390,
+     "read": 12,
+     "real": 8,
+     "unclear": 0,
+     "est": 260,
+     "lo": 152.3408590850694,
+     "hi": 336.1340424400291,
+     "ci": [
+      0.3906175873976139,
+      0.8618821601026386
+     ]
+    }
+   },
+   "all": 262,
+   "theirs": {
+    "pairs": 5,
+    "real": 2,
+    "lo": 0.6847439057792386,
+    "hi": 3.684518241347053
+   },
+   "ours": {
+    "pairs": 393,
+    "real": 260,
+    "lo": 152.3408590850694,
+    "hi": 337.81856068137614
+   },
+   "own": {
+    "theirs": {
+     "lo": 0.6847439057792386,
+     "hi": 2
+    },
+    "ours": {
+     "lo": 152.3408590850694,
+     "hi": 336.1340424400291
+    },
+    "both": {
+     "lo": 0,
+     "hi": 1.6845182413470532
+    }
+   }
+  },
+  "bitwarden": {
+   "strata": {
+    "both": {
+     "size": 1,
+     "read": 1,
+     "real": 1,
+     "unclear": 0,
+     "est": 1,
+     "lo": 0.20654329147389294,
+     "hi": 1,
+     "ci": [
+      0.20654329147389294,
+      1
+     ]
+    },
+    "theirs": {
+     "size": 112,
+     "read": 12,
+     "real": 8,
+     "unclear": 0,
+     "est": 74.66666666666667,
+     "lo": 43.749169788532754,
+     "hi": 96.53080193149553,
+     "ci": [
+      0.3906175873976139,
+      0.8618821601026386
+     ]
+    },
+    "ours": {
+     "size": 559,
+     "read": 12,
+     "real": 10,
+     "unclear": 0,
+     "est": 465.8333333333333,
+     "lo": 308.547676221968,
+     "hi": 532.7470414833143,
+     "ci": [
+      0.5519636426153274,
+      0.9530358523851776
+     ]
+    }
+   },
+   "all": 541.5,
+   "theirs": {
+    "pairs": 113,
+    "real": 75.66666666666667,
+    "lo": 43.955713080006646,
+    "hi": 97.53080193149553
+   },
+   "ours": {
+    "pairs": 560,
+    "real": 466.8333333333333,
+    "lo": 308.7542195134419,
+    "hi": 533.7470414833143
+   },
+   "own": {
+    "theirs": {
+     "lo": 43.749169788532754,
+     "hi": 96.53080193149553
+    },
+    "ours": {
+     "lo": 308.547676221968,
+     "hi": 532.7470414833143
+    },
+    "both": {
+     "lo": 0.20654329147389294,
+     "hi": 1
+    }
+   }
+  },
+  "mifos": {
+   "strata": {
+    "both": {
+     "size": 14066,
+     "read": 12,
+     "real": 6,
+     "unclear": 0,
+     "est": 7033,
+     "lo": 3569.643744753877,
+     "hi": 10496.356255246123,
+     "ci": [
+      0.2537781703934222,
+      0.7462218296065778
+     ]
+    },
+    "theirs": {
+     "size": 3551,
+     "read": 12,
+     "real": 2,
+     "unclear": 0,
+     "est": 591.8333333333334,
+     "lo": 166.7696881802338,
+     "hi": 1590.9771050729728,
+     "ci": [
+      0.046964147614822246,
+      0.44803635738467273
+     ]
+    },
+    "oursShell": {
+     "size": 136935,
+     "read": 12,
+     "real": 0,
+     "unclear": 1,
+     "est": 0,
+     "lo": 0,
+     "hi": 33206.84122815877,
+     "ci": [
+      0,
+      0.2425007574992425
+     ]
+    },
+    "oursOther": {
+     "size": 10362,
+     "read": 12,
+     "real": 3,
+     "unclear": 0,
+     "est": 2590.5,
+     "lo": 921.5966906352977,
+     "hi": 5515.799733968279,
+     "ci": [
+      0.08894003962896137,
+      0.53231033912066
+     ]
+    }
+   },
+   "all": 10215.333333333332,
+   "theirs": {
+    "pairs": 17617,
+    "real": 7624.833333333333,
+    "lo": 3736.413432934111,
+    "hi": 12087.333360319095
+   },
+   "ours": {
+    "pairs": 161363,
+    "real": 9623.5,
+    "lo": 4491.240435389174,
+    "hi": 49218.99721737317
+   },
+   "own": {
+    "theirs": {
+     "lo": 166.7696881802338,
+     "hi": 1590.9771050729728
+    },
+    "ours": {
+     "lo": 921.5966906352977,
+     "hi": 38722.64096212705
+    },
+    "both": {
+     "lo": 3569.643744753877,
+     "hi": 10496.356255246123
+    }
+   }
+  }
+ },
+ "verdicts": [
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/new-post",
+   "to": "/posts",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:7",
+   "reason": "app.component.html renders <app-header> unconditionally above the <router-outlet>, so the header shows on /new-post (the route has no guards). Its Posts button has [routerLink]=\"'/posts'\", which matches route 'posts' (app.module.ts:25). A second trigger: NewPostComponent.onSavePost calls router.navigate(['/posts']) after the addPost HTTP call succeeds (new-post.component.ts:41)."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/new-post",
+   "to": "/users",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The shell header's Users button has routerLink '/users', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/new-user",
+   "to": "/user-search",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The shell header's Search Users button has routerLink '/user-search', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/posts",
+   "to": "/user-availability-schedule",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:12",
+   "reason": "The shell header's Schedule Availability button has routerLink '/user-availability-schedule', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/posts",
+   "to": "/users",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The shell header's Users button has routerLink '/users', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/user-availability-schedule",
+   "to": "/new-post",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:8",
+   "reason": "The shell header's Add a New Post button has routerLink '/new-post', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/user-availability-schedule",
+   "to": "/user-search",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The shell header (app-header, rendered unconditionally above the router-outlet) is shown on /user-availability-schedule, which has no guard. Its Search Users button has [routerLink]=\"'/user-search'\" with no *ngIf, and it resolves to route 'user-search' (app.module.ts:42)."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/user-search",
+   "to": "/new-post",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:8",
+   "reason": "The shell header's Add a New Post button has routerLink '/new-post', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/user-search",
+   "to": "/posts",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:7",
+   "reason": "The shell header's Posts button has routerLink '/posts', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/users",
+   "to": "/posts",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:7",
+   "reason": "The shell header's Posts button has routerLink '/posts', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/users",
+   "to": "/user-search",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:11",
+   "reason": "The shell header's Search Users button has routerLink '/user-search', is unconditional, and the route exists."
+  },
+  {
+   "slug": "posts-users-ui-ng",
+   "from": "/users/:id",
+   "to": "/users",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:9",
+   "reason": "The shell header is shown on every route, including the users/:id profile route, and its Users button links to '/users'."
+  },
+  {
+   "slug": "heroes-angular",
+   "from": "/about",
+   "to": "/heroes",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/components/nav.component.ts:10",
+   "reason": "The root AppComponent (app.component.html) renders <app-nav> at line 4, outside the router-outlet and with no *ngIf, so it is shown on /about. NavComponent is declared in AppModule through core's declarations export, and AppModule imports RouterModule.forRoot. Line 10 of its template has routerLink=\"/heroes\". That address matches the top-level 'heroes' route in router.ts:8, which lazy-loads HeroesModule; HeroesModule's child path '' renders HeroesComponent. No redirect is involved."
+  },
+  {
+   "slug": "heroes-angular",
+   "from": "/about",
+   "to": "/villains",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/components/nav.component.ts:13",
+   "reason": "The shell nav is always shown and has routerLink=\"/villains\", which matches the villains route."
+  },
+  {
+   "slug": "heroes-angular",
+   "from": "/heroes",
+   "to": "/about",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/components/nav.component.ts:16",
+   "reason": "The shell nav is shown on /heroes and has routerLink=\"/about\", which matches the about route."
+  },
+  {
+   "slug": "heroes-angular",
+   "from": "/heroes",
+   "to": "/villains",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/components/nav.component.ts:13",
+   "reason": "The shell nav is shown on /heroes and has routerLink=\"/villains\", which matches the villains route."
+  },
+  {
+   "slug": "heroes-angular",
+   "from": "/villains",
+   "to": "/about",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/components/nav.component.ts:16",
+   "reason": "The shell nav is shown on /villains and has routerLink=\"/about\", which matches the about route."
+  },
+  {
+   "slug": "heroes-angular",
+   "from": "/villains",
+   "to": "/heroes",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/components/nav.component.ts:10",
+   "reason": "The shell nav is shown on /villains and has routerLink=\"/heroes\", which matches the heroes route. The shared button-footer, list-header and modal sites are not needed to decide this pair."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/add",
+   "to": "/productByCategory",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:11",
+   "reason": "The /add route renders AddProductComponent, whose template is wrapped in <app-main-nav> (add-product.component.html:1). The main-nav sidenav has an <a routerLink=\"/productByCategory\"> with no *ngIf (main-nav.component.html:11), so it is shown on /add. That path matches the productByCategory route in app.module.ts. Its CanActivateRouteGuard admits the user, who is already logged in because /add has the same guard."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/dashboard",
+   "to": "/login",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "The dashboard route renders GetAllProductsComponent, which includes app-main-nav; the logout element has routerLink=/login."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/dashboard",
+   "to": "/update",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/get-all-products/get-all-products.component.html:60",
+   "reason": "The dashboard route renders GetAllProductsComponent; the edit icon calls updateProduct(), which calls routerService.routeToUpdateProduct() and navigates to 'update'."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/getAllProducts",
+   "to": "/add",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:26",
+   "reason": "GetAllProductsComponent includes app-main-nav, which has routerLink=/add."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/getAllProducts",
+   "to": "/login",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "main-nav is shown on this screen and its logout element has routerLink=/login."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/getAllProducts",
+   "to": "/productByCategory",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:11",
+   "reason": "main-nav sidenav link routerLink=/productByCategory."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/getAllProducts",
+   "to": "/update",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/get-all-products/get-all-products.component.html:60",
+   "reason": "The edit icon at line 60 calls (click)=\"updateProduct(product)\". That method calls routerService.routeToUpdateProduct() (get-all-products.component.ts:50), which runs router.navigate(['update']) (router.service.ts:24). The 'update' route exists and has the same auth guard the user already passed. The icon is in an *ngFor row, so it is shown whenever the product list has at least one product."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/productByCategory",
+   "to": "/add",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:26",
+   "reason": "GetProductByCategoryComponent includes app-main-nav, which has routerLink=/add."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/productByCategory",
+   "to": "/login",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "main-nav logout element has routerLink=/login."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/update",
+   "to": "/getAllProducts",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:19",
+   "reason": "UpdateProductComponent includes app-main-nav, which has routerLink=/getAllProducts. Its success and failure dialogs also call routeToAllProduct()."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/update",
+   "to": "/login",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:52",
+   "reason": "main-nav logout element has routerLink=/login."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/update",
+   "to": "/productByCategory",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/main-nav/main-nav.component.html:11",
+   "reason": "main-nav sidenav link routerLink=/productByCategory."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/login",
+   "to": "/add",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/login-page/login-page.component.html",
+   "reason": "The /login route renders LoginPageComponent. Its template has no <app-main-nav>, and the shell is only <router-outlet>, so the main-nav /add link (main-nav.component.html:26) is not shown on /login. Lines 39, 52 and 53 of main-nav are a toggle button and the /login logout links, which are not shown here either. The only navigation in the login code is routeToDashboard() on authentication success, which targets 'dashboard', not 'add'."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/login",
+   "to": "/getAllProducts",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/login-page/login-page.component.ts:63",
+   "reason": "main-nav, which holds the /getAllProducts link, is not included in the login template, so that link is not shown on /login. On HTTP success, login() calls routeToDashboard(), which navigates to 'dashboard' (router.service.ts:16). That is a separate route with URL /dashboard: it has no redirectTo and only happens to reuse GetAllProductsComponent, so the user does not land on /getAllProducts."
+  },
+  {
+   "slug": "airbus-inventory",
+   "from": "/login",
+   "to": "/productByCategory",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/login-page/login-page.component.html",
+   "reason": "The /productByCategory link exists only in main-nav (main-nav.component.html:11), and LoginPageComponent's template does not include <app-main-nav>. No dialog is opened from /login. Login only navigates to 'dashboard', so nothing shown on /login navigates to /productByCategory."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/",
+   "to": "/owners/add",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:42",
+   "reason": "The shell AppComponent renders the navbar above <router-outlet> with no *ngIf, so it is shown on '' (WelcomeComponent). Its Owners dropdown has routerLink=\"/owners/add\", and bootstrap.js is loaded in angular.json, so the dropdown opens. owners-routing lists 'owners/add' before 'owners/:id', so the link lands on /owners/add. The reader cited line 27; the link is actually at line 42."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/",
+   "to": "/specialties",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:50",
+   "reason": "Shell navbar link routerLink=/specialties is always shown, so it is reachable from /."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/owners",
+   "to": "/pettypes",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:44",
+   "reason": "Shell navbar link routerLink=/pettypes is always shown."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/owners/:id",
+   "to": "/welcome",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:28",
+   "reason": "The shell navbar is always shown, and its Home link has routerLink=\"welcome\". The link sits in the root AppComponent, so it is relative to the root route and resolves to /welcome, which is the route {path:'welcome'} in app-routing. The reader cited line 13; the link is actually at line 28."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/owners/:id/pets/add",
+   "to": "/owners/add",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:27",
+   "reason": "Shell navbar link routerLink=/owners/add is always shown, including on the pet-add screen."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/pets",
+   "to": "/owners/add",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:27",
+   "reason": "Shell navbar link routerLink=/owners/add is always shown."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/pets/:id/edit",
+   "to": "/owners",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:25",
+   "reason": "Shell navbar Owners > Search link routerLink=/owners is always shown."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/pettypes",
+   "to": "/owners/add",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:27",
+   "reason": "Shell navbar link routerLink=/owners/add is always shown."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/pettypes/:id/edit",
+   "to": "/owners",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:40",
+   "reason": "The always-shown shell navbar has an Owners dropdown (bootstrap.js loaded) whose Search item has routerLink=\"/owners\", which matches the 'owners' route. The reader cited line 25; the link is actually at line 40."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/vets",
+   "to": "/pettypes",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:44",
+   "reason": "Shell navbar link routerLink=/pettypes is always shown."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/vets/add",
+   "to": "/vets",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/vets/vet-add/vet-add.component.ts:76",
+   "reason": "The Back button calls gotoVetList(), which runs router.navigate(['/vets']). The shell navbar link routerLink=\"/vets\" (app.component.html:52) is also always shown, with no ngIf. Save Vet navigates there after addVet succeeds."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/visits/add",
+   "to": "/specialties",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/app.component.html:65",
+   "reason": "The shell AppComponent wraps the router-outlet. The navbar link routerLink=\"/specialties\" has no ngIf, so it is shown on /visits/add."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/owners/:id",
+   "to": "/pets/:id/edit",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/pets/pet-list/pet-list.component.ts:54",
+   "reason": "owner-detail renders app-pet-list per pet; Edit Pet button calls editPet, which does router.navigate(['/pets', id, 'edit'])."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/owners/:id",
+   "to": "/pets/:id/visits/add",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/pets/pet-list/pet-list.component.ts:67",
+   "reason": "Add Visit button in pet-list (shown inside owner-detail) calls addVisit, which navigates to /pets/:id/visits/add."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/owners/:id",
+   "to": "/visits/:id/edit",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/visits/visit-list/visit-list.component.ts:54",
+   "reason": "pet-list embeds app-visit-list inside owner-detail; Edit Visit button calls editVisit, which navigates to /visits/:id/edit (shown when the pet has visits)."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/pets",
+   "to": "/visits/:id/edit",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/pets/pet-list/pet-list.component.ts:43",
+   "reason": "Edit Visit (visit-list html:31, which calls ts:54) is inside *ngFor over visits. On /pets, PetListComponent's pet is {} (ts:43), so [visits]=\"pet.visits\" (pet-list html:36) is undefined and no rows are ever rendered. The trigger is never shown on /pets, and the navbar has no such link."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/pets/:id/visits/add",
+   "to": "/visits/:id/edit",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/visits/visit-add/visit-add.component.html:91",
+   "reason": "visit-add embeds app-visit-list with currentPet.visits; its Edit Visit button calls editVisit, which navigates to /visits/:id/edit (when the pet has visits)."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/visits/add",
+   "to": "/visits/:id/edit",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/visits/visit-add/visit-add.component.html:91",
+   "reason": "VisitAddComponent embeds <app-visit-list> (line 91), with no ngIf around it. Its Edit Visit button calls editVisit, which runs router.navigate(['/visits', visit.id, 'edit']) (visit-list.component.ts:54). The route is visits/:id/edit. The button is shown for each visit in currentPet.visits."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/owners",
+   "to": "/owners/:id/edit",
+   "stratum": "ours",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/owners/owner-detail/owner-detail.component.ts:60",
+   "reason": "The only navigation to /owners/:id/edit is in OwnerDetailComponent (ts:60), which is routed only at /owners/:id and is not shown on /owners. OwnerListComponent's triggers are: the name link routerLink=/owners/{{owner.id}} (html:58, plus onSelect ts:62) to /owners/:id, Add Owner (html:72, ts:66) to /owners/add, and the search form, which only fetches data. The navbar has no edit link. The reader said html:58 is the Add Owner button; it is actually the owner-name link."
+  },
+  {
+   "slug": "spring-petclinic-angular",
+   "from": "/owners",
+   "to": "/owners/:id/pets/add",
+   "stratum": "ours",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/owners/owner-detail/owner-detail.component.ts:64",
+   "reason": "The only navigation to /owners/:id/pets/add is addPet in OwnerDetailComponent (ts:64), which is not shown on /owners. The owner list only navigates to /owners/:id (html:58) and /owners/add (html:72), and the navbar has no add-pet link."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/login",
+   "to": "/projects",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/auth/stores/auth.state.ts:262",
+   "reason": "LoginComponent dispatches Login. On success ReceiveAPIAccessToken runs Navigate([redirect || '/']), and '/' is a redirectTo to 'projects', so /projects is reached through a redirect. The app-bar link at app-bar.component.html:9 is hidden on /login."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/login",
+   "to": "/user-settings",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/auth/stores/auth.state.ts:262",
+   "reason": "The app-bar link to /user-settings is hidden on /login because the bar renders only when authenticated. The real path is the stored redirect. A signed-out user who opens /user-settings hits AuthGuard, which dispatches MustLogin(state.url) (auth.guard.ts:18). MustLogin stores redirectTo='/user-settings' and navigates to /login (auth.state.ts:322-323). On /login, the form submit dispatches Login (login.component.ts:42). After HTTP success this runs ReceiveAPIAccessToken, which dispatches Navigate([redirect || '/']) and lands on /user-settings. It works only after that bounce, but the source fully gives the path."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId",
+   "to": "/projects",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:9",
+   "reason": "The authenticated shell app-bar has a Projects button with routerLink=\"/projects\". The cited line 7 is only the button tag, and line 2 is the brand link to '/', which also redirects to projects."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/export",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:74",
+   "reason": "The container sidebar link routerLink=\"export\" is shown on every child of :projectId, including the bare /projects/:projectId. It resolves to /projects/<id>/export."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/labels",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:50",
+   "reason": "The container sidebar link routerLink=\"labels\" resolves to /projects/<id>/labels."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId/import",
+   "to": "/projects/:projectId/api",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:84",
+   "reason": "The container sidebar link routerLink=\"api\" is shown on import. The 'disabled' class is only a styling ngClass; the routerLink remains."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId/import",
+   "to": "/user-settings",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
+   "reason": "The user is authenticated on import, so the app-bar is shown. Its dropdown item routerLink=\"/user-settings\" navigates there."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId/labels",
+   "to": "/projects/:projectId/terms",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:34",
+   "reason": "The container sidebar link routerLink=\"terms\" resolves to /projects/<id>/terms."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId/team",
+   "to": "/projects/:projectId/labels",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:50",
+   "reason": "The container sidebar link routerLink=\"labels\" is shown on the team screen."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId/team",
+   "to": "/projects/:projectId/terms",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:34",
+   "reason": "The container sidebar link routerLink=\"terms\" is shown on the team screen."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId/translations",
+   "to": "/projects/:projectId/export",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:72",
+   "reason": "ProjectContainerComponent is the parent shell of the translations route and always renders the sidebar link routerLink=\"export\", which resolves relative to the :projectId route to /projects/:projectId/export (route 'export' exists in projects.module.ts)."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId/translations",
+   "to": "/projects/:projectId/settings",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-container/project-container.component.html:91",
+   "reason": "The shell sidebar link routerLink=\"settings\" is shown whenever a project loads and resolves to /projects/:projectId/settings, a defined child route."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/translations/:localeCode",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/projects/projects.module.ts:48",
+   "reason": "The empty child path of :projectId has redirectTo 'translations' with pathMatch full. So /projects/X always resolves to /projects/X/translations, and the URL never rests on s. The only locale-code link is [routerLink]=[locale.locale.code] in ProjectLocalesComponent (project-locales.component.html:17). That component is routed at the 'translations' child, not on the path to s. The routed component on the path to s is ProjectContainer. Its nav links go to terms, translations, labels, team, import, export, api and settings, never to translations/<code>."
+  },
+  {
+   "slug": "ever-traduora",
+   "from": "/projects",
+   "to": "/projects/:projectId/translations",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/projects/components/project-card/project-card.component.html:1",
+   "reason": "The card's [routerLink]=[project.id] resolves to /projects/<id>. The empty child route redirects to 'translations' (projects.module.ts:48), so the target is reached through a redirectTo."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers",
+   "to": "/orders",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:17",
+   "reason": "The shell navbar has routerLink=\"/orders\" and is always shown."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id",
+   "to": "/customers/:id/details",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/customer/customer.component.html:10",
+   "reason": "CustomerComponent is routed at customers/:id and has the relative link routerLink=\"details\", which resolves to /customers/:id/details."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id",
+   "to": "/orders",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:17",
+   "reason": "The shell navbar link to /orders is shown. Customer.component.html:16 is a relative link to customers/:id/orders, not /orders, so it is not the trigger."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/details",
+   "to": "/orders",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:17",
+   "reason": "The shell navbar link to /orders. The customer.component.html:16 hint is relative to customers/:id/orders, a different route."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/edit",
+   "to": "/customers/:id/details",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/customer/customer.component.html:10",
+   "reason": "The CustomerComponent tab link routerLink=\"details\" is shown on the edit child route."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/orders",
+   "to": "/customers",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/customer/customer.component.html:35",
+   "reason": "CustomerComponent has an absolute back-link routerLink=\"/customers\". The shell navbar also links to /customers."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/orders",
+   "to": "/customers/:id/edit",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/customer/customer.component.html:22",
+   "reason": "The CustomerComponent tab link routerLink=\"edit\" is shown. The CanActivateGuard may redirect to /login when signed out, but the link is still a real trigger."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/orders",
+   "to": "/orders",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:17",
+   "reason": "The shell navbar link to /orders. The customer.component.html:16 hint resolves to customers/:id/orders, not /orders."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/login",
+   "to": "/customers",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/login/login.component.ts:56",
+   "reason": "Submitting the login form calls authService.login(), an HTTP POST. When it succeeds with status true and redirectUrl is empty, the component calls router.navigate(['/customers']) (line 56). On /login the shell navbar is also shown with no condition, and its routerLink=\"/customers\" links (navbar.component.html:11 and 16) reach the same route. Nothing hides these triggers on /login."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/login",
+   "to": "/orders",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:17",
+   "reason": "The shell navbar link to /orders is shown on /login. The navbar is not hidden when signed out."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/orders",
+   "to": "/about",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:18",
+   "reason": "The shell navbar has routerLink=\"/about\". The modal.component.html hints are only the modal's own buttons and are not the trigger."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/orders",
+   "to": "/customers",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.html:11",
+   "reason": "The navbar is in the app shell (app.component.html, outside the router-outlet), so it is shown on /orders. It has routerLink=\"/customers\" on the brand link and the Customers pill, with no ngIf or guard hiding them."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/about",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "Navbar is in the shell (app.component.html) and shown on every screen. Its Login item calls loginOrOut(), which ends in router.navigate(['/login'])."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell navbar's login/logout item calls redirectToLogin(), which navigates to /login."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id",
+   "to": "/customers/:id/orders",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/customer/customer.component.html:16",
+   "reason": "The relative routerLink=\"orders\" in CustomerComponent resolves to /customers/:id/orders."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell (app.component.html:2) always shows <cm-navbar>, with no condition. Its Login/Logout item (navbar.component.html:19, (click)=\"loginOrOut()\") calls redirectToLogin() on every click. That call (line 54) runs outside the isAuthenticated branch, and redirectToLogin does router.navigate(['/login']) at line 58. The /login route has no guard, and /customers/:id has no guard either (only the edit child has canActivate), so the item is shown and works on this screen."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/details",
+   "to": "/customers/:id/orders",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/customer/customer.component.html:16",
+   "reason": "The CustomerComponent tab link routerLink=\"orders\" is shown above the outlet while on details."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/details",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell navbar login item navigates to /login."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/edit",
+   "to": "/customers/:id/orders",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/customer/customer.component.html:16",
+   "reason": "CustomerComponent is the parent component (path '') of the edit child (customer/routes.ts:12-21), so its template is shown on /customers/:id/edit. Its tab <a routerLink=\"orders\"> is not wrapped in any condition. Relative to CustomerComponent's route, the link resolves to /customers/:id/orders (the 'orders' child, routes.ts:14). Leaving the edit page passes through CanDeactivateGuard (component.canDeactivate()), and a trigger behind a guard still counts."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/edit",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell navbar login item navigates to /login. The edit route's guard does not hide the navbar."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/customers/:id/orders",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell navbar login item navigates to /login."
+  },
+  {
+   "slug": "angular-jumpstart",
+   "from": "/orders",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/navbar/navbar.component.ts:58",
+   "reason": "The shell navbar's Login/Logout item runs (click)=\"loginOrOut()\". That method always ends in redirectToLogin(), which calls router.navigate(['/login']). It does so even after the logout branch. The item is always visible, and /login has no guard in routes.ts."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/",
+   "to": "/create-event",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/welcome/welcome.component.html:9",
+   "reason": "Home route renders app-welcome whose 'Create an Event' link has routerLink /create-event. The guard only applies after the click."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/",
+   "to": "/my-Events",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:29",
+   "reason": "'/' is the '' child of LayoutComponent, so HeaderComponent is shown. Its user dropdown (li *ngIf=\"isLoggedIn\", lines 23-32) contains <a routerLink=\"/my-Events\"> at line 29, not line 28. A signed-in user on '/' sees it. isLoggedIn comes from AuthService.loginStatus$, which becomes true after login or a sessionStorage restore. Neither '' nor my-Events has a guard."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/",
+   "to": "/register",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:19",
+   "reason": "Header shows a Sign up link with routerLink /register when !isLoggedIn, which a signed-out user on / sees."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/Contact",
+   "to": "/login",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:18",
+   "reason": "Header shows a Login link with routerLink /login when !isLoggedIn. The Contact route has no guard. Logout navigates to /login too (header.component.ts:39)."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/Contact",
+   "to": "/my-Events",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:28",
+   "reason": "Header dropdown has a routerLink /my-Events when logged in, and the header is in the layout shell."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/Contact",
+   "to": "/register",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:19",
+   "reason": "Header Sign up link with routerLink /register when signed out."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/create-event",
+   "to": "/Contact",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:16",
+   "reason": "Header always shows a routerLink /Contact, and the header is in the layout shell."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/create-event",
+   "to": "/my-Events",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/create-event/create-event.component.ts:74",
+   "reason": "onCreateEvent (form ngSubmit) calls router.navigate(['/my-Events']) once both createEvent and addToMyEvents succeed. That target matches the 'my-Events' child route of the '' layout route. A second trigger exists: the header is shown on /create-event (LayoutComponent renders app-header, which holds the router-outlet). Its 'My Events' dropdown link, routerLink=\"/my-Events\" at header.component.html:29, sits under *ngIf=\"isLoggedIn\". That condition is true on /create-event, because AuthGuardService admits only when currentUser != null, and currentUser can only be non-null after loginStatus$ has emitted true."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/create-event",
+   "to": "/register",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/header/header.component.html:20",
+   "reason": "The only link to /register in the components shown on /create-event is the header's Sign up link, routerLink=\"/register\" under *ngIf=\"!isLoggedIn\" (header.component.html:20). AuthGuardService on the create-event route admits only when authService.isLoggedIn() (currentUser != null). currentUser is set only together with loginStatus true, either in setUser or in the constructor's sessionStorage path, so the header's isLoggedIn is true and the link stays hidden while the user is on the screen. Logout (header.component.ts) clears the status but immediately navigates to /login, so the link shows only for a transient moment during that navigation, which does not count. Nothing else shown there navigates to /register: CreateEventComponent navigates only to /login and /my-Events, the footer has only href=\"#\" links, the logo points to index.html, and breadcrumbs appear only in HomeComponent."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/my-Events",
+   "to": "/Contact",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:16",
+   "reason": "Header always shows a routerLink /Contact, and the header is in the layout shell."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/my-Events",
+   "to": "/register",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/header/header.component.html:20",
+   "reason": "The deciding line is 20, not 19 (line 19 is Login). It is <li *ngIf=\"!isLoggedIn\"><a routerLink=\"/register\">Sign up</a>. The my-Events route has no canActivate, and UsersMyEventsComponent.ngOnInit does not redirect a signed-out user. Such a user stays on /my-Events with the header shown and the Sign up link visible."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/register",
+   "to": "/login",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/user/register/register.component.ts:27",
+   "reason": "onRegister success calls router.navigate(['/login']). The featured-events hint is Home-only and not shown here."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/Contact",
+   "to": "/create-event",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/welcome/welcome.component.html:10",
+   "reason": "The only trigger for /create-event is [routerLink]=\"['/create-event']\" in WelcomeComponent (line 10, not 9). WelcomeComponent appears only in home.component.html, which is the '' route. On /Contact the user sees LayoutComponent (header and footer) plus ContactComponent. The header links go to '', /Contact, /login, /register and /my-Events, and logout() calls navigate('/login'). The footer links are href=\"#\". ContactComponent has no links or router calls."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/login",
+   "to": "/create-event",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "",
+   "reason": "'login' is a top-level route outside LayoutComponent, so the user sees only AppComponent's router-outlet and LoginComponent. login.component.html has only href=\"\" links (to '/') and no child components. LoginComponent.onLogin's only router call is navigate(['/']). WelcomeComponent, the only source of /create-event, is not shown. Landing on '/' after login and then clicking there is a two-step path, not a direct trigger on /login."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/my-Events",
+   "to": "/create-event",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "",
+   "reason": "On /my-Events the user sees the Layout header and footer plus UsersMyEventsComponent. Its template's only handler is deleteUserEvent, which opens a Swal confirm and an HTTP delete and never calls the router. The header and footer have no /create-event link. The only /create-event link is in WelcomeComponent, which appears only on Home. create-event.component.ts:74 navigates the other way, to /my-Events."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/register",
+   "to": "/create-event",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "",
+   "reason": "'register' is a top-level route outside LayoutComponent, so only RegisterComponent is shown. Its links are terms.html and index.html (index.html resolves to Home '/'), and onRegister navigates only to /login. None of these targets /create-event. WelcomeComponent, the only /create-event trigger, is not shown on /register."
+  },
+  {
+   "slug": "event-booking-mean",
+   "from": "/login",
+   "to": "/",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/user/login/login.component.ts:31",
+   "reason": "onLogin success calls router.navigate(['/']). Breadcrumbs and filter-nav-bar are not shown on /login, since it is outside the layout and has no header."
+  },
+  {
+   "slug": "realworld",
+   "from": "/",
+   "to": "/editor",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/layout/header.component.html:33",
+   "reason": "The header is the shell and is always shown. For authenticated users it has a New Article routerLink to /editor, and '/' is open to signed-in users."
+  },
+  {
+   "slug": "realworld",
+   "from": "/",
+   "to": "/login",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/layout/header.component.html:14",
+   "reason": "A signed-out user on '/' sees the header Sign in routerLink to /login. home.component.ts:52 also navigates there for feed=following when not authenticated."
+  },
+  {
+   "slug": "realworld",
+   "from": "/",
+   "to": "/profile/:username",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/features/article/components/article-meta.component.ts:11",
+   "reason": "The article previews on home render article-meta, which links to /profile/<author>. The header also links to /profile/<currentUser> for signed-in users."
+  },
+  {
+   "slug": "realworld",
+   "from": "/article/:slug",
+   "to": "/login",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/features/article/pages/article/article.component.html:114",
+   "reason": "A signed-out user on the article page sees a Sign in routerLink to /login in the comments area (*ifAuthenticated=\"false\"). The header Sign in link and the follow-button navigate to /login (follow-button.component.ts:59) also apply."
+  },
+  {
+   "slug": "realworld",
+   "from": "/profile/:username",
+   "to": "/",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/layout/header.component.html:3",
+   "reason": "Confirmed. /profile/:username has no guard. The shell header's brand link routerLink=\"/\" (header.component.html:3) is shown in every auth state, and the footer logo link routerLink=\"/\" (footer.component.html:3) is always shown. For signed-in users, the Home link at header.component.html:27 also goes to '/'."
+  },
+  {
+   "slug": "realworld",
+   "from": "/profile/:username",
+   "to": "/article/:slug",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/features/article/components/article-preview.component.ts:18",
+   "reason": "The profile route's child ProfileArticlesComponent renders app-article-list, which renders app-article-preview with a routerLink to /article/<slug>. Favorites do the same."
+  },
+  {
+   "slug": "realworld",
+   "from": "/profile/:username",
+   "to": "/editor",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/layout/header.component.html:33",
+   "reason": "The header New Article link is shown to signed-in users on every screen, including the profile screen."
+  },
+  {
+   "slug": "realworld",
+   "from": "/profile/:username",
+   "to": "/profile/:username/favorites",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/features/profile/pages/profile/profile.component.html:52",
+   "reason": "The profile page has a Favorited Posts routerLink to ['/profile', username, 'favorites'], shown once the profile has loaded."
+  },
+  {
+   "slug": "realworld",
+   "from": "/profile/:username/favorites",
+   "to": "/editor",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/layout/header.component.html:33",
+   "reason": "The header New Article link for signed-in users is shown on all routes, including the favorites child route."
+  },
+  {
+   "slug": "realworld",
+   "from": "/settings",
+   "to": "/editor",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/layout/header.component.html:33",
+   "reason": "/settings requires authentication, and the header New Article link is shown to authenticated users."
+  },
+  {
+   "slug": "realworld",
+   "from": "/tag/:tag",
+   "to": "/editor",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/layout/header.component.html:33",
+   "reason": "Confirmed. tag/:tag renders HomeComponent with no guard, so a signed-in user can be on it, and the shell header's authenticated branch shows the New Article link routerLink=\"/editor\" (line 33), which passes requireAuth. The duplicate link at line 65 does not count: it is shown only in the 'unavailable' state, where currentUser is null, so requireAuth redirects to /login."
+  },
+  {
+   "slug": "realworld",
+   "from": "/tag/:tag",
+   "to": "/settings",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/layout/header.component.html:39",
+   "reason": "The header Settings link is shown to signed-in users on the tag route."
+  },
+  {
+   "slug": "realworld",
+   "from": "/login",
+   "to": "/article/:slug",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "",
+   "reason": "Confirmed. /login renders AuthComponent behind a guard that admits only signed-out users (app.routes.ts canActivate !isAuth). Its template links only to /register (auth.component.html:12), and submitForm navigates to '/' on success (auth.component.ts:76). On /login the header shows only '/', '/login' and '/register', and the footer only '/'. The cited article-preview.component.ts (link at line 18 to ['/article', slug]) is used only through article-list, which /login does not render."
+  },
+  {
+   "slug": "realworld",
+   "from": "/register",
+   "to": "/article/:slug",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "",
+   "reason": "Confirmed. /register uses the same AuthComponent, also behind a signed-out-only guard. Its template links only to /login (auth.component.html:8), and a successful sign-up navigates to '/' (auth.component.ts:76). The header (signed-out branch) and the footer have no article links, and article-preview/article-list are not rendered on this route."
+  },
+  {
+   "slug": "realworld",
+   "from": "/settings",
+   "to": "/article/:slug",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "",
+   "reason": "Confirmed. SettingsComponent imports only ListErrorsComponent and ReactiveFormsModule and has no routerLink. Its navigations are submit to ['/profile/', username] (settings.component.ts:72) and logout via UserService.logout to '/' (user.service.ts:86). The header and footer have no article links. article-preview is not shown on /settings."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/profile",
+   "to": "/personal-files",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/view-profile/view-profile.component.html:16",
+   "reason": "The back-arrow button calls navigateToPersonalFiles(), which runs router.navigate(['/personal-files']) (view-profile.component.ts:141). The sidenav personal-files link also reaches it."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/saved-searches",
+   "to": "/search",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts:163",
+   "reason": "The row action and context-menu action 'Execute search' call executeSearch(), which runs router.navigate(['/search'], {queryParams:{q}}). The sidenav saved-search links also go to search?q=."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/favorite/libraries/:folderId",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "Route is in CONTENT_LAYOUT_ROUTES, so it renders inside the ADF ShellLayoutComponent. The header from assets/app.extensions.json holds app.header.more (UserMenuComponent), whose menu includes app.header.user (UserInfoComponent). That component has [routerLink]=['/profile'], and /profile has a guard that admits logged-in users. ShellLayoutComponent lives in node_modules, which is not installed; the header content comes from the in-repo extension config."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/libraries",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "The /libraries route is in the shell layout, so the header user menu is shown. The menu item app.user (UserInfoComponent) uses routerLink '/profile', and the guard admits logged-in users. ShellLayoutComponent comes from the uninstalled library; the header items come from app.extensions.json."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/personal-files/details/:nodeId",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "The route is under the content shell, so the header user menu is shown. UserInfoComponent has routerLink '/profile', and the guard admits logged-in users."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/personal-files/details/:nodeId/:activeTab",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "The route is under the content shell, so the header user menu (app.header.more containing app.user) is shown. UserInfoComponent has routerLink '/profile', and the guard admits logged-in users."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/preview/s/:id",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/lib/aca-content.routes.ts:49",
+   "reason": "preview/s/:id is in CONTENT_ROUTES, which aca-content.module.ts:78 registers with provideRouter. It is outside the ShellLayoutComponent routes (CONTENT_LAYOUT_ROUTES, added through provideShellRoutes), so neither the sidenav, its header user menu nor UserInfoComponent is shown. SharedLinkViewComponent shows only adf-alfresco-viewer (allowGoBack false). Its toolbar comes from viewer.shared.toolbarActions, which holds only FULLSCREEN_VIEWER and DOWNLOAD_NODES (app.extensions.json:1559-1579). Neither navigates to /profile."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/recent-files",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "/recent-files is in CONTENT_LAYOUT_ROUTES, under the shell. The shell sidenav (app.layout.sidenav, SidenavComponent) contains <app-sidenav-header>, which shows getHeaderActions(). Those include app.header.more, the user menu, with no rules; its item app.header.user is UserInfoComponent, whose button has [routerLink]=\"['/profile']\". ViewProfileRuleGuard admits a signed-in user, and the shell routes already require AuthGuard. One part sits outside the repository: the code by which ShellLayoutComponent (@alfresco/adf-core/shell, not installed) renders app.layout.sidenav. The in-repo setup points to it being shown: app.layout.sidenav is registered, and AppService.hideSidenavConditions hides the sidenav only on '/preview/'."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/repository",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "The shell sidenav header user menu contains the UserInfo item with routerLink ['/profile']."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/repository/details/:nodeId/:activeTab",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "The route is under the content shell, so the header user menu is shown. The in-menu UserInfoComponent has routerLink '/profile', and the guard admits logged-in users."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/rules",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "projects/aca-content/folder-rules/src/folder-rules.module.ts:35",
+   "reason": "The literal /rules route is the top-level 'rules' route from FOLDER_RULES_ROUTES (folder-rules.module.ts:35). provideFolderRulesExtension() adds it to the root config with provideRouter. Its ROUTES providers (through ContentServiceExtensionModule and provideApplicationExtensions) are registered before provideShellRoutes(CONTENT_LAYOUT_ROUTES) in app/src/app/app.config.ts, so /rules matches it first. It renders ManageRulesSmartComponent directly in AppComponent's bare <router-outlet />, without ShellLayoutComponent, the sidenav, or the sidenav header that holds the user menu. The only trigger for /profile in the codebase is the routerLink in user-info.component.html:1. That component is reached only through the 'features.header' user menu in SidenavHeaderComponent. The manage-rules template, aca-page-layout and generic-error contain no /profile link; the only routerLink in manage-rules goes to /nodes/:id/rules. The shell-wrapped rules page is nodes/:nodeId/rules (aca-content.routes.ts:404), which is a different URL. One assumption: this relies on the route order that provideShellRoutes (from the @alfresco/adf-core/shell library, which is not installed) normally produces, with the shell route appended after earlier ROUTES providers."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/search",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "The search route (aca-content.routes.ts:364) is a child of CONTENT_LAYOUT_ROUTES, which provideShellRoutes wraps in ShellLayoutComponent. The shell renders 'app.layout.sidenav', which maps to SidenavComponent. That includes app-sidenav-header, whose aca-toolbar shows the 'features.header' actions. Among them is 'app.header.more' (UserMenuComponent), a mat-menu whose 'app.header.user' item renders UserInfoComponent, which has [routerLink]=\"['/profile']\". The sidenav is not hidden on search: hideSidenavConditions is ['/preview/'] and minimizeSidenavConditions is empty. The /profile route sits under the same shell with ViewProfileRuleGuard, which returns isLoggedIn() || isOauth(), so a signed-in user on /search can reach it."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/search-libraries",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "The search-libraries route is inside the content shell, so the header user menu is shown. UserInfoComponent has routerLink '/profile', and the guard admits logged-in users."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/shared",
+   "to": "/profile",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "reason": "The shell header's user menu (app.extensions.json 'app.user.menu' > 'app.user' = UserInfoComponent) has a button with [routerLink]=['/profile']. The shell is shown on /shared. The ViewProfileRuleGuard may reject it depending on the profile feature, but the trigger exists."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/favorite/libraries",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "assets/app.extensions.json:381",
+   "reason": "FavoriteLibraries renders LibrariesBase, which shows aca-toolbar. The toolbar search button (action SEARCH, visible when not on search results) leads through search.effects.ts:43 to SearchNavigationService.navigateToSearch, which calls router.navigate(['/search']). The sidenav saved-search links also go to search?q=."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/favorite/libraries/:folderId",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "assets/app.extensions.json:381",
+   "reason": "FilesComponent shows aca-toolbar with the toolbar search button (SEARCH action), which ends in navigateToSearch (search-navigation.service.ts:63). The sidenav saved-search links also reach /search."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/libraries",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "assets/app.extensions.json:381",
+   "reason": "/libraries renders LibrariesComponent, whose template holds <aca-libraries-base>. That component extends PageComponent, and PageComponent.ngOnInit sets actions from getAllowedToolbarActions(), which libraries-base.component.html passes to <aca-toolbar [items]=\"actions\"/>. The toolbar item app.toolbar.search has click 'SEARCH'. Its visible rule is !app.navigation.isSearchResults, meaning the URL does not start with '/search', so the button shows on /libraries. runActionById dispatches {type:'SEARCH'}, the SearchEffects.search$ effect calls SearchNavigationService.navigateToSearch(), and that calls router.navigate(['/search']) (search-navigation.service.ts:63)."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/personal-files",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "assets/app.extensions.json:381",
+   "reason": "FilesComponent shows aca-toolbar with the search button (SEARCH action), which ends in navigateToSearch (search-navigation.service.ts:63). The sidenav saved-search links also go to search?q=."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/personal-files/details/:nodeId/:activeTab",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "assets/app.extensions.json:381",
+   "reason": "DetailsComponent extends PageComponent and shows aca-toolbar [items]=actions. The toolbar search button (SEARCH action) is visible off the search-results screen. The sidenav saved-search links (save-search-sidenav.component.ts:76) also go to search?q=."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/profile",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/search/search-save/sidenav/save-search-sidenav.component.ts:76",
+   "reason": "ViewProfile has no toolbar, so the toolbar search button is not shown. The shell sidenav (extension app.search.navbar = SaveSearchSidenavComponent) lists saved searches as links to search?q=..., and these are shown on /profile whenever saved searches exist. Which saved searches exist is user data, so this depends on there being at least one."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/repository",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "assets/app.extensions.json:381",
+   "reason": "RepositoryViewComponent renders aca-files, which shows aca-toolbar with the search button (SEARCH action), ending in navigateToSearch (search-navigation.service.ts:63)."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/repository/:folderId",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "assets/app.extensions.json:381",
+   "reason": "Same as /repository: aca-files shows the toolbar search button (SEARCH action), ending in router.navigate(['/search']). The sidenav saved-search links also reach /search."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/search",
+   "to": "/personal-files",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/search/search-navigation.service.ts:57",
+   "reason": "SearchResultsComponent renders <aca-search-input/>, whose close button calls exitSearch() then navigateBack(). With no saved previousRoute (for example /search opened by direct URL or a saved-search link, since only navigateToSearch() sets it) it calls router.navigate(['/personal-files'])."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/search-libraries",
+   "to": "/personal-files",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/search/search-navigation.service.ts:57",
+   "reason": "SearchLibrariesResultsComponent renders <aca-search-input/>. Its close button runs exitSearch() then navigateBack(), which falls back to router.navigate(['/personal-files']) when previousRoute is empty (direct load of /search-libraries)."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/shared",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/search/search-navigation.service.ts:63",
+   "reason": "The toolbar action 'app.toolbar.search' (app.extensions.json:372-385, visible unless isSearchResults) dispatches SEARCH. SearchEffects.search$ then calls navigateToSearch(), which does router.navigate(['/search']). The saved-search sidenav items (route 'search?q=...') also lead to /search."
+  },
+  {
+   "slug": "alfresco",
+   "from": "/view",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/lib/components/search/search-save/sidenav/save-search-sidenav.component.ts:80",
+   "reason": "/view is a ShellLayoutComponent route with only the viewer outlet. The shell sidenav carries 'app.search.navbar' (SaveSearchSidenavComponent, built from the shell navbar extension), whose items link to route `search?q=<encodedUrl>`, which resolves to /search. It is conditional on saved searches existing, and the shell layout (@alfresco/adf-core/shell) is not installed here, so the sidenav's presence under the viewer overlay is assumed from it being the same shell used on the other routes. The toolbar search button is not shown on /view."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/accounts",
+   "to": "/accounts/:accountId",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "../../libs/ui/src/lib/accounts-table/accounts-table.component.ts:191",
+   "reason": "gf-accounts-table on /accounts calls router.navigate(accounts.detail.routerLink(accountId)) in onOpenAccountDetailDialog. hasPermissionToOpenDetails defaults to true. The accounts-page template does not override it."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/accounts/create",
+   "to": "/accounts/:accountId",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:620",
+   "reason": "Verdict confirmed, but through a different trigger. On /accounts/create the dialog host opens a modal MatDialog (account-dialog-host.component.ts:297). Its backdrop covers the accounts table, and clicking the backdrop closes the dialog and navigates back to /accounts. So the row click at accounts-table.component.ts:191 is not operable while the user stays on s. The header (shell) opens the assistant with the '/' hotkey through a window keydown listener (header.component.ts:159-171) while the dialog is open. Its account search results link to internalRoutes.accounts.subRoutes.detail.routerLink(id), which is /accounts/:accountId."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/accounts/transfer-cash-balance",
+   "to": "/accounts/:accountId",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "../../libs/ui/src/lib/accounts-table/accounts-table.component.ts:191",
+   "reason": "The transfer route is also a child of the accounts page. The same accounts table row click navigates to /accounts/:accountId."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/account/access",
+   "to": "/internalRoutes.account.path/access.path/:accessId",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/components/user-account-access/user-account-access.html:78",
+   "reason": "The target resolves to /account/access/:accessId. In user-account-page.routes.ts, ':accessId' has only an 'update' child and no '' child or component, so that URL is not a routed screen. The fab at lines 78-82 links to access/create, and access-table links to access/:id/update. Nothing links to /account/access/:id."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/account/access/:accessId/update",
+   "to": "/internalRoutes.account.path/access.path/:accessId",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/components/user-account-access/access-dialog-host/access-dialog-host.component.ts:147",
+   "reason": "/account/access/:accessId is not routable, because ':accessId' has only the 'update' child. The dialog host's navigateBack goes to ['/account','access']. The access-table links go to .../update and the fab goes to access/create. No trigger names /account/access/:id."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/account/access/create",
+   "to": "/internalRoutes.account.path/access.path/:accessId",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/components/user-account-access/user-account-access.html:78",
+   "reason": "The target is /account/access/:accessId once resolved, and it matches no route because ':accessId' has no '' child. The fab links to access/create. Closing the create dialog navigates back to /account/access. No link names the target."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/portfolio/activities",
+   "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+   "reason": "The target resolves to /portfolio/activities/:activityId. In activities-page.routes.ts, ':activityId' has only 'clone' and 'update' children and no '' child, so that URL is not a routed screen. The fab links to .../create, and the table rows link to :id/update and :id/clone. Nothing links to the bare :activityId URL."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/portfolio/activities/:activityId/clone",
+   "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/pages/portfolio/activities/activities-page.routes.ts:37",
+   "reason": "The target resolves to /portfolio/activities/:activityId. That route has no component and only the children 'clone' and 'update', with no '' child (activities-page.routes.ts:22-37), so a bare id URL matches no route and falls to the '**' redirect to home. No code navigates to the bare id: the activity links are always .../clone or .../update (routes.ts:188, 200; activities-table.component.html:509, 520), and the dialog host navigates back to /portfolio/activities."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/portfolio/activities/:activityId/update",
+   "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+   "reason": "/portfolio/activities/:activityId has no '' child under ':activityId', so it is not a routed screen. The update dialog host navigates back to /portfolio/activities. The fab and row links go to create, update and clone. No trigger names the target."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/portfolio/activities/create",
+   "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+   "reason": "The resolved target /portfolio/activities/:activityId matches no route, because ':activityId' has only clone and update children. The fab links to .../create, the rows link to :id/update and :id/clone, and closing the dialog returns to /portfolio/activities."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/about/privacy-policy",
+   "to": "/accounts/:accountId",
+   "stratum": "oursShell",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:620",
+   "reason": "The reader missed the assistant in the shell header. The about routes' AuthGuard lets signed-in users in, so a signed-in user on privacy-policy sees the signed-in header. Every role (ADMIN, USER, DEMO) has accessAssistant, so header.component.html:127 shows the assistant button. Typing an account name in the assistant runs searchAccounts, which builds routerLink internalRoutes.accounts.subRoutes.detail.routerLink(id) = ['/accounts', id] (assistant.component.ts:619-620). assistant-list-item.html:5 renders that link. /accounts/:accountId is a routed screen: the '' child of ':accountId' in accounts-page.routes.ts."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/account",
+   "to": "/portfolio/activities/create",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "../../libs/ui/src/lib/no-activities-info/no-activities-info.component.html:10",
+   "reason": "Links to activities/create exist only in home-overview, the activities-page fab, and no-activities-info inside gf-activities-table (shown only when !hasActivities). /account shows the settings, membership and access components plus the header, and none of these links there. The assistant quick links add only one level of subRoutes, so activities.subRoutes.create is never offered. The holding detail dialog can be opened from the assistant, but it passes [hasActivities]=true, which hides no-activities-info."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/accounts/:accountId",
+   "to": "/admin",
+   "stratum": "oursShell",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/components/header/header.component.html:74",
+   "reason": "The shell header, shown while the account dialog is open, has an 'Admin Control' link with routerLink ['/admin'] (line 74, plus a menu copy at 279-282). It is shown when hasPermissionToAccessAdminControl is true, which holds for admin users."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/accounts/:accountId/update",
+   "to": "/open",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/components/footer/footer.component.html:44",
+   "reason": "The only /open link available here would be the footer's (others are on the landing, about-overview and hacktoberfest pages). showFooter is false when currentRoute is 'accounts' (app.component.ts:184-192), so the footer is not rendered. The signed-in header has no /open link. The assistant quick links cover only internalRoutes, and openStartup is a public route. The accounts page and account dialogs have no such link."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/admin",
+   "to": "/account",
+   "stratum": "oursShell",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/components/header/header.component.html:279",
+   "reason": "The signed-in header's account menu always has 'My Ghostfolio' with [routerLink]=routerLinkAccount, which is ['/account']. The admin pages require a signed-in user, so the menu is shown. The assistant quick link 'Settings' also goes to /account."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/admin/settings",
+   "to": "/portfolio",
+   "stratum": "oursShell",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/components/header/header.component.html:44",
+   "reason": "The shell header shows a 'Portfolio' link with routerLink routerLinkPortfolio (['/portfolio']) to signed-in users, which the admin screen requires. A mobile menu copy is at line 260."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/blog/2024/11/black-weeks-2024",
+   "to": "/accounts/transfer-cash-balance",
+   "stratum": "oursShell",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+   "reason": "The reader missed the header assistant. The blog routes' AuthGuard admits signed-in users, and the signed-in header always shows the assistant (accessAssistant is in every role). searchQuickLinks builds its links from internalRoutes plus one level of subRoutes, keeping those with array routerLinks. accounts.subRoutes.transferCashBalance qualifies, with routerLink ['/accounts','transfer-cash-balance'] and title 'Transfer Cash Balance'. Searching that title renders a link to it (assistant-list-item.html:5)."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/blog/2025/09/hacktoberfest-2025",
+   "to": "/accounts",
+   "stratum": "oursShell",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/components/header/header.component.html:58",
+   "reason": "The signed-in header (inside @if (user())) has an Accounts routerLink to routerLinkAccounts (/accounts). On xs screens the same link is in the account menu (line 270). The blog AuthGuard admits signed-in users, so the link is shown on this screen."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/demo",
+   "to": "/portfolio/activities",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/pages/demo/demo-page.component.ts:38",
+   "reason": "The demo page has an empty template. Its ngOnInit always calls router.navigate(['/']), which goes through the '**' redirect to home. The user never stays on /demo, so header triggers such as the assistant's Activities quick link exist only during a transient moment of navigating away. The holding detail dialog's navigateToActivities is not open on /demo."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/home/holdings",
+   "to": "/accounts/transfer-cash-balance",
+   "stratum": "oursShell",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+   "reason": "The holdings page's own accounts-table does have the Transfer Cash Balance button hidden, as the reader said. But /home/holdings requires a signed-in user, and the signed-in header always shows the assistant. Its quick links include accounts.subRoutes.transferCashBalance (array routerLink ['/accounts','transfer-cash-balance'], not excluded), so searching 'Transfer Cash Balance' gives a link to it."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/home/watchlist/create",
+   "to": "/blog",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/components/footer/footer.component.html:23",
+   "reason": "Blog links exist only in the footer, the about-overview page and the blog posts. showFooter is false for the 'home' route, so the footer is not rendered. The header has no Blog link, and the assistant quick links cover only internalRoutes. The watchlist page and its create dialog do not link to /blog."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/portfolio/activities/:activityId/update",
+   "to": "/accounts/transfer-cash-balance",
+   "stratum": "oursShell",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+   "reason": "The activities page and the update dialog do not link there, but the shell header is shown on this screen for a signed-in user. Its assistant (opened by the button or the '/' hotkey) offers the quick link 'Transfer Cash Balance', taken from internalRoutes.accounts.subRoutes.transferCashBalance, which goes to ['/accounts','transfer-cash-balance']."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/about",
+   "to": "/blog",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/pages/about/overview/about-overview-page.html:202",
+   "reason": "/about renders the about-overview page (path '' child), which has a Blog button with routerLink=publicRoutes.blog.routerLink (/blog). It sits inside @if (hasPermissionForSubscription), a flag from the backend's globalPermissions, so it is shown only on deployments with subscriptions enabled. The footer link does not count because showFooter is false on 'about'."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/about/oss-friends",
+   "to": "/home",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/components/header/header.component.html:8",
+   "reason": "The header in the app shell is shown on every route. Its logo link and the 'Overview' link use routerLink ['/'] (signed-in header lines 8 and 29; signed-out logo line 250). app.routes.ts has no '' route, so '/' is caught by the '**' route with redirectTo 'home'. Reached via redirectTo. The footer is not shown on about."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/accounts",
+   "to": "/accounts/create",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/pages/accounts/accounts-page.html:25",
+   "reason": "The accounts page shows a gf-fab with routerLink internalRoutes.accounts.subRoutes.create.routerLink (/accounts/create). It sits inside @if (hasPermissionToCreateAccount && !isRestrictedView), which is user-dependent but normally true. accounts-page.component.ts:140 also navigates there when the user has no accounts."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/blog/2021/07/hallo-ghostfolio",
+   "to": "/blog",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.html:204",
+   "reason": "The article page has an unconditional breadcrumb link [routerLink]=\"routerLinkBlog\" to /blog. The footer, shown on blog routes, also links to /blog, but only when hasPermissionForSubscription is true."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/blog/2022/10/hacktoberfest-2022",
+   "to": "/demo",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/core/auth.guard.ts:35",
+   "reason": "/demo is linked only from the landing page (landing-page.html:49,352). The only other path is AuthGuard's catchError branch for utm_source=ios, which runs during a navigation into a guarded route and is not a trigger shown on this page. No link carries utm_source. The hacktoberfest page links only to /blog and external sites, and the header, footer and assistant (internal routes only) have no /demo link."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/blog/2023/02/ghostfolio-meets-umbrel",
+   "to": "/zen",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/auth.guard.ts:87",
+   "reason": "A signed-in user sees the header logo link and Overview link to '/', and the footer logo link. '/' hits the '**' redirect to home. AuthGuard then sends a user whose viewMode is ZEN to /zen (router.navigate to internalRoutes.zen.routerLink)."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/blog/2023/03/ghostfolio-reaches-1000-stars-on-github",
+   "to": "/demo",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/core/auth.guard.ts:35",
+   "reason": "This page links only to pricing, features and blog. The header, footer and assistant have no /demo link. /demo is reached only from the landing page's Live Demo links or from the guard's utm_source=ios branch, and neither is shown here."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/blog/2023/07/exploring-the-path-to-fire",
+   "to": "/demo",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/core/auth.guard.ts:35",
+   "reason": "This page links only to features and blog. The header and footer have no /demo link, and the assistant offers only internal routes. The guard's /demo navigation needs utm_source=ios on a failed user fetch during a navigation, which is not a trigger shown on this screen."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/blog/2026/04/ghostfolio-3",
+   "to": "/zen",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/auth.guard.ts:87",
+   "reason": "The signed-in header logo and Overview links go to '/'. That matches '**' with redirectTo 'home', and AuthGuard on /home then router.navigate to /zen when viewMode is ZEN. The route is reached through a redirect and a guard, so I counted it real."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/features",
+   "to": "/zen",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/auth.guard.ts:87",
+   "reason": "Features shows the header, with its logo and Overview links to '/', and the footer logo. '/' redirects to home, and AuthGuard sends a ZEN-viewMode user from home to /zen."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/markets",
+   "to": "/demo",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/core/auth.guard.ts:35",
+   "reason": "The markets page, the gf-markets component, the header and the footer (shown on markets) have no /demo link. The assistant offers internal routes only. The only /demo triggers are the landing page's Live Demo links and the guard's utm_source=ios fallback during a navigation, and neither is shown on /markets."
+  },
+  {
+   "slug": "ghostfolio",
+   "from": "/portfolio/allocations",
+   "to": "/zen",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/auth.guard.ts:87",
+   "reason": "The header is always shown, and its logo and Overview links go to '/'. That redirects to home, where AuthGuard sends a ZEN-viewMode user to /zen via router.navigate."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/",
+   "to": "/create",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/index.routing.ts:21",
+   "reason": "The URL '/' only matches {path:'', redirectTo:'/workloads', pathMatch:'full'} (index.routing.ts:21; the same redirect is at chrome/routing.ts:21). No routed component is ever shown on '/'. Only RootComponent's bare <router-outlet> exists there. The chrome '+' button (chrome/component.ts:82, template.html:50) appears only after the redirect lands on /workloads, which is a transient moment during navigation away from '/'."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/",
+   "to": "/overview",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/index.routing.ts:21",
+   "reason": "'/' is redirect-only (to /workloads) and shows no component. The namespace selector (namespace/component.ts:226) is in the chrome shell, which is not rendered on '/'. The create-form navigate(['overview']) calls are on /create screens, not on '/'."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/",
+   "to": "/search",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/index.routing.ts:21",
+   "reason": "'/' is redirect-only (to /workloads). The kd-search form (chrome/search/component.ts:45) sits in the chrome shell, which is never shown while the URL is '/'."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/login",
+   "to": "/overview",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/login/component.ts:53",
+   "reason": "After a successful login, login() calls historyService.goToPreviousState('workloads'). That does navigateByUrl(previousStateUrl_), the URL AuthGuard saved when it bounced the user to login. A user who first opened /overview while signed out lands on /overview. The target is not hard-coded, and the code does not restrict it to /overview."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/login",
+   "to": "/search",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/login/component.ts:53",
+   "reason": "Clicking Sign in on /login calls login() (component.ts:53), which runs historyService.goToPreviousState('workloads') after the HTTP login succeeds. That calls navigateByUrl(previousStateUrl_) (history.ts:52). previousStateUrl_ comes from the pairwise NavigationEnd tracker (history.ts:36). Example: a user on /search?q=x signs out from the chrome user panel (authService.logout navigates to /login), or a 401 makes error/handler.ts:57 navigate to /login. Logging back in then goes to /search?q=x. Correction to the reader's mechanism: AuthGuard.pushState sets previousStateUrl_ equal to currentStateUrl_ (extractedUrl.toString() equals initialUrl.toString() under the default UrlHandlingStrategy), so that path falls back to 'workloads'. The verdict still holds through the history path. The chrome search form itself is not shown on /login."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/clusterrolebinding",
+   "to": "/create",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/chrome/template.html:56",
+   "reason": "ChromeComponent is the routed parent of every child route under AuthGuard, /clusterrolebinding included. Its primary toolbar has a 'Create new resource' button with no *ngIf, and its (click)=\"goToCreateState()\" runs router_.navigate(['create'], {queryParamsHandling:'preserve'}) at src/chrome/component.ts:82. With no relativeTo that resolves from the root to /create, a child of the chrome route (src/chrome/routing.ts) with no extra guard."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/clusterrolebinding",
+   "to": "/overview",
+   "stratum": "ours",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/common/components/namespace/component.ts:224",
+   "reason": "Only one control on this screen sends the router to 'overview': the chrome namespace selector's changeNamespace_ at line 226. It sits under if (this.resourceNamespaceParam) at line 224. resourceNamespaceParam comes from the deepest primary route's params.resourceNamespace. The /clusterrolebinding list route is path '' and has no params (its detail route is ':resourceName', also without resourceNamespace), so that check fails and the code only merges the namespace query param into the current route. The other 'overview' paths are historyService.goToPreviousState('overview') at line 217, reached only from the namespace-change dialog, and shouldShowNamespaceChangeDialog also needs resourceNamespaceParam. The remaining ones are in the create components, which are not shown on this screen. No nav, breadcrumb or redirectTo points to /overview."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/configmap",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/chrome/search/component.ts:45",
+   "reason": "The chrome shell template includes <kd-search> in the main toolbar. Its submit() calls router.navigate(['search']) when the form is valid, which goes to /search. It is shown on /configmap because that route sits under ChromeComponent."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/customresourcedefinition/:crdName/:namespace/:objectName",
+   "to": "/workloads",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/chrome/template.html:30",
+   "reason": "The shell's logo link has routerLink=getWorkloadsStateName(), which returns '/workloads'. It is always shown, and the CRD routes are children of ChromeComponent. The path '' redirect to /workloads is a second route there."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/discovery",
+   "to": "/",
+   "stratum": "ours",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/common/components/resourcelist/persistentvolume/template.html:161",
+   "reason": "The cited PV claim link can resolve to '/': getClaimHref returns '' for a malformed claim, and routerLink '' is absolute root. But kd-persistent-volume-list is used only in search, cluster, storageclass detail and overview, not on /discovery. The ingress, ingressclass and service lists on /discovery build links with kdState.href, which always yields '/<state>/...'. The breadcrumb uses DISCOVERY_ROUTE data.link ['', 'discovery']. The zero-state routerLink 'deploy' and the logo (/workloads) do not go to '/' either."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/job",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/chrome/userpanel/template.html:70",
+   "reason": "The shell toolbar includes <kd-user-panel>. Its menu has a 'Sign out' button, shown when authenticated and there is no auth header, and it calls logout(). That calls AuthenticationService.logout(), which runs router.navigate(['login']) (authentication.ts:72). The LoginGuard admits the user because the token cookie is removed first. The 'Sign in' button (!isAuthenticated()) calls the same logout()."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/job",
+   "to": "/overview",
+   "stratum": "ours",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/common/components/namespace/component.ts:226",
+   "reason": "JOB_LIST_ROUTE has path '' and no resourceNamespace param, so a namespace change takes the navigate([]) branch and stays on /job. The overview branch and the dialog's goToPreviousState('overview') both require resourceNamespaceParam. The breadcrumb parent is WORKLOADS_ROUTE and no nav item targets overview."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/namespace/:resourceName",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/chrome/userpanel/template.html:70",
+   "reason": "The user-panel Sign out/Sign in buttons call logout(), which runs router.navigate(['login']). They are in the chrome shell, which wraps the /namespace/:resourceName route."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/networkpolicy",
+   "to": "/overview",
+   "stratum": "ours",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/common/components/namespace/component.ts:224",
+   "reason": "The /networkpolicy list route (path '' in src/resource/cluster/networkpolicy/routing.ts) has no :resourceNamespace param, so resourceNamespaceParam is undefined. The guard at line 224 therefore skips navigate(['overview']) (line 226), and the namespace-change dialog that leads to goToPreviousState('overview') never opens, because shouldShowNamespaceChangeDialog needs that param. Only the detail route ':resourceNamespace/:resourceName' would make these paths reachable. Nothing else shown on the list screen links to /overview."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/networkpolicy",
+   "to": "/search",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/chrome/search/component.ts:45",
+   "reason": "The shell's <kd-search> bar submit() calls router.navigate(['search']). The bar is shown on every ChromeComponent child route, including /networkpolicy."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+   "to": "/login",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/chrome/userpanel/template.html:70",
+   "reason": "kd-user-panel sits in the chrome toolbar, which wraps the PVC detail route. Its 'Sign out' menu item shows when isAuthenticated() && !hasAuthHeader(). The chrome AuthGuard lets a token-cookie user through (isAuthenticated = me.authenticated || hasTokenCookie), and for that user hasAuthHeader() is false, so the guard does not keep the button hidden. Its logout() calls AuthService.logout(), which clears the cookie, resets the me service and runs router_.navigate(['login']) (src/common/services/global/authentication.ts:72). That lands on the root /login route, and LoginGuard admits the user because they are now unauthenticated. The button is hidden only when the user signed in through an auth header."
+  },
+  {
+   "slug": "k8sdash",
+   "from": "/shell/:resourceNamespace/:resourceName",
+   "to": "/workloads",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/chrome/template.html:30",
+   "reason": "The shell's logo link uses routerLink=getWorkloadsStateName(), which returns '/workloads'. The shell route is a child of ChromeComponent, so the logo is shown on this screen."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/request-sm-access",
+   "to": "/sm-landing",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.html:32",
+   "reason": "The form's Cancel button has [routerLink]=\"'/sm-landing'\"."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/AuthRoute.NewDeviceVerification",
+   "to": "/settings/security/session-timeout",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/auth/guards/deep-link/deep-link.guard.ts:39",
+   "reason": "Real, but only through the deep-link restore. Submitting the code calls router.navigate(['/vault']) (../../libs/auth/src/angular/new-device-verification/new-device-verification.component.ts:172). /vault sits under the UserLayout route, whose guards are [deepLinkGuard(), authGuard] (oss-routing.module.ts:682). deepLinkGuard saves the URL a signed-out user asked for, and once the user is unlocked it calls router.navigateByUrl with that saved URL (deep-link.guard.ts:39). So a user who opened /settings/security[/session-timeout] while signed out, then logged in and reached this step, lands on session-timeout. /settings/security redirectTo session-timeout (security-routing.module.ts:19). Nothing on the way clears the saved URL: the login-success handler and authGuard's authBlocked path leave it alone. The reader's point that no trigger names settings/security is true, but it does not decide the pair. The hinted sites are wrong: [routerLink]=[] links back to the same page, and the vault rows are not shown here."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/AuthRoute.SignUp",
+   "to": "/settings/security/session-timeout",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/components/environment-selector/environment-selector.component.html:20",
+   "reason": "Only signed-out users are let in (unauthGuardFn), and the user never logs in on this screen. Its navigations go to /finish-signup and /organization-invite-link-invalid (registration-start.component.ts:220, 339) and to the /login link in the secondary component. The anon-layout logo goes to '/', and redirectGuard sends a signed-out user to /login from there. The saved deep link is only replayed after login, which does not happen here. The hinted environment-selector link is [routerLink]=[], a link to the same page, and the vault rows are not shown here."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/AuthRoute.TwoFactor",
+   "to": "/settings/security/session-timeout",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/auth/guards/deep-link/deep-link.guard.ts:39",
+   "reason": "Real, but only through the deep-link restore. After a successful 2FA submit, handleAuthResult calls router.navigate([defaultSuccessRoute]), which is normally 'vault' (../../libs/auth/src/angular/two-factor-auth/two-factor-auth.component.ts:506). The UserLayout route's deepLinkGuard (oss-routing.module.ts:682) then calls navigateByUrl with the URL the user asked for while signed out (deep-link.guard.ts:39). Opening /settings/security[/session-timeout] while signed out, then going through login and 2FA, lands on session-timeout; /settings/security redirectTo session-timeout. This is the flow deepLinkGuard was built for. The hinted sites are wrong: a link to the same page, and vault rows that are not shown here."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/browser-extension-prompt",
+   "to": "/settings/security/session-timeout",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/vault/components/browser-extension-prompt/browser-extension-prompt-install.component.html:4",
+   "reason": "The components have no router calls; the only link is the external web-store href. The anon-layout logo goes to '/', and redirectGuard sends the user on to /vault, /login, /lock or /login-initiated, never to settings/security. The user cannot log in on this page. An unlocked user has no saved deep link left, because the guard uses it up (or another flow clears it) the first time an unlocked user enters a UserLayout route. It is kept in per-tab sessionStorage, so another tab cannot supply one. The hinted sites are a link to the same page and vault rows that are not shown here."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/confirm-key-connector-domain",
+   "to": "/settings/security/session-timeout",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/key-management/key-connector/confirm-key-connector-domain.component.ts:18",
+   "reason": "Confirm runs onBeforeNavigation, which clears the saved deep link (ts:18), and then calls router.navigate(['/']) (../../libs/key-management-ui/src/key-connector/confirm-key-connector-domain.component.ts:116). From '/', redirectGuard goes to /vault. Cancel sends a logout message. The logo goes to '/'; a key-connector user who has not confirmed the domain has no user key, so redirectGuard sends them to /lock. There is no link to settings/security. The reader's site (oss-routing.module.ts:595) is the route definition, not what decides the pair."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/organizations/:organizationId/reporting/reports/weak-passwords-report",
+   "to": "/vault",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/layouts/product-switcher/product-switcher-content.component.html:15",
+   "reason": "The route sits under OrganizationLayoutComponent, which renders app-side-nav with the product switcher. The switcher's bento links go to the Password Manager product's appRoute '/vault' (product-switcher.service.ts:228). The hinted add-extension dialog is not shown on this screen."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/recover-2fa",
+   "to": "/settings/security/session-timeout",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/auth/guards/deep-link/deep-link.guard.ts:39",
+   "reason": "Real, through the deep-link restore. After a successful recovery-code login the component calls router.navigate(['/settings/security/two-factor']) (src/app/auth/recover-two-factor.component.ts:132). That enters the UserLayout route, and its deepLinkGuard, now that the user is unlocked, sends the user to any URL saved while signed out (deep-link.guard.ts:39). So a user who opened /settings/security[/session-timeout] before recovering lands on session-timeout rather than two-factor. The saved URL lives in the tab's sessionStorage and is not cleared by the login-success handler. The reader was right that the default target is two-factor, but missed the guard that replaces it."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/reports/breach-report",
+   "to": "/vault",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/layouts/user-layout.component.html:48",
+   "reason": "The route is under UserLayoutComponent. Its side nav has a vault nav item route=\"vault\" (and vault-nav-section when the vfo1 flag is on), plus the product switcher to /vault. The hinted dialog is not shown here."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/secrets-manager-trial-initiation",
+   "to": "/vault",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "../../libs/components/src/landing-layout/landing-header.component.html:4",
+   "reason": "The reader's 'the anon layout has no vault link' is wrong. The anon layout's header always shows the logo link [routerLink]=['/'] (hideLogo defaults to false and the wrapper never sets it). '/' is guarded by redirectGuard (oss-routing.module.ts:130), which sends unlocked users to /vault (libs/angular/.../redirect.guard.ts:21). With the trial stepper on (product=SM plus a productTier query param), handlePasswordSubmit logs the user in on this page (complete-trial-initiation.component.ts:359), and the user stays on the screen. unauthGuardFn is a canActivate guard checked only on entry, so it does not hide or disable the logo afterwards. The click then lands on /vault, as long as /vault's setupExtensionRedirectGuard lets it through: on a mobile browser or with suppressOnboardingInterstitials; otherwise a new account is sent to /setup-extension. The template links go to /sm/:id and /organizations/:id/vault or members, which are not /vault. The hinted dialog is not shown here."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/send/:sendId/:key",
+   "to": "/vault",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "../../libs/components/src/landing-layout/landing-header.component.html:4",
+   "reason": "The send page has no guard, so a signed-in, unlocked user can view it. Its anon-layout header shows the logo link [routerLink]=['/'], and redirectGuard on '' (oss-routing.module.ts:130) sends an unlocked user to /vault (redirect.guard.ts:21). So the logo lands on /vault for an existing user: one with no premium-interest flag who is older than 30 days or has dismissed setup-extension. This is a guard redirect rather than a redirectTo. The reader missed the logo; the explainer's /signup link and the hinted setup-extension dialog play no part."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/settings/security/password",
+   "to": "/vault",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/layouts/user-layout.component.html:48",
+   "reason": "The route is under UserLayoutComponent, whose side nav has a vault nav item (route=\"vault\") and the product switcher linking to /vault, both shown while on settings."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/setup-extension",
+   "to": "/settings/security/session-timeout",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/vault/components/setup-extension/setup-extension.component.html:63",
+   "reason": "The page's navigations go to /vault (html:63, ts:139, and the add-later dialog's link), to an external store link, and the logo goes to '/'. Users get here through /vault's setupExtensionRedirectGuard, which runs after the UserLayout deepLinkGuard has already used up any saved deep link. So for an unlocked user, /vault stays /vault. A signed-out visitor who clicks /vault is sent to /login. Nothing targets settings/security."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/2fa",
+   "to": "/",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "../../libs/components/src/landing-layout/landing-header.component.html:4",
+   "reason": "/2fa is a child of the AnonLayoutWrapper group (oss-routing.module.ts:420). The wrapper renders auth-anon-layout, which shows bit-landing-header. Neither the wrapper nor the route sets hideLogo, which defaults to false (anon-layout.component.ts:53). So the header's logo link, routerLink ['/'], is shown on /2fa and names route '/' directly. That route's redirectGuard then sends a signed-out user on to /login."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/confirm-key-connector-domain",
+   "to": "/",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "../../libs/key-management-ui/src/key-connector/confirm-key-connector-domain.component.ts:116",
+   "reason": "The confirm handler does router.navigate(['/']) after the sync, and the anon-layout logo also links to '/'."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/device-verification",
+   "to": "/remove-password",
+   "stratum": "ours",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "../../libs/common/src/key-management/key-connector/services/key-connector.service.ts:115",
+   "reason": "The reader's reason is wrong, but the verdict holds. A sender does exist: DefaultSyncService sends 'convertAccountToKeyConnector' (libs/common/src/platform/sync/default-sync.service.ts:290), and submit on this screen runs loginSuccessHandlerService.run, which does a fullSync. After that, submit navigates to /vault, where authGuard can redirect to /remove-password (auth.guard.ts:108). Both paths require convertAccountRequired$, which needs loggedInUsingSso = tokenService.getIsExternal. /device-verification exists only in a master-password login: it is reached only from LoginComponent (login.component.ts:445), and only PasswordLoginStrategy implements logInNewDeviceVerification. So that condition stays false on this screen and no trigger shown here can reach /remove-password. Caveat: this rests on the client treating the token's 'external' amr as an SSO login; the server that issues the token is not in the repository."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/login",
+   "to": "/login-with-passkey",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "../../libs/auth/src/angular/login/login.component.ts:755",
+   "reason": "The login template shows a passkey button (login.component.html:50-57) that calls handleLoginWithPasskeyClick(), which navigates to /login-with-passkey. isLoginWithPasskeySupported() is true for the Web client."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/organizations/:organizationId/billing/payment-details",
+   "to": "/organizations/:organizationId/vault",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/billing/individual/upgrade/services/upgrade-flow.service.ts:88",
+   "reason": "The org layout side nav includes app-upgrade-callout and the upgrade nav button, shown to non-premium users. UpgradeFlowService.upgrade() opens the upgrade dialog, and on UpgradedToFamilies it navigates to /organizations/{id}/vault, where the id can be any org."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/organizations/:organizationId/reporting/reports/exposed-passwords-report",
+   "to": "/organizations/:organizationId/billing/subscription",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/admin-console/organizations/layouts/organization-layout.component.html:71",
+   "reason": "The report is a child of OrganizationLayout, whose side nav has a billing/subscription nav item shown when canShowBillingTab is true."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/organizations/:organizationId/settings/account",
+   "to": "/remove-password",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/app.component.ts:172",
+   "reason": "The reader's claim of 'no sender' is false. DefaultSyncService sends 'convertAccountToKeyConnector' after any sync for which convertAccountRequired$ is true (libs/common/src/platform/sync/default-sync.service.ts:290). AppComponent, shown on every screen, handles it with router.navigate(['/remove-password']). On this screen the user can trigger a sync: the Purge vault button opens PurgeVaultComponent, which calls fullSync(true) (src/app/vault/settings/purge-vault.component.ts:65). A server-notification sync can also fire here. In addition, the product switcher's /vault link runs UserLayout's authGuard, which redirects to /remove-password under the same condition (auth.guard.ts:108). The condition depends on backend data that can change during the session: an SSO login plus non-admin membership in a Key Connector org."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/organizations/:organizationId/vault",
+   "to": "/settings/subscription/premium",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/billing/individual/upgrade/services/upgrade-flow.service.ts:53",
+   "reason": "On self-hosted installs, the org layout's upgrade callout calls upgrade(), which navigates to /settings/subscription/premium. The premium badge in the vault-item dialog (no org id) also reaches the same route through web-premium-upgrade-prompt.service.ts:99."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/recover-delete",
+   "to": "/organizations/:organizationId/billing/subscription",
+   "stratum": "ours",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/app.component.ts:143",
+   "reason": "The AppComponent 'upgradeOrganization' handler is the only hinted trigger. That message is sent only from vault screens (vault-cipher-actions.service.ts:123 and individual vault.component.ts:934). recover-delete is an anon screen that offers only routerLink /login, a submit that navigates to '/' (which goes on to /login for a signed-out user), and the environment selector. Nothing shown on it can send that message or reach org billing."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/reports/breach-report",
+   "to": "/organizations/:organizationId/billing/subscription",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/billing/individual/upgrade/upgrade-payment/upgrade-payment.component.html:20",
+   "reason": "The reports routes are under UserLayout. Its app-side-nav (web-side-nav) shows app-upgrade-callout when shouldShowPremiumUpgradeButton$ is true (non-premium user). The callout's upgrade() opens UnifiedUpgradeDialog, which contains app-upgrade-payment. When the Families plan is chosen and the user owns a free org, that step shows a routerLink to `/organizations/${org.id}/billing/subscription` (upgrade-payment.service.ts:76-82)."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/reports/weak-passwords-report",
+   "to": "/organizations/:organizationId/billing/subscription",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/billing/individual/upgrade/upgrade-payment/upgrade-payment.component.html:20",
+   "reason": "Same path as the breach report. UserLayout shows the upgrade callout, the upgrade dialog opens, and its families-plan callout links to the free-org owner's /organizations/{id}/billing/subscription."
+  },
+  {
+   "slug": "bitwarden",
+   "from": "/settings/sponsored-families",
+   "to": "/",
+   "stratum": "ours",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/billing/settings/sponsored-families.component.ts:194",
+   "reason": "On init, SponsoredFamiliesComponent calls preventAccessToFreeFamiliesPage(), which runs router.navigate([\"/\"]) when showFreeFamilies$ is false. The \"/\" route exists in oss-routing.module.ts as a redirectGuard route. The UserLayout logo (route=\".\") is a second trigger."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/fixed-deposits-accounts/create",
+   "to": "/groups",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/shell/toolbar/toolbar.component.html:156",
+   "reason": "The clients routes are wrapped in Route.withShell, so the toolbar is shown on s. Its Institution menu has routerLink='/groups', gated only by the READ_GROUP permission, and /groups routes to GroupsComponent."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/loans-accounts/:loanId/breach-actions",
+   "to": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.html:332",
+   "reason": "['./dashboard'] is relative and stays under /clients/:c/loans-accounts/:id. The breach-actions tab navigates only to ../actions/<name>. The tray goes to /{clients|groups}/{id}/loans-accounts/{id}, which redirects to 'general', not 'dashboard'."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/loans-accounts/glim-account/create",
+   "to": "/reports",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/shell/toolbar/toolbar.component.html:193",
+   "reason": "The shell toolbar's Reports menu has an 'All' item with [routerLink]=['/reports']. It is shown on s and gated only by READ_REPORT. The other cited sites are on other screens."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/account-transfers/:transferid",
+   "to": "/navigation",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/shell/sidenav/sidenav.component.html:97",
+   "reason": "The shell sidenav has a list item with [routerLink]=['/navigation'], shown on s and gated only by READ_CLIENT. The route 'navigation' exists in app-routing."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/list-standing-instructions",
+   "to": "/centers",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/shell/toolbar/toolbar.component.html:159",
+   "reason": "The shell toolbar's Institution menu has a Centers item with routerLink='/centers', shown on s and gated only by READ_CENTER."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/standing-instructions/make-account-transfer",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/account-transfers/make-account-transfers/make-account-transfers.component.html:225",
+   "reason": "The MakeAccountTransfers links are relative ('../..', '../../transactions') and stay under the client. Submit only advances the stepper. The checker-inbox row link is not shown on s. The tray goes only to the group savings account root."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+   "to": "/clients/:clientId/savings-accounts/:savingAccountId/documents",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+   "reason": "ClientsViewComponent (the hinted clients-view.html:468) is not shown under /groups/.../loans-accounts. The dashboard tab has no navigation. The tray lands on the savings account root, which redirects to general, with no /documents."
+  },
+  {
+   "slug": "mifos",
+   "from": "/loans/:loanId/breach-actions",
+   "to": "/centers/:centerId/savings-accounts/:savingAccountId/documents",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+   "reason": "The tray builds only /{clients|groups}/<id>/savings-accounts/<accountId>, with no centers prefix and no /documents. ClientsViewComponent is not shown under /loans/:loanId. The breach-actions tab goes only to ../actions/<name>."
+  },
+  {
+   "slug": "mifos",
+   "from": "/loans/:loanId/loan-collateral",
+   "to": "/reports",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/shell/toolbar/toolbar.component.html:193",
+   "reason": "LOANS_LIST_ROUTES wraps the /loans routes in Route.withShell, so the toolbar is shown. Its Reports menu item 'All' has [routerLink]=['/reports'], gated only by READ_REPORT, and /reports is a routed lazy module. The web-app keyboard shortcut with route 'reports' is a second trigger."
+  },
+  {
+   "slug": "mifos",
+   "from": "/loans/:loanId/payment-rates",
+   "to": "/groups/:groupId/loans-accounts/:loanId/originators",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.html:509",
+   "reason": "['./originators'] is relative and resolves to /loans/:loanId/originators. The tray goes only to /groups/:id/loans-accounts/:accountId, which redirects to general, never to originators."
+  },
+  {
+   "slug": "mifos",
+   "from": "/loans/:loanId/transactions/export",
+   "to": "/accounting",
+   "stratum": "both",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/shell/toolbar/toolbar.component.html:55",
+   "reason": "The shell toolbar is shown on this screen and has an Accounting link with routerLink ['/accounting']. It sits behind a permission directive only."
+  },
+  {
+   "slug": "mifos",
+   "from": "/organization/exchange-rates/:id",
+   "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/:standingInstructionsId/view",
+   "stratum": "both",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+   "reason": "The tray navigates only to /{clients|groups}/:id/recurring-deposits-accounts/:accountId, which redirects to general, with no transfer-funds sub-route. The checker-inbox link is in a tasks component that is not shown on this screen."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions/account-transfers/make-account-transfer",
+   "to": "/loans/:loanId/transfer-funds/:standingInstructionsId/view",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:208",
+   "reason": "The FD transactions route that holds account-transfers has no component, so only MakeAccountTransfersComponent and the shell are shown. Its links are relative ('../..', '../../transactions'), and submit only advances the stepper. The cited checker-inbox row link belongs to the checker-inbox page and is relative there. Nothing shown on s reaches /loans/.../transfer-funds/:id/view."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/loans-accounts/:loanId/accountdetail",
+   "to": "/loans/:loanId/notes",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.html:635",
+   "reason": "The notes tab link is ['./notes'], relative to LoansViewComponent's route, so on s it resolves to /clients/:c/loans-accounts/:id/notes, a different pattern. The hinted centers, clients and groups view templates are not shown on s. No absolute /loans/:id/notes trigger exists. The only /loans/<id> navigation is in credit-applications, to general."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/loans-accounts/:loanId/buy-down-fees",
+   "to": "/loans/:loanId/payment-rates",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.html:454",
+   "reason": "['./payment-rates'] is relative and resolves to /clients/:c/loans-accounts/:id/payment-rates. No absolute /loans/:id/payment-rates trigger exists anywhere."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/loans-accounts/:loanId/datatables/:datatableName",
+   "to": "/loans/:loanId/external-asset-owner",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.html:662",
+   "reason": "['./external-asset-owner'] is relative and resolves to /clients/:c/loans-accounts/:id/external-asset-owner. No component shown on s links to the /loans mount of that tab."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions-tab",
+   "to": "/appusers",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/shell/toolbar/toolbar.component.html:214",
+   "reason": "The shell toolbar's Admin menu has a Users item with [routerLink]=['/appusers'], shown on s and gated only by READ_USER. The route 'appusers' exists in app-routing."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+   "to": "/loans/:loanId/charges/:id",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/account-transfers/view-standing-instructions/view-standing-instructions.component.html:10",
+   "reason": "s matches the savings route ':savingAccountId/transfer-funds' (SavingsAccountViewComponent's children do not take 'transfer-funds'), inside the component-less second clients/:clientId block. So only ViewStandingInstructionsComponent and the shell are shown. Its links are ../edit and ../list-account-transactions. The hinted client general-tab is not shown. Nothing links to /loans/:id/charges/:id."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId",
+   "to": "/loans/:loanId/deferred-income",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.html:468",
+   "reason": "['./deferred-income'] is relative and resolves to /groups/:g/loans-accounts/:id/deferred-income. No absolute router call or link to /loans/<id>/deferred-income exists. The only /loans/<id> navigation is credit-applications, to general, and it is not shown on s."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/general",
+   "to": "/loans/:loanId/loan-documents",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.html:622",
+   "reason": "['./loan-documents'] is relative and lands on /groups/:g/loans-accounts/:id/loan-documents, a different pattern. The loan general tab has no router calls, and no absolute /loans/<id>/loan-documents link exists."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/loan-documents",
+   "to": "/appusers",
+   "stratum": "theirs",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/core/shell/toolbar/toolbar.component.html:214",
+   "reason": "The group loan view is mounted under the shell, which renders mifosx-toolbar. Its Admin menu has [routerLink]=['/appusers'] guarded only by the READ_USER permission directive. That is not a visibility condition tied to s, and /appusers is a routed lazy module (app-routing.module.ts). The view-user and edit-user links are not on s."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/original-schedule",
+   "to": "/:loanId/datatables",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.html:678",
+   "reason": "The only datatable link is ['./datatables', registeredTableName], which lands on .../loans-accounts/:id/datatables/:datatableName. The loans 'datatables' node has only a ':datatableName' child, so a bare .../datatables URL matches no component. '/:loanId/datatables' is not a declared mount (the loans module is mounted under clients/, groups/ and loans/). No trigger produces it."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/savings-accounts/:savingAccountId/notes",
+   "to": "/loans/:loanId/transfer-funds/:standingInstructionsId/view",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:208",
+   "reason": "The target route exists, but the cited checker-inbox row link is shown only on the checker-inbox page, and it is relative there. On s, SavingsAccountViewComponent's links are relative tabs plus actions/transfer-funds under the savings account. The notes tab has no navigation, and the shell's sidenav links only to the checker-inbox list."
+  },
+  {
+   "slug": "mifos",
+   "from": "/loans/glim-account/:glimId",
+   "to": "/loans/:loanId/charges/:id",
+   "stratum": "theirs",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/glim-account/glim-account.component.html:86",
+   "reason": "s resolves to GlimAccountComponent (':loanId' fails on the extra segment, so the router backtracks to 'glim-account/:glimId'). Its links go only to /loans-accounts/<child>/actions/... and /loans-accounts/<child>/general. The hinted client general-tab is not shown. Nothing reaches a loan charge view."
+  },
+  {
+   "slug": "mifos",
+   "from": "/accounting/provisioning-entries/journal-entries/view/:id",
+   "to": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:218",
+   "reason": "ViewProvisioningJournalEntriesComponent has no links or router calls. In the shell, the notifications tray goes only to /{clients|groups}/{id}/fixed-deposits-accounts/{accountId}, and the FD routing redirects '' to 'general', not 'charges'. Nothing else in the shell names the FD charges tab."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/standing-instructions/create-standing-instructions",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges/:id",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/account-transfers/create-standing-instructions/create-standing-instructions.component.ts:377",
+   "reason": "CreateStandingInstructions only navigates relatively: ['../'] in the template and navigate(['../../']) at ts:377. The tray reaches only the group savings account root, which redirects to general, never charges/:id."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/balances",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/edit",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+   "reason": "The balances tab has no navigation, and the loans-view tabs are relative to the loan. The tray goes only to /groups/<id>/savings-accounts/<accountId>, with no transactions/:id/edit. Breadcrumbs point only to ancestors of s."
+  },
+  {
+   "slug": "mifos",
+   "from": "/organization/employees/create",
+   "to": "/remittances/process",
+   "stratum": "oursShell",
+   "verdict": "unclear",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "unclear",
+   "site": "src/app/core/shell/sidenav/sidenav.component.html:151",
+   "reason": "The shell sidenav item routerLink ['/remittances/process'] is shown only when *ngIf=\"mifosRemittanceEnabled\", and the target route has remittanceEnabledGuard. The flag is deployment config, and the defaults in the source disagree. assets/env.js sets it false. environment.ts treats unset as enabled, and the Docker envsubst of env.template.js yields '' when MIFOS_REMITTANCE_ENABLED is unset, which counts as enabled. So the deployment decides."
+  },
+  {
+   "slug": "mifos",
+   "from": "/organization/exchange-rates/convert",
+   "to": "/clients/:clientId/shares-accounts/create",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:238",
+   "reason": "The tray navigates to /clients/:id/shares-accounts/<account.accountId>, which is the ':shareAccountId' view route (redirecting to general), not the static 'create' route. No other trigger on s names shares create."
+  },
+  {
+   "slug": "mifos",
+   "from": "/organization/working-days",
+   "to": "/centers/:centerId/savings-accounts/:savingAccountId/charges",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+   "reason": "The tray builds only /clients|groups/:id/savings-accounts/:accountId. It never uses the centers prefix for accounts and has no charges sub-route."
+  },
+  {
+   "slug": "mifos",
+   "from": "/products/fixed-deposit-products/:productId/edit",
+   "to": "/centers/:centerId/savings-accounts/:savingAccountId/notes",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+   "reason": "The tray reaches only the clients or groups savings account root. It has no centers prefix and no notes sub-route. No other trigger on s names a center savings tab."
+  },
+  {
+   "slug": "mifos",
+   "from": "/products/near-breach-configurations/create",
+   "to": "/groups/:groupId/loans-accounts/:loanId/transactions/:id/reciept",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+   "reason": "The tray navigates only to /groups/:id/loans-accounts/:accountId, which redirects to general, with no transactions/:id/reciept."
+  },
+  {
+   "slug": "mifos",
+   "from": "/settings",
+   "to": "/groups/:groupId/loans-accounts/:loanId/charges/:id",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+   "reason": "SettingsComponent has no router links. The tray reaches only the loan account root, not charges/:id."
+  },
+  {
+   "slug": "mifos",
+   "from": "/settings",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+   "reason": "SettingsComponent has no router links. The tray reaches only the savings account root, which redirects to general, not transactions."
+  },
+  {
+   "slug": "mifos",
+   "from": "/system",
+   "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/datatables/:datatableName",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+   "reason": "The tray reaches only the recurring-deposit account root. SystemComponent's 'data-tables' links go to /system/data-tables. Account datatable links exist only inside the RD account view, which is not shown on /system."
+  },
+  {
+   "slug": "mifos",
+   "from": "/system/codes/:id/edit",
+   "to": "/clients/:clientId/savings-accounts/:savingAccountId/actions/:name",
+   "stratum": "oursShell",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+   "reason": "The tray reaches only the savings account root, with no actions sub-route. Savings action navigations exist only in the savings view and transaction components, which are not shown on this screen."
+  },
+  {
+   "slug": "mifos",
+   "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/clients/:clientId/savings-accounts/:savingAccountId/datatables/:datatableName",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+   "reason": "On s the shown components are ViewTransactionComponent and DatatableTransactionTabComponent. doAction cuts router.url at '/transactions', so it goes to /centers/.../savings-accounts/S/actions/<name>. The tab links are relative to the transaction. The tray's savings route lands on the account root, which redirects to 'general'. Breadcrumbs point only to ancestors under /centers. Nothing produces the client-account datatables URL."
+  },
+  {
+   "slug": "mifos",
+   "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/loans/:loanId/transactions/:id/edit",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+   "reason": "doAction stays inside the savings account (/actions/<name>), and the datatable tab has only dialogs. The shell links to /loans only as the list. The tray's loan route goes to /{clients|groups}/.../loans-accounts/{id}, never to /loans/:id/transactions/:id/edit."
+  },
+  {
+   "slug": "mifos",
+   "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/general",
+   "to": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/edit",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+   "reason": "The general tab has only the relative 'edit' and '../../' links and navigate(['../..']), all under /centers. doAction goes to <account>/actions/<name>. The tray goes to the savings account root only. No trigger names a client standing-instruction edit route."
+  },
+  {
+   "slug": "mifos",
+   "from": "/checker-inbox-and-tasks/loan-approval",
+   "to": "/checker-inbox-and-tasks/client-approval",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:27",
+   "reason": "The parent tabs component CheckerInboxAndTasksComponent stays shown on the loan-approval child. Its tab nav has [routerLink]=['./client-approval'], resolving to /checker-inbox-and-tasks/client-approval. It is permission-gated (READ_CLIENT) at runtime only."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions",
+   "to": "/clients/:clientId/loans-accounts/:loanId/transfer-funds/make-account-transfer",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/loans/loans-view/loans-view.component.ts:578",
+   "reason": "On s the shown components are FixedDepositAccountViewComponent and the FD TransactionsTabComponent. Their navigations are reload() (the FD list and back to the same URL), actions/<name>, edit, ../../, the FD's own tabs, account-transfers/<id>, a transaction id and journal-entry. The only producers of loans-accounts/:id/transfer-funds/make-account-transfer are loans-view.ts:578 and the client general-tab, and neither is shown on s. The tray goes to the loan root only."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+   "reason": "The target route exists. On s, doAction goes only to <savings account>/actions/<name> and the datatable tab opens only dialogs. The tray reaches only the recurring-deposit account root, which redirects to general. No make-account-transfer producer (loans-view, savings-account-view, client general-tab) is shown on s."
+  },
+  {
+   "slug": "mifos",
+   "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/general",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+   "reason": "The tray navigates to /groups/<id>/savings-accounts/<accountId>, which redirects to 'general', with no /charges. On s the general tab links ('edit', '../../') and doAction (/actions/<name>) stay under /clients. Breadcrumbs point only to ancestors."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/loans/:loanId/buy-down-fees",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+   "reason": "doAction only goes to <savings account>/actions/<name>, and the datatable tab has only dialogs. buy-down-fees is reachable only through the relative tab link inside LoansViewComponent, which is not shown on s. The shell has no such link."
+  },
+  {
+   "slug": "mifos",
+   "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/system/roles-and-permissions/add",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+   "reason": "doAction only goes to .../actions/<name>. The shell links reach /system and other top-level pages, the frequent-activities top-level paths, and keyboard shortcuts with fixed routes. roles-and-permissions/add is linked only from the roles page ([routerLink]=['add']) and from home/activities.ts, which feeds only the Home and Dashboard search, and neither is shown on s."
+  },
+  {
+   "slug": "mifos",
+   "from": "/organization/manage-loan-originators/:id",
+   "to": "/organization/manage-loan-originators/:id/edit",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/organization/loan-originators/view-loan-originator/view-loan-originator.component.html:10",
+   "reason": "The Edit button has routerLink ['edit'], relative to the :id route, which resolves to :id/edit. That route exists in organization-routing. The button is behind the UPDATE_LOAN_ORIGINATOR permission only."
+  },
+  {
+   "slug": "mifos",
+   "from": "/products/recurring-deposit-products/:productId/edit",
+   "to": "/products/recurring-deposit-products/:productId/general",
+   "stratum": "oursOther",
+   "verdict": "real",
+   "gated": false,
+   "corrected": false,
+   "readerVerdict": "real",
+   "site": "src/app/products/recurring-deposit-products/view-recurring-deposit-product/view-recurring-deposit-product.component.html:14",
+   "reason": "The edit route is a child of the :productId route that renders ViewRecurringDepositProductComponent. Its tab-nav link ./general is therefore shown on the edit screen. After save, edit-recurring-deposit-product.component.ts:159 navigates ['../'], which redirects to general."
+  },
+  {
+   "slug": "mifos",
+   "from": "/system/manage-jobs",
+   "to": "/clients/:clientId/client-collateral/:collateralId",
+   "stratum": "oursOther",
+   "verdict": "spurious",
+   "gated": true,
+   "corrected": false,
+   "readerVerdict": "spurious",
+   "site": "src/app/system/manage-jobs/cob-workflow/loan-locked/loan-locked.component.ts:175",
+   "reason": "The hinted handler navigates to /clients/:id/loans-accounts/:loanId/general. The only client-collateral link is in the clients general-tab (html:641), which is not shown on this screen."
+  }
+ ]
+}

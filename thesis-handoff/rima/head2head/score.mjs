@@ -20,6 +20,7 @@ const key = (slug, from, to) => `${slug}\u0000${from}\u0000${to}`
  * sampled pair has no reading, so a dropped batch cannot pass unnoticed.
  */
 export function mergeReadings(reading, readers, gateItems, corrections = {}) {
+  // A pair read in an earlier pass keeps that reading; `readers` and `gateItems` may join several passes.
   const r = new Map(readers.map((x) => [key(x.slug, x.from, x.to), x]))
   const g = new Map(gateItems.map((x) => [key(x.slug, x.from, x.to), x]))
   // A hand correction (corrections.json, "slug|from|to") takes precedence over both readings.
@@ -52,20 +53,40 @@ export function wilson(k, n) {
  */
 export function scoreApp(strata, verdicts) {
   const st = {}
-  for (const [name, size] of [['both', strata.both], ['theirs', strata.theirsOnly], ['ours', strata.oursOnly]]) {
+  // An only-ours stratum split in two (oursShell, oursOther) is estimated part by part.
+  const ourParts = strata.oursShell !== undefined ? [['oursShell', strata.oursShell], ['oursOther', strata.oursOther]] : [['ours', strata.oursOnly]]
+  for (const [name, size] of [['both', strata.both], ['theirs', strata.theirsOnly], ...ourParts]) {
     const read = verdicts.filter((v) => v.stratum === name)
     const real = read.filter((v) => v.verdict === 'real').length
-    st[name] = { size, read: read.length, real, unclear: read.filter((v) => v.verdict === 'unclear').length, est: read.length ? (size * real) / read.length : 0, ci: wilson(real, read.length) }
+    const ci = wilson(real, read.length)
+    st[name] = { size, read: read.length, real, unclear: read.filter((v) => v.verdict === 'unclear').length, est: read.length ? (size * real) / read.length : 0, lo: size * ci[0], hi: size * ci[1], ci }
   }
-  const tool = (own) => {
-    const pairs = st.both.size + st[own].size
-    const real = st.both.est + st[own].est
-    return { pairs, real }
+  const ourNames = ourParts.map(([n]) => n)
+  const sum = (names, f) => names.reduce((x, n) => x + (st[n][f] ?? 0), 0)
+  const tool = (names) => ({ pairs: sum(['both', ...names], 'size'), real: sum(['both', ...names], 'est'), lo: sum(['both', ...names], 'lo'), hi: sum(['both', ...names], 'hi') })
+  const theirs = tool(['theirs'])
+  const ours = tool(ourNames)
+  const own = { theirs: { lo: sum(['theirs'], 'lo'), hi: sum(['theirs'], 'hi') }, ours: { lo: sum(ourNames, 'lo'), hi: sum(ourNames, 'hi') }, both: { lo: st.both.lo, hi: st.both.hi } }
+  const all = sum(['both', 'theirs', ...ourNames], 'est')
+  return { strata: st, all, theirs, ours, own }
+}
+
+/**
+ * Bounds on each tool's precision and relative recall over a group, setting every sampled stratum's
+ * real rate to the end of its Wilson interval that is worst, then best, for that tool. These are
+ * conservative bounds, not a joint confidence interval.
+ */
+export function bounds(apps) {
+  const s = (f) => apps.reduce((x, a) => x + f(a), 0)
+  const pairs = { theirs: s((a) => a.theirs.pairs), ours: s((a) => a.ours.pairs) }
+  const B = { lo: s((a) => a.own.both.lo), hi: s((a) => a.own.both.hi) }
+  const T = { lo: s((a) => a.own.theirs.lo), hi: s((a) => a.own.theirs.hi) }
+  const O = { lo: s((a) => a.own.ours.lo), hi: s((a) => a.own.ours.hi) }
+  const r = (mine, other, lo) => (lo ? (B.lo + mine.lo) / (B.lo + mine.lo + other.hi) : (B.hi + mine.hi) / (B.hi + mine.hi + other.lo))
+  return {
+    theirs: { precision: [(B.lo + T.lo) / pairs.theirs, Math.min(1, (B.hi + T.hi) / pairs.theirs)], recall: [r(T, O, true), r(T, O, false)] },
+    ours: { precision: [(B.lo + O.lo) / pairs.ours, Math.min(1, (B.hi + O.hi) / pairs.ours)], recall: [r(O, T, true), r(O, T, false)] },
   }
-  const theirs = tool('theirs')
-  const ours = tool('ours')
-  const all = st.both.est + st.theirs.est + st.ours.est
-  return { strata: st, all, theirs, ours }
 }
 
 /** Precision and relative recall from summed pairs and estimated real pairs. */
@@ -89,10 +110,10 @@ function main() {
   for (let i = 2; i < process.argv.length; i += 2) a[process.argv[i].replace(/^--/, '')] = process.argv[i + 1]
   const reading = JSON.parse(readFileSync(a.reading, 'utf8'))
   const strata = JSON.parse(readFileSync(a.strata, 'utf8'))
-  const raw = JSON.parse(readFileSync(a.raw, 'utf8'))
-  const res = raw.result ?? raw
-  const gateItems = res.gate.flatMap((g) => g.items.map((x) => ({ slug: g.slug, ...x })))
-  const verdicts = mergeReadings(reading, res.readers, gateItems, a.corrections ? JSON.parse(readFileSync(a.corrections, 'utf8')) : {})
+  const runs = a.raw.split(',').map((f) => { const raw = JSON.parse(readFileSync(f, 'utf8')); return raw.result ?? raw })
+  const readers = runs.flatMap((r) => r.readers)
+  const gateItems = runs.flatMap((r) => r.gate.flatMap((g) => g.items.map((x) => ({ slug: g.slug, ...x }))))
+  const verdicts = mergeReadings(reading, readers, gateItems, a.corrections ? JSON.parse(readFileSync(a.corrections, 'utf8')) : {})
   const apps = {}
   for (const slug of Object.keys(reading)) apps[slug] = scoreApp(strata[slug], verdicts.filter((v) => v.slug === slug))
   const groups = { Rima: RIMA, Corpus: CORPUS, CorpusNoMifos: CORPUS.filter((x) => x !== 'mifos'), All: [...RIMA, ...CORPUS] }
@@ -102,12 +123,15 @@ function main() {
   const m = (k, v) => { tex += `\\newcommand{\\HH${k}}{${v}}\n` }
   for (const [g, list] of Object.entries(groups)) {
     const p = pool(list.map((s) => apps[s]))
+    const b = bounds(list.map((s) => apps[s]))
     for (const t of ['theirs', 'ours']) {
       const r = rates(p[t], p.all)
       const T = t === 'theirs' ? 'Theirs' : 'Ours'
       m(`${g}${T}Pairs`, p[t].pairs)
       m(`${g}${T}Precision`, pct(r.precision))
       m(`${g}${T}Recall`, pct(r.recall))
+      m(`${g}${T}PrecisionRange`, `${pct(b[t].precision[0])}--${pct(b[t].precision[1])}`)
+      m(`${g}${T}RecallRange`, `${pct(b[t].recall[0])}--${pct(b[t].recall[1])}`)
     }
   }
   for (const [slug, s] of Object.entries(apps)) {

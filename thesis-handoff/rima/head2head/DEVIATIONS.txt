@@ -13,3 +13,22 @@ Deviations from PREREGISTRATION.txt (head-to-head), recorded 5 Nov 2026 after th
 4. Group "corpus without mifos" added to the pooled figures after reading, because mifos's pair count
    (161k of 163k for this extractor) decides the pooled precision.
 5. The real pairs only their tool finds were not classified by cause.
+
+Second pass, after an Opus red-team of the first (5 Nov 2026, late)
+6. The first pass paired every start route of a workflow with its terminal, but their enumerator
+   (task-enumerator.ts:362) sets the terminal of a workflow that does not navigate, or whose target is
+   unresolved, to its own active start route; those pairs were invented by the conversion. Only workflows
+   with a resolved WIDGET_NAVIGATES_ROUTE or COMPONENT_NAVIGATES_ROUTE step and no unresolvedTargets now
+   claim a transition. The first-pass figures (results/) are withdrawn; results-v2/ holds the second pass.
+7. Declaration mapping widened: a declaration mounted at several paths maps to the mount whose path their
+   tool records, else to the mounts ending in it (their tool does not prefix lazily loaded routes), else
+   to every mount. This widens their pairs on mifos (17617 instead of 3796).
+8. An only-ours stratum over 1000 pairs (ghostfolio, mifos) is read in two parts, pairs only the shell
+   reaches and the rest, 12 each. Pairs already read in the first pass keep their readings; 108 new pairs
+   were read under the same rules.
+9. Instead of per-stratum Wilson intervals alone, the scorer reports bounds on each tool's precision and
+   relative recall obtained by setting every stratum's rate to its Wilson ends; these are conservative
+   bounds, not a confidence interval.
+10. Not done as preregistered: the graph without attribution as a reference point; V2 is checked against
+   this extractor's screens, not the independent route parser; V1 is the workflow count, and start and
+   terminal routes were compared on six subjects (petclinic's reference is written with concrete URLs).

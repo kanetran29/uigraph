@@ -1,0 +1,1959 @@
+{
+  "summary": "Blind source reading of the pooled screen pairs of both tools; Opus gate re-checks",
+  "agentCount": 15,
+  "logs": [
+    "read 4/9 chunks",
+    "read 8/9 chunks",
+    "read 9/9 chunks",
+    "readers returned 108 items; the gate re-reads 75"
+  ],
+  "result": {
+    "readers": [
+      {
+        "from": "/create-event",
+        "to": "/my-Events",
+        "verdict": "real",
+        "site": "src/app/create-event/create-event.component.ts:74",
+        "reason": "After the user submits the create-event form and createEvent and addToMyEvents succeed, the component calls router.navigate(['/my-Events']), which matches the 'my-Events' route. The header link at header.component.html:29 also points there.",
+        "slug": "event-booking-mean",
+        "dir": "rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+      },
+      {
+        "from": "/create-event",
+        "to": "/register",
+        "verdict": "spurious",
+        "site": "src/app/header/header.component.html:20",
+        "reason": "The only link to /register is the Sign up link in the header shell, under *ngIf=\"!isLoggedIn\". /create-event is guarded by AuthGuardService, which admits only logged-in users (otherwise it redirects to /login). On /create-event the link is therefore hidden, and no other component shown there navigates to /register.",
+        "slug": "event-booking-mean",
+        "dir": "rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+      },
+      {
+        "from": "/favorite/libraries/:folderId",
+        "to": "/profile",
+        "verdict": "real",
+        "site": "src/lib/components/common/user-info/user-info.component.html:1",
+        "reason": "Route is in CONTENT_LAYOUT_ROUTES, so it renders inside the ADF ShellLayoutComponent. The header from assets/app.extensions.json holds app.header.more (UserMenuComponent), whose menu includes app.header.user (UserInfoComponent). That component has [routerLink]=['/profile'], and /profile has a guard that admits logged-in users. ShellLayoutComponent lives in node_modules, which is not installed; the header content comes from the in-repo extension config.",
+        "slug": "alfresco",
+        "dir": "corpus/alfresco/projects/aca-content"
+      },
+      {
+        "from": "/libraries",
+        "to": "/profile",
+        "verdict": "real",
+        "site": "src/lib/components/common/user-info/user-info.component.html:1",
+        "reason": "The /libraries route is in the shell layout, so the header user menu is shown. The menu item app.user (UserInfoComponent) uses routerLink '/profile', and the guard admits logged-in users. ShellLayoutComponent comes from the uninstalled library; the header items come from app.extensions.json.",
+        "slug": "alfresco",
+        "dir": "corpus/alfresco/projects/aca-content"
+      },
+      {
+        "from": "/personal-files/details/:nodeId",
+        "to": "/profile",
+        "verdict": "real",
+        "site": "src/lib/components/common/user-info/user-info.component.html:1",
+        "reason": "The route is under the content shell, so the header user menu is shown. UserInfoComponent has routerLink '/profile', and the guard admits logged-in users.",
+        "slug": "alfresco",
+        "dir": "corpus/alfresco/projects/aca-content"
+      },
+      {
+        "from": "/personal-files/details/:nodeId/:activeTab",
+        "to": "/profile",
+        "verdict": "real",
+        "site": "src/lib/components/common/user-info/user-info.component.html:1",
+        "reason": "The route is under the content shell, so the header user menu (app.header.more containing app.user) is shown. UserInfoComponent has routerLink '/profile', and the guard admits logged-in users.",
+        "slug": "alfresco",
+        "dir": "corpus/alfresco/projects/aca-content"
+      },
+      {
+        "from": "/repository/details/:nodeId/:activeTab",
+        "to": "/profile",
+        "verdict": "real",
+        "site": "src/lib/components/common/user-info/user-info.component.html:1",
+        "reason": "The route is under the content shell, so the header user menu is shown. The in-menu UserInfoComponent has routerLink '/profile', and the guard admits logged-in users.",
+        "slug": "alfresco",
+        "dir": "corpus/alfresco/projects/aca-content"
+      },
+      {
+        "from": "/rules",
+        "to": "/profile",
+        "verdict": "spurious",
+        "site": "projects/aca-content/folder-rules/src/folder-rules.module.ts:35",
+        "reason": "The literal /rules route comes from provideRouter(FOLDER_RULES_ROUTES) in provideFolderRulesExtension. It is a flat top-level route that renders ManageRulesSmartComponent with no ShellLayoutComponent, so the header user menu is not shown. The manage-rules templates contain no /profile link. The shell-wrapped rules page is at nodes/:nodeId/rules, which is a different URL, so the user-info trigger does not apply to /rules. Note: the shell-wrapped nodes/:nodeId/rules would be real.",
+        "slug": "alfresco",
+        "dir": "corpus/alfresco/projects/aca-content"
+      },
+      {
+        "from": "/search",
+        "to": "/profile",
+        "verdict": "real",
+        "site": "src/lib/components/common/user-info/user-info.component.html:1",
+        "reason": "The search route is inside the content shell, so the header user menu is shown. UserInfoComponent has routerLink '/profile', and the guard admits logged-in users.",
+        "slug": "alfresco",
+        "dir": "corpus/alfresco/projects/aca-content"
+      },
+      {
+        "from": "/search-libraries",
+        "to": "/profile",
+        "verdict": "real",
+        "site": "src/lib/components/common/user-info/user-info.component.html:1",
+        "reason": "The search-libraries route is inside the content shell, so the header user menu is shown. UserInfoComponent has routerLink '/profile', and the guard admits logged-in users.",
+        "slug": "alfresco",
+        "dir": "corpus/alfresco/projects/aca-content"
+      },
+      {
+        "from": "/about",
+        "to": "/blog",
+        "verdict": "real",
+        "site": "src/app/pages/about/overview/about-overview-page.html:202",
+        "reason": "/about renders the about-overview page (path '' child), which has a Blog button with routerLink=publicRoutes.blog.routerLink (/blog). It sits inside @if (hasPermissionForSubscription), a flag from the backend's globalPermissions, so it is shown only on deployments with subscriptions enabled. The footer link does not count because showFooter is false on 'about'.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/about/oss-friends",
+        "to": "/home",
+        "verdict": "real",
+        "site": "src/app/components/header/header.component.html:8",
+        "reason": "The header in the app shell is shown on every route. Its logo link and the 'Overview' link use routerLink ['/'] (signed-in header lines 8 and 29; signed-out logo line 250). app.routes.ts has no '' route, so '/' is caught by the '**' route with redirectTo 'home'. Reached via redirectTo. The footer is not shown on about.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/about/privacy-policy",
+        "to": "/accounts/:accountId",
+        "verdict": "spurious",
+        "site": "",
+        "reason": "The accounts-table that links to an account detail is not shown on the privacy-policy page. The shell header's Accounts link goes only to /accounts, with no id. Nothing on this screen navigates to /accounts/<id>.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/account",
+        "to": "/portfolio/activities/create",
+        "verdict": "spurious",
+        "site": "../../libs/ui/src/lib/no-activities-info/no-activities-info.component.html:10",
+        "reason": "The no-activities-info link is rendered only inside gf-activities-table, which is used in holding-detail-dialog, account-detail-dialog, public-page and the activities page. None of these is shown on /account (settings, membership and access components, plus the header). Nothing on /account links to portfolio/activities/create.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/account/access",
+        "to": "/internalRoutes.account.path/access.path/:accessId",
+        "verdict": "spurious",
+        "site": "src/app/components/user-account-access/user-account-access.html:78",
+        "reason": "The target is an unresolved-constant string. Resolved as /account/access/:accessId, it is not a routed URL: in user-account-page.routes.ts the ':accessId' route has only an 'update' child and no '' child. The cited site at line 78 is the fab linking to access/create, which is a different route.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/account/access/:accessId/update",
+        "to": "/internalRoutes.account.path/access.path/:accessId",
+        "verdict": "spurious",
+        "site": "src/app/components/user-account-access/access-dialog-host/access-dialog-host.component.ts:147",
+        "reason": "The target resolves to /account/access/:accessId, which is not a routed URL because the ':accessId' route has only an 'update' child. The dialog host navigates back to /account/access, not to /account/access/:accessId. The cited line 78 link goes to access/create.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/account/access/create",
+        "to": "/internalRoutes.account.path/access.path/:accessId",
+        "verdict": "spurious",
+        "site": "src/app/components/user-account-access/user-account-access.html:78",
+        "reason": "The target resolves to /account/access/:accessId, which does not match any route (the ':accessId' route has only an 'update' child). Line 78 is the fab linking to access/create. Closing the create dialog navigates to /account/access.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/accounts",
+        "to": "/accounts/create",
+        "verdict": "real",
+        "site": "src/app/pages/accounts/accounts-page.html:25",
+        "reason": "The accounts page shows a gf-fab with routerLink internalRoutes.accounts.subRoutes.create.routerLink (/accounts/create). It sits inside @if (hasPermissionToCreateAccount && !isRestrictedView), which is user-dependent but normally true. accounts-page.component.ts:140 also navigates there when the user has no accounts.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/accounts/:accountId",
+        "to": "/admin",
+        "verdict": "real",
+        "site": "src/app/components/header/header.component.html:74",
+        "reason": "The shell header, shown while the account dialog is open, has an 'Admin Control' link with routerLink ['/admin'] (line 74, plus a menu copy at 279-282). It is shown when hasPermissionToAccessAdminControl is true, which holds for admin users.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/accounts/:accountId/update",
+        "to": "/open",
+        "verdict": "spurious",
+        "site": "src/app/components/footer/footer.component.html:44",
+        "reason": "The only link to /open (openStartup) is in the footer, and showFooter is false on 'accounts' (app.component.ts:184). The header has no /open link, and the account update dialog and accounts page have none either.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/admin",
+        "to": "/account",
+        "verdict": "real",
+        "site": "src/app/components/header/header.component.html:279",
+        "reason": "The signed-in header's user menu has a 'My Ghostfolio' link with routerLink routerLinkAccount (['/account']). It is not conditional. Admin pages require a signed-in user, so the menu is available.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/admin/settings",
+        "to": "/portfolio",
+        "verdict": "real",
+        "site": "src/app/components/header/header.component.html:44",
+        "reason": "The shell header shows a 'Portfolio' link with routerLink routerLinkPortfolio (['/portfolio']) to signed-in users, which the admin screen requires. A mobile menu copy is at line 260.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/blog/2021/07/hallo-ghostfolio",
+        "to": "/blog",
+        "verdict": "real",
+        "site": "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.html:204",
+        "reason": "The article page has an unconditional breadcrumb link [routerLink]=\"routerLinkBlog\" to /blog. The footer, shown on blog routes, also links to /blog, but only when hasPermissionForSubscription is true.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/blog/2022/10/hacktoberfest-2022",
+        "to": "/demo",
+        "verdict": "spurious",
+        "site": "src/app/core/auth.guard.ts:35",
+        "reason": "The only navigate to /demo is in AuthGuard.catchError, when utm_source=ios and the user fetch fails. That runs while navigating into a guarded route, which is a transient moment during a navigation and not a trigger shown on this page. The hacktoberfest page, the header and the footer have no /demo link; the page's links are external.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/blog/2023/02/ghostfolio-meets-umbrel",
+        "to": "/zen",
+        "verdict": "real",
+        "site": "src/app/core/auth.guard.ts:87",
+        "reason": "A signed-in user sees the header logo link and Overview link to '/', and the footer logo link. '/' hits the '**' redirect to home. AuthGuard then sends a user whose viewMode is ZEN to /zen (router.navigate to internalRoutes.zen.routerLink).",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/blog/2023/03/ghostfolio-reaches-1000-stars-on-github",
+        "to": "/demo",
+        "verdict": "spurious",
+        "site": "src/app/core/auth.guard.ts:35",
+        "reason": "The only code that navigates to /demo is the guard branch for a failed user fetch with utm_source=ios, plus the landing page's Live Demo links on /start. No template on a blog page links to /demo or to a URL with utm_source=ios, so no trigger is shown on this screen.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/blog/2023/07/exploring-the-path-to-fire",
+        "to": "/demo",
+        "verdict": "spurious",
+        "site": "src/app/core/auth.guard.ts:35",
+        "reason": "Same as the other blog page. /demo is reached only from the guard's utm_source=ios branch or the landing page's Live Demo links, and neither is shown on a blog page.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/blog/2024/11/black-weeks-2024",
+        "to": "/accounts/transfer-cash-balance",
+        "verdict": "spurious",
+        "site": "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7",
+        "reason": "The Transfer Cash Balance link lives in gf-accounts-table, which is used only on the accounts page and in the holding detail dialog. That dialog does not set showActions, so the link is hidden there. Neither is shown on a blog page, and nothing else links to this route.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/demo",
+        "to": "/portfolio/activities",
+        "verdict": "spurious",
+        "site": "src/app/components/holding-detail-dialog/holding-detail-dialog.component.ts:740",
+        "reason": "The demo page only saves a token and calls router.navigate(['/']). It has no portfolio link, and the holding detail dialog that calls navigateToActivities is not shown on /demo. The header and footer have no such link for this user either. '/' leads to home, not activities.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/features",
+        "to": "/zen",
+        "verdict": "real",
+        "site": "src/app/core/auth.guard.ts:87",
+        "reason": "Features shows the header, with its logo and Overview links to '/', and the footer logo. '/' redirects to home, and AuthGuard sends a ZEN-viewMode user from home to /zen.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/home/holdings",
+        "to": "/accounts/transfer-cash-balance",
+        "verdict": "spurious",
+        "site": "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7",
+        "reason": "The Transfer Cash Balance link appears only in gf-accounts-table when showActions is true. That happens only on the accounts page. The holding detail dialog opened from holdings uses the table without showActions, so the link is hidden. No other link to this route is shown.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/home/watchlist/create",
+        "to": "/blog",
+        "verdict": "spurious",
+        "site": "src/app/components/footer/footer.component.html:23",
+        "reason": "The only Blog links are in the footer and the About overview page. app.component's showFooter is false for the home route, so the footer is not rendered on /home/watchlist/create. The header has no Blog link.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/markets",
+        "to": "/demo",
+        "verdict": "spurious",
+        "site": "src/app/core/auth.guard.ts:35",
+        "reason": "The guard navigates to /demo only on a failed user fetch with utm_source=ios, which is not a trigger shown on /markets. The Live Demo links exist only on the landing page (/start), which is not shown here.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/portfolio/activities",
+        "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+        "verdict": "spurious",
+        "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+        "reason": "The target is an unresolved expression string, not a URL. Resolved, it is /portfolio/activities/:activityId. That has no matching route, because the ':activityId' node has only clone and update children and no '' child, so it would fall to the '**' redirect. The cited fab links to .../create, and the table links go to :id/update and :id/clone.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/portfolio/activities/:activityId/update",
+        "to": "/accounts/transfer-cash-balance",
+        "verdict": "spurious",
+        "site": "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7",
+        "reason": "The activities page, with its activity dialog host, does not include gf-accounts-table with showActions. The Transfer Cash Balance link exists only on the accounts page, so nothing on this screen links to that route.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/portfolio/activities/:activityId/update",
+        "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+        "verdict": "spurious",
+        "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+        "reason": "The target is an unresolved expression string. Resolved to /portfolio/activities/:activityId, it matches no route, since the ':activityId' node has only clone and update children. The fab at line 44 links to the create route, not to this target.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/portfolio/activities/create",
+        "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+        "verdict": "spurious",
+        "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+        "reason": "The target is an unresolved expression string. Resolved to /portfolio/activities/:activityId, it matches no route, since there is no '' child under ':activityId'. The fab links to .../create, which is the current screen, and the table links go to :id/update and :id/clone.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/portfolio/allocations",
+        "to": "/zen",
+        "verdict": "real",
+        "site": "src/app/core/auth.guard.ts:87",
+        "reason": "The header is always shown, and its logo and Overview links go to '/'. That redirects to home, where AuthGuard sends a ZEN-viewMode user to /zen via router.navigate.",
+        "slug": "ghostfolio",
+        "dir": "corpus/ghostfolio/apps/client"
+      },
+      {
+        "from": "/clusterrolebinding",
+        "to": "/create",
+        "verdict": "real",
+        "site": "src/chrome/template.html:56",
+        "reason": "The chrome shell toolbar always shows the 'Create new resource' add button, and its (click) calls goToCreateState(), which runs router.navigate(['create']). With no relativeTo this goes to /create. The shell wraps every screen including /clusterrolebinding.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/clusterrolebinding",
+        "to": "/overview",
+        "verdict": "spurious",
+        "site": "src/common/components/namespace/component.ts:224",
+        "reason": "The only router.navigate(['overview']) is in changeNamespace_, and it runs only when resourceNamespaceParam is set. The /clusterrolebinding list route (path '') has no :resourceNamespace, so that branch is skipped and the code only changes the query param on the current route. The other overview path is historyService.goToPreviousState('overview') in the namespace-change dialog. It also requires a resourceNamespace param, so it is never reached on this list screen.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/configmap",
+        "to": "/search",
+        "verdict": "real",
+        "site": "src/chrome/search/component.ts:45",
+        "reason": "The chrome shell template includes <kd-search> in the main toolbar. Its submit() calls router.navigate(['search']) when the form is valid, which goes to /search. It is shown on /configmap because that route sits under ChromeComponent.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/customresourcedefinition/:crdName/:namespace/:objectName",
+        "to": "/workloads",
+        "verdict": "real",
+        "site": "src/chrome/template.html:30",
+        "reason": "The shell's logo link has routerLink=getWorkloadsStateName(), which returns '/workloads'. It is always shown, and the CRD routes are children of ChromeComponent. The path '' redirect to /workloads is a second route there.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/job",
+        "to": "/login",
+        "verdict": "real",
+        "site": "src/chrome/userpanel/template.html:70",
+        "reason": "The shell toolbar includes <kd-user-panel>. Its menu has a 'Sign out' button, shown when authenticated and there is no auth header, and it calls logout(). That calls AuthenticationService.logout(), which runs router.navigate(['login']) (authentication.ts:72). The LoginGuard admits the user because the token cookie is removed first. The 'Sign in' button (!isAuthenticated()) calls the same logout().",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/namespace/:resourceName",
+        "to": "/login",
+        "verdict": "real",
+        "site": "src/chrome/userpanel/template.html:70",
+        "reason": "The user-panel Sign out/Sign in buttons call logout(), which runs router.navigate(['login']). They are in the chrome shell, which wraps the /namespace/:resourceName route.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/networkpolicy",
+        "to": "/overview",
+        "verdict": "spurious",
+        "site": "src/common/components/namespace/component.ts:224",
+        "reason": "The /networkpolicy list route (path '') has no :resourceNamespace param, so the namespace selector's changeNamespace_ skips the navigate(['overview']) branch. The dialog path with goToPreviousState('overview') needs a resourceNamespace param, which only the detail route :resourceNamespace/:resourceName has. No trigger on the list screen reaches /overview.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/networkpolicy",
+        "to": "/search",
+        "verdict": "real",
+        "site": "src/chrome/search/component.ts:45",
+        "reason": "The shell's <kd-search> bar submit() calls router.navigate(['search']). The bar is shown on every ChromeComponent child route, including /networkpolicy.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+        "to": "/login",
+        "verdict": "real",
+        "site": "src/chrome/userpanel/template.html:70",
+        "reason": "The chrome shell's user-panel Sign out button calls logout(), which runs router.navigate(['login']) (authentication.ts:72). The shell wraps the PVC detail route, so the button is available there.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/shell/:resourceNamespace/:resourceName",
+        "to": "/workloads",
+        "verdict": "real",
+        "site": "src/chrome/template.html:30",
+        "reason": "The shell's logo link uses routerLink=getWorkloadsStateName(), which returns '/workloads'. The shell route is a child of ChromeComponent, so the logo is shown on this screen.",
+        "slug": "k8sdash",
+        "dir": "corpus/k8sdash/modules/web"
+      },
+      {
+        "from": "/AuthRoute.NewDeviceVerification",
+        "to": "/settings/security/session-timeout",
+        "verdict": "spurious",
+        "site": "src/app/components/environment-selector/environment-selector.component.html:20",
+        "reason": "Screen is a signed-out anon-layout page with no settings nav. The hinted link is routerLink=[] (self link) and the vault row links are not shown here. No trigger names settings/security.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/AuthRoute.SignUp",
+        "to": "/settings/security/session-timeout",
+        "verdict": "spurious",
+        "site": "src/app/components/environment-selector/environment-selector.component.html:20",
+        "reason": "Anon-layout signed-out page. The hinted environment-selector link is routerLink=[] and the vault row links are not shown here. Nothing links to settings/security.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/AuthRoute.TwoFactor",
+        "to": "/settings/security/session-timeout",
+        "verdict": "spurious",
+        "site": "src/app/components/environment-selector/environment-selector.component.html:20",
+        "reason": "Login 2FA step in the anon layout, with no settings navigation. The hinted sites are a self link ([]) and vault list rows that are not shown here.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/browser-extension-prompt",
+        "to": "/settings/security/session-timeout",
+        "verdict": "spurious",
+        "site": "src/app/vault/components/browser-extension-prompt/browser-extension-prompt-install.component.html:4",
+        "reason": "Anon-layout page whose only link is an external web-store href. The hinted sites are a self link and vault rows that are not shown here. No route to settings/security.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/confirm-key-connector-domain",
+        "to": "/settings/security/session-timeout",
+        "verdict": "spurious",
+        "site": "src/app/oss-routing.module.ts:595",
+        "reason": "Anon-layout page with no settings nav (the anon layout in libs/components has no links). The hinted sites are not shown on this screen.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/organizations/:organizationId/reporting/reports/weak-passwords-report",
+        "to": "/vault",
+        "verdict": "real",
+        "site": "src/app/layouts/product-switcher/product-switcher-content.component.html:15",
+        "reason": "The route sits under OrganizationLayoutComponent, which renders app-side-nav with the product switcher. The switcher's bento links go to the Password Manager product's appRoute '/vault' (product-switcher.service.ts:228). The hinted add-extension dialog is not shown on this screen.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/recover-2fa",
+        "to": "/settings/security/session-timeout",
+        "verdict": "spurious",
+        "site": "src/app/auth/recover-two-factor.component.ts:132",
+        "reason": "Signed-out anon-layout page. After success it navigates to /settings/security/two-factor, which is a different route. The hinted sites are a self link and vault rows that are not shown here.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/reports/breach-report",
+        "to": "/vault",
+        "verdict": "real",
+        "site": "src/app/layouts/user-layout.component.html:48",
+        "reason": "The route is under UserLayoutComponent. Its side nav has a vault nav item route=\"vault\" (and vault-nav-section when the vfo1 flag is on), plus the product switcher to /vault. The hinted dialog is not shown here.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/secrets-manager-trial-initiation",
+        "to": "/vault",
+        "verdict": "spurious",
+        "site": "src/app/oss-routing.module.ts:619",
+        "reason": "Anon-layout page behind unauthGuardFn. Its template routerLinks go to /organizations/<id>/members and similar, not /vault. The anon layout has no vault link. The hinted add-extension dialog is opened only from SetupExtensionComponent.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/send/:sendId/:key",
+        "to": "/vault",
+        "verdict": "spurious",
+        "site": "src/app/oss-routing.module.ts:346",
+        "reason": "Anon-layout Send access page. Its only router link is /signup in the explainer, with no link to /vault. The hinted dialog belongs to /setup-extension and is not shown here.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/settings/security/password",
+        "to": "/vault",
+        "verdict": "real",
+        "site": "src/app/layouts/user-layout.component.html:48",
+        "reason": "The route is under UserLayoutComponent, whose side nav has a vault nav item (route=\"vault\") and the product switcher linking to /vault, both shown while on settings.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/setup-extension",
+        "to": "/settings/security/session-timeout",
+        "verdict": "spurious",
+        "site": "src/app/vault/components/setup-extension/setup-extension.component.html:63",
+        "reason": "Anon-layout page whose only navigations go to /vault (html:63 and ts:139) or an external store link. The hinted self link and vault rows are not shown here. Nothing targets settings/security.",
+        "slug": "bitwarden",
+        "dir": "corpus/bitwarden/apps/web"
+      },
+      {
+        "from": "/accounting/provisioning-entries/journal-entries/view/:id",
+        "to": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:218",
+        "reason": "Shown components are ViewProvisioningJournalEntries (no links) plus the shell. The notifications tray navigates only to /{clients|groups}/{id}/fixed-deposits-accounts/{accountId}, which redirects to 'general', not 'charges'. No trigger on s names the charges tab.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+        "to": "/clients/:clientId/savings-accounts/:savingAccountId/datatables/:datatableName",
+        "verdict": "spurious",
+        "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+        "reason": "doAction only navigates to <accountUrl>/actions/<name>. The tab links are relative to the transaction route. The tray at :208 goes only to the savings account root (redirects to general). Nothing produces the account-level datatables URL under /clients.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+        "to": "/loans/:loanId/transactions/:id/edit",
+        "verdict": "spurious",
+        "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+        "reason": "doAction navigates within the savings account (/actions/<name>). The tabs and the shell link to no loan transaction edit route. The tray goes to loans-accounts/{id} only.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/general",
+        "to": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/edit",
+        "verdict": "spurious",
+        "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+        "reason": "The general tab only has 'edit' and '../../' links and navigates '../..'. doAction goes to /actions/<name>. The tray goes to the savings account root. No trigger reaches the standing-instruction edit route.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/checker-inbox-and-tasks/loan-approval",
+        "to": "/checker-inbox-and-tasks/client-approval",
+        "verdict": "real",
+        "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:27",
+        "reason": "The parent tabs component CheckerInboxAndTasksComponent stays shown on the loan-approval child. Its tab nav has [routerLink]=['./client-approval'], resolving to /checker-inbox-and-tasks/client-approval. It is permission-gated (READ_CLIENT) at runtime only.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions",
+        "to": "/clients/:clientId/loans-accounts/:loanId/transfer-funds/make-account-transfer",
+        "verdict": "spurious",
+        "site": "src/app/deposits/fixed-deposits/fixed-deposit-account-view/fixed-deposit-account-view.component.ts:151",
+        "reason": "The cited sites are reload() calls that go to the FD list and back, and doAction targets only the FD's own actions/edit routes. The tray goes only to the loan account root. Only the loan view and the client general-tab routeTransferFund() go to loans-accounts/:id/transfer-funds/make-account-transfer, and neither is shown on s.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions/account-transfers/make-account-transfer",
+        "to": "/loans/:loanId/transfer-funds/:standingInstructionsId/view",
+        "verdict": "spurious",
+        "site": "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205",
+        "reason": "The cited checker-inbox row link ([row.id,'view']) belongs to a component not shown on s. MakeAccountTransfers only has '../..' and '../../transactions' links, and the shell has none to /loans/.../transfer-funds.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/fixed-deposits-accounts/create",
+        "to": "/groups",
+        "verdict": "real",
+        "site": "src/app/core/shell/toolbar/toolbar.component.html:156",
+        "reason": "The shell toolbar (via Route.withShell, authenticated) has an Institution menu whose item has routerLink='/groups'. It is shown on s and gated only by the READ_GROUP permission.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/loans-accounts/:loanId/accountdetail",
+        "to": "/loans/:loanId/notes",
+        "verdict": "spurious",
+        "site": "src/app/loans/loans-view/loans-view.component.html:632",
+        "reason": "The notes tab link in loans-view is relative ('./notes'), so on s it resolves to /clients/:c/loans-accounts/:id/notes, a different route pattern. The centers, clients and groups view sites are not shown on s. No absolute /loans/:id/notes link exists.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/loans-accounts/:loanId/breach-actions",
+        "to": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+        "verdict": "spurious",
+        "site": "src/app/loans/loans-view/loans-view.component.html:330",
+        "reason": "The dashboard tab link is relative ('./dashboard'), so it stays under /clients/:c/loans-accounts/:id. The tray goes to /{groups}/{id}/loans-accounts/{id}, which redirects to 'general', not 'dashboard'.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/loans-accounts/:loanId/buy-down-fees",
+        "to": "/loans/:loanId/payment-rates",
+        "verdict": "spurious",
+        "site": "src/app/loans/loans-view/loans-view.component.html:452",
+        "reason": "The payment-rates tab link is relative, so on s it resolves to /clients/:c/loans-accounts/:id/payment-rates, not the /loans mount. No absolute /loans/:id/payment-rates trigger is shown on s.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/loans-accounts/:loanId/datatables/:datatableName",
+        "to": "/loans/:loanId/external-asset-owner",
+        "verdict": "spurious",
+        "site": "src/app/loans/loans-view/loans-view.component.html:660",
+        "reason": "The external-asset-owner tab link is relative, so on s it resolves to /clients/:c/loans-accounts/:id/external-asset-owner. No component shown on s links to the absolute /loans/:id/external-asset-owner.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/loans-accounts/glim-account/create",
+        "to": "/reports",
+        "verdict": "real",
+        "site": "src/app/core/shell/toolbar/toolbar.component.html:193",
+        "reason": "The shell toolbar's Reports menu has an 'All' item with [routerLink]=['/reports']. It is shown on s and gated only by READ_REPORT. The other cited sites are on other screens.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions-tab",
+        "to": "/appusers",
+        "verdict": "real",
+        "site": "src/app/core/shell/toolbar/toolbar.component.html:214",
+        "reason": "The shell toolbar's Admin menu has a Users item with [routerLink]=['/appusers'], shown on s and gated only by READ_USER. The route 'appusers' exists in app-routing.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/account-transfers/:transferid",
+        "to": "/navigation",
+        "verdict": "real",
+        "site": "src/app/core/shell/sidenav/sidenav.component.html:97",
+        "reason": "The shell sidenav has a list item with [routerLink]=['/navigation'], shown on s and gated only by READ_CLIENT. The route 'navigation' exists in app-routing.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/list-standing-instructions",
+        "to": "/centers",
+        "verdict": "real",
+        "site": "src/app/core/shell/toolbar/toolbar.component.html:159",
+        "reason": "The shell toolbar's Institution menu has a Centers item with routerLink='/centers', shown on s and gated only by READ_CENTER.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+        "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+        "reason": "The target route exists, but nothing shown on s links to it. view-transaction.ts:135 only navigates to <account url>/actions/<name> under savings. The notification tray (in the shell toolbar) only reaches .../recurring-deposits-accounts/<id>, never its standing-instructions/make-account-transfer child. The recurring-deposit view links only to its own standing-instructions edit and view pages.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/general",
+        "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+        "reason": "The tray navigates only to /groups/<id>/savings-accounts/<accountId>, with no /charges suffix. The view-transaction doAction targets .../actions/<name>. All other links on s are relative and stay under /clients/. The target is also reached only through a charges/:id child or a redirect inside the same account, never from a client context.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+        "to": "/loans/:loanId/charges/:id",
+        "verdict": "spurious",
+        "site": "src/app/account-transfers/view-standing-instructions/view-standing-instructions.component.html:10",
+        "reason": "The transfer-funds route is mounted under the second clients/:clientId block that has no component, so ClientsViewComponent and its general-tab are not shown on s. The cited general-tab.html lines are therefore not on s. The view-standing-instructions template only has links to ../edit and ../list-account-transactions. Nothing in the shell links to /loans/:id/charges/:id.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/standing-instructions/create-standing-instructions",
+        "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges/:id",
+        "verdict": "spurious",
+        "site": "src/app/account-transfers/create-standing-instructions/create-standing-instructions.component.ts:377",
+        "reason": "The create page only navigates relatively: [routerLink]=['../'] in its template and navigate(['../../']) in ts:377. The tray only goes to /groups/<id>/savings-accounts/<accountId>, never to charges/:id. No trigger shown on s names the target.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/clients/:clientId/standing-instructions/make-account-transfer",
+        "to": "/groups/:groupId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+        "verdict": "spurious",
+        "site": "src/app/account-transfers/make-account-transfers/make-account-transfers.component.html:225",
+        "reason": "The make-account-transfers links are relative ('../..', '../../transactions') and stay within the client. The checker-inbox link at html:205 is not on s. The tray targets only the group savings account root. Nothing shown on s navigates to a group's transfer-funds view.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/loans-accounts/:loanId",
+        "to": "/loans/:loanId/deferred-income",
+        "verdict": "spurious",
+        "site": "src/app/loans/loans-view/loans-view.component.html:466",
+        "reason": "The cited link is the relative tab link ./deferred-income. Under s it resolves to /groups/:groupId/loans-accounts/:loanId/deferred-income, a different route pattern from /loans/:loanId/deferred-income. No absolute link or router call to /loans/<id>/deferred-income exists in the app. The only /loans/<id> navigation is credit-applications, which goes to .../general and is not shown on s.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/loans-accounts/:loanId/balances",
+        "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/edit",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+        "reason": "The tray navigates only to /groups/<id>/savings-accounts/<accountId>, without transactions/:id/edit. The loan view and the shell breadcrumb link nothing to savings transactions. Breadcrumbs only point to ancestors of s.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+        "to": "/clients/:clientId/savings-accounts/:savingAccountId/documents",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+        "reason": "The clients-view.html:468 documents tab link is not on s, because ClientsViewComponent is not shown under /groups/.../loans-accounts. The tray goes only to the savings account root, with no /documents suffix. Nothing else shown on s links to a client's savings documents.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/loans-accounts/:loanId/general",
+        "to": "/loans/:loanId/loan-documents",
+        "verdict": "spurious",
+        "site": "src/app/loans/loans-view/loans-view.component.html:620",
+        "reason": "The tab link there is relative (./loan-documents). From s it lands on /groups/:groupId/loans-accounts/:loanId/loan-documents, a different pattern from /loans/:loanId/loan-documents. No absolute link to /loans/<id>/loan-documents exists.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/loans-accounts/:loanId/loan-documents",
+        "to": "/appusers",
+        "verdict": "real",
+        "site": "src/app/core/shell/toolbar/toolbar.component.html:214",
+        "reason": "The group loan view is mounted under the shell, which renders mifosx-toolbar. Its Admin menu has [routerLink]=['/appusers'] guarded only by the READ_USER permission directive. That is not a visibility condition tied to s, and /appusers is a routed lazy module (app-routing.module.ts). The view-user and edit-user links are not on s.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/loans-accounts/:loanId/original-schedule",
+        "to": "/:loanId/datatables",
+        "verdict": "spurious",
+        "site": "src/app/loans/loans-view/loans-view.component.html:675",
+        "reason": "The only datatable link is [routerLink]=['./datatables', registeredTableName], which lands on .../loans-accounts/:loanId/datatables/:datatableName. The datatables route node has only a :datatableName child and no empty child, so a bare .../datatables URL matches no component. The pattern /:loanId/datatables is not a mount of the loans module, which is under clients/, groups/ or loans/.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/savings-accounts/:savingAccountId/notes",
+        "to": "/loans/:loanId/transfer-funds/:standingInstructionsId/view",
+        "verdict": "spurious",
+        "site": "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205",
+        "reason": "The route exists, but the checker-inbox template is only shown on /checker-inbox-and-tasks/checker-inbox, not on a group savings notes tab. The savings notes tab and the shell have no link to a loan's transfer-funds view. The sidenav only links to the checker inbox list.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+        "to": "/loans/:loanId/buy-down-fees",
+        "verdict": "spurious",
+        "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+        "reason": "ts:135 is doAction, which only navigates to <savings account url>/actions/<name>. Nothing else shown on s, including the shell, links to /loans/<id>/buy-down-fees. The buy-down-fees tab is a relative tab link inside the loans view only.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+        "to": "/system/roles-and-permissions/add",
+        "verdict": "spurious",
+        "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+        "reason": "doAction only goes to .../actions/<name>. The shell links only to /system, /system/system-information and the other top-level pages. /system/roles-and-permissions/add is reachable only from the roles-and-permissions page itself. The path in home/activities.ts feeds only the Home/dashboard search, which is not shown on s.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/loans/:loanId/breach-actions",
+        "to": "/centers/:centerId/savings-accounts/:savingAccountId/documents",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+        "reason": "The tray only builds /clients|groups/<id>/savings-accounts/<accountId>, with no centers and no /documents suffix. The clients-view.html:468 link is not on s, because ClientsViewComponent is not shown under /loans/:loanId. No other trigger on s names a center's savings documents.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/loans/:loanId/loan-collateral",
+        "to": "/reports",
+        "verdict": "real",
+        "site": "src/app/core/shell/toolbar/toolbar.component.html:193",
+        "reason": "The /loans/:loanId routes are wrapped by Route.withShell (loans-list.routes.ts), so the toolbar is shown. Its Reports menu has [routerLink]=['/reports'] ('All'), guarded only by READ_REPORT, and /reports is a routed lazy module. The keyboard shortcut route 'reports' is a second path.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/loans/:loanId/payment-rates",
+        "to": "/groups/:groupId/loans-accounts/:loanId/originators",
+        "verdict": "spurious",
+        "site": "src/app/loans/loans-view/loans-view.component.html:507",
+        "reason": "The loans-view tab link ./originators is relative and resolves to /loans/:loanId/originators, not the groups path. The notifications tray only navigates to /groups/:id/loans-accounts/:accountId, never to the originators sub-route.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/loans/:loanId/transactions/export",
+        "to": "/accounting",
+        "verdict": "real",
+        "site": "src/app/core/shell/toolbar/toolbar.component.html:55",
+        "reason": "The shell toolbar is shown on this screen and has an Accounting link with routerLink ['/accounting']. It sits behind a permission directive only.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/loans/glim-account/:glimId",
+        "to": "/loans/:loanId/charges/:id",
+        "verdict": "spurious",
+        "site": "src/app/loans/glim-account/glim-account.component.html:86",
+        "reason": "The GLIM view only links to /loans-accounts/<child>/actions/... and /general. The hinted clients general-tab is not shown on this screen. No trigger reaches a loan charge view.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/organization/employees/create",
+        "to": "/remittances/process",
+        "verdict": "unclear",
+        "site": "src/app/core/shell/sidenav/sidenav.component.html:151",
+        "reason": "The sidenav item has routerLink /remittances/process and the route exists. It is shown only when *ngIf=\"mifosRemittanceEnabled\", which comes from the runtime window.env flag (default false in assets/env.js), so it depends on deployment config.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/organization/exchange-rates/:id",
+        "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/:standingInstructionsId/view",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+        "reason": "The tray navigates only to /clients|groups/:id/recurring-deposits-accounts/:accountId, with no transfer-funds sub-route. The checker-inbox link is in a tasks component that is not shown on this screen.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/organization/exchange-rates/convert",
+        "to": "/clients/:clientId/shares-accounts/create",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:238",
+        "reason": "The tray navigates to /clients/:id/shares-accounts/<accountId> with accountId taken from a backend response. That is the view route, not the static create route.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/organization/manage-loan-originators/:id",
+        "to": "/organization/manage-loan-originators/:id/edit",
+        "verdict": "real",
+        "site": "src/app/organization/loan-originators/view-loan-originator/view-loan-originator.component.html:10",
+        "reason": "The Edit button has routerLink ['edit'], relative to the :id route, which resolves to :id/edit. That route exists in organization-routing. The button is behind the UPDATE_LOAN_ORIGINATOR permission only.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/organization/working-days",
+        "to": "/centers/:centerId/savings-accounts/:savingAccountId/charges",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+        "reason": "The tray builds /clients|groups/:id/savings-accounts/:accountId only. It never uses the centers prefix for accounts and has no charges sub-route.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/products/fixed-deposit-products/:productId/edit",
+        "to": "/centers/:centerId/savings-accounts/:savingAccountId/notes",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+        "reason": "The tray navigates only to the savings account view under clients or groups. It has no centers prefix and no notes sub-route.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/products/near-breach-configurations/create",
+        "to": "/groups/:groupId/loans-accounts/:loanId/transactions/:id/reciept",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+        "reason": "The tray navigates to /groups/:id/loans-accounts/:accountId only, with no transactions or receipt sub-route.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/products/recurring-deposit-products/:productId/edit",
+        "to": "/products/recurring-deposit-products/:productId/general",
+        "verdict": "real",
+        "site": "src/app/products/recurring-deposit-products/view-recurring-deposit-product/view-recurring-deposit-product.component.html:14",
+        "reason": "The edit route is a child of the :productId route that renders ViewRecurringDepositProductComponent. Its tab-nav link ./general is therefore shown on the edit screen. After save, edit-recurring-deposit-product.component.ts:159 navigates ['../'], which redirects to general.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/settings",
+        "to": "/groups/:groupId/loans-accounts/:loanId/charges/:id",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+        "reason": "The tray only reaches the loan account view /groups/:id/loans-accounts/:accountId, not a charges/:id sub-route.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/settings",
+        "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+        "reason": "The tray only reaches the savings account view, not its transactions sub-route.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/system",
+        "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/datatables/:datatableName",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+        "reason": "The tray only reaches the recurring deposit account view, with no datatables sub-route. Datatable links exist only inside the account view, which is not shown on /system.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/system/codes/:id/edit",
+        "to": "/clients/:clientId/savings-accounts/:savingAccountId/actions/:name",
+        "verdict": "spurious",
+        "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+        "reason": "The tray only reaches the savings account view, with no actions sub-route. Action links exist only inside savings account screens, which are not shown on this screen.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      },
+      {
+        "from": "/system/manage-jobs",
+        "to": "/clients/:clientId/client-collateral/:collateralId",
+        "verdict": "spurious",
+        "site": "src/app/system/manage-jobs/cob-workflow/loan-locked/loan-locked.component.ts:175",
+        "reason": "The hinted code navigates to /clients/:id/loans-accounts/:loanId/general, not client-collateral. The only client-collateral link is in the clients general-tab (line 641), which is not shown on this screen.",
+        "slug": "mifos",
+        "dir": "corpus/mifos"
+      }
+    ],
+    "gate": [
+      {
+        "slug": "event-booking-mean",
+        "items": [
+          {
+            "from": "/create-event",
+            "to": "/my-Events",
+            "readerVerdict": "real",
+            "verdict": "real",
+            "site": "src/app/create-event/create-event.component.ts:74",
+            "reason": "onCreateEvent (form ngSubmit) calls router.navigate(['/my-Events']) once both createEvent and addToMyEvents succeed. That target matches the 'my-Events' child route of the '' layout route. A second trigger exists: the header is shown on /create-event (LayoutComponent renders app-header, which holds the router-outlet). Its 'My Events' dropdown link, routerLink=\"/my-Events\" at header.component.html:29, sits under *ngIf=\"isLoggedIn\". That condition is true on /create-event, because AuthGuardService admits only when currentUser != null, and currentUser can only be non-null after loginStatus$ has emitted true."
+          },
+          {
+            "from": "/create-event",
+            "to": "/register",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/header/header.component.html:20",
+            "reason": "The only link to /register in the components shown on /create-event is the header's Sign up link, routerLink=\"/register\" under *ngIf=\"!isLoggedIn\" (header.component.html:20). AuthGuardService on the create-event route admits only when authService.isLoggedIn() (currentUser != null). currentUser is set only together with loginStatus true, either in setUser or in the constructor's sessionStorage path, so the header's isLoggedIn is true and the link stays hidden while the user is on the screen. Logout (header.component.ts) clears the status but immediately navigates to /login, so the link shows only for a transient moment during that navigation, which does not count. Nothing else shown there navigates to /register: CreateEventComponent navigates only to /login and /my-Events, the footer has only href=\"#\" links, the logo points to index.html, and breadcrumbs appear only in HomeComponent."
+          }
+        ],
+        "notes": "I re-derived both verdicts from app-routing.module.ts, layout, header, auth.service, auth-guard.service and create-event, and the source confirms the reader on both. The create-event navigate call is at line 74, as the hint says. One reason to read the files with grep -n rather than the rtk-filtered cat -n: the filtered output numbered the lines one short in the header (19/28 instead of the real 20/29) and in create-event.component.ts (72 instead of 74)."
+      },
+      {
+        "slug": "alfresco",
+        "items": [
+          {
+            "from": "/rules",
+            "to": "/profile",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "projects/aca-content/folder-rules/src/folder-rules.module.ts:35",
+            "reason": "The literal /rules route is the top-level 'rules' route from FOLDER_RULES_ROUTES (folder-rules.module.ts:35). provideFolderRulesExtension() adds it to the root config with provideRouter. Its ROUTES providers (through ContentServiceExtensionModule and provideApplicationExtensions) are registered before provideShellRoutes(CONTENT_LAYOUT_ROUTES) in app/src/app/app.config.ts, so /rules matches it first. It renders ManageRulesSmartComponent directly in AppComponent's bare <router-outlet />, without ShellLayoutComponent, the sidenav, or the sidenav header that holds the user menu. The only trigger for /profile in the codebase is the routerLink in user-info.component.html:1. That component is reached only through the 'features.header' user menu in SidenavHeaderComponent. The manage-rules template, aca-page-layout and generic-error contain no /profile link; the only routerLink in manage-rules goes to /nodes/:id/rules. The shell-wrapped rules page is nodes/:nodeId/rules (aca-content.routes.ts:404), which is a different URL. One assumption: this relies on the route order that provideShellRoutes (from the @alfresco/adf-core/shell library, which is not installed) normally produces, with the shell route appended after earlier ROUTES providers."
+          },
+          {
+            "from": "/search",
+            "to": "/profile",
+            "readerVerdict": "real",
+            "verdict": "real",
+            "site": "src/lib/components/common/user-info/user-info.component.html:1",
+            "reason": "The search route (aca-content.routes.ts:364) is a child of CONTENT_LAYOUT_ROUTES, which provideShellRoutes wraps in ShellLayoutComponent. The shell renders 'app.layout.sidenav', which maps to SidenavComponent. That includes app-sidenav-header, whose aca-toolbar shows the 'features.header' actions. Among them is 'app.header.more' (UserMenuComponent), a mat-menu whose 'app.header.user' item renders UserInfoComponent, which has [routerLink]=\"['/profile']\". The sidenav is not hidden on search: hideSidenavConditions is ['/preview/'] and minimizeSidenavConditions is empty. The /profile route sits under the same shell with ViewProfileRuleGuard, which returns isLoggedIn() || isOauth(), so a signed-in user on /search can reach it."
+          }
+        ],
+        "notes": "I re-derived both verdicts from the source and agree with the reader on both. For /rules, Angular reads the root ROUTES multi-providers in registration order: importProvidersFrom(ContentServiceExtensionModule), which contains provideFolderRulesExtension, comes before provideShellRoutes(CONTENT_LAYOUT_ROUTES) in app.config.ts. So the flat top-level 'rules' route matches /rules before the shell's '**' route. The internals of provideShellRoutes are in the @alfresco/adf-core/shell library, which is not installed, so I assumed it appends one ROUTES entry as ADF normally does. node_modules is absent. The only extension-defined route is 'about', so nothing re-registers 'rules' under the shell."
+      },
+      {
+        "slug": "ghostfolio",
+        "items": [
+          {
+            "from": "/about/privacy-policy",
+            "to": "/accounts/:accountId",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:620",
+            "reason": "The reader missed the assistant in the shell header. The about routes' AuthGuard lets signed-in users in, so a signed-in user on privacy-policy sees the signed-in header. Every role (ADMIN, USER, DEMO) has accessAssistant, so header.component.html:127 shows the assistant button. Typing an account name in the assistant runs searchAccounts, which builds routerLink internalRoutes.accounts.subRoutes.detail.routerLink(id) = ['/accounts', id] (assistant.component.ts:619-620). assistant-list-item.html:5 renders that link. /accounts/:accountId is a routed screen: the '' child of ':accountId' in accounts-page.routes.ts."
+          },
+          {
+            "from": "/account",
+            "to": "/portfolio/activities/create",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "../../libs/ui/src/lib/no-activities-info/no-activities-info.component.html:10",
+            "reason": "Links to activities/create exist only in home-overview, the activities-page fab, and no-activities-info inside gf-activities-table (shown only when !hasActivities). /account shows the settings, membership and access components plus the header, and none of these links there. The assistant quick links add only one level of subRoutes, so activities.subRoutes.create is never offered. The holding detail dialog can be opened from the assistant, but it passes [hasActivities]=true, which hides no-activities-info."
+          },
+          {
+            "from": "/account/access",
+            "to": "/internalRoutes.account.path/access.path/:accessId",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/components/user-account-access/user-account-access.html:78",
+            "reason": "The target resolves to /account/access/:accessId. In user-account-page.routes.ts, ':accessId' has only an 'update' child and no '' child or component, so that URL is not a routed screen. The fab at lines 78-82 links to access/create, and access-table links to access/:id/update. Nothing links to /account/access/:id."
+          },
+          {
+            "from": "/account/access/:accessId/update",
+            "to": "/internalRoutes.account.path/access.path/:accessId",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/components/user-account-access/access-dialog-host/access-dialog-host.component.ts:147",
+            "reason": "/account/access/:accessId is not routable, because ':accessId' has only the 'update' child. The dialog host's navigateBack goes to ['/account','access']. The access-table links go to .../update and the fab goes to access/create. No trigger names /account/access/:id."
+          },
+          {
+            "from": "/account/access/create",
+            "to": "/internalRoutes.account.path/access.path/:accessId",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/components/user-account-access/user-account-access.html:78",
+            "reason": "The target is /account/access/:accessId once resolved, and it matches no route because ':accessId' has no '' child. The fab links to access/create. Closing the create dialog navigates back to /account/access. No link names the target."
+          },
+          {
+            "from": "/accounts/:accountId/update",
+            "to": "/open",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/components/footer/footer.component.html:44",
+            "reason": "The only /open link available here would be the footer's (others are on the landing, about-overview and hacktoberfest pages). showFooter is false when currentRoute is 'accounts' (app.component.ts:184-192), so the footer is not rendered. The signed-in header has no /open link. The assistant quick links cover only internalRoutes, and openStartup is a public route. The accounts page and account dialogs have no such link."
+          },
+          {
+            "from": "/admin",
+            "to": "/account",
+            "readerVerdict": "real",
+            "verdict": "real",
+            "site": "src/app/components/header/header.component.html:279",
+            "reason": "The signed-in header's account menu always has 'My Ghostfolio' with [routerLink]=routerLinkAccount, which is ['/account']. The admin pages require a signed-in user, so the menu is shown. The assistant quick link 'Settings' also goes to /account."
+          },
+          {
+            "from": "/blog/2022/10/hacktoberfest-2022",
+            "to": "/demo",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/core/auth.guard.ts:35",
+            "reason": "/demo is linked only from the landing page (landing-page.html:49,352). The only other path is AuthGuard's catchError branch for utm_source=ios, which runs during a navigation into a guarded route and is not a trigger shown on this page. No link carries utm_source. The hacktoberfest page links only to /blog and external sites, and the header, footer and assistant (internal routes only) have no /demo link."
+          },
+          {
+            "from": "/blog/2023/03/ghostfolio-reaches-1000-stars-on-github",
+            "to": "/demo",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/core/auth.guard.ts:35",
+            "reason": "This page links only to pricing, features and blog. The header, footer and assistant have no /demo link. /demo is reached only from the landing page's Live Demo links or from the guard's utm_source=ios branch, and neither is shown here."
+          },
+          {
+            "from": "/blog/2023/07/exploring-the-path-to-fire",
+            "to": "/demo",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/core/auth.guard.ts:35",
+            "reason": "This page links only to features and blog. The header and footer have no /demo link, and the assistant offers only internal routes. The guard's /demo navigation needs utm_source=ios on a failed user fetch during a navigation, which is not a trigger shown on this screen."
+          },
+          {
+            "from": "/blog/2024/11/black-weeks-2024",
+            "to": "/accounts/transfer-cash-balance",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+            "reason": "The reader missed the header assistant. The blog routes' AuthGuard admits signed-in users, and the signed-in header always shows the assistant (accessAssistant is in every role). searchQuickLinks builds its links from internalRoutes plus one level of subRoutes, keeping those with array routerLinks. accounts.subRoutes.transferCashBalance qualifies, with routerLink ['/accounts','transfer-cash-balance'] and title 'Transfer Cash Balance'. Searching that title renders a link to it (assistant-list-item.html:5)."
+          },
+          {
+            "from": "/demo",
+            "to": "/portfolio/activities",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/pages/demo/demo-page.component.ts:38",
+            "reason": "The demo page has an empty template. Its ngOnInit always calls router.navigate(['/']), which goes through the '**' redirect to home. The user never stays on /demo, so header triggers such as the assistant's Activities quick link exist only during a transient moment of navigating away. The holding detail dialog's navigateToActivities is not open on /demo."
+          },
+          {
+            "from": "/home/holdings",
+            "to": "/accounts/transfer-cash-balance",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+            "reason": "The holdings page's own accounts-table does have the Transfer Cash Balance button hidden, as the reader said. But /home/holdings requires a signed-in user, and the signed-in header always shows the assistant. Its quick links include accounts.subRoutes.transferCashBalance (array routerLink ['/accounts','transfer-cash-balance'], not excluded), so searching 'Transfer Cash Balance' gives a link to it."
+          },
+          {
+            "from": "/home/watchlist/create",
+            "to": "/blog",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/components/footer/footer.component.html:23",
+            "reason": "Blog links exist only in the footer, the about-overview page and the blog posts. showFooter is false for the 'home' route, so the footer is not rendered. The header has no Blog link, and the assistant quick links cover only internalRoutes. The watchlist page and its create dialog do not link to /blog."
+          },
+          {
+            "from": "/markets",
+            "to": "/demo",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/core/auth.guard.ts:35",
+            "reason": "The markets page, the gf-markets component, the header and the footer (shown on markets) have no /demo link. The assistant offers internal routes only. The only /demo triggers are the landing page's Live Demo links and the guard's utm_source=ios fallback during a navigation, and neither is shown on /markets."
+          },
+          {
+            "from": "/portfolio/activities",
+            "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+            "reason": "The target resolves to /portfolio/activities/:activityId. In activities-page.routes.ts, ':activityId' has only 'clone' and 'update' children and no '' child, so that URL is not a routed screen. The fab links to .../create, and the table rows link to :id/update and :id/clone. Nothing links to the bare :activityId URL."
+          },
+          {
+            "from": "/portfolio/activities/:activityId/update",
+            "to": "/accounts/transfer-cash-balance",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+            "reason": "The activities page and the update dialog do not link there, but the shell header is shown on this screen for a signed-in user. Its assistant (opened by the button or the '/' hotkey) offers the quick link 'Transfer Cash Balance', taken from internalRoutes.accounts.subRoutes.transferCashBalance, which goes to ['/accounts','transfer-cash-balance']."
+          },
+          {
+            "from": "/portfolio/activities/:activityId/update",
+            "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+            "reason": "/portfolio/activities/:activityId has no '' child under ':activityId', so it is not a routed screen. The update dialog host navigates back to /portfolio/activities. The fab and row links go to create, update and clone. No trigger names the target."
+          },
+          {
+            "from": "/portfolio/activities/create",
+            "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/pages/portfolio/activities/activities-page.html:44",
+            "reason": "The resolved target /portfolio/activities/:activityId matches no route, because ':activityId' has only clone and update children. The fab links to .../create, the rows link to :id/update and :id/clone, and closing the dialog returns to /portfolio/activities."
+          }
+        ],
+        "notes": "I changed 4 of the 19 verdicts from spurious to real. All four come from the header's assistant (libs/ui/src/lib/assistant), which the reader overlooked. Every signed-in role (ADMIN, USER, DEMO) has accessAssistant in libs/common/src/lib/permissions.ts. So the signed-in header shows the assistant on every screen, except /start, which redirects signed-in users away. The assistant offers two kinds of link: account search results that go to /accounts/:id, and quick links built from internalRoutes plus one level of subRoutes, keeping those with array routerLinks. The quick links include /accounts/transfer-cash-balance, /account and /portfolio/activities. They do not include second-level routes such as activities/create, watchlist/create or access/create, or any public route (blog, demo, open).\n\nOn the /portfolio/activities/:activityId/update screen, I counted the header as shown under the preregistered shell rule even though a modal dialog sits on top.\n\nOne caveat I did not apply: the app.component system-message banner navigates to user.systemMessage.routerLink, which comes from an admin-set database property. Read literally, that would make every non-real pair 'unclear'. I treated it as configuration outside the code-determined triggers.\n\nThe three '/internalRoutes...:accessId' and '...:activityId' targets resolve to URLs that have no route, because their parameter node has no '' child.\n\nNothing under node_modules was needed."
+      },
+      {
+        "slug": "k8sdash",
+        "items": [
+          {
+            "from": "/clusterrolebinding",
+            "to": "/create",
+            "readerVerdict": "real",
+            "verdict": "real",
+            "site": "src/chrome/template.html:56",
+            "reason": "ChromeComponent is the routed parent of every child route under AuthGuard, /clusterrolebinding included. Its primary toolbar has a 'Create new resource' button with no *ngIf, and its (click)=\"goToCreateState()\" runs router_.navigate(['create'], {queryParamsHandling:'preserve'}) at src/chrome/component.ts:82. With no relativeTo that resolves from the root to /create, a child of the chrome route (src/chrome/routing.ts) with no extra guard."
+          },
+          {
+            "from": "/clusterrolebinding",
+            "to": "/overview",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/common/components/namespace/component.ts:224",
+            "reason": "Only one control on this screen sends the router to 'overview': the chrome namespace selector's changeNamespace_ at line 226. It sits under if (this.resourceNamespaceParam) at line 224. resourceNamespaceParam comes from the deepest primary route's params.resourceNamespace. The /clusterrolebinding list route is path '' and has no params (its detail route is ':resourceName', also without resourceNamespace), so that check fails and the code only merges the namespace query param into the current route. The other 'overview' paths are historyService.goToPreviousState('overview') at line 217, reached only from the namespace-change dialog, and shouldShowNamespaceChangeDialog also needs resourceNamespaceParam. The remaining ones are in the create components, which are not shown on this screen. No nav, breadcrumb or redirectTo points to /overview."
+          },
+          {
+            "from": "/networkpolicy",
+            "to": "/overview",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/common/components/namespace/component.ts:224",
+            "reason": "The /networkpolicy list route (path '' in src/resource/cluster/networkpolicy/routing.ts) has no :resourceNamespace param, so resourceNamespaceParam is undefined. The guard at line 224 therefore skips navigate(['overview']) (line 226), and the namespace-change dialog that leads to goToPreviousState('overview') never opens, because shouldShowNamespaceChangeDialog needs that param. Only the detail route ':resourceNamespace/:resourceName' would make these paths reachable. Nothing else shown on the list screen links to /overview."
+          },
+          {
+            "from": "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+            "to": "/login",
+            "readerVerdict": "real",
+            "verdict": "real",
+            "site": "src/chrome/userpanel/template.html:70",
+            "reason": "kd-user-panel sits in the chrome toolbar, which wraps the PVC detail route. Its 'Sign out' menu item shows when isAuthenticated() && !hasAuthHeader(). The chrome AuthGuard lets a token-cookie user through (isAuthenticated = me.authenticated || hasTokenCookie), and for that user hasAuthHeader() is false, so the guard does not keep the button hidden. Its logout() calls AuthService.logout(), which clears the cookie, resets the me service and runs router_.navigate(['login']) (src/common/services/global/authentication.ts:72). That lands on the root /login route, and LoginGuard admits the user because they are now unauthenticated. The button is hidden only when the user signed in through an auth header."
+          }
+        ],
+        "notes": "I confirmed all four of the reader's verdicts from the source. The reader's site for the namespace selector (component.ts:224) is the if (this.resourceNamespaceParam) check, and the navigate(['overview']) call is at line 226. Both lines come from the real file; the rtk-filtered view strips comments and shifts line numbers. In src/chrome/template.html the create button is not under any *ngIf. /login is a root route (src/index.routing.ts) guarded by LoginGuard, which admits users who are not authenticated."
+      },
+      {
+        "slug": "bitwarden",
+        "items": [
+          {
+            "from": "/AuthRoute.NewDeviceVerification",
+            "to": "/settings/security/session-timeout",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "src/app/auth/guards/deep-link/deep-link.guard.ts:39",
+            "reason": "Real, but only through the deep-link restore. Submitting the code calls router.navigate(['/vault']) (../../libs/auth/src/angular/new-device-verification/new-device-verification.component.ts:172). /vault sits under the UserLayout route, whose guards are [deepLinkGuard(), authGuard] (oss-routing.module.ts:682). deepLinkGuard saves the URL a signed-out user asked for, and once the user is unlocked it calls router.navigateByUrl with that saved URL (deep-link.guard.ts:39). So a user who opened /settings/security[/session-timeout] while signed out, then logged in and reached this step, lands on session-timeout. /settings/security redirectTo session-timeout (security-routing.module.ts:19). Nothing on the way clears the saved URL: the login-success handler and authGuard's authBlocked path leave it alone. The reader's point that no trigger names settings/security is true, but it does not decide the pair. The hinted sites are wrong: [routerLink]=[] links back to the same page, and the vault rows are not shown here."
+          },
+          {
+            "from": "/AuthRoute.SignUp",
+            "to": "/settings/security/session-timeout",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/components/environment-selector/environment-selector.component.html:20",
+            "reason": "Only signed-out users are let in (unauthGuardFn), and the user never logs in on this screen. Its navigations go to /finish-signup and /organization-invite-link-invalid (registration-start.component.ts:220, 339) and to the /login link in the secondary component. The anon-layout logo goes to '/', and redirectGuard sends a signed-out user to /login from there. The saved deep link is only replayed after login, which does not happen here. The hinted environment-selector link is [routerLink]=[], a link to the same page, and the vault rows are not shown here."
+          },
+          {
+            "from": "/AuthRoute.TwoFactor",
+            "to": "/settings/security/session-timeout",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "src/app/auth/guards/deep-link/deep-link.guard.ts:39",
+            "reason": "Real, but only through the deep-link restore. After a successful 2FA submit, handleAuthResult calls router.navigate([defaultSuccessRoute]), which is normally 'vault' (../../libs/auth/src/angular/two-factor-auth/two-factor-auth.component.ts:506). The UserLayout route's deepLinkGuard (oss-routing.module.ts:682) then calls navigateByUrl with the URL the user asked for while signed out (deep-link.guard.ts:39). Opening /settings/security[/session-timeout] while signed out, then going through login and 2FA, lands on session-timeout; /settings/security redirectTo session-timeout. This is the flow deepLinkGuard was built for. The hinted sites are wrong: a link to the same page, and vault rows that are not shown here."
+          },
+          {
+            "from": "/browser-extension-prompt",
+            "to": "/settings/security/session-timeout",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/vault/components/browser-extension-prompt/browser-extension-prompt-install.component.html:4",
+            "reason": "The components have no router calls; the only link is the external web-store href. The anon-layout logo goes to '/', and redirectGuard sends the user on to /vault, /login, /lock or /login-initiated, never to settings/security. The user cannot log in on this page. An unlocked user has no saved deep link left, because the guard uses it up (or another flow clears it) the first time an unlocked user enters a UserLayout route. It is kept in per-tab sessionStorage, so another tab cannot supply one. The hinted sites are a link to the same page and vault rows that are not shown here."
+          },
+          {
+            "from": "/confirm-key-connector-domain",
+            "to": "/settings/security/session-timeout",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/key-management/key-connector/confirm-key-connector-domain.component.ts:18",
+            "reason": "Confirm runs onBeforeNavigation, which clears the saved deep link (ts:18), and then calls router.navigate(['/']) (../../libs/key-management-ui/src/key-connector/confirm-key-connector-domain.component.ts:116). From '/', redirectGuard goes to /vault. Cancel sends a logout message. The logo goes to '/'; a key-connector user who has not confirmed the domain has no user key, so redirectGuard sends them to /lock. There is no link to settings/security. The reader's site (oss-routing.module.ts:595) is the route definition, not what decides the pair."
+          },
+          {
+            "from": "/recover-2fa",
+            "to": "/settings/security/session-timeout",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "src/app/auth/guards/deep-link/deep-link.guard.ts:39",
+            "reason": "Real, through the deep-link restore. After a successful recovery-code login the component calls router.navigate(['/settings/security/two-factor']) (src/app/auth/recover-two-factor.component.ts:132). That enters the UserLayout route, and its deepLinkGuard, now that the user is unlocked, sends the user to any URL saved while signed out (deep-link.guard.ts:39). So a user who opened /settings/security[/session-timeout] before recovering lands on session-timeout rather than two-factor. The saved URL lives in the tab's sessionStorage and is not cleared by the login-success handler. The reader was right that the default target is two-factor, but missed the guard that replaces it."
+          },
+          {
+            "from": "/secrets-manager-trial-initiation",
+            "to": "/vault",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "../../libs/components/src/landing-layout/landing-header.component.html:4",
+            "reason": "The reader's 'the anon layout has no vault link' is wrong. The anon layout's header always shows the logo link [routerLink]=['/'] (hideLogo defaults to false and the wrapper never sets it). '/' is guarded by redirectGuard (oss-routing.module.ts:130), which sends unlocked users to /vault (libs/angular/.../redirect.guard.ts:21). With the trial stepper on (product=SM plus a productTier query param), handlePasswordSubmit logs the user in on this page (complete-trial-initiation.component.ts:359), and the user stays on the screen. unauthGuardFn is a canActivate guard checked only on entry, so it does not hide or disable the logo afterwards. The click then lands on /vault, as long as /vault's setupExtensionRedirectGuard lets it through: on a mobile browser or with suppressOnboardingInterstitials; otherwise a new account is sent to /setup-extension. The template links go to /sm/:id and /organizations/:id/vault or members, which are not /vault. The hinted dialog is not shown here."
+          },
+          {
+            "from": "/send/:sendId/:key",
+            "to": "/vault",
+            "readerVerdict": "spurious",
+            "verdict": "real",
+            "site": "../../libs/components/src/landing-layout/landing-header.component.html:4",
+            "reason": "The send page has no guard, so a signed-in, unlocked user can view it. Its anon-layout header shows the logo link [routerLink]=['/'], and redirectGuard on '' (oss-routing.module.ts:130) sends an unlocked user to /vault (redirect.guard.ts:21). So the logo lands on /vault for an existing user: one with no premium-interest flag who is older than 30 days or has dismissed setup-extension. This is a guard redirect rather than a redirectTo. The reader missed the logo; the explainer's /signup link and the hinted setup-extension dialog play no part."
+          },
+          {
+            "from": "/setup-extension",
+            "to": "/settings/security/session-timeout",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/vault/components/setup-extension/setup-extension.component.html:63",
+            "reason": "The page's navigations go to /vault (html:63, ts:139, and the add-later dialog's link), to an external store link, and the logo goes to '/'. Users get here through /vault's setupExtensionRedirectGuard, which runs after the UserLayout deepLinkGuard has already used up any saved deep link. So for an unlocked user, /vault stays /vault. A signed-out visitor who clicks /vault is sent to /login. Nothing targets settings/security."
+          }
+        ],
+        "notes": "I changed 5 of the 9 verdicts, all from spurious to real. Two mechanisms explain them, and the pre-registered rules count both (whether t is reached is what matters, and a guard may stand in the way).\n(1) Deep-link restore, which turns TwoFactor, NewDeviceVerification and recover-2fa into real. The UserLayout route has canActivate [deepLinkGuard(), authGuard] (src/app/oss-routing.module.ts:682). When a user who is not unlocked opens a URL there, the guard saves it in the tab's sessionStorage. When an unlocked user next enters that route, the guard calls navigateByUrl with the saved URL (src/app/auth/guards/deep-link/deep-link.guard.ts:39). Login-completing screens navigate to /vault or /settings/security/two-factor, so they can land on any authenticated route the user asked for before logging in. Only confirm-key-connector-domain, change-password, set-initial-password and login-decryption-options clear the saved URL first. If your policy treats this kind of state-driven target as unclear or as not counted, apply it to all three of these items alike, and to any other login-completing screen paired with an authenticated route.\n(2) The anon-layout logo, which turns /send and /secrets-manager-trial-initiation to /vault into real. Every AnonLayoutWrapper page shows the logo link to '/' (libs/components/src/landing-layout/landing-header.component.html:4). redirectGuard on '' (oss-routing.module.ts:130) sends unlocked users to /vault. The send page has no guard. The trial stepper logs the user in on the page itself, so its entry-time unauthGuardFn does not keep the logo's /vault target off.\nDeciding these meant reading code under ../../libs (@bitwarden/components, auth, angular and key-management-ui). That code is in the repository, not in node_modules, and sites outside the app are given as ../../libs/... paths relative to the app directory. All the hinted sites for these pairs are wrong: environment-selector [routerLink]=[] links to the same page, the vault-row links only change query parameters, and the add-extension-later dialog belongs to /setup-extension."
+      },
+      {
+        "slug": "mifos",
+        "items": [
+          {
+            "from": "/accounting/provisioning-entries/journal-entries/view/:id",
+            "to": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:218",
+            "reason": "ViewProvisioningJournalEntriesComponent has no links or router calls. In the shell, the notifications tray goes only to /{clients|groups}/{id}/fixed-deposits-accounts/{accountId}, and the FD routing redirects '' to 'general', not 'charges'. Nothing else in the shell names the FD charges tab."
+          },
+          {
+            "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+            "to": "/clients/:clientId/savings-accounts/:savingAccountId/datatables/:datatableName",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+            "reason": "On s the shown components are ViewTransactionComponent and DatatableTransactionTabComponent. doAction cuts router.url at '/transactions', so it goes to /centers/.../savings-accounts/S/actions/<name>. The tab links are relative to the transaction. The tray's savings route lands on the account root, which redirects to 'general'. Breadcrumbs point only to ancestors under /centers. Nothing produces the client-account datatables URL."
+          },
+          {
+            "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+            "to": "/loans/:loanId/transactions/:id/edit",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+            "reason": "doAction stays inside the savings account (/actions/<name>), and the datatable tab has only dialogs. The shell links to /loans only as the list. The tray's loan route goes to /{clients|groups}/.../loans-accounts/{id}, never to /loans/:id/transactions/:id/edit."
+          },
+          {
+            "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/general",
+            "to": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/edit",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+            "reason": "The general tab has only the relative 'edit' and '../../' links and navigate(['../..']), all under /centers. doAction goes to <account>/actions/<name>. The tray goes to the savings account root only. No trigger names a client standing-instruction edit route."
+          },
+          {
+            "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions",
+            "to": "/clients/:clientId/loans-accounts/:loanId/transfer-funds/make-account-transfer",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.ts:578",
+            "reason": "On s the shown components are FixedDepositAccountViewComponent and the FD TransactionsTabComponent. Their navigations are reload() (the FD list and back to the same URL), actions/<name>, edit, ../../, the FD's own tabs, account-transfers/<id>, a transaction id and journal-entry. The only producers of loans-accounts/:id/transfer-funds/make-account-transfer are loans-view.ts:578 and the client general-tab, and neither is shown on s. The tray goes to the loan root only."
+          },
+          {
+            "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions/account-transfers/make-account-transfer",
+            "to": "/loans/:loanId/transfer-funds/:standingInstructionsId/view",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:208",
+            "reason": "The FD transactions route that holds account-transfers has no component, so only MakeAccountTransfersComponent and the shell are shown. Its links are relative ('../..', '../../transactions'), and submit only advances the stepper. The cited checker-inbox row link belongs to the checker-inbox page and is relative there. Nothing shown on s reaches /loans/.../transfer-funds/:id/view."
+          },
+          {
+            "from": "/clients/:clientId/fixed-deposits-accounts/create",
+            "to": "/groups",
+            "readerVerdict": "real",
+            "verdict": "real",
+            "site": "src/app/core/shell/toolbar/toolbar.component.html:156",
+            "reason": "The clients routes are wrapped in Route.withShell, so the toolbar is shown on s. Its Institution menu has routerLink='/groups', gated only by the READ_GROUP permission, and /groups routes to GroupsComponent."
+          },
+          {
+            "from": "/clients/:clientId/loans-accounts/:loanId/accountdetail",
+            "to": "/loans/:loanId/notes",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.html:635",
+            "reason": "The notes tab link is ['./notes'], relative to LoansViewComponent's route, so on s it resolves to /clients/:c/loans-accounts/:id/notes, a different pattern. The hinted centers, clients and groups view templates are not shown on s. No absolute /loans/:id/notes trigger exists. The only /loans/<id> navigation is in credit-applications, to general."
+          },
+          {
+            "from": "/clients/:clientId/loans-accounts/:loanId/breach-actions",
+            "to": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.html:332",
+            "reason": "['./dashboard'] is relative and stays under /clients/:c/loans-accounts/:id. The breach-actions tab navigates only to ../actions/<name>. The tray goes to /{clients|groups}/{id}/loans-accounts/{id}, which redirects to 'general', not 'dashboard'."
+          },
+          {
+            "from": "/clients/:clientId/loans-accounts/:loanId/buy-down-fees",
+            "to": "/loans/:loanId/payment-rates",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.html:454",
+            "reason": "['./payment-rates'] is relative and resolves to /clients/:c/loans-accounts/:id/payment-rates. No absolute /loans/:id/payment-rates trigger exists anywhere."
+          },
+          {
+            "from": "/clients/:clientId/loans-accounts/:loanId/datatables/:datatableName",
+            "to": "/loans/:loanId/external-asset-owner",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.html:662",
+            "reason": "['./external-asset-owner'] is relative and resolves to /clients/:c/loans-accounts/:id/external-asset-owner. No component shown on s links to the /loans mount of that tab."
+          },
+          {
+            "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+            "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+            "reason": "The target route exists. On s, doAction goes only to <savings account>/actions/<name> and the datatable tab opens only dialogs. The tray reaches only the recurring-deposit account root, which redirects to general. No make-account-transfer producer (loans-view, savings-account-view, client general-tab) is shown on s."
+          },
+          {
+            "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/general",
+            "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+            "reason": "The tray navigates to /groups/<id>/savings-accounts/<accountId>, which redirects to 'general', with no /charges. On s the general tab links ('edit', '../../') and doAction (/actions/<name>) stay under /clients. Breadcrumbs point only to ancestors."
+          },
+          {
+            "from": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+            "to": "/loans/:loanId/charges/:id",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/account-transfers/view-standing-instructions/view-standing-instructions.component.html:10",
+            "reason": "s matches the savings route ':savingAccountId/transfer-funds' (SavingsAccountViewComponent's children do not take 'transfer-funds'), inside the component-less second clients/:clientId block. So only ViewStandingInstructionsComponent and the shell are shown. Its links are ../edit and ../list-account-transactions. The hinted client general-tab is not shown. Nothing links to /loans/:id/charges/:id."
+          },
+          {
+            "from": "/clients/:clientId/standing-instructions/create-standing-instructions",
+            "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges/:id",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/account-transfers/create-standing-instructions/create-standing-instructions.component.ts:377",
+            "reason": "CreateStandingInstructions only navigates relatively: ['../'] in the template and navigate(['../../']) at ts:377. The tray reaches only the group savings account root, which redirects to general, never charges/:id."
+          },
+          {
+            "from": "/clients/:clientId/standing-instructions/make-account-transfer",
+            "to": "/groups/:groupId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/account-transfers/make-account-transfers/make-account-transfers.component.html:225",
+            "reason": "The MakeAccountTransfers links are relative ('../..', '../../transactions') and stay under the client. Submit only advances the stepper. The checker-inbox row link is not shown on s. The tray goes only to the group savings account root."
+          },
+          {
+            "from": "/groups/:groupId/loans-accounts/:loanId",
+            "to": "/loans/:loanId/deferred-income",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.html:468",
+            "reason": "['./deferred-income'] is relative and resolves to /groups/:g/loans-accounts/:id/deferred-income. No absolute router call or link to /loans/<id>/deferred-income exists. The only /loans/<id> navigation is credit-applications, to general, and it is not shown on s."
+          },
+          {
+            "from": "/groups/:groupId/loans-accounts/:loanId/balances",
+            "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/edit",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+            "reason": "The balances tab has no navigation, and the loans-view tabs are relative to the loan. The tray goes only to /groups/<id>/savings-accounts/<accountId>, with no transactions/:id/edit. Breadcrumbs point only to ancestors of s."
+          },
+          {
+            "from": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+            "to": "/clients/:clientId/savings-accounts/:savingAccountId/documents",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+            "reason": "ClientsViewComponent (the hinted clients-view.html:468) is not shown under /groups/.../loans-accounts. The dashboard tab has no navigation. The tray lands on the savings account root, which redirects to general, with no /documents."
+          },
+          {
+            "from": "/groups/:groupId/loans-accounts/:loanId/general",
+            "to": "/loans/:loanId/loan-documents",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.html:622",
+            "reason": "['./loan-documents'] is relative and lands on /groups/:g/loans-accounts/:id/loan-documents, a different pattern. The loan general tab has no router calls, and no absolute /loans/<id>/loan-documents link exists."
+          },
+          {
+            "from": "/groups/:groupId/loans-accounts/:loanId/original-schedule",
+            "to": "/:loanId/datatables",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.html:678",
+            "reason": "The only datatable link is ['./datatables', registeredTableName], which lands on .../loans-accounts/:id/datatables/:datatableName. The loans 'datatables' node has only a ':datatableName' child, so a bare .../datatables URL matches no component. '/:loanId/datatables' is not a declared mount (the loans module is mounted under clients/, groups/ and loans/). No trigger produces it."
+          },
+          {
+            "from": "/groups/:groupId/savings-accounts/:savingAccountId/notes",
+            "to": "/loans/:loanId/transfer-funds/:standingInstructionsId/view",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:208",
+            "reason": "The target route exists, but the cited checker-inbox row link is shown only on the checker-inbox page, and it is relative there. On s, SavingsAccountViewComponent's links are relative tabs plus actions/transfer-funds under the savings account. The notes tab has no navigation, and the shell's sidenav links only to the checker-inbox list."
+          },
+          {
+            "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+            "to": "/loans/:loanId/buy-down-fees",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+            "reason": "doAction only goes to <savings account>/actions/<name>, and the datatable tab has only dialogs. buy-down-fees is reachable only through the relative tab link inside LoansViewComponent, which is not shown on s. The shell has no such link."
+          },
+          {
+            "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+            "to": "/system/roles-and-permissions/add",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+            "reason": "doAction only goes to .../actions/<name>. The shell links reach /system and other top-level pages, the frequent-activities top-level paths, and keyboard shortcuts with fixed routes. roles-and-permissions/add is linked only from the roles page ([routerLink]=['add']) and from home/activities.ts, which feeds only the Home and Dashboard search, and neither is shown on s."
+          },
+          {
+            "from": "/loans/:loanId/breach-actions",
+            "to": "/centers/:centerId/savings-accounts/:savingAccountId/documents",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+            "reason": "The tray builds only /{clients|groups}/<id>/savings-accounts/<accountId>, with no centers prefix and no /documents. ClientsViewComponent is not shown under /loans/:loanId. The breach-actions tab goes only to ../actions/<name>."
+          },
+          {
+            "from": "/loans/:loanId/loan-collateral",
+            "to": "/reports",
+            "readerVerdict": "real",
+            "verdict": "real",
+            "site": "src/app/core/shell/toolbar/toolbar.component.html:193",
+            "reason": "LOANS_LIST_ROUTES wraps the /loans routes in Route.withShell, so the toolbar is shown. Its Reports menu item 'All' has [routerLink]=['/reports'], gated only by READ_REPORT, and /reports is a routed lazy module. The web-app keyboard shortcut with route 'reports' is a second trigger."
+          },
+          {
+            "from": "/loans/:loanId/payment-rates",
+            "to": "/groups/:groupId/loans-accounts/:loanId/originators",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/loans-view/loans-view.component.html:509",
+            "reason": "['./originators'] is relative and resolves to /loans/:loanId/originators. The tray goes only to /groups/:id/loans-accounts/:accountId, which redirects to general, never to originators."
+          },
+          {
+            "from": "/loans/glim-account/:glimId",
+            "to": "/loans/:loanId/charges/:id",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/loans/glim-account/glim-account.component.html:86",
+            "reason": "s resolves to GlimAccountComponent (':loanId' fails on the extra segment, so the router backtracks to 'glim-account/:glimId'). Its links go only to /loans-accounts/<child>/actions/... and /loans-accounts/<child>/general. The hinted client general-tab is not shown. Nothing reaches a loan charge view."
+          },
+          {
+            "from": "/organization/employees/create",
+            "to": "/remittances/process",
+            "readerVerdict": "unclear",
+            "verdict": "unclear",
+            "site": "src/app/core/shell/sidenav/sidenav.component.html:151",
+            "reason": "The shell sidenav item routerLink ['/remittances/process'] is shown only when *ngIf=\"mifosRemittanceEnabled\", and the target route has remittanceEnabledGuard. The flag is deployment config, and the defaults in the source disagree. assets/env.js sets it false. environment.ts treats unset as enabled, and the Docker envsubst of env.template.js yields '' when MIFOS_REMITTANCE_ENABLED is unset, which counts as enabled. So the deployment decides."
+          },
+          {
+            "from": "/organization/exchange-rates/:id",
+            "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/:standingInstructionsId/view",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+            "reason": "The tray navigates only to /{clients|groups}/:id/recurring-deposits-accounts/:accountId, which redirects to general, with no transfer-funds sub-route. The checker-inbox link is in a tasks component that is not shown on this screen."
+          },
+          {
+            "from": "/organization/exchange-rates/convert",
+            "to": "/clients/:clientId/shares-accounts/create",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:238",
+            "reason": "The tray navigates to /clients/:id/shares-accounts/<account.accountId>, which is the ':shareAccountId' view route (redirecting to general), not the static 'create' route. No other trigger on s names shares create."
+          },
+          {
+            "from": "/organization/working-days",
+            "to": "/centers/:centerId/savings-accounts/:savingAccountId/charges",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+            "reason": "The tray builds only /clients|groups/:id/savings-accounts/:accountId. It never uses the centers prefix for accounts and has no charges sub-route."
+          },
+          {
+            "from": "/products/fixed-deposit-products/:productId/edit",
+            "to": "/centers/:centerId/savings-accounts/:savingAccountId/notes",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+            "reason": "The tray reaches only the clients or groups savings account root. It has no centers prefix and no notes sub-route. No other trigger on s names a center savings tab."
+          },
+          {
+            "from": "/products/near-breach-configurations/create",
+            "to": "/groups/:groupId/loans-accounts/:loanId/transactions/:id/reciept",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+            "reason": "The tray navigates only to /groups/:id/loans-accounts/:accountId, which redirects to general, with no transactions/:id/reciept."
+          },
+          {
+            "from": "/settings",
+            "to": "/groups/:groupId/loans-accounts/:loanId/charges/:id",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+            "reason": "SettingsComponent has no router links. The tray reaches only the loan account root, not charges/:id."
+          },
+          {
+            "from": "/settings",
+            "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+            "reason": "SettingsComponent has no router links. The tray reaches only the savings account root, which redirects to general, not transactions."
+          },
+          {
+            "from": "/system",
+            "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/datatables/:datatableName",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+            "reason": "The tray reaches only the recurring-deposit account root. SystemComponent's 'data-tables' links go to /system/data-tables. Account datatable links exist only inside the RD account view, which is not shown on /system."
+          },
+          {
+            "from": "/system/codes/:id/edit",
+            "to": "/clients/:clientId/savings-accounts/:savingAccountId/actions/:name",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+            "reason": "The tray reaches only the savings account root, with no actions sub-route. Savings action navigations exist only in the savings view and transaction components, which are not shown on this screen."
+          },
+          {
+            "from": "/system/manage-jobs",
+            "to": "/clients/:clientId/client-collateral/:collateralId",
+            "readerVerdict": "spurious",
+            "verdict": "spurious",
+            "site": "src/app/system/manage-jobs/cob-workflow/loan-locked/loan-locked.component.ts:175",
+            "reason": "The hinted handler navigates to /clients/:id/loans-accounts/:loanId/general. The only client-collateral link is in the clients general-tab (html:641), which is not shown on this screen."
+          }
+        ],
+        "notes": "I re-derived all 39 verdicts from the source in /Users/kanetran29/personal/uigraph-work/corpus/mifos and confirmed every reader verdict: 2 real, 1 unclear, 36 spurious. I changed some sites to the exact line that holds the routerLink, because several reader sites pointed at the opening '<a' or '<tr' line two or three lines above it. The changed sites are loans-view.html 332, 454, 468, 509, 622, 635, 662 and 678, and checker-inbox.html:208. Item 5 now cites loans-view.ts:578, the only producer of the target.\n\nChecks behind the verdicts:\n- **Notification tray:** for loan, savings, FD, RD and share accounts it builds only /{clients|groups}/{id}/<type>/{accountId}. Every such account route redirects '' to 'general', so the tray never reaches a tab or sub-route.\n- **Other shell triggers:** the toolbar menus and the frequent-activities and keyboard-shortcut links reach only top-level paths. Search goes to /search, and breadcrumbs point to ancestors (sometimes with '/general' appended under /clients).\n- **Routes shown together:** clients/:clientId/<accounts> sits in a block with no component, so ClientsViewComponent is not shown there. The savings ':savingAccountId/transactions/:id' and ':savingAccountId/transfer-funds' routes are siblings of the account view, which the router backtracks past, so SavingsAccountViewComponent is not shown on them.\n- **No history-back triggers:** no component on any s here calls location.back().\n\nOne thing the preregistration may not cover: the Mifos Copilot panel. The shell creates it only when environment.enableCopilot is true. Its action cards call navigateByUrl with a route string sent by an external gateway. The flag is false in every default in the source (env.js false; env.template.js gives '' when MIFOS_ENABLE_COPILOT is unset, and only 'true' enables it). I treated it as not shown and changed no verdict. A deployment with Copilot turned on could navigate anywhere, which would make every shell pair unclear under the backend-target rule.\n\nThe remittance item stays unclear for a different reason: its flag's defaults disagree in the source. env.js says false, but environment.ts and the Docker envsubst both treat an unset flag as enabled. No item needed a library under node_modules."
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Read"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Gate"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "read:event-booking-mean:0-1",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "ad8d292d658a0a3dc",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903419706,
+      "queuedAt": 1793903419684,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"event-booking-mean\", array \"pairs\", indices 0 to 1 inclusive (0-based), 2 p…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903470224,
+      "tokens": 84855,
+      "toolCalls": 9,
+      "durationMs": 50518,
+      "resultPreview": "{\"items\":[{\"from\":\"/create-event\",\"to\":\"/my-Events\",\"verdict\":\"real\",\"site\":\"src/app/create-event/create-event.component.ts:74\",\"reason\":\"After the user submits the create-event form and createEvent and addToMyEvents succeed, the component calls router.navigate(['/my-Events']), which matches the 'my-Events' route. The header link at header.component.html:29 also points there.\"},{\"from\":\"/create-ev…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "read:alfresco:0-7",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a4596126b028ccdcb",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903419708,
+      "queuedAt": 1793903419684,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/corpus/alfresco/projects/aca-content\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"alfresco\", array \"pairs\", indices 0 to 7 inclusive (0-based), 8 pairs. Judge every one of them and return exact…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903506597,
+      "tokens": 90414,
+      "toolCalls": 17,
+      "durationMs": 86889,
+      "resultPreview": "{\"items\":[{\"from\":\"/favorite/libraries/:folderId\",\"to\":\"/profile\",\"verdict\":\"real\",\"site\":\"src/lib/components/common/user-info/user-info.component.html:1\",\"reason\":\"Route is in CONTENT_LAYOUT_ROUTES, so it renders inside the ADF ShellLayoutComponent. The header from assets/app.extensions.json holds app.header.more (UserMenuComponent), whose menu includes app.header.user (UserInfoComponent). That c…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "read:ghostfolio:0-13",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a6d0da501349467ef",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903419709,
+      "queuedAt": 1793903419684,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/corpus/ghostfolio/apps/client\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"ghostfolio\", array \"pairs\", indices 0 to 13 inclusive (0-based), 14 pairs. Judge every one of them and return exactly …",
+      "promptFramed": true,
+      "lastProgressAt": 1793903525610,
+      "tokens": 110482,
+      "toolCalls": 18,
+      "durationMs": 105901,
+      "resultPreview": "{\"items\":[{\"from\":\"/about\",\"to\":\"/blog\",\"verdict\":\"real\",\"site\":\"src/app/pages/about/overview/about-overview-page.html:202\",\"reason\":\"/about renders the about-overview page (path '' child), which has a Blog button with routerLink=publicRoutes.blog.routerLink (/blog). It sits inside @if (hasPermissionForSubscription), a flag from the backend's globalPermissions, so it is shown only on deployments w…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "read:ghostfolio:14-27",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a40cfd9c40d7fc272",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903419710,
+      "queuedAt": 1793903419684,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/corpus/ghostfolio/apps/client\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"ghostfolio\", array \"pairs\", indices 14 to 27 inclusive (0-based), 14 pairs. Judge every one of them and return exactly…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903517441,
+      "tokens": 106368,
+      "toolCalls": 16,
+      "durationMs": 97731,
+      "resultPreview": "{\"items\":[{\"from\":\"/blog/2023/02/ghostfolio-meets-umbrel\",\"to\":\"/zen\",\"verdict\":\"real\",\"site\":\"src/app/core/auth.guard.ts:87\",\"reason\":\"A signed-in user sees the header logo link and Overview link to '/', and the footer logo link. '/' hits the '**' redirect to home. AuthGuard then sends a user whose viewMode is ZEN to /zen (router.navigate to internalRoutes.zen.routerLink).\"},{\"from\":\"/blog/2023/0…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "read:k8sdash:0-9",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a2814e8195ac0a443",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903525646,
+      "queuedAt": 1793903525613,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/corpus/k8sdash/modules/web\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"k8sdash\", array \"pairs\", indices 0 to 9 inclusive (0-based), 10 pairs. Judge every one of them and return exactly 10 item…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903591344,
+      "tokens": 103026,
+      "toolCalls": 11,
+      "durationMs": 65697,
+      "resultPreview": "{\"items\":[{\"from\":\"/clusterrolebinding\",\"to\":\"/create\",\"verdict\":\"real\",\"site\":\"src/chrome/template.html:56\",\"reason\":\"The chrome shell toolbar always shows the 'Create new resource' add button, and its (click) calls goToCreateState(), which runs router.navigate(['create']). With no relativeTo this goes to /create. The shell wraps every screen including /clusterrolebinding.\"},{\"from\":\"/clusterrole…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "read:bitwarden:0-11",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "aac7d1c654535916b",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903525649,
+      "queuedAt": 1793903525613,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/corpus/bitwarden/apps/web\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"bitwarden\", array \"pairs\", indices 0 to 11 inclusive (0-based), 12 pairs. Judge every one of them and return exactly 12 it…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903618068,
+      "tokens": 94638,
+      "toolCalls": 19,
+      "durationMs": 92419,
+      "resultPreview": "{\"items\":[{\"from\":\"/AuthRoute.NewDeviceVerification\",\"to\":\"/settings/security/session-timeout\",\"verdict\":\"spurious\",\"site\":\"src/app/components/environment-selector/environment-selector.component.html:20\",\"reason\":\"Screen is a signed-out anon-layout page with no settings nav. The hinted link is routerLink=[] (self link) and the vault row links are not shown here. No trigger names settings/security.…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "read:mifos:0-15",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "ab5afe631b134d40b",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903525650,
+      "queuedAt": 1793903525613,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/corpus/mifos\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"mifos\", array \"pairs\", indices 0 to 15 inclusive (0-based), 16 pairs. Judge every one of them and return exactly 16 items in the given …",
+      "promptFramed": true,
+      "lastProgressAt": 1793903703886,
+      "tokens": 110029,
+      "toolCalls": 29,
+      "durationMs": 178236,
+      "resultPreview": "{\"items\":[{\"from\":\"/accounting/provisioning-entries/journal-entries/view/:id\",\"to\":\"/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges\",\"verdict\":\"spurious\",\"site\":\"src/app/shared/notifications-tray/notifications-tray.component.ts:218\",\"reason\":\"Shown components are ViewProvisioningJournalEntries (no links) plus the shell. The notifications tray navigates only to /{clients|g…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "read:mifos:16-31",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a35788d8341e59aa7",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903525652,
+      "queuedAt": 1793903525613,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/corpus/mifos\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"mifos\", array \"pairs\", indices 16 to 31 inclusive (0-based), 16 pairs. Judge every one of them and return exactly 16 items in the given…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903708402,
+      "tokens": 129872,
+      "toolCalls": 33,
+      "durationMs": 177749,
+      "resultPreview": "{\"items\":[{\"from\":\"/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName\",\"to\":\"/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer\",\"verdict\":\"spurious\",\"site\":\"src/app/shared/notifications-tray/notifications-tray.component.ts:228\",\"reason\":\"The target route exists, but nothing shown on s l…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "read:mifos:32-47",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "af87ba9f3b4dba5a0",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1793903708418,
+      "queuedAt": 1793903708405,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "You judge transitions between screens of an Angular app by reading its source.\n\nApp directory: /Users/kanetran29/personal/uigraph-work/corpus/mifos\nInput: read /Users/kanetran29/personal/uigraph/thesis-handoff/rima/head2head/results-v2/reading-blind-new.json, key \"mifos\", array \"pairs\", indices 32 to 47 inclusive (0-based), 16 pairs. Judge every one of them and return exactly 16 items in the given…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903817846,
+      "tokens": 99134,
+      "toolCalls": 21,
+      "durationMs": 109428,
+      "resultPreview": "{\"items\":[{\"from\":\"/loans/:loanId/payment-rates\",\"to\":\"/groups/:groupId/loans-accounts/:loanId/originators\",\"verdict\":\"spurious\",\"site\":\"src/app/loans/loans-view/loans-view.component.html:507\",\"reason\":\"The loans-view tab link ./originators is relative and resolves to /loans/:loanId/originators, not the groups path. The notifications tray only navigates to /groups/:id/loans-accounts/:accountId, ne…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "gate:event-booking-mean",
+      "phaseIndex": 2,
+      "phaseTitle": "Gate",
+      "agentId": "a337b49040d5789e4",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1793903817867,
+      "queuedAt": 1793903817849,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I re-derived both verdicts from app-routing.module.ts, layo…",
+      "promptPreview": "You are the final gate on judgements of transitions between screens of an Angular app, made by another reader. Re-derive each verdict yourself from the source; do not trust the reader. Keep the reader's verdict only when the source confirms it, and apply the rules exactly, including the rule that a trigger hidden on s by a condition its guard keeps false does not count.\n\nApp directory: /Users/kane…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903855638,
+      "tokens": 88523,
+      "toolCalls": 6,
+      "durationMs": 37770,
+      "resultPreview": "{\"items\":[{\"from\":\"/create-event\",\"to\":\"/my-Events\",\"readerVerdict\":\"real\",\"verdict\":\"real\",\"site\":\"src/app/create-event/create-event.component.ts:74\",\"reason\":\"onCreateEvent (form ngSubmit) calls router.navigate(['/my-Events']) once both createEvent and addToMyEvents succeed. That target matches the 'my-Events' child route of the '' layout route. A second trigger exists: the header is shown on /c…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 11,
+      "label": "gate:alfresco",
+      "phaseIndex": 2,
+      "phaseTitle": "Gate",
+      "agentId": "a2fddef0093dbaf45",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1793903817870,
+      "queuedAt": 1793903817849,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I re-derived both verdicts from the source and agree with t…",
+      "promptPreview": "You are the final gate on judgements of transitions between screens of an Angular app, made by another reader. Re-derive each verdict yourself from the source; do not trust the reader. Keep the reader's verdict only when the source confirms it, and apply the rules exactly, including the rule that a trigger hidden on s by a condition its guard keeps false does not count.\n\nApp directory: /Users/kane…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903957056,
+      "tokens": 108263,
+      "toolCalls": 23,
+      "durationMs": 137988,
+      "resultPreview": "{\"items\":[{\"from\":\"/rules\",\"to\":\"/profile\",\"readerVerdict\":\"spurious\",\"verdict\":\"spurious\",\"site\":\"projects/aca-content/folder-rules/src/folder-rules.module.ts:35\",\"reason\":\"The literal /rules route is the top-level 'rules' route from FOLDER_RULES_ROUTES (folder-rules.module.ts:35). provideFolderRulesExtension() adds it to the root config with provideRouter. Its ROUTES providers (through ContentSe…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 12,
+      "label": "gate:ghostfolio",
+      "phaseIndex": 2,
+      "phaseTitle": "Gate",
+      "agentId": "a9315df8a20292701",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1793903817870,
+      "queuedAt": 1793903817849,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I changed 4 of the 19 verdicts from spurious to real. All f…",
+      "promptPreview": "You are the final gate on judgements of transitions between screens of an Angular app, made by another reader. Re-derive each verdict yourself from the source; do not trust the reader. Keep the reader's verdict only when the source confirms it, and apply the rules exactly, including the rule that a trigger hidden on s by a condition its guard keeps false does not count.\n\nApp directory: /Users/kane…",
+      "promptFramed": true,
+      "lastProgressAt": 1793904124511,
+      "tokens": 159680,
+      "toolCalls": 49,
+      "durationMs": 305442,
+      "resultPreview": "{\"items\":[{\"from\":\"/about/privacy-policy\",\"to\":\"/accounts/:accountId\",\"readerVerdict\":\"spurious\",\"verdict\":\"real\",\"site\":\"../../libs/ui/src/lib/assistant/assistant.component.ts:620\",\"reason\":\"The reader missed the assistant in the shell header. The about routes' AuthGuard lets signed-in users in, so a signed-in user on privacy-policy sees the signed-in header. Every role (ADMIN, USER, DEMO) has ac…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 13,
+      "label": "gate:k8sdash",
+      "phaseIndex": 2,
+      "phaseTitle": "Gate",
+      "agentId": "af091ea8097eda516",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1793903817870,
+      "queuedAt": 1793903817849,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I confirmed all four of the reader's verdicts from the sour…",
+      "promptPreview": "You are the final gate on judgements of transitions between screens of an Angular app, made by another reader. Re-derive each verdict yourself from the source; do not trust the reader. Keep the reader's verdict only when the source confirms it, and apply the rules exactly, including the rule that a trigger hidden on s by a condition its guard keeps false does not count.\n\nApp directory: /Users/kane…",
+      "promptFramed": true,
+      "lastProgressAt": 1793903895405,
+      "tokens": 100383,
+      "toolCalls": 13,
+      "durationMs": 76335,
+      "resultPreview": "{\"items\":[{\"from\":\"/clusterrolebinding\",\"to\":\"/create\",\"readerVerdict\":\"real\",\"verdict\":\"real\",\"site\":\"src/chrome/template.html:56\",\"reason\":\"ChromeComponent is the routed parent of every child route under AuthGuard, /clusterrolebinding included. Its primary toolbar has a 'Create new resource' button with no *ngIf, and its (click)=\\\"goToCreateState()\\\" runs router_.navigate(['create'], {queryParam…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 14,
+      "label": "gate:bitwarden",
+      "phaseIndex": 2,
+      "phaseTitle": "Gate",
+      "agentId": "a4b637b1d9e9c5373",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1793903817870,
+      "queuedAt": 1793903817849,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I changed 5 of the 9 verdicts, all from spurious to real. T…",
+      "promptPreview": "You are the final gate on judgements of transitions between screens of an Angular app, made by another reader. Re-derive each verdict yourself from the source; do not trust the reader. Keep the reader's verdict only when the source confirms it, and apply the rules exactly, including the rule that a trigger hidden on s by a condition its guard keeps false does not count.\n\nApp directory: /Users/kane…",
+      "promptFramed": true,
+      "lastProgressAt": 1793904265718,
+      "tokens": 159695,
+      "toolCalls": 42,
+      "durationMs": 446648,
+      "resultPreview": "{\"items\":[{\"from\":\"/AuthRoute.NewDeviceVerification\",\"to\":\"/settings/security/session-timeout\",\"readerVerdict\":\"spurious\",\"verdict\":\"real\",\"site\":\"src/app/auth/guards/deep-link/deep-link.guard.ts:39\",\"reason\":\"Real, but only through the deep-link restore. Submitting the code calls router.navigate(['/vault']) (../../libs/auth/src/angular/new-device-verification/new-device-verification.component.ts:…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 15,
+      "label": "gate:mifos",
+      "phaseIndex": 2,
+      "phaseTitle": "Gate",
+      "agentId": "a21561b1f6250844f",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1793903817870,
+      "queuedAt": 1793903817849,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I re-derived all 39 verdicts from the source in /Users/kane…",
+      "promptPreview": "You are the final gate on judgements of transitions between screens of an Angular app, made by another reader. Re-derive each verdict yourself from the source; do not trust the reader. Keep the reader's verdict only when the source confirms it, and apply the rules exactly, including the rule that a trigger hidden on s by a condition its guard keeps false does not count.\n\nApp directory: /Users/kane…",
+      "promptFramed": true,
+      "lastProgressAt": 1793904281798,
+      "tokens": 188129,
+      "toolCalls": 74,
+      "durationMs": 462727,
+      "resultPreview": "{\"items\":[{\"from\":\"/accounting/provisioning-entries/journal-entries/view/:id\",\"to\":\"/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges\",\"readerVerdict\":\"spurious\",\"verdict\":\"spurious\",\"site\":\"src/app/shared/notifications-tray/notifications-tray.component.ts:218\",\"reason\":\"ViewProvisioningJournalEntriesComponent has no links or router calls. In the shell, the notifications tr…"
+    }
+  ],
+  "totalTokens": 1733491,
+  "totalToolCalls": 380
+}
