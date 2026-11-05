@@ -18,6 +18,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { importedFrom, isModuleFile, lostGuard, namedGuards } from './guard-resolve.mjs'
 import { adapterSrcTree, extractorStamp } from './provenance.mjs'
 import { conversion, judgedSites, pct1 } from './report-counts.mjs'
+import { workersFor } from './ram-workers.mjs'
 import { MUTANTS, applyMutant, judge, mutationProblems, sweepRecord, unappliedIds } from './sweep-mutants.mjs'
 import { readingProblems } from './tier-reading.mjs'
 
@@ -1402,5 +1403,17 @@ describe('witness-check: a relative link resolves against the route of the compo
     const r = JSON.parse(fs.readFileSync(out, 'utf8'))
     expect(r.mustBad).toEqual([])
     expect(r.mustClean).toBe(1)
+  })
+})
+
+describe('ram-workers: test workers sized by free RAM', () => {
+  it('fits the workers into free RAM above the reserve, within the cores', () => {
+    expect(workersFor({ freeGB: 18, cores: 14 })).toBe(13)
+    expect(workersFor({ freeGB: 8, cores: 14 })).toBe(2)
+    expect(workersFor({ freeGB: 4, cores: 14 })).toBe(1)
+  })
+  it('lets an explicit setting win, and ignores a malformed one', () => {
+    expect(workersFor({ freeGB: 18, cores: 14, env: '3' })).toBe(3)
+    expect(workersFor({ freeGB: 8, cores: 14, env: 'many' })).toBe(2)
   })
 })

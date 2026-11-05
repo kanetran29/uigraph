@@ -16,12 +16,14 @@
 //              partial run (--only) will not overwrite, so it needs --out
 //   --only     run these mutants only; the result is marked partial and sweep-to-latex refuses it
 //   --dry-run  check that every mutant applies once, run nothing, write nothing
+// Test workers are sized by free RAM before each mutant (ram-workers.mjs); SWEEP_WORKERS=<n> fixes them.
 // A flag that needs a value and is given none is refused: `--only` read as absent ran the whole
 // sweep and overwrote the recorded one.
 // The sweep describes a commit, so it refuses to run with uncommitted changes under packages/, and
 // it records the tree of packages/adapter-angular/src it ran on (srcTree), which sweep-to-latex.mjs
 // compares with HEAD's so that a sweep of other rules is not published.
 // A full sweep runs the suite once per mutant, about twelve seconds each.
+import { workersNow } from './ram-workers.mjs'
 import { execFileSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
@@ -54,8 +56,10 @@ const git = (...args) => execFileSync('git', ['-C', REPO, ...args], { encoding: 
 
 /** Runs the adapter's suite in `cwd` and returns everything it printed. */
 function suite(cwd) {
-  const r = spawnSync('pnpm', ['-s', 'exec', 'vitest', 'run', '--maxWorkers=2'], { cwd, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 })
-  return r.error?.code === 'ETIMEDOUT' ? 'timed out' : `${r.stdout}\n${r.stderr}`
+  // Sized by the RAM free before each run, so the sweep slows down rather than exhausting memory.
+  const workers = workersNow()
+  const r = spawnSync('pnpm', ['-s', 'exec', 'vitest', 'run', `--maxWorkers=${workers}`], { cwd, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 })
+  return r.error?.code === 'ETIMEDOUT' ? 'timed out' : `workers=${workers}\n${r.stdout}\n${r.stderr}`
 }
 
 const unknown = (only ?? []).filter((id) => !MUTANTS.some((m) => m.id === id))
