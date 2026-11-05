@@ -175,6 +175,39 @@ const RULES = {
 
 RULES['ng.navigate-by-url'] = RULES['ng.navigate']
 
+/**
+ * The component file that holds a construct: the file itself for a `.ts` file, and for a template
+ * the `.ts` beside it whose `templateUrl` names it, read from the sources. Null when none does.
+ */
+function holdingComponent(file) {
+  if (file.endsWith('.ts')) return file
+  const dirAbs = path.join(appDir, path.dirname(file))
+  const re = new RegExp(`templateUrl\\s*:\\s*['"\`]\\.?/?${path.basename(file).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"\`]`)
+  let names = []
+  try { names = fs.readdirSync(dirAbs).filter((n) => n.endsWith('.ts')) } catch { return null }
+  const ts = names.find((n) => re.test(fs.readFileSync(path.join(dirAbs, n), 'utf8')))
+  return ts ? path.join(path.dirname(file), ts) : null
+}
+
+/**
+ * The route a relative construct resolves against, as Angular resolves it: the route of the
+ * component that holds the construct, which a child outlet renders below. That is the longest
+ * screen route that is a prefix of the source screen's route (the source's own included) whose
+ * component is the holder; without one, the source screen's own route.
+ */
+function holderRoute(fromRoute, file) {
+  const holder = file ? holdingComponent(file) : null
+  if (!fromRoute || !holder) return fromRoute
+  const segs = fromRoute.split('/').filter(Boolean)
+  let best = null
+  for (const n of nodes.values()) {
+    if (n.kind !== 'screen' || n.componentPath !== holder || typeof n.route !== 'string') continue
+    const own = n.route.split('/').filter(Boolean)
+    if (own.length <= segs.length && own.every((x, i) => x === segs[i]) && (!best || own.length > best.split('/').filter(Boolean).length)) best = n.route
+  }
+  return best ?? fromRoute
+}
+
 /** Resolve a route-relative target against the path of the screen the edge fires from. */
 function resolveRelative(target, fromRoute) {
   if (!target || !fromRoute || target.startsWith('/') || target === '*') return target
@@ -339,14 +372,14 @@ for (const { i, e, w, merged } of sites) {
 
   const foundRaw = rule.target(src[hitLine - 1])
   const toRoute = nodes.get(e.to)?.route
-  // A routerLink without a leading slash is relative to the route the template is rendered on,
-  // so compare it as Angular resolves it, against the edge's own source screen. Harness 1.4.0;
+  // A routerLink without a leading slash is relative to the route that renders the component
+  // holding it (holderRoute), so compare it as Angular resolves it. Harness 1.4.0 resolved it against the edge's own source screen;
   // before this the oracle read every bare link as absolute and called 838 correct mifos edges
   // soundness violations.
   // Only a template link is route-relative; `navigate([...])` without `relativeTo` resolves
   // from the root, so a bare target there is absolute.
   const relativeHere = w.ruleId === 'ng.router-link' || src.slice(hitLine - 1, hitLine + 2).some((l) => /relativeTo/.test(l ?? ''))
-  const found = !foundRaw ? foundRaw : relativeHere ? resolveRelative(foundRaw, nodes.get(e.from)?.route) : foundRaw.startsWith('/') ? foundRaw : '/' + foundRaw
+  const found = !foundRaw ? foundRaw : relativeHere ? resolveRelative(foundRaw, holderRoute(nodes.get(e.from)?.route, w.file)) : foundRaw.startsWith('/') ? foundRaw : '/' + foundRaw
   const agrees = targetAgrees(found, toRoute)
   const fan = witnessFanout.get(`${w.file}:${w.loc?.line}`) || 1
 

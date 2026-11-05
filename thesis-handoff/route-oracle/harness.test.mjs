@@ -12,6 +12,7 @@ import { DatabaseSync } from 'node:sqlite'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import zlib from 'node:zlib'
 import { fileURLToPath } from 'node:url'
 import { afterAll, describe, expect, it } from 'vitest'
 import { importedFrom, isModuleFile, lostGuard, namedGuards } from './guard-resolve.mjs'
@@ -1288,5 +1289,104 @@ describe('node-audit.mjs scalar macros (review 4 Nov, numbers-07)', () => {
     expect(macro(out, 'NodeAuditDeclaredMifos')).toBe('610')
     expect(macro(out, 'NodeAuditMatchedMifos')).toBe('58')
     expect(macro(out, 'NodeAuditBlindSpotsMifos')).toBe('1')
+  })
+})
+
+describe('score-ground-truth --json: every site with a missing pair, for the ceiling', () => {
+  it('lists each missed site with its missing pairs and whether the reference places it on every screen', () => {
+    const d = dir('gtjson')
+    const truth = path.join(d, 'truth.json')
+    fs.writeFileSync(truth, JSON.stringify({
+      app: 'demo', screens: ['/a', '/b', '/c'],
+      sites: [{ site: 'x.ts:1', screens: 'ALL' }, { site: 'y.ts:2', screens: ['/a'] }],
+    }))
+    const db = path.join(d, 'full.db')
+    writeGraph(db, { nodes: [{ id: 'a', kind: 'screen', route: '/a' }], edges: [] })
+    const json = path.join(d, 'out.json')
+    run('score-ground-truth.mjs', ['--truth', truth, '--db', `full=${db}`, '--json', json], { tsx: true })
+    const out = JSON.parse(fs.readFileSync(json, 'utf8'))
+    expect(out.app).toBe('demo')
+    expect(out.levels[0].level).toBe('full')
+    expect(out.levels[0].correct).toBe(0)
+    expect(out.levels[0].missedSites).toEqual([
+      { site: 'src/app/x.ts:1', missing: 3, shell: true },
+      { site: 'src/app/y.ts:2', missing: 1, shell: false },
+    ])
+  })
+})
+
+describe('ceiling: the remaining misses inside and outside the static boundary', () => {
+  /** A structural-reference score, an end-to-end result directory with one hit and one miss, and a class file. */
+  function fixture(classes) {
+    const d = dir('ceil')
+    const gt = path.join(d, 'gt.json')
+    fs.writeFileSync(gt, JSON.stringify({ app: 'demo', levels: [{ level: 'full', correct: 6, missing: 4,
+      missedSites: [{ site: 's1', missing: 3, shell: true }, { site: 's2', missing: 1, shell: false }] }] }))
+    const e2e = dir('ceil-e2e')
+    const screen = (id, route) => ({ id, route, kind: 'screen', componentPath: `src/${id}.ts` })
+    fs.writeFileSync(path.join(e2e, 'graph.json.gz'), zlib.gzipSync(JSON.stringify({ nodes: [screen('a', '/a'), screen('b', '/b'), screen('c', '/c')], edges: [{ from: 'a', to: 'b' }] })))
+    fs.writeFileSync(path.join(e2e, 'soundiness.json.gz'), zlib.gzipSync('[]'))
+    const log = [{ fromPattern: '/a', url: '/b', urlAfterRedirects: '/b', pattern: '/b' }, { fromPattern: '/a', url: '/c', urlAfterRedirects: '/c', pattern: '/c' }]
+      .map((e) => JSON.stringify({ type: 'NavigationEnd', trigger: 'imperative', ...e })).join('\n')
+    fs.writeFileSync(path.join(e2e, 'navlog-run1.jsonl'), log)
+    fs.writeFileSync(path.join(e2e, 'navlog-run2.jsonl'), log)
+    const cls = path.join(d, 'classes.json')
+    fs.writeFileSync(cls, JSON.stringify({ misses: classes }))
+    return { args: ['--classes', cls, '--gt', `demo=${gt}`, '--e2e', `shop=${e2e}`], d }
+  }
+  const ALL = [
+    { source: 'gt:demo', id: 's1', boundary: 'inside', gap: 'Shell from a library', example: 'lib/shell.ts', fix: 'read node_modules' },
+    { source: 'gt:demo', id: 's2', boundary: 'outside', gap: 'Target from the backend', example: 'x.ts', fix: 'none' },
+    { source: 'e2e:shop', id: '/a -> /c', boundary: 'inside', gap: 'Shell from a library', example: 'lib/shell.ts', fix: 'read node_modules' },
+  ]
+
+  it('counts each source\'s misses by side and the recall a complete static reader would reach', () => {
+    const { args, d } = fixture(ALL)
+    const tex = path.join(d, 'out.tex')
+    run('ceiling.mjs', [...args, '--tex', tex])
+    const out = fs.readFileSync(tex, 'utf8')
+    expect(macro(out, 'CeilGtDemoMissing')).toBe('4')
+    expect(macro(out, 'CeilGtDemoInside')).toBe('3')
+    expect(macro(out, 'CeilGtDemoOutside')).toBe('1')
+    expect(macro(out, 'CeilGtDemoNow')).toBe('60.0\\,\\%')
+    expect(macro(out, 'CeilGtDemoCeiling')).toBe('90.0\\,\\%')
+    expect(macro(out, 'CeilEtoEShopMissing')).toBe('1')
+    expect(macro(out, 'CeilEtoEShopNow')).toBe('50.0\\,\\%')
+    expect(macro(out, 'CeilEtoEShopCeiling')).toBe('100.0\\,\\%')
+    expect(macro(out, 'CeilMissing')).toBe('5')
+    expect(macro(out, 'CeilInside')).toBe('4')
+    expect(macro(out, 'CeilInsideShare')).toBe('80.0\\,\\%')
+    expect(out).toContain('\\newcommand{\\TabCeilGaps}')
+    expect(out).toContain('Shell from a library')
+  })
+
+  it('refuses a miss no class names, and a class that names no miss', () => {
+    expect(refusal('ceiling.mjs', fixture(ALL.slice(1)).args).output).toMatch(/unclassified/)
+    expect(refusal('ceiling.mjs', fixture([...ALL, { source: 'gt:demo', id: 's9', boundary: 'inside', gap: 'g', example: 'e', fix: 'f' }]).args).output).toMatch(/names no miss/)
+  })
+})
+
+describe('witness-check: a relative link resolves against the route of the component that holds it', () => {
+  it('compares a parent template\'s link fired on a child screen against the parent\'s route', () => {
+    const app = dir('app')
+    put(app, {
+      'src/p.component.html': `<a routerLink="requests">tab</a>`,
+      'src/p.component.ts': `@Component({ templateUrl: './p.component.html' })\nexport class P {}\n`,
+    })
+    const witness = { file: 'src/p.component.html', loc: { line: 1 }, ruleId: 'ng.router-link', modality: 'must', source: 'static' }
+    const db = path.join(app, 'uigraph.db')
+    writeGraph(db, {
+      nodes: [
+        { id: 'p', kind: 'screen', route: '/p', componentPath: 'src/p.component.ts' },
+        { id: 'c', kind: 'screen', route: '/p/inbox', componentPath: 'src/c.component.ts' },
+        { id: 'r', kind: 'screen', route: '/p/requests', componentPath: 'src/r.component.ts' },
+      ],
+      edges: [{ from: 'c', to: 'r', event: 'click', modality: 'must', source: 'static', witness }],
+    })
+    const out = path.join(app, 'out.json')
+    run('witness-check.mjs', [app, db, '--json', out])
+    const r = JSON.parse(fs.readFileSync(out, 'utf8'))
+    expect(r.mustBad).toEqual([])
+    expect(r.mustClean).toBe(1)
   })
 })

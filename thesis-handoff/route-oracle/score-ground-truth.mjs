@@ -15,7 +15,7 @@
 // truth does not mention are reported too, because those are the ground truth's own misses
 // and reporting them is the only check this file gets.
 //
-// Usage: pnpm exec tsx score-ground-truth.mjs --truth <file.json> --db <level>=<path> ... [--tex <file>]
+// Usage: pnpm exec tsx score-ground-truth.mjs --truth <file.json> --db <level>=<path> ... [--tex <file>] [--json <file>]
 import { DatabaseSync } from 'node:sqlite'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { scopeMembers } from '@ui-graph/core'
@@ -92,7 +92,7 @@ for (const spec of dbArgs) {
     const x = [...have].filter((s) => !screens.has(s)).length
     correct += c; missing += m; excess += x
     if (!shellSites.has(site)) { correctNS += c; missingNS += m }
-    if (x || m) worst.push({ site, want: screens.size, got: have.size, missing: m, excess: x })
+    if (x || m) worst.push({ site, want: screens.size, got: have.size, missing: m, excess: x, shell: shellSites.has(site) })
   }
   // The ground truth's own blind spot: sites the graph places that it never listed.
   const unlisted = [...got.keys()].filter((k) => inApp(k) && !wanted.has(k) && !excludedSites.has(k))
@@ -113,6 +113,7 @@ for (const spec of dbArgs) {
     recallNonShell: correctNS + missingNS ? correctNS / (correctNS + missingNS) : 0,
     unlisted: unlisted.length,
     unlistedExamples: unlisted.slice(0, 5),
+    missedSites: worst.filter((w) => w.missing).map((w) => ({ site: w.site, missing: w.missing, shell: w.shell })),
     worst: worst.sort((a, b) => (b.excess + b.missing) - (a.excess + a.missing)).slice(0, 6),
   }
   if (row.correct + row.missing !== [...wanted.values()].reduce((a, w) => a + w.screens.size, 0)) {
@@ -130,6 +131,10 @@ for (const l of levels) {
     for (const w of l.worst) console.error(`    ${w.site}  want ${w.want} got ${w.got}  (+${w.excess} / -${w.missing})`)
   }
 }
+
+// Every missed site in full, for ceiling.mjs, which classes each one by the static boundary.
+const json = flag('--json')
+if (json) writeFileSync(json, JSON.stringify({ app: truth.app, levels: levels.map(({ worst, ...l }) => l) }, null, 1) + '\n')
 
 const tex = flag('--tex')
 if (tex) {
