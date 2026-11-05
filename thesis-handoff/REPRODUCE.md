@@ -8,11 +8,11 @@ extractor commit on its second. The versions are stated in Chapter 4's Reproduci
 
 | Item | Value |
 | --- | --- |
-| Extractor measured | `f26a302`; `packages/` last changed at `2aac284` (the three repairs the end-to-end check exposed, Table `tab:repairs`) |
-| Demotion-rule sweep, may-reason census | `f26a302`, 174 mutants; graphs with the `UIGRAPH_MAY_REASONS` switch off identical (`results-may-reasons/equivalence.json`) |
+| Extractor measured | `a9d29df` (`packages/` last changed there: the four repairs the comparison on Rima et al.'s subjects found, after the three the end-to-end check exposed at `2aac284`; Table `tab:repairs`) |
+| Demotion-rule sweep, may-reason census | `a9d29df`, 174 mutants; graphs with the `UIGRAPH_MAY_REASONS` switch off identical (`results-may-reasons/equivalence.json`) |
 | Previously evaluated extractor | `c42f220` (tag `thesis-eval-final`): its mifos graph is kept as `e2e-nav/results/mifos/graph-unfixed.json.gz` for the figure before the repairs |
 | Harness | route-oracle 1.10.0, mutation harness 1.9.1, route-probe 1.1.0 |
-| Generators | the commit that holds this file; `packages/` is unchanged since `2aac284` |
+| Generators | the commit that holds this file; `packages/` is unchanged since `a9d29df` |
 | Toolchain | node v24.14.0, pnpm 10.30.3, TeX Live with `latexmk` |
 
 Do not use the tag `thesis-eval`. It points at `dd28cc2`, the first attribution commit, and does
@@ -29,55 +29,27 @@ Corpus pins (also in `route-oracle/corpus.json`):
 | bitwarden | bitwarden/clients | `e40ce6f` | `apps/web` |
 | mifos | openMF/web-app | `7f78179` | `.` |
 
-## 1. Regenerate the tables from the recorded data (minutes)
+## 1. Regenerate the tables (minutes)
 
-No corpus checkout is needed. Run `pnpm install --frozen-lockfile` once at the repository root
-(it provides `tsx` and `@ui-graph/core`), then from `thesis-handoff/route-oracle`:
-
-```bash
-set -e
-npm ci
-T=$(mktemp -d)
-tar -xzf results-round2/final15.tgz -C "$T"      # two run-all.mjs runs at f26a302
-tar -xzf results-ablation/ablation.tgz -C "$T"   # ablation.json and the six realworld level DBs
-
-node to-latex.mjs "$T/final15/ctrl/results.json" > "$T/generated-tables.tex"
-node compare.mjs "$T/final15/ctrl" "$T/final15/fin" --tex "$T/generated-before-after.tex"
-node round2-to-latex.mjs "$T/final15/round2" > "$T/generated-round2.tex"
-pnpm -s exec tsx score-ground-truth.mjs --truth ground-truth/realworld.json \
-  $(for l in owned nesting rooted outlet full class; do echo --db $l="$T/ablation/realworld.$l.uigraph.db"; done) \
-  --tex "$T/generated-groundtruth.tex"
-mkdir -p "$T/e1" "$T/e2"
-pnpm -s exec tsx scope-ablation.mjs --corpus "$T/e1" --out "$T/e2" --from "$T/ablation/ablation.json" \
-  --tex "$T/generated-ablation.tex"
-
-R=results-rq4
-node rq4-to-latex.mjs $R/rq4-{realworld,alfresco,bitwarden}-attributed.json $R/rq4base-{realworld,alfresco,bitwarden}.json \
-  $R/rq4earlier-{realworld,alfresco,bitwarden}.json > "$T/generated-rq4.tex"
-node to-plots.mjs --rq4-only $R/rq4-{realworld,alfresco,bitwarden}-attributed.json > "$T/generated-plots-rq4.tex"
-node to-plots.mjs "$T/final15/ctrl/results.json" "$T/final15/fin/results.json" \
-  $R/rq4-{realworld,alfresco,bitwarden}-attributed.json > "$T/generated-plots.tex"
-node sweep-to-latex.mjs --tex "$T/generated-sweep.tex"
-node must-witness.mjs --dir results-must/witness --tex "$T/generated-must-witness.tex"
-
-for f in "$T"/generated-*.tex; do
-  diff <(grep -v '^%' "$f") <(grep -v '^%' "../thesis/$(basename "$f")") > /dev/null \
-    && echo "same  $(basename "$f")" || echo "DIFF  $(basename "$f")"
-done
-ls "$T"/generated-*.tex | wc -l   # expect 10
-```
-
-Only the `%` provenance lines should differ, since they name the commit the generator ran at.
-These ten files, and `generated-probe.tex` below, were checked this way in a clean checkout on
-2 and 3 November 2026, and the ten again from `final15.tgz` on 5 November. The census, census-base, expansion, must, guard-only, route-order and
-callgraph tables need the corpus graphs and are regenerated only by section 2.
-
-The runtime tables come from `thesis-handoff/route-probe/results/`:
+`regen/` holds one script per generated file (`regen/<name>.sh` writes `thesis/generated-<name>.tex`) and
+one command that runs them all, compares each result with the committed file (`%` provenance lines aside)
+and builds the PDF. Run `pnpm install --frozen-lockfile` at the repository root and `npm ci` in
+`route-oracle` once, then:
 
 ```bash
-cd ../route-probe
-node to-latex.mjs --results results --before results-before --out "$T/generated-probe.tex"
+bash thesis-handoff/regen/all.sh            # check: same / DIFF / skip / FAIL per file, then the PDF
+bash thesis-handoff/regen/all.sh --write    # take the regenerated values into thesis/
 ```
+
+The run tables come from `route-oracle/results-round2/final16.tgz` (the two `run-all.mjs` runs at
+`a9d29df`) and the level graphs from `route-oracle/results-ablation/ablation.tgz` (`a9d29df`). Nine
+scripts read the corpus graphs and sources of a work directory made by section 2 (`UIGRAPH_WORK`,
+default `~/personal/uigraph-work`), and six read files that cannot be committed: Rima et al.'s
+reference and their tool's output (the repository has no licence) and the alfresco level graphs. A
+script whose input is missing reports `skip`, not a failure. `regen/README.md` lists every script,
+the table it feeds and the data it reads. On 5 November 2026 all 31 regenerable files matched the
+committed ones; `generated-node-audit.tex` records extractor `4505fd2a`, which is not in the
+repository, and is kept as committed.
 
 ## 2. Re-measure from the sources (hours)
 
@@ -136,7 +108,7 @@ Run it with bash: the `$APPS` loops rely on word splitting, which zsh does not d
 
 The second structural reference (`generated-groundtruth-alfresco.tex`; protocol `route-oracle/ground-truth/ALFRESCO-PROTOCOL.txt`):
 map `projects/aca-content` of the alfresco pin with `uigraph map <dir> --adapter angular --attribution --out <level>.db` at
-`f26a302`, with `UIGRAPH_SCOPE_LAYERS=<level>` for each of owned, nesting, rooted, outlet and class (none for full), then
+`a9d29df`, with `UIGRAPH_SCOPE_LAYERS=<level>` for each of owned, nesting, rooted, outlet and class (none for full), then
 
 ```bash
 cd thesis-handoff/route-oracle
@@ -151,7 +123,7 @@ The earlier-work restrictions (`generated-earlier-work.tex`):
 
 ```bash
 cd thesis-handoff/route-oracle
-node earlier-work.mjs --dir <final15>/fin --apps realworld,alfresco,ghostfolio,k8sdash,bitwarden,mifos \
+node earlier-work.mjs --dir <final16>/fin --apps realworld,alfresco,ghostfolio,k8sdash,bitwarden,mifos \
   --tex ../thesis/generated-earlier-work.tex
 ```
 
