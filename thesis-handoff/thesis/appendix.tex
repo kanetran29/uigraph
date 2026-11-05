@@ -250,11 +250,10 @@ unlinked nodes, Section~\ref{sec:res-defects}): bugs with known causes, which th
 \multicolumn{3}{@{}l}{\emph{Approximated (no completeness claimed)}}\\
 \addlinespace[2pt]
 Components created programmatically (dialogs, overlays)
-& An overlay is a state no route declares, so it has no screen node, and the component implementing it
-is reached from no template, so its sites have the empty scope.
+& An overlay is a state no route declares, so it has no screen node. A component that a component or directive opens in its own file by naming its class (\texttt{open(X)}, \texttt{createComponent(X)}, \texttt{new ComponentPortal(X)}) is nested under its opener and takes its screens (Table~\ref{tab:repairs}); one opened from a service, or by a construction the reader cannot resolve, is reached from no template, so its sites have the empty scope.
 With attribution each such navigating component gets an unplaced origin carrying its file, and its sites
 become edges from that origin at \emph{may} (Section~\ref{sec:model}).
-& Missing: the overlay state, the transitions into and out of it, and the screens from which its exits
+& Missing: the overlay state, the transitions into and out of it, and, for a component with the empty scope, the screens from which its exits
 fire, not the destinations of those exits.
 A navigation in a service that only such a component injects is recorded only as a note. \\
 Named outlets and \texttt{\{outlets: \ldots\}} targets
@@ -393,8 +392,7 @@ button, to the browser, which opens the address in a new browsing context; so do
 The model reads every activation of a link as a navigation of the application.
 & A must edge from an anchor holds for a plain activation and not for these. \\
 Order in which Angular matches routes
-& The router takes the first route, in declaration order, that matches an address; it prefers an exact
-path to a parameter route and consults a redirect only when no route matches.
+& The router takes the first route, in declaration order, that matches an address, and a redirect is matched in that order like any other route, so a parameter route declared before a literal one takes the literal's address. The extractor resolves a literal target by preferring an exact path to a parameter route, which can differ from the router's choice.
 Route tables an application registers apart are joined in the order their providers are registered,
 which the extractor does not read; it takes a catch-all in one such table to be matched after every route
 of the others, and names each catch-all it dismissed this way in a note.

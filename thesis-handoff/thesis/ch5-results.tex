@@ -79,7 +79,7 @@ Completeness is a claim about the screens the readers can \emph{see}. The blind-
 \label{sec:res-defects}
 
 Table~\ref{tab:defects} lists the defect classes and the evidence for each, separating the named
-evaluation methods from the other observations. The attribution class leans most on observations, and
+evaluation methods from the other observations. Apart from the guard class, which has no named method (see the note), the attribution class leans most on observations, and
 it is the class the analysis of Chapter~\ref{ch:analysis} addresses. Its observations are not weak
 in themselves, but they are not independent instruments.
 
@@ -97,14 +97,14 @@ Class & Evidence & Methods & All \\
 Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph; multi-mount edge absent; manual audit; an application with nodes and no edges on a development version (k8s dashboard; Section~\ref{app:repairs}) & 1 & 4 \\
 Lazy module boundary not followed & independent route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & red-team panels and a source survey of the guard factory and the call-form \texttt{canActivate}
-(Section~\ref{sec:res-losses}) & 1 & 2 \\
+(Section~\ref{sec:res-losses}) & 0 & 2 \\
 Named router outlets not implemented & test-source cross-check; source survey & 1 & 2 \\
 Constant-valued route paths not resolved & independent route parser; node-count collapse & 1 & 2 \\
 \addlinespace
 \emph{Candidate:} node not linked to its component & independent route parser against graph & 1 & 1 \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} A class is admitted on two lines of evidence, at least one from a named evaluation method; the methods column counts only those. This summary is compiled by hand; it is not harness output.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} A class is admitted on two lines of evidence, at least one from a named evaluation method; the methods column counts only those. The guard class is the one exception: both its lines of evidence are source review, and the mutation run neither confirms nor refutes it (Section~\ref{sec:res-mutation}). This summary is compiled by hand; it is not harness output.}
 \end{table}
 
 Table~\ref{tab:loss} and Figure~\ref{fig:loss} assign every navigation construct to one outcome
@@ -195,8 +195,7 @@ Counted in edges, the must tier grows from \AttrMustBefore{} to \AttrMustAfter{}
 The edges added are the links of two application shells, drawn once for each screen the shell
 renders (Section~\ref{sec:res-round2}).
 
-Following each construct by its identifier across the two runs finds \AttrRegressed{}
-that leave the converted categories, so no must conversion of the baseline was lost. This measures recovery
+Following each construct by its identifier across the two runs finds \AttrRegressed{} that leave the converted categories and \AttrDemoted{} demoted from must to may, so no must conversion of the baseline was lost. This measures recovery
 of represented constructs and says little about must-edge target consistency. The evidence for that tier,
 and the edges outside it, are treated in Section~\ref{sec:res-soundness}.
 
@@ -479,7 +478,7 @@ matched pairs is a must edge, as predicted. One of the \EtoEMifosHitRedirect{} h
 rests only on the notifications tray, a shell site whose target keeps two leading parameters and so reaches every account screen from every screen. Such a
 hit shows that the target is reachable in the graph and not that the site was resolved. The same site
 makes the graph wide: it holds \EtoEMifosGraphPairsUnfixed{} $\to$ \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} possible pairs,
-before $\to$ after the repairs below, so a hit discriminates less than it did. A graph of that density would hold \EtoEMifosChanceHits{} of the \EtoEMifosPairs{} pairs by chance (realworld: \EtoERealworldChanceHits{} of \EtoERealworldPairs{}), so the hits show coverage more than discrimination. No other preregistered prediction is reported here.
+before $\to$ after the repairs below, so a hit discriminates less than it did. Pairs drawn uniformly at that density, a reference and not the suite's own success rate, would hit \EtoEMifosChanceHits{} of the \EtoEMifosPairs{} (realworld: \EtoERealworldChanceHits{} of \EtoERealworldPairs{}), so the hits show coverage more than discrimination. No other preregistered prediction is reported here.
 \item \emph{mifos, misses.} Only the redirect class was preregistered, and its misses are not classified
 further. The other classes were defined after the misses had been read, before the repairs below. Every
 remaining miss is in the redirect class (\EtoEMifosMissRedirect{}/\EtoEMifosMiss{}): the graph holds

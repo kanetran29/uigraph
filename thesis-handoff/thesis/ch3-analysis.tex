@@ -92,18 +92,18 @@ enclosing code executes, over the declared route set, under the route-order assu
 Section~\ref{sec:approximations}, and for a site whose component is not placed by a join over an
 ambiguous selector, within the following execution model: the event is a plain primary
 activation that navigates the current browsing context, no other listener the event reaches
-starts a navigation, no call the reader cannot resolve to a body in the application, nor any work the handler schedules for later, starts one, and every synchronous call that runs before the navigation returns normally.
+starts a navigation, no call the reader cannot resolve to a body in the application, nor any work the handler schedules for later, starts one, and all synchronous evaluation that precedes the navigation completes normally.
 \end{claim}
 
 \noindent The execution model is part of the claim and not a detail of the implementation.
-The cases it excludes are a call into a library that cancels the navigation by starting another, a second listener on the element or an ancestor, an activation with a modifier key or into another browsing context (Section~\ref{sec:approximations}), and a synchronous call before the navigation that throws. On such an execution a must edge
+The cases it excludes are a call into a library that cancels the navigation by starting another, a second listener on the element or an ancestor, an activation with a modifier key or into another browsing context (Section~\ref{sec:approximations}), and an exception raised before the navigation, by a call or by evaluating an expression. On such an execution a must edge
 can name a navigation that does not complete, and the claim says nothing about it.
 
 The route-order assumption of Claim~\ref{claim:must} carries much of the tier: without it the
 must tier holds \RouteOrderMustWithout{} of its \RouteOrderMust{} edges, on
 \RouteOrderSitesWithout{} of \RouteOrderSites{} constructs.
 
-The must tier is therefore a lower bound only relative to four assumptions, each with a class of counterexample. \emph{A1, route order:} a catch-all in a separately registered route table is matched after every route of the others; another registration order breaks it, and \RouteOrderResting{} must edges, on \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications, rest on it. \emph{A2, selectors:} no component is placed by a join over an ambiguous selector; no final must edge rests on such a join (Section~\ref{sec:inputs}). \emph{A3, calls:} a call with no body in the application starts no navigation; a library call that navigates breaks it. \emph{A4, execution model:} the plain primary activation above, in which every synchronous call before the navigation returns normally; a modifier key, a second listener, another browsing context or a synchronous call that throws breaks it. The edges resting on A3 and A4 are not counted, and neither is checked against a run.
+The must tier is therefore a lower bound only relative to four assumptions, each with a class of counterexample. \emph{A1, route order:} a catch-all in a separately registered route table is matched after every route of the others; another registration order breaks it, and \RouteOrderResting{} must edges, on \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications, rest on it. \emph{A2, selectors:} no component is placed by a join over an ambiguous selector; no final must edge rests on such a join (Section~\ref{sec:inputs}). \emph{A3, calls:} a call with no body in the application starts no navigation; a library call that navigates breaks it. \emph{A4, execution model:} the plain primary activation above, in which all synchronous evaluation before the navigation completes normally; a modifier key, a second listener, another browsing context or an exception before the navigation breaks it. The edges resting on A3 and A4 are not counted, and neither is checked against a run.
 
 \textbf{What the evaluation tests.} The evaluation tests a necessary condition of this claim
 rather than the claim itself. The distinction decides how the figures of
@@ -178,7 +178,7 @@ so what follows it there does not count, but its callers go on as soon as the fu
 awaits, so what they do still counts. A call the reader cannot resolve to a body in the
 application is taken not to navigate (Section~\ref{sec:approximations}).
 
-An exception from an earlier synchronous call is not counted, since every call can throw, and Claim~\ref{claim:must} assumes instead that such calls return normally. An \texttt{await} is counted, because a rejected request is an ordinary outcome. The router's fetch of a lazily loaded route is not counted: a failed chunk load is a fault of the deployment.
+An exception raised before the site, by a call or by evaluating an expression, is not counted, since almost any evaluation can throw, and Claim~\ref{claim:must} assumes instead that the evaluation completes normally. An \texttt{await} is counted, because a rejected request is an ordinary outcome. The router's fetch of a lazily loaded route is not counted: a failed chunk load is a fault of the deployment.
 
 \textbf{How far the rules are checked.} Unit tests cover each rule in both directions, and a
 mutation sweep deletes each rule in turn and checks that some test fails

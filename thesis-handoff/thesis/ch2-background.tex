@@ -197,7 +197,7 @@ on large frameworks whose behaviour a static analysis has to know, and that hand
 models of them are tedious, incomplete and sometimes wrong \cite{madsen2013practical}; they also address implicit control flow with an \emph{event-based call graph} for
 Node.js \cite{madsen2015static}. An Angular application has the same shape of problem,
 with the router, template event bindings and observable subscriptions in place of the
-event emitter. The only other peer-reviewed static analysis of a framework in the Angular family that this review found, apart from Oshima and Kishi's (Section~\ref{sec:dynamic-spa}), is Aurebesh \cite{ocariza2015detecting}. It checks identifier and type
+event emitter. Beside the navigation analyses of Oshima and Kishi (Section~\ref{sec:dynamic-spa}) and Rima et al.\ \cite{rima2026e2e}, Aurebesh \cite{ocariza2015detecting} takes a complementary direction in the Angular family: consistency checking for AngularJS. It checks identifier and type
 consistency between models, views and controllers of AngularJS 1.x, a different framework with a
 different template language, component model and injector, and it does not address navigation.
 \section{Formal foundations}
@@ -419,9 +419,7 @@ interpretation of JavaScript is established \cite{jensen2009type}. Source-level 
 over a typed syntax tree is a standard tooling style \cite{baxter1998clone,pawlak2016spoon}.
 The Java literature has shown repeatedly that framework behaviour can be modelled
 explicitly to recover call edges that a general analysis loses
-\cite{sridharan2011f4f,antoniadis2020enterprise,chen2022jasmine}. The other
-peer-reviewed static analysis in the Angular family targets AngularJS 1.x and checks
-template and controller consistency rather than navigation \cite{ocariza2015detecting}.
+\cite{sridharan2011f4f,antoniadis2020enterprise,chen2022jasmine}. A complementary static analysis in the Angular family, Aurebesh, targets AngularJS 1.x and checks template and controller consistency rather than navigation \cite{ocariza2015detecting}.
 The type information that TypeScript adds narrows a dispatch without settling it,
 because the type system is unsound by design \cite{bierman2014understanding,richards2015concrete}. The reactive literature marks where the
 boundary of the approach lies. This is because the firing of a reactive computation is decided by

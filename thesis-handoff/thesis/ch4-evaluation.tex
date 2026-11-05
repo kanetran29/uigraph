@@ -84,7 +84,7 @@ RQ1 is measured at two levels, since a transition cannot be
 recovered without the screens it runs between: the share of declared screens that have a node, and the
 share of navigation constructs that yield at least one must transition. For RQ2, observed failures are
 grouped into defect classes, a class being accepted only on two lines of evidence, at least one from an
-evaluation method of Section~\ref{sec:protocol}, and every construct not recovered is assigned to one loss
+evaluation method of Section~\ref{sec:protocol} (the guard class, accepted on source review alone, is the one exception; Table~\ref{tab:defects}), and every construct not recovered is assigned to one loss
 category. RQ3 is measured with the analysis disabled and enabled on the same extractor, and by the references below.
 RQ4 is a sanity check of witness mapping by mutation testing, not an independent test. For RQ5 each defect class of Table~\ref{tab:defects} is traced to its
 cause in the source and recorded as read by the final version (the loss was the tool's and not the
@@ -242,7 +242,7 @@ the suite exercises and nothing else. The graph is an over-approximation, so tha
 containment, and its weight depends on how many (screen, screen) pairs the graph holds, which is
 reported beside it: realworld's graph holds \EtoERealworldGraphPairs{} of \EtoERealworldPossiblePairs{} possible pairs
 and mifos's \EtoEMifosGraphPairs{} of \EtoEMifosPossiblePairs{}, against hits of \EtoERealworldHit{} of \EtoERealworldPairs{} and \EtoEMifosHit{} of \EtoEMifosPairs{}. A hit
-rate is read only against that share, since a denser graph contains more pairs by chance; by chance alone the graphs would hold \EtoERealworldChanceHits{} and \EtoEMifosChanceHits{} of those pairs. A graph edge no test takes is not an error, so the check cannot measure
+rate is read only against that share, since a denser graph contains more pairs by chance; a uniform reference at each graph's pair density, not the success rate of a suite that chooses its paths, would hold \EtoERealworldChanceHits{} and \EtoEMifosChanceHits{} of those pairs. A graph edge no test takes is not an error, so the check cannot measure
 precision, and one run cannot refute a must edge.
 
 \textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness cites it. A
