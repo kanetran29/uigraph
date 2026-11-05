@@ -273,7 +273,7 @@ category ``Attribution, service'' of Table~\ref{tab:loss-rules}.
 
 \subsection{The defect being addressed}
 
-In the instrument this work began with, a navigation site is attributed to a screen only if it
+In the starting version of uigraph, a navigation site is attributed to a screen only if it
 occurs directly in the component that the route for that screen renders. Navigation sites
 anywhere else are attributed to no screen. This one cause explains three symptoms:
 \begin{itemize}
@@ -530,7 +530,7 @@ sets on the corpus and on fixtures.
 \section{Implementation}
 \label{sec:implementation}
 
-The extractor, \emph{uigraph}, is available as open source. It consists of a core that is
+The extractor, \emph{uigraph}, was built for this thesis and is available as open source. It consists of a core that is
 independent of any particular framework and a set of adapters, one per framework. The core
 defines the graph model, its representation on disk, and the operations over graphs. Each adapter
 maps the source constructs of one framework onto the shared model, following a fixed interface.

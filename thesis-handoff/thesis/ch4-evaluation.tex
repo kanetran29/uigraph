@@ -489,7 +489,7 @@ otherwise have led to an incorrect figure. The corrections concerned matching ru
 a precision figure and the mutation harness, and are listed in Table~\ref{tab:repairs}.
 The final figures are those of the corrected protocol. The figures of the superseded instruments
 cannot be regenerated with the shipped harness and none is cited as a result; the few comparisons
-elsewhere that rest on an earlier extractor name its commit and read their figures from that commit's
+elsewhere that rest on an earlier version of uigraph name its commit and read their figures from that commit's
 own generated results (Section~\ref{sec:res-round2}). Several corrections were found because a figure
 looked implausibly good or bad, and each such figure proved a property of the measurement and not of
 the extractor. A surprising figure is therefore checked against its inputs before it is written down.
@@ -537,9 +537,10 @@ Two limits remain. The evaluated commit must be one a reader can fetch, so the f
 reproducible only once it is published. And the harness version decides several figures independently
 of the extractor, so a result file is comparable only with one made by the same version.
 
-Three instruments appear in the thesis and are named by one label each:
+Three versions of uigraph, all built in this work, appear in the thesis and are named by one label
+each:
 \begin{itemize}
-\item the \emph{starting instrument}: the results at extractor commit \EarlierCommit{};
+\item the \emph{starting instrument}: uigraph at commit \EarlierCommit{}, when the evaluation began;
 \item the \emph{intermediate instrument}: extractor \RoundExtractor{}, with its
 \RoundMustEdges{}-edge must tier and the tables as printed at \RoundCommit{};
 \item the \emph{final instrument}: extractor commit \texttt{c42f220}, harness 1.9.0 and mutation
@@ -561,7 +562,7 @@ agreement is its only link to the final graph. The construct prevalence counts r
 
 \begin{table}[t]\footnotesize
 \caption{Provenance of the generated tables. \emph{Final} means measured on the instrument
-every other figure describes; \emph{historical} means measured on an earlier instrument or graph
+every other figure describes; \emph{historical} means measured on an earlier version of uigraph or its graph
 and printed as a record of it.}
 \label{tab:provenance}
 \begin{tabularx}{\textwidth}{@{}Y>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{3.6cm}@{}}

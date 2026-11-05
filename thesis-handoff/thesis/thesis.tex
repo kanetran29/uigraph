@@ -74,14 +74,15 @@ Major: & Computer Science \\
 \addcontentsline{toc}{chapter}{Abstract}
 A user-interface (UI) transition graph describes the screens of an application and the transitions a
 user can cause between them. For single-page web applications they are usually built by
-running the application, although routing frameworks now declare routes in the source code. How well static extraction works on
+running the application, though routing frameworks now declare routes in the source. How well static extraction works on
 real applications, and why it fails, has not been measured construct by construct.
 
-This thesis makes that measurement. It extracts transition graphs from six open-source
-Angular applications and checks them with five methods: four read the source code and one
-reads the route configuration of the running application. Every navigation construct the
-extractor does not recover is assigned to a loss category and given a recorded reason. Under
-the order in which the loss rules are applied, the largest loss is navigation that belongs to
+This thesis builds uigraph, a static extractor for Angular, and makes that measurement with
+it on six open-source applications. uigraph reads nested and parameterised route trees, which
+the stated restrictions of an earlier Angular extraction exclude in every one of them. Five
+methods check the graphs: four read the source, one the running application's route
+configuration. Each construct the extractor does not
+recover is assigned to a loss category. Under the order of the loss rules, the largest loss is navigation that belongs to
 no single screen, such as a link in a shared header. For this loss the thesis proposes scope
 attribution, a dataflow analysis that computes the set of screens from which each navigation
 site can fire.
@@ -89,17 +90,16 @@ site can fire.
 Three results stand out. First, almost no navigation can be extracted as a deterministic
 transition. The corpus yields \CensusMust{} such edges from \CensusMustSites{} constructs. Most
 of them come from one toolbar whose screen set is untested, and most rest on an assumption
-about route order that the extractor does not read. Second, almost every cause the source review
-found behind the losses was a construct the extractor could read and did not. Most of these
-were repaired; two further causes, which no defect class names, lie beyond any static reader
-of a route table. Third, scope attribution recovers
+about route order that the extractor does not read. Second, almost every cause of loss the source
+review found was a construct the extractor could read and did not; most were repaired, and
+two lie beyond any static reader of a route table. Third, scope attribution recovers
 \AttrRecoveredShare{} of the constructs the loss rules assign to it, most of them on one
 application and almost all as possible rather than certain transitions. On the one application whose screen sets were read by hand,
 it adds almost nothing to a reimplementation of earlier mechanisms. That reference applies the
 analysis's own relations, was partly completed from the graph's output and guided two
 repairs. Mutation testing on three applications shows that the graph responds to injected
-changes in constructs it already represents; the harness was corrected after its earlier
-misses had been read.
+changes in constructs it already represents, after the harness was corrected on its earlier
+misses.
 
 The conclusion is that a declared route table is a usable starting point for static
 navigation extraction, but not a sufficient one. Scope attribution adds a modest gain over
@@ -117,7 +117,7 @@ Aalto University asks that the use of artificial intelligence (AI) tools in a th
 declared. An AI coding assistant was used in this work in the ways set out below, and I am
 responsible for the whole of the result.
 
-The extractor under study and the evaluation harness were written with the help of an AI
+The extractor built in this thesis (uigraph) and the evaluation harness were written with the help of an AI
 coding assistant. The result tables and plots of Chapter~\ref{ch:results} are generated from
 the harness's result files, except the two tables marked as compiled by hand. So are the figures
 the text states for the final instrument. All of these can be reproduced from the commits

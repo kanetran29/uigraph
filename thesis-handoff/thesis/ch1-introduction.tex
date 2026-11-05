@@ -88,19 +88,23 @@ and agent performance depends on the interface through which the repository is n
 \cite{yang2024sweagent}. Whether a navigation graph helps such tools is not tested here;
 these uses motivate the extraction but do not depend on the results of this thesis.
 
-This thesis carries out that measurement for Angular and proposes an analysis for the largest class of failures it finds under the order of its loss rules. What is proposed is a method rather than a product:
-scope attribution is stated as a dataflow analysis over a lattice of screen sets, and
-nothing in its formulation depends on a particular extractor.
+This thesis builds a static extractor for Angular, carries out that measurement with it, and
+proposes an analysis for the largest loss it finds under the order of its loss rules. The analysis,
+scope attribution, is stated as a dataflow analysis over a lattice of screen sets, and nothing in
+its formulation depends on this extractor.
 
 A method of this kind cannot be assessed without being instantiated, because the
 questions asked here are empirical: how much of the navigation in real applications it
 recovers, where it fails, and whether the resulting graph responds to a change in the
-source. The instrument used is \emph{uigraph}, an open-source static analyser for Angular
-that I developed together with this thesis, to serve its evaluation. It was corrected during
-that evaluation, and the corrections are listed in Table~\ref{tab:repairs}. In the experiment
-it plays the part of the subject of study, not of a result: the figures reported here describe what the
-analysis recovers when realised this way, and the limits they expose are limits of the
-method and of this instantiation, which Chapter~\ref{ch:discussion} separates.
+source. The extractor is \emph{uigraph}, an open-source static analyser for Angular built in this
+thesis. It is part of the contribution, not an existing tool: it reads nested, parameterised and
+lazily loaded route trees, which an earlier Angular extraction excludes by its stated
+restrictions (Section~\ref{sec:res-earlier}), and it implements scope attribution. It was
+corrected during the evaluation (Table~\ref{tab:repairs}). Because the same person built the
+tool and measured it, on the same corpus, the figures describe what this extractor recovers on
+these applications; Section~\ref{sec:limitations} discusses what that means for them, and
+Chapter~\ref{ch:discussion} separates the limits of the method from those of this
+implementation.
 
 \section{Research questions and scope}
 \label{sec:rqs}
