@@ -1,29 +1,21 @@
 \chapter{Evaluation setup and research material}
 \label{ch:evaluation}
 
-This chapter describes how the analysis of Chapter~\ref{ch:analysis} is evaluated. Section~\ref{sec:corpus}
-presents the corpus and argues that it is a valid basis for the measurements.
-Section~\ref{sec:metrics} defines every ratio and measure in one place. Section~\ref{sec:protocol}
-describes the five evaluation methods, what each can and cannot show, and how the results are kept
-reproducible. Chapter~\ref{ch:results} reports the results.
+This chapter describes how the analysis of Chapter~\ref{ch:analysis} is evaluated: the corpus
+(Section~\ref{sec:corpus}), every ratio and measure (Section~\ref{sec:metrics}), and the five
+evaluation methods with what each can and cannot show (Section~\ref{sec:protocol}).
+Chapter~\ref{ch:results} reports the results.
 
 \section{Corpus selection and validity}
 \label{sec:corpus}
 
 \subsection{Selection}
 
-Ten candidate applications were screened against six criteria, applied in order of increasing
-cost so that a candidate could be rejected cheaply. The criteria were:
-\begin{enumerate}
-\item a real application rather than a library or template;
-\item a nested, lazily loaded route tree;
-\item guards present, since guards produce conditional transitions;
-\item end-to-end test configuration for a browser driver;
-\item retrievable history in which tests and source change together;
-\item an active repository.
-\end{enumerate}
-Six candidates were retained (Table~\ref{tab:corpus}), each fixed to a specific commit so that
-the measurements can be repeated on the same code.
+Ten candidate applications were screened against six criteria: a real application rather than a
+library or template; a nested, lazily loaded route tree; guards present; end-to-end test
+configuration for a browser driver; retrievable history in which tests and source change together;
+and an active repository. Six candidates were retained (Table~\ref{tab:corpus}), each fixed to a
+specific commit so that the measurements can be repeated on the same code.
 
 Criterion (4) was checked as configuration, not as a usable suite. At the pinned commits only
 alfresco has specifications the test-source cross-check can read, so that method covers alfresco
@@ -53,57 +45,41 @@ openMF/web-app & \texttt{7f781796} & \RoundTwoRoutesMifos{} & size ceiling \\
 \end{tabularx}
 \end{table}
 
-Four candidates were rejected. They are listed because the rejected candidates are part of the
-selection protocol. The counts below were read from the candidate repositories and are not
-generated.
-\begin{itemize}
-\item \texttt{angular/components} is a component library with no product router.
-\item \texttt{vendure} has 169 end-to-end specifications, all of which exercise the GraphQL
-server and none of which drive the user interface.
-\item \texttt{gravitee} declares 618 routes but has 14 UI specifications.
-\item \texttt{SAP/spartacus} has a large Cypress suite, but its routing is configuration-driven
-in a way the extractor does not support, so it was set aside for later work. That reason is tool
-support, which is not one of the six criteria. This rejection therefore rests on a ground added after
-screening began.
-\end{itemize}
+Four candidates were rejected; the counts were read from the repositories and are not generated.
+\texttt{angular/components} is a component library with no product router. \texttt{vendure} has 169
+end-to-end specifications, all of which exercise the GraphQL server and none the user interface.
+\texttt{gravitee} declares 618 routes but has 14 UI specifications. \texttt{SAP/spartacus} has a
+large Cypress suite, but its routing is configuration-driven in a way the extractor does not
+support; that reason is tool support, which is not one of the six criteria, so this rejection rests
+on a ground added after screening began.
 
-The screening also showed that route-tree size and end-to-end test density were inversely related.
-The largest applications had few or no tests that exercise the user interface.
-The application with the richest navigation suite was of medium size. No application therefore provides both a large
-route tree and execution-based ground truth. The methods that need test suites are applied only to
-the applications that have them, and the other methods to all six.
+Route-tree size and end-to-end test density were inversely related: no application provides both a
+large route tree and execution-based ground truth. The methods that need test suites are applied
+only to the applications that have them, and the other methods to all six.
 
 \subsection{Validity of an open-source corpus}
 
 Kalliamvakou et al.\ show that many GitHub repositories are inactive, personal or not software
-projects. They also show that stars do not measure quality and that forks inflate counts
-\cite{kalliamvakou2014promises,kalliamvakou2016indepth}. They recommend filtering candidates by
-explicit criteria and reporting them, which the selection above does. The remaining threat is
-external validity: open-source applications may differ from proprietary ones in size, routing style
-and navigation mechanisms. In addition, I selected the corpus and wrote the extractor, which
-introduces a possible selection bias. Three measures address these threats:
-\begin{itemize}
-\item The selection protocol is reported in full, rejected candidates included. The criteria were
-fixed before any results were obtained, but one candidate was rejected on tool support and two
-retained applications do not meet the test-suite criterion.
-\item The corpus spans nearly two orders of magnitude in the number of routes, so an effect of
-size is visible and not averaged away.
-\item The commits are fixed and the harness is released with the thesis, so the measurement can be
-repeated rather than taken on trust.
-\end{itemize}
-None of these addresses a further threat. uigraph was developed on this corpus
-and is measured on it (Section~\ref{sec:limitations}), so the figures are fitted to it. A case study on a proprietary Angular application, reporting only
-aggregate figures, is planned as the most direct response (Chapter~\ref{ch:discussion}). There is
-no standard benchmark corpus for single-page applications either. Evaluations in this area use
-collections chosen for each study \cite{websurvey2025}. The corpus and its manifest are therefore
-an output of the thesis.
+projects, and recommend filtering candidates by explicit criteria and reporting them
+\cite{kalliamvakou2014promises,kalliamvakou2016indepth}, which the selection above does. The
+remaining threats are external validity (open-source applications may differ from proprietary ones)
+and a possible selection bias, since I selected the corpus and wrote the extractor. The selection
+protocol is therefore reported in full: the criteria were fixed before any results were obtained,
+but one candidate was rejected on tool support and two retained applications do not meet the
+test-suite criterion. The corpus spans nearly two orders of magnitude in routes, and the commits
+and harness are released so the measurement can be repeated.
+
+None of this addresses a further threat. uigraph was developed on this corpus and is measured on it
+(Section~\ref{sec:limitations}), so the figures are fitted to it. A case study on a proprietary
+Angular application, reporting only aggregate figures, is planned as the most direct response
+(Chapter~\ref{ch:discussion}). There is no standard benchmark corpus for single-page applications
+either \cite{websurvey2025}, so the corpus and its manifest are an output of the thesis.
 
 \section{Metrics}
 \label{sec:metrics}
 
-Each research question is answered with one main measure. This section is the home of every
-ratio the thesis reports. Table~\ref{tab:ratios} lists them, and the paragraphs after it define
-the terms the table uses.
+Each research question is answered with one main measure. Table~\ref{tab:ratios} lists every ratio
+the thesis reports, and the paragraphs after it define the terms the table uses.
 
 \begin{table}[t]\small
 \caption{The ratios and measures of the thesis. Each has one name, used throughout. A construct
@@ -133,73 +109,50 @@ Cause trace & defect classes traced to a cause in the source, by kind (read by t
 template, or a call to \texttt{Router.navigate} or \texttt{Router.navigateByUrl} in class code,
 in the application source excluding tests. Constructs are found by a separately written parser
 that shares no code with the extractor. Table~\ref{tab:repairs} qualifies what that
-independence covers. For the route-path forms added during development, the two resolve the same
-constructs by the same rules. Three of the independent route parser's corrections were made because it
-disagreed with the extractor. Attributes such as \texttt{routerLinkActive} are not constructs.
+independence covers: for the route-path forms added during development, the two resolve the same
+constructs by the same rules, and three of the independent parser's corrections were made because it
+disagreed with the extractor.
 
 \textbf{Must conversion (RQ1).} Must conversion is the fraction of in-scope constructs that are
-witnessed by at least one must edge. Four rules make it precise.
+witnessed by at least one must edge. Three rules make it precise.
 \begin{itemize}
 \item A construct is matched to a witness on its own line or on a line either side, to absorb
 offsets in the extractor's locations. Two constructs on adjacent lines can therefore both be
-credited by one witness. The ratio is an upper bound at line granularity.
+credited by one witness, so the ratio is an upper bound at line granularity.
 \item Query-only navigations and the two exclusions of Table~\ref{tab:loss-rules} are left out of
 the denominator as well as the numerator.
 \item When several constructs produce the same edge, the extractor keeps the most certain as the
-edge's witness. It records the others as merged witnesses, each with the modality it earns on its
-own. A construct counts as converted only where it earns must itself. The tables of
-Chapter~\ref{ch:results} count this way.
-\item The ratio is computed over constructs and not edges, because the number of edges depends on
-representation: one construct can be stored as one anchored edge or as one edge per screen
-(Section~\ref{sec:attribution}).
+witness and records the others as merged witnesses, each with the modality it earns on its own. A
+construct counts as converted only where it earns must itself.
 \end{itemize}
 
 \textbf{The other ratios.} More than one of these measures has been called coverage in the
-literature this thesis builds on. They are not interchangeable: on this corpus they differ by
+literature this thesis builds on, but they are not interchangeable: on this corpus they differ by
 more than an order of magnitude (\RoundTwoAccounted{} of sites accounted for against
-\RoundTwoMustConv{} converted to must). Four points complete Table~\ref{tab:ratios}.
-\begin{itemize}
-\item Node coverage rises if less of an application is read, so the blind-spot count is printed
-beside it. Over the addresses the running framework mounts it is a different and smaller figure
-(Section~\ref{sec:res-probe}).
-\item The recovered share widens the must-conversion numerator to an edge of any tier. A construct
-that a must edge cites only as evidence for may does not count towards must conversion.
-\item On an application whose screens sit behind guards the two are far apart. Almost every
-transition is conditional, so a corpus can be mostly recovered while almost none of it is
-deterministic.
-\item The accounted share alone measures whether the losses are declared, not how much is recovered.
-\end{itemize}
-Coverage without a qualifier means node coverage. The gap in recovered constructs is called the
-recovery gap, and the loss tables measure it.
+\RoundTwoMustConv{} converted to must). Node coverage rises if less of an application is read, so
+the blind-spot count is printed beside it. The recovered share widens the must-conversion numerator
+to an edge of any tier. The accounted share alone measures whether the losses are declared, not how
+much is recovered. Coverage without a qualifier means node coverage; the gap in recovered
+constructs is called the recovery gap, and the loss tables measure it.
 
 \textbf{Agreement between a scope and the rendered interface (RQ3).} The measures above cannot be
 asked the question the contribution turns on: is the set of screens that attribution computes for a
 site the set that site can really fire from? The \emph{rendered-interface check}, run on the harness
 of the runtime route oracle (Section~\ref{sec:protocol}), answers one direction. The harness
-navigates to each screen the graph holds and lets it render. It reads the in-app links the DOM carries and compares them with the edges the graph's per-screen query yields there.
+navigates to each screen the graph holds, reads the in-app links the DOM carries and compares them
+with the edges the graph's per-screen query yields there.
 
-The two directions are not equally decidable.
-\begin{itemize}
-\item A link rendered at a screen where the graph has no such edge is unambiguous: the site was
-attributed to too few screens or never read.
-\item An edge the graph has and the DOM does not show is weaker. A template may render links
-conditionally and this harness signs in to nothing, so an absent link may be correctly attributed.
-And where a target could not be resolved to one address, every address the static prefix admits is
-recorded at reduced confidence. That is not a claim that the screen links there.
-\end{itemize}
-This direction is therefore judged only over predictions that name a destination exactly. Their
-number is published so that no share is read off a denominator that cannot support one. Three bounds
-apply.
-\begin{itemize}
-\item Only links with a readable target are seen: an anchor's \texttt{href} or a static
-\texttt{routerLink}. A \texttt{Router.navigate} call in an event handler leaves nothing in the DOM,
-so the sites judged are the template-sourced ones.
-\item A screen whose guard redirects to a sign-in page without a backend renders another screen's
-links and cannot be judged. Such screens are counted apart. On this corpus they are most screens
-(Section~\ref{sec:res-scope}).
-\item The harness serves one built directory at the server root, which ghostfolio's per-locale build
-does not fit. Ghostfolio is measured by every other method and by none of this one.
-\end{itemize}
+A link rendered at a screen where the graph has no such edge is unambiguous: the site was
+attributed to too few screens or never read. An edge the graph has and the DOM does not show is
+weaker, since a template may render links conditionally and this harness signs in to nothing; where
+a target could not be resolved to one address, every address the static prefix admits is recorded at
+reduced confidence, which is not a claim that the screen links there. This direction is therefore
+judged only over predictions that name a destination exactly, and their number is published. Three
+bounds apply. Only template-sourced sites are judged, since a \texttt{Router.navigate} call in an
+event handler leaves nothing in the DOM. A screen whose guard redirects to a sign-in page without a
+backend renders another screen's links and cannot be judged; such screens are counted apart, and on
+this corpus they are most screens (Section~\ref{sec:res-scope}). Ghostfolio's per-locale build does
+not fit the harness, so it is measured by every other method and by none of this one.
 
 \textbf{The ablation and the structural reference (RQ3).} Two measurements ask whether the
 attribution computes a set of screens that agrees more closely with a structural reference than a
@@ -218,31 +171,27 @@ screen. Oshima and Kishi assemble their page information from the root component
 \item \emph{Full}: adds the member-level call graph, with its fallback join and the stand-ins for
 guards and effects.
 \end{itemize}
-Each level adds to the one before it, so a step measures what a mechanism adds given those below it,
-and the \emph{full} step is not one mechanism alone. A sixth level, \emph{class}, runs beside the
-nested ones and replaces the call graph with the per-class rule. This rule joins a navigating
-service over every component that injects its class. The nesting holds because the implementation
-withholds results rather than computing them differently. The harness checks this on the real
-graphs. A (site, screen) pair present at one level and absent at the next is a defect in the switch,
-and no table is written.
+Each level adds to the one before it, so the \emph{full} step is not one mechanism alone. A sixth
+level, \emph{class}, runs beside the nested ones and replaces the call graph with the per-class rule,
+which joins a navigating service over every component that injects its class. The harness checks on
+the real graphs that the levels nest: a (site, screen) pair present at one level and absent at the
+next is a defect in the switch, and no table is written.
 
 The structural reference is scored in both directions, which no other method allows. For one
-application, the screens each navigation site fires from were read off the sources by hand, under
-the rules in the file's method field. They were recorded with a derivation per site in
-\path{route-oracle/ground-truth/realworld.json}. It is the structural reference of
-Section~\ref{sec:scope}, called the ground truth below. A pair the reference has and a level does not
-is a scope too small by the reference. The converse is a scope too large. Four limits apply.
+application, the screens each navigation site fires from were read off the sources by hand, with a
+derivation per site, in \path{route-oracle/ground-truth/realworld.json}. It is the structural
+reference of Section~\ref{sec:scope}, called the ground truth below. A pair the reference has and a
+level does not is a scope too small by the reference; the converse is a scope too large. Four
+limits apply.
 \begin{itemize}
 \item On realworld it is one application, small enough to read exhaustively. A second, alfresco, is read
 under the same rules (Section~\ref{sec:res-groundtruth}).
 \item It is the author's reading, so it is not independent of the tool's author. It is published with
 its reasoning so a reader can check it.
-\item Its rules are the analysis's own relations. A component is on every screen whose routed
-component renders it through template selectors. The shell's components are on every screen. A
-navigation in a service member is on the screens of its callers. A template condition or guard that
-admits a screen only in one sign-in state does not narrow a scope under these rules. The ground truth
-therefore tests whether the implementation applies the relations correctly, not whether they match
-what the running application renders.
+\item Its rules are the analysis's own relations, and a template condition or guard that admits a
+screen only in one sign-in state does not narrow a scope under them. The ground truth therefore
+tests whether the implementation applies the relations correctly, not whether they match what the
+running application renders.
 \item It is checked in one direction only: the scorer reports every site the graph places that the
 ground truth omits.
 \end{itemize}
@@ -251,17 +200,17 @@ ground truth omits.
 relations, so it cannot show that they miss a navigation the application performs. This check takes
 its reference from execution. Two applications ship an end-to-end suite that can be run here.
 The first, realworld, runs against the public demonstration backend, which is not pinned. The second, mifos, runs against a local
-Fineract server started from the repository's own compose file with the image pinned by digest. A
-small module added to each application logs every navigation the router completes while the suite
-runs, with the route patterns of the screen left and the screen reached. Nothing else is changed.
+Fineract server with the image pinned by digest. A small module added to each application logs
+every navigation the router completes while the suite runs, with the route patterns of the screen
+left and the screen reached.
 
 An observed pair is such a source and target pattern for a navigation the application itself
-triggered. Back-button navigations and the first screen after a full page load are excluded, so no
-pair spans a reload. A pair is \emph{contained} if any edge, must or may, joins the two screens once
-scope nodes are expanded to their members, with parameter names ignored. An edge to an unknown target
-never counts. A hit is any such edge, not the edge of the site the test used, so the check does not
-test the scope of an individual site. Redirected navigations are compared on the address they asked
-for, as preregistered. The scorer's first departure from this rule is listed in
+triggered; back-button navigations and the first screen after a full page load are excluded. A pair
+is \emph{contained} if any edge, must or may, joins the two screens once scope nodes are expanded to
+their members, with parameter names ignored. An edge to an unknown target never counts. A hit is any
+such edge, not the edge of the site the test used, so the check does not test the scope of an
+individual site. Redirected navigations are compared on the address they asked for, as
+preregistered. The scorer's first departure from this rule is listed in
 Appendix~\ref{app:repairs}, and its figure is not used.
 
 A missed pair is classified from the graph alone, by rules over the graph so that no assignment is
@@ -277,29 +226,26 @@ the dynamic test whatever the order, so that count says little alone, and
 Section~\ref{sec:res-e2e} names the sites.
 
 The counting rules, three validity checks and predictions for each application were written down
-before any log was read, except for that departure. The
-validity checks are these. The instrumented and the plain suite pass and fail the same tests. At
-least ten distinct pairs are observed. A second instrumented run observes the same pair set.
-The check measures recall on the transitions the suite exercises and nothing else. The graph is an
-over-approximation, so that recall is containment. Its weight depends on how many (screen,
-screen) pairs the graph holds, which is reported beside it. A graph edge no test takes is not an
-error, so the check cannot measure precision. One run cannot refute a must edge, so it says
-nothing about the soundness property.
+before any log was read, except for that departure. The checks are that the instrumented and the
+plain suite pass and fail the same tests, that at least ten distinct pairs are observed, and that a
+second instrumented run observes the same pair set. The check measures recall on the transitions
+the suite exercises and nothing else. The graph is an over-approximation, so that recall is
+containment, and its weight depends on how many (screen, screen) pairs the graph holds, which is
+reported beside it. A graph edge no test takes is not an error, so the check cannot measure
+precision, and one run cannot refute a must edge.
 
 \textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness cites it. A
 construct that is in scope, cited by no must or may edge and not accounted for is \emph{lost}. It is
 assigned to exactly one loss category by the first rule in Table~\ref{tab:loss-rules} that applies.
-The categories therefore partition the lost constructs, and their sizes can be compared within an
-application. Named outlets are removed before the assignment, and guards are measured outside it. The
-categories Constant target, Node missing and Other were not put through the admission rule that maps
-a category to a defect class (Chapter~\ref{ch:results}).
+The categories therefore partition the lost constructs. Named outlets are removed before the
+assignment, and guards are measured outside it. The categories Constant target, Node missing and
+Other were not put through the admission rule that maps a category to a defect class
+(Chapter~\ref{ch:results}).
 
 Guard defects do not appear in the table, since a wrong guard mislabels an edge rather than removing
-it. No method here checks a guard label directly: the witness check compares the construct, its target
-and the destination of a must edge, not whether the transition is unconditional. Guard handling is
-exercised only by the guard-removal mutation operator and by the source review of
-Section~\ref{sec:res-round2}. The guard defect was found by red-team review of the graph and the
-source, not by any check above.
+it. No method here checks a guard label directly; guard handling is exercised only by the
+guard-removal mutation operator and by the source review of Section~\ref{sec:res-round2}. The guard
+defect was found by red-team review of the graph and the source, not by any check above.
 
 \begin{table}[t]\small
 \caption{Rules that classify a construct, in the order the harness tests them. The first three
@@ -342,36 +288,28 @@ Other & matches none of the above; inspected by hand \\
 \end{tabularx}
 \end{table}
 
-The category \emph{other} is reached in unrelated ways: a template site whose owner cannot be
-resolved, a route component whose route has a node elsewhere, and a construct no rule matches. Its
-size counts constructs left for inspection by hand, not one cause. The nested branch decides a
-category from the \emph{owning} route component. A construct can therefore be assigned to a node category
-and still be converted once attribution gives it a scope through the shell or a subtree
-(Section~\ref{sec:res-after}).
+The nested branch decides a category from the \emph{owning} route component, so a construct can be
+assigned to a node category and still be converted once attribution gives it a scope through the
+shell or a subtree (Section~\ref{sec:res-after}). The size of \emph{other} counts constructs left
+for inspection by hand, not one cause.
 
 \textbf{Change in recovery and must-tier precision (RQ3).} Must conversion and the loss breakdown are
 measured on one commit of the extractor, run twice on identical inputs with the attribution pass
-disabled and enabled. One commit rules out any difference between the runs other than the pass itself.
-Section~\ref{sec:implementation} reports that with the pass off the extractor reproduces the baseline
-edge set exactly on every application.
+disabled and enabled. With the pass off the extractor reproduces the baseline edge set exactly on
+every application (Section~\ref{sec:implementation}).
 
 \emph{Must-tier precision} is the fraction of must edges that meet two conditions. The witness line contains a construct of
 the claimed kind with the claimed target, \emph{and} the destination node sits at an address the
-independent route set declares. The second half is needed because checking only the witness against the
-edge's destination takes the destination for granted, so a node minted at an address the application
-never mounts would pass.
+independent route set declares; otherwise a node minted at an address the application never mounts
+would pass.
 
-An edge whose destination the check cannot read is neither a pass nor a failure. Precision is
-therefore stated as bounds: the share of must edges that pass, over all of them, and the share that do not fail.
+An edge whose destination the check cannot read is neither a pass nor a failure, so precision is
+stated as bounds: the share of must edges that pass and the share that do not fail.
 RQ3 is answered positively only if the recovered share and must conversion, over the same construct
 denominator, do not fall, the recovered share rises, and must-tier precision does not fall. This is
-read as no detected failure in either run. It is not a precision that did not fall where the check
+read as no detected failure in either run, not as a precision that did not fall where the check
 reads only part of the tier. The bounds of the two runs cover different sets of must edges, so
 they are not compared as rates.
-
-\textbf{Node-level recall.} Node-level recall is the fraction of distinct URLs named in an
-application's own end-to-end test sources that have a matching node in the graph. It is a
-cross-check on node extraction, which all edges depend on.
 
 \textbf{Detection rate (RQ4).} The detection rate is the fraction of injected source changes
 that produce the predicted change in the graph, reported per mutation operator with its $n$. A
@@ -379,25 +317,21 @@ change whose construct the graph does not contain is excluded and not counted as
 can only repeat a recovery gap that the loss tables measure. The rate is therefore conditional on
 recovery, and the number of excluded mutants is reported alongside it.
 
-\textbf{Cause trace (RQ5).} Each defect class of Table~\ref{tab:defects} is traced to its cause in the source of the applications.
-For each cause the analysis records one of three outcomes.
-\begin{itemize}
-\item The final version reads the cause. The information was in the source, so the loss was the tool's and not the application's.
-\item The final version does not yet read the cause, although a static reader could.
-\item The cause lies beyond a static reader of a route table.
-\end{itemize}
-The result is a list of causes by outcome, not a ratio. Every site that yields no transition still carries a recorded reason (Section~\ref{sec:res-round2}).
+\textbf{Cause trace (RQ5).} Each defect class of Table~\ref{tab:defects} is traced to its cause in the
+source, with one of three outcomes: the final version reads the cause (the loss was the tool's and
+not the application's), it does not yet read it although a static reader could, or the cause lies
+beyond a static reader of a route table. The result is a list of causes by outcome, not a ratio.
+Every site that yields no transition still carries a recorded reason (Section~\ref{sec:res-round2}).
 
 \section{Evaluation methods}
 \label{sec:protocol}
 
-Five methods are used. RQ3 adds four further checks (the rendered-interface check, the ablation, the structural reference and the end-to-end check), which Table~\ref{tab:methods} does not list. None establishes correctness alone, so Table~\ref{tab:methods} states what
+Five methods are used; RQ3 adds four further checks (the rendered-interface check, the ablation, the structural reference and the end-to-end check), which Table~\ref{tab:methods} does not list. None establishes correctness alone, so Table~\ref{tab:methods} states what
 each can show and where it is blind. Figure~\ref{fig:oracles} shows which part of the graph each
 method checks and where its ground truth comes from.
 
-Four of the five read the application's sources. That shared footing is their common weakness. Two
-readers of the same text can be wrong in the same way, and agreement between them is then no evidence.
-The fifth, the runtime route oracle, was added for that reason.
+Four of the five read the application's sources, and two readers of the same text can be wrong in
+the same way. The fifth, the runtime route oracle, was added for that reason.
 
 \input{figures/fig-oracles}
 
@@ -424,11 +358,9 @@ Witness check & Must-tier precision. For every must edge, the witness file is
 re-parsed at the claimed line, the construct kind and target are compared, and the
 destination node's address is tested against the independent route set. &
 Cannot see missing edges. Target agreement is invalid for over-approximated may
-edges, whose witness proves only that the call site exists. The destination test is
-only as good as the route set: where both tools read a table at the wrong prefix, they
-agree on a wrong address; Section~\ref{sec:res-probe} records such addresses. Target agreement is
-literal: a construct whose address a redirect rewrites is compared with the address written, so an
-edge to the screen the navigation lands on is reported as a failure. \\
+edges, whose witness proves only that the call site exists. Where both tools read a table at the
+wrong prefix, they agree on a wrong address (Section~\ref{sec:res-probe}). Target agreement is
+literal, so an edge to the screen a redirect lands on is reported as a failure. \\
 \addlinespace
 Differential test & Disagreements with a separately written route-configuration
 parser. &
@@ -440,21 +372,18 @@ Test-source cross-check & Node-level recall against a fourth reader of the sourc
 the application's end-to-end specifications are collected; a URL its own test suite names is an
 address its authors expect to exist, and the extractor is asked whether it minted a node there. &
 Reads test source text and runs nothing, so a collected string is an address a test \emph{names}, not
-one a test was observed to reach, and whether the suite passes is not established. Tested subset only.
-A direct \texttt{goto} is not a UI transition, so visit pairs are not counted as edges. Textual
-extraction under-samples click-driven navigation. \\
+one a test was observed to reach. Tested subset only. Textual extraction under-samples click-driven navigation. A direct \texttt{goto} is not a UI
+transition, so visit pairs are not counted as edges. \\
 \addlinespace
 Mutation test & Detection rate over four operators: rename a path, remove a guard,
 delete a \texttt{routerLink}, retarget a \texttt{navigate}. Ground truth is the
 authored delta. Detection is judged on the node and edge sets and on the witness set,
 since several constructs can produce one edge. &
 A mutant whose construct is absent from the baseline graph re-detects a recovery gap and
-is excluded, as is a guard mutant on a screen that no edge enters. A component several routes render
-maps to every screen those routes declare, which errs towards scoring a mutant rather than dropping
-it. Detection is conditional on recovery, and the attributed and unattributed graphs do not exclude
-the same mutants, so they are also compared over the mutants both can score, paired by operator,
-file, line and subject. The sample is drawn from the graph, so it is not independent of the
-artefact under test. Sampling is seeded and stratified by operator. \\
+is excluded, as is a guard mutant on a screen that no edge enters. A component several routes render maps to every screen those routes declare, which errs towards scoring a mutant rather than dropping it. Detection is conditional on
+recovery, and the attributed and unattributed graphs do not exclude the same mutants, so they are
+also compared over the mutants both can score, paired by operator, file, line and subject. The
+sample is drawn from the graph, so it is not independent of the artefact under test. \\
 \addlinespace
 Runtime route oracle & Node-level soundness against the framework itself. Each application is built in
 its development configuration, loaded in a headless browser, and asked for the route configuration the
@@ -465,22 +394,20 @@ harness navigates the running application to a list of addresses and records wha
 of each, before any \texttt{canActivate} guard runs and after the \texttt{canLoad} and
 \texttt{canMatch} guards that take part in matching. &
 Requires the application to build and boot without its server. It reads the configuration and not the
-rendered screen, so a route that a guard always refuses still counts as mounted, and a route whose
-component fails to render is not distinguished. An address claimed through a \texttt{UrlMatcher}
-cannot be decided from the configuration. A workspace application that composes the measured library
-mounts the shell's own routes as well, so part of any difference is scope and not reading. Its result
-files record no extractor commit or runtime version (Section~\ref{sec:reproducibility}). \\
+rendered screen, so a route that a guard always refuses still counts as mounted. An address claimed
+through a \texttt{UrlMatcher} cannot be decided from the configuration. A workspace application
+that composes the measured library mounts the shell's own routes as well, so part of any difference
+is scope and not reading. Its result files record no extractor commit or runtime version
+(Section~\ref{sec:reproducibility}). \\
 \end{xltabular}
 \endgroup
 
 \subsection{Preconditions}
 
 Two properties of the extractor were checked before any measurement. \emph{Determinism}: two
-extractions from the same unchanged source give identical nodes and edges, compared on identifier,
-route, event, guard and modality after sorting. Without it, differences seen in mutation testing could
-not be told from noise. \emph{No accumulated state}: extracting into an existing database gives the
-same graph as extracting after deleting it. Without it, a mutant's result could be affected by the
-earlier baseline run.
+extractions from the same unchanged source give identical nodes and edges. \emph{No accumulated
+state}: extracting into an existing database gives the same graph as extracting after deleting it.
+Without them, differences seen in mutation testing could not be told from noise.
 
 \subsection{Corrections made to the protocol}
 \label{sec:corrections}
@@ -488,9 +415,8 @@ earlier baseline run.
 The final figures are those of the final version of the protocol. The development versions of uigraph
 and the corrections between them are listed in Appendix~\ref{app:repairs}. The figures of superseded
 instruments cannot be regenerated with the shipped harness, and none is cited as a result. A surprising
-figure is checked against its inputs before it is written down. The reason is that a figure that looked
-implausibly good or bad has more than once proved a property of the measurement and not of the
-extractor.
+figure is checked against its inputs before it is written down, since such a figure has more than
+once proved a property of the measurement and not of the extractor.
 
 The mutation harness was corrected during development after its misses had been read, so the final
 run is not an independent test. The final run used the same seed as the run whose misses were read
@@ -507,10 +433,8 @@ commit each table comes from.
 
 \section{Summary}
 
-This chapter fixed the material and the measures for Chapter~\ref{ch:results}. The corpus is six
-applications at pinned commits, selected by explicit criteria that were not applied uniformly, and
-uigraph was developed on it. Every ratio has one name and one definition in
-Table~\ref{tab:ratios}. The five methods are each blind where the others see, and the fifth, the
-runtime route oracle, does not read the route files at all. The reproducibility arrangements
-cover the first four methods fully and the fifth only in part. The corrections that led to
-the final protocol are listed in Appendix~\ref{app:repairs}.
+The corpus is six applications at pinned commits, selected by explicit criteria that were not
+applied uniformly, and uigraph was developed on it. Every ratio has one name and one definition in
+Table~\ref{tab:ratios}. The five methods are each blind where the others see; the reproducibility
+arrangements cover the first four fully and the fifth, the runtime route oracle, only in part. The
+corrections that led to the final protocol are listed in Appendix~\ref{app:repairs}.

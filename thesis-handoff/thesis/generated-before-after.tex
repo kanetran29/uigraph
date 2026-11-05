@@ -3,18 +3,18 @@
 \newcommand{\TabBeforeAfter}{%
 \begin{tabular}{@{}lrrrrrrrr@{}}
 \toprule
- & \multicolumn{3}{c}{Must conversion} & \multicolumn{2}{c}{Must, read and passed} & \multicolumn{3}{c}{Attribution losses, recovered} \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-9}
-Application & Before & After & pp & Before & After & Before & must & may \\
+ & \multicolumn{3}{c}{Attribution losses, recovered} & \multicolumn{3}{c}{Must conversion (RQ1)} & \multicolumn{2}{c}{Must, read and passed} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-9}
+Application & Lost & must & may & Before & After & pp & Before & After \\
 \midrule
-realworld & 2.6\% & 7.7\% & +5.1 & 1/1 & 9/9 & 22 & 2 & 20 \\
-alfresco & 0.0\% & 0.0\% & +0.0 & -- & -- & 18 & 0 & 4 \\
-ghostfolio & 0.0\% & 0.0\% & +0.0 & -- & -- & 72 & 0 & 32 \\
-k8s dashboard & 0.0\% & 2.9\% & +2.9 & -- & 63/125 & 56 & 0 & 8 \\
-bitwarden & 0.9\% & 0.9\% & +0.0 & 1/1 & 1/1 & 52 & 0 & 16 \\
-mifos & 1.4\% & 1.4\% & +0.0 & 15/15 & 15/15 & 234 & 0 & 210 \\
+realworld & 22 & 2 & 20 & 2.6\% & 7.7\% & +5.1 & 1/1 & 9/9 \\
+alfresco & 18 & 0 & 4 & 0.0\% & 0.0\% & +0.0 & -- & -- \\
+ghostfolio & 72 & 0 & 32 & 0.0\% & 0.0\% & +0.0 & -- & -- \\
+k8s dashboard & 56 & 0 & 8 & 0.0\% & 2.9\% & +2.9 & -- & 63/125 \\
+bitwarden & 52 & 0 & 16 & 0.9\% & 0.9\% & +0.0 & 1/1 & 1/1 \\
+mifos & 234 & 0 & 210 & 1.4\% & 1.4\% & +0.0 & 15/15 & 15/15 \\
 \midrule
-All & & & & & & 454 & 2 & 290 \\
+All & 454 & 2 & 290 & & & & & \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRemaining}{%

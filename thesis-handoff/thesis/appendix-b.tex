@@ -35,21 +35,10 @@ Where the sources fix the condition of a conditional, the extractor reads it: a 
 environment file is resolved and the arm it selects is read.
 Where they do not, as here, it declares the subtree unread.
 The loss is declared and is \ProbeMissedMifos{} screens wide.
-That is the price of the rule that decides the question.
-The table a prefix mounts is the one its route names, or the one the module registers with
-\texttt{forChild}, or the only one in the file, and otherwise none.
-Reading every table a file holds would have given this prefix the right addresses by accident of
-the two tables agreeing.
-It would also give any prefix every table a file holds, minting the cross
-product of prefix and path wherever two tables differ.
-
-Where such a condition \emph{is} fixed by the sources, the value read is the one the checked-out
-sources carry.
-An Angular build may substitute one environment file for another, so a constant a production
-build fixes differently selects a different arm there.
-The measurements are taken over the sources as checked out, and the runtime route oracle reads a
-development build for the same reason.
-The two therefore agree about which configuration is measured.
+Where a condition is fixed by the sources, the value read is the one the checked-out sources carry,
+and a production build that substitutes another environment file may select a different arm.
+The runtime route oracle reads a development build for the same reason, so the two agree about which
+configuration is measured.
 
 \textbf{Read exactly} are the following, and everything in this group is the analysis's
 responsibility.
@@ -96,35 +85,20 @@ of the route of the component that holds the site, and attribution is what makes
 It is resolved once for each screen the edge is emitted from. A template \texttt{routerLink}, and a
 \texttt{Router.navigate} call whose options are an object literal with a \texttt{relativeTo} key, are
 resolved against that screen's path, applying a leading run of \texttt{.} and \texttt{..} segments; a
-call without \texttt{relativeTo}, and \texttt{navigateByUrl}, are resolved against the root. A target
-with more \texttt{..} segments than the route has segments is one Angular rejects, so it yields no edge
-and a note. A \texttt{..} that follows another segment, as in \texttt{a/../b}, is applied by Angular but
-kept as a literal segment by the extractor.
-The edge therefore falls to the catch-all or to a note, not to a wrong screen. The base is right only
+call without \texttt{relativeTo}, and \texttt{navigateByUrl}, are resolved against the root. The base is right only
 when the screen is the route of the component that holds the site, and only then can the edge be must.
-It is held at may in these cases:
-\begin{itemize}[nosep]
-\item a component rendered under a route it does not own, whose own route the analysis does not track;
-\item \texttt{relativeTo} written in shorthand, passed through an options variable, or given a route
-other than the component's own such as \texttt{this.route.parent}, none of which the reader evaluates
-(it accepts only a constructor parameter or an \texttt{inject} call that yields the component's
-\texttt{ActivatedRoute});
-\item a link that binds its own \texttt{[relativeTo]} input;
-\item an edge emitted from a node without a path of its own (a scope anchor, the shell or an unplaced
-origin), where a bare relative target is matched as if absolute.
-\end{itemize}
+It is held at may where the component is rendered under a route it does not own, where \texttt{relativeTo}
+is written in shorthand, passed through a variable or given another route, where a link binds its own
+\texttt{[relativeTo]} input, and where the edge leaves a node without a path of its own.
 Such an edge can name the wrong screen, which the may tier admits and the must tier does not.
-A target that matches nothing under the assumed base is recorded with a note that says so.
 \item \textbf{Templates passed as values (\texttt{TemplateRef}) and rendered elsewhere.} The analysis
 does not follow a template value from its declaration to its instantiation. Links inside an
 \texttt{<ng-template>} are read from the declaring template and attributed to the declaring component's
 screens.
 Every such link is held at \emph{may}, since nothing says whether or where the template is
-instantiated. The attribution is right when the template is instantiated within the declaring
-component's own subtree, as with a template passed to a child's input or to a dialog opened from that
-screen. When the value is carried to a component rendered on other screens, the edges stay with the
-declaring screens and not the screens on which the template appears. Recovering the place of
-instantiation is a dataflow problem, the same obstacle as for JavaScript XML (JSX; Section~\ref{sec:transfer}).
+instantiated. When the value is carried to a component rendered on other screens, the edges stay with the
+declaring screens. Recovering the place of instantiation is a dataflow problem, the same obstacle as for
+JavaScript XML (JSX; Section~\ref{sec:transfer}).
 \item \textbf{Dispatch through NgRx effects and router event subscriptions.} The dispatch relation is
 specified in Chapter~\ref{ch:analysis} and not implemented, so the screen that dispatched an action is
 never recovered. At the levels that keep the call graph or its class join, \emph{full} and \emph{class},
@@ -134,9 +108,7 @@ contains a \texttt{createEffect} call is given $\top$ and offered from the shell
 the shell's \texttt{u\_}\,sink when its target is fully dynamic. This is sound and coarse, since an
 effect can fire on any screen. At the lower levels the stand-in is not applied, and an effect outside
 the application directory, or declared with the older \texttt{@Effect} decorator, is treated as any
-service call. A navigation inside a \texttt{Router.events} subscription is attributed to the
-scope of the class that contains it, as any other call site, and held at \emph{may} because it runs in a
-callback (Section~\ref{sec:res-round2}).
+service call.
 \item \textbf{Navigation inside signal effects and observable subscriptions.} The firing condition is
 a data dependence in a graph the runtime builds, not a control-flow condition in the program text
 (Sections~\ref{sec:signals} and~\ref{sec:reactive}). The model gives such edges the modality
@@ -156,15 +128,9 @@ fires from. A template literal used as an element of a commands array is read as
 concatenation, or the constant elements before a trailing variable element of a commands array) is
 over-approximated into the \emph{may} tier.
 It gets one edge to every declared route that extends that prefix by at least one segment. An empty prefix therefore connects the site to every declared route
-except the root. The over-approximation is incomplete.
-A prefix segment matches only an identical route segment, so a route with a parameter in that
-position is not a candidate.
-A prefix that matches no route yields no edge and no sink, only a note that gives the
-count as zero.
-\item A commands array whose variable element is followed by constant elements is read as a pattern and
-drawn as a single \emph{may} edge to the first declared route that matches it.
-The variable element matches only a parameter segment. A route whose segment in that position is a constant is not
-reached, and no note records the omission.
+except the root. The over-approximation is incomplete, since a prefix segment matches only an identical
+route segment and a route with a parameter in that position is not a candidate.
+\item A commands array whose variable element is followed by constant elements is read as a pattern and drawn as a single \emph{may} edge to the first declared route that matches it. The variable element matches only a parameter segment, so a route whose segment in that position is a constant is not reached, and no note records the omission.
 \end{itemize}
 \item \textbf{Injection tokens and provider bindings.} The call graph of Section~\ref{sec:implementation} resolves a call on a field through the field's declared type. Three things are not read.
 \begin{itemize}[nosep]
@@ -176,18 +142,14 @@ bind nothing the pass can follow.
 A call through such a token therefore contributes no edge.
 It falls back to the join over every component that injects its class, or to no scope at all if none
 does.
-\item A receiver is resolved when it is a field of the class, an \texttt{inject(T)} call, or a local
-variable or parameter initialised with \texttt{inject(T)} or declared of an application type; any other
-receiver is not resolved.
 \end{itemize}
 Over the corpus the pass resolved \CGDirect{} calls on application types to the class the type names,
 \CGBound{} through a provider binding and \CGSubclass{} to subclasses, and left \CGUnresolved{}
 unresolved, in \CGUnresolvedApps{} of the six applications.
 \item \textbf{Configuration-driven route registration.} A table passed as an array to
 \texttt{RouterModule.forRoot}, \texttt{forChild} or \texttt{provideRouter} is read wherever the
-registration runs, including inside a provider factory the application calls, which is how alfresco's
-folder-rules library mounts \path{/rules}.
-A table held in a variable is also found by its shape. A route
+registration runs, including inside a provider factory the application calls.
+A route
 that exists only once configuration has been evaluated at startup is not recovered. Where a route object is declared and its
 \texttt{path} is supplied by configuration, the path is counted as unreadable, no node is minted, and
 the route set is declared a lower bound. Where the table is computed by a function and passed to a
@@ -200,16 +162,9 @@ neither can see. The same approximation is why one candidate application was rej
 (Section~\ref{sec:corpus}).
 \item \textbf{Guards that would let the navigation through.} A guard is a function of the application's
 state, and the extractor does not evaluate it. A guard the navigation runs holds the edge at \emph{may},
-even when the guard would always pass. A route the source and target share is taken to be reused unless its path has a parameter,
-\texttt{runGuardsAndResolvers} asks for more, or the navigation does not keep the segments the route
-consumes; a parameter that does not in fact change makes this too cautious. A guard is identified by the
-text of its expression, so two guards that compute the same thing are two guards. Content projected
-through \texttt{<ng-content>} is read as its host template places it, so a link projected into a
-component that renders it only under a condition is read as unconditional.
-\texttt{mat-menu} and \texttt{mat-tab} are the only library containers read as rendering their content
-lazily. A route
-component behind a conditional outlet is conditional, but a component nested in it is judged by its own
-placement, and the application root's outlet is not read.
+even when the guard would always pass. A guard is identified by the text of its expression, so two guards that compute the same thing are two
+guards. Content projected through \texttt{<ng-content>} is read as its host template places it, so a link
+projected into a component that renders it only under a condition is read as unconditional. \texttt{mat-menu} and \texttt{mat-tab} are the only library containers read as rendering their content lazily. A route component behind a conditional outlet is conditional, but a component nested in it is judged by its own placement, and the application root's outlet is not read.
 \item \textbf{Navigations a later one may cancel.} This item and the one on modifier keys are the
 execution model of Claim~\ref{claim:must}: the claim holds only on executions they do not describe. A
 navigation is demoted when code that runs after it, before the event is handled, may start another
@@ -218,11 +173,7 @@ resolve to a body in the application.
 Such a body is a member of the class, a function of the file, or a method the checker resolves on a
 typed receiver. A call into a library, through a receiver the checker cannot type,
 or into code loaded at run time is taken not to navigate.
-A navigation followed by such a call can therefore be published as must although the call cancels it. The reader does not follow a navigation a handler
-schedules for later (a timer, a promise it does not await).
-Nor does it follow the other listeners one event reaches: a
-click handler on an ancestor the event bubbles to, or a \texttt{(click)} binding that navigates on the
-same element as a \texttt{routerLink}.
+A navigation followed by such a call can therefore be published as must although the call cancels it. The reader does not follow a navigation scheduled for later, nor the other listeners one event reaches.
 \item \textbf{Children of a route a function returns, mounted at the empty path.} The first empty-path
 child under a screen, and the first below that one, render on the screen's own address, and their links
 are drawn from it. Where the empty-path route is written inside a function that returns it, as
@@ -243,20 +194,12 @@ matches. Wherever two declared routes, or a route and a redirect,
 can answer an address, the edge is held at \emph{may} and may name the route Angular does not take. One
 exception rests on an assumption. Route tables an application registers apart are joined in the order
 their providers are registered, which the extractor does not read. It takes a catch-all in one such table
-to be matched after every route of the others.
-This is the order Angular's documentation recommends and the one the corpus applications appear to
-keep.
-It names each catch-all it dismissed this way in a note.
-Extracted without the assumption, the must tier holds \RouteOrderMustWithout{} edges on
-\RouteOrderSitesWithout{} constructs instead of \RouteOrderMust{} on \RouteOrderSites{}.
-The other \RouteOrderResting{} edges, on \RouteOrderRestingSites{} constructs in
-\RouteOrderRestingApps{} applications (\RouteOrderRestingWhere{}), rest on it.
+to be matched after every route of the others, and names each catch-all it dismissed this way in a note.
+The must edges that rest on it are counted in Section~\ref{sec:res-soundness}.
 \item \textbf{Ambiguous selectors in the nesting relation.} When a selector belongs to more than one
 component, the candidates are narrowed to those the rendering file imports; where none is imported, the
 analysis joins over all of them and records a note, which can attribute a site to screens on which its
-component is never rendered. Attribute selectors are matched as element selectors are. When the question
-is whether a component renders an outlet through a component it places, an ambiguous placement counts
-only if every candidate renders one.
+component is never rendered.
 \end{itemize}
 
 
@@ -324,21 +267,8 @@ the objections of a source review and of red-team panels made with the assistant
 the front of this thesis describes. Every defect those reported was reproduced against the code
 before it was repaired.
 
-\paragraph{Conditions on the construct.} A site is demoted when it does not run every time its code
-does, under the conditions listed with Claim~\ref{claim:must} in Section~\ref{sec:model}. It is also demoted by the may caps on
-attribution's stand-ins (Section~\ref{sec:implementation}) and on catch-all routes
-(Appendix~\ref{app:repairs}). A construct under more than one condition is filed under the first the reader finds. The template
-conditions include realworld's own \texttt{*ifAuthenticated} directive.
-
-\paragraph{Guards as the router runs them.} The guards the router runs for each source and destination are those listed with Claim~\ref{claim:must} in Section~\ref{sec:model}. A navigation between two children of a parent guarded by \texttt{canActivate}
-therefore runs the children's guards and not the parent's. Gating it on the parent's would treat
-every navigation as an entry from outside the application. Further rules complete the reading.
-
-\begin{itemize}
-\item A guard on a child route with an empty path and no component gates the screen above it,
-because Angular matches such a child on every navigation to its parent. bitwarden's
-\texttt{redirectGuard()} sits on such a child.
-\end{itemize}
+The conditions on the construct and the guards the router runs for each source and destination are those
+listed with Claim~\ref{claim:must} in Section~\ref{sec:model}.
 
 \paragraph{Same-address navigation and modality.} Angular ignores a navigation to the address its
 source already displays, and where the address differs only in a parameter or the query it runs only
@@ -347,16 +277,7 @@ therefore drawn per screen: must from the others, and a may self-loop at the des
 takes the modality of its most certain construct, which becomes its witness. Every other construct it
 cites records the modality it earns on its own, and the witness check judges the must tier only on
 the constructs that earn must. Claim~\ref{claim:must} asks that a must edge correspond to \emph{a}
-navigation that occurs, not that every construct reaching the same screen does. realworld's tag page
-shows the point: its Global Feed link to the root runs whenever the page does, while two other links
-from the page reach the root under \texttt{*ifAuthenticated} and inside an \texttt{@empty} block.
-
-The witness check opens every cited site, not only the first. \WitnessMergedCitationShareAll{} of the
-cited sites are later citations of an edge, \WitnessMergedCitationShareMax{} in the application where
-the share is largest. In bitwarden such citations targeted \path{/vault}, where the running router
-places a component through a route a helper produces (Section~\ref{sec:res-probe}). An extractor that
-did not read that route fell back to the catch-all's redirect to the root. Under the present rule these
-citations are recorded as may, which is what they are evidence for.
+navigation that occurs, not that every construct reaching the same screen does.
 
 \subsubsection{The deterministic tier and its evidence}
 
@@ -368,13 +289,8 @@ With these rules the deterministic tier is \CensusMust{} edges with attribution 
 without it, resting on \CensusMustSites{} constructs with attribution and \CensusBaseMustSites{}
 without, in \CensusMustApps{} applications. \CensusZeroMustApps{} of the \CensusApps{} have no must
 edge. Most of the tier is navigation between screens that share a guarded parent, which reading guards as
-the router runs them lets through. realworld holds \CensusMustRealworld{} edges, its logo links and its
-Global Feed link into the root. k8sdash holds \CensusMustKdash{}: the logo link and the Create button
-of the toolbar its chrome component renders above every screen. They are drawn from every screen under that
-component except the root (which a redirect answers), the destination itself, and the screens whose
-\texttt{canDeactivate} guard runs when the user leaves them. mifos holds \CensusMustMifos{}, cancel and
-back buttons that return from a form to the section that opened it, and the menu of its system page.
-bitwarden holds \CensusMustBitwarden{}, a cancel button.
+the router runs them lets through. k8sdash holds \CensusMustKdash{}: the logo link and the Create button
+of the toolbar its chrome component renders above every screen.
 
 The edge count is a poor measure of how much evidence the tier holds. \CensusMustSitesKdash{}
 constructs yield \CensusMustKdash{} of the \CensusMust{} edges. Without k8sdash the tier is \the\numexpr\CensusMust-\CensusMustKdash\relax{} edges on
@@ -392,11 +308,8 @@ are matched (Section~\ref{sec:approximations}): \RouteOrderResting{} of them, in
 \RouteOrderMustWithout{} edges on \RouteOrderSitesWithout{} constructs.
 \end{itemize}
 
-Each of the \CensusMustSites{} constructs was read against the source. The reading covered the condition around the construct,
-the address Angular resolves it to (for a relative link, the route's consumed segments less one per
-\texttt{../}), and the guards and resolvers its navigation runs. The readings are kept in
-\path{results-must/tier-reading.json}, and the census refuses to report a must construct that file
-does not list. This reading was made once, by the AI assistant the
+Each of the \CensusMustSites{} constructs was read against the source, for its condition, the address it
+resolves to, and the guards its navigation runs. This reading was made once, by the AI assistant the
 declaration at the front describes, and with the extractor's decisions in view. It is a check that
 each decision can be defended from the source, not an independent second reading.
 
@@ -405,18 +318,14 @@ chrome component's scope and on the route-order assumption, so these weaknesses 
 Outside k8s dashboard every must edge was read and passed. Neither the source reading nor the
 mechanical check is an independent proof of Claim~\ref{claim:must}. The demotion rules are also
 exercised by a mutation sweep (\SweepMutants{} mutants at \texttt{\SweepCommit}) in which every
-one of the \SweepMutants{} deletions fails some test. \SweepEarlierRetired{} further deletions are not
-swept: they were retired as equivalent, each deleting a condition already implied by the shape of a route table or by another check. The sweep measures whether the tests detect
+one of the \SweepMutants{} deletions fails some test. The sweep measures whether the tests detect
 deletions of the rules, not whether the rules are a complete account of runtime navigation.
 
 \paragraph{The tier is not a property of the applications.} The extractor never evaluates a guard, so
 a guard that can refuse a navigation demotes it whatever the guard would decide. Extracting the corpus
 again with every guard taken to let the navigation through gives \GuardOnlyMust{} must edges in
 \GuardOnlyApps{} applications instead of \CensusMust{}, resting on \GuardOnlySites{} constructs.
-\GuardOnlyGuarded{} of those edges run a guard. For \GuardOnlySourceBehind{} of them, every guard
-the navigation runs is one the source screen's own routes carry by name. A user on that screen has
-therefore passed it at least once on the way there. \GuardOnlyGuardedGhostfolio{} of the guarded edges are
-ghostfolio's, which names its authentication guard on each route rather than once on a parent. The
+\GuardOnlyGuarded{} of those edges run a guard. The
 small tier therefore says what the extractor can assert without evaluating guards. Evaluating them
 would move at most \GuardOnlyGuarded{} edges from may to must. A reader who expected static
 extraction to recover a large deterministic graph should take this as part of the answer.
@@ -443,22 +352,11 @@ names another destination or none, and none is cited by a must edge.
 \end{itemize}
 
 The \RoundTwoOverApprox{} figure needs a caveat, because ``by design'' reads as a property of the
-method. The edge count is dominated by one line, and the location rate by mifos. Of the
-\RoundTwoEdges{} edges, \RoundTwoTopFanoutShare{} (\RoundTwoTopFanoutEdges{}) come from a single call
-site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, which navigates to a template literal whose
-static prefix is empty:
-
-\begin{quote}
-\texttt{this.router.navigateByUrl(`\$\{accountUrl\}/actions/\$\{name\}`)}
-\end{quote}
-
-\noindent With no prefix to narrow on, the site over-approximates to every declared route in an
-application that declares six hundred of them. mifos supplies \RoundTwoMifosEdgeShare{} of the
-corpus's edges, and that one line supplies half of those. The line inflates the edge count, but
-over-approximation remains the large majority of cited locations without it. The rate is therefore a
-property of how the method handles non-literal prefixes on this corpus, mostly on mifos. The case also argues for a prefix floor. A site whose
-static prefix is empty tells the analysis nothing, and the model would lose nothing by recording it
-as a dynamic sink instead of as \RoundTwoTopFanoutEdges{} may edges.
+method. Of the \RoundTwoEdges{} edges, \RoundTwoTopFanoutShare{} (\RoundTwoTopFanoutEdges{}) come from a
+single call site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, a \texttt{navigateByUrl} to a
+template literal whose static prefix is empty, which over-approximates to every declared route.
+The rate is therefore a property of how the method handles non-literal prefixes on this corpus, mostly
+on mifos, and over-approximation remains the large majority of cited locations without that line.
 
 \begin{table}[t]\footnotesize
 \caption{The route configuration the framework holds, against the extractor's node set, as
@@ -471,8 +369,7 @@ extractor has no node for, and \emph{prefix only} those further addresses the fr
 configuration holds where a component is placed but no screen of the address's own is: in
 \ProbeMissedPrefixUnanswered{} the route is a prefix with no empty-path child, and in
 \ProbeMissedPrefixRedirect{} its empty-path child is a redirect, and in neither case is the
-extractor wrong to mint no screen there. The column is reported so that \emph{mounted}
-less \emph{nodes} is accounted for in full.
+extractor wrong to mint no screen there.
 \emph{Incomplete} is the extractor's own statement, from its soundiness notes, that part of the
 route set was beyond it.}
 \label{tab:probe}
@@ -487,8 +384,7 @@ Across the corpus the compared graph declares \ProbeInvented{} screens that the 
 at. Over \ProbeApps{} applications, \ProbeRoutes{} route entries and \ProbeNodes{} nodes, every
 address the extractor claims is an address the framework's own configuration mounts. This is
 external evidence about these six applications that no node is minted at an address the application
-does not mount. It was measured on an earlier graph with the same node total (Table~\ref{tab:provenance}), which had been corrected using earlier findings of this check. It is a precondition of the must-tier property and not part of it. An address behind
-a guard that always refuses still counts as mounted, so the runtime route oracle could not expose such a node. The
+does not mount. It was measured on an earlier graph with the same node total (Table~\ref{tab:provenance}), which had been corrected using earlier findings of this check. It is a precondition of the must-tier property and not part of it. The
 two static readers could not produce this evidence, because an address both of them place at the
 wrong prefix is an address they agree on.
 
@@ -569,11 +465,8 @@ generated from those two runs.
 census, the expansion check, the witness check, the guard-only run, the call-graph counts, the
 ablation, the ground truth and the mutation run.
 \item \texttt{mutation-sweep.mjs} records the sweep of the demotion rules apart, because it runs the
-adapter's test suite once per rule (about forty minutes). It is refused if recorded on other rules than
-the commit's.
+adapter's test suite once per rule.
 \end{itemize}
-The scripts need the dependencies of the harness directory, installed with \texttt{npm ci}, and a
-checkout of the extractor at the evaluated commit. The extractor is run from its TypeScript source, so that the checkout being measured is not edited.
 
 The runtime route oracle is re-run by its own documented command, because it needs each application
 built in its development configuration and served to a browser. Its result files record no extractor
@@ -593,10 +486,7 @@ reproducible only once it is published. And the harness version decides several 
 of the extractor, so a result file is comparable only with one made by the same version.
 
 uigraph was developed within this thesis. The version evaluated throughout is the final version:
-extractor commit \texttt{c42f220}, harness 1.9.0 and mutation harness 1.9.1. The sweep of the demotion rules and the
-may-reason census were recorded at \texttt{d05227c}, whose adapter adds only a measurement switch
-that leaves the graphs unchanged. The
-tables of Section~\ref{sec:res-round2} were regenerated at that commit. Its development versions and
+extractor commit \texttt{c42f220}, harness 1.9.0 and mutation harness 1.9.1. Its development versions and
 the corrections between them are listed in Appendix~\ref{app:repairs}.
 
 Table~\ref{tab:provenance} gives, for each group of generated tables, the instrument and data it
@@ -605,7 +495,7 @@ figures of superseded instruments are written by hand. Two groups are historical
 labelled so where printed: the rendered-interface check and the runtime route oracle. They were not
 re-measured on the final version. The runtime route oracle was run on 29 and 30 October against a
 graph whose extractor commit was not recorded. Its node total equals the final screen count, and that
-agreement is its only link to the final graph. The construct prevalence counts read the sources only.
+agreement is its only link to the final graph.
 
 \begin{table}[t]\footnotesize
 \caption{Provenance of the generated tables. \emph{Final} means measured on the instrument
@@ -633,8 +523,7 @@ Rendered-interface check (Table~\ref{tab:scope}) & historical & an earlier graph
 graph; check 1.3.0 & \path{route-probe/results/} \\
 Runtime route oracle (Tables~\ref{tab:probe}, \ref{tab:probe-closure}) & historical, 29--30 Oct &
 oracle 1.0.0, comparison 1.1.0; extractor commit not recorded & \path{route-probe/results/} \\
-Construct prevalence (Table~\ref{tab:approx-counts}) & no extractor & pinned corpus commits &
-\texttt{approx-counts.mjs} over the sources \\
+Construct prevalence (Table~\ref{tab:approx-counts}) & no extractor & pinned corpus commits & \texttt{approx-counts.mjs} over the sources \\
 May-reason census (Table~\ref{tab:mayreasons}) & final & \texttt{d05227c}: \texttt{c42f220} plus a measurement switch &
 \path{results-may-}\allowbreak\path{reasons/} \\
 Earlier work's restrictions (Table~\ref{tab:world}) & no extractor & the independent route parser's final output &

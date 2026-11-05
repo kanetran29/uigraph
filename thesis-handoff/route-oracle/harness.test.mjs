@@ -886,7 +886,8 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
     const tex = path.join(before, 'out.tex')
     run('compare.mjs', [before, after, '--tex', tex])
     const out = fs.readFileSync(tex, 'utf8')
-    expect(out).toContain('realworld & 3.8\\% & 3.8\\% & +0.0 &')
+    // Recovery leads the row; must conversion, RQ1's measure, follows it.
+    expect(out).toContain('realworld & 0 & 0 & 0 & 3.8\\% & 3.8\\% & +0.0 &')
     expect(out).not.toContain('3.9')
     expect(pct1(1, 26)).toBe('3.8')
   })
@@ -928,7 +929,7 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
     const tex = path.join(before, 'out.tex')
     run('compare.mjs', [before, after, '--tex', tex])
     const out = fs.readFileSync(tex, 'utf8')
-    expect(out).toMatch(/realworld & [^\n]* & 1\/1 & 0\/1 &/)
+    expect(out).toMatch(/realworld & [^\n]* & 1\/1 & 0\/1 \\\\/)
   })
 })
 

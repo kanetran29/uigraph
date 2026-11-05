@@ -150,6 +150,17 @@ supersedes every older section where they disagree.
   length about 23 -> 18 words. ch1 gained a two-sentence roadmap. Also: "Section limitations states this as the most
   serious limitation" was unsupported (ch6 never says it) and now reads "discusses both as a limitation". 153 pages.
   Remaining: appendix-a has 68 sentences over 35 words; ch3 still 33.
+- **Condense to ~100 pp (student approved, 5 Nov):** step 1 moved approximations, final-tier soundness, unmounted
+  nodes and reproducibility to a new appendix B (`2de137e`); step 2-3: 7 Sonnet agents cut ch2-ch6 and both
+  appendices (202 cuts applied with a label guard). An Opus gate found the cut had deleted 12 rows of the corrections
+  table (post-hoc fixes, mutation-harness fixes, review-panel fixes) and ~19 other caveats; all restored (fixes 1-20).
+  Also: before-after table now leads with attribution recovery (RQ3), must conversion (RQ1) after it (compare.mjs, test
+  first, 103/103); alfresco "82 %" sentence moved next to its cause. Body ch1-ch7 is now p10-91 (82 pp).
+- **Next, approved by the student:** remove the appendices entirely (model: a friend's 4/5 thesis, 59 pp, no
+  appendix), keeping the corrections disclosure in the body in compact form; convert prose to tables/diagrams (ch7
+  RQ answer table, tab:earlier-only numbers, one structural-reference table for both apps, ablation, RQ4, e2e, ch6
+  threats table, ch3 demotion-conditions table, RQ5 accounting), add a pipeline diagram and a lattice diagram, drop
+  Fig 5.1.
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 
