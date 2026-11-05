@@ -641,6 +641,42 @@ Section~\ref{sec:deadlinks} names as this analysis's gap.
 The base misses are losses of a declared approximation and the dynamic misses are forms the extractor does not read; none is a target only the run time knows, and none was repaired. No other application with a runnable suite remains to test a repair, and a
 repair fitted to this check would be untested by it.
 
+\subsection{Against earlier work}
+\label{sec:res-earlier}
+
+Table~\ref{tab:earlier} gathers, in one place, what the corpus shows about the earlier static
+extractions of Angular navigation (Section~\ref{sec:dynamic-spa}) and about this thesis. Their tools
+were not run. The input restrictions are those the authors state, applied to the route tables the
+independent route parser reads. The other rows reimplement their mechanisms inside uigraph, on
+uigraph's own node extraction, so they measure the mechanisms and not the tools. Every row is
+measured on the corpus uigraph was developed on (Section~\ref{sec:limitations}).
+
+\begin{table}[t]\footnotesize
+\caption{Earlier work and this thesis on the corpus. Columns: the mechanism of Oshima and Kishi
+(\emph{rooted}), with the enclosing routes Rima et al.\ add (\emph{outlet}), and the full analysis.
+A dash marks a figure not measured. All cells are generated figures.}
+\label{tab:earlier}
+\begin{tabularx}{\textwidth}{@{}Yrrr@{}}
+\toprule
+ & rooted & outlet & full \\
+\midrule
+Applications the stated input restrictions admit (Oshima and Kishi) & \EarlierWorkAdmittedApps{} of \EarlierWorkApps{} & -- & \EarlierWorkApps{} of \EarlierWorkApps{} \\
+Sites placed beyond the rooted level, corpus & -- & \AblationOutletAddedSites{} & \AblationAboveRootedSites{} \\
+Structural-reference recall, \GTApp{} & \GTRootedRecall{} & \GTOutletRecall{} & \GTFullRecall{} \\
+End-to-end pairs in the graph, \GTApp{} & \EtoERealworldHitRooted{} of \EtoERealworldPairs{} & -- & \EtoERealworldHit{} of \EtoERealworldPairs{} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two things follow. The restrictions Oshima and Kishi state exclude every application in the corpus:
+all \EarlierWorkParamApps{} declare a route parameter, and all \EarlierWorkNestedApps{} a nested route
+tree. Against their method, the difference is first what it accepts. Against the mechanisms of both
+works, applied inside uigraph, the full analysis adds little: \AblationAboveRootedSites{} sites over the
+rooted level, \AblationAboveRootedShare{} of the corpus, and on \GTApp{} the rooted level already
+holds every observed end-to-end pair. What the corpus does not show is how the earlier tools
+themselves read these applications, since neither was run; Rima et al.\ state no restriction of
+this kind in the sources read (Section~\ref{sec:dynamic-spa}).
+
 \subsection{What the RQ3 evidence supports}
 
 Scope attribution raises measured recovery. Its attributed must tier has \MustWitnessViolations{}
