@@ -1,0 +1,150 @@
+  1	angular/angular	101105	2026-11-04	Deliver web apps with confidence 🚀
+  2	storybookjs/storybook	91461	2026-11-05	Storybook is the industry standard workshop for building, documenting, and testing UI comp
+  3	ionic-team/ionic-framework	52741	2026-11-05	A powerful cross-platform UI toolkit for building native-quality iOS, Android, and Progres
+  4	nrwl/nx	29453	2026-11-04	The Monorepo Platform that amplifies both developers and AI agents. Nx optimizes your buil
+  5	angular/angular-cli	27017	2026-11-05	CLI tool for Angular
+  6	NativeScript/NativeScript	25691	2026-11-02	⚡ Write Native with TypeScript ✨ Best of all worlds (TypeScript, Swift, Objective C, Kotli
+  7	angular/components	25041	2026-11-04	Component infrastructure and Material Design components for Angular
+  8	pubkey/rxdb	23421	2026-11-05	The local-first database that runs on every JS runtime and replicates with your existing b
+  9	jhipster/generator-jhipster	22460	2026-11-05	JHipster is a development platform to quickly generate, develop, & deploy modern web appli
+ 10	ag-grid/ag-grid	15672	2026-11-05	The best JavaScript Data Table for building Enterprise Applications. Supports React / Angu
+ 11	Chocobozzz/PeerTube	15388	2026-11-05	ActivityPub-federated video streaming platform using P2P directly in your web browser
+ 12	BuilderIO/mitosis	14459	2026-10-28	Write components once, run everywhere. Compiles to React, Vue, Qwik, Solid, Angular, Svelt
+ 13	bitwarden/clients	14146	2026-11-05	Bitwarden client apps (web, browser extension, desktop, and cli).
+ 14	openreplay/openreplay	13098	2026-11-04	Session replay, cobrowsing and product analytics you can self-host. Best for reproducing i
+ 15	primefaces/primeng	12480	2026-09-24	The Most Complete Angular UI Component Library
+ 16	linnovate/mean	12039	2026-02-17	The MEAN stack uses Mongo, Express, Angular(6) and Node for simple and scalable fullstack 
+ 17	dotansimha/graphql-code-generator	11265	2026-11-03	A tool for generating code based on a GraphQL schema and GraphQL operations (query/mutatio
+ 18	ghostfolio/ghostfolio	9651	2026-11-04	Open Source Wealth Management Software. Angular + NestJS + Prisma + Nx + TypeScript 🤍
+ 19	gridstack/gridstack.js	9225	2026-11-05	Build interactive dashboards in minutes.
+ 20	NG-ZORRO/ng-zorro-antd	9193	2026-11-04	Angular UI Component Library based on Ant Design
+ 21	tsparticles/tsparticles	9074	2026-11-04	tsParticles - Easily create highly customizable JavaScript particles effects, confetti exp
+ 22	BuilderIO/builder	8884	2026-11-04	Visual Development for React, Vue, Svelte, Qwik, and more
+ 23	getsentry/sentry-javascript	8771	2026-11-05	Official Sentry SDKs for JavaScript
+ 24	ngrx/platform	8342	2026-11-03	Reactive State for Angular
+ 25	jackocnr/intl-tel-input	8256	2026-10-31	For entering, formatting, and validating international telephone numbers. Available in van
+ 26	ng-bootstrap/ng-bootstrap	8217	2026-06-22	Angular powered Bootstrap
+ 27	akveo/nebular	8123	2026-01-15	:boom: Customizable Angular UI Library based on Eva Design System :new_moon_with_face::spa
+ 28	angular/angularfire	7794	2026-11-04	Angular + Firebase = ❤️
+ 29	zhongsp/TypeScript	7410	2026-07-05	TypeScript 使用手册（中文版）翻译。http://www.typescriptlang.org
+ 30	sachinchoolur/lightGallery	7058	2026-11-04	A customizable, modular, responsive, lightbox gallery plugin. 
+ 31	TanStack/form	6763	2026-11-03	🤖 Headless, performant, and type-safe form state management for TS/JS, React, Vue, Angular
+ 32	orval-labs/orval	6588	2026-11-05	orval is able to generate client with appropriate type-signatures (TypeScript) from any va
+ 33	dolanmiu/docx	5987	2026-11-04	Easily generate and modify .docx files with JS/TS with a nice declarative API. Works for N
+ 34	belnadris/angular-electron	5711	2026-09-04	Ultra-fast bootstrapping with Angular and Electron :speedboat:
+ 35	realworld-apps/angular-realworld-example-app	5653	2026-11-02	Exemplary real world application built with Angular
+ 36	valor-software/ngx-bootstrap	5511	2026-08-17	Fast and reliable Bootstrap widgets in Angular (supports Ivy engine)
+ 37	altair-graphql/altair	5433	2026-10-23	✨⚡️ A feature-rich GraphQL Client for all platforms.
+ 38	orneryd/ui-grid	5386	2026-10-24	UI Grid: a Data Grid
+ 39	KingSora/OverlayScrollbars	5237	2026-10-20	A javascript scrollbar plugin that hides the native scrollbars, provides custom styleable 
+ 40	rcbyr/keen-slider	5017	2026-01-22	The HTML touch slider carousel with the most native feeling you will get.
+ 41	surveyjs/survey-library	4920	2026-11-05	Open-source JavaScript form library for React, Angular, Vue, and plain JavaScript. Render 
+ 42	lokalise/i18n-ally	4900	2024-12-13	🌍 All in one i18n extension for VS Code
+ 43	searchkit/searchkit	4860	2026-04-04	React + Vue Search UI for Elasticsearch & Opensearch. Compatible with Algolia's Instantsea
+ 44	capricorn86/happy-dom	4734	2026-11-04	A JavaScript implementation of a web browser without its graphical user interface
+ 45	swimlane/ngx-datatable	4665	2026-08-11	✨  A feature-rich yet lightweight data-table crafted for Angular
+ 46	ngx-translate/core	4659	2026-11-04	The internationalization (i18n) library for Angular
+ 47	ng-alain/ng-alain	4532	2026-10-29	NG-ZORRO admin panel front-end framework
+ 48	mgechev/angular-seed	4517	2025-09-15	🌱 [Deprecated] Extensible, reliable, modular, PWA ready starter project for Angular (2 and
+ 49	swimlane/ngx-charts	4358	2026-10-29	:bar_chart: Declarative Charting Framework for Angular
+ 50	tolgee/tolgee-platform	4155	2026-11-04	Developer & translator friendly web-based localization platform
+ 51	compodoc/compodoc	4117	2026-11-05	:notebook_with_decorative_cover: The missing documentation tool for your Angular, Nest & S
+ 52	taiga-family/taiga-ui	4085	2026-11-05	Angular components library for awesome people
+ 53	alexjlockwood/ShapeShifter	4076	2026-10-15	SVG icon animation tool for Android, iOS, and the web
+ 54	inokawa/virtua	3760	2026-11-05	A zero-config, fast and small virtual list, grid and masonry component for React, Vue, Sol
+ 55	BuilderIO/figma-html	3713	2025-08-19	Convert any website to editable Figma designs
+ 56	ngxs/store	3544	2026-10-30	🚀 NGXS - State Management for Angular
+ 57	dockview/dockview	3508	2026-10-31	Zero dependency docking layout manager supporting tabs, groups, grids and splitviews. Supp
+ 58	revolist/revogrid	3455	2026-11-04	Powerful virtual data table smartsheet with advanced customization. Best features from exc
+ 59	ferdikoomen/openapi-typescript-codegen	3376	2026-10-25	NodeJS library that generates Typescript or Javascript clients based on the OpenAPI specif
+ 60	ng-select/ng-select	3370	2026-11-04	:star: Native angular select component
+ 61	matschik/component-party.dev	3346	2026-10-23	🎉 Web component JS frameworks overview by their syntax and features
+ 62	liuzi6612/nav	3335	2026-06-30	发现导航，好用强大轻量级导航网站 Discover navigation, easy to use, powerful lightweight navigation website
+ 63	remult/remult	3214	2026-11-05	Full-stack CRUD, simplified, with SSOT TypeScript entities
+ 64	analogjs/analog	3206	2026-11-04	The fullstack meta-framework for Angular. Powered by Vite and Nitro
+ 65	spartan-ng/spartan	2982	2026-11-03	Cutting-edge tools powering Angular full-stack development.
+ 66	ngx-formly/ngx-formly	2970	2026-11-04	📝 JSON powered / Dynamic forms for Angular
+ 67	naver/egjs-flicking	2922	2026-10-29	🎠 ♻️ Everyday 30 million people experience. It's reliable, flexible and extendable carouse
+ 68	tomastrajan/angular-ngrx-material-starter	2864	2022-11-22	Angular, NgRx, Angular CLI & Angular Material Starter Project
+ 69	f5/unovis	2864	2026-11-04	Modular data visualization framework for React, Angular, Svelte, Vue, and vanilla TypeScri
+ 70	webosbrew/dev-manager-desktop	2845	2026-11-04	Device/DevMode Manager for webOS TV
+ 71	mattlewis92/angular-calendar	2811	2026-04-08	A flexible calendar component for angular 20.2+ that can display events on a month, week o
+ 72	trungvose/angular-spotify	2785	2026-10-25	Spotify client built with Angular 15, Nx Workspace, ngrx, TailwindCSS and ng-zorro
+ 73	daybrush/scenejs	2772	2023-06-19	🎬 Scene.js is JavaScript & CSS timeline-based animation library
+ 74	eclipsesource/jsonforms	2752	2026-11-05	Customizable JSON Schema-based forms with React, Angular and Vue support out of the box.
+ 75	auth0/angular2-jwt	2621	2026-10-26	Helper library for handling JWTs in Angular apps
+ 76	schedule-x/schedule-x	2609	2026-11-04	JavaScript event calendar. Modern alternative to fullcalendar and react-big-calendar.
+ 77	codingcommons/typesafe-i18n	2478	2026-03-22	A fully type-safe and lightweight internationalization library for all your TypeScript and
+ 78	mgechev/codelyzer	2465	2026-11-02	Static analysis for Angular projects.
+ 79	danielsogl/awesome-cordova-plugins	2452	2026-11-02	Native features for mobile apps built with Cordova/PhoneGap and open web technologies. Com
+ 80	getmeli/meli	2420	2023-03-15	Platform for deploying static sites and frontend applications easily. Automatic SSL, deplo
+ 81	nvh95/jest-preview	2389	2026-04-25	Debug your Jest tests. Effortlessly.🛠🖼 
+ 82	Ismaestro/angular-example-app	2385	2026-09-30	Angular Example App is a beginner-friendly, production-ready web application built with An
+ 83	jsverse/transloco	2285	2026-11-05	🚀 😍 The internationalization (i18n) library for Angular
+ 84	trungvose/jira-clone-angular	2271	2026-04-03	A simplified Jira clone built with Angular, ng-zorro and Akita
+ 85	NathanWalker/angular-seed-advanced	2239	2025-09-15	Advanced Angular seed project with support for ngrx/store, ngrx/effects, ngx-translate, an
+ 86	daybrush/selecto	2231	2024-06-17	Selecto.js is a component that allows you to select elements in the drag area using the mo
+ 87	Teradata/covalent	2222	2026-10-02	Covalent - A Design System for Teradata
+ 88	ascorbic/unpic-img	2096	2026-11-03	Multi-framework responsive image component
+ 89	advanced-chat/advanced-chat-components	2085	2026-09-10	Framework-neutral chat web component and typed Vue 3 component library
+ 90	rx-angular/rx-angular	1965	2026-11-05	Reactive Extensions for Angular.
+ 91	ng-packagr/ng-packagr	1856	2026-11-05	Compile and package Angular libraries in Angular Package Format (APF)
+ 92	KillerCodeMonkey/ngx-quill	1854	2026-10-25	Angular (>=2) components for the Quill Rich Text Editor
+ 93	DevCloudFE/ng-devui	1814	2025-05-22	Angular UI Component Library based on DevUI Design
+ 94	angular-eslint/angular-eslint	1794	2026-11-04	:sparkles: Monorepo for all the tooling related to using ESLint with Angular
+ 95	Litlyx/litlyx	1748	2025-12-03	Powerful Analytics Solution. Setup in 30 seconds. Display all your data on a Simple, AI-po
+ 96	aviabird/angularspree	1715	2025-06-01	angular e-commerce framework for online store
+ 97	vladimiry/ElectronMail	1685	2026-09-29	Unofficial ProtonMail Desktop App
+ 98	taiga-family/maskito	1673	2026-11-04	Collection of libraries to create an input mask which ensures that user types value accord
+ 99	mgechev/ngrev	1573	2023-01-07	Tool for reverse engineering of Angular applications
+100	danrevah/ngx-pipes	1573	2024-01-10	⚡️ Useful pipes for Angular with no external dependencies! 
+101	DavideViolante/Angular-Full-Stack	1564	2026-02-25	Angular Full Stack project built using Angular, Express, Mongoose and Node. Whole stack in
+102	acidb/mobiscroll	1543	2026-10-30	Scheduling, event calendar and resource management UI components, and Mobiscroll Connect, 
+103	FortAwesome/angular-fontawesome	1532	2026-07-02	  Official Angular component for Font Awesome 5+
+104	the-guild-org/apollo-angular	1514	2026-09-11	A fully-featured, production ready caching GraphQL client for Angular and every GraphQL se
+105	ngx-rocket/generator-ngx-rocket	1501	2023-08-28	:rocket: Extensible Angular 14+ enterprise-grade project generator
+106	add2cal/add-to-calendar-button	1488	2026-11-03	Reliably create beautiful Add to Calendar Buttons, where people can add events to their ca
+107	ng-matero/ng-matero	1474	2026-11-01	Angular Material admin template.
+108	thomaschampagne/elevate	1470	2025-08-31	A sport app to "Elevate" your training experience and goals! Track your fitness and progre
+109	jhipster/jhipster-sample-app	1469	2026-09-18	This is a sample application created with JHipster
+110	TrilonIO/aspnetcore-angular-universal	1446	2019-05-26	ASP.NET Core & Angular Universal advanced starter - PWA w/ server-side rendering for SEO, 
+111	tomalaforge/angular-challenges	1394	2026-08-31	Set of Angular challenges to practise and train on Angular
+112	crashmax-dev/fireworks-js	1388	2024-07-16	🎆 A simple fireworks library! Ready to use components available for React, Vue 3, Svelte, 
+113	nestjs/docs.nestjs.com	1376	2026-11-05	The official documentation https://docs.nestjs.com 📕
+114	emonney/QuickApp	1354	2026-09-01	AI-ready reference architecture for Angular / ASP.NET Core projects. A hardened foundation
+115	VadimDez/ng2-pdf-viewer	1352	2026-02-05	📄 PDF Viewer Component for Angular
+116	angular-redux/store	1322	2019-05-05	Angular 2+ bindings for Redux
+117	udos86/ng-dynamic-forms	1307	2024-02-06	Rapid form development library for Angular
+118	housseindjirdeh/angular2-hn	1290	2023-01-05	:boom: Progressive Hacker News client built with Angular
+119	surveyjs/survey-creator	1286	2026-11-05	Embeddable JSON form builder for React, Angular, Vue, and plain JavaScript. Drag-and-drop 
+120	ngx-rocket/starter-kit	1259	2022-09-07	:package: Angular 14+ starter kit for enterprise-grade projects
+121	orizens/ngx-infinite-scroll	1253	2026-07-06	Infinite Scroll Directive for Angular
+122	NepipenkoIgor/ngx-mask	1242	2026-10-29	Angular Plugin to make masks on form fields and html elements.
+123	any86/any-touch	1241	2026-01-09	:wave: Touch gesture library, 1kb~5kb, compatible with PC / mobile
+124	damienbod/angular-auth-oidc-client	1234	2026-11-04	npm package for OpenID Connect, OAuth Code Flow with PKCE, Refresh tokens, Implicit Flow
+125	michaelbromley/ngx-pagination	1233	2022-11-21	Pagination for Angular
+126	NativeScript/nativescript-angular	1219	2024-10-28	Integrating NativeScript with Angular
+127	Zarestia-Dev/rclone-manager	1215	2026-11-04	RClone Manager is a cross-platform GUI application designed to help users manage Rclone re
+128	jfcere/ngx-markdown	1197	2026-11-04	Angular markdown component/directive/pipe/service to parse static, dynamic or remote conte
+129	zard-ui/zardui	1197	2026-11-05	A collection of beautiful and accessible components for Angular based in Shadcn/ui and Ng-
+130	xieziyu/ngx-echarts	1191	2026-06-11	An angular (ver >= 2.x) directive for ECharts (ver >= 3.x)
+131	fullcalendar/fullcalendar-angular	1167	2026-10-15	The official Angular component for FullCalendar
+132	just-jeb/angular-builders	1164	2026-11-05	Angular build facade extensions (Jest and custom webpack configuration) 
+133	help-me-mom/ng-mocks	1164	2026-11-05	Angular testing library for mocking components, directives, pipes, services and facilitati
+134	urish/ngx-moment	1155	2023-08-25	moment.js pipes for Angular
+135	aws-amplify/amplify-ui	1145	2026-11-04	Amplify UI is a collection of accessible, themeable, performant React (and more!) componen
+136	mathisGarberg/angular-folder-structure	1136	2023-02-04	The project is based on best practices from the community, other github Angular projects a
+137	darula-hpp/shimmer-from-structure	1134	2026-10-04	A structure-aware skeleton loader that mirrors your rendered UI at runtime. Zero layout du
+138	teleporthq/teleport-code-generators	1117	2026-11-04	A collection of code generators for modern JavaScript applications
+139	maciejtreder/ng-toolkit	1110	2023-01-24	:star: Angular tool-box! Start your PWA in two steps! Add Serverless support for existing 
+140	ant-design/ant-design-icons	1102	2026-08-31	⭐ Ant Design SVG Icons
+141	CirclonGroup/angular-tree-component	1098	2024-07-17	A simple yet powerful tree component for Angular (>=2)
+142	comarkdown/comark	1088	2026-11-05	Comark is an open-source Markdown parser and renderer with components, attributes and plug
+143	testing-library/eslint-plugin-testing-library	1064	2026-10-31	ESLint plugin to follow best practices and anticipate common mistakes when writing tests w
+144	ali-bouali/book-social-network	1061	2024-09-10	BSN is a social network platform to exchange books between the members.
+145	MurhafSousli/ngx-progressbar	1051	2026-02-07	Angular progress bar ☄
+146	CreativeIT/material-angular-dashboard	1046	2023-01-06	Material Angular Admin Template
+147	stefanoslig/angular-ngrx-nx-realworld-example-app	1043	2026-08-05	Real world application built with Angular 21, NgRx 21, nrwl/nx 22
+148	po-ui/po-angular	1017	2026-11-03	Biblioteca de componentes Angular.
+149	angulartics/angulartics2	1005	2026-01-13	Vendor-agnostic analytics for Angular2 applications.
+150	wordpress-clients/hybrid	1002	2018-11-24	[I don't have time to work on this anymore. Use at your own risk] Build WordPress based PW

@@ -108,3 +108,25 @@ Predictions (written now, knowing the first round)
 
 What each outcome does to the thesis
   As above: every outcome of both rounds is reported with generated macros; nothing is repaired before submission.
+
+=====================================================================
+Addendum D (5 Nov 2026, after walking positions 73-150, before mapping either application)
+=====================================================================
+The search (heldout/search-round2.txt) returns 150 repositories, not 180: no more have over 1000 stars. Its positions
+1-72 are in the same order as in Addenda A and B. Walk of positions 73-150, in order:
+  frameworks, libraries, components, tools, generators, design systems, seeds (S1): 73-79, 81, 83, 85-94, 98-100,
+  102-106, 112, 115-117, 119, 121-126, 128-135, 137-143, 145, 148, 149;
+  templates, starters, samples, examples, courses (S1): 82 Ismaestro/angular-example-app, 107 ng-matero,
+  109 jhipster-sample-app, 110 aspnetcore-angular-universal, 111 angular-challenges, 114 QuickApp (a reference
+  architecture), 120 ngx-rocket/starter-kit, 136 angular-folder-structure, 146 material-angular-dashboard,
+  147 angular-ngrx-nx-realworld-example-app;
+  not pushed since 5 May 2026 (S4): 80 meli (2023), 84 jira-clone-angular (3 Apr 2026), 95 litlyx (Dec 2025),
+  96 angularspree (Jun 2025), 101 Angular-Full-Stack (Feb 2026), 108 elevate (Aug 2025), 118 angular2-hn (2023),
+  144 book-social-network (2024), 150 wordpress-clients/hybrid (2018);
+  no @angular/router and no nested route (S2): 127 Zarestia-Dev/rclone-manager.
+  Taken: 97 vladimiry/ElectronMail, 64df3683e1eecaa202e04a1ad346fd82fd3cfb44, a desktop mail client whose Angular
+  interface is src/web/browser-window (nested routes, loadChildren, canActivate guards; pushed 2026-09-29);
+  113 nestjs/docs.nestjs.com, 133ffa757f21bb7dd7a3650c4e962e2e60b40a81, the deployed NestJS documentation site, an
+  Angular application at the repository root (nested routes, loadChildren, a canActivate guard; pushed 2026-11-05).
+Two qualify, fewer than four, so by Addendum C the second round runs on these two. The screening clones were made
+with --depth 1 of the default branch; heldout.sh fetches the same SHAs again.
