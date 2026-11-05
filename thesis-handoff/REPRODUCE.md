@@ -42,12 +42,12 @@ bash thesis-handoff/regen/all.sh --write    # take the regenerated values into t
 ```
 
 The run tables come from `route-oracle/results-round2/final16.tgz` (the two `run-all.mjs` runs at
-`a9d29df`) and the level graphs from `route-oracle/results-ablation/ablation.tgz` (`a9d29df`). Nine
-scripts read the corpus graphs and sources of a work directory made by section 2 (`UIGRAPH_WORK`,
+`a9d29df`) and the level graphs from `route-oracle/results-ablation/ablation.tgz` (`a9d29df`). Eight
+scripts read the corpus graphs of a work directory made by section 2 (`UIGRAPH_WORK`,
 default `~/personal/uigraph-work`), and six read files that cannot be committed: Rima et al.'s
 reference and their tool's output (the repository has no licence) and the alfresco level graphs. A
 script whose input is missing reports `skip`, not a failure. `regen/README.md` lists every script,
-the table it feeds and the data it reads. On 5 November 2026 all 31 regenerable files matched the
+the table it feeds and the data it reads. On 6 November 2026 all 31 regenerable files matched the
 committed ones; `generated-node-audit.tex` records extractor `4505fd2a`, which is not in the
 repository, and is kept as committed.
 
@@ -157,5 +157,6 @@ Three groups are printed as records of an earlier instrument: the first-round no
 repository), the earlier instrument and the round's own must tier (`generated-earlier.tex`, read
 from git at `f17a302` and `7d109c7` by `earlier-instrument.mjs`), and the runtime scope and route
 checks (`route-probe/results/`, made on 29 and 30 October; the route check records no extractor
-commit). `generated-approx.tex` reads only the
-application sources.
+commit). The route check is compared again with the final graph by `route-probe/final-check.mjs`
+(`generated-probe-final.tex`), from that reading and `route-probe/results-final/`, which
+`post-remeasure.sh` rewrites.

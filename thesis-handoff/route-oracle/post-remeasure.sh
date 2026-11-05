@@ -55,4 +55,11 @@ node ceiling.mjs --classes ceiling-classes.json \
   --gt realworld="$W/gt-realworld.json" --gt alfresco="$W/gt-alfresco.json" \
   --e2e realworld=../e2e-nav/results/realworld --e2e mifos=../e2e-nav/results/mifos \
   --tex ../thesis/generated-ceiling.tex
+echo "== runtime route oracle against the final graph"
+APPS="realworld:. alfresco:projects/aca-content ghostfolio:apps/client k8sdash:modules/web bitwarden:apps/web mifos:."
+for p in $APPS; do a=${p%%:*}; s=${p#*:}
+  node "$H/route-probe/compare-probe.mjs" --probe "$H/route-probe/results/$a.probe.json" --oracle "$W/C-$a.json" \
+    --db "$W/corpus/$a/$s/uigraph.db" --out "$H/route-probe/results-final/$a.cmp.json" > /dev/null 2>&1
+done
+(cd "$H/route-probe" && node final-check.mjs --tex ../thesis/generated-probe-final.tex)
 echo "== post done"

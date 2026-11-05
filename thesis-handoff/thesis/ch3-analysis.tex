@@ -92,21 +92,18 @@ enclosing code executes, over the declared route set, under the route-order assu
 Section~\ref{sec:approximations}, and for a site whose component is not placed by a join over an
 ambiguous selector, within the following execution model: the event is a plain primary
 activation that navigates the current browsing context, no other listener the event reaches
-starts a navigation, and no call the reader cannot resolve to a body in the application, nor any
-work the handler schedules for later, starts one.
+starts a navigation, no call the reader cannot resolve to a body in the application, nor any work the handler schedules for later, starts one, and every synchronous call that runs before the navigation returns normally.
 \end{claim}
 
 \noindent The execution model is part of the claim and not a detail of the implementation.
-Section~\ref{sec:approximations} lists the cases it excludes: a call into a library that cancels
-the navigation by starting another, a second listener on the element or an ancestor, and an
-activation with a modifier key or into another browsing context. On such an execution a must edge
+The cases it excludes are a call into a library that cancels the navigation by starting another, a second listener on the element or an ancestor, an activation with a modifier key or into another browsing context (Section~\ref{sec:approximations}), and a synchronous call before the navigation that throws. On such an execution a must edge
 can name a navigation that does not complete, and the claim says nothing about it.
 
 The route-order assumption of Claim~\ref{claim:must} carries much of the tier: without it the
 must tier holds \RouteOrderMustWithout{} of its \RouteOrderMust{} edges, on
 \RouteOrderSitesWithout{} of \RouteOrderSites{} constructs.
 
-The must tier is therefore a lower bound only relative to four assumptions, each with a class of counterexample. \emph{A1, route order:} a catch-all in a separately registered route table is matched after every route of the others; another registration order breaks it, and \RouteOrderResting{} must edges, on \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications, rest on it. \emph{A2, selectors:} no component is placed by a join over an ambiguous selector; no final must edge rests on such a join (Section~\ref{sec:inputs}). \emph{A3, calls:} a call with no body in the application starts no navigation; a library call that navigates breaks it. \emph{A4, execution model:} the plain primary activation above; a modifier key, a second listener or another browsing context breaks it. The edges resting on A3 and A4 are not counted, and neither is checked against a run.
+The must tier is therefore a lower bound only relative to four assumptions, each with a class of counterexample. \emph{A1, route order:} a catch-all in a separately registered route table is matched after every route of the others; another registration order breaks it, and \RouteOrderResting{} must edges, on \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications, rest on it. \emph{A2, selectors:} no component is placed by a join over an ambiguous selector; no final must edge rests on such a join (Section~\ref{sec:inputs}). \emph{A3, calls:} a call with no body in the application starts no navigation; a library call that navigates breaks it. \emph{A4, execution model:} the plain primary activation above, in which every synchronous call before the navigation returns normally; a modifier key, a second listener, another browsing context or a synchronous call that throws breaks it. The edges resting on A3 and A4 are not counted, and neither is checked against a run.
 
 \textbf{What the evaluation tests.} The evaluation tests a necessary condition of this claim
 rather than the claim itself. The distinction decides how the figures of
@@ -181,7 +178,7 @@ so what follows it there does not count, but its callers go on as soon as the fu
 awaits, so what they do still counts. A call the reader cannot resolve to a body in the
 application is taken not to navigate (Section~\ref{sec:approximations}).
 
-An exception from an earlier synchronous call is not counted, since every call can throw; an \texttt{await} is counted, because a rejected request is an ordinary outcome. The router's fetch of a lazily loaded route is not counted: a failed chunk load is a fault of the deployment.
+An exception from an earlier synchronous call is not counted, since every call can throw, and Claim~\ref{claim:must} assumes instead that such calls return normally. An \texttt{await} is counted, because a rejected request is an ordinary outcome. The router's fetch of a lazily loaded route is not counted: a failed chunk load is a fault of the deployment.
 
 \textbf{How far the rules are checked.} Unit tests cover each rule in both directions, and a
 mutation sweep deletes each rule in turn and checks that some test fails
@@ -219,7 +216,7 @@ boundary.
 \section{Scope attribution}
 \label{sec:attribution}
 
-Scope attribution is specified here over three \emph{input relations}. The analysis that is evaluated
+Scope attribution is specified over five \emph{input relations}, three of them here. The analysis that is evaluated
 implements all three, and adds fallbacks after the fixpoint, one of which is not monotone; termination and the least-solution property hold for the fixpoint core
 only:
 \begin{itemize}
@@ -266,7 +263,7 @@ widens it with fallbacks that are not constraints of the model
 A screen in $\mathit{scope}^{*}(x) \setminus \mathit{scope}(x)$ is a scope too small, and a
 screen in $\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ is a scope too large. No true scope
 is established anywhere in this thesis. For two applications a third set is read off the sources
-by hand: the \emph{structural reference} $\mathit{scope}^{R}(x)$. It applies the analysis's
+by the author for one and by the AI assistant for the other: the \emph{structural reference} $\mathit{scope}^{R}(x)$. It applies the analysis's
 own relations without its implementation (Section~\ref{sec:res-groundtruth}). Agreement between
 $\mathit{scope}$ and $\mathit{scope}^{R}$ shows that the relations are implemented as stated. It
 does not show that either equals $\mathit{scope}^{*}$. Everywhere else the thesis reports the
@@ -464,9 +461,9 @@ The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-abl
   \draw[dashed, muted] (cls) -- (full);
   \node[lbl, above=1mm of cls, text width=26mm] {beside \emph{full}: service join per class};
 \end{tikzpicture}
-\caption{Attribution levels: ownership and containment baselines $\subset \dots \subset$ service join.}
+\caption{Attribution levels: ownership and containment baselines $\subset \dots \subset$ full analysis.}
 \label{fig:lattice}
-\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what this thesis adds; \emph{class} is the per-class variant of the service join. The levels nest by construction: each withholds every mechanism above it (Section~\ref{sec:res-ablation}).}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what this thesis adds; \emph{class} is the per-class variant of the service join. Both orange levels also carry the fallback join and the stand-ins for guards and effects. The levels nest by construction: each withholds every mechanism above it (Section~\ref{sec:res-ablation}).}
 \end{figure}
 
 \textbf{Component nesting.} Every component in the application, excluding test hosts and stories,
@@ -562,4 +559,4 @@ service'' of Table~\ref{tab:loss-rules}. One change was made to the baseline its
 
 \section{Summary}
 
-The chapter defined a graph of screens and edges with three confidence labels and one soundness claim for the must tier, relative to the declared route set, the route-order assumption and an execution model; the evaluation tests only a necessary condition of it. Scope attribution assigns each navigation site a set of screens as a least fixpoint over four input relations. The prototype implements three of them, replaces the dispatch and guard relations by stand-ins, and widens the scopes with fallbacks that are not part of the model. Chapter~\ref{ch:evaluation} describes how the analysis is measured.
+The chapter defined a graph of screens and edges with three confidence labels and one soundness claim for the must tier, relative to the declared route set, the route-order assumption and an execution model; the evaluation tests only a necessary condition of it. Scope attribution assigns each navigation site a set of screens as a least fixpoint over five input relations. The prototype implements three of them, replaces the dispatch and guard relations by stand-ins, and widens the scopes with fallbacks that are not part of the model. Chapter~\ref{ch:evaluation} describes how the analysis is measured.

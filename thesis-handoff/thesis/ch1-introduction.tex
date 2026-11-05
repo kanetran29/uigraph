@@ -83,7 +83,7 @@ This thesis builds a static extractor for Angular and carries out that measureme
 It also proposes an analysis for the largest loss it finds under the order of its loss rules. The analysis,
 scope attribution, is stated as a dataflow analysis over a lattice of screen sets. Nothing in
 its formulation depends on this extractor.
-The measurement is the main contribution and scope attribution a modest extension: most of what attribution recovers comes from mechanisms of earlier work, which it contains as levels, and its one new step, the service join, adds \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) over the outlet level (Section~\ref{sec:res-ablation}).
+The measurement is the main contribution and scope attribution a modest extension: most of what attribution recovers comes from mechanisms of earlier work, which it contains as levels, and the one step it adds places navigation inside services, guards and effects, adding \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) over the outlet level. That step bundles a service join through a member-level call graph with a fallback join and stand-ins for guards and effects; the call graph alone adds \AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over the simpler per-class join it replaced (Section~\ref{sec:res-ablation}).
 
 A method of this kind cannot be assessed without being instantiated, because the
 questions asked here are empirical. They ask how much of the navigation in real applications it

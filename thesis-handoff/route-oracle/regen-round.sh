@@ -20,7 +20,7 @@
 # UNKNOWN, which is the premise of the round, and unexplained.mjs exits 1 for it. So the runs are
 # not chained, and this script is not run under set -e; the fin run is the one that must exit 0,
 # and nothing is copied into the thesis unless it did. To keep what a regeneration read, archive
-# the out dir as results-round2/final7.tgz does.
+# the out dir as results-round2/final16.tgz does.
 set -u
 if [ $# -ne 2 ]; then echo "usage: regen-round.sh <work dir holding corpus/<app>> <out dir>" >&2; exit 2; fi
 W=$(cd "$1" && pwd) || exit 2

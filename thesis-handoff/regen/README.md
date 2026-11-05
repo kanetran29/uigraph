@@ -51,6 +51,7 @@ tool's output have no licence).
 | `sweep` | appendix | repo `results-must/mutation-sweep.json` |
 | `must-witness` | tab:oracles, tab:before-after; ch5–7 | repo `results-must/witness/` |
 | `probe` | tab:scope; ch5–7 | repo `route-probe/results*/` |
+| `probe-final` | ch5 sec:res-probe, ch4 | repo `route-probe/results/` (runtime reading) and `results-final/` (that reading against the final graph) |
 | `rima` | tab:rima, tab:earlier; ch5, ch7 | repo `rima/graphs/` + work dir (their reference) |
 | `rimarep` | tab:rima; ch5, ch7 | repo `rima/graphs-repaired/` + work dir (their reference) |
 | `rima-verdicts` | tab:rima; ch5, ch6 | repo `rima/` readings + work dir (their reference) |
@@ -65,7 +66,6 @@ tool's output have no licence).
 | `route-order` | abstract, ch3, ch7 | work dir `corpus/` graphs |
 | `callgraph` | appendix | work dir `corpus/` graphs |
 | `may-reasons` | tab:mayreasons; abstract, ch5, ch7 | work dir `may-reasons/` + `corpus/` graphs |
-| `approx` | supplementary only (dropped appendix) | work dir `corpus/` sources |
 | `node-audit` | appendix | none: historical (extractor 4505fd2a is not in the repository), always `skip` |
 
 Diagrams (`thesis/figures/*.tex`) are TikZ drawn by hand and hold no measured number; the plot in

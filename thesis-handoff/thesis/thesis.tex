@@ -24,10 +24,10 @@
 \input{generated-tables}
 \input{generated-before-after}
 \input{generated-rq4}
-\input{generated-approx}
 \input{generated-node-audit}
 \input{generated-round2}
 \input{generated-probe}
+\input{generated-probe-final}
 \input{generated-expansion}
 \input{generated-ablation}
 \input{generated-groundtruth}
@@ -94,10 +94,12 @@ For it the thesis proposes scope attribution, a dataflow analysis that computes 
 each navigation site can fire.
 
 Few transitions are certain. The corpus yields \RouteOrderMust{} edges classified as always firing (\CensusMustKdash{} from one toolbar of untested scope), \RouteOrderMustWithout{}
-without an assumed route order and \GuardOnlyMust{} if every guard admits the user; this is largely a
-matter of definition, since \MayAppAny{} of the \MayOnlyConstructs{} witness locations that stay merely possible
+without an assumed route order and \GuardOnlyMust{} if every guard admits the user. This is largely a
+matter of definition: \MayAppAny{} of the \MayOnlyConstructs{} witness locations that stay merely possible
 sit behind an application guard or branch. Most causes of loss traced in the source are
-constructs a static reader can read. Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to it (\AttrRecoveredShareNoMifos{} without the largest application), almost all as possible transitions; its service join, generalising Rima et al.'s bounded router-service tracing, adds \AblationFullAddedShare{} of the sites. Its screen sets are \BaselineFactorMin{} to \BaselineFactorMax{} times narrower than all screens, but its precision against an AI-built reference that applies the analysis's own relations to one application's source is \GTAlfFullPrecision{} (per-class join: \GTAlfClassPrecision{}). Beside Rima et al.'s tool, on five applications grouped after reading, its relative recall (share of real transitions either finds, as an AI model read them) is \HHCorpusNoMifosOursRecall{} against \HHCorpusNoMifosTheirsRecall{}, at precision \HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}; on the largest application, most of whose pairs only the shell reaches, precision is \HHMifosOursPrecision{}, and the pooled comparison does not rank the tools. Mutation testing only sanity-checks the witness mapping.
+constructs a static reader can read.
+
+Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to it (\AttrRecoveredShareNoMifos{} without the largest application), almost all as possible transitions and mostly through mechanisms of earlier work. The step it adds places navigation inside services, guards and effects; built on a member-level call graph that generalises Rima et al.'s bounded router-service tracing, it adds \AblationFullAddedShare{} of the sites, the call graph alone \AblationCallGraphNetShare{} over a per-class join. Attribution's screen sets are \BaselineFactorMin{} to \BaselineFactorMax{} times narrower than all screens. Against an AI-built reference that applies the analysis's own relations to one application, the step trades precision for recall: on the \GTAlfSites{} sites the reference decides, it recalls \GTAlfFullRecall{} of the pairs against \GTAlfClassRecall{} for the per-class join, at \GTAlfFullPrecision{} precision against \GTAlfClassPrecision{}. Beside Rima et al.'s tool, on five applications grouped after reading, this extractor's relative recall (share of real transitions either finds, as an AI model read them) is \HHCorpusNoMifosOursRecall{} against \HHCorpusNoMifosTheirsRecall{}, at precision \HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}; on the largest application, most of whose pairs only the shell reaches, its precision is \HHMifosOursPrecision{}. The tools differ in coverage and graph width, and the comparison does not rank them. Mutation testing only sanity-checks the witness mapping.
 
 A declared route table is an insufficient basis for static navigation extraction. The tool was developed on this corpus, so the figures are in-sample; consumer use is not measured.
 

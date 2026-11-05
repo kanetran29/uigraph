@@ -184,7 +184,7 @@ edge after attribution.
 
 Attribution recovers \AttrRecovered{} of the \AttrLost{} constructs the loss rules assign to it.
 Per application the median recovery is \AttrRecoveredMedian{} (range \AttrRecoveredRange{}); pooled over the six applications, this is \AttrRecoveredShare{} of them, which this thesis calls the attribution recovery. Most of them are on mifos. Without mifos the share is \AttrRecoveredShareNoMifos{}, and \AttrUnderHalfApps{} of the six applications recover under half. It takes the graphs from \AttrEdgesBefore{} edges to
-\AttrEdgesAfter{}. Most of the recovery comes from mechanisms earlier work already had; the new step, the service join, adds \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) over the \emph{outlet} level (Section~\ref{sec:res-ablation}).
+\AttrEdgesAfter{}. Most of the recovery comes from mechanisms earlier work already had; the new step, the \emph{full} level (the service join through a member-level call graph, with a fallback join and stand-ins for guards and effects), adds \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) over the \emph{outlet} level, and the call graph alone \AblationCallGraphNetSites{} (\AblationCallGraphNetShare{}) over the per-class rule it replaced (Section~\ref{sec:res-ablation}).
 
 Measured by RQ1's must conversion, the gain is far smaller. Of the recovered
 constructs, \AttrRecoveredMust{} earn must and \AttrRecoveredMay{} earn may, and \AttrAppsGained{}
@@ -377,7 +377,7 @@ this thesis adds: \GTAlfSites{} sites and \GTAlfPairs{} pairs. Scoring every lev
 reading has both directions, which no other method here has. Table~\ref{tab:groundtruth} reports both.
 
 \begin{table}[t]\footnotesize
-\caption{Each attribution level against the hand-read structural reference of each application.}
+\caption{Each attribution level against the structural reference of each application.}
 \label{tab:groundtruth}
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
@@ -399,8 +399,7 @@ class & \GTClassPrecision{} & \GTClassRecall{} & \GTClassRecallNonShell{} & \GTA
 On \GTApp{} the table is produced only if each level's pairs are a subset of the next, and the full
 level asserts no pair outside the reference, so the levels differ only in recall. Most of the
 recovery is produced by mechanisms earlier work already had: the shell rule (\emph{rooted}) and the
-enclosing routes (\emph{outlet}), and the \emph{full} step adds the remaining \GTOutletMissing{} pair. On alfresco the gain
-over the levels of earlier work comes from the service join, and the precision order reverses: the
+enclosing routes (\emph{outlet}), and the \emph{full} step adds the remaining \GTOutletMissing{} pair. On alfresco the gain over the levels of earlier work comes from the \emph{full} step, whose added sites lie in services, guards and effects, and the precision order reverses: the
 full analysis is less precise than both the lower levels and the class join.
 
 \begin{itemize}
@@ -883,8 +882,7 @@ keyed on addresses can represent: entries on a named outlet or decided by a \tex
 development configuration, in a headless browser, reads the live router's route configuration after expanding
 every lazily loaded subtree, and counts an address as mounted when the configuration places a component there
 on the primary outlet. No route file is parsed. Against the \ProbeScreens{} addresses it mounts, the node set
-is \ProbeNodes{} of \ProbeScreens{}. The oracle ran on an earlier graph (29--30 October) with the same node
-total, one corrected using earlier findings of this check. The oracle's classification was itself checked by navigation and agrees on \ProbeAnswerAgreed{} of \ProbeAnswerChecked{} addresses; the \ProbeMissed{} unminted addresses are not individually checked.
+is \ProbeNodes{} of \ProbeScreens{}. The oracle read the applications once, on 29--30 October, against an earlier graph already corrected using the check's earlier findings; the applications were not read again. Compared with the final graph, that archived reading gives on \ProbeFinalSame{} of the \ProbeFinalApps{} applications the same node count (\ProbeFinalNodes{} in all) and the same address sets: \ProbeFinalInvented{} claimed but not mounted and \ProbeFinalMissed{} unminted. The oracle's classification was itself checked by navigation and agrees on \ProbeAnswerAgreed{} of \ProbeAnswerChecked{} addresses; the \ProbeMissed{} unminted addresses are not individually checked.
 
 \section{Dead links, found from the source}
 \label{sec:deadlinks}
