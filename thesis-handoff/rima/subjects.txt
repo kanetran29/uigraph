@@ -1,0 +1,9 @@
+# slug repo commit subdir  (commit = last default-branch commit dated on or before the subject's ground-truth generatedDate)
+posts-users-ui-ng anonbnr/posts-users-ui-ng c51b8489a8eda0642ada98e7ac1c98a59a53044f .
+heroes-angular johnpapa/heroes-angular 357d444c6729373bf0385e7de152d9e3872ae3a6 .
+airbus-inventory Akash-goyal-github/Inventory-Management-System 256ebe9d834c690e2d1c639dfefd00df6f3c408b AirbusInventory
+spring-petclinic-angular parsaalian/autoe2e 6f5360594ef64af1bd311b43977639fdab3fd24e benchmark/pet-clinic/spring-petclinic-angular
+ever-traduora parsaalian/autoe2e 6f5360594ef64af1bd311b43977639fdab3fd24e benchmark/ever-traduora/webapp
+angular-jumpstart DanWahlin/Angular-JumpStart bebc5431dfc65111a88bc2a5a27abf59888dd91d .
+event-booking-mean bekitos101/Event-Booking-App-MEAN-STACK d1f11b1b3017ef5c30a0701a47c83a1a0265a56a EventNest/Frontend/app
+# reference: softscanner-sw/softscanner_fa f33003fbe83a34fa6cf7f2965aa3cc3906594957 docs/analysis/phase-b/gt/<slug>.json

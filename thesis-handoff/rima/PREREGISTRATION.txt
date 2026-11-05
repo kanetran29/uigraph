@@ -1,0 +1,92 @@
+Pre-registration: same-dataset comparison with Rima et al. (rima2026e2e)
+Written 5 Nov 2026, before any of the seven subjects was mapped by this thesis's extractor.
+Extractor frozen at packages/ commit 2aac284 (repository HEAD 35a2132). The reference files and
+the subjects' sources have been read only to count the reference's entries and pairs.
+
+Why
+  The thesis compares its scope attribution with the mechanism of Rima et al. by reimplementing
+  that mechanism (the outlet level) on its own corpus. The user asked for a comparison on the same
+  dataset. Rima et al. publish seven Angular subjects and, for each, a ground truth of workflows
+  (softscanner-sw/softscanner_fa f33003f, docs/analysis/phase-b/gt/<subject>.json). None of the
+  seven was used in developing the extractor, so this is the thesis's only out-of-sample check.
+
+What the reference is, stated before scoring
+  Each ground-truth entry is one workflow their pipeline (stage A2) enumerated, annotated by hand
+  with its start routes and its terminal route. The entries were generated from their tool's own
+  output (field a2Source), so their tool holds every entry by construction; their reported figure
+  on this set is test-execution success (213/303 in their ROADMAP, Stage 5), not graph recall.
+  The comparison therefore asks: of the screen-to-screen transitions their pipeline found and
+  their authors annotated, how many does this thesis's graph hold, at each attribution level;
+  and what does the graph hold beyond them.
+
+Subjects and inputs
+  rima/subjects.txt: each subject's upstream at the last default-branch commit dated on or before
+  the subject's ground-truth generatedDate (their registry pins no commit). The subdirectory and
+  framework are those of their registry. node_modules are not installed; the extractor reads
+  sources only, as for the corpus. Their ground-truth files are not copied into this repository
+  (the repository has no licence); the scorer reads them from a checkout at f33003f.
+
+Unit and counting rules (fixed now)
+  - Reference pair: (s, t) for every entry whose terminal is an internal route t and whose start
+    routes do not contain t, one pair per start route s. Start routes: expectedIntent.
+    startRouteFullPaths, or for the petclinic schema the navigate-to-route preconditions. Terminal:
+    expectedIntent.terminalRoutePath, or for the petclinic schema expectedPlan.terminalUrl when it
+    starts with '/'. Entries with an external terminal, no terminal, or a terminal among their
+    start routes are counted per class and excluded from the pairs. Pairs are deduplicated.
+  - Matching: route parameters match whatever their names (':id' = ':ownerId'); a concrete
+    segment in the reference matches a ':param' segment of a graph screen (the e2e scorer's
+    url matcher, most literal segments wins). Leading and trailing '/' are ignored.
+  - Graph side: the e2e scorer's graphHits (e2e-nav/score.mjs): scope nodes expanded to their
+    member screens, the top scope to every screen; edges into nodes that are not screens never
+    count. A pair is held when any edge, must or may, joins the two screens.
+  - Levels: no attribution, rooted (Oshima and Kishi's rule), outlet (the enclosing-routes rule of
+    Rima et al.'s specification) and full, each mapped from the same sources.
+
+Measures
+  M1 pair recall per subject and pooled, per level.
+  M2 screen recall: reference routes (starts and terminals) that match a screen node, full level.
+  M3 every reference pair missed at the full level, classified from the source into exactly one of:
+       (a) attribution too narrow: the site is read, its scope lacks the start screen;
+       (b) site not read: no construct for it in the graph;
+       (c) route not read: the start or the terminal has no screen node;
+       (d) not a router navigation (window.location, href to a full URL, history API);
+       (e) reference entry wrong (the source holds no such transition), with the evidence;
+       (f) other, with a written reason.
+  M4 graph pairs outside the reference, full level: counted per subject, split by whether the
+     source of the edge is the top scope. Each is classified by reading the source as
+       real: a UI path from s to t exists in the source (cite the site);
+       spurious: no such path (state why);
+       unclear.
+     All extra pairs of subjects with at most 40 are classified; above 40, a sample of 40 drawn
+     with seed 20261105 over the sorted pair list, and the sample size is reported.
+  Not claimed: that either tool is better overall. The reference is their tool's own output, so
+  M1 bounds how much of what their tool finds this extractor also finds, and M4 what it finds
+  beyond it; neither is recall against an independent truth.
+
+Validity checks
+  V1 Every subject maps without error at all four levels, or the failure is reported and the
+     subject excluded from every figure.
+  V2 Reference routes are checked against the pinned sources: a reference route that matches no
+     route the independent route parser (route-oracle/index.mjs) reads is reported; it signals
+     a version mismatch, and such pairs are reported separately, not silently dropped.
+
+Predictions
+  P1 Full-level M1 pooled at least 90 %.
+  P2 Outlet level within 5 points of full: these subjects are small and navigate mostly from
+     templates and component handlers, not from services.
+  P3 Most misses, if any, are (c) or (d).
+  P4 Most extra pairs come from the top scope (header and side-navigation links).
+
+Repairs
+  No change to the extractor before M1-M4 are recorded at 2aac284. A defect found here may be
+  repaired afterwards; the frozen figures stay the primary result and the repaired ones are
+  reported beside them, marked post hoc, with the repair listed in the corrections table.
+
+Outcomes and what each does to the thesis
+  S1 V1-V2 pass: a short subsection in ch5 (RQ3 evidence) with one generated table (per-subject
+     pairs, recall at the four levels, extra pairs and their classes); tab:rw and tab:earlier gain
+     one line each; ch6 threats states that the reference comes from Rima et al.'s own tool.
+  S2 Any miss of class (a) or (b): reported as found; the in-sample claims stay as they are and the
+     out-of-sample figure is stated beside them.
+  F1 Fewer than 20 reference pairs survive V2: no ratio is reported; the counts are given in words.
+  In every outcome numbers go through generated macros (rima/score.mjs -> thesis/generated-rima.tex).
