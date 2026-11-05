@@ -10,7 +10,7 @@
  * that are neither a reference pair nor a pair of a screen with itself.
  *
  * Usage: node score.mjs --gt <softscanner_fa>/docs/analysis/phase-b/gt --graphs <dir> \
- *          --subjects subjects.txt [--json out.json] [--tex out.tex]
+ *          --subjects subjects.txt [--prefix Rima] [--json out.json] [--tex out.tex]
  * <dir> holds <slug>.<level>.json.gz for the levels noattr, rooted, outlet and full.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -110,6 +110,8 @@ const pct = (n, d) => (d ? `${((100 * n) / d).toFixed(1)}\\,\\%` : '--')
 function main() {
   const a = {}
   for (let i = 2; i < process.argv.length; i += 2) a[process.argv[i].replace(/^--/, '')] = process.argv[i + 1]
+  // The macro prefix: Rima for the frozen run, another for a post-hoc one.
+  const P = a.prefix ?? 'Rima'
   const slugs = readFileSync(a.subjects, 'utf8').split('\n').filter((l) => l.trim() && !l.startsWith('#')).map((l) => l.split(/\s+/)[0])
   const all = {}
   const pooled = { pairs: 0, routes: 0, routesHeld: 0, extras: 0, extrasTop: 0, ...Object.fromEntries(LEVELS.map((l) => [l, 0])) }
@@ -122,7 +124,7 @@ function main() {
     }
     const s = scoreSubject(JSON.parse(readFileSync(join(a.gt, `${slug}.json`), 'utf8')), graphs)
     all[slug] = s
-    const N = 'Rima' + macroName(slug)
+    const N = P + macroName(slug)
     const extrasTop = (s.extras ?? []).filter((x) => x.top).length
     const m = { Pairs: s.pairs, Routes: s.routes, RoutesHeld: s.routesHeld ?? 0, Extra: (s.extras ?? []).length, ExtraTop: extrasTop }
     for (const l of LEVELS) m['Hit' + macroName(l)] = s.levels[l]?.hit ?? 0
@@ -147,14 +149,14 @@ function main() {
     ps.extras += (s.extras ?? []).length
     for (const l of LEVELS) ps[l] += s.levels[l]?.hit ?? 0
   }
-  tex += `\\newcommand{\\RimaPsPairs}{${ps.pairs}}\n\\newcommand{\\RimaExtraInPs}{${pooled.extras - ps.extras}}\n`
-  for (const l of LEVELS) tex += `\\newcommand{\\RimaPsHit${macroName(l)}}{${ps[l]}}\n\\newcommand{\\RimaPsRecall${macroName(l)}}{${pct(ps[l], ps.pairs)}}\n`
-  tex += `\\newcommand{\\RimaSubjects}{${slugs.length}}\n\\newcommand{\\RimaPairs}{${pooled.pairs}}\n`
-  tex += `\\newcommand{\\RimaRoutes}{${pooled.routes}}\n\\newcommand{\\RimaRoutesHeld}{${pooled.routesHeld}}\n`
-  tex += `\\newcommand{\\RimaExtra}{${pooled.extras}}\n\\newcommand{\\RimaExtraTop}{${pooled.extrasTop}}\n`
+  tex += `\\newcommand{\\${P}PsPairs}{${ps.pairs}}\n\\newcommand{\\${P}ExtraInPs}{${pooled.extras - ps.extras}}\n`
+  for (const l of LEVELS) tex += `\\newcommand{\\${P}PsHit${macroName(l)}}{${ps[l]}}\n\\newcommand{\\${P}PsRecall${macroName(l)}}{${pct(ps[l], ps.pairs)}}\n`
+  tex += `\\newcommand{\\${P}Subjects}{${slugs.length}}\n\\newcommand{\\${P}Pairs}{${pooled.pairs}}\n`
+  tex += `\\newcommand{\\${P}Routes}{${pooled.routes}}\n\\newcommand{\\${P}RoutesHeld}{${pooled.routesHeld}}\n`
+  tex += `\\newcommand{\\${P}Extra}{${pooled.extras}}\n\\newcommand{\\${P}ExtraTop}{${pooled.extrasTop}}\n`
   for (const l of LEVELS) {
-    tex += `\\newcommand{\\RimaHit${macroName(l)}}{${pooled[l]}}\n`
-    tex += `\\newcommand{\\RimaRecall${macroName(l)}}{${pct(pooled[l], pooled.pairs)}}\n`
+    tex += `\\newcommand{\\${P}Hit${macroName(l)}}{${pooled[l]}}\n`
+    tex += `\\newcommand{\\${P}Recall${macroName(l)}}{${pct(pooled[l], pooled.pairs)}}\n`
   }
   console.log(JSON.stringify(Object.fromEntries(Object.entries(all).map(([k, s]) => [k, { pairs: s.pairs, classes: s.classes, hit: Object.fromEntries(LEVELS.map((l) => [l, s.levels[l]?.hit])), routes: `${s.routesHeld}/${s.routes}`, extras: s.extras?.length }])), null, 1))
   if (a.json) writeFileSync(a.json, JSON.stringify(all, null, 1) + '\n')

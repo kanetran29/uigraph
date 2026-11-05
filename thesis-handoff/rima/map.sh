@@ -4,6 +4,8 @@
 # rima/graphs, runs the independent route parser on each (validity check V2), and scores them.
 #
 # Usage: map.sh <work dir> <softscanner_fa checkout at f33003f>
+# RIMA_OUT (default rima/graphs) and RIMA_PREFIX (default Rima) keep a post-hoc run, such as one after
+# a repair, apart from the frozen one: its graphs, results-<prefix>.json and generated macros.
 # The work dir must not be under /tmp (macOS prunes it; see route-oracle/remeasure.sh).
 set -euo pipefail
 W=$(cd "$1" && pwd); GT=$(cd "$2/docs/analysis/phase-b/gt" && pwd)
@@ -14,8 +16,9 @@ CLI="pnpm -s -C $REPO/packages/cli run uigraph --"
 export NODE_OPTIONS=--max-old-space-size=8192
 # Writes one document of a uigraph database, gzipped.
 doc() { node -e "const {DatabaseSync}=require('node:sqlite');const z=require('zlib');const r=new DatabaseSync(process.argv[1]).prepare('select json from docs where key=?').get(process.argv[2]);require('fs').writeFileSync(process.argv[3],z.gzipSync(r.json))" "$1" "$2" "$3"; }
-mkdir -p "$W/src" "$W/db" "$W/routes" "$HERE/graphs"
-echo "extractor $(git -C "$REPO" log -1 --format=%h -- packages)" > "$HERE/graphs/EXTRACTOR"
+G=${RIMA_OUT:-$HERE/graphs}; P=${RIMA_PREFIX:-Rima}
+mkdir -p "$W/src" "$W/db" "$W/routes" "$G"
+echo "extractor $(git -C "$REPO" log -1 --format=%h -- packages)" > "$G/EXTRACTOR"
 
 grep -v '^#' "$HERE/subjects.txt" | while read -r slug repo sha sub; do
   [ -n "$slug" ] || continue
@@ -33,12 +36,13 @@ grep -v '^#' "$HERE/subjects.txt" | while read -r slug repo sha sub; do
       full) $CLI map "$app" --adapter angular --attribution --out "$db" > "$W/db/$slug.$l.log" 2>&1 ;;
       *) UIGRAPH_SCOPE_LAYERS=$l $CLI map "$app" --adapter angular --attribution --out "$db" > "$W/db/$slug.$l.log" 2>&1 ;;
     esac
-    doc "$db" graph "$HERE/graphs/$slug.$l.json.gz"
+    doc "$db" graph "$G/$slug.$l.json.gz"
   done
-  doc "$W/db/$slug.full.db" soundiness "$HERE/graphs/$slug.soundiness.json.gz"
+  doc "$W/db/$slug.full.db" soundiness "$G/$slug.soundiness.json.gz"
   node "$REPO/thesis-handoff/route-oracle/index.mjs" "$app" "$W/db/$slug.full.db" --json "$W/routes/$slug.json" > "$W/routes/$slug.txt" 2>&1 || true
   echo "$slug mapped"
 done
 
-node "$HERE/score.mjs" --gt "$GT" --graphs "$HERE/graphs" --subjects "$HERE/subjects.txt" \
-  --json "$HERE/results.json" --tex "$REPO/thesis-handoff/thesis/generated-rima.tex"
+if [ "$P" = Rima ]; then J="$HERE/results.json"; T="$REPO/thesis-handoff/thesis/generated-rima.tex"
+else J="$HERE/results-$P.json"; T="$REPO/thesis-handoff/thesis/generated-$(echo "$P" | tr '[:upper:]' '[:lower:]').tex"; fi
+node "$HERE/score.mjs" --gt "$GT" --graphs "$G" --subjects "$HERE/subjects.txt" --prefix "$P" --json "$J" --tex "$T"

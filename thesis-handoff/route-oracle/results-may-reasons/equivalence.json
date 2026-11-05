@@ -4,7 +4,7 @@
     "realworld": {
       "identical": true,
       "textIdentical": true,
-      "mayWitnesses": 86,
+      "mayWitnesses": 70,
       "mayWithoutReasons": 0
     },
     "alfresco": {
@@ -16,7 +16,7 @@
     "ghostfolio": {
       "identical": true,
       "textIdentical": true,
-      "mayWitnesses": 405,
+      "mayWitnesses": 399,
       "mayWithoutReasons": 0
     },
     "k8sdash": {
@@ -34,7 +34,7 @@
     "mifos": {
       "identical": true,
       "textIdentical": true,
-      "mayWitnesses": 14901,
+      "mayWitnesses": 12816,
       "mayWithoutReasons": 0
     }
   },

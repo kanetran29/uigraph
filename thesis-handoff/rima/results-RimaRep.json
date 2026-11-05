@@ -1,0 +1,2246 @@
+{
+ "posts-users-ui-ng": {
+  "pairs": 4,
+  "classes": {
+   "nav": 3,
+   "same": 15,
+   "external": 0,
+   "noterminal": 0
+  },
+  "routes": 7,
+  "levels": {
+   "noattr": {
+    "hit": 3,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/users",
+      "to": "/users/:id",
+      "why": "pair"
+     }
+    ]
+   },
+   "rooted": {
+    "hit": 4,
+    "hitTopOnly": 0,
+    "missed": []
+   },
+   "outlet": {
+    "hit": 4,
+    "hitTopOnly": 0,
+    "missed": []
+   },
+   "full": {
+    "hit": 4,
+    "hitTopOnly": 0,
+    "missed": []
+   }
+  },
+  "routesHeld": 7,
+  "extras": [
+   {
+    "from": "/new-post",
+    "to": "/new-user",
+    "top": false
+   },
+   {
+    "from": "/new-post",
+    "to": "/user-availability-schedule",
+    "top": false
+   },
+   {
+    "from": "/new-post",
+    "to": "/user-search",
+    "top": false
+   },
+   {
+    "from": "/new-post",
+    "to": "/users",
+    "top": false
+   },
+   {
+    "from": "/new-user",
+    "to": "/new-post",
+    "top": false
+   },
+   {
+    "from": "/new-user",
+    "to": "/posts",
+    "top": false
+   },
+   {
+    "from": "/new-user",
+    "to": "/user-availability-schedule",
+    "top": false
+   },
+   {
+    "from": "/new-user",
+    "to": "/user-search",
+    "top": false
+   },
+   {
+    "from": "/new-user",
+    "to": "/users",
+    "top": false
+   },
+   {
+    "from": "/posts",
+    "to": "/new-post",
+    "top": false
+   },
+   {
+    "from": "/posts",
+    "to": "/new-user",
+    "top": false
+   },
+   {
+    "from": "/posts",
+    "to": "/user-availability-schedule",
+    "top": false
+   },
+   {
+    "from": "/posts",
+    "to": "/user-search",
+    "top": false
+   },
+   {
+    "from": "/posts",
+    "to": "/users",
+    "top": false
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/new-post",
+    "top": false
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/new-user",
+    "top": false
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/posts",
+    "top": false
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/user-search",
+    "top": false
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/users",
+    "top": false
+   },
+   {
+    "from": "/user-search",
+    "to": "/new-post",
+    "top": false
+   },
+   {
+    "from": "/user-search",
+    "to": "/new-user",
+    "top": false
+   },
+   {
+    "from": "/user-search",
+    "to": "/posts",
+    "top": false
+   },
+   {
+    "from": "/user-search",
+    "to": "/user-availability-schedule",
+    "top": false
+   },
+   {
+    "from": "/user-search",
+    "to": "/users",
+    "top": false
+   },
+   {
+    "from": "/users",
+    "to": "/new-post",
+    "top": false
+   },
+   {
+    "from": "/users",
+    "to": "/new-user",
+    "top": false
+   },
+   {
+    "from": "/users",
+    "to": "/posts",
+    "top": false
+   },
+   {
+    "from": "/users",
+    "to": "/user-availability-schedule",
+    "top": false
+   },
+   {
+    "from": "/users",
+    "to": "/user-search",
+    "top": false
+   },
+   {
+    "from": "/users/:id",
+    "to": "/new-post",
+    "top": false
+   },
+   {
+    "from": "/users/:id",
+    "to": "/new-user",
+    "top": false
+   },
+   {
+    "from": "/users/:id",
+    "to": "/posts",
+    "top": false
+   },
+   {
+    "from": "/users/:id",
+    "to": "/user-availability-schedule",
+    "top": false
+   },
+   {
+    "from": "/users/:id",
+    "to": "/user-search",
+    "top": false
+   },
+   {
+    "from": "/users/:id",
+    "to": "/users",
+    "top": false
+   }
+  ],
+  "selfPairs": 6,
+  "graphPairs": 45
+ },
+ "heroes-angular": {
+  "pairs": 0,
+  "classes": {
+   "nav": 0,
+   "same": 8,
+   "external": 11,
+   "noterminal": 0
+  },
+  "routes": 4,
+  "levels": {
+   "noattr": {
+    "hit": 0,
+    "hitTopOnly": 0,
+    "missed": []
+   },
+   "rooted": {
+    "hit": 0,
+    "hitTopOnly": 0,
+    "missed": []
+   },
+   "outlet": {
+    "hit": 0,
+    "hitTopOnly": 0,
+    "missed": []
+   },
+   "full": {
+    "hit": 0,
+    "hitTopOnly": 0,
+    "missed": []
+   }
+  },
+  "routesHeld": 3,
+  "extras": [
+   {
+    "from": "*",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "*",
+    "to": "/heroes",
+    "top": false
+   },
+   {
+    "from": "*",
+    "to": "/villains",
+    "top": false
+   },
+   {
+    "from": "/about",
+    "to": "/heroes",
+    "top": false
+   },
+   {
+    "from": "/about",
+    "to": "/villains",
+    "top": false
+   },
+   {
+    "from": "/heroes",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/heroes",
+    "to": "/villains",
+    "top": false
+   },
+   {
+    "from": "/villains",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/villains",
+    "to": "/heroes",
+    "top": false
+   }
+  ],
+  "selfPairs": 3,
+  "graphPairs": 12
+ },
+ "airbus-inventory": {
+  "pairs": 3,
+  "classes": {
+   "nav": 2,
+   "same": 19,
+   "external": 0,
+   "noterminal": 0
+  },
+  "routes": 6,
+  "levels": {
+   "noattr": {
+    "hit": 0,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/dashboard",
+      "to": "/update",
+      "why": "pair"
+     },
+     {
+      "from": "/getAllProducts",
+      "to": "/update",
+      "why": "pair"
+     },
+     {
+      "from": "/login",
+      "to": "/dashboard",
+      "why": "pair"
+     }
+    ]
+   },
+   "rooted": {
+    "hit": 0,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/dashboard",
+      "to": "/update",
+      "why": "pair"
+     },
+     {
+      "from": "/getAllProducts",
+      "to": "/update",
+      "why": "pair"
+     },
+     {
+      "from": "/login",
+      "to": "/dashboard",
+      "why": "pair"
+     }
+    ]
+   },
+   "outlet": {
+    "hit": 0,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/dashboard",
+      "to": "/update",
+      "why": "pair"
+     },
+     {
+      "from": "/getAllProducts",
+      "to": "/update",
+      "why": "pair"
+     },
+     {
+      "from": "/login",
+      "to": "/dashboard",
+      "why": "pair"
+     }
+    ]
+   },
+   "full": {
+    "hit": 3,
+    "hitTopOnly": 0,
+    "missed": []
+   }
+  },
+  "routesHeld": 6,
+  "extras": [
+   {
+    "from": "/add",
+    "to": "/getAllProducts",
+    "top": false
+   },
+   {
+    "from": "/add",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/add",
+    "to": "/productByCategory",
+    "top": false
+   },
+   {
+    "from": "/dashboard",
+    "to": "/add",
+    "top": false
+   },
+   {
+    "from": "/dashboard",
+    "to": "/getAllProducts",
+    "top": false
+   },
+   {
+    "from": "/dashboard",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/dashboard",
+    "to": "/productByCategory",
+    "top": false
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/add",
+    "top": false
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/productByCategory",
+    "top": false
+   },
+   {
+    "from": "/productByCategory",
+    "to": "/add",
+    "top": false
+   },
+   {
+    "from": "/productByCategory",
+    "to": "/getAllProducts",
+    "top": false
+   },
+   {
+    "from": "/productByCategory",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/update",
+    "to": "/add",
+    "top": false
+   },
+   {
+    "from": "/update",
+    "to": "/getAllProducts",
+    "top": false
+   },
+   {
+    "from": "/update",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/update",
+    "to": "/productByCategory",
+    "top": false
+   }
+  ],
+  "selfPairs": 4,
+  "graphPairs": 24
+ },
+ "spring-petclinic-angular": {
+  "pairs": 35,
+  "classes": {
+   "nav": 46,
+   "same": 20,
+   "external": 0,
+   "noterminal": 8
+  },
+  "routes": 22,
+  "levels": {
+   "noattr": {
+    "hit": 25,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/pets",
+      "to": "/welcome",
+      "why": "pair"
+     },
+     {
+      "from": "/pets",
+      "to": "/**",
+      "why": "route"
+     },
+     {
+      "from": "/pets",
+      "to": "/owners",
+      "why": "pair"
+     },
+     {
+      "from": "/pets",
+      "to": "/owners/add",
+      "why": "pair"
+     },
+     {
+      "from": "/pets",
+      "to": "/vets",
+      "why": "pair"
+     },
+     {
+      "from": "/pets",
+      "to": "/vets/add",
+      "why": "pair"
+     },
+     {
+      "from": "/pets",
+      "to": "/pettypes",
+      "why": "pair"
+     },
+     {
+      "from": "/pets",
+      "to": "/specialties",
+      "why": "pair"
+     },
+     {
+      "from": "/pettypes",
+      "to": "/pettypes/add",
+      "why": "pair"
+     },
+     {
+      "from": "/visits/add",
+      "to": "/pets/1/visits/add",
+      "why": "pair"
+     }
+    ]
+   },
+   "rooted": {
+    "hit": 32,
+    "hitTopOnly": 2,
+    "missed": [
+     {
+      "from": "/pets",
+      "to": "/**",
+      "why": "route"
+     },
+     {
+      "from": "/pettypes",
+      "to": "/pettypes/add",
+      "why": "pair"
+     },
+     {
+      "from": "/visits/add",
+      "to": "/pets/1/visits/add",
+      "why": "pair"
+     }
+    ]
+   },
+   "outlet": {
+    "hit": 32,
+    "hitTopOnly": 2,
+    "missed": [
+     {
+      "from": "/pets",
+      "to": "/**",
+      "why": "route"
+     },
+     {
+      "from": "/pettypes",
+      "to": "/pettypes/add",
+      "why": "pair"
+     },
+     {
+      "from": "/visits/add",
+      "to": "/pets/1/visits/add",
+      "why": "pair"
+     }
+    ]
+   },
+   "full": {
+    "hit": 32,
+    "hitTopOnly": 2,
+    "missed": [
+     {
+      "from": "/pets",
+      "to": "/**",
+      "why": "route"
+     },
+     {
+      "from": "/pettypes",
+      "to": "/pettypes/add",
+      "why": "pair"
+     },
+     {
+      "from": "/visits/add",
+      "to": "/pets/1/visits/add",
+      "why": "pair"
+     }
+    ]
+   }
+  },
+  "routesHeld": 21,
+  "extras": [
+   {
+    "from": "*",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "*",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "*",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "*",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "*",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "*",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "*",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/owners",
+    "to": "/owners/:id/edit",
+    "top": false
+   },
+   {
+    "from": "/owners",
+    "to": "/owners/:id/pets/add",
+    "top": false
+   },
+   {
+    "from": "/owners",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/owners",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/owners",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/owners",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/owners",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/owners/:id/edit",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/edit",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/owners/:id/edit",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/edit",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/edit",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/edit",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/edit",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/owners/:id",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/owners/add",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/owners/add",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/owners/add",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/owners/add",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/owners/add",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/owners/:id",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/pets/add",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/pets/add",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/pets/add",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/pets/add",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/pets/add",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/pets/add",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/pets/add",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/pettypes",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/pettypes",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/pettypes",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/pettypes",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/pettypes",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/pettypes/:id/edit",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/pettypes/:id/edit",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/pettypes/:id/edit",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/pettypes/:id/edit",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/pettypes/:id/edit",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/pettypes/:id/edit",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/specialties",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/specialties",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/specialties",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/specialties",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/specialties",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/specialties/:id/edit",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/specialties/:id/edit",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/specialties/:id/edit",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/specialties/:id/edit",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/specialties/:id/edit",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/specialties/:id/edit",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/vets",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/vets",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/vets",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/vets",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/vets/add",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/vets/add",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/vets/add",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/vets/add",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/vets/add",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/visits",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/visits",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/visits",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/visits",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/visits",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/visits",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/visits",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/visits/add",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/visits/add",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/visits/add",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/visits/add",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/visits/add",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/visits/add",
+    "to": "/vets/add",
+    "top": false
+   },
+   {
+    "from": "/visits/add",
+    "to": "/welcome",
+    "top": true
+   },
+   {
+    "from": "/welcome",
+    "to": "/owners",
+    "top": false
+   },
+   {
+    "from": "/welcome",
+    "to": "/owners/add",
+    "top": true
+   },
+   {
+    "from": "/welcome",
+    "to": "/pettypes",
+    "top": false
+   },
+   {
+    "from": "/welcome",
+    "to": "/specialties",
+    "top": false
+   },
+   {
+    "from": "/welcome",
+    "to": "/vets",
+    "top": false
+   },
+   {
+    "from": "/welcome",
+    "to": "/vets/add",
+    "top": false
+   }
+  ],
+  "selfPairs": 7,
+  "graphPairs": 179
+ },
+ "ever-traduora": {
+  "pairs": 11,
+  "classes": {
+   "nav": 10,
+   "same": 99,
+   "external": 0,
+   "noterminal": 0
+  },
+  "routes": 18,
+  "levels": {
+   "noattr": {
+    "hit": 10,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/projects/:projectId",
+      "to": "/projects/:projectId/translations/:localeCode",
+      "why": "pair"
+     }
+    ]
+   },
+   "rooted": {
+    "hit": 10,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/projects/:projectId",
+      "to": "/projects/:projectId/translations/:localeCode",
+      "why": "pair"
+     }
+    ]
+   },
+   "outlet": {
+    "hit": 10,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/projects/:projectId",
+      "to": "/projects/:projectId/translations/:localeCode",
+      "why": "pair"
+     }
+    ]
+   },
+   "full": {
+    "hit": 10,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/projects/:projectId",
+      "to": "/projects/:projectId/translations/:localeCode",
+      "why": "pair"
+     }
+    ]
+   }
+  },
+  "routesHeld": 18,
+  "extras": [
+   {
+    "from": "/404",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/auth/callback",
+    "to": "/projects",
+    "top": false
+   },
+   {
+    "from": "/auth/callback",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/forgot-password",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/forgot-password",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/login",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/login",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects",
+    "to": "/projects/:projectId/translations",
+    "top": false
+   },
+   {
+    "from": "/projects",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/terms",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/translations",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/terms",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/translations",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/terms",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/translations",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/terms",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/translations",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/terms",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/translations",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/terms",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/terms",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/translations",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/translations",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/terms",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects/:projectId/api",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects/:projectId/export",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects/:projectId/import",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects/:projectId/labels",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects/:projectId/settings",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects/:projectId/team",
+    "top": false
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/reset-password",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/reset-password",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/signup",
+    "to": "/projects",
+    "top": true
+   },
+   {
+    "from": "/signup",
+    "to": "/user-settings",
+    "top": true
+   },
+   {
+    "from": "/user-settings",
+    "to": "/projects",
+    "top": true
+   }
+  ],
+  "selfPairs": 10,
+  "graphPairs": 123
+ },
+ "angular-jumpstart": {
+  "pairs": 11,
+  "classes": {
+   "nav": 13,
+   "same": 31,
+   "external": 0,
+   "noterminal": 3
+  },
+  "routes": 8,
+  "levels": {
+   "noattr": {
+    "hit": 3,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/customers/:id",
+      "to": "/orders",
+      "why": "pair"
+     },
+     {
+      "from": "/customers/:id/details",
+      "to": "/orders",
+      "why": "pair"
+     },
+     {
+      "from": "/customers/:id/edit",
+      "to": "/orders",
+      "why": "pair"
+     },
+     {
+      "from": "/customers/:id/orders",
+      "to": "/orders",
+      "why": "pair"
+     },
+     {
+      "from": "/customers/:id/details",
+      "to": "/customers",
+      "why": "pair"
+     },
+     {
+      "from": "/customers/:id/orders",
+      "to": "/customers",
+      "why": "pair"
+     },
+     {
+      "from": "/customers",
+      "to": "/customers/:id/orders",
+      "why": "pair"
+     },
+     {
+      "from": "/customers",
+      "to": "/customers/:id/details",
+      "why": "pair"
+     }
+    ]
+   },
+   "rooted": {
+    "hit": 11,
+    "hitTopOnly": 0,
+    "missed": []
+   },
+   "outlet": {
+    "hit": 11,
+    "hitTopOnly": 0,
+    "missed": []
+   },
+   "full": {
+    "hit": 11,
+    "hitTopOnly": 0,
+    "missed": []
+   }
+  },
+  "routesHeld": 8,
+  "extras": [
+   {
+    "from": "/about",
+    "to": "/customers",
+    "top": false
+   },
+   {
+    "from": "/about",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/about",
+    "to": "/orders",
+    "top": false
+   },
+   {
+    "from": "/customers",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/customers",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/customers",
+    "to": "/orders",
+    "top": false
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/customers/:id/details",
+    "top": false
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/customers/:id/edit",
+    "top": false
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/customers/:id/orders",
+    "top": false
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/customers/:id/edit",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/customers/:id/orders",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/customers/:id/details",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/customers/:id/orders",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/customers/:id/details",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/customers/:id/edit",
+    "top": false
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/login",
+    "top": false
+   },
+   {
+    "from": "/login",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/login",
+    "to": "/customers",
+    "top": false
+   },
+   {
+    "from": "/login",
+    "to": "/orders",
+    "top": false
+   },
+   {
+    "from": "/orders",
+    "to": "/about",
+    "top": false
+   },
+   {
+    "from": "/orders",
+    "to": "/customers",
+    "top": false
+   },
+   {
+    "from": "/orders",
+    "to": "/login",
+    "top": false
+   }
+  ],
+  "selfPairs": 7,
+  "graphPairs": 47
+ },
+ "event-booking-mean": {
+  "pairs": 9,
+  "classes": {
+   "nav": 6,
+   "same": 9,
+   "external": 0,
+   "noterminal": 0
+  },
+  "routes": 6,
+  "levels": {
+   "noattr": {
+    "hit": 2,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/",
+      "to": "/login",
+      "why": "pair"
+     },
+     {
+      "from": "/Contact",
+      "to": "/login",
+      "why": "pair"
+     },
+     {
+      "from": "/my-Events",
+      "to": "/login",
+      "why": "pair"
+     },
+     {
+      "from": "/",
+      "to": "/register",
+      "why": "pair"
+     },
+     {
+      "from": "/Contact",
+      "to": "/register",
+      "why": "pair"
+     },
+     {
+      "from": "/create-event",
+      "to": "/register",
+      "why": "pair"
+     },
+     {
+      "from": "/my-Events",
+      "to": "/register",
+      "why": "pair"
+     }
+    ]
+   },
+   "rooted": {
+    "hit": 4,
+    "hitTopOnly": 0,
+    "missed": [
+     {
+      "from": "/Contact",
+      "to": "/login",
+      "why": "pair"
+     },
+     {
+      "from": "/my-Events",
+      "to": "/login",
+      "why": "pair"
+     },
+     {
+      "from": "/Contact",
+      "to": "/register",
+      "why": "pair"
+     },
+     {
+      "from": "/create-event",
+      "to": "/register",
+      "why": "pair"
+     },
+     {
+      "from": "/my-Events",
+      "to": "/register",
+      "why": "pair"
+     }
+    ]
+   },
+   "outlet": {
+    "hit": 9,
+    "hitTopOnly": 0,
+    "missed": []
+   },
+   "full": {
+    "hit": 9,
+    "hitTopOnly": 0,
+    "missed": []
+   }
+  },
+  "routesHeld": 6,
+  "extras": [
+   {
+    "from": "/",
+    "to": "/Contact",
+    "top": false
+   },
+   {
+    "from": "/",
+    "to": "/create-event",
+    "top": false
+   },
+   {
+    "from": "/",
+    "to": "/my-Events",
+    "top": false
+   },
+   {
+    "from": "/Contact",
+    "to": "/my-Events",
+    "top": false
+   },
+   {
+    "from": "/create-event",
+    "to": "/Contact",
+    "top": false
+   },
+   {
+    "from": "/create-event",
+    "to": "/my-Events",
+    "top": false
+   },
+   {
+    "from": "/login",
+    "to": "/",
+    "top": false
+   },
+   {
+    "from": "/my-Events",
+    "to": "/Contact",
+    "top": false
+   }
+  ],
+  "selfPairs": 2,
+  "graphPairs": 19
+ }
+}

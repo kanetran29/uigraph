@@ -165,6 +165,7 @@ const PRETTY = {
   'declared-route-has-no-node': 'The route is declared; the node is missing',
   'name-not-resolved': 'The target names a value no resolver could follow',
   'extractor-note:over-approximation': 'Over-approximated at the site',
+  'extractor-note:dynamic-target': 'The target is computed; the extractor declares it unknown',
   'not-a-navigation': 'The construct carries no commands, so it names no destination',
   'named-outlet': 'Navigates a secondary outlet, which the model does not admit',
 }

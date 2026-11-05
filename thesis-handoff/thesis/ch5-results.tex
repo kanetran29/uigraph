@@ -528,7 +528,7 @@ it did. No other preregistered prediction is reported here.
 further. The other classes were defined after the misses had been read, before the repairs below. Every
 remaining miss is in the redirect class (\EtoEMifosMissRedirect{}/\EtoEMifosMiss{}): the graph holds
 the pair on the screen the redirect lands on. For \CeilEtoEMifosInside{} of them a better reader would also
-hold the address asked for (Section~\ref{sec:may-incomplete}). They also meet the
+hold the address asked for (Section~\ref{sec:may-incomplete}). \EtoEMifosMissDynamicAny{} of them also meet the
 dynamic test, which fires on any unresolved site in the source component or above it, so that test does
 not show that a missed navigation is that site. The preregistered five-class scheme and its prediction
 that misses would be mostly a scope too narrow or a site not read are not scored.
@@ -681,9 +681,10 @@ Subject & Pairs & none & rooted & outlet & full & all & real/read \\
 All, preregistered & \RimaPairs{} & \RimaRecallNoattr{} & \RimaRecallRooted{} & \RimaRecallOutlet{} & \RimaRecallFull{} & \RimaExtra{} & \RimaJudgedReal{}/\RimaJudged{} \\
 Without \RimaMissE{} read as absent$^{\dagger}$ & \RimaPairsValid{} & \RimaRecallValidNoattr{} & \RimaRecallValidRooted{} & \RimaRecallValidOutlet{} & \RimaRecallValidFull{} & & \\
 Per start route$^{\dagger}$ & \RimaPsPairs{} & \RimaPsRecallNoattr{} & \RimaPsRecallRooted{} & \RimaPsRecallOutlet{} & \RimaPsRecallFull{} & & \\
+Repaired extractor$^{\dagger}$ & \RimaRepPairs{} & \RimaRepRecallNoattr{} & \RimaRepRecallRooted{} & \RimaRepRecallOutlet{} & \RimaRepRecallFull{} & \RimaRepExtra{} & \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{none} is the graph without attribution; \emph{rooted} and \emph{outlet} are the rules of Oshima and Kishi and of Rima et al.'s specification (Section~\ref{sec:res-ablation}). heroes has no pair under the preregistered rule: its entries are external links or list their terminal among their start routes. \emph{Read}: pairs judged from the source, all of them where a subject has at most 40 other pairs and a seeded sample of 40 otherwise. The reference's wildcard route matches no screen, so its one pair counts as missed, while the graph's own wildcard screen is counted among its other pairs. $^{\dagger}$Post hoc, not preregistered: the first drops the reference pairs the source shows to be absent, and only missed pairs were read, so it can only rise; the second keeps the entries the preregistered rule drops, and its misses were not read. All cells are generated figures.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{none} is the graph without attribution; \emph{rooted} and \emph{outlet} are the rules of Oshima and Kishi and of Rima et al.'s specification (Section~\ref{sec:res-ablation}). heroes has no pair under the preregistered rule: its entries are external links or list their terminal among their start routes. \emph{Read}: pairs judged from the source, all of them where a subject has at most 40 other pairs and a seeded sample of 40 otherwise. The reference's wildcard route matches no screen, so its one pair counts as missed, while the graph's own wildcard screen is counted among its other pairs. $^{\dagger}$Post hoc, not preregistered: the first drops the reference pairs the source shows to be absent, and only missed pairs were read, so it can only rise; the second keeps the entries the preregistered rule drops, and its misses were not read; the third maps the subjects again after the repairs this comparison prompted. All cells are generated figures.}
 \end{table}
 
 Table~\ref{tab:rima} gives the result. The full level holds \RimaHitFull{} of the \RimaPairs{} reference
@@ -722,11 +723,16 @@ changed \RimaGateChanged{}. One batch was read twice because the first run retur
 A later adversarial review found that the second run had counted a shell bar as shown on sign-in and
 password-reset screens whose guard hides it; \RimaCorrected{} verdicts were corrected and \RimaRecited{} re-cited by hand. A script
 checked that every cited site exists and holds a navigation construct, which cannot show that the construct
-is rendered on the start screen. Four defects found here are not repaired in these figures: a relative link whose only segment is an
-expression; a fixed-length command matched as a route prefix; a navigation bar that pages include taken
-for the shell; and a service method called only from dialogs placed on the screens of the components
-that inject the service, not of those that open the dialogs. The hidden shell bar follows from the guard
-stand-in (Section~\ref{sec:approximations}).
+is rendered on the start screen. Four defects were found here: a relative link whose only segment is an expression; a fixed-length
+command matched as a route prefix; a navigation bar that pages include taken for the shell; and a service
+method called only from dialogs placed on the screens of the components that inject the service, not of
+those that open the dialogs. The hidden shell bar follows from the guard stand-in
+(Section~\ref{sec:approximations}). The four were repaired after the figures above were recorded
+(Table~\ref{tab:repairs}), and the corpus was re-measured. Mapped again, the subjects give \RimaRepHitFull{} of
+the \RimaPairs{} pairs and \RimaRepExtra{} other pairs: the repaired graph gains the locale link and loses
+the three airbus pairs from the sign-in screen, which Rima et al.'s reference lists when read per start
+route although the source holds no such transition. These figures are post hoc, and none of their pairs
+was read again.
 
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}

@@ -1,6 +1,6 @@
 {
   "harnessVersion": "mutate 1.9.1",
-  "extractor": "% Extractor f26a302, packages/ clean, harness clean when generated.",
+  "extractor": "% Extractor a9d29df, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/realworld",
   "attribution": false,
@@ -8,7 +8,7 @@
   "quota": 8,
   "baseline": {
     "nodes": 10,
-    "edges": 25,
+    "edges": 24,
     "routes": 10
   },
   "discovered": {
@@ -133,7 +133,7 @@
       "subject": "/profile => /login",
       "predict": "the edges this line witnesses go to /login and no longer to where it led before",
       "verdict": "DETECTED",
-      "touched": 3,
+      "touched": 2,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -144,8 +144,7 @@
           "/settings -> /login (navigate)"
         ],
         "edgesRemoved": [
-          "/settings -> /profile/:username (navigate)",
-          "/settings -> /profile/:username/favorites (navigate)"
+          "/settings -> /profile/:username (navigate)"
         ],
         "guardChanged": []
       }
@@ -388,7 +387,7 @@
       "subject": "settings",
       "predict": "a node route containing \"settings\" becomes \"settings-mutated\"",
       "verdict": "DETECTED",
-      "touched": 8,
+      "touched": 6,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/profile/pages/profile/profile.component.html:23"
@@ -402,12 +401,10 @@
         ],
         "routeChanged": [],
         "edgesAdded": [
-          "/settings-mutated -> /profile/:username (navigate)",
-          "/settings-mutated -> /profile/:username/favorites (navigate)"
+          "/settings-mutated -> /profile/:username (navigate)"
         ],
         "edgesRemoved": [
           "/settings -> /profile/:username (navigate)",
-          "/settings -> /profile/:username/favorites (navigate)",
           "/profile/:username -> /settings (click:routerLink)"
         ],
         "guardChanged": []
@@ -420,7 +417,7 @@
       "subject": "profile",
       "predict": "a node route containing \"profile\" becomes \"profile-mutated\"",
       "verdict": "DETECTED",
-      "touched": 13,
+      "touched": 12,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/settings/settings.component.ts:72",
@@ -442,9 +439,9 @@
         ],
         "edgesRemoved": [
           "/settings -> /profile/:username (navigate)",
-          "/settings -> /profile/:username/favorites (navigate)",
           "/profile/:username -> /settings (click:routerLink)",
-          "/profile/:username -> /profile/:username (click:routerLink)"
+          "/profile/:username -> /profile/:username (click:routerLink)",
+          "/profile/:username -> /profile/:username/favorites (click:routerLink)"
         ],
         "guardChanged": []
       }
@@ -456,7 +453,7 @@
       "subject": "favorites",
       "predict": "a node route containing \"favorites\" becomes \"favorites-mutated\"",
       "verdict": "DETECTED",
-      "touched": 7,
+      "touched": 4,
       "delta": {
         "witnessLinesRemoved": [
           "src/app/features/profile/pages/profile/profile.component.html:52"
@@ -469,12 +466,8 @@
           "/profile/:username/favorites"
         ],
         "routeChanged": [],
-        "edgesAdded": [
-          "/settings -> /profile/:username/favorites-mutated (navigate)",
-          "/profile/:username -> /profile/:username/favorites-mutated (click:routerLink)"
-        ],
+        "edgesAdded": [],
         "edgesRemoved": [
-          "/settings -> /profile/:username/favorites (navigate)",
           "/profile/:username -> /profile/:username/favorites (click:routerLink)"
         ],
         "guardChanged": []

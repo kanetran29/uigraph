@@ -21,12 +21,12 @@ Application & Sites & Excl. & In scope & Recovered & Dynamic & Unplaced \\
 \midrule
 realworld & 40 & 1 & 39 & 100.0\,\% & 0.0\,\% & 0.0\,\% \\
 alfresco & 34 & 7 & 27 & 25.9\,\% & 25.9\,\% & 44.4\,\% \\
-ghostfolio & 198 & 12 & 186 & 47.8\,\% & 43.5\,\% & 7.5\,\% \\
+ghostfolio & 198 & 12 & 186 & 48.4\,\% & 44.1\,\% & 6.5\,\% \\
 k8s dashboard & 72 & 4 & 68 & 17.6\,\% & 70.6\,\% & 8.8\,\% \\
-bitwarden & 131 & 19 & 112 & 63.4\,\% & 14.3\,\% & 18.8\,\% \\
-mifos & 1343 & 0 & 1343 & 90.5\,\% & 6.4\,\% & 2.5\,\% \\
+bitwarden & 131 & 19 & 112 & 64.3\,\% & 14.3\,\% & 17.9\,\% \\
+mifos & 1343 & 0 & 1343 & 94.0\,\% & 3.1\,\% & 2.5\,\% \\
 \midrule
-All & 1818 & 43 & 1775 & 80.7\,\% & 13.4\,\% & 4.8\,\% \\
+All & 1818 & 43 & 1775 & 83.5\,\% & 11.0\,\% & 4.7\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoReasons}{%
@@ -35,11 +35,11 @@ All & 1818 & 43 & 1775 & 80.7\,\% & 13.4\,\% & 4.8\,\% \\
 Sites & Reason the site is not a transition \\
 \midrule
 10 & A class the extractor could not place under any screen \\
-4 & The target names no route the application declares \\
-3 & Over-approximated at the site \\
+3 & The target is computed; the extractor declares it unknown \\
 1 & A service; whether anything injects it is not established \\
+1 & Over-approximated at the site \\
 \midrule
-18 & All, none of them without a reason \\
+15 & All, none of them without a reason \\
 \bottomrule
 \end{tabular}}
 \newcommand{\TabRoundTwoSoundness}{%
@@ -47,23 +47,23 @@ Sites & Reason the site is not a transition \\
 \toprule
 Application & Edges & \shortstack[r]{Sites\\cited} & Judged & \shortstack[r]{Clean of\\judged} & \shortstack[r]{Must read\\and passed} & \shortstack[r]{Must\\conversion} \\
 \midrule
-realworld & 65 & 105 & 65 & 92.3\,\% & 9/9 & 7.7\,\% \\
+realworld & 59 & 89 & 63 & 98.4\,\% & 9/9 & 7.7\,\% \\
 alfresco & 55 & 79 & 23 & 43.5\,\% & n/a & 0.0\,\% \\
-ghostfolio & 403 & 685 & 20 & 35.0\,\% & n/a & 0.0\,\% \\
+ghostfolio & 395 & 671 & 20 & 35.0\,\% & n/a & 0.0\,\% \\
 k8s dashboard & 313 & 443 & 71 & 97.2\,\% & 63/125 & 2.9\,\% \\
-bitwarden & 578 & 1282 & 201 & 59.2\,\% & 1/1 & 0.9\,\% \\
-mifos & 14239 & 15207 & 1057 & 78.4\,\% & 24/24 & 1.4\,\% \\
+bitwarden & 576 & 1284 & 201 & 59.2\,\% & 1/1 & 0.9\,\% \\
+mifos & 12432 & 13072 & 1059 & 78.2\,\% & 24/24 & 1.4\,\% \\
 \midrule
-All & 15653 & 17801 & 1437 & 76.1\,\% & 97/159 & 1.4\,\% \\
+All & 13830 & 15638 & 1437 & 76.2\,\% & 97/159 & 1.4\,\% \\
 \bottomrule
 \end{tabular}}
 \newcommand{\RoundTwoInScope}{1775}
-\newcommand{\RoundTwoRecovered}{80.7\,\%}
-\newcommand{\RoundTwoDynamic}{13.4\,\%}
-\newcommand{\RoundTwoUnplaced}{4.8\,\%}
-\newcommand{\RoundTwoAccounted}{99.0\,\%}
-\newcommand{\RoundTwoUnexplained}{18}
-\newcommand{\RoundTwoBefore}{71.5\,\%}
+\newcommand{\RoundTwoRecovered}{83.5\,\%}
+\newcommand{\RoundTwoDynamic}{11.0\,\%}
+\newcommand{\RoundTwoUnplaced}{4.7\,\%}
+\newcommand{\RoundTwoAccounted}{99.2\,\%}
+\newcommand{\RoundTwoUnexplained}{15}
+\newcommand{\RoundTwoBefore}{71.7\,\%}
 \newcommand{\RoundTwoExcluded}{43}
 \newcommand{\RoundTwoExcludedQueryOnly}{35}
 \newcommand{\RoundTwoExcludedOutlet}{7}
@@ -87,14 +87,14 @@ All & 15653 & 17801 & 1437 & 76.1\,\% & 97/159 & 1.4\,\% \\
 \newcommand{\RoundTwoLowerBoundApps}{4}
 \newcommand{\RoundTwoLowerBoundWhere}{alfresco, ghostfolio, bitwarden, mifos}
 \newcommand{\RoundTwoLowerBoundReasons}{children not resolvable to a route array; matcher route: path not statically knowable; spread route source: not followed}
-\newcommand{\RoundTwoNoMifosRecovered}{50.5\,\%}
+\newcommand{\RoundTwoNoMifosRecovered}{50.9\,\%}
 \newcommand{\RoundTwoNoMifosAccounted}{97.9\,\%}
 \newcommand{\RoundTwoMifosShare}{75.7\,\%}
 \newcommand{\RoundTwoRelativeUnresolved}{0}
 \newcommand{\RoundTwoUnderUnreadable}{0}
 \newcommand{\RoundTwoNoRouteCaveated}{none}
 \newcommand{\RoundTwoTargetNoNode}{0}
-\newcommand{\RoundTwoTargetNoRoute}{4}
+\newcommand{\RoundTwoTargetNoRoute}{0}
 \newcommand{\RoundTwoMustMismatch}{0}
 \newcommand{\RoundTwoMustOffBy}{0}
 \newcommand{\RoundTwoMustInTs}{0}
@@ -102,52 +102,52 @@ All & 15653 & 17801 & 1437 & 76.1\,\% & 97/159 & 1.4\,\% \\
 \newcommand{\RoundTwoMustRelUp}{0}
 \newcommand{\RoundTwoMustRelRoot}{0}
 \newcommand{\RoundTwoMustRelBare}{0}
-\newcommand{\RoundTwoGraphClean}{6.1\,\%}
-\newcommand{\RoundTwoJudgedClean}{76.1\,\%}
+\newcommand{\RoundTwoGraphClean}{7.0\,\%}
+\newcommand{\RoundTwoJudgedClean}{76.2\,\%}
 \newcommand{\RoundTwoJudged}{1437}
-\newcommand{\RoundTwoSites}{17801}
-\newcommand{\RoundTwoOverApprox}{89.0\,\%}
-\newcommand{\RoundTwoUnreadSites}{522}
+\newcommand{\RoundTwoSites}{15638}
+\newcommand{\RoundTwoOverApprox}{87.2\,\%}
+\newcommand{\RoundTwoUnreadSites}{560}
 \newcommand{\RoundTwoWildcardNoNode}{none}
 \newcommand{\RoundTwoWildcardPrefix}{none}
 \newcommand{\RoundTwoWildcardPrefixEmptyChild}{0}
 \newcommand{\RoundTwoWildcardBlind}{0}
-\newcommand{\RoundTwoWildcardPattern}{2}
-\newcommand{\RoundTwoWildcardRelative}{18}
+\newcommand{\RoundTwoWildcardPattern}{3}
+\newcommand{\RoundTwoWildcardRelative}{20}
 \newcommand{\RoundTwoWildcardAppRoot}{12}
 \newcommand{\RoundTwoWildcardNoTarget}{0}
-\newcommand{\RoundTwoWildcardRescued}{167}
+\newcommand{\RoundTwoWildcardRescued}{175}
 \newcommand{\RoundTwoUnresolvedTarget}{0}
 \newcommand{\RoundTwoWildcardCaveated}{0}
 \newcommand{\RoundTwoOutsideDirSites}{69}
 \newcommand{\RoundTwoOutsideDirWhere}{../../libs, ../aca-shared, ../browser}
 \newcommand{\RoundTwoOutsideDirApps}{2}
-\newcommand{\RoundTwoFrameworkMountsIt}{24}
+\newcommand{\RoundTwoFrameworkMountsIt}{23}
 \newcommand{\RoundTwoFrameworkPrefix}{19}
 \newcommand{\RoundTwoFrameworkRedirects}{0}
-\newcommand{\RoundTwoFrameworkDecided}{66}
+\newcommand{\RoundTwoFrameworkDecided}{71}
 \newcommand{\RoundTwoWildcardCaveatedApps}{0}
 \newcommand{\RoundTwoWildcardCaveatedWhere}{none}
-\newcommand{\RoundTwoDeadLinkCandidates}{27}
-\newcommand{\RoundTwoDeadLinkWildcarded}{23}
-\newcommand{\RoundTwoDeadLinkUnanswered}{4}
-\newcommand{\RoundTwoDeadLinkUrls}{23}
-\newcommand{\RoundTwoDeadLinkLocations}{25}
+\newcommand{\RoundTwoDeadLinkCandidates}{29}
+\newcommand{\RoundTwoDeadLinkWildcarded}{29}
+\newcommand{\RoundTwoDeadLinkUnanswered}{0}
+\newcommand{\RoundTwoDeadLinkUrls}{25}
+\newcommand{\RoundTwoDeadLinkLocations}{27}
 \newcommand{\RoundTwoDeadLinkAbsolute}{18}
 \newcommand{\RoundTwoDeadLinkAbsoluteLocations}{18}
 \newcommand{\RoundTwoDeadLinkRelative}{5}
 \newcommand{\RoundTwoDeadLinkRelativeLocations}{3}
-\newcommand{\RoundTwoDeadLinkBaseUnknown}{4}
-\newcommand{\RoundTwoDeadLinkBaseUnknownLocations}{4}
+\newcommand{\RoundTwoDeadLinkBaseUnknown}{6}
+\newcommand{\RoundTwoDeadLinkBaseUnknownLocations}{6}
 \newcommand{\RoundTwoDeadLinkOutsideDir}{0}
 \newcommand{\RoundTwoDeadLinkApps}{2}
 \newcommand{\RoundTwoDeadLinkWhere}{bitwarden, mifos}
-\newcommand{\RoundTwoEdges}{15653}
+\newcommand{\RoundTwoEdges}{13830}
 \newcommand{\RoundTwoTopFanoutEdges}{5454}
-\newcommand{\RoundTwoTopFanoutShare}{34.8\,\%}
+\newcommand{\RoundTwoTopFanoutShare}{39.4\,\%}
 \newcommand{\RoundTwoTopFanoutApp}{mifos}
 \newcommand{\RoundTwoTopFanoutSite}{\texttt{view-transaction.component.ts:135}}
-\newcommand{\RoundTwoMifosEdgeShare}{91.0\,\%}
+\newcommand{\RoundTwoMifosEdgeShare}{89.9\,\%}
 \newcommand{\RoundTwoExtraNodes}{2}
 \newcommand{\RoundTwoExtraNodesWildcard}{2}
 \newcommand{\RoundTwoDynamicFiles}{42}
@@ -199,11 +199,11 @@ All & 15653 & 17801 & 1437 & 76.1\,\% & 97/159 & 1.4\,\% \\
 \newcommand{\RoundTwoMustEdgesMifos}{24}
 \newcommand{\RoundTwoCtrlOutletWhere}{alfresco}
 \newcommand{\RoundTwoUnplacedClass}{10}
-\newcommand{\RoundTwoOutsideWitness}{636}
+\newcommand{\RoundTwoOutsideWitness}{623}
 \newcommand{\RoundTwoOutsideWitnessMust}{0}
 \newcommand{\RoundTwoOutsideWitnessApps}{3}
 \newcommand{\RoundTwoOutsideWitnessWorst}{bitwarden}
-\newcommand{\RoundTwoOutsideWitnessWorstN}{527}
+\newcommand{\RoundTwoOutsideWitnessWorstN}{529}
 \newcommand{\RoundTwoOutsideWitnessWorstMust}{0}
 \newcommand{\RoundTwoSetMoved}{5}
 \newcommand{\RoundTwoSetMovedCountSame}{1}
