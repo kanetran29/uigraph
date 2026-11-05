@@ -1,0 +1,15 @@
+extractor 6b0d723 (packages = c42f220)
+peertube Chocobozzz/PeerTube 4b859fe1542b22f0c003bd480f4687e49d2b47b6 client
+peertube map-attr exit=0 seconds=5
+peertube map-noattr exit=0 seconds=3
+peertube index exit=0
+peertube witness exit=0
+peertube loss exit=0
+peertube loss-noattr exit=0
+spotify trungvose/angular-spotify 57585bbd46767d5aa1c3d939e7131109aafc620b apps/angular-spotify
+spotify map-attr exit=0 seconds=1
+spotify map-noattr exit=0 seconds=1
+spotify index exit=0
+spotify witness exit=0
+spotify loss exit=0
+spotify loss-noattr exit=0

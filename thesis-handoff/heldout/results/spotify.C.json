@@ -1,0 +1,22 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/spotify/apps/angular-spotify",
+  "db": "/Users/kanetran29/personal/uigraph-work/heldout/spotify/apps/angular-spotify/uigraph.db",
+  "filesParsed": 447,
+  "declaredRoutesTotal": 0,
+  "byKind": {},
+  "uniqueScreenPaths": 0,
+  "guardedScreenPaths": 0,
+  "blindSpots": [],
+  "excluded": {
+    "storybookFiles": 0
+  },
+  "comparison": {
+    "declaredScreens": 0,
+    "graphNodes": 0,
+    "matched": 0,
+    "coverage": null,
+    "missing": [],
+    "extraNodes": []
+  },
+  "routes": []
+}

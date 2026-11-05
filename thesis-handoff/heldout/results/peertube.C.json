@@ -1,0 +1,1558 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/peertube/client",
+  "db": "/Users/kanetran29/personal/uigraph-work/heldout/peertube/client/uigraph.db",
+  "filesParsed": 829,
+  "declaredRoutesTotal": 107,
+  "byKind": {
+    "LAZY_UNRESOLVED": 17,
+    "REDIRECT": 34,
+    "PREFIX": 9,
+    "SCREEN": 45,
+    "MATCHER": 2
+  },
+  "uniqueScreenPaths": 45,
+  "guardedScreenPaths": 22,
+  "blindSpots": [
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+admin/routes.ts",
+      "prefix": "/admin"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+my-account/routes.ts",
+      "prefix": "/my-account"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+my-library/routes.ts",
+      "prefix": "/my-library"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+signup/+verify-account/routes.ts",
+      "prefix": "/verify-account"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+accounts/routes.ts",
+      "prefix": "/a"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+video-channels/routes.ts",
+      "prefix": "/c"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/shared/shared-plugin-pages/routes.ts",
+      "prefix": "/p"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+signup/+register/routes.ts",
+      "prefix": "/signup"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+reset-password/routes.ts",
+      "prefix": "/reset-password"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+login/routes.ts",
+      "prefix": "/login"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+search/routes.ts",
+      "prefix": "/search"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+videos-publish-manage/+video-manage/routes.ts",
+      "prefix": "/videos/manage/:uuid"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+videos-publish-manage/+video-publish/routes.ts",
+      "prefix": "/videos/publish"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+video-watch/routes.ts",
+      "prefix": "/w"
+    },
+    {
+      "reason": "matcher route: path not statically knowable",
+      "spec": "matcher: (url): UrlMatchResult => {\n      if (url.length < 1",
+      "at": "src/app/app.routes.ts:179",
+      "prefix": "/"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+home/routes.ts",
+      "prefix": "/home"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+video-list/routes.ts",
+      "prefix": "/videos"
+    },
+    {
+      "reason": "lazy module has no discoverable route array",
+      "file": "src/app/+remote-interaction/routes.ts",
+      "prefix": "/remote-interaction"
+    },
+    {
+      "reason": "matcher route: path not statically knowable",
+      "spec": "matcher: (url): UrlMatchResult => {\n      const regex = new ",
+      "at": "src/app/app.routes.ts:215",
+      "prefix": "/"
+    },
+    {
+      "reason": "spread route source: not followed",
+      "spec": "...RunnersRoutes",
+      "at": "src/app/+admin/system/system.routes.ts:64",
+      "prefix": "/system"
+    }
+  ],
+  "excluded": {
+    "storybookFiles": 0
+  },
+  "comparison": {
+    "declaredScreens": 45,
+    "graphNodes": 1,
+    "matched": 1,
+    "coverage": 0.0222,
+    "missing": [
+      {
+        "path": "/about/instance",
+        "at": "src/app/+about/about-instance/about-instance.routes.ts:11",
+        "guards": []
+      },
+      {
+        "path": "/about/instance/home",
+        "at": "src/app/+about/about-instance/about-instance.routes.ts:29",
+        "guards": []
+      },
+      {
+        "path": "/about/instance/support",
+        "at": "src/app/+about/about-instance/about-instance.routes.ts:33",
+        "guards": []
+      },
+      {
+        "path": "/about/instance/team",
+        "at": "src/app/+about/about-instance/about-instance.routes.ts:40",
+        "guards": []
+      },
+      {
+        "path": "/about/instance/tech",
+        "at": "src/app/+about/about-instance/about-instance.routes.ts:44",
+        "guards": []
+      },
+      {
+        "path": "/about/instance/moderation",
+        "at": "src/app/+about/about-instance/about-instance.routes.ts:48",
+        "guards": []
+      },
+      {
+        "path": "/about/instance/contact",
+        "at": "src/app/+about/about-instance/about-instance.routes.ts:52",
+        "guards": []
+      },
+      {
+        "path": "/config",
+        "at": "src/app/+admin/config/config.routes.ts:79",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/config/homepage",
+        "at": "src/app/+admin/config/config.routes.ts:105",
+        "guards": [
+          "[ CanDeactivateGuard ]"
+        ]
+      },
+      {
+        "path": "/config/customization",
+        "at": "src/app/+admin/config/config.routes.ts:118",
+        "guards": [
+          "[ CanDeactivateGuard ]"
+        ]
+      },
+      {
+        "path": "/config/information",
+        "at": "src/app/+admin/config/config.routes.ts:128",
+        "guards": [
+          "[ CanDeactivateGuard ]"
+        ]
+      },
+      {
+        "path": "/config/logo",
+        "at": "src/app/+admin/config/config.routes.ts:142",
+        "guards": [
+          "[ CanDeactivateGuard ]"
+        ]
+      },
+      {
+        "path": "/config/general",
+        "at": "src/app/+admin/config/config.routes.ts:155",
+        "guards": [
+          "[ CanDeactivateGuard ]"
+        ]
+      },
+      {
+        "path": "/config/vod",
+        "at": "src/app/+admin/config/config.routes.ts:171",
+        "guards": [
+          "[ CanDeactivateGuard ]"
+        ]
+      },
+      {
+        "path": "/config/live",
+        "at": "src/app/+admin/config/config.routes.ts:181",
+        "guards": [
+          "[ CanDeactivateGuard ]"
+        ]
+      },
+      {
+        "path": "/config/advanced",
+        "at": "src/app/+admin/config/config.routes.ts:191",
+        "guards": [
+          "[ CanDeactivateGuard ]"
+        ]
+      },
+      {
+        "path": "/follows/following-list",
+        "at": "src/app/+admin/follows/follows.routes.ts:21",
+        "guards": []
+      },
+      {
+        "path": "/follows/followers-list",
+        "at": "src/app/+admin/follows/follows.routes.ts:30",
+        "guards": []
+      },
+      {
+        "path": "/follows/video-redundancies-list",
+        "at": "src/app/+admin/follows/follows.routes.ts:43",
+        "guards": []
+      },
+      {
+        "path": "/moderation/abuses/list",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:36",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/moderation/video-blocks/list",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:63",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/moderation/registrations/list",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:75",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/moderation/blocklist/accounts",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:99",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/moderation/blocklist/servers",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:110",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/moderation/blocklist/subscriptions",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:122",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/moderation/watched-words/list",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:134",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/moderation/watched-words/subscriptions",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:146",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/moderation/watched-words/automatic-tag-policies",
+        "at": "src/app/+admin/moderation/moderation.routes.ts:158",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/overview/comments/list",
+        "at": "src/app/+admin/overview/overview.routes.ts:53",
+        "guards": []
+      },
+      {
+        "path": "/overview/users/list",
+        "at": "src/app/+admin/overview/overview.routes.ts:77",
+        "guards": []
+      },
+      {
+        "path": "/overview/users/create",
+        "at": "src/app/+admin/overview/overview.routes.ts:86",
+        "guards": []
+      },
+      {
+        "path": "/overview/users/update/:id",
+        "at": "src/app/+admin/overview/overview.routes.ts:95",
+        "guards": []
+      },
+      {
+        "path": "/overview/videos/list",
+        "at": "src/app/+admin/overview/overview.routes.ts:119",
+        "guards": []
+      },
+      {
+        "path": "/plugins/list-installed",
+        "at": "src/app/+admin/plugins/plugins.routes.ts:21",
+        "guards": []
+      },
+      {
+        "path": "/plugins/search",
+        "at": "src/app/+admin/plugins/plugins.routes.ts:30",
+        "guards": []
+      },
+      {
+        "path": "/plugins/show/:npmName",
+        "at": "src/app/+admin/plugins/plugins.routes.ts:39",
+        "guards": []
+      },
+      {
+        "path": "/system/jobs",
+        "at": "src/app/+admin/system/system.routes.ts:19",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/system/logs",
+        "at": "src/app/+admin/system/system.routes.ts:30",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/system/audit-logs",
+        "at": "src/app/+admin/system/system.routes.ts:41",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/system/debug",
+        "at": "src/app/+admin/system/system.routes.ts:52",
+        "guards": [
+          "[ UserRightGuard ]"
+        ]
+      },
+      {
+        "path": "/general",
+        "at": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts:13",
+        "guards": []
+      },
+      {
+        "path": "/podcast",
+        "at": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts:22",
+        "guards": []
+      },
+      {
+        "path": "/editors",
+        "at": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts:31",
+        "guards": []
+      },
+      {
+        "path": "/activities",
+        "at": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts:40",
+        "guards": []
+      }
+    ],
+    "extraNodes": []
+  },
+  "routes": [
+    {
+      "path": "/admin",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 11,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/my-account",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 19,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/my-library",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 24,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/verify-account",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 29,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/accounts",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 35,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/a",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 39,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/video-channels",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 47,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/c",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 51,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/manage/create",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 57,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/manage/update/:channel",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 63,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/p",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 71,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/about",
+      "kind": "PREFIX",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 80,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/about/instance",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+about/about-instance/about-instance.routes.ts",
+      "line": 11,
+      "component": "AboutInstanceComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/about/instance",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+about/about-instance/about-instance.routes.ts",
+      "line": 24,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/about/instance/home",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+about/about-instance/about-instance.routes.ts",
+      "line": 29,
+      "component": "AboutInstanceHomeComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/about/instance/support",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+about/about-instance/about-instance.routes.ts",
+      "line": 33,
+      "component": "AboutInstanceHomeComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/about/instance/team",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+about/about-instance/about-instance.routes.ts",
+      "line": 40,
+      "component": "AboutInstanceTeamComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/about/instance/tech",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+about/about-instance/about-instance.routes.ts",
+      "line": 44,
+      "component": "AboutInstanceTechComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/about/instance/moderation",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+about/about-instance/about-instance.routes.ts",
+      "line": 48,
+      "component": "AboutInstanceModerationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/about/instance/contact",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+about/about-instance/about-instance.routes.ts",
+      "line": 52,
+      "component": "AboutContactComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/signup",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 85,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/reset-password",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 90,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/login",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 95,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/search",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 100,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/studio/edit/:videoId",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 108,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/stats/videos/:videoId",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 114,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/videos/upload",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 120,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/videos/update/:uuid",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 125,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/videos/manage/:uuid",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 131,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/videos/publish",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 142,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/video-playlists/watch",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 155,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/videos/watch/playlist",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 160,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/videos/watch",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 164,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/w",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 168,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "MATCHER",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 179,
+      "component": "VideosParentComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/home",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 191,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/videos",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 196,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/remote-interaction",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [
+        "[ MetaGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 206,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "MATCHER",
+      "guards": [
+        "[ ActorRedirectGuard ]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 215,
+      "component": "EmptyComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 237,
+      "component": "HomepageRedirectComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 79,
+      "component": "AdminConfigComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/edit-custom",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 94,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 100,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/homepage",
+      "kind": "SCREEN",
+      "guards": [
+        "[ CanDeactivateGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 105,
+      "component": "AdminConfigHomepageComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/customization",
+      "kind": "SCREEN",
+      "guards": [
+        "[ CanDeactivateGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 118,
+      "component": "AdminConfigCustomizationComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/information",
+      "kind": "SCREEN",
+      "guards": [
+        "[ CanDeactivateGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 128,
+      "component": "AdminConfigInformationComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/logo",
+      "kind": "SCREEN",
+      "guards": [
+        "[ CanDeactivateGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 142,
+      "component": "AdminConfigLogoComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/general",
+      "kind": "SCREEN",
+      "guards": [
+        "[ CanDeactivateGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 155,
+      "component": "AdminConfigGeneralComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/vod",
+      "kind": "SCREEN",
+      "guards": [
+        "[ CanDeactivateGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 171,
+      "component": "AdminConfigVODComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/live",
+      "kind": "SCREEN",
+      "guards": [
+        "[ CanDeactivateGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 181,
+      "component": "AdminConfigLiveComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/config/advanced",
+      "kind": "SCREEN",
+      "guards": [
+        "[ CanDeactivateGuard ]"
+      ],
+      "file": "src/app/+admin/config/config.routes.ts",
+      "line": 191,
+      "component": "AdminConfigAdvancedComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/follows",
+      "kind": "PREFIX",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/follows/follows.routes.ts",
+      "line": 9,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/follows",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/follows/follows.routes.ts",
+      "line": 16,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/follows/following-list",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/follows/follows.routes.ts",
+      "line": 21,
+      "component": "FollowingListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/follows/followers-list",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/follows/follows.routes.ts",
+      "line": 30,
+      "component": "FollowersListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/follows/following-add",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/follows/follows.routes.ts",
+      "line": 39,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/follows/video-redundancies-list",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/follows/follows.routes.ts",
+      "line": 43,
+      "component": "VideoRedundanciesListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 18,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 21,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/video-abuses",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 26,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/video-abuses/list",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 31,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/abuses/list",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 36,
+      "component": "AbuseListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/video-blacklist",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 48,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/video-auto-blacklist",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 53,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/video-auto-blacklist/list",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 58,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/video-blocks/list",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 63,
+      "component": "VideoBlockListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/registrations/list",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 75,
+      "component": "RegistrationListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/video-comments",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 88,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/video-comments/list",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 93,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/blocklist/accounts",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 99,
+      "component": "InstanceAccountBlocklistComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/blocklist/servers",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 110,
+      "component": "InstanceServerBlocklistComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/blocklist/subscriptions",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 122,
+      "component": "InstanceBlocklistSubscriptionsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/watched-words/list",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 134,
+      "component": "WatchedWordsListAdminComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/watched-words/subscriptions",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 146,
+      "component": "WatchedWordsSubscriptionsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/moderation/watched-words/automatic-tag-policies",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/moderation/moderation.routes.ts",
+      "line": 158,
+      "component": "AutomaticTagPoliciesAdminComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/comments",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 13,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/videos",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 19,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/users",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 25,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 31,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 35,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/comments",
+      "kind": "PREFIX",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 41,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/comments",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 48,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/comments/list",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 53,
+      "component": "VideoCommentListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/users",
+      "kind": "PREFIX",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 65,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/users",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 72,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/users/list",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 77,
+      "component": "UserListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/users/create",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 86,
+      "component": "UserCreateComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/users/update/:id",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 95,
+      "component": "UserUpdateComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/videos",
+      "kind": "PREFIX",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 107,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/videos",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 114,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/overview/videos/list",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/overview/overview.routes.ts",
+      "line": 119,
+      "component": "VideoListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/plugins",
+      "kind": "PREFIX",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/plugins/plugins.routes.ts",
+      "line": 9,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/plugins",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/plugins/plugins.routes.ts",
+      "line": 16,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/plugins/list-installed",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/plugins/plugins.routes.ts",
+      "line": 21,
+      "component": "PluginListInstalledComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/plugins/search",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/plugins/plugins.routes.ts",
+      "line": 30,
+      "component": "PluginSearchComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/plugins/show/:npmName",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+admin/plugins/plugins.routes.ts",
+      "line": 39,
+      "component": "PluginShowInstalledComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/system",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/+admin/system/system.routes.ts",
+      "line": 11,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/system",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+admin/system/system.routes.ts",
+      "line": 14,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/system/jobs",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/system/system.routes.ts",
+      "line": 19,
+      "component": "JobsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/system/logs",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/system/system.routes.ts",
+      "line": 30,
+      "component": "LogsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/system/audit-logs",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/system/system.routes.ts",
+      "line": 41,
+      "component": "AuditLogListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/system/debug",
+      "kind": "SCREEN",
+      "guards": [
+        "[ UserRightGuard ]"
+      ],
+      "file": "src/app/+admin/system/system.routes.ts",
+      "line": 52,
+      "component": "DebugComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts",
+      "line": 8,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/general",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts",
+      "line": 13,
+      "component": "VideoChannelEditGeneralComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/podcast",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts",
+      "line": 22,
+      "component": "VideoChannelEditPodcastComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/editors",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts",
+      "line": 31,
+      "component": "VideoChannelEditEditorsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/activities",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.routes.ts",
+      "line": 40,
+      "component": "VideoChannelActivitiesComponent",
+      "constantPath": false,
+      "lazy": false
+    }
+  ]
+}

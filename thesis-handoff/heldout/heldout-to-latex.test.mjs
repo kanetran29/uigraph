@@ -1,0 +1,51 @@
+/**
+ * Checks heldout-to-latex.mjs on a fixture of one application's result files.
+ * Run: node --test heldout-to-latex.test.mjs
+ */
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { execFileSync } from 'node:child_process'
+
+test('derives the held-out figures with the corpus definitions', () => {
+  const d = mkdtempSync(join(tmpdir(), 'heldout-'))
+  const w = (f, o) => writeFileSync(join(d, f), typeof o === 'string' ? o : JSON.stringify(o))
+  w('provenance.txt', 'extractor x\napp a b c d\napp map-attr exit=0 seconds=1\napp map-noattr exit=0 seconds=1\n')
+  w('app.C.json', { comparison: { declaredScreens: 4, matched: 3 }, blindSpots: [{}], routes: [{ path: '/a/:id', kind: 'SCREEN' }, { path: '/b', kind: 'PREFIX' }] })
+  w('app.B.json', { mustEdges: 5, mustClean: 3, mustUnread: 1 })
+  const rows = [{ at: 'x:1', cls: 'CONVERTED_MUST' }, { at: 'x:2', cls: 'CONVERTED_MAY' }, { at: 'x:3', cls: 'CONVERTED_MAY' }, { at: 'x:4', cls: 'ACCOUNTED_DYNAMIC' }, { at: 'x:5', cls: 'QUERY_ONLY' }]
+  w('app.L.json', { constructs: 5, inScope: 4, recovered: 3, accounted: 1, lost: 0, tally: { CONVERTED_MUST: 1, CONVERTED_MAY: 2, ACCOUNTED_DYNAMIC: 1, QUERY_ONLY: 1 }, rows })
+  w('app.L0.json', { constructs: 5, inScope: 4, recovered: 1, accounted: 1, lost: 2, tally: {}, rows: [rows[0], { at: 'x:2', cls: 'ATTRIBUTION_SHARED' }, { at: 'x:3', cls: 'ATTRIBUTION_SERVICE' }, rows[3], rows[4]] })
+  const tex = join(d, 'out.tex')
+  execFileSync('node', [join(import.meta.dirname, 'heldout-to-latex.mjs'), '--dir', d, '--apps', 'app=App', '--tex', tex])
+  const out = readFileSync(tex, 'utf8')
+  const m = (n) => new RegExp(`\\\\newcommand\\{\\\\${n}\\}\\{([^}]*)\\}`).exec(out)?.[1]
+  assert.equal(m('HeldoutCompletedApp'), 'yes')
+  assert.equal(m('HeldoutNodesApp'), '3 of 4')
+  assert.equal(m('HeldoutNodeCoverageApp'), '75.0\\,\\%')
+  assert.equal(m('HeldoutBlindSpotsApp'), '1')
+  assert.equal(m('HeldoutMustConversionApp'), '25.0\\,\\%')
+  assert.equal(m('HeldoutRecoveredShareApp'), '75.0\\,\\%')
+  assert.equal(m('HeldoutAccountedShareApp'), '100.0\\,\\%')
+  assert.equal(m('HeldoutMustEdgesApp'), '5')
+  assert.equal(m('HeldoutWitnessFailuresApp'), '1')
+  assert.equal(m('HeldoutWitnessUnreadApp'), '1')
+  assert.equal(m('HeldoutAttrLostApp'), '2')
+  assert.equal(m('HeldoutAttrRecoveredApp'), '2')
+  assert.equal(m('HeldoutEarlierAdmittedApp'), 'no')
+})
+
+test('does not call an application admitted when no route was read', () => {
+  const d = mkdtempSync(join(tmpdir(), 'heldout-'))
+  const w = (f, o) => writeFileSync(join(d, f), typeof o === 'string' ? o : JSON.stringify(o))
+  w('provenance.txt', 'extractor x\nz map-attr exit=0 seconds=1\n')
+  w('z.C.json', { comparison: { declaredScreens: 0, matched: 0 }, blindSpots: [], routes: [] })
+  w('z.B.json', { mustEdges: 0, mustClean: 0, mustUnread: 0 })
+  w('z.L.json', { constructs: 0, inScope: 0, recovered: 0, accounted: 0, lost: 0, tally: {}, rows: [] })
+  w('z.L0.json', { constructs: 0, inScope: 0, recovered: 0, accounted: 0, lost: 0, tally: {}, rows: [] })
+  const tex = join(d, 'out.tex')
+  execFileSync('node', [join(import.meta.dirname, 'heldout-to-latex.mjs'), '--dir', d, '--apps', 'z=Z', '--tex', tex])
+  assert.match(readFileSync(tex, 'utf8'), /\\newcommand\{\\HeldoutEarlierAdmittedZ\}\{--\}/)
+})

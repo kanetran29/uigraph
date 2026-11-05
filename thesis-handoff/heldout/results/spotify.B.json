@@ -1,0 +1,123 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/spotify/apps/angular-spotify",
+  "dbPath": "/Users/kanetran29/personal/uigraph-work/heldout/spotify/apps/angular-spotify/uigraph.db",
+  "edges": 8,
+  "sites": 10,
+  "sitesCited": 10,
+  "mergedSites": 2,
+  "clean": 0,
+  "mustEdges": 0,
+  "mustClean": 0,
+  "mustUnread": 0,
+  "outsideApp": 10,
+  "outsideAppMust": 0,
+  "destinationsChecked": true,
+  "tally": {
+    "TARGET_UNREAD": 10
+  },
+  "mustBad": [],
+  "findings": [
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 0,
+      "edge": "o_ArtistTopTrackComponent -> u_o_ArtistTopTrackComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/artist/ui/artist-top-track/src/lib/artist-top-track.component.html:13",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_ArtistTopTrackComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 1,
+      "edge": "o_CategoryCoverComponent -> u_o_CategoryCoverComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/browse/ui/category-cover/src/lib/category-cover.component.html:1",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_CategoryCoverComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 2,
+      "edge": "o_PlaylistTrackComponent -> u_o_PlaylistTrackComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/playlist/ui/playlist-track/src/lib/playlist-track.component.html:8",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_PlaylistTrackComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 3,
+      "edge": "o_CardComponent -> u_o_CardComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/shared/ui/media/src/lib/card.component.html:2",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_CardComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 4,
+      "edge": "o_TrackCurrentInfoComponent -> u_o_TrackCurrentInfoComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/shared/ui/track-current-info/src/lib/track-current-info.component.html:3",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_TrackCurrentInfoComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 4,
+      "edge": "o_TrackCurrentInfoComponent -> u_o_TrackCurrentInfoComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/shared/ui/track-current-info/src/lib/track-current-info.component.html:10",
+      "mergedWitness": true,
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_TrackCurrentInfoComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 4,
+      "edge": "o_TrackCurrentInfoComponent -> u_o_TrackCurrentInfoComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/shared/ui/track-current-info/src/lib/track-current-info.component.html:21",
+      "mergedWitness": true,
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_TrackCurrentInfoComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 5,
+      "edge": "o_TrackMainInfoComponent -> u_o_TrackMainInfoComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/shared/ui/track-main-info/src/lib/track-main-info.component.html:19",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_TrackMainInfoComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 6,
+      "edge": "o_NavBarComponent -> u_o_NavBarComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/shell/ui/nav-bar/src/lib/nav-bar.component.html:10",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_NavBarComponent was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 7,
+      "edge": "o_NavLinkComponent -> u_o_NavLinkComponent",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/web/shell/ui/nav-links/src/lib/nav-link/nav-link.component.html:2",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_o_NavLinkComponent was not compared with it"
+    }
+  ]
+}

@@ -1,0 +1,1586 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/peertube/client",
+  "constructs": 224,
+  "excluded": 8,
+  "inScope": 216,
+  "recovered": 0,
+  "accounted": 0,
+  "lost": 216,
+  "tally": {
+    "ATTRIBUTION_SHARED": 129,
+    "LAZY_BOUNDARY": 1,
+    "NODE_MISS": 67,
+    "QUERY_ONLY": 8,
+    "ATTRIBUTION_SERVICE": 19
+  },
+  "rows": [
+    {
+      "at": "src/app/+about/about-follows/about-follows.component.html:45",
+      "kind": "routerLink",
+      "owner": "src/app/+about/about-follows/about-follows.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/videos/browse"
+    },
+    {
+      "at": "src/app/+about/about-instance/children/about-instance-home.component.ts:63",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+about/about-instance/children/about-instance-home.component.ts",
+      "cls": "LAZY_BOUNDARY",
+      "target": "'/about/instance/home'))"
+    },
+    {
+      "at": "src/app/+about/about-instance/instance-stat-rules.component.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/+about/about-instance/instance-stat-rules.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/videos/browse"
+    },
+    {
+      "at": "src/app/+about/about-instance/instance-stat-rules.component.html:69",
+      "kind": "routerLink",
+      "owner": "src/app/+about/about-instance/instance-stat-rules.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/about/instance/moderation"
+    },
+    {
+      "at": "src/app/+about/about-instance/instance-stat-rules.component.html:94",
+      "kind": "routerLink",
+      "owner": "src/app/+about/about-instance/instance-stat-rules.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/signup"
+    },
+    {
+      "at": "src/app/+about/about-instance/instance-stat-rules.component.html:102",
+      "kind": "routerLink",
+      "owner": "src/app/+about/about-instance/instance-stat-rules.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/signup"
+    },
+    {
+      "at": "src/app/+about/about-instance/instance-stat-rules.component.html:166",
+      "kind": "routerLink",
+      "owner": "src/app/+about/about-instance/instance-stat-rules.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/about/instance/contact"
+    },
+    {
+      "at": "src/app/+accounts/account-video-channels/account-video-channels.component.html:22",
+      "kind": "routerLink",
+      "owner": "src/app/+accounts/account-video-channels/account-video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "getVideoChannelLink(videoChannel)"
+    },
+    {
+      "at": "src/app/+accounts/account-video-channels/account-video-channels.component.html:41",
+      "kind": "routerLink",
+      "owner": "src/app/+accounts/account-video-channels/account-video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "getVideoChannelLink(videoChannel)"
+    },
+    {
+      "at": "src/app/+accounts/account-video-channels/account-video-channels.component.html:58",
+      "kind": "routerLink",
+      "owner": "src/app/+accounts/account-video-channels/account-video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "getVideoChannelLink(videoChannel)"
+    },
+    {
+      "at": "src/app/+accounts/accounts.component.html:78",
+      "kind": "routerLink",
+      "owner": "src/app/+accounts/accounts.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/my-account"
+    },
+    {
+      "at": "src/app/+accounts/accounts.component.html:88",
+      "kind": "routerLink",
+      "owner": "src/app/+accounts/accounts.component.ts",
+      "cls": "NODE_MISS",
+      "target": "item.routerLink"
+    },
+    {
+      "at": "src/app/+admin/config/pages/admin-config-customization.component.html:47",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/config/pages/admin-config-customization.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/admin/settings/plugins"
+    },
+    {
+      "at": "src/app/+admin/config/pages/admin-config-general.component.html:476",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/config/pages/admin-config-general.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/settings/system/runners/runners-list"
+    },
+    {
+      "at": "src/app/+admin/config/pages/admin-config-general.component.html:503",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/config/pages/admin-config-general.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/settings/system/runners/runners-list"
+    },
+    {
+      "at": "src/app/+admin/config/pages/admin-config-general.component.html:603",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/config/pages/admin-config-general.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/settings/follows"
+    },
+    {
+      "at": "src/app/+admin/config/pages/admin-config-information.component.html:225",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/config/pages/admin-config-information.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/overview/users"
+    },
+    {
+      "at": "src/app/+admin/config/pages/admin-config-live.component.html:220",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/config/pages/admin-config-live.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/settings/system/runners/runners-list"
+    },
+    {
+      "at": "src/app/+admin/config/pages/admin-config-vod.component.html:213",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/config/pages/admin-config-vod.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/settings/system/runners/runners-list"
+    },
+    {
+      "at": "src/app/+admin/config/pages/admin-config-vod.component.html:308",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/config/pages/admin-config-vod.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/settings/system/runners/runners-list"
+    },
+    {
+      "at": "src/app/+admin/follows/followers-list/followers-list.component.html:28",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/follows/followers-list/followers-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/follows/followers-list/followers-list.component.html:30",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/follows/followers-list/followers-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/follows/followers-list/followers-list.component.html:32",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/follows/followers-list/followers-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/follows/following-list/following-list.component.html:35",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/follows/following-list/following-list.component.ts",
+      "cls": "NODE_MISS",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/follows/following-list/following-list.component.html:37",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/follows/following-list/following-list.component.ts",
+      "cls": "NODE_MISS",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/follows/following-list/following-list.component.html:39",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/follows/following-list/following-list.component.ts",
+      "cls": "NODE_MISS",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/moderation/instance-blocklist/instance-blocklist-subscriptions.component.html:43",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/moderation/instance-blocklist/instance-blocklist-subscriptions.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getServerBlocklistUrl()"
+    },
+    {
+      "at": "src/app/+admin/moderation/instance-blocklist/instance-blocklist-subscriptions.component.html:52",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/moderation/instance-blocklist/instance-blocklist-subscriptions.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getAccountBlocklistUrl()"
+    },
+    {
+      "at": "src/app/+admin/moderation/registration-list/registration-list.component.html:55",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/moderation/registration-list/registration-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/moderation/registration-list/registration-list.component.html:59",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/moderation/registration-list/registration-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/moderation/watched-words-list/watched-words-list-admin.component.html:3",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/moderation/watched-words-list/watched-words-list-admin.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/admin/moderation/watched-words/automatic-tag-policies"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-edit/user-create.component.ts:118",
+      "kind": "navigate",
+      "owner": "src/app/+admin/overview/users/user-edit/user-create.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/admin/overview/users/list' ])"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-edit/user-edit.component.html:4",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-edit/user-update.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/overview/users"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-edit/user-edit.component.html:14",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-edit/user-update.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/a', user.username ]"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-edit/user-edit.component.html:43",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-edit/user-update.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/admin/moderation/abuses/list' ]"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-edit/user-edit.component.html:49",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-edit/user-update.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/admin/moderation/abuses/list' ]"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-edit/user-update.component.ts:132",
+      "kind": "navigate",
+      "owner": "src/app/+admin/overview/users/user-edit/user-update.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/admin/overview/users/list' ])"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-list/user-list.component.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-list/user-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/admin/overview/users/create"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-list/user-list.component.html:30",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-list/user-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/a/' + user.username ]"
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-list/user-list.component.html:43",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-list/user-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-list/user-list.component.html:51",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-list/user-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/overview/users/user-list/user-list.component.html:53",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/users/user-list/user-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/overview/videos/video-list.component.html:58",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/overview/videos/video-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ]"
+    },
+    {
+      "at": "src/app/+admin/plugins/plugin-list-installed/plugin-list-installed.component.ts:62",
+      "kind": "navigate",
+      "owner": "src/app/+admin/plugins/plugin-list-installed/plugin-list-installed.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], { queryParams, replaceUrl: true })"
+    },
+    {
+      "at": "src/app/+admin/plugins/plugin-search/plugin-search.component.ts:64",
+      "kind": "navigate",
+      "owner": "src/app/+admin/plugins/plugin-search/plugin-search.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], { queryParams })"
+    },
+    {
+      "at": "src/app/+admin/plugins/plugin-search/plugin-search.component.ts:81",
+      "kind": "navigate",
+      "owner": "src/app/+admin/plugins/plugin-search/plugin-search.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], { queryParams: { search }, queryParamsHandling: 'merge' }))"
+    },
+    {
+      "at": "src/app/+admin/system/audit-logs/audit-log-list.component.html:30",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/audit-logs/audit-log-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/system/audit-logs/audit-log-list.component.html:42",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/audit-logs/audit-log-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/system/audit-logs/audit-log-list.component.html:53",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/audit-logs/audit-log-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "auditLog.entityLink.routerLink"
+    },
+    {
+      "at": "src/app/+admin/system/audit-logs/audit-log-list.component.html:76",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/audit-logs/audit-log-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/system/jobs/jobs.component.html:2",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/jobs/jobs.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/admin/settings/system/runners/jobs-list"
+    },
+    {
+      "at": "src/app/+admin/system/jobs/jobs.component.html:28",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/jobs/jobs.component.ts",
+      "cls": "NODE_MISS",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/system/jobs/jobs.component.html:39",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/jobs/jobs.component.ts",
+      "cls": "NODE_MISS",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/system/runners/runner-job-list/runner-job-list.component.html:27",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/runners/runner-job-list/runner-job-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+admin/system/runners/runner-job-list/runner-job-list.component.html:39",
+      "kind": "routerLink",
+      "owner": "src/app/+admin/system/runners/runner-job-list/runner-job-list.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/+login/login.component.html:6",
+      "kind": "routerLink",
+      "owner": "src/app/+login/login.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/about"
+    },
+    {
+      "at": "src/app/+login/login.component.html:22",
+      "kind": "routerLink",
+      "owner": "src/app/+login/login.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/about/instance"
+    },
+    {
+      "at": "src/app/+login/login.component.html:27",
+      "kind": "routerLink",
+      "owner": "src/app/+login/login.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/about/instance"
+    },
+    {
+      "at": "src/app/+login/login.component.html:38",
+      "kind": "routerLink",
+      "owner": "src/app/+login/login.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/verify-account/ask-send-email"
+    },
+    {
+      "at": "src/app/+login/login.component.html:102",
+      "kind": "routerLink",
+      "owner": "src/app/+login/login.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/signup"
+    },
+    {
+      "at": "src/app/+login/login.component.ts:231",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+login/login.component.ts",
+      "cls": "NODE_MISS",
+      "target": "redirectUrl)"
+    },
+    {
+      "at": "src/app/+my-account/my-account-notifications/my-account-notifications.component.html:9",
+      "kind": "routerLink",
+      "owner": "src/app/+my-account/my-account-notifications/my-account-notifications.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/my-account/settings"
+    },
+    {
+      "at": "src/app/+my-account/my-account-settings/my-account-two-factor/my-account-two-factor.component.ts:82",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+my-account/my-account-settings/my-account-two-factor/my-account-two-factor.component.ts",
+      "cls": "NODE_MISS",
+      "target": "'/my-account/settings')"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:9",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:15",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/my-library/video-playlists/', a.playlist.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:23",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-library/video-channel-syncs"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:29",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.videoImport.uuid ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:39",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:45",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/my-library/video-playlists/', a.playlist.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:66",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:72",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/my-library/video-playlists/', a.playlist.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:92",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:102",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:112",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:122",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:132",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:142",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/my-library/video-playlists/', a.playlist.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:152",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:158",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/my-library/video-playlists/', a.playlist.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:168",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:174",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/my-library/video-playlists/', a.playlist.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:183",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:193",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:203",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:212",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.html:218",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-activity.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/w', a.video.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-edit-general.component.ts:281",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-edit-general.component.ts",
+      "cls": "NODE_MISS",
+      "target": "'/my-library/video-channels')"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-editors.component.ts:91",
+      "kind": "navigate",
+      "owner": "src/app/+my-library/+my-video-channels/edit/pages/video-channel-editors.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library', 'video-channels' ])"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.component.html:74",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/edit/video-channel-edit.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "errorRoot.path"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/my-video-channels.component.html:24",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/my-video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/manage/create"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/my-video-channels.component.html:43",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/my-video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/c', videoChannel.nameWithHost ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/my-video-channels.component.html:57",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/+my-video-channels/my-video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library', 'followers' ]"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/routes.ts:40",
+      "kind": "navigate",
+      "owner": "src/app/+my-library/+my-video-channels/routes.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/401' ], { state: { obj: err }, skipLocationChange: true })"
+    },
+    {
+      "at": "src/app/+my-library/+my-video-channels/video-channel-create.component.ts:78",
+      "kind": "navigate",
+      "owner": "src/app/+my-library/+my-video-channels/video-channel-create.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/my-library/video-channels/manage', this.videoChannelEdit.channel.name ])"
+    },
+    {
+      "at": "src/app/+my-library/my-follows/my-subscriptions.component.html:19",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-follows/my-subscriptions.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/c', videoChannel.nameWithHost ]"
+    },
+    {
+      "at": "src/app/+my-library/my-follows/my-subscriptions.component.html:26",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-follows/my-subscriptions.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/a', videoChannel.ownerBy ]"
+    },
+    {
+      "at": "src/app/+my-library/my-video-channel-syncs/my-video-channel-syncs.component.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-video-channel-syncs/my-video-channel-syncs.component.ts",
+      "cls": "NODE_MISS",
+      "target": "{{ getSyncCreateLink() }}"
+    },
+    {
+      "at": "src/app/+my-library/my-video-channel-syncs/video-channel-sync-edit/video-channel-sync-edit.component.ts:90",
+      "kind": "navigate",
+      "owner": "src/app/+my-library/my-video-channel-syncs/video-channel-sync-edit/video-channel-sync-edit.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library', 'video-channel-syncs' ])"
+    },
+    {
+      "at": "src/app/+my-library/my-video-playlists/my-video-playlist-create.component.ts:115",
+      "kind": "navigate",
+      "owner": "src/app/+my-library/my-video-playlists/my-video-playlist-create.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library', 'video-playlists' ])"
+    },
+    {
+      "at": "src/app/+my-library/my-video-playlists/my-video-playlist-edit.component.html:10",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-video-playlists/my-video-playlist-update.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/my-library/video-playlists"
+    },
+    {
+      "at": "src/app/+my-library/my-video-playlists/my-video-playlist-edit.component.html:20",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-video-playlists/my-video-playlist-update.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library/video-playlists/update', videoPlaylistToUpdate?.shortUUID]"
+    },
+    {
+      "at": "src/app/+my-library/my-video-playlists/my-video-playlist-elements.component.ts:153",
+      "kind": "navigate",
+      "owner": "src/app/+my-library/my-video-playlists/my-video-playlist-elements.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library', 'video-playlists' ])"
+    },
+    {
+      "at": "src/app/+my-library/my-video-playlists/my-video-playlist-update.component.ts:137",
+      "kind": "navigate",
+      "owner": "src/app/+my-library/my-video-playlists/my-video-playlist-update.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library', 'video-playlists' ])"
+    },
+    {
+      "at": "src/app/+my-library/my-video-playlists/my-video-playlists.component.html:40",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-video-playlists/my-video-playlists.component.ts",
+      "cls": "NODE_MISS",
+      "target": "create"
+    },
+    {
+      "at": "src/app/+my-library/my-video-playlists/my-video-playlists.component.html:63",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-video-playlists/my-video-playlists.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library/video-playlists', playlist.shortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/my-video-playlists/my-video-playlists.component.html:67",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-video-playlists/my-video-playlists.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/c', playlist.videoChannel.name]"
+    },
+    {
+      "at": "src/app/+my-library/my-videos/my-videos.component.html:46",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-videos/my-videos.component.ts",
+      "cls": "NODE_MISS",
+      "target": "."
+    },
+    {
+      "at": "src/app/+my-library/my-videos/my-videos.component.html:57",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-videos/my-videos.component.ts",
+      "cls": "NODE_MISS",
+      "target": "."
+    },
+    {
+      "at": "src/app/+my-library/my-videos/my-videos.component.html:76",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-videos/my-videos.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/videos/manage', video.shortUUID, 'stats' ]"
+    },
+    {
+      "at": "src/app/+my-library/my-videos/my-videos.component.html:150",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-videos/my-videos.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/w/p/', playlist.playlistShortUUID ]"
+    },
+    {
+      "at": "src/app/+my-library/my-watched-words-list/my-watched-words-list.component.html:3",
+      "kind": "routerLink",
+      "owner": "src/app/+my-library/my-watched-words-list/my-watched-words-list.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/my-account/auto-tag-policies"
+    },
+    {
+      "at": "src/app/+remote-interaction/remote-interaction.component.ts:53",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+remote-interaction/remote-interaction.component.ts",
+      "cls": "NODE_MISS",
+      "target": "redirectUrl)"
+    },
+    {
+      "at": "src/app/+reset-password/reset-password.component.ts:41",
+      "kind": "navigate",
+      "owner": "src/app/+reset-password/reset-password.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/' ])"
+    },
+    {
+      "at": "src/app/+reset-password/reset-password.component.ts:51",
+      "kind": "navigate",
+      "owner": "src/app/+reset-password/reset-password.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/login' ])"
+    },
+    {
+      "at": "src/app/+search/search.component.html:63",
+      "kind": "routerLink",
+      "owner": "src/app/+search/search.component.ts",
+      "cls": "NODE_MISS",
+      "target": "getInternalChannelUrl(result)"
+    },
+    {
+      "at": "src/app/+search/search.component.ts:298",
+      "kind": "navigate",
+      "owner": "src/app/+search/search.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], {"
+    },
+    {
+      "at": "src/app/+search/shared/abstract-lazy-load.resolver.ts:15",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+search/shared/abstract-lazy-load.resolver.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "'/404')"
+    },
+    {
+      "at": "src/app/+search/shared/abstract-lazy-load.resolver.ts:23",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+search/shared/abstract-lazy-load.resolver.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "'/404')"
+    },
+    {
+      "at": "src/app/+search/shared/abstract-lazy-load.resolver.ts:28",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+search/shared/abstract-lazy-load.resolver.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "redirectUrl)"
+    },
+    {
+      "at": "src/app/+signup/+register/register.component.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/+signup/+register/register.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/+signup/+verify-account/verify-account-email/verify-account-email.component.html:14",
+      "kind": "routerLink",
+      "owner": "src/app/+signup/+verify-account/verify-account-email/verify-account-email.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/verify-account/ask-send-email"
+    },
+    {
+      "at": "src/app/+signup/shared/signup-success-after-email.component.html:22",
+      "kind": "routerLink",
+      "owner": "src/app/+signup/shared/signup-success-after-email.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/+video-channels/video-channels.component.html:14",
+      "kind": "routerLink",
+      "owner": "src/app/+video-channels/video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/manage/update', videoChannel.nameWithHost  ]"
+    },
+    {
+      "at": "src/app/+video-channels/video-channels.component.html:41",
+      "kind": "routerLink",
+      "owner": "src/app/+video-channels/video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "getAccountUrl()"
+    },
+    {
+      "at": "src/app/+video-channels/video-channels.component.html:52",
+      "kind": "routerLink",
+      "owner": "src/app/+video-channels/video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "getAccountUrl()"
+    },
+    {
+      "at": "src/app/+video-channels/video-channels.component.html:54",
+      "kind": "routerLink",
+      "owner": "src/app/+video-channels/video-channels.component.ts",
+      "cls": "NODE_MISS",
+      "target": "getAccountUrl()"
+    },
+    {
+      "at": "src/app/+video-list/overview/video-overview.component.html:13",
+      "kind": "routerLink",
+      "owner": "src/app/+video-list/overview/video-overview.component.ts",
+      "cls": "NODE_MISS",
+      "target": "quickAccess.routerLink"
+    },
+    {
+      "at": "src/app/+video-list/overview/video-overview.component.html:50",
+      "kind": "routerLink",
+      "owner": "src/app/+video-list/overview/video-overview.component.ts",
+      "cls": "NODE_MISS",
+      "target": "object.routerLink"
+    },
+    {
+      "at": "src/app/+video-watch/shared/comment/video-comment.component.html:23",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/shared/comment/video-comment.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/a', comment().by ]"
+    },
+    {
+      "at": "src/app/+video-watch/shared/comment/video-comment.component.html:31",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/shared/comment/video-comment.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/w', video().shortUUID, { 'threadId': comment().threadId }]"
+    },
+    {
+      "at": "src/app/+video-watch/shared/comment/video-comment.component.html:64",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/shared/comment/video-comment.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/w', video().shortUUID, { 'threadId': comment().threadId }]"
+    },
+    {
+      "at": "src/app/+video-watch/shared/metadata/video-attributes.component.html:9",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/shared/metadata/video-attributes.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/search"
+    },
+    {
+      "at": "src/app/+video-watch/shared/metadata/video-attributes.component.html:36",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/shared/metadata/video-attributes.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/search' ]"
+    },
+    {
+      "at": "src/app/+video-watch/shared/metadata/video-attributes.component.html:45",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/shared/metadata/video-attributes.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/search' ]"
+    },
+    {
+      "at": "src/app/+video-watch/shared/metadata/video-attributes.component.html:54",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/shared/metadata/video-attributes.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/search' ]"
+    },
+    {
+      "at": "src/app/+video-watch/shared/metadata/video-attributes.component.html:78",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/shared/metadata/video-attributes.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/search' ]"
+    },
+    {
+      "at": "src/app/+video-watch/shared/player-widgets/video-watch-playlist.component.ts:147",
+      "kind": "navigate",
+      "owner": "src/app/+video-watch/shared/player-widgets/video-watch-playlist.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], extras)"
+    },
+    {
+      "at": "src/app/+video-watch/shared/player-widgets/video-watch-playlist.component.ts:208",
+      "kind": "navigate",
+      "owner": "src/app/+video-watch/shared/player-widgets/video-watch-playlist.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], { queryParams: { playlistPosition: previous.position, start, stop } })"
+    },
+    {
+      "at": "src/app/+video-watch/shared/player-widgets/video-watch-playlist.component.ts:241",
+      "kind": "navigate",
+      "owner": "src/app/+video-watch/shared/player-widgets/video-watch-playlist.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], { queryParams: { playlistPosition: next.position, start, stop } })"
+    },
+    {
+      "at": "src/app/+video-watch/video-watch.component.html:79",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/video-watch.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/c', video.byVideoChannel ]"
+    },
+    {
+      "at": "src/app/+video-watch/video-watch.component.html:80",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/video-watch.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/a', video.byAccount ]"
+    },
+    {
+      "at": "src/app/+video-watch/video-watch.component.html:82",
+      "kind": "routerLink",
+      "owner": "src/app/+video-watch/video-watch.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/a', video.byAccount ]"
+    },
+    {
+      "at": "src/app/+video-watch/video-watch.component.ts:829",
+      "kind": "navigate",
+      "owner": "src/app/+video-watch/video-watch.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/w', this.nextRecommendedVideoId ])"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/+video-manage/video-manage.resolver.ts:111",
+      "kind": "navigate",
+      "owner": "src/app/+videos-publish-manage/+video-manage/video-manage.resolver.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/401' ], { state: { obj: err }, skipLocationChange: true })"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/+video-publish/import/video-import-url.component.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/+video-publish/import/video-import-url.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-library/video-channel-syncs"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/+video-publish/video-publish.component.html:3",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/+video-publish/video-publish.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/about/instance/contact"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/+video-publish/video-publish.component.html:6",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/+video-publish/video-publish.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/about/instance"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/+video-publish/video-publish.component.html:22",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/+video-publish/video-publish.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/admin/overview/users"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/+video-publish/video-publish.component.ts:209",
+      "kind": "navigate",
+      "owner": "src/app/+videos-publish-manage/+video-publish/video-publish.component.ts",
+      "cls": "QUERY_ONLY",
+      "target": "[], { fragment: this.activeNav })"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/shared-manage/common/manage-errors.component.html:6",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/shared-manage/common/manage-errors.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "errorRoot.path"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/shared-manage/live-settings/live-stream-information.component.html:17",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/shared-manage/live-settings/live-stream-information.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getVideoUrl(session.replayVideo)"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/shared-manage/main-info/video-main-info.component.html:71",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/shared-manage/main-info/video-main-info.component.ts",
+      "cls": "NODE_MISS",
+      "target": "getChannelUpdateUrl()"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/shared-manage/main-info/video-main-info.component.ts:534",
+      "kind": "navigate",
+      "owner": "src/app/+videos-publish-manage/shared-manage/main-info/video-main-info.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/my-library/videos' ])"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/shared-manage/moderation/video-moderation.component.html:44",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/shared-manage/moderation/video-moderation.component.ts",
+      "cls": "NODE_MISS",
+      "target": "/my-account/auto-tag-policies"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/shared-manage/video-manage-container.component.html:67",
+      "kind": "routerLink",
+      "owner": "src/app/+videos-publish-manage/shared-manage/video-manage-container.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getVideoWarning().routerLink.link"
+    },
+    {
+      "at": "src/app/+videos-publish-manage/shared-manage/video-manage-container.component.ts:187",
+      "kind": "navigateByUrl",
+      "owner": "src/app/+videos-publish-manage/shared-manage/video-manage-container.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "Video.buildManageUrl(video), { state: { discardPendingChanges: true } })"
+    },
+    {
+      "at": "src/app/app.component.ts:383",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/videos/overview' ])"
+    },
+    {
+      "at": "src/app/app.component.ts:388",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/videos/browse' ])"
+    },
+    {
+      "at": "src/app/app.component.ts:393",
+      "kind": "navigate",
+      "owner": "src/app/app.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/videos/publish' ])"
+    },
+    {
+      "at": "src/app/core/auth/auth.service.ts:59",
+      "kind": "navigate",
+      "owner": "src/app/core/auth/auth.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/videos/subscriptions' ])"
+    },
+    {
+      "at": "src/app/core/auth/auth.service.ts:63",
+      "kind": "navigate",
+      "owner": "src/app/core/auth/auth.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/my-library/videos' ])"
+    },
+    {
+      "at": "src/app/core/auth/auth.service.ts:67",
+      "kind": "navigate",
+      "owner": "src/app/core/auth/auth.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/my-library/video-imports' ])"
+    },
+    {
+      "at": "src/app/core/auth/auth.service.ts:71",
+      "kind": "navigate",
+      "owner": "src/app/core/auth/auth.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/my-library/video-channels' ])"
+    },
+    {
+      "at": "src/app/core/auth/auth.service.ts:75",
+      "kind": "navigate",
+      "owner": "src/app/core/auth/auth.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/my-library/video-playlists' ])"
+    },
+    {
+      "at": "src/app/core/plugins/plugin.service.ts:248",
+      "kind": "navigateByUrl",
+      "owner": "src/app/core/plugins/plugin.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "url)"
+    },
+    {
+      "at": "src/app/core/rest/rest-extractor.service.ts:51",
+      "kind": "navigate",
+      "owner": "src/app/core/rest/rest-extractor.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/404' ], { state: { type, obj }, skipLocationChange: true })"
+    },
+    {
+      "at": "src/app/core/routing/peertube-router.service.ts:36",
+      "kind": "navigate",
+      "owner": "src/app/core/routing/peertube-router.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "baseRoute, { queryParams: existingParams, relativeTo, state: { routeSetting } })"
+    },
+    {
+      "at": "src/app/core/routing/redirect.service.ts:125",
+      "kind": "navigateByUrl",
+      "owner": "src/app/core/routing/redirect.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "this.defaultRoute, {"
+    },
+    {
+      "at": "src/app/core/routing/redirect.service.ts:135",
+      "kind": "navigateByUrl",
+      "owner": "src/app/core/routing/redirect.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "this.defaultRoute, { skipLocationChange })"
+    },
+    {
+      "at": "src/app/core/routing/redirect.service.ts:143",
+      "kind": "navigate",
+      "owner": "src/app/core/routing/redirect.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/login' ])"
+    },
+    {
+      "at": "src/app/core/routing/redirect.service.ts:147",
+      "kind": "navigate",
+      "owner": "src/app/core/routing/redirect.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/401' ], { state: { obj: err }, skipLocationChange: true })"
+    },
+    {
+      "at": "src/app/core/routing/redirect.service.ts:163",
+      "kind": "navigateByUrl",
+      "owner": "src/app/core/routing/redirect.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "redirectUrl)"
+    },
+    {
+      "at": "src/app/header/header.component.html:18",
+      "kind": "routerLink",
+      "owner": "src/app/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getDefaultRoute()"
+    },
+    {
+      "at": "src/app/header/header.component.html:38",
+      "kind": "routerLink",
+      "owner": "src/app/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/signup"
+    },
+    {
+      "at": "src/app/header/header.component.html:71",
+      "kind": "routerLink",
+      "owner": "src/app/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/a', user.account.nameWithHost ]"
+    },
+    {
+      "at": "src/app/header/header.component.html:81",
+      "kind": "routerLink",
+      "owner": "src/app/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account"
+    },
+    {
+      "at": "src/app/header/header.component.html:90",
+      "kind": "routerLink",
+      "owner": "src/app/header/header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account/settings"
+    },
+    {
+      "at": "src/app/header/notification-dropdown.component.html:22",
+      "kind": "routerLink",
+      "owner": "src/app/header/notification-dropdown.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account/notifications"
+    },
+    {
+      "at": "src/app/header/notification-dropdown.component.html:85",
+      "kind": "routerLink",
+      "owner": "src/app/header/notification-dropdown.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account/settings"
+    },
+    {
+      "at": "src/app/header/notification-dropdown.component.html:96",
+      "kind": "routerLink",
+      "owner": "src/app/header/notification-dropdown.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account/notifications"
+    },
+    {
+      "at": "src/app/header/search-typeahead.component.ts:209",
+      "kind": "navigate",
+      "owner": "src/app/header/search-typeahead.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/search' ], { queryParams }))"
+    },
+    {
+      "at": "src/app/menu/menu.component.html:5",
+      "kind": "routerLink",
+      "owner": "src/app/menu/menu.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/about"
+    },
+    {
+      "at": "src/app/menu/menu.component.html:78",
+      "kind": "routerLink",
+      "owner": "src/app/menu/menu.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "link.path"
+    },
+    {
+      "at": "src/app/modal/account-setup-warning-modal.component.html:41",
+      "kind": "routerLink",
+      "owner": "src/app/modal/account-setup-warning-modal.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account"
+    },
+    {
+      "at": "src/app/shared/shared-abuse-list/abuse-details.component.html:11",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-abuse-list/abuse-details.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ]"
+    },
+    {
+      "at": "src/app/shared/shared-abuse-list/abuse-details.component.html:19",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-abuse-list/abuse-details.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ]"
+    },
+    {
+      "at": "src/app/shared/shared-abuse-list/abuse-details.component.html:35",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-abuse-list/abuse-details.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ]"
+    },
+    {
+      "at": "src/app/shared/shared-abuse-list/abuse-details.component.html:44",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-abuse-list/abuse-details.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ]"
+    },
+    {
+      "at": "src/app/shared/shared-abuse-list/abuse-details.component.html:66",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-abuse-list/abuse-details.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ]"
+    },
+    {
+      "at": "src/app/shared/shared-abuse-list/abuse-details.component.html:75",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-abuse-list/abuse-details.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ]"
+    },
+    {
+      "at": "src/app/shared/shared-actor/actor-host.component.html:25",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-actor/actor-host.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/about/follows"
+    },
+    {
+      "at": "src/app/shared/shared-actor-image/actor-avatar.component.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-actor-image/actor-avatar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "internalHref()"
+    },
+    {
+      "at": "src/app/shared/shared-custom-markup/peertube-custom-tags/channel-miniature-markup.component.html:11",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-custom-markup/peertube-custom-tags/channel-miniature-markup.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getVideoChannelLink()"
+    },
+    {
+      "at": "src/app/shared/shared-forms/search-input.component.ts:131",
+      "kind": "navigate",
+      "owner": "src/app/shared/shared-forms/search-input.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ], {"
+    },
+    {
+      "at": "src/app/shared/shared-main/buttons/action-dropdown.component.html:76",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-main/buttons/action-dropdown.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "action.linkBuilder(entry())"
+    },
+    {
+      "at": "src/app/shared/shared-main/buttons/button.component.html:5",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-main/buttons/button.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "ptRouterLink()"
+    },
+    {
+      "at": "src/app/shared/shared-main/channel/channels-setup-message.component.html:6",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-main/channel/channels-setup-message.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-library/video-channels"
+    },
+    {
+      "at": "src/app/shared/shared-main/common/link.component.html:14",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-main/common/link.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "internalLink()"
+    },
+    {
+      "at": "src/app/shared/shared-main/http/auth-interceptor.service.ts:89",
+      "kind": "navigate",
+      "owner": "src/app/shared/shared-main/http/auth-interceptor.service.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "[ '/401' ], { state: { obj: err }, skipLocationChange: true })"
+    },
+    {
+      "at": "src/app/shared/shared-main/menu/horizontal-menu.component.html:14",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-main/menu/horizontal-menu.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "item.routerLink"
+    },
+    {
+      "at": "src/app/shared/shared-main/menu/lateral-menu.component.html:33",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-main/menu/lateral-menu.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "entry.routerLink"
+    },
+    {
+      "at": "src/app/shared/shared-moderation/generic-account-blocklist.component.html:36",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-moderation/generic-account-blocklist.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getBlocklistUrl()"
+    },
+    {
+      "at": "src/app/shared/shared-moderation/generic-server-blocklist.component.html:37",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-moderation/generic-server-blocklist.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getBlocklistUrl()"
+    },
+    {
+      "at": "src/app/shared/shared-notifications/user-notification-content.component.ts:90",
+      "kind": "navigate",
+      "owner": "src/app/shared/shared-notifications/user-notification-content.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "this.n.url)"
+    },
+    {
+      "at": "src/app/shared/shared-notifications/user-notification-content.component.ts:148",
+      "kind": "navigate",
+      "owner": "src/app/shared/shared-notifications/user-notification-content.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "this.n.url)"
+    },
+    {
+      "at": "src/app/shared/shared-notifications/user-notifications.component.html:35",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-notifications/user-notifications.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "notification.url"
+    },
+    {
+      "at": "src/app/shared/shared-plugin-pages/plugin-pages.component.ts:46",
+      "kind": "navigateByUrl",
+      "owner": "src/app/shared/shared-plugin-pages/plugin-pages.component.ts",
+      "cls": "NODE_MISS",
+      "target": "href)"
+    },
+    {
+      "at": "src/app/shared/shared-plugin-pages/plugin-pages.component.ts:64",
+      "kind": "navigate",
+      "owner": "src/app/shared/shared-plugin-pages/plugin-pages.component.ts",
+      "cls": "NODE_MISS",
+      "target": "[ '/404' ], { skipLocationChange: true })"
+    },
+    {
+      "at": "src/app/shared/shared-share-modal/share-playlist.component.html:13",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-share-modal/share-playlist.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/my-library/video-playlists/update', playlist().shortUUID ]"
+    },
+    {
+      "at": "src/app/shared/shared-share-modal/share-video.component.html:13",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-share-modal/share-video.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/videos/', 'manage', video().shortUUID ]"
+    },
+    {
+      "at": "src/app/shared/shared-tables/actor-cell.component.html:1",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-tables/actor-cell.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "routerLink"
+    },
+    {
+      "at": "src/app/shared/shared-tables/video-cell.component.html:13",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-tables/video-cell.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getVideoUrl()"
+    },
+    {
+      "at": "src/app/shared/shared-tables/video-cell.component.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-tables/video-cell.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getChannelUrl()"
+    },
+    {
+      "at": "src/app/shared/shared-thumbnail/video-thumbnail.component.html:17",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-thumbnail/video-thumbnail.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "getVideoRouterLink()"
+    },
+    {
+      "at": "src/app/shared/shared-video-comment/video-comment-list-admin-owner.component.html:31",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-comment/video-comment-list-admin-owner.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/c', comment.video.channel.name]"
+    },
+    {
+      "at": "src/app/shared/shared-video-comment/video-comment-list-admin-owner.component.html:50",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-comment/video-comment-list-admin-owner.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "."
+    },
+    {
+      "at": "src/app/shared/shared-video-comment/video-comment-list-admin-owner.component.html:83",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-comment/video-comment-list-admin-owner.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '.' ]"
+    },
+    {
+      "at": "src/app/shared/shared-video-miniature/video-filters-header.component.html:80",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-miniature/video-filters-header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account/settings"
+    },
+    {
+      "at": "src/app/shared/shared-video-miniature/video-filters-header.component.html:131",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-miniature/video-filters-header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account/settings"
+    },
+    {
+      "at": "src/app/shared/shared-video-miniature/video-filters-header.component.html:144",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-miniature/video-filters-header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/my-account/settings"
+    },
+    {
+      "at": "src/app/shared/shared-video-miniature/video-filters-header.component.html:159",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-miniature/video-filters-header.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/about/follows"
+    },
+    {
+      "at": "src/app/shared/shared-video-playlist/video-playlist-element-miniature.component.html:2",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-playlist/video-playlist-element-miniature.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "buildRouterLink()"
+    },
+    {
+      "at": "src/app/shared/shared-video-playlist/video-playlist-element-miniature.component.html:26",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-playlist/video-playlist-element-miniature.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "buildRouterLink()"
+    },
+    {
+      "at": "src/app/shared/shared-video-playlist/video-playlist-element-miniature.component.html:54",
+      "kind": "routerLink",
+      "owner": "src/app/shared/shared-video-playlist/video-playlist-element-miniature.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "[ '/c', playlistElement().video.byVideoChannel ]"
+    }
+  ]
+}
