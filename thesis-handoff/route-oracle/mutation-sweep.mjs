@@ -54,7 +54,7 @@ const git = (...args) => execFileSync('git', ['-C', REPO, ...args], { encoding: 
 
 /** Runs the adapter's suite in `cwd` and returns everything it printed. */
 function suite(cwd) {
-  const r = spawnSync('pnpm', ['-s', 'exec', 'vitest', 'run'], { cwd, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 })
+  const r = spawnSync('pnpm', ['-s', 'exec', 'vitest', 'run', '--maxWorkers=2'], { cwd, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 })
   return r.error?.code === 'ETIMEDOUT' ? 'timed out' : `${r.stdout}\n${r.stderr}`
 }
 

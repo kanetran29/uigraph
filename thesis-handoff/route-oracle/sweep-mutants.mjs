@@ -634,4 +634,7 @@ export const MUTANTS = [
   { id: "172", rule: "supersededAt: an awaited navigation stops the walk before its callers", file: "conditions.ts",
     find: "    if (navigates && node === call && Node.isAwaitExpression(parent)) awaited = true\n",
     replace: "    if (navigates && node === call && Node.isAwaitExpression(parent)) return false\n" },
+  { id: "173", rule: "relative base unknown when no screen on the chain renders the holding component", file: "extract.ts",
+    find: "(t.baseUnknown === true || (t.relative === true && holder === undefined))",
+    replace: "(t.baseUnknown === true || false)" },
 ]
