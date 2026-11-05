@@ -1360,6 +1360,20 @@ describe('ceiling: the remaining misses inside and outside the static boundary',
     expect(out).toContain('Shell from a library')
   })
 
+  it('counts a pair held on the screen a redirect lands on apart, and never toward the ceiling', () => {
+    const held = [ALL[0], ALL[1], { ...ALL[2], boundary: 'held', gap: 'Held on the landed screen' }]
+    const { args, d } = fixture(held)
+    const tex = path.join(d, 'out.tex')
+    run('ceiling.mjs', [...args, '--tex', tex])
+    const out = fs.readFileSync(tex, 'utf8')
+    expect(macro(out, 'CeilEtoEShopHeld')).toBe('1')
+    expect(macro(out, 'CeilEtoEShopInside')).toBe('0')
+    expect(macro(out, 'CeilEtoEShopCeiling')).toBe('50.0\\,\\%')
+    expect(macro(out, 'CeilHeld')).toBe('1')
+    expect(macro(out, 'CeilInside')).toBe('3')
+    expect(macro(out, 'CeilInsideShare')).toBe('60.0\\,\\%')
+  })
+
   it('refuses a miss no class names, and a class that names no miss', () => {
     expect(refusal('ceiling.mjs', fixture(ALL.slice(1)).args).output).toMatch(/unclassified/)
     expect(refusal('ceiling.mjs', fixture([...ALL, { source: 'gt:demo', id: 's9', boundary: 'inside', gap: 'g', example: 'e', fix: 'f' }]).args).output).toMatch(/names no miss/)
