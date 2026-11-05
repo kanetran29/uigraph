@@ -127,6 +127,43 @@ criteria and report them" (ch4:60). The abstract supports "a set of recommendati
 No red-team panel was run on this audit: the brief capped helper agents for budget. Items 1–7
 were each checked against the source text quoted in the table.
 
+## Artifacts and datasets of compared work
+
+Checked read-only on 5 Nov 2026: paper text, GitHub API (licence, last push), project pages.
+Nothing was downloaded or run. "Last update" is the repository's last push.
+
+| Work | Tool released? | Licence | Last update | Evaluation subjects | Subjects available? |
+|---|---|---|---|---|---|
+| Oshima and Kishi 2018 | No. The paper gives no tool link. | n/a | n/a | 4 hand-built sample apps, plus a "Small App" (1824 LOC, 6 pages) and a "Large App" (6893 LOC, 23 pages). | No. The samples are not published. The two real apps are cited only as "[17] GitHub, https://github.com/", so they cannot be identified. |
+| Rima et al. 2026 (`rima2026e2e`) | Yes: [softscanner-sw/softscanner_fa](https://github.com/softscanner-sw/softscanner_fa). It holds the pipeline, the per-subject manifests, runbooks and a ground truth for each subject (`docs/analysis/phase-b/gt/*.json`). | **None** (no LICENSE file, so default copyright applies) | 2026-04-24 (created 2026-02-25) | 7 Angular apps (Angular 11–20): posts-users-ui-ng, heroes-angular, airbus-inventory, spring-petclinic-angular, ever-traduora, angular-jumpstart, event-booking-mean. | Yes. All upstreams are public: anonbnr/posts-users-ui-ng (MIT), johnpapa/heroes-angular (no licence), Akash-goyal-github/Inventory-Management-System (no licence), parsaalian/autoe2e (no licence; hosts petclinic and traduora), DanWahlin/Angular-JumpStart (MIT), bekitos101/Event-Booking-App-MEAN-STACK (no licence). **No commit pins**: `subjects.md` gives repository URLs and subdirectories only. Running the apps needs backends (Express, JSON Server, Spring/H2, NestJS/MySQL, Spring Boot/MySQL, Express/MongoDB). |
+| Zhang et al. 2025, VeriFlow (`zhang2025veriflow`) | No. The paper gives no tool link, and its Data Availability Statement says the datasets "are not readily available" (on request to the corresponding author). | n/a | n/a | Casdoor (SPA), iTrust (SPA, version not identified), OpenRMF (MPA), DVWA (MPA). | The apps are public (e.g. casdoor/casdoor, Apache-2.0). The policies, ground truth and graphs are not. Casdoor's frontend is React (react 19.3.0), and no subject is Angular. |
+| Yang et al. 2015/2018, WTG (`yang2015wtg`, `yang2015callbacks`, `yang2018wtg`) | Yes, as part of the GATOR toolkit (web.cse.ohio-state.edu/presto/software/gator, cited in both papers). The page returned 403 to automated fetches, so its licence and date are unchecked. No GitHub mirror was found. | unchecked | unchecked | 20 open-source Android apps from the group's earlier work. | APKs and sources are open source (F-Droid style), but this audit did not resolve the list. |
+| GoalExplorer (`goalexplorer2019`) | Yes: [resess/GoalExplorer](https://github.com/resess/GoalExplorer), bundling modified Backstage, FlowDroid and Stoat. Paper artifact page at resess.github.io/artifacts/GoalExplorer/. | MIT | 2024-09-15 | 93 F-Droid apps (Stoat's benchmark), 95 Google Play apps, and a manual STG ground truth for 36 F-Droid apps. | F-Droid apps and the ground truth via the online appendix (per the paper). Google Play APKs are not redistributable. |
+| ProMal (`promal2022`) | Yes: [promal-android/Promal](https://github.com/promal-android/Promal) (StaticWTGAnalysis, DynamicWTGAnalysis, WindowTransitionPrediction). | **None** | 2021-04-22 | 40 apps (35 from APKCombo, 5 from F-Droid). The `Data/app.list` holds 40 package IDs, with results in `app_data.xlsx`. | IDs only, no APKs. Current store versions will differ from those evaluated. The paper says no public ground-truth WTG existed and the authors built their own. |
+| StoryDroid (`storydroid2019`) | Yes: [tjusenchen/StoryDroid](https://github.com/tjusenchen/StoryDroid). | None | 2024-10-29 | 10 self-developed ground-truth apps (sites.google.com/view/storydroid) plus F-Droid/Google Play apps. | Ground-truth apps via the project site (per the paper; not opened). |
+
+**What this means for a same-dataset comparison**
+
+- **Only Rima et al. allows one, in both directions.** Their tool and our extractor both read Angular
+  sources, all seven of their subjects are public Angular apps, and they publish a per-subject ground
+  truth. Two caveats. First, the repository has no licence, so ask the authors before redistributing
+  outputs; running the tool locally for measurement is a separate question for the student. Second,
+  the subjects are not pinned to commits, so any comparison must record the commit used and note that
+  it may differ from theirs.
+  - *Our extractor on their 7 apps* needs only the sources.
+  - *Their tool on our 6 apps* needs their A1 stage (static graph) only. Their test generation and
+    execution (B-stages) need running backends and accounts.
+  - Their graph's unit (workflows rooted at a widget trigger) differs from ours (screen-to-screen
+    transitions with scopes). A comparison has to map one onto the other, e.g. navigation edges and
+    their active-component sets. It is not a like-for-like score.
+- **Oshima and Kishi:** no tool and no identifiable apps, so neither direction is possible. Only
+  reimplementation remains, which the thesis already does (the `rooted` level, `earlier-work.mjs`).
+- **VeriFlow:** no tool, no data, and no Angular subject. Neither direction is possible. Our extractor
+  cannot read React (Casdoor), and their bundle-level tool is not available to run on our corpus.
+- **Android line (GATOR WTG, GoalExplorer, ProMal, StoryDroid):** the tools take APKs and our
+  extractor takes Angular sources, so neither tool can run on the other's subjects. Comparison stays
+  conceptual, as in tab:rw.
+
 ## Per-entry table
 
 Verdict codes: FT = supported by full text; AB = supported by abstract or metadata only; OV = at least one claim not supported or overstated; CV = cannot verify from a primary source; UN = not cited. Locations are `file:line` at the time of the audit (another session is editing the .tex files, so lines may shift by a few).
