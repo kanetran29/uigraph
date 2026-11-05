@@ -104,7 +104,7 @@ Node coverage & declared screens that have a node & screens the independent rout
 Must conversion & in-scope constructs witnessed by a must edge & in-scope constructs & RQ1 & \ref{sec:res-baseline} \\
 Recovered share & in-scope constructs witnessed by an edge of any tier & in-scope constructs & RQ1, RQ3 & \ref{sec:res-after}, \ref{sec:res-round2} \\
 Accounted share & recovered constructs plus in-scope constructs recorded as dynamic or unplaced & in-scope constructs & RQ2 & \ref{sec:res-defects} \\
-Must-tier precision & must edges whose witness passes (lower bound) or does not fail (upper bound) & all must edges & RQ3 & \ref{sec:res-soundness} \\
+Must-edge target consistency & must edges whose witness passes (lower bound) or does not fail (upper bound) & all must edges & RQ3 & \ref{sec:res-soundness} \\
 Node-level recall & distinct URLs named in an application's end-to-end test sources that have a node & distinct URLs so named & RQ1 & \ref{sec:res-baseline} \\
 Structural-reference recall and precision & (site, screen) pairs the reference and a level share & pairs in the reference (recall) or pairs the level places (precision) & RQ3 & \ref{sec:res-groundtruth} \\
 End-to-end containment & observed screen pairs joined by an edge of the graph & observed screen pairs & RQ3 & \ref{sec:res-e2e} \\
@@ -301,25 +301,25 @@ assigned to a node category and still be converted once attribution gives it a s
 shell or a subtree (Section~\ref{sec:res-after}). The size of \emph{other} counts constructs left
 for inspection by hand, not one cause.
 
-\textbf{Change in recovery and must-tier precision (RQ3).} Must conversion and the loss breakdown are
+\textbf{Change in recovery and must-edge target consistency (RQ3).} Must conversion and the loss breakdown are
 measured on one commit of the extractor, run twice on identical inputs with the attribution pass
 disabled and enabled. With the pass off the extractor reproduces the baseline edge set exactly on
 every application (Section~\ref{sec:implementation}).
 
-\emph{Must-tier precision} is the fraction of must edges that meet two conditions. The witness line contains a construct of
+\emph{Must-edge target consistency} is the fraction of must edges that meet two conditions. The witness line contains a construct of
 the claimed kind with the claimed target, \emph{and} the destination node sits at an address the
 independent route set declares; otherwise a node minted at an address the application never mounts
 would pass.
 
-An edge whose destination the check cannot read is neither a pass nor a failure, so precision is
+An edge whose destination the check cannot read is neither a pass nor a failure, so the consistency is
 stated as bounds: the share of must edges that pass and the share that do not fail.
 RQ3 is not decided by one rule. An attribution that put every site on every screen would raise the
-recovered share without lowering must conversion or must-tier precision, so those figures alone cannot
+recovered share without lowering must conversion or must-edge target consistency, so those figures alone cannot
 fail. RQ3 is therefore answered by three measures read together: the recovered share and must
 conversion over the same construct denominator; the width of the computed screen sets against that
 trivial assignment (Section~\ref{sec:res-width}); and agreement with references that do not come from
 the attribution's output alone, namely the two structural references, the applications' own suites and
-the comparison with Rima et al.'s tool (Section~\ref{sec:res-earlier}). The must tier's precision bounds
+the comparison with Rima et al.'s tool (Section~\ref{sec:res-earlier}). The must tier's consistency bounds
 are reported for both runs, but they cover different sets of must edges and are not compared as rates.
 
 \textbf{Detection rate (RQ4).} This is a sanity check of the mapping from a source change to its
@@ -364,7 +364,7 @@ Method & Quantity & Blind spot \\
 \endfoot
 \bottomrule
 \endlastfoot
-Witness check & Must-tier precision. For every must edge, the witness file is
+Witness check & Must-edge target consistency. For every must edge, the witness file is
 re-parsed at the claimed line, the construct kind and target are compared, and the
 destination node's address is tested against the independent route set. &
 Cannot see missing edges. Target agreement is invalid for over-approximated may

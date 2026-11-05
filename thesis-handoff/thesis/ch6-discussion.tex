@@ -95,9 +95,9 @@ Only the must tier is meant as a lower bound on the navigation an
 application can perform, and only relative to the assumptions of Claim~\ref{claim:must} (route order, ambiguous selector joins, the unresolved-call rule, the execution model), each with a class of counterexample; Section~\ref{sec:model} counts the edges resting on the first two, so a query that must not miss a transition cannot be answered from the graph alone.
 Authentication bounds the deterministic tier in the same way: a guard decides on state the source does not fix, so a reader that keeps Claim~\ref{claim:must}
 demotes it.
-The small must tier is largely this fact, a matter of definition rather than a defect of the extractor.
+The small must tier follows largely from this demotion and from those under a branch, a callback or a template condition (Table~\ref{tab:mayreasons}): a matter of definition under the present demotion rules, though a reader that proved a guard always admits could lift more.
 Taking every guard to let the navigation through raises the tier from \CensusMust{} to
-\GuardOnlyMust{} edges (Section~\ref{sec:res-round2}).
+\GuardOnlyMust{} edges (the corpus extracted again with guards ignored and every other demotion kept; \texttt{route-oracle/guard-only.mjs}).
 \section{Limitations and threats to validity}
 \label{sec:limitations}
 

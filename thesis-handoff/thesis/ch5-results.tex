@@ -33,9 +33,7 @@ the switch off the output is unchanged, which was checked on all six application
 (Section~\ref{sec:reproducibility}). Table~\ref{tab:mayreasons} groups the reasons of the
 \MayOnlyConstructs{} witness locations that yield may edges and no must edge. \MayAppAny{} of them sit behind
 at least one decision of the application itself that the extractor reads: a guard or resolver, a
-branch, a callback or a template condition. Only \MayToolOnly{} are held at may by the extractor's
-own uncertainty alone, so a better reader could lift at most those to must. The small must tier is
-therefore largely a matter of definition: a decided navigation is not deterministic. One limit applies: a guard that always lets the navigation through still counts as a guard, so the census says the application decides, not that the navigation is conditional at run time. The shares are also mostly mifos's: it holds \MayOnlyConstructsMifos{} of the \MayOnlyConstructs{} witness locations.
+branch, a callback or a template condition. Only \MayToolOnly{} are held at may by the extractor's own uncertainty alone. Under the present demotion rules a better reading of the same constructs could lift at most those to must; a reader that proved a guard always admits or a branch is always taken could lift more. The small must tier therefore follows largely from the definition: under these rules a navigation behind a decision of the application is not deterministic. One limit applies: a guard that always lets the navigation through still counts as a guard, so the census says the application decides, not that the navigation is conditional at run time. The shares are also mostly mifos's: it holds \MayOnlyConstructsMifos{} of the \MayOnlyConstructs{} witness locations.
 
 \begin{table}[t]\footnotesize
 \caption{Why the may-only witness locations are may, by family of reason.}
@@ -199,7 +197,7 @@ renders (Section~\ref{sec:res-round2}).
 
 Following each construct by its identifier across the two runs finds \AttrRegressed{}
 that leave the converted categories, so no must conversion of the baseline was lost. This measures recovery
-of represented constructs and says little about must-tier precision. The evidence for that tier,
+of represented constructs and says little about must-edge target consistency. The evidence for that tier,
 and the edges outside it, are treated in Section~\ref{sec:res-soundness}.
 
 The anchored representation was checked on the same graphs. Claim~\ref{claim:expansion} requires
@@ -699,7 +697,7 @@ stratum's real rate to the ends of its Wilson interval leaves these recalls apar
 \HHCorpusNoMifosOursRecallRange{} against \HHCorpusNoMifosTheirsRecallRange{}. On mifos this extractor holds
 \HHMifosOursPairs{} pairs (theirs \HHMifosTheirsPairs{}, found by both \HHMifosBoth{}), most of them reached only from the shell (Section~\ref{sec:res-e2e}); its precision there is
 \HHMifosOursPrecision{} against \HHMifosTheirsPrecision{}, and the pooled corpus figures, which mifos decides,
-span \HHCorpusOursRecallRange{} against \HHCorpusTheirsRecallRange{} in recall, so the pooled comparison does not rank the tools. The intervals treat the sampled pairs as independent, although pairs cluster by site.
+span \HHCorpusOursRecallRange{} against \HHCorpusTheirsRecallRange{} in recall, so the pooled comparison does not rank the tools. The intervals treat the sampled pairs as independent, although pairs cluster by site, and they cover sampling only: a systematic error of the reader, one model family throughout, would move both ends.
 Of the three preregistered predictions, the first (this extractor's recall on the corpus is the higher) holds
 at the point estimate, and its bounds separate only without mifos, a group formed after reading; the second (their precision on their subjects is at least this extractor's) and the
 third (their tool fails on some application) did not hold.
@@ -770,7 +768,7 @@ The cause trace of Section~\ref{sec:metrics} defines the three outcomes used bel
 This section keeps two words apart: a \emph{class} is a row of Table~\ref{tab:defects}, and a
 \emph{cause} is what the source review found behind a class.
 
-RQ5 is answered in three parts, not by one claim that the loss was the tool's. That holds only for the classes found and fixed, which the first part lists; it is not shown for constructs in general. Constructs held at may by the application's own decisions (\MayAppAny{} of \MayOnlyConstructs{} witness locations, Table~\ref{tab:mayreasons}) are the application's. The lists below count causes, not constructs; the construct counts are those of Tables~\ref{tab:remaining} and~\ref{tab:round2acct}, where \AttrRemainingUnexplained{} of the \AttrRemaining{} remaining attribution constructs have no recorded reason.
+RQ5 is answered in three parts, not by one claim that the loss was the tool's. That holds only for the classes found and fixed, which the first part lists; it is not shown for constructs in general. Constructs held at may behind a decision of the application (\MayAppAny{} of \MayOnlyConstructs{} witness locations, Table~\ref{tab:mayreasons}) are held there by the present demotion rules, which do not ask whether that decision can go the other way, so they are not shown to be the application's. The lists below count causes, not constructs; the construct counts are those of Tables~\ref{tab:remaining} and~\ref{tab:round2acct}, where \AttrRemainingUnexplained{} of the \AttrRemaining{} remaining attribution constructs have no recorded reason.
 
 \paragraph{Read by the final version.} The information was in the source, so the loss was the
 tool's.
@@ -868,7 +866,7 @@ the destination its edge names; it does not ask whether the construct runs every
 lets the navigation through, which the demotion rules cover. Neither the source reading of the must tier (Section~\ref{sec:limitations}) nor the mechanical check is an
 independent proof of Claim~\ref{claim:must}.
 
-\paragraph{The whole graph.} Over the whole graph the check says much less. The \RoundTwoEdges{} edges cite \RoundTwoSites{} locations, and only \RoundTwoGraphClean{} are clean, because \RoundTwoOverApprox{} are over-approximations for which the check claims no target agreement. \RoundTwoTopFanoutShare{} of all edges (\RoundTwoTopFanoutEdges{}) come from one call site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, a \texttt{navigateByUrl} to a template literal with an empty static prefix. mifos holds \RoundTwoMifosEdgeShare{} of all edges, so figures pooled over the corpus are mostly mifos's. Of the \RoundTwoJudged{} locations the check judges, \RoundTwoJudgedClean{} are clean, and none of the rest is cited by a must edge. A precision figure for the must tier is not one for the graph.
+\paragraph{The whole graph.} Over the whole graph the check says much less. The \RoundTwoEdges{} edges cite \RoundTwoSites{} locations, and only \RoundTwoGraphClean{} are clean, because \RoundTwoOverApprox{} are over-approximations for which the check claims no target agreement. \RoundTwoTopFanoutShare{} of all edges (\RoundTwoTopFanoutEdges{}) come from one call site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, a \texttt{navigateByUrl} to a template literal with an empty static prefix. mifos holds \RoundTwoMifosEdgeShare{} of all edges, so figures pooled over the corpus are mostly mifos's. Of the \RoundTwoJudged{} locations the check judges, \RoundTwoJudgedClean{} are clean, and none of the rest is cited by a must edge. A target-consistency figure for the must tier is not one for the graph.
 
 \paragraph{The node set.} Across the corpus the compared graph declares \ProbeInvented{} screens at
 addresses the framework mounts nothing at. Every address the extractor claims is an address the
