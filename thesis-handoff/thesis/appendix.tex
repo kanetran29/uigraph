@@ -409,37 +409,3 @@ file imports; where none is imported, the analysis joins over all of them.
 \end{xltabular}
 \par\smallskip{\footnotesize\noindent\emph{Note.} ``May'' is the tier without a soundness claim.}
 \endgroup
-
-\chapter{What the corpus shows can be done}
-\label{app:world}
-
-Table~\ref{tab:world} puts the comparison of Section~\ref{sec:res-earlier} in terms of what can be done without this thesis and with it on this corpus; the last row sets it beside Rima et al.'s tool.
-
-\begin{table}[t]\footnotesize
-\caption{What the corpus shows can be done without this thesis and with it.}
-\label{tab:world}
-\begin{tabularx}{\textwidth}{@{}YYY@{}}
-\toprule
- & Without this thesis & With this thesis \\
-\midrule
-Static extraction of the corpus applications & Oshima and Kishi's restrictions admit \EarlierWorkAdmittedApps{}/\EarlierWorkApps{} & extracts all \EarlierWorkApps{} \\
-Screens checked without signing in & a browser run renders \ScopeJudged{}/\ScopeScreens{}; the rest redirect to sign-in & every screen the static readers find declared has a node; nothing is run \\
-Dead links found from the source & -- & \RoundTwoDeadLinkCandidates{} candidate sites in \RoundTwoDeadLinkWhere{}, checked against the runtime route oracle (Section~\ref{sec:deadlinks}) \\
-Transitions on \GTApp{} & its own suite takes \EtoERealworldPairs{} pairs & the graph holds \EtoERealworldGraphPairs{}, an over-approximation \\
-Response to a source change & -- & \MutDetected{}/\MutScored{} mutants, at constructs the graph represents \\
-Transitions, five corpus applications other than mifos (grouped after reading; relative recall) & Rima et al.'s tool finds \HHCorpusNoMifosTheirsRecall{} of the real pairs either tool finds, at \HHCorpusNoMifosTheirsPrecision{} precision & this extractor finds \HHCorpusNoMifosOursRecall{}, at \HHCorpusNoMifosOursPrecision{}; close on their subjects, unresolved on mifos (Section~\ref{sec:res-h2h}) \\
-\bottomrule
-\end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; Oshima and Kishi's tool was not run, Rima et al.'s was (last row, Section~\ref{sec:res-h2h}); every figure is in-sample. All cells are generated figures.}
-\end{table}
-
-\chapter{Mutation detail}
-\label{app:mutation}
-
-\begin{table}[t]\small
-\caption{Detection rate per mutation operator on the attributed graph.}
-\label{tab:mutation}
-\TabMutation
-\par\smallskip{\footnotesize\noindent\emph{Note.} Detected over scored mutants. A dash means the operator found no candidate in that application.}
-\end{table}
-\FigMutation
