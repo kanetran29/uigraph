@@ -130,3 +130,28 @@ The search (heldout/search-round2.txt) returns 150 repositories, not 180: no mor
   Angular application at the repository root (nested routes, loadChildren, a canActivate guard; pushed 2026-11-05).
 Two qualify, fewer than four, so by Addendum C the second round runs on these two. The screening clones were made
 with --depth 1 of the default branch; heldout.sh fetches the same SHAs again.
+
+=====================================================================
+Addendum E (5 Nov 2026, after the second round's results and a review of its walk, before cloning or mapping the
+application below)
+=====================================================================
+A review of Addendum D found the S1 exclusion of samples and examples stricter than the corpus, which contains the
+RealWorld example application. Of the repositories Addendum D excluded as examples, two have the route features of
+S2-S3, checked through the GitHub API:
+  82 Ismaestro/angular-example-app: lazily loaded routes and guards, but no route declares children, so it fails S2
+     as well; S1 is not decisive for it.
+  147 stefanoslig/angular-ngrx-nx-realworld-example-app: nested routes (profile.routes.ts), lazily loaded routes and
+     canActivate guards, pushed 2026-08-05 (S2-S4); excluded by S1 alone.
+  (114 QuickApp has no nested or lazily loaded route in app.routes.ts and fails S2 as well.)
+So 147 is measured as a sensitivity case: what round two would have contained under the corpus's reading of S1. It is
+reported beside the two rounds, labelled as such, and not counted in either. It implements the same specification as
+the corpus's realworld application in a different codebase (an Nx workspace whose routes live in libraries reached
+through path aliases), so it is not out-of-sample in the application's domain.
+  sensitivity  stefanoslig/angular-ngrx-nx-realworld-example-app  bc7158d61319b6748b94cef301dc347efcc23f00
+               appDir apps/conduit
+Measures H1-H6 as above, same scripts, same frozen extractor.
+Predictions (written now)
+  P9  The extractor completes (H1).
+  P10 Most declared screens have a node, since its lazy routes are loaded by named export through path aliases, a
+      form the corpus contains.
+  P11 Oshima and Kishi's restrictions do not admit it (nested and parameterised routes).

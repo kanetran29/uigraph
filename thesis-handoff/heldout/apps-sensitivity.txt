@@ -1,0 +1,1 @@
+conduit stefanoslig/angular-ngrx-nx-realworld-example-app bc7158d61319b6748b94cef301dc347efcc23f00 apps/conduit
