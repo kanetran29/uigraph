@@ -83,36 +83,34 @@ Major: & Computer Science \\
 \addcontentsline{toc}{chapter}{Abstract}
 \vspace{-1.5em}
 A user-interface (UI) transition graph describes the screens of an application and the transitions a
-user can cause between them. For single-page web applications they are usually built by
-running the application, though routing frameworks now declare routes in the source. How well static extraction works on
-real applications, and why it fails, has not been measured construct by construct.
+user can cause between them. For single-page web applications such graphs are usually built by running
+the application, although routing frameworks declare routes in the source. How far static extraction
+gets on real applications, and why it fails, has not been measured construct by construct.
 
-This thesis builds a static extractor for Angular and makes that measurement with
-it on six open-source applications. The extractor reads nested and parameterised route trees, which
-the stated restrictions of an earlier Angular extraction exclude in every one of them. Five methods check the graphs. Each construct the extractor does not recover is assigned to a loss category; under
-the order of the loss rules, the largest is navigation that belongs to no single screen, such as a link in a shared header. For this loss the thesis proposes scope
-attribution, a dataflow analysis that computes the set of screens from which each navigation
-site can fire.
+This thesis builds a static extractor for Angular and measures it on six open-source applications,
+checking the graphs in five ways and assigning every construct it does not recover to a loss category.
+The largest category is navigation that belongs to no single screen, such as a link in a shared header.
+For it the thesis proposes scope attribution, a dataflow analysis that computes the screens from which
+each navigation site can fire.
 
-Three results stand out. First, almost no navigation can be extracted as a deterministic
-transition, mostly because the applications' own guards and branches decide it. The corpus yields \CensusMust{} such edges from \CensusMustSites{} constructs. Most
-of them come from one toolbar whose screen set is untested, and most rest on an assumption
-about route order that the extractor does not read. Second, almost every cause of loss traced in the source is a construct a static reader can
-read, so the loss was the tool's; the final version reads most of them, and two lie beyond any
-static reader of a route table. Third, scope attribution recovers
-\AttrRecoveredShare{} of the constructs the loss rules assign to it, most of them on one
-application and almost all as possible rather than certain transitions. Unlike the mechanisms of
-earlier work, it places navigation inside services: \AttrServiceRecovered{}
-of \AttrServiceLost{} such constructs. Against screen sets read from the sources of two applications, it finds every pair and none outside
-them on one; on the other, recall off the shell rises from \GTAlfOutletRecallNonShell{} to
-\GTAlfFullRecallNonShell{} and precision falls to \GTAlfFullPrecision{}. Both
-references apply the analysis's own relations, and the first was partly completed from the graph's
-output and guided two repairs. Mutation testing on three applications shows that the graph responds to injected
-changes in constructs it already represents; its harness was corrected after its misses were
-read, so the test is not independent.
+Few transitions are certain. The corpus yields \RouteOrderMust{} edges that always fire, \RouteOrderMustWithout{}
+without an assumed route order and \GuardOnlyMust{} if every guard admits the user; this is largely a
+matter of definition, since \MayAppAny{} of the \MayOnlyConstructs{} constructs that stay merely possible
+sit behind a guard or branch of the application. Most causes of loss traced in the source are
+constructs a static reader can read. Scope attribution recovers \AttrRecoveredShare{} of the
+constructs assigned to it, mostly on one application and almost all as possible transitions, and places
+navigation inside services, which the published rules of earlier work do not. Its screen sets are
+\BaselineFactorMin{} to \BaselineFactorMax{} times narrower than putting every site on every screen, but
+against a reference read from one application's source its precision is \GTAlfFullPrecision{}. Beside
+Rima et al.'s tool, on five corpus applications it finds \HHCorpusNoMifosOursRecall{} of the real
+transitions either finds, against \HHCorpusNoMifosTheirsRecall{}, at precision
+\HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}, a grouping chosen after reading;
+on the largest application its precision is \HHMifosOursPrecision{}. Mutation testing shows that the graph
+responds to changes in constructs it represents, though not independently of the tool.
 
-A declared route table is a usable but insufficient basis for static navigation
-extraction. The figures are in-sample; beside Rima et al.'s tool, on five corpus applications it finds \HHCorpusNoMifosOursRecall{} of the real transitions either finds, against \HHCorpusNoMifosTheirsRecall{}, at similar precision; on the largest its precision is \HHMifosOursPrecision{} against \HHMifosTheirsPrecision{}.
+A declared route table is a usable but insufficient basis for static navigation extraction. The tool was
+developed on this corpus, so the figures are in-sample, and whether the graph helps its intended
+consumers is not measured.
 
 \vspace{0.5em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page

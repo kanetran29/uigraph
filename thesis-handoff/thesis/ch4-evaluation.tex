@@ -299,11 +299,14 @@ would pass.
 
 An edge whose destination the check cannot read is neither a pass nor a failure, so precision is
 stated as bounds: the share of must edges that pass and the share that do not fail.
-RQ3 is answered positively only if the recovered share and must conversion, over the same construct
-denominator, do not fall, the recovered share rises, and must-tier precision does not fall. This is
-read as no detected failure in either run, not as a precision that did not fall where the check
-reads only part of the tier. The bounds of the two runs cover different sets of must edges, so
-they are not compared as rates.
+RQ3 is not decided by one rule. An attribution that put every site on every screen would raise the
+recovered share without lowering must conversion or must-tier precision, so those figures alone cannot
+fail. RQ3 is therefore answered by three measures read together: the recovered share and must
+conversion over the same construct denominator; the width of the computed screen sets against that
+trivial assignment (Section~\ref{sec:res-width}); and agreement with references that do not come from
+the attribution's output alone, namely the two structural references, the applications' own suites and
+the comparison with Rima et al.'s tool (Section~\ref{sec:res-earlier}). The must tier's precision bounds
+are reported for both runs, but they cover different sets of must edges and are not compared as rates.
 
 \textbf{Detection rate (RQ4).} The detection rate is the fraction of injected source changes
 that produce the predicted change in the graph, reported per mutation operator with its $n$. A

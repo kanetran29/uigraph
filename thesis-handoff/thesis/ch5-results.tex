@@ -38,7 +38,8 @@ the switch off the output is unchanged, which was checked on all six application
 at least one decision of the application itself that the extractor reads: a guard or resolver, a
 branch, a callback or a template condition. Only \MayToolOnly{} are held at may by the extractor's
 own uncertainty alone, so a better reader could lift at most those to must. The small must tier is
-therefore mostly a property of how these applications navigate, not of the extractor. One limit applies: a guard that always lets the navigation through still counts as a guard, so the census says the application decides, not that the navigation is conditional at run time. The shares are also mostly mifos's: it holds \MayOnlyConstructsMifos{} of the \MayOnlyConstructs{} constructs.
+therefore largely a matter of definition: these applications decide their navigations, and a decided
+navigation is not deterministic, whatever it decides at run time. One limit applies: a guard that always lets the navigation through still counts as a guard, so the census says the application decides, not that the navigation is conditional at run time. The shares are also mostly mifos's: it holds \MayOnlyConstructsMifos{} of the \MayOnlyConstructs{} constructs.
 
 \begin{table}[t]\footnotesize
 \caption{Why the constructs that yield only may edges are may, by family of reason.}
