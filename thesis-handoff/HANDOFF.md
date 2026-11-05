@@ -52,6 +52,16 @@ supersedes every older section where they disagree.
   P7 not judgeable. Table `tab:heldout` now has 4 columns; abstract, ch1, ch4 provenance, ch5 `tab:world` caption, ch6,
   ch7 updated. Harness scripts unchanged between rounds (checked). A third round would need its own addendum, e.g. a
   lower star threshold, written before screening.
+- **Panel on round two (2 Sonnet lenses, claims checked by hand):** no blockers. Fixed in prose: commit-order caveat,
+  round-1 walk extension (60 -> 72) and search end at 150, ElectronMail opened in round 1, docs site's only guard is
+  an external redirect, "carries over" narrowed to the route reader, ElectronMail's 9 are a parser artefact (not
+  primary addresses), P7 undecided (1 of 5 constructs but 161 edges > corpus `\AttrMustAfter`=150), P5/P8 over two.
+  S1 "sample" exclusion was stricter than the corpus (which has RealWorld): Addendum E (`772970e`, before cloning)
+  measures #147 stefanoslig/angular-ngrx-nx-realworld-example-app (apps/conduit) as a labelled sensitivity case
+  (#82 fails S2 anyway: no `children`). Result: 9/9 screens, attribution 8 of 8, but its 8 must edges all fail the
+  witness check: one `routerLink="/"`, app redirects `''` -> `home`, extractor follows redirects
+  (`redirectAddress`), `witness-check.mjs` applies none. A gap in the check, not repaired (preregistration); reported
+  as failures. Fifth column in `tab:heldout`; `generated-heldout-sens.tex`.
 - **May-reason census (done, committed `6df6c62`, thesis `c32cf06`):** behaviour-neutral switch
   `UIGRAPH_MAY_REASONS=1` in the adapter; `route-oracle/may-reasons.mjs`; equivalence on all six apps
   (`results-may-reasons/equivalence.json`, re-checked by `remeasure.sh`). Two Opus reviews; all blockers fixed. Result
@@ -67,7 +77,7 @@ supersedes every older section where they disagree.
   figure is c42f220 (packages identical except the switch).
 - **Ablation idea (student, later):** per-feature ablation of the final version's extraction (lazy boundaries,
   constant paths, ...) with measurement flags, like `UIGRAPH_IGNORE_GUARDS`; attribution levels and guard-only exist.
-- **Build after round two:** 156 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
+- **Build after round two and the sensitivity case:** 157 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 
 ## Current state, 5 Nov 2026

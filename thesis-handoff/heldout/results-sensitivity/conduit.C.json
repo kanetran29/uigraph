@@ -1,0 +1,185 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/conduit/apps/conduit",
+  "db": "/Users/kanetran29/personal/uigraph-work/heldout/conduit/apps/conduit/uigraph.db",
+  "filesParsed": 97,
+  "declaredRoutesTotal": 15,
+  "byKind": {
+    "REDIRECT": 1,
+    "SCREEN": 11,
+    "PREFIX": 3
+  },
+  "uniqueScreenPaths": 9,
+  "guardedScreenPaths": 2,
+  "blindSpots": [],
+  "excluded": {
+    "storybookFiles": 0
+  },
+  "comparison": {
+    "declaredScreens": 9,
+    "graphNodes": 9,
+    "matched": 9,
+    "coverage": 1,
+    "missing": [],
+    "extraNodes": []
+  },
+  "routes": [
+    {
+      "path": "/",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.config.ts",
+      "line": 14,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/home",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.config.ts",
+      "line": 19,
+      "component": "@realworld/home/feature-home",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/login",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.config.ts",
+      "line": 23,
+      "component": "@realworld/auth/feature-auth",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/register",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.config.ts",
+      "line": 27,
+      "component": "@realworld/auth/feature-auth",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/article",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.config.ts",
+      "line": 31,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/article/:slug",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "../../libs/articles/feature-article/src/article.routes.ts",
+      "line": 5,
+      "component": "ArticleComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/settings",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/app.config.ts",
+      "line": 35,
+      "component": "@realworld/settings/feature-settings",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/editor",
+      "kind": "PREFIX",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "src/app/app.config.ts",
+      "line": 41,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/editor",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "../../libs/articles/feature-article-edit/src/article-edit.routes.ts",
+      "line": 7,
+      "component": "ArticleEditComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/editor",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "../../libs/articles/feature-article-edit/src/article-edit.routes.ts",
+      "line": 11,
+      "component": "ArticleEditComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/editor/:slug",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "../../libs/articles/feature-article-edit/src/article-edit.routes.ts",
+      "line": 17,
+      "component": "ArticleEditComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/profile",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.config.ts",
+      "line": 46,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/profile/:username",
+      "kind": "SCREEN",
+      "guards": [
+        "[AuthGuard]"
+      ],
+      "file": "../../libs/profile/feature-profile/src/profile.routes.ts",
+      "line": 8,
+      "component": "ProfileComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/profile/:username",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "../../libs/profile/feature-profile/src/profile.routes.ts",
+      "line": 14,
+      "component": "ArticleListComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/profile/:username/favorites",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "../../libs/profile/feature-profile/src/profile.routes.ts",
+      "line": 19,
+      "component": "ArticleListComponent",
+      "constantPath": false,
+      "lazy": true
+    }
+  ]
+}

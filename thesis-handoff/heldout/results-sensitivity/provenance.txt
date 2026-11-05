@@ -1,0 +1,8 @@
+extractor 6b0d723 (packages = c42f220)
+conduit stefanoslig/angular-ngrx-nx-realworld-example-app bc7158d61319b6748b94cef301dc347efcc23f00 apps/conduit
+conduit map-attr exit=0 seconds=1
+conduit map-noattr exit=0 seconds=1
+conduit index exit=0
+conduit witness exit=0
+conduit loss exit=0
+conduit loss-noattr exit=0

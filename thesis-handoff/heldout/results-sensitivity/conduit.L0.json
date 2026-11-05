@@ -1,0 +1,70 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/conduit/apps/conduit",
+  "constructs": 8,
+  "excluded": 0,
+  "inScope": 8,
+  "recovered": 0,
+  "accounted": 0,
+  "lost": 8,
+  "tally": {
+    "ATTRIBUTION_SHARED": 8
+  },
+  "rows": [
+    {
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "kind": "routerLink",
+      "owner": "src/app/layout/navbar/navbar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/layout/navbar/navbar.component.html:8",
+      "kind": "routerLink",
+      "owner": "src/app/layout/navbar/navbar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/"
+    },
+    {
+      "at": "src/app/layout/navbar/navbar.component.html:11",
+      "kind": "routerLink",
+      "owner": "src/app/layout/navbar/navbar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/login"
+    },
+    {
+      "at": "src/app/layout/navbar/navbar.component.html:14",
+      "kind": "routerLink",
+      "owner": "src/app/layout/navbar/navbar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/register"
+    },
+    {
+      "at": "src/app/layout/navbar/navbar.component.html:23",
+      "kind": "routerLink",
+      "owner": "src/app/layout/navbar/navbar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/']"
+    },
+    {
+      "at": "src/app/layout/navbar/navbar.component.html:30",
+      "kind": "routerLink",
+      "owner": "src/app/layout/navbar/navbar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/editor"
+    },
+    {
+      "at": "src/app/layout/navbar/navbar.component.html:35",
+      "kind": "routerLink",
+      "owner": "src/app/layout/navbar/navbar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "/settings"
+    },
+    {
+      "at": "src/app/layout/navbar/navbar.component.html:43",
+      "kind": "routerLink",
+      "owner": "src/app/layout/navbar/navbar.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "['/profile', user().username]"
+    }
+  ]
+}

@@ -1,0 +1,340 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/conduit/apps/conduit",
+  "dbPath": "/Users/kanetran29/personal/uigraph-work/heldout/conduit/apps/conduit/uigraph.db",
+  "edges": 31,
+  "sites": 42,
+  "sitesCited": 42,
+  "mergedSites": 11,
+  "clean": 20,
+  "mustEdges": 8,
+  "mustClean": 0,
+  "mustUnread": 0,
+  "outsideApp": 25,
+  "outsideAppMust": 0,
+  "destinationsChecked": true,
+  "tally": {
+    "TARGET_MISMATCH": 17,
+    "OVER_APPROX": 5
+  },
+  "mustBad": [
+    {
+      "witnessModality": "must",
+      "edgeIndex": 13,
+      "edge": "/article/:slug -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 14,
+      "edge": "/editor -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 15,
+      "edge": "/editor/:slug -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 17,
+      "edge": "/login -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 18,
+      "edge": "/profile/:username -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 19,
+      "edge": "/profile/:username/favorites -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 20,
+      "edge": "/register -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 21,
+      "edge": "/settings -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    }
+  ],
+  "findings": [
+    {
+      "witnessModality": "may",
+      "edgeIndex": 1,
+      "edge": "/article/:slug -> /register",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/articles/feature-article/src/article.component.html:43",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /login, edge claims /register"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 3,
+      "edge": "/profile/:username -> /profile/:username",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/profile/feature-profile/src/profile.component.html:44",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 4,
+      "edge": "/profile/:username -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/profile/feature-profile/src/profile.component.html:44",
+      "mergedWitness": true,
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.6,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 7,
+      "edge": "n_scope_subtree__n_profile_username -> /profile/:username",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/profile/feature-profile/src/profile.component.html:44",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 8,
+      "edge": "n_scope_subtree__n_profile_username -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/profile/feature-profile/src/profile.component.html:44",
+      "mergedWitness": true,
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.6,
+      "detail": "one of 4 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 8,
+      "edge": "n_scope_subtree__n_profile_username -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/articles/feature-articles-list/src/article-list-item/article-list-item.component.html:3",
+      "mergedWitness": true,
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile/:param, edge claims /profile/:username/favorites"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 11,
+      "edge": "/article/:slug -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/articles/feature-article/src/article-meta/article-meta.component.html:2",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile/:param, edge claims /profile/:username/favorites"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 11,
+      "edge": "/article/:slug -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/articles/feature-article/src/article-meta/article-meta.component.html:6",
+      "mergedWitness": true,
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile/:param, edge claims /profile/:username/favorites"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 11,
+      "edge": "/article/:slug -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/articles/feature-article/src/article-comment/article-comment.component.html:6",
+      "mergedWitness": true,
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile/:param, edge claims /profile/:username/favorites"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 11,
+      "edge": "/article/:slug -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "../../libs/articles/feature-article/src/article-comment/article-comment.component.html:10",
+      "mergedWitness": true,
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile/:param, edge claims /profile/:username/favorites"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 13,
+      "edge": "/article/:slug -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 14,
+      "edge": "/editor -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 15,
+      "edge": "/editor/:slug -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 16,
+      "edge": "/home -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 9 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 17,
+      "edge": "/login -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 18,
+      "edge": "/profile/:username -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 19,
+      "edge": "/profile/:username/favorites -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 20,
+      "edge": "/register -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "must",
+      "edgeIndex": 21,
+      "edge": "/settings -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:3",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 22,
+      "edge": "n_scope_shell -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:8",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 22,
+      "edge": "n_scope_shell -> /home",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:23",
+      "mergedWitness": true,
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /, edge claims /home"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 28,
+      "edge": "n_scope_shell -> /profile/:username/favorites",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/layout/navbar/navbar.component.html:43",
+      "verdict": "TARGET_MISMATCH",
+      "detail": "construct at the witness targets /profile/:param, edge claims /profile/:username/favorites"
+    }
+  ]
+}

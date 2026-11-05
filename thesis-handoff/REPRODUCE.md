@@ -149,6 +149,14 @@ node heldout-to-latex.mjs --dir results-round2 --apps electronmail=Electronmail,
   --tex ../thesis/generated-heldout2.tex
 ```
 
+The sensitivity case of Addendum E (`apps-sensitivity.txt`, `results-sensitivity/`, `generated-heldout-sens.tex`):
+
+```bash
+thesis-handoff/heldout/heldout.sh <work dir> <wt> thesis-handoff/heldout/apps-sensitivity.txt thesis-handoff/heldout/results-sensitivity
+cd thesis-handoff/heldout && node heldout-to-latex.mjs --dir results-sensitivity --apps conduit=Conduit \
+  --tex ../thesis/generated-heldout-sens.tex
+```
+
 ## 3. Build the PDF
 
 ```bash
