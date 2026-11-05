@@ -49,6 +49,16 @@ echo "== must tier with every guard passing"
 pnpm -s -C "$REPO" exec tsx "$HERE/guard-only.mjs" --corpus "$W/corpus" --out "$W/guard-only" --tex "$TEX/generated-guard-only.tex"
 cp "$W/guard-only/guard-only.json" results-must/guard-only.json
 
+echo "== why the may tier is may"
+mkdir -p "$W/may-reasons"
+for p in $APPS; do a=${p%%:*}; s=${p#*:}
+  rm -f "$W/may-reasons/$a.uigraph.db"; UIGRAPH_MAY_REASONS=1 $MAP "$W/corpus/$a/$s" --adapter angular --attribution --out "$W/may-reasons/$a.uigraph.db" > /dev/null 2>&1
+done
+# The same map without the flag, the instrument as shipped, whose graph the flagged one must equal.
+rm -f "$W/may-reasons/realworld.unset.uigraph.db"; $MAP "$W/corpus/realworld" --adapter angular --attribution --out "$W/may-reasons/realworld.unset.uigraph.db" > /dev/null 2>&1
+node may-reasons.mjs $(for p in $APPS; do a=${p%%:*}; echo --db $a="$W/may-reasons/$a.uigraph.db"; done) --tex "$TEX/generated-may-reasons.tex" \
+  $(for p in $APPS; do a=${p%%:*}; s=${p#*:}; echo --corpus $a="$W/corpus/$a/$s/uigraph.db"; done) --unset "$W/may-reasons/realworld.unset.uigraph.db"
+
 echo "== must tier without the route-order assumption"
 pnpm -s -C "$REPO" exec tsx "$HERE/route-order.mjs" --corpus "$W/corpus" --out "$W/route-order" --tex "$TEX/generated-route-order.tex"
 cp "$W/route-order/route-order.json" results-must/route-order.json

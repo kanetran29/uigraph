@@ -346,9 +346,23 @@ export function appSourceFiles(sfs: SourceFile[]): SourceFile[] {
  * route names a component the reader cannot resolve, and a component the chain does not hold.
  */
 export function outletHiddenAbove(routes: RouteInfo[], sfs: SourceFile[]): (route: RouteInfo, file: string) => boolean {
+  const why = outletHiddenReason(routes, sfs)
+  return (route, file) => why(route, file) !== null
+}
+
+/**
+ * The reason `outletHiddenAbove` holds a component hidden, or null when it is not: 'outlet under a
+ * template condition' when the first outlet above that is not firm is found, in its own template,
+ * under a condition (the application's own), 'no outlet or component found' when it is not firm
+ * because no outlet or no resolvable component was found (a limit of the reader). Read by the
+ * may-reason measurement flag; `outletHiddenAbove` is this reason being non-null.
+ */
+export function outletHiddenReason(routes: RouteInfo[], sfs: SourceFile[]): (route: RouteInfo, file: string) => string | null {
   const componentOf = new Map<Node, SourceFile | undefined>(routes.map((r) => [r.routeObj, r.componentFile]))
   let components: Map<string, ComponentInfo> | undefined
   const firm = new Map<string, boolean>()
+  // Files whose own template holds the outlet, but under a template condition.
+  const underCondition = new Set<string>()
   /** Whether the component in `sf` renders a primary outlet on every execution, in its own template or through a component it places. */
   const firmOutlet = (sf: SourceFile): boolean => {
     const file = sf.getFilePath()
@@ -359,7 +373,9 @@ export function outletHiddenAbove(routes: RouteInfo[], sfs: SourceFile[]): (rout
     const tpl = inlineTemplate(sf)
     const at = tpl ? tpl.text.search(/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/) : -1
     if (tpl && at >= 0) {
-      firm.set(file, templateCondition(tpl.text, at + 1) === null)
+      const held = templateCondition(tpl.text, at + 1) !== null
+      if (held) underCondition.add(file)
+      firm.set(file, !held)
       return firm.get(file)!
     }
     // Only a component that holds no outlet of its own has its template scanned for the ones it
@@ -391,7 +407,12 @@ export function outletHiddenAbove(routes: RouteInfo[], sfs: SourceFile[]): (rout
     const chain = chains.get(route) ?? route.levels.map(holderOf)
     chains.set(route, chain)
     const at = chain.findIndex((c) => c?.getFilePath() === file)
-    return at < 0 || chain.slice(0, at).some((c) => c === null || (c !== undefined && !firmOutlet(c)))
+    if (at < 0) return 'no outlet or component found'
+    for (const c of chain.slice(0, at)) {
+      if (c === null) return 'no outlet or component found'
+      if (c !== undefined && !firmOutlet(c)) return underCondition.has(c.getFilePath()) ? 'outlet under a template condition' : 'no outlet or component found'
+    }
+    return null
   }
 }
 

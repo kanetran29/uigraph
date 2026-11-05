@@ -146,6 +146,11 @@ export interface RawTarget {
    * the navigation occurs whenever its code runs, so a conditional site is placed on may.
    */
   conditional?: boolean
+  /**
+   * The conditions that make `conditional` true, as the condition readers name them. Read only by
+   * the may-reason measurement flag; `conditional` alone decides the modality.
+   */
+  why?: string[]
 }
 
 const STATIC_LINK_RE = /(?<!\[)\brouterLink\s*=\s*"([^"]*)"/g
@@ -166,7 +171,8 @@ const BOUND_LINK_RE = /\[routerLink\]\s*=\s*"([^"]*)"/g
 /**
  * Parse routerLink / [routerLink] attributes out of a component's template
  * (inline or external). Each target's witness loc is its line within the
- * template text; for an external template the witness file is the html path.
+ * template text; for an external template the witness file is the html path. A link under a
+ * template condition also carries `why`, for the may-reason measurement flag.
  */
 export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[] {
   const tpl = inlineTemplate(sf)
@@ -177,10 +183,12 @@ export function templateTargets(sf: SourceFile, projectDir: string): RawTarget[]
   // A link that binds its own `relativeTo` input resolves against a route the reader does not evaluate.
   const boundBase = (at: number): boolean => /\[relativeTo\]\s*=/.test(openTag(tpl.text, tpl.text.lastIndexOf('<', at))?.attrs ?? '')
   for (const m of tpl.text.matchAll(STATIC_LINK_RE)) {
-    out.push({ ti: staticLinkTarget(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, baseUnknown: boundBase(m.index), conditional: templateCondition(tpl.text, m.index) !== null })
+    const cond = templateCondition(tpl.text, m.index)
+    out.push({ ti: staticLinkTarget(m[1] ?? ''), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, baseUnknown: boundBase(m.index), conditional: cond !== null, why: cond === null ? undefined : [cond] })
   }
   for (const m of tpl.text.matchAll(BOUND_LINK_RE)) {
-    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, baseUnknown: boundBase(m.index), conditional: templateCondition(tpl.text, m.index) !== null })
+    const cond = templateCondition(tpl.text, m.index)
+    out.push({ ti: classifyBoundLink(m[1] ?? '', sf), event: 'click:routerLink', effect: 'navigate', ruleId: 'ng.router-link', loc: locAt(m.index), file, relative: true, baseUnknown: boundBase(m.index), conditional: cond !== null, why: cond === null ? undefined : [cond] })
   }
   return out
 }
@@ -402,7 +410,7 @@ export function enclosingMember(node: Node): string | undefined {
   return undefined
 }
 
-/** Parse `this.router.navigate([...])` and `this.router.navigateByUrl(...)` calls. */
+/** Parse `this.router.navigate([...])` and `this.router.navigateByUrl(...)` calls; a conditional call carries the condition `callCondition` names as `why`. */
 export function routerCallTargets(sf: SourceFile): RawTarget[] {
   const out: RawTarget[] = []
   for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
@@ -412,9 +420,11 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
     if (member !== 'navigate' && member !== 'navigateByUrl') continue
     const lc = sf.getLineAndColumnAtPos(call.getStart())
     const loc = { line: lc.line, col: lc.column }
+    const cond = callCondition(call)
+    const why = cond === null ? undefined : [cond]
     if (member === 'navigateByUrl') {
       const arg0 = call.getArguments()[0]
-      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, url: true, member: enclosingMember(call), conditional: callCondition(call) !== null })
+      out.push({ ti: classifyTarget(arg0), event: 'navigate', effect: 'router.navigateByUrl', ruleId: 'ng.navigate-by-url', loc, url: true, member: enclosingMember(call), conditional: cond !== null, why })
     } else {
       const arg0 = call.getArguments()[0]
       // `navigate(x)` takes a commands array. Written out, every element counts, not only the
@@ -428,7 +438,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
         arg0 && Node.isArrayLiteralExpression(arg0)
           ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf)
           : classifyTarget(arg0)
-      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, baseUnknown, member: enclosingMember(call), conditional: callCondition(call) !== null })
+      out.push({ ti, event: 'navigate', effect: 'router.navigate', ruleId: 'ng.navigate', loc, relative, baseUnknown, member: enclosingMember(call), conditional: cond !== null, why })
     }
   }
   return out
@@ -485,9 +495,9 @@ function extraConditionGuard(node: Node): string | null {
   return null
 }
 
-/** Navigations a component method performs: trace `methodName` to its class method, collect router.navigate/navigateByUrl with guards. */
-export function methodNavTargets(sf: SourceFile, methodName: string): { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null; conditional: boolean }[] {
-  const out: { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null; conditional: boolean }[] = []
+/** Navigations a component method performs: trace `methodName` to its class method, collect router.navigate/navigateByUrl with guards and, when conditional, the condition as `why`. */
+export function methodNavTargets(sf: SourceFile, methodName: string): { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null; conditional: boolean; why?: string[] }[] {
+  const out: { ti: TargetInfo; event: string; effect: string; ruleId: string; loc: { line: number; col: number }; guard: string | null; conditional: boolean; why?: string[] }[] = []
   for (const cls of sf.getClasses()) {
     const method = cls.getMethod(methodName)
     if (!method) continue
@@ -499,12 +509,14 @@ export function methodNavTargets(sf: SourceFile, methodName: string): { ti: Targ
       const lc = sf.getLineAndColumnAtPos(call.getStart())
       const loc = { line: lc.line, col: lc.column }
       const guard = getGuard(call) ?? extraConditionGuard(call)
+      const cond = callCondition(call)
+      const why = cond === null ? undefined : [cond]
       if (member === 'navigateByUrl') {
-        out.push({ ti: classifyTarget(call.getArguments()[0]), event: 'click', effect: 'router.navigateByUrl', ruleId: 'ng.control.navigate-by-url', loc, guard, conditional: callCondition(call) !== null })
+        out.push({ ti: classifyTarget(call.getArguments()[0]), event: 'click', effect: 'router.navigateByUrl', ruleId: 'ng.control.navigate-by-url', loc, guard, conditional: cond !== null, why })
       } else {
         const arg0 = call.getArguments()[0]
         const ti = arg0 && Node.isArrayLiteralExpression(arg0) ? classifyCommandParts(arg0.getElements().map((e) => e.getText()), sf) : classifyTarget(arg0)
-        out.push({ ti, event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard, conditional: callCondition(call) !== null })
+        out.push({ ti, event: 'click', effect: 'router.navigate', ruleId: 'ng.control.navigate', loc, guard, conditional: cond !== null, why })
       }
     }
     return out

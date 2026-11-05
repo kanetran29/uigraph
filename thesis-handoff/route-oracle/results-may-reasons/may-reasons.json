@@ -1,0 +1,207 @@
+{
+  "perApp": {
+    "realworld": {
+      "total": 37,
+      "any": {
+        "async": 4,
+        "branch": 4,
+        "template": 30,
+        "guard": 16,
+        "reader": 1,
+        "attribution": 1,
+        "target": 13,
+        "sameScreen": 4
+      },
+      "sole": {
+        "async": 2,
+        "branch": 1,
+        "template": 4,
+        "guard": 0,
+        "reader": 0,
+        "attribution": 0,
+        "target": 0,
+        "sameScreen": 0
+      },
+      "app": 19,
+      "tool": 14,
+      "neither": 4,
+      "appAny": 36,
+      "toolOnly": 1,
+      "both": 13
+    },
+    "alfresco": {
+      "total": 9,
+      "any": {
+        "async": 0,
+        "branch": 4,
+        "template": 3,
+        "guard": 9,
+        "reader": 1,
+        "attribution": 4,
+        "target": 3,
+        "sameScreen": 3
+      },
+      "sole": {
+        "async": 0,
+        "branch": 0,
+        "template": 0,
+        "guard": 1,
+        "reader": 0,
+        "attribution": 0,
+        "target": 0,
+        "sameScreen": 0
+      },
+      "app": 2,
+      "tool": 6,
+      "neither": 1,
+      "appAny": 9,
+      "toolOnly": 0,
+      "both": 6
+    },
+    "ghostfolio": {
+      "total": 99,
+      "any": {
+        "async": 15,
+        "branch": 17,
+        "template": 34,
+        "guard": 98,
+        "reader": 0,
+        "attribution": 9,
+        "target": 28,
+        "sameScreen": 15
+      },
+      "sole": {
+        "async": 0,
+        "branch": 0,
+        "template": 0,
+        "guard": 32,
+        "reader": 0,
+        "attribution": 0,
+        "target": 0,
+        "sameScreen": 0
+      },
+      "app": 63,
+      "tool": 34,
+      "neither": 2,
+      "appAny": 99,
+      "toolOnly": 0,
+      "both": 34
+    },
+    "k8sdash": {
+      "total": 11,
+      "any": {
+        "async": 5,
+        "branch": 1,
+        "template": 6,
+        "guard": 10,
+        "reader": 1,
+        "attribution": 3,
+        "target": 4,
+        "sameScreen": 1
+      },
+      "sole": {
+        "async": 0,
+        "branch": 0,
+        "template": 0,
+        "guard": 0,
+        "reader": 0,
+        "attribution": 0,
+        "target": 0,
+        "sameScreen": 0
+      },
+      "app": 5,
+      "tool": 6,
+      "neither": 0,
+      "appAny": 11,
+      "toolOnly": 0,
+      "both": 6
+    },
+    "bitwarden": {
+      "total": 209,
+      "any": {
+        "async": 61,
+        "branch": 84,
+        "template": 29,
+        "guard": 201,
+        "reader": 3,
+        "attribution": 94,
+        "target": 96,
+        "sameScreen": 5
+      },
+      "sole": {
+        "async": 3,
+        "branch": 3,
+        "template": 1,
+        "guard": 11,
+        "reader": 0,
+        "attribution": 0,
+        "target": 0,
+        "sameScreen": 0
+      },
+      "app": 90,
+      "tool": 118,
+      "neither": 1,
+      "appAny": 209,
+      "toolOnly": 0,
+      "both": 118
+    },
+    "mifos": {
+      "total": 1210,
+      "any": {
+        "async": 247,
+        "branch": 94,
+        "template": 632,
+        "guard": 1106,
+        "reader": 121,
+        "attribution": 82,
+        "target": 565,
+        "sameScreen": 152
+      },
+      "sole": {
+        "async": 5,
+        "branch": 5,
+        "template": 26,
+        "guard": 130,
+        "reader": 1,
+        "attribution": 0,
+        "target": 4,
+        "sameScreen": 0
+      },
+      "app": 476,
+      "tool": 713,
+      "neither": 21,
+      "appAny": 1186,
+      "toolOnly": 24,
+      "both": 689
+    }
+  },
+  "totals": {
+    "total": 1575,
+    "app": 655,
+    "tool": 891,
+    "neither": 29,
+    "appAny": 1550,
+    "toolOnly": 25,
+    "both": 866,
+    "any": {
+      "async": 332,
+      "branch": 204,
+      "template": 734,
+      "guard": 1440,
+      "reader": 127,
+      "attribution": 193,
+      "target": 709,
+      "sameScreen": 180
+    },
+    "sole": {
+      "async": 10,
+      "branch": 9,
+      "template": 31,
+      "guard": 174,
+      "reader": 1,
+      "attribution": 0,
+      "target": 4,
+      "sameScreen": 0
+    }
+  }
+}

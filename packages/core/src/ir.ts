@@ -108,6 +108,11 @@ export interface Witness {
    * constructs that reach its destination only on some executions; this says which is which.
    */
   modality?: Modality
+  /**
+   * Why this construct is held at may, sorted and without repeats. Written only by the adapter's
+   * measurement flag `UIGRAPH_MAY_REASONS=1` and only on a may witness; absent otherwise.
+   */
+  reasons?: string[]
 }
 
 /**

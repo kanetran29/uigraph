@@ -1,0 +1,42 @@
+{
+  "comparison": "graph doc of flagged DB with every reasons key deleted vs graph doc of corpus DB, deep-equal and text-equal",
+  "apps": {
+    "realworld": {
+      "identical": true,
+      "textIdentical": true,
+      "mayWitnesses": 86,
+      "mayWithoutReasons": 0
+    },
+    "alfresco": {
+      "identical": true,
+      "textIdentical": true,
+      "mayWitnesses": 38,
+      "mayWithoutReasons": 0
+    },
+    "ghostfolio": {
+      "identical": true,
+      "textIdentical": true,
+      "mayWitnesses": 405,
+      "mayWithoutReasons": 0
+    },
+    "k8sdash": {
+      "identical": true,
+      "textIdentical": true,
+      "mayWitnesses": 83,
+      "mayWithoutReasons": 0
+    },
+    "bitwarden": {
+      "identical": true,
+      "textIdentical": true,
+      "mayWitnesses": 484,
+      "mayWithoutReasons": 0
+    },
+    "mifos": {
+      "identical": true,
+      "textIdentical": true,
+      "mayWitnesses": 13906,
+      "mayWithoutReasons": 0
+    }
+  },
+  "unsetRealworldGraphByteIdentical": true
+}

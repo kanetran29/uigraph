@@ -153,13 +153,36 @@ function handlersOf(cls: ClassDeclaration): Set<string> {
 }
 
 /**
+ * How the component's template binds a member to an event when `handlersOf` does not count it a
+ * handler: 'conditional' when a bare call to it sits under a template condition, 'unread' when
+ * a binding calls it inside a longer expression (`flag && go()`, `a(); go()`), null when no
+ * binding names it. A conditional binding wins, since it is the application's own condition.
+ */
+function bindingOf(cls: ClassDeclaration, name: string): 'conditional' | 'unread' | null {
+  const tpl = inlineTemplate(cls.getSourceFile())
+  const calls = new RegExp(`(?<![\\w$.])(?:this\\.)?${name.replace(/\$/g, '\\$')}\\s*\\(`)
+  let found: 'conditional' | 'unread' | null = null
+  for (const b of tpl?.text.matchAll(EVENT_BINDING) ?? []) {
+    const expr = b[3] ?? ''
+    if (!calls.test(expr)) continue
+    if (isBareCall(expr) && templateCondition(tpl!.text, b.index) !== null) return 'conditional'
+    if (!isBareCall(expr)) found = 'unread'
+  }
+  return found
+}
+
+/**
  * The condition a member of a class runs under: null when it is a handler, or when some caller
  * in the same class calls it unconditionally from a handler; otherwise the reason it may not
- * run. `seen` stops a cycle of calls between members.
+ * run, which names the cause. 'handler bound under a template condition' is the application's
+ * own condition; 'all callers conditional' is its control flow (a cycle of calls counts, since
+ * no caller in it is unconditional); 'handler not read' and 'callers not followed' are limits of
+ * the reader, which does not parse a binding that is more than a bare call and does not follow a
+ * call from another class. `seen` stops a cycle of calls between members.
  */
 function memberCondition(cls: ClassDeclaration, name: string, seen: Set<string>): string | null {
   if (handlersOf(cls).has(name)) return null
-  if (seen.has(name)) return 'in a helper method'
+  if (seen.has(name)) return 'all callers conditional'
   seen.add(name)
   const callers = cls.getDescendantsOfKind(SyntaxKind.CallExpression).filter((c) => {
     const e = c.getExpression()
@@ -168,7 +191,10 @@ function memberCondition(cls: ClassDeclaration, name: string, seen: Set<string>)
   for (const c of callers) {
     if (callCondition(c, seen) === null) return null
   }
-  return 'in a helper method'
+  const bound = bindingOf(cls, name)
+  if (bound === 'conditional') return 'handler bound under a template condition'
+  if (bound === 'unread') return 'handler not read'
+  return callers.length > 0 ? 'all callers conditional' : 'callers not followed'
 }
 
 /** Whether a break or continue in an earlier statement can skip what follows it: one whose target encloses that statement. */

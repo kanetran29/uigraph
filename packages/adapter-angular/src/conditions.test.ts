@@ -174,15 +174,15 @@ describe('callCondition on the rest of the ways a call can be skipped', () => {
   })
   it('treats a member the template does not bind as a helper, conditional unless a handler calls it unconditionally', () => {
     expect(callIn('go() { this.bail() } \n private bail() { this.router.navigate(["/x"]) }')).toBeNull()
-    expect(callIn('go() { if (this.flag) { this.bail() } } \n private bail() { this.router.navigate(["/x"]) }')).toBe('in a helper method')
-    expect(callIn('other() { this.router.navigate(["/x"]) }')).toBe('in a helper method')
+    expect(callIn('go() { if (this.flag) { this.bail() } } \n private bail() { this.router.navigate(["/x"]) }')).toBe('all callers conditional')
+    expect(callIn('other() { this.router.navigate(["/x"]) }')).toBe('callers not followed')
     expect(callIn('ngOnInit() { this.router.navigate(["/x"]) }')).toBeNull()
   })
   it('treats a member bound only under a template condition, or bound with a guard, as conditional', () => {
-    expect(callIn('go() { this.router.navigate(["/x"]) }', '<b *ngIf="flag" (click)="go()"></b>')).toBe('in a helper method')
-    expect(callIn('go() { this.router.navigate(["/x"]) }', '<b (click)="flag && go()"></b>')).toBe('in a helper method')
+    expect(callIn('go() { this.router.navigate(["/x"]) }', '<b *ngIf="flag" (click)="go()"></b>')).toBe('handler bound under a template condition')
+    expect(callIn('go() { this.router.navigate(["/x"]) }', '<b (click)="flag && go()"></b>')).toBe('handler not read')
     expect(callIn('go = () => { this.router.navigate(["/x"]) }')).toBeNull()
-    expect(callIn('stay = () => { this.router.navigate(["/x"]) }')).toBe('in a helper method')
+    expect(callIn('stay = () => { this.router.navigate(["/x"]) }')).toBe('callers not followed')
   })
 })
 
@@ -192,6 +192,6 @@ describe('the remaining fallbacks of the condition readers', () => {
   })
   it('does not take a binding that calls a member and then more for a bare call', () => {
     const sf = new Project({ useInMemoryFileSystem: true }).createSourceFile('/h.ts', `@Component({ template: '<b (click)="go() || reset()"></b>' })\nclass C { router: any\ngo() { this.router.navigate(["/x"]) }\nreset() {}\n}`)
-    expect(callCondition(sf.getDescendantsOfKind(SyntaxKind.CallExpression).find((c) => /\.navigate$/.test(c.getExpression().getText()))!)).toBe('in a helper method')
+    expect(callCondition(sf.getDescendantsOfKind(SyntaxKind.CallExpression).find((c) => /\.navigate$/.test(c.getExpression().getText()))!)).toBe('handler not read')
   })
 })

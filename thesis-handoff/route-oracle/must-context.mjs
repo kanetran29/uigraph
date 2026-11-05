@@ -148,7 +148,7 @@ if (unexplained.length) throw new Error(`${unexplained.length} edge(s) left the 
 if (fates.reduce((a, f) => a + fateCount[f], 0) !== total) throw new Error(`the fates do not account for all ${total} edges`)
 // Every condition callCondition and templateCondition can return; a construct with one this list
 // does not name stops the ledger below rather than being left out of the tally.
-const reasons = ['after await', 'in a callback', 'in a helper method', 'in a helper function', 'under a branch', 'after early exit', 'superseded by a later navigation', 'in a catch clause', 'in a loop', 'control-flow block', 'structural directive', 'ng-template', 'ICU case', 'lazy container', 'unreadable template']
+const reasons = ['after await', 'in a callback', 'all callers conditional', 'handler bound under a template condition', 'handler not read', 'callers not followed', 'in a helper function', 'under a branch', 'after early exit', 'superseded by a later navigation', 'in a catch clause', 'in a loop', 'control-flow block', 'structural directive', 'ng-template', 'ICU case', 'lazy container', 'unreadable template']
 const reasonCount = Object.fromEntries(reasons.map((r) => [r, constructs.filter((c) => c.condition === r).length]))
 const conditional = constructs.filter((c) => c.condition !== null).length
 if (reasons.reduce((a, r) => a + reasonCount[r], 0) !== conditional) throw new Error('a construct carries a condition this ledger does not name')

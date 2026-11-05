@@ -17,9 +17,9 @@ import { edgeId, controlNodeId } from './ids'
 import { climbsAboveRoot, keptSegments, matchAll, matchLiteral, matchPrefix, overlaps, redirectAddress, resolveRelativeTarget, urlPath, type RouteLike } from './matcher'
 import { analyzeInputBindings } from './inputs'
 import { isBareCall, templateCondition } from './conditions'
-import { collectRoutes, type Redirect, type RouteLevel, type UnreadableRoutes } from './routes'
+import { collectRoutes, type Redirect, type RouteInfo, type RouteLevel, type UnreadableRoutes } from './routes'
 import { resolveImportedFile, isInsideDir } from './resolve'
-import { appSourceFiles, attributeScopes, isEffectFile, outletHiddenAbove, subtreeAnchor, SHELL_NODE_ID } from './attribute'
+import { appSourceFiles, attributeScopes, isEffectFile, outletHiddenReason, subtreeAnchor, SHELL_NODE_ID } from './attribute'
 import { templateTargets, routerCallTargets, methodNavTargets, templateLoc, linkAttrTarget, type RawTarget } from './nav'
 import { parseControls } from './controls'
 import { inlineTemplate } from './templates'
@@ -387,7 +387,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     return redirectOfNode.has(id) || (path !== undefined && redirectsAt(path, first, true).length + catchAllsAt(path, first, true).filter((c) => !below(c, id)).length > 0)
   }
   // Whether a route component or layout renders on a screen only on some executions of it.
-  const hiddenAbove = outletHiddenAbove(routes, appSourceFiles(project.getSourceFiles()))
+  const hiddenWhy = outletHiddenReason(routes, appSourceFiles(project.getSourceFiles()))
+  const hiddenAbove = (route: RouteInfo, file: string): boolean => hiddenWhy(route, file) !== null
   // The screens a scope anchor stands for, filled as anchors are minted, and every screen, which the shell stands for.
   const screenIds = new Set(routes.map((r) => r.nodeId))
   const anchorMembers = new Map<string, Set<string>>()
@@ -414,9 +415,16 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   const edgeById = new Map<string, GraphEdge>()
   const seenAsyncGuards = new Set<string>()
 
-  function pushEdge(from: string, to: string, t: RawTarget, modality: GraphEdge['modality'], confidence: number, guard: string | null, file: string): void {
+  /**
+   * Add the edge one construct produces, or record the construct on the edge it already
+   * produces. `reasons` names what holds a may construct at may; it is kept on the witness only
+   * under the `UIGRAPH_MAY_REASONS` measurement flag, so the graph is unchanged without it. A may
+   * construct no decision point named is recorded as `untagged`, so a gap shows in the census.
+   */
+  function pushEdge(from: string, to: string, t: RawTarget, modality: GraphEdge['modality'], confidence: number, guard: string | null, file: string, reasons: string[] = []): void {
     const id = edgeId(from, to, t.event, guard)
-    const w = { source: 'static' as const, file: t.file ?? file, loc: t.loc, ruleId: t.ruleId, modality }
+    const noted = modality === 'may' && process.env.UIGRAPH_MAY_REASONS === '1'
+    const w = { source: 'static' as const, file: t.file ?? file, loc: t.loc, ruleId: t.ruleId, modality, ...(noted ? { reasons: reasons.length > 0 ? [...new Set(reasons)].sort() : ['untagged'] } : {}) }
     const e = edgeById.get(id)
     if (!e) {
       edges.push({ id, from, to, event: t.event, guard, effect: t.effect, modality, source: 'static', confidence, witness: w })
@@ -453,7 +461,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
    * parent the literal is below) at may, never must. Every note cites
    * the target's own file when it has one: a link parsed out of an external template carries
    * the `.html` path and a line within it, and pairing that line with the component's `.ts` path
-   * pointed published dead-link citations at a `.ts` line that holds no link.
+   * pointed published dead-link citations at a `.ts` line that holds no link. Each may edge passes
+   * the conditions that hold it at may to `pushEdge`, which keeps them under the measurement flag.
    */
   function emitTargets(from: string, targets: RawTarget[], file: string, note: boolean, capMay = false): void {
     for (const t of targets) {
@@ -519,7 +528,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           if (note) soundiness.push({ kind: 'unresolved-target', file: t.file ?? file, loc: t.loc, detail: `literal target "${value}" matches no declared route${baseUnknown ? ', resolved against a base the reader could not fix' : ''}` })
           continue
         }
-        const conservative = gateFromGuards(runningGuards(undefined, target.nodeId, 0, landed.tried).guards)
+        const conservativeRun = runningGuards(undefined, target.nodeId, 0, landed.tried)
+        const conservative = gateFromGuards(conservativeRun.guards)
         // A command resolved against the source's own route keeps the segments it does not climb
         // out of, matrix parameters and all; an absolute one, a URL, and an address a redirect
         // rewrote keep none.
@@ -530,7 +540,16 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // A URL naming an auxiliary outlet fails whole when that outlet's route does not match,
         // which is not read; an address several declared routes or a redirect can answer goes to
         // whichever Angular meets first, which the matcher does not decide.
-        const common = capMay || viaWildcard || baseUnknown || parsed.aux || landed.ambiguous || t.conditional === true || (t.ti.kind === 'literal' && t.ti.holes === true)
+        const commonWhy = [
+          ...(capMay ? ['attribution scope uncertain'] : []),
+          ...(viaWildcard ? ['catch-all'] : []),
+          ...(baseUnknown ? ['relative base unknown'] : []),
+          ...(parsed.aux ? ['auxiliary outlet'] : []),
+          ...(landed.ambiguous ? ['ambiguous address'] : []),
+          ...conditionReasons(t),
+          ...(t.ti.holes === true ? ['target has holes'] : []),
+        ]
+        const common = commonWhy.length > 0
         /**
          * The edge as drawn from one screen. A guard that runs on this navigation, or a resolver it
          * awaits, holds it at may; so does a navigation to the address the screen already displays,
@@ -543,8 +562,15 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           // A measurement switch, not a product option: the thesis counts what would be must if
           // every guard that runs let the navigation through. The guard text stays on the edge.
           const gated = gate.guarded && process.env.UIGRAPH_IGNORE_GUARDS !== '1'
-          const may = common || gated || run.resolves || src === target.nodeId || (src !== undefined && hidden(src))
-          return { modality: may ? 'may' as const : 'must' as const, confidence: gate.guarded ? gate.confidence : may ? 0.5 : 1, guardText: gate.guarded ? gate.guardTexts.join(',') : null }
+          const why = [
+            ...commonWhy,
+            ...(gated ? ['guard'] : []),
+            ...(run.resolves ? ['resolver'] : []),
+            ...(src === target.nodeId ? ['same screen'] : []),
+            ...(src !== undefined && hidden(src) ? ['hidden by redirect'] : []),
+          ]
+          const may = why.length > 0
+          return { modality: may ? 'may' as const : 'must' as const, confidence: gate.guarded ? gate.confidence : may ? 0.5 : 1, guardText: gate.guarded ? gate.guardTexts.join(',') : null, why }
         }
         if (members && !common) {
           // Each screen the edge stands for gets its own verdict; the edge stays one anchored edge
@@ -552,19 +578,23 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           const each = [...members].sort().map((m) => ({ m, v: verdict(m) }))
           const first = each[0]?.v
           if (first && !members.has(target.nodeId) && each.every(({ v }) => v.modality === first.modality && v.guardText === first.guardText)) {
-            pushEdge(from, target.nodeId, t, first.modality, first.confidence, first.guardText, file)
+            pushEdge(from, target.nodeId, t, first.modality, first.confidence, first.guardText, file, each.flatMap(({ v }) => v.why))
           } else {
-            for (const { m, v } of each) pushEdge(m, target.nodeId, t, v.modality, v.confidence, v.guardText, file)
+            for (const { m, v } of each) pushEdge(m, target.nodeId, t, v.modality, v.confidence, v.guardText, file, v.why)
           }
           continue
         }
         if (members) {
           // Held at may for a reason every screen shares, so one anchored edge says it for all of them.
-          pushEdge(from, target.nodeId, t, 'may', conservative.guarded ? conservative.confidence : 0.5, conservative.guarded ? conservative.guardTexts.join(',') : null, file)
+          pushEdge(from, target.nodeId, t, 'may', conservative.guarded ? conservative.confidence : 0.5, conservative.guarded ? conservative.guardTexts.join(',') : null, file, [
+            ...commonWhy,
+            ...(conservative.guarded && process.env.UIGRAPH_IGNORE_GUARDS !== '1' ? ['guard'] : []),
+            ...(conservativeRun.resolves ? ['resolver'] : []),
+          ])
           continue
         }
         const v = verdict(levelsByNodeId.has(from) ? from : undefined)
-        pushEdge(from, target.nodeId, t, v.modality, v.confidence, v.guardText, file)
+        pushEdge(from, target.nodeId, t, v.modality, v.confidence, v.guardText, file, v.why)
       } else if (t.ti.kind === 'template') {
         const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
         const cands = matchPrefix(prefix, routeLikes)
@@ -573,7 +603,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           const gate = gateFromGuards(runningGuards(undefined, cand.nodeId).guards)
           noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
           const guardText = gate.guarded ? gate.guardTexts.join(',') : null
-          pushEdge(from, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file)
+          pushEdge(from, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guardText, file, ['over-approximated target', ...conditionReasons(t), ...(gate.guarded ? ['guard'] : [])])
         }
       } else if (t.ti.kind === 'same-screen' || t.ti.kind === 'aux-outlet') {
         // `navigate([], { queryParams })` changes the query on the route it is already on, so
@@ -590,6 +620,16 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         if (note) soundiness.push({ kind: 'dynamic-target', file: t.file ?? file, loc: t.loc, detail: `fully dynamic navigation target (event ${t.event})` })
       }
     }
+  }
+
+  /** The targets held conditional for `reasons`, which join any condition each already carries so the measurement flag can name them all. */
+  function conditionally(ts: RawTarget[], ...reasons: string[]): RawTarget[] {
+    return ts.map((t) => ({ ...t, conditional: true, why: [...(t.why ?? []), ...reasons] }))
+  }
+
+  /** The conditions that make a target conditional, as the measurement flag names them: none when it is not, a bare 'conditional' when its source recorded no reason. */
+  function conditionReasons(t: RawTarget): string[] {
+    return t.conditional === true ? (t.why?.length ? t.why : ['conditional']) : []
   }
 
   /** The `u_<screen>` sink that holds the targets only the run time knows, minted on demand. */
@@ -612,7 +652,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
     // In controls mode every template routerLink is anchored to the link control that
     // fires it (below), so the screen-level copy would be an undrivable duplicate.
     const targets = [...(opts.controls ? [] : templateTargets(route.componentFile, projectDir)), ...routerCallTargets(route.componentFile)]
-    emitTargets(route.nodeId, hiddenAbove(route, route.componentFile.getFilePath()) ? targets.map((t) => ({ ...t, conditional: true })) : targets, file, true)
+    const hiddenBy = hiddenWhy(route, route.componentFile.getFilePath())
+    emitTargets(route.nodeId, hiddenBy !== null ? conditionally(targets, hiddenBy) : targets, file, true)
   }
 
   if (opts.attribution) {
@@ -658,7 +699,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const sure = new Set(all.filter((s) => !unsure.has(s)))
       const ts = targetsOf(sf)
       if (sure.size > 0) emitOver(sure, ts, relative(projectDir, f))
-      if (unsure.size > 0) emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))
+      if (unsure.size > 0) emitOver(unsure, conditionally(ts, ...new Set([...unsure].map((s) => hiddenWhy(routeByNodeId.get(s)!, f)!))), relative(projectDir, f))
     }
     // Components rendered inside screens: anchored at a subtree when their screen set is one,
     // otherwise one edge per screen that renders them.
@@ -673,7 +714,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       const sure = new Set([...screens].filter((x) => firm.has(x)))
       const unsure = new Set([...screens].filter((x) => !firm.has(x)))
       if (sure.size > 0) emitOver(sure, ts, relative(projectDir, f))
-      if (unsure.size > 0) emitOver(unsure, ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f))
+      if (unsure.size > 0) emitOver(unsure, conditionally(ts, 'mounted under a template condition'), relative(projectDir, f))
     }
     // The application shell: anchored once at a scope node, expanded on query.
     let shellEdges = 0
@@ -682,7 +723,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
       if (!c) continue
       const before = edges.length
       const ts = targetsOf(c.sf)
-      emitTargets(SHELL_NODE_ID, scopes.firmShell.has(f) ? ts : ts.map((t) => ({ ...t, conditional: true })), relative(projectDir, f), true)
+      emitTargets(SHELL_NODE_ID, scopes.firmShell.has(f) ? ts : conditionally(ts, 'mounted under a template condition'), relative(projectDir, f), true)
       shellEdges += edges.length - before
     }
     for (const f of [...scopes.indirectShell].sort()) {
@@ -837,7 +878,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const cId = controlNodeId(route.nodeId, c.selector)
         const loc = tpl ? templateLoc(sf, tpl, c.index) : { line: 1, col: 1 }
         // The offset past `<` so the scan reads the control's own open tag and its directives.
-        const controlConditional = tpl ? templateCondition(tpl.text, c.index + 1) !== null : false
+        const controlCondition = tpl ? templateCondition(tpl.text, c.index + 1) : null
+        const controlConditional = controlCondition !== null
         const navEffects = new Set<string>()
         /**
          * Wire one navigation this control fires — from a traced (click) handler or
@@ -847,7 +889,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
          * only a redirect the reader does not follow answers, which is no dead link. `guard` is a
          * handler-level condition joined with the route gate; `what` names the source
          * in notes. A note cites `t.file` when set, because `t.loc` is then a line in that
-         * external template and not in the component's `.ts`.
+         * external template and not in the component's `.ts`. The conditions that make the edge
+         * may are passed to `pushEdge` for the measurement flag.
          */
         const wireControlNav = (t: RawTarget, guard: string | null, what: string): void => {
           if (t.ti.kind === 'literal') {
@@ -869,17 +912,29 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
             // This mode resolves no relative target, so one without a leading slash is matched as
             // written and never trusted; the other demotions are the screen-level ones, including
             // routes below a conditional outlet (hiddenAbove).
-            const uncertain = guarded || t.conditional === true || !primary.startsWith('/') || target.nodeId === route.nodeId || t.ti.holes === true ||
-              parsed.aux || landed.ambiguous || run.resolves || hidden(route.nodeId) || hiddenAbove(route, sf.getFilePath())
+            const why = [
+              ...(gate.guardTexts.length > 0 ? ['guard'] : []),
+              ...(guard != null ? ['handler condition'] : []),
+              ...conditionReasons(t),
+              ...(!primary.startsWith('/') ? ['relative target not resolved'] : []),
+              ...(target.nodeId === route.nodeId ? ['same screen'] : []),
+              ...(t.ti.holes === true ? ['target has holes'] : []),
+              ...(parsed.aux ? ['auxiliary outlet'] : []),
+              ...(landed.ambiguous ? ['ambiguous address'] : []),
+              ...(run.resolves ? ['resolver'] : []),
+              ...(hidden(route.nodeId) ? ['hidden by redirect'] : []),
+              ...[hiddenWhy(route, sf.getFilePath())].filter((r): r is string => r !== null),
+            ]
+            const uncertain = why.length > 0
             const confidence = gate.guarded ? gate.confidence : guard != null ? 0.6 : uncertain ? 0.5 : 1
-            pushEdge(cId, target.nodeId, t, uncertain ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file)
+            pushEdge(cId, target.nodeId, t, uncertain ? 'may' : 'must', confidence, guarded ? guards.join(',') : null, file, why)
             navEffects.add('navigate')
           } else if (t.ti.kind === 'template') {
             for (const cand of matchPrefix(t.ti.staticPrefix, routeLikes)) {
               const gate = gateFromGuards(runningGuards(undefined, cand.nodeId).guards)
               noteGuards(gate, pathByNodeId.get(cand.nodeId) ?? cand.nodeId, soundiness, seenAsyncGuards)
               const guards = [guard, ...gate.guardTexts].filter((g): g is string => g != null)
-              pushEdge(cId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guards.length > 0 ? guards.join(',') : null, file)
+              pushEdge(cId, cand.nodeId, t, 'may', gate.guarded ? Math.min(gate.confidence, 0.5) : 0.5, guards.length > 0 ? guards.join(',') : null, file, ['over-approximated target', ...conditionReasons(t), ...(guard != null ? ['handler condition'] : []), ...(gate.guarded ? ['guard'] : [])])
               navEffects.add('navigate')
             }
           } else if (t.ti.kind !== 'same-screen' && t.ti.kind !== 'aux-outlet') {
@@ -892,11 +947,11 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
           // `(click)="flag && go()"` calls the method only on some clicks.
           const bare = isBareCall(handler)
           for (const nav of methodNavTargets(sf, methodName)) {
-            wireControlNav({ ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc, file: tplFile, url: nav.effect === 'router.navigateByUrl', conditional: controlConditional || !bare || nav.conditional }, nav.guard, `control handler ${methodName}()`)
+            wireControlNav({ ti: nav.ti, event: nav.event, effect: nav.effect, ruleId: nav.ruleId, loc, file: tplFile, url: nav.effect === 'router.navigateByUrl', conditional: controlConditional || !bare || nav.conditional, why: [...(controlCondition !== null ? [controlCondition] : []), ...(!bare ? ['handler condition'] : []), ...(nav.why ?? [])] }, nav.guard, `control handler ${methodName}()`)
           }
         }
         const link = linkAttrTarget(c.attrs)
-        if (link !== null) wireControlNav({ ti: link, event: 'click', effect: 'navigate', ruleId: 'ng.control.router-link', loc, file: tplFile, conditional: controlConditional }, null, 'control routerLink')
+        if (link !== null) wireControlNav({ ti: link, event: 'click', effect: 'navigate', ruleId: 'ng.control.router-link', loc, file: tplFile, conditional: controlConditional, why: controlCondition !== null ? [controlCondition] : undefined }, null, 'control routerLink')
 
         const name = c.text ?? c.attrs.get('aria-label') ?? c.attrs.get('placeholder') ?? c.attrs.get('name')
         // A nameless generic element is usually a child component with an @Output
