@@ -2,11 +2,6 @@
 \label{ch:discussion}
 
 This chapter interprets the results of Chapter~\ref{ch:results}; it does not repeat them.
-Section~\ref{sec:findings} reads the findings against the research questions.
-Section~\ref{sec:limitations} sets out what limits them, and Section~\ref{sec:approximations}
-declares what the analysis does not decide.
-Section~\ref{sec:transfer} argues how far the approach would carry to other routers, and
-Section~\ref{sec:future} says what should come next.
 The thread running through the chapter is that the extractor loses transitions in two places, at
 the nodes and at the edges, and that each level limits what the other can achieve.
 
@@ -58,18 +53,8 @@ The categories are a diagnostic partition of the losses, not a bound on what att
 On realworld attribution recovered every one of its attribution losses
 (Table~\ref{tab:before-after}), and Table~\ref{tab:remaining} records no remaining loss there.
 Elsewhere, two of the remaining reasons are not attribution problems: a target screen with no node, as the diagnosis labels it (the label also covers targets held in a field), is a node-level loss, and a fully dynamic target lies outside any attribution.
-Two others are limits of the implemented analysis.
-An owning component that is never reached gives an empty computed scope that the analysis cannot
-tell from unreachable code.
-A site in a service or a guard whose receiver or provider form the call graph does not resolve
-needs relations (dispatch, the guard relation $T$) that are specified in Chapter~\ref{ch:analysis}
-and not implemented; a stand-in replaces $T$.
 
-No construct that the baseline converted was lost (\AttrRegressed{} leave the converted categories).
-The gain does widen the must tier: under the demotion rules (Table~\ref{tab:repairs}, rows 14 to 18) it
-holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, mostly the links of
-realworld's and k8sdash's shells placed on every screen the shell renders.
-Whether the edges attribution added at k8sdash occur on every input is what the demotion rules decide; \CensusMustKdash{} of them are kept at must.
+Whether the edges attribution added at k8sdash (its toolbar edges, Section~\ref{sec:res-soundness}) occur on every input is what the demotion rules decide; \CensusMustKdash{} of them are kept at must.
 The demotion rules were written during development, in part in response to objections from red-team panels run with the AI assistant.
 The witness check finds \MustWitnessViolations{} failures among the
 \MustWitnessEdges{} must edges, but cannot read the destination of \MustWitnessUnread{}, all of
@@ -93,8 +78,6 @@ mutants on the attributed graph: every deleted \texttt{routerLink}, \MutRetarget
 The mutation harness was corrected during development after its misses had been read
 (Appendix~\ref{app:repairs}), so the clean result is not an independent test.
 It does not show that the remaining operators would survive a larger or differently drawn sample.
-The final sample shares \MutOverlap{} of its \MutSampled{} mutants with the run whose misses were read
-(Section~\ref{sec:corrections}), so the two runs share a seed and not a sample.
 The three mutated applications use different routing styles, and no operator fails under one
 style and not the other (Section~\ref{sec:res-mutation}); the corpus was not stratified by style,
 so nothing more general follows.
@@ -108,11 +91,6 @@ Source review in red-team panels found those defects, not the witness check, and
 neither confirms nor refutes the class.
 
 Detection is also conditional on recovery.
-Against the attributed graph only \MutExcluded{} of the sampled mutants cannot be scored at all,
-all of them guards the graph can record on no edge (Table~\ref{tab:mutation-sample}); against the
-baseline graph \MutBaseExcluded{} cannot.
-That distance is where RQ1's recovered share shows up in this experiment, and either count is a recovery
-result and not a sensitivity one.
 The conclusion is therefore: given that a construct is represented in the graph, every scored
 change to it was visible, and the probability that it is represented at all is what RQ1 measures.
 For change impact analysis this form of claim is appropriate, because an impact query is only asked
@@ -150,8 +128,6 @@ application can perform; the may tier is not.
 A query that must not miss a transition therefore cannot be answered from the graph alone, and the
 graph's witnesses and declared approximations tell a consumer which queries those are.
 Authentication bounds the deterministic tier in the same way.
-Without a backend, \ScopeUnjudged{} of the \ScopeScreens{} screens the rendered-interface check
-visited in \ScopeApps{} applications redirect to a sign-in page (Section~\ref{sec:res-scope}).
 A guard decides on state the source does not fix, so a reader that keeps Claim~\ref{claim:must}
 demotes it, and the small must tier is in part this fact and not a defect of the extractor.
 Taking every guard to let the navigation through raises the tier from \CensusMust{} to
@@ -193,29 +169,16 @@ hold none outside it.
 own suites perform. On realworld it does not discriminate: the shell-rule level, which stands for
 earlier work, already contains all \EtoERealworldPairs{} observed pairs (\EtoERealworldHitRooted{}),
 among \EtoERealworldPossiblePairs{} possible ordered pairs of which the attributed graph holds
-\EtoERealworldGraphPairs{}. On mifos the graph contains \EtoEMifosHit{} of \EtoEMifosPairs{}
-transitions, against \EtoEMifosHitNoattr{} without attribution. Of the \EtoEMifosMiss{} misses, \EtoEMifosMissRedirect{} fall in the preregistered
-redirect class, where the graph holds the pair on the address the navigation landed on. The other
-\the\numexpr\EtoEMifosMissBase+\EtoEMifosMissDynamic\relax{} are defects of the tool and none is repaired:
-\EtoEMifosMissBase{} are a relative link in a template shared by a screen and its
-child tabs, resolved against the child's address, and \EtoEMifosMissDynamic{} sit at places the
-extractor fails to read (a template literal inside a commands array, \texttt{relativeTo} passed
-through a variable).
+\EtoERealworldGraphPairs{}. On mifos the same level holds \EtoEMifosHitRooted{} of \EtoEMifosPairs{}, as
+many as the full analysis (Table~\ref{tab:earlier}); the hits and misses are in Section~\ref{sec:res-e2e}.
 \item The rendered-interface check covers \ScopeApps{} of the six applications, answers half of the question,
 and ran on an earlier graph than the final call graph and on \ScopeJudged{} of \ScopeScreens{}
-screens (Section~\ref{sec:res-scope}). Of the \ScopePairs{} (screen, target pattern) pairs the
-applications render on the screens it could judge, \ScopeConfirmed{} are predicted by the edges
-leaving that screen. That tests the screen's pooled outgoing destinations, not each site's scope.
-The \ScopeUnpredicted{} that are not predicted turn out to be sites attribution declined to place,
-not sites it placed wrongly.
-\end{itemize}
+screens (Section~\ref{sec:res-scope}). \end{itemize}
 What remains unvalidated is the other half and the reach.
 A site attributed to too \emph{many} screens produces edges whose witnesses all pass, because the
 construct really is there and really names that target.
 The rendered-interface check cannot convict it, since a predicted link missing from the DOM is equally a link rendered
 only to a signed-in user.
-It could convict only predictions that name a destination exactly: \ScopeExact{} on the screens it
-could judge, against \ScopeApprox{} that over-approximate.
 The direction is unrefuted but close to untestable by this method.
 Driving the applications far enough to render their interiors (seeding a backend, signing in,
 visiting a guarded screen) would lift both limits, and would do most to change what the thesis can
@@ -223,9 +186,6 @@ claim about its own contribution.
 Without a running application only the width of the scopes can be measured (Section~\ref{sec:res-width}):
 on \BaselineBluntest{} the average site is attributed to \BaselineBluntestShare{} of the screens, and a
 scope that wide says little about where a site fires, even if it is sound.
-The recovered share that attribution gains comes at the cost of that width.
-The same untested direction bears on the must tier: most of k8sdash's must edges, one per screen its
-toolbar is attributed to, are as right as that one scope.
 
 \textbf{Construct validity.}
 The denominator of must conversion (Section~\ref{sec:metrics}) over-counts, since it contains constructs in code the application never mounts,
@@ -257,32 +217,21 @@ Screens whose paths are assembled inside a template literal from an exported con
 application's declared screens are, fall outside the ratio when neither tool reads them, and coverage can
 then read as complete (Section~\ref{sec:res-round2}).
 Nothing in the ratio would say so.
-Every coverage figure is therefore printed beside the count of routes the independent route parser knows are there and
-cannot address.
 
-The two units stand in a many-to-many relation, which is why the ratio counts constructs and not edges
-(Section~\ref{sec:metrics}).
-Several constructs can yield one edge, the extra ones recorded as merged witnesses.
-The witness check judges every location an edge cites, so a construct counts towards the ratio
+The witness check judges every location an edge cites, so a construct counts towards must conversion
 only on evidence the check has read; merged citations are \WitnessMergedCitationShareRealworld{} of
 those in realworld's attributed graph and \WitnessMergedCitationShareMax{} where the share is largest
 (Section~\ref{sec:res-round2}).
-The ratio and the precision figure still answer different questions, which is why they are reported
+Must conversion and the precision figure still answer different questions, which is why they are reported
 separately.
 
 The graph also loses guard information.
 Constructs merge into one edge only when their guard texts are equal, so a merge never discards a
 guard.
-The loss comes earlier: a structural condition in a template, or a condition around a navigation
-call, demotes the edge to may but is not written into its guard (Section~\ref{sec:attribution}).
-A consumer learns which router guards run, not under what condition in the application the
-navigation is reached.
+The loss is that a structural condition is not written into the edge's guard (Section~\ref{sec:attribution}).
 
 The loss breakdown has a second construct threat: the precedence order of the rules is part of the
 measure.
-A construct outside a route component is filed as attribution whatever its target, and
-\AttrNonLiteral{} constructs in the attribution categories have a target that the literal test of the loss rules
-does not accept.
 Testing the target first would make the target category larger than attribution on
 \AttrOrderFlips{} applications (\AttrOrderFlipWhere{}).
 Category sizes are comparable within one application and under one order, which is what
@@ -329,7 +278,6 @@ The independence is also partial (Table~\ref{tab:repairs}): for the route-path f
 alias), the two tools apply the same rules.
 Their agreeing about such a path is weaker evidence than their agreeing about a path each reads its own
 way.
-The corrections of the independent route parser are listed in Table~\ref{tab:repairs}.
 A differential test only shows that two implementations disagree, never which is right, and each
 disagreement was resolved by reading the source, by the person who wrote both implementations.
 
@@ -395,7 +343,6 @@ Threat 3 moves the set in no fixed direction, since a production configuration c
 drop them.
 Both results are statements about the development router configuration that was recorded, under the
 abstraction of Section~\ref{sec:res-probe}.
-The oracle ran on an earlier graph whose node total equals the final one (Section~\ref{sec:reproducibility}).
 The compared graph mints \ProbeInvented{} such addresses, which is the absence of a failure on that
 configuration and not a proof of its impossibility.
 
@@ -404,9 +351,6 @@ configuration and not a proof of its impossibility.
 
 This section lists the constructs the analysis does not decide, so that a consumer of the graph
 can tell which queries it may ask.
-The thesis claims soundness only for the deterministic tier and only over the declared route set
-(Claim~\ref{claim:must}), and pairs that claim with this list in the soundiness position of
-Section~\ref{sec:soundiness} \cite{livshits2015soundiness}.
 The list separates constructs read exactly, where a failure is a defect that Chapter~\ref{ch:results}
 counts, from constructs approximated, where no completeness is claimed. Constructs of the approximated group still count in the construct denominator of Table~\ref{tab:ratios}, where they appear as dynamic, unplaced or attribution losses. A declared approximation can still cost transitions that the suites take; the end-to-end check measures that cost on mifos (Section~\ref{sec:res-e2e}).
 Two of the approximations were found by the runtime route oracle of Section~\ref{sec:res-probe} and not by
@@ -553,10 +497,7 @@ drawn as a single \emph{may} edge to the first declared route that matches it, w
 element matching only a parameter segment. A route whose segment in that position is a constant is not
 reached, and no note records the omission.
 \end{itemize}
-\item \textbf{Injection tokens and provider bindings.} The call graph resolves a call on a field
-through the field's declared type: the class it names, the classes a provider declaration binds it to
-with \texttt{useClass} or \texttt{useExisting}, or the subclasses of an abstract class no provider
-binds. Three things are not read.
+\item \textbf{Injection tokens and provider bindings.} The call graph of Section~\ref{sec:implementation} resolves a call on a field through the field's declared type. Three things are not read.
 \begin{itemize}[nosep]
 \item A binding is taken application-wide and not from the injector that resolves the token, so where
 two components provide a token differently both implementations are joined, which widens a scope and
@@ -586,10 +527,7 @@ neither can see. The same approximation is why one candidate application was rej
 (Section~\ref{sec:corpus}).
 \item \textbf{Guards that would let the navigation through.} A guard is a function of the application's
 state, and the extractor does not evaluate it. A guard the navigation runs holds the edge at \emph{may},
-even when the guard would always pass. The guards a navigation runs are the \texttt{canMatch} of a route
-its address is matched through, the \texttt{canActivate}, \texttt{canLoad} or resolver of a route it
-enters, the \texttt{canActivateChild} above those, and the \texttt{canDeactivate} of a route it leaves.
-A route the source and target share is taken to be reused unless its path has a parameter,
+even when the guard would always pass. A route the source and target share is taken to be reused unless its path has a parameter,
 \texttt{runGuardsAndResolvers} asks for more, or the navigation does not keep the segments the route
 consumes; a parameter that does not in fact change makes this too cautious. A guard is identified by the
 text of its expression, so two guards that compute the same thing are two guards. Content projected
@@ -644,10 +582,7 @@ only if every candidate renders one.
 Table~\ref{tab:approx-counts} gives the prevalence of the approximated constructs in the
 three applications that were cloned for the mutation run. The in-scope kinds are not
 repeated, because the construct denominator of Table~\ref{tab:conversion} already
-counts them with the independent route parser. The counts come from \texttt{approx-counts.mjs}, which is part of the
-harness and runs over the application sources with tests excluded. It counts call sites,
-which is a different procedure from the independent route parser that produces the construct denominator of
-Chapter~\ref{ch:results}, so the two are not comparable term by term. Three of the six
+counts them with the independent route parser. Three of the six
 applications were counted, so no corpus-level prevalence is claimed.
 
 \begin{table}[t]\small
@@ -801,7 +736,6 @@ further, since it would show which \emph{rule} made a site wrong without re-extr
 rule.
 
 \paragraph{The remaining node-level losses.}
-The final version reads the causes of the node defects of Section~\ref{sec:res-defects}.
 Some attribution losses that remain, most of them in ghostfolio (Table~\ref{tab:remaining}), are
 constructs whose scope was found but whose target screen has no node.
 Those behind the spread of computed routes could be recovered by reading more of the route
@@ -897,10 +831,6 @@ Chapter~\ref{ch:results} are what it would have to control for.
 
 \section{Summary}
 
-The findings of Chapter~\ref{ch:results} are conditional: node extraction is complete only relative to
-what a route table can be read to declare, the loss ranking depends on the order of the loss rules, and
-change detection holds only for constructs the graph represents.
-The limits and the declared approximations say which queries the graph can and cannot answer.
 The transfer argument is a hypothesis, not a measurement.
 The most valuable next steps are an oracle for the screen set on a large application and a runtime tier
 that completes the graph for signed-in use.

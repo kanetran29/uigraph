@@ -98,6 +98,20 @@ supersedes every older section where they disagree.
   figure is in-sample and not an estimate for other applications (no claim that generalisation is untested). The
   witness-check limits cell keeps the literal-target caveat (true in general). `heldout/` stays unchanged, with
   Addendum F recording the decision. Build 152 pages, 0 overfull, 0 undefined, abstract on one page.
+- **Scope attribution evidence in one place + repetition cut (5 Nov, after the student read the supervisor's mails):**
+  the supervisor wrote (9 Oct) that "scope attribution works as expected, but it cannot draw edges to screen nodes that
+  were never created by the route parser" and calls it the primary contribution; his 4 Nov mail asks only for a shorter,
+  clearer text. Done: RQ3's "Against earlier work" + "What the RQ3 evidence supports" merged into "What scope
+  attribution adds" (`sec:res-earlier`, `tab:earlier`: no attribution / rooted / full). New, post hoc and disclosed:
+  mifos mapped at the frozen extractor with `UIGRAPH_SCOPE_LAYERS=rooted` (the full re-map reproduces the published
+  graph exactly), scored on the suite pairs: `\EtoEMifosHitRooted`=12 of 22, the same as full; so the suite gains over
+  no attribution (realworld 13->19, mifos 10->12) come from the rooted level, and the levels only this thesis adds give
+  50 sites (2.8 %) and no extra suite transition. Then 57 cuts of repeated passages in ch5/ch6 (Sonnet finders, no
+  figure lost, checked by script), and an Opus gate on both: 2 blockers fixed (the bullet that credited attribution with
+  running on all six; "width is not the limit"), 7 dangling references repaired (several `sec:protocol` refs pointed at
+  content in `sec:metrics`, incl. a pre-existing one in ch2), caveats restored (node-defect direction, reference
+  precision circularity). Not applied: ch5 RQ4 "(not an independent test)" pointer; ch6 Summary is two sentences.
+  Build 147 pages, 0 overfull, 0 undefined, abstract on one page.
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 
