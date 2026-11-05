@@ -39,6 +39,19 @@ supersedes every older section where they disagree.
   `loadChildren: () => import('./+admin/routes')`) and no route at all on angular-spotify (router provided inside an
   Nx library module). Reported in ch5 `sec:res-heldout` (Table `tab:heldout`), abstract, ch1, ch6, ch7. Not repaired,
   by the preregistration. These two forms are the first thing to extend after submission.
+- **Held-out round two (student asked for more apps, 5 Nov):** the first round stays reported; dropping it would hide a
+  preregistered result. Addendum C (`b2f76bc`, committed before any screening) walks the same search further and
+  takes the next four by S1-S5, with no criterion on route declarations; Addendum D (`ea7a579`, before mapping) records
+  the walk of positions 73-150 (the search ends at 150) and the two that qualified: ElectronMail
+  (`src/web/browser-window`) and docs.nestjs.com (`.`). `heldout.sh` takes an apps file and results dir;
+  `heldout-to-latex.mjs` gains `MustConverted` and names its dir in the header (test first) ->
+  `generated-heldout2.tex`. Result: docs.nestjs.com 163/163 screens, 0 blind spots, 161 must edges all witnessed (all
+  from one `routerLink="/support"` in the page frame); ElectronMail 0/9: every route on a named outlet, which by design
+  gets no primary node; the parser's 9 come from the settings module read at the root because its 3 async-body lazy
+  loads are unresolved. Predictions: P5, P8 held; P6 first part held, second not (named outlets are in the corpus);
+  P7 not judgeable. Table `tab:heldout` now has 4 columns; abstract, ch1, ch4 provenance, ch5 `tab:world` caption, ch6,
+  ch7 updated. Harness scripts unchanged between rounds (checked). A third round would need its own addendum, e.g. a
+  lower star threshold, written before screening.
 - **May-reason census (done, committed `6df6c62`, thesis `c32cf06`):** behaviour-neutral switch
   `UIGRAPH_MAY_REASONS=1` in the adapter; `route-oracle/may-reasons.mjs`; equivalence on all six apps
   (`results-may-reasons/equivalence.json`, re-checked by `remeasure.sh`). Two Opus reviews; all blockers fixed. Result
@@ -54,8 +67,8 @@ supersedes every older section where they disagree.
   figure is c42f220 (packages identical except the switch).
 - **Ablation idea (student, later):** per-feature ablation of the final version's extraction (lazy boundaries,
   constant paths, ...) with measurement flags, like `UIGRAPH_IGNORE_GUARDS`; attribution levels and guard-only exist.
-- **Build at `09b5938`:** 154 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page. Nothing pushed, nothing
-  tagged. Usage at the end of the session: 8 % of the week.
+- **Build after round two:** 156 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
+  large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 
 ## Current state, 5 Nov 2026
 

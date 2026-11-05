@@ -1,0 +1,2349 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/nestdocs",
+  "db": "/Users/kanetran29/personal/uigraph-work/heldout/nestdocs/./uigraph.db",
+  "filesParsed": 259,
+  "declaredRoutesTotal": 232,
+  "byKind": {
+    "SCREEN": 164,
+    "REDIRECT": 50,
+    "PREFIX": 18
+  },
+  "uniqueScreenPaths": 163,
+  "guardedScreenPaths": 1,
+  "blindSpots": [],
+  "excluded": {
+    "storybookFiles": 0
+  },
+  "comparison": {
+    "declaredScreens": 163,
+    "graphNodes": 163,
+    "matched": 163,
+    "coverage": 1,
+    "missing": [],
+    "extraNodes": []
+  },
+  "routes": [
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 24,
+      "component": "HomepageComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 28,
+      "component": "IntroductionComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/first-steps",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 29,
+      "component": "FirstStepsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/controllers",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 34,
+      "component": "ControllersComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/components",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 39,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/providers",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 40,
+      "component": "ComponentsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/modules",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 45,
+      "component": "ModulesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/middleware",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 50,
+      "component": "MiddlewaresComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/pipes",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 55,
+      "component": "PipesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/guards",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 56,
+      "component": "GuardsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/exception-filters",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 57,
+      "component": "ExceptionFiltersComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/interceptors",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 62,
+      "component": "InterceptorsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/custom-decorators",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 67,
+      "component": "CustomDecoratorsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/standalone-applications",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 72,
+      "component": "ApplicationContextComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/application-context",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 77,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/discover/companies",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 78,
+      "component": "WhoUsesComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/migration-guide",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 83,
+      "component": "MigrationComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/deployment",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 88,
+      "component": "DeploymentComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/support",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 93,
+      "component": "SupportComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/consulting",
+      "kind": "SCREEN",
+      "guards": [
+        "[RedirectGuard]"
+      ],
+      "file": "src/app/app.routes.ts",
+      "line": 98,
+      "component": "EnterpriseComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/enterprise",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 105,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/enterprise",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 106,
+      "component": "EnterpriseComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/fundamentals",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 111,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/fundamentals/dynamic-modules",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 16,
+      "component": "DynamicModulesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/dependency-injection",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 21,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/custom-providers",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 25,
+      "component": "DependencyInjectionComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/platform-agnosticism",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 30,
+      "component": "PlatformAgnosticismComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/async-components",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 35,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/async-providers",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 39,
+      "component": "AsyncComponentsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/module-ref",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 44,
+      "component": "ModuleRefComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/lazy-loading-modules",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 49,
+      "component": "LazyLoadingModulesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/unit-testing",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 54,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/e2e-testing",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 58,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/testing",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 62,
+      "component": "UnitTestingComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/injection-scopes",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 67,
+      "component": "ProviderScopesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/execution-context",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 72,
+      "component": "ExecutionContextComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/lifecycle-events",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 77,
+      "component": "LifecycleEventsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/circular-dependency",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 82,
+      "component": "CircularDependencyComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/fundamentals/discovery-service",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/fundamentals/fundamentals.routes.ts",
+      "line": 87,
+      "component": "DiscoveryServiceComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 118,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/techniques/authentication",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 8,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/security",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 9,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/hot-reload",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 10,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/caching",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 11,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/compression",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 12,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/configuration",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 13,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/cookies",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 14,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/database",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 15,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/events",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 19,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/file-upload",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 20,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/http-module",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 21,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/logger",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 22,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/mongodb",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 23,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/mvc",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 24,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/performance",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 25,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/queues",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 26,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/serialization",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 27,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/server-sent-events",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 28,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/session",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 32,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/sql",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 33,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/streaming-files",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 37,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/task-scheduling",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 41,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/validation",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 45,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/techniques/versioning",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/techniques/techniques.routes.ts",
+      "line": 46,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 125,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/application/configuration",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 16,
+      "component": "ConfigurationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/validation",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 21,
+      "component": "ValidationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/serialization",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 26,
+      "component": "SerializationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/logger",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 31,
+      "component": "LoggerComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/events",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 36,
+      "component": "EventsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/task-scheduling",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 41,
+      "component": "TaskSchedulingComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/queues",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 46,
+      "component": "QueuesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/http-client",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 51,
+      "component": "HttpClientComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/file-storage",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 56,
+      "component": "FileStorageComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/i18n",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 61,
+      "component": "I18nComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/mail",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 66,
+      "component": "MailComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/application/http-module",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/application/application.routes.ts",
+      "line": 72,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 132,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/data/overview",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 14,
+      "component": "DataOverviewComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data/typeorm",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 19,
+      "component": "TypeOrmComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data/sequelize",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 24,
+      "component": "SequelizeComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data/drizzle",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 29,
+      "component": "DrizzleComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data/database",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 34,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data/mongodb",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 38,
+      "component": "MongoComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data/prisma",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 43,
+      "component": "PrismaComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data/mikroorm",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 48,
+      "component": "MikroOrmComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/data/caching",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/data/data.routes.ts",
+      "line": 53,
+      "component": "CachingComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/reliability",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 139,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/reliability/resilience",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/reliability/reliability.routes.ts",
+      "line": 10,
+      "component": "ResilienceComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/reliability/idempotency",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/reliability/reliability.routes.ts",
+      "line": 15,
+      "component": "IdempotencyComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/reliability/outbox",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/reliability/reliability.routes.ts",
+      "line": 20,
+      "component": "OutboxComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/reliability/workflows",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/reliability/reliability.routes.ts",
+      "line": 25,
+      "component": "WorkflowsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/reliability/locks",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/reliability/reliability.routes.ts",
+      "line": 30,
+      "component": "LocksComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/reliability/terminus",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/reliability/reliability.routes.ts",
+      "line": 35,
+      "component": "TerminusComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 146,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/http/versioning",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 13,
+      "component": "VersioningComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http/cookies",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 18,
+      "component": "CookiesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http/session",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 23,
+      "component": "SessionComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http/file-upload",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 28,
+      "component": "FileUploadComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http/compression",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 33,
+      "component": "CompressionComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http/server-sent-events",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 38,
+      "component": "ServerSentEventsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http/mvc",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 43,
+      "component": "MvcComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http/performance",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 48,
+      "component": "PerformanceComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/http/webhooks",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/http/http.routes.ts",
+      "line": 53,
+      "component": "WebhooksComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/security",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 153,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/security/authentication",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/security/security.routes.ts",
+      "line": 11,
+      "component": "AuthenticationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/security/cors",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/security/security.routes.ts",
+      "line": 16,
+      "component": "CorsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/security/helmet",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/security/security.routes.ts",
+      "line": 21,
+      "component": "HelmetComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/security/encryption-and-hashing",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/security/security.routes.ts",
+      "line": 26,
+      "component": "EncryptionHashingComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/security/csrf",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/security/security.routes.ts",
+      "line": 31,
+      "component": "CsrfComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/security/rate-limiting",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/security/security.routes.ts",
+      "line": 36,
+      "component": "RateLimitingComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/security/authorization",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/security/security.routes.ts",
+      "line": 41,
+      "component": "AuthorizationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 160,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/graphql/quick-start",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 22,
+      "component": "QuickStartComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/resolvers-map",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 27,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/resolvers",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 31,
+      "component": "ResolversMapComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/mutations",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 36,
+      "component": "MutationsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/scalars",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 41,
+      "component": "ScalarsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/subscriptions",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 46,
+      "component": "SubscriptionsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/guards-interceptors",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 51,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/tooling",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 55,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/other-features",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 59,
+      "component": "GuardsInterceptorsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/federation",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 64,
+      "component": "FederationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/directives",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 69,
+      "component": "DirectivesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/field-middleware",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 74,
+      "component": "FieldMiddlewareComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/complexity",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 79,
+      "component": "ComplexityComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/extensions",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 84,
+      "component": "ExtensionsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/enums",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 89,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/unions",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 93,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/unions-and-enums",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 97,
+      "component": "UnionsAndEnumsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/plugins",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 102,
+      "component": "PluginsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/interfaces",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 107,
+      "component": "InterfacesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/sharing-models",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 112,
+      "component": "SharingModelsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/mapped-types",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 117,
+      "component": "MappedTypesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/cli-plugin",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 122,
+      "component": "CliPluginComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/graphql/generating-sdl",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/graphql/graphql.routes.ts",
+      "line": 127,
+      "component": "SchemaGeneratorComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/websockets",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 167,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/websockets/gateways",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/websockets/websockets.routes.ts",
+      "line": 10,
+      "component": "GatewaysComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/websockets/pipes",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/websockets/websockets.routes.ts",
+      "line": 15,
+      "component": "WsPipesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/websockets/exception-filters",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/websockets/websockets.routes.ts",
+      "line": 20,
+      "component": "WsExceptionFiltersComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/websockets/guards",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/websockets/websockets.routes.ts",
+      "line": 25,
+      "component": "WsGuardsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/websockets/interceptors",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/websockets/websockets.routes.ts",
+      "line": 30,
+      "component": "WsInterceptorsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/websockets/adapter",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/websockets/websockets.routes.ts",
+      "line": 35,
+      "component": "AdapterComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/mcp",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 174,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/mcp",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/mcp/mcp.routes.ts",
+      "line": 9,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/mcp/overview",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/mcp/mcp.routes.ts",
+      "line": 14,
+      "component": "McpOverviewComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/mcp/primitives",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/mcp/mcp.routes.ts",
+      "line": 19,
+      "component": "McpPrimitivesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/mcp/transports",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/mcp/mcp.routes.ts",
+      "line": 24,
+      "component": "McpTransportsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/mcp/testing",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/mcp/mcp.routes.ts",
+      "line": 29,
+      "component": "McpTestingComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/mcp/migration",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/mcp/mcp.routes.ts",
+      "line": 34,
+      "component": "McpMigrationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/ai",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 179,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/ai",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/ai/ai.routes.ts",
+      "line": 9,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/ai/overview",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/ai/ai.routes.ts",
+      "line": 14,
+      "component": "AiOverviewComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/ai/models",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/ai/ai.routes.ts",
+      "line": 19,
+      "component": "AiModelsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/ai/tools",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/ai/ai.routes.ts",
+      "line": 24,
+      "component": "AiToolsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/ai/agents",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/ai/ai.routes.ts",
+      "line": 29,
+      "component": "AiAgentsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/ai/testing",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/ai/ai.routes.ts",
+      "line": 34,
+      "component": "AiTestingComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 184,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/microservices/basics",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 17,
+      "component": "BasicsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/redis",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 22,
+      "component": "RedisComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/mqtt",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 27,
+      "component": "MqttComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/nats",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 32,
+      "component": "NatsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/grpc",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 37,
+      "component": "GrpcComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/rabbitmq",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 42,
+      "component": "RabbitMQComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/kafka",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 47,
+      "component": "KafkaComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/pipes",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 52,
+      "component": "MicroservicesPipesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/exception-filters",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 57,
+      "component": "MicroservicesExceptionFiltersComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/guards",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 62,
+      "component": "MicroservicesGuardsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/interceptors",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 67,
+      "component": "MicroservicesInterceptorsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/pre-request-hooks",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 72,
+      "component": "PreRequestHooksComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/microservices/custom-transport",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/microservices/microservices.routes.ts",
+      "line": 77,
+      "component": "CustomTransportComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 191,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/recipes/mikroorm",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 17,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/cqrs",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 18,
+      "component": "CqrsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/swagger",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 23,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/prisma",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 27,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/sentry",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 29,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/terminus",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 30,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/crud-utilities",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 31,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/crud",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 35,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/crud-generator",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 39,
+      "component": "CrudGeneratorComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/hot-reload",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 44,
+      "component": "HotReloadComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/serve-static",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 49,
+      "component": "ServeStaticComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/router-module",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 54,
+      "component": "RouterModuleComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/nest-commander",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 59,
+      "component": "NestCommanderComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/async-local-storage",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 64,
+      "component": "AsyncLocalStorageComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/repl",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 69,
+      "component": "ReplComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/swc",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 74,
+      "component": "SwcComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/passport",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 79,
+      "component": "PassportComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/recipes/socket-activation",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/recipes/recipes.routes.ts",
+      "line": 84,
+      "component": "SocketActivationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 198,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/faq/global-prefix",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 13,
+      "component": "GlobalPrefixComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq/hybrid-application",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 18,
+      "component": "HybridApplicationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq/multiple-servers",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 23,
+      "component": "MultipleServersComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq/http-adapter",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 28,
+      "component": "HttpAdapterComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq/keep-alive-connections",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 33,
+      "component": "KeepAliveConnectionsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq/raw-body",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 38,
+      "component": "RawBodyComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq/request-lifecycle",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 43,
+      "component": "RequestLifecycleComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq/common-errors",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 48,
+      "component": "ErrorsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/faq/serverless",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/faq/faq.routes.ts",
+      "line": 53,
+      "component": "ServerlessComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/cli",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 205,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/cli/overview",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/cli/cli-routing.routes.ts",
+      "line": 9,
+      "component": "CliOverviewComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/cli/monorepo",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/cli/cli-routing.routes.ts",
+      "line": 16,
+      "component": "CliWorkspacesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/cli/workspaces",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/cli/cli-routing.routes.ts",
+      "line": 23,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/cli/libraries",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/cli/cli-routing.routes.ts",
+      "line": 27,
+      "component": "CliLibrariesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/cli/usages",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/cli/cli-routing.routes.ts",
+      "line": 34,
+      "component": "CliUsagesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/cli/scripts",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/cli/cli-routing.routes.ts",
+      "line": 41,
+      "component": "CliScriptsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/openapi",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 212,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/openapi/introduction",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/openapi/openapi.routes.ts",
+      "line": 12,
+      "component": "IntroductionComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/openapi/types-and-parameters",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/openapi/openapi.routes.ts",
+      "line": 17,
+      "component": "TypesAndParametersComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/openapi/operations",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/openapi/openapi.routes.ts",
+      "line": 22,
+      "component": "OperationsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/openapi/security",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/openapi/openapi.routes.ts",
+      "line": 27,
+      "component": "OpenApiSecurityComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/openapi/decorators",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/openapi/openapi.routes.ts",
+      "line": 32,
+      "component": "DecoratorsComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/openapi/mapped-types",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/openapi/openapi.routes.ts",
+      "line": 37,
+      "component": "MappedTypesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/openapi/cli-plugin",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/openapi/openapi.routes.ts",
+      "line": 42,
+      "component": "CliPluginComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/openapi/other-features",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/openapi/openapi.routes.ts",
+      "line": 47,
+      "component": "OpenApiOtherFeaturesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/devtools",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 219,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/devtools/overview",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/devtools/devtools.routes.ts",
+      "line": 6,
+      "component": "DevtoolsOverviewComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/devtools/ci-cd-integration",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/devtools/devtools.routes.ts",
+      "line": 11,
+      "component": "DevtoolsCiCdComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability",
+      "kind": "PREFIX",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 226,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/observability",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 14,
+      "component": null,
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/overview",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 19,
+      "component": "ObservabilityOverviewComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/sdk",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 24,
+      "component": "ObservabilitySdkComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/manual-instrumentation",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 29,
+      "component": "ObservabilityManualInstrumentationComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/distributed-tracing",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 34,
+      "component": "ObservabilityDistributedTracingComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/error-monitoring",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 39,
+      "component": "ObservabilityErrorMonitoringComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/dashboard",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 44,
+      "component": "ObservabilityDashboardComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/production-rules",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 49,
+      "component": "ObservabilityProductionRulesComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/mcp-server",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 54,
+      "component": "ObservabilityMcpServerComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/opentelemetry",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 59,
+      "component": "ObservabilityOpentelemetryComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/observability/choosing-an-apm",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "src/app/homepage/pages/observability/observability.routes.ts",
+      "line": 64,
+      "component": "ObservabilityChoosingAnApmComponent",
+      "constantPath": false,
+      "lazy": true
+    },
+    {
+      "path": "/**",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "src/app/app.routes.ts",
+      "line": 235,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/electronmail/src/web/browser-window",
+  "constructs": 4,
+  "excluded": 0,
+  "inScope": 4,
+  "recovered": 0,
+  "accounted": 0,
+  "lost": 4,
+  "tally": {
+    "ATTRIBUTION_SERVICE": 1,
+    "NODE_MISS": 3
+  },
+  "rows": [
+    {
+      "at": "app/_core/navigation.effects.ts:36",
+      "kind": "navigate",
+      "owner": "app/_core/navigation.effects.ts",
+      "cls": "ATTRIBUTION_SERVICE",
+      "target": "path, {queryParams, ...extras});"
+    },
+    {
+      "at": "app/_options/settings.component.html:16",
+      "kind": "routerLink",
+      "owner": "app/_options/settings.component.ts",
+      "cls": "NODE_MISS",
+      "target": "['accounts']"
+    },
+    {
+      "at": "app/_options/settings.component.html:20",
+      "kind": "routerLink",
+      "owner": "app/_options/settings.component.ts",
+      "cls": "NODE_MISS",
+      "target": "['general']"
+    },
+    {
+      "at": "app/_options/settings.component.html:24",
+      "kind": "routerLink",
+      "owner": "app/_options/settings.component.ts",
+      "cls": "NODE_MISS",
+      "target": "['storage']"
+    }
+  ]
+}

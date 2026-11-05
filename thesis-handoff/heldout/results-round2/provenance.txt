@@ -1,0 +1,15 @@
+extractor 6b0d723 (packages = c42f220)
+electronmail vladimiry/ElectronMail 64df3683e1eecaa202e04a1ad346fd82fd3cfb44 src/web/browser-window
+electronmail map-attr exit=0 seconds=1
+electronmail map-noattr exit=0 seconds=1
+electronmail index exit=0
+electronmail witness exit=0
+electronmail loss exit=0
+electronmail loss-noattr exit=0
+nestdocs nestjs/docs.nestjs.com 133ffa757f21bb7dd7a3650c4e962e2e60b40a81 .
+nestdocs map-attr exit=0 seconds=1
+nestdocs map-noattr exit=0 seconds=1
+nestdocs index exit=0
+nestdocs witness exit=0
+nestdocs loss exit=0
+nestdocs loss-noattr exit=0

@@ -1,0 +1,309 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/electronmail/src/web/browser-window",
+  "db": "/Users/kanetran29/personal/uigraph-work/heldout/electronmail/src/web/browser-window/uigraph.db",
+  "filesParsed": 125,
+  "declaredRoutesTotal": 21,
+  "byKind": {
+    "REDIRECT": 2,
+    "AUX_OUTLET": 5,
+    "LAZY_UNRESOLVED": 3,
+    "SCREEN": 11
+  },
+  "uniqueScreenPaths": 9,
+  "guardedScreenPaths": 1,
+  "blindSpots": [
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "loadChildren: async () => {\n                    return (\n   ",
+      "at": "app/app.routing.module.ts:26",
+      "prefix": "/accounts"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "loadChildren: async () => {\n                            retu",
+      "at": "app/app.routing.module.ts:47",
+      "prefix": "/settings"
+    },
+    {
+      "reason": "loadChildren target not resolvable",
+      "spec": "loadChildren: async () => {\n                    return (\n   ",
+      "at": "app/app.routing.module.ts:67",
+      "prefix": "/notifications"
+    }
+  ],
+  "excluded": {
+    "storybookFiles": 0
+  },
+  "comparison": {
+    "declaredScreens": 9,
+    "graphNodes": 0,
+    "matched": 0,
+    "coverage": 0,
+    "missing": [
+      {
+        "path": "/",
+        "at": "app/_options/options.routing.module.ts:29",
+        "guards": [
+          "[SettingsConfigureGuard]"
+        ]
+      },
+      {
+        "path": "/login",
+        "at": "app/_options/options.routing.module.ts:17",
+        "guards": []
+      },
+      {
+        "path": "/settings-setup",
+        "at": "app/_options/options.routing.module.ts:21",
+        "guards": []
+      },
+      {
+        "path": "/db-metadata-reset-request",
+        "at": "app/_options/options.routing.module.ts:25",
+        "guards": []
+      },
+      {
+        "path": "/accounts",
+        "at": "app/_options/options.routing.module.ts:39",
+        "guards": []
+      },
+      {
+        "path": "/account-edit",
+        "at": "app/_options/options.routing.module.ts:43",
+        "guards": []
+      },
+      {
+        "path": "/account-edit/:login",
+        "at": "app/_options/options.routing.module.ts:47",
+        "guards": []
+      },
+      {
+        "path": "/general",
+        "at": "app/_options/options.routing.module.ts:51",
+        "guards": []
+      },
+      {
+        "path": "/storage",
+        "at": "app/_options/options.routing.module.ts:55",
+        "guards": []
+      }
+    ],
+    "extraNodes": []
+  },
+  "routes": [
+    {
+      "path": "/",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 12,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/accounts",
+      "kind": "AUX_OUTLET",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 17,
+      "component": "RouterProxyComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/accounts",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 26,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings",
+      "kind": "AUX_OUTLET",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 36,
+      "component": "RouterProxyComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings",
+      "kind": "AUX_OUTLET",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 44,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 47,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/notifications",
+      "kind": "AUX_OUTLET",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 59,
+      "component": "RouterProxyComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/notifications",
+      "kind": "LAZY_UNRESOLVED",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 67,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/stub",
+      "kind": "AUX_OUTLET",
+      "guards": [],
+      "file": "app/app.routing.module.ts",
+      "line": 77,
+      "component": "RouterProxyComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [
+        "[AccountsGuard]"
+      ],
+      "file": "app/_accounts/accounts.routing.module.ts",
+      "line": 9,
+      "component": "AccountsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_notification/notification.routing.module.ts",
+      "line": 8,
+      "component": "NotificationListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/login",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 17,
+      "component": "LoginComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/settings-setup",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 21,
+      "component": "SettingsSetupComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/db-metadata-reset-request",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 25,
+      "component": "DbMetadataResetRequestComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "SCREEN",
+      "guards": [
+        "[SettingsConfigureGuard]"
+      ],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 29,
+      "component": "SettingsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/",
+      "kind": "REDIRECT",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 34,
+      "component": null,
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/accounts",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 39,
+      "component": "AccountsListComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/account-edit",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 43,
+      "component": "AccountEditComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/account-edit/:login",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 47,
+      "component": "AccountEditComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/general",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 51,
+      "component": "BaseSettingsComponent",
+      "constantPath": false,
+      "lazy": false
+    },
+    {
+      "path": "/storage",
+      "kind": "SCREEN",
+      "guards": [],
+      "file": "app/_options/options.routing.module.ts",
+      "line": 55,
+      "component": "StorageComponent",
+      "constantPath": false,
+      "lazy": false
+    }
+  ]
+}

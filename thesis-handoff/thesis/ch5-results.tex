@@ -697,8 +697,8 @@ and with it, on this corpus.
 \begin{table}[t]\footnotesize
 \caption{What the corpus shows can be done without this thesis and with it. The dynamic row is this
 thesis's own rendered-interface check run without signing in, not a crawler with credentials; the
-earlier tools were not run; every figure is in-sample, and on the held-out applications of
-Section~\ref{sec:res-heldout} the static rows do not hold. All cells are generated figures.}
+earlier tools were not run; every figure is in-sample, and on three of the four held-out applications
+of Section~\ref{sec:res-heldout} the static rows do not hold. All cells are generated figures.}
 \label{tab:world}
 \begin{tabularx}{\textwidth}{@{}YYY@{}}
 \toprule
@@ -957,6 +957,7 @@ Table~\ref{tab:repairs}. The final baseline and attributed runs use the same rou
 (Table~\ref{tab:coverage}).
 
 \subsection{Construct accounting}
+\label{sec:res-accounting}
 
 Table~\ref{tab:round2acct} gives the construct accounting in four parts, because a single ratio cannot
 separate three different things. A site is \emph{recovered} when it becomes a transition with a
@@ -1365,56 +1366,83 @@ counted here and left out of the census.
 \label{sec:res-heldout}
 
 Every figure above is measured on the six applications uigraph was developed on. To see how far the
-final version carries to applications it has never been run on, two more were measured with the
-extractor frozen at its final commit and nothing repaired afterwards. The selection rule, the
-measures and the predictions were committed before either application was cloned
-(\path{heldout/PREREGISTRATION.txt}). The rule walks a GitHub search for Angular repositories in
-order of stars and takes the first two that are deployable applications with nested and lazily
-loaded routes and route guards, and that were not among the candidates screened for the corpus.
-It gave PeerTube, a federated video platform, and angular-spotify, a Spotify web client.
+final version carries to applications it has never been run on, further applications were measured
+in two rounds, with the extractor frozen at its final commit and nothing repaired afterwards. The
+selection rule, the measures and the predictions of each round were committed before any of its
+applications was cloned (\path{heldout/PREREGISTRATION.txt}). The rule walks a GitHub search for
+Angular repositories in order of stars and takes the first that are deployable applications with
+nested and lazily loaded routes and route guards, pushed in the six months before the check, and not
+among the candidates screened for the corpus. The first round took the first two: PeerTube, a
+federated video platform, and angular-spotify, a Spotify web client. After its result, the second
+round walked on down the same search for four more, with no criterion added about how an application
+declares its routes. To the end of the search only two more qualified: ElectronMail, a desktop mail
+client, and the documentation site of NestJS.
 
 \begin{table}[t]\footnotesize
-\caption{The frozen final version on the two held-out applications. Node coverage is against the
-independent route parser; the other ratios are those of Table~\ref{tab:ratios}. A dash marks a
-ratio whose denominator is zero.}
+\caption{The frozen final version on the held-out applications of both rounds. Node coverage is
+against the independent route parser; the other ratios are those of Table~\ref{tab:ratios}. A dash
+marks a ratio whose denominator is zero.}
 \label{tab:heldout}
-\begin{tabularx}{\textwidth}{@{}Yrr@{}}
+\begin{tabularx}{\textwidth}{@{}Yrrrr@{}}
 \toprule
- & PeerTube & angular-spotify \\
+ & \multicolumn{2}{c}{First round} & \multicolumn{2}{c@{}}{Second round} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+ & PeerTube & angular-spotify & ElectronMail & NestJS docs \\
 \midrule
-Extraction completes & \HeldoutCompletedPeertube{} & \HeldoutCompletedSpotify{} \\
-Declared screens with a node & \HeldoutNodesPeertube{} & \HeldoutNodesSpotify{} \\
-Blind spots of the independent route parser & \HeldoutBlindSpotsPeertube{} & \HeldoutBlindSpotsSpotify{} \\
-In-scope navigation constructs & \HeldoutConstructsPeertube{} & \HeldoutConstructsSpotify{} \\
-Must conversion & \HeldoutMustConversionPeertube{} & \HeldoutMustConversionSpotify{} \\
-Recovered share & \HeldoutRecoveredSharePeertube{} & \HeldoutRecoveredShareSpotify{} \\
-Must edges & \HeldoutMustEdgesPeertube{} & \HeldoutMustEdgesSpotify{} \\
-Attribution losses recovered & \HeldoutAttrRecoveredPeertube{} of \HeldoutAttrLostPeertube{} & \HeldoutAttrRecoveredSpotify{} of \HeldoutAttrLostSpotify{} \\
+Extraction completes & \HeldoutCompletedPeertube{} & \HeldoutCompletedSpotify{} & \HeldoutCompletedElectronmail{} & \HeldoutCompletedNestdocs{} \\
+Declared screens with a node & \HeldoutNodesPeertube{} & \HeldoutNodesSpotify{} & \HeldoutNodesElectronmail{} & \HeldoutNodesNestdocs{} \\
+Blind spots of the independent route parser & \HeldoutBlindSpotsPeertube{} & \HeldoutBlindSpotsSpotify{} & \HeldoutBlindSpotsElectronmail{} & \HeldoutBlindSpotsNestdocs{} \\
+In-scope navigation constructs & \HeldoutConstructsPeertube{} & \HeldoutConstructsSpotify{} & \HeldoutConstructsElectronmail{} & \HeldoutConstructsNestdocs{} \\
+Must conversion & \HeldoutMustConversionPeertube{} & \HeldoutMustConversionSpotify{} & \HeldoutMustConversionElectronmail{} & \HeldoutMustConversionNestdocs{} \\
+Recovered share & \HeldoutRecoveredSharePeertube{} & \HeldoutRecoveredShareSpotify{} & \HeldoutRecoveredShareElectronmail{} & \HeldoutRecoveredShareNestdocs{} \\
+Must edges & \HeldoutMustEdgesPeertube{} & \HeldoutMustEdgesSpotify{} & \HeldoutMustEdgesElectronmail{} & \HeldoutMustEdgesNestdocs{} \\
+Witness-check failures & \HeldoutWitnessFailuresPeertube{} & \HeldoutWitnessFailuresSpotify{} & \HeldoutWitnessFailuresElectronmail{} & \HeldoutWitnessFailuresNestdocs{} \\
+Attribution losses recovered & \HeldoutAttrRecoveredPeertube{} of \HeldoutAttrLostPeertube{} & \HeldoutAttrRecoveredSpotify{} of \HeldoutAttrLostSpotify{} & \HeldoutAttrRecoveredElectronmail{} of \HeldoutAttrLostElectronmail{} & \HeldoutAttrRecoveredNestdocs{} of \HeldoutAttrLostNestdocs{} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Table~\ref{tab:heldout} shows that the final version does not carry over. Both extractions complete,
-but on PeerTube the graph holds a node for \HeldoutNodesPeertube{} declared screens, and on
-angular-spotify neither static reader finds a route at all. Two route-declaration forms that the
-corpus did not contain account for this.
+Table~\ref{tab:heldout} shows that the final version carries over to the NestJS documentation site
+and not to the other three. On the documentation site every declared screen has a node
+(\HeldoutNodesNestdocs{}), the independent parser has \HeldoutBlindSpotsNestdocs{} blind spots, and the
+witness check finds \HeldoutWitnessFailuresNestdocs{} failures among the \HeldoutMustEdgesNestdocs{} must
+edges. All of these edges come from the \HeldoutMustConvertedNestdocs{} construct converted to must, a
+link to \path{/support} in the page frame that every screen renders. The site has few navigation
+constructs of its own; the others take their targets from data, and with attribution its
+\HeldoutAttrLostNestdocs{} attribution losses become accounted rather than recovered for that reason.
+
+On the other three the graph holds few screens or none, each because of how the application declares
+or mounts its routes.
 \begin{itemize}
 \item PeerTube loads each lazy route file by its default export,
   \texttt{loadChildren: () => import('./+admin/routes')}. Neither reader follows it: the independent
   route parser records it as a blind spot each time.
 \item angular-spotify provides its router with \texttt{provideRouter(\ldots)} inside a module of an Nx
   library rather than of the application. Neither reader looks for the route table there.
+\item ElectronMail mounts every route on a named outlet, so no screen has a primary address. The
+  extractor gives such routes no node by design (Section~\ref{sec:res-accounting}), so its graph has no
+  screen. The independent parser cannot resolve the \HeldoutBlindSpotsElectronmail{} lazy loads that
+  place the routes under their outlets, written as \texttt{async} function bodies, and reads the
+  settings module's routes at the root; that is where its declared screens come from.
 \end{itemize}
-Without screens there is little to convert, so the must conversion and the attribution recovery
-are zero as well. Of the four predictions, three held: both extractions complete, coverage falls
-below the corpus's, and the must tier is small (empty). The fourth, that Oshima and Kishi's
-restrictions exclude both applications, can be applied only to PeerTube, which they exclude; on
-angular-spotify no route was read.
+Without screens there is little to convert, so on these three the must conversion and the attribution
+recovery are zero as well. Of the first round's four predictions, three held: both extractions
+complete, coverage falls below the corpus's, and the must tier is small (empty). The fourth, that
+Oshima and Kishi's restrictions exclude both applications, can be applied only to PeerTube, which they
+exclude; on angular-spotify no route was read. Of the second round's, two held: both extractions
+complete, and the restrictions admit neither application. The prediction on coverage held in its first
+part, a fall below the corpus's on at least one application, but not in its second: ElectronMail's
+screens are lost to named outlets, a form the corpus contains (alfresco's viewer), although no corpus
+application mounts all its screens there. The prediction that the must tier stays small cannot be
+judged on the documentation site's \HeldoutConstructsNestdocs{} constructs, and ElectronMail gives it
+nothing to judge.
 
-The result is the out-of-sample measure the corpus could not give. The extractor's coverage of the six
-applications is a property of the version fitted to them, and the first two applications outside
-them use declaration forms it does not read. The analysis of Chapter~\ref{ch:analysis} does not
-depend on these forms; the extractor's route reader does.
+The result is the out-of-sample measure the corpus could not give. Where an application declares its
+routes as the corpus applications do, as the documentation site does, the route reader carries over
+whole and its must edges pass the witness check. PeerTube, angular-spotify and ElectronMail declare or
+mount theirs in ways the route reader does not follow or the node model leaves out, so the corpus
+figures do not carry over as they stand. The analysis of Chapter~\ref{ch:analysis} does not depend on
+these forms; the extractor's route reader and its node model do.
 
 \section{Summary}
 

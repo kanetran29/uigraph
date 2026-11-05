@@ -135,13 +135,18 @@ node earlier-work.mjs --dir <final14>/fin --apps realworld,alfresco,ghostfolio,k
   --tex ../thesis/generated-earlier-work.tex
 ```
 
-The held-out applications (`generated-heldout.tex`), preregistered in `heldout/PREREGISTRATION.txt`:
+The held-out applications, preregistered in `heldout/PREREGISTRATION.txt`: the first round
+(`generated-heldout.tex`, `apps.txt`, `results/`) and the second (`generated-heldout2.tex`,
+`apps-round2.txt`, `results-round2/`, Addenda C and D; the search it walked is `search-round2.txt`):
 
 ```bash
 git worktree add --detach <wt> <a commit whose packages/ equals c42f220> && (cd <wt> && pnpm install --frozen-lockfile)
 thesis-handoff/heldout/heldout.sh <work dir> <wt>
-cd thesis-handoff/heldout && node heldout-to-latex.mjs --dir results --apps peertube=Peertube,spotify=Spotify \
-  --tex ../thesis/generated-heldout.tex
+thesis-handoff/heldout/heldout.sh <work dir> <wt> thesis-handoff/heldout/apps-round2.txt thesis-handoff/heldout/results-round2
+cd thesis-handoff/heldout
+node heldout-to-latex.mjs --dir results --apps peertube=Peertube,spotify=Spotify --tex ../thesis/generated-heldout.tex
+node heldout-to-latex.mjs --dir results-round2 --apps electronmail=Electronmail,nestdocs=Nestdocs \
+  --tex ../thesis/generated-heldout2.tex
 ```
 
 ## 3. Build the PDF

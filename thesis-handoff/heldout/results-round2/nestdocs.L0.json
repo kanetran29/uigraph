@@ -1,0 +1,50 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/nestdocs",
+  "constructs": 5,
+  "excluded": 0,
+  "inScope": 5,
+  "recovered": 1,
+  "accounted": 0,
+  "lost": 4,
+  "tally": {
+    "CONVERTED_MUST": 1,
+    "ATTRIBUTION_SHARED": 4
+  },
+  "rows": [
+    {
+      "at": "src/app/homepage/homepage.component.html:34",
+      "kind": "routerLink",
+      "owner": "src/app/homepage/homepage.component.ts",
+      "cls": "CONVERTED_MUST",
+      "target": "/support"
+    },
+    {
+      "at": "src/app/homepage/menu/menu-item/menu-item.component.html:18",
+      "kind": "routerLink",
+      "owner": "src/app/homepage/menu/menu-item/menu-item.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "item.path"
+    },
+    {
+      "at": "src/app/homepage/menu/menu-item/menu-item.component.html:49",
+      "kind": "routerLink",
+      "owner": "src/app/homepage/menu/menu-item/menu-item.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "path"
+    },
+    {
+      "at": "src/app/shared/components/page-nav/page-nav.component.html:6",
+      "kind": "routerLink",
+      "owner": "src/app/shared/components/page-nav/page-nav.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "prev.path"
+    },
+    {
+      "at": "src/app/shared/components/page-nav/page-nav.component.html:21",
+      "kind": "routerLink",
+      "owner": "src/app/shared/components/page-nav/page-nav.component.ts",
+      "cls": "ATTRIBUTION_SHARED",
+      "target": "next.path"
+    }
+  ]
+}

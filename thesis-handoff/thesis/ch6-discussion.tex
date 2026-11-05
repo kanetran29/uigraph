@@ -173,9 +173,9 @@ parser, the mutation harness and the structural reference were corrected against
 they are scored on. The structural reference guided two repairs of the extractor. The end-to-end check comes closest to an out-of-sample test. The extractor
 was fixed at its final commit before the suites' logs were read, and nothing was repaired after;
 the archive cannot corroborate that order, since the preregistration and the logs were committed
-together. On two held-out applications measured with the frozen extractor, it reads almost none of
-the declared screens (Section~\ref{sec:res-heldout}), so the corpus figures do not generalise as
-they stand.
+together. On four held-out applications measured with the frozen extractor, it reads every
+declared screen of one and almost none of the other three (Section~\ref{sec:res-heldout}), so the
+corpus figures do not generalise as they stand.
 
 \textbf{The scope is compared in both directions on one application only, and only against the analysis's own relations.}
 Every other method in Chapter~\ref{ch:evaluation} checks a node, an edge or a witness; none can be
@@ -362,8 +362,8 @@ assistant declared at the front, which also helped write the extractor and the i
 It was made with the extractor's decisions in view and no human second reader checked it.
 Its agreement with the extractor therefore shows consistency with the stated rules, not independent correctness;
 \item uigraph was developed on, and is measured on, the same six
-applications, so the figures are fitted to this corpus; the two held-out applications confirm it
-(Section~\ref{sec:res-heldout}).
+applications, so the figures are fitted to this corpus; three of the four held-out applications
+confirm it (Section~\ref{sec:res-heldout}).
 \end{itemize}
 The requirement of two lines of evidence per defect class is the strongest control on the last point,
 and the reason one class is still a candidate.

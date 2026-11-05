@@ -1,0 +1,89 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/nestdocs",
+  "dbPath": "/Users/kanetran29/personal/uigraph-work/heldout/nestdocs/uigraph.db",
+  "edges": 164,
+  "sites": 167,
+  "sitesCited": 167,
+  "mergedSites": 3,
+  "clean": 161,
+  "mustEdges": 161,
+  "mustClean": 161,
+  "mustUnread": 0,
+  "outsideApp": 0,
+  "outsideAppMust": 0,
+  "destinationsChecked": true,
+  "tally": {
+    "OVER_APPROX": 2,
+    "TARGET_UNREAD": 4
+  },
+  "mustBad": [],
+  "findings": [
+    {
+      "witnessModality": "may",
+      "edgeIndex": 37,
+      "edge": "/enterprise -> /support",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/homepage/homepage.component.html:34",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 163 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "witnessModality": "may",
+      "edgeIndex": 156,
+      "edge": "/support -> /support",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/homepage/homepage.component.html:34",
+      "verdict": "OVER_APPROX",
+      "modality": "may",
+      "confidence": 0.5,
+      "detail": "one of 163 edges citing this call site; target agreement is not claimed for over-approximated edges"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 163,
+      "edge": "n_scope_subtree__n_root -> u_n_scope_subtree__n_root",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/shared/components/page-nav/page-nav.component.html:6",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_n_scope_subtree__n_root was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 163,
+      "edge": "n_scope_subtree__n_root -> u_n_scope_subtree__n_root",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/shared/components/page-nav/page-nav.component.html:21",
+      "mergedWitness": true,
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_n_scope_subtree__n_root was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 163,
+      "edge": "n_scope_subtree__n_root -> u_n_scope_subtree__n_root",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/homepage/menu/menu-item/menu-item.component.html:18",
+      "mergedWitness": true,
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_n_scope_subtree__n_root was not compared with it"
+    },
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 163,
+      "edge": "n_scope_subtree__n_root -> u_n_scope_subtree__n_root",
+      "event": "click:routerLink",
+      "ruleId": "ng.router-link",
+      "at": "src/app/homepage/menu/menu-item/menu-item.component.html:49",
+      "mergedWitness": true,
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_n_scope_subtree__n_root was not compared with it"
+    }
+  ]
+}

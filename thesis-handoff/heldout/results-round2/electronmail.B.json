@@ -1,0 +1,31 @@
+{
+  "appDir": "/Users/kanetran29/personal/uigraph-work/heldout/electronmail/src/web/browser-window",
+  "dbPath": "/Users/kanetran29/personal/uigraph-work/heldout/electronmail/src/web/browser-window/uigraph.db",
+  "edges": 1,
+  "sites": 1,
+  "sitesCited": 1,
+  "mergedSites": 0,
+  "clean": 0,
+  "mustEdges": 0,
+  "mustClean": 0,
+  "mustUnread": 0,
+  "outsideApp": 0,
+  "outsideAppMust": 0,
+  "destinationsChecked": true,
+  "tally": {
+    "TARGET_UNREAD": 1
+  },
+  "mustBad": [],
+  "findings": [
+    {
+      "witnessModality": "unknown",
+      "edgeIndex": 0,
+      "edge": "n_scope_shell -> u_n_scope_shell",
+      "event": "navigate",
+      "ruleId": "ng.navigate",
+      "at": "app/_core/navigation.effects.ts:36",
+      "verdict": "TARGET_UNREAD",
+      "detail": "construct at the witness names no destination this check can read, so u_n_scope_shell was not compared with it"
+    }
+  ]
+}
