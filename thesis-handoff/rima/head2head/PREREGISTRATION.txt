@@ -1,0 +1,65 @@
+Pre-registration: head-to-head comparison with Rima et al.'s tool on the same applications
+Written 5 Nov 2026, before any output of their tool on the six corpus applications was read. On their
+seven subjects their tool's output has been seen indirectly, through their ground truth, which their
+pipeline generated; their run here is checked against it (V1). This thesis's extractor is at packages
+commit a9d29df, after the repairs of the first comparison (rima/PREREGISTRATION.txt, DEVIATIONS.txt).
+
+Question
+  On the same applications at the same commits, which transitions between screens does each tool
+  find, how many of them are real, and how many of all real transitions found by either does each
+  find? "Before this thesis" is their tool; "with this thesis" is this extractor.
+
+Tools
+  Theirs: softscanner-sw/softscanner_fa at the commit in THEIRS_COMMIT, stages A1 (static extraction)
+  and A2 (workflow enumeration) only, run by run-theirs.sh with the tsconfig of apps.txt, dependencies
+  installed with --ignore-scripts. Their B stages need running backends and are not run.
+  Ours: this thesis's extractor, full attribution level, the graphs of the corpus re-measure and of
+  rima/graphs-repaired. The graph without attribution is reported beside it as a reference point.
+
+Applications (apps.txt)
+  Their seven subjects at the commits of rima/subjects.txt and the six corpus applications at the
+  commits of the corpus manifest. A tool that fails or exceeds 30 minutes on an application finds no
+  pair there; the failure is reported.
+
+Unit
+  A pair (s, t) of two different screens, each a declared route pattern, parameters matched by
+  position whatever their names. Their pairs: for every A2 workflow whose terminal node is a route,
+  each start route paired with that route, the route identities mapped to full paths through their
+  own route map. Ours: every edge, must or may, between screens once scope nodes are expanded
+  (e2e-nav/score.mjs graphHits). Pairs of a screen with itself, external targets and wildcard routes
+  are left out on both sides.
+
+Reference and reading
+  The pool is the union of both tools' pairs, split per application into three strata: found by both,
+  only by theirs, only by ours. Each stratum is read in full when it holds at most 12 pairs, otherwise
+  a sample of 12 drawn with seed 20261106 over the sorted list. A reader sees the application and the
+  pair, never which tool proposed it, and judges it by reading the source:
+    real      a user on s can trigger a navigation that lands on t (a link, or a handler that calls
+              the router directly, through helpers or through an injected service, possibly after an
+              await or behind a guard), the trigger being shown while the user stays on s;
+    spurious  no such trigger exists; state why;
+    unclear   the source does not decide it; say what is missing.
+  A stronger model re-reads every pair not judged real and every sixth real one; a script checks that
+  every cited site exists and holds a navigation construct. Corrections made later are recorded with
+  their reason, as in the first comparison.
+
+Measures, per application and pooled
+  M1 pairs found by each tool, and the stratum sizes.
+  M2 precision of each tool: real pairs among those it finds, each stratum weighted by its size.
+  M3 relative recall of each tool: the real pairs it finds over the real pairs found by either.
+  M4 the same two measures on their seven subjects against their ground truth (secondary; the
+     reference is generated from their tool).
+  Estimates from samples are reported with the sample sizes and a Wilson 95 % interval for each
+  sampled stratum's real rate.
+
+Validity checks
+  V1 On their seven subjects their A2 workflow count equals their ground truth's entry count.
+  V2 Every route either tool names maps to a route the independent route parser declares, or is
+     reported.
+
+Predictions
+  P1 On the six corpus applications our relative recall exceeds theirs.
+  P2 On their seven subjects their precision is at least ours.
+  P3 Their tool yields no pair or fails on at least one corpus application.
+
+No change to either tool before M1-M4 are recorded.

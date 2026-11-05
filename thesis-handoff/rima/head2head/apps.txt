@@ -1,0 +1,14 @@
+# slug  app dir relative to the work dir  tsconfig relative to the app dir (Rima et al.'s registry for their subjects; for the corpus the one that includes the sources)
+posts-users-ui-ng rima/src/anonbnr__posts-users-ui-ng tsconfig.json
+heroes-angular rima/src/johnpapa__heroes-angular src/tsconfig.app.json
+airbus-inventory rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory tsconfig.app.json
+spring-petclinic-angular rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular tsconfig.json
+ever-traduora rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp src/tsconfig.app.json
+angular-jumpstart rima/src/DanWahlin__Angular-JumpStart tsconfig.app.json
+event-booking-mean rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app tsconfig.app.json
+realworld corpus/realworld tsconfig.app.json
+alfresco corpus/alfresco/projects/aca-content tsconfig.lib.json
+ghostfolio corpus/ghostfolio/apps/client tsconfig.app.json
+k8sdash corpus/k8sdash/modules/web tsconfig.app.json
+bitwarden corpus/bitwarden/apps/web tsconfig.build.json
+mifos corpus/mifos tsconfig.json
