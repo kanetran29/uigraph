@@ -15,13 +15,16 @@ Ten candidate applications were screened against six criteria: a real applicatio
 library or template; a nested, lazily loaded route tree; guards present; end-to-end test
 configuration for a browser driver; retrievable history in which tests and source change together;
 and an active repository. Six candidates were retained (Table~\ref{tab:corpus}), each fixed to a
-specific commit so that the measurements can be repeated on the same code.
+specific commit so that the measurements can be repeated on the same code. The criteria were fixed
+before any results were obtained.
 
 Criterion (4) was checked as configuration, not as a usable suite. At the pinned commits only
 alfresco has specifications the test-source cross-check can read, so that method covers alfresco
-alone. Ghostfolio and bitwarden carry no browser-test configuration at all, so for them the
-criterion was not met. It was therefore not applied uniformly: \texttt{gravitee} was rejected
-for a thin UI suite while two applications with none were kept.
+alone; ghostfolio and bitwarden carry no browser-test configuration at all. The criterion was
+therefore not applied uniformly: \texttt{gravitee} was rejected for a thin UI suite while two
+applications with none were kept. Route-tree size and end-to-end test density were inversely
+related, so the methods that need test suites are applied only to the applications that have them,
+and the other methods to all six.
 
 \begin{table}[t]\small
 \caption{The corpus: commit, route count and role in the study of each application.}
@@ -41,54 +44,50 @@ openMF/web-app & \texttt{7f781796} & \RoundTwoRoutesMifos{} & size ceiling \\
 \par\smallskip{\footnotesize\noindent\emph{Note.} Routes are the route entries reached by the independent route parser of Section~\ref{sec:protocol}, as it stands in the final version (Section~\ref{sec:res-round2}). A count marked $\geq$ is a lower bound: the parser records a blind spot for that application, so the entries behind it are not in the figure; Table~\ref{tab:coverage} gives how many blind spots each application has. The marks are on \RoundTwoLowerBoundWhere{}, on these grounds: \RoundTwoLowerBoundReasons{}.}
 \end{table}
 
+
 Four candidates were rejected; the counts were read from the repositories and are not generated.
 \texttt{angular/components} is a component library with no product router. \texttt{vendure} has 169
 end-to-end specifications, all of which exercise the GraphQL server and none the user interface.
 \texttt{gravitee} declares 618 routes but has 14 UI specifications. \texttt{SAP/spartacus} has a
 large Cypress suite, but its routing is configuration-driven in a way the extractor does not
-support; that reason is tool support, which is not one of the six criteria, so this rejection rests
-on a ground added after screening began.
-
-Route-tree size and end-to-end test density were inversely related: no application provides both a
-large route tree and execution-based ground truth. The methods that need test suites are applied
-only to the applications that have them, and the other methods to all six.
+support; that reason is tool support, not one of the six criteria, so this rejection rests on a
+ground added after screening began.
 
 \subsection{Validity of an open-source corpus}
 
-Kalliamvakou et al.\ show that many GitHub repositories are inactive, personal or not software
-projects, and recommend filtering candidates by explicit criteria and reporting them
-\cite{kalliamvakou2014promises,kalliamvakou2016indepth}, which the selection above does. The
+Kalliamvakou et al.\ recommend filtering candidate repositories by explicit criteria and reporting
+them \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, which the selection above does. The
 remaining threats are external validity (open-source applications may differ from proprietary ones)
-and a possible selection bias, since I selected the corpus and wrote the extractor. The selection
-protocol is therefore reported in full: the criteria were fixed before any results were obtained,
-but one candidate was rejected on tool support and two retained applications do not meet the
-test-suite criterion. The corpus spans nearly two orders of magnitude in routes, and the commits
-and harness are released so the measurement can be repeated.
+and a possible selection bias, since I selected the corpus and wrote the extractor; the departures
+from the criteria are the two stated above. The corpus spans nearly two orders of magnitude in
+routes, and the commits and harness are released so the measurement can be repeated.
 
-None of this addresses a further threat. The extractor was developed on this corpus and is measured on it
-(Section~\ref{sec:limitations}), so the figures are fitted to it. The one measurement outside it runs the frozen extractor on the seven
-subjects of Rima et al.\ against their ground truth, preregistered before any subject was mapped (Section~\ref{sec:res-rima}). A case study on a proprietary
-Angular application, reporting only aggregate figures, is planned as the most direct response
-(Chapter~\ref{ch:discussion}). The literature reviewed in Chapter~\ref{ch:background} offers no
-standard benchmark corpus of single-page applications either, so the corpus and its manifest are
+A further threat is not addressed by this. The extractor was developed on this corpus and is measured
+on it (Section~\ref{sec:limitations}), so the figures are fitted to it. The one measurement outside
+it runs the frozen extractor on the seven subjects of Rima et al.\ against their ground truth,
+preregistered before any subject was mapped (Section~\ref{sec:res-rima}). A case study on a
+proprietary Angular application, reporting only aggregate figures, is planned as the most direct
+response (Chapter~\ref{ch:discussion}). The literature reviewed in Chapter~\ref{ch:background} offers
+no standard benchmark corpus of single-page applications either, so the corpus and its manifest are
 an output of the thesis.
 
 \section{Metrics}
 \label{sec:metrics}
 
-Each research question is measured as follows. RQ1 is measured at two levels, since a transition cannot be
+Each research question is answered with one main measure; Table~\ref{tab:ratios} lists every ratio
+the thesis reports, and the paragraphs after it define the terms the table uses.
+RQ1 is measured at two levels, since a transition cannot be
 recovered without the screens it runs between: the share of declared screens that have a node, and the
 share of navigation constructs that yield at least one must transition. For RQ2, observed failures are
 grouped into defect classes, a class being accepted only on two lines of evidence, at least one from an
 evaluation method of Section~\ref{sec:protocol}, and every construct not recovered is assigned to one loss
-category. For RQ3 the same extractor runs with the analysis disabled and enabled, so that nothing else
-differs. RQ4 is measured by mutation testing. For RQ5 each defect class is traced to its cause in the
-source and recorded as read by the final version, still unread, or beyond a static reader; every site that
-still yields no transition must carry a recorded label.
+category. RQ3 is measured with the analysis disabled and enabled on the same extractor, and by the references below.
+RQ4 is measured by mutation testing. For RQ5 each defect class of Table~\ref{tab:defects} is traced to its
+cause in the source and recorded as read by the final version (the loss was the tool's and not the
+application's), still unread although a static reader could, or beyond a static reader of a route
+table; the result is a list of causes, not a ratio, and every site that still yields no transition
+must carry a recorded label (Section~\ref{sec:res-round2}).
 
-
-Each research question is answered with one main measure. Table~\ref{tab:ratios} lists every ratio
-the thesis reports, and the paragraphs after it define the terms the table uses.
 
 \begin{table}[t]\small
 \caption{The ratios and measures of the thesis, with numerator, denominator and research question.}
@@ -134,14 +133,13 @@ witness and records the others as merged witnesses, each with the modality it ea
 construct counts as converted only where it earns must itself.
 \end{itemize}
 
-\textbf{The other ratios.} More than one of these measures has been called coverage in the
-literature this thesis builds on, but they are not interchangeable: on this corpus they differ by
+\textbf{The other ratios.} Several of these measures have been called coverage in the
+literature this thesis builds on, but they differ on this corpus by
 more than an order of magnitude (\RoundTwoAccounted{} of sites accounted for against
 \RoundTwoMustConv{} converted to must). Node coverage rises if less of an application is read, so
-the blind-spot count is printed beside it. The recovered share widens the must-conversion numerator
-to an edge of any tier. The accounted share alone measures whether the losses are declared, not how
-much is recovered. Coverage without a qualifier means node coverage; the gap in recovered
-constructs is called the recovery gap, and the loss tables measure it.
+the blind-spot count is printed beside it. The accounted share alone measures whether the losses are declared, not how
+much is recovered. The gap in recovered constructs is called the recovery gap, and the loss tables
+measure it.
 
 \textbf{Agreement between a scope and the rendered interface (RQ3).} The measures above cannot be
 asked the question the contribution turns on: is the set of screens that attribution computes for a
@@ -325,12 +323,6 @@ change whose construct the graph does not contain is excluded and not counted as
 can only repeat a recovery gap that the loss tables measure. The rate is therefore conditional on
 recovery, and the number of excluded mutants is reported alongside it.
 
-\textbf{Cause trace (RQ5).} Each defect class of Table~\ref{tab:defects} is traced to its cause in the
-source, with one of three outcomes: the final version reads the cause (the loss was the tool's and
-not the application's), it does not yet read it although a static reader could, or the cause lies
-beyond a static reader of a route table. The result is a list of causes by outcome, not a ratio.
-Every site that yields no transition still carries a recorded reason (Section~\ref{sec:res-round2}).
-
 \section{Evaluation methods}
 \label{sec:protocol}
 
@@ -442,11 +434,3 @@ Appendix~\ref{app:corrections} lists every correction, one row each, in Table~\r
 
 Every figure is generated by scripts at one commit of the extractor and written into the thesis as a
 macro. \texttt{REPRODUCE.md} in the repository lists the scripts and the commit each table comes from. The version evaluated throughout is the extractor of commit \texttt{a9d29df}, re-measured after the repairs the comparison on Rima et al.'s subjects prompted (Table~\ref{tab:repairs}), with harness 1.10.0 and mutation harness 1.9.1; the demotion-rule sweep and the may-reason census were recorded at the same commit. The end-to-end figure before the repairs that check prompted (Table~\ref{tab:repairs}) comes from the graph of the previously evaluated commit, \texttt{c42f220}, kept beside the results. Two groups are historical and were not re-measured: the rendered-interface check (Table~\ref{tab:scope}), and the runtime route oracle, run on 29 and 30 October against a graph whose extractor commit was not recorded and whose node total is its only link to the final graph.
-
-\section{Summary}
-
-The corpus is six applications at pinned commits, selected by explicit criteria that were not
-applied uniformly, and the extractor was developed on it. Every ratio has one name and one definition in
-Table~\ref{tab:ratios}. The five methods are each blind where the others see; the reproducibility
-arrangements cover the first four fully and the fifth, the runtime route oracle, only in part. The
-corrections that led to the final protocol are listed in Table~\ref{tab:repairs}.

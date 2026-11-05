@@ -290,11 +290,12 @@ The method needs an application that builds and boots, and a corpus chosen partl
 is not chosen at random.
 & --
 & The selection is not random. \\
-Configuration, not rendered page
+Configuration, not rendered page; workspace scope
 & It reads the route configuration, so a route behind a guard that always refuses, or whose component
-throws on render, counts as mounted.
+throws on render, counts as mounted. Where a workspace application composes the library a measurement is scoped to, the framework's set is
+a superset of the library's, and part of any difference is scope and not reading; two of alfresco's three differences are of this kind.
 & --
-& Makes the framework's set larger than what a visitor can reach, which makes containment easier to
+& Both make the framework's set larger than what a visitor can reach, which makes containment easier to
 satisfy. \\
 Development build
 & The build was a development build in each case, because Angular removes the debug surface the method
@@ -302,12 +303,6 @@ reads in production mode.
 & --
 & A production configuration can differ in ways a route table does not show; it can add routes as well
 as drop them, so the effect has no fixed direction. \\
-Workspace scope
-& Where a workspace application composes the library a measurement is scoped to, the framework's set is
-a superset of the library's, and part of any difference is scope and not reading.
-Two of alfresco's three differences are of this kind.
-& --
-& Also makes the framework's set larger, which makes containment easier to satisfy. \\
 \end{xltabular}
 \endgroup
 
@@ -375,89 +370,27 @@ Gap & Example & Boundary & Fix & Pairs \\
 \section{Transfer to other frameworks}
 \label{sec:transfer}
 
-All measurements in this thesis concern Angular.
-This section argues how much of the approach would carry over to React with React Router and to Vue
-with Vue Router \cite{reactrouterdocs,vuerouterdocs}.
-It is a qualitative analysis of the routers' documented behaviour, not a measurement; a measurement would require a corpus for each framework.
-
-The graph model, the lattice of scopes, the fixpoint, anchored edges and the expansion
-query do not mention Angular and transfer unchanged. What is specific to Angular are the four input relations
-of Section~\ref{sec:attribution}: component nesting, router outlets, the call graph
-with dependency injection, and dispatch relations, which would have to be derived from the other framework's constructs.
-
-Outlets transfer directly: in all three routers a parent route renders a
-placeholder where the matched child is inserted, so the scopes $\top$ and
-$\mathit{subtree}(r)$ keep their meaning.
-The call graph is easier in React and Vue, because a hook or composable gives every navigation site an owning component and no injector needs to be resolved; code that imports the router instance directly is the analogue of Angular's service case and resolves by ordinary import resolution.
-
-Redirects do not transfer. Angular's validator refuses a route that declares
-\texttt{redirectTo} beside \texttt{children} or a \texttt{component}, so the model's
-step from ``redirects'' to ``renders nothing'' costs nothing there. Vue Router applies a record's redirect only when that record
-is the last one matched, so a redirecting parent with children does render its component for a
-matching child. Carrying the Angular reading into the Vue extractor dropped those components.
-The extractor now keeps that component and declares
-one residue as a note at the parent rather than modelling it as an edge: navigating to the
-parent's own address lands on the redirect target with that component unmounted.
-The same porting exposed a second Vue-only hazard.
-A table that mixes the Vue~2 catch-all \texttt{'*'} with the Vue~3 form \texttt{'/:pathMatch(.*)*'}
-folds both to one address.
-The extractor keeps the record declared first. Where that is the Vue~2 form, which Vue Router~4 rejects, the surviving component
-is the wrong one. The collision is declared, but which record to keep is not something the table alone
-determines.
-
-Guards move to different scopes. A React Router loader redirect plays the role of \texttt{canActivate}, so its scope is the join of the origins of the navigations that may run the loader, as the relation $T$ gives for entry guards, and not $\mathit{subtree}(r)$. Vue's global \texttt{beforeEach} guard corresponds most closely to a \texttt{canActivateChild} on a root route with no component, anchored at $\top$.
-
-Component nesting is harder in React. Angular and Vue keep templates in a
-separate language, so the nesting relation can be read from element names. In React,
-components are created in JSX, which is ordinary JavaScript, so recovering the nesting relation becomes a data flow
-problem closer to points-to analysis than to reading a template.
-This is the main place where a React version would need new work.
-All of these are expectations derived from the routers' documented behaviour, and testing them on real
-applications is left for future work (Section~\ref{sec:future}).
+All measurements in this thesis concern Angular; nothing was measured for React with React Router or Vue with Vue Router \cite{reactrouterdocs,vuerouterdocs}, and what follows is a qualitative reading of the routers' documented behaviour, not a result.
+The graph model, the lattice of scopes, the fixpoint, anchored edges and the expansion query do not mention Angular and would transfer unchanged, and outlets would too, since in all three routers a parent route renders a placeholder for the matched child.
+What changes are the four input relations of Section~\ref{sec:attribution}, which must be derived from the other framework's constructs.
+The call graph is easier in React and Vue, because a hook or composable gives every navigation site an owning component.
+Component nesting is harder in React, where components are created in JSX and recovering the nesting relation becomes a data flow problem closer to points-to analysis than to reading a template.
+Guards change scope: a React Router loader redirect plays the role of \texttt{canActivate}, and Vue's global \texttt{beforeEach} corresponds most closely to a \texttt{canActivateChild} on a root route anchored at $\top$.
+Redirects do not transfer: Vue Router applies a record's redirect only when that record is the last one matched, so a redirecting parent with children still renders its component for a matching child, which Angular's validator rules out; Carrying the Angular reading into the Vue extractor dropped those components; the Vue extractor keeps that component and declares one residue as a note at the parent, since navigating to the parent's own address lands on the redirect target with the component unmounted.
+A table that mixes the Vue~2 catch-all \texttt{'*'} with the Vue~3 form \texttt{'/:pathMatch(.*)*'} folds both to one address; the extractor keeps the record declared first, which may be the wrong one, and the collision is declared.
+Testing these expectations on real applications is left for future work (Section~\ref{sec:future}).
 
 \section{Future work}
 \label{sec:future}
 
-The topics are ordered by how much each would change what the thesis can claim.
-
-\paragraph{An oracle for the screen set on a large application.}
-This is the cheapest addition that would strengthen the thesis most.
-The hand-built ground truth of Section~\ref{sec:res-groundtruth} covers only the smallest
-application, and hand-reading every site is impractical on an application of hundreds of screens,
-where most of the corpus's attributions are made (Table~\ref{tab:scopebaseline}).
-Two routes lead there: reading the rendered links of such an application driven into a signed-in state, or annotating a stratified sample of its sites.
-
-\paragraph{The unimplemented part of the model.}
-Chapter~\ref{ch:analysis} specifies two things the prototype leaves out: the dispatch relations that carry NgRx effects and router event subscriptions, and
-the injector hierarchy that the implemented call graph reads past, since it takes every
-provider binding as applying application-wide (Section~\ref{sec:approximations}).
-Guards that return a \texttt{UrlTree} belong to the same group, since a redirecting guard is itself
-a navigation site and not only a label.
-The wider treatment of guards in Chapter~\ref{ch:analysis}, where the guard of an edge is the
-conjunction of the conditions on the containment path with the guards the router runs, is the more
-substantial piece of work; its test, the guard-removal operator, reaches on this corpus only
-guards the graph already records on an edge (Section~\ref{sec:res-mutation}).
-
-\paragraph{A runtime tier.}
-The model already admits observation identifiers as witnesses beside source locations.
-Setting a runtime tier against the dynamic lineage \cite{crawljax2012,feedex2013,fraggen2022}
-would show how much of what a crawler finds the static graph contains, and the reverse.
-A signed-in run against a seeded backend would show which may edges occur in applications used signed in.
-That is evidence that the may edge exists, not a promotion to must, since a must edge asserts the
-transition on every execution the claim ranges over and one run shows it on one.
-A candidate never observed stays may, so the combination does not weaken Claim~\ref{claim:must}.
-This thesis neither builds nor measures it.
-
-\paragraph{A larger and broader corpus.}
-An automated search over a larger pool of repositories, keeping applications the extractor handles badly \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, would weaken the tool-driven selection bias of Section~\ref{sec:limitations}.
-A case study on a proprietary industrial application, reporting only aggregate figures, is the most direct answer to the external validity threat.
-
-\paragraph{The use that motivated the thesis.}
-That use is still unmeasured.
-Whether a graph of screens and guarded transitions improves mobile testing agents or coding agents (Chapter~\ref{ch:introduction}), or improves automated test generation, is a
-controlled experiment that this thesis does not attempt.
-The graph and the harness are the artefacts such an experiment would need; the defects quantified in
-Chapter~\ref{ch:results} are what it would have to control for.
+In order of how much each would change what the thesis can claim:
+\begin{itemize}
+\item \emph{An oracle for the screen set on a large application.} The hand-built ground truth of Section~\ref{sec:res-groundtruth} covers only the smallest application, whereas most of the corpus's attributions are made on applications of hundreds of screens (Table~\ref{tab:scopebaseline}). Either read the rendered links of such an application in a signed-in state, or annotate a stratified sample of its sites.
+\item \emph{The unimplemented part of the model.} The prototype leaves out the dispatch relations that carry NgRx effects and router event subscriptions, the injector hierarchy (it takes every provider binding as application-wide; Section~\ref{sec:approximations}), and guards that return a \texttt{UrlTree}. The wider treatment of guards in Chapter~\ref{ch:analysis} is the more substantial piece of work; its test, the guard-removal operator, reaches on this corpus only guards the graph already records (Section~\ref{sec:res-mutation}).
+\item \emph{A runtime tier.} Observation identifiers are already admitted as witnesses. Setting such a tier against the dynamic lineage \cite{crawljax2012,feedex2013,fraggen2022} would show how much a crawler finds that the static graph lacks, and the reverse. An observed run is evidence that a may edge exists, not a promotion to must, and a candidate never observed stays may, so Claim~\ref{claim:must} is not weakened. This thesis neither builds nor measures it.
+\item \emph{A larger and broader corpus.} An automated search over a larger pool of repositories, keeping applications the extractor handles badly \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, would weaken the tool-driven selection bias of Section~\ref{sec:limitations}; a case study on a proprietary industrial application, reporting only aggregate figures, would answer the external validity threat.
+\item \emph{The motivating use.} Whether such a graph improves mobile testing agents, coding agents (Chapter~\ref{ch:introduction}) or automated test generation remains unmeasured and is a controlled experiment this thesis does not attempt.
+\end{itemize}
 
 \section{Summary}
 
