@@ -26,7 +26,7 @@ The runtime route oracle also bounds the first claim: the route configuration it
 sense of a node for every mounted address.
 Both readings are reported: the weaker is what the loss classification is computed against, and
 the stronger is what a user of the graph would want.
-The node defects of the starting instrument (constant paths, lazy boundaries) are described in
+The node defects of the early development version (constant paths, lazy boundaries) are described in
 Section~\ref{sec:res-defects} and were repaired in Section~\ref{sec:res-round2}; on the final
 instrument those losses are empty.
 
@@ -70,12 +70,12 @@ No construct that the baseline converted was lost (\AttrRegressed{} leave the co
 The gain does widen the must tier: under the demotion rules (Table~\ref{tab:repairs}, rows 14 to 18) it
 holds \CensusBaseMust{} edges without attribution and \CensusMust{} with it, mostly the links of
 realworld's and k8sdash's shells placed on every screen the shell renders.
-On the intermediate instrument every must edge passed the witness check (\RoundMustClean{} after
+On the intermediate version every must edge passed the witness check (\RoundMustClean{} after
 attribution), but only as the tables were printed then: the runs behind them were lost and an
 archived re-run did not reproduce them.
 That tier held none of k8sdash's edges, so it says nothing of the edges attribution added there.
 Whether those edges occur on every input is what the demotion rules decide; \CensusMustKdash{} of them are kept at must.
-On the final instrument the check finds \MustWitnessViolations{} failures among the
+On the final version the check finds \MustWitnessViolations{} failures among the
 \MustWitnessEdges{} must edges, but cannot read the destination of \MustWitnessUnread{}, all of
 them k8sdash's toolbar edges, so only about half of that application's must edges are read.
 
@@ -465,7 +465,7 @@ scope.
 \item The primary \texttt{<router-outlet>} with the shell rule that follows from it.
 \item Guards named on a route, as labels on the edges entering that route's subtree.
 \end{itemize}
-The failures measured on the starting version of uigraph were failures inside this group:
+The failures measured on the early development version of uigraph were failures inside this group:
 constant route paths, lazy boundaries and unlinked nodes (Section~\ref{sec:res-defects}).
 They were bugs with known causes and not approximations to be declared away, which is why RQ5
 could repair them (Section~\ref{sec:res-round2}).
@@ -813,7 +813,7 @@ further, since it would show which \emph{rule} made a site wrong without re-extr
 rule.
 
 \paragraph{The remaining node-level losses.}
-The node defects of the starting instrument are repaired (Section~\ref{sec:res-defects}).
+The node defects of the early development version are repaired (Section~\ref{sec:res-defects}).
 Some attribution losses that remain, most of them in ghostfolio (Table~\ref{tab:remaining}), are
 constructs whose scope was found but whose target screen has no node.
 Those behind the spread of computed routes could be recovered by reading more of the route
@@ -887,8 +887,8 @@ The predictions of Section~\ref{sec:transfer} are specific enough to be falsifie
 The defect class ``node not linked to its component'' has one confirmation, from the comparison
 between the independent route parser and the graph, and the rule adopted in Chapter~\ref{ch:results} admits a
 class only with two.
-The class is empty on the final instrument (Table~\ref{tab:loss}), so its standing matters only for
-the record of the starting instrument.
+The class is empty on the final version (Table~\ref{tab:loss}), so its standing matters only for
+the record of the early development version.
 A second method would have to reach it independently, and the test-source cross-check is the
 natural candidate: a screen whose node exists but carries no component link should still be
 visited by tests while contributing no outbound edges.

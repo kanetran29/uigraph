@@ -226,7 +226,7 @@ takes the code as deployed.
 mutation sweep deletes each rule in turn and checks that some test fails
 (Section~\ref{sec:res-round2}). The tests share the extractor's reading of each construct, and no
 second classifier re-derives them. What stands in for one, for the condition rules, is a review in
-which the assistant the declaration describes read the constructs behind the intermediate instrument's must tier in
+which the assistant the declaration describes read the constructs behind the intermediate version's must tier in
 the source, twice and separately, without the extractor's readers
 (Section~\ref{sec:res-round2}; the corrections are in Table~\ref{tab:repairs}; some were found by this review
 and not by the witness check). What the witness check establishes is therefore narrower than the
@@ -273,7 +273,7 @@ category ``Attribution, service'' of Table~\ref{tab:loss-rules}.
 
 \subsection{The defect being addressed}
 
-In the starting version of uigraph, a navigation site is attributed to a screen only if it
+In the early development version of uigraph, a navigation site is attributed to a screen only if it
 occurs directly in the component that the route for that screen renders. Navigation sites
 anywhere else are attributed to no screen. This one cause explains three symptoms:
 \begin{itemize}
@@ -282,7 +282,7 @@ next to the router outlet and not inside the subtree of any screen;
 \item a component mounted at several routes contributes one edge instead of one per route;
 \item navigations from injected services yield no edges.
 \end{itemize}
-The symptoms are those of the starting instrument. On the final baseline no application is
+The symptoms are those of the early development version. On the final baseline no application is
 without edges.
 
 \subsection{Scope}

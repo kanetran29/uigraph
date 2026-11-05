@@ -62,7 +62,7 @@ Table~\ref{tab:coverage} gives the first measure. It compares the nodes the extr
 the screens the independent route parser finds declared. Against that denominator node
 extraction is complete: on all six applications every declared screen has a node.
 
-That was not true of the starting version of uigraph. It read one application as a
+That was not true of the early development version of uigraph. It read one application as a
 single node for the \RoundTwoEarlierOracleGhostfolioDeclared{} screens it declares, and the
 largest as under a tenth of its screens. Section~\ref{sec:res-round2} reports what had to be
 repaired, and Appendix~\ref{app:readers} the handful of addresses the two readers still disagree
@@ -113,11 +113,11 @@ lazy-boundary class rests on three methods. The attribution class leans most on 
 it is the class the analysis of Chapter~\ref{ch:analysis} addresses. Its observations are not weak
 in themselves, but they are not independent instruments.
 
-The five classes were found at the starting instrument, and each has at least two confirmations.
+The five classes were found at the early development version, and each has at least two confirmations.
 The quantitative breakdown revealed a sixth candidate: a node that exists but is not linked to the
 component that renders it. It is confirmed only by the comparison between the independent route parser and the
 graph, so it is reported as a candidate until a second method confirms it. It is empty on the
-final instrument.
+final version.
 
 \begin{table}[tbp]\footnotesize
 \caption{Defect classes and the evidence for each. A class is admitted on two
@@ -129,7 +129,7 @@ column counts only those. This summary is compiled by hand; it is not harness ou
 Class & Evidence & Methods & All \\
 \midrule
 Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph (at commit \EarlierCommit{});
-multi-mount edge absent; manual audit; an application with nodes and no edges at the starting instrument (k8s dashboard) & 1 & 4 \\
+multi-mount edge absent; manual audit; an application with nodes and no edges at the early development version (k8s dashboard) & 1 & 4 \\
 Lazy module boundary not followed & independent route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & red-team panels and a source survey of the guard factory and the call-form \texttt{canActivate}, after commit \EarlierCommit{}
 (Section~\ref{sec:res-soundness}) & 1 & 2 \\
@@ -293,7 +293,7 @@ Table~\ref{tab:recovery-source} gives the recovery by the loss category each con
 baseline and by the modality its own witness earns. Of the recoveries from the attribution categories,
 \AttrRecoveredMust{} earn must and \AttrRecoveredMay{} earn may. The loss categories are not
 independent causes: a shared component can be assigned to attribution even when a missing target
-node prevents its recovery. On the starting version of uigraph (commit \EarlierCommit{}),
+node prevents its recovery. On the early development version of uigraph (commit \EarlierCommit{}),
 \EarlierGainFromNode{} of \EarlierGainMust{} constructs converted to must, \EarlierGainFromNodeShare{},
 came out of node-related categories against \EarlierGainFromAttribution{} from attribution categories.
 Those figures come from that commit's recorded results and supply no counts for the final
@@ -854,7 +854,7 @@ Table~\ref{tab:remaining}, including sites that no relation the prototype implem
 implement, and not repaired. Its navigations are excluded from the denominator
 (\RoundTwoExcludedOutlet{} sites) and its screens left out of the runtime route oracle's mounted set
 (\ProbeOutletScreens{} route entries).
-\item The candidate class \emph{node not linked to its component}: empty on the final instrument.
+\item The candidate class \emph{node not linked to its component}: empty on the final version.
 \end{itemize}
 
 The source review also found three causes that no class row names.
@@ -883,7 +883,7 @@ route array held inline by \texttt{RouterModule.forChild([\ldots])}, whose eleme
 (\texttt{loadChildren: () => VaultModule}); a barrel that re-exports the route array; and a wrapper
 such as mifos's \texttt{Route.withShell([\ldots])}, a call whose array argument was skipped whole. A
 related defect left nodes with no link to the component that renders them. It is the candidate class
-and is empty on the final instrument.
+and is empty on the final version.
 \end{sloppypar}
 
 \paragraph{The path was named, not written.} This is the constant-path defect. In one application every

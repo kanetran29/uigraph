@@ -93,7 +93,7 @@ size is visible and not averaged away.
 \item The commits are fixed and the harness is released with the thesis, so the measurement can be
 repeated rather than taken on trust.
 \end{itemize}
-None of these addresses a further threat: the repairs made after the starting instrument were found on this corpus
+None of these addresses a further threat: the repairs made after the early development version were found on this corpus
 and are measured on it, with no held-out application (Section~\ref{sec:limitations}), so the figures
 after the repairs are fitted to it. A case study on a proprietary Angular application, reporting only
 aggregate figures, is planned as the most direct response (Chapter~\ref{ch:discussion}). There is
@@ -136,7 +136,7 @@ Cause trace & defect classes traced to a cause in the source, by kind (unread, u
 template, or a call to \texttt{Router.navigate} or \texttt{Router.navigateByUrl} in class code,
 in the application source excluding tests. Constructs are found by a separately written parser
 that shares no code with the extractor. Table~\ref{tab:repairs} qualifies what that
-independence covers: for the route-path forms added after the starting instrument, the two resolve the same
+independence covers: for the route-path forms added after the early development version, the two resolve the same
 constructs by the same rules, and three of the independent route parser's corrections were made because it
 disagreed with the extractor. Attributes such as \texttt{routerLinkActive} are not constructs.
 
@@ -537,13 +537,14 @@ Two limits remain. The evaluated commit must be one a reader can fetch, so the f
 reproducible only once it is published. And the harness version decides several figures independently
 of the extractor, so a result file is comparable only with one made by the same version.
 
-Three versions of uigraph, all built in this work, appear in the thesis and are named by one label
-each:
+uigraph was developed within this thesis, and three of its development versions appear in the text,
+each named by one label:
 \begin{itemize}
-\item the \emph{starting instrument}: uigraph at commit \EarlierCommit{}, when the evaluation began;
-\item the \emph{intermediate instrument}: extractor \RoundExtractor{}, with its
+\item the \emph{early development version}: commit \EarlierCommit{}, before the corrections the evaluation
+  prompted;
+\item the \emph{intermediate version}: extractor \RoundExtractor{}, with its
 \RoundMustEdges{}-edge must tier and the tables as printed at \RoundCommit{};
-\item the \emph{final instrument}: extractor commit \texttt{c42f220}, harness 1.9.0 and mutation
+\item the \emph{final version}: extractor commit \texttt{c42f220}, harness 1.9.0 and mutation
 harness 1.9.1. The source of the Angular adapter is identical at \texttt{920e1aa}, where the
 sweep of the demotion rules was recorded.
 \end{itemize}
@@ -555,8 +556,8 @@ Table~\ref{tab:provenance} gives, for each group of generated tables, the instru
 comes from. The table itself, the corpus table, the counts of the rejected candidates and the
 figures of superseded instruments are written by hand. Three groups are historical by design and
 labelled so where printed: the first node audit of Appendix~\ref{app:validation}, the
-intermediate instrument with its own must tier, and the rendered-interface check and the runtime route oracle. They were not
-re-measured on the final instrument. The runtime route oracle was run on 29 and 30 October against a
+intermediate version with its own must tier, and the rendered-interface check and the runtime route oracle. They were not
+re-measured on the final version. The runtime route oracle was run on 29 and 30 October against a
 graph whose extractor commit was not recorded; its node total equals the final screen count, and that
 agreement is its only link to the final graph. The construct prevalence counts read the sources only.
 
@@ -580,7 +581,7 @@ End-to-end navigation check & final & \texttt{c42f220} graphs; suites run 3 Nov 
 \path{e2e-nav/results/}, via \texttt{score.mjs} \\
 Demotion-rule sweep & final & \texttt{920e1aa}, same adapter source$^{a}$ &
 \path{results-must/mutation-sweep.json} \\
-Starting instrument and the intermediate must tier & historical & \texttt{eb9dab80} and before &
+Early development version and the intermediate must tier & historical & \texttt{eb9dab80} and before &
 tables read from git at \texttt{f17a302} and \texttt{7d109c7} \\
 Rendered-interface check (Table~\ref{tab:scope}) & historical & an earlier graph, before the call
 graph; check 1.3.0 & \path{route-probe/results/} \\

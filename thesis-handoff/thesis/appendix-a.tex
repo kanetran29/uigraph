@@ -70,7 +70,7 @@ No. & What was wrong & Found by & What changed & Effect on the figures \\
 11 & A guard on a route that a wrapper function returns was not read, so everything below it was published as unconditional.
   & Red-team panels reading the graph and the source after commit \EarlierCommit{}. The witness check did not find it.
   & The guard set of a screen also reads routes a function returns.
-  & At \EarlierCommit{} the tier held \EarlierMustEdges{} must edges with \EarlierMustViolations{} witness failures, read from that commit's own results. The failures were target mismatches on edges the unread guard left on the deterministic tier. Reading the guard cut mifos's tier to \RoundMustEdgesMifos{} on the intermediate instrument. \\
+  & At \EarlierCommit{} the tier held \EarlierMustEdges{} must edges with \EarlierMustViolations{} witness failures, read from that commit's own results. The failures were target mismatches on edges the unread guard left on the deterministic tier. Reading the guard cut mifos's tier to \RoundMustEdgesMifos{} on the intermediate version. \\
 12 & A \texttt{canActivate} element that is a call, such as a guard factory, was skipped, so a route guarded only by one read as unguarded.
   & Red-team panels, as in row 11.
   & An element the reader cannot name gates the edge anyway.
@@ -116,7 +116,7 @@ No. & What was wrong & Found by & What changed & Effect on the figures \\
 22 & The first-audit extractor reached route tables without their parent prefix, and minted a node at \texttt{*} for each catch-all.
   & Resolving the disagreement of the first node audit (Section~\ref{app:readers}).
   & The repairs of the loss list: a table not reached, a path named and not written, a destination named and not written (Section~\ref{sec:res-defects}).
-  & Of \RoundTwoFirstRoundExtra{} nodes with no declared route, \RoundTwoFirstRoundTruncated{} were the tail of a declared route and \RoundTwoFirstRoundSynthetic{} were catch-alls. On the final instrument \RoundTwoExtraNodes{} nodes match no declared screen, \RoundTwoExtraNodesWildcard{} of them at \texttt{*}. \\
+  & Of \RoundTwoFirstRoundExtra{} nodes with no declared route, \RoundTwoFirstRoundTruncated{} were the tail of a declared route and \RoundTwoFirstRoundSynthetic{} were catch-alls. On the final version \RoundTwoExtraNodes{} nodes match no declared screen, \RoundTwoExtraNodesWildcard{} of them at \texttt{*}. \\
 23 & The grounds that exclude a construct from the denominator were tested after the graph had been consulted.
   & Not stated.
   & The grounds are decided from the construct's own text before the graph is consulted. The comparison refuses to print if a construct changes its ground between the two runs.
@@ -382,7 +382,7 @@ The attribution reaches the published reason table in neither form. It is asked 
 \section{The intermediate must tier, construct by construct}
 \label{app:mustledger}
 
-Table~\ref{tab:mustledger} lists every construct that the \MustCtxEdges{} must edges of the intermediate instrument cite, with the edge that cites it and the condition the current extractor reads at it (Section~\ref{sec:res-round2}). A construct appears once for each edge that cites it. The condition is read by the extractor's own readers, so the table records the extractor's decisions, and a reader checks it by opening each construct at the line given.
+Table~\ref{tab:mustledger} lists every construct that the \MustCtxEdges{} must edges of the intermediate version cite, with the edge that cites it and the condition the current extractor reads at it (Section~\ref{sec:res-round2}). A construct appears once for each edge that cites it. The condition is read by the extractor's own readers, so the table records the extractor's decisions, and a reader checks it by opening each construct at the line given.
 
 \TabMustLedger{The constructs behind the intermediate must tier and the condition the extractor reads
 at each. \emph{none} means the construct runs whenever its template or handler does.}
