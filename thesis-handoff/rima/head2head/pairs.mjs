@@ -54,16 +54,21 @@ export function theirPairs(workflows, routes, appDir, decls = null) {
     if (!navigates || w.meta?.unresolvedTargets?.length) continue
     const m = /\|([^|]+):(\d+):\d+\|/.exec(w.triggerEdgeId ?? w.id ?? '')
     const site = m ? `${relative(appDir, m[1])}:${m[2]}` : null
-    for (const t of paths.get(w.terminalNodeId) ?? []) {
+    const ts = paths.get(w.terminalNodeId) ?? []
+    for (const t of ts) {
       if (wild(t)) continue
-      for (const id of w.startRouteIds ?? [])
-        for (const s of paths.get(id) ?? []) {
+      for (const id of w.startRouteIds ?? []) {
+        const ss = paths.get(id) ?? []
+        for (const s of ss) {
           if (wild(s) || norm(s) === norm(t)) continue
+          // Both ends mounted in several places: a move stays within one mount, which shares its first segment.
+          if (ss.length > 1 && ts.length > 1 && s.split('/')[1] !== t.split('/')[1]) continue
           const k = key(s, t)
           const p = out.get(k) ?? { from: s, to: t, sites: new Set() }
           if (site) p.sites.add(site)
           out.set(k, p)
         }
+      }
     }
   }
   return out

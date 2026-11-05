@@ -54,7 +54,7 @@ export function wilson(k, n) {
 export function scoreApp(strata, verdicts) {
   const st = {}
   // An only-ours stratum split in two (oursShell, oursOther) is estimated part by part.
-  const ourParts = strata.oursShell !== undefined ? [['oursShell', strata.oursShell], ['oursOther', strata.oursOther]] : [['ours', strata.oursOnly]]
+  const ourParts = strata.oursParts ?? (strata.oursShell !== undefined ? [['oursShell', strata.oursShell], ['oursOther', strata.oursOther]] : [['ours', strata.oursOnly]])
   for (const [name, size] of [['both', strata.both], ['theirs', strata.theirsOnly], ...ourParts]) {
     const read = verdicts.filter((v) => v.stratum === name)
     const real = read.filter((v) => v.verdict === 'real').length

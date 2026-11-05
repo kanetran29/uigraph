@@ -32,3 +32,12 @@ Second pass, after an Opus red-team of the first (5 Nov 2026, late)
 10. Not done as preregistered: the graph without attribution as a reference point; V2 is checked against
    this extractor's screens, not the independent route parser; V1 is the workflow count, and start and
    terminal routes were compared on six subjects (petclinic's reference is written with concrete URLs).
+
+Third pass (5 Nov 2026, late), after the red-team's re-check
+11. Pairing every mount of a start route with every mount of a terminal route invented moves across
+    mounts (a lazily loaded module mounted under /clients and under /loans). Both ends mounted in several
+    places now pair only mounts sharing their first segment; only mifos changes. No pair was read anew:
+    the second pass's mifos samples are restricted to the pairs that remain (results-v3/), the new
+    shared and only-theirs strata being subsets of the old, and the shared pairs that lost their twin
+    form an only-ours part estimated from the old shared sample's pairs that moved. The samples behind
+    the mifos figures are therefore small (7, 4 and 5 pairs for those three strata).

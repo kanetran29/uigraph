@@ -1,0 +1,2316 @@
+{
+ "posts-users-ui-ng": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng",
+  "pairs": [
+   {
+    "from": "/new-post",
+    "to": "/posts",
+    "sites": [
+     "src/app/header/header.component.html:7",
+     "src/app/new-post/new-post.component.html:7",
+     "src/app/new-post/new-post.component.ts:41"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/new-post",
+    "to": "/users",
+    "sites": [
+     "src/app/header/header.component.html:9"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/new-user",
+    "to": "/user-search",
+    "sites": [
+     "src/app/header/header.component.html:11"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/posts",
+    "to": "/user-availability-schedule",
+    "sites": [
+     "src/app/header/header.component.html:12"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/posts",
+    "to": "/users",
+    "sites": [
+     "src/app/header/header.component.html:9"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/new-post",
+    "sites": [
+     "src/app/header/header.component.html:8"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/user-search",
+    "sites": [
+     "src/app/header/header.component.html:11"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/user-search",
+    "to": "/new-post",
+    "sites": [
+     "src/app/header/header.component.html:8"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/user-search",
+    "to": "/posts",
+    "sites": [
+     "src/app/header/header.component.html:7"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/users",
+    "to": "/posts",
+    "sites": [
+     "src/app/header/header.component.html:7"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/users",
+    "to": "/user-search",
+    "sites": [
+     "src/app/header/header.component.html:11"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/users/:id",
+    "to": "/users",
+    "sites": [
+     "src/app/header/header.component.html:9"
+    ],
+    "stratum": "both"
+   }
+  ]
+ },
+ "heroes-angular": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/rima/src/johnpapa__heroes-angular",
+  "pairs": [
+   {
+    "from": "/about",
+    "to": "/heroes",
+    "sites": [
+     "src/app/core/components/nav.component.ts:10",
+     "src/app/core/components/nav.component.ts:5"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/about",
+    "to": "/villains",
+    "sites": [
+     "src/app/core/components/nav.component.ts:13",
+     "src/app/core/components/nav.component.ts:8"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/heroes",
+    "to": "/about",
+    "sites": [
+     "src/app/core/components/nav.component.ts:11",
+     "src/app/core/components/nav.component.ts:16"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/heroes",
+    "to": "/villains",
+    "sites": [
+     "src/app/core/components/nav.component.ts:13",
+     "src/app/core/components/nav.component.ts:8"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/villains",
+    "to": "/about",
+    "sites": [
+     "src/app/core/components/nav.component.ts:11",
+     "src/app/core/components/nav.component.ts:16"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/villains",
+    "to": "/heroes",
+    "sites": [
+     "src/app/core/components/nav.component.ts:10",
+     "src/app/core/components/nav.component.ts:5"
+    ],
+    "stratum": "both"
+   }
+  ]
+ },
+ "airbus-inventory": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory",
+  "pairs": [
+   {
+    "from": "/add",
+    "to": "/productByCategory",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:11"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/dashboard",
+    "to": "/login",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:52",
+     "src/app/main-nav/main-nav.component.html:53",
+     "src/app/services/router.service.ts:12"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/dashboard",
+    "to": "/update",
+    "sites": [
+     "src/app/get-all-products/get-all-products.component.html:60",
+     "src/app/services/router.service.ts:24"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/add",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:26"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/login",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:52",
+     "src/app/main-nav/main-nav.component.html:53",
+     "src/app/services/router.service.ts:12"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/productByCategory",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:11"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/update",
+    "sites": [
+     "src/app/get-all-products/get-all-products.component.html:60",
+     "src/app/services/router.service.ts:24"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/productByCategory",
+    "to": "/add",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:26"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/productByCategory",
+    "to": "/login",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:52",
+     "src/app/main-nav/main-nav.component.html:53",
+     "src/app/services/router.service.ts:12"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/update",
+    "to": "/getAllProducts",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:19",
+     "src/app/services/router.service.ts:20",
+     "src/app/successful-dialog/successful-dialog.component.html:5",
+     "src/app/un-successful-dialog/un-successful-dialog.component.html:5"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/update",
+    "to": "/login",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:52",
+     "src/app/main-nav/main-nav.component.html:53",
+     "src/app/services/router.service.ts:12"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/update",
+    "to": "/productByCategory",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:11"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/login",
+    "to": "/add",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:26"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/login",
+    "to": "/getAllProducts",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:19"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/login",
+    "to": "/productByCategory",
+    "sites": [
+     "src/app/main-nav/main-nav.component.html:11"
+    ],
+    "stratum": "theirs"
+   }
+  ]
+ },
+ "spring-petclinic-angular": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular",
+  "pairs": [
+   {
+    "from": "/",
+    "to": "/owners/add",
+    "sites": [
+     "src/app/app.component.html:42"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/",
+    "to": "/specialties",
+    "sites": [
+     "src/app/app.component.html:65"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/owners",
+    "to": "/pettypes",
+    "sites": [
+     "src/app/app.component.html:59"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/welcome",
+    "sites": [
+     "src/app/app.component.html:28"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/owners/add",
+    "sites": [
+     "src/app/app.component.html:42"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/pets",
+    "to": "/owners/add",
+    "sites": [
+     "src/app/app.component.html:42"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/owners",
+    "sites": [
+     "src/app/app.component.html:40"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/pettypes",
+    "to": "/owners/add",
+    "sites": [
+     "src/app/app.component.html:42"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/pettypes/:id/edit",
+    "to": "/owners",
+    "sites": [
+     "src/app/app.component.html:40"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/vets",
+    "to": "/pettypes",
+    "sites": [
+     "src/app/app.component.html:59"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/vets/add",
+    "to": "/vets",
+    "sites": [
+     "src/app/app.component.html:52",
+     "src/app/vets/vet-add/vet-add.component.html:22",
+     "src/app/vets/vet-add/vet-add.component.html:59",
+     "src/app/vets/vet-add/vet-add.component.ts:76"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/visits/add",
+    "to": "/specialties",
+    "sites": [
+     "src/app/app.component.html:65"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/pets/:id/edit",
+    "sites": [
+     "src/app/pets/pet-list/pet-list.component.html:29"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/pets/:id/visits/add",
+    "sites": [
+     "src/app/pets/pet-list/pet-list.component.html:31"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/owners/:id",
+    "to": "/visits/:id/edit",
+    "sites": [
+     "src/app/visits/visit-list/visit-list.component.html:31"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/pets",
+    "to": "/visits/:id/edit",
+    "sites": [
+     "src/app/visits/visit-list/visit-list.component.html:31"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/visits/:id/edit",
+    "sites": [
+     "src/app/visits/visit-list/visit-list.component.html:31"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/visits/add",
+    "to": "/visits/:id/edit",
+    "sites": [
+     "src/app/visits/visit-list/visit-list.component.html:31"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/owners",
+    "to": "/owners/:id/edit",
+    "sites": [
+     "src/app/owners/owner-list/owner-list.component.html:58"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/owners",
+    "to": "/owners/:id/pets/add",
+    "sites": [
+     "src/app/owners/owner-list/owner-list.component.html:58"
+    ],
+    "stratum": "ours"
+   }
+  ]
+ },
+ "ever-traduora": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp",
+  "pairs": [
+   {
+    "from": "/login",
+    "to": "/projects",
+    "sites": [
+     "src/app/shared/components/app-bar/app-bar.component.html:2",
+     "src/app/shared/components/app-bar/app-bar.component.html:7"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/login",
+    "to": "/user-settings",
+    "sites": [
+     "src/app/shared/components/app-bar/app-bar.component.html:21"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects",
+    "sites": [
+     "src/app/shared/components/app-bar/app-bar.component.html:2",
+     "src/app/shared/components/app-bar/app-bar.component.html:7"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/export",
+    "sites": [
+     "src/app/projects/components/project-container/project-container.component.html:72",
+     "src/app/projects/components/project-container/project-container.component.html:74"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/labels",
+    "sites": [
+     "src/app/projects/components/project-container/project-container.component.html:48",
+     "src/app/projects/components/project-container/project-container.component.html:50"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/api",
+    "sites": [
+     "src/app/projects/components/project-container/project-container.component.html:81",
+     "src/app/projects/components/project-container/project-container.component.html:84"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/user-settings",
+    "sites": [
+     "src/app/shared/components/app-bar/app-bar.component.html:21"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/terms",
+    "sites": [
+     "src/app/projects/components/project-container/project-container.component.html:34"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/labels",
+    "sites": [
+     "src/app/projects/components/project-container/project-container.component.html:48",
+     "src/app/projects/components/project-container/project-container.component.html:50"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/terms",
+    "sites": [
+     "src/app/projects/components/project-container/project-container.component.html:34"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/export",
+    "sites": [
+     "src/app/projects/components/project-container/project-container.component.html:72",
+     "src/app/projects/components/project-container/project-container.component.html:74"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/settings",
+    "sites": [
+     "src/app/projects/components/project-container/project-container.component.html:91",
+     "src/app/projects/components/project-container/project-container.component.html:93"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/translations/:localeCode",
+    "sites": [
+     "src/app/projects/components/project-locales/project-locales.component.html:17"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/projects",
+    "to": "/projects/:projectId/translations",
+    "sites": [
+     "src/app/projects/components/project-card/project-card.component.html:1"
+    ],
+    "stratum": "ours"
+   }
+  ]
+ },
+ "angular-jumpstart": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/rima/src/DanWahlin__Angular-JumpStart",
+  "pairs": [
+   {
+    "from": "/customers",
+    "to": "/orders",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:17"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/customers/:id/details",
+    "sites": [
+     "src/app/customer/customer.component.html:10"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/orders",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:17",
+     "src/app/customer/customer.component.html:16"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/orders",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:17",
+     "src/app/customer/customer.component.html:16"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/customers/:id/details",
+    "sites": [
+     "src/app/customer/customer.component.html:10"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/customers",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:11",
+     "src/app/core/navbar/navbar.component.html:16",
+     "src/app/core/navbar/navbar.component.html:19",
+     "src/app/core/navbar/navbar.component.ts:48",
+     "src/app/customer/customer.component.html:35"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/customers/:id/edit",
+    "sites": [
+     "src/app/customer/customer.component.html:22"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/orders",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:17",
+     "src/app/customer/customer.component.html:16"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/login",
+    "to": "/customers",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:11",
+     "src/app/core/navbar/navbar.component.html:16",
+     "src/app/core/navbar/navbar.component.html:19",
+     "src/app/core/navbar/navbar.component.ts:48",
+     "src/app/login/login.component.ts:56"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/login",
+    "to": "/orders",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:17"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/orders",
+    "to": "/about",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:18"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/orders",
+    "to": "/customers",
+    "sites": [
+     "src/app/core/navbar/navbar.component.html:11",
+     "src/app/core/navbar/navbar.component.html:16",
+     "src/app/core/navbar/navbar.component.html:19",
+     "src/app/core/navbar/navbar.component.ts:48"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/about",
+    "to": "/login",
+    "sites": [
+     "src/app/core/navbar/navbar.component.ts:58"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customers",
+    "to": "/login",
+    "sites": [
+     "src/app/core/navbar/navbar.component.ts:58"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/customers/:id/orders",
+    "sites": [
+     "src/app/customer/customer.component.html:16"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/login",
+    "sites": [
+     "src/app/core/navbar/navbar.component.ts:58"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/customers/:id/orders",
+    "sites": [
+     "src/app/customer/customer.component.html:16"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/login",
+    "sites": [
+     "src/app/core/navbar/navbar.component.ts:58"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/customers/:id/orders",
+    "sites": [
+     "src/app/customer/customer.component.html:16"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/login",
+    "sites": [
+     "src/app/core/navbar/navbar.component.ts:58"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/login",
+    "sites": [
+     "src/app/core/navbar/navbar.component.ts:58"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/orders",
+    "to": "/login",
+    "sites": [
+     "src/app/core/navbar/navbar.component.ts:58"
+    ],
+    "stratum": "ours"
+   }
+  ]
+ },
+ "event-booking-mean": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app",
+  "pairs": [
+   {
+    "from": "/",
+    "to": "/create-event",
+    "sites": [
+     "src/app/welcome/welcome.component.html:10"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/",
+    "to": "/my-Events",
+    "sites": [
+     "src/app/header/header.component.html:29"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/",
+    "to": "/register",
+    "sites": [
+     "src/app/header/header.component.html:20"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/Contact",
+    "to": "/login",
+    "sites": [
+     "src/app/featured-events/featured-events.component.html:27",
+     "src/app/header/header.component.html:19",
+     "src/app/header/header.component.html:31",
+     "src/app/header/header.component.ts:46"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/Contact",
+    "to": "/my-Events",
+    "sites": [
+     "src/app/header/header.component.html:29"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/Contact",
+    "to": "/register",
+    "sites": [
+     "src/app/header/header.component.html:20"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/create-event",
+    "to": "/Contact",
+    "sites": [
+     "src/app/header/header.component.html:17"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/create-event",
+    "to": "/my-Events",
+    "sites": [
+     "src/app/create-event/create-event.component.ts:74",
+     "src/app/header/header.component.html:29"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/create-event",
+    "to": "/register",
+    "sites": [
+     "src/app/header/header.component.html:20"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/my-Events",
+    "to": "/Contact",
+    "sites": [
+     "src/app/header/header.component.html:17"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/my-Events",
+    "to": "/register",
+    "sites": [
+     "src/app/header/header.component.html:20"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/register",
+    "to": "/login",
+    "sites": [
+     "src/app/featured-events/featured-events.component.html:27",
+     "src/app/user/register/register.component.html:8",
+     "src/app/user/register/register.component.ts:28"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/Contact",
+    "to": "/create-event",
+    "sites": [
+     "src/app/welcome/welcome.component.html:10"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/login",
+    "to": "/create-event",
+    "sites": [
+     "src/app/welcome/welcome.component.html:10"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/my-Events",
+    "to": "/create-event",
+    "sites": [
+     "src/app/welcome/welcome.component.html:10"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/register",
+    "to": "/create-event",
+    "sites": [
+     "src/app/welcome/welcome.component.html:10"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/login",
+    "to": "/",
+    "sites": [
+     "src/app/user/login/login.component.ts:33"
+    ],
+    "stratum": "ours"
+   }
+  ]
+ },
+ "realworld": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/realworld",
+  "pairs": [
+   {
+    "from": "/",
+    "to": "/editor",
+    "sites": [
+     "src/app/core/layout/header.component.html:33",
+     "src/app/core/layout/header.component.html:65"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/",
+    "to": "/login",
+    "sites": [
+     "src/app/core/layout/header.component.html:14",
+     "src/app/features/article/pages/home/home.component.ts:53"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/",
+    "to": "/profile/:username",
+    "sites": [
+     "src/app/core/layout/header.component.html:46",
+     "src/app/features/article/components/article-meta.component.ts:11",
+     "src/app/features/article/components/article-meta.component.ts:3",
+     "src/app/features/article/components/article-meta.component.ts:8"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/article/:slug",
+    "to": "/login",
+    "sites": [
+     "src/app/core/layout/header.component.html:14",
+     "src/app/features/article/pages/article/article.component.html:114",
+     "src/app/features/profile/components/follow-button.component.ts:2",
+     "src/app/features/profile/components/follow-button.component.ts:59"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/profile/:username",
+    "to": "/",
+    "sites": [
+     "src/app/core/layout/footer.component.html:3",
+     "src/app/core/layout/header.component.html:10",
+     "src/app/core/layout/header.component.html:27",
+     "src/app/core/layout/header.component.html:3",
+     "src/app/core/layout/header.component.html:59",
+     "src/app/core/layout/header.component.html:88",
+     "src/app/features/article/components/article-list.component.ts:13",
+     "src/app/features/article/components/article-list.component.ts:36"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/profile/:username",
+    "to": "/article/:slug",
+    "sites": [
+     "src/app/features/article/components/article-preview.component.ts:18",
+     "src/app/features/article/components/article-preview.component.ts:9"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/profile/:username",
+    "to": "/editor",
+    "sites": [
+     "src/app/core/layout/header.component.html:33",
+     "src/app/core/layout/header.component.html:65"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/profile/:username",
+    "to": "/profile/:username/favorites",
+    "sites": [
+     "src/app/features/profile/pages/profile/profile.component.html:48",
+     "src/app/features/profile/pages/profile/profile.component.html:52"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/profile/:username/favorites",
+    "to": "/editor",
+    "sites": [
+     "src/app/core/layout/header.component.html:33",
+     "src/app/core/layout/header.component.html:65"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/settings",
+    "to": "/editor",
+    "sites": [
+     "src/app/core/layout/header.component.html:33",
+     "src/app/core/layout/header.component.html:65"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/tag/:tag",
+    "to": "/editor",
+    "sites": [
+     "src/app/core/layout/header.component.html:33",
+     "src/app/core/layout/header.component.html:65"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/tag/:tag",
+    "to": "/settings",
+    "sites": [
+     "src/app/core/layout/header.component.html:39",
+     "src/app/core/layout/header.component.html:71"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/login",
+    "to": "/article/:slug",
+    "sites": [
+     "src/app/features/article/components/article-preview.component.ts:9"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/register",
+    "to": "/article/:slug",
+    "sites": [
+     "src/app/features/article/components/article-preview.component.ts:9"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/settings",
+    "to": "/article/:slug",
+    "sites": [
+     "src/app/features/article/components/article-preview.component.ts:9"
+    ],
+    "stratum": "theirs"
+   }
+  ]
+ },
+ "alfresco": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/alfresco/projects/aca-content",
+  "pairs": [
+   {
+    "from": "/profile",
+    "to": "/personal-files",
+    "sites": [
+     "src/lib/components/view-profile/view-profile.component.html:13",
+     "src/lib/components/view-profile/view-profile.component.ts:141"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/saved-searches",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63",
+     "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.html:1",
+     "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts:163"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/favorite/libraries/:folderId",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/libraries",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/personal-files/details/:nodeId",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/personal-files/details/:nodeId/:activeTab",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/preview/s/:id",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/recent-files",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/repository",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/repository/details/:nodeId/:activeTab",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/rules",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/search",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/search-libraries",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/shared",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/favorite/libraries",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/favorite/libraries/:folderId",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/libraries",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/personal-files",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/personal-files/details/:nodeId/:activeTab",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/profile",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/repository",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/repository/:folderId",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/search",
+    "to": "/personal-files",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:57"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/search-libraries",
+    "to": "/personal-files",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:57"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/shared",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/view",
+    "to": "/search",
+    "sites": [
+     "src/lib/components/search/search-navigation.service.ts:63"
+    ],
+    "stratum": "ours"
+   }
+  ]
+ },
+ "ghostfolio": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/ghostfolio/apps/client",
+  "pairs": [
+   {
+    "from": "/accounts",
+    "to": "/accounts/:accountId",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.ts:191",
+     "src/app/pages/accounts/accounts-page.html:24"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/accounts/create",
+    "to": "/accounts/:accountId",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.ts:191",
+     "src/app/pages/accounts/accounts-page.html:24"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/accounts/transfer-cash-balance",
+    "to": "/accounts/:accountId",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.ts:191",
+     "src/app/pages/accounts/accounts-page.html:24"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/account/access",
+    "to": "/internalRoutes.account.path/access.path/:accessId",
+    "sites": [
+     "src/app/components/user-account-access/user-account-access.html:78"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/account/access/:accessId/update",
+    "to": "/internalRoutes.account.path/access.path/:accessId",
+    "sites": [
+     "src/app/components/user-account-access/user-account-access.html:78"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/account/access/create",
+    "to": "/internalRoutes.account.path/access.path/:accessId",
+    "sites": [
+     "src/app/components/user-account-access/user-account-access.html:78"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/portfolio/activities",
+    "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+    "sites": [
+     "src/app/pages/portfolio/activities/activities-page.html:44"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/portfolio/activities/:activityId/clone",
+    "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+    "sites": [
+     "src/app/pages/portfolio/activities/activities-page.html:44"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/portfolio/activities/:activityId/update",
+    "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+    "sites": [
+     "src/app/pages/portfolio/activities/activities-page.html:44"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/portfolio/activities/create",
+    "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+    "sites": [
+     "src/app/pages/portfolio/activities/activities-page.html:44"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/about/privacy-policy",
+    "to": "/accounts/:accountId",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.ts:191"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/account",
+    "to": "/portfolio/activities/create",
+    "sites": [
+     "../../libs/ui/src/lib/no-activities-info/no-activities-info.component.html:10"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/accounts/:accountId",
+    "to": "/admin",
+    "sites": [
+     "src/app/components/header/header.component.html:74"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/accounts/:accountId/update",
+    "to": "/open",
+    "sites": [
+     "src/app/components/footer/footer.component.html:44"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/admin",
+    "to": "/account",
+    "sites": [
+     "src/app/components/header/header.component.html:279"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/admin/settings",
+    "to": "/portfolio",
+    "sites": [
+     "src/app/components/header/header.component.html:44"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/blog/2024/11/black-weeks-2024",
+    "to": "/accounts/transfer-cash-balance",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/blog/2025/09/hacktoberfest-2025",
+    "to": "/accounts",
+    "sites": [
+     "src/app/components/header/header.component.html:58"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/demo",
+    "to": "/portfolio/activities",
+    "sites": [
+     "src/app/components/holding-detail-dialog/holding-detail-dialog.component.ts:740"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/home/holdings",
+    "to": "/accounts/transfer-cash-balance",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/home/watchlist/create",
+    "to": "/blog",
+    "sites": [
+     "src/app/components/footer/footer.component.html:23"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/portfolio/activities/:activityId/update",
+    "to": "/accounts/transfer-cash-balance",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/about",
+    "to": "/blog",
+    "sites": [
+     "src/app/components/footer/footer.component.html:23",
+     "src/app/pages/about/overview/about-overview-page.html:202"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/about/oss-friends",
+    "to": "/home",
+    "sites": [
+     "src/app/components/footer/footer.component.html:4",
+     "src/app/components/header/header.component.ts:356",
+     "src/app/core/auth.guard.ts:94"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/accounts",
+    "to": "/accounts/create",
+    "sites": [
+     "src/app/pages/accounts/accounts-page.component.ts:140",
+     "src/app/pages/accounts/accounts-page.html:25"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/blog/2021/07/hallo-ghostfolio",
+    "to": "/blog",
+    "sites": [
+     "src/app/components/footer/footer.component.html:23",
+     "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.html:204"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/blog/2022/10/hacktoberfest-2022",
+    "to": "/demo",
+    "sites": [
+     "src/app/core/auth.guard.ts:35"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/blog/2023/02/ghostfolio-meets-umbrel",
+    "to": "/zen",
+    "sites": [
+     "src/app/core/auth.guard.ts:87"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/blog/2023/03/ghostfolio-reaches-1000-stars-on-github",
+    "to": "/demo",
+    "sites": [
+     "src/app/core/auth.guard.ts:35"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/blog/2023/07/exploring-the-path-to-fire",
+    "to": "/demo",
+    "sites": [
+     "src/app/core/auth.guard.ts:35"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/blog/2026/04/ghostfolio-3",
+    "to": "/zen",
+    "sites": [
+     "src/app/core/auth.guard.ts:87"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/features",
+    "to": "/zen",
+    "sites": [
+     "src/app/core/auth.guard.ts:87"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/markets",
+    "to": "/demo",
+    "sites": [
+     "src/app/core/auth.guard.ts:35"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/portfolio/allocations",
+    "to": "/zen",
+    "sites": [
+     "src/app/core/auth.guard.ts:87"
+    ],
+    "stratum": "oursOther"
+   }
+  ]
+ },
+ "k8sdash": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/k8sdash/modules/web",
+  "pairs": [
+   {
+    "from": "/",
+    "to": "/create",
+    "sites": [
+     "src/chrome/component.ts:82",
+     "src/chrome/template.html:50"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/",
+    "to": "/overview",
+    "sites": [
+     "src/common/components/namespace/component.ts:226",
+     "src/create/from/file/template.html:46",
+     "src/create/from/form/template.html:461",
+     "src/create/from/input/template.html:41"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/",
+    "to": "/search",
+    "sites": [
+     "src/chrome/search/component.ts:45",
+     "src/chrome/search/template.html:21"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/login",
+    "to": "/overview",
+    "sites": [
+     "src/create/from/file/template.html:46",
+     "src/create/from/form/template.html:461",
+     "src/create/from/input/template.html:41"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/login",
+    "to": "/search",
+    "sites": [
+     "src/chrome/search/template.html:21"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/clusterrolebinding",
+    "to": "/create",
+    "sites": [
+     "src/chrome/component.ts:82"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/clusterrolebinding",
+    "to": "/overview",
+    "sites": [
+     "src/common/components/namespace/component.ts:226"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/configmap",
+    "to": "/search",
+    "sites": [
+     "src/chrome/search/component.ts:45"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/customresourcedefinition/:crdName/:namespace/:objectName",
+    "to": "/workloads",
+    "sites": [
+     "src/chrome/template.html:30",
+     "src/common/components/zerostate/template.html:37"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/discovery",
+    "to": "/",
+    "sites": [
+     "src/common/components/resourcelist/persistentvolume/template.html:161"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/job",
+    "to": "/login",
+    "sites": [
+     "src/common/services/global/authentication.ts:72"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/job",
+    "to": "/overview",
+    "sites": [
+     "src/common/components/namespace/component.ts:226"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/namespace/:resourceName",
+    "to": "/login",
+    "sites": [
+     "src/common/services/global/authentication.ts:72"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/networkpolicy",
+    "to": "/overview",
+    "sites": [
+     "src/common/components/namespace/component.ts:226"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/networkpolicy",
+    "to": "/search",
+    "sites": [
+     "src/chrome/search/component.ts:45"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+    "to": "/login",
+    "sites": [
+     "src/common/services/global/authentication.ts:72"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/shell/:resourceNamespace/:resourceName",
+    "to": "/workloads",
+    "sites": [
+     "src/chrome/template.html:30",
+     "src/common/components/zerostate/template.html:37"
+    ],
+    "stratum": "ours"
+   }
+  ]
+ },
+ "bitwarden": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/bitwarden/apps/web",
+  "pairs": [
+   {
+    "from": "/request-sm-access",
+    "to": "/sm-landing",
+    "sites": [
+     "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.html:32"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/AuthRoute.NewDeviceVerification",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/AuthRoute.SignUp",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/AuthRoute.TwoFactor",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/browser-extension-prompt",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/confirm-key-connector-domain",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/organizations/:organizationId/reporting/reports/weak-passwords-report",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/recover-2fa",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/reports/breach-report",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/secrets-manager-trial-initiation",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/send/:sendId/:key",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/settings/security/password",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/setup-extension",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/2fa",
+    "to": "/",
+    "sites": [
+     "../../libs/components/src/landing-layout/landing-header.component.html:4",
+     "src/app/app.component.ts:110"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/confirm-key-connector-domain",
+    "to": "/",
+    "sites": [
+     "../../libs/components/src/landing-layout/landing-header.component.html:4",
+     "../../libs/key-management-ui/src/key-connector/confirm-key-connector-domain.component.ts:116",
+     "src/app/app.component.ts:110"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/device-verification",
+    "to": "/remove-password",
+    "sites": [
+     "src/app/app.component.ts:172"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/login",
+    "to": "/login-with-passkey",
+    "sites": [
+     "../../libs/auth/src/angular/login/login.component.ts:755"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/organizations/:organizationId/billing/payment-details",
+    "to": "/organizations/:organizationId/vault",
+    "sites": [
+     "src/app/billing/individual/upgrade/services/upgrade-flow.service.ts:88"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/organizations/:organizationId/reporting/reports/exposed-passwords-report",
+    "to": "/organizations/:organizationId/billing/subscription",
+    "sites": [
+     "src/app/app.component.ts:143"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/organizations/:organizationId/settings/account",
+    "to": "/remove-password",
+    "sites": [
+     "src/app/app.component.ts:172"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/organizations/:organizationId/vault",
+    "to": "/settings/subscription/premium",
+    "sites": [
+     "src/app/billing/services/web-premium-upgrade-prompt.service.ts:99"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/recover-delete",
+    "to": "/organizations/:organizationId/billing/subscription",
+    "sites": [
+     "src/app/app.component.ts:143"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/reports/breach-report",
+    "to": "/organizations/:organizationId/billing/subscription",
+    "sites": [
+     "src/app/app.component.ts:143"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/reports/weak-passwords-report",
+    "to": "/organizations/:organizationId/billing/subscription",
+    "sites": [
+     "src/app/app.component.ts:143"
+    ],
+    "stratum": "ours"
+   },
+   {
+    "from": "/settings/sponsored-families",
+    "to": "/",
+    "sites": [
+     "src/app/app.component.ts:110",
+     "src/app/billing/settings/sponsored-families.component.ts:194"
+    ],
+    "stratum": "ours"
+   }
+  ]
+ },
+ "mifos": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/mifos",
+  "pairs": [
+   {
+    "from": "/clients/:clientId/fixed-deposits-accounts/create",
+    "to": "/groups",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:156"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/clients/:clientId/loans-accounts/:loanId/breach-actions",
+    "to": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:330",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ],
+    "stratum": "oursMoved"
+   },
+   {
+    "from": "/clients/:clientId/loans-accounts/glim-account/create",
+    "to": "/reports",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:193",
+     "src/app/reports/run-report/run-report.component.html:208",
+     "src/app/system/system.component.html:367",
+     "src/app/system/system.component.html:369",
+     "src/app/system/system.component.html:376"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/account-transfers/:transferid",
+    "to": "/navigation",
+    "sites": [
+     "src/app/core/shell/sidenav/sidenav.component.html:97",
+     "src/app/core/shell/sidenav/sidenav.component.html:98"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/list-standing-instructions",
+    "to": "/centers",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:159"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/clients/:clientId/standing-instructions/make-account-transfer",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205"
+    ],
+    "stratum": "oursMoved"
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+    "to": "/clients/:clientId/savings-accounts/:savingAccountId/documents",
+    "sites": [
+     "src/app/clients/clients-view/clients-view.component.html:468",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursMoved"
+   },
+   {
+    "from": "/loans/:loanId/breach-actions",
+    "to": "/centers/:centerId/savings-accounts/:savingAccountId/documents",
+    "sites": [
+     "src/app/clients/clients-view/clients-view.component.html:468",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursMoved"
+   },
+   {
+    "from": "/loans/:loanId/loan-collateral",
+    "to": "/reports",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:193",
+     "src/app/reports/run-report/run-report.component.html:208",
+     "src/app/system/system.component.html:367",
+     "src/app/system/system.component.html:369",
+     "src/app/system/system.component.html:376"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/loans/:loanId/payment-rates",
+    "to": "/groups/:groupId/loans-accounts/:loanId/originators",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:507",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ],
+    "stratum": "oursMoved"
+   },
+   {
+    "from": "/loans/:loanId/transactions/export",
+    "to": "/accounting",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:163",
+     "src/app/core/shell/toolbar/toolbar.component.html:52",
+     "src/app/core/shell/toolbar/toolbar.component.html:55",
+     "src/app/core/shell/toolbar/toolbar.component.ts:220"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/organization/exchange-rates/:id",
+    "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/:standingInstructionsId/view",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+     "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205"
+    ],
+    "stratum": "both"
+   },
+   {
+    "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions-tab",
+    "to": "/appusers",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:214",
+     "src/app/users/view-user/view-user.component.html:14",
+     "src/app/users/view-user/view-user.component.html:18",
+     "src/app/zitadel/users/edit-user/edit-user.component.html:12"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/loan-documents",
+    "to": "/appusers",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:214",
+     "src/app/users/view-user/view-user.component.html:14",
+     "src/app/users/view-user/view-user.component.html:18",
+     "src/app/zitadel/users/edit-user/edit-user.component.html:12"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/original-schedule",
+    "to": "/:loanId/datatables",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:675"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/loans/glim-account/:glimId",
+    "to": "/loans/:loanId/charges/:id",
+    "sites": [
+     "src/app/clients/clients-view/general-tab/general-tab.component.html:102",
+     "src/app/clients/clients-view/general-tab/general-tab.component.html:41"
+    ],
+    "stratum": "theirs"
+   },
+   {
+    "from": "/accounting/provisioning-entries/journal-entries/view/:id",
+    "to": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:218"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/clients/:clientId/standing-instructions/create-standing-instructions",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges/:id",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/balances",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/edit",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/organization/employees/create",
+    "to": "/remittances/process",
+    "sites": [
+     "src/app/core/shell/sidenav/sidenav.component.html:151"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/organization/exchange-rates/convert",
+    "to": "/clients/:clientId/shares-accounts/create",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:238"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/organization/working-days",
+    "to": "/centers/:centerId/savings-accounts/:savingAccountId/charges",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/products/fixed-deposit-products/:productId/edit",
+    "to": "/centers/:centerId/savings-accounts/:savingAccountId/notes",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/products/near-breach-configurations/create",
+    "to": "/groups/:groupId/loans-accounts/:loanId/transactions/:id/reciept",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/settings",
+    "to": "/groups/:groupId/loans-accounts/:loanId/charges/:id",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/settings",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/system",
+    "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/datatables/:datatableName",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:228"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/system/codes/:id/edit",
+    "to": "/clients/:clientId/savings-accounts/:savingAccountId/actions/:name",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursShell"
+   },
+   {
+    "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/clients/:clientId/savings-accounts/:savingAccountId/datatables/:datatableName",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/loans/:loanId/transactions/:id/edit",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/general",
+    "to": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/edit",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/checker-inbox-and-tasks/loan-approval",
+    "to": "/checker-inbox-and-tasks/client-approval",
+    "sites": [
+     "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:27"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions",
+    "to": "/clients/:clientId/loans-accounts/:loanId/transfer-funds/make-account-transfer",
+    "sites": [
+     "src/app/deposits/fixed-deposits/fixed-deposit-account-view/fixed-deposit-account-view.component.ts:151",
+     "src/app/deposits/fixed-deposits/fixed-deposit-account-view/transactions-tab/transactions-tab.component.ts:245",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:228"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/general",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/loans/:loanId/buy-down-fees",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/system/roles-and-permissions/add",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/organization/manage-loan-originators/:id",
+    "to": "/organization/manage-loan-originators/:id/edit",
+    "sites": [
+     "src/app/organization/loan-originators/view-loan-originator/view-loan-originator.component.html:10"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/products/recurring-deposit-products/:productId/edit",
+    "to": "/products/recurring-deposit-products/:productId/general",
+    "sites": [
+     "src/app/products/recurring-deposit-products/edit-recurring-deposit-product/edit-recurring-deposit-product.component.ts:159",
+     "src/app/products/recurring-deposit-products/recurring-deposit-product-stepper/recurring-deposit-product-preview-step/recurring-deposit-product-preview-step.component.html:572",
+     "src/app/products/recurring-deposit-products/view-recurring-deposit-product/view-recurring-deposit-product.component.html:14"
+    ],
+    "stratum": "oursOther"
+   },
+   {
+    "from": "/system/manage-jobs",
+    "to": "/clients/:clientId/client-collateral/:collateralId",
+    "sites": [
+     "src/app/system/manage-jobs/cob-workflow/loan-locked/loan-locked.component.ts:175"
+    ],
+    "stratum": "oursOther"
+   }
+  ]
+ }
+}

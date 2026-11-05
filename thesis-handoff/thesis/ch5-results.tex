@@ -625,7 +625,7 @@ agree, so no witness-based method can find it. The suites test only the missing 
 the transitions they take. Attribution also widens what a source change can be scored against (Section~\ref{sec:res-mutation}).
 
 Table~\ref{tab:world} puts the comparison in terms of what can be done without this thesis and with
-it: on this corpus and, in its last row, beside Rima et al.'s tool on their subjects and the corpus.
+it on this corpus; the last row sets it beside Rima et al.'s tool.
 
 \begin{table}[t]\footnotesize
 \caption{What the corpus shows can be done without this thesis and with it.}
@@ -642,7 +642,7 @@ Response to a source change & -- & \MutFallibleDetected{}/\MutFallibleScored{} m
 Transitions, five corpus applications other than mifos & Rima et al.'s tool finds \HHCorpusNoMifosTheirsRecall{} of the real pairs either tool finds, at \HHCorpusNoMifosTheirsPrecision{} precision & this extractor finds \HHCorpusNoMifosOursRecall{}, at \HHCorpusNoMifosOursPrecision{}; close on their subjects, unresolved on mifos (Section~\ref{sec:res-h2h}) \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; Oshima and Kishi's tool was not run, Rima et al.'s was (last row, Section~\ref{sec:res-h2h}); every figure is in-sample, the last row's on Rima et al.'s subjects only partly, since four repairs came from them. All cells are generated figures.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; Oshima and Kishi's tool was not run, Rima et al.'s was (last row, Section~\ref{sec:res-h2h}); every figure is in-sample. All cells are generated figures.}
 \end{table}
 
 \subsection{On the applications of Rima et al.}
@@ -759,7 +759,8 @@ a lazily loaded module's routes with the path that loads them. On ghostfolio non
 at \HHRoutesMifosDeclsHit{} of \HHRoutesMifosDecls{}, on bitwarden at \HHRoutesBitwardenDeclsHit{} of
 \HHRoutesBitwardenDecls{}. So that a pair is not lost to its name, a route of theirs was identified with the
 mounts of the declaration it is written at: the mount whose path it records, else the mounts ending in that
-path, else every mount. This choice was made after their output was read; it widens their pairs on mifos.
+path, else every mount, and a move between two routes mounted in several places stays within one mount.
+This choice was made after their output was read.
 
 \newcommand{\hhrow}[2]{#1 & \csname HH#2TheirsPairs\endcsname & \csname HH#2TheirsPrecision\endcsname & \csname HH#2TheirsRecall\endcsname & \csname HH#2OursPairs\endcsname & \csname HH#2OursPrecision\endcsname & \csname HH#2OursRecall\endcsname \\}
 \begin{table}[t]\footnotesize
@@ -801,20 +802,21 @@ finds \HHCorpusNoMifosOursRecall{} of the real pairs either finds, their tool \H
 at similar precision (\HHCorpusNoMifosOursPrecision{} and \HHCorpusNoMifosTheirsPrecision{}). Setting each
 stratum's real rate to the ends of its Wilson interval leaves these recalls apart:
 \HHCorpusNoMifosOursRecallRange{} against \HHCorpusNoMifosTheirsRecallRange{}. On mifos this extractor holds
-\HHMifosOursPairs{} pairs, most of them reached only from the shell's notifications tray, whose target covers
+\HHMifosOursPairs{} pairs, most of them reached only from the shell, where the notifications tray's target covers
 every account screen below the one it names (Section~\ref{sec:res-e2e}); its precision there is
 \HHMifosOursPrecision{} against \HHMifosTheirsPrecision{}, and the pooled corpus figures, which mifos decides,
 span \HHCorpusOursRecallRange{} against \HHCorpusTheirsRecallRange{} in recall, so they do not rank the tools.
 Of the three preregistered predictions, the first (this extractor's recall on the corpus is the higher) holds
-outside mifos only; the second (their precision on their subjects is at least this extractor's) and the
+at the point estimate, and its bounds separate only without mifos, a group formed after reading; the second (their precision on their subjects is at least this extractor's) and the
 third (their tool fails on some application) did not hold. On their reference this extractor holds
 \RimaRepHitFull{} of \RimaPairs{} pairs (Section~\ref{sec:res-rima}); their tool holds all of them by
 construction.
 
 The readings were made by the AI assistant under the rules of the first comparison: \HHRead{} pairs, of which
-a stronger model re-read \HHGated{} and changed \HHGateChanged{}; \HHCorrected{} reading, made under a
-mistyped start screen, was supplied by hand. A first pass had also paired the start routes of workflows that
-do not navigate; it was withdrawn, and the strata it changed were read again. The deviations from the
+a stronger model re-read \HHGated{} and changed \HHGateChanged{}. A first pass had also paired the start routes of workflows that do not navigate;
+it was withdrawn, its readings were re-used where its pairs remain, and 108 pairs new to the samples were
+read. The mifos estimates re-use those samples, restricted to the pairs that remain once moves across
+mounts are left out. The deviations from the
 preregistration are recorded with the results.
 
 \section{Change sensitivity (RQ4)}
