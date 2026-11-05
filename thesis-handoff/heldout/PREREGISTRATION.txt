@@ -60,3 +60,18 @@ Walk of the first 60, in order (skipped repositories and the criterion they fail
   Taken: Chocobozzz/PeerTube (client/), 4b859fe1542b22f0c003bd480f4687e49d2b47b6.
 Only one of the first 60 qualifies, so the walk continues, by the same rule, over the next 60 of the same search
 (--limit 120, positions 61-120), and takes the first that qualifies. If none does, the check runs on PeerTube alone.
+
+=====================================================================
+Addendum B (5 Nov 2026, before mapping either application)
+=====================================================================
+Walk of positions 61-72, in order: component-party.dev (no @angular/router, S2), liuzi6612/nav (no guard, S3),
+remult, analog, spartan, ngx-formly, egjs-flicking, unovis, angular-calendar (libraries/frameworks, S1),
+angular-ngrx-material-starter (starter, S1; pushed 2022, S4), webosbrew/dev-manager-desktop (no guard, S3).
+  Taken: trungvose/angular-spotify (position 72), 57585bbd46767d5aa1c3d939e7131109aafc620b, an Nx workspace whose
+  application is apps/angular-spotify; a working Spotify web client with a public deployment, so S1 holds (it is not a
+  library, template or tutorial); lazily loaded and nested routes, guards in route configs (S2, S3), pushed 2026-10-25.
+  Positions 73-120 were checked only as far as 84, 95 and 97 before this addendum (jira-clone-angular, litlyx,
+  ElectronMail); none of them is used.
+The two held-out applications are therefore:
+  peertube   Chocobozzz/PeerTube        4b859fe1542b22f0c003bd480f4687e49d2b47b6  appDir client
+  spotify    trungvose/angular-spotify  57585bbd46767d5aa1c3d939e7131109aafc620b  appDir apps/angular-spotify

@@ -1,0 +1,2 @@
+peertube Chocobozzz/PeerTube 4b859fe1542b22f0c003bd480f4687e49d2b47b6 client
+spotify trungvose/angular-spotify 57585bbd46767d5aa1c3d939e7131109aafc620b apps/angular-spotify
