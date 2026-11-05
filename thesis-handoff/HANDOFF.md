@@ -122,6 +122,19 @@ supersedes every older section where they disagree.
   RQ3 and fourth contribution updated; "modest gain" / "adds almost nothing" removed; a held-out remnant in ch7 ("outside
   it, the route reader is the first thing to extend") removed. A genuinely stronger result would need a second
   structural reference on an app where the service join matters (alfresco: 8 service constructs, 5 of 19 sites).
+- **Second structural reference, alfresco (student: "Yes, do alfresco", 5 Nov):** protocol committed first (`da82fa0`,
+  predictions A1-A3); reference built by a Sonnet agent from the sources alone, blind to the graph, committed before
+  scoring (`94eb26a`): 16 sites, 17 undetermined (viewer outlet, preview, config-driven effects), 1 excluded. Levels
+  mapped at the frozen extractor. Scorer gained `--prefix`, a reference `root`, undetermined sites excluded, and an
+  Unlisted macro (tests first, 103/103; realworld output identical apart from the new zero macros). The 4 sites the
+  scorer reported as unlisted were read by a second blind agent: none is a navigation site (callers of a helper whose
+  Router call is line 184; a store dispatch), added as excluded with that reading. Result: off the shell, recall
+  43.2 % (rooted/outlet) -> 52.3 % (class) -> 90.9 % (full); precision 100 % below full, 82.0 % at full (9 pairs, one
+  site, `navigateToSearch`, whose caller is a toolbar button in the extension JSON, placed at the shell scope, may);
+  the 5 shell sites (130 of 174 pairs) are missed at every level because alfresco's shell comes from
+  `@alfresco/adf-core/shell`, outside the sources. A1 held, A2 did not (class precision higher). `navigateBack`'s two
+  service sites placed exactly on /search and /search-libraries. Written into ch5 (`sec:res-groundtruth` paragraph,
+  `tab:earlier` rows, service bullet, width paragraph), ch6 limitation, ch1, ch7, abstract ("two applications").
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 

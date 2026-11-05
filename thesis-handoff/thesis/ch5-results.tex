@@ -557,14 +557,38 @@ empty-path child on the screen above it (Section~\ref{sec:approximations}). The 
 precision and the recall of \emph{full} are scored on the same reference, so they are consistent with
 the two repairs and test neither independently.
 
-For RQ3 two things follow. First, most of the recovery attributed to this analysis is produced by
-mechanisms earlier work already had: \GTRootedRecall{} of the \GTPairs{} pairs are reached by the
-shell rule and \GTOutletRecall{} once the enclosing routes are added. The \emph{full} step adds
-\GTOutletMissing{} pair on this application and takes recall to \GTFullRecall{}. Second, this is one
-application of six, the smallest, and the corpus-wide widths of Table~\ref{tab:scopebaseline} are not
-licensed by it. What the ground truth establishes is narrower than soundness: the additional
-mechanisms raise agreement with the structural reference without a pair outside it.
-It cannot establish that the same holds on an application of six hundred screens.
+On realworld most of the recovery is produced by mechanisms earlier work already had:
+\GTRootedRecall{} of the \GTPairs{} pairs are reached by the shell rule and \GTOutletRecall{} once the
+enclosing routes are added. The \emph{full} step adds \GTOutletMissing{} pair and takes recall to
+\GTFullRecall{}. realworld has one navigation inside a service, so it barely exercises the step only
+this thesis adds.
+
+\paragraph{A second application.} A second reference was therefore built for alfresco, where
+navigation inside services occurs. Its protocol, the same rules as realworld's, was committed before
+the reference was built or any level was scored (\path{ground-truth/ALFRESCO-PROTOCOL.txt}). The AI
+assistant built it from the sources alone, without the graph. It places \GTAlfSites{} sites and leaves
+\GTAlfUndetermined{} undetermined with the reason: on the viewer's named outlet, in components no route
+places, or behind actions declared in the extension configuration. Those are not scored. Four lines
+the scorer then reported as placed by the graph and absent from the reference were read afterwards
+under the same rules, again without the graph, and none is a navigation site.
+
+\GTAlfShellSites{} of the sites, \GTAlfShellPairs{} of the \GTAlfPairs{} pairs, sit in a shell the
+application takes from a library outside its sources. No level finds that shell, so every level misses
+them. Over the other pairs, where attribution decides, the levels that stand for earlier work recall
+\GTAlfOutletRecallNonShell{}, the class-level join \GTAlfClassRecallNonShell{} and the full analysis
+\GTAlfFullRecallNonShell{}. The gain is the service join. The two sites of \texttt{navigateBack} are
+placed exactly on the two search screens their only caller renders. The full analysis asserts
+\GTAlfFullExcess{} pairs outside the reference, all at \GTAlfFullExcessSites{} site,
+\texttt{navigateToSearch}. Its only caller is an effect triggered by a toolbar button declared in the
+extension configuration, which the analysis does not read, so it places the site on every screen at
+the may tier. That takes precision to \GTAlfFullPrecision{}, against \GTAlfOutletPrecision{} for the
+lower levels and \GTAlfClassPrecision{} for the class join. Of the protocol's predictions, the first,
+that the full level recalls more than \emph{outlet}, held; the second, that its precision is at least
+the class join's, did not.
+
+What the two references establish is narrower than soundness. Both apply the analysis's own relations,
+and neither licenses the corpus-wide widths of Table~\ref{tab:scopebaseline} on an application of six
+hundred screens.
 
 \subsection{Agreement with the applications' own suites}
 \label{sec:res-e2e}
@@ -651,6 +675,8 @@ Graph pairs, realworld & \EtoERealworldGraphPairsNoattr{} & \EtoERealworldGraphP
 Graph pairs, mifos & \EtoEMifosGraphPairsNoattr{} & \EtoEMifosGraphPairsRooted{} & \EtoEMifosGraphPairs{} \\
 Sites placed on at least one screen, corpus & -- & \AblationRootedSites{} & \AblationFullSites{} \\
 Structural-reference recall, \GTApp{} & -- & \GTRootedRecall{} & \GTFullRecall{} \\
+Structural-reference recall off the shell, alfresco & -- & \GTAlfRootedRecallNonShell{} & \GTAlfFullRecallNonShell{} \\
+Structural-reference precision, alfresco & -- & \GTAlfRootedPrecision{} & \GTAlfFullPrecision{} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -677,7 +703,9 @@ Three things follow.
   recovers \AttrServiceRecovered{} of them and places \AblationFullAddedSites{} sites in services,
   guards and effects. Its member-level call graph is also more precise than a class-level join: on
   \GTApp{} the class join asserts \GTClassExcess{} pairs outside the reference (precision
-  \GTClassPrecision{}), the call graph none (\GTFullPrecision{}). With the enclosing routes, the levels
+  \GTClassPrecision{}), the call graph none (\GTFullPrecision{}). On alfresco, where such navigation
+  occurs, it raises recall off the shell from \GTAlfOutletRecallNonShell{} at the levels of earlier work
+  to \GTAlfFullRecallNonShell{} (Section~\ref{sec:res-groundtruth}). With the enclosing routes, the levels
   above \emph{rooted} find the \GTRootedMissing{} reference pairs rooted misses
   (Section~\ref{sec:res-groundtruth}). On the two applications with suites, they add no transition the
   suites take.
@@ -693,9 +721,10 @@ edges, with \MustWitnessUnread{} destinations unread, which are not passes
 The scopes are wide where a shell renders a link on every screen: the computed attribution is
 \BaselineFactorMin{} to \BaselineFactorMax{} times narrower than assigning every site to every screen
 (Section~\ref{sec:res-width}). Wide is not the same as too large. Where the scopes were read against a
-reference, on \GTApp{}, the full analysis asserts no pair outside it. That reference applies the
-analysis's own relations, and no other application was read this way; Section~\ref{sec:limitations}
-states this as the most serious limitation of the work. A scope that is too large still yields edges whose witnesses
+reference, the full analysis asserts no pair outside it on \GTApp{} and \GTAlfFullExcess{} at one site on
+alfresco. Both references apply the analysis's own relations, and only two of the six applications
+were read this way; Section~\ref{sec:limitations} states this as the most serious limitation of the
+work. A scope that is too large still yields edges whose witnesses
 agree, so no witness-based method can find it. The suites test only the missing direction, and only on
 the transitions they take. Attribution also widens what a source change can be scored against:
 \MutBaseExcluded{} mutants cannot be scored without it, against \MutExcluded{} with it, and on the

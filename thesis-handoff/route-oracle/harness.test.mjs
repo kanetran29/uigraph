@@ -971,6 +971,35 @@ describe('score-ground-truth: the shell sites of the reference', () => {
   })
 })
 
+describe('score-ground-truth: a second application under its own root and macro prefix', () => {
+  it('keys sites under the reference root and writes macros under the given prefix', () => {
+    const d = dir('gt2')
+    const truth = path.join(d, 'truth.json')
+    fs.writeFileSync(truth, JSON.stringify({ app: 'second', root: '', screens: ['/a', '/b'], sites: [{ site: 'src/lib/x.html:1', screens: ['/a'] }],
+      undetermined: [{ site: 'src/lib/z.ts:3', why: 'no finite caller set' }] }))
+    const db = path.join(d, 'full.db')
+    writeGraph(db, {
+      nodes: [{ id: 'a', kind: 'screen', route: '/a' }, { id: 'b', kind: 'screen', route: '/b' }],
+      edges: [
+        { from: 'a', to: 'b', witness: { source: 'static', file: 'src/lib/x.html', loc: { line: 1 } } },
+        { from: 'b', to: 'a', witness: { source: 'static', file: '../outside/y.html', loc: { line: 2 } } },
+        { from: 'b', to: 'b', witness: { source: 'static', file: 'src/lib/z.ts', loc: { line: 3 } } },
+      ],
+    })
+    const tex = path.join(d, 'out.tex')
+    run('score-ground-truth.mjs', ['--truth', truth, '--db', `full=${db}`, '--prefix', 'GTSec', '--tex', tex], { tsx: true })
+    const out = fs.readFileSync(tex, 'utf8')
+    expect(out).toContain('\\newcommand{\\TabGTSec}')
+    expect(macro(out, 'GTSecApp')).toBe('second')
+    expect(macro(out, 'GTSecFullRecall')).toBe('100.0\\,\\%')
+    expect(macro(out, 'GTSecFullPrecision')).toBe('100.0\\,\\%')
+    // A site outside the application directory is not the reference's miss.
+    expect(macro(out, 'GTSecFullUnlisted')).toBe('0')
+    // A site the reference leaves undetermined is neither scored nor counted as its miss.
+    expect(macro(out, 'GTSecUndetermined')).toBe('1')
+  })
+})
+
 describe('to-plots (prose panel 38 and 39)', () => {
   const ledger = (tally) => ({ constructs: Object.values(tally).reduce((a, b) => a + b, 0), tally })
   const app = (slug, tally) => ({ slug, totalConstructs: ledger(tally).constructs, conversion: 0, loss: ledger(tally), testC: { coverage: 1 } })

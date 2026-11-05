@@ -38,8 +38,9 @@ guided two repairs. A reimplementation of the mechanisms of earlier work reaches
 \GTOutletRecall{}. What only this analysis does is place navigation inside services, which no earlier
 mechanism places: it recovers \AttrServiceRecovered{} of the \AttrServiceLost{} such constructs, through a
 call graph that on the reference application asserts none of the \GTClassExcess{} pairs a class-level
-join places outside it. Whether the scopes are too wide was tested on that application only, where none
-was. The applications' own end-to-end suites test the missing direction on two
+join places outside it. On alfresco, where navigation inside services occurs, it raises recall off the shell from
+\GTAlfOutletRecallNonShell{} to \GTAlfFullRecallNonShell{}, with \GTAlfFullExcess{} pairs outside the
+reference at one site whose caller is declared in configuration. The applications' own end-to-end suites test the missing direction on two
 applications. The graph holds every observed transition on realworld, where the check does not
 discriminate, and \EtoEMifosHit{} of \EtoEMifosPairs{} on mifos, against \EtoEMifosHitNoattr{}
 without attribution; the level of earlier work's mechanism already reaches \EtoEMifosHitRooted{}. Of the
@@ -90,7 +91,7 @@ lack, the placement of navigation inside services (Section~\ref{sec:res-earlier}
 
 \paragraph{What remains open.} The dispatch relation is specified but not implemented, the guard relation is replaced by a
 stand-in, and the call graph ignores the injector hierarchy. The screen sets were checked in both directions on
-one application only, against a reference that applies the analysis's own relations, and uigraph was developed on the same corpus it is measured on. The
+two applications only, against references that applies the analysis's own relations, and uigraph was developed on the same corpus it is measured on. The
 end-to-end check on mifos found transitions lost to a declared approximation, a relative link
 in a template shared with child tabs resolved against the child's address, and to target forms
 the extractor does not read; none is repaired (Section~\ref{sec:res-e2e}). The

@@ -130,6 +130,17 @@ the corpus again with `UIGRAPH_MAY_REASONS=1`, a measurement switch that adds `r
 nothing else, checks that the graphs with `reasons` removed equal the corpus graphs, and runs `may-reasons.mjs`.
 Run it with bash: the `$APPS` loops rely on word splitting, which zsh does not do.
 
+The second structural reference (`generated-groundtruth-alfresco.tex`; protocol `route-oracle/ground-truth/ALFRESCO-PROTOCOL.txt`):
+map `projects/aca-content` of the alfresco pin with `uigraph map <dir> --adapter angular --attribution --out <level>.db` at
+`c42f220`, with `UIGRAPH_SCOPE_LAYERS=<level>` for each of owned, nesting, rooted, outlet and class (none for full), then
+
+```bash
+cd thesis-handoff/route-oracle
+pnpm -s exec tsx score-ground-truth.mjs --truth ground-truth/alfresco.json --prefix GTAlf \
+  $(for l in owned nesting rooted outlet full class; do echo --db $l=<dir>/$l.db; done) \
+  --tex ../thesis/generated-groundtruth-alfresco.tex
+```
+
 The earlier-work restrictions (`generated-earlier-work.tex`):
 
 ```bash

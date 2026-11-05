@@ -1,304 +1,321 @@
 {
-  "app": "alfresco",
-  "root": "",
-  "derivedBy": "hand, from the application sources at the pinned commit b88d47f (projects/aca-content)",
-  "method": [
-    "R1 A navigation site is a routerLink attribute or binding, or a Router.navigate / navigateByUrl call, in a file under the application directory; test and spec files are excluded. navigate([], ...) that only changes the query string of the current screen is excluded and recorded with its reason.",
-    "R2 The screens a site fires from are the screens whose routed component renders, transitively through template element selectors, the component whose file holds the site. What the shell renders around the primary outlet is on every screen.",
-    "R3 A site inside a service is attributed to the screens from which the enclosing method can actually be called, found by searching for its callers, not to every component that injects the service.",
-    "R4 Each site records its target and a one-line reason; sites whose screens cannot be determined from the source are listed separately with the reason, not guessed.",
-    "R5 This reference was built by an AI assistant from the application sources alone, blind to the analyzer's output; it is not independent of the analysis's relations, which it applies by hand.",
-    "Shell: ShellLayoutComponent (@alfresco/adf-core/shell, not in the source tree) is placed by provideShellRoutes(CONTENT_LAYOUT_ROUTES) under the root router-outlet in app.component.html; the sidenav (app.layout.sidenav) and the header user menu (features.header in app.extensions.json) are shell content, hence ALL.",
-    "Routes: CONTENT_LAYOUT_ROUTES (aca-content.routes.ts), CONTENT_ROUTES (preview/s/:id, view), FOLDER_RULES_ROUTES (rules; also lazily under nodes/:nodeId). Secondary-outlet 'viewer' routes are not screens."
+ "app": "alfresco",
+ "root": "",
+ "derivedBy": "hand, from the application sources at the pinned commit b88d47f (projects/aca-content)",
+ "method": [
+  "R1 A navigation site is a routerLink attribute or binding, or a Router.navigate / navigateByUrl call, in a file under the application directory; test and spec files are excluded. navigate([], ...) that only changes the query string of the current screen is excluded and recorded with its reason.",
+  "R2 The screens a site fires from are the screens whose routed component renders, transitively through template element selectors, the component whose file holds the site. What the shell renders around the primary outlet is on every screen.",
+  "R3 A site inside a service is attributed to the screens from which the enclosing method can actually be called, found by searching for its callers, not to every component that injects the service.",
+  "R4 Each site records its target and a one-line reason; sites whose screens cannot be determined from the source are listed separately with the reason, not guessed.",
+  "R5 This reference was built by an AI assistant from the application sources alone, blind to the analyzer's output; it is not independent of the analysis's relations, which it applies by hand.",
+  "Shell: ShellLayoutComponent (@alfresco/adf-core/shell, not in the source tree) is placed by provideShellRoutes(CONTENT_LAYOUT_ROUTES) under the root router-outlet in app.component.html; the sidenav (app.layout.sidenav) and the header user menu (features.header in app.extensions.json) are shell content, hence ALL.",
+  "Routes: CONTENT_LAYOUT_ROUTES (aca-content.routes.ts), CONTENT_ROUTES (preview/s/:id, view), FOLDER_RULES_ROUTES (rules; also lazily under nodes/:nodeId). Secondary-outlet 'viewer' routes are not screens.",
+  "Four lines the scorer reported as placed by the graph and absent here were read afterwards by a second assistant run, blind to the graph, under the same rules; none is a navigation site, and they are listed as excluded with that reading."
+ ],
+ "screens": [
+  "/",
+  "/all/libraries",
+  "/favorite/libraries",
+  "/favorite/libraries/:folderId",
+  "/favorites",
+  "/libraries",
+  "/libraries/:folderId",
+  "/nodes/:nodeId/rules",
+  "/personal-files",
+  "/personal-files/:folderId",
+  "/personal-files/details/:nodeId",
+  "/personal-files/details/:nodeId/:activeTab",
+  "/preview/s/:id",
+  "/profile",
+  "/recent-files",
+  "/repository",
+  "/repository/:folderId",
+  "/repository/details/:nodeId",
+  "/repository/details/:nodeId/:activeTab",
+  "/rules",
+  "/saved-searches",
+  "/search",
+  "/search-libraries",
+  "/shared",
+  "/trashcan",
+  "/view"
+ ],
+ "containment": {
+  "ShellLayoutComponent (shell, external; holds the router-outlet for CONTENT_LAYOUT_ROUTES)": [
+   "SidenavComponent",
+   "UserMenuComponent",
+   "UserInfoComponent"
   ],
-  "screens": [
-    "/",
-    "/all/libraries",
-    "/favorite/libraries",
-    "/favorite/libraries/:folderId",
-    "/favorites",
-    "/libraries",
-    "/libraries/:folderId",
-    "/nodes/:nodeId/rules",
-    "/personal-files",
-    "/personal-files/:folderId",
+  "SidenavComponent": [
+   "SidenavHeaderComponent",
+   "ExpandMenuComponent (+ [action], acaActiveLink directives)",
+   "ButtonMenuComponent (+ [action], acaMenuPanel directives)"
+  ],
+  "RepositoryViewComponent": [
+   "FilesComponent"
+  ],
+  "LibrariesComponent / FavoriteLibrariesComponent / LibraryListComponent": [
+   "LibrariesBaseComponent"
+  ],
+  "SearchResultsComponent / SearchLibrariesResultsComponent": [
+   "SearchInputComponent",
+   "SearchResultsRowComponent (SearchResultsComponent only, via dynamic column)"
+  ],
+  "SavedSearchesSmartListComponent": [
+   "SavedSearchesListUiComponent"
+  ],
+  "ManageRulesSmartComponent": [
+   "RuleListUiComponent",
+   "RuleDetailsUiComponent"
+  ],
+  "DetailsComponent": [
+   "MetadataTabComponent",
+   "CommentsTabComponent"
+  ]
+ },
+ "sites": [
+  {
+   "site": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
+   "target": "computed: landingPage (app setting)",
+   "screens": "ALL",
+   "why": "SidenavComponent is registered as the shell's app.layout.sidenav and renders app-sidenav-header; shell content is on every screen"
+  },
+  {
+   "site": "src/lib/components/common/user-info/user-info.component.html:1",
+   "target": "/profile",
+   "screens": "ALL",
+   "why": "app-user-info is the app.user entry of the header's user menu (assets/app.extensions.json features.header), rendered by the shell on every screen"
+  },
+  {
+   "site": "folder-rules/src/manage-rules/manage-rules.smart-component.html:98",
+   "target": "/nodes/:nodeId/rules",
+   "screens": [
+    "/rules",
+    "/nodes/:nodeId/rules"
+   ],
+   "why": "ManageRulesSmartComponent is the routed component of both rules routes (FOLDER_RULES_ROUTES via provideRouter and via nodes/:nodeId lazy children)"
+  },
+  {
+   "site": "folder-rules/src/rule-list/rule-list/rule-list.ui-component.html:75",
+   "target": "/nodes/:nodeId/rules",
+   "screens": [
+    "/rules",
+    "/nodes/:nodeId/rules"
+   ],
+   "why": "aca-rule-list is rendered by ManageRulesSmartComponent (manage-rules template line 60), routed on both rules routes"
+  },
+  {
+   "site": "src/lib/components/home/home.component.ts:39",
+   "target": "computed: appSettings.landingPage",
+   "screens": [
+    "/"
+   ],
+   "why": "HomeComponent is the routed component of path '' ; ngOnInit redirects to the configured landing page"
+  },
+  {
+   "site": "src/lib/components/sidenav/directives/expansion-panel.directive.ts:50",
+   "target": "computed: url of the first child nav item",
+   "screens": "ALL",
+   "why": "directive used on sidenav menu elements (sidenav is shell content); navigates to first child's configured url"
+  },
+  {
+   "site": "src/lib/components/sidenav/directives/action.directive.ts:51",
+   "target": "computed: url of the nav action item (extension config)",
+   "screens": "ALL",
+   "why": "[action] directive is applied to buttons in expand-menu / button-menu, rendered inside the shell sidenav"
+  },
+  {
+   "site": "src/lib/components/sidenav/directives/menu-panel.directive.ts:48",
+   "target": "computed: url of the first child nav item",
+   "screens": "ALL",
+   "why": "directive used on sidenav button-menu elements (sidenav is shell content)"
+  },
+  {
+   "site": "src/lib/components/view-profile/view-profile.component.ts:141",
+   "target": "/personal-files",
+   "screens": [
+    "/profile"
+   ],
+   "why": "ViewProfileComponent is the routed component of /profile; back button (click)=navigateToPersonalFiles()"
+  },
+  {
+   "site": "src/lib/components/details/details.component.ts:147",
+   "target": "computed: previousRoute saved earlier",
+   "screens": [
     "/personal-files/details/:nodeId",
     "/personal-files/details/:nodeId/:activeTab",
-    "/preview/s/:id",
-    "/profile",
-    "/recent-files",
-    "/repository",
-    "/repository/:folderId",
     "/repository/details/:nodeId",
-    "/repository/details/:nodeId/:activeTab",
-    "/rules",
-    "/saved-searches",
+    "/repository/details/:nodeId/:activeTab"
+   ],
+   "why": "DetailsComponent is the routed component of the four details routes; goBack() is bound in its template (details.component.html:22)"
+  },
+  {
+   "site": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts:163",
+   "target": "/search (with q query param)",
+   "screens": [
+    "/saved-searches"
+   ],
+   "why": "SavedSearchesListUiComponent is rendered only by SavedSearchesSmartListComponent, routed on /saved-searches"
+  },
+  {
+   "site": "src/lib/components/search/search-navigation.service.ts:55",
+   "target": "computed: previously saved route",
+   "screens": [
     "/search",
-    "/search-libraries",
+    "/search-libraries"
+   ],
+   "why": "service; enclosing navigateBack() has one caller, SearchInputComponent.exitSearch (search-input.component.ts:105, bound in its template); aca-search-input is rendered only by SearchResultsComponent and SearchLibrariesResultsComponent"
+  },
+  {
+   "site": "src/lib/components/search/search-navigation.service.ts:57",
+   "target": "/personal-files",
+   "screens": [
+    "/search",
+    "/search-libraries"
+   ],
+   "why": "same method navigateBack() as line 55 (fallback branch)"
+  },
+  {
+   "site": "src/lib/components/search/search-navigation.service.ts:63",
+   "target": "/search",
+   "screens": [
+    "/favorites",
+    "/recent-files",
     "/shared",
     "/trashcan",
-    "/view"
-  ],
-  "containment": {
-    "ShellLayoutComponent (shell, external; holds the router-outlet for CONTENT_LAYOUT_ROUTES)": [
-      "SidenavComponent",
-      "UserMenuComponent",
-      "UserInfoComponent"
-    ],
-    "SidenavComponent": [
-      "SidenavHeaderComponent",
-      "ExpandMenuComponent (+ [action], acaActiveLink directives)",
-      "ButtonMenuComponent (+ [action], acaMenuPanel directives)"
-    ],
-    "RepositoryViewComponent": [
-      "FilesComponent"
-    ],
-    "LibrariesComponent / FavoriteLibrariesComponent / LibraryListComponent": [
-      "LibrariesBaseComponent"
-    ],
-    "SearchResultsComponent / SearchLibrariesResultsComponent": [
-      "SearchInputComponent",
-      "SearchResultsRowComponent (SearchResultsComponent only, via dynamic column)"
-    ],
-    "SavedSearchesSmartListComponent": [
-      "SavedSearchesListUiComponent"
-    ],
-    "ManageRulesSmartComponent": [
-      "RuleListUiComponent",
-      "RuleDetailsUiComponent"
-    ],
-    "DetailsComponent": [
-      "MetadataTabComponent",
-      "CommentsTabComponent"
-    ]
+    "/libraries",
+    "/all/libraries",
+    "/favorite/libraries",
+    "/personal-files/details/:nodeId",
+    "/personal-files/details/:nodeId/:activeTab",
+    "/repository/details/:nodeId",
+    "/repository/details/:nodeId/:activeTab",
+    "/personal-files",
+    "/personal-files/:folderId",
+    "/libraries/:folderId",
+    "/favorite/libraries/:folderId",
+    "/repository",
+    "/repository/:folderId"
+   ],
+   "why": "service; enclosing navigateToSearch() has one caller, SearchEffects.search$ (search.effects.ts:43) on the SEARCH action; SEARCH is dispatched only by the app.toolbar.search button in extension features.toolbar (visible when url does not start with /search), which every PageComponent page with <aca-toolbar [items]=actions> renders: favorites, recent-files, shared, trashcan, libraries-base pages, files pages (incl. repository) and details; search pages excluded by the visibility rule"
   },
-  "sites": [
-    {
-      "site": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
-      "target": "computed: landingPage (app setting)",
-      "screens": "ALL",
-      "why": "SidenavComponent is registered as the shell's app.layout.sidenav and renders app-sidenav-header; shell content is on every screen"
-    },
-    {
-      "site": "src/lib/components/common/user-info/user-info.component.html:1",
-      "target": "/profile",
-      "screens": "ALL",
-      "why": "app-user-info is the app.user entry of the header's user menu (assets/app.extensions.json features.header), rendered by the shell on every screen"
-    },
-    {
-      "site": "folder-rules/src/manage-rules/manage-rules.smart-component.html:98",
-      "target": "/nodes/:nodeId/rules",
-      "screens": [
-        "/rules",
-        "/nodes/:nodeId/rules"
-      ],
-      "why": "ManageRulesSmartComponent is the routed component of both rules routes (FOLDER_RULES_ROUTES via provideRouter and via nodes/:nodeId lazy children)"
-    },
-    {
-      "site": "folder-rules/src/rule-list/rule-list/rule-list.ui-component.html:75",
-      "target": "/nodes/:nodeId/rules",
-      "screens": [
-        "/rules",
-        "/nodes/:nodeId/rules"
-      ],
-      "why": "aca-rule-list is rendered by ManageRulesSmartComponent (manage-rules template line 60), routed on both rules routes"
-    },
-    {
-      "site": "src/lib/components/home/home.component.ts:39",
-      "target": "computed: appSettings.landingPage",
-      "screens": [
-        "/"
-      ],
-      "why": "HomeComponent is the routed component of path '' ; ngOnInit redirects to the configured landing page"
-    },
-    {
-      "site": "src/lib/components/sidenav/directives/expansion-panel.directive.ts:50",
-      "target": "computed: url of the first child nav item",
-      "screens": "ALL",
-      "why": "directive used on sidenav menu elements (sidenav is shell content); navigates to first child's configured url"
-    },
-    {
-      "site": "src/lib/components/sidenav/directives/action.directive.ts:51",
-      "target": "computed: url of the nav action item (extension config)",
-      "screens": "ALL",
-      "why": "[action] directive is applied to buttons in expand-menu / button-menu, rendered inside the shell sidenav"
-    },
-    {
-      "site": "src/lib/components/sidenav/directives/menu-panel.directive.ts:48",
-      "target": "computed: url of the first child nav item",
-      "screens": "ALL",
-      "why": "directive used on sidenav button-menu elements (sidenav is shell content)"
-    },
-    {
-      "site": "src/lib/components/view-profile/view-profile.component.ts:141",
-      "target": "/personal-files",
-      "screens": [
-        "/profile"
-      ],
-      "why": "ViewProfileComponent is the routed component of /profile; back button (click)=navigateToPersonalFiles()"
-    },
-    {
-      "site": "src/lib/components/details/details.component.ts:147",
-      "target": "computed: previousRoute saved earlier",
-      "screens": [
-        "/personal-files/details/:nodeId",
-        "/personal-files/details/:nodeId/:activeTab",
-        "/repository/details/:nodeId",
-        "/repository/details/:nodeId/:activeTab"
-      ],
-      "why": "DetailsComponent is the routed component of the four details routes; goBack() is bound in its template (details.component.html:22)"
-    },
-    {
-      "site": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts:163",
-      "target": "/search (with q query param)",
-      "screens": [
-        "/saved-searches"
-      ],
-      "why": "SavedSearchesListUiComponent is rendered only by SavedSearchesSmartListComponent, routed on /saved-searches"
-    },
-    {
-      "site": "src/lib/components/search/search-navigation.service.ts:55",
-      "target": "computed: previously saved route",
-      "screens": [
-        "/search",
-        "/search-libraries"
-      ],
-      "why": "service; enclosing navigateBack() has one caller, SearchInputComponent.exitSearch (search-input.component.ts:105, bound in its template); aca-search-input is rendered only by SearchResultsComponent and SearchLibrariesResultsComponent"
-    },
-    {
-      "site": "src/lib/components/search/search-navigation.service.ts:57",
-      "target": "/personal-files",
-      "screens": [
-        "/search",
-        "/search-libraries"
-      ],
-      "why": "same method navigateBack() as line 55 (fallback branch)"
-    },
-    {
-      "site": "src/lib/components/search/search-navigation.service.ts:63",
-      "target": "/search",
-      "screens": [
-        "/favorites",
-        "/recent-files",
-        "/shared",
-        "/trashcan",
-        "/libraries",
-        "/all/libraries",
-        "/favorite/libraries",
-        "/personal-files/details/:nodeId",
-        "/personal-files/details/:nodeId/:activeTab",
-        "/repository/details/:nodeId",
-        "/repository/details/:nodeId/:activeTab",
-        "/personal-files",
-        "/personal-files/:folderId",
-        "/libraries/:folderId",
-        "/favorite/libraries/:folderId",
-        "/repository",
-        "/repository/:folderId"
-      ],
-      "why": "service; enclosing navigateToSearch() has one caller, SearchEffects.search$ (search.effects.ts:43) on the SEARCH action; SEARCH is dispatched only by the app.toolbar.search button in extension features.toolbar (visible when url does not start with /search), which every PageComponent page with <aca-toolbar [items]=actions> renders: favorites, recent-files, shared, trashcan, libraries-base pages, files pages (incl. repository) and details; search pages excluded by the visibility rule"
-    },
-    {
-      "site": "src/lib/components/files/files.component.ts:143",
-      "target": "computed: [navigationPath, parentId]",
-      "screens": [
-        "/personal-files",
-        "/personal-files/:folderId",
-        "/libraries/:folderId",
-        "/favorite/libraries/:folderId",
-        "/repository",
-        "/repository/:folderId"
-      ],
-      "why": "FilesComponent is routed on four routes and rendered by RepositoryViewComponent (two repository routes); in route.params subscription in ngOnInit"
-    },
-    {
-      "site": "src/lib/components/files/files.component.ts:184",
-      "target": "computed: current folder url plus node id",
-      "screens": [
-        "/personal-files",
-        "/personal-files/:folderId",
-        "/libraries/:folderId",
-        "/favorite/libraries/:folderId",
-        "/repository",
-        "/repository/:folderId"
-      ],
-      "why": "FilesComponent.navigate(nodeId); callers are all inside FilesComponent (lines 243, 261, 264)"
-    }
-  ],
-  "excluded": [
-    {
-      "site": "src/lib/components/files/files.component.ts:400",
-      "why": "navigate(['.'], { relativeTo: this.route }) in onFilterSelected only re-enters the current route to drop the filter query string; stays on the same screen"
-    }
-  ],
-  "undetermined": [
-    {
-      "site": "viewer/src/lib/components/viewer/viewer.component.ts:240",
-      "why": "AcaViewerComponent is placed only by routes on the secondary 'viewer' outlet (lazy AcaViewerModule), declared under many primary routes (createViewRoutes) and under /view; R2 defines screens by primary-outlet routed components, so which screens it fires from is not settled by the rules"
-    },
-    {
-      "site": "viewer/src/lib/components/viewer/viewer.component.ts:241",
-      "why": "same as viewer.component.ts:240 (secondary-outlet component)"
-    },
-    {
-      "site": "viewer/src/lib/components/viewer/viewer.component.ts:278",
-      "why": "same as viewer.component.ts:240 (secondary-outlet component)"
-    },
-    {
-      "site": "viewer/src/lib/components/preview/preview.component.ts:156",
-      "why": "PreviewComponent is only registered as extension component 'app.components.preview'; no route or template in the source places it, so no screen can be derived"
-    },
-    {
-      "site": "viewer/src/lib/components/preview/preview.component.ts:159",
-      "why": "same as preview.component.ts:156"
-    },
-    {
-      "site": "viewer/src/lib/components/preview/preview.component.ts:196",
-      "why": "same as preview.component.ts:156"
-    },
-    {
-      "site": "viewer/src/lib/components/preview/preview.component.ts:208",
-      "why": "same as preview.component.ts:156"
-    },
-    {
-      "site": "viewer/src/lib/components/preview/preview.component.ts:219",
-      "why": "same as preview.component.ts:156"
-    },
-    {
-      "site": "src/lib/store/effects/viewer.effects.ts:79",
-      "why": "effect on ViewNodeAction; dispatched from showPreview of five page components, search-results-row, the view-node toolbar component, viewer.component, content-management.service and node.effects, several of them through config-driven actions and the secondary viewer outlet; no finite screen set follows without modelling the extension config"
-    },
-    {
-      "site": "src/lib/store/effects/viewer.effects.ts:85",
-      "why": "same effect as viewer.effects.ts:79"
-    },
-    {
-      "site": "src/lib/store/effects/viewer.effects.ts:90",
-      "why": "same effect as viewer.effects.ts:79"
-    },
-    {
-      "site": "src/lib/store/effects/viewer.effects.ts:138",
-      "why": "effect on ViewNodeVersionAction; dispatched from content-management.service.ts:711 inside a dialog callback of a config-driven action; callers not reducible to a screen set"
-    },
-    {
-      "site": "src/lib/store/effects/viewer.effects.ts:144",
-      "why": "same effect as viewer.effects.ts:138"
-    },
-    {
-      "site": "src/lib/store/effects/viewer.effects.ts:149",
-      "why": "same effect as viewer.effects.ts:138"
-    },
-    {
-      "site": "src/lib/store/effects/viewer.effects.ts:161",
-      "why": "effect on PluginPreviewAction; no dispatcher exists in the source (only the class and this effect), reachable only from an external plugin"
-    },
-    {
-      "site": "src/lib/store/effects/viewer.effects.ts:190",
-      "why": "displayPreview(), called only by the ViewFileAction effect; no dispatcher of ViewFileAction exists in the source"
-    },
-    {
-      "site": "about/src/about.component.html:7",
-      "why": "AboutComponent is placed by the plugin route 'about' in about/assets/about.plugin.json (app.about.component); that path is not among the 26 screens, so the site fires from no listed screen"
-    }
-  ]
+  {
+   "site": "src/lib/components/files/files.component.ts:143",
+   "target": "computed: [navigationPath, parentId]",
+   "screens": [
+    "/personal-files",
+    "/personal-files/:folderId",
+    "/libraries/:folderId",
+    "/favorite/libraries/:folderId",
+    "/repository",
+    "/repository/:folderId"
+   ],
+   "why": "FilesComponent is routed on four routes and rendered by RepositoryViewComponent (two repository routes); in route.params subscription in ngOnInit"
+  },
+  {
+   "site": "src/lib/components/files/files.component.ts:184",
+   "target": "computed: current folder url plus node id",
+   "screens": [
+    "/personal-files",
+    "/personal-files/:folderId",
+    "/libraries/:folderId",
+    "/favorite/libraries/:folderId",
+    "/repository",
+    "/repository/:folderId"
+   ],
+   "why": "FilesComponent.navigate(nodeId); callers are all inside FilesComponent (lines 243, 261, 264)"
+  }
+ ],
+ "excluded": [
+  {
+   "site": "src/lib/components/files/files.component.ts:400",
+   "why": "navigate(['.'], { relativeTo: this.route }) in onFilterSelected only re-enters the current route to drop the filter query string; stays on the same screen"
+  },
+  {
+   "site": "src/lib/components/files/files.component.ts:243",
+   "why": "added after scoring (protocol: a site the scorer reported, read blind): calls FilesComponent's own navigate() (line 180); the Router call is the line-184 site, so counting this line would count it twice"
+  },
+  {
+   "site": "src/lib/components/files/files.component.ts:261",
+   "why": "added after scoring, read blind: same as line 243, a caller of the line-184 site"
+  },
+  {
+   "site": "src/lib/components/files/files.component.ts:264",
+   "why": "added after scoring, read blind: same as line 243, a caller of the line-184 site"
+  },
+  {
+   "site": "src/lib/components/favorites/favorites.component.ts:98",
+   "why": "added after scoring, read blind: calls FavoritesComponent.navigate, which dispatches a NavigateToFolder store action and makes no Router call here; the navigation is in the effect that handles the action"
+  }
+ ],
+ "undetermined": [
+  {
+   "site": "viewer/src/lib/components/viewer/viewer.component.ts:240",
+   "why": "AcaViewerComponent is placed only by routes on the secondary 'viewer' outlet (lazy AcaViewerModule), declared under many primary routes (createViewRoutes) and under /view; R2 defines screens by primary-outlet routed components, so which screens it fires from is not settled by the rules"
+  },
+  {
+   "site": "viewer/src/lib/components/viewer/viewer.component.ts:241",
+   "why": "same as viewer.component.ts:240 (secondary-outlet component)"
+  },
+  {
+   "site": "viewer/src/lib/components/viewer/viewer.component.ts:278",
+   "why": "same as viewer.component.ts:240 (secondary-outlet component)"
+  },
+  {
+   "site": "viewer/src/lib/components/preview/preview.component.ts:156",
+   "why": "PreviewComponent is only registered as extension component 'app.components.preview'; no route or template in the source places it, so no screen can be derived"
+  },
+  {
+   "site": "viewer/src/lib/components/preview/preview.component.ts:159",
+   "why": "same as preview.component.ts:156"
+  },
+  {
+   "site": "viewer/src/lib/components/preview/preview.component.ts:196",
+   "why": "same as preview.component.ts:156"
+  },
+  {
+   "site": "viewer/src/lib/components/preview/preview.component.ts:208",
+   "why": "same as preview.component.ts:156"
+  },
+  {
+   "site": "viewer/src/lib/components/preview/preview.component.ts:219",
+   "why": "same as preview.component.ts:156"
+  },
+  {
+   "site": "src/lib/store/effects/viewer.effects.ts:79",
+   "why": "effect on ViewNodeAction; dispatched from showPreview of five page components, search-results-row, the view-node toolbar component, viewer.component, content-management.service and node.effects, several of them through config-driven actions and the secondary viewer outlet; no finite screen set follows without modelling the extension config"
+  },
+  {
+   "site": "src/lib/store/effects/viewer.effects.ts:85",
+   "why": "same effect as viewer.effects.ts:79"
+  },
+  {
+   "site": "src/lib/store/effects/viewer.effects.ts:90",
+   "why": "same effect as viewer.effects.ts:79"
+  },
+  {
+   "site": "src/lib/store/effects/viewer.effects.ts:138",
+   "why": "effect on ViewNodeVersionAction; dispatched from content-management.service.ts:711 inside a dialog callback of a config-driven action; callers not reducible to a screen set"
+  },
+  {
+   "site": "src/lib/store/effects/viewer.effects.ts:144",
+   "why": "same effect as viewer.effects.ts:138"
+  },
+  {
+   "site": "src/lib/store/effects/viewer.effects.ts:149",
+   "why": "same effect as viewer.effects.ts:138"
+  },
+  {
+   "site": "src/lib/store/effects/viewer.effects.ts:161",
+   "why": "effect on PluginPreviewAction; no dispatcher exists in the source (only the class and this effect), reachable only from an external plugin"
+  },
+  {
+   "site": "src/lib/store/effects/viewer.effects.ts:190",
+   "why": "displayPreview(), called only by the ViewFileAction effect; no dispatcher of ViewFileAction exists in the source"
+  },
+  {
+   "site": "about/src/about.component.html:7",
+   "why": "AboutComponent is placed by the plugin route 'about' in about/assets/about.plugin.json (app.about.component); that path is not among the 26 screens, so the site fires from no listed screen"
+  }
+ ]
 }
