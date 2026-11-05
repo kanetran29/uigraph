@@ -284,20 +284,27 @@ function joinCommands(segs: string[]): string {
 /**
  * Classify a commands array from its already-separated parts, resolving any part that is a
  * name rather than a literal and reading a template literal by its static text. All parts static
- * is a literal; parts that end in ones that are not are a prefix of everything before those, a
- * parameter inside it standing for one segment; nothing static is dynamic.
+ * is a literal. Angular splits only the first command on slashes, so a hole after it is exactly
+ * one segment and the array stays a pattern; a trailing hole in the first command may span
+ * several, so the parts before it are a prefix. Nothing static is dynamic, except that a template
+ * link's lone bound command (`oneSegmentFirst`) is read as one segment below the route holding
+ * it, the assumption already made for an interpolation in the first command.
  */
-function classifyCommandParts(parts: string[], sf: SourceFile | undefined): TargetInfo {
+function classifyCommandParts(parts: string[], sf: SourceFile | undefined, oneSegmentFirst = false): TargetInfo {
   if (parts.length === 0) return { kind: 'same-screen' }
   if (parts.some((p) => /^\{[\s\S]*\boutlets\s*:/.test(p.trim()))) return { kind: 'aux-outlet' }
   const segs: string[] = []
   let holes = 0
   let known = 0
+  // Index in `segs` of the last hole that may span several segments.
+  let elasticAt = -1
   for (const [i, p] of parts.entries()) {
+    // Matrix parameters (`{ page: 2 }`) belong to the segment before them and add none.
+    if (i > 0 && /^\{[\s\S]*\}$/.test(p.trim())) continue
     const tpl = templateCommand(p)
     if (tpl !== null && i === 0) {
       for (const piece of tpl.split('/')) {
-        if (piece.includes('\u0000')) { segs.push(':param'); holes++ }
+        if (piece.includes('\u0000')) { segs.push(':param'); holes++; elasticAt = segs.length - 1 }
         else { segs.push(piece); if (piece !== '') known++ }
       }
       continue
@@ -323,21 +330,27 @@ function classifyCommandParts(parts: string[], sf: SourceFile | undefined): Targ
       // keeps what comes after it instead of throwing the tail away.
       segs.push(':param')
       holes++
+      if (i === 0) elasticAt = segs.length - 1
       continue
     }
     if (Array.isArray(resolved)) { segs.push(...resolved); known += resolved.length }
     else { segs.push(resolved); known++ }
   }
-  if (known === 0) return { kind: 'dynamic' }
+  if (known === 0) {
+    if (oneSegmentFirst && parts.length === 1 && /^(this\.)?[A-Za-z_$][\w$.]*$/.test(parts[0]!.trim())) return { kind: 'literal', value: ':param', holes: true }
+    return { kind: 'dynamic' }
+  }
   const path = joinCommands(segs)
   if (holes === 0) return { kind: 'literal', value: path }
-  // A trailing hole says nothing about what follows, so it stays a prefix; a hole in the
-  // middle leaves a pattern a single declared route can satisfy.
+  // A trailing hole in the first command says nothing about what follows, so it stays a prefix;
+  // a hole after it, or in the middle, leaves a pattern a single declared route can satisfy.
   if (segs[segs.length - 1] === ':param') {
     let end = segs.length
     while (end > 0 && segs[end - 1] === ':param') end--
-    const head = joinCommands(segs.slice(0, end))
-    return { kind: 'template', staticPrefix: head.endsWith('/') ? head : head + '/' }
+    if (elasticAt >= end) {
+      const head = joinCommands(segs.slice(0, end))
+      return { kind: 'template', staticPrefix: head.endsWith('/') ? head : head + '/' }
+    }
   }
   // The pattern pins the screen only if one declared route satisfies it, and the matcher does
   // not check that it is the only one, so the edge is offered at may rather than must.
@@ -365,7 +378,7 @@ function templateCommand(p: string): string | null {
 function classifyLinkArray(arr: string, sf?: SourceFile): TargetInfo {
   const inner = arr.slice(1, arr.lastIndexOf(']'))
   const parts = splitTopLevel(inner)
-  if (sf) return classifyCommandParts(parts, sf)
+  if (sf) return classifyCommandParts(parts, sf, true)
   if (parts.length === 0) return { kind: 'same-screen' }
   if (parts.some((p) => /^\{[\s\S]*\boutlets\s*:/.test(p.trim()))) return { kind: 'aux-outlet' }
   const lits: string[] = []

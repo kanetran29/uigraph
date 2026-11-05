@@ -1272,3 +1272,67 @@ export class Personal {
     expect(has('/clients/:clientId/general', '/clients/:clientId/actions/:name')).toBe(true)
   })
 })
+
+describe('extractGraph — the defects the comparison on Rima et al.\'s subjects found', () => {
+  const comp = (name: string, sel: string, tpl: string, body = '', imports = '') =>
+    `import { Component } from '@angular/core'\nimport { Router } from '@angular/router'\n${imports}\n@Component({ selector: '${sel}', standalone: true, template: '${tpl}' })\nexport class ${name} {\n${body}\n}`
+  const project = inMemory({
+    '/app/main.ts': `import { bootstrapApplication } from '@angular/platform-browser'\nimport { App } from './app.component'\nbootstrapApplication(App, {})`,
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { Login } from './login.component'
+import { List } from './list.component'
+import { Update } from './update.component'
+import { Owner } from './owner.component'
+import { OwnerEdit } from './owner-edit.component'
+import { PetAdd } from './pet-add.component'
+import { Locales } from './locales.component'
+import { Translations } from './translations.component'
+export const routes: Routes = [
+  { path: 'login', component: Login },
+  { path: 'list', component: List },
+  { path: 'update', component: Update },
+  { path: 'owners/:id', component: Owner },
+  { path: 'owners/:id/edit', component: OwnerEdit },
+  { path: 'owners/:id/pets/add', component: PetAdd },
+  { path: 'projects/:pid/translations', component: Locales },
+  { path: 'projects/:pid/translations/:code', component: Translations },
+]`,
+    '/app/app.component.ts': comp('App', 'x-root', '<router-outlet></router-outlet>'),
+    // Declared and never rendered: no route, no template and no bootstrap names it.
+    '/app/dashboard.component.ts': comp('Dashboard', 'x-dashboard', '<x-nav><router-outlet></router-outlet></x-nav>'),
+    '/app/nav.component.ts': comp('Nav', 'x-nav', '<a routerLink="/update">u</a><ng-content></ng-content>'),
+    '/app/router.service.ts': `import { Injectable } from '@angular/core'\nimport { Router } from '@angular/router'\n@Injectable({ providedIn: 'root' })\nexport class RouterService {\n  constructor(private router: Router) {}\n  toList() { this.router.navigate(['/list']) }\n}`,
+    '/app/login.component.ts': comp('Login', 'x-login', '<p>sign in</p>', '  constructor(private rs: RouterService) {}', "import { RouterService } from './router.service'"),
+    '/app/list.component.ts': comp('List', 'x-list', '<x-nav>list</x-nav>'),
+    '/app/update.component.ts': comp('Update', 'x-update', '<x-nav><b (click)="done()"></b></x-nav>', '  constructor(private dialog: MatDialog) {}\n  done() { this.dialog.open(Done) }', "import { MatDialog } from '@angular/material/dialog'\nimport { Done } from './done.component'"),
+    '/app/done.component.ts': comp('Done', 'x-done', '<b (click)="ok()"></b>', '  constructor(private rs: RouterService) {}\n  ok() { this.rs.toList() }', "import { RouterService } from './router.service'"),
+    '/app/owner.component.ts': comp('Owner', 'x-owner', '<p>o</p>'),
+    '/app/owner-edit.component.ts': comp('OwnerEdit', 'x-owner-edit', '<b (click)="back()"></b>', '  id = 1\n  constructor(private router: Router) {}\n  back() { this.router.navigate([\'/owners\', this.id]) }'),
+    '/app/pet-add.component.ts': comp('PetAdd', 'x-pet-add', '<p>p</p>'),
+    '/app/locales.component.ts': comp('Locales', 'x-locales', '<a *ngFor="let l of ls" [routerLink]="[l.code]">x</a>', '  ls: { code: string }[] = []'),
+    '/app/translations.component.ts': comp('Translations', 'x-translations', '<p>t</p>'),
+  })
+  const { graph } = extractGraph(project, '/app', { attribution: true })
+  const members = new Map(graph.nodes.map((n) => [n.id, n.scope?.members ?? [n.id]]))
+  const has = (from: string, to: string) =>
+    graph.edges.some((e) => e.to === routeId(to) && (members.get(e.from) ?? [e.from]).includes(routeId(from)))
+
+  it('reads a template link whose only command is a bound value as one segment below the route holding it', () => {
+    expect(has('/projects/:pid/translations', '/projects/:pid/translations/:code')).toBe(true)
+  })
+
+  it('matches a command after the first to exactly one segment, so a fixed-length array is no prefix', () => {
+    expect(has('/owners/:id/edit', '/owners/:id')).toBe(true)
+    expect(has('/owners/:id/edit', '/owners/:id/pets/add')).toBe(false)
+  })
+
+  it('takes no never-rendered outlet holder for the shell when the bootstrapped root holds the outlet', () => {
+    expect(has('/list', '/update')).toBe(true)
+    expect(has('/login', '/update')).toBe(false)
+  })
+
+  it('renders a component a page opens by class (a dialog) on that page, so a service it calls runs there and not on every injector', () => {
+    expect(has('/update', '/list')).toBe(true)
+    expect(has('/login', '/list')).toBe(false)
+  })
+})

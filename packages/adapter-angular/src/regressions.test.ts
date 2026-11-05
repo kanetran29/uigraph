@@ -528,12 +528,13 @@ describe('adapter regressions — a wrong destination is worse than none', () =>
     const cited = soundiness.filter((n) => ['wildcard-redirect', 'over-approximation', 'dynamic-target'].includes(n.kind)).map((n) => [n.kind, n.file, n.loc?.line])
     expect(cited.sort()).toEqual([
       ['dynamic-target', 'a.component.html', 4],
-      ['over-approximation', 'a.component.html', 3],
+      // `['/items', id]` is a two-segment pattern no route declares, so the wildcard redirect answers it.
       ['wildcard-redirect', 'a.component.html', 2],
+      ['wildcard-redirect', 'a.component.html', 3],
     ])
     // The edge's own witnesses already named the html file; the notes now agree with them.
     const home = graph.edges.find((e) => e.to === 'n_home')
-    expect([home?.witness, ...(home?.mergedWitnesses ?? [])].map((w) => w?.file)).toEqual(['a.component.html', 'a.component.html'])
+    expect([home?.witness, ...(home?.mergedWitnesses ?? [])].map((w) => w?.file)).toEqual(['a.component.html', 'a.component.html', 'a.component.html'])
   })
 
   it('cites the html file for an unresolved external template link when no wildcard route answers it', () => {

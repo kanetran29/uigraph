@@ -195,7 +195,8 @@ function importedFiles(sf: SourceFile): Set<string> {
 }
 
 /**
- * Nesting graph: component file -> component files its template instantiates. `firm`, when
+ * Nesting graph: component file -> component files its template instantiates, or its class opens
+ * by name (a dialog, a created component), which is never firm. `firm`, when
  * given, receives the sub-graph of the placements at least one of which sits outside every
  * template condition, read at the child's own tag so a directive on it counts. `only`, when
  * given, limits the scan to the template of that one file, which is all a caller asking about
@@ -224,6 +225,15 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
     graph.set(a.file, kids)
     firm?.set(a.file, firmKids)
     firmPlacements?.set(a.file, placements)
+    // A component the class opens by name (`dialog.open(X)`, `createComponent(X)`,
+    // `new ComponentPortal(X)`) is rendered on its screens too, though only when that code runs.
+    for (const call of a.sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      const e = call.getExpression()
+      if (!Node.isPropertyAccessExpression(e) || !['open', 'createComponent'].includes(e.getName())) continue
+      for (const f of componentFilesNamed(call.getArguments()[0], components)) if (f !== a.file) kids.add(f)
+    }
+    for (const nw of a.sf.getDescendantsOfKind(SyntaxKind.NewExpression))
+      if (nw.getExpression().getText() === 'ComponentPortal') for (const f of componentFilesNamed(nw.getArguments()[0], components)) if (f !== a.file) kids.add(f)
     if (!a.template) continue
     const template = a.template
     const tagMatches = [...template.matchAll(/<([a-zA-Z][\w-]*)/g)]
@@ -265,6 +275,34 @@ export function nestingGraph(components: Map<string, ComponentInfo>, notes: Soun
     }
   }
   return graph
+}
+
+/** The files of the components a class name denotes, followed through imports. */
+function componentFilesNamed(n: Node | undefined, components: Map<string, ComponentInfo>): string[] {
+  return declarationsOf(n).filter((d) => Node.isClassDeclaration(d)).map((d) => d.getSourceFile().getFilePath()).filter((f) => components.has(f))
+}
+
+/**
+ * The component files an application bootstraps: the first argument of `bootstrapApplication`
+ * and the classes listed under an `@NgModule`'s `bootstrap`. Empty when none is found, as for a
+ * library or a fixture without an entry point.
+ */
+function bootstrapRoots(appFiles: SourceFile[]): Set<string> {
+  const out = new Set<string>()
+  const add = (n: Node | undefined): void => {
+    for (const d of declarationsOf(n)) if (Node.isClassDeclaration(d)) out.add(d.getSourceFile().getFilePath())
+  }
+  for (const sf of appFiles) {
+    for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      const e = call.getExpression()
+      if (Node.isIdentifier(e) && e.getText() === 'bootstrapApplication') add(call.getArguments()[0])
+    }
+    for (const pa of sf.getDescendantsOfKind(SyntaxKind.PropertyAssignment)) {
+      const init = pa.getInitializer()
+      if (pa.getName() === 'bootstrap' && init && Node.isArrayLiteralExpression(init)) for (const el of init.getElements()) add(el)
+    }
+  }
+  return out
 }
 
 function reach(graph: Map<string, Set<string>>, start: string): Set<string> {
@@ -506,9 +544,16 @@ export function attributeScopes(sfs: SourceFile[], routes: RouteInfo[], projectD
   // route nobody can see: rendered on that route's screens, not on every one, so it is no shell.
   const lostShell = new Set<string>()
   let named: Set<string> | undefined
+  // When the bootstrapped root renders an outlet holder, the shell is found from it, and an
+  // outlet holder it never renders, which no route mounts either, is dead code, not a shell.
+  const outletRe = /<router-outlet(?![\w-])(?![^>]*\bname\s*=)/
+  const fromRoot = new Set<string>()
+  for (const r of bootstrapRoots(appFiles)) for (const x of reach(nesting, r)) fromRoot.add(x)
+  const rootHoldsOutlet = [...fromRoot].some((f) => outletRe.test(components.get(f)?.template ?? ''))
   for (const c of components.values()) {
     if (!mayBeShell(c.file) || routeComponentScreens.has(c.file) || screensOf.has(c.file)) continue
-    if (!c.template || !/<router-outlet(?![\w-])(?![^>]*\bname\s*=)/.test(c.template)) continue
+    if (!c.template || !outletRe.test(c.template)) continue
+    if (rootHoldsOutlet && !fromRoot.has(c.file)) continue
     named ??= routeNamedComponents(appFiles)
     if (named.has(c.file)) {
       for (const x of reach(nesting, c.file)) if (!routeComponentScreens.has(x)) lostShell.add(x)
