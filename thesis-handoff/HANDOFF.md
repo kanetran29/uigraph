@@ -1,4 +1,4 @@
-# Thesis handoff (5 Nov 2026, late)
+# Thesis handoff (5 Nov 2026, night)
 
 Read this first. It is written for a Claude Code session continuing the work. Sections are dated and the
 newest come first; the section "Current state, 5 Nov 2026" was checked against the repository on 5 Nov and
@@ -20,6 +20,34 @@ supersedes every older section where they disagree.
   generated macro file, never typed by hand.
 - Run an Opus red-team panel on finished work before calling it done; verify the panel's own claims before acting.
 - Before a striking headline, check it adversarially. Verify the referent, not the nearest proxy.
+
+## Re-measure after the end-to-end repairs, 5 Nov 2026, night (supersedes everything below where they disagree)
+
+- **Evaluated version is now `f26a302`** (packages = `2aac284`, harness 1.10.0, mutation harness 1.9.1), not c42f220.
+  Every extractor-dependent figure was regenerated there (commit `ed603e9`); c42f220's mifos graph is kept as
+  `e2e-nav/results/mifos/graph-unfixed.json.gz` and printed as `\EtoEMifosHitUnfixed` (12 of 22).
+- **Three extractor repairs the mifos suite exposed** (test first, `2aac284` and parents): template literal in a commands
+  array read by its static text; `relativeTo` via a `const` options literal; relative target resolved against the
+  holder route (route rendering the component that holds the site; witness check applies the same rule, harness
+  1.10.0). A fourth correction: a prefix is no longer cut at its first parameter (that made the tray reach every
+  route); trailing parameters drop, an inner parameter matches any one segment. Four rows in `tab:repairs`.
+- **Key figures now:** mifos suite 20/22 (both misses redirect-class), realworld 19/19, must 159 (mifos 24), census
+  15653 edges, sweep 174/174 killed. Honest costs, disclosed in ch5/ch6/ch7: the post-repair mifos figure is in-sample;
+  the mifos graph holds 163138 of 367236 possible pairs (was 28185), mostly via the notifications tray (shell site,
+  target `/${entityType}/${entityId}/...-accounts/${id}`), so the suite check discriminates little there. Outlet level
+  already equals full (20) on mifos: the extra hits over rooted come from earlier work's enclosing-route mechanism.
+- **Static ceiling:** `route-oracle/ceiling.mjs` + `ceiling-classes.json` (author's class per miss: inside / outside /
+  held; refuses unclassified misses and orphan classes) -> `generated-ceiling.tex`, ch6 `sec:may-incomplete`,
+  `tab:ceiling`. 134 of 135 missing pairs inside (alfresco 133 library-shell and nested-routed-component pairs; mifos
+  1, a service's default `['../../']` commands), 0 outside, 1 held (`/login -> /`, redirect). Prose says the
+  references cannot show an outside miss by construction; only the suites can.
+- **Pipeline:** `route-oracle/post-remeasure.sh <work>` (new, after remeasure.sh and regen-round.sh): e2e graphs incl.
+  rooted/outlet/unfixed, e2e score, alfresco levels, both references with `--json`, ceiling. `final15.tgz` and the new
+  `ablation.tgz` archive the runs; REPRODUCE.md §1 regenerates its ten files byte-identical from them, and the
+  committed post-remeasure.sh, run once after ed603e9, rewrote every output identically (only stamp lines differ; checked).
+- **Opus gate** ran on the diff: 15 items, all applied after checking (notably one ceiling miss reclassed held ->
+  inside; landed-target figure before the repairs now generated, `\EtoEMifosHitAfterRedirectsUnfixed` = 15).
+- **Open:** `generated-e2e.tex` and `generated-ceiling.tex` carry no extractor/harness stamp line. Nothing pushed or tagged.
 
 ## Later on 5 Nov 2026 (supersedes the section below where they disagree)
 
