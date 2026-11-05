@@ -1,0 +1,44 @@
+Pre-registration: held-out applications (5 Nov 2026)
+Written before any held-out repository was cloned or mapped. Extractor frozen at c42f220 (packages/ identical at HEAD);
+no repair to the extractor or the harness is made in response to anything measured on these applications.
+
+Why
+  uigraph was developed on the six corpus applications, so every corpus figure is in-sample. This check measures the
+  frozen extractor on applications it has never been run on.
+
+Selection rule (fixed now)
+  Source: `gh search repos --topic angular --language TypeScript --stars ">1000" --archived=false --sort stars
+  --order desc --limit 60`, run 5 Nov 2026. Walk the list in that order and take the first two repositories that:
+    S1 are a deployable application (not a framework, library, component kit, tool, generator, template, starter,
+       sample or course);
+    S2 have an Angular client using @angular/router with at least one nested route (children) and one lazily loaded
+       route (loadChildren or loadComponent);
+    S3 declare at least one route guard (canActivate, canActivateChild, canMatch, canLoad or canDeactivate);
+    S4 were pushed in the six months before 5 Nov 2026;
+    S5 are none of the ten candidates screened for the corpus (realworld, alfresco, ghostfolio, kubernetes/dashboard,
+       bitwarden, openMF/web-app, angular/components, vendure, gravitee, SAP/spartacus).
+  Criteria (4) and (5) of the corpus selection (browser-test configuration, test-and-source history) are not applied:
+  the held-out check uses no method that needs them. A candidate whose Angular client is not in the repository, or
+  that is not Angular, fails S1/S2. Each skipped repository is recorded with the criterion it failed.
+  The pin is the default branch HEAD at the time of cloning; the SHA is recorded in heldout/apps.txt.
+
+Measures (the same scripts and versions as the final version; harness 1.9.0)
+  H1 the extractor completes on the application (yes/no; a crash or timeout is a result, reported, not fixed).
+  H2 node coverage against the independent route parser (index.mjs), and the parser's blind spots.
+  H3 must conversion, recovered share and accounted share from loss-breakdown.mjs, with attribution.
+  H4 must edges and witness-check failures (witness-check.mjs).
+  H5 attribution: the loss-breakdown with and without --attribution (attribution recovery).
+  H6 Oshima and Kishi's stated restrictions (earlier-work.mjs).
+  Not measured: the runtime route oracle, the rendered-interface check, the end-to-end check, mutation testing
+  (each needs a running application or suite).
+
+Predictions (written now)
+  P1 The extractor completes on both (H1).
+  P2 Node coverage is below the corpus's (every declared screen has a node on all six), because constructs the corpus
+     did not contain will appear.
+  P3 The must tier is small, as on the corpus.
+  P4 Oshima and Kishi's restrictions admit neither application.
+
+What each outcome does to the thesis
+  Every outcome is reported in the thesis with generated macros, including a crash. A low figure is not repaired before
+  submission; it is reported as the out-of-sample result.
