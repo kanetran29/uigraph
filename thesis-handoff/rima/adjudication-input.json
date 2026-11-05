@@ -1,0 +1,2982 @@
+{
+ "posts-users-ui-ng": {
+  "misses": [],
+  "extrasTotal": 35,
+  "extrasSampled": 35,
+  "extras": [
+   {
+    "from": "/new-post",
+    "to": "/new-user",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/new-post",
+    "to": "/user-availability-schedule",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 12,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/new-post",
+    "to": "/user-search",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/new-post",
+    "to": "/users",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 9,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/new-user",
+    "to": "/new-post",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 8,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/new-user",
+    "to": "/posts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 7,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/new-user",
+    "to": "/user-availability-schedule",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 12,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/new-user",
+    "to": "/user-search",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/new-user",
+    "to": "/users",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 9,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/posts",
+    "to": "/new-post",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 8,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/posts",
+    "to": "/new-user",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/posts",
+    "to": "/user-availability-schedule",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 12,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/posts",
+    "to": "/user-search",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/posts",
+    "to": "/users",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 9,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/new-post",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 8,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/new-user",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/posts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 7,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/user-search",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-availability-schedule",
+    "to": "/users",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 9,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-search",
+    "to": "/new-post",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 8,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-search",
+    "to": "/new-user",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-search",
+    "to": "/posts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 7,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-search",
+    "to": "/user-availability-schedule",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 12,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/user-search",
+    "to": "/users",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 9,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users",
+    "to": "/new-post",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 8,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users",
+    "to": "/new-user",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users",
+    "to": "/posts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 7,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users",
+    "to": "/user-availability-schedule",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 12,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users",
+    "to": "/user-search",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users/:id",
+    "to": "/new-post",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 8,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users/:id",
+    "to": "/new-user",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users/:id",
+    "to": "/posts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 7,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users/:id",
+    "to": "/user-availability-schedule",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 12,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users/:id",
+    "to": "/user-search",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/users/:id",
+    "to": "/users",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 9,
+      "rule": "ng.router-link"
+     }
+    ]
+   }
+  ]
+ },
+ "heroes-angular": {
+  "misses": [],
+  "extrasTotal": 9,
+  "extrasSampled": 9,
+  "extras": [
+   {
+    "from": "*",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 16,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "*",
+    "to": "/heroes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "*",
+    "to": "/villains",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 13,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/about",
+    "to": "/heroes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/about",
+    "to": "/villains",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 13,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/heroes",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 16,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/heroes",
+    "to": "/villains",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 13,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/villains",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 16,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/villains",
+    "to": "/heroes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/components/nav.component.ts",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   }
+  ]
+ },
+ "airbus-inventory": {
+  "misses": [],
+  "extrasTotal": 20,
+  "extrasSampled": 20,
+  "extras": [
+   {
+    "from": "/add",
+    "to": "/getAllProducts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 19,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/add",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/services/router.service.ts",
+      "line": 12,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/add",
+    "to": "/productByCategory",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/dashboard",
+    "to": "/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 26,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/dashboard",
+    "to": "/getAllProducts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 19,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/services/router.service.ts",
+      "line": 20,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/dashboard",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/services/router.service.ts",
+      "line": 12,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/dashboard",
+    "to": "/productByCategory",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 26,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/services/router.service.ts",
+      "line": 12,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/getAllProducts",
+    "to": "/productByCategory",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/login",
+    "to": "/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 26,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/login",
+    "to": "/getAllProducts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 19,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/services/router.service.ts",
+      "line": 20,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/login",
+    "to": "/productByCategory",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/productByCategory",
+    "to": "/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 26,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/productByCategory",
+    "to": "/getAllProducts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 19,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/productByCategory",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/services/router.service.ts",
+      "line": 12,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/update",
+    "to": "/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 26,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/update",
+    "to": "/getAllProducts",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 19,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/update",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/services/router.service.ts",
+      "line": 12,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/update",
+    "to": "/productByCategory",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/main-nav/main-nav.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     }
+    ]
+   }
+  ]
+ },
+ "spring-petclinic-angular": {
+  "misses": [
+   {
+    "from": "/pets",
+    "to": "/**",
+    "why": "route",
+    "entries": [
+     {
+      "gtId": "petclinic-GT-03",
+      "workflowId": "C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/app.component.ts#AppComponent|C:\\Users\\basha\\git\\github\\autoe2e\\benchmark\\pet-clinic\\spring-petclinic-angular\\src\\app\\app.component.html:35:7|Link|2::WIDGET_TRIGGERS_HANDLER::C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/app.component.ts#AppComponent::0",
+      "triggerKind": "WIDGET_TRIGGERS_HANDLER"
+     },
+     {
+      "gtId": "petclinic-GT-08",
+      "workflowId": "C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/app.component.ts#AppComponent|C:\\Users\\basha\\git\\github\\autoe2e\\benchmark\\pet-clinic\\spring-petclinic-angular\\src\\app\\app.component.html:47:7|Link|5::WIDGET_TRIGGERS_HANDLER::C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/app.component.ts#AppComponent::0",
+      "triggerKind": "WIDGET_TRIGGERS_HANDLER"
+     }
+    ]
+   },
+   {
+    "from": "/pettypes",
+    "to": "/pettypes/add",
+    "why": "pair",
+    "entries": [
+     {
+      "gtId": "petclinic-GT-39",
+      "workflowId": "C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/pettypes/pettype-add/pettype-add.component.ts#PettypeAddComponent|C:\\Users\\basha\\git\\github\\autoe2e\\benchmark\\pet-clinic\\spring-petclinic-angular\\src\\app\\pettypes\\pettype-add\\pettype-add.component.html:22:5|Form|0::WIDGET_SUBMITS_FORM::C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/pettypes/pettype-add/pettype-add.component.ts#PettypeAddComponent::0",
+      "triggerKind": "WIDGET_SUBMITS_FORM"
+     },
+     {
+      "gtId": "petclinic-GT-40",
+      "workflowId": "C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/pettypes/pettype-add/pettype-add.component.ts#PettypeAddComponent|C:\\Users\\basha\\git\\github\\autoe2e\\benchmark\\pet-clinic\\spring-petclinic-angular\\src\\app\\pettypes\\pettype-add\\pettype-add.component.html:34:11|Button|0::WIDGET_TRIGGERS_HANDLER::C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/pettypes/pettype-add/pettype-add.component.ts#PettypeAddComponent::0",
+      "triggerKind": "WIDGET_TRIGGERS_HANDLER"
+     }
+    ]
+   },
+   {
+    "from": "/visits/add",
+    "to": "/pets/1/visits/add",
+    "why": "pair",
+    "entries": [
+     {
+      "gtId": "petclinic-GT-67",
+      "workflowId": "C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/visits/visit-add/visit-add.component.ts#VisitAddComponent|C:\\Users\\basha\\git\\github\\autoe2e\\benchmark\\pet-clinic\\spring-petclinic-angular\\src\\app\\visits\\visit-add\\visit-add.component.html:43:5|Form|0::WIDGET_SUBMITS_FORM::C:/Users/basha/git/github/autoe2e/benchmark/pet-clinic/spring-petclinic-angular/src/app/visits/visit-add/visit-add.component.ts#VisitAddComponent::0",
+      "triggerKind": "WIDGET_SUBMITS_FORM"
+     }
+    ]
+   }
+  ],
+  "extrasTotal": 152,
+  "extrasSampled": 40,
+  "extras": [
+   {
+    "from": "*",
+    "to": "/vets/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 54,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "*",
+    "to": "/welcome",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 28,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/",
+    "to": "/owners",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 40,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/",
+    "to": "/welcome",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 28,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/owners/:id/edit",
+    "to": "/owners/:id/pets/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/owners/owner-edit/owner-edit.component.ts",
+      "line": 70,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/owners",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 40,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/owners/:id/edit",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/pets/pet-add/pet-add.component.ts",
+      "line": 90,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/owners/:id/pets/add",
+    "to": "/pettypes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 59,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/owners/add",
+    "to": "/vets",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/pets/:id/edit",
+    "to": "/vets",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/owners/:id/pets/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/visits/visit-add/visit-add.component.ts",
+      "line": 102,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/specialties",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/pets/:id/visits/add",
+    "to": "/welcome",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 28,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/pets/add",
+    "to": "/vets/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 54,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/pettypes",
+    "to": "/owners",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 40,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/pettypes",
+    "to": "/vets",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/owners",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 40,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/pettypes/add",
+    "to": "/vets/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 54,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/specialties/:id/edit",
+    "to": "/owners/add",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 42,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/vets",
+    "to": "/owners",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 40,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/vets",
+    "to": "/owners/add",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 42,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/vets",
+    "to": "/specialties",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/owners/add",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 42,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/pettypes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 59,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/vets/:id/edit",
+    "to": "/welcome",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 28,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/vets/add",
+    "to": "/pettypes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 59,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/vets/add",
+    "to": "/welcome",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 28,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits",
+    "to": "/pettypes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 59,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits",
+    "to": "/specialties",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits",
+    "to": "/vets",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/owners",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 40,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/owners/:id/edit",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/visits/visit-edit/visit-edit.component.ts",
+      "line": 98,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/pettypes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 59,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits/:id/edit",
+    "to": "/welcome",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/app.component.html",
+      "line": 28,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits/add",
+    "to": "/owners/:id/edit",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/visits/visit-add/visit-add.component.ts",
+      "line": 102,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/visits/add",
+    "to": "/pettypes",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 59,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits/add",
+    "to": "/specialties",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/visits/add",
+    "to": "/vets/add",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 54,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/welcome",
+    "to": "/specialties",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/welcome",
+    "to": "/vets",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/app.component.html",
+      "line": 52,
+      "rule": "ng.router-link"
+     }
+    ]
+   }
+  ]
+ },
+ "ever-traduora": {
+  "misses": [
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/translations/:localeCode",
+    "why": "pair",
+    "entries": [
+     {
+      "gtId": "traduora-GT-070",
+      "workflowId": "ProjectLocalesComponent|Link|0::WNR",
+      "triggerKind": "WNR"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/translations/:localeCode",
+    "why": "pair",
+    "entries": [
+     {
+      "gtId": "traduora-GT-070",
+      "workflowId": "ProjectLocalesComponent|Link|0::WNR",
+      "triggerKind": "WNR"
+     }
+    ]
+   }
+  ],
+  "extrasTotal": 104,
+  "extrasSampled": 40,
+  "extras": [
+   {
+    "from": "/404",
+    "to": "/user-settings",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 21,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/forgot-password",
+    "to": "/projects",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 2,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/forgot-password",
+    "to": "/user-settings",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 21,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/login",
+    "to": "/user-settings",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 21,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/import",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/labels",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 50,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 50,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/projects/:projectId/terms",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 34,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 34,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId",
+    "to": "/user-settings",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 21,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/export",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 74,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/import",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/labels",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 50,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/projects/:projectId/settings",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 93,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/api",
+    "to": "/user-settings",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 21,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/settings",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 93,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/export",
+    "to": "/projects/:projectId/team",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 57,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 2,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/api",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 84,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/export",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 74,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/import",
+    "to": "/projects/:projectId/settings",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 93,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/api",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 84,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/team",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 57,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/labels",
+    "to": "/projects/:projectId/translations",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 41,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-settings/project-settings.component.html",
+      "line": 46,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/export",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-settings/project-settings.component.html",
+      "line": 46,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 74,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/import",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-settings/project-settings.component.html",
+      "line": 46,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/labels",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-settings/project-settings.component.html",
+      "line": 46,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 50,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/projects/:projectId/translations/:localeCode",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-settings/project-settings.component.html",
+      "line": 46,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/settings",
+    "to": "/user-settings",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 21,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/api",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 84,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/team",
+    "to": "/projects/:projectId/settings",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 93,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/import",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/settings",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 93,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/terms",
+    "to": "/projects/:projectId/translations",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 41,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 2,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/import",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/labels",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 50,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/translations",
+    "to": "/projects/:projectId/settings",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 93,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 2,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/projects/:projectId/translations/:localeCode",
+    "to": "/projects/:projectId/import",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/projects/components/project-container/project-container.component.html",
+      "line": 65,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/signup",
+    "to": "/projects",
+    "top": true,
+    "edges": [
+     {
+      "fromNode": "scope:top",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/shared/components/app-bar/app-bar.component.html",
+      "line": 2,
+      "rule": "ng.router-link"
+     }
+    ]
+   }
+  ]
+ },
+ "angular-jumpstart": {
+  "misses": [],
+  "extrasTotal": 29,
+  "extrasSampled": 29,
+  "extras": [
+   {
+    "from": "/about",
+    "to": "/customers",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:top",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 48,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/about",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 58,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/about",
+    "to": "/orders",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 17,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 18,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 58,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/customers",
+    "to": "/orders",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 17,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 18,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/customers/:id/details",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/customer/customer.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/customers/:id/edit",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/customer/customer.component.html",
+      "line": 22,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/customers/:id/orders",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/customer/customer.component.html",
+      "line": 16,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 58,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 18,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/customers/:id/edit",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/customer/customer.component.html",
+      "line": 22,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/customers/:id/orders",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/customer/customer.component.html",
+      "line": 16,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/details",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 58,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 18,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/customers/:id/details",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/customer/customer.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/customers/:id/orders",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/customer/customer.component.html",
+      "line": 16,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/edit",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 58,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 18,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/customers/:id/details",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/customer/customer.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/customers/:id/edit",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/customer/customer.component.html",
+      "line": 22,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/customers/:id/orders",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 58,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/login",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 18,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/login",
+    "to": "/customers",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/login/login.component.ts",
+      "line": 56,
+      "rule": "ng.navigate"
+     },
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:top",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 48,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/login",
+    "to": "/orders",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 17,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/orders",
+    "to": "/about",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 18,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/orders",
+    "to": "/customers",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.html",
+      "line": 11,
+      "rule": "ng.router-link"
+     },
+     {
+      "fromNode": "scope:top",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 48,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/orders",
+    "to": "/login",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "must",
+      "file": "src/app/core/navbar/navbar.component.ts",
+      "line": 58,
+      "rule": "ng.navigate"
+     }
+    ]
+   }
+  ]
+ },
+ "event-booking-mean": {
+  "misses": [],
+  "extrasTotal": 8,
+  "extrasSampled": 8,
+  "extras": [
+   {
+    "from": "/",
+    "to": "/Contact",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 17,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/",
+    "to": "/create-event",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/welcome/welcome.component.html",
+      "line": 10,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/",
+    "to": "/my-Events",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/header/header.component.html",
+      "line": 29,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/Contact",
+    "to": "/my-Events",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/header/header.component.html",
+      "line": 29,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/create-event",
+    "to": "/Contact",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 17,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/create-event",
+    "to": "/my-Events",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/create-event/create-event.component.ts",
+      "line": 74,
+      "rule": "ng.navigate"
+     },
+     {
+      "fromNode": "scope:subtree",
+      "event": "click:routerLink",
+      "modality": "may",
+      "file": "src/app/header/header.component.html",
+      "line": 29,
+      "rule": "ng.router-link"
+     }
+    ]
+   },
+   {
+    "from": "/login",
+    "to": "/",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "navigate",
+      "modality": "may",
+      "file": "src/app/user/login/login.component.ts",
+      "line": 33,
+      "rule": "ng.navigate"
+     }
+    ]
+   },
+   {
+    "from": "/my-Events",
+    "to": "/Contact",
+    "top": false,
+    "edges": [
+     {
+      "fromNode": "screen",
+      "event": "click:routerLink",
+      "modality": "must",
+      "file": "src/app/header/header.component.html",
+      "line": 17,
+      "rule": "ng.router-link"
+     }
+    ]
+   }
+  ]
+ }
+}

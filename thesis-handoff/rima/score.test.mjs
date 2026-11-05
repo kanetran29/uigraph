@@ -59,3 +59,13 @@ test('extra pairs exclude reference pairs and self pairs, and record whether onl
   assert.equal(s.routes, 5)
   assert.equal(s.routesHeld, 4)
 })
+
+test('the adjudication sample keeps every item up to the cap and a fixed seeded subset above it', async () => {
+  const { sample } = await import('./adjudication-input.mjs')
+  const items = Array.from({ length: 50 }, (_, i) => ({ from: `/s${String(i).padStart(2, '0')}`, to: '/t' }))
+  assert.equal(sample(items.slice(0, 40)).length, 40)
+  const a = sample(items)
+  assert.equal(a.length, 40)
+  assert.deepEqual(a, sample([...items].reverse()))
+  assert.deepEqual(a, [...a].sort((x, y) => `${x.from} ${x.to}`.localeCompare(`${y.from} ${y.to}`)))
+})
