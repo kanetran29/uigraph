@@ -227,6 +227,10 @@ const order = B.results.map((b) => {
   return { slug: b.slug, attrNonLit, flips: nonLit.length > attrKept }
 })
 T.nonLiteral = order.reduce((a, o) => a + o.attrNonLit, 0)
+// Navigation inside a service is the class no level below the full analysis can place: count it
+// at the baseline and how many of those constructs attribution converts.
+T.serviceLost = B.results.reduce((a, b) => a + raw(beforeDir, b.slug).rows.filter((r) => r.cls === 'ATTRIBUTION_SERVICE').length, 0)
+T.serviceRecovered = (moves.ATTRIBUTION_SERVICE?.must ?? 0) + (moves.ATTRIBUTION_SERVICE?.may ?? 0)
 T.orderFlips = order.filter((o) => o.flips).length
 T.orderFlipWhere = order.filter((o) => o.flips).map((o) => NAME[o.slug]).join(' and ') || 'none'
 // The corpus share is dominated by the largest application, so state how many applications
@@ -250,6 +254,7 @@ for (const [k, v] of [
   ['AttrAppsFell', T.fell], ['AttrFellWhere', T.fellWhere], ['AttrDemoted', T.demoted],
   ['AttrNonLiteral', T.nonLiteral], ['AttrOrderFlips', T.orderFlips], ['AttrOrderFlipWhere', T.orderFlipWhere],
   ['AttrUnderHalfApps', T.underHalf], ['AttrRecoveredShareNoMifos', pc(T.noMifosRec, T.noMifosLost)],
+  ['AttrServiceLost', T.serviceLost], ['AttrServiceRecovered', T.serviceRecovered],
 ]) tex4 += `\\newcommand{\\${k}}{${v}}\n`
 // held back until every check below has passed; see the single write at the end
 console.log(`\nRQ3: ${recovered} of ${T.lost} recovered (${T.must} must, ${T.may} may), ${T.remaining} classified (${T.unexplained} unexplained), ${T.regressed} regressed, ${T.demoted} demoted from must to may (conversion fell on ${T.fell}: ${T.fellWhere}); edges ${T.edgesBefore} -> ${T.edgesAfter}, must ${T.mustBefore} -> ${T.mustAfter}`)

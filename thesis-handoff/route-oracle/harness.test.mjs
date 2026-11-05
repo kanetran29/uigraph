@@ -868,6 +868,16 @@ describe('compare.mjs (prose panel 3 and 6)', () => {
     expect(macro(out, 'AttrRegressed')).toBe('0')
   })
 
+  it('counts the service-class attribution losses and how many of them attribution recovers', () => {
+    const before = run1('before', { realworld: ['ATTRIBUTION_SERVICE', 'ATTRIBUTION_SHARED'], bitwarden: RAW_CLASSES.bitwarden }, false)
+    const after = run1('after', { realworld: ['CONVERTED_MAY', 'CONVERTED_MUST'], bitwarden: AFTER_CLASSES.bitwarden }, true)
+    const tex = path.join(before, 'out.tex')
+    run('compare.mjs', [before, after, '--tex', tex])
+    const out = fs.readFileSync(tex, 'utf8')
+    expect(macro(out, 'AttrServiceLost')).toBe('1')
+    expect(macro(out, 'AttrServiceRecovered')).toBe('1')
+  })
+
   it('prints a conversion from the counts, not from the ratio results.json already rounded (prose 38)', () => {
     // 1 of 26 is 3.846 %: the plot prints 3.8, and rounding the stored 0.0385 a second time gave 3.9 here.
     const same = { realworld: ['CONVERTED_MUST', ...Array(25).fill('LAZY_BOUNDARY')] }

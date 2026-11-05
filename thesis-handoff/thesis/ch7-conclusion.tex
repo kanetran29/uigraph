@@ -35,9 +35,11 @@ than certain transitions. Most of them are on mifos: without it the share is
 whose screen sets were read by hand, the analysis finds \GTFullRecall{} of the reference pairs
 and none outside them; that reference was partly completed from the graph's output and
 guided two repairs. A reimplementation of the mechanisms of earlier work reaches
-\GTOutletRecall{}, so the gain is small. The computed scopes are also wide. RQ3 is therefore
-answered only in part: the recovered share rises, but whether the added scopes are too wide was tested on
-one application only. The applications' own end-to-end suites test the missing direction on two
+\GTOutletRecall{}. What only this analysis does is place navigation inside services, which no earlier
+mechanism places: it recovers \AttrServiceRecovered{} of the \AttrServiceLost{} such constructs, through a
+call graph that on the reference application asserts none of the \GTClassExcess{} pairs a class-level
+join places outside it. Whether the scopes are too wide was tested on that application only, where none
+was. The applications' own end-to-end suites test the missing direction on two
 applications. The graph holds every observed transition on realworld, where the check does not
 discriminate, and \EtoEMifosHit{} of \EtoEMifosPairs{} on mifos, against \EtoEMifosHitNoattr{}
 without attribution; the level of earlier work's mechanism already reaches \EtoEMifosHitRooted{}. Of the
@@ -83,12 +85,12 @@ that read the sources re-run from pinned commits. The runtime route oracle re-ru
 the realworld end-to-end check depends on an unpinned public backend, and superseded figures
 cannot be regenerated. The fourth is scope attribution, specified as a
 dataflow analysis over screen sets and implemented over three of its four input relations
-(Section~\ref{sec:attribution}).
+(Section~\ref{sec:attribution}). It contains the mechanisms of earlier work as levels and adds one they
+lack, the placement of navigation inside services (Section~\ref{sec:res-earlier}).
 
 \paragraph{What remains open.} The dispatch relation is specified but not implemented, the guard relation is replaced by a
 stand-in, and the call graph ignores the injector hierarchy. The screen sets were checked in both directions on
-one application only, against a reference that applies the analysis's own relations, and uigraph was developed on the same corpus it is measured on; outside it, the route reader is
-the first thing to extend. The
+one application only, against a reference that applies the analysis's own relations, and uigraph was developed on the same corpus it is measured on. The
 end-to-end check on mifos found transitions lost to a declared approximation, a relative link
 in a template shared with child tabs resolved against the child's address, and to target forms
 the extractor does not read; none is repaired (Section~\ref{sec:res-e2e}). The

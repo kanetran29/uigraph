@@ -112,6 +112,16 @@ supersedes every older section where they disagree.
   content in `sec:metrics`, incl. a pre-existing one in ch2), caveats restored (node-defect direction, reference
   precision circularity). Not applied: ch5 RQ4 "(not an independent test)" pointer; ch6 Summary is two sentences.
   Build 147 pages, 0 overfull, 0 undefined, abstract on one page.
+- **Scope attribution's own contribution stated with its evidence (student: "need stronger results", 5 Nov):** no
+  number changed; the text now leads with what only this analysis does. New macros (compare.mjs, test first, 102/102;
+  regenerated from `final14.tgz`, all other output identical): `\AttrServiceLost`=48 navigation constructs inside
+  services at the baseline, on all six apps; `\AttrServiceRecovered`=19. Levels below full place none of them by
+  construction (`attribute.ts` clears `serviceScreens`/`serviceShell` and skips the call graph). The call graph vs the
+  class join on realworld: 9 excess pairs -> 0 (95.4 % -> 100 %). Width reworded as "wide is not too large; where read
+  against a reference, none outside it; only one app read" (the limitation itself is kept). Abstract, ch5 bullet, ch7
+  RQ3 and fourth contribution updated; "modest gain" / "adds almost nothing" removed; a held-out remnant in ch7 ("outside
+  it, the route reader is the first thing to extend") removed. A genuinely stronger result would need a second
+  structural reference on an app where the service join matters (alfresco: 8 service constructs, 5 of 19 sites).
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 

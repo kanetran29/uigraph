@@ -670,12 +670,17 @@ Three things follow.
   restriction, and their specification covers this level (Section~\ref{sec:dynamic-spa}). Neither tool
   was run, so how they read these applications is not shown. Inside uigraph the level runs on all six
   because uigraph's route extraction reads parameters and nested trees, with or without attribution.
-\item \emph{The levels above rooted add little.} They place \AblationAboveRootedSites{} more sites,
-  \AblationAboveRootedShare{} of the corpus. \AblationFullAddedSites{} of them come from the
-  injected-service join that only this thesis adds, all in services, guards and effects. On \GTApp{}
-  they find the \GTRootedMissing{} reference pairs rooted misses, with none outside the reference
-  (Section~\ref{sec:res-groundtruth}). On the two applications with suites, these levels add no
-  transition the suites take.
+\item \emph{The service join places navigation no earlier mechanism can place.} A navigation call
+  inside an injected service belongs to no component, so the levels up to \emph{outlet} cannot place
+  it on any screen. The corpus has \AttrServiceLost{} such constructs at the baseline, on every one of
+  the six applications (Table~\ref{tab:loss}). The service join, which only this thesis adds,
+  recovers \AttrServiceRecovered{} of them and places \AblationFullAddedSites{} sites in services,
+  guards and effects. Its member-level call graph is also more precise than a class-level join: on
+  \GTApp{} the class join asserts \GTClassExcess{} pairs outside the reference (precision
+  \GTClassPrecision{}), the call graph none (\GTFullPrecision{}). With the enclosing routes, the levels
+  above \emph{rooted} find the \GTRootedMissing{} reference pairs rooted misses
+  (Section~\ref{sec:res-groundtruth}). On the two applications with suites, they add no transition the
+  suites take.
 \end{itemize}
 
 Of the \AttrLost{} constructs the loss rules assign to attribution, it recovers \AttrRecovered{}
@@ -685,12 +690,12 @@ attributed must tier has \MustWitnessViolations{} witness-check failures among \
 edges, with \MustWitnessUnread{} destinations unread, which are not passes
 (Section~\ref{sec:res-soundness}).
 
-Three limits remain. The recovery is bought with wide scopes: the computed attribution is only
-\BaselineFactorMin{} to \BaselineFactorMax{} times narrower than assigning every site to every
-screen, and on \BaselineBluntest{} a site averages \BaselineBluntestShare{} of the screens
-(Section~\ref{sec:res-width}). Whether a scope is too large is tested in both directions only on \GTApp{}, against
-a reference that applies the analysis's own relations; Section~\ref{sec:limitations} states this as
-the most serious limitation of the work. A scope that is too large still yields edges whose witnesses
+The scopes are wide where a shell renders a link on every screen: the computed attribution is
+\BaselineFactorMin{} to \BaselineFactorMax{} times narrower than assigning every site to every screen
+(Section~\ref{sec:res-width}). Wide is not the same as too large. Where the scopes were read against a
+reference, on \GTApp{}, the full analysis asserts no pair outside it. That reference applies the
+analysis's own relations, and no other application was read this way; Section~\ref{sec:limitations}
+states this as the most serious limitation of the work. A scope that is too large still yields edges whose witnesses
 agree, so no witness-based method can find it. The suites test only the missing direction, and only on
 the transitions they take. Attribution also widens what a source change can be scored against:
 \MutBaseExcluded{} mutants cannot be scored without it, against \MutExcluded{} with it, and on the
