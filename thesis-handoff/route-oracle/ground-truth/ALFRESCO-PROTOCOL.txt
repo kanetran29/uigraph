@@ -1,0 +1,37 @@
+Protocol: a second structural reference, for alfresco (5 Nov 2026)
+Written before the reference is built and before alfresco is mapped at any attribution level for it.
+
+Why
+  The screen sets scope attribution computes were checked in both directions on realworld only. realworld has one
+  navigation construct inside a service; alfresco has eight at the baseline, so the service join, the part of the
+  analysis earlier work lacks, is exercised there and not on realworld.
+
+Application and screens
+  alfresco/alfresco-content-app at b88d47f, application directory projects/aca-content (corpus pin). The screens are
+  the 26 screen paths the independent route parser (index.mjs) declares for it; the catch-all is not a screen.
+
+How the reference is built (the same rules as ground-truth/realworld.json)
+  R1 A navigation site is a routerLink attribute or binding, or a Router.navigate / navigateByUrl call, in a file under
+     the application directory; test and spec files are excluded. navigate([], ...) that only changes the query
+     string of the current screen is excluded and recorded with its reason.
+  R2 The screens a site fires from are the screens whose routed component renders, transitively through template
+     element selectors, the component whose file holds the site. What the shell renders around the primary outlet is
+     on every screen.
+  R3 A site inside a service is attributed to the screens from which the enclosing method can actually be called,
+     found by searching for its callers, not to every component that injects the service.
+  R4 Each site records its target and a one-line reason; sites whose screens cannot be determined from the source are
+     listed separately with the reason, not guessed.
+  R5 The reference is built by an AI assistant from the application sources alone. The builder is not given the
+     uigraph graph, its databases or any extractor output, and the thesis says so. It is not independent of the
+     analysis's relations, which it applies by hand, as for realworld.
+
+Scoring
+  score-ground-truth.mjs scores the levels owned, nesting, rooted, outlet, full and class, each mapped from the frozen
+  extractor (packages = c42f220) with UIGRAPH_SCOPE_LAYERS, over the sites in the application directory. Sites the
+  graph places that the reference does not list are reported as the reference's misses, and the reference is not
+  edited after scoring except to add a missed site with its own reading, which is reported.
+
+Predictions (written now)
+  A1 The full level has higher recall than outlet, because only it places the service sites.
+  A2 Precision of the full level is at least as high as the class level's.
+  A3 Some pairs disagree in each direction; the result is reported whatever it is.
