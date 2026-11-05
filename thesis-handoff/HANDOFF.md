@@ -4,6 +4,8 @@ Read this first. It is written for a Claude Code session continuing the work. Se
 newest come first; the section "Current state, 5 Nov 2026" was checked against the repository on 5 Nov and
 supersedes every older section where they disagree.
 
+- **Citation audit, 5 Nov 2026:** `citation-audit.md` checks all 84 bib entries (metadata all correct; 24 full text, 47 abstract/metadata, 7 overstated, 4 unverifiable, 2 uncited); its top list names 8 sentences to fix, unapplied.
+
 ## Who and what
 
 - Student: Duy Khanh Tran (official name order as in Sisu), student number 103503394, Aalto SCI, CS (Algorithms).
