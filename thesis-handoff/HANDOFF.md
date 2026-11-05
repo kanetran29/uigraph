@@ -39,15 +39,23 @@ supersedes every older section where they disagree.
   `loadChildren: () => import('./+admin/routes')`) and no route at all on angular-spotify (router provided inside an
   Nx library module). Reported in ch5 `sec:res-heldout` (Table `tab:heldout`), abstract, ch1, ch6, ch7. Not repaired,
   by the preregistration. These two forms are the first thing to extend after submission.
-- **May-reason census (in progress at the end of this session):** behaviour-neutral flag `UIGRAPH_MAY_REASONS=1` in
-  the adapter (uncommitted in `packages/`), `route-oracle/may-reasons.mjs`, equivalence proved on all six apps
-  (reasons-stripped graphs identical to c42f220). First Opus review found 3 blockers (missing reasons at template and
-  members branches, a mislabelled attribution reason, MayToolUncertain's meaning); a fix workflow was running. Early,
-  unverified headline: about 98 % of may-only constructs have at least one application-semantic reason. Not in the
-  thesis yet; do not use until the re-review passes. Check `git status` for its uncommitted files.
+- **May-reason census (done, committed `6df6c62`, thesis `c32cf06`):** behaviour-neutral switch
+  `UIGRAPH_MAY_REASONS=1` in the adapter; `route-oracle/may-reasons.mjs`; equivalence on all six apps
+  (`results-may-reasons/equivalence.json`, re-checked by `remeasure.sh`). Two Opus reviews; all blockers fixed. Result
+  in ch5 Table `tab:mayreasons`, ch7, abstract: 1550 of 1575 may-only constructs sit behind an application decision the
+  extractor reads (guard/resolver 1440), 25 are held by the extractor's uncertainty alone; mifos holds 1210. Open
+  minors from the second review (no census number changes): N3 the shared-reason anchored path omits `same screen`
+  (alternative definition would give TemplateSole 27, MayAppSemantics 626); N4 `flag && go()` vs `a(); go()` labelled
+  differently by path; N5 template-literal branches never record `resolver` (GuardAny low by at most 10); N6 two
+  template labels could hide extractor causes (none in the corpus). Run the remeasure loops with bash: zsh does not
+  word-split `$APPS` (it silently counted only realworld once on 5 Nov).
+- **Sweep re-recorded at `d05227c`** (c42f220 + the switch): 173/173 killed after re-expressing mutants 46, 59, 161
+  for the refactored source (`09b5938`). The extractor commit for the census and sweep is d05227c; every other final
+  figure is c42f220 (packages identical except the switch).
 - **Ablation idea (student, later):** per-feature ablation of the final version's extraction (lazy boundaries,
   constant paths, ...) with measurement flags, like `UIGRAPH_IGNORE_GUARDS`; attribution levels and guard-only exist.
-- **Build at `c330229`:** 153 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page. Nothing pushed.
+- **Build at `09b5938`:** 154 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page. Nothing pushed, nothing
+  tagged. Usage at the end of the session: 8 % of the week.
 
 ## Current state, 5 Nov 2026
 
