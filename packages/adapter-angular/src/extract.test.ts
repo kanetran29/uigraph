@@ -1198,3 +1198,67 @@ describe('extractGraph — controls mode reads a guarded binding as conditional'
     expect(tier('b')).toBe('may')
   })
 })
+
+describe('extractGraph — the forms the end-to-end check found unread (mifos)', () => {
+  const project = inMemory({
+    '/app/app.routes.ts': `import type { Routes } from '@angular/router'
+import { View } from './view.component'
+import { General } from './general.component'
+import { Personal } from './personal.component'
+import { Action } from './action.component'
+import { Loan } from './loan.component'
+export const routes: Routes = [
+  { path: 'clients/:clientId', component: View, children: [
+    { path: '', redirectTo: 'general', pathMatch: 'full' },
+    { path: 'general', component: General },
+    { path: 'personal-data', component: Personal },
+    { path: 'actions/:name', component: Action },
+  ] },
+  { path: 'loans/:loanId', component: Loan, children: [{ path: 'actions/:action', component: Action }] },
+]`,
+    '/app/view.component.ts': `import { Component } from '@angular/core'
+import { Router, ActivatedRoute } from '@angular/router'
+@Component({ selector: 'x-view', standalone: true, template: '<a [routerLink]="[\\'./personal-data\\']">p</a><b (click)="act(n)"></b><router-outlet></router-outlet>' })
+export class View {
+  n = 'x'
+  constructor(private router: Router, private route: ActivatedRoute) {}
+  act(name: string) { this.router.navigate([\`actions/\${name}\`], { relativeTo: this.route }) }
+  abs(id: string, a: string) { this.router.navigate([\`/loans/\${id}/actions/\${a}\`]) }
+}`,
+    '/app/loan.component.ts': `import { Component } from '@angular/core'
+import { Router, ActivatedRoute, NavigationExtras } from '@angular/router'
+@Component({ selector: 'x-loan', standalone: true, template: '<b (click)="go(n)"></b><router-outlet></router-outlet>' })
+export class Loan {
+  n = 'x'
+  constructor(private router: Router, private route: ActivatedRoute) {}
+  go(actionName: string) {
+    const extras: NavigationExtras = { queryParams: { a: 1 }, relativeTo: this.route }
+    this.router.navigate(['actions', actionName], extras)
+  }
+}`,
+    '/app/general.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-general', standalone: true, template: '<p>g</p>' })\nexport class General {}`,
+    '/app/personal.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-personal', standalone: true, template: '<p>p</p>' })\nexport class Personal {}`,
+    '/app/action.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-action', standalone: true, template: '<p>a</p>' })\nexport class Action {}`,
+  })
+  const { graph } = extractGraph(project, '/app', { attribution: true })
+  const members = new Map(graph.nodes.map((n) => [n.id, n.scope?.members ?? [n.id]]))
+  const has = (from: string, to: string) =>
+    graph.edges.some((e) => e.to === routeId(to) && (members.get(e.from) ?? [e.from]).includes(routeId(from)))
+
+  it('reads a template literal inside a commands array as its static text with the interpolation as a parameter', () => {
+    expect(has('/clients/:clientId', '/clients/:clientId/actions/:name')).toBe(true)
+  })
+
+  it('cuts a prefix at its first parameter, so a parameter inside it does not hide the routes below', () => {
+    expect(has('/clients/:clientId', '/loans/:loanId/actions/:action')).toBe(true)
+  })
+
+  it('evaluates relativeTo passed through an options variable', () => {
+    expect(has('/loans/:loanId', '/loans/:loanId/actions/:action')).toBe(true)
+  })
+
+  it('resolves a relative link against the route of the component that holds it, on every child screen', () => {
+    expect(has('/clients/:clientId/general', '/clients/:clientId/personal-data')).toBe(true)
+    expect(has('/clients/:clientId/general', '/clients/:clientId/actions/:name')).toBe(true)
+  })
+})

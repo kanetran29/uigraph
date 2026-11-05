@@ -392,6 +392,21 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
   // The screens a scope anchor stands for, filled as anchors are minted, and every screen, which the shell stands for.
   const screenIds = new Set(routes.map((r) => r.nodeId))
   const anchorMembers = new Map<string, Set<string>>()
+  // The screen each scope anchor is the subtree of.
+  const anchorRoot = new Map<string, string>()
+  /**
+   * The screen whose route renders the component in `file` where a site fired from `from` is: the
+   * nearest screen at or above `from` (an anchor's root, for an anchor) whose route names that
+   * component. Angular resolves a relative link or a call relative to the injected route against
+   * that route, not against the screen a child outlet shows below it. Undefined when no such
+   * screen is on the chain, as for a component nested in a template or a service.
+   */
+  const holderRoute = (from: string, file: string): string | undefined => {
+    for (let id: string | null | undefined = anchorRoot.get(from) ?? from; id; id = routeByNodeId.get(id)?.parentNodeId) {
+      if (componentByNodeId.get(id) === file) return id
+    }
+    return undefined
+  }
 
   // A screen is a ROUTE, not a component: one component serving several routes
   // (/login and /register on one AuthComponent) is several states. Label those
@@ -463,6 +478,8 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
    * the `.html` path and a line within it, and pairing that line with the component's `.ts` path
    * pointed published dead-link citations at a `.ts` line that holds no link. Each may edge passes
    * the conditions that hold it at may to `pushEdge`, which keeps them under the measurement flag.
+   * A relative target is resolved against the route that renders the component holding it
+   * (`holderRoute`), which on a child screen is the route above it, not the child's own.
    */
   function emitTargets(from: string, targets: RawTarget[], file: string, note: boolean, capMay = false): void {
     for (const t of targets) {
@@ -470,14 +487,14 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         // Angular resolves a commands array against the current route only when the link is
         // a template one or the call passes `relativeTo`; without that the base is the root.
         // Either way a leading `.` or `..` is resolved — leaving it raw matches nothing.
-        const base = t.relative ? pathByNodeId.get(from) : '/'
+        const holder = t.relative ? holderRoute(from, file) : undefined
+        const base = t.relative ? pathByNodeId.get(holder ?? from) : '/'
         // A URL is parsed as navigateByUrl parses it; a command keeps every character but the slash.
         const parsed = t.url ? urlPath(t.ti.value) : { path: t.ti.value, aux: false }
         if (parsed === null) continue
         const value = resolveRelativeTarget(parsed.path, base)
-        // A relative target resolves against the route of the component that holds the site, and
-        // the emitting node's path is that route only when the node is the component's own route.
-        const baseUnknown = !parsed.path.startsWith('/') && (t.baseUnknown === true || (t.relative === true && componentByNodeId.get(from) !== file))
+        // A relative target resolves against the route of the component that holds the site; where no screen on the chain renders that component, the base is not known.
+        const baseUnknown = !parsed.path.startsWith('/') && (t.baseUnknown === true || (t.relative === true && holder === undefined))
         // Angular throws on a command that climbs above the root, so the navigation never runs.
         if (t.relative === true && !baseUnknown && climbsAboveRoot(parsed.path, base)) {
           if (note) soundiness.push({ kind: 'relative-above-root', file: t.file ?? file, loc: t.loc, detail: `relative target "${parsed.path}" climbs above the root from ${base}, which Angular rejects (NG04005), so it navigates nowhere` })
@@ -596,7 +613,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         const v = verdict(levelsByNodeId.has(from) ? from : undefined)
         pushEdge(from, target.nodeId, t, v.modality, v.confidence, v.guardText, file, v.why)
       } else if (t.ti.kind === 'template') {
-        const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(from) : '/')
+        const prefix = resolveRelativeTarget(t.ti.staticPrefix, t.relative ? pathByNodeId.get(holderRoute(from, file) ?? from) : '/')
         const cands = matchPrefix(prefix, routeLikes)
         if (note) soundiness.push({ kind: 'over-approximation', file: t.file ?? file, loc: t.loc, detail: `non-literal target prefix "${prefix}" over-approximated to ${cands.length} route(s)` })
         for (const cand of cands) {
@@ -675,6 +692,7 @@ export function extractGraph(project: Project, projectDir: string, opts: Extract
         anchors.set(root, id)
         const members = [root, ...[...scopes.subtreeOf.get(root)!].filter((m) => m !== root).sort()]
         anchorMembers.set(id, new Set(members))
+        anchorRoot.set(id, root)
         nodes.push({ id, route: null, componentPath: null, label: `subtree of ${pathByNodeId.get(root) ?? root}`, kind: 'scope', scope: { kind: 'subtree', root, members } })
       }
       return id

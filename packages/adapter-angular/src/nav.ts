@@ -283,8 +283,9 @@ function joinCommands(segs: string[]): string {
 
 /**
  * Classify a commands array from its already-separated parts, resolving any part that is a
- * name rather than a literal. All parts static is a literal; a static head followed by a part
- * that is not is a prefix; nothing static is dynamic.
+ * name rather than a literal and reading a template literal by its static text. All parts static
+ * is a literal; a static head followed by parts that are not is a prefix, cut at the first part
+ * that is not; nothing static is dynamic.
  */
 function classifyCommandParts(parts: string[], sf: SourceFile | undefined): TargetInfo {
   if (parts.length === 0) return { kind: 'same-screen' }
@@ -293,6 +294,19 @@ function classifyCommandParts(parts: string[], sf: SourceFile | undefined): Targ
   let holes = 0
   let known = 0
   for (const [i, p] of parts.entries()) {
+    const tpl = templateCommand(p)
+    if (tpl !== null && i === 0) {
+      for (const piece of tpl.split('/')) {
+        if (piece.includes('\u0000')) { segs.push(':param'); holes++ }
+        else { segs.push(piece); if (piece !== '') known++ }
+      }
+      continue
+    }
+    if (tpl !== null && !tpl.includes('\u0000')) {
+      segs.push(tpl.replace(/\//g, '%2F'))
+      known++
+      continue
+    }
     const lit = /^'([^']*)'$/.exec(p) ?? /^"([^"]*)"$/.exec(p)
     if (lit) {
       // Angular splits only the first command on slashes; a later string is one segment, its
@@ -320,12 +334,24 @@ function classifyCommandParts(parts: string[], sf: SourceFile | undefined): Targ
   // A trailing hole says nothing about what follows, so it stays a prefix; a hole in the
   // middle leaves a pattern a single declared route can satisfy.
   if (segs[segs.length - 1] === ':param') {
-    const head = joinCommands(segs.slice(0, segs.length - holes))
+    const head = joinCommands(segs.slice(0, segs.indexOf(':param')))
     return { kind: 'template', staticPrefix: head.endsWith('/') ? head : head + '/' }
   }
   // The pattern pins the screen only if one declared route satisfies it, and the matcher does
   // not check that it is the only one, so the edge is offered at may rather than must.
   return { kind: 'literal', value: path, holes: true }
+}
+
+/**
+ * The text of a template literal command, each interpolation replaced by a NUL, or null when the
+ * command is not a template literal the reader can split. Angular splits only the first command
+ * on slashes, so there a segment holding an interpolation is a parameter and the rest is static
+ * (`actions/${name}` -> `actions/:param`); a later command is one segment whatever it holds.
+ */
+function templateCommand(p: string): string | null {
+  if (!/^`[^`]*`$/.test(p)) return null
+  const text = p.slice(1, -1).replace(/\$\{[^{}]*\}/g, '\u0000')
+  return text.includes('${') ? null : text
 }
 
 /**
@@ -364,7 +390,7 @@ function splitTopLevel(s: string): string[] {
       if (ch === quote) quote = ''
       continue
     }
-    if (ch === "'" || ch === '"') {
+    if (ch === "'" || ch === '"' || ch === '`') {
       quote = ch
       cur += ch
       continue
@@ -429,7 +455,7 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
       const arg0 = call.getArguments()[0]
       // `navigate(x)` takes a commands array. Written out, every element counts, not only the
       // first: `['/clients', id]` is a prefix, not the literal `/clients`.
-      const extras = call.getArguments()[1]
+      const extras = constObjectLiteral(call.getArguments()[1])
       const relativeTo = extras && Node.isObjectLiteralExpression(extras) ? extras.getProperty('relativeTo') : undefined
       const relative = relativeTo !== undefined
       const baseUnknown = extras !== undefined && (!Node.isObjectLiteralExpression(extras) ||
@@ -442,6 +468,20 @@ export function routerCallTargets(sf: SourceFile): RawTarget[] {
     }
   }
   return out
+}
+
+/**
+ * The navigation options a call passes: the expression itself, or, when it names a `const`
+ * initialised with an object literal (`const extras: NavigationExtras = { relativeTo: this.route }`),
+ * that literal, which the name holds on every execution.
+ */
+function constObjectLiteral(expr: Node | undefined): Node | undefined {
+  if (!expr || !Node.isIdentifier(expr)) return expr
+  const decl = expr.getSymbol()?.getDeclarations()[0]
+  if (!decl || !Node.isVariableDeclaration(decl)) return expr
+  const init = decl.getInitializer()
+  const isConst = decl.getVariableStatement()?.getDeclarationKind() === 'const'
+  return isConst && init && Node.isObjectLiteralExpression(init) ? init : expr
 }
 
 /** Nearest enclosing if/ternary/&& condition as symbolic text, or null. */
