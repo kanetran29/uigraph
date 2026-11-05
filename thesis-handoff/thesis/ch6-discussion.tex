@@ -156,9 +156,10 @@ Tool developed with the evaluation, on the same corpus
 Every figure measured on the six applications is in-sample and fitted to this corpus; the extractor,
 the independent route parser, the mutation harness and the structural reference were corrected against
 the applications they are scored on.
-The structural reference guided two repairs of the extractor.
-& The end-to-end check comes closest to an out-of-sample test: the extractor was fixed at its final
-commit before the suites' logs were read, and nothing was repaired after.
+The structural reference guided two repairs of the extractor, and the end-to-end check three.
+& The end-to-end check came closest to an out-of-sample test: the extractor was fixed before the
+suites' logs were read, and held \EtoEMifosHitUnfixed{} of \EtoEMifosPairs{} mifos pairs. The repairs
+it exposed make the final figure in-sample like the rest.
 Corrections are reported in full.
 & The archive cannot corroborate that order, since the preregistration and the logs were committed
 together.
@@ -207,10 +208,11 @@ test it independently. \\
 & Asks the same half of the question of the navigations two applications' own suites perform.
 On realworld it does not discriminate: the shell-rule level, which stands for earlier work, already
 contains all \EtoERealworldPairs{} observed pairs (\EtoERealworldHitRooted{}).
-On mifos the same level holds \EtoEMifosHitRooted{} of \EtoEMifosPairs{}, as many as the full analysis
-(Table~\ref{tab:earlier}).
+On mifos the same level holds \EtoEMifosHitRooted{} of \EtoEMifosPairs{} and the enclosing-route level
+\EtoEMifosHitOutlet{}, as many as the full analysis (Section~\ref{sec:res-earlier}), in a graph that holds
+\EtoEMifosGraphPairs{} of \EtoEMifosPossiblePairs{} possible pairs.
 & Hits and misses are reported in Section~\ref{sec:res-e2e}.
-& Two applications only. \\
+& Two applications only; the mifos figure after the repairs is in-sample. \\
 \quad Rendered-interface check (Section~\ref{sec:res-scope})
 & Covers \ScopeApps{} of the six applications and answers half of the question; ran on
 \ScopeJudged{} of \ScopeScreens{} screens.
@@ -361,8 +363,8 @@ The list separates constructs read exactly, where a failure is a defect that Cha
 counts, from constructs approximated, where no completeness is claimed.
 Constructs of the approximated group still count in the construct denominator of
 Table~\ref{tab:ratios}, where they appear as dynamic, unplaced or attribution losses.
-A declared approximation can still cost transitions that the suites take; the end-to-end check measures
-that cost on mifos (Section~\ref{sec:res-e2e}).
+Before the repairs of Table~\ref{tab:repairs}, the end-to-end check found one such cost on mifos, the base of a
+relative link in a template shared with child tabs; no remaining miss is of this kind (Section~\ref{sec:res-e2e}).
 The first two rows were found by the runtime route oracle of Section~\ref{sec:res-probe} and not by
 reading the analysis.
 Both are places where the analysis is silent rather than approximate.
@@ -440,18 +442,16 @@ A later string element of a \texttt{navigate} command is one segment whatever it
 URL written there reaches whichever route matches it as one segment; the test-source cross-check shows
 such URLs among its misses. \\
 Navigation relative to the active route (\texttt{relativeTo})
-& The target depends on the route of the component holding the site; attribution makes it resolvable,
-once for each screen the edge is emitted from.
+& The target depends on the route of the component holding the site.
 A template \texttt{routerLink}, and a \texttt{Router.navigate} call whose options are an object literal
-with a \texttt{relativeTo} key, are resolved against that screen's path, applying a leading run of
-\texttt{.} and \texttt{..} segments; a call without \texttt{relativeTo}, and \texttt{navigateByUrl}, are
-resolved against the root.
-& The base is right only when the screen is the route of the component holding the site, and only then
-can the edge be must.
-Held at \emph{may} where the component is rendered under a route it does not own, where
-\texttt{relativeTo} is written in shorthand, passed through a variable or given another route, where a
-link binds its own \texttt{[relativeTo]} input, and where the edge leaves a node without a path of its
-own.
+with a \texttt{relativeTo} key (written out or held in a \texttt{const}), are resolved against the route
+that renders that component on the chain above the screen the edge fires from
+(Section~\ref{sec:anchored}), applying a leading run of \texttt{.} and \texttt{..} segments; a call
+without \texttt{relativeTo}, and \texttt{navigateByUrl}, are resolved against the root.
+& Held at \emph{may} where no route on that chain renders the component (a component nested in
+another's template), where \texttt{relativeTo} is written in shorthand, passed through any other
+variable or given another route, where a link binds its own \texttt{[relativeTo]} input, and where the
+edge leaves the shell.
 Such an edge can name the wrong screen, which the may tier admits and the must tier does not. \\
 Templates passed as values (\texttt{TemplateRef})
 & The template value is not followed from declaration to instantiation.
@@ -487,15 +487,15 @@ Computed targets, no static part
 & A target built at run time from values cannot be enumerated statically in general.
 A target with no static part, such as a \texttt{routerLink} whose value is an interpolation among them, is
 an edge into the \texttt{u\_}\,sink of the node it fires from.
-A template literal as an element of a commands array is read as a variable element.
 & Modality \emph{unknown}, confidence 0. \\
 Computed targets, static leading part
-& A static leading part (the head of a template literal, the left operand of a concatenation, or the
-constant elements before a trailing variable element of a commands array) gets one edge to every
-declared route that extends that prefix by at least one segment.
+& A static leading part (the head of a template literal, the left operand of a concatenation, or a
+commands array that ends in variable elements, read up to them, where a variable element before them,
+or an interpolation of a template literal that opens the array, stands for any one segment) gets one
+edge to every declared route that extends that prefix by at least one segment.
 An empty prefix connects the site to every declared route except the root.
-& Over-approximated into the \emph{may} tier, and incomplete: a prefix segment matches only an identical
-route segment, so a route with a parameter in that position is not a candidate. \\
+& Over-approximated into the \emph{may} tier, and incomplete: a static prefix segment matches only an
+identical route segment, so a route with a parameter in that position is not a candidate. \\
 Computed targets, commands array with trailing constants
 & An array whose variable element is followed by constant elements is read as a pattern and drawn as a
 single edge to the first declared route that matches it.
@@ -576,6 +576,48 @@ file imports; where none is imported, the analysis joins over all of them.
 & A note is recorded; a site can be attributed to screens on which its component is never rendered. \\
 \end{xltabular}
 \endgroup
+
+\subsection{Why the may tier is incomplete}
+\label{sec:may-incomplete}
+
+The may tier is read as an upper bound (Section~\ref{sec:model}), so a transition the application
+takes and the graph lacks is its defect, while an excess may edge is not. Table~\ref{tab:ceiling}
+sorts every transition still missing in the two suites (Section~\ref{sec:res-e2e}) and the two
+structural references (Section~\ref{sec:res-groundtruth}) by where its destination is fixed.
+\emph{Inside} the static boundary, the frontend source, a library under \texttt{node\_modules} or
+configuration committed to the repository fixes it, so a better reader recovers it: these rows are
+known limitations of this tool, not of static extraction. \emph{Outside} it, the backend supplies the
+target or the route, configuration is fetched at run time, or user input changes the destination
+screen. A third class, \emph{held}, is a suite pair the graph holds on the screen a redirect lands
+on, which the preregistered rule scores on the address asked for: no reader turns it into a hit, so it
+counts toward neither side. On alfresco every missing (site, screen) pair of the reference lies inside
+(\CeilGtAlfrescoInside{} of \CeilGtAlfrescoMissing{}); on mifos \CeilEtoEMifosInside{} of the
+\CeilEtoEMifosMissing{} missing suite pairs lies inside and \CeilEtoEMifosHeld{} is held; realworld misses
+nothing in either measure. A reader that recovered every inside miss would hold \CeilGtAlfrescoCeiling{} of
+alfresco's reference pairs (now \CeilGtAlfrescoNow{}) and \CeilEtoEMifosCeiling{} of mifos's suite pairs
+(now \CeilEtoEMifosNow{}). This is the static ceiling on these four measures, and on the references it is
+weak evidence: both apply the analysis's own relations (Section~\ref{sec:res-groundtruth}), so none of
+their pairs can lie outside the boundary, and realworld's was partly completed from the graph's output.
+Only the suites can show an outside miss, and on two applications they show none. The ceiling does not
+reach causes these measures do not exercise, such as the two Section~\ref{sec:res-losses} places beyond
+any static reader of a route table. It bounds the missing direction only: the excess of the may tier is
+not scored here, and the mifos graph holds \EtoEMifosGraphPairs{} of the \EtoEMifosPossiblePairs{} possible
+pairs (Section~\ref{sec:res-e2e}). The classes are the author's reading of each miss, recorded with its
+site in the repository; the script that joins them to the scores refuses a miss without a class and a class without a miss.
+
+\begin{table}[t]\footnotesize
+\caption{Why the graph still misses transitions: every remaining miss of the two suites and the two
+structural references, grouped by gap. \emph{Pairs} counts missing suite pairs and missing (site,
+screen) pairs of a reference.}
+\label{tab:ceiling}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}Xl>{\raggedright\arraybackslash}p{0.24\textwidth}r@{}}
+\toprule
+Gap & Example & Boundary & Fix & Pairs \\
+\midrule
+\TabCeilGaps
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Transfer to other frameworks}
 \label{sec:transfer}

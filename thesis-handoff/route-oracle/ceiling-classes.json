@@ -1,0 +1,86 @@
+{
+  "note": "Every transition the graph still misses at the final extractor, in the two suites (e2e-nav) and the two structural references (ground-truth), classed by where its destination is fixed. inside: the frontend source, a library under node_modules or configuration committed to the repository fixes it, so a better reader recovers it. outside: the backend, configuration fetched at run time, or user input fixes it. held: a suite pair the graph holds on the screen a redirect lands on, which the preregistered rule scores on the address asked for. Read by the author from the sources; ceiling.mjs refuses a miss without a class and a class without a miss.",
+  "misses": [
+    {
+      "source": "gt:alfresco",
+      "id": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
+      "boundary": "inside",
+      "gap": "Shell from a library (alfresco)",
+      "example": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
+      "fix": "read the shell route that @alfresco/adf-core/shell provides under node_modules and the extension JSON in the repository that fills it",
+      "evidence": "SidenavComponent is registered as the shell's app.layout.sidenav (assets/app.extensions.json); the shell component and its route come from @alfresco/adf-core/shell; deployment flags (docker/docker-entrypoint.d/30-sed-on-appconfig.sh) toggle plugin entries of the menu, not the shell, its header, user menu or the directives these sites are in"
+    },
+    {
+      "source": "gt:alfresco",
+      "id": "src/lib/components/common/user-info/user-info.component.html:1",
+      "boundary": "inside",
+      "gap": "Shell from a library (alfresco)",
+      "example": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
+      "fix": "read the shell route that @alfresco/adf-core/shell provides under node_modules and the extension JSON in the repository that fills it",
+      "evidence": "app-user-info is the app.user entry of the header's user menu in assets/app.extensions.json, rendered by the library shell; deployment flags (docker/docker-entrypoint.d/30-sed-on-appconfig.sh) toggle plugin entries of the menu, not the shell, its header, user menu or the directives these sites are in"
+    },
+    {
+      "source": "gt:alfresco",
+      "id": "src/lib/components/sidenav/directives/expansion-panel.directive.ts:50",
+      "boundary": "inside",
+      "gap": "Shell from a library (alfresco)",
+      "example": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
+      "fix": "read the shell route that @alfresco/adf-core/shell provides under node_modules and the extension JSON in the repository that fills it",
+      "evidence": "directive on sidenav menu elements; the sidenav is library shell content; deployment flags (docker/docker-entrypoint.d/30-sed-on-appconfig.sh) toggle plugin entries of the menu, not the shell, its header, user menu or the directives these sites are in"
+    },
+    {
+      "source": "gt:alfresco",
+      "id": "src/lib/components/sidenav/directives/action.directive.ts:51",
+      "boundary": "inside",
+      "gap": "Shell from a library (alfresco)",
+      "example": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
+      "fix": "read the shell route that @alfresco/adf-core/shell provides under node_modules and the extension JSON in the repository that fills it",
+      "evidence": "[action] directive on buttons inside the library shell's sidenav; deployment flags (docker/docker-entrypoint.d/30-sed-on-appconfig.sh) toggle plugin entries of the menu, not the shell, its header, user menu or the directives these sites are in"
+    },
+    {
+      "source": "gt:alfresco",
+      "id": "src/lib/components/sidenav/directives/menu-panel.directive.ts:48",
+      "boundary": "inside",
+      "gap": "Shell from a library (alfresco)",
+      "example": "src/lib/components/sidenav/components/sidenav-header.component.html:20",
+      "fix": "read the shell route that @alfresco/adf-core/shell provides under node_modules and the extension JSON in the repository that fills it",
+      "evidence": "directive on sidenav button-menu elements; the sidenav is library shell content; deployment flags (docker/docker-entrypoint.d/30-sed-on-appconfig.sh) toggle plugin entries of the menu, not the shell, its header, user menu or the directives these sites are in"
+    },
+    {
+      "source": "gt:alfresco",
+      "id": "src/lib/components/files/files.component.ts:143",
+      "boundary": "inside",
+      "gap": "Routed component nested in another screen's template (alfresco)",
+      "example": "src/lib/components/files/files.component.ts:143",
+      "fix": "attribute its sites to the screens of the component that nests it as well as to its own routes",
+      "evidence": "RepositoryViewComponent (routes /repository, /repository/:folderId) renders <aca-files>; attribute.ts skips a component reached by nesting when it is itself a route component (routeComponentScreens.has(c))"
+    },
+    {
+      "source": "gt:alfresco",
+      "id": "src/lib/components/files/files.component.ts:184",
+      "boundary": "inside",
+      "gap": "Routed component nested in another screen's template (alfresco)",
+      "example": "src/lib/components/files/files.component.ts:143",
+      "fix": "attribute its sites to the screens of the component that nests it as well as to its own routes",
+      "evidence": "as files.component.ts:143"
+    },
+    {
+      "source": "e2e:mifos",
+      "id": "/login -> unmatched:/",
+      "boundary": "held",
+      "gap": "Redirected navigation (mifos)",
+      "example": "src/app/login/login.component.ts:121",
+      "fix": "none in the reader: the graph holds the pair on the screen the redirect lands on, and the rule scores the address asked for",
+      "evidence": "navigateByUrl(returnUrl) with no returnUrl goes to /, which the route table redirects to /home; the graph holds /login -> /home"
+    },
+    {
+      "source": "e2e:mifos",
+      "id": "/clients/:clientId/actions/:name -> /clients/:clientId",
+      "boundary": "inside",
+      "gap": "Default commands of a service navigation (mifos)",
+      "example": "src/app/clients/clients-view/client-actions/client-action-notifier.service.ts:34",
+      "fix": "read a parameter's default value and the route each caller passes as relativeTo",
+      "evidence": "notifyAndNavigate(key, route, commands = ['../../']) navigates relative to the caller's ActivatedRoute; from actions/:name that is /clients/:clientId, a declared screen. The graph records the site as unknown; it holds the pair on the redirect's landed screen only through another site (client-assign-staff.component.html:34)"
+    }
+  ]
+}

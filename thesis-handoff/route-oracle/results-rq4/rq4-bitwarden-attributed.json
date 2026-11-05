@@ -1,6 +1,6 @@
 {
   "harnessVersion": "mutate 1.9.1",
-  "extractor": "% Extractor c42f220, packages/ clean, harness clean when generated.",
+  "extractor": "% Extractor f26a302, packages/ clean, harness clean when generated.",
   "repoRoot": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/bitwarden",
   "appDir": "/Users/kanetran29/personal/uigraph-work/corpus-rq4/bitwarden/apps/web",
   "attribution": true,
@@ -8,7 +8,7 @@
   "quota": 8,
   "baseline": {
     "nodes": 249,
-    "edges": 529,
+    "edges": 578,
     "routes": 98
   },
   "discovered": {
@@ -560,7 +560,7 @@
       "subject": "exposed-passwords-report",
       "predict": "a node route containing \"exposed-passwords-report\" becomes \"exposed-passwords-report-mutated\"",
       "verdict": "DETECTED",
-      "touched": 14,
+      "touched": 16,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -647,7 +647,7 @@
           "/organizations/:organizationId/billing/payment-details-mutated -> /settings/account (click:routerLink)",
           "/organizations/:organizationId/billing/payment-details-mutated -> u_n_organizations_organizationId_billing_payment-details-mutated (click:routerLink)",
           "/organizations/:organizationId/billing/payment-details-mutated -> /settings/subscription/premium (navigate)",
-          "/organizations/:organizationId/billing/payment-details-mutated -> u_n_organizations_organizationId_billing_payment-details-mutated (navigate)"
+          "/organizations/:organizationId/billing/payment-details-mutated -> /organizations/:organizationId/vault (navigate)"
         ],
         "edgesRemoved": [
           "/organizations/:organizationId/vault -> /organizations/:organizationId/billing/payment-details (navigate)",
@@ -700,7 +700,7 @@
       "subject": "user-subscription",
       "predict": "a node route containing \"user-subscription\" becomes \"user-subscription-mutated\"",
       "verdict": "DETECTED",
-      "touched": 16,
+      "touched": 17,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -737,7 +737,7 @@
       "subject": "premium",
       "predict": "a node route containing \"premium\" becomes \"premium-mutated\"",
       "verdict": "DETECTED",
-      "touched": 10,
+      "touched": 11,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -768,7 +768,7 @@
       "subject": "add-plan",
       "predict": "a node route containing \"add-plan\" becomes \"add-plan-mutated\"",
       "verdict": "DETECTED",
-      "touched": 14,
+      "touched": 16,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],
@@ -803,7 +803,7 @@
       "subject": "passkey-report",
       "predict": "a node route containing \"passkey-report\" becomes \"passkey-report-mutated\"",
       "verdict": "DETECTED",
-      "touched": 14,
+      "touched": 16,
       "delta": {
         "witnessLinesRemoved": [],
         "witnessLinesAdded": [],

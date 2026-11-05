@@ -42,8 +42,8 @@
     },
     {
       "slug": "mifos",
-      "must": 15,
-      "unguarded": 15,
+      "must": 24,
+      "unguarded": 24,
       "guarded": 0,
       "sourceBehind": 0,
       "sites": 19

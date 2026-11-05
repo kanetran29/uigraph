@@ -132,7 +132,8 @@ function graphHits(g) {
 
 /**
  * Scores the logs in `dir` against its graph.json.gz, and against every graph-<name>.json.gz
- * beside it (a comparison graph, such as the one mapped without attribution) on the same pairs.
+ * beside it (a comparison graph, such as the one mapped without attribution) on the same pairs,
+ * on the address asked for and on the address landed on.
  */
 export function score(dir) {
   const g = readGz(join(dir, 'graph.json.gz'))
@@ -193,8 +194,8 @@ export function score(dir) {
     const m = /^graph-(.+)\.json\.gz$/.exec(f)
     if (!m) continue
     const v = graphHits(readGz(join(dir, f))).hit
-    const hits = [...runs[0].pairs.keys()].filter((k) => v.has(k.split('\u0000').map(norm).join('\u0000'))).length
-    res.variants[m[1]] = { hit: hits, graphPairs: v.size }
+    const has = (k) => v.has(k.split('\u0000').map(norm).join('\u0000'))
+    res.variants[m[1]] = { hit: [...runs[0].pairs.keys()].filter(has).length, graphPairs: v.size, hitAfterRedirects: [...runs[0].after].filter(has).length }
   }
   return res
 }
@@ -216,6 +217,7 @@ for (const spec of a.app) {
   for (const [v, x] of Object.entries(r.variants)) {
     tex += `\\newcommand{\\${N}Hit${name(v)}}{${x.hit}}\n`
     tex += `\\newcommand{\\${N}GraphPairs${name(v)}}{${x.graphPairs}}\n`
+    tex += `\\newcommand{\\${N}HitAfterRedirects${name(v)}}{${x.hitAfterRedirects}}\n`
   }
   tex += `\\newcommand{\\${N}Stable}{${r.same ? 'yes' : 'no'}}\n`
 }

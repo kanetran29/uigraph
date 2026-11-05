@@ -63,5 +63,17 @@ test('a comparison graph is scored on the same pairs', () => {
   writeFileSync(join(dir, 'graph-noattr.json.gz'), gzipSync(JSON.stringify(noattr)))
   const r = score(dir)
   assert.equal(r.hit, 2)
-  assert.deepEqual(r.variants, { noattr: { hit: 1, graphPairs: 1 } })
+  assert.deepEqual(r.variants, { noattr: { hit: 1, graphPairs: 1, hitAfterRedirects: 1 } })
+})
+
+test('a comparison graph is also scored on the address a navigation landed on', () => {
+  const dir = fixture([
+    { fromPattern: '/a', url: '/c/7', urlAfterRedirects: '/c/7/general', pattern: '/c/:id/general' },
+  ])
+  const screen = (id, route) => ({ id, route, kind: 'screen' })
+  const older = { nodes: [screen('a', '/a'), screen('c', '/c/:id'), screen('cg', '/c/:id/general')], edges: [{ from: 'a', to: 'cg' }] }
+  writeFileSync(join(dir, 'graph-older.json.gz'), gzipSync(JSON.stringify(older)))
+  const r = score(dir)
+  assert.equal(r.variants.older.hit, 0)
+  assert.equal(r.variants.older.hitAfterRedirects, 1)
 })

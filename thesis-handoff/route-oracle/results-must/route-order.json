@@ -14,7 +14,7 @@
       "edgesWithout": 0,
       "sites": 0,
       "sitesWithout": 0,
-      "noted": false
+      "noted": true
     },
     {
       "slug": "ghostfolio",
@@ -42,8 +42,8 @@
     },
     {
       "slug": "mifos",
-      "edges": 15,
-      "edgesWithout": 15,
+      "edges": 24,
+      "edgesWithout": 24,
       "sites": 19,
       "sitesWithout": 19,
       "noted": true

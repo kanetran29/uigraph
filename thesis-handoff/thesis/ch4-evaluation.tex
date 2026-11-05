@@ -221,9 +221,9 @@ made by hand. The classes are tested in this order, and the first match wins:
 \item \emph{dynamic}: the source screen's routed component, or one above it, holds a site whose target the extractor records as unresolved;
 \item \emph{other}: none of these.
 \end{itemize} The base and dynamic classes were defined after the misses had been
-read. Because of the order, the dynamic count is what is left after base. On mifos every miss meets
-the dynamic test whatever the order, so that count says little alone, and
-Section~\ref{sec:res-e2e} names the sites.
+read. Because of the order, the dynamic count is what is left after base. On mifos every miss met
+the dynamic test whatever the order, so that count said little alone; Section~\ref{sec:res-e2e} names
+the sites, which were repaired after the check.
 
 The counting rules, three validity checks and predictions for each application were written down
 before any log was read, except for that departure. The checks are that the instrumented and the
@@ -427,12 +427,12 @@ but a partly different sample. \MutOverlap{} of its \MutSampled{} mutants are at
 may differ. \MutEarlierFailuresAbsent{} of the \MutEarlierFailures{} misses that were read are at no
 location of the final sample.
 
-Table~\ref{tab:repairs} lists every correction, one row each, in the order the chapters record them; the full record with commit hashes is in the accompanying repository. In the first column, \emph{figure} marks a correction made after an implausible or unwelcome figure was seen, \emph{panel} one from a red-team panel, \emph{review} one from a source review made with the assistant, and \emph{harness} one that changed the mutation harness. The reviews and panels were made with the AI assistant that the declaration at the front of this thesis describes, and every defect they reported was reproduced against the code before it was repaired.
+Table~\ref{tab:repairs} lists every correction, one row each, in the order the chapters record them; the full record with commit hashes is in the accompanying repository. In the first column, \emph{figure} marks a correction made after an implausible or unwelcome figure was seen, \emph{panel} one from a red-team panel, \emph{review} one from a source review made with the assistant, \emph{harness} one that changed the mutation harness, and \emph{end-to-end check} a gap in the extractor that the suites of Section~\ref{sec:res-e2e} exposed, repaired afterwards with a test for each. The reviews and panels were made with the AI assistant that the declaration at the front of this thesis describes, and every defect they reported was reproduced against the code before it was repaired.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{2.5pt}
 \begin{xltabular}{\textwidth}{@{}YYYY@{}}
 \caption{The corrections made to the instruments. \emph{Found by} names the method as the main
-text does; \emph{figure}, \emph{panel}, \emph{review} and \emph{harness} are explained in the text above.}
+text does; \emph{figure}, \emph{panel}, \emph{review}, \emph{harness} and \emph{end-to-end check} are explained in the text above.}
 \label{tab:repairs}\\
 \toprule
 Found by & What was wrong & What changed & Effect on the figures \\
@@ -582,7 +582,23 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
 \emph{Panel}: a review panel checking the scorer against the preregistration.
   & The end-to-end scorer compared a redirected navigation on the landed address, against the preregistration.
   & The scorer applies the preregistered rule.
-  & mifos scores \EtoEMifosHit{} of \EtoEMifosPairs{} pairs; \EtoEMifosRedirect{} were redirected, \EtoEMifosHitRedirect{} of them hit. The earlier, landed-target figure was \EtoEMifosHitAfterRedirects{} of \EtoEMifosPairsAfterRedirects{}. \\
+  & mifos then scored \EtoEMifosHitUnfixed{} of \EtoEMifosPairs{} pairs, \EtoEMifosRedirect{} of them redirected; the landed-target figure had been \EtoEMifosHitAfterRedirectsUnfixed{} of \EtoEMifosPairsAfterRedirects{}. \\
+\emph{End-to-end check}: mifos's suite missed transitions to action screens.
+  & A template literal inside a commands array (\texttt{navigate([\textasciigrave{}actions/}\allowbreak\texttt{\$\{name\}\textasciigrave{}])}) was read as a variable, so its target was recorded as unresolved.
+  & Its static text is read, each segment holding an interpolation a parameter.
+  & The client, group and savings views reach their action screens. \\
+\emph{Figure}: after that repair the re-measured mifos graph joined every pair of screens.
+  & A target prefix was cut at its first parameter, so the notifications tray's prefix, which opens with two parameters, was empty and the shell site reached every route.
+  & Only trailing parameters are dropped from a target prefix; a parameter inside it matches any one segment.
+  & The tray reaches the account screens its targets name; the mifos graph holds \EtoEMifosGraphPairs{} of \EtoEMifosPossiblePairs{} possible pairs, against \EtoEMifosGraphPairsUnfixed{} before the repairs. \\
+\emph{End-to-end check}: the same.
+  & \texttt{relativeTo} passed in an options variable was not evaluated, so the loan view's actions were resolved from the root.
+  & A \texttt{const} initialised with an object literal is read as that literal.
+  & The loan view reaches its action screens. \\
+\emph{End-to-end check}: mifos's suite missed tab transitions.
+  & A relative target was resolved against the screen it fires on; a link in a parent's template, rendered with each child tab, named nothing mounted.
+  & It is resolved against the route that renders the component holding it (Section~\ref{sec:anchored}); the witness check applies the same rule (harness \HarnessVersion{}).
+  & With the two rows above, mifos holds \EtoEMifosHit{} of \EtoEMifosPairs{} suite pairs, against \EtoEMifosHitUnfixed{} before; every figure that depends on the extractor was re-measured. \\
 \end{xltabular}
 \endgroup
 
@@ -592,7 +608,7 @@ Several corrections in the protocol and harness group were found by a figure tha
 \label{sec:reproducibility}
 
 Every figure is generated by scripts at one commit of the extractor and written into the thesis as a
-macro. \texttt{REPRODUCE.md} in the repository lists the scripts and the commit each table comes from. The version evaluated throughout is extractor commit \texttt{c42f220} with harness 1.9.0 and mutation harness 1.9.1. The demotion-rule sweep and the may-reason census were recorded at \texttt{d05227c}, which adds only a measurement switch; with it off the graphs are unchanged on all six applications. Two groups are historical and were not re-measured: the rendered-interface check (Table~\ref{tab:scope}), and the runtime route oracle, run on 29 and 30 October against a graph whose extractor commit was not recorded and whose node total is its only link to the final graph.
+macro. \texttt{REPRODUCE.md} in the repository lists the scripts and the commit each table comes from. The version evaluated throughout is commit \texttt{f26a302}, whose extractor last changed at \texttt{2aac284}, with harness 1.10.0 and mutation harness 1.9.1; the demotion-rule sweep and the may-reason census were recorded at the same commit. The end-to-end figure before the repairs of Table~\ref{tab:repairs} comes from the graph of the previously evaluated commit, \texttt{c42f220}, kept beside the results. Two groups are historical and were not re-measured: the rendered-interface check (Table~\ref{tab:scope}), and the runtime route oracle, run on 29 and 30 October against a graph whose extractor commit was not recorded and whose node total is its only link to the final graph.
 
 \section{Summary}
 

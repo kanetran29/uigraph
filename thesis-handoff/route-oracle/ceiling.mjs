@@ -88,7 +88,7 @@ for (const s of sources) {
     if (c.boundary === 'inside') inside += m.weight
     if (c.boundary === 'held') held += m.weight
     const g = gaps.get(c.gap) ?? { gap: c.gap, example: c.example, boundary: c.boundary, fix: c.fix, pairs: 0 }
-    if (g.boundary !== c.boundary) throw new Error(`gap "${c.gap}" is classed both inside and outside`)
+    if (g.boundary !== c.boundary) throw new Error(`gap "${c.gap}" is classed with two boundaries`)
     g.pairs += m.weight
     gaps.set(c.gap, g)
   }

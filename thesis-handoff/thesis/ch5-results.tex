@@ -556,34 +556,36 @@ result does not bear on what the levels above \emph{rooted} add, because the \em
 contains every pair.
 \item \emph{mifos, hits.} The preregistered rule compares a redirected navigation on the address it asked
 for. The scorer's departure from this rule during development is listed in Table~\ref{tab:repairs}. None of the
-matched pairs is a must edge, as predicted. The hits of the redirect bucket rest only on a site whose target
-prefix was over-approximated to many routes, so they show that the target is reachable in the graph and not
-that the site was resolved. No other preregistered prediction is reported here.
+matched pairs is a must edge, as predicted. One of the \EtoEMifosHitRedirect{} hits of the redirect bucket
+rests only on the notifications tray, a shell site whose target, \texttt{/\$\{entityType\}/\$\{entityId\}/savings-accounts/\$\{id\}} and
+its siblings, keeps two leading parameters and so reaches every account screen from every screen. Such a
+hit shows that the target is reachable in the graph and not that the site was resolved. The same site
+makes the graph wide: it holds \EtoEMifosGraphPairs{} of the \EtoEMifosPossiblePairs{} possible pairs,
+against \EtoEMifosGraphPairsUnfixed{} before the repairs below, so a hit on mifos discriminates less than
+it did. No other preregistered prediction is reported here.
 \item \emph{mifos, misses.} Only the redirect class was preregistered, and its misses are not classified
-further. The other classes were defined after the misses had been read. Every miss meets the dynamic test
-whatever the order, so the dynamic count is only what is left after the others. The test fires on any
-unresolved site in the source component or above it, so it does not show that the missed navigation is that
-site. The preregistered five-class scheme and its prediction that misses would be mostly a scope too narrow
-or a site not read are not scored.
+further. The other classes were defined after the misses had been read, before the repairs below. Every
+remaining miss is in the redirect class (\EtoEMifosMissRedirect{} of \EtoEMifosMiss{}): the graph holds
+the pair on the screen the redirect lands on. For \CeilEtoEMifosInside{} of them a better reader would also
+hold the address asked for (Section~\ref{sec:may-incomplete}). They also meet the
+dynamic test, which fires on any unresolved site in the source component or above it, so that test does
+not show that a missed navigation is that site. The preregistered five-class scheme and its prediction
+that misses would be mostly a scope too narrow or a site not read are not scored.
 \end{itemize}
 
-The two post-hoc classes read as follows.
-
-\begin{itemize}
-\item \EtoEMifosMissDynamic{} misses are classed \emph{dynamic}: places the extractor does
-not read, not destinations only the run time knows. Three sites open an action screen with a template
-literal inside a commands array, which the reader treats as a variable and records as unresolved
-(Section~\ref{sec:approximations}), although the text is static up to the action name. In the loan
-view, \texttt{relativeTo} is passed through an options variable the reader does not evaluate.
-\item \EtoEMifosMissBase{} misses are classed \emph{base}, and are losses of a declared approximation, not repaired. The client
-view's template is rendered with each child tab and attributed to the subtree scope of that screen, so its relative links
-are resolved against the child's address, where they name nothing mounted. Angular resolves
-such a link against the route of the component that holds it. This is the base resolution
-Section~\ref{sec:deadlinks} names as this analysis's gap.
-\end{itemize}
-
-None of the misses was repaired: no other application with a runnable suite remains to test a repair,
-and a repair fitted to this check would be untested by it.
+Before the repairs the graph held \EtoEMifosHitUnfixed{} of the \EtoEMifosPairs{} pairs, and the
+post-hoc classes pointed at places the extractor did not read, not at destinations only the run time
+knows. Sites in the client, group and savings views open an action screen with a template literal inside
+a commands array, which the reader treated as a variable although the text is static up to the action
+name. In the loan view, \texttt{relativeTo} was passed through an options variable the reader did not
+evaluate. The client view's template is rendered with each child tab, and its relative links were
+resolved against the child's address, where they name nothing mounted; Angular resolves such a link
+against the route of the component that holds it (Section~\ref{sec:anchored}). These gaps were repaired
+after the check, each with a test, and every figure that depends on the extractor was re-measured with
+the repaired one, except the historical groups of Section~\ref{sec:reproducibility} (Table~\ref{tab:repairs}). The repairs follow rules of Angular's router and name no site, but
+this check found them and scores them, so the mifos figure after them is in-sample like every other
+figure; only the earlier one, \EtoEMifosHitUnfixed{}, comes from an extractor fixed before the logs were read. No other
+application with a runnable suite remains to test them.
 
 \subsection{What scope attribution adds}
 \label{sec:res-earlier}
@@ -626,8 +628,15 @@ Three things follow, with the figures in Table~\ref{tab:earlier}.
 
 \begin{itemize}
 \item \emph{Attribution puts more of the suites' transitions into the graph, in a wider graph.} The
-  extractor was fixed before the suites' logs were read (Section~\ref{sec:limitations}).
-\item \emph{The gain is already reached at the rooted level, the mechanism of earlier work.} Oshima and
+  extractor of the first measurement was fixed before the suites' logs were read; the repairs that
+  followed the check are in-sample (Section~\ref{sec:res-e2e}).
+\item \emph{The gain is reached by the mechanisms of earlier work.} On realworld the rooted level holds
+  every suite pair. On mifos it holds \EtoEMifosHitRooted{}; the other
+  \the\numexpr\EtoEMifosHitOutlet-\EtoEMifosHitRooted\relax{} hits have a child tab as source and a
+  site in the parent view, which the \emph{outlet} level, the enclosing routes of Rima et al.'s
+  specification (Section~\ref{sec:res-ablation}), places on the child screens. That level holds
+  \EtoEMifosHitOutlet{}, as many as the full analysis. These pairs were missed before the repairs, so the
+  difference is in-sample (Section~\ref{sec:res-e2e}). Oshima and
   Kishi's stated restrictions admit none of these applications, which declare route parameters and nested
   route trees. Rima et al.\ state no such restriction, and their specification covers this level
   (Section~\ref{sec:dynamic-spa}). Neither tool was run, so how they read these applications is not shown.
@@ -638,7 +647,7 @@ Three things follow, with the figures in Table~\ref{tab:earlier}.
   on every application of the corpus (Table~\ref{tab:loss}). The member-level call graph is more precise than
   a class-level join on \GTApp{}, but on alfresco the precision order reverses
   (Table~\ref{tab:groundtruth}). The levels above \emph{rooted} find the reference pairs rooted misses, and on
-  the two applications with suites they add no transition the suites take.
+  the two applications with suites the step above \emph{outlet} adds no transition the suites take.
 \end{itemize}
 
 Of the \AttrLost{} constructs the loss rules assign to attribution, it recovers \AttrRecovered{}
@@ -758,6 +767,9 @@ read by the final version, and empty in Table~\ref{tab:loss}.
 \texttt{canActivate} element written as a call) are read, and the guard rule is the router's own
 semantics (Section~\ref{sec:model}).
 \item The candidate class \emph{node not linked to its component}: empty on the final version.
+\item Three forms that the end-to-end check exposed: a template literal inside a commands array,
+\texttt{relativeTo} passed through a variable, and the base of a relative link in a template shared
+with child screens (Section~\ref{sec:res-e2e}, Table~\ref{tab:repairs}).
 \end{itemize}
 
 \paragraph{Still not read.} The final version does not read these causes.
@@ -772,9 +784,6 @@ its screens left out of the runtime route oracle's mounted set (\ProbeOutletScre
 entries).
 \item ghostfolio's spread of computed routes is a construct the extractor could read and does not.
 \ProbeMissedGhostfolio{} of the \ProbeMissed{} mounted addresses without a node sit behind it.
-\item Three readable forms that the end-to-end check exposed: a template literal inside a commands
-array, \texttt{relativeTo} passed through a variable, and the base resolution of a template shared
-with child tabs (Section~\ref{sec:res-e2e}).
 \end{itemize}
 
 \paragraph{Beyond a static reader of a route table.} No reader of a route table can resolve these.
@@ -912,8 +921,9 @@ application does not mount, usually the name the server uses rather than the one
 Those are the application's.
 \item \RoundTwoDeadLinkRelative{} come from a \emph{relative} \texttt{routerLink}, such as
 \texttt{[routerLink]="'edit'"} or \texttt{[routerLink]="['../../transactions']"}. Their target
-depends on resolving the link against the screen it fires from, and getting that base wrong is this
-analysis's gap before it is the application's defect.
+depends on the route the link resolves against, that of the component holding it
+(Section~\ref{sec:anchored}), so a wrong base is the analysis's question before it is the
+application's defect.
 \item \RoundTwoDeadLinkBaseUnknown{} are neither, because the result files do not record enough of
 the construct to say which it is. They are counted and not classified, rather than assigned to the
 half that would flatter the finding.

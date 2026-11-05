@@ -426,7 +426,10 @@
   "reasons": {
     "after await": 4,
     "in a callback": 3,
-    "in a helper method": 0,
+    "all callers conditional": 0,
+    "handler bound under a template condition": 0,
+    "handler not read": 0,
+    "callers not followed": 0,
     "in a helper function": 0,
     "under a branch": 10,
     "after early exit": 3,

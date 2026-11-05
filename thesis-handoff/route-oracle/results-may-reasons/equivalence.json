@@ -22,19 +22,19 @@
     "k8sdash": {
       "identical": true,
       "textIdentical": true,
-      "mayWitnesses": 83,
+      "mayWitnesses": 87,
       "mayWithoutReasons": 0
     },
     "bitwarden": {
       "identical": true,
       "textIdentical": true,
-      "mayWitnesses": 484,
+      "mayWitnesses": 546,
       "mayWithoutReasons": 0
     },
     "mifos": {
       "identical": true,
       "textIdentical": true,
-      "mayWitnesses": 13906,
+      "mayWitnesses": 14901,
       "mayWithoutReasons": 0
     }
   },

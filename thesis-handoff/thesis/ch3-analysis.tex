@@ -204,6 +204,17 @@ meaningful question for must edges, and for may edges whose target is a literal.
 meaningful question for edges the extractor produced by over-approximation. Treating it as
 one leads to spurious failures (Section~\ref{app:repairs}, Table~\ref{tab:repairs}).
 
+\textbf{The may tier as an upper bound.} As in a modal transition system \cite{larsen1988modal}, the
+may tier is read as an over-approximation. The must and may edges together are meant to contain every
+transition the application can take between its declared screens. An excess may edge, one the
+application never takes, is admitted by this reading and costs only precision. A transition the
+application takes and the graph lacks is the defect. No completeness theorem is claimed. The
+end-to-end check (Section~\ref{sec:res-e2e}) measures how far the graph falls short of the transitions
+the suites take; the structural references (Section~\ref{sec:res-groundtruth}) measure only how far it
+falls short of the analysis's own relations.
+Section~\ref{sec:may-incomplete} sorts what is still missing by whether it lies inside the static
+boundary.
+
 \section{Scope attribution}
 \label{sec:attribution}
 
@@ -432,6 +443,17 @@ The expansion of the anchored edge set equals the materialised edge set.
 
 \noindent The claim is tested rather than proved: Section~\ref{sec:res-after} compares the two
 sets on the corpus and on fixtures.
+
+\textbf{Relative targets.} A site attributed to several screens fires on each of them, but a relative
+target does not resolve against each of them. Angular resolves a \texttt{routerLink} without a
+leading slash, and a \texttt{Router.navigate} call relative to the injected route, against the route
+that renders the component holding the site. A component's template renders on every screen below
+its route, so a link in it that fires on a child screen still resolves against the component's own
+route. Write $\mathit{holder}(s, c)$ for the nearest route at or above screen $s$ whose component is
+$c$. A relative target at a site in component $c$ that fires on $s$ resolves against the path of
+$\mathit{holder}(s, c)$. Where no route on that chain renders $c$, as for a component nested in a
+template, a full target's base is not read and its edge is held at may (Table~\ref{tab:demotion}); a
+target prefix falls back to the address of $s$, and its edges are may edges as every prefix edge is.
 
 \section{Implementation}
 \label{sec:implementation}

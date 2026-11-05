@@ -88,15 +88,15 @@
       "both": 34
     },
     "k8sdash": {
-      "total": 11,
+      "total": 12,
       "any": {
         "async": 5,
         "branch": 1,
-        "template": 6,
-        "guard": 10,
+        "template": 7,
+        "guard": 11,
         "reader": 1,
         "attribution": 3,
-        "target": 4,
+        "target": 5,
         "sameScreen": 1
       },
       "sole": {
@@ -110,23 +110,23 @@
         "sameScreen": 0
       },
       "app": 5,
-      "tool": 6,
+      "tool": 7,
       "neither": 0,
-      "appAny": 11,
+      "appAny": 12,
       "toolOnly": 0,
-      "both": 6
+      "both": 7
     },
     "bitwarden": {
-      "total": 209,
+      "total": 210,
       "any": {
         "async": 61,
-        "branch": 84,
+        "branch": 85,
         "template": 29,
-        "guard": 201,
+        "guard": 202,
         "reader": 3,
-        "attribution": 94,
-        "target": 96,
-        "sameScreen": 5
+        "attribution": 95,
+        "target": 97,
+        "sameScreen": 6
       },
       "sole": {
         "async": 3,
@@ -139,23 +139,23 @@
         "sameScreen": 0
       },
       "app": 90,
-      "tool": 118,
+      "tool": 119,
       "neither": 1,
-      "appAny": 209,
+      "appAny": 210,
       "toolOnly": 0,
-      "both": 118
+      "both": 119
     },
     "mifos": {
-      "total": 1210,
+      "total": 1240,
       "any": {
         "async": 247,
-        "branch": 94,
-        "template": 632,
-        "guard": 1106,
+        "branch": 119,
+        "template": 637,
+        "guard": 1139,
         "reader": 121,
         "attribution": 82,
-        "target": 565,
-        "sameScreen": 152
+        "target": 494,
+        "sameScreen": 155
       },
       "sole": {
         "async": 5,
@@ -167,31 +167,31 @@
         "target": 4,
         "sameScreen": 0
       },
-      "app": 476,
-      "tool": 713,
-      "neither": 21,
-      "appAny": 1186,
+      "app": 485,
+      "tool": 642,
+      "neither": 113,
+      "appAny": 1216,
       "toolOnly": 24,
-      "both": 689
+      "both": 618
     }
   },
   "totals": {
-    "total": 1575,
-    "app": 655,
-    "tool": 891,
-    "neither": 29,
-    "appAny": 1550,
+    "total": 1607,
+    "app": 664,
+    "tool": 822,
+    "neither": 121,
+    "appAny": 1582,
     "toolOnly": 25,
-    "both": 866,
+    "both": 797,
     "any": {
       "async": 332,
-      "branch": 204,
-      "template": 734,
-      "guard": 1440,
+      "branch": 230,
+      "template": 740,
+      "guard": 1475,
       "reader": 127,
-      "attribution": 193,
-      "target": 709,
-      "sameScreen": 180
+      "attribution": 194,
+      "target": 640,
+      "sameScreen": 184
     },
     "sole": {
       "async": 10,
