@@ -1,0 +1,93 @@
+{
+ "posts-users-ui-ng": {
+  "both": 39,
+  "theirsOnly": 0,
+  "oursOnly": 0,
+  "theirs": 39,
+  "ours": 39
+ },
+ "heroes-angular": {
+  "both": 6,
+  "theirsOnly": 0,
+  "oursOnly": 0,
+  "theirs": 6,
+  "ours": 6
+ },
+ "airbus-inventory": {
+  "both": 20,
+  "theirsOnly": 4,
+  "oursOnly": 0,
+  "theirs": 24,
+  "ours": 20
+ },
+ "spring-petclinic-angular": {
+  "both": 163,
+  "theirsOnly": 11,
+  "oursOnly": 2,
+  "theirs": 174,
+  "ours": 165
+ },
+ "ever-traduora": {
+  "both": 112,
+  "theirsOnly": 18,
+  "oursOnly": 1,
+  "theirs": 130,
+  "ours": 113
+ },
+ "angular-jumpstart": {
+  "both": 30,
+  "theirsOnly": 0,
+  "oursOnly": 10,
+  "theirs": 30,
+  "ours": 40
+ },
+ "event-booking-mean": {
+  "both": 17,
+  "theirsOnly": 8,
+  "oursOnly": 0,
+  "theirs": 25,
+  "ours": 17
+ },
+ "realworld": {
+  "both": 63,
+  "theirsOnly": 4,
+  "oursOnly": 0,
+  "theirs": 67,
+  "ours": 63
+ },
+ "alfresco": {
+  "both": 2,
+  "theirsOnly": 32,
+  "oursOnly": 27,
+  "theirs": 34,
+  "ours": 29
+ },
+ "ghostfolio": {
+  "both": 0,
+  "theirsOnly": 97,
+  "oursOnly": 1039,
+  "theirs": 97,
+  "ours": 1039
+ },
+ "k8sdash": {
+  "both": 4,
+  "theirsOnly": 3,
+  "oursOnly": 389,
+  "theirs": 7,
+  "ours": 393
+ },
+ "bitwarden": {
+  "both": 1,
+  "theirsOnly": 173,
+  "oursOnly": 559,
+  "theirs": 174,
+  "ours": 560
+ },
+ "mifos": {
+  "both": 16,
+  "theirsOnly": 2438,
+  "oursOnly": 161347,
+  "theirs": 2454,
+  "ours": 161363
+ }
+}
