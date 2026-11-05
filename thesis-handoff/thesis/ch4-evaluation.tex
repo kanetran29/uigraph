@@ -500,94 +500,10 @@ may differ. \MutEarlierFailuresAbsent{} of the \MutEarlierFailures{} misses that
 location of the final sample.
 
 \subsection{Reproducibility}
-\label{sec:reproducibility}
 
-The four methods that read the sources are re-run by three scripts at one commit of the extractor.
-The first two refuse to start while the extractor's packages carry uncommitted changes.
-\begin{itemize}
-\item \texttt{regen-round.sh} runs \texttt{run-all.mjs} with the attribution pass disabled and then
-enabled. It refuses an application whose checkout is not at its fixed commit. It writes a results
-file with the raw output of each method. The ratio, loss, before-and-after and repair tables are
-generated from those two runs.
-\item \texttt{remeasure.sh} maps the corpus again and generates what is read off the graphs: the
-census, the expansion check, the witness check, the guard-only run, the call-graph counts, the
-ablation, the ground truth and the mutation run.
-\item \texttt{mutation-sweep.mjs} records the sweep of the demotion rules apart, because it runs the
-adapter's test suite once per rule (about forty minutes). It is refused if recorded on other rules than
-the commit's.
-\end{itemize}
-The scripts need the dependencies of the harness directory, installed with \texttt{npm ci}, and a
-checkout of the extractor at the evaluated commit. The extractor is run from its TypeScript source, so that the checkout being measured is not edited.
-
-The runtime route oracle is re-run by its own documented command, because it needs each application
-built in its development configuration and served to a browser. Its result files record no extractor
-commit or runtime version, so the guarantee below does not extend to them.
-
-Each figure from the first four methods is recorded with the extractor commit, the corpus commits, the
-harness version and the runtime version. Every result table is generated from those files, and prose
-that states a measured figure takes it from the same file as the table. Two of the scripts that produce tables stop
-rather than print a figure they cannot account for:
-\begin{itemize}
-\item the census stops unless every route entry falls in exactly one bucket and the buckets sum to the route total;
-\item the before-and-after comparison stops unless every attribution-category construct is either recovered or classified among the remaining
-losses.
-\end{itemize} That ensures the accounting closes, not that each category explains the construct's cause.
-Two limits remain. The evaluated commit must be one a reader can fetch, so the figures are
-reproducible only once it is published. And the harness version decides several figures independently
-of the extractor, so a result file is comparable only with one made by the same version.
-
-uigraph was developed within this thesis. The version evaluated throughout is the final version:
-extractor commit \texttt{c42f220}, harness 1.9.0 and mutation harness 1.9.1. The sweep of the demotion rules and the
-may-reason census were recorded at \texttt{d05227c}, whose adapter adds only a measurement switch
-that leaves the graphs unchanged. The
-tables of Section~\ref{sec:res-round2} were regenerated at that commit. Its development versions and
-the corrections between them are listed in Appendix~\ref{app:repairs}.
-
-Table~\ref{tab:provenance} gives, for each group of generated tables, the instrument and data it
-comes from. The table itself, the corpus table, the counts of the rejected candidates and the
-figures of superseded instruments are written by hand. Two groups are historical by design and
-labelled so where printed: the rendered-interface check and the runtime route oracle. They were not
-re-measured on the final version. The runtime route oracle was run on 29 and 30 October against a
-graph whose extractor commit was not recorded. Its node total equals the final screen count, and that
-agreement is its only link to the final graph. The construct prevalence counts read the sources only.
-
-\begin{table}[t]\footnotesize
-\caption{Provenance of the generated tables. \emph{Final} means measured on the instrument
-every other figure describes; \emph{historical} means measured on an earlier version of uigraph or its graph
-and printed as a record of it.}
-\label{tab:provenance}
-\begin{tabularx}{\textwidth}{@{}Y>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{3.6cm}@{}}
-\toprule
-Tables & Status & Measured with & Regenerated from \\
-\midrule
-Loss ledger, before and after, repair tables, plots & final & \texttt{c42f220}, harness 1.9.0 &
-\path{results-round2/final14.tgz}; the plots also \path{results-rq4/} \\
-Census, must tier, witness check, guard-only, route order, call graph, expansion & final &
-\texttt{c42f220} & the corpus graphs, via \texttt{remeasure.sh} \\
-Ablation, structural reference & final & \texttt{c42f220}; generated at later commits with identical \texttt{packages/} &
-\path{results-ablation/ablation.tgz} \\
-Second structural reference (alfresco) & final & \texttt{c42f220}, one map per level &
-\path{ground-truth/}\allowbreak\path{alfresco.json} \\
-Mutation (RQ4) & final & \texttt{c42f220}, mutate 1.9.1 & \path{results-rq4/} \\
-End-to-end navigation check & final & \texttt{c42f220} graphs (mifos \emph{rooted} mapped after scoring); suites run 3 Nov &
-\path{e2e-nav/results/}, via \texttt{score.mjs} \\
-Demotion-rule sweep & final & \texttt{d05227c}: \texttt{c42f220} plus the measurement switch &
-\path{results-must/mutation-sweep.json} \\
-Rendered-interface check (Table~\ref{tab:scope}) & historical & an earlier graph, before the call
-graph; check 1.3.0 & \path{route-probe/results/} \\
-Runtime route oracle (Tables~\ref{tab:probe}, \ref{tab:probe-closure}) & historical, 29--30 Oct &
-oracle 1.0.0, comparison 1.1.0; extractor commit not recorded & \path{route-probe/results/} \\
-Construct prevalence (Table~\ref{tab:approx-counts}) & no extractor & pinned corpus commits &
-\texttt{approx-counts.mjs} over the sources \\
-May-reason census (Table~\ref{tab:mayreasons}) & final & \texttt{d05227c}: \texttt{c42f220} plus a measurement switch &
-\path{results-may-}\allowbreak\path{reasons/} \\
-Earlier work's restrictions (Table~\ref{tab:world}) & no extractor & the independent route parser's final output &
-\path{results-round2/final14.tgz} \\
-\bottomrule
-\end{tabularx}
-
-
-\end{table}
+Every figure is generated by scripts at one commit of the extractor and written into the thesis as a
+macro. Appendix~\ref{sec:reproducibility} lists the scripts, and Table~\ref{tab:provenance} gives the
+commit each table comes from.
 
 \section{Summary}
 
