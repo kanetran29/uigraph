@@ -40,21 +40,21 @@ sections according to both distinctions.
 \toprule
 Work & Target & Static & Guards & Evaluation basis \\
 \midrule
-Yang et al.\ \cite{yang2015wtg,yang2018wtg} & Android windows & yes & no & 20 apps; manual on 6 \\
-Yang et al.\ \cite{yang2015callbacks} & Android callbacks & yes & context & manual vs.\ dynamic \\
-StoryDroid \cite{storydroid2019} & Android activities & yes & no & hand-built, 10 apps \\
-GoalExplorer \cite{goalexplorer2019} & Android screens & hybrid & no & manual, 36 apps \\
-ProMal \cite{promal2022} & Android windows & hybrid & no & 40 apps, F1 \\
-UI-CTX \cite{uictx2025} & Android widgets & yes & branches & 2000 labelled widgets \\
-Ricca and Tonella \cite{riccatonella2001} & server-rendered pages & semi & yes & manual \\
-WebUml \cite{webuml2004} & server-rendered pages & hybrid & yes & case study \\
-Tkachuk and Rajan \cite{tkachuk2013patent} & Struts, JavaServer Pages (JSP) & yes & outcome & not stated \\
-Crawljax \cite{crawljax2012} & Ajax DOM states & no & no & manual \\
-FeedEx, FRAGGEN \cite{feedex2013,fraggen2022} & DOM states & no & no & coverage \\
-Kurant \cite{kurant2025} & React components & yes & n/a & F1, no routing \\
-Oshima and Kishi \cite{oshima2018model} & Angular pages & yes & no & 6 apps, faults \\
-Rima et al.\ \cite{rima2026e2e} & Angular workflows & yes & conditions & 7 apps, tests run \\
-Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & yes & no & 4 apps, vs.\ ZAP \\
+Yang et al.\ \cite{yang2015wtg,yang2018wtg} & Android windows & \checkmark & \xmark & 20 apps; manual on 6 \\
+Yang et al.\ \cite{yang2015callbacks} & Android callbacks & \checkmark & context & manual vs.\ dynamic \\
+StoryDroid \cite{storydroid2019} & Android activities & \checkmark & \xmark & hand-built, 10 apps \\
+GoalExplorer \cite{goalexplorer2019} & Android screens & hybrid & \xmark & manual, 36 apps \\
+ProMal \cite{promal2022} & Android windows & hybrid & \xmark & 40 apps, F1 \\
+UI-CTX \cite{uictx2025} & Android widgets & \checkmark & branches & 2000 labelled widgets \\
+Ricca and Tonella \cite{riccatonella2001} & server-rendered pages & semi & \checkmark & manual \\
+WebUml \cite{webuml2004} & server-rendered pages & hybrid & \checkmark & case study \\
+Tkachuk and Rajan \cite{tkachuk2013patent} & Struts, JavaServer Pages (JSP) & \checkmark & outcome & not stated \\
+Crawljax \cite{crawljax2012} & Ajax DOM states & \xmark & \xmark & manual \\
+FeedEx, FRAGGEN \cite{feedex2013,fraggen2022} & DOM states & \xmark & \xmark & coverage \\
+Kurant \cite{kurant2025} & React components & \checkmark & n/a & F1, no routing \\
+Oshima and Kishi \cite{oshima2018model} & Angular pages & \checkmark & \xmark & 6 apps, faults \\
+Rima et al.\ \cite{rima2026e2e} & Angular workflows & \checkmark & conditions & 7 apps, tests run \\
+Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & \checkmark & \xmark & 4 apps, vs.\ ZAP \\
 \bottomrule
 \end{tabularx}
 \par\smallskip{\footnotesize\noindent\emph{Note.} Evaluation basis is a reference, a metric or the tool compared with, as each work states it.}

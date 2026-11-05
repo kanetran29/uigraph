@@ -68,8 +68,8 @@ They are detected in \MutFallibleDetected{} of \MutFallibleScored{} scored mutan
 graph (Table~\ref{tab:mutation}), split as follows.
 \begin{itemize}[nosep]
 \item Deleted \texttt{routerLink}: every one is detected.
-\item Retargeted calls: \MutRetargetDetected{} of \MutRetargetScored{}.
-\item Removed guards: \MutGuardDetected{} of \MutGuardScored{}.
+\item Retargeted calls: \MutRetargetDetected{}/\MutRetargetScored{}.
+\item Removed guards: \MutGuardDetected{}/\MutGuardScored{}.
 \end{itemize}
 The mutation harness was corrected during development after its misses had been read
 (Section~\ref{app:repairs}), so the clean result is not an independent test.
@@ -158,7 +158,7 @@ the independent route parser, the mutation harness and the structural reference 
 the applications they are scored on.
 The structural reference guided two repairs of the extractor, and the end-to-end check three.
 & The end-to-end check came closest to an out-of-sample test: the extractor was fixed before the
-suites' logs were read, and held \EtoEMifosHitUnfixed{} of \EtoEMifosPairs{} mifos pairs. The repairs
+suites' logs were read, and held \EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} mifos pairs. The repairs
 it exposed make the final figure in-sample like the rest.
 Corrections are reported in full.
 & The archive cannot corroborate that order, since the preregistration and the logs were committed
@@ -208,14 +208,14 @@ test it independently. \\
 & Asks the same half of the question of the navigations two applications' own suites perform.
 On realworld it does not discriminate: the shell-rule level, which stands for earlier work, already
 contains all \EtoERealworldPairs{} observed pairs (\EtoERealworldHitRooted{}).
-On mifos the same level holds \EtoEMifosHitRooted{} of \EtoEMifosPairs{} and the enclosing-route level
+On mifos the same level holds \EtoEMifosHitRooted{}/\EtoEMifosPairs{} and the enclosing-route level
 \EtoEMifosHitOutlet{}, as many as the full analysis (Section~\ref{sec:res-earlier}), in a graph that holds
-\EtoEMifosGraphPairs{} of \EtoEMifosPossiblePairs{} possible pairs.
+\EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} possible pairs.
 & Hits and misses are reported in Section~\ref{sec:res-e2e}.
 & Two applications only; the mifos figure after the repairs is in-sample. \\
 \quad Rendered-interface check (Section~\ref{sec:res-scope})
 & Covers \ScopeApps{} of the six applications and answers half of the question; ran on
-\ScopeJudged{} of \ScopeScreens{} screens.
+\ScopeJudged{}/\ScopeScreens{} screens.
 & Ran on an earlier graph than the final call graph.
 & A predicted link missing from the DOM is equally a link rendered only to a signed-in user, so it
 cannot convict over-attribution. \\

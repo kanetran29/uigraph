@@ -62,7 +62,7 @@ The two readers still disagree about a handful of addresses. Two qualifications 
 
 \begin{itemize}
 \item The denominator is the screens a \emph{static reader} can enumerate. Against the addresses
-the running framework mounts, the same node set is \ProbeNodes{} of \ProbeScreens{}
+the running framework mounts, the same node set is \ProbeNodes{}/\ProbeScreens{}
 (Section~\ref{sec:res-probe}). Almost all of the difference is one construct in one application
 that the extractor declares unread.
 \item The two static readers reached their agreement partly by being corrected against each other,
@@ -187,7 +187,7 @@ construct is \emph{recovered} if it was lost to attribution in the baseline and 
 edge after attribution.
 
 \begin{table}[t]\footnotesize
-\caption{Before and after scope attribution on the final evaluated snapshot.}
+\caption{Before $\to$ after scope attribution, on the final evaluated snapshot.}
 \label{tab:before-after}
 \setlength{\tabcolsep}{4pt}
 \TabBeforeAfter
@@ -335,7 +335,7 @@ per-screen query would return the whole site list on every screen. The ratio bet
 measures what the analysis contributes (Table~\ref{tab:scopebaseline}).
 
 \begin{table}[t]\small
-\caption{The computed attribution against assigning every site to every screen.}
+\caption{The computed attribution against scope $\top$ for every site.}
 \label{tab:scopebaseline}
 \TabScopeBaseline
 \par\smallskip{\footnotesize\noindent\emph{Note.} A site is a source construct a witness cites; an edge anchored at a scope is counted over the screens that scope stands for, since counting it at its anchor would understate the analysis's breadth. \emph{Mean scope} is the attributed pairs per site.}
@@ -434,9 +434,9 @@ full analysis is less precise than both the lower levels and the class join.
 \item \emph{The reference is not independent of the graph.} The \GTApp{} reference was completed in its
   first version with nine header sites the scorer reported from the graph. Its precision is therefore
   weakest as evidence where the shell dominates.
-\item \emph{The shell dominates.} On \GTApp{}, \GTShellSites{} of the \GTSites{} sites are placed on every
-  screen and supply \GTShellPairs{} of the \GTPairs{} pairs, and every level from \emph{rooted} upward places
-  them trivially. On alfresco, \GTAlfShellSites{} of the sites, \GTAlfShellPairs{} of the \GTAlfPairs{}
+\item \emph{The shell dominates.} On \GTApp{}, \GTShellSites{}/\GTSites{} sites are placed at
+  $\top$ and supply \GTShellPairs{}/\GTPairs{} pairs, and every level from \emph{rooted} upward places
+  them trivially. On alfresco, \GTAlfShellSites{} of the sites, \GTAlfShellPairs{}/\GTAlfPairs{}
   pairs, sit in a shell that the application takes from a library outside its sources. No level reads
   it, so every level misses all but at most one of those pairs. The off-shell column is the one where
   attribution decides.
@@ -460,14 +460,14 @@ full analysis is less precise than both the lower levels and the class join.
 \item \emph{All of the full level's excess on alfresco is one config-driven site.} The \GTAlfFullExcess{} excess
   pairs are at \GTAlfFullExcessSites{} site, \texttt{navigateToSearch}, whose only caller is an effect
   triggered by a toolbar button declared in the extension configuration, which the analysis does not
-  read, so it places the site on every screen at the may tier. Most of the pairs the full analysis adds over
+  read, so it places the site at $\top$, at the may tier. Most of the pairs the full analysis adds over
   \emph{outlet} come from this placement. The class join's \GTAlfClassExcess{} excess pairs are at the same
   site. The two sites of \texttt{navigateBack} are placed exactly on the two search screens their only caller
   renders.
-\item \emph{One undetermined site is placed on every screen} by the full and class levels, because no source
+\item \emph{One undetermined site is placed at $\top$} by the full and class levels, because no source
   dispatches its action. It is not scored; scored as firing from nowhere, it would add to the excess of both.
-\item \emph{The protocol's predictions.} The first (A1), that the full level recalls more than \emph{outlet},
-  held. The second (A2), that its precision is at least the class join's, did not.
+\item \emph{The protocol's predictions.} The first (A1), that the full level recalls more than \emph{outlet}:
+  \checkmark. The second (A2), that its precision is $\geq$ the class join's: \xmark.
 \end{itemize}
 
 What the two references establish is narrower than soundness. Both apply the analysis's own relations,
@@ -521,12 +521,12 @@ matched pairs is a must edge, as predicted. One of the \EtoEMifosHitRedirect{} h
 rests only on the notifications tray, a shell site whose target, \texttt{/\$\{entityType\}/\$\{entityId\}/savings-accounts/\$\{id\}} and
 its siblings, keeps two leading parameters and so reaches every account screen from every screen. Such a
 hit shows that the target is reachable in the graph and not that the site was resolved. The same site
-makes the graph wide: it holds \EtoEMifosGraphPairs{} of the \EtoEMifosPossiblePairs{} possible pairs,
-against \EtoEMifosGraphPairsUnfixed{} before the repairs below, so a hit on mifos discriminates less than
+makes the graph wide: it holds \EtoEMifosGraphPairsUnfixed{} $\to$ \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} possible pairs,
+before $\to$ after the repairs below, so a hit on mifos discriminates less than
 it did. No other preregistered prediction is reported here.
 \item \emph{mifos, misses.} Only the redirect class was preregistered, and its misses are not classified
 further. The other classes were defined after the misses had been read, before the repairs below. Every
-remaining miss is in the redirect class (\EtoEMifosMissRedirect{} of \EtoEMifosMiss{}): the graph holds
+remaining miss is in the redirect class (\EtoEMifosMissRedirect{}/\EtoEMifosMiss{}): the graph holds
 the pair on the screen the redirect lands on. For \CeilEtoEMifosInside{} of them a better reader would also
 hold the address asked for (Section~\ref{sec:may-incomplete}). They also meet the
 dynamic test, which fires on any unresolved site in the source component or above it, so that test does
@@ -563,8 +563,8 @@ uigraph, on uigraph's own node extraction (Section~\ref{sec:res-ablation}). Ever
 \toprule
  & no attribution & rooted & full \\
 \midrule
-Suite transitions in the graph, realworld & \EtoERealworldHitNoattr{} of \EtoERealworldPairs{} & \EtoERealworldHitRooted{} of \EtoERealworldPairs{} & \EtoERealworldHit{} of \EtoERealworldPairs{} \\
-Suite transitions in the graph, mifos & \EtoEMifosHitNoattr{} of \EtoEMifosPairs{} & \EtoEMifosHitRooted{} of \EtoEMifosPairs{} & \EtoEMifosHit{} of \EtoEMifosPairs{} \\
+Suite transitions in the graph, realworld & \EtoERealworldHitNoattr{}/\EtoERealworldPairs{} & \EtoERealworldHitRooted{}/\EtoERealworldPairs{} & \EtoERealworldHit{}/\EtoERealworldPairs{} \\
+Suite transitions in the graph, mifos & \EtoEMifosHitNoattr{}/\EtoEMifosPairs{} & \EtoEMifosHitRooted{}/\EtoEMifosPairs{} & \EtoEMifosHit{}/\EtoEMifosPairs{} \\
 Graph pairs, realworld & \EtoERealworldGraphPairsNoattr{} & \EtoERealworldGraphPairsRooted{} & \EtoERealworldGraphPairs{} \\
 Graph pairs, mifos & \EtoEMifosGraphPairsNoattr{} & \EtoEMifosGraphPairsRooted{} & \EtoEMifosGraphPairs{} \\
 Sites placed on at least one screen, corpus & -- & \AblationRootedSites{} & \AblationFullSites{} \\
@@ -573,7 +573,7 @@ Structural-reference recall, alfresco & -- & \GTAlfRootedRecall{} & \GTAlfFullRe
 Structural-reference recall off the shell, alfresco & -- & \GTAlfRootedRecallNonShell{} & \GTAlfFullRecallNonShell{} \\
 Structural-reference precision, alfresco & -- & \GTAlfRootedPrecision{} & \GTAlfFullPrecision{} \\
 Structural-reference precision, \GTApp{} & -- & \GTRootedPrecision{} & \GTFullPrecision{} \\
-Navigation inside services, constructs lost at baseline and recovered & -- & -- & \AttrServiceRecovered{} of \AttrServiceLost{} \\
+Navigation inside services, constructs lost at baseline and recovered & -- & -- & \AttrServiceRecovered{}/\AttrServiceLost{} \\
 Sites placed in services, guards and effects & -- & -- & \AblationFullAddedSites{} \\
 \bottomrule
 \end{tabularx}
@@ -633,11 +633,11 @@ it, on this corpus.
 \toprule
  & Without this thesis & With uigraph \\
 \midrule
-Static extraction of the corpus applications & Oshima and Kishi's restrictions admit \EarlierWorkAdmittedApps{} of \EarlierWorkApps{} & extracts all \EarlierWorkApps{} \\
-Screens checked without signing in & a browser run renders \ScopeJudged{} of \ScopeScreens{}; the rest redirect to sign-in & every screen the static readers find declared has a node; nothing is run \\
+Static extraction of the corpus applications & Oshima and Kishi's restrictions admit \EarlierWorkAdmittedApps{}/\EarlierWorkApps{} & extracts all \EarlierWorkApps{} \\
+Screens checked without signing in & a browser run renders \ScopeJudged{}/\ScopeScreens{}; the rest redirect to sign-in & every screen the static readers find declared has a node; nothing is run \\
 Dead links found from the source & -- & \RoundTwoDeadLinkCandidates{} candidate sites in \RoundTwoDeadLinkWhere{}, checked against the runtime route oracle (Section~\ref{sec:deadlinks}) \\
 Transitions on \GTApp{} & its own suite takes \EtoERealworldPairs{} pairs & the graph holds \EtoERealworldGraphPairs{}, an over-approximation \\
-Response to a source change & -- & \MutFallibleDetected{} of \MutFallibleScored{} mutants, at constructs the graph represents \\
+Response to a source change & -- & \MutFallibleDetected{}/\MutFallibleScored{} mutants, at constructs the graph represents \\
 \bottomrule
 \end{tabularx}
 \par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; the earlier tools were not run; every figure is in-sample. All cells are generated figures.}
@@ -667,11 +667,11 @@ Excluded & \MutExcluded{} & \MutBaseExcluded{} \\
 \quad guard on a route with no component and no children & \MutExcludedNoScreen{} & -- \\
 Scored & \MutScored{} & \MutBaseScored{} \\
 Detected & \MutDetected{} & \MutBaseDetected{} \\
-\quad rename a route path & \MutRenameDetected{} of \MutRenameScored{} & -- \\
-\quad delete a \texttt{routerLink} & \MutLinkDetected{} of \MutLinkScored{} & \MutLinkBaseDetected{} of \MutLinkBaseScored{} \\
-\quad retarget a \texttt{navigate} & \MutRetargetDetected{} of \MutRetargetScored{} & -- \\
-\quad remove a guard & \MutGuardDetected{} of \MutGuardScored{} & -- \\
-Paired mutants, detected & \MutPairedDetected{} of \MutPaired{} & \MutPairedBaseDetected{} of \MutPaired{} \\
+\quad rename a route path & \MutRenameDetected{}/\MutRenameScored{} & -- \\
+\quad delete a \texttt{routerLink} & \MutLinkDetected{}/\MutLinkScored{} & \MutLinkBaseDetected{}/\MutLinkBaseScored{} \\
+\quad retarget a \texttt{navigate} & \MutRetargetDetected{}/\MutRetargetScored{} & -- \\
+\quad remove a guard & \MutGuardDetected{}/\MutGuardScored{} & -- \\
+Paired mutants, detected & \MutPairedDetected{}/\MutPaired{} & \MutPairedBaseDetected{}/\MutPaired{} \\
 \bottomrule
 \end{tabularx}
 \par\smallskip{\footnotesize\noindent\emph{Note.} An excluded mutant carries no information about sensitivity. All exclusions are guard removals: for the first kind no edge of the unmutated graph enters any screen the guarded route yields, and the second guards a route that declares neither a component nor children. \emph{Paired} counts the mutants both graphs can score. A dash means the figure is not reported for that graph. Operator rows are detected over scored.}
@@ -735,7 +735,7 @@ implement. Its navigations are excluded from the denominator (\RoundTwoExcludedO
 its screens left out of the runtime route oracle's mounted set (\ProbeOutletScreens{} route
 entries).
 \item ghostfolio's spread of computed routes is a construct the extractor could read and does not.
-\ProbeMissedGhostfolio{} of the \ProbeMissed{} mounted addresses without a node sit behind it.
+\ProbeMissedGhostfolio{}/\ProbeMissed{} mounted addresses without a node sit behind it.
 \end{itemize}
 
 \paragraph{Beyond a static reader of a route table.} No reader of a route table can resolve these.

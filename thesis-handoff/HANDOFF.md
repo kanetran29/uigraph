@@ -209,6 +209,12 @@ supersedes every older section where they disagree.
   caveats moved into a `\emph{Note.}` line inside each float (nothing moved into running text). Checked: no macro,
   label or ref lost in any file; at most a few connective words dropped. fig:coverage's caption is still a 29-word
   statement (could split). 119 pages, 0 overfull, 0 undefined, abstract on one page.
+- **Symbols in tables, notes, captions and bullets (5 Nov):** 47 macro pairs "X of Y" became X/Y, 8 before/after
+  phrasings use $\to$, 25 yes/no or held/did-not-hold cells use \checkmark/\xmark (`\xmark` = pifont `\ding{55}` in
+  figures-preamble), 5 "every screen" scopes became $\top$, one level chain $\subset$, one $\geq$, one $\approx$; running
+  prose untouched. Spelled numbers ("at least one", "three times") kept as words, since a digit would be a typed number.
+  Checked: macros, refs/labels/cites and digits per file equal to HEAD (only `55` added, the glyph code); 118 pages,
+  0 overfull, 0 undefined, abstract on page 2.
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 

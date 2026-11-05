@@ -92,7 +92,7 @@ Must-tier precision & must edges whose witness passes (lower bound) or does not 
 Node-level recall & distinct URLs named in an application's end-to-end test sources that have a node & distinct URLs so named & RQ1 & \ref{sec:res-baseline} \\
 Structural-reference recall and precision & (site, screen) pairs the reference and a level share & pairs in the reference (recall) or pairs the level places (precision) & RQ3 & \ref{sec:res-groundtruth} \\
 End-to-end containment & observed screen pairs joined by an edge of the graph & observed screen pairs & RQ3 & \ref{sec:res-e2e} \\
-Scope width & mean screens a site is attributed to & the same when every site is assigned to every screen & RQ3 & \ref{sec:res-width} \\
+Scope width & mean screens a site is attributed to & the same when every site has scope $\top$ & RQ3 & \ref{sec:res-width} \\
 Detection rate & injected changes that produce the predicted change in the graph & injected changes the graph can score (excluded mutants reported) & RQ4 & \ref{sec:res-mutation} \\
 Cause trace & defect classes traced to a cause in the source, by kind (read by the final version, still not read, beyond a static reader); no ratio & defect classes & RQ5 & \ref{sec:res-round2} \\
 \bottomrule
@@ -451,7 +451,7 @@ One application's recall fell when the rule was tightened.
 \emph{Figure}: a construct count that tripled.
   & The construct denominator counted the substring \texttt{routerLink}, which also matches \texttt{routerLinkActive}.
   & Constructs are counted by the independent route parser, so ratio and loss breakdown share one definition.
-  & alfresco: the independent route parser finds \ConstructsAlfresco{}; the substring count was about three times larger. \\
+  & alfresco: the independent route parser finds \ConstructsAlfresco{}; the substring count was $\approx$\,three times larger. \\
 \emph{Figure}: coverage reached 100 per cent (mifos).
   & The first independent route parser skipped wrapper calls, did not follow a lazily loaded module to its routing module, and dropped the prefix of lazy tables.
   & It reads wrapper calls, follows the routing module, and keeps the prefix.
@@ -463,7 +463,7 @@ One application's recall fell when the rule was tightened.
 \emph{Harness}, \emph{review}, \emph{figure}: a review of the harness, and a detection rate that moved by more than twenty points.
   & The mutation harness patched the first textual match, judged detection on node and edge sets alone, and retargeted only the head of a commands array.
   & Patches at the construct's offset; detection also on the witness set; retargeting points at another declared route; guard mutants on a screen no edge enters are excluded; a rename counts when the renamed route appears.
-  & realworld's detection rose sharply. Same seed, not the same sample: \MutEarlierSampled{} mutants earlier, \MutSampled{} in the final run, \MutOverlap{} at one location (operator, file, line; destinations may differ); \MutEarlierFailuresAbsent{} of \MutEarlierFailures{} earlier misses are not in the final sample. In the earlier run six paired disagreements favoured attribution; five were retarget mutants whose operator replaced only the head of the commands array, and with it corrected the baseline detects them too. \\
+  & realworld's detection rose sharply. Same seed, not the same sample: \MutEarlierSampled{} $\to$ \MutSampled{} mutants (earlier $\to$ final run), \MutOverlap{} at one location (operator, file, line; destinations may differ); \MutEarlierFailuresAbsent{}/\MutEarlierFailures{} earlier misses are not in the final sample. In the earlier run six paired disagreements favoured attribution; five were retarget mutants whose operator replaced only the head of the commands array, and with it corrected the baseline detects them too. \\
 \emph{Harness}: reading the graph at the sites the rule let through.
   & The guard exclusion rule located a route by the nearest path literal before \texttt{canActivate}, which fails for children, empty paths, constants and template literals.
   & The route is found by brace-matching over source with comments and strings blanked; a route yielding no screen is excluded.
@@ -493,7 +493,7 @@ Correcting the witness check itself.
 \emph{Review}, then \emph{panel}: a review of every construct the intermediate tier cites (\MustCtxEdges{} edges, \MustCtxDistinct{} distinct constructs, cited \MustCtxConstructs{} times). The witness check cannot find this: it compares destinations, not whether a construct runs every time.
   & The demotion rules were incomplete: a link under \texttt{*ngIf}, in \texttt{@if}, a callback, a \texttt{catch}, or after \texttt{await} or an early return was must.
   & Demotion under every condition of Section~\ref{sec:model}; the panels added members no handler calls unconditionally, components under a template condition, ICU cases and addresses two routes can answer; a later review added code after a navigation that may start another.
-  & \MustCtxConditional{} of the \MustCtxConstructs{} citations ran under such a condition. \\
+  & \MustCtxConditional{}/\MustCtxConstructs{} citations ran under such a condition. \\
 \emph{Review}, as above.
   & A guard on an empty-path child without a component was not read, and \texttt{canMatch}, \texttt{canActivateChild} and \texttt{canLoad} not at all.
   & Such a guard gates the screen above; the other three kinds are read.
@@ -519,7 +519,7 @@ The disagreements of the first node audit; each gap had scored the extractor aga
 The dead-link corrections.
   & It read Storybook fixtures as screens, a sibling application's tables via a tsconfig alias as this application's, and a path in an \texttt{Object.freeze} table as unresolvable.
   & It sets Storybook aside, ignores the sibling's tables, reads the frozen table. Dropping the frozen routes as unreadable was considered and rejected: they were readable one call away.
-  & Declared sets moved in \RoundTwoSetMoved{} of \CensusApps{} applications; in \RoundTwoSetMovedCountSame{} of them the count stayed the same. \\
+  & Declared sets moved in \RoundTwoSetMoved{}/\CensusApps{} applications; in \RoundTwoSetMovedCountSame{} of them the count stayed the same. \\
 Fixing the provenance of the comparison.
   & A file from an interim revision of the parser, dropped into the table directory, was read as the earlier parser's output; the script could not detect this, and an absent file read as a denominator that did not move.
   & The earlier parser's own committed output is read from the repository.
@@ -551,7 +551,7 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
 \emph{Refutation attempts} on the dead-link finding.
   & An earlier correction followed only the redirecting kind of catch-all route.
   & Both kinds are followed, the edge is held at may, and where the catch-all sent the URL is recorded.
-  & The correction held for the application it was written against and failed for the two needing the other kind. \\
+  & The correction: \checkmark{} for the application it was written against, \xmark{} for the two needing the other kind. \\
 \emph{Refutation attempts}.
   & Resolving a target and calling a link dead were conflated; bitwarden's authentication paths went through an unread enum, so the wildcard forwarded them all.
   & The enum and wrapper call are read; each application notes when its route set is a lower bound; each caveated candidate is put to the framework's route configuration.
@@ -569,11 +569,11 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
 \emph{Mutation sweep} of the demotion rules, at commit \SweepEarlierCommit{}.
   & On its first run in the final revision the sweep found rules the router fixes had added without a test.
   & Tests were written for most survivors; the rest were retired as equivalent, since no input tells them from their absence.
-  & \SweepEarlierSurvived{} of \SweepEarlierMutants{} mutants survived; \SweepEarlierCovered{} now have tests, \SweepEarlierRetired{} were retired. At \SweepCommit{} every one of \SweepMutants{} deletions fails some test. The tests exposed a relative link that climbs above the root. \\
+  & \SweepEarlierSurvived{}/\SweepEarlierMutants{} mutants survived; \SweepEarlierCovered{} now have tests, \SweepEarlierRetired{} were retired. At \SweepCommit{} every one of \SweepMutants{} deletions fails some test. The tests exposed a relative link that climbs above the root. \\
 \emph{Panel}: a review panel checking the scorer against the preregistration.
   & The end-to-end scorer compared a redirected navigation on the landed address, against the preregistration.
   & The scorer applies the preregistered rule.
-  & mifos then scored \EtoEMifosHitUnfixed{} of \EtoEMifosPairs{} pairs, \EtoEMifosRedirect{} of them redirected; the landed-target figure had been \EtoEMifosHitAfterRedirectsUnfixed{} of \EtoEMifosPairsAfterRedirects{}. \\
+  & mifos then scored \EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} pairs, \EtoEMifosRedirect{} of them redirected; the landed-target figure had been \EtoEMifosHitAfterRedirectsUnfixed{}/\EtoEMifosPairsAfterRedirects{}. \\
 \emph{End-to-end check}: mifos's suite missed transitions to action screens.
   & A template literal inside a commands array (\texttt{navigate([\textasciigrave{}actions/}\allowbreak\texttt{\$\{name\}\textasciigrave{}])}) was read as a variable, so its target was recorded as unresolved.
   & Its static text is read, each segment holding an interpolation a parameter.
@@ -581,7 +581,7 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
 \emph{Figure}: after that repair the re-measured mifos graph joined every pair of screens.
   & A target prefix was cut at its first parameter, so the notifications tray's prefix, which opens with two parameters, was empty and the shell site reached every route.
   & Only trailing parameters are dropped from a target prefix; a parameter inside it matches any one segment.
-  & The tray reaches the account screens its targets name; the mifos graph holds \EtoEMifosGraphPairs{} of \EtoEMifosPossiblePairs{} possible pairs, against \EtoEMifosGraphPairsUnfixed{} before the repairs. \\
+  & The tray reaches the account screens its targets name; possible pairs the mifos graph holds, before $\to$ after the repairs: \EtoEMifosGraphPairsUnfixed{} $\to$ \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{}. \\
 \emph{End-to-end check}: the same.
   & \texttt{relativeTo} passed in an options variable was not evaluated, so the loan view's actions were resolved from the root.
   & A \texttt{const} initialised with an object literal is read as that literal.
@@ -589,7 +589,7 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
 \emph{End-to-end check}: mifos's suite missed tab transitions.
   & A relative target was resolved against the screen it fires on; a link in a parent's template, rendered with each child tab, named nothing mounted.
   & It is resolved against the route that renders the component holding it (Section~\ref{sec:anchored}); the witness check applies the same rule (harness \HarnessVersion{}).
-  & With the two rows above, mifos holds \EtoEMifosHit{} of \EtoEMifosPairs{} suite pairs, against \EtoEMifosHitUnfixed{} before; every figure that depends on the extractor was re-measured. \\
+  & With the two rows above, mifos suite pairs held: \EtoEMifosHitUnfixed{} $\to$ \EtoEMifosHit{}/\EtoEMifosPairs{}; every figure that depends on the extractor was re-measured. \\
 \end{xltabular}
 \par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Found by} names the method as the main text does; \emph{figure}, \emph{panel}, \emph{review}, \emph{harness} and \emph{end-to-end check} are explained in the text above.}
 \endgroup
