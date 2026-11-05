@@ -155,3 +155,12 @@ Predictions (written now)
   P10 Most declared screens have a node, since its lazy routes are loaded by named export through path aliases, a
       form the corpus contains.
   P11 Oshima and Kishi's restrictions do not admit it (nested and parameterised routes).
+
+=====================================================================
+Addendum F (5 Nov 2026, after both rounds, the sensitivity case and two reviews)
+=====================================================================
+The author decided not to report the held-out check in the thesis, to shorten it after the supervisor asked for a
+considerably shorter text. This departs from "every outcome is reported in the thesis" above. The preregistration, the
+results of both rounds and of the sensitivity case (results/, results-round2/, results-sensitivity/), the review note
+and the generator stay in this directory unchanged, and the thesis no longer cites them. The thesis states that every
+figure is in-sample and is not an estimate for other applications.

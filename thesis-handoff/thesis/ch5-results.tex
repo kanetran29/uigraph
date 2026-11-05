@@ -697,8 +697,7 @@ and with it, on this corpus.
 \begin{table}[t]\footnotesize
 \caption{What the corpus shows can be done without this thesis and with it. The dynamic row is this
 thesis's own rendered-interface check run without signing in, not a crawler with credentials; the
-earlier tools were not run; every figure is in-sample, and on three of the four held-out applications
-of Section~\ref{sec:res-heldout} the extractor reads few screens or none. All cells are generated figures.}
+earlier tools were not run; every figure is in-sample. All cells are generated figures.}
 \label{tab:world}
 \begin{tabularx}{\textwidth}{@{}YYY@{}}
 \toprule
@@ -1361,164 +1360,10 @@ merely unestablished but false. The route set these sites would be judged agains
 and publishing them would report one application's valid links as another's defects. They are
 counted here and left out of the census.
 
-\section{Held-out applications}
-\label{sec:res-heldout}
-
-Every figure above is measured on the six applications uigraph was developed on. To see how far the
-final version carries to applications it has never been run on, further applications were measured
-in two rounds, with the extractor frozen at its final commit and nothing repaired afterwards. The
-selection rule, the measures and the predictions of each round were committed before any of its
-applications was cloned (\path{heldout/PREREGISTRATION.txt}); within the day, the order rests on the
-order of the commits. The rule walks a GitHub search for Angular repositories in order of stars and
-takes the first that are deployable applications (not frameworks, libraries, templates, starters,
-samples or courses) with nested and lazily loaded routes and route guards, pushed in the six months
-before the check, and not among the candidates screened for the corpus. Whether a repository is a
-deployable application is judged by hand. The first round was to take the first two of sixty
-repositories; only one of them qualified, so the walk went on by the same rule and took the second at
-position 72. It gave PeerTube, a federated video platform, and angular-spotify, a Spotify web client.
-After its result, a second round ran the same search again with a larger limit and walked on from
-position 73 for four more, with no criterion added about how an application declares its routes; its
-predictions were written knowing the first round's. The search ends at position 150, and only two
-more qualified: ElectronMail, a desktop mail client, which had been opened but not measured during the
-first round's walk, and the documentation site of NestJS, whose only guard redirects to an external
-page.
-
-A review of the second walk found its exclusion of samples stricter than the corpus, which contains
-the RealWorld example application; the review re-examined only the repositories excluded as examples,
-not those admitted. One of them meets every other criterion: a second implementation of the same
-RealWorld specification, an Nx workspace whose routes live in libraries. It was measured as a
-sensitivity case and is reported beside the rounds rather than in them. It was preregistered before it
-was cloned, but after its route files had been read through the GitHub API to check the criteria, so
-its predictions were written knowing how it declares its routes. It is not out-of-sample in the
-application's domain.
-
-\begin{table}[t]\footnotesize
-\caption{The frozen final version on the held-out applications of both rounds and on the sensitivity
-case. Coverage is against the independent route parser, whose count of declared screens is a lower
-bound where it records blind spots; 0 of 0 means neither reader found a route table. The ratios are
-those of Table~\ref{tab:ratios}, over the constructs in files under the application directory, as on
-the corpus. \emph{Recovered share} counts the constructs converted in the run with attribution;
-\emph{attribution losses recovered} counts only those the run without attribution loses. A dash marks
-a ratio whose denominator is zero, or restrictions that cannot be applied because no route was read.
-\textsuperscript{a}\,Not primary addresses of the application (see the text).}
-\label{tab:heldout}
-\begin{tabularx}{\textwidth}{@{}Yrrrrr@{}}
-\toprule
- & \multicolumn{2}{c}{First round} & \multicolumn{2}{c}{Second round} & Sensitivity \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(l){6-6}
- & PeerTube & angular-spotify & ElectronMail & NestJS docs & RealWorld (Nx) \\
-\midrule
-Extraction completes & \HeldoutCompletedPeertube{} & \HeldoutCompletedSpotify{} & \HeldoutCompletedElectronmail{} & \HeldoutCompletedNestdocs{} & \HeldoutCompletedConduit{} \\
-Declared screens with a node & \HeldoutNodesPeertube{} & \HeldoutNodesSpotify{} & \HeldoutNodesElectronmail{}\textsuperscript{a} & \HeldoutNodesNestdocs{} & \HeldoutNodesConduit{} \\
-Parser blind spots & \HeldoutBlindSpotsPeertube{} & \HeldoutBlindSpotsSpotify{} & \HeldoutBlindSpotsElectronmail{} & \HeldoutBlindSpotsNestdocs{} & \HeldoutBlindSpotsConduit{} \\
-In-scope constructs & \HeldoutConstructsPeertube{} & \HeldoutConstructsSpotify{} & \HeldoutConstructsElectronmail{} & \HeldoutConstructsNestdocs{} & \HeldoutConstructsConduit{} \\
-Must conversion & \HeldoutMustConversionPeertube{} & \HeldoutMustConversionSpotify{} & \HeldoutMustConversionElectronmail{} & \HeldoutMustConversionNestdocs{} & \HeldoutMustConversionConduit{} \\
-Recovered share & \HeldoutRecoveredSharePeertube{} & \HeldoutRecoveredShareSpotify{} & \HeldoutRecoveredShareElectronmail{} & \HeldoutRecoveredShareNestdocs{} & \HeldoutRecoveredShareConduit{} \\
-Must edges & \HeldoutMustEdgesPeertube{} & \HeldoutMustEdgesSpotify{} & \HeldoutMustEdgesElectronmail{} & \HeldoutMustEdgesNestdocs{} & \HeldoutMustEdgesConduit{} \\
-Must edges the witness check rejects & \HeldoutWitnessFailuresPeertube{} & \HeldoutWitnessFailuresSpotify{} & \HeldoutWitnessFailuresElectronmail{} & \HeldoutWitnessFailuresNestdocs{} & \HeldoutWitnessFailuresConduit{} \\
-Attribution losses recovered & \HeldoutAttrRecoveredPeertube{} of \HeldoutAttrLostPeertube{} & \HeldoutAttrRecoveredSpotify{} of \HeldoutAttrLostSpotify{} & \HeldoutAttrRecoveredElectronmail{} of \HeldoutAttrLostElectronmail{} & \HeldoutAttrRecoveredNestdocs{} of \HeldoutAttrLostNestdocs{} & \HeldoutAttrRecoveredConduit{} of \HeldoutAttrLostConduit{} \\
-Admitted by Oshima and Kishi's restrictions & \HeldoutEarlierAdmittedPeertube{} & \HeldoutEarlierAdmittedSpotify{} & \HeldoutEarlierAdmittedElectronmail{} & \HeldoutEarlierAdmittedNestdocs{} & \HeldoutEarlierAdmittedConduit{} \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-As on the corpus, the construct rows of Table~\ref{tab:heldout} count only constructs in files under
-the application directory. On the two Nx workspaces that directory holds little of the navigation:
-angular-spotify's links and navigation calls all lie in its libraries, so its construct rows are empty,
-and the RealWorld case's are those of its navigation bar alone. Completing the run says nothing about
-coverage: on angular-spotify the extractor completed without a warning that it had found no route
-table.
-
-On the NestJS documentation site every declared screen has a node (\HeldoutNodesNestdocs{}), the
-independent parser has \HeldoutBlindSpotsNestdocs{} blind spots, and the witness check rejects
-\HeldoutWitnessFailuresNestdocs{} of the \HeldoutMustEdgesNestdocs{} must edges. All of these edges come
-from the \HeldoutMustConvertedNestdocs{} construct converted to must, a link to \path{/support} that
-every screen's layout contains. The site has few navigation constructs of its own; the others take
-their targets from data, and with attribution its \HeldoutAttrLostNestdocs{} attribution losses become
-accounted rather than recovered for that reason.
-
-On the sensitivity case, too, every declared screen has a node (\HeldoutNodesConduit{}), and attribution
-recovers \HeldoutAttrRecoveredConduit{} of the \HeldoutAttrLostConduit{} attribution losses in its
-application directory, all in the navigation bar. Its \HeldoutMustEdgesConduit{} must edges all come
-from the \HeldoutMustConvertedConduit{} construct converted to must, the brand link
-\texttt{routerLink="/"} in that bar, and the witness check rejects all of them. The application
-redirects the empty path to \path{home} (\texttt{pathMatch: 'full'}). The extractor follows the
-redirect and gives each edge the screen the navigation lands on, while the witness check compares the
-edge with the literal target \path{/} and applies no redirect. Read against Angular's redirect
-semantics, the failures are a gap in the check; no runtime oracle was run on this application, and
-the preregistration forbids repairing the check in response to these applications, so they stand as
-failures. The same run finds target mismatches on the may tier as well: on the same redirect, and on
-links to a profile drawn to the profile's favorites child, which shares its list component; the
-latter were not traced and may be the extractor's. On this case the reader carries over in node
-coverage; that its edge targets do was not shown.
-
-On the other three the graph holds few screens or none, each because of how the application declares
-or mounts its routes. The causes below were read from the applications' sources by the AI assistant
-and re-read by AI reviewers; none was tested by changing the source and mapping it again.
-\begin{itemize}\sloppy
-\item PeerTube's lazy route files default-export an inline array (\texttt{export default [\ldots]}),
-  loaded as \texttt{loadChildren: () => import('./+admin/routes')}. Neither reader follows that form;
-  the corpus's realworld application default-exports a named array (\texttt{export default routes;}),
-  which the route reader follows. The independent parser records each such load as a blind spot,
-  \HeldoutLazyBlindSpotsPeertube{} of its \HeldoutBlindSpotsPeertube{}; the others are matcher and
-  spread routes.
-\item angular-spotify passes its route table to \texttt{provideRouter} by name (\texttt{webShellRoutes},
-  typed \texttt{Route[]} rather than \texttt{Routes}) in a module of an Nx library rather than of the
-  application, and its lazy loads are \texttt{async} function bodies. Neither reader finds the table;
-  which of these forms stops each reader was not tested.
-\item ElectronMail mounts every screen-bearing route on a named outlet (its only primary route is a
-  redirect), so no screen has a primary address. The extractor gives such routes no node by design
-  (Section~\ref{sec:named-outlet}), so its graph has no screen. The independent parser cannot resolve
-  the \HeldoutBlindSpotsElectronmail{} lazy loads that place the routes under their outlets, written
-  as \texttt{async} function bodies, and reads the routes of the modules behind them at the root. Its
-  declared screens are therefore not primary addresses of the application: the denominator comes from
-  the parser's unresolved loads, and what holds without it is that the graph has no screen node for an
-  application that has screens.
-\end{itemize}
-Without screens there is little to convert, so on PeerTube and ElectronMail the must conversion and
-the attribution recovery are zero as well; angular-spotify has no construct in its application
-directory, so neither ratio has a denominator. For applications declared like these three, a consumer
-of the graph receives an empty or nearly empty one.
-
-Of the first round's four predictions, the first held on both applications. The second, coverage below
-the corpus's, and the fourth, that Oshima and Kishi's restrictions exclude both, can be judged only on
-PeerTube, where both held; on angular-spotify no route was read. The third held only vacuously: the
-must tier is empty because almost no screen was read. Of the second round's, over the two applications
-that qualified, two held: both extractions complete, and the restrictions admit neither. The
-prediction on coverage held in its first part on the preregistered measure, ElectronMail's
-\HeldoutNodesElectronmail{}, a denominator that is the parser's misreading described above; it did not
-hold in its second part: ElectronMail's screens are lost to named outlets, a form the corpus contains
-(alfresco's viewer), although no corpus application mounts all its screens there. The prediction that
-the must tier stays small did not hold on the documentation site as measured: its must conversion,
-\HeldoutMustConversionNestdocs{}, is above every corpus application's (Table~\ref{tab:before-after}),
-and its \HeldoutMustEdgesNestdocs{} must edges exceed the \AttrMustAfter{} of the six corpus
-applications together. Both rest on one construct of \HeldoutConstructsNestdocs{}, a link in the layout
-drawn once for each screen, the mechanism behind the corpus's must edges too
-(Section~\ref{sec:res-round2}). ElectronMail gives it nothing to judge. The sensitivity case's three
-predictions held, though not blind: the extraction completes, every declared screen has a node, and
-the restrictions do not admit it.
-
-The result is the out-of-sample measure the corpus could not give, and it is existence evidence, not
-an estimate of how often the reader carries over. The route reader gives every declared screen a node
-on the documentation site and on the sensitivity case. The documentation site's must tier is
-\HeldoutMustConvertedNestdocs{} construct, a link in its layout, and it passes the witness check; the
-sensitivity case's \HeldoutMustConvertedConduit{} must construct fails it on a redirect the check does
-not apply. On PeerTube and angular-spotify the reader does not follow the declaration forms listed
-above, and on ElectronMail the node model leaves the outlet screens out, so the corpus figures do not
-carry over as they stand. The two applications that carry over are a documentation site and a second
-implementation of a corpus application, so the evidence that the reader generalises is narrow. Scope
-attribution recovers none of the attribution losses of the four round applications: three of them
-give it almost no screens to attribute to, and on the documentation site its losses take their targets
-from data. Its only held-out recovery is on the sensitivity case, which is not out-of-sample in
-domain, so the attribution analysis of Chapter~\ref{ch:analysis} is untested out of sample; what failed
-to carry over is the route reader and the node model it feeds.
-
 \section{Summary}
 
 On the corpus, node extraction is complete against what a static reader can see, and the one-sided
-runtime route oracle finds no node where the framework mounts nothing. Outside the corpus, the frozen
-extractor gives every declared screen a node on one of four held-out applications and few or none on
-the other three (Section~\ref{sec:res-heldout}). Scope attribution recovers a majority of the
+runtime route oracle finds no node where the framework mounts nothing. Scope attribution recovers a majority of the
 constructs the loss rules assign to it, most of them at the may tier, and gains little in
 must conversion. Its scopes are narrower than the trivial attribution by a factor that is
 small on some applications, and the evidence that they are not too large is limited to one

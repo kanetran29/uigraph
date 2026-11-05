@@ -91,6 +91,13 @@ supersedes every older section where they disagree.
   rescoring P6 or blanking ElectronMail's cell, a counterfactual strict-S1 table. **For the student:** ch5 now says
   the held-out causes "were read ... by the AI assistant and re-read by AI reviewers" (REV-19); confirm or adjust with
   the AI-use statement (Q3).
+- **Held-out removed from the thesis (student's decision, 5 Nov, "xoá hẳn vì dài quá"):** I advised shrinking it to
+  a paragraph in ch6 plus an appendix instead (deleting a preregistered study after a bad result can read as
+  concealment; the repo keeps it). The student chose full removal. Done: ch5 section and `tab:heldout` gone, the three
+  `generated-heldout*.tex` removed, abstract/ch1/ch4/ch5 Summary/`tab:world` caption/ch6/ch7 now say only that every
+  figure is in-sample and not an estimate for other applications (no claim that generalisation is untested). The
+  witness-check limits cell keeps the literal-target caveat (true in general). `heldout/` stays unchanged, with
+  Addendum F recording the decision. Build 152 pages, 0 overfull, 0 undefined, abstract on one page.
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 

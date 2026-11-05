@@ -92,9 +92,7 @@ size is visible and not averaged away.
 repeated rather than taken on trust.
 \end{itemize}
 None of these addresses a further threat: uigraph was developed on this corpus
-and is measured on it (Section~\ref{sec:limitations}), so the figures are fitted to it. Four
-applications outside the corpus, measured with the frozen extractor, test how far they carry over
-(Section~\ref{sec:res-heldout}); on three of them they do not. A case study on a proprietary Angular application, reporting only
+and is measured on it (Section~\ref{sec:limitations}), so the figures are fitted to it. A case study on a proprietary Angular application, reporting only
 aggregate figures, is planned as the most direct response (Chapter~\ref{ch:discussion}). There is
 no standard benchmark corpus for single-page applications either; evaluations in this area use
 collections chosen for each study \cite{websurvey2025}. The corpus and its manifest are therefore
@@ -427,7 +425,7 @@ edges, whose witness proves only that the call site exists. The destination test
 only as good as the route set: where both tools read a table at the wrong prefix, they
 agree on a wrong address; Section~\ref{sec:res-probe} records such addresses. Target agreement is
 literal: a construct whose address a redirect rewrites is compared with the address written, so an
-edge to the screen the navigation lands on is reported as a failure (Section~\ref{sec:res-heldout}). \\
+edge to the screen the navigation lands on is reported as a failure. \\
 \addlinespace
 Differential test & Disagreements with a separately written route-configuration
 parser. &
@@ -576,8 +574,6 @@ Construct prevalence (Table~\ref{tab:approx-counts}) & no extractor & pinned cor
 \texttt{approx-counts.mjs} over the sources \\
 May-reason census (Table~\ref{tab:mayreasons}) & final & \texttt{d05227c}: \texttt{c42f220} plus a measurement switch &
 \path{results-may-}\allowbreak\path{reasons/} \\
-Held-out applications (Table~\ref{tab:heldout}) & final & \texttt{c42f220}, frozen; applications pinned in \path{heldout/apps.txt}, \path{apps-round2.txt}, \path{apps-sensitivity.txt} &
-\path{heldout/results/}, \path{results-round2/}, \path{results-}\allowbreak\path{sensitivity/} \\
 Earlier work's restrictions (Table~\ref{tab:earlier}) & no extractor & the independent route parser's final output &
 \path{results-round2/final14.tgz} \\
 \bottomrule

@@ -135,27 +135,9 @@ node earlier-work.mjs --dir <final14>/fin --apps realworld,alfresco,ghostfolio,k
   --tex ../thesis/generated-earlier-work.tex
 ```
 
-The held-out applications, preregistered in `heldout/PREREGISTRATION.txt`: the first round
-(`generated-heldout.tex`, `apps.txt`, `results/`) and the second (`generated-heldout2.tex`,
-`apps-round2.txt`, `results-round2/`, Addenda C and D; the search it walked is `search-round2.txt`):
-
-```bash
-git worktree add --detach <wt> <a commit whose packages/ equals c42f220> && (cd <wt> && pnpm install --frozen-lockfile)
-thesis-handoff/heldout/heldout.sh <work dir> <wt>
-thesis-handoff/heldout/heldout.sh <work dir> <wt> thesis-handoff/heldout/apps-round2.txt thesis-handoff/heldout/results-round2
-(cd thesis-handoff/heldout &&
-  node heldout-to-latex.mjs --dir results --apps peertube=Peertube,spotify=Spotify --tex ../thesis/generated-heldout.tex &&
-  node heldout-to-latex.mjs --dir results-round2 --apps electronmail=Electronmail,nestdocs=Nestdocs \
-    --tex ../thesis/generated-heldout2.tex)
-```
-
-The sensitivity case of Addendum E (`apps-sensitivity.txt`, `results-sensitivity/`, `generated-heldout-sens.tex`):
-
-```bash
-thesis-handoff/heldout/heldout.sh <work dir> <wt> thesis-handoff/heldout/apps-sensitivity.txt thesis-handoff/heldout/results-sensitivity
-(cd thesis-handoff/heldout && node heldout-to-latex.mjs --dir results-sensitivity --apps conduit=Conduit \
-  --tex ../thesis/generated-heldout-sens.tex)
-```
+The held-out check (`heldout/`, preregistered in `heldout/PREREGISTRATION.txt`, two rounds and a sensitivity case) is
+not reported in the thesis (Addendum F); its scripts and results stay in `heldout/` and are run as `heldout/heldout.sh`
+and `heldout/heldout-to-latex.mjs` describe.
 
 ## 3. Build the PDF
 
