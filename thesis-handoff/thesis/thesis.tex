@@ -81,9 +81,7 @@ real applications, and why it fails, has not been measured construct by construc
 
 This thesis builds uigraph, a static extractor for Angular, and makes that measurement with
 it on six open-source applications. uigraph reads nested and parameterised route trees, which
-the stated restrictions of an earlier Angular extraction exclude in every one of them. Five
-methods check the graphs: four read the source, one the running application's route
-configuration. Each construct the extractor does not recover is assigned to a loss category; under
+the stated restrictions of an earlier Angular extraction exclude in every one of them. Five methods check the graphs. Each construct the extractor does not recover is assigned to a loss category; under
 the order of the loss rules, the largest is navigation that belongs to no single screen, such as a link in a shared header. For this loss the thesis proposes scope
 attribution, a dataflow analysis that computes the set of screens from which each navigation
 site can fire.
@@ -97,8 +95,9 @@ static reader of a route table. Third, scope attribution recovers
 \AttrRecoveredShare{} of the constructs the loss rules assign to it, most of them on one
 application and almost all as possible rather than certain transitions. Beyond the mechanisms of
 earlier work, it places navigation inside services, which they cannot place: \AttrServiceRecovered{}
-of \AttrServiceLost{} such constructs. Against screen sets read from the sources of two applications, it finds every pair on one and, on the
-other, raises recall off the shell from \GTAlfOutletRecallNonShell{} to \GTAlfFullRecallNonShell{}. Both
+of \AttrServiceLost{} such constructs. Against screen sets read from the sources of two applications, it finds every pair and none outside
+them on one; on the other, recall off the shell rises from \GTAlfOutletRecallNonShell{} to
+\GTAlfFullRecallNonShell{} and precision falls to \GTAlfFullPrecision{}. Both
 references apply the analysis's own relations, and the first was partly completed from the graph's
 output and guided two repairs. Mutation testing on three applications shows that the graph responds to injected
 changes in constructs it already represents; its harness was corrected after its misses were

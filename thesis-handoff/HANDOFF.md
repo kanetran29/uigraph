@@ -135,6 +135,13 @@ supersedes every older section where they disagree.
   `@alfresco/adf-core/shell`, outside the sources. A1 held, A2 did not (class precision higher). `navigateBack`'s two
   service sites placed exactly on /search and /search-libraries. Written into ch5 (`sec:res-groundtruth` paragraph,
   `tab:earlier` rows, service bullet, width paragraph), ch6 limitation, ch1, ch7, abstract ("two applications").
+- **Opus gate on the alfresco reference:** data and integrity confirmed (reference changed after scoring only by the 4
+  disclosed excluded lines; builders blind; every figure recomputed from the DBs). Fixed overstatements: the call
+  graph's precision advantage is realworld-only (alfresco reverses it: 82.0 % vs class 92.3 %); overall alfresco recall
+  (11.5 % -> 23.6 %) now stated beside the off-shell figure in ch5, tab:earlier, ch6, ch7; the abstract states the
+  precision drop; the shell sentence corrected ("all but at most one" pair; shell filled through the extension
+  registry); displayPreview (an undetermined site placed on every screen at full and class) disclosed; ch3/ch4 "one
+  application" updated; macro stamps regenerated clean. Abstract trimmed by one method clause to stay on one page.
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 

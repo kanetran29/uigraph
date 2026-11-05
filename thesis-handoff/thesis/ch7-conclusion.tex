@@ -31,16 +31,18 @@ before the owner, the target category would be the larger one on \AttrOrderFlipW
 \paragraph{RQ3: what scope attribution adds.} Scope attribution recovers \AttrRecovered{} of
 the \AttrLost{} constructs in its loss categories (\AttrRecoveredShare{}), almost all as possible rather
 than certain transitions. Most of them are on mifos: without it the share is
-\AttrRecoveredShareNoMifos{}, and \AttrUnderHalfApps{} of the six applications recover under half. No construct the baseline recovered was lost. On the one application
-whose screen sets were read by hand, the analysis finds \GTFullRecall{} of the reference pairs
+\AttrRecoveredShareNoMifos{}, and \AttrUnderHalfApps{} of the six applications recover under half. No construct the baseline recovered was lost. On realworld, whose
+screen sets were read by hand, the analysis finds \GTFullRecall{} of the reference pairs
 and none outside them; that reference was partly completed from the graph's output and
 guided two repairs. A reimplementation of the mechanisms of earlier work reaches
 \GTOutletRecall{}. What only this analysis does is place navigation inside services, which no earlier
 mechanism places: it recovers \AttrServiceRecovered{} of the \AttrServiceLost{} such constructs, through a
-call graph that on the reference application asserts none of the \GTClassExcess{} pairs a class-level
-join places outside it. On alfresco, where navigation inside services occurs, it raises recall off the shell from
-\GTAlfOutletRecallNonShell{} to \GTAlfFullRecallNonShell{}, with \GTAlfFullExcess{} pairs outside the
-reference at one site whose caller is declared in configuration. The applications' own end-to-end suites test the missing direction on two
+call graph that on realworld asserts none of the \GTClassExcess{} pairs a class-level join places
+outside it. On alfresco, where navigation inside services occurs, it raises recall off the shell from
+\GTAlfOutletRecallNonShell{} to \GTAlfFullRecallNonShell{} (overall \GTAlfOutletRecall{} to
+\GTAlfFullRecall{}, since a library shell no level reads holds most pairs) at \GTAlfFullPrecision{}
+precision, below the class join's \GTAlfClassPrecision{}: \GTAlfFullExcess{} pairs fall outside the
+reference at one site whose only trigger is declared in configuration. The applications' own end-to-end suites test the missing direction on two
 applications. The graph holds every observed transition on realworld, where the check does not
 discriminate, and \EtoEMifosHit{} of \EtoEMifosPairs{} on mifos, against \EtoEMifosHitNoattr{}
 without attribution; the level of earlier work's mechanism already reaches \EtoEMifosHitRooted{}. Of the
@@ -91,7 +93,7 @@ lack, the placement of navigation inside services (Section~\ref{sec:res-earlier}
 
 \paragraph{What remains open.} The dispatch relation is specified but not implemented, the guard relation is replaced by a
 stand-in, and the call graph ignores the injector hierarchy. The screen sets were checked in both directions on
-two applications only, against references that applies the analysis's own relations, and uigraph was developed on the same corpus it is measured on. The
+two applications only, against references that apply the analysis's own relations, and uigraph was developed on the same corpus it is measured on. The
 end-to-end check on mifos found transitions lost to a declared approximation, a relative link
 in a template shared with child tabs resolved against the child's address, and to target forms
 the extractor does not read; none is repaired (Section~\ref{sec:res-e2e}). The
