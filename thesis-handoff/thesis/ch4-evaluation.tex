@@ -531,8 +531,9 @@ reproducible only once it is published. And the harness version decides several 
 of the extractor, so a result file is comparable only with one made by the same version.
 
 uigraph was developed within this thesis. The version evaluated throughout is the final version:
-extractor commit \texttt{c42f220}, harness 1.9.0 and mutation harness 1.9.1. The source of the Angular
-adapter is identical at \texttt{920e1aa}, where the sweep of the demotion rules was recorded. The
+extractor commit \texttt{c42f220}, harness 1.9.0 and mutation harness 1.9.1. The sweep of the demotion rules and the
+may-reason census were recorded at \texttt{d05227c}, whose adapter adds only a measurement switch
+that leaves the graphs unchanged. The
 tables of Section~\ref{sec:res-round2} were regenerated at that commit. Its development versions and
 the corrections between them are listed in Appendix~\ref{app:repairs}.
 
@@ -562,7 +563,7 @@ Ablation, structural reference & final & \texttt{c42f220}; generated at later co
 Mutation (RQ4) & final & \texttt{c42f220}, mutate 1.9.1 & \path{results-rq4/} \\
 End-to-end navigation check & final & \texttt{c42f220} graphs; suites run 3 Nov &
 \path{e2e-nav/results/}, via \texttt{score.mjs} \\
-Demotion-rule sweep & final & \texttt{920e1aa}, same adapter source$^{a}$ &
+Demotion-rule sweep & final & \texttt{d05227c}: \texttt{c42f220} plus the measurement switch &
 \path{results-must/mutation-sweep.json} \\
 Rendered-interface check (Table~\ref{tab:scope}) & historical & an earlier graph, before the call
 graph; check 1.3.0 & \path{route-probe/results/} \\
@@ -570,12 +571,16 @@ Runtime route oracle (Tables~\ref{tab:probe}, \ref{tab:probe-closure}) & histori
 oracle 1.0.0, comparison 1.1.0; extractor commit not recorded & \path{route-probe/results/} \\
 Construct prevalence (Table~\ref{tab:approx-counts}) & no extractor & pinned corpus commits &
 \texttt{approx-counts.mjs} over the sources \\
+May-reason census (Table~\ref{tab:mayreasons}) & final & \texttt{d05227c}: \texttt{c42f220} plus a measurement switch &
+\path{results-may-}\allowbreak\path{reasons/} \\
+Held-out applications (Table~\ref{tab:heldout}) & final & \texttt{c42f220}, frozen; applications pinned in \path{heldout/apps.txt} &
+\path{heldout/results/} \\
+Earlier work's restrictions (Table~\ref{tab:earlier}) & no extractor & the independent route parser's final output &
+\path{results-round2/final14.tgz} \\
 \bottomrule
 \end{tabularx}
 
-\smallskip\footnotesize $^{a}$\,\texttt{packages/core} differs between the two commits; the adapter
-tests the sweep runs import from it, so the sweep result is carried over on the adapter source
-alone.
+
 \end{table}
 
 \section{Summary}

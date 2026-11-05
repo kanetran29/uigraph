@@ -10,7 +10,7 @@ extractor commit on its second. The provenance table in Chapter 4 (section Repro
 | Item | Value |
 | --- | --- |
 | Extractor measured | `c42f2204802a32fe50f0aecfedc0faef1eefb61b` (tag `thesis-eval-final`; branch `thesis-final-2026-11`) |
-| Demotion-rule sweep | `920e1aa`, same `packages/adapter-angular/src` tree as `c42f220` (`bdbe98b2`) |
+| Demotion-rule sweep, may-reason census | `d05227c`: `c42f220` plus the `UIGRAPH_MAY_REASONS` measurement switch; graphs with the switch off identical (`results-may-reasons/equivalence.json`) |
 | Harness | route-oracle 1.9.0, mutation harness 1.9.1, route-probe 1.1.0 |
 | Generators | the commit that holds this file; `packages/` is unchanged since `c42f220` |
 | Toolchain | node v24.14.0, pnpm 10.30.3, TeX Live with `latexmk` |
@@ -121,6 +121,28 @@ public backend, which is not pinned. Mifos (`7f78179`) needs `docker compose -f
 docker-compose.e2e.yml up -d db fineract` and the projects `setup` and `chromium`; the exact
 commands and environment are in `results/mifos/summary.txt`. The rules were fixed beforehand in
 `PREREGISTRATION.txt`.
+
+The may-reason census (`generated-may-reasons.tex`) is a step of `remeasure.sh` ("why the may tier is may"): it maps
+the corpus again with `UIGRAPH_MAY_REASONS=1`, a measurement switch that adds `reasons` to may witnesses and changes
+nothing else, checks that the graphs with `reasons` removed equal the corpus graphs, and runs `may-reasons.mjs`.
+Run it with bash: the `$APPS` loops rely on word splitting, which zsh does not do.
+
+The earlier-work restrictions (`generated-earlier-work.tex`):
+
+```bash
+cd thesis-handoff/route-oracle
+node earlier-work.mjs --dir <final14>/fin --apps realworld,alfresco,ghostfolio,k8sdash,bitwarden,mifos \
+  --tex ../thesis/generated-earlier-work.tex
+```
+
+The held-out applications (`generated-heldout.tex`), preregistered in `heldout/PREREGISTRATION.txt`:
+
+```bash
+git worktree add --detach <wt> <a commit whose packages/ equals c42f220> && (cd <wt> && pnpm install --frozen-lockfile)
+thesis-handoff/heldout/heldout.sh <work dir> <wt>
+cd thesis-handoff/heldout && node heldout-to-latex.mjs --dir results --apps peertube=Peertube,spotify=Spotify \
+  --tex ../thesis/generated-heldout.tex
+```
 
 ## 3. Build the PDF
 
