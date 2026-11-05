@@ -156,13 +156,15 @@ export function matchLiteral(target: string, routes: RouteLike[], asUrl = true):
 /**
  * Over-approximate a non-literal target by its static prefix: every declared
  * route that extends the prefix with at least one more segment is a candidate
- * (e.g. prefix "/products/" -> "/products/:id"). Returns may-edge candidates.
+ * (e.g. prefix "/products/" -> "/products/:id"). A `:param` segment of the prefix,
+ * a computed part the reader could not fix, matches any one segment.
+ * Returns may-edge candidates.
  */
 export function matchPrefix(staticPrefix: string, routes: RouteLike[]): RouteLike[] {
   const pre = segments(staticPrefix)
   return routes.filter((r) => {
     const segs = segments(r.fullPath)
     if (segs.length <= pre.length) return false
-    return pre.every((seg, i) => segs[i] === seg)
+    return pre.every((seg, i) => seg === ':param' || segs[i] === seg)
   })
 }

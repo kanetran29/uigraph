@@ -1237,7 +1237,14 @@ export class Loan {
   }
 }`,
     '/app/general.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-general', standalone: true, template: '<p>g</p>' })\nexport class General {}`,
-    '/app/personal.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-personal', standalone: true, template: '<p>p</p>' })\nexport class Personal {}`,
+    '/app/personal.component.ts': `import { Component } from '@angular/core'
+import { Router } from '@angular/router'
+@Component({ selector: 'x-personal', standalone: true, template: '<b (click)="wide(n, n, n)"></b>' })
+export class Personal {
+  n = 'x'
+  constructor(private router: Router) {}
+  wide(a: string, b: string, c: string) { this.router.navigate([\`/\${a}/\${b}/actions/\${c}\`]) }
+}`,
     '/app/action.component.ts': `import { Component } from '@angular/core'\n@Component({ selector: 'x-action', standalone: true, template: '<p>a</p>' })\nexport class Action {}`,
   })
   const { graph } = extractGraph(project, '/app', { attribution: true })
@@ -1249,8 +1256,11 @@ export class Loan {
     expect(has('/clients/:clientId', '/clients/:clientId/actions/:name')).toBe(true)
   })
 
-  it('cuts a prefix at its first parameter, so a parameter inside it does not hide the routes below', () => {
+  it('matches a parameter inside a prefix to any one segment, so it neither hides the routes below nor reaches every route', () => {
     expect(has('/clients/:clientId', '/loans/:loanId/actions/:action')).toBe(true)
+    expect(has('/clients/:clientId/personal-data', '/loans/:loanId/actions/:action')).toBe(true)
+    expect(has('/clients/:clientId/personal-data', '/clients/:clientId/actions/:name')).toBe(true)
+    expect(has('/clients/:clientId/personal-data', '/clients/:clientId/general')).toBe(false)
   })
 
   it('evaluates relativeTo passed through an options variable', () => {

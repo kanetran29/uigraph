@@ -284,8 +284,8 @@ function joinCommands(segs: string[]): string {
 /**
  * Classify a commands array from its already-separated parts, resolving any part that is a
  * name rather than a literal and reading a template literal by its static text. All parts static
- * is a literal; a static head followed by parts that are not is a prefix, cut at the first part
- * that is not; nothing static is dynamic.
+ * is a literal; parts that end in ones that are not are a prefix of everything before those, a
+ * parameter inside it standing for one segment; nothing static is dynamic.
  */
 function classifyCommandParts(parts: string[], sf: SourceFile | undefined): TargetInfo {
   if (parts.length === 0) return { kind: 'same-screen' }
@@ -334,7 +334,9 @@ function classifyCommandParts(parts: string[], sf: SourceFile | undefined): Targ
   // A trailing hole says nothing about what follows, so it stays a prefix; a hole in the
   // middle leaves a pattern a single declared route can satisfy.
   if (segs[segs.length - 1] === ':param') {
-    const head = joinCommands(segs.slice(0, segs.indexOf(':param')))
+    let end = segs.length
+    while (end > 0 && segs[end - 1] === ':param') end--
+    const head = joinCommands(segs.slice(0, end))
     return { kind: 'template', staticPrefix: head.endsWith('/') ? head : head + '/' }
   }
   // The pattern pins the screen only if one declared route satisfies it, and the matcher does
