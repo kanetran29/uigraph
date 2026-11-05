@@ -1,5 +1,5 @@
 {
- "_note": "Cause of each pair the source readings judged spurious, read from the graph edge behind it (adjudication-input.json) and the source. attribution: the trigger's component or service is given a screen it is not rendered on. target: the navigation's target over-approximates to a route it cannot reach.",
+ "_note": "Cause of each pair the source readings judged spurious, read from the graph edge behind it (adjudication-input.json) and the source. attribution: the trigger's component or service is given a screen it is not rendered on. target: the navigation's target over-approximates to a route it cannot reach. For the two traduora sign-in pairs the component (the app bar) is rendered only under a condition the screen's guard keeps false.",
  "airbus-inventory /login /add": "attribution",
  "airbus-inventory /login /getAllProducts": "attribution",
  "airbus-inventory /login /productByCategory": "attribution",
@@ -8,5 +8,7 @@
  "spring-petclinic-angular /pets/:id/visits/add /owners/:id/pets/add": "target",
  "spring-petclinic-angular /visits/:id/edit /owners/:id/edit": "target",
  "spring-petclinic-angular /visits/add /owners/:id/edit": "target",
- "ever-traduora /projects/:projectId/settings /projects/:projectId/translations/:localeCode": "target"
+ "ever-traduora /projects/:projectId/settings /projects/:projectId/translations/:localeCode": "target",
+ "ever-traduora /forgot-password /projects": "attribution",
+ "ever-traduora /forgot-password /user-settings": "attribution"
 }

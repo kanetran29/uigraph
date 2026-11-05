@@ -1,0 +1,22 @@
+Deviations from PREREGISTRATION.txt, recorded 5 Nov 2026 after the results were read
+
+1. One reading batch ran twice. The traduora batch of extras 0-19 returned only the subject's two misses on
+   its first run (workflow wf_e82c0ccb-ae7), so those 20 extras were read in a second run (wf_eba5baf3-b46,
+   adjudication-raw-traduora.json) with the same rules and an explicit count.
+2. Verdicts corrected after the gate (corrections.json). An adversarial review found that the second run
+   counted the traduora app bar as shown on /login and /forgot-password, whose NoAuthGuard keeps its
+   *ngIf false; the first run and its gate had held that a condition must be satisfiable while the user
+   stays on the start screen. Two verdicts became spurious and one real verdict was re-cited to the
+   login redirect (auth.state.ts:258-262). The rule as preregistered ("an *ngIf that can be true") did not
+   settle transient states; the stricter reading is applied to every verdict.
+3. Two post-hoc measures, reported beside the preregistered one and marked as such:
+   - recall without the 3 reference pairs the source shows to be absent (class e). Only missed pairs were
+     read, so this measure can only rise;
+   - recall per start route, keeping the entries the preregistered rule drops (terminal among the start
+     routes, typically a shell link listed from every screen). Its misses were not read.
+4. Causes of spurious pairs (spurious-causes.json) were assigned by hand from the edge evidence and the
+   source; the preregistration did not ask for them.
+5. Reporting (outcome S1): tab:rw gained no row; the result went into a new subsection with tab:rima and
+   rows in tab:earlier, tab:world and tab:rqanswers.
+6. The reference's wildcard route ('/**') can never match a screen (the url matcher refuses wildcards),
+   while the graph's own wildcard screen counts among its other pairs. This asymmetry was not foreseen.

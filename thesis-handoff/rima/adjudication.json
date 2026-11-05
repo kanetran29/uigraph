@@ -1326,10 +1326,11 @@
   "to": "/projects",
   "top": true,
   "readerVerdict": "real",
-  "verdict": "real",
+  "verdict": "spurious",
   "gated": false,
-  "site": "src/app/shared/components/app-bar/app-bar.component.html:9",
-  "reason": "app-bar is rendered above the outlet when isAuthenticated$ is true and has routerLink=/projects (line 9; line 2 is brand link to / which redirects to projects). Caveat: NoAuthGuard blocks /forgot-password for authenticated users, so the bar is visible there only transiently (auth state flips true while on the page); counted real because the ngIf can be true."
+  "site": "src/app/auth/components/forgot-password/forgot-password.component.html:29",
+  "reason": "The app bar is behind *ngIf=isAuthenticated$ (app.component.html:3) and /forgot-password carries NoAuthGuard, so it is not shown there; the page's only link is /login (line 29) and its action only sets a status message.",
+  "corrected": "verdict"
  },
  {
   "slug": "ever-traduora",
@@ -1338,10 +1339,11 @@
   "to": "/user-settings",
   "top": true,
   "readerVerdict": "real",
-  "verdict": "real",
+  "verdict": "spurious",
   "gated": false,
-  "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
-  "reason": "Same shell app-bar Account Settings link as the /projects case; visible only when authenticated, which NoAuthGuard makes transient on this route, but the ngIf can be true."
+  "site": "src/app/auth/components/forgot-password/forgot-password.component.html:29",
+  "reason": "As for /forgot-password -> /projects: the app bar is not shown under NoAuthGuard, and nothing else on the page reaches /user-settings.",
+  "corrected": "verdict"
  },
  {
   "slug": "ever-traduora",
@@ -1352,8 +1354,9 @@
   "readerVerdict": "real",
   "verdict": "real",
   "gated": false,
-  "site": "src/app/shared/components/app-bar/app-bar.component.html:21",
-  "reason": "Shell app-bar routerLink to /user-settings is rendered while authenticated; on /login this holds in the window after ReceiveAPIAccessToken sets isAuthenticated (and GetUserInfo loads user) before the Navigate completes. Weak/transient since NoAuthGuard blocks authenticated direct visits, but the ngIf can be true."
+  "site": "src/app/auth/stores/auth.state.ts:262",
+  "reason": "Not through the app bar, which NoAuthGuard hides on /login: AuthGuard on /user-settings dispatches MustLogin with the address, and a successful login on /login dispatches Navigate([redirect]) (auth.state.ts:258-262).",
+  "corrected": "site"
  },
  {
   "slug": "ever-traduora",

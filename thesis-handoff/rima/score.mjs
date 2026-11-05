@@ -28,8 +28,11 @@ const route = (r) => '/' + r.split('/').filter(Boolean).join('/')
  * Returns the reference pairs of one ground-truth file, its distinct routes (starts and internal
  * terminals of every entry) and the count of entries per class: nav, same (terminal among the
  * starts), external and noterminal. Both schemas of the published files are read.
+ * With perStart, a post-hoc reading not in the preregistration: an entry whose terminal is among its
+ * start routes is kept, with one pair per start route other than the terminal (a shell link listed
+ * from every screen, its own target included).
  */
-export function referencePairs(gt) {
+export function referencePairs(gt, { perStart = false } = {}) {
   const pairs = new Map()
   const routes = new Set()
   const classes = { nav: 0, same: 0, external: 0, noterminal: 0 }
@@ -43,9 +46,11 @@ export function referencePairs(gt) {
     if (raw == null) { classes.noterminal++; continue }
     const t = route(raw)
     routes.add(t)
-    if (starts.includes(t)) { classes.same++; continue }
-    classes.nav++
-    for (const s of starts) pairs.set(`${s}\u0000${t}`, [s, t])
+    if (starts.includes(t)) {
+      classes.same++
+      if (!perStart) continue
+    } else classes.nav++
+    for (const s of starts) if (s !== t) pairs.set(`${s}\u0000${t}`, [s, t])
   }
   return { pairs: [...pairs.values()], routes, classes }
 }
@@ -55,8 +60,8 @@ export function referencePairs(gt) {
  * Returns the pair and route counts, per level the pairs held and the missed ones (why: 'route'
  * when an end matches no screen, 'pair' otherwise), and for the full level the extra pairs.
  */
-export function scoreSubject(gt, graphs) {
-  const ref = referencePairs(gt)
+export function scoreSubject(gt, graphs, opts = {}) {
+  const ref = referencePairs(gt, opts)
   const out = { pairs: ref.pairs.length, classes: ref.classes, routes: ref.routes.size, levels: {} }
   for (const [level, g] of Object.entries(graphs)) {
     const { screens, hit } = graphHits(g)
@@ -129,6 +134,21 @@ function main() {
     pooled.extrasTop += extrasTop
     for (const l of LEVELS) pooled[l] += s.levels[l]?.hit ?? 0
   }
+  // The post-hoc per-start reading, pooled only.
+  const ps = { pairs: 0, extras: 0, ...Object.fromEntries(LEVELS.map((l) => [l, 0])) }
+  for (const slug of slugs) {
+    const graphs = {}
+    for (const l of LEVELS) {
+      const f = join(a.graphs, `${slug}.${l}.json.gz`)
+      if (existsSync(f)) graphs[l] = readGz(f)
+    }
+    const s = scoreSubject(JSON.parse(readFileSync(join(a.gt, `${slug}.json`), 'utf8')), graphs, { perStart: true })
+    ps.pairs += s.pairs
+    ps.extras += (s.extras ?? []).length
+    for (const l of LEVELS) ps[l] += s.levels[l]?.hit ?? 0
+  }
+  tex += `\\newcommand{\\RimaPsPairs}{${ps.pairs}}\n\\newcommand{\\RimaExtraInPs}{${pooled.extras - ps.extras}}\n`
+  for (const l of LEVELS) tex += `\\newcommand{\\RimaPsHit${macroName(l)}}{${ps[l]}}\n\\newcommand{\\RimaPsRecall${macroName(l)}}{${pct(ps[l], ps.pairs)}}\n`
   tex += `\\newcommand{\\RimaSubjects}{${slugs.length}}\n\\newcommand{\\RimaPairs}{${pooled.pairs}}\n`
   tex += `\\newcommand{\\RimaRoutes}{${pooled.routes}}\n\\newcommand{\\RimaRoutesHeld}{${pooled.routesHeld}}\n`
   tex += `\\newcommand{\\RimaExtra}{${pooled.extras}}\n\\newcommand{\\RimaExtraTop}{${pooled.extrasTop}}\n`

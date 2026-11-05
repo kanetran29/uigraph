@@ -78,3 +78,18 @@ test('verdicts: the gate overrides the reader, and a pair with no reading is an 
   assert.deepEqual(out.map((x) => `${x.kind} ${x.from} ${x.to} ${x.verdict} ${x.gated}`), ['miss /a /b b false', 'extra /a /c real true', 'extra /b /c real false'])
   assert.throws(() => merge([{ slug: 'app', readers: runs[0].readers.slice(1), gateItems: [] }], input), /no reading/)
 })
+
+test('verdicts: a hand correction replaces the merged verdict and an unknown pair is refused', async () => {
+  const { merge, applyCorrections } = await import('./verdicts.mjs')
+  const input = { app: { misses: [], extras: [{ from: '/a', to: '/c', top: false }, { from: '/a', to: '/d', top: false }] } }
+  const out = merge([{ slug: 'app', readers: [{ kind: 'extra', from: '/a', to: '/c', verdict: 'real' }, { kind: 'extra', from: '/a', to: '/d', verdict: 'real' }], gateItems: [] }], input)
+  applyCorrections(out, { _note: 'x', 'app extra /a /c': { verdict: 'spurious', site: 'f:1', reason: 'r' }, 'app extra /a /d': { verdict: 'real', site: 'g:2', reason: 'r2' } })
+  assert.deepEqual(out.map((x) => `${x.verdict} ${x.corrected} ${x.site}`), ['spurious verdict f:1', 'real site g:2'])
+  assert.throws(() => applyCorrections(out, { 'app extra /x /y': { verdict: 'real', site: '', reason: '' } }), /unknown pair/)
+})
+
+test('per-start reading: an entry whose terminal is a start route yields a pair from each other start', () => {
+  const g = { entries: [entry(['/a', '/b', '/c/1'], '/b'), entry(['/a'], '/b')] }
+  assert.deepEqual(referencePairs(g).pairs.map((p) => p.join(' ')), ['/a /b'])
+  assert.deepEqual(referencePairs(g, { perStart: true }).pairs.map((p) => p.join(' ')).sort(), ['/a /b', '/c/1 /b'])
+})

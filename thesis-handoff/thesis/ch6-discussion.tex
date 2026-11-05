@@ -157,13 +157,13 @@ Every figure measured on the six applications is in-sample and fitted to this co
 the independent route parser, the mutation harness and the structural reference were corrected against
 the applications they are scored on.
 The structural reference guided two repairs of the extractor, and the end-to-end check three.
-& The end-to-end check came closest to an out-of-sample test: the extractor was fixed before the
+& Among the measurements on the corpus, the end-to-end check came closest to an out-of-sample test: the extractor was fixed before the
 suites' logs were read, and held \EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} mifos pairs. The repairs
 it exposed make the final figure in-sample like the rest.
-The comparison on Rima et al.'s seven subjects is out-of-sample: the extractor was frozen before they were mapped (Section~\ref{sec:res-rima}).
+The comparison on Rima et al.'s seven subjects is out-of-sample: the extractor was frozen before they were mapped, against a reference generated from their own tool's output (Section~\ref{sec:res-rima}).
 Corrections are reported in full.
-& The archive cannot corroborate that order, since the preregistration and the logs were committed
-together.
+& For the end-to-end check the archive cannot corroborate that order, since the preregistration and the logs were committed
+together; for the comparison on Rima et al.'s subjects it can, as the preregistration was committed before the scorer and the results.
 The corpus figures should not be read as estimates for other applications. \\
 Dependencies not installed
 & Extraction runs on source trees whose dependencies are not installed, so the TypeScript compiler cannot

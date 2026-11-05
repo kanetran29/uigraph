@@ -625,7 +625,7 @@ agree, so no witness-based method can find it. The suites test only the missing 
 the transitions they take. Attribution also widens what a source change can be scored against (Section~\ref{sec:res-mutation}).
 
 Table~\ref{tab:world} puts the comparison in terms of what can be done without this thesis and with
-it, on this corpus.
+it, on this corpus and, in its last row, on Rima et al.'s subjects.
 
 \begin{table}[t]\footnotesize
 \caption{What the corpus shows can be done without this thesis and with it.}
@@ -639,7 +639,7 @@ Screens checked without signing in & a browser run renders \ScopeJudged{}/\Scope
 Dead links found from the source & -- & \RoundTwoDeadLinkCandidates{} candidate sites in \RoundTwoDeadLinkWhere{}, checked against the runtime route oracle (Section~\ref{sec:deadlinks}) \\
 Transitions on \GTApp{} & its own suite takes \EtoERealworldPairs{} pairs & the graph holds \EtoERealworldGraphPairs{}, an over-approximation \\
 Response to a source change & -- & \MutFallibleDetected{}/\MutFallibleScored{} mutants, at constructs the graph represents \\
-Transitions of Rima et al.'s seven subjects & their pipeline enumerates the workflows their reference annotates & the graph holds \RimaHitValidFull{}/\RimaPairsValid{} source-confirmed pairs, and \RimaRealNewTarget{} read transitions to screens the reference never reaches \\
+Transitions of Rima et al.'s seven subjects & their pipeline enumerates the workflows their reference annotates & the graph holds \RimaHitFull{}/\RimaPairs{} of their preregistered reference pairs, \RimaHitOutlet{} at their specification's rule \\
 \bottomrule
 \end{tabularx}
 \par\smallskip{\footnotesize\noindent\emph{Note.} The dynamic row is this thesis's own rendered-interface check run without signing in, not a crawler with credentials; the earlier tools were not run; every figure is in-sample except the last row (Section~\ref{sec:res-rima}). All cells are generated figures.}
@@ -651,21 +651,22 @@ Transitions of Rima et al.'s seven subjects & their pipeline enumerates the work
 Rima et al.\ publish their seven Angular subjects and, for each, a ground truth: the workflows their
 pipeline enumerated, annotated by hand with start and terminal routes \cite{rima2026e2e}. None of the
 seven was used to develop the extractor, so this is the thesis's only out-of-sample measurement. It was
-preregistered, and the extractor was frozen before any subject was mapped. Each subject was taken at
-its last commit before the date of its ground truth, since their registry pins none; the independent
-route parser found every declared screen in the graph on all seven. A reference pair is a start route and a
-different terminal route of one entry. The reference was generated from their tool's output, so their tool
-holds every pair by construction, and their own figure on this set is test-execution success, not graph
-recall. The comparison therefore shows how much of what their pipeline finds this graph holds, and what it
-holds beyond that; it does not rank the two tools.
+preregistered and committed before the scorer and the results, and the extractor was frozen before any
+subject was mapped. Each subject was taken at its last commit before the date of its ground truth, since
+their registry pins none; the independent route parser found every declared screen in the graph on all
+seven. The preregistered unit is the reference pair: for an entry whose terminal route is none of its
+start routes, one pair from each start route to the terminal. The reference was generated from their
+tool's output, so their tool holds every pair by construction, and their own figure on this set is
+test-execution success, not graph recall. The comparison therefore shows how much of what their pipeline
+finds this graph holds, and what else the graph holds; it does not rank the two tools.
 
 \newcommand{\rimarow}[2]{#1 & \csname Rima#2Pairs\endcsname & \csname Rima#2HitNoattr\endcsname & \csname Rima#2HitRooted\endcsname & \csname Rima#2HitOutlet\endcsname & \csname Rima#2HitFull\endcsname & \csname Rima#2Extra\endcsname & \csname Rima#2Real\endcsname/\csname Rima#2Judged\endcsname \\}
 \begin{table}[t]\footnotesize
-\caption{Rima et al.'s reference pairs held at each attribution level, and the graph's pairs beyond them.}
+\caption{Rima et al.'s reference pairs held at each attribution level, and the graph's other pairs.}
 \label{tab:rima}
 \begin{tabularx}{\textwidth}{@{}Yrrrrrrr@{}}
 \toprule
- & & \multicolumn{4}{c}{Reference pairs held} & \multicolumn{2}{c}{Pairs beyond} \\
+ & & \multicolumn{4}{c}{Reference pairs held} & \multicolumn{2}{c}{Other graph pairs} \\
 \cmidrule(lr){3-6}\cmidrule(l){7-8}
 Subject & Pairs & none & rooted & outlet & full & all & real/read \\
 \midrule
@@ -677,35 +678,49 @@ Subject & Pairs & none & rooted & outlet & full & all & real/read \\
 \rimarow{jumpstart}{AngularJumpstart}
 \rimarow{event-booking}{EventBookingMean}
 \midrule
-All & \RimaPairs{} & \RimaHitNoattr{} & \RimaHitRooted{} & \RimaHitOutlet{} & \RimaHitFull{} & \RimaExtra{} & \RimaJudgedReal{}/\RimaJudged{} \\
-Source-confirmed & \RimaPairsValid{} & \RimaRecallValidNoattr{} & \RimaRecallValidRooted{} & \RimaRecallValidOutlet{} & \RimaRecallValidFull{} & & \\
+All, preregistered & \RimaPairs{} & \RimaRecallNoattr{} & \RimaRecallRooted{} & \RimaRecallOutlet{} & \RimaRecallFull{} & \RimaExtra{} & \RimaJudgedReal{}/\RimaJudged{} \\
+Without \RimaMissE{} read as absent$^{\dagger}$ & \RimaPairsValid{} & \RimaRecallValidNoattr{} & \RimaRecallValidRooted{} & \RimaRecallValidOutlet{} & \RimaRecallValidFull{} & & \\
+Per start route$^{\dagger}$ & \RimaPsPairs{} & \RimaPsRecallNoattr{} & \RimaPsRecallRooted{} & \RimaPsRecallOutlet{} & \RimaPsRecallFull{} & & \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{none} is the graph without attribution; \emph{rooted} and \emph{outlet} are the rules of Oshima and Kishi and of Rima et al.'s specification (Section~\ref{sec:res-ablation}). heroes has no pair: its entries are external links or stay on their start screen. \emph{Read}: pairs judged from the source, all of them where a subject has at most 40 and a seeded sample of 40 otherwise. \emph{Source-confirmed} leaves out the reference pairs the source does not hold. All cells are generated figures.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{none} is the graph without attribution; \emph{rooted} and \emph{outlet} are the rules of Oshima and Kishi and of Rima et al.'s specification (Section~\ref{sec:res-ablation}). heroes has no pair under the preregistered rule: its entries are external links or list their terminal among their start routes. \emph{Read}: pairs judged from the source, all of them where a subject has at most 40 other pairs and a seeded sample of 40 otherwise. The reference's wildcard route matches no screen, so its one pair counts as missed, while the graph's own wildcard screen is counted among its other pairs. $^{\dagger}$Post hoc, not preregistered: the first drops the reference pairs the source shows to be absent, and only missed pairs were read, so it can only rise; the second keeps the entries the preregistered rule drops, and its misses were not read. All cells are generated figures.}
 \end{table}
 
-Table~\ref{tab:rima} gives the result. The full level holds \RimaHitFull{} of the \RimaPairs{} reference pairs.
-Of the \RimaMissed{} it misses, the source holds \RimaMissE{} as no transition at all: a dropdown toggle
-with no link, a form whose component has no router, and a form that returns to the owner's page. The
-other \RimaMissF{} come from one relative link whose only segment is an expression; the extractor leaves
-its target unknown, although the route it reaches can be read. Against the \RimaPairsValid{} pairs the
-source confirms, the levels hold \RimaRecallValidNoattr{}, \RimaRecallValidRooted{},
-\RimaRecallValidOutlet{} and \RimaRecallValidFull{}. The step from \emph{outlet} to \emph{full} is
+Table~\ref{tab:rima} gives the result. The full level holds \RimaHitFull{} of the \RimaPairs{} reference
+pairs and the \emph{outlet} level \RimaHitOutlet{}. Two of the four preregistered predictions held: the full level
+holds at least 90\,\%, and the \emph{outlet} level is within five points of it. Two failed: no miss is a
+route the graph lacks or a navigation outside the router, and only \RimaExtraTop{} of the \RimaExtra{} other
+pairs are reached only from the shell scope. \RimaRoutesHeld{} of the \RimaRoutes{} reference routes match a screen; the
+other two are the wildcard.
+
+Of the \RimaMissed{} misses, the source holds \RimaMissE{} as no transition at all: two dropdown toggles with
+no link, a form whose component has no router, and a form that returns to the owner's page. The other
+\RimaMissF{} come from one relative link whose only segment is an expression, which the extractor leaves to
+an unknown target although the route it reaches can be read; the second of them also starts on a route
+that only redirects. The step from \emph{outlet} to \emph{full} is
 \the\numexpr\RimaHitFull-\RimaHitOutlet\relax{} pairs, all on airbus, where the navigation runs inside an
 injected router service, the construct the specification's rule does not follow
-(Section~\ref{sec:dynamic-spa}).
+(Section~\ref{sec:dynamic-spa}). The preregistered rule drops every entry whose component is also shown on
+its target, which removes most links of a shell; counted from each start route instead, the reference has
+\RimaPsPairs{} pairs, and the levels hold \RimaPsHitNoattr{}, \RimaPsHitRooted{}, \RimaPsHitOutlet{} and
+\RimaPsHitFull{} of them.
 
-Beyond the reference the graph holds \RimaExtra{} pairs. Of the \RimaJudged{} read from the source,
-\RimaJudgedReal{} are transitions the application has, and \RimaRealNewTarget{} of those reach a screen
-that no reference pair reaches. \RimaJudgedSpurious{} are not:
-\RimaSpuriousTarget{} come from a navigation whose target is matched to longer routes than its command can
-produce, and \RimaSpuriousAttribution{} from a navigation placed on the sign-in screen, where neither the
-component nor the service caller holding it is rendered. All \RimaJudgedSpurious{} are at the may tier;
-\RimaSpuriousMust{} has a must edge. The readings were made by the AI assistant. A stronger model of the same
-assistant re-read every miss, every pair not judged real and every sixth real one, \RimaGated{} in all,
-and changed \RimaGateChanged{} verdicts; a script checked that every cited site exists and holds a
-navigation construct. The three defects found
-here are not repaired in these figures.
+Besides the counted pairs the graph holds \RimaExtra{} others; \RimaExtraInPs{} of them are pairs of the
+entries the preregistered rule drops. Of the \RimaJudged{} read from the source, \RimaJudgedReal{} are transitions the
+application has. \RimaJudgedSpurious{} are not: \RimaSpuriousTarget{} come from a navigation whose target is
+matched to longer routes than its command can produce, and \RimaSpuriousAttribution{} from a navigation
+placed on a sign-in screen where the component holding it is not shown: a navigation bar that only the other
+pages include, a service method called only from dialogs, and a shell bar hidden by a condition the screen's
+guard keeps false. Rima et al.'s reference lists the three airbus pairs too. All
+\RimaJudgedSpurious{} are at the may tier; \RimaSpuriousMust{} has a must edge.
+
+The readings were made by the AI assistant: one model read each pair, and a stronger model of the same
+assistant re-read every miss, every pair not judged real and every sixth real one, \RimaGated{} in all, and
+changed \RimaGateChanged{}. One batch was read twice because the first run returned none of its pairs. A
+later adversarial review found that the second run had counted a shell bar as shown on sign-in screens whose
+guard hides it; \RimaCorrected{} verdicts were corrected and \RimaRecited{} re-cited by hand. A script
+checked that every cited site exists and holds a navigation construct, which cannot show that the construct
+is rendered on the start screen. The three defects found here are not repaired in these figures.
 
 \section{Change sensitivity (RQ4)}
 \label{sec:res-mutation}

@@ -2,7 +2,7 @@
  * Merges the source readings of PREREGISTRATION.txt M3 and M4 (a reader's verdict per pair, overridden
  * by the final gate's where the gate re-checked it) and writes the counts as LaTeX macros.
  *
- * Usage: node verdicts.mjs --raw a.json[,b.json:slug] --input adjudication-input.json --out adjudication.json --causes spurious-causes.json --results results.json --gt <gt dir> --tex out.tex
+ * Usage: node verdicts.mjs --raw a.json[,b.json:slug] --input adjudication-input.json --out adjudication.json --causes spurious-causes.json --corrections corrections.json --results results.json --gt <gt dir> --tex out.tex
  * Each raw file is a workflow result { readers: [...], gate: [{ items }] | { items } }; a ':slug' suffix
  * names the subject of a file whose items carry none.
  */
@@ -37,6 +37,21 @@ export function merge(runs, input) {
   return out
 }
 
+/**
+ * Replaces the verdict, site and reason of each pair named in `corrections` (keys "slug kind from to"),
+ * marking it corrected ('verdict' when the verdict changes, 'site' when only the evidence does).
+ * Throws on a key that names no pair.
+ */
+export function applyCorrections(final, corrections) {
+  for (const [k, c] of Object.entries(corrections)) {
+    if (k.startsWith('_')) continue
+    const x = final.find((y) => `${y.slug} ${y.kind} ${y.from} ${y.to}` === k)
+    if (!x) throw new Error(`correction for an unknown pair: ${k}`)
+    Object.assign(x, { corrected: x.verdict !== c.verdict ? 'verdict' : 'site', verdict: c.verdict, site: c.site, reason: c.reason })
+  }
+  return final
+}
+
 /** Reads every raw workflow result into runs for merge(). */
 function runsOf(files) {
   return files.map((spec) => {
@@ -54,6 +69,8 @@ function main() {
   const input = JSON.parse(readFileSync(a.input, 'utf8'))
   const runs = runsOf(a.raw.split(','))
   const final = merge(runs, input)
+  // Corrections made after the gate, each with its reason (corrections.json); they are counted apart.
+  applyCorrections(final, a.corrections ? JSON.parse(readFileSync(a.corrections, 'utf8')) : {})
   writeFileSync(a.out, JSON.stringify(final, null, 1) + '\n')
   const n = (f) => final.filter(f).length
   const extra = (v) => n((x) => x.kind === 'extra' && x.verdict === v)
@@ -63,7 +80,9 @@ function main() {
     JudgedSpurious: extra('spurious'),
     JudgedUnclear: extra('unclear'),
     Gated: n((x) => x.gated),
-    GateChanged: n((x) => x.gated && x.verdict !== x.readerVerdict),
+    GateChanged: n((x) => x.gated && !x.corrected && x.verdict !== x.readerVerdict),
+    Corrected: n((x) => x.corrected === 'verdict'),
+    Recited: n((x) => x.corrected === 'site'),
     Missed: n((x) => x.kind === 'miss'),
     ...Object.fromEntries(['a', 'b', 'c', 'd', 'e', 'f'].map((c) => ['Miss' + c.toUpperCase(), n((x) => x.kind === 'miss' && x.verdict === c)])),
   }
