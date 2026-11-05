@@ -7,7 +7,7 @@ set -u
 export NODE_OPTIONS=--max-old-space-size=8192
 W=$(cd "$1" && pwd); T=$(cd "$2" && pwd); HERE=$(cd "$(dirname "$0")" && pwd); OUT="$W/rima/theirs"
 mkdir -p "$OUT"
-git -C "$T" rev-parse HEAD > "$HERE/THEIRS_COMMIT"
+DEVELOPER_DIR=/Library/Developer/CommandLineTools /usr/bin/git -C "$T" rev-parse HEAD > "$HERE/THEIRS_COMMIT"
 grep -v '^#' "$HERE/apps.txt" | while read -r slug dir tsc; do
   [ -n "$slug" ] || continue
   o="$OUT/$slug"; rm -rf "$o"; mkdir -p "$o"

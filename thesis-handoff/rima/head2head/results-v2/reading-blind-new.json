@@ -1,0 +1,847 @@
+{
+ "event-booking-mean": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app",
+  "pairs": [
+   {
+    "from": "/create-event",
+    "to": "/my-Events",
+    "sites": [
+     "src/app/create-event/create-event.component.ts:74",
+     "src/app/header/header.component.html:29"
+    ]
+   },
+   {
+    "from": "/create-event",
+    "to": "/register",
+    "sites": [
+     "src/app/header/header.component.html:20"
+    ]
+   }
+  ]
+ },
+ "alfresco": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/alfresco/projects/aca-content",
+  "pairs": [
+   {
+    "from": "/favorite/libraries/:folderId",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ]
+   },
+   {
+    "from": "/libraries",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ]
+   },
+   {
+    "from": "/personal-files/details/:nodeId",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ]
+   },
+   {
+    "from": "/personal-files/details/:nodeId/:activeTab",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ]
+   },
+   {
+    "from": "/repository/details/:nodeId/:activeTab",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ]
+   },
+   {
+    "from": "/rules",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ]
+   },
+   {
+    "from": "/search",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ]
+   },
+   {
+    "from": "/search-libraries",
+    "to": "/profile",
+    "sites": [
+     "src/lib/components/common/user-info/user-info.component.html:1"
+    ]
+   }
+  ]
+ },
+ "ghostfolio": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/ghostfolio/apps/client",
+  "pairs": [
+   {
+    "from": "/about",
+    "to": "/blog",
+    "sites": [
+     "src/app/components/footer/footer.component.html:23",
+     "src/app/pages/about/overview/about-overview-page.html:202"
+    ]
+   },
+   {
+    "from": "/about/oss-friends",
+    "to": "/home",
+    "sites": [
+     "src/app/components/footer/footer.component.html:4",
+     "src/app/components/header/header.component.ts:356",
+     "src/app/core/auth.guard.ts:94"
+    ]
+   },
+   {
+    "from": "/about/privacy-policy",
+    "to": "/accounts/:accountId",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.ts:191"
+    ]
+   },
+   {
+    "from": "/account",
+    "to": "/portfolio/activities/create",
+    "sites": [
+     "../../libs/ui/src/lib/no-activities-info/no-activities-info.component.html:10"
+    ]
+   },
+   {
+    "from": "/account/access",
+    "to": "/internalRoutes.account.path/access.path/:accessId",
+    "sites": [
+     "src/app/components/user-account-access/user-account-access.html:78"
+    ]
+   },
+   {
+    "from": "/account/access/:accessId/update",
+    "to": "/internalRoutes.account.path/access.path/:accessId",
+    "sites": [
+     "src/app/components/user-account-access/user-account-access.html:78"
+    ]
+   },
+   {
+    "from": "/account/access/create",
+    "to": "/internalRoutes.account.path/access.path/:accessId",
+    "sites": [
+     "src/app/components/user-account-access/user-account-access.html:78"
+    ]
+   },
+   {
+    "from": "/accounts",
+    "to": "/accounts/create",
+    "sites": [
+     "src/app/pages/accounts/accounts-page.component.ts:140",
+     "src/app/pages/accounts/accounts-page.html:25"
+    ]
+   },
+   {
+    "from": "/accounts/:accountId",
+    "to": "/admin",
+    "sites": [
+     "src/app/components/header/header.component.html:74"
+    ]
+   },
+   {
+    "from": "/accounts/:accountId/update",
+    "to": "/open",
+    "sites": [
+     "src/app/components/footer/footer.component.html:44"
+    ]
+   },
+   {
+    "from": "/admin",
+    "to": "/account",
+    "sites": [
+     "src/app/components/header/header.component.html:279"
+    ]
+   },
+   {
+    "from": "/admin/settings",
+    "to": "/portfolio",
+    "sites": [
+     "src/app/components/header/header.component.html:44"
+    ]
+   },
+   {
+    "from": "/blog/2021/07/hallo-ghostfolio",
+    "to": "/blog",
+    "sites": [
+     "src/app/components/footer/footer.component.html:23",
+     "src/app/pages/blog/2021/07/hallo-ghostfolio/hallo-ghostfolio-page.html:204"
+    ]
+   },
+   {
+    "from": "/blog/2022/10/hacktoberfest-2022",
+    "to": "/demo",
+    "sites": [
+     "src/app/core/auth.guard.ts:35"
+    ]
+   },
+   {
+    "from": "/blog/2023/02/ghostfolio-meets-umbrel",
+    "to": "/zen",
+    "sites": [
+     "src/app/core/auth.guard.ts:87"
+    ]
+   },
+   {
+    "from": "/blog/2023/03/ghostfolio-reaches-1000-stars-on-github",
+    "to": "/demo",
+    "sites": [
+     "src/app/core/auth.guard.ts:35"
+    ]
+   },
+   {
+    "from": "/blog/2023/07/exploring-the-path-to-fire",
+    "to": "/demo",
+    "sites": [
+     "src/app/core/auth.guard.ts:35"
+    ]
+   },
+   {
+    "from": "/blog/2024/11/black-weeks-2024",
+    "to": "/accounts/transfer-cash-balance",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7"
+    ]
+   },
+   {
+    "from": "/demo",
+    "to": "/portfolio/activities",
+    "sites": [
+     "src/app/components/holding-detail-dialog/holding-detail-dialog.component.ts:740"
+    ]
+   },
+   {
+    "from": "/features",
+    "to": "/zen",
+    "sites": [
+     "src/app/core/auth.guard.ts:87"
+    ]
+   },
+   {
+    "from": "/home/holdings",
+    "to": "/accounts/transfer-cash-balance",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7"
+    ]
+   },
+   {
+    "from": "/home/watchlist/create",
+    "to": "/blog",
+    "sites": [
+     "src/app/components/footer/footer.component.html:23"
+    ]
+   },
+   {
+    "from": "/markets",
+    "to": "/demo",
+    "sites": [
+     "src/app/core/auth.guard.ts:35"
+    ]
+   },
+   {
+    "from": "/portfolio/activities",
+    "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+    "sites": [
+     "src/app/pages/portfolio/activities/activities-page.html:44"
+    ]
+   },
+   {
+    "from": "/portfolio/activities/:activityId/update",
+    "to": "/accounts/transfer-cash-balance",
+    "sites": [
+     "../../libs/ui/src/lib/accounts-table/accounts-table.component.html:7"
+    ]
+   },
+   {
+    "from": "/portfolio/activities/:activityId/update",
+    "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+    "sites": [
+     "src/app/pages/portfolio/activities/activities-page.html:44"
+    ]
+   },
+   {
+    "from": "/portfolio/activities/create",
+    "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+    "sites": [
+     "src/app/pages/portfolio/activities/activities-page.html:44"
+    ]
+   },
+   {
+    "from": "/portfolio/allocations",
+    "to": "/zen",
+    "sites": [
+     "src/app/core/auth.guard.ts:87"
+    ]
+   }
+  ]
+ },
+ "k8sdash": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/k8sdash/modules/web",
+  "pairs": [
+   {
+    "from": "/clusterrolebinding",
+    "to": "/create",
+    "sites": [
+     "src/chrome/component.ts:82"
+    ]
+   },
+   {
+    "from": "/clusterrolebinding",
+    "to": "/overview",
+    "sites": [
+     "src/common/components/namespace/component.ts:226"
+    ]
+   },
+   {
+    "from": "/configmap",
+    "to": "/search",
+    "sites": [
+     "src/chrome/search/component.ts:45"
+    ]
+   },
+   {
+    "from": "/customresourcedefinition/:crdName/:namespace/:objectName",
+    "to": "/workloads",
+    "sites": [
+     "src/chrome/template.html:30",
+     "src/common/components/zerostate/template.html:37"
+    ]
+   },
+   {
+    "from": "/job",
+    "to": "/login",
+    "sites": [
+     "src/common/services/global/authentication.ts:72"
+    ]
+   },
+   {
+    "from": "/namespace/:resourceName",
+    "to": "/login",
+    "sites": [
+     "src/common/services/global/authentication.ts:72"
+    ]
+   },
+   {
+    "from": "/networkpolicy",
+    "to": "/overview",
+    "sites": [
+     "src/common/components/namespace/component.ts:226"
+    ]
+   },
+   {
+    "from": "/networkpolicy",
+    "to": "/search",
+    "sites": [
+     "src/chrome/search/component.ts:45"
+    ]
+   },
+   {
+    "from": "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+    "to": "/login",
+    "sites": [
+     "src/common/services/global/authentication.ts:72"
+    ]
+   },
+   {
+    "from": "/shell/:resourceNamespace/:resourceName",
+    "to": "/workloads",
+    "sites": [
+     "src/chrome/template.html:30",
+     "src/common/components/zerostate/template.html:37"
+    ]
+   }
+  ]
+ },
+ "bitwarden": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/bitwarden/apps/web",
+  "pairs": [
+   {
+    "from": "/AuthRoute.NewDeviceVerification",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ]
+   },
+   {
+    "from": "/AuthRoute.SignUp",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ]
+   },
+   {
+    "from": "/AuthRoute.TwoFactor",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ]
+   },
+   {
+    "from": "/browser-extension-prompt",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ]
+   },
+   {
+    "from": "/confirm-key-connector-domain",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ]
+   },
+   {
+    "from": "/organizations/:organizationId/reporting/reports/weak-passwords-report",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ]
+   },
+   {
+    "from": "/recover-2fa",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ]
+   },
+   {
+    "from": "/reports/breach-report",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ]
+   },
+   {
+    "from": "/secrets-manager-trial-initiation",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ]
+   },
+   {
+    "from": "/send/:sendId/:key",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ]
+   },
+   {
+    "from": "/settings/security/password",
+    "to": "/vault",
+    "sites": [
+     "src/app/vault/components/setup-extension/add-extension-later-dialog.component.html:21"
+    ]
+   },
+   {
+    "from": "/setup-extension",
+    "to": "/settings/security/session-timeout",
+    "sites": [
+     "src/app/components/environment-selector/environment-selector.component.html:20",
+     "src/app/vault/components/vault-items/vault-cipher-row.component.html:20",
+     "src/app/vault/components/vault-items/vault-collection-row.component.html:28"
+    ]
+   }
+  ]
+ },
+ "mifos": {
+  "appDir": "/Users/kanetran29/personal/uigraph-work/corpus/mifos",
+  "pairs": [
+   {
+    "from": "/accounting/provisioning-entries/journal-entries/view/:id",
+    "to": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:218"
+    ]
+   },
+   {
+    "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/clients/:clientId/savings-accounts/:savingAccountId/datatables/:datatableName",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/loans/:loanId/transactions/:id/edit",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135"
+    ]
+   },
+   {
+    "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/general",
+    "to": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/edit",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/checker-inbox-and-tasks/loan-approval",
+    "to": "/checker-inbox-and-tasks/client-approval",
+    "sites": [
+     "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:27"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions",
+    "to": "/clients/:clientId/loans-accounts/:loanId/transfer-funds/make-account-transfer",
+    "sites": [
+     "src/app/deposits/fixed-deposits/fixed-deposit-account-view/fixed-deposit-account-view.component.ts:151",
+     "src/app/deposits/fixed-deposits/fixed-deposit-account-view/transactions-tab/transactions-tab.component.ts:245",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions/account-transfers/make-account-transfer",
+    "to": "/loans/:loanId/transfer-funds/:standingInstructionsId/view",
+    "sites": [
+     "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/fixed-deposits-accounts/create",
+    "to": "/groups",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:156"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/loans-accounts/:loanId/accountdetail",
+    "to": "/loans/:loanId/notes",
+    "sites": [
+     "src/app/centers/centers-view/centers-view.component.html:257",
+     "src/app/clients/clients-view/clients-view.component.html:482",
+     "src/app/groups/groups-view/groups-view.component.html:312",
+     "src/app/loans/loans-view/loans-view.component.html:632"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/loans-accounts/:loanId/breach-actions",
+    "to": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:330",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/loans-accounts/:loanId/buy-down-fees",
+    "to": "/loans/:loanId/payment-rates",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:452"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/loans-accounts/:loanId/datatables/:datatableName",
+    "to": "/loans/:loanId/external-asset-owner",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:660"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/loans-accounts/glim-account/create",
+    "to": "/reports",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:193",
+     "src/app/reports/run-report/run-report.component.html:208",
+     "src/app/system/system.component.html:367",
+     "src/app/system/system.component.html:369",
+     "src/app/system/system.component.html:376"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions-tab",
+    "to": "/appusers",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:214",
+     "src/app/users/view-user/view-user.component.html:14",
+     "src/app/users/view-user/view-user.component.html:18",
+     "src/app/zitadel/users/edit-user/edit-user.component.html:12"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/account-transfers/:transferid",
+    "to": "/navigation",
+    "sites": [
+     "src/app/core/shell/sidenav/sidenav.component.html:97",
+     "src/app/core/shell/sidenav/sidenav.component.html:98"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/list-standing-instructions",
+    "to": "/centers",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:159"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:228"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/general",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+    "to": "/loans/:loanId/charges/:id",
+    "sites": [
+     "src/app/clients/clients-view/general-tab/general-tab.component.html:102",
+     "src/app/clients/clients-view/general-tab/general-tab.component.html:41"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/standing-instructions/create-standing-instructions",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges/:id",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/clients/:clientId/standing-instructions/make-account-transfer",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId",
+    "to": "/loans/:loanId/deferred-income",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:466"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/balances",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/edit",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+    "to": "/clients/:clientId/savings-accounts/:savingAccountId/documents",
+    "sites": [
+     "src/app/clients/clients-view/clients-view.component.html:468",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/general",
+    "to": "/loans/:loanId/loan-documents",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:620"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/loan-documents",
+    "to": "/appusers",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:214",
+     "src/app/users/view-user/view-user.component.html:14",
+     "src/app/users/view-user/view-user.component.html:18",
+     "src/app/zitadel/users/edit-user/edit-user.component.html:12"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/loans-accounts/:loanId/original-schedule",
+    "to": "/:loanId/datatables",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:675"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/savings-accounts/:savingAccountId/notes",
+    "to": "/loans/:loanId/transfer-funds/:standingInstructionsId/view",
+    "sites": [
+     "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/loans/:loanId/buy-down-fees",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135"
+    ]
+   },
+   {
+    "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+    "to": "/system/roles-and-permissions/add",
+    "sites": [
+     "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135"
+    ]
+   },
+   {
+    "from": "/loans/:loanId/breach-actions",
+    "to": "/centers/:centerId/savings-accounts/:savingAccountId/documents",
+    "sites": [
+     "src/app/clients/clients-view/clients-view.component.html:468",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/loans/:loanId/loan-collateral",
+    "to": "/reports",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:193",
+     "src/app/reports/run-report/run-report.component.html:208",
+     "src/app/system/system.component.html:367",
+     "src/app/system/system.component.html:369",
+     "src/app/system/system.component.html:376"
+    ]
+   },
+   {
+    "from": "/loans/:loanId/payment-rates",
+    "to": "/groups/:groupId/loans-accounts/:loanId/originators",
+    "sites": [
+     "src/app/loans/loans-view/loans-view.component.html:507",
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ]
+   },
+   {
+    "from": "/loans/:loanId/transactions/export",
+    "to": "/accounting",
+    "sites": [
+     "src/app/core/shell/toolbar/toolbar.component.html:163",
+     "src/app/core/shell/toolbar/toolbar.component.html:52",
+     "src/app/core/shell/toolbar/toolbar.component.html:55",
+     "src/app/core/shell/toolbar/toolbar.component.ts:220"
+    ]
+   },
+   {
+    "from": "/loans/glim-account/:glimId",
+    "to": "/loans/:loanId/charges/:id",
+    "sites": [
+     "src/app/clients/clients-view/general-tab/general-tab.component.html:102",
+     "src/app/clients/clients-view/general-tab/general-tab.component.html:41"
+    ]
+   },
+   {
+    "from": "/organization/employees/create",
+    "to": "/remittances/process",
+    "sites": [
+     "src/app/core/shell/sidenav/sidenav.component.html:151"
+    ]
+   },
+   {
+    "from": "/organization/exchange-rates/:id",
+    "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/:standingInstructionsId/view",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+     "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205"
+    ]
+   },
+   {
+    "from": "/organization/exchange-rates/convert",
+    "to": "/clients/:clientId/shares-accounts/create",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:238"
+    ]
+   },
+   {
+    "from": "/organization/manage-loan-originators/:id",
+    "to": "/organization/manage-loan-originators/:id/edit",
+    "sites": [
+     "src/app/organization/loan-originators/view-loan-originator/view-loan-originator.component.html:10"
+    ]
+   },
+   {
+    "from": "/organization/working-days",
+    "to": "/centers/:centerId/savings-accounts/:savingAccountId/charges",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/products/fixed-deposit-products/:productId/edit",
+    "to": "/centers/:centerId/savings-accounts/:savingAccountId/notes",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/products/near-breach-configurations/create",
+    "to": "/groups/:groupId/loans-accounts/:loanId/transactions/:id/reciept",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ]
+   },
+   {
+    "from": "/products/recurring-deposit-products/:productId/edit",
+    "to": "/products/recurring-deposit-products/:productId/general",
+    "sites": [
+     "src/app/products/recurring-deposit-products/edit-recurring-deposit-product/edit-recurring-deposit-product.component.ts:159",
+     "src/app/products/recurring-deposit-products/recurring-deposit-product-stepper/recurring-deposit-product-preview-step/recurring-deposit-product-preview-step.component.html:572",
+     "src/app/products/recurring-deposit-products/view-recurring-deposit-product/view-recurring-deposit-product.component.html:14"
+    ]
+   },
+   {
+    "from": "/settings",
+    "to": "/groups/:groupId/loans-accounts/:loanId/charges/:id",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:198"
+    ]
+   },
+   {
+    "from": "/settings",
+    "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/system",
+    "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/datatables/:datatableName",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:228"
+    ]
+   },
+   {
+    "from": "/system/codes/:id/edit",
+    "to": "/clients/:clientId/savings-accounts/:savingAccountId/actions/:name",
+    "sites": [
+     "src/app/shared/notifications-tray/notifications-tray.component.ts:208"
+    ]
+   },
+   {
+    "from": "/system/manage-jobs",
+    "to": "/clients/:clientId/client-collateral/:collateralId",
+    "sites": [
+     "src/app/system/manage-jobs/cob-workflow/loan-locked/loan-locked.component.ts:175"
+    ]
+   }
+  ]
+ }
+}

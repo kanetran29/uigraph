@@ -21,6 +21,7 @@ import { sample } from '../adjudication-input.mjs'
 
 export const SEED = 20261106
 export const CAP = 12
+export const SPLIT = 1000
 
 /** '/a/b/' and 'a/b' both name '/a/b'. */
 const route = (r) => '/' + String(r).split('/').filter(Boolean).join('/')
@@ -32,23 +33,37 @@ const key = (s, t) => `${norm(s)}\u0000${norm(t)}`
  * sites being the trigger locations their workflow ids name, relative to `appDir`.
  */
 export function theirPairs(workflows, routes, appDir, decls = null) {
-  // A route is identified by where it is declared when `decls` (file:line -> our path) knows it,
-  // so a path their map records as unresolved text still names the declared route.
-  const at = (r) => (decls && r.origin ? decls[`${r.origin.file}:${r.origin.startLine}`] : undefined)
-  const path = new Map(routes.map((r) => [r.id, route(at(r) ?? r.fullPath)]))
+  // A route is identified by where it is declared when `decls` (file:line -> the paths ours mounts it
+  // at) knows it: the mount whose path is the one they record, else the mounts ending in it (their
+  // tool does not prefix a lazily loaded module's routes), else every mount.
+  const mounts = (r) => {
+    const ms = decls && r.origin ? decls[`${r.origin.file}:${r.origin.startLine}`] : undefined
+    if (!ms || ms.length === 0) return [route(r.fullPath)]
+    const own = norm(route(r.fullPath))
+    const same = ms.filter((x) => norm(route(x)) === own)
+    if (same.length) return same.map(route)
+    const tail = ms.filter((x) => norm(route(x)).endsWith(own))
+    return (tail.length ? tail : ms).map(route)
+  }
+  const paths = new Map(routes.map((r) => [r.id, mounts(r)]))
   const out = new Map()
   for (const w of workflows) {
-    const t = path.get(w.terminalNodeId)
-    if (t === undefined || wild(t)) continue
+    // Their enumerator sets a workflow's terminal to its own start route when the trigger does not
+    // navigate or its target is unresolved; only a resolved navigation claims a transition.
+    const navigates = (w.steps ?? []).some((x) => x.kind === 'WIDGET_NAVIGATES_ROUTE' || x.kind === 'COMPONENT_NAVIGATES_ROUTE')
+    if (!navigates || w.meta?.unresolvedTargets?.length) continue
     const m = /\|([^|]+):(\d+):\d+\|/.exec(w.triggerEdgeId ?? w.id ?? '')
     const site = m ? `${relative(appDir, m[1])}:${m[2]}` : null
-    for (const id of w.startRouteIds ?? []) {
-      const s = path.get(id)
-      if (s === undefined || wild(s) || norm(s) === norm(t)) continue
-      const k = key(s, t)
-      const p = out.get(k) ?? { from: s, to: t, sites: new Set() }
-      if (site) p.sites.add(site)
-      out.set(k, p)
+    for (const t of paths.get(w.terminalNodeId) ?? []) {
+      if (wild(t)) continue
+      for (const id of w.startRouteIds ?? [])
+        for (const s of paths.get(id) ?? []) {
+          if (wild(s) || norm(s) === norm(t)) continue
+          const k = key(s, t)
+          const p = out.get(k) ?? { from: s, to: t, sites: new Set() }
+          if (site) p.sites.add(site)
+          out.set(k, p)
+        }
     }
   }
   return out
@@ -71,8 +86,9 @@ export function ourPairs(g) {
       for (const t of expand(e.to)) {
         if (norm(s) === norm(t)) continue
         const k = key(s, t)
-        const p = out.get(k) ?? { from: s, to: t, sites: new Set() }
+        const p = out.get(k) ?? { from: s, to: t, sites: new Set(), shellOnly: true }
         if (e.witness?.file) p.sites.add(`${e.witness.file}:${e.witness.loc?.line}`)
+        if (!(byId.get(e.from)?.kind === 'scope' && byId.get(e.from).scope.kind === 'top')) p.shellOnly = false
         out.set(k, p)
       }
   return out
@@ -107,7 +123,16 @@ function main() {
     for (const [k, p] of ours) if (!theirs.has(k)) oursOnly.push({ k, ...p })
     strata[slug] = { both: both.length, theirsOnly: theirsOnly.length, oursOnly: oursOnly.length, theirs: theirs.size, ours: ours.size }
     const pick = (list, stratum) => sample(list.map(({ from, to, sites }) => ({ from, to, sites: [...sites].sort(), stratum })), CAP, SEED)
-    reading[slug] = { appDir, pairs: [...pick(both, 'both'), ...pick(theirsOnly, 'theirs'), ...pick(oursOnly, 'ours')] }
+    // An only-ours stratum over SPLIT pairs is read in two parts, those only the shell reaches and the
+    // rest, so one dominant trigger cannot decide the estimate alone (a post-hoc refinement).
+    let ourSample
+    if (oursOnly.length > SPLIT) {
+      const shell = oursOnly.filter((p) => p.shellOnly), other = oursOnly.filter((p) => !p.shellOnly)
+      strata[slug].oursShell = shell.length
+      strata[slug].oursOther = other.length
+      ourSample = [...pick(shell, 'oursShell'), ...pick(other, 'oursOther')]
+    } else ourSample = pick(oursOnly, 'ours')
+    reading[slug] = { appDir, pairs: [...pick(both, 'both'), ...pick(theirsOnly, 'theirs'), ...ourSample] }
     console.log(slug.padEnd(26), JSON.stringify(strata[slug]))
   }
   writeFileSync(join(a.out, 'strata.json'), JSON.stringify(strata, null, 1) + '\n')
