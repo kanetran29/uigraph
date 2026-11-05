@@ -45,13 +45,10 @@ analysis could not name, and nothing about which screen is reached. Claim~\ref{c
 must conversion (RQ1) range over the edges whose source and target are both screens.
 
 \begin{table}[t]\small
-\caption{What the published graphs are made of: nodes by kind, where an anchor stands for a
-whole subtree of screens and \emph{other} counts unplaced origins and dynamic targets
-together, and edges by modality. These are the attributed graphs; the node column of
-Table~\ref{tab:conversion} counts the graphs of the same snapshot without attribution, which
-hold no anchors and fewer \emph{other} nodes.}
+\caption{What the published graphs are made of: nodes by kind and edges by modality.}
 \label{tab:census}
 \TabCensus
+\par\smallskip{\footnotesize\noindent\emph{Note.} An anchor stands for a whole subtree of screens; \emph{other} counts unplaced origins and dynamic targets together. These are the attributed graphs; the node column of Table~\ref{tab:conversion} counts the graphs of the same snapshot without attribution, which hold no anchors and fewer \emph{other} nodes.}
 \end{table}
 
 \textbf{Modalities.} A \emph{must} edge is claimed to fire for every input on which the
@@ -485,8 +482,9 @@ The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-abl
   \draw[dashed, muted] (cls) -- (full);
   \node[lbl, above=1mm of cls, text width=26mm] {beside \emph{full}: service join per class};
 \end{tikzpicture}
-\caption{Attribution levels. Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what only this thesis adds; \emph{class} is the per-class variant of the service join.}
+\caption{Attribution levels, from the ownership and containment baselines to the service join.}
 \label{fig:lattice}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what only this thesis adds; \emph{class} is the per-class variant of the service join.}
 \end{figure}
 
 \textbf{Component nesting.} Every component in the application, excluding test hosts and stories,

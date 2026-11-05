@@ -371,8 +371,7 @@ Both are places where the analysis is silent rather than approximate.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
 \begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.7cm}YY@{}}
-\caption{Declared approximations and exact-read constructs: how the analysis treats each and what the
-graph loses. ``May'' is the tier without a soundness claim.}
+\caption{Declared approximations and exact-read constructs, and what the graph loses for each.}
 \label{tab:approximations}\\
 \toprule
 Construct & How it is treated & Consequence (tier, missing edges, note) \\
@@ -575,6 +574,7 @@ Ambiguous selectors in the nesting relation
 file imports; where none is imported, the analysis joins over all of them.
 & A note is recorded; a site can be attributed to screens on which its component is never rendered. \\
 \end{xltabular}
+\par\smallskip{\footnotesize\noindent\emph{Note.} ``May'' is the tier without a soundness claim.}
 \endgroup
 
 \subsection{Why the may tier is incomplete}
@@ -606,9 +606,7 @@ pairs (Section~\ref{sec:res-e2e}). The classes are the author's reading of each 
 site in the repository; the script that joins them to the scores refuses a miss without a class and a class without a miss.
 
 \begin{table}[t]\footnotesize
-\caption{Why the graph still misses transitions: every remaining miss of the two suites and the two
-structural references, grouped by gap. \emph{Pairs} counts missing suite pairs and missing (site,
-screen) pairs of a reference.}
+\caption{Why the graph still misses transitions: every remaining miss, grouped by gap.}
 \label{tab:ceiling}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}Xl>{\raggedright\arraybackslash}p{0.24\textwidth}r@{}}
 \toprule
@@ -617,6 +615,7 @@ Gap & Example & Boundary & Fix & Pairs \\
 \TabCeilGaps
 \bottomrule
 \end{tabularx}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Covers the two suites and the two structural references. \emph{Pairs} counts missing suite pairs and missing (site, screen) pairs of a reference.}
 \end{table}
 
 \section{Transfer to other frameworks}

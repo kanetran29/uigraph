@@ -25,13 +25,7 @@
   \node[font=\scriptsize, text=muted] at (0,-1.7) {one edge; members expanded on query};
   \end{scope}
 \end{tikzpicture}
-\caption{A header link to \texttt{/settings}, rendered under a condition and so held at may on every screen,
-stored two ways. Materialised, it becomes one edge per screen, including one from
-\texttt{/settings} itself, which is not drawn. Anchored, it is stored once at the scope node $\top$,
-and $\mathit{edgesFrom}(r)$ adds it to the edges of any screen $r$ when asked.
-Claim~\ref{claim:expansion} states that both forms describe the same transitions. Only a reason
-for may that every screen shares keeps the anchored form: an unconditional link is demoted from
-\texttt{/settings}, the screen it already displays, but not from the others, so the extractor
-stores it as one edge per screen.}
+\caption{A conditional header link to \texttt{/settings}, stored materialised (one edge per screen) and anchored (once at the scope node $\top$).}
 \label{fig:anchored}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Materialised, the may link becomes one edge per screen, including one from \texttt{/settings} itself, which is not drawn; anchored, it is stored once at $\top$ and $\mathit{edgesFrom}(r)$ adds it to the edges of any screen $r$ when asked. Claim~\ref{claim:expansion} states that both forms describe the same transitions. Only a reason for may that every screen shares keeps the anchored form: an unconditional link is demoted from \texttt{/settings}, the screen it already displays, but not from the others, so the extractor stores it as one edge per screen.}
 \end{figure}

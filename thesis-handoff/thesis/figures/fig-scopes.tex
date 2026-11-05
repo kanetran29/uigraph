@@ -33,10 +33,7 @@
   \node[font=\scriptsize, align=center, anchor=north, text=warm] at ($(card.south)+(0,-6mm)$) {links here: scope $\{\text{/}, \text{/feed}\}$,\\one edge per screen};
   \node[font=\scriptsize, align=left, anchor=west, text=accent] at ($(profile.east)+(3mm,-6mm)$) {links in the settings\\template: anchored at the\\subtree, stored once\\unless the target is in it};
 \end{tikzpicture}
-\caption{Scopes in a small application. The header is rendered next to the outlet, so its
-links fire from every screen. The card is rendered inside two unrelated screens, so its
-scope is the union of the two, which is none of the named elements. The settings template
-is rendered on its own screen and on its child screen, which is exactly
-$\mathit{subtree}(\text{/settings})$. Grey arrows show component nesting and outlets.}
+\caption{Scopes in a small application: shell, shared card and routed settings template.}
 \label{fig:scopes}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The header is rendered next to the outlet, so its links fire from every screen. The card is rendered inside two unrelated screens, so its scope is their union, which is none of the named elements. The settings template is rendered on its own screen and on its child screen, exactly $\mathit{subtree}(\text{/settings})$. Grey arrows show component nesting and outlets.}
 \end{figure}

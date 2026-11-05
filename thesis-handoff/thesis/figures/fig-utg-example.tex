@@ -13,12 +13,7 @@
   \draw[mayedge] (home) -- node[lbl, left] {\texttt{click} $\cdot$ may} (article);
   \draw[->, thick, dotted] (article) -- node[lbl, above] {\texttt{effect} $\cdot$ unknown} (profile);
 \end{tikzpicture}
-\caption{A small UI transition graph in the model of this thesis. Each edge carries an
-event, an optional guard in brackets, and a modality. A \emph{must} edge always fires when
-its code runs, and a \emph{may} edge is conditional, here on a route guard or on a target that
-is only partly known. The dotted \emph{unknown} edge shows the model's treatment of a navigation
-inside a signal effect, whose firing condition cannot be determined statically; the prototype
-does not implement it (Section~\ref{sec:boundary}). In the measured graphs the unknown modality
-marks only edges into a sink for destinations that only the run time knows.}
+\caption{A small UI transition graph in the model of this thesis, with must, may and unknown edges.}
 \label{fig:utg-example}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Each edge carries an event, an optional guard in brackets, and a modality: \emph{must} always fires when its code runs, \emph{may} is conditional (here on a route guard or a partly known target). The dotted \emph{unknown} edge shows the model's treatment of a navigation inside a signal effect, whose firing condition cannot be determined statically; the prototype does not implement it (Section~\ref{sec:boundary}). In the measured graphs the unknown modality marks only edges into a sink for destinations that only the run time knows.}
 \end{figure}

@@ -1,9 +1,6 @@
 \begin{algorithm}[t]
 \footnotesize
-\caption{Scope attribution as a worklist fixpoint over $\mathcal{P}(S)$. The relations marked \emph{model only} belong to the full analysis and are not implemented in
-the prototype evaluated in Chapter~\ref{ch:results}; the prototype's other departures, among
-them the stand-ins for guards and effects and the rule for routed components, are listed in
-Section~\ref{sec:implementation}.}
+\caption{Scope attribution as a worklist fixpoint over $\mathcal{P}(S)$.}
 \label{alg:attribution}
 \begin{algorithmic}[1]
 \Require routes $R$ with route tree; for each route $r$ its entry guards $\mathit{entry}(r)$,
@@ -48,4 +45,5 @@ Section~\ref{sec:implementation}.}
   \EndIf
 \EndProcedure
 \end{algorithmic}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The relations marked \emph{model only} belong to the full analysis and are not implemented in the prototype evaluated in Chapter~\ref{ch:results}; the prototype's other departures, among them the stand-ins for guards and effects and the rule for routed components, are listed in Section~\ref{sec:implementation}.}
 \end{algorithm}

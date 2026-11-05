@@ -1,4 +1,4 @@
-\begin{lstlisting}[language=TypeScript, caption={A route table with the constructs the analysis must handle: a guarded route, a parent route whose children render in its outlet, a lazily loaded route table and a path held in a constant.}, label={lst:routes}]
+\begin{lstlisting}[language=TypeScript, caption={A route table with a guarded route, nested children, a lazy route table and a constant path.}, label={lst:routes}]
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'settings', component: SettingsComponent,
@@ -9,7 +9,7 @@ export const routes: Routes = [
 ];
 \end{lstlisting}
 
-\begin{lstlisting}[language=AngularHTML, caption={The root component's template. The header sits next to the outlet, so its links are present on every screen but belong to none of them.}, label={lst:shell}]
+\begin{lstlisting}[language=AngularHTML, caption={The root template: the header sits next to the outlet.}, label={lst:shell}]
 <app-header />                 <!-- shell: rendered on every screen -->
 <router-outlet />              <!-- the active route renders here -->
 
@@ -17,8 +17,9 @@ export const routes: Routes = [
 <a routerLink="/settings">Settings</a>
 @if (user()) { <a [routerLink]="['/profile', user().name]">Me</a> }
 \end{lstlisting}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Its links are present on every screen but belong to none of them.}
 
-\begin{lstlisting}[language=TypeScript, caption={Navigation from an injected service. The call site belongs to no component, so its screens can only be found through the components that call \texttt{logout}.}, label={lst:service}]
+\begin{lstlisting}[language=TypeScript, caption={Navigation from an injected service.}, label={lst:service}]
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
@@ -29,3 +30,4 @@ export class AuthService {
   }
 }
 \end{lstlisting}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The call site belongs to no component, so its screens can only be found through the components that call \texttt{logout}.}

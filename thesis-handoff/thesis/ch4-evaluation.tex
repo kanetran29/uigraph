@@ -24,12 +24,7 @@ criterion was not met. It was therefore not applied uniformly: \texttt{gravitee}
 for a thin UI suite while two applications with none were kept.
 
 \begin{table}[t]\small
-\caption{The corpus. Routes are the route entries reached by the independent route
-parser of Section~\ref{sec:protocol}, as it stands in the final version
-(Section~\ref{sec:res-round2}). A count marked $\geq$ is a lower bound: the independent route parser records a
-blind spot for that application, so the entries behind it are not in the figure, and
-Table~\ref{tab:coverage} gives how many blind spots each application has. The marks are on
-\RoundTwoLowerBoundWhere{}, on these grounds: \RoundTwoLowerBoundReasons{}.}
+\caption{The corpus: commit, route count and role in the study of each application.}
 \label{tab:corpus}
 \begin{tabularx}{\textwidth}{@{}lYrY@{}}
 \toprule
@@ -43,6 +38,7 @@ bitwarden/clients (web) & \texttt{e40ce6f0} & \RoundTwoRoutesBitwarden{} & many 
 openMF/web-app & \texttt{7f781796} & \RoundTwoRoutesMifos{} & size ceiling \\
 \bottomrule
 \end{tabularx}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Routes are the route entries reached by the independent route parser of Section~\ref{sec:protocol}, as it stands in the final version (Section~\ref{sec:res-round2}). A count marked $\geq$ is a lower bound: the parser records a blind spot for that application, so the entries behind it are not in the figure; Table~\ref{tab:coverage} gives how many blind spots each application has. The marks are on \RoundTwoLowerBoundWhere{}, on these grounds: \RoundTwoLowerBoundReasons{}.}
 \end{table}
 
 Four candidates were rejected; the counts were read from the repositories and are not generated.
@@ -82,9 +78,7 @@ Each research question is answered with one main measure. Table~\ref{tab:ratios}
 the thesis reports, and the paragraphs after it define the terms the table uses.
 
 \begin{table}[t]\small
-\caption{The ratios and measures of the thesis. Each has one name, used throughout. A construct
-is \emph{in scope} when it is neither a query-only navigation nor excluded by the first rows of
-Table~\ref{tab:loss-rules}. Node coverage is the only measure called coverage in this thesis.}
+\caption{The ratios and measures of the thesis, with numerator, denominator and research question.}
 \label{tab:ratios}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.4cm}YY>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{2.0cm}@{}}
 \toprule
@@ -103,6 +97,7 @@ Detection rate & injected changes that produce the predicted change in the graph
 Cause trace & defect classes traced to a cause in the source, by kind (read by the final version, still not read, beyond a static reader); no ratio & defect classes & RQ5 & \ref{sec:res-round2} \\
 \bottomrule
 \end{tabularx}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Each measure has one name, used throughout. A construct is \emph{in scope} when it is neither a query-only navigation nor excluded by the first rows of Table~\ref{tab:loss-rules}. Node coverage is the only measure called coverage in this thesis.}
 \end{table}
 
 \textbf{Navigation construct.} A navigation construct is a \texttt{routerLink} binding in a
@@ -248,11 +243,7 @@ guard-removal mutation operator and by the source review of Section~\ref{sec:res
 defect was found by red-team review of the graph and the source, not by any check above.
 
 \begin{table}[t]\small
-\caption{Rules that classify a construct, in the order the harness tests them. The first three
-rows take a construct out of the denominator, the next counts it as recovered in the tier that
-cites it, and the two after that as accounted for. Only a construct that reaches the rows below is
-lost. The indented rules are the nested decision taken when the construct's owning route component
-has no node.}
+\caption{Rules that classify a construct, in the order the harness tests them.}
 \label{tab:loss-rules}
 \begin{tabularx}{\textwidth}{@{}lY@{}}
 \toprule
@@ -286,6 +277,7 @@ Constant target & owner has a node, but the construct's own target is not a lite
 Other & matches none of the above; inspected by hand \\
 \bottomrule
 \end{tabularx}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The first three rows take a construct out of the denominator, the next counts it as recovered in the tier that cites it, and the two after that as accounted for. Only a construct that reaches the rows below is lost. The indented rules are the nested decision taken when the construct's owning route component has no node.}
 \end{table}
 
 The nested branch decides a category from the \emph{owning} route component, so a construct can be
@@ -431,8 +423,7 @@ Table~\ref{tab:repairs} lists every correction, one row each, in the order the c
 
 \begingroup\footnotesize\setlength{\tabcolsep}{2.5pt}
 \begin{xltabular}{\textwidth}{@{}YYYY@{}}
-\caption{The corrections made to the instruments. \emph{Found by} names the method as the main
-text does; \emph{figure}, \emph{panel}, \emph{review}, \emph{harness} and \emph{end-to-end check} are explained in the text above.}
+\caption{The corrections made to the instruments.}
 \label{tab:repairs}\\
 \toprule
 Found by & What was wrong & What changed & Effect on the figures \\
@@ -600,6 +591,7 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
   & It is resolved against the route that renders the component holding it (Section~\ref{sec:anchored}); the witness check applies the same rule (harness \HarnessVersion{}).
   & With the two rows above, mifos holds \EtoEMifosHit{} of \EtoEMifosPairs{} suite pairs, against \EtoEMifosHitUnfixed{} before; every figure that depends on the extractor was re-measured. \\
 \end{xltabular}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Found by} names the method as the main text does; \emph{figure}, \emph{panel}, \emph{review}, \emph{harness} and \emph{end-to-end check} are explained in the text above.}
 \endgroup
 
 Several corrections in the protocol and harness group were found by a figure that looked implausibly good or bad (marked \emph{figure}); each proved a property of the measurement and not of the extractor.

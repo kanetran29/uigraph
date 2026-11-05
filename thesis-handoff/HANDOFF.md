@@ -205,6 +205,10 @@ supersedes every older section where they disagree.
   commands array; relativeTo via a variable; relative-link base resolution by the holder component's route) in a new
   version, re-measure everything, and disclose in Table 4.5 that the e2e check found them (agreed this is evidential
   weight, not dishonesty). Not started; do it in a fresh session with a plan.
+- **Captions shortened (5 Nov):** 46 captions (median 50 words, max 120) became short titles; definitions and
+  caveats moved into a `\emph{Note.}` line inside each float (nothing moved into running text). Checked: no macro,
+  label or ref lost in any file; at most a few connective words dropped. fig:coverage's caption is still a 29-word
+  statement (could split). 119 pages, 0 overfull, 0 undefined, abstract on one page.
 - **Build after the full review:** 159 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page; one "float too
   large" warning from ch3-analysis.tex line 50 (file untouched in round two). Nothing pushed, nothing tagged.
 

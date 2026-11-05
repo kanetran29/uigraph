@@ -3,24 +3,18 @@
 \begin{figure}[t]
 \centering
 \PlotCoverage
-\caption{Node coverage: the share of declared screens that have a node in the graph. It is
-complete on every application; the blind-spot column of Table~\ref{tab:coverage} bounds what
-that means, since a route entry neither reader can resolve to an address is outside the
-denominator.}
+\caption{Node coverage: the share of declared screens that have a node in the graph.}
 \label{fig:coverage}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Coverage is complete on every application, but the blind-spot column of Table~\ref{tab:coverage} bounds what that means: a route entry neither reader can resolve to an address is outside the denominator.}
 \end{figure}}
 
 \newcommand{\FigLoss}{%
 \begin{figure}[t]
 \centering
 \PlotLoss
-\caption{What happens to the navigation constructs of each application without the
-attribution pass. Under the order of the loss rules, attribution losses are the largest category in every application; of the node
-classes, the lazy-boundary, constant-path and component-unlinked ones are empty on this
-instrument, and the remaining one holds few constructs, most of them in mifos. The exact counts
-per class are in Table~\ref{tab:loss}. \emph{Converted} counts constructs witnessed at must or
-may, as that table does; the must conversion of Figure~\ref{fig:before-after} counts must only.}
+\caption{What happens to the navigation constructs of each application without the attribution pass.}
 \label{fig:loss}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Attribution losses are the largest category in every application; the lazy-boundary, constant-path and component-unlinked node classes are empty on this instrument, and the remaining one holds few constructs, most of them in mifos. Exact counts per class are in Table~\ref{tab:loss}. \emph{Converted} counts constructs witnessed at must or may, as that table does; the must conversion of Figure~\ref{fig:before-after} counts must only.}
 \end{figure}}
 
 \newcommand{\FigBeforeAfter}{%
@@ -35,9 +29,7 @@ may, as that table does; the must conversion of Figure~\ref{fig:before-after} co
 \begin{figure}[t]
 \centering
 \PlotMutationRQ
-\caption{Mutation outcomes by operator, summed over realworld, alfresco and bitwarden, on
-the attributed graph. Excluded mutants are not shown; \MutExcluded{} of the
-\MutSampled{} sampled were excluded here against \MutBaseExcluded{} of \MutBaseSampled{} on the
-graph without attribution.}
+\caption{Mutation outcomes by operator, summed over realworld, alfresco and bitwarden, on the attributed graph.}
 \label{fig:mutation}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Excluded mutants are not shown; \MutExcluded{} of the \MutSampled{} sampled were excluded here against \MutBaseExcluded{} of \MutBaseSampled{} on the graph without attribution.}
 \end{figure}}
