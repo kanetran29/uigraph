@@ -155,8 +155,9 @@ components, which covers what the \emph{rooted} and \emph{outlet} levels of
 Section~\ref{sec:res-ablation} place. A handler is followed into helper methods of the same
 class to depth one and into the first callback of a \texttt{subscribe}. The specification excludes
 router-outlet modelling and provider resolution beyond module and root providers, and
-does not follow a call into a service, so a navigation inside a service member is not placed on the
-screens of its callers. Zhang et al.\ parse
+does not follow a call into a service. Their implementation, however, traces a call into a service
+whose class name matches a router or navigation pattern, to a bounded depth of one, so a navigation
+inside such a router service is placed on the screens of its callers. Zhang et al.\ parse
 the compiled JavaScript bundle rather than the sources, taking declared routes as vertices and
 navigation calls as edges, and check an access-control policy against the screens reachable
 from an authorised one. Two of their four subjects are multi-page applications, which are crawled instead. The graph is declared an over-approximation
@@ -400,8 +401,8 @@ on the transitions. It makes no measurement of what the extraction fails to read
 two put the graph to work without narrowing it. One uses it as the coverage denominator of a
 generated end-to-end suite \cite{rima2026e2e}. The other uses it as the reachability relation of an
 access-control check, declared an over-approximation \cite{zhang2025veriflow}. Rima et al.\ already read nested and lazily loaded route trees and attach guards to
-edges as constraints. What this review found no earlier work combining is attribution that follows calls
-across classes and into services under their provider bindings, a modality on each transition
+edges as constraints, and their implementation traces router calls into services to a bounded depth. What this review found no earlier work combining is attribution that follows calls
+across classes and into services under their provider bindings (a generalisation of that bounded tracing), a modality on each transition
 that separates what is unconditionally available from what a guard or an unresolved scope
 makes uncertain, and a measurement of the resulting loss, classified by construct, on
 applications large enough for the difficult constructs to occur. The Android literature is the nearest static

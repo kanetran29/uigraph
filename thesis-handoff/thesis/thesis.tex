@@ -84,22 +84,22 @@ Major: & Computer Science \\
 \vspace{-1.5em}
 A user-interface (UI) transition graph describes the screens of an application and the transitions a
 user can cause between them. For single-page web applications such graphs are usually built by running
-the application, although routing frameworks declare routes in the source. How far static extraction
+the application. How far static extraction
 gets on real applications, and why it fails, has not been measured construct by construct.
 
 This thesis builds a static extractor for Angular and measures it on six open-source applications,
 checking the graphs in five ways and assigning every construct it does not recover to a loss category.
-The largest category is navigation that belongs to no single screen, such as a link in a shared header.
+The largest category is navigation that belongs to no single screen.
 For it the thesis proposes scope attribution, a dataflow analysis that computes the screens from which
 each navigation site can fire.
 
-Few transitions are certain. The corpus yields \RouteOrderMust{} edges that always fire, \RouteOrderMustWithout{}
+Few transitions are certain. The corpus yields \RouteOrderMust{} edges classified as always firing (\CensusMustKdash{} from one toolbar of untested scope), \RouteOrderMustWithout{}
 without an assumed route order and \GuardOnlyMust{} if every guard admits the user; this is largely a
-matter of definition, since \MayAppAny{} of the \MayOnlyConstructs{} constructs that stay merely possible
-sit behind a guard or branch of the application. Most causes of loss traced in the source are
-constructs a static reader can read. Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to it (\AttrRecoveredShareNoMifos{} without the largest application), almost all as possible transitions; its one new step, placing navigation inside services, adds \AblationFullAddedShare{} of the sites. Its screen sets are \BaselineFactorMin{} to \BaselineFactorMax{} times narrower than all screens, but its precision against a reference read from one application's source is \GTAlfFullPrecision{}. Beside Rima et al.'s tool, on five applications grouped after reading, its relative recall (share of real transitions either finds, as an AI model read them) is \HHCorpusNoMifosOursRecall{} against \HHCorpusNoMifosTheirsRecall{}, at precision \HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}; on the largest application, most of whose pairs only the shell reaches, precision is \HHMifosOursPrecision{}, and the pooled comparison does not rank the tools. Mutation testing only sanity-checks the witness mapping.
+matter of definition, since \MayAppAny{} of the \MayOnlyConstructs{} witness locations that stay merely possible
+sit behind an application guard or branch. Most causes of loss traced in the source are
+constructs a static reader can read. Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to it (\AttrRecoveredShareNoMifos{} without the largest application), almost all as possible transitions; its service join, generalising Rima et al.'s bounded router-service tracing, adds \AblationFullAddedShare{} of the sites. Its screen sets are \BaselineFactorMin{} to \BaselineFactorMax{} times narrower than all screens, but its precision against an AI-built reference that applies the analysis's own relations to one application's source is \GTAlfFullPrecision{} (per-class join: \GTAlfClassPrecision{}). Beside Rima et al.'s tool, on five applications grouped after reading, its relative recall (share of real transitions either finds, as an AI model read them) is \HHCorpusNoMifosOursRecall{} against \HHCorpusNoMifosTheirsRecall{}, at precision \HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}; on the largest application, most of whose pairs only the shell reaches, precision is \HHMifosOursPrecision{}, and the pooled comparison does not rank the tools. Mutation testing only sanity-checks the witness mapping.
 
-A declared route table is a starting point but an insufficient basis for static navigation extraction. The tool was developed on this corpus, so the figures are in-sample; consumer use is not measured.
+A declared route table is an insufficient basis for static navigation extraction. The tool was developed on this corpus, so the figures are in-sample; consumer use is not measured.
 
 \vspace{0.5em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
@@ -126,12 +126,12 @@ recorded with them. Four kinds of figure cannot:
 \item the corpus-selection counts of Section~\ref{sec:corpus}, read from the candidate
   repositories.
 \end{itemize} The diagrams in
-Chapters~\ref{ch:introduction} to~\ref{ch:evaluation} were drawn by hand.
+Chapters~\ref{ch:introduction} to~\ref{ch:evaluation} were drafted as TikZ with the assistant and revised by me.
 
 The assistant was also used to read the application sources, in three roles. As a reviewer it
 read the constructs behind an edge and reported where the extractor's reading disagreed with
 them. In red-team panels it attacked the extractor, the harness and this text. Several of the
-demotion rules of Section~\ref{sec:res-round2} were written in response to its objections, among
+demotion rules of Table~\ref{tab:demotion} were written in response to its objections, among
 them the rule by which the extractor decides which guards a navigation runs. Every defect it
 reported in either role was reproduced against the code before anything was changed, and the
 corrections that followed are listed in Section~\ref{app:repairs}. Its readings
@@ -146,8 +146,8 @@ The assistant was also used during the literature search, to locate candidate so
 to summarise them. No source is cited on the strength of such a summary. Every entry in
 the bibliography was checked field by field against the publisher page, Crossref
 metadata, arXiv metadata or DBLP before it was cited, and sources that could not be
-checked in this way are kept in a separate block in the bibliography file and are not
-cited anywhere in the text.
+checked in this way are not cited in the text. Two entries of the bibliography file are not
+cited anywhere.
 
 Finally, the assistant was used to draft and edit prose, which I then revised. The
 research questions and the interpretation of the results are my own; the analysis and the

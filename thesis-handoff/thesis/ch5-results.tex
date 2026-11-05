@@ -31,17 +31,17 @@ Why the tier is small is measured directly. A measurement switch of the final ve
 every may witness, each condition that held it at may. With
 the switch off the output is unchanged, which was checked on all six applications
 (Section~\ref{sec:reproducibility}). Table~\ref{tab:mayreasons} groups the reasons of the
-\MayOnlyConstructs{} constructs that yield may edges and no must edge. \MayAppAny{} of them sit behind
+\MayOnlyConstructs{} witness locations that yield may edges and no must edge. \MayAppAny{} of them sit behind
 at least one decision of the application itself that the extractor reads: a guard or resolver, a
 branch, a callback or a template condition. Only \MayToolOnly{} are held at may by the extractor's
 own uncertainty alone, so a better reader could lift at most those to must. The small must tier is
-therefore largely a matter of definition: a decided navigation is not deterministic. One limit applies: a guard that always lets the navigation through still counts as a guard, so the census says the application decides, not that the navigation is conditional at run time. The shares are also mostly mifos's: it holds \MayOnlyConstructsMifos{} of the \MayOnlyConstructs{} constructs.
+therefore largely a matter of definition: a decided navigation is not deterministic. One limit applies: a guard that always lets the navigation through still counts as a guard, so the census says the application decides, not that the navigation is conditional at run time. The shares are also mostly mifos's: it holds \MayOnlyConstructsMifos{} of the \MayOnlyConstructs{} witness locations.
 
 \begin{table}[t]\footnotesize
-\caption{Why the constructs that yield only may edges are may, by family of reason.}
+\caption{Why the may-only witness locations are may, by family of reason.}
 \label{tab:mayreasons}
 \TabMayReasons
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Any} counts the constructs with at least one reason of the family, \emph{Sole} those whose every may witness has that one reason only. The application's own decisions are the async, branch, template and guard families; reader, attribution and target are the extractor's uncertainty; same screen is neither.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Any} counts the witness locations with at least one reason of the family, \emph{Sole} those whose every may witness has that one reason only. The application's own decisions are the async, branch, template and guard families; reader, attribution and target are the extractor's uncertainty; same screen is neither.}
 \end{table}
 
 \begin{table}[t]\small
@@ -373,7 +373,7 @@ total, every one outside a component, in a service, guard or effect.
 For \GTApp{} the screens each navigation site fires from were read off the sources by hand
 (Section~\ref{sec:metrics}): \GTSites{} sites and \GTPairs{} (site, screen) pairs. A second reference
 was built for alfresco, where navigation inside services occurs; realworld has one such navigation and barely exercises the step
-only this thesis adds: \GTAlfSites{} sites and \GTAlfPairs{} pairs. Scoring every level against such a
+this thesis adds: \GTAlfSites{} sites and \GTAlfPairs{} pairs. Scoring every level against such a
 reading has both directions, which no other method here has. Table~\ref{tab:groundtruth} reports both.
 
 \begin{table}[t]\footnotesize
@@ -542,7 +542,7 @@ Three things follow, with the figures in Table~\ref{tab:earlier}.
   Kishi name two of their restrictions, no \texttt{children} attribute and no route parameters;
   these alone admit none of the six applications, which declare both. Rima et al.\ state no such restriction, and their specification covers this level
   (Section~\ref{sec:dynamic-spa}).
-\item \emph{The service join places navigation no earlier mechanism can place.} A navigation call inside an
+\item \emph{The service join generalises the bounded router-service tracing of Rima et al.'s tool, which follows a call into a service whose class name matches a router or navigation pattern to a bounded depth.} A navigation call inside an
   injected service belongs to no component, so the levels up to \emph{outlet} cannot place it on any screen,
   on every application of the corpus (Table~\ref{tab:loss}). The member-level call graph is more precise than
   a class-level join on \GTApp{}, but on alfresco the precision order reverses
@@ -612,7 +612,7 @@ Of the \RimaMissed{} misses, the source holds \RimaMissE{} as no transition at a
 an unknown target although the route it reaches can be read; the second of them also starts on a route
 that only redirects. The step from \emph{outlet} to \emph{full} is
 \the\numexpr\RimaHitFull-\RimaHitOutlet\relax{} pairs, all on airbus, where the navigation runs inside an
-injected router service, the construct the specification's rule does not follow
+injected router service, which the specification's rule does not follow but their implementation traces to a bounded depth
 (Section~\ref{sec:dynamic-spa}). The preregistered rule drops every entry whose component is also shown on
 its target, which removes most links of a shell; the per-start-route row of Table~\ref{tab:rima} counts them.
 
@@ -633,7 +633,7 @@ checked that every cited site exists and holds a navigation construct, not that 
 is rendered on the start screen. Four defects were found here and repaired after the figures above were recorded
 (Table~\ref{tab:repairs}); the corpus was re-measured. Mapped again, the subjects give \RimaRepHitFull{} of
 the \RimaPairs{} pairs and \RimaRepExtra{} other pairs: the repaired graph gains the locale link and loses
-the three airbus pairs from the sign-in screen, which the source does not hold, a traduora pair and petclinic's
+three non-reference airbus pairs from the sign-in screen, which the source does not hold, a traduora pair and petclinic's
 target over-approximations. These figures are post hoc, and none of their pairs was read again.
 
 \subsection{The tool of Rima et al.\ on the same applications}
@@ -771,7 +771,7 @@ The cause trace of Section~\ref{sec:metrics} defines the three outcomes used bel
 This section keeps two words apart: a \emph{class} is a row of Table~\ref{tab:defects}, and a
 \emph{cause} is what the source review found behind a class.
 
-RQ5 is answered in three parts, not by one claim that the loss was the tool's. That holds only for the classes found and fixed, which the first part lists; it is not shown for constructs in general. Constructs held at may by the application's own decisions (\MayAppAny{} of \MayOnlyConstructs{}, Table~\ref{tab:mayreasons}) are the application's. The lists below count causes, not constructs; the construct counts are those of Tables~\ref{tab:remaining} and~\ref{tab:round2acct}, where \AttrRemainingUnexplained{} of the \AttrRemaining{} remaining attribution constructs have no recorded reason.
+RQ5 is answered in three parts, not by one claim that the loss was the tool's. That holds only for the classes found and fixed, which the first part lists; it is not shown for constructs in general. Constructs held at may by the application's own decisions (\MayAppAny{} of \MayOnlyConstructs{} witness locations, Table~\ref{tab:mayreasons}) are the application's. The lists below count causes, not constructs; the construct counts are those of Tables~\ref{tab:remaining} and~\ref{tab:round2acct}, where \AttrRemainingUnexplained{} of the \AttrRemaining{} remaining attribution constructs have no recorded reason.
 
 \paragraph{Read by the final version.} The information was in the source, so the loss was the
 tool's.

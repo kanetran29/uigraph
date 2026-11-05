@@ -152,7 +152,8 @@ The excluded mutants are reported.
 & The sample is not independent of the artefact under test. \\
 Test-source cross-check
 & Measures node existence and nothing finer; covers one application.
-& Used as the only method that sees past the syntactic proxy (below).
+& Used as the only method that sees past the syntactic proxy (below): a URL the application's own
+end-to-end specifications name is an address its authors expect to exist.
 & It reads the specifications without running them, so a URL there is named and not observed. \\
 \addlinespace[2pt]
 \multicolumn{4}{@{}l}{\emph{Scope attribution}}\\
@@ -202,9 +203,7 @@ a receiver whose name contains \emph{router}.
 Helper-wrapped navigation, assignments to \texttt{location.href}, server-driven redirects and
 navigation inside third-party components count as neither a loss nor a success.
 The figure is not a bound in either direction.
-& The ratio is read as recall against an enumerable syntactic proxy.
-Only the test-source cross-check sees past it: a URL the application's own
-end-to-end specifications name is an address its authors expect to exist.
+& The ratio is read as recall against an enumerable syntactic proxy; only the test-source cross-check (above) sees past it.
 & The completeness of the proxy is not itself measured. \\
 Denominator of node coverage
 & Its denominator is the screens the independent route parser can address, so a screen whose path
@@ -297,19 +296,16 @@ The method needs an application that builds and boots, and a corpus chosen partl
 is not chosen at random.
 & --
 & The selection is not random. \\
-Configuration, not rendered page; workspace scope
+Configuration, not rendered page; workspace scope; development build
 & It reads the route configuration, so a route behind a guard that always refuses, or whose component
 throws on render, counts as mounted. Where a workspace application composes the library a measurement is scoped to, the framework's set is
 a superset of the library's, and part of any difference is scope and not reading; two of alfresco's three differences are of this kind.
-& --
-& Both make the framework's set larger than what a visitor can reach, which makes containment easier to
-satisfy. \\
-Development build
-& The build was a development build in each case, because Angular removes the debug surface the method
+The build was a development build in each case, because Angular removes the debug surface the method
 reads in production mode.
 & --
-& A production configuration can differ in ways a route table does not show; it can add routes as well
-as drop them, so the effect has no fixed direction. \\
+& The first two make the framework's set larger than what a visitor can reach, which makes containment easier to
+satisfy. A production configuration can differ in ways a route table does not show; it can add routes as well
+as drop them, so that effect has no fixed direction. \\
 \end{xltabular}
 \endgroup
 

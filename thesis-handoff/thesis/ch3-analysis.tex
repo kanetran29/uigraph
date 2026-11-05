@@ -441,7 +441,7 @@ The extractor was built for this thesis and is in the accompanying repository, e
 
 Scope attribution is a separate pass in the Angular adapter, enabled with the option \texttt{-{}-attribution}. With the option off, the extractor produces exactly the baseline edge set, as checked on every application in the corpus. The pass implements component nesting, router outlets and the call graph; stand-ins replace $D$ and $T$ (below).
 
-The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-ablation}), at the levels of Figure~\ref{fig:lattice}. Each level adds to the one before it, and the figure marks which levels stand for earlier work and which only this thesis adds.
+The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-ablation}), at the levels of Figure~\ref{fig:lattice}. Each level adds to the one before it, and the figure marks which levels stand for earlier work and which this thesis adds.
 
 \begin{figure}[t]
 \centering
@@ -466,7 +466,7 @@ The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-abl
 \end{tikzpicture}
 \caption{Attribution levels: ownership and containment baselines $\subset \dots \subset$ service join.}
 \label{fig:lattice}
-\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what only this thesis adds; \emph{class} is the per-class variant of the service join. The levels nest by construction: each withholds every mechanism above it (Section~\ref{sec:res-ablation}).}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what this thesis adds; \emph{class} is the per-class variant of the service join. The levels nest by construction: each withholds every mechanism above it (Section~\ref{sec:res-ablation}).}
 \end{figure}
 
 \textbf{Component nesting.} Every component in the application, excluding test hosts and stories,
