@@ -1,4 +1,4 @@
-# Thesis handoff (5 Nov 2026)
+# Thesis handoff (5 Nov 2026, late)
 
 Read this first. It is written for a Claude Code session continuing the work. Sections are dated and the
 newest come first; the section "Current state, 5 Nov 2026" was checked against the repository on 5 Nov and
@@ -20,6 +20,34 @@ supersedes every older section where they disagree.
   generated macro file, never typed by hand.
 - Run an Opus red-team panel on finished work before calling it done; verify the panel's own claims before acting.
 - Before a striking headline, check it adversarially. Verify the referent, not the nearest proxy.
+
+## Later on 5 Nov 2026 (supersedes the section below where they disagree)
+
+- **Framing decisions by the student:** uigraph was built within the thesis (coded before the text, in scope); it is
+  the first contribution, never "an existing tool" or "the instrument this work began with". The body presents only
+  the final version (c42f220); development versions and corrections live only in Appendix A (`app:repairs`,
+  `tab:repairs`, which now also holds the version list). Comparing uigraph's own versions is not a result.
+- **Before/after = the world without the thesis vs with uigraph:** ch5 `sec:res-earlier`, Table `tab:earlier`
+  (Oshima-Kishi stated restrictions admit 0 of 6, `earlier-work.mjs` + test; their mechanisms reimplemented in uigraph
+  as rooted/outlet vs full) and Table `tab:world` (static extraction 0/6 vs 6/6; a browser run without sign-in
+  renders 30 of 806 screens; dead-link candidates from the source; realworld suite pairs vs graph pairs; mutation).
+- **Held-out check (out-of-sample, preregistered):** `heldout/PREREGISTRATION.txt` committed before any clone
+  (`f2e60e7`, addenda `e0b4d4f`, `6b0d723`); PeerTube (client/) and angular-spotify picked by rule from a GitHub
+  star-ordered search; `heldout/heldout.sh` from a clean worktree (`~/personal/uigraph-work/heldout-wt`, packages =
+  c42f220), apps in `~/personal/uigraph-work/heldout/`; `heldout-to-latex.mjs` (+ test) -> `generated-heldout.tex`.
+  Result: both complete, but 1 of 45 declared screens on PeerTube (lazy route files loaded by default export,
+  `loadChildren: () => import('./+admin/routes')`) and no route at all on angular-spotify (router provided inside an
+  Nx library module). Reported in ch5 `sec:res-heldout` (Table `tab:heldout`), abstract, ch1, ch6, ch7. Not repaired,
+  by the preregistration. These two forms are the first thing to extend after submission.
+- **May-reason census (in progress at the end of this session):** behaviour-neutral flag `UIGRAPH_MAY_REASONS=1` in
+  the adapter (uncommitted in `packages/`), `route-oracle/may-reasons.mjs`, equivalence proved on all six apps
+  (reasons-stripped graphs identical to c42f220). First Opus review found 3 blockers (missing reasons at template and
+  members branches, a mislabelled attribution reason, MayToolUncertain's meaning); a fix workflow was running. Early,
+  unverified headline: about 98 % of may-only constructs have at least one application-semantic reason. Not in the
+  thesis yet; do not use until the re-review passes. Check `git status` for its uncommitted files.
+- **Ablation idea (student, later):** per-feature ablation of the final version's extraction (lazy boundaries,
+  constant paths, ...) with measurement flags, like `UIGRAPH_IGNORE_GUARDS`; attribution levels and guard-only exist.
+- **Build at `c330229`:** 153 pages, 0 errors, 0 undefined, 0 overfull; abstract on one page. Nothing pushed.
 
 ## Current state, 5 Nov 2026
 
