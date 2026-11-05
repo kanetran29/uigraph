@@ -65,124 +65,97 @@ Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & \checkmark &
 \label{sec:android}
 
 The largest body of static work on transition graphs concerns Android. Yang et al.\
-introduced the window transition graph. Its nodes are windows (activities,
-dialogs and menus), and its edges are transitions caused by callbacks that run on the
-UI thread. The analysis models the stack of active windows, so that the effect of the back
-button is captured \cite{yang2015wtg}. A journal version extends the work \cite{yang2018wtg}. A
-related analysis by the same group constructs a callback control-flow graph whose
-nodes are pairs of a handler and the widget it belongs to \cite{yang2015callbacks}.
+introduced the window transition graph, whose nodes are windows (activities,
+dialogs and menus) and whose edges are transitions caused by UI-thread callbacks; the analysis models the stack of active windows, so the back button is captured \cite{yang2015wtg,yang2018wtg}. A
+related analysis by the same group builds a callback control-flow graph over pairs of a handler and its widget \cite{yang2015callbacks}.
 StoryDroid builds an activity transition graph from \texttt{startActivity} calls \cite{storydroid2019}. GoalExplorer combines a statically derived screen
 transition graph with dynamic exploration \cite{goalexplorer2019}. UI-CTX finds the code context of a widget's behaviour
-with a backward data-flow analysis from the handler to the
-call that retrieves the widget \cite{uictx2025}.
+with a backward data-flow analysis from the handler to the call that retrieves the widget \cite{uictx2025}.
 
-These approaches have in common the way a navigation is attributed to a screen. In
-Android, an event handler is registered on a widget object, and at run time that
-object belongs to exactly one window. Attribution can therefore be treated as an object
-resolution problem: the widget identifier is resolved, usually by constant propagation
-of the \texttt{getId()} call, and the window is then known
-\cite{yang2015callbacks}.
-
-The limits of this approach become visible in ProMal. Its authors report that a purely
-static window transition graph contains infeasible transitions. The cause is that imprecision in the
-reference analysis makes several widgets aliases of one another, and the over-approximated
-data flow then attaches a handler to the wrong window. They address this by combining the
-static analysis with runtime traces and a learned model \cite{promal2022}. Where the owning
-object cannot be resolved precisely, ProMal therefore turns to dynamic evidence rather than
+These approaches attribute a navigation to a screen by object resolution: a handler is registered on a widget, and at run time that
+widget belongs to exactly one window, so resolving the widget identifier, usually by constant propagation
+of \texttt{getId()}, gives the window \cite{yang2015callbacks}.
+The limit shows in ProMal: its authors report that imprecision in the
+reference analysis makes several widgets aliases of one another, so the over-approximated
+data flow attaches a handler to the wrong window and the static graph contains infeasible transitions. They combine the
+static analysis with runtime traces and a learned model \cite{promal2022}, turning to dynamic evidence rather than
 refining the static attribution.
 
 \section{Navigation models for web applications}
 \label{sec:webmodels}
 
-Navigation models for the web were first extracted from server-rendered sites, well
-before single-page applications became common. Ricca and Tonella modelled a web
-application as a set of pages, frames and forms connected by links and form
-submissions. Their model includes conditional edges that carry a boolean condition on
-input values, and was derived semi-automatically with a crawler and
+Navigation models for the web were first extracted from server-rendered sites. Ricca and Tonella modelled a web
+application as pages, frames and forms connected by links and form
+submissions, with conditional edges carrying a boolean condition on
+input values, derived semi-automatically with a crawler and
 annotations by an analyst \cite{riccatonella2001}. WebUml recovers a state diagram from
 Hypertext Markup Language (HTML), script and server-side pages by static analysis combined with
 runs against the server, deriving guards by control-flow analysis of the server code
 \cite{webuml2004}. A patent assigned to Fujitsu describes a fully static method
-for extracting a navigation model from Struts and JSP sources \cite{tkachuk2013patent}. For verification, SiteHopper builds abstracted
+for Struts and JSP sources \cite{tkachuk2013patent}. SiteHopper builds abstracted
 navigation state machines on the fly for model checking \cite{sitehopper2013}.
 
-This work shows that navigation models, including guards, have been extracted from web applications with the help of a crawler or of runs against the server, and that a fully static method has been described in a patent. The models reviewed in this section all concern server-rendered frameworks, where a page corresponds to a file and a link to an anchor element. None of them deals with a client-side router, a component tree, or
+All of these concern server-rendered frameworks, where a page corresponds to a file and a link to an anchor element. None of them deals with a client-side router, a component tree, or
 dependency injection. Section~\ref{sec:dynamic-spa} turns to the work that does.
 
 \section{Dynamic state models for single-page applications}
 \label{sec:dynamic-spa}
 
-When web applications moved to Ajax and later to client-side frameworks, work on
-model construction moved to run time. Crawljax executes user events against a running
+With Ajax and client-side frameworks, model construction moved to run time. Crawljax executes user events against a running
 application, compares the DOM before and after each event, and builds a state flow
 graph whose nodes are equivalence classes of DOM states \cite{crawljax2012}. Later
 work in this line changed the exploration strategy but not the source of the model
 \cite{feedex2013,fraggen2022}. The survey by Kertusha et al.\
-reviews web testing research from 2014 to 2025 \cite{websurvey2025}. Of the model-based
+reviews web testing research from 2014 to 2025 \cite{websurvey2025}; of the model-based
 tools it lists, every one whose model construction was examined for this thesis builds
 that model by executing the application.
+The reason is largely historical: an Ajax application had no
+declarative route table, one uniform resource locator (URL) could represent many states, and nothing in the source represented routes explicitly, although static analysis of JavaScript existed \cite{jensen2009type}.
 
-The reason is largely historical. In an Ajax application there was no
-declarative route table, and one uniform resource locator (URL) could represent many states, because navigation
-was implemented by handlers that modified the DOM. Static analysis of JavaScript existed \cite{jensen2009type}, but recovering navigation
-from it was hard, and nothing in the source represented the routes explicitly. The dynamic
-approach observed directly what the source represented only implicitly.
-
-Client-side routing frameworks changed this situation. The route table is now a
-declared data structure in the source. A navigation is an attribute or a method call
-that names a route. A guard is a named function attached to a route. Four static
+Client-side routing frameworks changed this. The route table is now a
+declared data structure, a navigation is an attribute or a method call
+that names a route, and a guard is a named function attached to a route. Four static
 analyses of such a framework were found during the literature search for this thesis, three
-of them reading the framework's own sources and one a compiled bundle.
+reading the framework's own sources and one a compiled bundle.
 Kurant's component dependency graph for React stops at the component rendering graph
 without addressing routing \cite{kurant2025}.
 
-The other three do address routing. Oshima and Kishi extract page transitions from an
-Angular application in order to model-check them with SPIN \cite{oshima2018model}. Their
-extraction reads the transition information from the route declarations in
-\texttt{RouterModule}, reads the navigable paths from every component, and resolves the parent--child relationships among the root
-component, the routed component and the custom child components. That attribution step is scope attribution.
-A navigable path is attributed to the routed component that contains it, and the root
+The other three address routing. Oshima and Kishi extract page transitions from an
+Angular application in order to model-check them with SPIN \cite{oshima2018model}, reading the route declarations in
+\texttt{RouterModule} and the navigable paths of every component, and resolving the parent--child relationships among the root,
+routed and custom child components. A navigable path is attributed to the routed component that contains it, and the root
 component's own paths are attributed to every page.
 Section~\ref{sec:res-ablation} measures that combination, as the \emph{rooted} level
 of the analysis presented here (the levels are defined in Section~\ref{sec:metrics}).
-
-What distinguishes the present work is the input the method accepts and what it claims
-about its output. The authors list restrictions on the applications they handle, among them that the
-routing declarations must not use the \texttt{children} attribute or route parameters. They also state that
-changes arising from data binding are not treated as page transitions. Those exclusions
-remove nested route trees and parameterised addresses. How the method treats a navigation whose
-destination is an expression rather than a literal is not stated in the paper, and it is not
-assumed here. A screen is identified by the
-name of its routed component rather than by an address, so path composition does not
-arise. Guards, lazy loading and named outlets are not part of the model. A
-navigation site that reaches a screen through a method call or through a dispatch lies
-outside the attribution mechanism. The model
-carries no modality, so a navigation that is always available and one that is available
+The authors list restrictions on the applications they handle, among them that the routing declarations must not use \texttt{children} or route parameters, and
+changes arising from data binding are not treated as page transitions. How a navigation whose
+destination is an expression rather than a literal is treated is not stated in the paper, and it is not
+assumed here. A screen is identified by the name of its routed component, not an address. Guards, lazy loading and named outlets are not modelled, and a
+navigation site that reaches a screen through a method call or a dispatch lies
+outside the attribution mechanism. The model carries no modality, so an always-available navigation and one available
 only if a guard admits it are represented identically. The evaluation applies the tool
 to four constructed applications and to two published ones of 1824 and 6893 lines, with
-six and twenty-three pages. It reports whether the intended model was produced and
-whether transition faults, injected by hand into constructed variants of the first sample
-application, were detected. What the extraction loses on an
-application it cannot fully read is not measured. This is the question this thesis
-takes as its subject.
+six and twenty-three pages, and reports whether the intended model was produced and
+whether hand-injected transition faults in constructed variants of the first sample
+application were detected. What the extraction loses on an
+application it cannot fully read is not measured; this is the question this thesis takes as its subject.
 
 Two recent works read a client-side router configuration statically for other ends. Rima et
 al.\ parse Angular sources and templates to build a graph of navigation structure,
 interaction sites and the conditions (guards among them) that decide whether an
-interaction is executable. They enumerate workflows over that graph and compile each workflow
-into a browser test. The graph is a coverage denominator for generated end-to-end tests
+interaction is executable, and compile workflows enumerated over that graph into browser tests; the graph is a coverage denominator
 \cite{rima2026e2e}. This account is taken from the publisher's abstract, the
 operational specification in the project's replication package
 (\path{softscanner-sw/softscanner_fa}, \path{docs/paper/approach.md}), and the anonymised
-manuscript in the same repository (\path{docs/paper/main.pdf}). The published chapter was not
+manuscript in the same repository (\path{docs/paper/main.pdf}); the published chapter was not
 available to this review and may differ from both documents. Both
-documents describe attribution beyond containment: the components active at a route are those activated by the route
+describe attribution beyond containment: the components active at a route are those activated by the route
 and its ancestor routes, closed under composition, plus the bootstrap
-components. This covers what the \emph{rooted} and \emph{outlet} levels of
+components, which covers what the \emph{rooted} and \emph{outlet} levels of
 Section~\ref{sec:res-ablation} place. A handler is followed into helper methods of the same
 class to depth one and into the first callback of a \texttt{subscribe}. The specification excludes
-router-outlet modelling and provider resolution beyond module and root providers. It does
-not follow a call into a service, so a navigation inside a service member is not placed on the
+router-outlet modelling and provider resolution beyond module and root providers, and
+does not follow a call into a service, so a navigation inside a service member is not placed on the
 screens of its callers. Zhang et al.\ parse
 the compiled JavaScript bundle rather than the sources, taking declared routes as vertices and
 navigation calls as edges, and check an access-control policy against the screens reachable
@@ -190,12 +163,8 @@ from an authorised one. Two of their four subjects are multi-page applications, 
 and is not narrowed. The paper does not describe how the source screen of a navigation call is
 determined, and guards appear only as runtime conditions the graph does not model
 \cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth generated from their pipeline's output and annotated by hand for the applications they
-study. Neither work classifies the losses by
-construct or measures them across a corpus. The
-problem addressed in this thesis is therefore neither new nor settled. Section~\ref{sec:gap} states what none of these works does.
-
-The work reported here is located between these analyses and
-the dynamic tools described above.
+study. Neither work classifies the losses by construct or measures them across a corpus, so the
+problem addressed in this thesis is neither new nor settled. Section~\ref{sec:gap} states what none of these works does.
 
 \section{Static analysis of JavaScript and TypeScript source}
 \label{sec:asttools}

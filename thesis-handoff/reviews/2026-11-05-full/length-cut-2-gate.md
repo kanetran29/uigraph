@@ -1,0 +1,8 @@
+1. ch5-results.tex, around lines 625-627 (sec:res-rima intro): fix the over-claim. Replace with: "None of the seven was used to develop the extractor, so the first comparison is the thesis's only out-of-sample measurement. Two comparisons use these subjects, and both were preregistered. For the first, the preregistration was committed before the scorer and the results, and the extractor was frozen before any subject was mapped. The second runs the extractor as repaired after the first (Table~\ref{tab:repairs}), so on these subjects it is not out-of-sample."
+2. ch6-discussion.tex, line 15: restore "That shows that no such error was observed, not that none can occur."
+3. ch6-discussion.tex, ~line 180 (tab:threats, end-to-end row): restore "in a graph that holds \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} possible pairs."
+4. ch5-results.tex, line 832: after "that load the same component file" restore ", so the harness cannot tell their screens apart"; restore opening "One limit of the harness's matching of a class by the file its routing module imports it from shows in the run without attribution."
+5. ch5-results.tex, line 711: change "It was preregistered" to "This comparison was preregistered before their output on the corpus was read."
+6. ch5-results.tex, line 533: insert missing space in "(Table~\ref{tab:repairs}).The repairs".
+7. ch6-discussion.tex, line 415: rewrite "These are expectations..." as "All of these are expectations derived...".
+8. ch2-background.tex, line 130: restore "The authors list restrictions on the applications they handle, among them that the routing declarations must not use \texttt{children} or route parameters".
