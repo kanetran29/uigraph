@@ -53,8 +53,8 @@ One application's recall fell when the rule was tightened.
   & The mutation harness patched the first textual match, judged detection on node and edge sets alone, and retargeted only the head of a commands array.
   & Patches use construct offsets, detection includes witnesses, and retargeting selects another declared route. Guards without incoming edges are excluded. Renames require the renamed route to appear.
   & realworld's detection rose sharply. The seed stayed fixed, but the sample changed from \MutEarlierSampled{} to \MutSampled{} mutants, of which \MutOverlap{} share an earlier mutant's location: the same operator, file and line, though destinations may differ. The final sample omits \MutEarlierFailuresAbsent{}/\MutEarlierFailures{} earlier misses. Of six earlier paired disagreements favouring attribution, five used retargeting that replaced only the commands-array head. Correcting it also lets the baseline detect them. \\
-\emph{Harness}: reading the graph at the sites the rule let through.
-  & Locating a guard's route by the nearest preceding path literal fails for children, empty paths, constants and template literals.
+\emph{Harness}: reading the graph at the guard mutants the exclusion rule kept.
+  & The rule that excludes guard mutants located a guard's route by the nearest preceding path literal, which fails for children, empty paths, constants and template literals.
   & Brace matching after blanking comments and strings locates the route. Routes without screens are excluded.
   & Four unobservable mutants, previously counted as graph defects, are now excluded. The superseded run sampled \MutEarlierSampled{} mutants. \\
 \emph{Harness}: prompted by an extractor change rather than a figure.
@@ -86,7 +86,7 @@ Correcting the witness check itself.
 \emph{Review}, as above.
   & A guard on an empty-path child without a component was not read, and \texttt{canMatch}, \texttt{canActivateChild} and \texttt{canLoad} guards not at all.
   & Such a guard gates the screen above. The other three kinds are read.
-  & \MustFateGuard{} of the intermediate tier's edges, all of bitwarden's, are guarded. \\
+  & The current graph reads a guard, missed before, on \MustFateGuard{} of the intermediate tier's edges: every bitwarden edge of that tier and none from another application. \\
 \emph{Panel}: a red-team panel.
   & Gating on every destination guard also demoted navigations the router permits.
   & The extractor computes the guards the router runs for each source and destination: levels left, matched, entered, kept.
@@ -144,7 +144,7 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
 \emph{Refutation attempts}.
   & Target resolution was conflated with dead-link detection. An unresolved enum sent all bitwarden authentication paths through the wildcard.
   & The enum and wrapper are resolved. Lower-bound route sets are noted. Caveated candidates are checked against runtime configuration.
-  & Wildcard matching had inflated recovery. Withdrawn: \RoundTwoFrameworkMountsIt{} mounted screens, \RoundTwoFrameworkPrefix{} screenless prefixes and \RoundTwoFrameworkRedirects{} redirects, with \RoundTwoWildcardCaveated{} still caveated. \\
+  & Wildcard matching had raised bitwarden's recovered figure. Checked against the framework's route configuration, dead-link candidates were withdrawn: \RoundTwoFrameworkMountsIt{} where the framework serves a screen, \RoundTwoFrameworkPrefix{} where the matching route places no screen and \RoundTwoFrameworkRedirects{} where a redirect answers. \RoundTwoWildcardCaveated{} keep the caveat. \\
 \emph{Refutation attempts}.
   & Unresolved routes were treated as undeclared: a spread-built array, ghostfolio's \texttt{matcher} and alfresco's tsconfig \texttt{paths} alias.
   & Both tools record unresolved regions and exclude undeclared claims within them.
