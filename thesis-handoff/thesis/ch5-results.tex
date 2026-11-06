@@ -168,8 +168,8 @@ The analysis under evaluation is the one Chapter~\ref{ch:analysis} states: scope
 
 Table~\ref{tab:before-after} and Figure~\ref{fig:before-after} compare the extractor with and
 without scope attribution on identical inputs. The comparison is made construct by construct. A
-construct is \emph{recovered} if it was lost to attribution in the baseline and is witnessed by an
-edge after attribution.
+construct is \emph{recovered} if it was lost to attribution in the baseline and is witnessed by a
+must or may edge from a placed screen after attribution; an edge into a dynamic sink or from an unplaced origin does not make it recovered.
 
 \begin{table}[t]\footnotesize
 \caption{Before $\to$ after scope attribution, on the final evaluated snapshot.}
@@ -302,8 +302,7 @@ observe.
 \label{sec:res-width}
 
 The rendered-interface check cannot say whether the scopes are too large, so this subsection asks
-how much narrower the computed attribution is than the widest one there is. Assigning every
-navigation site to every screen recovers every construct and needs no analysis. The ratio between the two
+how much narrower the computed attribution is than the widest one there is. Assigning every represented navigation site to every screen gives the widest source scope there is without any scope analysis; it places sites, but resolves no unknown target and adds no missing destination, so it does not recover every construct. The ratio between the two
 measures what the analysis contributes (Table~\ref{tab:scopebaseline}).
 
 \begin{table}[t]\small
@@ -547,7 +546,7 @@ Three things follow, with the figures in Table~\ref{tab:earlier}.
 \end{itemize}
 
 The scopes are wide where a shell renders a link on every screen: the computed attribution is
-\BaselineFactorMin{} to \BaselineFactorMax{} times narrower than assigning every site to every screen
+\BaselineFactorMin{} to \BaselineFactorMax{} times narrower than assigning every represented site to every screen
 (Section~\ref{sec:res-width}). Wide is not the same as too large: against the structural references the full analysis asserts no pair outside them on \GTApp{} and \GTAlfFullExcess{} at one site on
 alfresco, where it also places an undetermined site on every screen. Both references apply the analysis's own relations, and only two of the six applications
 were read this way; a scope that is too large still yields edges whose witnesses agree, and the suites test only the missing direction
@@ -819,7 +818,7 @@ turn a run-time value into a must edge.
 \label{sec:res-accounting}
 
 Table~\ref{tab:round2acct} gives the construct accounting in four parts, because a single ratio cannot
-separate three different things. A site is \emph{recovered} when it becomes a transition with a
+separate three different things. A site is \emph{recovered} when a must or may edge from a placed screen witnesses it, that is, it becomes a transition with a
 destination. It is \emph{dynamic} when the extractor records the destination as unresolved: a value from the backend or a history entry, but also a field it treats as mutable although the route table initialises it, or a template literal inside a commands array (Section~\ref{sec:approximations}). The graph then records an edge into that screen's
 \texttt{u\_}\,sink with modality unknown, rather than dropping or guessing. It is \emph{unplaced} when
 the destination is readable but the screen it fires from is not, and the edge is anchored at an
@@ -865,7 +864,7 @@ the destination its edge names; it does not ask whether the construct runs every
 lets the navigation through, which the demotion rules cover. Neither the source reading of the must tier (Section~\ref{sec:limitations}) nor the mechanical check is an
 independent proof of Claim~\ref{claim:must}.
 
-\paragraph{The whole graph.} Over the whole graph the check says much less. The \RoundTwoEdges{} edges cite \RoundTwoSites{} locations, and only \RoundTwoGraphClean{} are clean, because \RoundTwoOverApprox{} are over-approximations for which the check claims no target agreement. \RoundTwoTopFanoutShare{} of all edges (\RoundTwoTopFanoutEdges{}) come from one call site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, a \texttt{navigateByUrl} to a template literal with an empty static prefix. mifos holds \RoundTwoMifosEdgeShare{} of all edges, so figures pooled over the corpus are mostly mifos's. Of the \RoundTwoJudged{} locations the check judges, \RoundTwoJudgedClean{} are clean, and none of the rest is cited by a must edge. A target-consistency figure for the must tier is not one for the graph.
+\paragraph{The whole graph.} Over the whole graph the check says much less. The \RoundTwoEdges{} edges carry \RoundTwoSites{} witness citations, counted per edge with merged witnesses and not deduplicated by location, so a site that yields many edges weighs more; only \RoundTwoGraphClean{} of them are clean, because \RoundTwoOverApprox{} are over-approximations for which the check claims no target agreement. \RoundTwoTopFanoutShare{} of all edges (\RoundTwoTopFanoutEdges{}) come from one call site in \RoundTwoTopFanoutApp{}, \RoundTwoTopFanoutSite{}, a \texttt{navigateByUrl} to a template literal with an empty static prefix. mifos holds \RoundTwoMifosEdgeShare{} of all edges, so figures pooled over the corpus are mostly mifos's. Of the \RoundTwoJudged{} citations the check judges, \RoundTwoJudgedClean{} are clean, and none of the rest belongs to a must edge. A target-consistency figure for the must tier is not one for the graph.
 
 \paragraph{The node set.} Across the corpus the compared graph declares \ProbeInvented{} screens at
 addresses the framework mounts nothing at. Every address the extractor claims is an address the
