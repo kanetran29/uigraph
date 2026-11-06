@@ -1,11 +1,11 @@
-\chapter{Static navigation analysis and scope attribution}
+\section{Static navigation analysis and scope attribution}
 \label{ch:analysis}
 
 This chapter defines the graph model and its soundness claim (Section~\ref{sec:model}), scope
 attribution for RQ3 (Section~\ref{sec:attribution}), and its partial implementation
 (Section~\ref{sec:implementation}).
 
-\section{Graph model and soundness}
+\subsection{Graph model and soundness}
 \label{sec:model}
 \begin{definition}[UI transition graph]
 A UI transition graph is a labelled transition system $(S, \Sigma, G, M, E)$ with
@@ -36,20 +36,13 @@ $(s, \sigma, g, s')$. The paragraph on witnesses below says how constructs are t
 edge relation. An \emph{unplaced origin} represents a component and navigation sites that
 could not be assigned to a screen. A \emph{dynamic target} represents an unresolved
 destination. These preserve unplaced sites for the loss counts in Chapter~\ref{ch:results}
-and unresolved destinations that may still occur at run time. Table~\ref{tab:census} counts
+and unresolved destinations that may still occur at run time. Section~\ref{sec:res-after} counts
 both kinds: \CensusOtherNodes{} of \CensusNodes{} corpus nodes (\CensusOtherNodeShare{}).
 Of \CensusEdges{} edges, \CensusTargetNotScreen{} reach a dynamic target. Another
 \CensusMaySourceNotScreen{} leave an unplaced origin and are labelled \emph{may}, so
 Chapter~\ref{ch:results} includes them in that tier despite their nonscreen sources.
 An edge to a dynamic target records outgoing navigation without identifying the destination
 screen. Claim~\ref{claim:must} and must conversion (RQ1) concern only edges between screens.
-
-\begin{table}[t]\small
-\caption{What the published graphs are made of: nodes by kind and edges by modality.}
-\label{tab:census}
-\TabCensus
-\par\smallskip{\footnotesize\noindent\emph{Note.} An anchor stands for a whole subtree of screens; \emph{other} counts unplaced origins and dynamic targets together. These are the attributed graphs; the node column of Table~\ref{tab:conversion} counts the graphs of the same snapshot without attribution, which hold no anchors and fewer \emph{other} nodes.}
-\end{table}
 
 \textbf{Modalities.} A \emph{must} edge is claimed to fire for every input on which the
 enclosing code executes. A \emph{may} edge is possible but conditional. \emph{Unknown} marks an
@@ -245,7 +238,7 @@ Section~\ref{sec:scope} defines them.
 Section~\ref{sec:may-incomplete} sorts what is still missing by whether it lies inside the static
 boundary.
 
-\section{Scope attribution}
+\subsection{Scope attribution}
 \label{sec:attribution}
 
 Scope attribution uses five \emph{input relations}. The evaluated analysis implements three
@@ -272,7 +265,7 @@ features that the extractor approximates or omits, as listed in
 Section~\ref{sec:approximations}. A site assigned no scope by implemented relations contributes
 no edge and counts as ``Attribution, service'' in Table~\ref{tab:loss-rules}.
 
-\subsection{The defect being addressed}
+\subsubsection{The defect being addressed}
 
 Without scope attribution, only sites directly in a screen's routed component are attributed
 to that screen, which explains three baseline symptoms when the attribution pass is disabled
@@ -281,7 +274,7 @@ the header beside the outlet, outside every screen's subtree. A component mounte
 routes contributes one edge instead of one per route. Injected-service navigation contributes
 none. Every baseline application nevertheless has edges.
 
-\subsection{Scope}
+\subsubsection{Scope}
 \label{sec:scope}
 
 \textbf{The lattice.} Every navigation site is anchored at a \emph{scope}: the set of screens
@@ -396,7 +389,7 @@ $O\bigl(|S|^2 \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|)\bigr)$.
 The worklist handles cycles, including mutually recursive templates. The restrictions,
 fallbacks and stand-ins of Section~\ref{sec:implementation} lie outside it.
 
-\subsection{Input relations}
+\subsubsection{Input relations}
 \label{sec:inputs}
 
 Three relations, in order of increasing difficulty, provide the input to the fixpoint.
@@ -424,7 +417,7 @@ Its result is not the least solution of this system or of any restriction of it.
 
 \input{figures/alg-attribution}
 
-\subsection{Guards as program points}
+\subsubsection{Guards as program points}
 
 A guard returning \texttt{UrlTree} initiates navigation, typically to login. A
 \texttt{canActivate} or \texttt{canMatch} guard on $r$ redirects from the navigation's source
@@ -438,7 +431,7 @@ to may but are not included in the guard. Screen-to-screen edges record only rou
 so they identify conditional navigation without its full condition. An optional mode retains
 enclosing conditions, but no Chapter~\ref{ch:results} table uses it.
 
-\subsection{Boundary}
+\subsubsection{Boundary}
 \label{sec:boundary}
 
 Navigation inside a signal effect depends on a reactive graph whose read set alone is
@@ -446,7 +439,7 @@ statically visible (Section~\ref{sec:angular}). The model labels these edges \em
 and records the signals read as a symbolic guard. This version emits none and does not
 attempt to determine when they fire.
 
-\subsection{Anchored edges}
+\subsubsection{Anchored edges}
 \label{sec:anchored}
 
 Explicit attribution would create one edge per screen for a shell link. For the largest
@@ -480,7 +473,7 @@ $c$. A relative target at a site in component $c$ that fires on $s$ resolves aga
 components, the full target's base is unresolved and the edge is may
 (Table~\ref{tab:demotion}). A target prefix falls back to $s$'s address; all prefix edges are may.
 
-\subsection{Extensions not evaluated}
+\subsubsection{Extensions not evaluated}
 \label{sec:extensions}
 
 Two model-only input relations were not evaluated. \emph{Dispatch} ($D$) treats dispatch as
@@ -495,7 +488,7 @@ source screens of navigation into $r$. With these relations, propagation along $
 $\mathit{Mem}$, $\mathit{CG}$, $D$ and $T$ remains monotone. The prototype uses stand-ins
 instead (Section~\ref{sec:implementation}).
 
-\section{Implementation}
+\subsection{Implementation}
 \label{sec:implementation}
 
 The accompanying extractor was built for this thesis and evaluated at commit \texttt{a9d29df}
@@ -518,17 +511,17 @@ Figure~\ref{fig:lattice} distinguishes levels representing earlier work from thi
   lvl/.style={draw=ink, rounded corners=2pt, fill=white, align=center, minimum width=21mm, minimum height=8mm, inner sep=2pt},
   lbl/.style={align=center, text width=26mm, inner sep=1pt}]
   \node[lvl] (own) at (0,0) {owned};
-  \node[lvl] (nest) at (30mm,0) {nesting};
-  \node[lvl, fill=accentlight] (root) at (60mm,0) {rooted};
-  \node[lvl, fill=accentlight] (out) at (90mm,0) {outlet};
-  \node[lvl, fill=warmlight] (full) at (120mm,0) {full};
+  \node[lvl] (nest) at (28mm,0) {nesting};
+  \node[lvl, fill=accentlight] (root) at (56mm,0) {rooted};
+  \node[lvl, fill=accentlight] (out) at (84mm,0) {outlet};
+  \node[lvl, fill=warmlight] (full) at (112mm,0) {full};
   \foreach \x/\y in {own/nest,nest/root,root/out,out/full} \path (\x) -- node{$\subset$} (\y);
   \node[lbl, below=2mm of own] {the routed\\component's own file};
   \node[lbl, below=2mm of nest] {+ template\\containment};
   \node[lbl, below=2mm of root] {+ shell rule\\(Oshima and Kishi)};
   \node[lbl, below=2mm of out] {+ outlet descent\\(Rima et al.)};
   \node[lbl, below=2mm of full, text width=30mm] {+ \mbox{injected-service} join\\by member-level\\call graph (this thesis)};
-  \node[lvl, fill=warmlight] (cls) at (120mm,15mm) {class};
+  \node[lvl, fill=warmlight] (cls) at (112mm,15mm) {class};
   \draw[->] (out.north) |- node[above, pos=0.8]{$\subset$} (cls.west);
   \draw[dashed, muted] (cls) -- (full);
   \node[lbl, above=1mm of cls, text width=26mm] {beside \emph{full}: service join per class};
@@ -619,7 +612,7 @@ moved inline-template witnesses from the template's first line to the construct'
 Baseline graphs are identical with and without this change on the corpus. Unit tests cover
 each case above.
 
-\section{Summary}
+\subsection{Summary}
 
 The graph model uses three modality labels. Its must-tier soundness claim rests on four
 assumptions about routes and route order, selectors, unresolved calls and the execution model.

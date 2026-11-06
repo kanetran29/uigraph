@@ -32,3 +32,8 @@ thesis-handoff/thesis/*.fdb_latexmk
 thesis-handoff/thesis/*.out
 thesis-handoff/thesis/*.toc
 thesis-handoff/thesis/*.synctex.gz
+thesis-handoff/thesis/*.xmpdata
+thesis-handoff/thesis/*.xmpi
+
+# Downloaded official Aalto thesis package (kept locally; aaltothesis.cls and the SCI logo are committed)
+thesis-handoff/thesis/aalto/

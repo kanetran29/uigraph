@@ -1,25 +1,28 @@
-% Master's thesis draft. Author: Duy Khanh Tran, student number 103503394.
-% PREVIEW PREAMBLE: replace with the official aaltothesis class.
-% Chapter files use only \chapter, \section, \subsection and standard packages.
-\documentclass[12pt,a4paper,oneside]{report}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{lmodern}
-\usepackage[a4paper,margin=3cm]{geometry}
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{booktabs,tabularx,array,enumitem,graphicx,microtype,url}
+% Master's thesis. Author: Duy Khanh Tran, student number 103503394.
+% Official Aalto thesis class (aaltothesis.cls v4.20, package of 19 Feb 2026). The class is
+% based on article, so chapters are \section and their parts \subsection and \subsubsection.
+\documentclass[english,12pt,a4paper,sci,utf8,a-2b,online]{aaltothesis}
+% amsthm must be loaded before \setupthesisfonts; newtxmath supplies the AMS symbols.
+\usepackage{amsmath}
+\usepackage{amsthm}
+\setupthesisfonts
+\usepackage{booktabs,tabularx,array,enumitem,graphicx}
 % The methods table is taller than a page; xltabular gives it tabularx columns that break.
 \usepackage{xltabular}
 \input{figures-preamble}
-\usepackage[hidelinks]{hyperref}
-\usepackage{titlesec}
-\titleformat{\chapter}[display]{\normalfont\Large\bfseries}{\chaptertitlename\ \thechapter}{10pt}{\LARGE}
-\newtheorem{definition}{Definition}[chapter]
-\newtheorem{claim}{Claim}[chapter]
+% Chapters are top-level sections: number floats, equations and theorems within them (5.1).
+\numberwithin{table}{section}
+\numberwithin{figure}{section}
+\numberwithin{equation}{section}
+\AtBeginDocument{\counterwithin{lstlisting}{section}}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{claim}{Claim}[section]
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-\setcounter{secnumdepth}{2}
-\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
 \setlength{\parskip}{0.3em}
+% The online option colours links blue; keep them unmarked as before.
+\AtEndPreamble{\hypersetup{hidelinks}}
 
 \input{generated-tables}
 \input{generated-before-after}
@@ -55,66 +58,63 @@
 \input{generated-h2h-author}
 \input{figures/fig-plots}
 
-\begin{document}
-
-\begin{titlepage}
-\centering
-\vspace*{2cm}
-{\large Aalto University\par}
-{\large School of Science\par}
-{\large Master's Programme in Computer, Communication and Information Sciences\par}
-\vfill
-{\LARGE\bfseries Scope Attribution for Static UI Transition\\[0.3em] Graph Extraction in Single-Page Applications\par}
-\vfill
-{\large Duy Khanh Tran\par}
+\degreeprogram{Computer, Communication and Information Sciences}
+\major{Computer Science}
+\univdegree{MSc}
+\thesisauthor{Duy Khanh Tran}
 % Student number 103503394 (needed in MyStudies; the aaltothesis class has no field for it)
-\vspace{2cm}
-{\large Master's Thesis\par}
-{\large Espoo, \today\par}
-\vspace{1.5cm}
-\begin{tabular}{ll}
-Supervisor: & Prof.\ Petri Vuorimaa \\
-Major: & Computer Science \\
-\end{tabular}
-\vfill
-\end{titlepage}
-
-\chapter*{Abstract}
-\addcontentsline{toc}{chapter}{Abstract}
-\vspace{-1.5em}
+\thesistitle{Scope Attribution for Static UI Transition Graph Extraction in Single-Page Applications}
+\place{Espoo}
+\date{\today}
+\supervisor{Prof.\ Petri Vuorimaa}
+\uselogo{!}
+\keywords{static analysis\spc UI transition graph\spc single-page
+application\spc Angular\spc dataflow analysis\spc program analysis\spc software testing}
+% The abstract is written once, for the abstract page and the PDF metadata: \abspar breaks the
+% paragraph on the page and is empty in the metadata, which cannot hold paragraph breaks;
+% macros end in "\ " rather than "{}", which the metadata would keep.
+\newcommand{\abspar}{}
+\thesisabstract{%
 A user interface (UI) transition graph represents an application's screens and the navigation
 between them. For single-page applications, such graphs usually come from execution. Static
 extraction avoids execution, but its losses have not been measured construct by construct.
-
+\abspar
 This thesis measures what static extraction recovers from Angular applications and why it loses
 the rest. It proposes scope attribution, a dataflow analysis that computes the screens from which
 each navigation site can fire.
-
+\abspar
 An extractor was applied to six open-source Angular applications and checked with five evaluation
 methods. Every unrecovered navigation construct was classified.
-
-Every screen readable from route tables has a node. Only \CensusMustSites{} constructs yield
+\abspar
+Every screen readable from route tables has a node. Only \CensusMustSites\ constructs yield
 deterministic transitions under stated assumptions, largely because the study defines them strictly. Under the study's classification order, the largest loss
 category is navigation outside components that routes render directly. Scope attribution
-recovers \AttrRecoveredShare{} of these constructs, most of them in the largest application. Almost all become possible transitions, mostly
+recovers \AttrRecoveredShare\ of these constructs, most of them in the largest application. Almost all become possible transitions, mostly
 through mechanisms from earlier work. The added step, for services, guards and effects, places a
-further \AblationFullAddedShare{} of the sites. On a reference that applies the
+further \AblationFullAddedShare\ of the sites. On a reference that applies the
 analysis's own relations to one application's source, it trades precision for recall. A comparison with
 Rima et al.'s tool shows a similar trade-off and no overall ranking, with this extractor far less
 precise on the largest application. Both comparisons rest on small samples read by an artificial
 intelligence model, and one subgroup was formed after reading. Mutation testing only sanity-checks
 the mapping between source and witnesses.
-
+\abspar
 Route tables give static extraction a starting point, but attribution and target resolution remain
 necessary. The main corpus results are in-sample because the extractor was developed on these
 applications. The graph's benefit to users is not measured.
+}
 
-\vspace{0.5em}
-\noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
-application; Angular; dataflow analysis; program analysis; software testing
+\begin{document}
 
-\chapter*{Use of AI tools}
-\addcontentsline{toc}{chapter}{Use of AI tools}
+\makecoverpage
+
+\begin{abstractpage}[english]
+\let\abspar\par
+\abstracttext
+\end{abstractpage}
+
+\dothesispagenumbering{}
+
+\mysection{Use of AI tools}
 
 I wrote the text of this thesis and made the revisions myself. Artificial intelligence (AI)
 tools were used to support implementation, the search for relevant projects and papers, and
@@ -140,8 +140,13 @@ limitations are stated there; they are not treated as independent human validati
 
 I take responsibility for the final text, implementation, results and conclusions.
 
-\chapter*{Abbreviations}
-\addcontentsline{toc}{chapter}{Abbreviations}
+\newpage
+\thesistableofcontents
+
+\mysection{Abbreviations and terms}
+
+\subsection*{Abbreviations}
+
 
 \begin{tabular}{@{}ll@{}}
 AGPL & GNU Affero General Public License \\
@@ -171,8 +176,8 @@ XML & Extensible Markup Language \\
 ZAP & Zed Attack Proxy, a web security scanner \\
 \end{tabular}
 
-\chapter*{Terms}
-\addcontentsline{toc}{chapter}{Terms}
+\subsection*{Terms}
+
 
 \begin{description}[nosep]
 \item[Anchored edge] An edge stored once at its scope, $\top$ or $\mathit{subtree}(r)$, instead of
@@ -242,7 +247,7 @@ cited line, compares the construct's kind and target with the edge, and tests th
 against the independent route set (Table~\ref{tab:methods}).
 \end{description}
 
-\tableofcontents
+\clearpage
 
 \include{ch1-introduction}
 \include{ch2-background}
@@ -252,9 +257,12 @@ against the independent route set (Table~\ref{tab:methods}).
 \include{ch6-discussion}
 \include{ch7-conclusion}
 
-
+\clearpage
+\thesisbibliography
 \bibliographystyle{plain}
-\addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{references}
-\include{appendix}
+% \input, not \include: the trailing \clearpage of \include would add a page to the
+% appendix page count on the abstract page.
+\clearpage
+\input{appendix}
 \end{document}

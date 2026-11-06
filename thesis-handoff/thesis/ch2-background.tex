@@ -1,4 +1,4 @@
-\chapter{Background}
+\section{Background}
 \label{ch:background}
 
 This chapter defines transition-graph terminology in Section~\ref{sec:terminology}.
@@ -11,7 +11,7 @@ Section~\ref{sec:mutation} reviews mutation testing, the method that
 Chapter~\ref{ch:evaluation} specifies and Chapter~\ref{ch:results} applies to answer RQ4.
 Section~\ref{sec:gap} summarises the chapter and identifies the research gap.
 
-\section{User-interface transition graphs}
+\subsection{User-interface transition graphs}
 \label{sec:terminology}
 
 A UI transition graph is a directed graph whose nodes represent user-visible application
@@ -61,7 +61,7 @@ Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & \checkmark &
 \par\smallskip{\footnotesize\noindent\emph{Note.} Evaluation basis is a reference, a metric or the tool compared with, as each work states it.}
 \end{table}
 
-\section{Static extraction for Android}
+\subsection{Static extraction for Android}
 \label{sec:android}
 
 Most static transition-graph research concerns Android. Yang et al.\ introduced the window
@@ -81,7 +81,7 @@ analysis aliases several widgets, assigning handlers to the wrong window and pro
 infeasible transitions. Its authors combine static analysis with runtime traces and a
 learned model \cite{promal2022}, using dynamic evidence rather than refining static attribution.
 
-\section{Navigation models for web applications}
+\subsection{Navigation models for web applications}
 \label{sec:webmodels}
 
 Web navigation models were first extracted from server-rendered sites. Ricca and Tonella
@@ -98,7 +98,7 @@ These approaches target server-rendered frameworks, where pages correspond to fi
 to anchor elements. They do not address client-side routers, component trees or dependency
 injection. Section~\ref{sec:dynamic-spa} reviews work that does.
 
-\section{Dynamic state models for single-page applications}
+\subsection{Dynamic state models for single-page applications}
 \label{sec:dynamic-spa}
 
 With Ajax and client-side frameworks, model construction moved to run time. Crawljax executes
@@ -163,7 +163,7 @@ their pipeline's output and annotated by hand. Neither work classifies losses by
 or measures them across a corpus. The problem is therefore neither new nor settled, and
 Section~\ref{sec:gap} identifies the remaining gap.
 
-\section{Static analysis of JavaScript and TypeScript source}
+\subsection{Static analysis of JavaScript and TypeScript source}
 \label{sec:asttools}
 
 The analysis in Chapter~\ref{ch:analysis} reads Angular source with the TypeScript compiler
@@ -172,7 +172,7 @@ rather than on a compiled artefact. This section reviews that style of tooling, 
 interpretation of JavaScript, what the declared types of a TypeScript program contribute, and
 the evidence that frameworks limit such analyses more than the language does.
 
-\subsection{Analyses over a source-level syntax tree}
+\subsubsection{Analyses over a source-level syntax tree}
 
 Analysing the syntax tree of the source, instead of bytecode or an intermediate representation,
 is a long-established style. Baxter et al.\ detect exact and near-miss code clones by comparing
@@ -190,7 +190,7 @@ definition and read the declared type of an injected field. The cost of the styl
 analysis sees the program as written, including the parts that a compiler later rewrites or
 erases.
 
-\subsection{Abstract interpretation of JavaScript}
+\subsubsection{Abstract interpretation of JavaScript}
 
 Lattice-based analysis of JavaScript has a formal treatment. Jensen et al.\ present an analysis
 based on abstract interpretation that infers detailed and sound type information for the full
@@ -200,7 +200,7 @@ Section~\ref{sec:formal} applies to JavaScript at the level of individual values
 considerably harder than scope attribution, which uses the same machinery over a much coarser
 domain of screens, defined in Section~\ref{sec:scope}, instead of abstractions of heap objects.
 
-\subsection{What TypeScript's types contribute}
+\subsubsection{What TypeScript's types contribute}
 
 Angular applications are written in TypeScript, so an analysis can read declared types instead
 of inferring them. The type system is deliberately unsound. Bierman et al.\ give a precise
@@ -226,7 +226,7 @@ type does not establish that the call reaches exactly one candidate. An unresolv
 type must therefore widen the result instead of being trusted. In the graph model, this widening
 is one source of the may tier.
 
-\subsection{Frameworks as the practical obstacle}
+\subsubsection{Frameworks as the practical obstacle}
 
 In practice, the framework around the code limits a static analysis of a client-side application
 more than the language does. Madsen et al.\ observe that JavaScript applications depend on large
@@ -253,14 +253,14 @@ The two frameworks share the problem of relating an identifier in a template to 
 defines it. Aurebesh solves that problem for a consistency check, does not address navigation and
 reports no transition graph.
 
-\section{Formal foundations}
+\subsection{Formal foundations}
 \label{sec:formal}
 
 The analysis builds on three ideas from the literature: a transition system whose edges carry a
 modality, a stated position on what soundness can mean for a practical analysis, and dataflow
 analysis as the computational framework.
 
-\subsection{Modal transition systems}
+\subsubsection{Modal transition systems}
 
 The \emph{modal transition system} of Larsen and Thomsen labels each transition as
 either required, a \emph{must} edge, or merely permitted, a \emph{may} edge
@@ -273,7 +273,7 @@ With one edge kind, an unresolved transition must either be included, reducing p
 or omitted, reducing recall. Modalities record the evidence available, letting consumers
 select a tier. Chapter~\ref{ch:results} therefore reports the tiers separately.
 
-\subsection{Soundiness}
+\subsubsection{Soundiness}
 \label{sec:soundiness}
 
 Livshits et al.\ argue that practical static analyses are inevitably sound only for a
@@ -283,7 +283,7 @@ Sections~\ref{sec:asttools} to~\ref{sec:angular} explain the limits: TypeScript 
 are not guarantees, framework configuration determines call targets, and reactive firing
 conditions are not written in the program text.
 
-\subsection{Dataflow analysis and abstract interpretation}
+\subsubsection{Dataflow analysis and abstract interpretation}
 
 Kildall expressed many program analyses as fixpoint computations over lattices of abstract
 values. A join combines information, which propagates along graph edges until stable
@@ -297,7 +297,7 @@ An instance needs a lattice of bounded height and a propagation graph. When unre
 the propagation graph incomplete, the result omits information in a way the framework itself cannot
 detect.
 
-\section{Angular routing, dependency injection and reactive state}
+\subsection{Angular routing, dependency injection and reactive state}
 \label{sec:angular}
 
 The analysis in Chapter~\ref{ch:analysis} must account for Angular-specific mechanisms,
@@ -306,7 +306,7 @@ to~\ref{lst:service} introduce a running example.
 
 \input{figures/lst-angular}
 
-\subsection{Routes, components and navigation sites}
+\subsubsection{Routes, components and navigation sites}
 
 Angular declares screens through a tree of route objects. Each has a \texttt{path} pattern
 and a \texttt{component}, \texttt{redirectTo} target or \texttt{children} list. A route with
@@ -331,7 +331,7 @@ permits targets relative to the current route. Navigation sites can occur in com
 injectable services, guards, interceptors and resolvers. Their source screens are not
 explicitly declared and must be derived.
 
-\subsection{Dependency injection}
+\subsubsection{Dependency injection}
 \label{sec:di}
 
 Angular creates services and supplies them to the components and services that declare them as
@@ -416,7 +416,7 @@ different implementations depending on where the injection happens. Resolution i
 injector, which makes the provider hierarchy an input to the explicit framework model of
 Section~\ref{sec:inputs}.
 
-\subsection{Reactive state}
+\subsubsection{Reactive state}
 \label{sec:signals}
 
 Recent Angular versions include signals and effects \cite{angulareffects}. A signal is a value
@@ -435,14 +435,14 @@ for the same purpose, in subscriptions to router events, in responses from the s
 state containers. Section~\ref{sec:reactive} reviews what the reactive programming literature
 establishes about this boundary.
 
-\section{Reactive programming and the limits of static dataflow}
+\subsection{Reactive programming and the limits of static dataflow}
 \label{sec:reactive}
 
 In reactive programming, the runtime decides when a computation runs. This section reviews the
 propagation discipline that reactive runtimes implement and the evidence on how well developers
 can reason about reactive code with tools.
 
-\subsection{Propagation order and glitch freedom}
+\subsubsection{Propagation order and glitch freedom}
 
 A reactive program is a graph of values in which an update to one value must propagate to the
 values that depend on it. Cooper and Krishnamurthi embed dynamic dataflow in a call-by-value
@@ -466,7 +466,7 @@ effect runs and the application state at each run depend on which writes occur a
 order, so they cannot in general be determined exactly from source. They could still be
 over-approximated, but this analysis does not attempt it.
 
-\subsection{Reactive code and the tools developers have}
+\subsubsection{Reactive code and the tools developers have}
 
 Empirical studies separate reading reactive code from reasoning about its behaviour. Salvaneschi
 et al.\ ran an experiment with 127 subjects that compared reactive code with object-oriented code
@@ -497,7 +497,7 @@ position of Section~\ref{sec:formal} for unresolved constructs. The prototype em
 edges for effects or subscriptions. Its unknown edges have destinations it cannot resolve
 to screens.
 
-\section{Mutation testing}
+\subsection{Mutation testing}
 \label{sec:mutation}
 
 RQ4 asks whether the graph responds to changes in the source constructs it represents. Mutation
@@ -507,7 +507,7 @@ suite. This section reviews the technique and the evidence for its central assum
 JavaScript and web applications, and the reporting practice that Chapter~\ref{ch:evaluation}
 follows.
 
-\subsection{The coupling effect}
+\subsubsection{The coupling effect}
 
 Mutation testing introduces small syntactic changes, called mutants, into a program and measures
 the share that a test suite detects. It rests on the \emph{coupling effect} stated by DeMillo et
@@ -524,7 +524,7 @@ faults in 5 open-source applications, mutant detection
 correlated significantly with real-fault detection, independently of code coverage
 \cite{just2014mutants}.
 
-\subsection{Mutation for JavaScript and web applications}
+\subsubsection{Mutation for JavaScript and web applications}
 
 Mutation analysis has been adapted to JavaScript and to web applications, where the cost of
 generating and running mutants is a central concern. Mirshokraie et al.\ use static and dynamic
@@ -547,7 +547,7 @@ design that works with any test runner \cite{stryker}. No peer-reviewed publicat
 Stryker was found, and the project cites none. For that reason, the mutation procedure of
 Chapter~\ref{ch:evaluation} is specified explicitly instead of delegated to a tool's defaults.
 
-\subsection{Reporting a mutation experiment}
+\subsubsection{Reporting a mutation experiment}
 
 Papadakis et al.\ also give best-practice advice on the use of mutation in empirical studies
 \cite{papadakis2019mutation}. Chapter~\ref{ch:evaluation} follows it and states the operators,
@@ -568,7 +568,7 @@ level of screens. The mutation experiment checks whether the graph changes where
 changes. It is a sanity check of the mapping from witnesses to source and does not measure
 change-impact accuracy (Section~\ref{sec:metrics}).
 
-\section{Summary and the gap}
+\subsection{Summary and the gap}
 \label{sec:gap}
 
 Static web navigation extraction has largely targeted server-rendered frameworks, where pages

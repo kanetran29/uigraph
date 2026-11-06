@@ -1,4 +1,4 @@
-\chapter{Results}
+\section{Results}
 \label{ch:results}
 % Numerical tables are generated. Each generated file identifies its evaluated snapshot.
 % The main RQ1--RQ3 tables use the final snapshot with attribution off and on.
@@ -16,7 +16,7 @@ All extractions use source trees without installed dependencies. The corpus was 
 support in view, so results are likely optimistic for Angular applications generally.
 Section~\ref{sec:limitations} discusses both conditions.
 
-\section{The two levels of loss (RQ1)}
+\subsection{The two levels of loss (RQ1)}
 \label{sec:res-baseline}
 
 RQ1 measures declared screens represented as nodes and navigation constructs yielding deterministic
@@ -54,7 +54,7 @@ counts of constructs and edges and the shares pooled from them.
 \caption{Must conversion per application, baseline.}
 \label{tab:conversion}
 \TabConversion
-\par\smallskip{\footnotesize\noindent\emph{Note.} Must conversion is the fraction of in-scope constructs whose own witness earns must; the edge columns count edges. \emph{Nodes} counts every node of the baseline graph: the screens of Table~\ref{tab:coverage} together with its unplaced origins and dynamic targets (Table~\ref{tab:census} counts the attributed graphs, which add anchors and more of the latter). The baseline and attributed graphs are extracted from the same final snapshot on identical corpus inputs.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Must conversion is the fraction of in-scope constructs whose own witness earns must; the edge columns count edges. \emph{Nodes} counts every node of the baseline graph: the screens of Table~\ref{tab:coverage} together with its unplaced origins and dynamic targets (Section~\ref{sec:res-after} counts the nodes of the attributed graphs, which add anchors and more of the latter). The baseline and attributed graphs are extracted from the same final snapshot on identical corpus inputs.}
 \end{table}
 
 Table~\ref{tab:coverage} compares extracted nodes with the independent route parser's declared
@@ -83,7 +83,7 @@ omissions: one unresolved route entry can conceal many screens (Section~\ref{sec
 \par\smallskip{\footnotesize\noindent\emph{Note.} Declared screens that have a matching node, and nodes for which the independent route parser holds no declared screen. The blind-spot column counts route entries the parser could not follow (an unfound lazy route array, an unresolvable path expression, a custom matcher, or a route source spread from a call it does not follow), which marks where either direction is incomplete. The node set is the same with scope attribution off and on, since attribution creates no nodes.}
 \end{table}
 
-\section{Where static extraction fails, and why (RQ2)}
+\subsection{Where static extraction fails, and why (RQ2)}
 \label{sec:res-defects}
 
 Table~\ref{tab:defects} separates evidence from named evaluation methods and other observations.
@@ -114,7 +114,7 @@ Constant-valued route paths not resolved & independent route parser; node-count 
 \par\smallskip{\footnotesize\noindent\emph{Note.} A class is admitted on two lines of evidence, at least one from a named evaluation method; the methods column counts only those. The guard class is the one exception: both its lines of evidence are source review, and the mutation run neither confirms nor refutes it (Section~\ref{sec:res-mutation}). This summary is compiled by hand; it is not harness output.}
 \end{table}
 
-Table~\ref{tab:loss} and Figure~\ref{fig:loss} classify \RoundTwoInScopeAll{} constructs under
+Table~\ref{tab:loss} classifies \RoundTwoInScopeAll{} constructs under
 Table~\ref{tab:loss-rules}, recording their tier or loss reason. A construct counts as must only
 through its own must witness. Rows are loss categories, distinct from the defect classes of
 Table~\ref{tab:defects}; guards are assessed separately (Section~\ref{sec:metrics}).
@@ -125,7 +125,6 @@ Table~\ref{tab:defects}; guards are assessed separately (Section~\ref{sec:metric
 \TabLoss
 \par\smallskip{\footnotesize\noindent\emph{Note.} Columns: realworld, alfresco, ghostfolio, k8s dashboard, bitwarden, mifos. All rows are measured on the final snapshot with attribution disabled.}
 \end{table}
-\FigLoss
 
 Under the loss rules' precedence, attribution is the largest loss category in every application.
 The two attribution categories contain \AttrLost{} of \RoundTwoInScopeAll{} constructs; no other
@@ -165,7 +164,7 @@ negative test excluded. & \EtoERowsAlfresco{} \\
 \par\smallskip{\footnotesize\noindent\emph{Note.} Mutation is reported separately in Section~\ref{sec:res-mutation}, on the attributed graph. This summary is written by hand from the harness output rather than generated.}
 \end{table}
 
-\section{Scope attribution (RQ3)}
+\subsection{Scope attribution (RQ3)}
 \label{sec:res-after}
 
 The evaluation covers the scopes, attribution rules and anchored representation defined in
@@ -194,7 +193,10 @@ Attribution recovers \AttrRecovered{}/\AttrLost{} assigned constructs: a per-app
 \AttrRecoveredMedian{} (range \AttrRecoveredRange{}) and a pooled share of \AttrRecoveredShare{}.
 Most recoveries occur on mifos. Excluding it reduces the share to \AttrRecoveredShareNoMifos{}, and
 recovery stays under half on \AttrUnderHalfApps{} of the six applications. Edge counts rise from
-\AttrEdgesBefore{} to \AttrEdgesAfter{}. Section~\ref{sec:res-ablation} measures what the
+\AttrEdgesBefore{} to \AttrEdgesAfter{} (per application in the \emph{anchored} column of
+Table~\ref{tab:expansion}): \CensusMust{} must, \CensusMay{} may and \CensusUnknown{} unknown. The
+attributed graphs hold \CensusNodes{} nodes: \CensusScreens{} screens, \CensusAnchors{} anchors and
+\CensusOtherNodes{} unplaced origins or dynamic targets. Section~\ref{sec:res-ablation} measures what the
 \emph{full} step adds beyond the levels that reimplement earlier work and what its call graph adds
 over the class rule it replaced.
 
@@ -266,7 +268,7 @@ computed scope does not prove that the application never renders them.
 node.
 \end{itemize}
 
-\subsection{Checking the scopes against the running interface}
+\subsubsection{Checking the scopes against the running interface}
 \label{sec:res-scope}
 
 Recovery does not establish whether a site's computed scope matches its actual screens. The
@@ -312,7 +314,7 @@ Of these \ScopeExact{}, the number not rendered is \ScopeOverAttributed{}, and a
 corpus, because the graph almost never claims an exact destination at a screen this check can
 observe.
 
-\subsection{What the attribution discriminates}
+\subsubsection{What the attribution discriminates}
 \label{sec:res-width}
 
 Since the rendered-interface check cannot establish over-attribution, Table~\ref{tab:scopebaseline}
@@ -346,7 +348,7 @@ provides little discrimination. The evaluation neither validates nor refutes the
 the rendered-interface check cannot test over-attribution.
 \end{enumerate}
 
-\subsection{What each mechanism contributes}
+\subsubsection{What each mechanism contributes}
 \label{sec:res-ablation}
 
 Table~\ref{tab:ablation} extracts the corpus at \AblationLevels{}
@@ -357,6 +359,7 @@ level would credit direct ownership with sites that only the stand-ins place.
 \begin{table}[t]\footnotesize
 \caption{The corpus extracted at each attribution level.}
 \label{tab:ablation}
+\setlength{\tabcolsep}{5pt}
 \TabAblation
 \par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Sites} counts the source locations a witness cites that the level places on at least one screen; one construct can have more than one, and a location can lie outside the application directory, so site counts are not comparable with the construct counts of Table~\ref{tab:loss}. \emph{Pairs} are the (site, screen) attributions it asserts. The levels are nested, and the table is produced only if each one's pairs are a subset of the next one's. \emph{Screens} counts the screens at an address a link can name, so the catch-all screens of alfresco and mifos are left out of it and of the pairs, and the column falls short of the census's total by those screens.}
 \end{table}
@@ -375,7 +378,7 @@ that those tools would place fewer sites. Against the closest level, \emph{outle
 \AblationFullAddedSites{} sites (\AblationFullAddedShare{} of the corpus), all in services,
 guards or effects rather than components.
 
-\subsection{Agreement with a structural reference}
+\subsubsection{Agreement with a structural reference}
 \label{sec:res-groundtruth}
 
 Source inspection produced \GTSites{} sites and \GTPairs{} (site, screen) pairs for \GTApp{}
@@ -450,7 +453,7 @@ levels, but is less precise than both those levels and the class join.
 What the two references establish is therefore narrower than soundness. Neither licenses the
 corpus-wide widths of Table~\ref{tab:scopebaseline} on an application of six hundred screens.
 
-\subsection{Agreement with the applications' own suites}
+\subsubsection{Agreement with the applications' own suites}
 \label{sec:res-e2e}
 
 The end-to-end reference comes from execution, without applying the analysis's relations
@@ -521,7 +524,7 @@ a missed navigation is that site. The preregistered five-class scheme, and its p
 misses would mostly be a scope too narrow or a site not read, are not scored.
 \end{itemize}
 
-\subsection{What scope attribution adds}
+\subsubsection{What scope attribution adds}
 \label{sec:res-earlier}
 
 Table~\ref{tab:earlier} compares no attribution, earlier work's mechanism (\emph{rooted}) and full
@@ -583,7 +586,7 @@ cover two applications and share the limit stated in Section~\ref{sec:res-ground
 Over-attribution can pass witness checks, and the suites test omissions alone
 (Section~\ref{sec:limitations}).
 
-\subsection{On the applications of Rima et al.}
+\subsubsection{On the applications of Rima et al.}
 \label{sec:res-rima}
 
 Rima et al.\ publish seven Angular subjects with ground truths. Each ground truth is a set of
@@ -673,7 +676,7 @@ The comparison prompted four repairs (Table~\ref{tab:repairs}), after which the 
 re-extraction holds \RimaRepHitFull{}/\RimaPairs{} reference pairs and \RimaRepExtra{} additional
 pairs, none of them reassessed.
 
-\subsection{The tool of Rima et al.\ on the same applications}
+\subsubsection{The tool of Rima et al.\ on the same applications}
 \label{sec:res-h2h}
 
 This comparison runs their tool at \texttt{f33003f}. Its static extraction and workflow enumeration
@@ -759,7 +762,7 @@ It was withdrawn; valid remaining assessments were reused and 108 new sample pai
 Mifos estimates reuse those samples after excluding cross-mount moves. Preregistration deviations
 are recorded with the results.
 
-\section{Change sensitivity (RQ4)}
+\subsection{Change sensitivity (RQ4)}
 \label{sec:res-mutation}
 
 Mutation testing re-extracts each application per mutant, so it covers three of six applications:
@@ -814,13 +817,13 @@ disagreement reflects the harness, not the graph.
 
 The mutation run neither confirms nor contradicts the defect class \emph{guards unreliable in both directions}; Chapter~\ref{ch:discussion} gives the reading. In this sample the graph responded to every scored change (\MutDetected{}/\MutScored{}) in the constructs it represents, a result the construction makes close to certain.
 
-\section{What the losses were (RQ5)}
+\subsection{What the losses were (RQ5)}
 \label{sec:res-round2}
 
 RQ5 traces the defect classes of Section~\ref{sec:res-defects} to causes in the final version,
 using the three outcomes defined in Section~\ref{sec:metrics}.
 
-\subsection{The cause of each defect class}
+\subsubsection{The cause of each defect class}
 \label{sec:res-losses}
 
 A \emph{class} is a row of Table~\ref{tab:defects}; a \emph{cause} is its explanation from source review.
@@ -880,7 +883,7 @@ elements, builder returns or lookup values. Literal-initialised fields remain un
 they are mutable; resolving them as constants would turn runtime values into must edges.
 
 
-\subsection{Construct accounting}
+\subsubsection{Construct accounting}
 \label{sec:res-accounting}
 
 Table~\ref{tab:round2acct} separates four outcomes. A site is \emph{recovered} when a must or may
@@ -920,7 +923,7 @@ nodes for alfresco's viewer routes at the primary address, although Angular reac
 only as \texttt{(viewer:\ldots)}. Both tools read the subtree the same way, so only the runtime
 route oracle of Section~\ref{sec:res-probe} exposed the error.
 
-\subsection{The final tier and the node set}
+\subsubsection{The final tier and the node set}
 \label{sec:res-soundness}
 \label{sec:res-unmounted}
 
@@ -968,7 +971,7 @@ and address sets on \ProbeFinalSame{} of the \ProbeFinalApps{} applications. The
 \ProbeAnswerAgreed{}/\ProbeAnswerChecked{} addresses, and the \ProbeMissed{} missing addresses were
 not checked individually.
 
-\section{Dead links, found from the source}
+\subsection{Dead links, found from the source}
 \label{sec:deadlinks}
 
 A link to an unmounted target is a dead link. Static candidates are checked against the recorded
@@ -1005,7 +1008,7 @@ excluded from the census. Most belong to sibling frontends whose routers declare
 would otherwise be labelled dead.
 
 
-\section{Summary}
+\subsection{Summary}
 \label{sec:res-summary}
 
 This section answers each research question briefly. The sections cited give the figures and
@@ -1015,7 +1018,8 @@ the limits.
 oracle finds no node at an address where the framework mounts nothing. Against the addresses the
 running framework mounts, the missing nodes lie almost entirely behind one construct in ghostfolio
 that the extractor declares unread. Deterministic transitions are rare: \CensusMustSites{}
-constructs earn must. Most may-only witness locations involve a guard, branch or other
+constructs earn must, and \CensusMustKdash{} of the \CensusMust{} must edges come from one toolbar
+in k8s dashboard. Most may-only witness locations involve a guard, branch or other
 application decision, and the demotion rules do not test whether that decision can vary
 (Section~\ref{sec:res-baseline}).
 

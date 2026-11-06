@@ -1,7 +1,7 @@
 % Appendices: material moved out of the body to shorten it; it is not counted as content.
-\appendix
+\thesisappendix
 
-\chapter{Corrections made to the protocol}
+\section{Corrections made to the protocol}
 \label{app:corrections}
 
 Table~\ref{tab:repairs} lists the corrections in chapter order, and the repository records their commit hashes.
@@ -164,7 +164,7 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
   & The scorer applies the preregistered rule.
   & mifos then scored \EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} pairs, \EtoEMifosRedirect{} of them redirected. The landed-target figure had been \EtoEMifosHitAfterRedirectsUnfixed{}/\EtoEMifosPairsAfterRedirects{}. \\
 \emph{End-to-end check}: mifos's suite missed transitions to action screens.
-  & A commands-array template literal (\texttt{navigate([\textasciigrave{}actions/}\allowbreak\texttt{\$\{name\}\textasciigrave{}])}) was treated as an unresolved variable.
+  & A commands-array template literal (\texttt{navigate([}\allowbreak\texttt{\textasciigrave{}actions/}\allowbreak\texttt{\$\{name\}\textasciigrave{}])}) was treated as an unresolved variable.
   & Static text is retained. Interpolated segments become parameters.
   & The client, group and savings views reach their action screens. \\
 \emph{Figure}: after that repair, the re-measured mifos graph joined every pair of screens.
@@ -181,7 +181,7 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
   & With the preceding two repairs, mifos suite hits rose from \EtoEMifosHitUnfixed{} to \EtoEMifosHit{}/\EtoEMifosPairs{}. All extractor-dependent figures were re-measured. \\
 \addlinespace[2pt]
 \multicolumn{4}{@{}l}{\emph{Comparison on Rima et al.'s subjects (Section~\ref{sec:res-rima}), after recording its frozen figures}} \\
-\emph{Comparison}: petclinic's \texttt{navigate([\textquotesingle/owners\textquotesingle, id])} reached the owner's edit and pet screens.
+\emph{Comparison}: petclinic's \texttt{navigate([}\allowbreak\texttt{\textquotesingle/owners\textquotesingle, id])} reached the owner's edit and pet screens.
   & A commands array ending in a bound value was read as a prefix, although Angular splits only the first command on slashes.
   & A command after the first is one segment, so the array is a pattern. A matrix-parameter object adds no segment.
   & The target pairs read as spurious are gone. \\
@@ -203,7 +203,7 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
 
 Except for the mifos graph that joined every pair of screens, results marked \emph{figure} exposed measurement errors rather than extractor defects.
 
-\chapter{Declared approximations}
+\section{Declared approximations}
 \label{app:approx}
 
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}

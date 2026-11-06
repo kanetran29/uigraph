@@ -1,47 +1,11 @@
-\chapter{Conclusion}
+\section{Conclusion}
 \label{ch:conclusion}
 
 This thesis measured how much navigation static extraction recovers from six Angular
 applications, classified the navigation it loses and evaluated scope attribution as a way to
-recover part of that loss. Table~\ref{tab:rqanswers} gives, for each of the five research
-questions, the main answer, the figures that decide it and its main limit.
-
-\begingroup\footnotesize
-\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.13\textwidth}YYY@{}}
-\caption{Answers to the research questions, supporting figures and main limitations.}
-\label{tab:rqanswers}\\
-\toprule
-RQ & Answer & Key figures & Main limit \\
-\midrule
-\endfirsthead
-\toprule
-RQ & Answer & Key figures & Main limit \\
-\midrule
-\endhead
-\bottomrule
-\endfoot
-RQ1: how much is recovered
-& Every declared screen that the static readers identify has a node, but few constructs yield must transitions.
-& \CensusMustSites{} constructs yield \CensusMust{} must edges, \CensusMustKdash{} of them from one toolbar in k8s dashboard.
-& Only \ProbeExactApps{} of the six applications have a node for every screen that the running application mounts. The toolbar's scope has not been tested, and most must edges rest on the route-order assumption, which has not been validated. \\
-RQ2: where extraction fails
-& Failures fall into five defect classes and one candidate class (Table~\ref{tab:defects}), and attribution is the largest loss category in every application.
-& Table~\ref{tab:loss} gives the counts.
-& The ranking depends on the order in which the loss rules are applied. \\
-RQ3: what scope attribution adds
-& Scope attribution recovers constructs without losing any that the baseline recovers, but most of them come through mechanisms from earlier work. On alfresco, the one structural reference that can tell, the added step trades precision for recall.
-& It recovers a per-application median of \AttrRecoveredMedian{} (range \AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{} pooled.
-& Both structural references apply the analysis's own relations, and on neither application with an end-to-end suite does the added step recover a transition beyond \emph{outlet}. \\
-RQ4: whether the graph responds to change
-& Mutation testing is a conditional sanity check of witness mapping on three applications, and change-impact accuracy remains unmeasured.
-& \MutDetected{} of the \MutScored{} scored mutants are detected.
-& The mutation operators act only at constructs the graph already represents, so detection is nearly guaranteed. \\
-RQ5: whose losses they are
-& The losses form three groups: repaired tool defects, unresolved losses such as the remaining attribution losses and named outlets, and cases beyond static route-table analysis.
-& \AttrRemainingUnexplained{} of the \AttrRemaining{} constructs still lost to attribution are labelled as having no reason found.
-& The harness checks that every construct has a label but not that the label is correct. \\
-\end{xltabular}
-\endgroup
+recover part of that loss. Section~\ref{sec:res-summary} answers each of the five research
+questions with the figures that decide it and its main limit, and Chapter~\ref{ch:discussion}
+interprets the answers.
 
 \paragraph{Contributions.} The thesis makes two contributions. The first is scope attribution, a
 formal model of the screens from which a navigation site can fire, which contains the attribution

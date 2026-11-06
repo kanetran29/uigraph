@@ -1,14 +1,14 @@
-\chapter{Evaluation setup and research material}
+\section{Evaluation setup and research material}
 \label{ch:evaluation}
 
 This chapter defines the corpus (Section~\ref{sec:corpus}), metrics (Section~\ref{sec:metrics})
 and evaluation methods (Section~\ref{sec:protocol}) used to evaluate the analysis of Chapter~\ref{ch:analysis}.
 Chapter~\ref{ch:results} reports the results.
 
-\section{Corpus selection and validity}
+\subsection{Corpus selection and validity}
 \label{sec:corpus}
 
-\subsection{Selection}
+\subsubsection{Selection}
 
 Ten candidate applications were screened against six criteria: a real application rather than a
 library or template; a nested, lazily loaded route tree; guards present; end-to-end test
@@ -50,7 +50,7 @@ end-to-end specifications, all of which exercise the GraphQL server and none the
 large Cypress suite, but the extractor does not support its configuration-driven routing. Tool
 support was not one of the six criteria but became a rejection criterion after screening began.
 
-\subsection{Validity of an open-source corpus}
+\subsubsection{Validity of an open-source corpus}
 
 The selection follows Kalliamvakou et al.'s recommendation to use and report explicit criteria
 \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, with the departures stated above.
@@ -67,7 +67,7 @@ planned to address external validity (Chapter~\ref{ch:discussion}). The literatu
 Chapter~\ref{ch:background} provides no standard benchmark corpus of single-page applications, so
 the corpus and manifest are an output of this thesis.
 
-\section{Metrics}
+\subsection{Metrics}
 \label{sec:metrics}
 
 Table~\ref{tab:ratios} defines the measures for each research question. RQ1 has two levels: the
@@ -303,7 +303,7 @@ harness was tuned on its misses (Section~\ref{sec:corrections}). Changes to unre
 are excluded and not counted as misses, because they repeat recovery gaps measured by the loss
 tables. The rate is conditional on recovery and reported with the exclusion count.
 
-\section{Evaluation methods}
+\subsection{Evaluation methods}
 \label{sec:protocol}
 
 Figure~\ref{fig:pipeline} locates the five methods in the extraction pipeline.
@@ -386,14 +386,14 @@ is scope and not reading. Its result files record no extractor commit or runtime
 \end{xltabular}
 \endgroup
 
-\subsection{Preconditions}
+\subsubsection{Preconditions}
 
 Two properties of the extractor were checked before any measurement. \emph{Determinism}: two
 extractions from the same unchanged source give identical nodes and edges. \emph{No accumulated
 state}: extracting into an existing database gives the same graph as extracting after deleting it.
 Without them, differences seen in mutation testing could not be told from noise.
 
-\subsection{Changes to the protocol}
+\subsubsection{Changes to the protocol}
 \label{sec:corrections}
 \label{app:repairs}
 \label{app:validation}
@@ -414,7 +414,7 @@ the mutation sample.
 
 \textbf{Availability.} The extractor and harness are in the accompanying repository under the MIT licence. Rima et al.'s tool was run from its public repository at commit \texttt{f33003f}; it carried no licence when checked on 5 November 2026, so it is not redistributed.
 
-\subsection{Reproducibility}
+\subsubsection{Reproducibility}
 \label{sec:reproducibility}
 
 Scripts generate numerical macros; \texttt{REPRODUCE.md} lists each table's script and commit.
@@ -427,7 +427,7 @@ uses \texttt{2aac284}, frozen before its evaluation-driven repairs as preregiste
 (Table~\ref{tab:scope}) and the runtime route configurations recorded on 29--30 October without
 an extractor commit. The latter are compared with the final graph (Section~\ref{sec:res-probe}).
 
-\section{Summary}
+\subsection{Summary}
 \label{sec:eval-summary}
 
 The corpus is six open-source Angular applications pinned to commits, chosen by criteria fixed before any result was seen, and its limits are those of an open-source sample selected with tool support in view. The measures of Table~\ref{tab:ratios} answer the research questions: node coverage, node-level recall, must conversion and recovered share answer RQ1, and the loss categories and accounted share answer RQ2. Attribution recovery, must-edge target consistency, scope width and agreement with the structural reference and the end-to-end suites answer RQ3, the detection rate answers RQ4, and the cause trace answers RQ5. Four of the five evaluation methods check the extractor against other readings of the same sources, and the fifth, the runtime route oracle, checks it against the framework. Four further checks, the rendered-interface check, the ablation, the structural reference and the end-to-end check, test the attribution. No method sees everything, and Table~\ref{tab:methods} states the blind spot of each.

@@ -4,22 +4,17 @@ Structure only. No filler prose: every file carries its section headings, a note
 on what belongs there, and a page target taken from a sample of seven Aalto CS
 and Security master's theses read in full.
 
-## Getting the class files
+## Class and build
 
-This scaffold assumes the official `aaltothesis` class. It is not included here.
+The thesis uses the official `aaltothesis` class (version of 19 Feb 2026 from the Aalto wiki
+page "Aalto Thesis LaTeX Template", https://wiki.aalto.fi/display/Aaltothesis/), with options
+`english, 12pt, a4paper, sci, utf8, a-2b, online`. `aaltothesis.cls` and the School of Science
+logo (`logos/sci-exclm-en.pdf`) are committed here; the full downloaded package is kept locally in
+`aalto/` (not committed). The class is based on `article`, so chapters are `\section`.
 
-- Aalto wiki: search the Aalto intranet wiki for "Aalto Thesis LaTeX Template"
-- Overleaf: "Aalto University bachelor's, master's and licentiate thesis template"
-- GitHub mirror with example chapters: `zwuh/aalto-thesis`
-
-Copy `aaltothesis.cls` and `aaltologo.sty` next to `main.tex`, then:
-
-```
-latexmk -pdf main.tex
-```
-
-Check the school, degree programme and major strings in the class file against
-your own record before submitting. They differ by school.
+Build and check with `bash ../regen/build.sh` (it refuses a changed title), or regenerate every
+table and number first with `bash ../regen/all.sh`. The three overfull boxes it reports come from
+the class's cover page; the unmodified official template shows the same.
 
 ## Page targets
 
@@ -35,8 +30,8 @@ Structure after Petri's review (5 Oct 2026): seven chapters, Chapter 3 split.
 | 6 Discussion | ch6-discussion.tex | 8-12 |
 | 7 Conclusion | ch7-conclusion.tex | 1-2 |
 
-Result tables live in generated-tables.tex. Regenerate with
-`node to-latex.mjs results/results.json > generated-tables.tex`; never edit by hand.
+Every table and number lives in a `generated-*.tex` file written by a script; never edit them by
+hand. `../regen/README.md` maps each file to its script and data.
 
 Total 70 to 90 pages. The sampled theses ran 53 to 133 with a median near 93;
 theses from this supervisor cluster tighter at 55 to 70.

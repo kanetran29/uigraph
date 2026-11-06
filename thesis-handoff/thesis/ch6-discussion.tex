@@ -1,4 +1,4 @@
-\chapter{Discussion}
+\section{Discussion}
 \label{ch:discussion}
 
 This chapter interprets the results of Chapter~\ref{ch:results}. Section~\ref{sec:findings}
@@ -7,7 +7,7 @@ Section~\ref{sec:limitations} records the threats to validity. Section~\ref{sec:
 declares what the analysis approximates, Section~\ref{sec:transfer} considers other routers, and
 Section~\ref{sec:future} sets priorities for future work.
 
-\section{Key findings}
+\subsection{Key findings}
 \label{sec:findings}
 
 The results locate extraction losses at two levels, the nodes and the edges, and each level limits
@@ -121,7 +121,7 @@ Section~\ref{sec:model} counts the edges that rely on the first two. The graph a
 cannot answer queries that need every transition. Authentication also limits the must tier, because
 guards depend on unresolved state and Claim~\ref{claim:must} requires their demotion.
 
-\section{Limitations and threats to validity}
+\subsection{Limitations and threats to validity}
 \label{sec:limitations}
 
 The tool's author evaluated one tool on one corpus with five methods and end-to-end checks on two
@@ -314,7 +314,7 @@ the abstraction of Section~\ref{sec:res-probe} and the recorded development conf
 graph contains \ProbeInvented{} unmounted addresses, so no containment failure was observed there.
 The observation does not prove failures impossible.
 
-\section{Soundiness and declared approximations}
+\subsection{Soundiness and declared approximations}
 \label{sec:approximations}
 
 The thesis claims soundness for the must tier alone, over the declared route set and under the
@@ -390,7 +390,7 @@ Gap & Example & Boundary & Fix & Pairs \\
 \par\smallskip{\footnotesize\noindent\emph{Note.} Covers the two suites and the two structural references. \emph{Pairs} counts missing suite pairs and missing (site, screen) pairs of a reference. JSON stands for JavaScript Object Notation.}
 \end{table}
 
-\section{Transfer to other frameworks}
+\subsection{Transfer to other frameworks}
 \label{sec:transfer}
 
 All measurements concern Angular. The following account of React Router and Vue Router is
@@ -413,7 +413,7 @@ mounting its component. Mixing Vue~2's catch-all \texttt{'*'} with Vue~3's
 possibly the wrong one, and reports the collision. These expectations need evaluation on real
 applications (Section~\ref{sec:future}).
 
-\section{Future work}
+\subsection{Future work}
 \label{sec:future}
 
 Priorities, ordered by their potential effect on the claims, are:
@@ -425,7 +425,7 @@ Priorities, ordered by their potential effect on the claims, are:
 \item \emph{Consumer evaluation.} Controlled experiments are needed to test benefits for mobile testing agents, coding agents (Chapter~\ref{ch:introduction}) and automated test generation. None was attempted here.
 \end{itemize}
 
-\section{Summary}
+\subsection{Summary}
 
 Node extraction is complete against the route configuration that static readers can read, although
 some running applications mount leaf screens that have no node, and most remaining losses occur at the
