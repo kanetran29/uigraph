@@ -21,10 +21,10 @@
   \coordinate (row) at ($(ext.south)+(0,-17mm)$);
   \node[box, minimum width=23mm, font=\footnotesize, anchor=north] (l) at (row) {loss breakdown\\[-2pt]defect classes};
   \node[box, minimum width=23mm, font=\footnotesize, left=1.5mm of l] (c) {route parser\\[-2pt]node coverage};
-  \node[box, minimum width=23mm, font=\footnotesize, left=1.5mm of c] (b) {witness check\\[-2pt]must-tier agreement};
+  \node[box, minimum width=23mm, font=\footnotesize, left=1.5mm of c] (b) {witness check\\[-2pt]target consistency};
   \node[box, minimum width=23mm, font=\footnotesize, right=1.5mm of l] (f) {mutation\\[-2pt]detection rate};
   \node[box, minimum width=16mm, font=\footnotesize, right=1.5mm of f] (d) {test\\[-2pt]sources};
-  \node[box, minimum width=16mm, font=\footnotesize, right=1.5mm of d] (p) {runtime\\[-2pt]probe};
+  \node[box, minimum width=16mm, font=\footnotesize, right=1.5mm of d] (p) {runtime\\[-2pt]route\\[-2pt]oracle};
   \node[font=\footnotesize\itshape, text=muted, anchor=south west] at ($(b.north west)+(0,8mm)$) {evaluation (Chapter~\ref{ch:evaluation})};
   % bus from the graph down to the evaluation row
   \coordinate (bus) at ($(row)+(0,6mm)$);
@@ -34,7 +34,7 @@
   % research questions
   \node[below=1mm of b, font=\scriptsize] {RQ1, RQ3};
   \node[below=1mm of c, font=\scriptsize] {RQ1};
-  \node[below=1mm of l, font=\scriptsize] {RQ2, RQ3};
+  \node[below=1mm of l, font=\scriptsize, align=center] {RQ2, RQ3,\\ RQ5};
   \node[below=1mm of f, font=\scriptsize] {RQ4};
   \node[below=1mm of d, font=\scriptsize] {RQ1};
   \node[below=1mm of p, font=\scriptsize] {RQ1, RQ5};

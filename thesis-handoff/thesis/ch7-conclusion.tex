@@ -22,33 +22,31 @@ RQ & Answer & Key figures & Main limit \\
 \endfoot
 RQ1: how much is recovered
 & Every declared screen that the static readers identify has a node, but few constructs yield must transitions.
-& Against the mounted routes, nodes are complete on \ProbeExactApps{} of six applications. \CensusMustSites{} constructs yield \CensusMust{} must edges, of which \CensusMustKdash{} come from one toolbar and \RouteOrderMustWithout{} remain without the route-order assumption.
-& Most must edges, \RouteOrderResting{} of them, rest on the route-order assumption, which has not been validated. The toolbar's scope has not been tested. \\
+& \CensusMustSites{} constructs yield \CensusMust{} must edges.
+& Most of these edges rest on the route-order assumption, which has not been validated. \\
 RQ2: where extraction fails
-& Failures fall into five defect classes and one candidate class (Table~\ref{tab:defects}). Under the chosen rule order, attribution is the largest loss category in every application.
-& Table~\ref{tab:loss} gives the counts. If the target were tested before ownership, the target category would be larger than attribution on \AttrOrderFlipWhere{}.
+& Failures fall into five defect classes and one candidate class (Table~\ref{tab:defects}), and attribution is the largest loss category in every application.
+& Table~\ref{tab:loss} gives the counts.
 & The ranking depends on the order in which the loss rules are applied. \\
 RQ3: what scope attribution adds
-& Scope attribution recovers constructs without losing any that the baseline recovers. Most of them come through mechanisms from earlier work, and almost all yield possible transitions. On the alfresco reference, the added step raises recall at the cost of precision.
-& It recovers \AttrRecoveredShare{} of the constructs lost to attribution, or \AttrRecoveredShareNoMifos{} without mifos. Its screen sets are \BaselineFactorMin{} to \BaselineFactorMax{} times narrower than a baseline that places every represented site on every screen. The added step contributes \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) over \emph{outlet}. On the alfresco reference, recall is \GTAlfFullRecall{} against \GTAlfClassRecall{} for a per-class join, and precision is \GTAlfFullPrecision{} against \GTAlfClassPrecision{}.
-& Both structural references apply the analysis's own relations. On neither application with an end-to-end suite does the added step recover a transition beyond \emph{outlet}: mifos has \EtoEMifosHitOutlet{}/\EtoEMifosPairs{} hits with and without it, against \EtoEMifosChanceHits{} for uniformly drawn pairs at the graph's density. The comparison with Rima et al.'s tool gives no overall ranking (Section~\ref{sec:res-h2h}). \\
+& Scope attribution recovers constructs without losing any that the baseline recovers, but most of them come through mechanisms from earlier work.
+& It recovers \AttrRecoveredShare{} of the constructs lost to attribution.
+& Both structural references apply the analysis's own relations, and on neither application with an end-to-end suite does the added step recover a transition beyond \emph{outlet}. \\
 RQ4: whether the graph responds to change
-& Mutation testing gives a conditional sanity check of witness mapping on three applications, but change-impact accuracy remains unmeasured.
+& Mutation testing is a conditional sanity check of witness mapping on three applications, and change-impact accuracy remains unmeasured.
 & \MutDetected{} of the \MutScored{} scored mutants are detected.
-& The mutation operators act only at constructs the graph already represents, so detection is close to guaranteed. The harness was also corrected after its misses had been inspected. \\
+& The mutation operators act only at constructs the graph already represents, so detection is nearly guaranteed. \\
 RQ5: whose losses they are
-& The losses form three groups. The first consists of tool defects, which have been repaired. The second, still unresolved, holds the remaining attribution losses, named outlets and one application's computed routes. The third lies beyond static route-table analysis: a custom \texttt{UrlMatcher} and deployment-selected routes. Under the present demotion rules, application decisions demote sites to may. This demotion does not establish an inherent limit of static analysis.
-& Of \MayOnlyConstructs{} may-only witness locations, \MayAppAny{} sit behind an application decision and \MayToolOnly{} behind the extractor's uncertainty alone. Of the \AttrRemaining{} constructs still lost to attribution, \AttrRemainingUnexplained{} are labelled as having no reason found.
-& These causes describe the classes that were found and repaired. The harness checks that every construct has a label but does not check that the label is correct. \\
+& The losses form three groups: repaired tool defects, unresolved losses such as the remaining attribution losses and named outlets, and cases beyond static route-table analysis.
+& \AttrRemainingUnexplained{} of the \AttrRemaining{} constructs still lost to attribution are labelled as having no reason found.
+& The harness checks that every construct has a label but not that the label is correct. \\
 \end{xltabular}
 \endgroup
 
 \paragraph{Contributions.} The main contribution is the measurement itself. It covers six pinned
 applications, uses five evaluation methods with different blind spots and four further scope
 checks, and classifies every lost construct. The extractor also supports nested and parameterised
-route trees, which the stated restrictions of an earlier Angular extraction exclude. Those
-restrictions admit \EarlierWorkAdmittedApps{} of the \EarlierWorkApps{} corpus applications,
-whereas this extractor processes all of them (Section~\ref{sec:res-earlier}).
+route trees, which the restrictions of Oshima and Kishi exclude (Section~\ref{sec:res-earlier}).
 
 The evaluation apparatus makes the measurements inspectable: tables are generated from harness
 results, and the source-based methods re-run from pinned commits. Runtime reproduction is partial:
@@ -72,13 +70,8 @@ Rendered-interface checks covered only the screens reachable without signing in,
 needs signed-in execution (Section~\ref{sec:future}). Consumer benefit, including support for UI
 agents and test generation, remains unmeasured.
 
-The main corpus is in-sample. Rima et al.'s seven applications were excluded from initial
-development, and on them the extractor contains \RimaHitFull{} of the \RimaPairs{} reference
-pairs before four repairs and \RimaRepHitFull{} after them, so these results are partly fitted
-too (Section~\ref{sec:res-rima}). The mifos end-to-end check exposed unsupported target
-forms and a relative link resolved against a child tab's address instead of its containing
-route. The repairs made after that check make the final mifos result in-sample as well
-(Section~\ref{sec:res-e2e}).
+The main corpus results, and those on the subjects of Rima et al. after the extractor was repaired on them, are in-sample
+(Section~\ref{sec:limitations} and Appendix~\ref{app:corrections}).
 
 Part of the evidence rests on AI readings. The must-tier judgments were made by the AI
 assistant, and two readings by one model measure consistency rather than correctness. The

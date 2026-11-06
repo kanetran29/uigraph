@@ -238,12 +238,12 @@ The oracle likewise uses a development build to measure the same configuration.
 \multicolumn{3}{@{}l}{\emph{Read exactly: the analysis's responsibility}}\\
 \addlinespace[2pt]
 Literal routes, links, calls, nesting, outlet, guards
-& Supported exactly: string-literal route paths and their components;
-\texttt{routerLink} bindings whose value is a literal or an array of literals;
-\texttt{Router.navigate} and \texttt{Router.navigateByUrl} calls with a literal target; the nesting
-relation from element selectors, resolved through the rendering file's imports when ambiguous; the primary
-\texttt{<router-outlet>} with the shell rule that follows from it; guards named on a route, as labels on
-the edges entering that route's subtree.
+& The analysis reads these exactly. String-literal route paths are read together with their components.
+A \texttt{routerLink} binding is read when its value is a literal or an array of literals.
+\texttt{Router.navigate} and \texttt{Router.navigateByUrl} calls are read when their target is a literal.
+Nesting comes from element selectors, resolved through the imports of the rendering file when a selector is ambiguous.
+The primary \texttt{<router-outlet>} is read together with the shell rule that follows from it.
+Guards named on a route become labels on the edges entering that route's subtree.
 & Failures are defects, not approximations, counted in Chapter~\ref{ch:results}: constant-path,
 lazy-boundary and unlinked-node bugs (Section~\ref{sec:res-defects}), resolved in the final version (Section~\ref{sec:res-round2}). \\
 \addlinespace[2pt]

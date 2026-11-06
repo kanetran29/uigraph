@@ -31,15 +31,15 @@ only applications that have them; the rest cover all six.
 \toprule
 Application & Commit & Licence & Routes & Role in the study \\
 \midrule
-gothinkster/angular-realworld-example-app & \texttt{dd99ed2c} & MIT & \RoundTwoRoutesRealworld{} & size floor; all literal paths \\
-alfresco/alfresco-content-app & \texttt{b88d47f4} & LGPL-3.0 & \RoundTwoRoutesAlfresco{} & 87 Playwright specs including a navigation suite \\
-ghostfolio/ghostfolio & \texttt{9884fa0b} & AGPL-3.0 & \RoundTwoRoutesGhostfolio{} & constant-valued route paths; self-hostable \\
-kubernetes/dashboard & \texttt{0ba796d9} & Apache-2.0 & \RoundTwoRoutesKdash{} & mid-size control \\
-bitwarden/clients (web) & \texttt{e40ce6f0} & GPL-3.0$^{\ddagger}$ & \RoundTwoRoutesBitwarden{} & many guards, guard factories among them \\
-openMF/web-app & \texttt{7f781796} & MPL-2.0 & \RoundTwoRoutesMifos{} & size ceiling \\
+realworld & \texttt{dd99ed2c} & MIT & \RoundTwoRoutesRealworld{} & size floor; all literal paths \\
+alfresco & \texttt{b88d47f4} & LGPL-3.0 & \RoundTwoRoutesAlfresco{} & 87 Playwright specs including a navigation suite \\
+ghostfolio & \texttt{9884fa0b} & AGPL-3.0 & \RoundTwoRoutesGhostfolio{} & constant-valued route paths; self-hostable \\
+k8s dashboard & \texttt{0ba796d9} & Apache-2.0 & \RoundTwoRoutesKdash{} & mid-size control \\
+bitwarden & \texttt{e40ce6f0} & GPL-3.0$^{\ddagger}$ & \RoundTwoRoutesBitwarden{} & many guards, guard factories among them \\
+mifos & \texttt{7f781796} & MPL-2.0 & \RoundTwoRoutesMifos{} & size ceiling \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} Licences are read from the local checkouts at the pinned commits; $^{\ddagger}$the \texttt{bitwarden\_license/} directory is under the Bitwarden License. Routes are the route entries reached by the independent route parser of Section~\ref{sec:protocol}, as it stands in the final version (Section~\ref{sec:res-round2}). A count marked $\geq$ is a lower bound: the parser records a blind spot for that application, so the entries behind it are not in the figure; Table~\ref{tab:coverage} gives how many blind spots each application has. The marks are on \RoundTwoLowerBoundWhere{}, on these grounds: \RoundTwoLowerBoundReasons{}.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The repositories are gothinkster/angular-realworld-example-app (realworld), alfresco/alfresco-content-app (alfresco), ghostfolio/ghostfolio (ghostfolio), kubernetes/dashboard (k8s dashboard), the web client of bitwarden/clients (bitwarden) and openMF/web-app (mifos). Licences are read from the local checkouts at the pinned commits; $^{\ddagger}$the \texttt{bitwarden\_license/} directory is under the Bitwarden License. Routes are the route entries reached by the independent route parser of Section~\ref{sec:protocol}, as it stands in the final version (Section~\ref{sec:res-round2}). A count marked $\geq$ is a lower bound: the parser records a blind spot for that application, so the entries behind it are not in the figure; Table~\ref{tab:coverage} gives how many blind spots each application has. The marks are on \RoundTwoLowerBoundWhere{}, on these grounds: \RoundTwoLowerBoundReasons{}.}
 \end{table}
 
 
@@ -84,7 +84,7 @@ a static route-table reader. The result is a cause list. Every site without a
 transition must carry a label (Section~\ref{sec:res-round2}).
 
 
-\begin{table}[t]\small
+\begin{table}[tp]\footnotesize
 \caption{The ratios and measures of the thesis, with numerator, denominator and research question.}
 \label{tab:ratios}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.4cm}YY>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{2.0cm}@{}}
@@ -94,9 +94,10 @@ Name & Numerator & Denominator & RQ & Reported in \\
 Node coverage & declared screens that have a node & screens the independent route parser declares & RQ1 & \ref{sec:res-baseline} \\
 Must conversion & in-scope constructs witnessed by a must edge & in-scope constructs & RQ1 & \ref{sec:res-baseline} \\
 Recovered share & in-scope constructs witnessed by a must or may edge from a placed screen & in-scope constructs & RQ1, RQ3 & \ref{sec:res-after}, \ref{sec:res-round2} \\
-Accounted share & recovered constructs plus in-scope constructs recorded as dynamic or unplaced & in-scope constructs & RQ2 & \ref{sec:res-defects} \\
+Attribution recovery & constructs assigned to attribution loss in the baseline that the analysis recovers & constructs assigned to attribution loss in the baseline & RQ3 & \ref{sec:res-after} \\
+Accounted share & recovered constructs plus in-scope constructs recorded as dynamic or unplaced & in-scope constructs & RQ2 & \ref{sec:res-accounting} \\
 Must-edge target consistency & must edges whose witness passes (lower bound) or does not fail (upper bound) & all must edges & RQ3 & \ref{sec:res-soundness} \\
-Node-level recall & distinct URLs named in an application's end-to-end test sources that have a node & distinct URLs so named & RQ1 & \ref{sec:res-baseline} \\
+Node-level recall & distinct URLs named in an application's end-to-end test sources that have a node & distinct URLs so named & RQ1 & \ref{sec:res-defects} \\
 Structural-reference recall and precision & (site, screen) pairs the reference and a level share & pairs in the reference (recall) or pairs the level places (precision) & RQ3 & \ref{sec:res-groundtruth} \\
 End-to-end containment & observed screen pairs joined by an edge of the graph & observed screen pairs & RQ3 & \ref{sec:res-e2e} \\
 Scope width & mean screens a site is attributed to & the same when every site has scope $\top$ & RQ3 & \ref{sec:res-width} \\
@@ -128,8 +129,8 @@ construct counts as converted only where it earns must itself.
 \end{itemize}
 
 \textbf{The other ratios.} Prior work calls several measures coverage, but here they differ by
-more than an order of magnitude: \RoundTwoAccounted{} of sites are accounted for and
-\RoundTwoMustConv{} convert to must. Node coverage rises when the parser recognises less of an
+more than an order of magnitude: the share of sites accounted for (Section~\ref{sec:res-accounting})
+is far above the share that convert to must (Section~\ref{sec:res-baseline}). Node coverage rises when the parser recognises less of an
 application, so it is reported with a blind-spot count. Accounted share measures whether losses are
 declared and says nothing about how much is recovered. The loss tables measure the unrecovered
 constructs, or recovery gap.
@@ -186,9 +187,8 @@ the running application renders.
 that the ground truth omits.
 \end{itemize}
 
-\textbf{The end-to-end navigation check (RQ3).} The structural reference applies the analysis's own
-relations, so it cannot show that they miss a navigation the application performs. This check takes
-its reference from execution. Two applications ship an end-to-end suite that can be run here.
+\textbf{The end-to-end navigation check (RQ3).} This check takes its reference from execution, so it can show a navigation that the
+analysis's relations miss, which the structural reference cannot. Two applications ship an end-to-end suite that can be run here.
 The first, realworld, runs against the public demonstration backend, which is not pinned. The second, mifos, runs against a local
 Fineract server with the image pinned by digest. A small module added to each application logs
 every navigation the router completes while the suite runs, with the route patterns of the screen
@@ -217,13 +217,10 @@ Except for that departure, the counting rules, application-specific predictions 
 checks were recorded before inspecting logs. The checks require matching test outcomes with and
 without instrumentation, at least ten distinct pairs, and the same pair set in a second instrumented
 run. The experiment measures containment only for exercised transitions, and how to read it
-depends on graph density. Realworld contains
-\EtoERealworldGraphPairs{}/\EtoERealworldPossiblePairs{} possible screen pairs, with
-\EtoERealworldHit{}/\EtoERealworldPairs{} hits, and mifos contains
-\EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{}, with \EtoEMifosHit{}/\EtoEMifosPairs{} hits.
-Uniformly sampled pairs at these densities would yield \EtoERealworldChanceHits{} and
-\EtoEMifosChanceHits{} hits. This is a reference, not the expected success of a suite that
-chooses its paths. Untested edges are not errors, so the check cannot measure precision, and one run
+depends on graph density. Section~\ref{sec:res-e2e} gives, for each application, the pairs the
+graph contains out of all possible screen pairs, and the hits that uniformly sampled pairs would
+yield at that density. This chance figure is a reference and not the expected success of a suite
+that chooses its paths. Untested edges are not errors, so the check cannot measure precision, and one run
 cannot refute a must edge.
 
 \textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness cites it. A
@@ -357,7 +354,7 @@ all. \\
 \addlinespace
 Test-source cross-check & Node-level recall against a fourth reader of the source. The URL literals in
 the application's end-to-end specifications are collected; a URL its own test suite names is an
-address its authors expect to exist, and the extractor is asked whether it minted a node there. &
+address its authors expect to exist, and the extractor is asked whether it created a node at that address. &
 Reads test source text and runs nothing, so a collected string is an address a test \emph{names}, not
 one a test was observed to reach. Tested subset only. Textual extraction under-samples click-driven navigation. A direct \texttt{goto} is not a UI
 transition, so visit pairs are not counted as edges. \\
@@ -375,7 +372,7 @@ sample is drawn from the graph, so it is not independent of the artefact under t
 Runtime route oracle & Node-level soundness against the framework itself. Each application is built in
 its development configuration, loaded in a headless browser, and asked for the route configuration the
 Angular router holds, with every lazily loaded subtree expanded through the application's own
-\texttt{loadChildren}. The addresses the extractor mints are compared with the addresses the framework
+\texttt{loadChildren}. The addresses at which the extractor creates nodes are compared with the addresses the framework
 mounts. Nothing re-reads the route files. Which addresses count as mounted is itself a reading, so the
 harness navigates the running application to a list of addresses and records what the recogniser made
 of each, before any \texttt{canActivate} guard runs and after the \texttt{canLoad} and
@@ -396,7 +393,7 @@ extractions from the same unchanged source give identical nodes and edges. \emph
 state}: extracting into an existing database gives the same graph as extracting after deleting it.
 Without them, differences seen in mutation testing could not be told from noise.
 
-\subsection{Corrections made to the protocol}
+\subsection{Changes to the protocol}
 \label{sec:corrections}
 \label{app:repairs}
 \label{app:validation}
@@ -410,13 +407,10 @@ loss ledger. Superseded instrument figures cannot be regenerated with the releas
 not cited as results. Unexpected figures are checked against their inputs before reporting, because
 several came from measurement defects, not extractor behaviour.
 
-The mutation harness was corrected after inspecting its misses, so the final run is not independent.
-It uses the same seed but a partly different sample: \MutOverlap{} of \MutSampled{} mutants share
-an operator, file and line with one of the earlier \MutEarlierSampled{}, although destinations may
-differ. \MutEarlierFailuresAbsent{} of the \MutEarlierFailures{} inspected misses are absent from
-the final sample's locations.
-
-Appendix~\ref{app:corrections} lists every correction, one row each, in Table~\ref{tab:repairs}.
+The mutation harness was corrected after inspecting its misses, so the final mutation run is not
+independent of the earlier one. Every correction is listed, one
+row each, in Table~\ref{tab:repairs} of Appendix~\ref{app:corrections}, together with the change in
+the mutation sample.
 
 \textbf{Availability.} The extractor and harness are in the accompanying repository under the MIT licence. Rima et al.'s tool was run from its public repository at commit \texttt{f33003f}; it carried no licence when checked on 5 November 2026, so it is not redistributed.
 
@@ -432,3 +426,8 @@ uses \texttt{2aac284}, frozen before its evaluation-driven repairs as preregiste
 (Section~\ref{sec:res-rima}). Two measurements remain historical: the rendered-interface check
 (Table~\ref{tab:scope}) and the runtime route configurations recorded on 29--30 October without
 an extractor commit. The latter are compared with the final graph (Section~\ref{sec:res-probe}).
+
+\section{Summary}
+\label{sec:eval-summary}
+
+The corpus is six open-source Angular applications pinned to commits, chosen by criteria fixed before any result was seen, and its limits are those of an open-source sample selected with tool support in view. The measures of Table~\ref{tab:ratios} answer the research questions: node coverage, node-level recall, must conversion and recovered share answer RQ1, and the loss categories and accounted share answer RQ2. Attribution recovery, must-edge target consistency, scope width and agreement with the structural reference and the end-to-end suites answer RQ3, the detection rate answers RQ4, and the cause trace answers RQ5. Four of the five evaluation methods check the extractor against other readings of the same sources, and the fifth, the runtime route oracle, checks it against the framework. Four further checks, the rendered-interface check, the ablation, the structural reference and the end-to-end check, test the attribution. No method sees everything, and Table~\ref{tab:methods} states the blind spot of each.

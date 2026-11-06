@@ -1,14 +1,15 @@
 \chapter{Background}
 \label{ch:background}
 
-This chapter defines transition-graph terminology (Section~\ref{sec:terminology}) and reviews
-static extraction for Android, web navigation models and dynamic models for single-page
-applications (SPAs) (Sections~\ref{sec:android} to~\ref{sec:dynamic-spa}). It then covers
-source-level static analysis (Section~\ref{sec:asttools}), formal foundations
-(Section~\ref{sec:formal}), Angular mechanisms (Section~\ref{sec:angular}) and reactive
-programming's limits on static analysis (Section~\ref{sec:reactive}). Section~\ref{sec:mutation}
-reviews mutation testing, used to answer RQ4 in Chapter~\ref{ch:evaluation}.
-Section~\ref{sec:gap} identifies the research gap.
+This chapter defines transition-graph terminology in Section~\ref{sec:terminology}.
+Sections~\ref{sec:android} to~\ref{sec:dynamic-spa} review static extraction for Android,
+navigation models for web applications and dynamic models for single-page applications (SPAs).
+The chapter then covers source-level static analysis (Section~\ref{sec:asttools}), formal
+foundations (Section~\ref{sec:formal}), Angular mechanisms (Section~\ref{sec:angular}) and
+reactive programming's limits on static analysis (Section~\ref{sec:reactive}).
+Section~\ref{sec:mutation} reviews mutation testing, the method that
+Chapter~\ref{ch:evaluation} specifies and Chapter~\ref{ch:results} applies to answer RQ4.
+Section~\ref{sec:gap} summarises the chapter and identifies the research gap.
 
 \section{User-interface transition graphs}
 \label{sec:terminology}
@@ -32,11 +33,11 @@ source code or binaries without execution, or \emph{dynamic}, from observed runs
 may or may not record \emph{guards}, the conditions under which transitions are available.
 Table~\ref{tab:rw} classifies the reviewed work by both distinctions.
 
-\begin{table}[t]\small
+\begin{table}[tbp]\small
 \caption{Prior work closest to this thesis, by target, extraction mode, guard representation and evaluation basis.}
 \label{tab:rw}
 \setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\textwidth}{@{}lYlll@{}}
+\begin{tabularx}{\textwidth}{@{}lYllY@{}}
 \toprule
 Work & Target & Static & Guards & Evaluation basis \\
 \midrule
@@ -44,17 +45,17 @@ Yang et al.\ \cite{yang2015wtg,yang2018wtg} & Android windows & \checkmark & \xm
 Yang et al.\ \cite{yang2015callbacks} & Android callbacks & \checkmark & context & manual vs.\ dynamic \\
 StoryDroid \cite{storydroid2019} & Android activities & \checkmark & \xmark & hand-built, 10 apps \\
 GoalExplorer \cite{goalexplorer2019} & Android screens & hybrid & \xmark & manual, 36 apps \\
-ProMal \cite{promal2022} & Android windows & hybrid & \xmark & 40 apps, F1 \\
+ProMal \cite{promal2022} & Android windows & hybrid & \xmark & 40 apps, F1 score \\
 UI-CTX \cite{uictx2025} & Android widgets & \checkmark & branches & 2000 labelled widgets \\
 Ricca and Tonella \cite{riccatonella2001} & server-rendered pages & semi & \checkmark & manual \\
 WebUml \cite{webuml2004} & server-rendered pages & hybrid & \checkmark & case study \\
 Tkachuk and Rajan \cite{tkachuk2013patent} & Struts, JavaServer Pages (JSP) & \checkmark & outcome & not stated \\
 Crawljax \cite{crawljax2012} & Ajax DOM states & \xmark & \xmark & manual \\
 FeedEx, FRAGGEN \cite{feedex2013,fraggen2022} & DOM states & \xmark & \xmark & coverage \\
-Kurant \cite{kurant2025} & React components & \checkmark & n/a & F1, no routing \\
+Kurant \cite{kurant2025} & React components & \checkmark & n/a & F1 score, no routing \\
 Oshima and Kishi \cite{oshima2018model} & Angular pages & \checkmark & \xmark & 6 apps, faults \\
 Rima et al.\ \cite{rima2026e2e} & Angular workflows & \checkmark & conditions & 7 apps, tests run \\
-Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & \checkmark & \xmark & 4 apps (2 SPA), vs.\ ZAP \\
+Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & \checkmark & \xmark & 4 apps (2 SPA), vs.\ Zed Attack Proxy (ZAP) \\
 \bottomrule
 \end{tabularx}
 \par\smallskip{\footnotesize\noindent\emph{Note.} Evaluation basis is a reference, a metric or the tool compared with, as each work states it.}
@@ -90,7 +91,7 @@ conditions on input values, derived semi-automatically using a crawler and analy
 script and server-side pages with server runs to recover a state diagram. It derives guards
 through control-flow analysis of server code
 \cite{webuml2004}. A patent assigned to Fujitsu describes a fully static method
-for Struts and JSP sources \cite{tkachuk2013patent}. SiteHopper builds abstracted
+for Struts and JavaServer Pages (JSP) sources \cite{tkachuk2013patent}. SiteHopper builds abstracted
 navigation state machines on the fly for model checking \cite{sitehopper2013}.
 
 These approaches target server-rendered frameworks, where pages correspond to files and links
@@ -107,7 +108,7 @@ strategy but not the model's source
 \cite{feedex2013,fraggen2022}. The survey by Kertusha et al.\
 reviews web testing research from 2014 to 2025 \cite{websurvey2025}. Every listed model-based
 tool whose construction method was examined for this thesis executes the application to build
-its model. This has historical reasons: Ajax applications lacked declarative route tables,
+its model. The reasons are historical: Ajax applications lacked declarative route tables,
 one uniform resource locator (URL) could represent many states, and source code did not
 represent routes explicitly, although JavaScript static analysis existed \cite{jensen2009type}.
 
@@ -117,8 +118,8 @@ search found four static analyses of such frameworks: three analyse framework-sp
 code and one a compiled bundle. Kurant extracts a React component rendering graph but does not
 address routing \cite{kurant2025}.
 
-The other three address routing. Oshima and Kishi extract Angular page transitions for model
-checking with SPIN \cite{oshima2018model}. They analyse \texttt{RouterModule} declarations
+The other three address routing. Oshima and Kishi extract Angular page transitions and verify
+them with the model checker SPIN (Simple Promela Interpreter) \cite{oshima2018model}. They analyse \texttt{RouterModule} declarations
 and each component's navigable paths, resolving parent--child relationships among root, routed
 and custom child components. Paths are attributed to the containing routed component, and the
 root component's own paths to every page. Section~\ref{sec:res-ablation}
@@ -156,7 +157,7 @@ Zhang et al.\ parse compiled JavaScript bundles, using declared routes as vertic
 navigation calls as edges. They check an access-control policy against screens reachable
 from an authorised screen. Two of their four subjects are multi-page applications, analysed
 by crawling instead. Their graph is an over-approximation and is not narrowed. The paper does
-not explain source-screen attribution; guards remain unmodelled runtime conditions
+not explain source-screen attribution, and guards remain unmodelled runtime conditions
 \cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth derived from
 their pipeline's output and annotated by hand. Neither work classifies losses by construct
 or measures them across a corpus. The problem is therefore neither new nor settled, and
@@ -165,40 +166,98 @@ Section~\ref{sec:gap} identifies the remaining gap.
 \section{Static analysis of JavaScript and TypeScript source}
 \label{sec:asttools}
 
-The analysis in Chapter~\ref{ch:analysis} uses the TypeScript compiler application programming
-interface (API) to analyse source-level abstract syntax trees rather than compiled artefacts.
-Baxter et al.\ used this approach for C clone detection \cite{baxter1998clone}, and SPOON
-provides a reusable Java library \cite{pawlak2016spoon}. Source-level analysis preserves
-the connection to the developer's code, allowing results to cite source locations, but is
-limited to the program as written. Jensen et al.\ show that abstract interpretation can
-infer sound type information for full JavaScript \cite{jensen2009type}. The framework
-of Section~\ref{sec:formal} thus applies to individual values, a harder problem than scope
-attribution, whose much coarser domain is defined in Section~\ref{sec:scope}.
+The analysis in Chapter~\ref{ch:analysis} reads Angular source with the TypeScript compiler
+application programming interface (API), so it works on a source-level abstract syntax tree
+rather than on a compiled artefact. This section reviews that style of tooling, the abstract
+interpretation of JavaScript, what the declared types of a TypeScript program contribute, and
+the evidence that frameworks limit such analyses more than the language does.
 
-TypeScript lets an analysis use declared types instead of inferring them. Its type system
-is deliberately unsound \cite{bierman2014understanding,richards2015concrete}, so a declaration
-is evidence, not a guarantee. Flow and TypeScript detected only about 15\% of fixed bugs in
-JavaScript project histories \cite{gao2017type}. Across 604 GitHub projects, TypeScript was
-associated with better code quality and understandability but not lower bug proneness
-\cite{bogner2022type}. Declarations for untyped libraries can also be wrong, as TSCheck found
-142 errors in those of 10 libraries \cite{feldthaus2014checking}. Declared types narrow a
-call's candidate implementations, as used in the call graph of Section~\ref{sec:angular},
-but do not guarantee a unique target. An unresolved or ambiguous type must therefore widen
-the result. In the graph model, this distinguishes the must and may tiers.
+\subsection{Analyses over a source-level syntax tree}
 
-Framework behaviour poses the practical obstacle. Madsen et al.\ note that JavaScript
-applications depend on large frameworks whose behaviour static analyses must model;
-hand-written models are tedious, incomplete and sometimes wrong \cite{madsen2013practical}.
-They also model implicit Node.js control flow through an \emph{event-based call graph}
-\cite{madsen2015static}. Angular poses a similar problem through its router, template event
-bindings and observable subscriptions. Besides the navigation analyses of Oshima and Kishi
-(Section~\ref{sec:dynamic-spa}) and Rima et al.\ \cite{rima2026e2e}, Aurebesh checks consistency
-in AngularJS \cite{ocariza2015detecting}. It checks identifiers and types across models,
-views and controllers in AngularJS 1.x, whose template language, component model and injector
-differ from Angular's. It does not address navigation.
+Analysing the syntax tree of the source, instead of bytecode or an intermediate representation,
+is a long-established style. Baxter et al.\ detect exact and near-miss code clones by comparing
+abstract syntax trees with a variant of the common-subexpression detection used in compilers.
+They apply the method to a C system of about 400\,000 lines \cite{baxter1998clone}. Working on
+the tree keeps the analysis close to what the developer wrote, so each result can be reported at
+a source location.
+
+SPOON turns this style into a reusable library. It exposes a metamodel of Java source and lets
+an analysis or a transformation be written in plain Java, without modifying a compiler or
+learning a separate formalism \cite{pawlak2016spoon}. The TypeScript compiler API plays the same
+role for TypeScript. It provides a typed syntax tree, a symbol table and a type checker over an
+ordinary program. With them, an analysis can follow a constant reference in a route table to its
+definition and read the declared type of an injected field. The cost of the style is that the
+analysis sees the program as written, including the parts that a compiler later rewrites or
+erases.
+
+\subsection{Abstract interpretation of JavaScript}
+
+Lattice-based analysis of JavaScript has a formal treatment. Jensen et al.\ present an analysis
+based on abstract interpretation that infers detailed and sound type information for the full
+language, including its object model and built-in functions. They propose it as a foundation for
+developer tools \cite{jensen2009type}. Their work shows that the framework of
+Section~\ref{sec:formal} applies to JavaScript at the level of individual values. That problem is
+considerably harder than scope attribution, which uses the same machinery over a much coarser
+domain of screens, defined in Section~\ref{sec:scope}, instead of abstractions of heap objects.
+
+\subsection{What TypeScript's types contribute}
+
+Angular applications are written in TypeScript, so an analysis can read declared types instead
+of inferring them. The type system is deliberately unsound. Bierman et al.\ give a precise
+definition of it \cite{bierman2014understanding}, and Richards et al.\ describe its annotations
+as unsound by design \cite{richards2015concrete}. A declared type is therefore evidence about
+the program and gives no guarantee about its execution.
+
+Empirical studies point the same way. Gao et al.\ took bugs that had been fixed in the histories
+of JavaScript projects, added type annotations to the buggy versions and checked whether a type
+checker would have reported them. Flow and TypeScript each detected about 15\% of these bugs
+\cite{gao2017type}. Bogner and Merkel mined 604 GitHub projects, 299 in JavaScript and 305 in
+TypeScript. The TypeScript projects showed better code quality and understandability, but neither
+lower bug proneness nor shorter bug resolution time. Heavier use of the \texttt{any} type
+correlated weakly with worse measurements \cite{bogner2022type}. The declarations that describe
+untyped libraries can themselves be wrong. TSCheck, which compares a declaration file with the
+library it describes, found 142 errors in the declarations of 10 libraries
+\cite{feldthaus2014checking}.
+
+For an analysis of Angular code, a declared type narrows the set of candidate implementations of
+a call, and the call graph described in Section~\ref{sec:angular} relies on that narrowing. The
+type does not establish that the call reaches exactly one candidate. An unresolved or ambiguous
+type must therefore widen the result instead of being trusted. In the graph model, this widening
+is one source of the may tier.
+
+\subsection{Frameworks as the practical obstacle}
+
+In practice, the framework around the code limits a static analysis of a client-side application
+more than the language does. Madsen et al.\ observe that JavaScript applications depend on large
+frameworks and libraries whose behaviour an analysis must know. Hand-written models of that
+behaviour are tedious to produce, incomplete and sometimes wrong. Their alternative infers library
+behaviour from the way the application uses it, combining pointer analysis with such a \emph{use
+analysis} \cite{madsen2013practical}.
+
+A later analysis by Madsen et al.\ addresses implicit control flow directly. Their
+\emph{event-based call graph} for Node.js represents the listeners that run when an event fires.
+The analyses built on it find event-handling defects, such as events that no listener handles and
+listeners registered too late \cite{madsen2015static}. An Angular application poses the same kind
+of problem, with the router, template event bindings and observable subscriptions in place of the
+Node.js event emitter.
+
+Besides the navigation analyses of Oshima and Kishi (Section~\ref{sec:dynamic-spa}) and Rima et
+al.\ \cite{rima2026e2e}, one static analysis of a framework in the Angular family is relevant
+here. Aurebesh, by Ocariza et al., defines a consistency model for web applications built on a
+model--view--controller framework \cite{ocariza2015detecting}. It detects identifier and type
+inconsistencies between models, views and controllers, with a reported recall of 96.1\% and a
+precision of 100\%, and it found 15 real bugs. Aurebesh targets AngularJS 1.x, whose template
+language, component model and injector differ from those of the Angular versions analysed here.
+The two frameworks share the problem of relating an identifier in a template to the code that
+defines it. Aurebesh solves that problem for a consistency check, does not address navigation and
+reports no transition graph.
+
 \section{Formal foundations}
 \label{sec:formal}
 
+The analysis builds on three ideas from the literature: a transition system whose edges carry a
+modality, a stated position on what soundness can mean for a practical analysis, and dataflow
+analysis as the computational framework.
 
 \subsection{Modal transition systems}
 
@@ -233,8 +292,9 @@ of abstract interpretation \cite{cousot1977abstract}, and Nielson et al.\ provid
 account \cite{nielson1999principles}. Scope attribution in Chapter~\ref{ch:analysis} uses
 this framework, with abstract values and join defined in Section~\ref{sec:scope}.
 
-An instance needs a bounded-height lattice and a propagation graph. Unresolved calls can
-make that graph incomplete, producing omissions the framework cannot detect.
+An instance needs a lattice of bounded height and a propagation graph. When unresolved calls leave
+the propagation graph incomplete, the result omits information in a way the framework itself cannot
+detect.
 
 \section{Angular routing, dependency injection and reactive state}
 \label{sec:angular}
@@ -273,62 +333,161 @@ explicitly declared and must be derived.
 \subsection{Dependency injection}
 \label{sec:di}
 
-Angular creates services and supplies them to components and services that declare them as
-dependencies. This is dependency injection, a form of inversion of control
-\cite{johnson1988reusable,fowler2004injection}. Dependencies are requested by type or injection
-token. A token can have different implementations in different injector scopes, bound through
-\texttt{useClass}, \texttt{useExisting} or a factory. The pattern is common outside Angular, and its use and anti-patterns have been detected
-statically in Java \cite{yang2008empirical,laigner2022cataloging}. Configuration is statically available but
-does not directly identify the binding at each call site.
+Angular creates services and supplies them to the components and services that declare them as
+dependencies. This mechanism is dependency injection, a form of inversion of control: a class does
+not construct or look up its collaborators but receives them from a container
+\cite{johnson1988reusable,fowler2004injection}. A dependency is requested by type or by an
+injection token. The same token can be bound to different implementations in different injector
+scopes, through \texttt{useClass}, \texttt{useExisting} or a factory function.
 
-For static analysis, this makes a method call a dispatch problem. Resolving
-\texttt{this.nav.goHome()} requires the type of \texttt{nav} and its binding in the relevant
-injector. This call graph construction problem is familiar from object-oriented languages.
-Approaches include class hierarchy analysis \cite{dean1995cha}, rapid type analysis
-\cite{bacon1996rta} and points-to analysis \cite{andersen1994pointsto}, unified by Grove
-and Chambers \cite{grove2001callgraph}. For JavaScript, Feldthaus et al.\ show that approximate
-call graphs can be precise enough for practical tools \cite{feldthaus2013jscg}.
+The pattern is widely used outside Angular. Yang, Tempero and Melton defined operational
+criteria for dependency injection and detected its use in the source code of 34 open-source Java
+applications \cite{yang2008empirical}. The configuration that the pattern introduces can itself be
+analysed statically. Laigner et al.\ catalogue 12 dependency injection anti-patterns and detect
+them with a static analyser at a relative recall of 92.19\%, and at least 9 of the anti-patterns
+occur frequently in open-source and industrial projects \cite{laigner2022cataloging}. Dependency injection
+configuration can therefore be read from the source, but it does not state which binding a given
+call site receives.
 
-The Java literature models frameworks explicitly to resolve bindings that depend on configuration. Sridharan et al.\ derive framework specifications from application code and
-configuration \cite{sridharan2011f4f}. Antoniadis et al.\ model shared enterprise-framework concepts
-declaratively, measuring about four times higher completeness \cite{antoniadis2020enterprise}.
-Chen et al.'s Jasmine extends Soot to improve Spring call graph completeness \cite{chen2022jasmine}. Limits remain, because reflection
-cannot be ignored in 78\% of Java projects and resolving it requires unsound assumptions
-\cite{landman2017challenges}. In Angular, provider arrays belong to modules, routes or
-components, so a token's implementation depends on the injection site. Resolution is relative
-to an injector, which makes the provider hierarchy an input to the explicit framework model
-(Section~\ref{sec:inputs}).
+For a static analysis, injection turns a simple method call into a dispatch problem. A call such
+as \texttt{this.nav.goHome()} cannot be linked to the method it invokes until the type of
+\texttt{nav} and the binding of that type in the relevant injector are resolved. Linking it is an
+instance of the call graph construction problem known from object-oriented languages, where a
+virtual call must be resolved to its possible targets. Class hierarchy analysis resolves such a
+call from the declared type and its subclasses \cite{dean1995cha}. Rapid type analysis narrows
+the result to the classes that the program instantiates \cite{bacon1996rta}, and points-to
+analysis narrows it further by tracking which objects each variable may hold
+\cite{andersen1994pointsto}. Grove and Chambers place these algorithms in a common framework that
+trades precision against cost \cite{grove2001callgraph}. For JavaScript, Feldthaus et al.\ show
+that an approximate call graph, which tracks functions by the property names they are stored
+under, is precise enough for practical tools \cite{feldthaus2013jscg}.
+
+Dependency injection adds a further difficulty, because the binding of a type to an
+implementation is written in framework configuration instead of ordinary code. The Java
+literature has measured what this costs a general analysis and what recovers the loss.
+Table~\ref{tab:framework-models} lists the analyses that model framework behaviour explicitly.
+Sridharan et al.\ report that the heavy use of reflection in frameworks makes static taint
+analysis ineffective, and that adding support for one framework at a time does not scale. Their
+tool, F4F, instead generates a specification of framework behaviour from the application code and
+its configuration files. An unmodified taint engine consumes the specification, and the approach
+found 525 new issues across nine benchmarks \cite{sridharan2011f4f}.
+
+\begin{table}[tbp]\small
+\caption{Static analyses that model framework behaviour explicitly, and the mechanism each of
+them resolves.}
+\label{tab:framework-models}
+\begin{tabularx}{\textwidth}{@{}lYY@{}}
+\toprule
+Work & Framework & Mechanism modelled \\
+\midrule
+F4F \cite{sridharan2011f4f} & Java web frameworks & reflective calls, from a specification generated from code and configuration \\
+\addlinespace
+JackEE \cite{antoniadis2020enterprise} & Java enterprise frameworks & components and entry points, declaratively \\
+\addlinespace
+Jasmine \cite{chen2022jasmine} & Spring & dependency injection and aspect-oriented programming \\
+\addlinespace
+Aurebesh \cite{ocariza2015detecting} & AngularJS 1.x & identifiers shared between template and controller \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Antoniadis et al.\ report that the major Java analysis frameworks offer almost no support for
+enterprise applications. Their analysis, JackEE, captures the concepts that enterprise frameworks
+share, such as components and entry points, in a declarative and largely framework-independent
+form. Against the most precise conventional analysis, it measures about four times higher
+completeness and about a sixfold speedup \cite{antoniadis2020enterprise}. Landman et al.\ set a
+bound on what such modelling can achieve. In a literature review and corpus study of Java
+reflection, they find that reflection cannot be ignored in 78\% of projects and that resolving it
+requires unsound assumptions \cite{landman2017challenges}.
+
+The closest analogue to resolving Angular's injectors is Jasmine, by Chen et al.\
+\cite{chen2022jasmine}. Spring's core mechanisms, dependency injection and aspect-oriented
+programming, rely on dynamic language features, so a conventional call graph of a Spring
+application misses edges. Jasmine extends the Soot framework to make the call graph of a Spring
+program more complete. On micro-benchmarks and 18 real Spring programs it improves on tools built
+with Soot and with Doop. The structural problem is the one that Angular poses. An injected field has a declared type, the
+binding of that type lives in framework configuration, and an analysis that does not read the
+configuration cannot connect the call to a body.
+
+Angular differs from Spring in where the configuration lives and how far its effect reaches.
+Provider arrays belong to modules, routes or components, so the same token can resolve to
+different implementations depending on where the injection happens. Resolution is relative to an
+injector, which makes the provider hierarchy an input to the explicit framework model of
+Section~\ref{sec:inputs}.
 
 \subsection{Reactive state}
 \label{sec:signals}
 
-Recent Angular versions include signals, values that change over time, and effects,
-computations that rerun when a signal they read changes \cite{angulareffects}. This is reactive
-programming \cite{elliott1997frp,bainomugisha2013survey}: dependencies between values are
-recorded at run time. Navigation inside an effect therefore depends on the reactive graph
-instead of a control-flow condition. Static analysis can identify the signals read but cannot
-generally determine when the effect runs, and this thesis does not attempt to bound it. Angular
-applications also use Reactive Extensions for JavaScript (RxJS) observables for this purpose.
+Recent Angular versions include signals and effects \cite{angulareffects}. A signal is a value
+that changes over time, and an effect is a computation that runs again whenever a signal it read
+changes. Signals and effects are an instance of reactive programming, which goes back to
+functional reactive programming \cite{elliott1997frp} and has been surveyed by Bainomugisha et
+al.\ \cite{bainomugisha2013survey}. In a reactive system, the runtime records the dependencies
+between values as they are read and propagates updates without explicit calls in the program
+text.
+
+A navigation call placed inside an effect therefore fires under a data dependence in the reactive
+graph instead of a control-flow condition. Static analysis can identify the signals the effect
+reads but cannot in general determine when the effect runs, and this thesis does not attempt to
+bound it. Angular applications also use observables of Reactive Extensions for JavaScript (RxJS)
+for the same purpose, in subscriptions to router events, in responses from the server and in
+state containers. Section~\ref{sec:reactive} reviews what the reactive programming literature
+establishes about this boundary.
 
 \section{Reactive programming and the limits of static dataflow}
 \label{sec:reactive}
 
-In reactive programming, the runtime controls when computations run. Cooper and Krishnamurthi
-embed dynamic dataflow in a call-by-value language and identify the \emph{glitch}: a signal
-is recomputed before all its dependencies are up to date \cite{cooper2006embedding}.
-Drechsler et al.\ extend glitch freedom to distributed systems \cite{drechsler2014distributed}.
-Static analysis can over-approximate an effect's signal read set. Its execution count and
-the application state at execution depend on which writes occur and in what order, so they
-cannot generally be determined exactly from source. They could still be over-approximated,
-but this analysis does not attempt it.
+In reactive programming, the runtime decides when a computation runs. This section reviews the
+propagation discipline that reactive runtimes implement and the evidence on how well developers
+can reason about reactive code with tools.
 
-Tool support for reactive code is weak. Salvaneschi et al.\ found better comprehension of
-reactive code in an experiment with 127 subjects \cite{salvaneschi2017positive}, but argue
-that it needs its own debugging concepts \cite{salvaneschi2016debugging}. Banken et al.\ report
-that conventional debuggers lack Rx support \cite{banken2018debugging}. Alabor and Stolze's
-small workshop study of 10 engineers suggests, without establishing, reliance on manual
-trace logging \cite{alabor2020debugging}. Tools also face broad operator use:
-95.2\% of the Rx operators are used in practice \cite{zimmerle2022mining}.
+\subsection{Propagation order and glitch freedom}
+
+A reactive program is a graph of values in which an update to one value must propagate to the
+values that depend on it. Cooper and Krishnamurthi embed dynamic dataflow in a call-by-value
+language, so that an expression evaluates to a node in a dataflow graph
+\cite{cooper2006embedding}. They name the central hazard. A \emph{glitch} occurs when a signal is
+recomputed before all the signals it depends on are up to date, which exposes an intermediate
+value that no consistent state of the program ever had. Their runtime prevents glitches by giving
+each signal a height and updating signals in order of increasing height. The order is
+topological, so the dependency graph must be acyclic.
+
+Drechsler et al.\ carry glitch freedom into a distributed setting. Their change-propagation
+algorithm needs no central knowledge of the dependency topology and avoids propagating updates
+that cannot change a result \cite{drechsler2014distributed}. An Angular signal graph records its
+dependencies as they are read (Section~\ref{sec:signals}), so it is the kind of structure over
+which these propagation algorithms are defined.
+
+For a static analysis, the order in which reactive computations run is a property of the graph
+that the runtime builds, and that graph is built from the reads that actually happen. Static
+analysis can over-approximate the set of signals an effect may read. The number of times the
+effect runs and the application state at each run depend on which writes occur and in what
+order, so they cannot in general be determined exactly from source. They could still be
+over-approximated, but this analysis does not attempt it.
+
+\subsection{Reactive code and the tools developers have}
+
+Empirical studies separate reading reactive code from reasoning about its behaviour. Salvaneschi
+et al.\ ran an experiment with 127 subjects that compared reactive code with object-oriented code
+using the Observer pattern. Comprehension was significantly better for the reactive version
+\cite{salvaneschi2017positive}. The same group identifies tool support as the weak side. A
+conventional debugger shows a call stack, whereas the developer's question concerns a dataflow
+graph, so reactive programs need debugging concepts of their own. Their Reactive Inspector
+implements such concepts and outperformed conventional debugging in a controlled experiment
+\cite{salvaneschi2016debugging}.
+
+Studies of RxJS report the same gap. Banken et al.\ find that conventional debuggers offer no
+support for reactive libraries such as RxJS, and that developers fall back on inserting console
+logging. Their RxFiddle visualises the structure and the values of an RxJS dataflow, and in an
+experiment with 111 developers it let them finish debugging tasks faster
+\cite{banken2018debugging}. Alabor and Stolze interviewed 10 professional engineers and observed
+4 of them debugging RxJS code. The engineers relied on manually added trace logging instead of
+specialised tools. The study is a small workshop paper, so it suggests the practice without
+establishing it \cite{alabor2020debugging}.
+
+The surface that a tool would have to cover is large. Zimmerle et al.\ mined the use of the
+reactive libraries RxJava, RxJS and RxSwift on GitHub and Stack Overflow. They found that 95.2\%
+of the libraries' operators are used in practice \cite{zimmerle2022mining}.
 
 Angular navigation analysis inherits this limit. An effect or subscription exposes a read set
 in source, but that set does not exactly determine firing. Chapter~\ref{ch:analysis} therefore
@@ -340,43 +499,92 @@ to screens.
 \section{Mutation testing}
 \label{sec:mutation}
 
-RQ4 asks whether the graph responds to changes in the source constructs it represents.
-Mutation testing is applied to the application source, measuring the extracted graph's
-response rather than a test suite's.
+RQ4 asks whether the graph responds to changes in the source constructs it represents. Mutation
+testing is applied here in an unusual direction. The mutants are inserted into the application
+source, and the artefact whose response is measured is the extracted graph instead of a test
+suite. This section reviews the technique and the evidence for its central assumption, its use on
+JavaScript and web applications, and the reporting practice that Chapter~\ref{ch:evaluation}
+follows.
 
-Mutation testing introduces small syntactic changes and measures the share detected by a test
-suite. It rests on DeMillo et al.'s \emph{coupling effect}: tests that detect simple errors
-are often effective against more complex errors \cite{demillo1978hints}. This assumption connects mutants to developer faults. Jia and Harman provide the standard survey
-\cite{jia2011mutation}; a study of 357 real faults found a correlation between mutant and
-real-fault detection \cite{just2014mutants}. Operators exist for JavaScript and web applications
-\cite{mirshokraie2013efficient,mirshokraie2015guided,praphamontripong2010applying}.
-Stryker supports JavaScript and TypeScript; its documentation lists more than 30 mutations,
-but no peer-reviewed description was found \cite{stryker}. The procedure in
-Chapter~\ref{ch:evaluation} is therefore specified explicitly rather than delegated to tool defaults.
+\subsection{The coupling effect}
 
-Following Papadakis et al.\ \cite{papadakis2019mutation}, Chapter~\ref{ch:evaluation} states
-the operators, mutant generation and sampling procedures, exclusions and per-operator
-detection rates. This use of mutation belongs to change impact analysis rather than test
-adequacy measurement \cite{arnold1993impact,bohner1996software,ren2004chianti,lehnert2011taxonomy}.
+Mutation testing introduces small syntactic changes, called mutants, into a program and measures
+the share that a test suite detects. It rests on the \emph{coupling effect} stated by DeMillo et
+al.: tests that detect simple errors are often effective against more complex errors as well
+\cite{demillo1978hints}. Without this assumption, a mutant would say nothing about the faults
+that developers actually make.
+
+Jia and Harman provide the standard survey of the field, covering approaches, tools and empirical
+results. Their trend analysis suggests that the techniques and tools are reaching maturity
+\cite{jia2011mutation}. Papadakis et al.\ survey the following decade of work on the fundamental
+problems of the technique and list those that remain open \cite{papadakis2019mutation}. The
+evidence that mutants are a usable proxy for real faults comes from Just et al. On 357 real
+faults in 5 open-source applications, mutant detection
+correlated significantly with real-fault detection, independently of code coverage
+\cite{just2014mutants}.
+
+\subsection{Mutation for JavaScript and web applications}
+
+Mutation analysis has been adapted to JavaScript and to web applications, where the cost of
+generating and running mutants is a central concern. Mirshokraie et al.\ use static and dynamic
+analysis to direct mutant generation at code that is error-prone or likely to affect the output.
+The guidance reduces the cost and the number of equivalent mutants, and the authors propose
+mutation operators specific to JavaScript and the web \cite{mirshokraie2013efficient}. The journal
+version adds a ranking of functions. In it, more than 93\% of the generated mutants are
+non-equivalent, and more than 75\% of the surviving non-equivalent mutants lie in the top 30\% of
+the ranked functions \cite{mirshokraie2015guided}.
+
+Praphamontripong and Offutt target faults in the way web components interact with each other,
+covering client-to-server and server-to-server interaction. They define mutation operators for
+such faults and implement them in a tool called webMuJava. A small case study suggests that the
+resulting tests find web application faults, and the work appeared at a workshop
+\cite{praphamontripong2010applying}.
+
+Stryker is a mutation testing framework for JavaScript and TypeScript, with further
+implementations for C\# and Scala. Its documentation lists more than 30 supported mutations and a
+design that works with any test runner \cite{stryker}. No peer-reviewed publication describing
+Stryker was found, and the project cites none. For that reason, the mutation procedure of
+Chapter~\ref{ch:evaluation} is specified explicitly instead of delegated to a tool's defaults.
+
+\subsection{Reporting a mutation experiment}
+
+Papadakis et al.\ also give best-practice advice on the use of mutation in empirical studies
+\cite{papadakis2019mutation}. Chapter~\ref{ch:evaluation} follows it and states the operators,
+mutant generation and sampling procedures, exclusions and per-operator detection rates instead of
+only an aggregate figure.
+
+In each of the works above, the mutants evaluate a test suite for the application. The use of
+mutation in this thesis belongs instead to change impact analysis. Arnold and Bohner compare impact analysis approaches by how they are used, how they work
+internally and how effective they are \cite{arnold1993impact}, and the collection they edited is
+the standard reference for the area \cite{bohner1996software}. Chianti is a classic tool
+of this kind. It decomposes the difference between two versions of a program into atomic changes
+and reports, for each affected test, the changes that affect it \cite{ren2004chianti}. Lehnert's
+taxonomy classifies impact analysis approaches by finer criteria than the earlier frameworks
+\cite{lehnert2011taxonomy}.
+
+A transition graph whose edges carry source witnesses supports the same kind of query at the
+level of screens. The mutation experiment checks whether the graph changes where its source
+changes. It is a sanity check of the mapping from witnesses to source and does not measure
+change-impact accuracy (Section~\ref{sec:metrics}).
+
 \section{Summary and the gap}
 \label{sec:gap}
 
 Static web navigation extraction has largely targeted server-rendered frameworks, where pages
 are files and links are anchors. Client-side routing frameworks have mostly been modelled
-dynamically. This literature search found three static client-side navigation extractions:
-two analyse framework-specific source code and one a compiled bundle, each for a different
-consumer. Oshima and Kishi establish the problem addressed here (Section~\ref{sec:dynamic-spa}),
-but exclude \texttt{children} and route parameters, and do not model data-binding changes as
-page transitions. Attribution uses component containment and the root component's own paths;
-transitions have no modality, and extraction losses are not measured. The other two works use
+dynamically. This literature search found three static extractions of client-side navigation
+graphs. Two analyse framework-specific source code and one a compiled bundle, each for a
+different consumer. Oshima and Kishi establish the problem addressed here, and
+Section~\ref{sec:dynamic-spa} sets out what their approach leaves out. The other two works use
 their graphs without narrowing them: as a generated test suite's coverage denominator
 \cite{rima2026e2e}, or as an over-approximated reachability relation for access-control checks
-\cite{zhang2025veriflow}. Rima et al.\ already analyse nested and lazy route trees, constrain
-edges with guards and trace router-service calls to a bounded depth. No earlier work found
-in this review combines cross-class and service attribution under provider bindings
-(generalising that bounded tracing), modalities separating unconditional from guarded or
-scope-uncertain transitions, and construct-level loss measurement on applications large enough
-to contain difficult constructs.
+\cite{zhang2025veriflow}.
+Rima et al.\ already analyse nested and lazy route trees, constrain edges with guards and trace
+router-service calls to a bounded depth. No earlier work found in this review combines
+cross-class and service attribution under provider bindings, which generalises that bounded
+tracing, with modalities that separate unconditional transitions from guarded or scope-uncertain
+ones, and with construct-level loss measurement on applications large enough to contain
+difficult constructs.
 
 Android provides the closest static techniques. They resolve navigation's owning object,
 which usually identifies the window, and use runtime traces when resolution is imprecise.
@@ -394,6 +602,8 @@ TypeScript types narrow dispatch targets without resolving them, because the typ
 deliberately unsound \cite{bierman2014understanding,richards2015concrete}. Reactive execution
 depends on a runtime-built graph, limiting what source analysis determines
 \cite{cooper2006embedding,banken2018debugging}. Mutation testing measures model responses to
-source changes \cite{jia2011mutation,papadakis2019mutation}. For static client-side navigation
-graphs, it has been applied only to hand-injected faults in constructed applications
-\cite{oshima2018model}. This review found no operator-level mutation study of such graphs.
+source changes \cite{jia2011mutation,papadakis2019mutation}, and on web applications it has been
+used to evaluate test suites \cite{mirshokraie2013efficient,praphamontripong2010applying}. For
+static client-side navigation graphs, it has been applied only to hand-injected faults in
+constructed applications \cite{oshima2018model}. This review found no operator-level mutation
+study of such graphs.

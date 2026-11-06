@@ -52,8 +52,7 @@ dependency graph of React components that leaves out routing \cite{kurant2025}, 
 extract navigation:
 \begin{itemize}
 \item Oshima and Kishi extract Angular page transitions for model checking. Their stated
-restrictions exclude nested routes and route parameters, and their model omits page transitions
-caused by data-binding changes \cite{oshima2018model}.
+restrictions exclude nested routes and route parameters \cite{oshima2018model}.
 \item Rima et al.\ extract Angular workflows as a coverage denominator for generated end-to-end
 tests \cite{rima2026e2e}.
 \item Zhang et al.\ analyse compiled single-page application bundles to check access-control
@@ -61,7 +60,7 @@ policies against reachable screens \cite{zhang2025veriflow}.
 \end{itemize}
 Section~\ref{sec:dynamic-spa} compares these approaches.
 
-Early Ajax applications had no declarative route tables, so crawlers observed navigation through
+Early Ajax (asynchronous JavaScript and XML) applications had no declarative route tables, so crawlers observed navigation through
 DOM states. In Angular, React Router and Vue Router, route tables, template navigation and service
 calls now appear in source code, and a route can also name its guards \cite{angulardocs}. Static
 extraction can take these declarations as its inputs. Existing studies evaluate extraction against
@@ -69,22 +68,19 @@ hand-built references on their chosen applications, but they do not measure the 
 by construct.
 
 This thesis therefore builds an Angular extractor to measure how much navigation is recovered and
-to classify the losses. The largest loss category under the study's rule order is attribution loss: navigation in code
-outside the components that routes render directly, such as services, guards and shared
-components. To recover it, the thesis proposes \emph{scope attribution}. Scope attribution is a dataflow analysis over screen
-sets that computes the scope of each navigation site, the set of screens from which the site can
-fire, and it is specified independently of the extractor. The measurement is the main contribution,
-whereas scope attribution is a modest extension of earlier mechanisms. The step it adds
-attributes the navigation in services, guards and effects to screens. That step combines a member-level service
-call graph, a fallback join and stand-ins for guards and effects, and it recovers
-\AblationFullAddedSites{} sites (\AblationFullAddedShare{}) beyond outlet descent. The call graph
-alone adds \AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over a per-class join,
-which links a navigating service to every component that injects its class
-(Section~\ref{sec:res-ablation}).
+to classify the losses. Navigation in code outside the components that routes render directly, such
+as services, guards and shared components, can be recovered only if each navigation site is
+attributed to the screens it belongs to. For this the thesis proposes \emph{scope attribution}, a
+formal model specified independently of the extractor. It is a dataflow analysis over screen sets
+that computes the scope of each navigation site, the set of screens from which the site can fire.
+The model contains the attribution rules of the earlier Angular extractions of Oshima and Kishi and of Rima et al.\ as levels. It adds
+a member-level service call graph, a fallback join and stand-ins for guards and effects, which
+attribute the navigation in services, guards and effects to screens. The thesis measures what each
+level adds (Section~\ref{sec:res-ablation}). Most of the recovery comes from the earlier
+mechanisms, and the added levels contribute a smaller part.
 
 Besides scope attribution, the extractor handles nested, parameterised and lazily loaded route
-trees, whereas the stated restrictions of Oshima and Kishi's approach exclude the first two
-(Section~\ref{sec:res-earlier}). It was developed and evaluated on the same corpus, so its
+trees (Section~\ref{sec:res-earlier} compares it with the approach of Oshima and Kishi). It was developed and evaluated on the same corpus, so its
 measurements describe these applications and are not estimates of performance on Angular
 applications in general. Section~\ref{app:repairs} records the corrections made during
 development, and Section~\ref{sec:limitations} discusses what they imply.
@@ -111,10 +107,10 @@ Chapter~\ref{ch:results} answers them.
 
 The questions are answered with the final version of the extractor on six open-source Angular
 applications pinned to fixed commits (Chapter~\ref{ch:evaluation}). The thesis does not claim
-completeness. For the must tier, the edges claimed to fire for every input on which their
-enclosing code executes, it states a soundness property conditional on stated assumptions
-(Claim~\ref{claim:must}), and it lists what the analysis approximates
-(Section~\ref{sec:soundiness}). It does not measure the graph's effect on any consumer, and it
+completeness. It states a soundness property for the edges labelled must, which are claimed to
+fire for every input on which their enclosing code executes. The property is conditional on stated
+assumptions (Claim~\ref{claim:must}). The thesis also lists what the analysis approximates
+(Appendix~\ref{app:approx}). It does not measure the graph's effect on any consumer, and it
 evaluates Angular alone. Because the extractor was developed on the corpus, its figures on that
 corpus are in-sample.
 

@@ -8,7 +8,7 @@ This chapter reports measurements from the harness of Section~\ref{sec:protocol}
 Section~\ref{sec:corpus}. Sections~\ref{sec:res-baseline}--\ref{sec:res-mutation} answer RQ1--RQ4:
 losses, defect classes, scope attribution and mutation sensitivity, respectively.
 Section~\ref{sec:res-round2} traces loss causes (RQ5), and Section~\ref{sec:deadlinks} reports
-dead-link candidates.
+dead-link candidates. Section~\ref{sec:res-summary} gives a short answer to each research question.
 
 The numerical tables are generated from the harness result files, and hand-compiled summaries are marked. The development versions and the corrections between them are listed in Section~\ref{app:repairs}.
 
@@ -25,18 +25,23 @@ ratio does not numerically bound the second, because the first counts screens an
 
 Table~\ref{tab:conversion} gives the second measure on the final snapshot. The constructs that
 earn must number \CensusBaseMustSites{} in the whole corpus without attribution and
-\CensusMustSites{} with it. They lie in \CensusMustApps{} applications with attribution, and the
-other \CensusZeroMustApps{} have none. Edge counts should be read per tier and not summed as distinct constructs, because one unresolved site can produce many over-approximated may edges.
+\CensusMustSites{} with it, \RoundTwoMustConv{} of the in-scope constructs. With attribution they lie in \CensusMustApps{} of the six applications,
+and none lies in the other \CensusZeroMustApps{}. Edge counts should be read per tier and not summed as distinct constructs, because one unresolved site can produce many over-approximated may edges.
 An optional measurement switch records every condition that demotes a may witness. Disabling it
 leaves output unchanged on all six applications (Section~\ref{sec:reproducibility}).
 Table~\ref{tab:mayreasons} groups reasons for \MayOnlyConstructs{} may-only witness locations.
 \MayAppAny{} involve an application decision identified by the extractor: a guard or resolver,
-branch, callback or template condition. Only \MayToolOnly{} remain at may solely through extractor
-uncertainty, so under the present rules better resolution alone could promote at most those to must;
-proving that a guard always admits or a branch always executes could promote more. The small must
-tier thus follows largely from its definition. A guard that always admits still causes
-demotion, because the census identifies decision constructs and not runtime conditionality. Mifos dominates these counts,
-with \MayOnlyConstructsMifos{} of \MayOnlyConstructs{} locations.
+branch, callback or template condition. The number of locations that stay at may solely through
+extractor uncertainty is \MayToolOnly{}. Under the present rules, better resolution alone could promote at
+most those to must. Proving that a guard always admits or that a branch always executes could
+promote more. The small must tier thus follows largely from its definition. A guard that always
+admits still causes demotion, because the census identifies decision constructs and does not test
+whether they vary at run time.
+
+Mifos, the largest application, holds \MayOnlyConstructsMifos{} of these \MayOnlyConstructs{}
+locations. It also holds most of the corpus's constructs and edges
+(Sections~\ref{sec:res-accounting} and~\ref{sec:res-soundness}), so it dominates the corpus-wide
+counts of constructs and edges and the shares pooled from them.
 
 \begin{table}[t]\footnotesize
 \caption{Why the may-only witness locations are may, by family of reason.}
@@ -75,10 +80,10 @@ omissions: one unresolved route entry can conceal many screens (Section~\ref{sec
 \caption{Node extraction against the independent route parser, in both directions.}
 \label{tab:coverage}
 \TabCoverage
-\par\smallskip{\footnotesize\noindent\emph{Note.} Declared screens that have a matching node, and nodes for which the independent route parser holds no declared screen. The blind-spot column counts route entries the parser could not follow (an unfound lazy route array, an unresolvable path expression, a custom matcher, or a route source spread from a call it does not follow), which marks where either direction is incomplete. The node set is the same with scope attribution off and on, since attribution mints no nodes.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Declared screens that have a matching node, and nodes for which the independent route parser holds no declared screen. The blind-spot column counts route entries the parser could not follow (an unfound lazy route array, an unresolvable path expression, a custom matcher, or a route source spread from a call it does not follow), which marks where either direction is incomplete. The node set is the same with scope attribution off and on, since attribution creates no nodes.}
 \end{table}
 
-\section{Which failure is worth an analysis (RQ2)}
+\section{Where static extraction fails, and why (RQ2)}
 \label{sec:res-defects}
 
 Table~\ref{tab:defects} separates evidence from named evaluation methods and other observations.
@@ -149,8 +154,8 @@ test-source cross-check. Section~\ref{sec:res-round2} treats the must tier separ
 \toprule
 Method & Result & $n$ \\
 \midrule
-Witness check, final attributed must tier & \MustWitnessViolations{} detected
-failures; \MustWitnessUnread{} edges have a destination the checker cannot read.
+Witness check, final attributed must tier & Detected failures: \MustWitnessViolations{}.
+Edges with a destination the checker cannot read: \MustWitnessUnread{}.
 Unread edges are not passes, and target agreement does not establish
 Claim~\ref{claim:must}. & \MustWitnessEdges{} \\
 Test-source cross-check, alfresco & \EtoERecallAlfresco{} URLs the specifications name have a node; one
@@ -165,9 +170,15 @@ negative test excluded. & \EtoERowsAlfresco{} \\
 
 The evaluation covers the scopes, attribution rules and anchored representation defined in
 Sections~\ref{sec:scope}, \ref{sec:attribution} and~\ref{sec:anchored} of Chapter~\ref{ch:analysis}.
+The section first reports what attribution recovers on the whole corpus and checks the anchored
+edge set. Sections~\ref{sec:res-scope} to~\ref{sec:res-e2e} then check the computed scopes against the
+rendered interface and the widest possible assignment, measure what each mechanism contributes,
+and check the scopes against structural references and the applications' own end-to-end suites.
+Sections~\ref{sec:res-earlier} to~\ref{sec:res-h2h} compare the analysis with earlier work: with
+earlier work's mechanisms inside this extractor, on Rima et al.'s subjects and against their tool.
 
-Table~\ref{tab:before-after} and Figure~\ref{fig:before-after} compare identical inputs with and
-without attribution, construct by construct. A baseline attribution loss is \emph{recovered} if a
+Table~\ref{tab:before-after} compares identical inputs with and without attribution, construct by
+construct. A baseline attribution loss is \emph{recovered} if a
 must or may edge from a placed screen witnesses it after attribution. Dynamic sinks and unplaced
 origins do not count as recovery.
 
@@ -178,31 +189,31 @@ origins do not count as recovery.
 \TabBeforeAfter
 \par\smallskip{\footnotesize\noindent\emph{Note.} First, the constructs assigned to attribution in the baseline and how many recover onto must or may, the measure of RQ3. Then must conversion (RQ1) in per cent and its change in percentage points, and must-tier edges whose destination the witness check read and passed; a construct's tier is the modality its own witness earns. The remaining must edges are unread destinations, all \MustWitnessUnread{} of them on k8s dashboard, which are neither passes nor failures; no edge failed. Constructs converted from other baseline categories are in Table~\ref{tab:recovery-source}.}
 \end{table}
-\FigBeforeAfter
 
 Attribution recovers \AttrRecovered{}/\AttrLost{} assigned constructs: a per-application median of
 \AttrRecoveredMedian{} (range \AttrRecoveredRange{}) and a pooled share of \AttrRecoveredShare{}.
-Most recoveries occur on mifos. Excluding it reduces the share to \AttrRecoveredShareNoMifos{};
-\AttrUnderHalfApps{} of six applications recover under half. Edge counts rise from \AttrEdgesBefore{}
-to \AttrEdgesAfter{}. Most recovery uses mechanisms from earlier work. The \emph{full} step adds
-the member-level service join, fallback join and guard/effect stand-ins, placing
-\AblationFullAddedSites{} sites (\AblationFullAddedShare{}) beyond \emph{outlet}. The call graph
-alone adds \AblationCallGraphNetSites{} (\AblationCallGraphNetShare{}) beyond the per-class rule
-it replaced (Section~\ref{sec:res-ablation}).
+Most recoveries occur on mifos. Excluding it reduces the share to \AttrRecoveredShareNoMifos{}, and
+recovery stays under half on \AttrUnderHalfApps{} of the six applications. Edge counts rise from
+\AttrEdgesBefore{} to \AttrEdgesAfter{}. Most recovery uses mechanisms from earlier work.
+Section~\ref{sec:res-ablation} measures what the \emph{full} step adds beyond them and what its
+call graph adds over the class rule it replaced.
 
-Measured by RQ1's must conversion, the gain is far smaller. Of the recovered
-constructs, \AttrRecoveredMust{} earn must and \AttrRecoveredMay{} earn may, and \AttrAppsGained{}
-of the six applications gain any must conversion at all. The must constructs rise from
-\CensusBaseMustSites{} to \CensusMustSites{}. Two of the rise are those recoveries, both on
-realworld. The other two are k8s dashboard constructs that the baseline already converted at may
-and attribution raises to must. The recovery count does not include them.
+Measured by RQ1's must conversion, the gain is far smaller. The recovered
+constructs divide into \AttrRecoveredMust{} at must and \AttrRecoveredMay{} at may, and must
+conversion rises on \AttrAppsGained{} of the six applications. The must constructs rise from
+\CensusBaseMustSites{} to \CensusMustSites{}. The recoveries at must, on realworld, account for
+\AttrRecoveredMust{} of the rise. The other
+\the\numexpr\CensusMustSites-\CensusBaseMustSites-\AttrRecoveredMust\relax{} are k8s dashboard
+constructs that the baseline already converted at may and attribution raises to must. The recovery count does not include them.
 
 Counted in edges, the must tier grows from \AttrMustBefore{} to \AttrMustAfter{}.
 The edges added are the links of two application shells, drawn once for each screen the shell
 renders (Section~\ref{sec:res-round2}).
 
-Tracking construct identifiers across runs finds \AttrRegressed{} conversion regressions and
-\AttrDemoted{} must-to-may demotions. No baseline must conversion was lost. The tracking measures recovery and not target consistency.
+Construct identifiers are tracked across the two runs. The number of conversion regressions they
+show is \AttrRegressed{}, and the number of must-to-may demotions is \AttrDemoted{}. No baseline
+must conversion was lost. The tracking measures recovery and does not test whether targets stay
+the same.
 Section~\ref{sec:res-soundness} assesses the must tier and remaining edges.
 
 Claim~\ref{claim:expansion} requires anchored-edge expansion to equal the materialised edge set.
@@ -242,8 +253,9 @@ Table~\ref{tab:remaining} classifies each construct that stays lost.
 \end{table}
 
 The \AttrLost{} assigned constructs comprise \AttrRecovered{} recovered and \AttrRemaining{}
-remaining. All but \AttrRemainingUnexplained{} remaining constructs have a recorded reason.
-Those \AttrRemainingUnexplained{} have a scope and a destination node but no diagnosed cause.
+remaining. All but \AttrRemainingUnexplained{} of the remaining constructs have a recorded reason.
+Each of the \AttrRemainingUnexplained{} without a reason has a scope and a destination node but no
+diagnosed cause.
 The reasons combine implementation gaps and limits of the source population.
 
 \begin{itemize}
@@ -275,17 +287,18 @@ applications render on the judged screens, \ScopeConfirmed{} are predicted by th
 realworld, which renders most of its screens without a backend, every rendered pair on every
 judged screen is predicted. The pairs that are not predicted are all bitwarden's.
 
-The unit is a (screen, destination) pair and not a site, so confirmation does not validate every underlying
-site's scope, but the \ScopeUnpredicted{} unpredicted pairs still demonstrate under-attribution.
+The unit is a (screen, destination) pair rather than a site, so a confirmed pair does not validate
+the scope of every site behind it. The \ScopeUnpredicted{} unpredicted pairs still demonstrate
+under-attribution.
 The check covers \ScopeJudged{}/\ScopeScreens{} screens; \ScopeUnjudged{} redirect to sign-in
 without a backend. It includes \ScopeApps{} of six applications, excluding ghostfolio because its
 per-locale bundles do not fit the harness's single served directory. These restrictions leave only
 one direction tested (Section~\ref{sec:limitations}).
 
-The \ScopeUnpredicted{} unpredicted links share one cause, and all are in bitwarden: the graph holds the edges, with the right witness, but anchors
-them at an origin node rather than at a screen, because the component that renders them lives in a
-workspace library outside the application directory and attribution computed the empty scope for it.
-These sites are the \emph{unplaced} class of Table~\ref{tab:round2acct}.
+The \ScopeUnpredicted{} unpredicted links share one cause. The graph holds their edges, with the
+right witness, but anchors them at an origin node instead of a screen. The component that renders
+them lives in a workspace library outside the application directory, and attribution computed the
+empty scope for it. These sites belong to the \emph{unplaced} class of Table~\ref{tab:round2acct}.
 
 \paragraph{Scopes too large.} The \ScopeUnrendered{} predicted but unrendered links combine three
 causes. Two are not defects: realworld's header hides links from unsigned users, and a tag page
@@ -294,8 +307,8 @@ which concerns the destination rather than the scope. The combined count cannot 
 
 Only predictions that name a destination exactly can be refuted by a page not linking there. There
 are \ScopeExact{} of them across the judged screens, against \ScopeApprox{} over-approximated.
-\ScopeOverAttributed{} of the \ScopeExact{} were not rendered. A denominator of \ScopeExact{}
-supports no rate. The over-attribution direction was therefore not refuted on this
+Of these \ScopeExact{}, the number not rendered is \ScopeOverAttributed{}, and a denominator of
+\ScopeExact{} supports no rate. The over-attribution direction was therefore not refuted on this
 corpus, because the graph almost never claims an exact destination at a screen this check can
 observe.
 
@@ -369,7 +382,9 @@ Source inspection produced \GTSites{} sites and \GTPairs{} (site, screen) pairs 
 (Section~\ref{sec:metrics}). Realworld has only one service navigation and barely exercises the
 new step. The alfresco reference includes service navigation: \GTAlfSites{} sites and
 \GTAlfPairs{} pairs. Table~\ref{tab:groundtruth} scores every level against both references in
-both directions.
+both directions. Both references apply the analysis's own relations (Section~\ref{sec:metrics}),
+so precision and recall here measure agreement with a reading made under those relations. They do
+not measure agreement with what the running application renders.
 
 \begin{table}[t]\footnotesize
 \caption{Each attribution level against the structural reference of each application.}
@@ -388,13 +403,13 @@ full & \GTFullPrecision{} & \GTFullRecall{} & \GTFullRecallNonShell{} & \GTAlfFu
 class & \GTClassPrecision{} & \GTClassRecall{} & \GTClassRecallNonShell{} & \GTAlfClassPrecision{} & \GTAlfClassRecall{} & \GTAlfClassRecallNonShell{} \\
 \bottomrule
 \end{tabular}
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Precision} and \emph{recall} are agreement with that reference, not with what the running application renders. \emph{Off shell} is recall over the pairs outside the shell, where attribution decides. \emph{class} is the class-level join that the call graph of \emph{full} refines.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Precision} and \emph{recall} are agreement with that reference. \emph{Off shell} is recall over the pairs outside the shell, where attribution decides. \emph{class} is the class-level join that the call graph of \emph{full} refines.}
 \end{table}
 
 On \GTApp{}, the table requires nested pair sets and no full-level pair outside the reference;
-levels therefore differ only in recall. Most recovery comes from the pre-existing shell
-(\emph{rooted}) and enclosing-route (\emph{outlet}) rules; full adds the remaining
-\GTOutletMissing{} pair. On alfresco, full adds service, guard and effect sites beyond earlier
+levels therefore differ in recall alone. Most recovery comes from the pre-existing shell
+(\emph{rooted}) and enclosing-route (\emph{outlet}) rules, and full adds the remaining
+\GTOutletMissing{} of the \GTPairs{} pairs. On alfresco, full adds service, guard and effect sites beyond earlier
 levels, but is less precise than both those levels and the class join.
 
 \begin{itemize}
@@ -412,28 +427,28 @@ levels, but is less precise than both those levels and the class join.
   \emph{full} are scored on the same reference and test neither repair independently
   (Section~\ref{sec:limitations}).
 \item \emph{The class join's excess on \GTApp{}} is \GTClassExcess{} pairs, all at the
-  \texttt{navigate} inside \texttt{UserService.logout}: the class join attributes the service to
-  every screen whose components inject it, while its only caller is a button on the settings screen.
+  \texttt{navigate} inside \texttt{UserService.logout}. The class join attributes the service to
+  every screen whose components inject it, but its only caller is a button on the settings screen.
 \item \emph{An AI assistant built the alfresco reference without the graph,} using realworld's rules
   under a protocol committed before scoring (\path{ground-truth/ALFRESCO-PROTOCOL.txt}).
   \GTAlfUndetermined{} undetermined sites are not scored. Afterwards, four lines reported by the
   scorer as placed but unlisted were inspected using only line numbers, without graph placements.
   None was a navigation site. They were added as excluded, a protocol deviation: only adding missed
   sites was permitted. The addition changes no figure because unlisted lines are not scored.
-\item \emph{One configuration-driven site accounts for all full-level excess on alfresco.}
-  The \GTAlfFullExcess{} excess pairs arise at \GTAlfFullExcessSites{} site,
-  \texttt{navigateToSearch}. Its only caller is an effect triggered by a toolbar button in extension
-  configuration that the analysis does not parse. It assigns the site to $\top$ at may, producing
-  most pairs added over \emph{outlet}. The class join's \GTAlfClassExcess{} excess pairs arise at
-  the same site. Both levels also place an undetermined site at $\top$. It is unscored; treating it
-  as firing nowhere would increase both excess counts.
+\item \emph{A configuration-driven site accounts for all full-level excess on alfresco.}
+  The number of sites with full-level excess is \GTAlfFullExcessSites{}:
+  \texttt{navigateToSearch} produces all \GTAlfFullExcess{} excess pairs. Its only caller is an
+  effect triggered by a toolbar button in extension configuration that the analysis does not parse.
+  The full level assigns the site to $\top$ at may, which produces most pairs added over
+  \emph{outlet}. The class join's excess pairs, \GTAlfClassExcess{} in number, arise at the same
+  site. Both levels also place an undetermined site at $\top$. That site is unscored, and treating
+  it as firing nowhere would increase both excess counts.
 \item \emph{The protocol's predictions.} The first (A1), that the full level recalls more than \emph{outlet}:
   \checkmark. The second (A2), that its precision is $\geq$ the class join's: \xmark.
 \end{itemize}
 
-What the two references establish is narrower than soundness. Both apply the analysis's own relations,
-and neither licenses the corpus-wide widths of Table~\ref{tab:scopebaseline} on an application of six
-hundred screens.
+What the two references establish is therefore narrower than soundness. Neither licenses the
+corpus-wide widths of Table~\ref{tab:scopebaseline} on an application of six hundred screens.
 
 \subsection{Agreement with the applications' own suites}
 \label{sec:res-e2e}
@@ -443,7 +458,14 @@ The end-to-end reference comes from execution, without applying the analysis's r
 also passes the first: its uninstrumented run fails the same tests. Realworld has only instrumented
 run records, all without failures.
 
-Table~\ref{tab:e2e} gives the figures for both applications.
+Table~\ref{tab:e2e} gives the final figures for both applications.
+With the extractor frozen before this check's logs were read, the graph held
+\EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} mifos suite pairs. Post-hoc classification found among the
+misses three source forms the extractor did not support, rather than destinations known only at run
+time, and each form was then repaired with a test (Table~\ref{tab:repairs}). The repairs apply
+general Angular rules without naming sites, but this check found and evaluated them. Only the frozen
+figure is therefore independent of these repairs, and no other runnable suite remains for an
+independent test (Section~\ref{sec:limitations}).
 
 \begin{table}[t]\footnotesize
 \caption{The graph against the pairs of screens the applications' own end-to-end suites navigate between.}
@@ -478,35 +500,26 @@ Misses that meet the dynamic test in any order & \EtoERealworldMissDynamicAny{} 
 \item \emph{realworld.} The result does not bear on what the levels above \emph{rooted} add, because the \emph{rooted} level already
 contains every pair.
 \item \emph{mifos, hits.} Table~\ref{tab:repairs} records the scorer's departure from the
-preregistered rule. As predicted, no matched pair has a must edge. One of
-\EtoEMifosHitRedirect{} redirect-bucket hits depends solely on the notifications tray, a shell
-site whose target retains two leading parameters and connects every screen to every account screen.
-The hit shows graph containment but not site resolution. The same site widens the graph from
-\EtoEMifosGraphPairsUnfixed{} to \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} possible pairs
-after the repairs below, reducing discrimination. Uniform pairs at that density would yield
-\EtoEMifosChanceHits{}/\EtoEMifosPairs{} hits (realworld:
-\EtoERealworldChanceHits{}/\EtoERealworldPairs{}). This reference is not the suite's expected
-success rate; the observed hits demonstrate containment more than discrimination. No other
+preregistered rule. As predicted, no matched pair has a must edge. One of the
+\EtoEMifosHitRedirect{} redirect-bucket hits depends solely on the notifications tray. The tray is a
+shell site whose target retains two leading parameters, so it connects every screen to every
+account screen. The hit shows that the graph contains the pair, but it does not show that the site
+was resolved. After the repairs, the same site widens the graph from \EtoEMifosGraphPairsUnfixed{}
+to \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} possible pairs, which reduces discrimination.
+Uniform pairs at that density would yield \EtoEMifosChanceHits{}/\EtoEMifosPairs{} hits (realworld:
+\EtoERealworldChanceHits{}/\EtoERealworldPairs{}). That chance level is not the suite's expected
+success rate, and the observed hits demonstrate containment more than discrimination. No other
 preregistered prediction is reported here.
-\item \emph{mifos, misses.} Only the redirect class was preregistered, and its misses are not classified
-further. The other classes were defined after the misses had been read, before the repairs below. Every
-remaining miss is in the redirect class (\EtoEMifosMissRedirect{}/\EtoEMifosMiss{}): the graph holds
-the pair on the screen the redirect lands on. For \CeilEtoEMifosInside{} of them a better reader would also
-hold the address asked for (Section~\ref{sec:may-incomplete}). \EtoEMifosMissDynamicAny{} of them also meet the
-dynamic test, which fires on any unresolved site in the source component or above it, so it does
-not show that a missed navigation is that site. The preregistered five-class scheme and its prediction that misses would be mostly a scope too narrow or a site not read are not scored.
+\item \emph{mifos, misses.} Of the miss classes, the redirect class alone was preregistered, and its
+misses are not classified further. The other classes were defined after the misses had been read,
+before the repairs. Every remaining miss is in the redirect class
+(\EtoEMifosMissRedirect{}/\EtoEMifosMiss{}): the graph holds the pair on the screen the redirect
+lands on. For \CeilEtoEMifosInside{} of them a better reader would also hold the address asked for
+(Section~\ref{sec:may-incomplete}). The dynamic test is also met by \EtoEMifosMissDynamicAny{} of them.
+The test fires on any unresolved site in the source component or above it, so it does not show that
+a missed navigation is that site. The preregistered five-class scheme, and its prediction that
+misses would mostly be a scope too narrow or a site not read, are not scored.
 \end{itemize}
-
-Before repair, the graph contained \EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} pairs. Post-hoc
-classification identified unsupported source forms rather than runtime-only destinations:
-commands-array template literals were treated as variables, \texttt{relativeTo} through an options
-variable was not evaluated, and client-view relative links used child-tab addresses instead of the
-holding component's route (Section~\ref{sec:anchored}). Each gap was repaired with a test.
-Extractor-dependent figures were remeasured, except the historical groups in
-Section~\ref{sec:reproducibility} (Table~\ref{tab:repairs}). The repairs implement general Angular
-rules without naming sites, but were identified and evaluated by this check. Only the earlier
-\EtoEMifosHitUnfixed{} figure uses an extractor frozen before log inspection
-(Section~\ref{sec:limitations}); no other runnable suite remains for independent testing.
 
 \subsection{What scope attribution adds}
 \label{sec:res-earlier}
@@ -541,47 +554,53 @@ Three things follow, with the figures in Table~\ref{tab:earlier}.
 \begin{itemize}
 \item \emph{Attribution puts more of the suites' transitions into the graph, in a wider graph.}
 \item \emph{The gain is reached by the mechanisms of earlier work.} On realworld the rooted level holds
-  every suite pair. On mifos it holds \EtoEMifosHitRooted{}; the other
+  every suite pair. On mifos it holds \EtoEMifosHitRooted{}. The other
   \the\numexpr\EtoEMifosHitOutlet-\EtoEMifosHitRooted\relax{} hits have a child tab as source and a
-  site in the parent view, which the \emph{outlet} level, the enclosing routes of Rima et al.'s
-  specification (Section~\ref{sec:res-ablation}), places on the child screens. That level holds
-  \EtoEMifosHitOutlet{}, as many as the full analysis. These pairs were missed before the repairs, so the
-  difference is in-sample (Section~\ref{sec:res-e2e}). Oshima and
-  Kishi name two of their restrictions, no \texttt{children} attribute and no route parameters;
-  these alone admit none of the six applications, which declare both. Rima et al.\ state no such restriction, and their specification covers this level
-  (Section~\ref{sec:dynamic-spa}).
-\item \emph{The service join generalises the bounded router-service tracing of Rima et al.'s tool, which follows a call into a service whose class name matches a router or navigation pattern to a bounded depth.} A navigation call inside an
-  injected service belongs to no component, so the levels up to \emph{outlet} cannot place it on any screen,
-  on every application of the corpus (Table~\ref{tab:loss}). The member-level call graph is more precise than
-  a class-level join on \GTApp{}, but on alfresco the precision order reverses
-  (Table~\ref{tab:groundtruth}). The levels above \emph{rooted} find the reference pairs rooted misses, and on
-  the two applications with suites the step above \emph{outlet} adds no transition the suites take.
+  site in the parent view. The \emph{outlet} level, which stands for the enclosing routes of Rima et
+  al.'s specification (Section~\ref{sec:res-ablation}), places such sites on the child screens and
+  holds \EtoEMifosHitOutlet{} pairs, as many as the full analysis. These pairs were missed before
+  the repairs, so the difference is in-sample (Section~\ref{sec:res-e2e}). Oshima and Kishi's
+  restrictions on \texttt{children} attributes and route parameters (Section~\ref{sec:dynamic-spa})
+  admit \EarlierWorkAdmittedApps{} of the \EarlierWorkApps{} corpus applications, which all declare
+  both. Rima et al.\ state no such restriction, and their specification covers the \emph{outlet}
+  level.
+\item \emph{The service join generalises the router-service tracing of Rima et al.'s tool.} Their tool
+  follows a call into a service whose class name matches a router or navigation pattern, to a
+  bounded depth. A navigation call inside an injected service belongs to no component, so on every
+  application of the corpus the levels up to \emph{outlet} cannot place it on any screen
+  (Table~\ref{tab:loss}). The member-level call graph is more precise than a class-level join on
+  \GTApp{}, but on alfresco the precision order reverses (Table~\ref{tab:groundtruth}). The levels
+  above \emph{rooted} find the reference pairs that rooted misses. On the two applications with
+  suites, the step above \emph{outlet} adds no transition the suites take.
 \end{itemize}
 
 Shell links produce wide scopes, although computed scopes are \BaselineFactorMin{} to \BaselineFactorMax{}
 times narrower than universal attribution (Section~\ref{sec:res-width}). Width alone does not
-establish over-attribution. Full produces no excess reference pair on \GTApp{} and
-\GTAlfFullExcess{} at one alfresco site, plus a universally attributed undetermined site.
-Both references apply the analysis's relations and cover only two applications. Over-attribution
-can pass witness checks, while suites test only omissions (Section~\ref{sec:limitations}).
-
-Oshima and Kishi's restrictions admit \EarlierWorkAdmittedApps{} of the \EarlierWorkApps{} corpus applications.
+establish over-attribution. Full produces no excess reference pair on \GTApp{}. On alfresco it
+produces \GTAlfFullExcess{} excess pairs, all at the configuration-driven site of
+Section~\ref{sec:res-groundtruth}, and it places an undetermined site at $\top$. Both references
+cover two applications and share the limit stated in Section~\ref{sec:res-groundtruth}.
+Over-attribution can pass witness checks, and the suites test omissions alone
+(Section~\ref{sec:limitations}).
 
 \subsection{On the applications of Rima et al.}
 \label{sec:res-rima}
 
-Rima et al.\ publish seven Angular subjects and ground truths comprising enumerated workflows with
-manually annotated start and terminal routes \cite{rima2026e2e}. None was used in extractor
-development. Two preregistered comparisons use these subjects. The first is this thesis's only
-out-of-sample measurement: preregistration preceded the scorer and results, and the extractor was
-frozen before extraction. The second uses the extractor repaired after the first
-(Table~\ref{tab:repairs}) and is therefore in-sample. Because their registry pins no commits, each
-subject uses its last commit before its ground-truth date. The AI assistant assessed both comparisons;
-a stronger model reassessed a gated subset specified below. The preregistered unit is a reference
-pair: when an entry's terminal differs from every start route, each start is paired with the terminal.
-Their tool contains every reference pair by construction because its output generated the reference.
-Their published measure is test-execution success, not graph recall. This comparison measures
-containment of their pipeline's pairs and examines additional graph pairs; it does not rank the tools.
+Rima et al.\ publish seven Angular subjects with ground truths. Each ground truth is a set of
+enumerated workflows with manually annotated start and terminal routes \cite{rima2026e2e}. None of
+the subjects was used in extractor development. Two preregistered comparisons use them. The first
+is this thesis's only out-of-sample measurement: preregistration preceded the scorer and the
+results, and the extractor was frozen before extraction. The second uses the extractor repaired
+after the first (Table~\ref{tab:repairs}) and is therefore in-sample. Their registry pins no
+commits, so each subject uses its last commit before its ground-truth date. The AI assistant
+assessed both comparisons, and a stronger model reassessed a gated subset specified below.
+
+The preregistered unit is a reference pair: when an entry's terminal differs from every start
+route, each start is paired with the terminal. Their tool contains every reference pair by
+construction, because its output generated the reference. Their published measure is
+test-execution success rather than graph recall. This comparison therefore measures how many of
+their pipeline's pairs the graph contains and examines the graph's additional pairs. It does not
+rank the tools.
 
 \newcommand{\rimarow}[2]{#1 & \csname Rima#2Pairs\endcsname & \csname Rima#2HitNoattr\endcsname & \csname Rima#2HitRooted\endcsname & \csname Rima#2HitOutlet\endcsname & \csname Rima#2HitFull\endcsname & \csname Rima#2Extra\endcsname & \csname Rima#2Real\endcsname/\csname Rima#2Judged\endcsname \\}
 \begin{table}[t]\footnotesize
@@ -607,45 +626,52 @@ Per start route$^{\dagger}$ & \RimaPsPairs{} & \RimaPsRecallNoattr{} & \RimaPsRe
 Repaired extractor$^{\dagger}$ & \RimaRepPairs{} & \RimaRepRecallNoattr{} & \RimaRepRecallRooted{} & \RimaRepRecallOutlet{} & \RimaRepRecallFull{} & \RimaRepExtra{} & \\
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{none} is the graph without attribution; \emph{rooted} and \emph{outlet} are the rules of Oshima and Kishi and of Rima et al.'s specification (Section~\ref{sec:res-ablation}). heroes has no pair under the preregistered rule: its entries are external links or list their terminal among their start routes. \emph{Read}: pairs judged from the source, all of them where a subject has at most 40 other pairs and a seeded sample of 40 otherwise. The reference's wildcard route matches no screen, so its one pair counts as missed, while the graph's own wildcard screen is counted among its other pairs. $^{\dagger}$Post hoc, not preregistered: the first drops the reference pairs the source shows to be absent, and only missed pairs were read, so it can only rise; the second keeps the entries the preregistered rule drops, and its misses were not read; the third maps the subjects again after the repairs this comparison prompted. All cells are generated figures.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{none} is the graph without attribution; \emph{rooted} and \emph{outlet} are the rules of Oshima and Kishi and of Rima et al.'s specification (Section~\ref{sec:res-ablation}). heroes has no pair under the preregistered rule: its entries are external links or list their terminal among their start routes. \emph{Read}: pairs judged from the source, all of them where a subject has at most 40 other pairs and a seeded sample of 40 otherwise. The reference's wildcard route matches no screen, so its one pair counts as missed, while the graph's own wildcard screen is counted among its other pairs. $^{\dagger}$Post hoc, not preregistered: the first drops the reference pairs the source shows to be absent, and only missed pairs were read, so it can only rise; the second keeps the entries the preregistered rule drops, and its misses were not read; the third maps the subjects again after the repairs this comparison prompted, which gain the locale link and remove three invalid non-reference airbus pairs from sign-in, one traduora pair and petclinic's target over-approximations. All cells are generated figures.}
 \end{table}
 
-Table~\ref{tab:rima} gives the result. The full level holds \RimaHitFull{} of the \RimaPairs{} reference
-pairs and the \emph{outlet} level \RimaHitOutlet{}. Two of the four preregistered predictions held: the full level
-holds at least 90\,\%, and the \emph{outlet} level is within five points of it. Two failed: no miss was classed
-as a route the graph lacks or a navigation outside the router (the wildcard pair, whose route matches no
-screen, was classed as absent from the source), and only \RimaExtraTop{} of the \RimaExtra{} other
-pairs are reached only from the shell scope.
+Table~\ref{tab:rima} gives the result. The full level holds \RimaHitFull{} of the \RimaPairs{}
+reference pairs, and the \emph{outlet} level holds \RimaHitOutlet{}. Two of the four preregistered
+predictions held: the full level holds at least 90\,\%, and the \emph{outlet} level is within five
+points of it. The other two failed. The third predicted that most misses would be a route the graph
+lacks or a navigation outside the router, and no miss was classed as either. The wildcard pair,
+whose route matches no screen, was classed as absent from the source. The fourth predicted that
+most other pairs would come from the shell scope, but \RimaExtraTop{} of the \RimaExtra{} are
+reached only from it.
 
-Of the \RimaMissed{} misses, the source holds \RimaMissE{} as no transition at all (dropdown toggles, a form with no router, a form that returns to the owner's page). The other
-\RimaMissF{} come from one relative link whose only segment is an expression, which the extractor leaves to
-an unknown target although the route it reaches can be read; the second of them also starts on a route
-that only redirects. The step from \emph{outlet} to \emph{full} is
-\the\numexpr\RimaHitFull-\RimaHitOutlet\relax{} pairs, all on airbus, where the navigation runs inside an
-injected router service, which the specification's rule does not follow but their implementation traces to a bounded depth
-(Section~\ref{sec:dynamic-spa}). The preregistered rule drops every entry whose component is also shown on
-its target, which removes most links of a shell; the per-start-route row of Table~\ref{tab:rima} counts them.
+Of the \RimaMissed{} misses, the source holds \RimaMissE{} as no transition at all: dropdown
+toggles, a form with no router and a form that returns to the owner's page. One relative link
+whose only segment is an expression causes the other \RimaMissF{}. The extractor leaves
+its target unknown, although the route it reaches can be read. One of these misses also starts on a
+route that only redirects. The step from \emph{outlet} to \emph{full} is
+\the\numexpr\RimaHitFull-\RimaHitOutlet\relax{} pairs, all on airbus, where the navigation runs
+inside an injected router service. The specification's rule does not follow such a service, but
+their implementation traces it to a bounded depth (Section~\ref{sec:dynamic-spa}). The
+preregistered rule drops every entry whose component is also shown on its target, which removes
+most links of a shell. The per-start-route row of Table~\ref{tab:rima} counts them.
 
-Besides the counted pairs the graph holds \RimaExtra{} others; \RimaExtraInPs{} of them are pairs of the
-entries the preregistered rule drops. Of the \RimaJudged{} read from the source, \RimaJudgedReal{} are transitions the
-application has. \RimaJudgedSpurious{} are not: \RimaSpuriousTarget{} come from a navigation whose target is
-matched to longer routes than its command can produce, and \RimaSpuriousAttribution{} from a navigation
-placed on a sign-in or password-reset screen where the component holding it is not shown. Read per start
-route, Rima et al.'s reference lists all five of these pairs too. All
-\RimaJudgedSpurious{} are at the may tier; \RimaSpuriousMust{} has a must edge.
+Besides the counted pairs, the graph holds \RimaExtra{} others, and \RimaExtraInPs{} of them are
+pairs of the entries the preregistered rule drops. Of the \RimaJudged{} pairs read from the source,
+\RimaJudgedReal{} are transitions the application has and \RimaJudgedSpurious{} are not. A navigation
+whose target is matched to longer routes than its command can produce accounts for
+\RimaSpuriousTarget{} of the spurious pairs. A navigation placed on a sign-in or password-reset
+screen, where the component holding it is not shown, accounts for the other
+\RimaSpuriousAttribution{}. Read per start route, Rima et al.'s reference lists these
+\RimaSpuriousAttribution{} pairs too. All
+\RimaJudgedSpurious{} spurious pairs are at the may tier: the number with a must edge is
+\RimaSpuriousMust{}.
 
-All assessments use one AI model family and establish consistency, not correctness. A stronger
-model reassessed every miss, every pair not judged real and every sixth real pair:
-\RimaGated{} pairs, with \RimaGateChanged{} changes. One batch was repeated because its first
-response omitted all 20 additional pairs. Adversarial review later found that the second response
-incorrectly classified a shell bar as rendered on sign-in and password-reset screens where a guard hides it
-(Section~\ref{sec:approximations}). \RimaCorrected{} verdicts were corrected and \RimaRecited{}
-citations revised manually. A script verifies cited navigation sites, not their rendering on start
-screens. Four defects were repaired after recording these figures (Table~\ref{tab:repairs}), and
-the corpus was remeasured. Re-extraction contains \RimaRepHitFull{}/\RimaPairs{} reference pairs
-and \RimaRepExtra{} additional pairs. It gains the locale link and removes three invalid
-non-reference airbus pairs from sign-in, one traduora pair and petclinic's target over-approximations.
-These are post-hoc figures; none of their pairs was reassessed.
+All assessments use one AI model family, so they establish consistency rather than correctness. A
+stronger model reassessed every miss, every pair not judged real and every sixth real pair. It
+reassessed \RimaGated{} pairs and changed \RimaGateChanged{} of the verdicts. One batch was
+repeated because its first response omitted all 20 additional pairs. Adversarial review later
+found that the second response wrongly classified a shell bar as rendered on sign-in and
+password-reset screens, where a guard hides it (Section~\ref{sec:approximations}). Manual
+correction changed \RimaCorrected{} of the verdicts and \RimaRecited{} of the citations. A script
+verifies the cited navigation sites but not their rendering on start screens.
+
+The comparison prompted four repairs (Table~\ref{tab:repairs}), after which the post-hoc
+re-extraction holds \RimaRepHitFull{}/\RimaPairs{} reference pairs and \RimaRepExtra{} additional
+pairs, none of them reassessed.
 
 \subsection{The tool of Rima et al.\ on the same applications}
 \label{sec:res-h2h}
@@ -713,16 +739,18 @@ Wilson interval endpoints preserves separate recall ranges: \HHCorpusNoMifosOurs
 versus \HHCorpusNoMifosTheirsRecallRange{}. On mifos, this extractor proposes \HHMifosOursPairs{}
 pairs, theirs \HHMifosTheirsPairs{}, and both share \HHMifosBoth{}. Most of this extractor's pairs are shell-only
 (Section~\ref{sec:res-e2e}); precision is \HHMifosOursPrecision{} versus \HHMifosTheirsPrecision{}.
-Mifos dominates pooled corpus recall ranges, \HHCorpusOursRecallRange{} versus
-\HHCorpusTheirsRecallRange{}, which do not rank the tools. Intervals assume independent sampled
-pairs despite site clustering and cover sampling only. Systematic error from the single model
-family would shift both endpoints.
+The pooled corpus recall ranges, \HHCorpusOursRecallRange{} versus
+\HHCorpusTheirsRecallRange{}, therefore rest mostly on mifos (Section~\ref{sec:res-baseline}) and
+do not rank the tools. The intervals assume independent sampled pairs despite site clustering, and
+they cover sampling error alone. Systematic error from the single model family would shift both
+endpoints.
+
 Three predictions were preregistered. The first, that this extractor's recall on the corpus is the higher, holds
 at the point estimate, and its bounds separate only without mifos, a group formed after reading. The second, that their
 precision on their subjects is at least this extractor's, did not hold, and neither did the third, that their tool fails on some application.
 
-Assessment follows the first comparison's rules: \HHRead{} pairs, with \HHGated{} reassessed by
-a stronger model and \HHGateChanged{} changes. I checked \HHAuthorSample{} sampled assessments
+Assessment follows the first comparison's rules. It covers \HHRead{} pairs, of which a stronger
+model reassessed \HHGated{}, changing \HHGateChanged{} of the verdicts. I checked \HHAuthorSample{} sampled assessments
 underlying the five-application figures, three per stratum, against source. The model verdict was
 visible, so this was not blind and measures agreement rather than correctness.
 I judged \HHAuthorJudged{} cases and agreed on \HHAuthorAgree{} (Wilson 95\,\% interval
@@ -792,7 +820,7 @@ The mutation run neither confirms nor contradicts the defect class \emph{guards 
 RQ5 traces the defect classes of Section~\ref{sec:res-defects} to causes in the final version,
 using the three outcomes defined in Section~\ref{sec:metrics}.
 
-\subsection{What the losses were}
+\subsection{The cause of each defect class}
 \label{sec:res-losses}
 
 A \emph{class} is a row of Table~\ref{tab:defects}; a \emph{cause} is its explanation from source review.
@@ -828,8 +856,8 @@ components that no screen may render, and no measurement separates them.
 implement. Its navigations are excluded from the denominator (\RoundTwoExcludedOutlet{} sites) and
 its screens left out of the runtime route oracle's mounted set (\ProbeOutletScreens{} route
 entries).
-\item ghostfolio's spread of computed routes is a construct the extractor could read and does not.
-\ProbeMissedGhostfolio{} of the \ProbeMissed{} unminted leaf screens sit behind it.
+\item The spread of computed routes in ghostfolio is a construct the extractor could read and does
+not. It hides \ProbeMissedGhostfolio{} of the \ProbeMissed{} mounted leaf screens that have no node.
 \end{itemize}
 
 \paragraph{Beyond a static reader of a route table.} No reader of a route table can resolve these.
@@ -862,40 +890,46 @@ unknown-modality edges to a screen's \texttt{u\_}\,sink. A site is \emph{unplace
 is resolvable but its source screen is not; its edge uses an \texttt{o\_}\,origin. Remaining sites
 have a recorded reason but no transition. The check enforces reason presence, not correctness.
 
-\RoundTwoExcluded{} sites are excluded using construct text before consulting the graph:
-\RoundTwoExcludedQueryOnly{} pass empty commands arrays and change only query parameters;
-\RoundTwoExcludedNoCommands{} names no destination. Neither connects screens.
-\RoundTwoExcludedOutlet{} navigate a secondary outlet, represented by the model as a second mount
-(Section~\ref{sec:inputs}) but unimplemented. This recall limitation raises alfresco's ratios when
-excluded. Both columns of Table~\ref{tab:before-after} use the same \RoundTwoInScope{} sites;
-the comparison rejects any changed exclusion reason.
+Before the graph is consulted, \RoundTwoExcluded{} sites are excluded on their construct text.
+They form three groups: \RoundTwoExcludedQueryOnly{} with an empty commands array that changes only
+query parameters, \RoundTwoExcludedNoCommands{} with no destination, and \RoundTwoExcludedOutlet{}
+with a secondary outlet as target. The first two groups connect no screens. The model represents a
+secondary outlet as a second mount (Section~\ref{sec:inputs}), but the extractor does not implement
+it. Excluding the outlet sites removes a recall limitation from the denominator and so
+raises alfresco's ratios. Both columns of
+Table~\ref{tab:before-after} use the same \RoundTwoInScope{} sites, and the comparison rejects any
+changed exclusion reason.
 
 \begin{table}[t]\small
 \caption{Construct accounting after the loss list was worked.}
 \label{tab:round2acct}
 \TabRoundTwoAccounting
-\par\smallskip{\footnotesize\noindent\emph{Note.} Percentages are of the in-scope sites.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Percentages are of the in-scope sites. The accounted share, the sum of the recovered, dynamic and unplaced shares, is \RoundTwoAccounted{} over all applications.}
 \end{table}
 
-k8s dashboard combines low recovery with many runtime-dependent destinations. Its dynamic sites
-span \RoundTwoDynamicFiles{} files, including \RoundTwoDynamicFilesOne{} with one site each,
-indicating a distributed coding pattern rather than a single defect. Mifos contributes
-\RoundTwoMifosShare{} of in-scope sites and dominates pooled results. Without it, recovery is
-\RoundTwoNoMifosRecovered{} and accounted share \RoundTwoNoMifosAccounted{}.
+On k8s dashboard, recovery is low and many destinations depend on run time. Its dynamic sites
+span \RoundTwoDynamicFiles{} files, \RoundTwoDynamicFilesOne{} of them with one site each, which
+indicates a distributed coding pattern rather than a single defect. Mifos contributes
+\RoundTwoMifosShare{} of the in-scope sites. Without it, recovery is \RoundTwoNoMifosRecovered{}
+and the accounted share \RoundTwoNoMifosAccounted{}.
 Section~\ref{app:validation} records route-denominator changes.
 
-The named-outlet restriction reaches a named outlet's \emph{subtree} too: alfresco's viewer routes
-were minted at the primary address, which Angular reaches only as \texttt{(viewer:\ldots)}. Both tools read the subtree the same way, so only the runtime route oracle of Section~\ref{sec:res-probe} exposed it.
+The named-outlet restriction reaches a named outlet's \emph{subtree} too. The extractor created
+nodes for alfresco's viewer routes at the primary address, although Angular reaches those routes
+only as \texttt{(viewer:\ldots)}. Both tools read the subtree the same way, so only the runtime
+route oracle of Section~\ref{sec:res-probe} exposed the error.
 
 \subsection{The final tier and the node set}
 \label{sec:res-soundness}
 \label{sec:res-unmounted}
 
-\paragraph{The final tier.} The attributed tier has \MustWitnessViolations{} witness-check failures
-among \MustWitnessEdges{} must edges and \MustWitnessUnread{} unread destinations, neither passes
-nor failures. All unread destinations are toolbar edges in one application, relying on chrome
-component scope and assumed route order. The check compares construct and edge destinations; it
-does not test unconditional execution or router admission, which the demotion rules address.
+\paragraph{The final tier.} Among the \MustWitnessEdges{} must edges of the attributed tier, the
+number of witness-check failures is \MustWitnessViolations{}. The checker cannot read the
+destination of \MustWitnessUnread{} of them, so those edges are neither passes nor failures. All
+unread destinations are toolbar edges in one application, and they rely on the toolbar component's
+computed scope and on the route-order assumption. The check compares construct and edge
+destinations. It does not test unconditional execution or router admission, which the demotion
+rules address.
 Neither source inspection (Section~\ref{sec:limitations}) nor this mechanical check independently
 proves Claim~\ref{claim:must}.
 
@@ -904,30 +938,34 @@ including merged witnesses and repeated locations. Sites producing more edges th
 more weight. Only \RoundTwoGraphClean{} are clean; \RoundTwoOverApprox{} are over-approximations
 without a target-agreement claim. One \texttt{navigateByUrl} call to an empty-prefix template
 literal, \RoundTwoTopFanoutSite{} in \RoundTwoTopFanoutApp{}, produces \RoundTwoTopFanoutShare{}
-of edges (\RoundTwoTopFanoutEdges{}). Mifos contributes \RoundTwoMifosEdgeShare{} of all edges
-and dominates pooled figures. Among \RoundTwoJudged{} judged citations, \RoundTwoJudgedClean{}
+of edges (\RoundTwoTopFanoutEdges{}). Mifos contributes \RoundTwoMifosEdgeShare{} of all edges.
+Among \RoundTwoJudged{} judged citations, \RoundTwoJudgedClean{}
 are clean; no remaining citation belongs to a must edge. Must-tier consistency does not describe
 the whole graph.
 
-\paragraph{The node set.} The compared graph declares \ProbeInvented{} screens at unmounted
-addresses. Every claimed address appears in the framework configuration. That match is external evidence
-for the six applications: static readers can agree on an incorrect prefix. Node validity is a
-precondition of the must-tier property, not part of it. The address-based census excludes named
+\paragraph{The node set.} The number of screens the compared graph declares at unmounted
+addresses is \ProbeInvented{}. Every claimed address appears in the framework configuration. That
+match is external evidence for the six applications, because static readers can agree on an
+incorrect prefix. Node validity is a precondition of the must-tier property rather than part of it. The address-based census excludes named
 outlets and \texttt{UrlMatcher} entries (\ProbeUnaddressableScreens{} route entries) from both columns.
 
-\paragraph{The runtime route oracle.}\label{sec:res-probe} The oracle loads each application, built in its
-development configuration, in a headless browser, reads the live router's route configuration after expanding
-every lazily loaded subtree, and counts an address as mounted when the configuration places a component there
-on the primary outlet. No route file is parsed. Of \ProbeScreens{} mounted addresses, the graph
-represents \ProbeNodes{}/\ProbeScreens{}. The \ProbeMissed{} missing addresses are leaf screens;
-\ProbeMissedPrefixOnly{} more are prefixes, not missing screens: \ProbeMissedPrefixRedirect{}
-redirect into their subtrees and \ProbeMissedPrefixUnanswered{} displays only a layout.
+\paragraph{The runtime route oracle.}\label{sec:res-probe} The oracle loads each application,
+built in its development configuration, in a headless browser. It reads the live router's route
+configuration after expanding every lazily loaded subtree. An address counts as mounted when the
+configuration places a component there on the primary outlet. The oracle parses no route file. Of the
+\ProbeScreens{} mounted addresses, the graph represents \ProbeNodes{}/\ProbeScreens{}. The
+\ProbeMissed{} missing addresses are leaf screens. Besides them, the mounted addresses without a
+node include prefixes, which are not missing screens: \ProbeMissedPrefixRedirect{} with a redirect
+into the subtree below and \ProbeMissedPrefixUnanswered{} with a layout alone,
+\ProbeMissedPrefixOnly{} in all.
+
 The applications were probed once, on 29--30 October, against an earlier graph already corrected
 using oracle findings. Against the final graph, the archived configuration gives identical counts
-and address sets on \ProbeFinalSame{}/\ProbeFinalApps{} applications: \ProbeFinalNodes{} nodes,
-\ProbeFinalInvented{} unmounted addresses and \ProbeFinalMissed{} missing leaf screens.
-Navigation checks agree with the oracle on \ProbeAnswerAgreed{}/\ProbeAnswerChecked{} addresses;
-the \ProbeMissed{} missing addresses were not checked individually.
+and address sets on \ProbeFinalSame{} of the \ProbeFinalApps{} applications. The final counts are
+\ProbeFinalNodes{} for nodes, \ProbeFinalInvented{} for unmounted addresses and
+\ProbeFinalMissed{} for missing leaf screens. Navigation checks agree with the oracle on
+\ProbeAnswerAgreed{}/\ProbeAnswerChecked{} addresses, and the \ProbeMissed{} missing addresses were
+not checked individually.
 
 \section{Dead links, found from the source}
 \label{sec:deadlinks}
@@ -965,3 +1003,43 @@ A further \RoundTwoOutsideDirSites{} sites in \RoundTwoOutsideDirWhere{}, across
 excluded from the census. Most belong to sibling frontends whose routers declare addresses that
 would otherwise be labelled dead.
 
+
+\section{Summary}
+\label{sec:res-summary}
+
+This section answers each research question briefly. The sections cited give the figures and
+the limits.
+
+\paragraph{RQ1.} Every screen that a static reader can enumerate has a node, and the runtime route
+oracle finds no node at an address where the framework mounts nothing. Against the addresses the
+running framework mounts, the missing nodes lie almost entirely behind one construct in ghostfolio
+that the extractor declares unread. Deterministic transitions are rare: \CensusMustSites{}
+constructs earn must. Most may-only witness locations involve a guard, branch or other
+application decision, and the demotion rules do not test whether that decision can vary
+(Section~\ref{sec:res-baseline}).
+
+\paragraph{RQ2.} Under the precedence of the loss rules, attribution is the largest loss category
+in every application. An attribution loss is a construct that the extractor, without attribution,
+cannot place on a screen it fires from. The evidence supports five defect classes and one candidate
+class (Table~\ref{tab:defects}). The lazy-boundary, constant-path and unlinked-component classes
+have no instances on the final version (Section~\ref{sec:res-defects}).
+
+\paragraph{RQ3.} Scope attribution recovers \AttrRecoveredShare{} of the constructs lost to
+attribution. Almost all of them are recovered at the may tier, so the gain in must conversion is
+small. Most of the recovery comes from mechanisms of earlier work, which the analysis includes as
+levels. Its added step places navigation in services, guards and effects, and on the alfresco
+reference it raises recall at a cost in precision. No check establishes that the computed scopes
+are not too large (Section~\ref{sec:res-after}).
+
+\paragraph{RQ4.} The graph responded to \MutDetected{} of the \MutScored{} scored mutants. The
+operators act only at constructs the graph already cites, so the result is a conditional check of
+the mapping from witnesses to source, and change-impact accuracy remains unmeasured
+(Section~\ref{sec:res-mutation}).
+
+\paragraph{RQ5.} The repaired classes were defects of the tool: their information was in the
+source, and the final version reads it. Attribution losses remain open, and they mix gaps of the
+tool with components that no screen may render. Other causes lie beyond any reader of a route table:
+a route path computed by a custom matcher, and a choice between route tables made at
+deployment (Section~\ref{sec:res-round2}).
+
+Chapter~\ref{ch:discussion} interprets these answers and their limits.

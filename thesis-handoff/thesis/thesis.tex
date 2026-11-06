@@ -82,37 +82,32 @@ Major: & Computer Science \\
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 \vspace{-1.5em}
-A user-interface (UI) transition graph represents application screens and navigation between
-them. For single-page applications they are usually obtained by execution. This thesis measures
-static extraction on six open-source Angular applications with five evaluation methods and
-classifies every unrecovered navigation construct. It proposes scope attribution, a dataflow
-analysis of the screens from which a navigation site may fire.
+A user interface (UI) transition graph represents an application's screens and the navigation
+between them. For single-page applications, such graphs are usually obtained by execution. Static
+extraction from source code avoids execution, but its losses have not been measured construct by
+construct.
 
-Under the study's demotion rules and execution assumptions, \CensusMustSites{} constructs yield
-\RouteOrderMust{} must edges. Of these, \CensusMustKdash{} come from one toolbar whose scope has
-not been validated at run time. Without the route-order assumption, \RouteOrderMustWithout{}
-remain. The small must tier largely reflects the classification rules rather than an inherent
-limit of static analysis.
+This thesis measures what static extraction recovers from Angular applications and why it loses
+the rest. It proposes scope attribution, a dataflow analysis that computes the screens from which
+each navigation site can fire.
 
-Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to attribution loss,
-or \AttrRecoveredShareNoMifos{} without the largest application, mostly as possible transitions
-through mechanisms from earlier work. The added step places navigation in services, guards and
-effects, adding \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) beyond outlet descent.
-Its member-level call graph generalises Rima et al.'s bounded router-service tracing and adds
-\AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over a per-class join.
+An extractor was applied to six open-source Angular applications and checked with five evaluation
+methods. Every unrecovered navigation construct was classified.
 
-On the \GTAlfSites{} determined sites of an AI-built Alfresco reference, full attribution raises
-recall from \GTAlfClassRecall{} under the per-class join to \GTAlfFullRecall{} but lowers precision
-from \GTAlfClassPrecision{} to \GTAlfFullPrecision{}. Because the reference applies the analysis's
-own relations, agreement does not establish the true scope. A comparison with Rima et al.'s tool
-also shows a recall--precision trade-off, without an overall ranking. It rests on small AI-read
-samples and on a five-application subgroup formed post hoc. This extractor's estimated precision
-on the largest application is \HHMifosOursPrecision{}. Mutation testing gives only a conditional
-sanity check of source-to-witness mapping.
+Every screen readable from the route tables has a node. Only \CensusMustSites{} constructs yield
+deterministic transitions under stated assumptions, largely because the study defines them strictly. Under the study's classification order, the largest loss
+category is navigation outside the components that routes render directly. Scope attribution
+recovers \AttrRecoveredShare{} of these constructs, most of them in the largest application. Almost all become possible transitions, mostly
+through mechanisms from earlier work. The added step, for services, guards and effects, places a
+further \AblationFullAddedShare{} of the navigation sites and, on a reference read from one
+application's source, trades precision for recall. A comparison with the tool of Rima et al.\ shows a similar
+trade-off and no overall ranking, and this extractor's precision is far lower on the largest
+application. Both comparisons rest on small samples read by an artificial intelligence model, and
+one subgroup was formed after reading.
 
-Route tables give static extraction a starting point, but source attribution and target
-resolution remain necessary. The main corpus results are in-sample because the extractor was
-developed on these applications. Consumer benefit is not measured.
+Route tables give static extraction a starting point, but attributing navigation to screens and
+resolving targets remain necessary. The results are in-sample because the extractor was developed
+on these applications. The graph's benefit to its users is not measured.
 
 \vspace{0.5em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
@@ -149,24 +144,30 @@ I take responsibility for the final text, implementation, results and conclusion
 \addcontentsline{toc}{chapter}{Abbreviations}
 
 \begin{tabular}{@{}ll@{}}
+AGPL & GNU Affero General Public License \\
 AI & artificial intelligence \\
 Ajax & asynchronous JavaScript and XML \\
 API & application programming interface \\
 DOM & Document Object Model \\
-GUI & graphical user interface \\
+GPL & GNU General Public License \\
 HTML & Hypertext Markup Language \\
 HTTP & Hypertext Transfer Protocol \\
 ICU & International Components for Unicode (message format) \\
 JSON & JavaScript Object Notation \\
 JSP & JavaServer Pages \\
 JSX & JavaScript XML, the markup syntax of React \\
+k8s & Kubernetes \\
+LGPL & GNU Lesser General Public License \\
+MIT & Massachusetts Institute of Technology (the MIT licence) \\
+MPL & Mozilla Public License \\
 NgRx & Angular state-management library built on RxJS \\
 RQ & research question \\
 RxJS & Reactive Extensions for JavaScript \\
 SPA & single-page application \\
-SPIN & model checker for Promela models \\
+SPIN & Simple Promela Interpreter, a model checker \\
 UI & user interface \\
 URL & Uniform Resource Locator \\
+XML & Extensible Markup Language \\
 ZAP & Zed Attack Proxy, a web security scanner \\
 \end{tabular}
 
@@ -176,6 +177,10 @@ ZAP & Zed Attack Proxy, a web security scanner \\
 \begin{description}[nosep]
 \item[Anchored edge] An edge stored once at its scope, $\top$ or $\mathit{subtree}(r)$, instead of
 once per screen (Section~\ref{sec:anchored}).
+\item[Attribution loss] A lost navigation construct in one of the two attribution categories of
+Table~\ref{tab:loss-rules}. It has no owning component, is owned by a class that is not a
+component, such as a service or guard, or lies in a component that no route renders directly
+(Section~\ref{sec:metrics}).
 \item[Demotion] Lowering a site from must to may because a condition of Table~\ref{tab:demotion}
 holds (Section~\ref{sec:model}).
 \item[Dynamic target, dynamic sink] A nonscreen node, a screen's \texttt{u\_}\,sink, for an
@@ -195,28 +200,37 @@ Recovery counts must and may edges from placed screens (Section~\ref{sec:res-acc
 one tool finds (Section~\ref{sec:res-h2h}).
 \item[Route-order assumption] Assumption A1: a catch-all in a separately registered route table is
 matched after every route of the others (Section~\ref{sec:model}).
+\item[Runtime route oracle] The evaluation method that loads each built application in a headless
+browser and compares the addresses at which the Angular router mounts a component with the screens
+of the graph (Table~\ref{tab:methods} and Section~\ref{sec:res-probe}).
 \item[Scope] The set of screens from which a site can fire. The extractor emits edges from the
 \emph{computed scope}, whereas the \emph{true scope} is a property of the application that this
 thesis does not establish (Section~\ref{sec:scope}).
 \item[Screen] A graph node for a route that renders a component, identified by the concatenated
 paths of the route and its ancestors (Section~\ref{sec:model}).
+\item[Screen without a node] A leaf address at which the runtime route oracle finds a mounted component
+but the graph has no node (Section~\ref{sec:res-probe}).
 \item[Shell] The components from the root to the primary router outlet. They and everything they
 render get the scope $\top$ of all screens (Section~\ref{sec:inputs}).
-\item[Site, navigation site] A source location that a witness cites. One construct can have more
-than one site (Section~\ref{sec:res-ablation}).
+\item[Site, navigation site] A source location from which a navigation can fire. Scope
+attribution gives each site a scope (Section~\ref{sec:scope}). The construct accounting counts
+one site per navigation construct (Section~\ref{sec:res-accounting}). The ablation counts every
+location that a witness cites, so one construct can contribute more than one site there
+(Section~\ref{sec:res-ablation}).
 \item[Static reader] A tool that enumerates screens from the route configuration in the source:
 the extractor or the independent route parser (Section~\ref{sec:res-baseline}).
 \item[Structural reference] The (site, screen) pairs read from an application's source under the
 analysis's own relations, independently of its implementation, so agreement with it does not
 establish the true scope (Section~\ref{sec:scope}).
-\item[Unminted screen] An address at which the runtime route oracle finds a mounted component but
-the graph has no node (Section~\ref{sec:res-probe}).
 \item[Unplaced origin] A nonscreen node, prefixed \texttt{o\_}, for a component whose sites could
 not be assigned to a screen. Its edges are labelled may (Section~\ref{sec:model}).
 \item[Witness, witness citation] The file and line of the construct that generates an edge, or an
 observation identifier. Other constructs producing that edge become merged witnesses. Witness
 citations count every cited location, repeats included (Sections~\ref{sec:model}
 and~\ref{sec:res-soundness}).
+\item[Witness check] The evaluation method that re-parses the witness of every must edge at the
+cited line, compares the construct's kind and target with the edge, and tests the destination
+against the independent route set (Table~\ref{tab:methods}).
 \end{description}
 
 \tableofcontents

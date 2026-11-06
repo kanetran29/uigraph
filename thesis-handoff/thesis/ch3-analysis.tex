@@ -54,13 +54,11 @@ screen. Claim~\ref{claim:must} and must conversion (RQ1) concern only edges betw
 \textbf{Modalities.} A \emph{must} edge is claimed to fire for every input on which the
 enclosing code executes. A \emph{may} edge is possible but conditional. \emph{Unknown} marks an
 edge whose modality could not be determined, including unresolved destinations. In the
-measured graphs it labels only edges to the \texttt{u\_}\,sink
-(Section~\ref{sec:res-round2}), recording events with unresolved targets. The pinned
-extractor produces \CensusUnknown{} such edges among \CensusEdges{} corpus edges, across
-\CensusUnknownApps{} of \CensusApps{} applications. On every corpus edge, this modality
-coincides with a nonscreen target, and the census rejects graphs where they differ. Unknown edges
-count towards totals but no rate: must conversion (RQ1) and Claim~\ref{claim:must} concern
-the other tiers. The model also assigns \emph{unknown} to navigation inside signal effects
+measured graphs it labels exactly the edges to a dynamic target, the \texttt{u\_}\,sink
+(Section~\ref{sec:res-round2}) that records events with unresolved targets. Such edges occur in
+\CensusUnknownApps{} of \CensusApps{} applications, and the census rejects any graph in which
+the unknown edges and the edges to nonscreen targets differ. Unknown edges count towards totals
+but towards no rate. The model also assigns \emph{unknown} to navigation inside signal effects
 (Section~\ref{sec:boundary}), but this version emits none.
 
 The artefact also records numeric \emph{confidence}: $1$ for must, at most $0.6$ for may,
@@ -99,33 +97,51 @@ the primary witness and the others are recorded as merged witnesses (Section~\re
 The base graph requires witnesses, and manual edges stay in a separate overlay. The first
 evaluation method checks this mechanically.
 
-\textbf{The soundness claim.} Under the soundiness position of
-Section~\ref{sec:soundiness}, the thesis claims the following.
+\textbf{The soundness claim.} The thesis takes the soundiness position of
+Section~\ref{sec:soundiness} and states its claim relative to four assumptions. For each
+assumption the list gives a class of counterexample, a kind of program or execution on which the assumption
+fails and the claim can fail with it.
+\begin{description}
+\item[A1. Routes and route order.] The routes are those the application declares, and a
+catch-all route in a separately registered route table is matched after every route of the
+other tables. A route added at run time is a counterexample, and so is a registration order
+that puts such a catch-all earlier. Table~\ref{tab:approximations} lists the matching order
+among the declared approximations. Most of the must tier rests on A1. Of the \RouteOrderMust{}
+must edges, \RouteOrderResting{} hold only under A1, and these come from
+\RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications. Without A1, \RouteOrderMustWithout{} must
+edges remain, on \RouteOrderSitesWithout{} of the \RouteOrderSites{} constructs.
+\item[A2. Selectors.] The component of a must edge's site is not placed by a join over an ambiguous selector,
+the fallback of the nesting relation when no import resolves the selector
+(Sections~\ref{sec:inputs} and~\ref{sec:implementation}). A join that places a component on a
+screen that never renders it is a counterexample. Such joins occur in k8s dashboard and
+bitwarden, but no final must edge cites a construct placed through one.
+\item[A3. Calls.] In handling the event of a must edge, no call that the reader cannot resolve to a body in the application starts a
+navigation, and no work that the handler schedules for later starts one. A library call that
+navigates is a counterexample, and so is a callback that the handler schedules and that
+navigates.
+\item[A4. Execution model.] The event is a plain primary activation that navigates the current
+browsing context. No other listener that the event reaches starts a navigation, and all
+synchronous evaluation that precedes the navigation completes normally. The counterexamples are
+an activation with a modifier key, navigation into another browsing context
+(Section~\ref{sec:approximations}), and a second listener on the element or an ancestor. An
+exception before the navigation is another, whether it comes from a call or from the evaluation
+of an expression.
+\end{description}
+The edges that rest on A3 and A4 are not counted, and neither assumption is checked against a
+run.
 
 \begin{claim}[Soundness of the must tier]
 \label{claim:must}
-Every must edge corresponds to a navigation that occurs, for every input on which the
-enclosing code executes, over the declared route set, under the route-order assumption of
-Section~\ref{sec:approximations}, and for a site whose component is not placed by a join over an
-ambiguous selector, within the following execution model: the event is a plain primary
-activation that navigates the current browsing context, no other listener the event reaches
-starts a navigation, no call the reader cannot resolve to a body in the application, nor any work the handler schedules for later, starts one, and all synchronous evaluation that precedes the navigation completes normally.
+Under assumptions A1 to A4, every must edge corresponds to a navigation that occurs for every
+input on which the enclosing code executes.
 \end{claim}
 
-\noindent The execution model is part of the claim. It excludes library calls that start a
-competing navigation, second listeners on the element or an ancestor, modifier-key activations
-or navigation into another browsing context (Section~\ref{sec:approximations}), and exceptions
-before navigation, whether from calls or expression evaluation. A must navigation may not
-complete in these executions; the claim does not cover them.
+\noindent Where an assumption fails, for a program or for one execution, a must edge need not
+correspond to a navigation that occurs, and Claim~\ref{claim:must} does not cover that case. The must tier is therefore
+a lower bound relative to A1 to A4.
 
-Much of the must tier depends on the route-order assumption in Claim~\ref{claim:must}: without it,
-\RouteOrderMustWithout{} of \RouteOrderMust{} edges remain, on
-\RouteOrderSitesWithout{} of \RouteOrderSites{} constructs.
-
-The must tier is therefore a lower bound relative to four assumptions, each with a class of counterexample. \emph{A1, route order:} a catch-all in a separately registered route table is matched after every route of the others; another registration order breaks it, and \RouteOrderResting{} must edges, on \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications, rest on it. \emph{A2, selectors:} no component is placed by a join over an ambiguous selector; no final must edge rests on such a join (Section~\ref{sec:inputs}). \emph{A3, calls:} a call with no body in the application starts no navigation; a library call that navigates breaks it. \emph{A4, execution model:} the plain primary activation above, in which all synchronous evaluation before the navigation completes normally; a modifier key, a second listener, another browsing context or an exception before the navigation breaks it. The edges resting on A3 and A4 are not counted, and neither is checked against a run.
-
-\textbf{What the evaluation tests.} The evaluation tests only a necessary condition of the
-claim, which limits the reading of Chapter~\ref{ch:results}. The witness check
+\textbf{What the evaluation tests.} The evaluation tests only a necessary condition of
+Claim~\ref{claim:must}, which limits the reading of Chapter~\ref{ch:results}. The witness check
 (Section~\ref{sec:protocol}) inspects every cited source location for agreement with the
 edge's destination. If the construct supporting a must label names another destination,
 the claim fails there. Agreement does not establish the claim. Other cited constructs
@@ -192,26 +208,25 @@ through a navigation call, including in a branch or callback, or through a call 
 of the class, a function in the file or an injected service's method whose body navigates. An awaited
 navigation finishes before its function continues, so subsequent code in that function does
 not count. Callers continue at its first await, so their subsequent code still counts.
-Calls without resolvable application bodies are assumed not to navigate
+Calls without resolvable application bodies are taken not to navigate, which is assumption A3
 (Section~\ref{sec:approximations}).
 
 Exceptions before the site are not counted, because almost any evaluation can throw and
-Claim~\ref{claim:must} assumes normal completion. An \texttt{await} is counted because request
+Claim~\ref{claim:must} assumes normal completion in A4. An \texttt{await} is counted because request
 rejection is an ordinary outcome. Lazy-route fetches are not counted, since a chunk-load failure is
 a deployment fault.
 
 \textbf{How far the rules are checked.} Unit tests cover each rule in both directions. A
 mutation sweep deletes each rule in turn and requires a test failure
 (Section~\ref{sec:res-round2}). The tests share the extractor's interpretation, and no second
-classifier derives it independently. The declared AI assistant checked final must-tier
+classifier derives it independently. The declared artificial intelligence (AI) assistant checked final must-tier
 constructs against source with the extractor's decisions visible. This tests whether the
 decisions are defensible, but not whether an independent reading reproduces them
 (Section~\ref{sec:res-round2}). An earlier review of a development tier found condition-rule
 defects that the witness check missed (Section~\ref{app:repairs}). That check establishes only source-site existence and target agreement. The stronger claim rests on the demotion rules
 and remains independently unverified.
 
-\textbf{Scope of the claim.} This thesis claims soundness for the must tier alone, relative to
-the declared route set. A may witness establishes that a call site exists, not that its
+\textbf{Scope of the claim.} This thesis claims soundness for the must tier alone. A may witness establishes that a call site exists, not that its
 transition ever occurs. Target agreement at the witness location is meaningful for must
 edges and literal-target may edges, but not for over-approximated edges, where applying it produces spurious failures (Section~\ref{app:repairs},
 Table~\ref{tab:repairs}). No soundness property is claimed for may or unknown.
@@ -223,27 +238,33 @@ rules under-approximate: selecting the first matching route, treating interpolat
 path segment, ordering catch-all routes last, placing dispatch and dialogs, and assuming
 calls without application bodies do not navigate. The graph can therefore omit intended
 transitions. An infeasible may edge costs precision, whereas an omitted actual transition is a
-defect. No completeness theorem is claimed. The end-to-end check
-(Section~\ref{sec:res-e2e}) measures omissions against suite transitions, and the structural
-references (Section~\ref{sec:res-groundtruth}) measure them only against the analysis's
-own relations.
+defect. No completeness theorem is claimed. The end-to-end check (Section~\ref{sec:res-e2e})
+measures omissions against the transitions of test suites. The structural references
+(Section~\ref{sec:res-groundtruth}) also count omissions, within the limit stated where
+Section~\ref{sec:scope} defines them.
 Section~\ref{sec:may-incomplete} sorts what is still missing by whether it lies inside the static
 boundary.
 
 \section{Scope attribution}
 \label{sec:attribution}
 
-Scope attribution uses five \emph{input relations}. The evaluated analysis implements
-the three listed below, then adds post-fixpoint fallbacks, one nonmonotone. Termination and the
-least-solution property hold for the fixpoint core only:
+Scope attribution uses five \emph{input relations}. The evaluated analysis implements three
+of them:
 \begin{itemize}
 \item component nesting ($N$): which component's template instantiates which;
 \item router outlets: which components lie on the path from the root to an outlet, and below a
 route's component;
 \item the call graph with dependency injection ($\mathit{CG}$).
 \end{itemize}
-The derived relation $\mathit{Mem}$ links components to their members. Dispatch ($D$) and
-guards ($T$), defined in Section~\ref{sec:extensions}, are not implemented. Chapter~\ref{ch:evaluation} therefore evaluates three relations, two stand-ins and a fallback post-pass.
+The other two, dispatch ($D$) and guards ($T$), are defined in Section~\ref{sec:extensions}
+and are not implemented. The prototype replaces them with stand-ins. The derived relation
+$\mathit{Mem}$ links components to their members.
+
+The analysis computes a fixpoint over these relations, and the prototype then adds fallbacks
+after the fixpoint, one of them nonmonotone. Termination and the least-solution property of
+Section~\ref{sec:scope} hold for the fixpoint alone. The evaluation in
+Chapters~\ref{ch:evaluation} and~\ref{ch:results} therefore covers three relations, two
+stand-ins and a fallback post-pass.
 
 Guards returning \texttt{UrlTree}, the injector hierarchy, and navigation inside signal effects
 and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) are model-only
@@ -284,11 +305,14 @@ widens it with fallbacks that are not constraints of the model
 \end{itemize}
 A screen in $\mathit{scope}^{*}(x) \setminus \mathit{scope}(x)$ indicates a scope too small;
 one in $\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ indicates a scope too large. This
-thesis establishes no true scope. For two applications, source inspection defines a third set:
-the \emph{structural reference} $\mathit{scope}^{R}(x)$, constructed by the author for one and
-the AI assistant for the other. It applies the analysis's relations independently of its
-implementation (Section~\ref{sec:res-groundtruth}). Agreement with $\mathit{scope}^{R}$ shows
-that the specified relations are implemented, not equality with $\mathit{scope}^{*}$. Every scope reported elsewhere is a computed scope.
+thesis establishes no true scope. For two applications, source inspection defines a third set,
+the \emph{structural reference} $\mathit{scope}^{R}(x)$. The author constructed it for one
+application and the AI assistant for the other. It applies the analysis's own relations,
+independently of the implementation (Section~\ref{sec:res-groundtruth}). Agreement with
+$\mathit{scope}^{R}$ therefore shows that the implementation applies the specified relations.
+It does not show that the computed scope equals $\mathit{scope}^{*}$, and it cannot reveal a
+navigation that the relations themselves miss. Every scope reported elsewhere is a computed
+scope.
 
 \textbf{The empty scope.} An empty computed scope can indicate two distinct situations.
 \begin{itemize}
@@ -339,7 +363,7 @@ member (method, property initialiser, lifecycle hook) of a component & the scope
 component \\
 method of an injectable service & join of the scopes of its callers \\
 \texttt{canDeactivate} on route $r$ & $\mathit{subtree}(r)$ \\
-HTTP interceptor & $\top$ \\
+Hypertext Transfer Protocol (HTTP) interceptor & $\top$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -357,6 +381,17 @@ system, independent of the order in which nodes leave the worklist. The transfer
 monotone because the only operation they apply to a scope is a join, and union is monotone in
 both arguments.
 \end{itemize}
+
+The height also bounds the cost of the fixpoint. A node's scope rises at most $|S|$ times, and
+each rise applies one transfer function to each pair that leaves the node in $N$,
+$\mathit{Mem}$, $\mathit{CG}$, $D$ or $T$. The fixpoint therefore applies
+\[
+  O\bigl(|S| \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|)\bigr)
+\]
+transfer functions, and the implemented core is the case in which $D$ and $T$ are empty. With
+scopes held as bit sets, one application is a union of two subsets of $S$ and costs $O(|S|)$,
+so the running time is bounded by
+$O\bigl(|S|^2 \cdot (|N| + |\mathit{Mem}| + |\mathit{CG}| + |D| + |T|)\bigr)$.
 
 The worklist handles cycles, including mutually recursive templates. The restrictions,
 fallbacks and stand-ins of Section~\ref{sec:implementation} lie outside it.
@@ -507,9 +542,8 @@ Figure~\ref{fig:lattice} distinguishes levels representing earlier work from thi
 matching $B$'s selector. Ambiguous matches are restricted to components imported by $A$'s
 file. If none is imported, the pass joins all candidates and records a note. Such edges are
 not capped at \emph{may}, so sites may be attributed to screens rendering another candidate.
-Claim~\ref{claim:must} excludes these edges (Section~\ref{sec:approximations}). Such joins
-occur in k8s dashboard and bitwarden, but no final must edge cites a construct placed through
-one. Attribute selectors are matched similarly, assigning scopes to directives as well as components.
+Assumption A2 of Section~\ref{sec:model} excludes these edges from Claim~\ref{claim:must}, and
+Table~\ref{tab:approximations} lists the join among the declared approximations. Attribute selectors are matched similarly, assigning scopes to directives as well as components.
 
 \textbf{Router outlets.} Route extraction records the route tree. A route component's template
 renders on its own and descendant screens, giving its sites scope $\mathit{subtree}(r)$.
@@ -587,8 +621,8 @@ each case above.
 
 \section{Summary}
 
-The graph model uses three modality labels. Its must-tier soundness claim is relative to
-declared routes, route order and an execution model, and the evaluation tests a necessary
-condition only. Scope attribution computes screen sets as a least fixpoint over five relations.
+The graph model uses three modality labels. Its must-tier soundness claim rests on four
+assumptions about routes and route order, selectors, unresolved calls and the execution model.
+The evaluation tests a necessary condition of the claim. Scope attribution computes screen sets as a least fixpoint over five relations.
 The prototype implements three, substitutes stand-ins for dispatch and guards, and adds
 fallbacks outside the model. Chapter~\ref{ch:evaluation} describes the measurement.
