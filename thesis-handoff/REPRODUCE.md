@@ -54,10 +54,13 @@ repository, and is kept as committed.
 ## 2. Re-measure from the sources (hours)
 
 Needs a work directory outside `/tmp` (macOS cleans it) holding `corpus/<app>` checkouts at the
-pins above, each with its dependencies installed. Then, from the repository root:
+pins above, without their dependencies installed: the static measurement reads source only, as the thesis states. The
+runtime route oracle reads the applications built separately in their development configuration (`--dist-root` in
+`route-probe/README.md`), and the end-to-end suites run on separate clones of the checkouts, with dependencies installed
+(`e2e-nav/results/<app>/summary.txt`).
 
-Run from the commit that holds this file: its `packages/` is identical to `2aac284`, and its
-harness is the one that wrote the committed tables.
+Run from the commit that holds this file: its `packages/` is identical to `a9d29df`, and its
+harness is the one that wrote the committed tables. From the repository root:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -68,13 +71,10 @@ cd thesis-handoff/route-oracle && npm ci
 ./post-remeasure.sh <work>            # e2e graphs and score, alfresco levels, both references, ceiling
 ```
 
-Both scripts refuse to start if `packages/` has uncommitted changes. The mutation sweep (`mutation-sweep.mjs`, then
+All three scripts refuse to start if `packages/` has uncommitted changes. The mutation sweep (`mutation-sweep.mjs`, then
 `sweep-to-latex.mjs`) runs the adapter's test suite once per mutant with `--maxWorkers=2` and is only needed if
 `packages/adapter-angular/src` changes. `remeasure.sh` ends in `sweep-to-latex.mjs`, which refuses a sweep recorded on
 other adapter sources; run the sweep and then `sweep-to-latex.mjs` again.
-
-The runtime probe needs each application built in its development configuration; see
-`route-probe/README.md`.
 
 The end-to-end navigation check (`e2e-nav/`) is scored from its archived logs and the
 corpus graphs, both under `e2e-nav/results/<app>/`. `route-oracle/post-remeasure.sh <work>`, run after

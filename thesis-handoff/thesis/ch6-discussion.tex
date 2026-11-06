@@ -14,8 +14,8 @@ configuration (Table~\ref{tab:coverage}), and the loss classification is compute
 The runtime route oracle observes no node placed at an address where the framework mounts nothing.
 That shows that no such error was observed, not that none can occur.
 Against the mounted addresses the route configuration the oracle reads holds \ProbeMissed{}
-addresses with no node, \ProbeMissedGhostfolio{} of them in ghostfolio (Section~\ref{sec:res-probe}),
-so only \ProbeExactApps{} of the six are complete in this stronger sense of a node for every mounted address, which is what a user of the graph would want.
+leaf screens with no node, \ProbeMissedGhostfolio{} of them in ghostfolio (Section~\ref{sec:res-probe}),
+so only \ProbeExactApps{} of the six are complete in this stronger sense of a node for every mounted leaf screen, which is what a user of the graph would want.
 The node defects (constant paths, lazy boundaries) are traced in Section~\ref{sec:res-defects}; the final version reads their causes (Section~\ref{sec:res-round2}), and those losses are empty.
 
 \paragraph{What remains is lost at the edge.}
@@ -211,11 +211,10 @@ Refusing to read more raises reported coverage.
 & The runtime route oracle supplies a second reading (Section~\ref{sec:res-probe}).
 & The stronger threat, in the opposite direction to the one above. \\
 Witness check
-& A construct counts towards must conversion only on evidence the check has read.
+& Must conversion rests on must witnesses, and their target consistency on what the check can read.
 It is mechanical and re-parses the source at the claimed location.
-& Judges every location an edge cites.
-& It checks the witness and not the address: an edge whose target node sits at a path the application
-does not mount satisfies it. \\
+& Judges every must witness of every must edge, merged witnesses included: compares the construct and its target with the edge, tests the destination's address against the independent static route set, and reports apart the \MustWitnessUnread{} must-edge destinations it cannot read.
+& It does not see whether the router mounts that address at run time, which the runtime route oracle checks, nor whether the navigation executes. \\
 Precedence of the loss rules
 & The order of the rules is part of the measure; testing the target first would make the target category
 larger than attribution on \AttrOrderFlips{} applications (\AttrOrderFlipWhere{}).
