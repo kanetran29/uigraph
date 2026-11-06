@@ -170,7 +170,7 @@ export function macros({ perApp, totals }) {
   const rows = Object.keys(FAMILIES).map((f) => `${f === 'sameScreen' ? 'same screen' : f} & ${totals.any[f]} & ${totals.sole[f]} & ${names.map((n) => perApp[n].any[f]).join(' & ')} \\\\`)
   out.push('\\newcommand{\\TabMayReasons}{%', `\\begin{tabular}{@{}lrr${'r'.repeat(names.length)}@{}}`, '\\toprule',
     ` & & & \\multicolumn{${names.length}}{c@{}}{Any, by application} \\\\`, `\\cmidrule(l){4-${3 + names.length}}`,
-    `Family & Any & Sole & ${names.map((n) => APPS[n].toLowerCase()).join(' & ')} \\\\`, '\\midrule', ...rows, '\\bottomrule', '\\end{tabular}}')
+    `Family & Any & Sole & ${names.map((n) => (n === 'k8sdash' ? 'k8s' : APPS[n].toLowerCase())).join(' & ')} \\\\`, '\\midrule', ...rows, '\\bottomrule', '\\end{tabular}}')
   return out
 }
 

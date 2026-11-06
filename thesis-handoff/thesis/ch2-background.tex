@@ -220,7 +220,8 @@ library it describes, found 142 errors in the declarations of 10 libraries
 \cite{feldthaus2014checking}.
 
 For an analysis of Angular code, a declared type narrows the set of candidate implementations of
-a call, and the call graph described in Section~\ref{sec:angular} relies on that narrowing. The
+a call, and the call graph described in Sections~\ref{sec:inputs} and~\ref{sec:implementation}
+relies on that narrowing. The
 type does not establish that the call reaches exactly one candidate. An unresolved or ambiguous
 type must therefore widen the result instead of being trusted. In the graph model, this widening
 is one source of the may tier.

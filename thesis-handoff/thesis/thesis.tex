@@ -83,9 +83,8 @@ Major: & Computer Science \\
 \addcontentsline{toc}{chapter}{Abstract}
 \vspace{-1.5em}
 A user interface (UI) transition graph represents an application's screens and the navigation
-between them. For single-page applications, such graphs are usually obtained by execution. Static
-extraction from source code avoids execution, but its losses have not been measured construct by
-construct.
+between them. For single-page applications, such graphs usually come from execution. Static
+extraction avoids execution, but its losses have not been measured construct by construct.
 
 This thesis measures what static extraction recovers from Angular applications and why it loses
 the rest. It proposes scope attribution, a dataflow analysis that computes the screens from which
@@ -94,20 +93,21 @@ each navigation site can fire.
 An extractor was applied to six open-source Angular applications and checked with five evaluation
 methods. Every unrecovered navigation construct was classified.
 
-Every screen readable from the route tables has a node. Only \CensusMustSites{} constructs yield
+Every screen readable from route tables has a node. Only \CensusMustSites{} constructs yield
 deterministic transitions under stated assumptions, largely because the study defines them strictly. Under the study's classification order, the largest loss
-category is navigation outside the components that routes render directly. Scope attribution
+category is navigation outside components that routes render directly. Scope attribution
 recovers \AttrRecoveredShare{} of these constructs, most of them in the largest application. Almost all become possible transitions, mostly
 through mechanisms from earlier work. The added step, for services, guards and effects, places a
-further \AblationFullAddedShare{} of the navigation sites and, on a reference read from one
-application's source, trades precision for recall. A comparison with the tool of Rima et al.\ shows a similar
-trade-off and no overall ranking, and this extractor's precision is far lower on the largest
-application. Both comparisons rest on small samples read by an artificial intelligence model, and
-one subgroup was formed after reading.
+further \AblationFullAddedShare{} of the sites. On a reference that applies the
+analysis's own relations to one application's source, it trades precision for recall. A comparison with
+Rima et al.'s tool shows a similar trade-off and no overall ranking, with this extractor far less
+precise on the largest application. Both comparisons rest on small samples read by an artificial
+intelligence model, and one subgroup was formed after reading. Mutation testing only sanity-checks
+the mapping between source and witnesses.
 
-Route tables give static extraction a starting point, but attributing navigation to screens and
-resolving targets remain necessary. The results are in-sample because the extractor was developed
-on these applications. The graph's benefit to its users is not measured.
+Route tables give static extraction a starting point, but attribution and target resolution remain
+necessary. The main corpus results are in-sample because the extractor was developed on these
+applications. The graph's benefit to users is not measured.
 
 \vspace{0.5em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
@@ -177,10 +177,16 @@ ZAP & Zed Attack Proxy, a web security scanner \\
 \begin{description}[nosep]
 \item[Anchored edge] An edge stored once at its scope, $\top$ or $\mathit{subtree}(r)$, instead of
 once per screen (Section~\ref{sec:anchored}).
-\item[Attribution loss] A lost navigation construct in one of the two attribution categories of
-Table~\ref{tab:loss-rules}. It has no owning component, is owned by a class that is not a
-component, such as a service or guard, or lies in a component that no route renders directly
-(Section~\ref{sec:metrics}).
+\item[Attribution level] One of the nested configurations at which the ablation extracts the
+corpus. The levels \emph{owned}, \emph{nesting}, \emph{rooted}, \emph{outlet} and \emph{full}
+are nested, each adding mechanisms to the one before. \emph{Class} replaces the call graph of \emph{full} with a
+per-class join (Section~\ref{sec:metrics} and Figure~\ref{fig:lattice}).
+\item[Attribution loss] A lost navigation construct in one of the two attribution categories. It
+has no owning component, is owned by a class that is not a component, such as a service or guard,
+or lies in a component that no route renders directly (Table~\ref{tab:loss-rules}).
+\item[Clean citation] A witness citation that the witness check reads and passes. Citations at
+over-approximated sites, and those whose target the check cannot read, are neither clean nor
+failures (Section~\ref{sec:res-soundness}).
 \item[Demotion] Lowering a site from must to may because a condition of Table~\ref{tab:demotion}
 holds (Section~\ref{sec:model}).
 \item[Dynamic target, dynamic sink] A nonscreen node, a screen's \texttt{u\_}\,sink, for an
@@ -196,6 +202,9 @@ destination (Section~\ref{sec:metrics}).
 $\mathit{subtree}(r)$, the screens of $r$ and its descendants (Section~\ref{sec:inputs}).
 \item[Placed screen] A screen node, rather than an unplaced origin, as the source of an edge.
 Recovery counts must and may edges from placed screens (Section~\ref{sec:res-accounting}).
+\item[Red-team panel] An adversarial review, run with the declared AI assistant, in which several
+reviewers read the graph and the source and each try to find errors
+(Appendix~\ref{app:corrections}).
 \item[Relative recall] The share of the real transition pairs in the union of two tools' pairs that
 one tool finds (Section~\ref{sec:res-h2h}).
 \item[Route-order assumption] Assumption A1: a catch-all in a separately registered route table is

@@ -101,7 +101,7 @@ It remains a candidate and has no instances in the final version.
 \toprule
 Class & Evidence & Methods & All \\
 \midrule
-Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph; multi-mount edge absent; manual audit; an application with nodes and no edges on a development version (k8s dashboard; Section~\ref{app:repairs}) & 1 & 4 \\
+Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph; multi-mount edge absent; manual audit; an application, k8s dashboard, with nodes and no edges on the early development version of Section~\ref{app:repairs} & 1 & 4 \\
 Lazy module boundary not followed & independent route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & red-team panels and a source survey of the guard factory and the call-form \texttt{canActivate}
 (Section~\ref{sec:res-losses}) & 0 & 2 \\
@@ -194,9 +194,9 @@ Attribution recovers \AttrRecovered{}/\AttrLost{} assigned constructs: a per-app
 \AttrRecoveredMedian{} (range \AttrRecoveredRange{}) and a pooled share of \AttrRecoveredShare{}.
 Most recoveries occur on mifos. Excluding it reduces the share to \AttrRecoveredShareNoMifos{}, and
 recovery stays under half on \AttrUnderHalfApps{} of the six applications. Edge counts rise from
-\AttrEdgesBefore{} to \AttrEdgesAfter{}. Most recovery uses mechanisms from earlier work.
-Section~\ref{sec:res-ablation} measures what the \emph{full} step adds beyond them and what its
-call graph adds over the class rule it replaced.
+\AttrEdgesBefore{} to \AttrEdgesAfter{}. Section~\ref{sec:res-ablation} measures what the
+\emph{full} step adds beyond the levels that reimplement earlier work and what its call graph adds
+over the class rule it replaced.
 
 Measured by RQ1's must conversion, the gain is far smaller. The recovered
 constructs divide into \AttrRecoveredMust{} at must and \AttrRecoveredMay{} at may, and must
@@ -407,8 +407,8 @@ class & \GTClassPrecision{} & \GTClassRecall{} & \GTClassRecallNonShell{} & \GTA
 \end{table}
 
 On \GTApp{}, the table requires nested pair sets and no full-level pair outside the reference;
-levels therefore differ in recall alone. Most recovery comes from the pre-existing shell
-(\emph{rooted}) and enclosing-route (\emph{outlet}) rules, and full adds the remaining
+levels therefore differ in recall alone. Most reference pairs come from the shell rule
+(\emph{rooted}) and the enclosing-route rule (\emph{outlet}), and full adds the remaining
 \GTOutletMissing{} of the \GTPairs{} pairs. On alfresco, full adds service, guard and effect sites beyond earlier
 levels, but is less precise than both those levels and the class join.
 
@@ -849,7 +849,8 @@ semantics (Section~\ref{sec:model}).
 \paragraph{Still not read (open).} The final version does not read these causes.
 
 \begin{itemize}
-\item \emph{Attribution}: \AttrRecoveredShare{} of its constructs are recovered. The remainder is in
+\item \emph{Attribution}: the share of its constructs recovered has a per-application median of
+\AttrRecoveredMedian{} and is \AttrRecoveredShare{} pooled. The remainder is in
 Table~\ref{tab:remaining}, including sites that no relation the prototype implements reaches. It mixes gaps of the tool with
 components that no screen may render, and no measurement separates them.
 \item \emph{Named router outlets}: a construct the model represents and the extractor does not
@@ -912,7 +913,7 @@ span \RoundTwoDynamicFiles{} files, \RoundTwoDynamicFilesOne{} of them with one 
 indicates a distributed coding pattern rather than a single defect. Mifos contributes
 \RoundTwoMifosShare{} of the in-scope sites. Without it, recovery is \RoundTwoNoMifosRecovered{}
 and the accounted share \RoundTwoNoMifosAccounted{}.
-Section~\ref{app:validation} records route-denominator changes.
+Table~\ref{tab:repairs} records the changes to the route denominators.
 
 The named-outlet restriction reaches a named outlet's \emph{subtree} too. The extractor created
 nodes for alfresco's viewer routes at the primary address, although Angular reaches those routes
@@ -1024,8 +1025,9 @@ cannot place on a screen it fires from. The evidence supports five defect classe
 class (Table~\ref{tab:defects}). The lazy-boundary, constant-path and unlinked-component classes
 have no instances on the final version (Section~\ref{sec:res-defects}).
 
-\paragraph{RQ3.} Scope attribution recovers \AttrRecoveredShare{} of the constructs lost to
-attribution. Almost all of them are recovered at the may tier, so the gain in must conversion is
+\paragraph{RQ3.} Scope attribution recovers a per-application median of \AttrRecoveredMedian{}
+(range \AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{}
+pooled. Almost all recovered constructs are at the may tier, so the gain in must conversion is
 small. Most of the recovery comes from mechanisms of earlier work, which the analysis includes as
 levels. Its added step places navigation in services, guards and effects, and on the alfresco
 reference it raises recall at a cost in precision. No check establishes that the computed scopes
@@ -1036,10 +1038,7 @@ operators act only at constructs the graph already cites, so the result is a con
 the mapping from witnesses to source, and change-impact accuracy remains unmeasured
 (Section~\ref{sec:res-mutation}).
 
-\paragraph{RQ5.} The repaired classes were defects of the tool: their information was in the
-source, and the final version reads it. Attribution losses remain open, and they mix gaps of the
-tool with components that no screen may render. Other causes lie beyond any reader of a route table:
-a route path computed by a custom matcher, and a choice between route tables made at
-deployment (Section~\ref{sec:res-round2}).
+\paragraph{RQ5.} The repaired classes were defects of the tool, the attribution losses remain
+open, and two causes lie beyond any reader of a route table (Section~\ref{sec:res-round2}).
 
 Chapter~\ref{ch:discussion} interprets these answers and their limits.

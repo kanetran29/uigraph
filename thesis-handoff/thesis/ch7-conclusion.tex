@@ -22,15 +22,15 @@ RQ & Answer & Key figures & Main limit \\
 \endfoot
 RQ1: how much is recovered
 & Every declared screen that the static readers identify has a node, but few constructs yield must transitions.
-& \CensusMustSites{} constructs yield \CensusMust{} must edges.
-& Most of these edges rest on the route-order assumption, which has not been validated. \\
+& \CensusMustSites{} constructs yield \CensusMust{} must edges, \CensusMustKdash{} of them from one toolbar in k8s dashboard.
+& Only \ProbeExactApps{} of the six applications have a node for every screen that the running application mounts. The toolbar's scope has not been tested, and most must edges rest on the route-order assumption, which has not been validated. \\
 RQ2: where extraction fails
 & Failures fall into five defect classes and one candidate class (Table~\ref{tab:defects}), and attribution is the largest loss category in every application.
 & Table~\ref{tab:loss} gives the counts.
 & The ranking depends on the order in which the loss rules are applied. \\
 RQ3: what scope attribution adds
-& Scope attribution recovers constructs without losing any that the baseline recovers, but most of them come through mechanisms from earlier work.
-& It recovers \AttrRecoveredShare{} of the constructs lost to attribution.
+& Scope attribution recovers constructs without losing any that the baseline recovers, but most of them come through mechanisms from earlier work. On alfresco, the one structural reference that can tell, the added step trades precision for recall.
+& It recovers a per-application median of \AttrRecoveredMedian{} (range \AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{} pooled.
 & Both structural references apply the analysis's own relations, and on neither application with an end-to-end suite does the added step recover a transition beyond \emph{outlet}. \\
 RQ4: whether the graph responds to change
 & Mutation testing is a conditional sanity check of witness mapping on three applications, and change-impact accuracy remains unmeasured.
@@ -43,9 +43,11 @@ RQ5: whose losses they are
 \end{xltabular}
 \endgroup
 
-\paragraph{Contributions.} The main contribution is the measurement itself. It covers six pinned
-applications, uses five evaluation methods with different blind spots and four further scope
-checks, and classifies every lost construct. The extractor also supports nested and parameterised
+\paragraph{Contributions.} The thesis makes two contributions. The first is scope attribution, a
+formal model of the screens from which a navigation site can fire, which contains the attribution
+rules of earlier Angular extractions as levels. The second is a measurement of what each level
+adds and of what static extraction loses. The measurement covers six pinned applications, uses five evaluation methods
+with different blind spots and four further scope checks, and classifies every lost construct. The extractor also supports nested and parameterised
 route trees, which the restrictions of Oshima and Kishi exclude (Section~\ref{sec:res-earlier}).
 
 The evaluation apparatus makes the measurements inspectable: tables are generated from harness
@@ -54,8 +56,7 @@ the route oracle re-runs only in part, the realworld end-to-end check uses an un
 backend, and superseded figures cannot be regenerated.
 
 Scope attribution is specified as a dataflow analysis over screen sets and implemented over
-three of its five input relations (Section~\ref{sec:attribution}). Most of what it recovers comes
-from mechanisms of earlier work, which it includes as analysis levels. Its added step places
+three of its five input relations (Section~\ref{sec:attribution}). Its added step places
 navigation in services, guards and effects. The step's service join is type-directed and transitive,
 so it generalises the router-service tracing in Rima et al.'s implementation, which is bounded
 to one level and matches by name. With a fallback join and stand-ins for guards and effects, the
