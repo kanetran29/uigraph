@@ -82,35 +82,35 @@ Major: & Computer Science \\
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 \vspace{-1.5em}
-A user-interface (UI) transition graph represents application screens and navigation between them.
-Such graphs are usually obtained by executing single-page applications. This thesis measures static
-extraction on six open-source Angular applications using five evaluation methods and a construct-level
-classification of unrecovered navigation. It proposes scope attribution, a dataflow analysis of the
-screens from which a navigation site may fire.
+A user-interface (UI) transition graph represents application screens and navigation between
+them. For single-page applications they are usually obtained by execution. This thesis measures
+static extraction on six open-source Angular applications with five evaluation methods and
+classifies every unrecovered navigation construct. It proposes scope attribution, a dataflow
+analysis of the screens from which a navigation site may fire.
 
 Under the study's demotion rules and execution assumptions, \CensusMustSites{} constructs yield
-\RouteOrderMust{} must edges. Of these, \CensusMustKdash{} come from one toolbar whose scope has not
-been validated at run time; \RouteOrderMustWithout{} remain without the route-order assumption.
-The small must tier largely reflects the classification rules rather than an inherent limit of
-static analysis.
+\RouteOrderMust{} must edges. Of these, \CensusMustKdash{} come from one toolbar whose scope has
+not been validated at run time. Without the route-order assumption, \RouteOrderMustWithout{}
+remain. The small must tier largely reflects the classification rules rather than an inherent
+limit of static analysis.
 
 Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to attribution loss,
-or \AttrRecoveredShareNoMifos{} without the largest application. Most recovered constructs yield
-possible transitions through mechanisms from earlier work. The added step places navigation in services, guards
-and effects, contributing \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) above outlet
-attribution. Its member-level call graph generalises Rima et al.'s bounded router-service tracing
-and adds \AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over a per-class join.
+or \AttrRecoveredShareNoMifos{} without the largest application, mostly as possible transitions
+through mechanisms from earlier work. The added step places navigation in services, guards and
+effects, adding \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) beyond outlet descent.
+Its member-level call graph generalises Rima et al.'s bounded router-service tracing and adds
+\AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over a per-class join.
 
-On the \GTAlfSites{} determined sites of an AI-built Alfresco reference, full attribution increases
-recall from \GTAlfClassRecall{} to \GTAlfFullRecall{} while reducing precision from
-\GTAlfClassPrecision{} to \GTAlfFullPrecision{}. The reference applies the analysis's own relations,
-so agreement does not establish true runtime scope. A comparison with Rima et al.'s tool also shows
-a coverage--precision trade-off, without an overall ranking. It uses small AI-read samples; its
-five-application subgroup was selected after inspecting the results. This extractor's estimated
-precision on the largest application is \HHMifosOursPrecision{}. Mutation testing provides only a
-conditional sanity check of source-to-witness mapping.
+On the \GTAlfSites{} determined sites of an AI-built Alfresco reference, full attribution raises
+recall from \GTAlfClassRecall{} under the per-class join to \GTAlfFullRecall{} but lowers precision
+from \GTAlfClassPrecision{} to \GTAlfFullPrecision{}. Because the reference applies the analysis's
+own relations, agreement does not establish the true scope. A comparison with Rima et al.'s tool
+also shows a recall--precision trade-off, without an overall ranking. It rests on small AI-read
+samples and on a five-application subgroup formed post hoc. This extractor's estimated precision
+on the largest application is \HHMifosOursPrecision{}. Mutation testing gives only a conditional
+sanity check of source-to-witness mapping.
 
-Route tables provide a starting point for static extraction, but source attribution and target
+Route tables give static extraction a starting point, but source attribution and target
 resolution remain necessary. The main corpus results are in-sample because the extractor was
 developed on these applications. Consumer benefit is not measured.
 
@@ -169,6 +169,55 @@ UI & user interface \\
 URL & Uniform Resource Locator \\
 ZAP & Zed Attack Proxy, a web security scanner \\
 \end{tabular}
+
+\chapter*{Terms}
+\addcontentsline{toc}{chapter}{Terms}
+
+\begin{description}[nosep]
+\item[Anchored edge] An edge stored once at its scope, $\top$ or $\mathit{subtree}(r)$, instead of
+once per screen (Section~\ref{sec:anchored}).
+\item[Demotion] Lowering a site from must to may because a condition of Table~\ref{tab:demotion}
+holds (Section~\ref{sec:model}).
+\item[Dynamic target, dynamic sink] A nonscreen node, a screen's \texttt{u\_}\,sink, for an
+unresolved destination. Edges into it have modality unknown (Section~\ref{sec:model}).
+\item[Modality] The confidence label of an edge: \emph{must} if it is claimed to fire for every
+input on which the enclosing code executes, \emph{may} if it is possible but conditional, and
+\emph{unknown} if it could not be determined (Section~\ref{sec:model}).
+\item[Navigation construct] A \texttt{routerLink} binding in a template, or a call in class code to
+\texttt{Router.navigate} or \texttt{Router.navigateByUrl}, outside tests. It is
+\emph{in scope} unless it changes only the query string, targets a named outlet or names no
+destination (Section~\ref{sec:metrics}).
+\item[Outlet descent] Giving the component of route $r$, and the components it renders, the scope
+$\mathit{subtree}(r)$, the screens of $r$ and its descendants (Section~\ref{sec:inputs}).
+\item[Placed screen] A screen node, rather than an unplaced origin, as the source of an edge.
+Recovery counts must and may edges from placed screens (Section~\ref{sec:res-accounting}).
+\item[Relative recall] The share of the real transition pairs in the union of two tools' pairs that
+one tool finds (Section~\ref{sec:res-h2h}).
+\item[Route-order assumption] Assumption A1: a catch-all in a separately registered route table is
+matched after every route of the others (Section~\ref{sec:model}).
+\item[Scope] The set of screens from which a site can fire. The extractor emits edges from the
+\emph{computed scope}, whereas the \emph{true scope} is a property of the application that this
+thesis does not establish (Section~\ref{sec:scope}).
+\item[Screen] A graph node for a route that renders a component, identified by the concatenated
+paths of the route and its ancestors (Section~\ref{sec:model}).
+\item[Shell] The components from the root to the primary router outlet. They and everything they
+render get the scope $\top$ of all screens (Section~\ref{sec:inputs}).
+\item[Site, navigation site] A source location that a witness cites. One construct can have more
+than one site (Section~\ref{sec:res-ablation}).
+\item[Static reader] A tool that enumerates screens from the route configuration in the source:
+the extractor or the independent route parser (Section~\ref{sec:res-baseline}).
+\item[Structural reference] The (site, screen) pairs read from an application's source under the
+analysis's own relations, independently of its implementation, so agreement with it does not
+establish the true scope (Section~\ref{sec:scope}).
+\item[Unminted screen] An address at which the runtime route oracle finds a mounted component but
+the graph has no node (Section~\ref{sec:res-probe}).
+\item[Unplaced origin] A nonscreen node, prefixed \texttt{o\_}, for a component whose sites could
+not be assigned to a screen. Its edges are labelled may (Section~\ref{sec:model}).
+\item[Witness, witness citation] The file and line of the construct that generates an edge, or an
+observation identifier. Other constructs producing that edge become merged witnesses. Witness
+citations count every cited location, repeats included (Sections~\ref{sec:model}
+and~\ref{sec:res-soundness}).
+\end{description}
 
 \tableofcontents
 

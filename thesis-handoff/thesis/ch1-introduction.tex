@@ -1,41 +1,55 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-A user interface (UI) transition graph represents application screens and the transitions caused
-by user actions. Each edge records a triggering event, a guard and a destination. The graph supports
-reachability queries and helps identify screens affected by a component change.
+A user interface (UI) transition graph represents the screens of an application and the
+transitions that user actions cause between them. Each edge records the triggering event, a guard
+and the destination. The graph answers reachability queries and helps identify the screens that a
+change to a component affects.
 
-Transition graphs support Android test generation and exploration
+Transition graphs support test generation and exploration for Android
 \cite{yang2015wtg,goalexplorer2019,storydroid2019} and crawling-based web testing
-\cite{crawljax2012,feedex2013}. Their links to source code and tests also support change impact
+\cite{crawljax2012,feedex2013}. Linked to source code and tests, they also support change impact
 analysis \cite{arnold1993impact,bohner1996software}.
 
 \section{Motivation}
 
 Dynamic extraction executes an application and records the states and transitions it observes.
-Its coverage depends on test data, authentication and the exploration budget, and each new version
-requires another run. Static extraction derives a graph from source code without executing the
-application. It can run on each commit, but recovers only the constructs its analysis supports and
-must approximate targets it cannot resolve.
+Its coverage therefore depends on test data, authentication and the exploration budget, and each
+new version needs another run. Static extraction instead derives the graph from source code without
+executing the application. It can run on every commit, but it recovers only the constructs its
+analysis supports and has to approximate the targets it cannot resolve.
 
-These approaches are complementary. Much of the navigation in the applications studied here is
-behind authentication guards. A static graph can identify candidate screens, transitions and
-guards for a crawler, while execution can confirm observed transitions. This thesis evaluates only
-static extraction; the combination is left for future work (Section~\ref{sec:future}).
+The two approaches complement each other. Much of the navigation in the applications studied here
+is behind authentication guards. A static graph can give a crawler candidate screens, transitions
+and guards, and execution can confirm the transitions the crawler observes. This thesis evaluates
+static extraction alone and leaves the combination to future work (Section~\ref{sec:future}).
+
+Navigation graphs also have uses beyond model-based testing. GPTDroid runs a question-and-answer
+loop with a large language model over the current mobile screen and reports higher activity
+coverage and more detected bugs than its best baseline on 93 applications \cite{liu2024make}.
+AutoDroid gives such a model an application-specific transition graph built by offline dynamic
+exploration \cite{wen2024autodroid}, and LLMDroid uses a model to guide exploration towards
+uncovered behaviour \cite{llmdroid2025}. Related work explores web interfaces with vision-language
+models \cite{wang2024leveraging}, and a survey covers large language models in software testing
+\cite{wang2024software}. Coding agents could use navigation structure too, because SWE-bench tasks
+require coordinated edits across the files of a repository \cite{jimenez2024swebench} and the
+interface an agent uses to work on a repository affects its performance \cite{yang2024sweagent}. This thesis does not test whether navigation graphs benefit any of these
+consumers.
 
 Static extraction is established for Android. Window transition graph analyses derive windows and
-transitions from bytecode and link callback control flow to the widgets registering each handler
-\cite{yang2015wtg,yang2015callbacks,yang2018wtg}. Early web navigation models combined templates
-and configuration with crawling or server execution \cite{riccatonella2001,webuml2004}; a patent
-describes a fully static method \cite{tkachuk2013patent}.
+transitions from bytecode and link callback control flow to the widgets that register each handler
+\cite{yang2015wtg,yang2015callbacks,yang2018wtg}. For the web, early navigation models combined
+templates and configuration with crawling or server execution \cite{riccatonella2001,webuml2004},
+and a patent describes a fully static method \cite{tkachuk2013patent}.
 
-Modern single-page applications have mostly been modelled dynamically. Crawljax builds a state
-flow graph by firing events against the running Document Object Model (DOM) \cite{crawljax2012}.
-FeedEx and FRAGGEN improve exploration while retaining execution as the source of the model
-\cite{feedex2013,fraggen2022}. A survey covering 2014--2025 reviews model-based web testing
-\cite{websurvey2025}; every listed tool whose model construction was examined for this thesis
-executes the application. Framework-specific static analyses remain few. One constructs a React
-component dependency graph without routing \cite{kurant2025}. Three extract navigation:
+Modern single-page applications, by contrast, have mostly been modelled dynamically. Crawljax
+builds a state flow graph by firing events against the running Document Object Model (DOM)
+\cite{crawljax2012}. FeedEx and FRAGGEN improve the exploration but still build the model from
+execution \cite{feedex2013,fraggen2022}. Of the tools listed in a survey of model-based web testing
+covering 2014--2025 \cite{websurvey2025}, every one whose model construction was examined for this
+thesis executes the application. Framework-specific static analyses remain few. One builds a
+dependency graph of React components that leaves out routing \cite{kurant2025}, and three others
+extract navigation:
 \begin{itemize}
 \item Oshima and Kishi extract Angular page transitions for model checking. Their stated
 restrictions exclude nested routes and route parameters, and their model omits page transitions
@@ -47,49 +61,42 @@ policies against reachable screens \cite{zhang2025veriflow}.
 \end{itemize}
 Section~\ref{sec:dynamic-spa} compares these approaches.
 
-Early Ajax applications lacked declarative route tables, so crawlers used DOM states to observe
-navigation. Angular, React Router and Vue Router now expose route tables, template navigation and
-service calls in source code; routes can also name guards \cite{angulardocs}. These declarations
-provide inputs for static extraction. Existing studies evaluate extraction against hand-built
-references on their chosen applications, but do not measure losses construct by construct.
+Early Ajax applications had no declarative route tables, so crawlers observed navigation through
+DOM states. In Angular, React Router and Vue Router, route tables, template navigation and service
+calls now appear in source code, and a route can also name its guards \cite{angulardocs}. Static
+extraction can take these declarations as its inputs. Existing studies evaluate extraction against
+hand-built references on their chosen applications, but they do not measure the losses construct
+by construct.
 
-Navigation graphs also motivate applications beyond model-based testing. GPTDroid uses a
-question-and-answer loop over the current mobile screen and reports higher activity coverage and
-more detected bugs than its best baseline on 93 applications \cite{liu2024make}. AutoDroid supplies
-a model with an application-specific transition graph built by offline dynamic exploration
-\cite{wen2024autodroid}; LLMDroid uses a model to guide exploration towards uncovered behaviour
-\cite{llmdroid2025}. Related work explores web interfaces using vision-language models
-\cite{wang2024leveraging}, and a survey covers large language models in software testing
-\cite{wang2024software}. Coding agents may also use navigation structure: SWE-bench tasks require
-coordinated edits across repository files \cite{jimenez2024swebench}, and repository interfaces
-affect agent performance \cite{yang2024sweagent}. Whether navigation graphs benefit these consumers
-is not tested here.
-
-This thesis builds an Angular extractor to measure recovery and classify losses. It proposes
-\emph{scope attribution}, a dataflow analysis over screen sets, for the largest loss category under
-the study's rule order. The analysis is specified independently of the extractor. Measurement is
-the main contribution; scope attribution is a modest extension of earlier mechanisms. Its added
-step places navigation in services, guards and effects, recovering \AblationFullAddedSites{} sites
-(\AblationFullAddedShare{}) above outlet attribution. This step combines a member-level service
-call graph, a fallback join and stand-ins for guards and effects. The call graph alone adds
-\AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over a per-class join
+This thesis therefore builds an Angular extractor to measure how much navigation is recovered and
+to classify the losses. The largest loss category under the study's rule order is attribution loss: navigation in code
+outside the components that routes render directly, such as services, guards and shared
+components. To recover it, the thesis proposes \emph{scope attribution}. Scope attribution is a dataflow analysis over screen
+sets that computes the scope of each navigation site, the set of screens from which the site can
+fire, and it is specified independently of the extractor. The measurement is the main contribution,
+whereas scope attribution is a modest extension of earlier mechanisms. The step it adds
+attributes the navigation in services, guards and effects to screens. That step combines a member-level service
+call graph, a fallback join and stand-ins for guards and effects, and it recovers
+\AblationFullAddedSites{} sites (\AblationFullAddedShare{}) beyond outlet descent. The call graph
+alone adds \AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over a per-class join,
+which links a navigating service to every component that injects its class
 (Section~\ref{sec:res-ablation}).
 
-The extractor supports nested, parameterised and lazily loaded route trees as well as scope
-attribution. The stated restrictions of the earlier Angular model-checking approach exclude the
-first two (Section~\ref{sec:res-earlier}). The extractor was developed and evaluated on the same
-corpus, so its measurements describe these applications rather than estimate performance on
-Angular applications generally. Section~\ref{app:repairs} records the development corrections;
-Section~\ref{sec:limitations} discusses their implications. Chapter~\ref{ch:discussion} separates
-implementation gaps from limits of the approach.
+Besides scope attribution, the extractor handles nested, parameterised and lazily loaded route
+trees, whereas the stated restrictions of Oshima and Kishi's approach exclude the first two
+(Section~\ref{sec:res-earlier}). It was developed and evaluated on the same corpus, so its
+measurements describe these applications and are not estimates of performance on Angular
+applications in general. Section~\ref{app:repairs} records the corrections made during
+development, and Section~\ref{sec:limitations} discusses what they imply.
+Chapter~\ref{ch:discussion} separates gaps in the implementation from limits of the approach.
 
 \section{Research questions and scope}
 \label{sec:rqs}
 
 The aim is to measure how far static extraction of a UI transition graph gets on real Angular
 applications, why it fails where it does, and what scope attribution adds. Five research questions
-(RQs) follow from it; the measures are defined in Section~\ref{sec:metrics} and answered in
-Chapter~\ref{ch:results}.
+(RQs) follow from this aim. Section~\ref{sec:metrics} defines their measures, and
+Chapter~\ref{ch:results} answers them.
 
 \begin{description}[nosep,leftmargin=2.6em,labelwidth=2.2em]
 \item[RQ1] How much of the navigation in Angular applications can static analysis recover as
@@ -102,11 +109,14 @@ Chapter~\ref{ch:results}.
 \item[RQ5] Are the losses a property of the applications or of the tool?
 \end{description}
 
-The questions are answered on six open-source Angular applications pinned to fixed commits
-(Chapter~\ref{ch:evaluation}), with the final version of the extractor. The thesis does not claim
-completeness: it states a soundness property for the must tier that holds only relative to stated assumptions (Claim~\ref{claim:must}) and lists what it approximates
-(Section~\ref{sec:soundiness}). It does not measure the graph's effect on any consumer, it evaluates
-Angular only, and its figures on the corpus are in-sample, since the extractor was developed on it.
+The questions are answered with the final version of the extractor on six open-source Angular
+applications pinned to fixed commits (Chapter~\ref{ch:evaluation}). The thesis does not claim
+completeness. For the must tier, the edges claimed to fire for every input on which their
+enclosing code executes, it states a soundness property conditional on stated assumptions
+(Claim~\ref{claim:must}), and it lists what the analysis approximates
+(Section~\ref{sec:soundiness}). It does not measure the graph's effect on any consumer, and it
+evaluates Angular alone. Because the extractor was developed on the corpus, its figures on that
+corpus are in-sample.
 
 \section{Thesis structure}
 
@@ -115,8 +125,8 @@ Figure~\ref{fig:overview} summarises the study.
 \input{figures/fig-overview}
 
 Chapter~\ref{ch:background} reviews transition graphs, related extraction methods, Angular and
-the analysis foundations. Chapter~\ref{ch:analysis} defines the model, its conditional soundness
-claim, scope attribution and the implementation. Chapter~\ref{ch:evaluation} describes the corpus,
+the analysis foundations. Chapter~\ref{ch:analysis} defines the graph model, its conditional
+soundness claim and scope attribution, and describes the implementation. Chapter~\ref{ch:evaluation} describes the corpus,
 metrics, evaluation methods and protocol corrections. Chapter~\ref{ch:results} answers the research
 questions and reports statically detected dead-link candidates. Chapter~\ref{ch:discussion}
 interprets the results and discusses limitations, framework transfer and future work.
