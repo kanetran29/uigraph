@@ -27,50 +27,50 @@ Found by & What was wrong & What changed & Effect on the figures \\
 \multicolumn{4}{@{}l}{\emph{Protocol and harness}} \\
 One application's recall fell when the rule was tightened.
   & Test-source cross-check: a URL parameter in a test could match a literal route segment.
-  & A parameter no longer matches a literal segment; a negative test is excluded.
-  & The earlier recall cannot be regenerated; end-to-end recall there is now \EtoERateAlfresco{}. \\
-\emph{Figure}: inspection of the flagged edges.
+  & A parameter no longer matches a literal segment. A negative test is excluded.
+  & The earlier recall cannot be regenerated. End-to-end recall there is now \EtoERateAlfresco{}. \\
+\emph{Figure}: inspecting the flagged edges.
   & A low witness-check pass rate came entirely from may edges at one over-approximated call site.
-  & Over-approximated sites are reported separately; the extractor is unchanged.
-  & The low rate reflected the measurement; no must edge failed. \\
+  & Over-approximated sites are reported separately. The extractor is unchanged.
+  & The low rate was a measurement artefact. No must edge failed. \\
 \emph{Harness}: not stated beyond one application's misses.
   & Mutants with targets absent from the baseline graph repeat recovery gaps counted elsewhere.
   & These mutants are classified separately.
-  & Most of that application's misses left the detection rate. \\
+  & Most of that application's misses dropped out of the detection rate. \\
 \emph{Figure}: a construct count that tripled.
-  & Substring counting included \texttt{routerLinkActive} as \texttt{routerLink}.
-  & The independent parser counts constructs, giving the ratio and loss breakdown one definition.
-  & alfresco: the independent route parser finds \ConstructsAlfresco{}; the substring count was $\approx$\,three times larger. \\
-\emph{Figure}: coverage reached 100 per cent (mifos).
-  & The independent parser skipped wrappers, stopped before lazy modules' routing modules, and lost lazy-table prefixes.
+  & Substring matching counted \texttt{routerLinkActive} as \texttt{routerLink}.
+  & The independent route parser counts constructs, giving the ratio and loss breakdown one definition.
+  & alfresco: the independent route parser finds \ConstructsAlfresco{}, about a third of the substring count. \\
+\emph{Figure}: coverage on mifos reached 100 per cent.
+  & The independent route parser skipped wrappers, stopped before lazy modules' routing modules, and lost lazy-table prefixes.
   & It follows wrappers and routing modules, retaining prefixes.
-  & mifos has \RoundTwoEarlierOracleMifosDeclared{} declared screens, \NodeAuditMatchedMifos{} with a node; the extractor was the same in both runs. \\
-\emph{Figure}: a ratio that rose implausibly after attribution (mifos).
+  & mifos has \RoundTwoEarlierOracleMifosDeclared{} declared screens, \NodeAuditMatchedMifos{} with a node. The extractor was the same in both runs. \\
+\emph{Figure}: on mifos, a ratio rose implausibly after attribution.
   & Must conversion originally divided must edges by constructs.
-  & Conversion is counted per construct; subtree-scoped edges are stored once (Section~\ref{sec:attribution}).
-  & Edge storage inflated the rate without adding evidence. Definition: Section~\ref{sec:metrics}. \\
-\emph{Harness}, \emph{review}, \emph{figure}: harness review and a detection-rate shift exceeding twenty points.
+  & Conversion is counted per construct. Subtree-scoped edges are stored once (Section~\ref{sec:attribution}).
+  & Edge storage inflated the rate without adding evidence. Section~\ref{sec:metrics} defines conversion. \\
+\emph{Harness}, \emph{review}, \emph{figure}: a harness review and a detection-rate shift exceeding twenty points.
   & The mutation harness patched the first textual match, judged detection on node and edge sets alone, and retargeted only the head of a commands array.
-  & Patches use construct offsets; detection includes witnesses; retargeting selects another declared route; guards without incoming edges are excluded; renames require the renamed route to appear.
-  & realworld's detection rose sharply. The seed stayed fixed, but the sample changed: \MutEarlierSampled{} $\to$ \MutSampled{} mutants (earlier $\to$ final), \MutOverlap{} sharing a location (same operator, file and line, though destinations may differ). The final sample omits \MutEarlierFailuresAbsent{}/\MutEarlierFailures{} earlier misses. Of six earlier paired disagreements favouring attribution, five used retargeting that replaced only the commands-array head; correcting it also lets the baseline detect them. \\
+  & Patches use construct offsets, detection includes witnesses, and retargeting selects another declared route. Guards without incoming edges are excluded. Renames require the renamed route to appear.
+  & realworld's detection rose sharply. The seed stayed fixed, but the sample changed from \MutEarlierSampled{} to \MutSampled{} mutants, of which \MutOverlap{} share an earlier mutant's location: the same operator, file and line, though destinations may differ. The final sample omits \MutEarlierFailuresAbsent{}/\MutEarlierFailures{} earlier misses. Of six earlier paired disagreements favouring attribution, five used retargeting that replaced only the commands-array head. Correcting it also lets the baseline detect them. \\
 \emph{Harness}: reading the graph at the sites the rule let through.
   & Locating a guard's route by the nearest preceding path literal fails for children, empty paths, constants and template literals.
-  & Brace matching after blanking comments and strings locates the route; routes without screens are excluded.
+  & Brace matching after blanking comments and strings locates the route. Routes without screens are excluded.
   & Four unobservable mutants, previously counted as graph defects, are now excluded. The superseded run sampled \MutEarlierSampled{} mutants. \\
-\emph{Harness}: a change in the extractor, not a figure.
+\emph{Harness}: prompted by an extractor change rather than a figure.
   & Guard removal was misjudged: a guarded parent's child lost the parent guard, and set comparison hid changes among three identical guard texts.
-  & Guard multiplicities are counted; an edge losing a guard is detection, while absence from all baseline edges means exclusion.
-  & Scoring changes; sampled mutants do not. \\
+  & Guard multiplicities are counted. An edge losing a guard is detection, whereas absence from all baseline edges means exclusion.
+  & Scoring changes, but the sampled mutants do not. \\
 A table script stopped.
-  & The construct denominator took constructs from commented-out links and code comments.
+  & The construct denominator included constructs from commented-out links and code comments.
   & Comments are blanked before parsing, with the compiler's scanner for TypeScript.
-  & One construct leaves the denominator in each of bitwarden and mifos; nothing else changes. \\
+  & One construct leaves the denominator in each of bitwarden and mifos. Nothing else changes. \\
 \addlinespace
 \multicolumn{4}{@{}l}{\emph{The extractor and the deterministic tier}} \\
-\emph{Panel}: red-team panels reading graph and source after commit \EarlierCommit{}; the witness check missed it.
+\emph{Panel}: red-team panels reading the graph and source after commit \EarlierCommit{} found what the witness check missed.
   & A guard on a wrapper-returned route was omitted, making all descendants unconditional.
   & Screen guard sets include function-returned routes.
-  & At \EarlierCommit{}: \EarlierMustEdges{} must edges with \EarlierMustViolations{} witness failures, read from that commit's results. Reading the guard cut mifos to \RoundMustEdgesMifos{} on the intermediate version. \\
+  & The results of commit \EarlierCommit{} record \EarlierMustEdges{} must edges with \EarlierMustViolations{} witness failures. Reading the guard cut mifos to \RoundMustEdgesMifos{} on the intermediate version. \\
 \emph{Panel}, as above.
   & Calls in \texttt{canActivate}, including guard factories, were skipped.
   & Unresolved elements still gate edges.
@@ -78,57 +78,57 @@ A table script stopped.
 Correcting the witness check itself.
   & It checked only the first construct producing an edge, so it missed that later bitwarden citations targeted unresolved \path{/vault}.
   & It checks every cited site. Edges initially took the weakest cited modality (replaced below).
-  & Later citations are \WitnessMergedCitationShareAll{} of all witness citations, and up to \WitnessMergedCitationShareMax{} in one application. The intermediate tier held \RoundMustEdges{} must edges, \RoundMustClean{} passing, \RoundMustViolations{} failing. \\
-\emph{Review}, then \emph{panel}: all intermediate-tier constructs (\MustCtxEdges{} edges, \MustCtxDistinct{} distinct constructs, \MustCtxConstructs{} citations). Witness checking compares targets, not unconditional execution.
-  & The demotion rules were incomplete: a link under \texttt{*ngIf}, in \texttt{@if}, a callback, a \texttt{catch}, or after \texttt{await} or an early return was must.
+  & Later citations are \WitnessMergedCitationShareAll{} of all witness citations, and up to \WitnessMergedCitationShareMax{} in one application. The intermediate tier held \RoundMustEdges{} must edges: \RoundMustClean{} passing, \RoundMustViolations{} failing. \\
+\emph{Review}, then \emph{panel}, of all intermediate-tier constructs: \MustCtxEdges{} edges, \MustCtxDistinct{} distinct constructs, \MustCtxConstructs{} citations. Witness checking compares targets, not unconditional execution.
+  & The demotion rules were incomplete: a link under \texttt{*ngIf}, inside \texttt{@if}, a callback or a \texttt{catch}, or after \texttt{await} or an early return was must.
   & Demotion covers Section~\ref{sec:model}'s conditions. Panels added members without unconditional handler calls, conditional component placement, ICU cases and ambiguous routes. Later review added potentially superseding navigation.
   & \MustCtxConditional{}/\MustCtxConstructs{} citations ran under such a condition. \\
 \emph{Review}, as above.
-  & A guard on an empty-path child without a component was not read, and \texttt{canMatch}, \texttt{canActivateChild} and \texttt{canLoad} not at all.
-  & Such a guard gates the screen above; the other three kinds are read.
+  & A guard on an empty-path child without a component was not read, and \texttt{canMatch}, \texttt{canActivateChild} and \texttt{canLoad} guards not at all.
+  & Such a guard gates the screen above. The other three kinds are read.
   & \MustFateGuard{} of the intermediate tier's edges, all of bitwarden's, are guarded. \\
 \emph{Panel}: a red-team panel.
   & Gating on every destination guard also demoted navigations the router permits.
   & The extractor computes the guards the router runs for each source and destination: levels left, matched, entered, kept.
-  & Navigations between screens under a shared guarded parent pass; mifos holds \CensusMustMifos{} must edges again. \\
+  & Navigations between screens under a shared guarded parent pass, and mifos again holds \CensusMustMifos{} must edges. \\
 \emph{Review}, as above.
   & Navigation to the current address was treated as occurring on every execution.
   & Such an edge is drawn per screen: must from the others, a may self-loop at the destination.
   & \MustFateSelfLoop{} of the intermediate tier's edges is such a self-loop. \\
 Reading the edges that survived.
-  & Weakest-modality merging discarded certainty, as for realworld's unconditional Global Feed link.
-  & Edges take their strongest construct's modality. Other witnesses retain theirs; must checking uses only witnesses that earn must.
-  & The final tier has \CensusMust{} edges on \CensusMustSites{} constructs, a different set rather than a subset of the intermediate tier. Current conversion counts require each construct to earn must; superseded tables credited every cited construct. \\
+  & Weakest-modality merging discarded certainty, as with realworld's unconditional Global Feed link.
+  & Edges take their strongest construct's modality. Other witnesses keep theirs. Must checking uses only witnesses that earn must.
+  & The final tier has \CensusMust{} edges on \CensusMustSites{} constructs, a set not contained in the intermediate tier. Current conversion counts require each construct to earn must, whereas superseded tables credited every cited construct. \\
 \addlinespace
 \multicolumn{4}{@{}l}{\emph{The independent route parser and the denominators}} \\
-First node-audit disagreements: the extractor was scored against paths the independent parser could not resolve.
+First node-audit disagreements: the extractor was scored against paths the independent route parser could not resolve.
   & The parser missed constant, enum and \texttt{\$localize} paths; first-party \texttt{baseUrl} imports; and named route arrays.
   & It resolves all three forms.
   & Without the last repair, it missed almost all kubernetes/dashboard screens and labelled nearly every extracted node unmatched. \\
 The dead-link corrections.
-  & It included Storybook fixtures and a sibling application's aliased tables, but failed to resolve a path in an \texttt{Object.freeze} table.
-  & It excludes fixtures and sibling tables, and resolves the frozen table. Excluding frozen routes as unreadable was rejected: they were one call away.
+  & It included Storybook fixtures and a sibling application's aliased tables but failed to resolve a path in an \texttt{Object.freeze} table.
+  & It excludes fixtures and sibling tables and resolves the frozen table. Excluding frozen routes as unreadable was rejected: they were one call away.
   & Declared sets changed in \RoundTwoSetMoved{}/\CensusApps{} applications, with counts unchanged in \RoundTwoSetMovedCountSame{}. \\
 Fixing the provenance of the comparison.
-  & An interim parser's output was misidentified as earlier output; the script also treated missing files as unchanged denominators.
+  & An interim parser's output was mistaken for earlier output. The script also treated missing files as unchanged denominators.
   & It uses the earlier parser's committed output.
   & The resulting bitwarden decomposition is withdrawn. \\
 Resolving the first node audit's disagreement.
   & The first-audit extractor lost parent prefixes and created a \texttt{*} node per catch-all.
-  & The loss-list repairs: a table not reached, a path or destination named and not written (Section~\ref{sec:res-defects}).
+  & The loss-list repairs: a table not reached, a path or destination named but not written (Section~\ref{sec:res-defects}).
   & Of \RoundTwoFirstRoundExtra{} nodes with no declared route, \RoundTwoFirstRoundTruncated{} were the tail of a declared route and \RoundTwoFirstRoundSynthetic{} catch-alls. The final version has \RoundTwoExtraNodes{} nodes matching no declared screen, \RoundTwoExtraNodesWildcard{} at \texttt{*}. \\
-\emph{Not stated}; classification followed graph inspection.
+\emph{Not stated}. Classification followed graph inspection.
   & Denominator exclusions were tested after consulting the graph.
-  & Exclusions are decided from source text first; comparison rejects changes between runs.
-  & Attribution had enlarged the denominator; both columns now use the same \RoundTwoInScope{} sites. \\
+  & Exclusions are decided from source text first. Comparison rejects changes between runs.
+  & Attribution had enlarged the denominator. Both columns now use the same \RoundTwoInScope{} sites. \\
 \addlinespace
 \multicolumn{4}{@{}l}{\emph{Findings of the runtime route oracle}} \\
 The oracle found two alfresco addresses served by the catch-all. Both static readers made the same error, hidden by 100 per cent coverage.
-  & A named-outlet route could inherit a sibling's primary address; descendants also received primary-address nodes.
+  & A named-outlet route could inherit a sibling's primary address. Descendants also received primary-address nodes.
   & Traversal preserves outlet context and creates no screen beneath a named outlet.
   & Extracted screens at unmounted addresses: \ProbeInvented{}. Remaining gaps limit recall. \\
-The oracle against both static route sets. Each static reader had acquired the defect independently.
-  & Lazy modules reached through barrels were followed only one hop; their tables were scanned at the root.
+Comparing the oracle with both static route sets. Each static reader had acquired the defect independently.
+  & Lazy modules reached through barrels were followed only one hop. Their tables were scanned at the root.
   & Both follow bounded chains, rejecting at each hop the route's own file, files loaded by other routes, and files with root-registered tables.
   & \ProbeBeforeNotMounted{} addresses in \ProbeBeforeWhere{}, including the two alfresco addresses, were wrong. Static node coverage had been 100 per cent against the same wrong addresses. \\
 Instrumenting the predicate (commit \texttt{d40c8dc}).
@@ -139,55 +139,55 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
 \multicolumn{4}{@{}l}{\emph{The dead-link census}} \\
 \emph{Refutation attempts} on the dead-link finding.
   & An earlier correction followed only the redirecting kind of catch-all route.
-  & Both kinds are followed; edges remain may and record the catch-all destination.
+  & Both kinds are followed. Edges remain may and record the catch-all destination.
   & The original correction worked (\checkmark{}) on its development application but failed (\xmark{}) on two using the other kind. \\
 \emph{Refutation attempts}.
   & Target resolution was conflated with dead-link detection. An unresolved enum sent all bitwarden authentication paths through the wildcard.
-  & The enum and wrapper are resolved; lower-bound route sets are noted; caveated candidates are checked against runtime configuration.
-  & Wildcard matching had inflated recovery. Withdrawn: \RoundTwoFrameworkMountsIt{} mounted screens, \RoundTwoFrameworkPrefix{} screenless prefixes and \RoundTwoFrameworkRedirects{} redirects; \RoundTwoWildcardCaveated{} remain caveated. \\
+  & The enum and wrapper are resolved. Lower-bound route sets are noted. Caveated candidates are checked against runtime configuration.
+  & Wildcard matching had inflated recovery. Withdrawn: \RoundTwoFrameworkMountsIt{} mounted screens, \RoundTwoFrameworkPrefix{} screenless prefixes and \RoundTwoFrameworkRedirects{} redirects, with \RoundTwoWildcardCaveated{} still caveated. \\
 \emph{Refutation attempts}.
   & Unresolved routes were treated as undeclared: a spread-built array, ghostfolio's \texttt{matcher} and alfresco's tsconfig \texttt{paths} alias.
   & Both tools record unresolved regions and exclude undeclared claims within them.
-  & ghostfolio's \path{/admin/users} and two live alfresco links had been called dead; all three constructs are now resolved. \\
+  & ghostfolio's \path{/admin/users} and two live alfresco links had been called dead. All three constructs are now resolved. \\
 \emph{Refutation attempts}.
   & The route-set test treated a commands array's first quoted segment as its complete target.
   & Whole-array patterns, with computed segments as holes, are matched against route patterns.
-  & alfresco's two candidates were cleared and more mifos sites found; the census contains \RoundTwoDeadLinkCandidates{} candidates. \\
+  & alfresco's two candidates were cleared and more mifos sites found. The census contains \RoundTwoDeadLinkCandidates{} candidates. \\
 \addlinespace
 \multicolumn{4}{@{}l}{\emph{Mutation sweep and end-to-end check}} \\
 \emph{Mutation sweep} of the demotion rules, at commit \SweepEarlierCommit{}.
   & The final revision's first sweep found untested rules added by router repairs.
-  & Tests cover most survivors; observationally equivalent mutants were retired.
+  & Tests cover most survivors, and observationally equivalent mutants were retired.
   & Of \SweepEarlierSurvived{}/\SweepEarlierMutants{} survivors, \SweepEarlierCovered{} gained tests and \SweepEarlierRetired{} were retired. At \SweepCommit{}, all \SweepMutants{} deletions fail a test. Testing also exposed relative links climbing above the root. \\
 \emph{Panel}: a review panel checking the scorer against the preregistration.
   & Redirects were scored at landed addresses, contrary to preregistration.
   & The scorer applies the preregistered rule.
-  & mifos then scored \EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} pairs, \EtoEMifosRedirect{} of them redirected; the landed-target figure had been \EtoEMifosHitAfterRedirectsUnfixed{}/\EtoEMifosPairsAfterRedirects{}. \\
+  & mifos then scored \EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} pairs, \EtoEMifosRedirect{} of them redirected. The landed-target figure had been \EtoEMifosHitAfterRedirectsUnfixed{}/\EtoEMifosPairsAfterRedirects{}. \\
 \emph{End-to-end check}: mifos's suite missed transitions to action screens.
   & A commands-array template literal (\texttt{navigate([\textasciigrave{}actions/}\allowbreak\texttt{\$\{name\}\textasciigrave{}])}) was treated as an unresolved variable.
-  & Static text is retained; interpolated segments become parameters.
+  & Static text is retained. Interpolated segments become parameters.
   & The client, group and savings views reach their action screens. \\
-\emph{Figure}: after that repair the re-measured mifos graph joined every pair of screens.
+\emph{Figure}: after that repair, the re-measured mifos graph joined every pair of screens.
   & Truncation at the first parameter emptied the notifications tray's two-parameter prefix, connecting its shell site to every route.
-  & Only trailing parameters are dropped from a target prefix; a parameter inside it matches any one segment.
-  & The tray reaches its named account screens. Graph pairs before $\to$ after repair: \EtoEMifosGraphPairsUnfixed{} $\to$ \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{}. \\
+  & Only trailing parameters are dropped from a target prefix. A parameter inside the prefix matches any one segment.
+  & The tray reaches its named account screens. Graph pairs: \EtoEMifosGraphPairsUnfixed{} before repair, \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} after. \\
 \emph{End-to-end check}: the same.
   & Unresolved \texttt{relativeTo} in an options variable made loan-view actions root-relative.
   & A \texttt{const} initialised with an object literal is read as that literal.
   & The loan view reaches its action screens. \\
 \emph{End-to-end check}: mifos's suite missed tab transitions.
   & A parent-template link rendered with child tabs was resolved against each child, producing unmounted targets.
-  & Resolution uses the route rendering the component (Section~\ref{sec:anchored}), also in witness checking (harness \HarnessVersion{}).
+  & Resolution uses the route rendering the component (Section~\ref{sec:anchored}), as does witness checking in harness \HarnessVersion{}.
   & With the preceding two repairs, mifos suite hits rose from \EtoEMifosHitUnfixed{} to \EtoEMifosHit{}/\EtoEMifosPairs{}. All extractor-dependent figures were re-measured. \\
 \addlinespace[2pt]
-\multicolumn{4}{@{}l}{\emph{Comparison on Rima et al.'s subjects (Section~\ref{sec:res-rima}), after its frozen figures}} \\
+\multicolumn{4}{@{}l}{\emph{Comparison on Rima et al.'s subjects (Section~\ref{sec:res-rima}), after recording its frozen figures}} \\
 \emph{Comparison}: petclinic's \texttt{navigate([\textquotesingle/owners\textquotesingle, id])} reached the owner's edit and pet screens.
-  & A command array ending in a bound value was read as a prefix, though Angular splits only the first command on slashes.
-  & A command after the first is one segment, so the array is a pattern; a matrix-parameter object adds no segment.
+  & A commands array ending in a bound value was read as a prefix, although Angular splits only the first command on slashes.
+  & A command after the first is one segment, so the array is a pattern. A matrix-parameter object adds no segment.
   & The target pairs read as spurious are gone. \\
 \emph{Comparison}: traduora's locale link produced no transition.
-  & A single bound command (\texttt{[routerLink]=}\allowbreak\texttt{"[l.code]"}) produced an unknown target.
-  & It becomes one segment below the declaring route, as already assumed for first-command interpolation. Some corpus bindings violate this assumption (mifos's \texttt{[cancelRoute]} can be \texttt{../../}), though pair counts were unchanged.
+  & A single bound command, \texttt{[routerLink]=}\allowbreak\texttt{"[l.code]"}, produced an unknown target.
+  & It becomes one segment below the declaring route, as already assumed for first-command interpolation. Some corpus bindings violate this assumption: mifos's \texttt{[cancelRoute]} can be \texttt{../../}. Pair counts were unchanged.
   & The locale list reaches the translation screen. \\
 \emph{Comparison}: airbus's navigation bar was placed on its sign-in screen.
   & An unrendered outlet holder and its navigation bar were mistaken for the shell.
@@ -198,10 +198,10 @@ Instrumenting the predicate (commit \texttt{d40c8dc}).
   & Class-named opening (\texttt{open}, \texttt{createComponent}, \texttt{ComponentPortal}) creates a nesting relation to the opener.
   & With the preceding three repairs, Rima reference hits rose from \RimaHitFull{} to \RimaRepHitFull{}/\RimaPairs{}, and other pairs changed from \RimaExtra{} to \RimaRepExtra{}. All extractor-dependent figures were re-measured. \\
 \end{xltabular}
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Found by} names the method as the main text does. The text above explains \emph{figure}, \emph{panel}, \emph{review}, \emph{harness} and \emph{end-to-end check}.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Found by} names the method as the main text does.}
 \endgroup
 
-Results marked \emph{figure} exposed measurement errors rather than extractor defects.
+Except for the mifos graph that joined every pair of screens, results marked \emph{figure} exposed measurement errors rather than extractor defects.
 
 \chapter{Declared approximations}
 \label{app:approx}
@@ -225,78 +225,78 @@ Construct & How it is treated & Consequence (tier, missing edges, note) \\
 Route declared outside the language
 & alfresco registers its about page through a JSON path and identifier, bound to a component by the
 runtime extension registry. TypeScript parsing cannot recover it, and supporting the plugin format as
-a second source language is outside scope.
+a second source language lies beyond this thesis.
 & The route is absent without a note: no TypeScript construct is unresolved. \\
 Table chosen outside the sources
 & mifos selects between two users-module route tables, one per identity provider, using a constant
 derived from deployment-injected \texttt{window.env}. Source-fixed conditions, such as environment-file
 flags, select an arm, whereas unresolved conditions, as here, mark the subtree unread.
-Extraction uses checked-out environment values; production values may select differently.
+Extraction uses checked-out environment values. Production values may select differently.
 The oracle likewise uses a development build to measure the same configuration.
 & Declared unread subtree, \ProbeMissedMifos{} screens wide. \\
 \addlinespace[2pt]
-\multicolumn{3}{@{}l}{\emph{Read exactly (the analysis's responsibility)}}\\
+\multicolumn{3}{@{}l}{\emph{Read exactly: the analysis's responsibility}}\\
 \addlinespace[2pt]
 Literal routes, links, calls, nesting, outlet, guards
 & Supported exactly: string-literal route paths and their components;
 \texttt{routerLink} bindings whose value is a literal or an array of literals;
 \texttt{Router.navigate} and \texttt{Router.navigateByUrl} calls with a literal target; the nesting
-relation from element selectors resolved within the importing file's scope; the primary
+relation from element selectors, resolved through the rendering file's imports when ambiguous; the primary
 \texttt{<router-outlet>} with the shell rule that follows from it; guards named on a route, as labels on
 the edges entering that route's subtree.
-& Failures are defects, not approximations, counted in Chapter~\ref{ch:results}: constant-path, lazy-boundary and unlinked-node
-bugs (Section~\ref{sec:res-defects}), resolved in the final version (Section~\ref{sec:res-round2}). \\
+& Failures are defects, not approximations, counted in Chapter~\ref{ch:results}: constant-path,
+lazy-boundary and unlinked-node bugs (Section~\ref{sec:res-defects}), resolved in the final version (Section~\ref{sec:res-round2}). \\
 \addlinespace[2pt]
-\multicolumn{3}{@{}l}{\emph{Approximated (no completeness claimed)}}\\
+\multicolumn{3}{@{}l}{\emph{Approximated: no completeness claimed}}\\
 \addlinespace[2pt]
 Components created programmatically (dialogs, overlays)
 & Unrouted overlays have no screen nodes. Components or directives opening a class in their own file
-(\texttt{open(X)}, \texttt{createComponent(X)}, \texttt{new ComponentPortal(X)}) supply their screens
-through nesting (Table~\ref{tab:repairs}). Service-opened or unresolved constructions have empty scope.
-Attribution gives these navigating components file-labelled unplaced origins, with \emph{may} edges
-from their sites (Section~\ref{sec:model}).
+(\texttt{open(X)}, \texttt{createComponent(X)}, \texttt{new ComponentPortal(X)}) supply their
+screens through nesting (Table~\ref{tab:repairs}). Service-opened or unresolved constructions have empty
+scope. Attribution gives these navigating components file-labelled unplaced origins, with \emph{may}
+edges from their sites (Section~\ref{sec:model}).
 & The graph omits overlay states, entry/exit transitions and, for empty scopes, the screens from which
 exits fire, but exit destinations remain represented. Navigation in a service injected only by such a
 component produces only a note. \\
 Named outlets and \texttt{\{outlets: \ldots\}} targets
 & An auxiliary route adds a second active route and mount point, encoded as \texttt{(name:path)}
 \cite{angulardocs}.
-Chapter~\ref{ch:analysis} models a second mount, but the adapter omits it. Non-primary-outlet routes,
-their descendants and routes with unresolved outlet strings create no nodes.
-\texttt{navigateByUrl} drops auxiliary groups and marks primary-path edges \emph{may}, since an
+Chapter~\ref{ch:analysis} models a second mount, but the adapter omits it. Non-primary-outlet
+routes, their descendants and routes with unresolved outlet strings create no nodes.
+\texttt{navigateByUrl} drops auxiliary groups and marks primary-path edges \emph{may}, because an
 unmatched auxiliary route would prevent navigation.
 & Unresolved outlet strings contribute to the incomplete-route-set note.
-Commands containing \texttt{\{outlets: \ldots\}} produce neither edges nor notes, even if the group
+Commands containing \texttt{\{outlets: \ldots\}} produce neither edges nor notes, even when the group
 includes the primary outlet. Later string commands are single segments, so auxiliary URLs there match
 only as single segments. The test-source cross-check misses such URLs. \\
 Navigation relative to the active route (\texttt{relativeTo})
-& Template \texttt{routerLink} and \texttt{Router.navigate} with a \texttt{relativeTo} key in an options
-object (inline or in a \texttt{const}) resolve against the route rendering their component on the source
+& Template \texttt{routerLink}, and \texttt{Router.navigate} with a \texttt{relativeTo} key in an inline
+or \texttt{const} options object, resolve against the route rendering their component on the source
 screen's ancestor chain (Section~\ref{sec:anchored}), applying leading \texttt{.} and \texttt{..}
-segments. Calls without \texttt{relativeTo} and \texttt{navigateByUrl} resolve against the root.
+segments. Calls without \texttt{relativeTo}, and \texttt{navigateByUrl}, resolve against the root.
 & Edges remain \emph{may} when the chain has no rendering route (template-nested components),
 \texttt{relativeTo} is shorthand, uses other variables or names another route, a link binds
 \texttt{[relativeTo]}, or the source is the shell. They may name wrong screens, which must forbids. \\
 Templates passed as values (\texttt{TemplateRef})
 & Template values are not traced to instantiation. Links in \texttt{<ng-template>} are attributed
 to the declaring component's screens.
-& Links remain \emph{may}: neither instantiation nor its location is established. Passing templates
-to other screens does not move their edges. Recovering instantiation requires dataflow analysis,
-as for JavaScript XML (JSX; Section~\ref{sec:transfer}). \\
+& Links remain \emph{may}: neither instantiation nor its location is established. Passing
+templates to other screens does not move their edges. Recovering instantiation requires dataflow
+analysis, as for JSX (Section~\ref{sec:transfer}). \\
 Dispatch through NgRx effects and router event subscriptions
 & Chapter~\ref{ch:analysis}'s dispatch relation is unimplemented, leaving dispatching screens unresolved.
-At \emph{full} and \emph{class}, navigation calls in application files containing \texttt{createEffect}
-receive $\top$: \emph{may} edges from the shell, or edges into its \texttt{u\_}\,sink for fully dynamic
-targets. Lower levels omit this stand-in.
+At \emph{full} and \emph{class}, navigation calls in application files containing
+\texttt{createEffect} receive $\top$: \emph{may} edges from the shell, or edges into its \texttt{u\_}\,sink
+for fully dynamic targets. Lower levels omit this stand-in.
 & Sound and coarse, since an effect can fire on any screen.
-An effect outside the application directory, or declared with the older \texttt{@Effect} decorator, is
-treated as any service call. \\
+An effect outside the application directory, or declared with the older \texttt{@Effect} decorator,
+is treated like any service call. \\
 Navigation inside signal effects and observable subscriptions
 & Firing depends on a runtime dependency graph rather than textual control flow
 (Sections~\ref{sec:signals} and~\ref{sec:reactive}). The model assigns \emph{unknown} with a symbolic
-read-set guard, but neither is implemented. Navigation in an \texttt{effect}, \texttt{subscribe} callback
-or other called function receives its class's scope (Section~\ref{sec:res-round2}).
-& Conditional invocation keeps edges at \emph{may}; fully dynamic targets enter the \texttt{u\_}\,sink.
+read-set guard, but neither is implemented. Navigation in an \texttt{effect}, \texttt{subscribe}
+callback or other called function receives its class's scope (Section~\ref{sec:res-round2}).
+& Conditional invocation keeps edges at \emph{may}. Fully dynamic targets enter the \texttt{u\_}\,sink.
 The graph identifies possible exits without their firing conditions. \\
 Computed targets, no static part
 & Runtime-built targets cannot generally be enumerated statically. Targets without static parts,
@@ -306,18 +306,18 @@ Computed targets, static leading part
 & Prefixes come from template-literal heads, concatenation's left operands, or commands arrays up to
 trailing variable elements. Earlier variable elements and interpolations in an opening template literal
 each represent one segment. Edges connect to every declared route extending the prefix by at least
-one segment; an empty prefix reaches every route except the root.
-& \emph{May}, with incomplete over-approximation: static prefix segments require identical route segments,
-excluding routes with parameters at those positions. \\
+one segment. An empty prefix reaches every route except the root.
+& \emph{May}, with incomplete over-approximation: static prefix segments require identical
+route segments, excluding routes with parameters at those positions. \\
 Computed targets, commands array with trailing constants
 & An array with constants after a variable element becomes a pattern with one edge to its first matching route.
-& \emph{May}. Variable elements match parameter segments only, silently omitting routes with constants in those positions. \\
+& \emph{May}. Variable elements match only parameter segments, silently omitting routes with constants in those positions. \\
 Injection tokens and provider bindings
 & The call graph resolves field calls through declared types (Section~\ref{sec:implementation}).
 Bindings are application-wide: different providers for one token are joined rather than resolved by
 injector. Factory/value providers and externally returned provider arrays are unsupported. Calls fall
 back to all components injecting the class, or empty scope if none does.
-& Joins only widen scope; unresolved tokens add no edges. The corpus has \CGDirect{} calls resolved
+& Joins only widen scope. Unresolved tokens add no edges. The corpus has \CGDirect{} calls resolved
 directly through application types, \CGBound{} through provider bindings and \CGSubclass{} through
 subclasses, with \CGUnresolved{} unresolved across \CGUnresolvedApps{} of six applications. \\
 Configuration-driven route registration
@@ -327,13 +327,13 @@ startup configuration are omitted. Declared route objects with configuration-sup
 produce unresolved-path records without nodes.
 & Unresolved paths mark the route set as a lower bound. Function-computed tables, \texttt{ROUTES}
 providers, \texttt{Router.resetConfig} calls and JSON extension manifests (Section~\ref{sec:res-probe})
-silently omit routes without a lower-bound note. The independent parser behaves identically, so both
-agree on omissions. This approximation also caused one corpus rejection (Section~\ref{sec:corpus}). \\
+silently omit routes without a lower-bound note. The independent route parser behaves identically, so
+both agree on omissions. This approximation also caused one corpus rejection (Section~\ref{sec:corpus}). \\
 Guards that would let the navigation through
-& State-dependent guards are not evaluated; expression text identifies them, so equivalent expressions
-remain distinct. Projected \texttt{<ng-content>} follows its host template's placement. Only
-\texttt{mat-menu} and \texttt{mat-tab} are recognised as lazy containers. Conditional outlets demote
-their route components, but nested components use their own placement; the root outlet is not inspected.
+& State-dependent guards are not evaluated. Expression text identifies them, so equivalent expressions
+remain distinct. Projected \texttt{<ng-content>} follows its host template's placement.
+Only \texttt{mat-menu} and \texttt{mat-tab} are recognised as lazy containers. Conditional outlets demote
+their route components, but nested components use their own placement. The root outlet is not inspected.
 & Any executed guard keeps an edge at \emph{may}, even if it always passes. Conditional rendering
 inside a projection recipient does not demote projected links. \\
 Navigations a later one may cancel
@@ -343,27 +343,28 @@ Code that may start another navigation before event handling completes demotes t
 functions or methods resolved through typed receivers.
 & Library calls, untyped receivers and runtime-loaded code are assumed not to navigate, potentially
 leaving cancelled navigation at must. Scheduled navigation and other listeners for the event are not followed. \\
-Children of a route a function returns, at the empty path
+Empty-path children of a route that a function returns
 & The first empty-path child under a screen and its first empty-path child render at the screen's
-address; their links originate there. For function-returned routes such as \texttt{withShell([\ldots])}, traversal does not place
-the returned child components under the enclosing screen.
-& Links remain at unplaced origins with \emph{may}: screen edges are missing, without false assertions. \\
+address, so their links originate there. For function-returned routes such as
+\texttt{withShell([\ldots])}, traversal does not place the returned child components under the enclosing screen.
+& Links remain at unplaced origins with \emph{may}. Screen edges are missing, without false assertions. \\
 Activation with a modifier key
-& Anchor \texttt{routerLink} leaves modifier-key and non-primary clicks to the browser, opening another
-browsing context, as does \texttt{target} naming another context. The model treats all activation as application navigation.
-& Must applies to plain activation, excluding these cases. \\
+& Anchor \texttt{routerLink} leaves modifier-key and non-primary clicks to the browser, opening
+another browsing context, as does a \texttt{target} naming another context. The model treats all
+activation as application navigation.
+& Must applies to plain activation and excludes these cases. \\
 Order in which Angular matches routes
 & Angular matches routes and redirects in declaration order: an earlier parameter route can shadow
 a literal route. The extractor instead prefers exact paths. Separately registered tables follow
-provider order, which is unresolved; the extractor assumes their catch-alls follow all other tables'
+provider order, which is unresolved. The extractor assumes their catch-alls follow all other tables'
 routes and records each dismissed catch-all in a note.
 & Overlapping routes or redirects keep edges at \emph{may}, potentially naming Angular's unchosen route.
-The catch-all exception assumes unresolved registration order; Section~\ref{sec:model} counts the
-must edges relying on it with Claim~\ref{claim:must}. \\
+The catch-all exception is the route-order assumption. Section~\ref{sec:model} counts the
+must edges relying on it, with Claim~\ref{claim:must}. \\
 Ambiguous selectors in the nesting relation
-& Shared selectors are narrowed to components imported by the rendering file; if none is imported,
-all candidates are joined.
-& A note records the ambiguity; sites may be attributed to screens that never render their components. \\
+& Shared selectors are narrowed to components the rendering file imports. If it imports none, all
+candidates are joined.
+& A note records the ambiguity. Sites may be attributed to screens that never render their components. \\
 \end{xltabular}
 \par\smallskip{\footnotesize\noindent\emph{Note.} ``May'' is the tier without a soundness claim.}
 \endgroup
