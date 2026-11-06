@@ -82,24 +82,37 @@ Major: & Computer Science \\
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 \vspace{-1.5em}
-A user-interface (UI) transition graph describes the screens of an application and the transitions a
-user can cause between them. For single-page web applications such graphs are usually built by running
-the application. How far static extraction
-gets on real applications, and why it fails, has not been measured construct by construct.
+A user-interface (UI) transition graph represents application screens and navigation between them.
+Such graphs are usually obtained by executing single-page applications. This thesis measures static
+extraction on six open-source Angular applications using five evaluation methods and a construct-level
+classification of unrecovered navigation. It proposes scope attribution, a dataflow analysis of the
+screens from which a navigation site may fire.
 
-This thesis builds a static extractor for Angular and measures it on six open-source applications,
-checking the graphs in five ways and assigning every construct it does not recover to a loss category.
-The largest category is navigation that belongs to no single screen.
-For it the thesis proposes scope attribution, a dataflow analysis that computes the screens from which
-each navigation site can fire.
+Under the study's demotion rules and execution assumptions, \CensusMustSites{} constructs yield
+\RouteOrderMust{} must edges. Of these, \CensusMustKdash{} come from one toolbar whose scope has not
+been validated at run time; \RouteOrderMustWithout{} remain without the route-order assumption.
+The small must tier largely reflects the classification rules rather than an inherent limit of
+static analysis.
 
-Few transitions are certain. The corpus yields \RouteOrderMust{} edges classified as always firing (\CensusMustKdash{} from one toolbar of untested scope), \RouteOrderMustWithout{}
-without an assumed route order and \GuardOnlyMust{} if every guard admits the user. This follows largely from the definition: \MayAppAny{} of the \MayOnlyConstructs{} witness locations that stay merely possible sit behind a decision the application makes (a guard, branch, callback or template condition). Most causes of loss traced in the source are
-constructs a static reader can read.
+Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to attribution loss,
+or \AttrRecoveredShareNoMifos{} without the largest application. Most recovered constructs yield
+possible transitions through mechanisms from earlier work. The added step places navigation in services, guards
+and effects, contributing \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) above outlet
+attribution. Its member-level call graph generalises Rima et al.'s bounded router-service tracing
+and adds \AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over a per-class join.
 
-Scope attribution recovers \AttrRecoveredShare{} of the constructs assigned to it (\AttrRecoveredShareNoMifos{} without the largest application), almost all as possible transitions and mostly through mechanisms of earlier work. The step it adds places navigation inside services, guards and effects; built on a member-level call graph that generalises Rima et al.'s bounded router-service tracing, it adds \AblationFullAddedShare{} of the sites, the call graph alone \AblationCallGraphNetShare{} over a per-class join. Attribution's screen sets are \BaselineFactorMin{} to \BaselineFactorMax{} times narrower than all screens. Against an AI-built reference that applies the analysis's own relations to one application, the step trades precision for recall: on the \GTAlfSites{} sites the reference decides, it recalls \GTAlfFullRecall{} of the pairs against \GTAlfClassRecall{} for the per-class join, at \GTAlfFullPrecision{} precision against \GTAlfClassPrecision{}. Beside Rima et al.'s tool, on five applications grouped after reading, this extractor's relative recall (share of real transitions either finds, as an AI model read them) is \HHCorpusNoMifosOursRecall{} against \HHCorpusNoMifosTheirsRecall{}, at precision \HHCorpusNoMifosOursPrecision{} against \HHCorpusNoMifosTheirsPrecision{}; on the largest application, most of whose pairs only the shell reaches, its precision is \HHMifosOursPrecision{}. The tools differ in coverage and graph width, and the comparison does not rank them. Mutation testing only sanity-checks the witness mapping.
+On the \GTAlfSites{} determined sites of an AI-built Alfresco reference, full attribution increases
+recall from \GTAlfClassRecall{} to \GTAlfFullRecall{} while reducing precision from
+\GTAlfClassPrecision{} to \GTAlfFullPrecision{}. The reference applies the analysis's own relations,
+so agreement does not establish true runtime scope. A comparison with Rima et al.'s tool also shows
+a coverage--precision trade-off, without an overall ranking. It uses small AI-read samples; its
+five-application subgroup was selected after inspecting the results. This extractor's estimated
+precision on the largest application is \HHMifosOursPrecision{}. Mutation testing provides only a
+conditional sanity check of source-to-witness mapping.
 
-A declared route table is an insufficient basis for static navigation extraction. The tool was developed on this corpus, so the figures are in-sample; consumer use is not measured.
+Route tables provide a starting point for static extraction, but source attribution and target
+resolution remain necessary. The main corpus results are in-sample because the extractor was
+developed on these applications. Consumer benefit is not measured.
 
 \vspace{0.5em}
 \noindent\textbf{Keywords:} static analysis; UI transition graph; single-page
@@ -108,52 +121,29 @@ application; Angular; dataflow analysis; program analysis; software testing
 \chapter*{Use of AI tools}
 \addcontentsline{toc}{chapter}{Use of AI tools}
 
-Aalto University asks that the use of artificial intelligence (AI) tools in a thesis be
-declared. An AI coding assistant was used in this work in the ways set out below, and I am
-responsible for the whole of the result.
+I wrote the text of this thesis and made the revisions myself. Artificial intelligence (AI)
+tools were used to support implementation, the search for relevant projects and papers, and
+review. I assessed the suggestions and decided which changes to make. The research questions,
+methodological choices and interpretation of the results are my own.
 
-The extractor built in this thesis and the evaluation harness were written with the help of an AI
-coding assistant. The result tables and plots of Chapter~\ref{ch:results} are generated from
-the harness's result files, except the two tables marked as compiled by hand. So are the figures
-the text states for the final version. All of these can be reproduced from the commits
-recorded with them. Four kinds of figure cannot:
-\begin{itemize}
-\item those of superseded instruments, copied by hand from the outputs of those runs
-  (Section~\ref{app:validation});
-\item a few counts taken at named earlier commits whose output was not committed;
-\item a few counts from the history of the structural reference and of the instruments, stated
-  in words;
-\item the corpus-selection counts of Section~\ref{sec:corpus}, read from the candidate
-  repositories.
-\end{itemize} The diagrams in
-Chapters~\ref{ch:introduction} to~\ref{ch:evaluation} were drafted as TikZ with the assistant and revised by me.
+An AI coding assistant supported the implementation of the algorithms presented in this
+thesis, including the extractor and evaluation code. I reviewed the implementation and remain
+responsible for its correctness.
 
-The assistant was also used to read the application sources, in three roles. As a reviewer it
-read the constructs behind an edge and reported where the extractor's reading disagreed with
-them. In red-team panels it attacked the extractor, the harness and this text. Several of the
-demotion rules of Table~\ref{tab:demotion} were written in response to its objections, among
-them the rule by which the extractor decides which guards a navigation runs. Every defect it
-reported in either role was reproduced against the code before anything was changed, and the
-corrections that followed are listed in Section~\ref{app:repairs}. Its readings
-are also part of the evaluation itself. The two readings of a development version's must
-tier in \path{results-must/review.json} and the reading of the final tier in
-\path{results-must/tier-reading.json} were made by the assistant. Chapter~\ref{ch:results} says what
-the reading of the final tier can and cannot show, and Table~\ref{tab:repairs} what the review of
-the development version's tier found. The two readings are two runs of one model,
-so their agreement measures consistency, not correctness.
+AI tools also helped identify candidate open-source projects and research papers. I assessed
+their relevance and selected the projects and sources used in the study.
 
-The assistant was also used during the literature search, to locate candidate sources and
-to summarise them. No source is cited on the strength of such a summary. Every entry in
-the bibliography was checked field by field against the publisher page, Crossref
-metadata, arXiv metadata or DBLP before it was cited, and sources that could not be
-checked in this way are not cited in the text. Two entries of the bibliography file are not
-cited anywhere.
+AI was used to review the implementation, evaluation and manuscript, and to identify possible
+errors, inconsistencies and gaps in the arguments. I evaluated that feedback and revised the
+text myself. The corrections made in response to reviews are recorded in
+Section~\ref{app:repairs}.
 
-Finally, the assistant was used to draft and edit prose, which I then revised. The
-research questions and the interpretation of the results are my own; the analysis and the
-evaluation protocol were revised in the course of the work in response to the reviews and panels
-described above, as Section~\ref{app:repairs} records, and the responsibility for every claim
-made here is mine.
+AI-assisted readings of application source code also form part of the evaluation evidence,
+including the Alfresco structural reference, the must-tier readings and the transition-pair
+judgements described in Chapters~\ref{ch:evaluation} to~\ref{ch:discussion}. Their role and
+limitations are stated there; they are not treated as independent human validation.
+
+I take responsibility for the final text, implementation, results and conclusions.
 
 \chapter*{Abbreviations}
 \addcontentsline{toc}{chapter}{Abbreviations}

@@ -1,9 +1,8 @@
 \chapter{Evaluation setup and research material}
 \label{ch:evaluation}
 
-This chapter describes how the analysis of Chapter~\ref{ch:analysis} is evaluated: the corpus
-(Section~\ref{sec:corpus}), every ratio and measure (Section~\ref{sec:metrics}), and the five
-evaluation methods with what each can and cannot show (Section~\ref{sec:protocol}).
+This chapter defines the corpus (Section~\ref{sec:corpus}), metrics (Section~\ref{sec:metrics})
+and evaluation methods (Section~\ref{sec:protocol}) used to evaluate the analysis of Chapter~\ref{ch:analysis}.
 Chapter~\ref{ch:results} reports the results.
 
 \section{Corpus selection and validity}
@@ -14,17 +13,15 @@ Chapter~\ref{ch:results} reports the results.
 Ten candidate applications were screened against six criteria: a real application rather than a
 library or template; a nested, lazily loaded route tree; guards present; end-to-end test
 configuration for a browser driver; retrievable history in which tests and source change together;
-and an active repository. Six candidates were retained (Table~\ref{tab:corpus}), each fixed to a
-specific commit so that the measurements can be repeated on the same code. The criteria were fixed
-before any results were obtained.
+and an active repository. Six candidates were retained and pinned to commits for repeatable
+measurement (Table~\ref{tab:corpus}). The criteria were fixed before any results were obtained.
 
-Criterion (4) was checked as configuration, not as a usable suite. At the pinned commits only
-alfresco has specifications the test-source cross-check can read, so that method covers alfresco
-alone; ghostfolio and bitwarden carry no browser-test configuration at all. The criterion was
-therefore not applied uniformly: \texttt{gravitee} was rejected for a thin UI suite while two
-applications with none were kept. Route-tree size and end-to-end test density were inversely
-related, so the methods that need test suites are applied only to the applications that have them,
-and the other methods to all six.
+Criterion (4) required configuration, not a usable suite. At the pinned commits, only alfresco has
+specifications the test-source cross-check can parse; ghostfolio and bitwarden have no browser-test
+configuration. The criterion was applied inconsistently: \texttt{gravitee} was rejected for a sparse
+UI suite while two applications with none were retained. Route-tree size and end-to-end test density
+were inversely related. Methods requiring test suites therefore cover only applications with suites;
+the other methods cover all six.
 
 \begin{table}[t]\small
 \caption{The corpus: commit, route count and role in the study of each application.}
@@ -50,47 +47,43 @@ Four candidates were rejected; the counts were read from the repositories and ar
 \texttt{angular/components} is a component library with no product router. \texttt{vendure} has 169
 end-to-end specifications, all of which exercise the GraphQL server and none the user interface.
 \texttt{gravitee} declares 618 routes but has 14 UI specifications. \texttt{SAP/spartacus} has a
-large Cypress suite, but its routing is configuration-driven in a way the extractor does not
-support; that reason is tool support, not one of the six criteria, so this rejection rests on a
-ground added after screening began.
+large Cypress suite, but the extractor does not support its configuration-driven routing. Tool
+support was not one of the six criteria; this ground was added after screening began.
 
 \subsection{Validity of an open-source corpus}
 
-Kalliamvakou et al.\ recommend filtering candidate repositories by explicit criteria and reporting
-them \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, which the selection above does. The
-remaining threats are external validity (open-source applications may differ from proprietary ones)
-and a possible selection bias, since I selected the corpus and wrote the extractor; the departures
-from the criteria are the two stated above. Selection was not blind to the tool: one candidate was
-rejected on a ground added after screening began, the extractor's own support. Pooled percentages
-are dominated by the largest application, mifos, so per-application figures are the primary summary
-where the chapters give them. The corpus spans nearly two orders of magnitude in
-routes, and the commits and harness are released so the measurement can be repeated.
+The selection follows Kalliamvakou et al.'s recommendation to use and report explicit criteria
+\cite{kalliamvakou2014promises,kalliamvakou2016indepth}, with the departures stated above.
+External validity remains limited: open-source applications may differ from proprietary ones.
+Selection bias is also possible because I selected the corpus and wrote the extractor. Selection
+was not blind to tool support, which became a rejection criterion after screening began.
+Pooled percentages are dominated by mifos, so per-application figures are the primary summary where
+available. The corpus spans nearly two orders of magnitude in route counts; the pinned commits
+and released harness permit repeated measurement.
 
-A further threat is not addressed by this. The extractor was developed on this corpus and is measured
-on it (Section~\ref{sec:limitations}), so the figures are fitted to it. The one measurement outside
-it runs the frozen extractor on the seven subjects of Rima et al.\ against their ground truth,
-preregistered before any subject was mapped (Section~\ref{sec:res-rima}). A case study on a
-proprietary Angular application, reporting only aggregate figures, is planned as the most direct
-response (Chapter~\ref{ch:discussion}). The literature reviewed in Chapter~\ref{ch:background} offers
-no standard benchmark corpus of single-page applications either, so the corpus and its manifest are
-an output of the thesis.
+The extractor was also developed on this corpus, so its measurements are fitted to it
+(Section~\ref{sec:limitations}). The sole out-of-sample measurement compares the frozen extractor
+with Rima et al.'s ground truth on their seven subjects, preregistered before extraction
+(Section~\ref{sec:res-rima}). A proprietary Angular case study reporting aggregate figures is
+planned to address external validity (Chapter~\ref{ch:discussion}). The literature reviewed in
+Chapter~\ref{ch:background} provides no standard benchmark corpus of single-page applications;
+the corpus and manifest are therefore an output of this thesis.
 
 \section{Metrics}
 \label{sec:metrics}
 
-Each research question is answered with one main measure; Table~\ref{tab:ratios} lists every ratio
-the thesis reports, and the paragraphs after it define the terms the table uses.
-RQ1 is measured at two levels, since a transition cannot be
-recovered without the screens it runs between: the share of declared screens that have a node, and the
-share of navigation constructs that yield at least one must transition. For RQ2, observed failures are
-grouped into defect classes, a class being accepted only on two lines of evidence, at least one from an
-evaluation method of Section~\ref{sec:protocol} (the guard class, accepted on source review alone, is the one exception; Table~\ref{tab:defects}), and every construct not recovered is assigned to one loss
-category. RQ3 is measured with the analysis disabled and enabled on the same extractor, and by the references below.
-RQ4 is a sanity check of witness mapping by mutation testing, not an independent test. For RQ5 each defect class of Table~\ref{tab:defects} is traced to its
-cause in the source and recorded as read by the final version (the loss was the tool's and not the
-application's), still unread although a static reader could, or beyond a static reader of a route
-table; the result is a list of causes, not a ratio, and every site that still yields no transition
-must carry a recorded label (Section~\ref{sec:res-round2}).
+Table~\ref{tab:ratios} defines the measures for each research question. RQ1 has two levels:
+the share of declared screens with a node and the share of navigation constructs yielding at least
+one must transition. Both are needed because a transition requires its endpoint screens.
+For RQ2, defect classes require two lines of evidence, at least one from an evaluation method
+(Section~\ref{sec:protocol}). The guard class, accepted on source review alone, is the exception
+(Table~\ref{tab:defects}). Every unrecovered construct is assigned to one loss category.
+RQ3 compares the same extractor with the analysis disabled and enabled, using the references below.
+RQ4 uses mutation testing as a witness-mapping sanity check, not an independent test.
+For RQ5, source analysis assigns each defect class of Table~\ref{tab:defects} to one of three causes:
+resolved by the final version (a tool defect), still unresolved but statically resolvable, or beyond
+a static route-table reader. This produces a cause list, not a ratio. Every site without a
+transition must carry a label (Section~\ref{sec:res-round2}).
 
 
 \begin{table}[t]\small
@@ -118,11 +111,10 @@ Cause trace & defect classes traced to a cause in the source, by kind (read by t
 
 \textbf{Navigation construct.} A navigation construct is a \texttt{routerLink} binding in a
 template, or a call to \texttt{Router.navigate} or \texttt{Router.navigateByUrl} in class code,
-in the application source excluding tests. Constructs are found by a separately written parser
-that shares no code with the extractor. Table~\ref{tab:repairs} qualifies what that
-independence covers: for the route-path forms added during development, the two resolve the same
-constructs by the same rules, and three of the independent parser's corrections were made because it
-disagreed with the extractor.
+in the application source excluding tests. A separately written parser finds constructs and shares
+no code with the extractor. Its independence is qualified by Table~\ref{tab:repairs}: both tools use
+the same resolution rules for route-path forms added during development, and three parser
+corrections followed disagreements with the extractor.
 
 \textbf{Must conversion (RQ1).} Must conversion is the fraction of in-scope constructs that are
 witnessed by at least one must edge. Three rules make it precise.
@@ -137,36 +129,30 @@ witness and records the others as merged witnesses, each with the modality it ea
 construct counts as converted only where it earns must itself.
 \end{itemize}
 
-\textbf{The other ratios.} Several of these measures have been called coverage in the
-literature this thesis builds on, but they differ on this corpus by
-more than an order of magnitude (\RoundTwoAccounted{} of sites accounted for against
-\RoundTwoMustConv{} converted to must). Node coverage rises if less of an application is read, so
-the blind-spot count is printed beside it. The accounted share alone measures whether the losses are declared, not how
-much is recovered. The gap in recovered constructs is called the recovery gap, and the loss tables
-measure it.
+\textbf{The other ratios.} Several measures have been called coverage in prior work, but here they
+differ by more than an order of magnitude: \RoundTwoAccounted{} of sites are accounted for and
+\RoundTwoMustConv{} convert to must. Node coverage rises when the parser recognises less of an
+application, so it is reported with a blind-spot count. Accounted share measures whether losses are
+declared, not how much is recovered. The loss tables measure the unrecovered constructs, or recovery gap.
 
-\textbf{Agreement between a scope and the rendered interface (RQ3).} The measures above cannot be
-asked the question the contribution turns on: is the set of screens that attribution computes for a
-site the set that site can really fire from? The \emph{rendered-interface check}, run on the harness
-of the runtime route oracle (Section~\ref{sec:protocol}), answers one direction. The harness
-navigates to each screen the graph holds, reads the in-app links the DOM carries and compares them
-with the edges the graph's per-screen query yields there.
+\textbf{Agreement between a scope and the rendered interface (RQ3).} The measures above do not test
+whether a site's computed scope matches the screens from which it can fire. The
+\emph{rendered-interface check} tests one direction using the runtime route oracle's harness
+(Section~\ref{sec:protocol}). It navigates to each screen in the graph, extracts in-app links from
+the DOM and compares them with the graph's per-screen edges.
 
-A link rendered at a screen where the graph has no such edge is unambiguous: the site was
-attributed to too few screens or never read. An edge the graph has and the DOM does not show is
-weaker, since a template may render links conditionally and this harness signs in to nothing; where
-a target could not be resolved to one address, every address the static prefix admits is recorded at
-reduced confidence, which is not a claim that the screen links there. This direction is therefore
-judged only over predictions that name a destination exactly, and their number is published. Three
-bounds apply. Only template-sourced sites are judged, since a \texttt{Router.navigate} call in an
-event handler leaves nothing in the DOM. A screen whose guard redirects to a sign-in page without a
-backend renders another screen's links and cannot be judged; such screens are counted apart, and on
-this corpus they are most screens (Section~\ref{sec:res-scope}). Ghostfolio's per-locale build does
-not fit the harness, so it is measured by every other method and by none of this one.
+A rendered link without a corresponding edge shows that a site was under-attributed or not
+extracted. The converse is weaker: links may render conditionally, and the harness does not sign in.
+An unresolved target also yields reduced-confidence edges to every address matching its static
+prefix; these do not assert that a link exists. The converse is therefore assessed only for exact
+destination predictions, whose count is reported. Three restrictions apply. Only template sites
+are judged because event-handler calls to \texttt{Router.navigate} leave no DOM link. Guard-redirected
+screens display another screen's links and cannot be judged; they are counted separately and
+constitute most screens here (Section~\ref{sec:res-scope}). Ghostfolio's per-locale build is
+incompatible with this harness, so this check excludes it; every other method includes it.
 
-\textbf{The ablation and the structural reference (RQ3).} Two measurements ask whether the
-attribution computes a set of screens that agrees more closely with a structural reference than a
-simpler analysis does, or only a larger one.
+\textbf{The ablation and the structural reference (RQ3).} These measurements test whether attribution
+improves agreement with a structural reference or merely produces larger screen sets.
 
 The ablation withholds the mechanisms of Section~\ref{sec:attribution} one at a time and extracts
 the whole corpus at each level:
@@ -181,18 +167,16 @@ screen. Oshima and Kishi assemble their page information from the root component
 \item \emph{Full}: adds the member-level call graph, with its fallback join and the stand-ins for
 guards and effects.
 \end{itemize}
-Each level adds to the one before it, so the \emph{full} step is not one mechanism alone. A sixth
-level, \emph{class}, runs beside the nested ones and replaces the call graph with the per-class rule,
-which joins a navigating service over every component that injects its class. The harness checks on
-the real graphs that the levels nest: a (site, screen) pair present at one level and absent at the
-next is a defect in the switch, and no table is written.
+Each level adds to its predecessor; \emph{full} adds several mechanisms. A sixth level,
+\emph{class}, replaces the call graph with the per-class rule, joining a navigating service to every
+component that injects its class. The harness verifies nesting on the application graphs and refuses
+to produce a table if any (site, screen) pair disappears at the next level.
 
-The structural reference is scored in both directions, which no other method allows. For one
-application, the screens each navigation site fires from were read off the sources by hand, with a
-derivation per site, in \path{route-oracle/ground-truth/realworld.json}. It is the structural
-reference of Section~\ref{sec:scope}, called the ground truth below. A pair the reference has and a
-level does not is a scope too small by the reference; the converse is a scope too large. Four
-limits apply.
+The structural reference supports scoring in both directions. For one application, source inspection
+identified each site's screens with a derivation in \path{route-oracle/ground-truth/realworld.json}.
+This is the structural reference of Section~\ref{sec:scope}, termed ground truth below. A missing
+reference pair indicates under-attribution; an extra pair indicates over-attribution, both relative
+to the reference. Four limits apply.
 \begin{itemize}
 \item On realworld it is one application, small enough to read exhaustively. A second, alfresco, was built under the same rules by the AI assistant from the sources alone, without the extractor's output (\path{route-oracle/ground-truth/ALFRESCO-PROTOCOL.txt}); it leaves \GTAlfUndetermined{} sites undetermined (Section~\ref{sec:res-groundtruth}).
 \item The realworld reference is the author's reading, so it is not independent of the tool's author. It is published with
@@ -213,50 +197,46 @@ Fineract server with the image pinned by digest. A small module added to each ap
 every navigation the router completes while the suite runs, with the route patterns of the screen
 left and the screen reached.
 
-An observed pair is such a source and target pattern for a navigation the application itself
-triggered; back-button navigations and the first screen after a full page load are excluded. A pair
-is \emph{contained} if any edge, must or may, joins the two screens once scope nodes are expanded to
-their members, with parameter names ignored. An edge to an unknown target never counts. A hit is any
-such edge, not the edge of the site the test used, so the check does not test the scope of an
-individual site. Redirected navigations are compared on the address they asked for, as
-preregistered. The scorer's first departure from this rule is listed in
-Table~\ref{tab:repairs}, and its figure is not used.
+An observed pair consists of source and target route patterns for an application-triggered
+navigation. Back-button navigations and the first screen after a full page load are excluded.
+A pair is \emph{contained} if any must or may edge connects its screens after scope expansion,
+ignoring parameter names. Unknown targets never count. A hit need not come from the site the test
+used, so it does not validate an individual site's scope. Redirects are compared on the requested
+address, as preregistered. The scorer initially departed from this rule
+(Table~\ref{tab:repairs}); that figure is not used.
 
-A missed pair is classified from the graph alone, by rules over the graph so that no assignment is
-made by hand. The classes are tested in this order, and the first match wins:
+A missed pair is classified automatically from the graph by the first matching rule:
 \begin{itemize}
 \item \emph{redirect}: the navigation was redirected and the graph holds the pair on the address it landed on (the preregistered redirect class);
 \item \emph{base}: the target is reached from a screen above the source but not from the source, as a relative link resolved against the wrong route appears;
 \item \emph{dynamic}: the source screen's routed component, or one above it, holds a site whose target the extractor records as unresolved;
 \item \emph{other}: none of these.
-\end{itemize} The base and dynamic classes were defined after the misses had been
-read. Because of the order, the dynamic count is what is left after base. On mifos every miss met
-the dynamic test whatever the order, so that count said little alone; Section~\ref{sec:res-e2e} names
-the sites, which were repaired after the check.
+\end{itemize} The base and dynamic classes were defined after inspecting the misses. Dynamic counts
+only misses not assigned to base. Every mifos miss met the dynamic test regardless of order, so
+that count alone was uninformative. Section~\ref{sec:res-e2e} identifies the sites repaired after the check.
 
-The counting rules, three validity checks and predictions for each application were written down
-before any log was read, except for that departure. The checks are that the instrumented and the
-plain suite pass and fail the same tests, that at least ten distinct pairs are observed, and that a
-second instrumented run observes the same pair set. The check measures recall on the transitions
-the suite exercises and nothing else. The graph is an over-approximation, so that recall is
-containment, and its weight depends on how many (screen, screen) pairs the graph holds, which is
-reported beside it: realworld's graph holds \EtoERealworldGraphPairs{} of \EtoERealworldPossiblePairs{} possible pairs
-and mifos's \EtoEMifosGraphPairs{} of \EtoEMifosPossiblePairs{}, against hits of \EtoERealworldHit{} of \EtoERealworldPairs{} and \EtoEMifosHit{} of \EtoEMifosPairs{}. A hit
-rate is read only against that share, since a denser graph contains more pairs by chance; a uniform reference at each graph's pair density, not the success rate of a suite that chooses its paths, would hold \EtoERealworldChanceHits{} and \EtoEMifosChanceHits{} of those pairs. A graph edge no test takes is not an error, so the check cannot measure
-precision, and one run cannot refute a must edge.
+Except for that departure, the counting rules, application-specific predictions and three validity
+checks were recorded before inspecting logs. The checks require matching test outcomes with and
+without instrumentation, at least ten distinct pairs, and the same pair set in a second instrumented
+run. The experiment measures containment only for exercised transitions. Its interpretation depends
+on graph density: realworld contains \EtoERealworldGraphPairs{}/\EtoERealworldPossiblePairs{}
+possible screen pairs, with \EtoERealworldHit{}/\EtoERealworldPairs{} hits; mifos contains
+\EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{}, with \EtoEMifosHit{}/\EtoEMifosPairs{} hits.
+Uniformly sampled pairs at these densities would yield \EtoERealworldChanceHits{} and
+\EtoEMifosChanceHits{} hits. This is a reference, not the expected success of a suite that chooses
+its paths. Untested edges are not errors, so the check cannot measure precision. One run cannot
+refute a must edge.
 
 \textbf{Loss breakdown (RQ2).} Each construct is matched to the edges whose witness cites it. A
 construct that is in scope, cited by no must or may edge and not accounted for is \emph{lost}. It is
 assigned to exactly one loss category by the first rule in Table~\ref{tab:loss-rules} that applies.
-The categories therefore partition the lost constructs. Named outlets are removed before the
-assignment, and guards are measured outside it. The categories Constant target, Node missing and
-Other were not put through the admission rule that maps a category to a defect class
-(Chapter~\ref{ch:results}).
+The categories partition the lost constructs. Named outlets are excluded before assignment, and
+guards are assessed separately. Constant target, Node missing and Other were not assessed under
+the defect-class admission rule (Chapter~\ref{ch:results}).
 
-Guard defects do not appear in the table, since a wrong guard mislabels an edge rather than removing
-it. No method here checks a guard label directly; guard handling is exercised only by the
-guard-removal mutation operator and by the source review of Section~\ref{sec:res-round2}. The guard
-defect was found by red-team review of the graph and the source, not by any check above.
+Guard defects mislabel rather than remove edges, so they are absent from this table. No method
+directly validates guard labels. Guard handling is assessed only by guard-removal mutation and
+source review (Section~\ref{sec:res-round2}); red-team review of the graph and source found the defect.
 
 \begin{table}[t]\small
 \caption{Rules that classify a construct, in the order the harness tests them.}
@@ -296,47 +276,43 @@ Other & matches none of the above; inspected by hand \\
 \par\smallskip{\footnotesize\noindent\emph{Note.} The first three rows take a construct out of the denominator, the next counts it as recovered in the tier that cites it, and the two after that as accounted for. Only a construct that reaches the rows below is lost. The indented rules are the nested decision taken when the construct's owning route component has no node.}
 \end{table}
 
-The nested branch decides a category from the \emph{owning} route component, so a construct can be
-assigned to a node category and still be converted once attribution gives it a scope through the
-shell or a subtree (Section~\ref{sec:res-after}). The size of \emph{other} counts constructs left
-for inspection by hand, not one cause.
+The nested branch classifies the \emph{owning} route component. A node-category construct can still
+convert if attribution places it through a shell or subtree (Section~\ref{sec:res-after}).
+\emph{Other} counts constructs requiring manual inspection, not a single cause.
 
 \textbf{Change in recovery and must-edge target consistency (RQ3).} Must conversion and the loss breakdown are
-measured on one commit of the extractor, run twice on identical inputs with the attribution pass
-disabled and enabled. With the pass off the extractor reproduces the baseline edge set exactly on
-every application (Section~\ref{sec:implementation}).
+measured at one extractor commit on identical inputs, with attribution disabled and enabled.
+Disabling attribution reproduces every application's baseline edge set exactly
+(Section~\ref{sec:implementation}).
 
-\emph{Must-edge target consistency} is the fraction of must edges that meet two conditions. The witness line contains a construct of
-the claimed kind with the claimed target, \emph{and} the destination node sits at an address the
-independent route set declares; otherwise a node minted at an address the application never mounts
-would pass.
+\emph{Must-edge target consistency} requires two conditions: the witness line contains a construct
+of the claimed kind with the claimed target, and the independent route set declares the destination
+node's address. Without the latter, a node at an address the application never mounts could pass.
 
-An edge whose destination the check cannot read is neither a pass nor a failure, so the consistency is
-stated as bounds: the share of must edges that pass and the share that do not fail.
-RQ3 is not decided by one rule. An attribution that put every site on every screen would raise the
-recovered share without lowering must conversion or must-edge target consistency, so those figures alone cannot
-fail. RQ3 is therefore answered by three measures read together: the recovered share and must
-conversion over the same construct denominator; the width of the computed screen sets against that
-trivial assignment (Section~\ref{sec:res-width}); and agreement with references that do not come from
-the attribution's output alone, namely the two structural references, the applications' own suites and
-the comparison with Rima et al.'s tool (Section~\ref{sec:res-earlier}). The must tier's consistency bounds
-are reported for both runs, but they cover different sets of must edges and are not compared as rates.
+Unread destinations are neither passes nor failures. Consistency is bounded by the share of must
+edges that pass and the share that do not fail. Recovery and consistency alone cannot assess RQ3:
+attributing every site to every screen would raise recovery without reducing must conversion or
+target consistency. Three measures are therefore considered together: recovered share and must
+conversion over the same denominator; scope width against that trivial assignment
+(Section~\ref{sec:res-width}); and agreement with the two structural references, the application
+suites and Rima et al.'s tool (Section~\ref{sec:res-earlier}). These references do not derive solely
+from attribution output. Consistency bounds are reported for both runs but cover different must-edge
+sets, so they are not compared as rates.
 
-\textbf{Detection rate (RQ4).} This is a sanity check of the mapping from a source change to its
-witness in the graph, not evidence of change-impact detection. It is close to guaranteed by
-construction, since the sample is drawn from the graph, and the harness was tuned on its misses
-(Section~\ref{sec:corrections}). The detection rate is the fraction of injected source changes
-that produce the predicted change in the graph, reported per mutation operator with its $n$. A
-change whose construct the graph does not contain is excluded and not counted as a miss, since it
-can only repeat a recovery gap that the loss tables measure. The rate is therefore conditional on
-recovery, and the number of excluded mutants is reported alongside it.
+\textbf{Detection rate (RQ4).} This sanity check tests whether an injected source change produces
+the predicted graph change, reported per operator with its $n$. It does not establish change-impact
+accuracy. Detection is nearly guaranteed because mutants are sampled from the graph, and the
+harness was tuned on its misses (Section~\ref{sec:corrections}). Changes to unrepresented constructs
+are excluded rather than counted as misses: they repeat recovery gaps measured by the loss tables.
+The rate is conditional on recovery and reported with the exclusion count.
 
 \section{Evaluation methods}
 \label{sec:protocol}
 
-Figure~\ref{fig:pipeline} shows where the methods act on the extraction pipeline. Five methods are used; RQ3 adds four further checks (the rendered-interface check, the ablation, the structural reference and the end-to-end check), which Table~\ref{tab:methods} does not list. None establishes correctness alone, so Table~\ref{tab:methods} states what
-each can show and where it is blind. Figure~\ref{fig:oracles} shows which part of the graph each
-method checks and where its ground truth comes from.
+Figure~\ref{fig:pipeline} locates the five methods in the extraction pipeline.
+Table~\ref{tab:methods} states their measures and blind spots; none establishes correctness alone.
+RQ3 adds four checks not listed there: the rendered-interface check, ablation, structural reference
+and end-to-end check. Figure~\ref{fig:oracles} identifies their graph targets and reference sources.
 
 \input{figures/fig-pipeline}
 
@@ -424,16 +400,20 @@ Without them, differences seen in mutation testing could not be told from noise.
 \label{app:repairs}
 \label{app:validation}
 
-The final figures are those of the final version of the protocol. The extractor was developed within this thesis, and three versions are named: the \emph{early development version} (commit \EarlierCommit{}), before the corrections the evaluation prompted; the \emph{intermediate version} (extractor \RoundExtractor{}, with a must tier of \RoundMustEdges{} edges, tables as printed at \RoundCommit{}); and the \emph{final version}, which the chapters present. Of the intermediate version only the must-tier figures are cited, as printed; the runs behind the printed tables were lost, and an archived re-run of the same extractor gave a different loss ledger. The figures of superseded instruments cannot be regenerated with the shipped harness, and none is cited as a result. A surprising
-figure is checked against its inputs before it is written down, since such a figure has more than
-once proved a property of the measurement and not of the extractor.
+The thesis distinguishes three extractor versions: \emph{early development} (commit
+\EarlierCommit{}), before evaluation-driven corrections; \emph{intermediate} (extractor
+\RoundExtractor{}, with \RoundMustEdges{} must edges, tables printed at \RoundCommit{}); and
+\emph{final}, whose results are presented throughout. Only the intermediate must-tier figures are
+cited as printed: the underlying runs were lost, and an archived rerun produced a different loss
+ledger. Superseded instrument figures cannot be regenerated with the released harness and are not
+cited as results. Unexpected figures are checked against their inputs before reporting, because
+several arose from measurement defects rather than extractor behaviour.
 
-The mutation harness was corrected during development after its misses had been read, so the final
-run is not an independent test. The final run used the same seed as the run whose misses were read
-but a partly different sample. \MutOverlap{} of its \MutSampled{} mutants are at the same location
-(operator, file and line) as one of the \MutEarlierSampled{} of that run, though the destinations
-may differ. \MutEarlierFailuresAbsent{} of the \MutEarlierFailures{} misses that were read are at no
-location of the final sample.
+The mutation harness was corrected after inspecting its misses, so the final run is not independent.
+It uses the same seed but a partly different sample: \MutOverlap{} of \MutSampled{} mutants share
+an operator, file and line with one of the earlier \MutEarlierSampled{}, although destinations may
+differ. \MutEarlierFailuresAbsent{} of the \MutEarlierFailures{} inspected misses are absent from
+the final sample's locations.
 
 Appendix~\ref{app:corrections} lists every correction, one row each, in Table~\ref{tab:repairs}.
 
@@ -442,5 +422,12 @@ Appendix~\ref{app:corrections} lists every correction, one row each, in Table~\r
 \subsection{Reproducibility}
 \label{sec:reproducibility}
 
-Every figure is generated by a script and written into the thesis as a
-macro. \texttt{REPRODUCE.md} in the repository lists the scripts and the commit each table comes from. The version evaluated throughout is the extractor of commit \texttt{a9d29df}, re-measured after the repairs the comparison on Rima et al.'s subjects prompted (Table~\ref{tab:repairs}), with harness \HarnessVersion{} and, for mutation, \HarnessVersionMutation{}; the demotion-rule sweep and the may-reason census were recorded at the same commit. The end-to-end figure before the repairs that check prompted (Table~\ref{tab:repairs}) comes from the graph of the previously evaluated commit, \texttt{c42f220}, kept beside the results. The first comparison on Rima et al.'s subjects ran the extractor frozen at commit \texttt{2aac284}, before the repairs it prompted, as its preregistration fixed (Section~\ref{sec:res-rima}). Two groups are historical and were not re-measured: the rendered-interface check (Table~\ref{tab:scope}), and the runtime route oracle's reading of the live route configurations, made on 29 and 30 October against a graph whose extractor commit was not recorded; that reading is compared again with the final graph (Section~\ref{sec:res-probe}).
+Scripts generate numerical macros; \texttt{REPRODUCE.md} lists each table's script and commit.
+The final results use extractor \texttt{a9d29df}, after repairs prompted by Rima et al.'s subjects
+(Table~\ref{tab:repairs}), with harness \HarnessVersion{} and mutation harness \HarnessVersionMutation{}.
+The demotion-rule sweep and may-reason census use the same commit. The pre-repair end-to-end figure
+(Table~\ref{tab:repairs}) uses the archived graph from \texttt{c42f220}. The first Rima comparison
+uses \texttt{2aac284}, frozen before its evaluation-driven repairs as preregistered
+(Section~\ref{sec:res-rima}). Two measurements remain historical: the rendered-interface check
+(Table~\ref{tab:scope}) and the runtime route configurations recorded on 29--30 October without
+an extractor commit. The latter are compared with the final graph (Section~\ref{sec:res-probe}).

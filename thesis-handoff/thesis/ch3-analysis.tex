@@ -1,7 +1,9 @@
 \chapter{Static navigation analysis and scope attribution}
 \label{ch:analysis}
 
-This chapter defines the graph model (Section~\ref{sec:model}) with its one soundness claim, then scope attribution, the analysis proposed in answer to RQ3 (Section~\ref{sec:attribution}), and the extractor that implements part of it (Section~\ref{sec:implementation}).
+This chapter defines the graph model and its soundness claim (Section~\ref{sec:model}), scope
+attribution for RQ3 (Section~\ref{sec:attribution}), and its partial implementation
+(Section~\ref{sec:implementation}).
 
 \section{Graph model and soundness}
 \label{sec:model}
@@ -30,19 +32,17 @@ $\mathit{unknown} < \mathit{may} < \mathit{must}$. So $E$ holds at most one moda
 $(s, \sigma, g, s')$. The paragraph on witnesses below says how the constructs are traced.
 \end{definition}
 
-\textbf{Nodes outside the model.} The extractor emits two node kinds that are not screens, and
-the edge relation does not range over them. An \emph{unplaced origin} stands for a component,
-with the navigation sites in it, that the analysis could not place under any screen. A
-\emph{dynamic target} stands for a destination the extractor records as unresolved. Both are kept for two reasons.
-An unplaced site is a loss that Chapter~\ref{ch:results} has to count. A destination the analysis
-cannot name is one the run time could still take. Table~\ref{tab:census} reports how much of each
-graph they are. \CensusOtherNodes{} of the \CensusNodes{} nodes in the corpus are of these two kinds, \CensusOtherNodeShare{}
-of them. \CensusTargetNotScreen{} of the \CensusEdges{} edges reach a dynamic target. A further
-\CensusMaySourceNotScreen{} edges leave an unplaced origin and are held at \emph{may}. They therefore sit
-inside a tier that Chapter~\ref{ch:results} reports, although their source is not a screen. An edge into
-a dynamic target asserts that its source screen has an outgoing navigation whose destination the
-analysis could not name, and nothing about which screen is reached. Claim~\ref{claim:must} and
-must conversion (RQ1) range over the edges whose source and target are both screens.
+\textbf{Nodes outside the model.} The extractor emits two nonscreen node kinds outside the
+edge relation. An \emph{unplaced origin} represents a component and navigation sites that
+could not be assigned to a screen. A \emph{dynamic target} represents an unresolved
+destination. These preserve unplaced sites for the loss counts in Chapter~\ref{ch:results}
+and unresolved destinations that may still occur at run time. Table~\ref{tab:census} counts
+both kinds: \CensusOtherNodes{} of \CensusNodes{} corpus nodes (\CensusOtherNodeShare{}).
+Of \CensusEdges{} edges, \CensusTargetNotScreen{} reach a dynamic target. Another
+\CensusMaySourceNotScreen{} leave an unplaced origin and are labelled \emph{may}, so
+Chapter~\ref{ch:results} includes them in that tier despite their nonscreen sources.
+An edge to a dynamic target records outgoing navigation without identifying the destination
+screen. Claim~\ref{claim:must} and must conversion (RQ1) concern only edges between screens.
 
 \begin{table}[t]\small
 \caption{What the published graphs are made of: nodes by kind and edges by modality.}
@@ -53,37 +53,56 @@ must conversion (RQ1) range over the edges whose source and target are both scre
 
 \textbf{Modalities.} A \emph{must} edge is claimed to fire for every input on which the
 enclosing code executes. A \emph{may} edge is possible but conditional. \emph{Unknown} marks an
-edge whose modality could not be determined, and carries the destinations the analysis cannot
-name. In the measured graphs it labels only edges into the \texttt{u\_}\,sink of Section~\ref{sec:res-round2}, which records that a screen is left by an event whose target the extractor records as unresolved. The pinned extractor produces \CensusUnknown{} such edges of the \CensusEdges{} in the corpus, in \CensusUnknownApps{} of the \CensusApps{} applications. Carrying this modality and reaching a node that is not a screen coincide on every corpus edge, and the census refuses to report a graph in which they come apart. Must conversion (RQ1) and Claim~\ref{claim:must} are defined over the other two tiers, so the unknown tier is counted in the edge totals and in no rate. The model also assigns \emph{unknown} to navigations inside signal effects (Section~\ref{sec:boundary}); no pass of this version emits one.
+edge whose modality could not be determined, including unresolved destinations. In the
+measured graphs it labels only edges to the \texttt{u\_}\,sink
+(Section~\ref{sec:res-round2}), recording events with unresolved targets. The pinned
+extractor produces \CensusUnknown{} such edges among \CensusEdges{} corpus edges, across
+\CensusUnknownApps{} of \CensusApps{} applications. On every corpus edge, this modality
+coincides with a nonscreen target; the census rejects graphs where they differ. Unknown edges
+count towards totals but no rate: must conversion (RQ1) and Claim~\ref{claim:must} concern
+the other tiers. The model also assigns \emph{unknown} to navigation inside signal effects
+(Section~\ref{sec:boundary}), but this version emits none.
 
-The artefact also records a numeric \emph{confidence} on each edge ($1$ for a must edge, at most $0.6$ for a may edge, $0$ for an edge into a dynamic target). It is not part of the model, and every figure is reported over the modalities.
+The artefact also records numeric \emph{confidence}: $1$ for must, at most $0.6$ for may,
+and $0$ for dynamic targets. This is outside the model; all figures use modalities.
 
-Guards are stored as source text and are never evaluated by the tool, which keeps $G$ opaque: the model does not need to represent application state.
+The tool stores guards as source text without evaluating them. Keeping $G$ opaque avoids
+representing application state.
 
-\textbf{Screens and routes.} The set $S$ is derived from the route configuration, and not every
-route contributes a screen. Write $\mathit{Routes}$ for the set of routes the application
+\textbf{Screens and routes.} Not every configured route contributes a screen to $S$.
+Write $\mathit{Routes}$ for the set of routes the application
 declares and $\mathit{component}(r)$ for the component that route $r$ renders. Then
 \[
   S \;=\; \{\, \mathit{screen}(r) \;\mid\; r \in \mathit{Routes}
   \text{ and } \mathit{component}(r) \text{ is defined} \,\},
 \]
-where $\mathit{screen}(r)$ is the node for route $r$, identified by the full path that
-concatenates the paths of $r$ and of its ancestors. Two kinds of route contribute no element of
+where $\mathit{screen}(r)$ is the node for route $r$, identified by its full path:
+the concatenated paths of $r$ and its ancestors. Two route kinds contribute no element of
 $S$:
 \begin{itemize}
 \item A route that declares \texttt{children} but no \texttt{component} is only a path prefix
 (Section~\ref{sec:angular}). Its path is carried into the full paths of its children.
 \item A route whose only effect is a \texttt{redirectTo} renders nothing.
 \end{itemize}
-In Angular a redirecting route is only a redirect: the router refuses \texttt{redirectTo} together with \texttt{children} or a \texttt{component}. This was read off the router's configuration validator in Angular~18.2.14, the vendored version, and is not true of every router: Vue Router applies a redirect only when its record is the last one matched, so a redirecting parent does render its component for a matching child (Section~\ref{sec:transfer}).
+Angular rejects \texttt{redirectTo} combined with \texttt{children} or \texttt{component},
+as verified in the configuration validator of the vendored Angular~18.2.14. Other routers
+differ: Vue Router applies a redirect only to the last matched record, so a redirecting
+parent renders its component for a matching child (Section~\ref{sec:transfer}).
 
-Angular also permits two component-bearing routes with the same full path, told apart at run time by \texttt{pathMatch} or a \texttt{canMatch} guard. The model assumes this does not occur: the extractor keeps the route declared first and drops the later ones, silently for Angular and with a note for Vue and React (Section~\ref{sec:transfer}). Two routes with different paths that render the same component give two screens, which is the case that makes the attribution of Section~\ref{sec:attribution} necessary.
+Angular permits component-bearing routes with the same full path, distinguished at run time
+by \texttt{pathMatch} or \texttt{canMatch}. The model assumes no such duplicates. The extractor
+retains only the first route, silently for Angular and with a note for Vue and React
+(Section~\ref{sec:transfer}). Different paths rendering the same component produce distinct
+screens, requiring the attribution of Section~\ref{sec:attribution}.
 
-\textbf{Witnesses.} Every edge of static or runtime origin carries a witness: the file and line
-of a construct that produced it, or an observation identifier. Where several constructs produce the same edge, one is kept as the witness and the others are recorded as merged witnesses (Section~\ref{sec:metrics}). No edge is added to the base graph without a witness; manual edges stay in a separate overlay. The first evaluation method checks this mechanically.
+\textbf{Witnesses.} Each static or runtime edge has a witness: its generating construct's file
+and line, or an observation identifier. When constructs produce the same edge, one becomes
+the primary witness and the others are recorded as merged witnesses (Section~\ref{sec:metrics}).
+The base graph requires witnesses; manual edges remain in a separate overlay. The first
+evaluation method checks this mechanically.
 
-\textbf{The soundness claim.} The soundiness position that frames such claims is argued in
-Section~\ref{sec:soundiness}. The thesis claims only the following.
+\textbf{The soundness claim.} Under the soundiness position of
+Section~\ref{sec:soundiness}, the thesis claims only the following.
 
 \begin{claim}[Soundness of the must tier]
 \label{claim:must}
@@ -95,28 +114,28 @@ activation that navigates the current browsing context, no other listener the ev
 starts a navigation, no call the reader cannot resolve to a body in the application, nor any work the handler schedules for later, starts one, and all synchronous evaluation that precedes the navigation completes normally.
 \end{claim}
 
-\noindent The execution model is part of the claim and not a detail of the implementation.
-The cases it excludes are a call into a library that cancels the navigation by starting another, a second listener on the element or an ancestor, an activation with a modifier key or into another browsing context (Section~\ref{sec:approximations}), and an exception raised before the navigation, by a call or by evaluating an expression. On such an execution a must edge
-can name a navigation that does not complete, and the claim says nothing about it.
+\noindent The execution model is part of the claim. It excludes library calls that start a
+competing navigation, second listeners on the element or an ancestor, modifier-key activations
+or navigation into another browsing context (Section~\ref{sec:approximations}), and exceptions
+before navigation, whether from calls or expression evaluation. A must navigation may not
+complete in these executions; the claim does not cover them.
 
-The route-order assumption of Claim~\ref{claim:must} carries much of the tier: without it the
-must tier holds \RouteOrderMustWithout{} of its \RouteOrderMust{} edges, on
+Much of the must tier depends on the route-order assumption in Claim~\ref{claim:must}: without it,
+\RouteOrderMustWithout{} of \RouteOrderMust{} edges remain, on
 \RouteOrderSitesWithout{} of \RouteOrderSites{} constructs.
 
 The must tier is therefore a lower bound only relative to four assumptions, each with a class of counterexample. \emph{A1, route order:} a catch-all in a separately registered route table is matched after every route of the others; another registration order breaks it, and \RouteOrderResting{} must edges, on \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications, rest on it. \emph{A2, selectors:} no component is placed by a join over an ambiguous selector; no final must edge rests on such a join (Section~\ref{sec:inputs}). \emph{A3, calls:} a call with no body in the application starts no navigation; a library call that navigates breaks it. \emph{A4, execution model:} the plain primary activation above, in which all synchronous evaluation before the navigation completes normally; a modifier key, a second listener, another browsing context or an exception before the navigation breaks it. The edges resting on A3 and A4 are not counted, and neither is checked against a run.
 
-\textbf{What the evaluation tests.} The evaluation tests a necessary condition of this claim
-rather than the claim itself. The distinction decides how the figures of
-Chapter~\ref{ch:results} may be read. The witness check of Section~\ref{sec:protocol} re-reads
-the source at every location an edge cites and asks whether the construct found there names the
-destination the edge names. A must edge cannot satisfy the claim if the construct that makes it
-must names a different destination, so a failure of the check refutes the claim there. Agreement
-does not establish it. The other constructs a must edge cites are evidence for may and are not
-judged against the claim.
+\textbf{What the evaluation tests.} The evaluation tests only a necessary condition of the
+claim, which limits interpretation of Chapter~\ref{ch:results}. The witness check
+(Section~\ref{sec:protocol}) inspects every cited source location for agreement with the
+edge's destination. If the construct supporting a must label names another destination,
+the claim fails there. Agreement does not establish the claim. Other cited constructs
+support only may and are not judged against it.
 
-\textbf{Demotion conditions.} Whether the navigation occurs \emph{for every input on which the
-enclosing code executes} is decided by the rules that place an edge in the must tier instead of
-the may tier. Table~\ref{tab:demotion} lists every condition that demotes a site to may.
+\textbf{Demotion conditions.} Classification as must requires navigation \emph{for every input
+on which the enclosing code executes}. Table~\ref{tab:demotion} lists all conditions that
+demote a site to may.
 
 {\footnotesize
 \begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
@@ -170,72 +189,81 @@ A handler is a member that the framework calls itself: a lifecycle hook, or a me
 \texttt{@HostListener} registers. A handler is also a member that the template binds to an event as a bare call outside
 any template condition.
 
-The router cancels a navigation when another starts before it has finished. Code that runs after
-a site may navigate when it holds a navigation call, in a branch or a callback as much as at
-the top, or a call to a member of the class, a function of the file or a method of an injected
-service whose body does. An awaited navigation has finished before the rest of its function runs,
-so what follows it there does not count, but its callers go on as soon as the function first
-awaits, so what they do still counts. A call the reader cannot resolve to a body in the
-application is taken not to navigate (Section~\ref{sec:approximations}).
+The router cancels a navigation if another starts before it finishes. Later code may navigate
+through a navigation call, including in a branch or callback, or through a call to a member
+of the class, a function in the file or an injected service's method whose body navigates. An awaited
+navigation finishes before its function continues, so subsequent code in that function does
+not count. Callers continue at its first await, so their subsequent code still counts.
+Calls without resolvable application bodies are assumed not to navigate
+(Section~\ref{sec:approximations}).
 
-An exception raised before the site, by a call or by evaluating an expression, is not counted, since almost any evaluation can throw, and Claim~\ref{claim:must} assumes instead that the evaluation completes normally. An \texttt{await} is counted, because a rejected request is an ordinary outcome. The router's fetch of a lazily loaded route is not counted: a failed chunk load is a fault of the deployment.
+Exceptions before the site are not counted: almost any evaluation can throw, and
+Claim~\ref{claim:must} assumes normal completion. An \texttt{await} is counted because request
+rejection is an ordinary outcome. Lazy-route fetches are not counted; chunk-load failure is
+a deployment fault.
 
-\textbf{How far the rules are checked.} Unit tests cover each rule in both directions, and a
-mutation sweep deletes each rule in turn and checks that some test fails
-(Section~\ref{sec:res-round2}). The tests share the extractor's reading of each construct, and no
-second classifier re-derives them. The constructs of the final must tier were read against the
-source by the assistant the declaration describes, with the extractor's decisions in view; this
-checks that each decision can be defended and is not an independent second reading
-(Section~\ref{sec:res-round2}). Some defects in the condition rules were found by an earlier review
-of a development version's tier and not by the witness check (Section~\ref{app:repairs}). What the witness check establishes is therefore narrower than the
-claim. It establishes that every cited site exists in the source and agrees on its target. The stronger half of
-the claim rests on the demotion rules and is not independently verified.
+\textbf{How far the rules are checked.} Unit tests cover each rule in both directions. A
+mutation sweep deletes each rule in turn and requires a test failure
+(Section~\ref{sec:res-round2}). The tests share the extractor's interpretation; no second
+classifier independently derives it. The declared AI assistant checked final must-tier
+constructs against source with the extractor's decisions visible. This tests whether the
+decisions are defensible, not whether an independent reading reproduces them
+(Section~\ref{sec:res-round2}). An earlier review of a development tier found condition-rule
+defects missed by the witness check (Section~\ref{app:repairs}). That check establishes only
+source-site existence and target agreement. The stronger claim rests on the demotion rules
+and remains independently unverified.
 
-\textbf{Scope of the claim.} This is the only soundness property claimed in the thesis, and it
-holds only relative to the declared route set. No such property is claimed for the may and
-unknown tiers. The witness of a may edge shows that the corresponding call site exists in the
-source, not that the transition is ever taken. This difference matters for the evaluation.
-Whether the target found at a witness location agrees with the target of the edge is a
-meaningful question for must edges, and for may edges whose target is a literal. It is not a
-meaningful question for edges the extractor produced by over-approximation. Treating it as
-one leads to spurious failures (Section~\ref{app:repairs}, Table~\ref{tab:repairs}).
+\textbf{Scope of the claim.} This thesis claims soundness only for the must tier, relative to
+the declared route set. A may witness establishes that a call site exists, not that its
+transition ever occurs. Target agreement at the witness location is meaningful for must
+edges and literal-target may edges, but not for over-approximated edges. Applying that check
+to over-approximations produces spurious failures (Section~\ref{app:repairs},
+Table~\ref{tab:repairs}). No soundness property is claimed for may or unknown.
 
-\textbf{The may tier as a design intent.} As in a modal transition system \cite{larsen1988modal}, the
-may tier is meant as an over-approximation: the must and may edges together are meant to contain every
-transition the application can take between its declared screens. This is a design intent and not a
-property that holds. Some rules under-approximate: the rules that take the first matching route, read an interpolation as one path segment, order a catch-all route last, and place dispatch and dialogs, and the rule that a call with no body in
-the application navigates nowhere. The graph can lack a transition it was meant to contain. An excess may edge, one the
-application never takes, is admitted by this reading and costs only precision. A transition the
-application takes and the graph lacks is the defect. No completeness theorem is claimed. The
-end-to-end check (Section~\ref{sec:res-e2e}) measures how far the graph falls short of the transitions
-the suites take; the structural references (Section~\ref{sec:res-groundtruth}) measure only how far it
-falls short of the analysis's own relations.
+\textbf{The may tier as a design intent.} Following modal transition systems
+\cite{larsen1988modal}, must and may together are intended to over-approximate every
+transition between declared screens. This intent is not an established property. Several
+rules under-approximate: selecting the first matching route, treating interpolation as one
+path segment, ordering catch-all routes last, placing dispatch and dialogs, and assuming
+calls without application bodies do not navigate. The graph can therefore omit intended
+transitions. An infeasible may edge costs precision; an omitted actual transition is a
+defect. No completeness theorem is claimed. The end-to-end check
+(Section~\ref{sec:res-e2e}) measures omissions against suite transitions; the structural
+references (Section~\ref{sec:res-groundtruth}) measure omissions only against the analysis's
+own relations.
 Section~\ref{sec:may-incomplete} sorts what is still missing by whether it lies inside the static
 boundary.
 
 \section{Scope attribution}
 \label{sec:attribution}
 
-Scope attribution is specified over five \emph{input relations}, three of them here. The analysis that is evaluated
-implements all three, and adds fallbacks after the fixpoint, one of which is not monotone; termination and the least-solution property hold for the fixpoint core
-only:
+Scope attribution uses five \emph{input relations}. The evaluated analysis implements the
+following three, then adds post-fixpoint fallbacks, one nonmonotone. Termination and the
+least-solution property apply only to the fixpoint core:
 \begin{itemize}
 \item component nesting ($N$): which component's template instantiates which;
 \item router outlets: which components lie on the path from the root to an outlet, and below a
 route's component;
 \item the call graph with dependency injection ($\mathit{CG}$).
 \end{itemize}
-The fixpoint also uses the derived relation $\mathit{Mem}$, which links each component to its
-members. Two further relations, dispatch ($D$) and guards ($T$), are defined in Section~\ref{sec:extensions}; the prototype does not implement them, and the evaluation of Chapter~\ref{ch:evaluation} measures the three-relation analysis with two stand-ins and a post-pass of fallbacks.
+The derived relation $\mathit{Mem}$ links components to their members. Dispatch ($D$) and
+guards ($T$), defined in Section~\ref{sec:extensions}, are not implemented. Thus
+Chapter~\ref{ch:evaluation} evaluates three relations, two stand-ins and a fallback post-pass.
 
-Guards that return a \texttt{UrlTree}, the injector hierarchy, and navigation inside signal effects and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) belong to the model only. The extractor approximates or omits them as Section~\ref{sec:approximations} lists. A site that no implemented relation reaches contributes no edge and is counted in the loss category ``Attribution, service'' of Table~\ref{tab:loss-rules}.
+Guards returning \texttt{UrlTree}, the injector hierarchy, and navigation inside signal effects
+and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) are model-only
+features. The extractor approximates or omits them as listed in
+Section~\ref{sec:approximations}. A site assigned no scope by implemented relations contributes
+no edge and counts as ``Attribution, service'' in Table~\ref{tab:loss-rules}.
 
 \subsection{The defect being addressed}
 
-Without scope attribution, a navigation site is attributed to a screen only if it
-occurs directly in the component that the route for that screen renders. This one cause explains three symptoms of the baseline, the extractor with the attribution pass disabled
-(Section~\ref{sec:implementation}): shared components contribute no edges, because the application shell places the header
-next to the router outlet and not inside the subtree of any screen; a component mounted at several routes contributes one edge instead of one per route; and navigations from injected services yield no edges. On it no application is without edges.
+Without scope attribution, only sites directly in a screen's routed component are attributed
+to that screen. This explains three baseline symptoms when the attribution pass is disabled
+(Section~\ref{sec:implementation}). Shared components contribute no edges: the shell places
+the header beside the outlet, outside every screen's subtree. A component mounted at several
+routes contributes one edge instead of one per route. Injected-service navigation contributes
+none. Every baseline application nevertheless has edges.
 
 \subsection{Scope}
 \label{sec:scope}
@@ -250,8 +278,7 @@ the powerset lattice over the screens. Its least element is the empty scope
 $\bot = \varnothing$, a site that fires from no screen at all. Its greatest element is
 $\top = S$, every screen.
 
-\textbf{True, computed and reference scope.} Two different things are called a scope, and the
-rest of this thesis keeps them apart.
+\textbf{True, computed and reference scope.} The thesis distinguishes two scopes.
 \begin{itemize}
 \item $\mathit{scope}^{*}(x)$ is the \emph{true scope} of a site $x$, the set of screens from
 which $x$ really can fire. It is a property of the application and not of any analysis.
@@ -260,17 +287,16 @@ edges from for $x$. In the model it is the fixpoint of Section~\ref{sec:inputs}.
 widens it with fallbacks that are not constraints of the model
 (Section~\ref{sec:implementation}).
 \end{itemize}
-A screen in $\mathit{scope}^{*}(x) \setminus \mathit{scope}(x)$ is a scope too small, and a
-screen in $\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ is a scope too large. No true scope
-is established anywhere in this thesis. For two applications a third set is read off the sources
-by the author for one and by the AI assistant for the other: the \emph{structural reference} $\mathit{scope}^{R}(x)$. It applies the analysis's
-own relations without its implementation (Section~\ref{sec:res-groundtruth}). Agreement between
-$\mathit{scope}$ and $\mathit{scope}^{R}$ shows that the relations are implemented as stated. It
-does not show that either equals $\mathit{scope}^{*}$. Everywhere else the thesis reports the
-computed scope and says so.
+A screen in $\mathit{scope}^{*}(x) \setminus \mathit{scope}(x)$ indicates a scope too small;
+one in $\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ indicates a scope too large. This
+thesis establishes no true scope. For two applications, source inspection defines a third set:
+the \emph{structural reference} $\mathit{scope}^{R}(x)$, constructed by the author for one and
+the AI assistant for the other. It applies the analysis's relations independently of its
+implementation (Section~\ref{sec:res-groundtruth}). Agreement with $\mathit{scope}^{R}$ shows
+that the specified relations are implemented, not equality with $\mathit{scope}^{*}$. Elsewhere, reported
+scopes are explicitly identified as computed.
 
-\textbf{The empty scope.} The empty computed scope is likewise two situations, and conflating
-them would hide a defect inside a property of the application.
+\textbf{The empty scope.} An empty computed scope can indicate two distinct situations.
 \begin{itemize}
 \item A site is \emph{unreachable} when $\mathit{scope}^{*}(x) = \varnothing$: the code exists
 and no screen can reach it, so contributing no edge is the correct answer.
@@ -278,12 +304,11 @@ and no screen can reach it, so contributing no edge is the correct answer.
 analysis reaches it (a navigation in a service nothing is known to inject, or behind a construct
 the reader could not follow). The true scope is simply unknown.
 \end{itemize}
-Both yield $\bot$, so $\bot$ alone does not say which holds. The extractor therefore does not
-let an unresolved site vanish silently. A site in a component that no rule places is anchored at
-an unplaced origin, a node that carries the component's file. The site's edges are held at
-\emph{may}. A site in any other component whose scope is empty contributes no edge. The extractor
-records a note naming its file and the reason. Either trace makes the unresolved sites countable
-in Chapter~\ref{ch:results} rather than indistinguishable from unreachable code.
+Both yield $\bot$, which cannot distinguish them. To preserve unresolved sites, the extractor
+anchors a site in an unplaced component at an unplaced-origin node recording its file, with
+edges labelled \emph{may}. A site in any other component with empty scope contributes no edge;
+a note records its file and reason. These traces make unresolved sites countable in
+Chapter~\ref{ch:results}, distinguishing them from unreachable code.
 
 \textbf{Named elements.} Three elements of the domain are named, because attribution anchors
 edges at them. Write $r' \succeq r$ for the reflexive ancestor relation on routes: $r'$ is $r$
@@ -299,7 +324,10 @@ and they form the chain
   \;\sqsubseteq\; \top .
 \]
 The chain is stated for a route with a component; for a prefix route only $\mathit{subtree}(r)$ is defined.
-These names are a representation device for anchoring edges, not a restriction of the domain: a component mounted at two unrelated leaf routes has the scope $\{\mathit{screen}(r_1), \mathit{screen}(r_2)\}$, none of the three named elements. They matter for storage, where an edge anchored at $\top$ or at $\mathit{subtree}(r)$ is kept once rather than once per screen. Table~\ref{tab:scopes} assigns a scope to each Angular construct.
+These names anchor edges without restricting the domain. A component mounted at unrelated
+leaf routes has scope $\{\mathit{screen}(r_1), \mathit{screen}(r_2)\}$, none of the three
+named elements. Anchoring at $\top$ or $\mathit{subtree}(r)$ stores an edge once rather than
+per screen. Table~\ref{tab:scopes} assigns scopes to Angular constructs.
 
 \begin{table}[t]\small
 \caption{Scope of each construct that can contain a navigation site.}
@@ -324,14 +352,12 @@ HTTP interceptor & $\top$ \\
 \end{tabularx}
 \end{table}
 
-\textbf{Computing the scopes.} The row for services is why a simple traversal of the component
-tree is not enough. A service has no scope of its own: its scope is the join of the scopes of the
-places that call it, which may themselves be services. In the model attribution is computed as a
-fixpoint over the relations of Section~\ref{sec:inputs}. The outlet relation gives the initial
-scopes, which propagate along $N$, $\mathit{Mem}$ and $\mathit{CG}$.
-This fixpoint core is a monotone dataflow problem in the sense of Kildall
-\cite{kildall1973unified,nielson1999principles}, and two properties of it do separate work. They
-do not extend to the fallbacks of Section~\ref{sec:implementation}.
+\textbf{Computing the scopes.} Services require more than component-tree traversal: their
+scopes join their callers' scopes, including calls from other services. The model computes
+a fixpoint over the relations in Section~\ref{sec:inputs}. Outlet-derived initial scopes
+propagate along $N$, $\mathit{Mem}$ and $\mathit{CG}$. This core is a monotone dataflow
+problem \cite{kildall1973unified,nielson1999principles}, with two properties that do not
+extend to the fallbacks in Section~\ref{sec:implementation}.
 \begin{itemize}
 \item Finite height gives termination. The height of $\mathcal{P}(S)$ is $|S|$, so the scope of
 one node can rise at most $|S|$ times before it reaches $\top$.
@@ -341,7 +367,8 @@ monotone because the only operation they apply to a scope is a join, and union i
 both arguments.
 \end{itemize}
 
-The relations may contain cycles, since mutually recursive templates are legal, and the worklist handles them. The restrictions, fallbacks and stand-ins of Section~\ref{sec:implementation} are computed outside the worklist.
+The worklist handles cycles, including mutually recursive templates. The restrictions,
+fallbacks and stand-ins of Section~\ref{sec:implementation} operate outside it.
 
 \subsection{Input relations}
 \label{sec:inputs}
@@ -364,81 +391,103 @@ several implementations the analysis joins over all of them, which is one source
 modality.
 \end{itemize}
 
-Algorithm~\ref{alg:attribution} gives the computation. A step adds a screen to a scope only when an edge
-of $N$, $\mathit{Mem}$ or $\mathit{CG}$ carries it there, and scopes only grow, so the
-algorithm computes the least solution of the constraint system that
-Table~\ref{tab:scopes} states. In the model a component that is both mounted by a route and
-rendered in the template of another component holds the join of the two scopes.
-Section~\ref{sec:implementation} reports where the prototype departs from this: it does not
-propagate into a component that a route mounts, and it adds fallbacks that are not constraints of
-the table, so its result is not the least solution of this system or of any restriction of it.
+Algorithm~\ref{alg:attribution} adds screens only along $N$, $\mathit{Mem}$ or $\mathit{CG}$,
+and scopes only grow. It therefore computes the least solution of Table~\ref{tab:scopes}'
+constraints. A component mounted by a route and rendered in another component's template
+receives the join of both scopes. The prototype instead blocks propagation into routed
+components and adds fallbacks outside these constraints (Section~\ref{sec:implementation}).
+Its result is not the least solution of this system or any restriction of it.
 
 \input{figures/alg-attribution}
 
 \subsection{Guards as program points}
 
-A guard that returns a \texttt{UrlTree} is itself a navigation, typically to a login screen. A \texttt{canActivate} or \texttt{canMatch} guard on $r$ runs
-while the router leaves the screen the navigation started from, so the redirect edge leaves that
-screen and not the guarded route. Only a \texttt{canDeactivate} guard
-redirects from a screen of $\mathit{subtree}(r)$ itself. The prototype does not implement this edge class.
+A guard returning \texttt{UrlTree} initiates navigation, typically to login. A
+\texttt{canActivate} or \texttt{canMatch} guard on $r$ redirects from the navigation's source
+screen, not the guarded route. Only \texttt{canDeactivate} redirects from a screen in
+$\mathit{subtree}(r)$ itself. The prototype does not implement this edge class.
 
-Further, the guard of an edge in the model is the conjunction of the structural conditions on the path from screen to call site and the guards the router runs on that navigation (Section~\ref{sec:model}). The prototype does not materialise that conjunction in the measured graph: a structural condition or an enclosing \texttt{if} demotes the edge to may but is not written into its guard, so the guard of a screen-to-screen edge holds only the router's guards. The evaluated graph therefore records that a navigation is conditional without recording the condition. Only an optional mode that no table of Chapter~\ref{ch:results} uses keeps the enclosing condition.
+The model's edge guard conjoins structural conditions from screen to call site with the
+router guards run during navigation (Section~\ref{sec:model}). The measured graph omits
+this conjunction: structural conditions and enclosing \texttt{if} statements demote edges
+to may but are not included in the guard. Screen-to-screen edges record only router guards,
+so they identify conditional navigation without its full condition. An optional mode retains
+enclosing conditions, but no Chapter~\ref{ch:results} table uses it.
 
 \subsection{Boundary}
 \label{sec:boundary}
 
-A navigation inside a signal effect has a firing condition that is a data dependence on a
-reactive graph, of which only the read set is statically visible (Section~\ref{sec:angular}). The
-model gives such edges the modality \emph{unknown} and records the signals read by the
-effect as the symbolic guard. No pass in this version emits one, and the analysis does not try to
-determine when these edges fire.
+Navigation inside a signal effect depends on a reactive graph whose read set alone is
+statically visible (Section~\ref{sec:angular}). The model labels these edges \emph{unknown}
+and records the signals read as a symbolic guard. This version emits none and does not
+attempt to determine when they fire.
 
 \subsection{Anchored edges}
 \label{sec:anchored}
 
-If the result of attribution were stored explicitly, a single link in the application shell would produce one edge for every screen; for the largest application in the corpus the bound is the product of its screens (Table~\ref{tab:conversion}) and its \ConstructsMifos{} constructs. Anchoring removes the factor that comes from the source scope. Each edge is stored once, anchored at its scope, and the set of edges leaving a screen is computed when requested:
+Explicit attribution would create one edge per screen for a shell link. For the largest
+application, the bound is its screen count (Table~\ref{tab:conversion}) times its
+\ConstructsMifos{} constructs. Anchoring removes this source-scope factor: edges are stored
+once at their scopes, and outgoing edges are computed on demand:
 \[
   \mathit{edgesFrom}(r) \;=\; E_\top \;\cup\; \bigcup_{r' \succeq r}
   E_{\mathit{subtree}(r')} \;\cup\; E_{\{\mathit{screen}(r)\}},
 \]
-where $E_X$ is the set of edges anchored at scope $X$. The term for $r' = r$ contributes
-$E_{\mathit{subtree}(r)}$ itself. The query is made for a screen, so $\mathit{component}(r)$ is
-defined, while $r'$ ranges over all ancestors of $r$, prefix routes included. An edge whose scope
-is some other screen set is stored at each of its screens and reaches $\mathit{edgesFrom}(r)$
-through the $E_{\{\mathit{screen}(r)\}}$ term.
+where $E_X$ contains edges anchored at scope $X$. The $r' = r$ term includes
+$E_{\mathit{subtree}(r)}$. Since the query is for a screen, $\mathit{component}(r)$ is defined;
+$r'$ ranges over all ancestors, including prefixes. Other screen sets are stored per screen
+and included through $E_{\{\mathit{screen}(r)\}}$ in $\mathit{edgesFrom}(r)$.
 
 \begin{claim}[Expansion]
 \label{claim:expansion}
 The expansion of the anchored edge set equals the materialised edge set.
 \end{claim}
 
-\noindent The claim is tested rather than proved: Section~\ref{sec:res-after} compares the two
-sets on the corpus and on fixtures.
+\noindent Section~\ref{sec:res-after} tests, rather than proves, this claim by comparing
+the sets on the corpus and fixtures.
 
-\textbf{Relative targets.} A site attributed to several screens is represented as possibly firing from each of them, but a relative
-target does not resolve against each of them. Angular resolves a \texttt{routerLink} without a
-leading slash, and a \texttt{Router.navigate} call relative to the injected route, against the route
-that renders the component holding the site. A component's template renders on every screen below
-its route, so a link in it that fires on a child screen still resolves against the component's own
-route. Write $\mathit{holder}(s, c)$ for the nearest route at or above screen $s$ whose component is
+\textbf{Relative targets.} Attribution to several screens represents possible firing from each,
+but relative targets do not resolve against each source screen. Angular resolves a
+\texttt{routerLink} without a leading slash, or a \texttt{Router.navigate} call relative to
+the injected route, against the route rendering the component containing the site. Its template
+also renders on descendant screens, where links still resolve against that component's route.
+Write $\mathit{holder}(s, c)$ for the nearest route at or above screen $s$ whose component is
 $c$. A relative target at a site in component $c$ that fires on $s$ resolves against the path of
-$\mathit{holder}(s, c)$. Where no route on that chain renders $c$, as for a component nested in a
-template, a full target's base is not read and its edge is held at may (Table~\ref{tab:demotion}); a
-target prefix falls back to the address of $s$, and its edges are may edges as every prefix edge is.
+$\mathit{holder}(s, c)$. If no route on that chain renders $c$, as with template-nested
+components, the full target's base is unresolved and the edge is may
+(Table~\ref{tab:demotion}). A target prefix falls back to $s$'s address; all prefix edges are may.
 
 \subsection{Extensions not evaluated}
 \label{sec:extensions}
 
-Two further input relations belong to the model and not to the prototype, and the parts of the attribution that use them were not evaluated. \emph{Dispatch} ($D$): a dispatch is treated as a call-graph edge from every dispatcher to every handler, which admits NgRx effects (NgRx is the Angular state-management library) and router event subscriptions; an NgRx effect for action $a$ takes the join of the scopes of every dispatcher of $a$. \emph{Guards} ($T$): $T$ links each callable that holds a navigation site to the entry guards that navigation runs; a \texttt{canActivate}, \texttt{canActivateChild} or \texttt{canMatch} guard on route $r$ takes the join of the scopes of the navigation sites with a known target in $\mathit{subtree}(r)$, an approximation of the screens a navigation into $r$ starts from. With both relations the fixpoint propagates along $N$, $\mathit{Mem}$, $\mathit{CG}$, $D$ and $T$ and remains a monotone problem; stand-ins replace them in the prototype (Section~\ref{sec:implementation}).
+Two model-only input relations were not evaluated. \emph{Dispatch} ($D$) treats dispatch as
+call-graph edges from each dispatcher to each handler, covering NgRx effects (NgRx is Angular's
+state-management library) and router event subscriptions. An effect for action $a$ receives
+the join of all dispatchers' scopes for $a$.
+
+\emph{Guards} ($T$) links each callable containing navigation to the entry guards it runs.
+A \texttt{canActivate}, \texttt{canActivateChild} or \texttt{canMatch} guard on $r$ receives
+the join of scopes of sites with known targets in $\mathit{subtree}(r)$, approximating the
+source screens of navigation into $r$. With these relations, propagation along $N$,
+$\mathit{Mem}$, $\mathit{CG}$, $D$ and $T$ remains monotone. The prototype uses stand-ins
+instead (Section~\ref{sec:implementation}).
 
 \section{Implementation}
 \label{sec:implementation}
 
-The extractor was built for this thesis and is in the accompanying repository, evaluated at commit \texttt{a9d29df} (Chapter~\ref{ch:evaluation}). It consists of a framework-independent core, which defines the graph model and the operations over graphs, and one adapter per framework that maps source constructs onto the shared model. The Angular adapter reads route configuration, templates and class code with the TypeScript compiler API and emits screens and edges for \texttt{routerLink} attributes and \texttt{Router.navigate} calls, each with the rule identifier and source location that produced it as witness.
+The accompanying extractor was built for this thesis and evaluated at commit \texttt{a9d29df}
+(Chapter~\ref{ch:evaluation}). A framework-independent core defines the graph model and
+operations; framework adapters map source constructs to that model. The Angular adapter uses
+the TypeScript compiler API to analyse routes, templates and class code. It emits screens and
+edges for \texttt{routerLink} attributes and \texttt{Router.navigate} calls, with the generating
+rule identifier and source location as witnesses.
 
-Scope attribution is a separate pass in the Angular adapter, enabled with the option \texttt{-{}-attribution}. With the option off, the extractor produces exactly the baseline edge set, as checked on every application in the corpus. The pass implements component nesting, router outlets and the call graph; stand-ins replace $D$ and $T$ (below).
+The Angular adapter's separate attribution pass is enabled with \texttt{-{}-attribution}.
+Disabling it reproduces the baseline edge set on every corpus application. The pass implements
+component nesting, router outlets and the call graph, with stand-ins for $D$ and $T$ below.
 
-The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-ablation}), at the levels of Figure~\ref{fig:lattice}. Each level adds to the one before it, and the figure marks which levels stand for earlier work and which this thesis adds.
+The evaluation enables these mechanisms cumulatively (Section~\ref{sec:res-ablation}).
+Figure~\ref{fig:lattice} distinguishes levels representing earlier work from this thesis's additions.
 
 \begin{figure}[t]
 \centering
@@ -466,97 +515,95 @@ The pass is switched on cumulatively in the evaluation (Section~\ref{sec:res-abl
 \par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what this thesis adds; \emph{class} is the per-class variant of the service join. Both orange levels also carry the fallback join and the stand-ins for guards and effects. The levels nest by construction: each withholds every mechanism above it (Section~\ref{sec:res-ablation}).}
 \end{figure}
 
-\textbf{Component nesting.} Every component in the application, excluding test hosts and stories,
-is read with its element selectors and template. An edge $A \to B$ is added when $A$'s template
-contains an element with $B$'s selector. When a selector belongs to more than one component, the
-candidates are narrowed to those that $A$'s file imports. If none is imported, the analysis joins
-over all of them and records a note. Edges from such a join are not capped at \emph{may}, so a
-site in one candidate can be placed on a screen that renders another. Claim~\ref{claim:must}
-excludes such edges (Section~\ref{sec:approximations}). The corpus has such joins in k8s dashboard and
-bitwarden. No must edge of the final graphs cites a construct placed through one. An attribute
-selector is matched the same way, so a directive has a scope as a component does.
+\textbf{Component nesting.} The pass analyses each component's selectors and template,
+excluding test hosts and stories. It adds $A \to B$ when $A$'s template contains an element
+matching $B$'s selector. Ambiguous matches are restricted to components imported by $A$'s
+file. If none is imported, the pass joins all candidates and records a note. Such edges are
+not capped at \emph{may}, so sites may be attributed to screens rendering another candidate.
+Claim~\ref{claim:must} excludes these edges (Section~\ref{sec:approximations}). Such joins
+occur in k8s dashboard and bitwarden, but no final must edge cites a construct placed through
+one. Attribute selectors are matched similarly, assigning scopes to directives as well as components.
 
-\textbf{Router outlets.} The route tree is recorded during route extraction. A route component's
-template is rendered on its own screen and on every descendant screen, so its navigation sites
-get the scope $\mathit{subtree}(r)$. A component is the application shell when it is not routed, is not placed on a screen
-by the nesting relation and holds the primary \texttt{<router-outlet>}.
-Everything it renders gets the scope $\top$. A component that is not routed and not
-referenced, but whose subtree contains the outlet, is most likely mounted by a route the
-extractor cannot see, for example through a helper function that wraps a route table. It is also
-treated as shell. Its edges are capped at \emph{may}, so that Claim~\ref{claim:must} is not
-put at risk by a scope that may be too large.
+\textbf{Router outlets.} Route extraction records the route tree. A route component's template
+renders on its own and descendant screens, giving its sites scope $\mathit{subtree}(r)$.
+An unrouted component that contains the primary \texttt{<router-outlet>} and is unplaced by
+nesting is treated as the shell; everything it renders receives $\top$. An unrouted,
+unreferenced component whose subtree contains the outlet is also treated as shell. It is
+likely mounted through an unresolved route declaration, such as a route-table helper.
+Its edges are capped at \emph{may}, protecting Claim~\ref{claim:must} from an excessive scope.
 
-\textbf{Departures from Algorithm~\ref{alg:attribution}.} The pass departs from the algorithm in
-two respects.
+\textbf{Departures from Algorithm~\ref{alg:attribution}.} The pass has two departures.
 
-The first is that it does not propagate a scope into a component that a route mounts. A routed
-component keeps $\mathit{subtree}(r)$ and does not also receive the scope of a component whose
-template renders it. Traversal does pass through a routed component, so a component nested
-beneath it still receives the scopes of the components above. Taken alone, this restriction can only shrink a routed component's scope. Two other rules can enlarge a scope beyond the model's:
+First, propagation into routed components is blocked. They retain $\mathit{subtree}(r)$
+without receiving the scopes of components whose templates render them. Traversal still
+passes through them, so their nested components receive scopes from above. This restriction
+alone can only shrink a routed component's scope. Two other rules can enlarge scopes beyond
+the model's:
 \begin{itemize}
 \item components that nothing references and no route renders, but whose subtree holds the
 primary outlet, are treated as shell and given $\top$, with their edges capped at may;
 \item an ambiguous selector that no candidate's import resolves joins over all candidates, which
 Claim~\ref{claim:must} excludes.
 \end{itemize}
-A scope that is too small loses edges and cannot invent them, so the restriction cannot
-put Claim~\ref{claim:must} at risk; it costs recall, and the constructs it strands are counted in
-Chapter~\ref{ch:results}.
+A smaller scope loses edges without inventing them, so this restriction affects recall,
+not Claim~\ref{claim:must}. Chapter~\ref{ch:results} counts the constructs it leaves unplaced.
 
-The second departure is in how the call graph of Section~\ref{sec:inputs} is read. The pass
-ranges over the members of classes, and a member of a component runs on that component's screens.
-A call \texttt{this.f.g()} is resolved through the declared type of \texttt{f} (a constructor
+Second, the call graph differs from Section~\ref{sec:inputs}. The pass operates on class
+members, assigning component members their component's screens. A call \texttt{this.f.g()}
+is resolved through \texttt{f}'s declared type (a constructor
 parameter, typed field, \texttt{inject(T)} field or \texttt{@Inject(TOKEN)} parameter). The call resolves to:
 \begin{itemize}
 \item the class that type names;
 \item the classes a provider binds it to with \texttt{useClass} or \texttt{useExisting}; or
 \item for an abstract class no provider binds, its subclasses in the application.
 \end{itemize} This is class hierarchy analysis \cite{dean1995cha} restricted to the declared type.
-Bindings are read across the whole application rather than relative to the injector that
-resolves them, so where two injectors bind a token differently the join covers both. This can
-only widen a scope. A factory or value provider is not read. A call on a type declared outside
-the application contributes no edge.
+Bindings are collected application-wide rather than per injector. Different bindings for one
+token are joined, which can only widen scopes. Factory and value providers are not analysed;
+calls on types declared outside the application contribute no edges.
 
-The seeded call-graph iteration on its own reaches the least solution of its constraints. The
-scopes emitted for service sites add two fallbacks to it:
+The seeded call-graph iteration reaches its constraints' least solution. Service scopes
+then receive two fallbacks:
 \begin{itemize}
 \item a member no caller reaches falls back to the join over every component that injects its
 class, the per-class approximation that the \emph{class} level of the ablation applies to every service
 (Section~\ref{sec:res-ablation});
-\item a member the iteration does reach receives more screens where a caller the graph does not
-see reaches it: the join of that caller's class is added, or this class's own join if nothing
-places the caller.
+\item a member reached by the iteration receives additional screens from callers not represented
+in the graph: that caller's class join is added, or this class's own join if the caller is unplaced.
 \end{itemize}
-Neither fallback is a constraint of Table~\ref{tab:scopes}. The first is not monotone in the
-call graph, since adding a call edge can narrow a scope. The emitted service scopes are therefore the
-least call-graph solution widened by these fallbacks, and not the least solution of the
-constraints in Table~\ref{tab:scopes}. Service sites are held at \emph{may} either way, because
-the calls on the way carry conditions the analysis does not follow.
+Neither fallback belongs to Table~\ref{tab:scopes}. The first is nonmonotone in the call
+graph: adding a call edge can narrow scope. Emitted service scopes are therefore the least
+call-graph solution widened by fallbacks, not the least solution of Table~\ref{tab:scopes}.
+Service sites remain \emph{may} because conditions along their call paths are not analysed.
 
-\textbf{Anchored edges.} Edges with scope $\top$ are stored once at a node of kind \texttt{scope}.
-Edges whose screen set is exactly $\mathit{subtree}(r)$ for a screen $r$ with at least one
-descendant are stored once at a scope node listing the members of that subtree. A prefix route
-that is not itself a screen is not anchored. Other screen sets are stored per screen. The core
-provides the query $\mathit{edgesFrom}(r)$ and a function that materialises all anchored edges.
+\textbf{Anchored edges.} Edges with scope $\top$ are stored once at a \texttt{scope} node.
+Edges scoped to exactly $\mathit{subtree}(r)$, where $r$ is a screen with a descendant, are
+stored once at a node listing its screens. Prefix routes that are not screens are not anchored; other sets are stored per
+screen. The core provides $\mathit{edgesFrom}(r)$ and materialisation of all anchored edges.
 
-\textbf{Stand-ins for $D$ and $T$.} Two approximations stand in where the model has a
-relation the pass does not implement. Section~\ref{sec:res-ablation} withholds them below the
-\emph{full} level of Figure~\ref{fig:lattice}, so no lower level counts their sites.
+\textbf{Stand-ins for $D$ and $T$.} Two approximations replace unimplemented relations.
+They are withheld below Figure~\ref{fig:lattice}'s \emph{full} level in
+Section~\ref{sec:res-ablation}, so lower levels exclude their sites.
 \begin{itemize}
-\item \emph{Guards (for $T$).} A guard is given the screens of the routes that name it, as a
-bare identifier, in \texttt{canActivate}, \texttt{canActivateChild}, \texttt{canMatch} or
-\texttt{canDeactivate}: the screen of each such route, not $\mathit{subtree}(r)$, and nothing for
-a componentless prefix. For a \texttt{canDeactivate} guard that is narrower than the model's
-scope; for an entry guard it is not the model's rule, since the redirect leaves the screen a
-navigation starts from. The stand-in can therefore be too small where navigations into the route start
-elsewhere, and too large where they do not start at the route itself.
+\item \emph{Guards (for $T$).} A guard receives the screens of routes naming it as a bare
+identifier in \texttt{canActivate}, \texttt{canActivateChild}, \texttt{canMatch} or
+\texttt{canDeactivate}. It receives each route's own screen, not $\mathit{subtree}(r)$,
+and none for componentless prefixes. This is narrower than the model for \texttt{canDeactivate}.
+For entry guards it differs from the model, since redirects leave the navigation's source
+screen. Scope may therefore be too small when navigation starts elsewhere, and too large
+when it does not start at the guarded route.
 \item \emph{Effects (for $D$).} An effect, being registered for the lifetime of the application,
 is given $\top$.
 \end{itemize}
-Edges from both are capped at \emph{may}. A class the call graph does not reach and nothing
-injects still has no scope. The evaluation counts those in the loss category ``Attribution,
-service'' of Table~\ref{tab:loss-rules}. One change was made to the baseline itself: for components with an inline template, the witness now points at the construct's own line rather than the template's first line; on the corpus the baseline graphs with and without this change are identical. Unit tests cover each case above.
+Both produce only \emph{may} edges. Classes not reached by calls or injection remain without
+scope and count as ``Attribution, service'' in Table~\ref{tab:loss-rules}. One baseline change
+moved inline-template witnesses from the template's first line to the construct's own line.
+Baseline graphs are identical with and without this change on the corpus. Unit tests cover
+each case above.
 
 \section{Summary}
 
-The chapter defined a graph of screens and edges with three confidence labels and one soundness claim for the must tier, relative to the declared route set, the route-order assumption and an execution model; the evaluation tests only a necessary condition of it. Scope attribution assigns each navigation site a set of screens as a least fixpoint over five input relations. The prototype implements three of them, replaces the dispatch and guard relations by stand-ins, and widens the scopes with fallbacks that are not part of the model. Chapter~\ref{ch:evaluation} describes how the analysis is measured.
+The graph model uses three modality labels. Its must-tier soundness claim is relative to
+declared routes, route order and an execution model; evaluation tests only a necessary
+condition. Scope attribution computes screen sets as a least fixpoint over five relations.
+The prototype implements three, substitutes stand-ins for dispatch and guards, and adds
+fallbacks outside the model. Chapter~\ref{ch:evaluation} describes the measurement.
