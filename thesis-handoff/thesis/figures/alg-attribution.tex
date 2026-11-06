@@ -8,7 +8,8 @@
   \texttt{canDeactivate} guards $\mathit{leave}(r)$; components $C$; nesting
   $N \subseteq C \times C$; HTTP interceptors $I$; call graph $\mathit{CG}$; dispatch relation
   $D$; guard relation $T$, linking a callable $x$ to $g \in \mathit{entry}(r)$ when $x$ holds a
-  navigation site whose target lies in $\mathit{subtree}(r)$
+  navigation site whose target lies in $\mathit{subtree}(r)$; guards and interceptors are given as
+  the callables that run, such as a guard's \texttt{canActivate} or an interceptor's \texttt{intercept}
 \Ensure $\mathit{scope}(x) \in \mathcal{P}(S)$ for every component and callable $x$; the
   callables include the members of components and of services
 \ForAll{$x$} $\mathit{scope}(x) \gets \varnothing$ \EndFor

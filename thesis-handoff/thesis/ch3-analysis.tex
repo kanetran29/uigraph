@@ -129,9 +129,14 @@ Under assumptions A1 to A4, every must edge corresponds to a navigation that occ
 input on which the enclosing code executes.
 \end{claim}
 
-\noindent Where an assumption fails, for a program or for one execution, a must edge need not
-correspond to a navigation that occurs, and Claim~\ref{claim:must} does not cover that case. The must tier is therefore
-a lower bound relative to A1 to A4.
+\noindent A navigation occurs when the router activates the route of $s'$; any guard or resolver on
+the way demotes the edge (Table~\ref{tab:demotion}). For a merged edge, the enclosing code is that
+of a construct that earns must. The claim is conditional on that code running, so it does not show
+that a user can reach the trigger. It states what the demotion rules are designed to meet and is not
+proved. Where an assumption fails, for a program or for one
+execution, a must edge need not correspond to a navigation that occurs, and
+Claim~\ref{claim:must} does not cover that case. The must tier is therefore a lower bound, relative
+to A1 to A4, on the navigations that occur whenever their triggering code runs.
 
 \textbf{What the evaluation tests.} The evaluation tests only a necessary condition of
 Claim~\ref{claim:must}, which limits the reading of Chapter~\ref{ch:results}. The witness check
@@ -591,7 +596,7 @@ Service sites remain \emph{may} because conditions along their call paths are no
 \textbf{Anchored edges.} Edges with scope $\top$ are stored once at a \texttt{scope} node.
 Edges scoped to exactly $\mathit{subtree}(r)$, where $r$ is a screen with a descendant, are
 stored once at a node listing its screens. Prefix routes that are not screens are not anchored; other sets are stored per
-screen. The core provides $\mathit{edgesFrom}(r)$ and materialisation of all anchored edges.
+screen. The core provides $\mathit{edgesFrom}(r)$ and expands anchored edges.
 
 \textbf{Stand-ins for $D$ and $T$.} Two approximations replace unimplemented relations and are withheld below Figure~\ref{fig:lattice}'s \emph{full} level in
 Section~\ref{sec:res-ablation}, so that lower levels exclude their sites.
@@ -603,13 +608,12 @@ and none for componentless prefixes. This is narrower than the model for \texttt
 For entry guards it differs from the model, since redirects leave the navigation's source
 screen. Scope may therefore be too small when navigation starts elsewhere, and too large
 when it does not start at the guarded route.
-\item \emph{Effects (for $D$).} An effect, registered for the lifetime of the application,
-is given $\top$.
+\item \emph{Effects (for $D$).} An effect lives as long as the application and is given $\top$.
 \end{itemize}
 Both produce \emph{may} edges only. Classes not reached by calls or injection remain without
-scope and count as ``Attribution, service'' in Table~\ref{tab:loss-rules}. One baseline change
-moved inline-template witnesses from the template's first line to the construct's own line.
-Baseline graphs are identical with and without this change on the corpus. Unit tests cover
+scope and count as ``Attribution, service'' in Table~\ref{tab:loss-rules}. Moving
+inline-template witnesses from the template's first line to the construct's own line leaves the
+baseline graphs on the corpus unchanged. Unit tests cover
 each case above.
 
 \subsection{Summary}

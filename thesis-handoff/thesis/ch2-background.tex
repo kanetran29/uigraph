@@ -264,8 +264,11 @@ analysis as the computational framework.
 
 The \emph{modal transition system} of Larsen and Thomsen labels each transition as
 either required, a \emph{must} edge, or merely permitted, a \emph{may} edge
-\cite{larsen1988modal}. The graph model in Chapter~\ref{ch:analysis} adopts this
-distinction and adds \emph{unknown} for edges whose modality could not be determined.
+\cite{larsen1988modal}. The graph model in Chapter~\ref{ch:analysis} borrows the names
+\emph{must} and \emph{may} with a different meaning. There they are confidence labels on a
+conditional runtime claim, not obligations on an implementation, and no refinement property of
+modal transition systems is used. The model adds \emph{unknown} for edges whose modality could not
+be determined.
 The thesis claims soundness for the must tier alone, and the evaluation distinguishes the tiers
 because may edges have weaker supporting evidence.
 

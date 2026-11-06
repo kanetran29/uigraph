@@ -98,7 +98,7 @@ Attribution recovery & constructs assigned to attribution loss in the baseline t
 Accounted share & recovered constructs plus in-scope constructs recorded as dynamic or unplaced & in-scope constructs & RQ2 & \ref{sec:res-accounting} \\
 Must-edge target consistency & must edges whose witness passes (lower bound) or does not fail (upper bound) & all must edges & RQ3 & \ref{sec:res-soundness} \\
 Node-level recall & distinct URLs named in an application's end-to-end test sources that have a node & distinct URLs so named & RQ1 & \ref{sec:res-defects} \\
-Structural-reference recall and precision & (site, screen) pairs the reference and a level share & pairs in the reference (recall) or pairs the level places (precision) & RQ3 & \ref{sec:res-groundtruth} \\
+Structural-reference recall and precision & (site, screen) pairs the reference and a level share & pairs in the reference (recall) or pairs the level places at the sites the reference determines (precision) & RQ3 & \ref{sec:res-groundtruth} \\
 End-to-end containment & observed screen pairs joined by an edge of the graph & observed screen pairs & RQ3 & \ref{sec:res-e2e} \\
 Scope width & mean screens a site is attributed to & the same when every site has scope $\top$ & RQ3 & \ref{sec:res-width} \\
 Detection rate & injected changes that produce the predicted change in the graph & injected changes the graph can score (excluded mutants reported) & RQ4 & \ref{sec:res-mutation} \\
@@ -413,7 +413,8 @@ independent of the earlier one. Every correction is listed, one
 row each, in Table~\ref{tab:repairs} of Appendix~\ref{app:corrections}, together with the change in
 the mutation sample.
 
-\textbf{Availability.} The extractor and harness are in the accompanying repository under the MIT licence. Rima et al.'s tool was run from its public repository at commit \texttt{f33003f}; it carried no licence when checked on 5 November 2026, so it is not redistributed.
+\textbf{Availability.} The extractor, the harness and the scripts that generate every table are in
+the accompanying repository, \url{https://github.com/kanetran29/uigraph}, under the MIT licence. Rima et al.'s tool was run from its public repository at commit \texttt{f33003f}; it carried no licence when checked on 5 November 2026, so it is not redistributed.
 
 \subsubsection{Reproducibility}
 \label{sec:reproducibility}

@@ -49,15 +49,16 @@ export function wilson(k, n) {
 
 /**
  * Per stratum of one application: its size, the sample read, the real ones among it and the estimated
- * real pairs; then each tool's pairs, estimated real pairs, precision and relative recall.
+ * real pairs; then each tool's pairs, estimated real pairs, precision and relative recall. An unclear
+ * verdict counts as not real, or as real with `unclearAsReal` (the sensitivity scenario).
  */
-export function scoreApp(strata, verdicts) {
+export function scoreApp(strata, verdicts, { unclearAsReal = false } = {}) {
   const st = {}
   // An only-ours stratum split in two (oursShell, oursOther) is estimated part by part.
   const ourParts = strata.oursParts ?? (strata.oursShell !== undefined ? [['oursShell', strata.oursShell], ['oursOther', strata.oursOther]] : [['ours', strata.oursOnly]])
   for (const [name, size] of [['both', strata.both], ['theirs', strata.theirsOnly], ...ourParts]) {
     const read = verdicts.filter((v) => v.stratum === name)
-    const real = read.filter((v) => v.verdict === 'real').length
+    const real = read.filter((v) => v.verdict === 'real' || (unclearAsReal && v.verdict === 'unclear')).length
     const ci = wilson(real, read.length)
     st[name] = { size, read: read.length, real, unclear: read.filter((v) => v.verdict === 'unclear').length, est: read.length ? (size * real) / read.length : 0, lo: size * ci[0], hi: size * ci[1], ci }
   }
@@ -115,7 +116,11 @@ function main() {
   const gateItems = runs.flatMap((r) => r.gate.flatMap((g) => g.items.map((x) => ({ slug: g.slug, ...x }))))
   const verdicts = mergeReadings(reading, readers, gateItems, a.corrections ? JSON.parse(readFileSync(a.corrections, 'utf8')) : {})
   const apps = {}
-  for (const slug of Object.keys(reading)) apps[slug] = scoreApp(strata[slug], verdicts.filter((v) => v.slug === slug))
+  const appsUnclearReal = {}
+  for (const slug of Object.keys(reading)) {
+    apps[slug] = scoreApp(strata[slug], verdicts.filter((v) => v.slug === slug))
+    appsUnclearReal[slug] = scoreApp(strata[slug], verdicts.filter((v) => v.slug === slug), { unclearAsReal: true })
+  }
   const groups = { Rima: RIMA, Corpus: CORPUS, CorpusNoMifos: CORPUS.filter((x) => x !== 'mifos'), All: [...RIMA, ...CORPUS] }
   const pct = (x) => (x === null ? '--' : `${(100 * x).toFixed(1)}\\,\\%`)
   const name = (s) => s.replace(/\d/g, (d) => ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'][d]).split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')
@@ -133,6 +138,10 @@ function main() {
       m(`${g}${T}Recall`, pct(r.recall))
       m(`${g}${T}PrecisionRange`, `${pct(b[t].precision[0])}--${pct(b[t].precision[1])}`)
       m(`${g}${T}RecallRange`, `${pct(b[t].recall[0])}--${pct(b[t].recall[1])}`)
+      const u = pool(list.map((s) => appsUnclearReal[s]))
+      const ru = rates(u[t], u.all)
+      m(`${g}${T}PrecisionUnclearReal`, pct(ru.precision))
+      m(`${g}${T}RecallUnclearReal`, pct(ru.recall))
     }
   }
   for (const [slug, s] of Object.entries(apps)) {

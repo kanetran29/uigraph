@@ -53,3 +53,14 @@ test('a split only-ours stratum is estimated part by part, and bounds bracket th
   assert.ok(b.ours.recall[0] <= r && r <= b.ours.recall[1])
   assert.ok(b.theirs.precision[0] <= rates(s.theirs, s.all).precision)
 })
+
+test('with unclearAsReal an unclear verdict counts as real, for the sensitivity scenario', () => {
+  const v = (stratum, verdict) => ({ stratum, verdict })
+  const verdicts = [v('both', 'real'), v('theirs', 'real'), v('theirs', 'unclear'), v('theirs', 'spurious'), v('theirs', 'spurious'), v('ours', 'unclear')]
+  const strata = { both: 2, theirsOnly: 20, oursOnly: 10 }
+  assert.equal(scoreApp(strata, verdicts).strata.theirs.est, 5)
+  const s = scoreApp(strata, verdicts, { unclearAsReal: true })
+  assert.equal(s.strata.theirs.est, 10)
+  assert.equal(s.strata.ours.est, 10)
+  assert.equal(s.strata.theirs.unclear, 1)
+})

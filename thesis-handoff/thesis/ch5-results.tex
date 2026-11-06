@@ -663,7 +663,9 @@ screen, where the component holding it is not shown, accounts for the other
 \RimaJudgedSpurious{} spurious pairs are at the may tier: the number with a must edge is
 \RimaSpuriousMust{}.
 
-All assessments use one AI model family, so they establish consistency rather than correctness. A
+All assessments use one AI model family, so they establish consistency rather than correctness. The
+run logs of the head-to-head comparison record Claude Sonnet 5.5 as the reader and Claude Opus 5.5
+as the stronger model; the archived records of the other readings do not name the model. A
 stronger model reassessed every miss, every pair not judged real and every sixth real pair. It
 reassessed \RimaGated{} pairs and changed \RimaGateChanged{} of the verdicts. One batch was
 repeated because its first response omitted all 20 additional pairs. Adversarial review later
@@ -690,7 +692,8 @@ all real transitions. Proposing more pairs enlarges that reference union. Within
 pairs are stratified as shared, only-theirs or only-ours. An only-ours stratum exceeding 1000 pairs
 is split into shell-only and other pairs. Every pair in each stratum, or a seeded sample of 12 when
 larger, was assessed from source without disclosing the proposing tool. Precision estimates the
-real share of a tool's pairs; relative recall estimates its share of real pairs in the union.
+real share of a tool's pairs; relative recall estimates its share of real pairs in the union. A pair
+judged unclear counts as not real, so both measures estimate pairs judged real.
 
 Their tool records constant-valued paths as expression text and omits lazy-module parent prefixes.
 None of its \HHRoutesGhostfolioTheirs{} ghostfolio paths names a declared route. To avoid losing
@@ -728,7 +731,7 @@ Application & pairs & precision & recall & pairs & precision & recall \\
 \hhrow{Corpus without mifos}{CorpusNoMifos}
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Recall} is relative: the share of the real pairs either tool finds. Real pairs are estimated per stratum from a reading of at most 12 pairs, so a figure over a large stratum is an estimate. Routes are identified by declaration site, and the row without mifos was added after reading (both post hoc). All cells are generated figures.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Recall} is relative: the share of the real pairs either tool finds. Real pairs are estimated per stratum from a reading of at most 12 pairs, so a figure over a large stratum is an estimate; the size of each stratum and the pairs read in it are in \texttt{rima/head2head/results-v3/score.json}. Routes are identified by declaration site, and the row without mifos was added after reading (both post hoc). All cells are generated figures.}
 \end{table}
 
 Table~\ref{tab:h2h} reports point estimates. On their seven subjects, the tools are close: theirs
@@ -738,13 +741,17 @@ recalls \HHCorpusNoMifosOursRecall{} of real union pairs versus \HHCorpusNoMifos
 at \HHCorpusNoMifosOursPrecision{} versus \HHCorpusNoMifosTheirsPrecision{} precision. They propose
 \HHCorpusNoMifosOursPairs{} and \HHCorpusNoMifosTheirsPairs{} pairs, with estimated real counts
 of \HHCorpusNoMifosOursReal{} and \HHCorpusNoMifosTheirsReal{}. Setting each stratum's rate to its
-Wilson interval endpoints preserves separate recall ranges: \HHCorpusNoMifosOursRecallRange{}
+Wilson interval endpoints gives bounds, not a joint 95\,\% interval, and the recall bounds stay separate: \HHCorpusNoMifosOursRecallRange{}
 versus \HHCorpusNoMifosTheirsRecallRange{}. On mifos, this extractor proposes \HHMifosOursPairs{}
 pairs, theirs \HHMifosTheirsPairs{}, and both share \HHMifosBoth{}. Most of this extractor's pairs are shell-only
 (Section~\ref{sec:res-e2e}); precision is \HHMifosOursPrecision{} versus \HHMifosTheirsPrecision{}.
 The pooled corpus recall ranges, \HHCorpusOursRecallRange{} versus
 \HHCorpusTheirsRecallRange{}, therefore rest mostly on mifos (Section~\ref{sec:res-baseline}) and
-do not rank the tools. The intervals assume independent sampled pairs despite site clustering, and
+do not rank the tools. They also rest on one verdict: \HHReadUnclear{} sampled pair, in mifos's
+shell-only stratum, was judged unclear. Counted as real, it would put this extractor at
+\HHCorpusOursPrecisionUnclearReal{} precision and \HHCorpusOursRecallUnclearReal{} recall on the
+pooled corpus and their tool at \HHCorpusTheirsRecallUnclearReal{} recall; the figures without mifos
+do not change. The bounds assume independent sampled pairs despite site clustering, and
 they cover sampling error alone. Systematic error from the single model family would shift both
 endpoints.
 
