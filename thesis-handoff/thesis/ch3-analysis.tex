@@ -37,7 +37,7 @@ edge relation. An \emph{unplaced origin} represents a component and navigation s
 could not be assigned to a screen. A \emph{dynamic target} represents an unresolved
 destination. These preserve unplaced sites for the loss counts in Chapter~\ref{ch:results}
 and unresolved destinations that may still occur at run time. Section~\ref{sec:res-after} counts
-both kinds: \CensusOtherNodes{} of \CensusNodes{} corpus nodes (\CensusOtherNodeShare{}).
+both kinds.
 Of \CensusEdges{} edges, \CensusTargetNotScreen{} reach a dynamic target. Another
 \CensusMaySourceNotScreen{} leave an unplaced origin and are labelled \emph{may}, so
 Chapter~\ref{ch:results} includes them in that tier despite their nonscreen sources.
@@ -106,7 +106,7 @@ edges remain, on \RouteOrderSitesWithout{} of the \RouteOrderSites{} constructs.
 \item[A2. Selectors.] The component of a must edge's site is not placed by a join over an ambiguous selector,
 the fallback of the nesting relation when no import resolves the selector
 (Sections~\ref{sec:inputs} and~\ref{sec:implementation}). A join that places a component on a
-screen that never renders it is a counterexample. Such joins occur in k8s dashboard and
+screen that never renders it is a counterexample. Such joins occur in k8s dashboard (the Kubernetes dashboard) and
 bitwarden, but no final must edge cites a construct placed through one.
 \item[A3. Calls.] In handling the event of a must edge, no call that the reader cannot resolve to a body in the application starts a
 navigation, and no work that the handler schedules for later starts one. A library call that

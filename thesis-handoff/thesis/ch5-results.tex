@@ -94,7 +94,7 @@ Five classes were identified during development, each with at least two confirma
 nodes unlinked to their rendering component, has only the parser--graph comparison as evidence.
 It remains a candidate and has no instances in the final version.
 
-\begin{table}[tbp]\footnotesize
+\begin{table}[t]\footnotesize
 \caption{Defect classes and the evidence for each.}
 \label{tab:defects}
 \begin{tabularx}{\textwidth}{@{}p{0.27\textwidth}Yrr@{}}
@@ -195,7 +195,7 @@ Most recoveries occur on mifos. Excluding it reduces the share to \AttrRecovered
 recovery stays under half on \AttrUnderHalfApps{} of the six applications. Edge counts rise from
 \AttrEdgesBefore{} to \AttrEdgesAfter{} (per application in the \emph{anchored} column of
 Table~\ref{tab:expansion}): \CensusMust{} must, \CensusMay{} may and \CensusUnknown{} unknown. The
-attributed graphs hold \CensusNodes{} nodes: \CensusScreens{} screens, \CensusAnchors{} anchors and
+attributed graphs hold \CensusNodes{} nodes: \CensusScreens{} screens, \CensusAnchors{} anchor nodes (each stores the edges anchored at one scope, Section~\ref{sec:anchored}) and
 \CensusOtherNodes{} unplaced origins or dynamic targets. Section~\ref{sec:res-ablation} measures what the
 \emph{full} step adds beyond the levels that reimplement earlier work and what its call graph adds
 over the class rule it replaced.
@@ -361,7 +361,7 @@ level would credit direct ownership with sites that only the stand-ins place.
 \label{tab:ablation}
 \setlength{\tabcolsep}{5pt}
 \TabAblation
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Sites} counts the source locations a witness cites that the level places on at least one screen; one construct can have more than one, and a location can lie outside the application directory, so site counts are not comparable with the construct counts of Table~\ref{tab:loss}. \emph{Pairs} are the (site, screen) attributions it asserts. The levels are nested, and the table is produced only if each one's pairs are a subset of the next one's. \emph{Screens} counts the screens at an address a link can name, so the catch-all screens of alfresco and mifos are left out of it and of the pairs, and the column falls short of the census's total by those screens.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Sites} counts the source locations a witness cites that the level places on at least one screen; one construct can have more than one, and a location can lie outside the application directory, so site counts are not comparable with the construct counts of Table~\ref{tab:loss}. \emph{Pairs} are the (site, screen) attributions it asserts. The levels are nested, and the table is produced only if each one's pairs are a subset of the next one's. \emph{Screens} counts the screens at an address a link can name, so the catch-all screens of alfresco and mifos are left out of it and of the pairs, and the column falls short of the \CensusScreens{} screens of Section~\ref{sec:res-after} by those screens.}
 \end{table}
 
 Containment adds the most sites. The pre-existing shell rule adds the most (site, screen) pairs and
@@ -1019,7 +1019,9 @@ oracle finds no node at an address where the framework mounts nothing. Against t
 running framework mounts, the missing nodes lie almost entirely behind one construct in ghostfolio
 that the extractor declares unread. Deterministic transitions are rare: \CensusMustSites{}
 constructs earn must, and \CensusMustKdash{} of the \CensusMust{} must edges come from one toolbar
-in k8s dashboard. Most may-only witness locations involve a guard, branch or other
+in k8s dashboard. That toolbar's computed scope is untested, and most must edges hold only under
+the route-order assumption A1 (Sections~\ref{sec:model} and~\ref{sec:res-soundness}). Most
+may-only witness locations involve a guard, branch or other
 application decision, and the demotion rules do not test whether that decision can vary
 (Section~\ref{sec:res-baseline}).
 
@@ -1044,5 +1046,8 @@ the mapping from witnesses to source, and change-impact accuracy remains unmeasu
 
 \paragraph{RQ5.} The repaired classes were defects of the tool, the attribution losses remain
 open, and two causes lie beyond any reader of a route table (Section~\ref{sec:res-round2}).
+\AttrRemainingUnexplained{} of the \AttrRemaining{} constructs still lost to attribution are
+labelled as having no reason found. The harness checks that every construct has a label, not that
+the label is correct.
 
 Chapter~\ref{ch:discussion} interprets these answers and their limits.
