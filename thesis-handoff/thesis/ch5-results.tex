@@ -665,7 +665,8 @@ screen, where the component holding it is not shown, accounts for the other
 
 All assessments use one AI model family, so they establish consistency rather than correctness. The
 run logs of the head-to-head comparison record Claude Sonnet 5.5 as the reader and Claude Opus 5.5
-as the stronger model; the archived records of the other readings do not name the model. A
+as the stronger model. The archived records of the other readings do not name the model, so for
+them the model family rests on my own record. A
 stronger model reassessed every miss, every pair not judged real and every sixth real pair. It
 reassessed \RimaGated{} pairs and changed \RimaGateChanged{} of the verdicts. One batch was
 repeated because its first response omitted all 20 additional pairs. Adversarial review later
@@ -747,7 +748,7 @@ pairs, theirs \HHMifosTheirsPairs{}, and both share \HHMifosBoth{}. Most of this
 (Section~\ref{sec:res-e2e}); precision is \HHMifosOursPrecision{} versus \HHMifosTheirsPrecision{}.
 The pooled corpus recall ranges, \HHCorpusOursRecallRange{} versus
 \HHCorpusTheirsRecallRange{}, therefore rest mostly on mifos (Section~\ref{sec:res-baseline}) and
-do not rank the tools. They also rest on one verdict: \HHReadUnclear{} sampled pair, in mifos's
+do not rank the tools. They also depend on how unclear verdicts count: \HHReadUnclear{} sampled pair, in mifos's
 shell-only stratum, was judged unclear. Counted as real, it would put this extractor at
 \HHCorpusOursPrecisionUnclearReal{} precision and \HHCorpusOursRecallUnclearReal{} recall on the
 pooled corpus and their tool at \HHCorpusTheirsRecallUnclearReal{} recall; the figures without mifos

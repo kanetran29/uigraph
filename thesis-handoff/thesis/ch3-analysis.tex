@@ -129,13 +129,13 @@ Under assumptions A1 to A4, every must edge corresponds to a navigation that occ
 input on which the enclosing code executes.
 \end{claim}
 
-\noindent A navigation occurs when the router activates the route of $s'$; any guard or resolver on
-the way demotes the edge (Table~\ref{tab:demotion}). For a merged edge, the enclosing code is that
+\noindent A navigation occurs when the router starts navigating to the route of $s'$; any guard or
+resolver the navigation runs demotes the edge (Table~\ref{tab:demotion}). For a merged edge, the enclosing code is that
 of a construct that earns must. The claim is conditional on that code running, so it does not show
 that a user can reach the trigger. It states what the demotion rules are designed to meet and is not
 proved. Where an assumption fails, for a program or for one
 execution, a must edge need not correspond to a navigation that occurs, and
-Claim~\ref{claim:must} does not cover that case. The must tier is therefore a lower bound, relative
+Claim~\ref{claim:must} does not cover that case. If the claim holds, the must tier is a lower bound, relative
 to A1 to A4, on the navigations that occur whenever their triggering code runs.
 
 \textbf{What the evaluation tests.} The evaluation tests only a necessary condition of
