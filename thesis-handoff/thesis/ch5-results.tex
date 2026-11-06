@@ -10,7 +10,7 @@ losses, defect classes, scope attribution and mutation sensitivity, respectively
 Section~\ref{sec:res-round2} traces loss causes (RQ5), and Section~\ref{sec:deadlinks} reports
 dead-link candidates.
 
-The numerical tables are generated from the harness result files; summaries compiled by hand are marked as such. The development versions and the corrections between them are listed in Section~\ref{app:repairs}.
+The numerical tables are generated from the harness result files, and hand-compiled summaries are marked. The development versions and the corrections between them are listed in Section~\ref{app:repairs}.
 
 All extractions use source trees without installed dependencies. The corpus was selected with tool
 support in view, so results are likely optimistic for Angular applications generally.
@@ -21,21 +21,21 @@ Section~\ref{sec:limitations} discusses both conditions.
 
 RQ1 measures declared screens represented as nodes and navigation constructs yielding deterministic
 transitions (Section~\ref{sec:metrics}). Nodes are a precondition for transitions, but the first
-ratio does not numerically bound the second: their units are screens and constructs, respectively.
+ratio does not numerically bound the second, because the first counts screens and the second counts constructs.
 
 Table~\ref{tab:conversion} gives the second measure on the final snapshot. The constructs that
 earn must number \CensusBaseMustSites{} in the whole corpus without attribution and
 \CensusMustSites{} with it. They lie in \CensusMustApps{} applications with attribution, and the
-other \CensusZeroMustApps{} have none. Edge counts must be read per tier and not summed as distinct constructs, because one unresolved site can produce many over-approximated may edges.
+other \CensusZeroMustApps{} have none. Edge counts should be read per tier and not summed as distinct constructs, because one unresolved site can produce many over-approximated may edges.
 An optional measurement switch records every condition that demotes a may witness. Disabling it
 leaves output unchanged on all six applications (Section~\ref{sec:reproducibility}).
 Table~\ref{tab:mayreasons} groups reasons for \MayOnlyConstructs{} may-only witness locations.
 \MayAppAny{} involve an application decision identified by the extractor: a guard or resolver,
 branch, callback or template condition. Only \MayToolOnly{} remain at may solely through extractor
-uncertainty. Under the present rules, better resolution alone could promote at most those to must;
+uncertainty, so under the present rules better resolution alone could promote at most those to must;
 proving that a guard always admits or a branch always executes could promote more. The small must
-tier thus follows largely from its definition. A guard that always admits still causes demotion:
-the census identifies decision constructs, not runtime conditionality. Mifos dominates these counts,
+tier thus follows largely from its definition. A guard that always admits still causes
+demotion, because the census identifies decision constructs and not runtime conditionality. Mifos dominates these counts,
 with \MayOnlyConstructsMifos{} of \MayOnlyConstructs{} locations.
 
 \begin{table}[t]\footnotesize
@@ -83,7 +83,7 @@ omissions: one unresolved route entry can conceal many screens (Section~\ref{sec
 
 Table~\ref{tab:defects} separates evidence from named evaluation methods and other observations.
 The guard class has no named method. Attribution, addressed by Chapter~\ref{ch:analysis}, relies
-most heavily on observations among the other classes; these are not independent instruments.
+most heavily on observations among the other classes, and these are not independent instruments.
 
 Five classes were identified during development, each with at least two confirmations. A sixth,
 nodes unlinked to their rendering component, has only the parser--graph comparison as evidence.
@@ -140,7 +140,7 @@ Category interactions mean that the \AttrLost{} attribution constructs neither l
 upper-bound attribution's recoveries (Section~\ref{sec:res-after}).
 
 Table~\ref{tab:oracles} reports the witness check on the final attributed tier and the
-test-source cross-check. Section~\ref{sec:res-round2} treats the must tier separately. \RoundTwoOutsideWitness{} edges in \RoundTwoOutsideWitnessApps{} applications have their only witness outside the application directory; both tools read those files, so their agreement there is not independent evidence.
+test-source cross-check. Section~\ref{sec:res-round2} treats the must tier separately. \RoundTwoOutsideWitness{} edges in \RoundTwoOutsideWitnessApps{} applications have their only witness outside the application directory. Both tools read those files, so their agreement there is not independent evidence.
 
 \begin{table}[t]\small
 \caption{Results of the witness check on the final attributed tier, and of the test-source cross-check.}
@@ -202,13 +202,13 @@ The edges added are the links of two application shells, drawn once for each scr
 renders (Section~\ref{sec:res-round2}).
 
 Tracking construct identifiers across runs finds \AttrRegressed{} conversion regressions and
-\AttrDemoted{} must-to-may demotions. No baseline must conversion was lost. This measures recovery,
-not target consistency; Section~\ref{sec:res-soundness} assesses the must tier and remaining edges.
+\AttrDemoted{} must-to-may demotions. No baseline must conversion was lost. The tracking measures recovery and not target consistency.
+Section~\ref{sec:res-soundness} assesses the must tier and remaining edges.
 
 Claim~\ref{claim:expansion} requires anchored-edge expansion to equal the materialised edge set.
 A separate implementation expands each scope-anchored edge over its member screens and
 deduplicates the result. Both sets agree on every application; otherwise Table~\ref{tab:expansion}
-is not produced. This is the sole measurement of storage savings: on \ExpansionWidest{},
+is not produced. The check is the only measurement of storage savings: on \ExpansionWidest{},
 materialisation yields \ExpansionWidestRatio{} times as many edges as stored.
 
 The check tests member traversal and deduplication, but both paths share the scope-membership
@@ -247,8 +247,8 @@ Those \AttrRemainingUnexplained{} have a scope and a destination node but no dia
 The reasons combine implementation gaps and limits of the source population.
 
 \begin{itemize}
-\item Some components have no recovered route or template path to a screen. This is an empty
-computed scope, not proof that the application never renders them.
+\item Some components have no recovered route or template path to a screen. An empty
+computed scope does not prove that the application never renders them.
 \item Some sites lie beyond the member-level call graph's supported receiver and provider forms.
 \item Other sites have a scope but a dynamic destination, or a target for which the graph has no
 node.
@@ -275,7 +275,7 @@ applications render on the judged screens, \ScopeConfirmed{} are predicted by th
 realworld, which renders most of its screens without a backend, every rendered pair on every
 judged screen is predicted. The pairs that are not predicted are all bitwarden's.
 
-The unit is a (screen, destination) pair, not a site. Confirmation does not validate every underlying
+The unit is a (screen, destination) pair and not a site, so confirmation does not validate every underlying
 site's scope, but the \ScopeUnpredicted{} unpredicted pairs still demonstrate under-attribution.
 The check covers \ScopeJudged{}/\ScopeScreens{} screens; \ScopeUnjudged{} redirect to sign-in
 without a backend. It includes \ScopeApps{} of six applications, excluding ghostfolio because its
@@ -304,7 +304,7 @@ observe.
 
 Since the rendered-interface check cannot establish over-attribution, Table~\ref{tab:scopebaseline}
 compares computed scopes with assigning every represented site to every screen. This widest
-assignment places sites but neither resolves unknown targets nor adds missing destinations; it
+assignment places sites but neither resolves unknown targets nor adds missing destinations, and it
 does not recover every construct. The ratio measures how much the analysis narrows source scopes.
 
 \begin{table}[t]\small
@@ -319,7 +319,7 @@ The lower bound limits RQ3: on \BaselineBluntest{}, the average site is attribut
 \BaselineBluntestScope{}/\BaselineBluntestScreens{} screens (\BaselineBluntestShare{}), excluding
 only about two screens in five.
 
-This has two implications.
+The comparison has two implications.
 
 \begin{enumerate}
 \item The trivial baseline is not a competitor for the must tier. An unguarded site in a shared
@@ -338,7 +338,7 @@ the rendered-interface check cannot test over-attribution.
 
 Table~\ref{tab:ablation} extracts the corpus at \AblationLevels{}
 nested levels, each withholding every mechanism above it, including the stand-ins of
-Section~\ref{sec:implementation}; otherwise the lowest
+Section~\ref{sec:implementation}, because otherwise the lowest
 level would credit direct ownership with sites that only the stand-ins place.
 
 \begin{table}[t]\footnotesize
@@ -349,8 +349,7 @@ level would credit direct ownership with sites that only the stand-ins place.
 \end{table}
 
 Containment adds the most sites. The pre-existing shell rule adds the most (site, screen) pairs and
-reference recall. Outlet descent mostly widens scopes; counts alone cannot validate this width
-(the next subsection evaluates it). Full adds the member-level service call graph, fallback join
+reference recall. Outlet descent mostly widens scopes; counts alone cannot validate this width, which the next subsection evaluates. Full adds the member-level service call graph, fallback join
 and guard/effect stand-ins, which only full and its class variant include. Relative to the class
 rule it replaced, the call graph adds \AblationCallGraphNetSites{} sites
 (\AblationCallGraphNetShare{} of the corpus) and \AblationCallGraphNetPairs{} pairs.
@@ -420,7 +419,7 @@ levels, but is less precise than both those levels and the class join.
   \GTAlfUndetermined{} undetermined sites are not scored. Afterwards, four lines reported by the
   scorer as placed but unlisted were inspected using only line numbers, without graph placements.
   None was a navigation site. They were added as excluded, a protocol deviation: only adding missed
-  sites was permitted. This changes no figure because unlisted lines are not scored.
+  sites was permitted. The addition changes no figure because unlisted lines are not scored.
 \item \emph{One configuration-driven site accounts for all full-level excess on alfresco.}
   The \GTAlfFullExcess{} excess pairs arise at \GTAlfFullExcessSites{} site,
   \texttt{navigateToSearch}. Its only caller is an effect triggered by a toolbar button in extension
@@ -482,7 +481,7 @@ contains every pair.
 preregistered rule. As predicted, no matched pair has a must edge. One of
 \EtoEMifosHitRedirect{} redirect-bucket hits depends solely on the notifications tray, a shell
 site whose target retains two leading parameters and connects every screen to every account screen.
-This establishes graph containment, not site resolution. The same site widens the graph from
+The hit shows graph containment but not site resolution. The same site widens the graph from
 \EtoEMifosGraphPairsUnfixed{} to \EtoEMifosGraphPairs{}/\EtoEMifosPossiblePairs{} possible pairs
 after the repairs below, reducing discrimination. Uniform pairs at that density would yield
 \EtoEMifosChanceHits{}/\EtoEMifosPairs{} hits (realworld:
@@ -559,7 +558,7 @@ Three things follow, with the figures in Table~\ref{tab:earlier}.
   the two applications with suites the step above \emph{outlet} adds no transition the suites take.
 \end{itemize}
 
-Shell links produce wide scopes; computed scopes are \BaselineFactorMin{} to \BaselineFactorMax{}
+Shell links produce wide scopes, although computed scopes are \BaselineFactorMin{} to \BaselineFactorMax{}
 times narrower than universal attribution (Section~\ref{sec:res-width}). Width alone does not
 establish over-attribution. Full produces no excess reference pair on \GTApp{} and
 \GTAlfFullExcess{} at one alfresco site, plus a universally attributed undetermined site.
@@ -718,9 +717,9 @@ Mifos dominates pooled corpus recall ranges, \HHCorpusOursRecallRange{} versus
 \HHCorpusTheirsRecallRange{}, which do not rank the tools. Intervals assume independent sampled
 pairs despite site clustering and cover sampling only. Systematic error from the single model
 family would shift both endpoints.
-Of the three preregistered predictions, the first (this extractor's recall on the corpus is the higher) holds
-at the point estimate, and its bounds separate only without mifos, a group formed after reading; the second (their precision on their subjects is at least this extractor's) and the
-third (their tool fails on some application) did not hold.
+Three predictions were preregistered. The first, that this extractor's recall on the corpus is the higher, holds
+at the point estimate, and its bounds separate only without mifos, a group formed after reading. The second, that their
+precision on their subjects is at least this extractor's, did not hold, and neither did the third, that their tool fails on some application.
 
 Assessment follows the first comparison's rules: \HHRead{} pairs, with \HHGated{} reassessed by
 a stronger model and \HHGateChanged{} changes. I checked \HHAuthorSample{} sampled assessments
@@ -911,7 +910,7 @@ are clean; no remaining citation belongs to a must edge. Must-tier consistency d
 the whole graph.
 
 \paragraph{The node set.} The compared graph declares \ProbeInvented{} screens at unmounted
-addresses. Every claimed address appears in the framework configuration. This is external evidence
+addresses. Every claimed address appears in the framework configuration. That match is external evidence
 for the six applications: static readers can agree on an incorrect prefix. Node validity is a
 precondition of the must-tier property, not part of it. The address-based census excludes named
 outlets and \texttt{UrlMatcher} entries (\ProbeUnaddressableScreens{} route entries) from both columns.
@@ -941,7 +940,7 @@ the list therefore establishes neither runtime occurrence nor confirmed defects.
 \path{/accounting/}\allowbreak\path{journal-entry/}\allowbreak\path{view/:id}. The link omits the parent
 prefix, and mifos's catch-all route renders the not-found screen, which a user can mistake for missing data rather than a broken link.\par}
 
-The list is not one defect class, and the split matters for what each part is worth.
+The list is not one defect class, and the parts differ in worth.
 
 \begin{itemize}
 \item \RoundTwoDeadLinkAbsolute{} of the candidates are an absolute link written against a path the

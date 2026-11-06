@@ -27,9 +27,9 @@ engineering it is a \emph{navigation model} or \emph{navigation state
 machine} \cite{riccatonella2001,sitehopper2013}. This thesis uses \emph{UI transition graph}
 for all of them, while recognising differences in state definitions and graph construction.
 
-Two distinctions matter more than terminology: whether extraction is \emph{static}, from
-source code or binaries without execution, or \emph{dynamic}, from observed runs; and whether
-edges record \emph{guards}, the conditions under which transitions are available.
+Two distinctions matter more than names. Extraction is either \emph{static}, from
+source code or binaries without execution, or \emph{dynamic}, from observed runs. Edges
+may or may not record \emph{guards}, the conditions under which transitions are available.
 Table~\ref{tab:rw} classifies the reviewed work by both distinctions.
 
 \begin{table}[t]\small
@@ -64,7 +64,7 @@ Zhang et al.\ \cite{zhang2025veriflow} & SPA routes, from bundles & \checkmark &
 \label{sec:android}
 
 Most static transition-graph research concerns Android. Yang et al.\ introduced the window
-transition graph, with windows (activities, dialogs and menus) as nodes and UI-thread
+transition graph, with activities, dialogs and menus as window nodes and UI-thread
 callback transitions as edges. The analysis models the active window stack, including back-button
 behaviour \cite{yang2015wtg,yang2018wtg}. A related analysis builds a callback control-flow
 graph over handler--widget pairs \cite{yang2015callbacks}.
@@ -73,8 +73,8 @@ transition graph with dynamic exploration \cite{goalexplorer2019}. UI-CTX finds 
 with a backward data-flow analysis from the handler to the call that retrieves the widget \cite{uictx2025}.
 
 These approaches attribute navigation to a screen through object resolution. A handler is
-registered on a widget that belongs to exactly one window at run time. Resolving its
-identifier, usually by constant propagation of \texttt{getId()}, identifies that window
+registered on a widget that belongs to exactly one window at run time, so resolving the
+widget's identifier, usually by constant propagation of \texttt{getId()}, identifies that window
 \cite{yang2015callbacks}. ProMal illustrates the limitation: imprecision in the reference
 analysis aliases several widgets, assigning handlers to the wrong window and producing
 infeasible transitions. Its authors combine static analysis with runtime traces and a
@@ -120,28 +120,28 @@ address routing \cite{kurant2025}.
 The other three address routing. Oshima and Kishi extract Angular page transitions for model
 checking with SPIN \cite{oshima2018model}. They analyse \texttt{RouterModule} declarations
 and each component's navigable paths, resolving parent--child relationships among root, routed
-and custom child components. Paths are attributed to the containing routed component; the
-root component's own paths are attributed to every page. Section~\ref{sec:res-ablation}
-measures this combination as the \emph{rooted} level (levels are defined in
-Section~\ref{sec:metrics}). The approach excludes \texttt{children} and route parameters
+and custom child components. Paths are attributed to the containing routed component, and the
+root component's own paths to every page. Section~\ref{sec:res-ablation}
+measures this combination as the \emph{rooted} level, which Section~\ref{sec:metrics} defines
+with the other levels. The approach excludes \texttt{children} and route parameters
 and does not treat data-binding changes as page transitions. The paper does not state how it
-handles destinations expressed as nonliteral expressions; no treatment is assumed here. Screens are
-identified by routed-component names, not addresses. Guards, lazy loading and named outlets
+handles destinations that are nonliteral expressions, so no treatment is assumed here. Screens are
+identified by routed-component names instead of addresses. Guards, lazy loading and named outlets
 are not modelled. Navigation reached through a method call or dispatch is outside the
 attribution mechanism. Without modalities, always-available and guarded transitions have
 identical representations. The evaluation uses four constructed applications and two published
 applications of 1824 and 6893 lines, with six and twenty-three pages. It reports whether the
 intended models were produced and hand-injected transition faults were detected in constructed
 variants of the first sample. Losses on applications the extractor cannot fully analyse are
-not measured; that is the subject of this thesis.
+not measured, and measuring them is the subject of this thesis.
 
 Two recent works statically analyse client-side router configuration for other purposes.
 Rima et al.\ parse Angular sources and templates into a graph of navigation, interaction
 sites and execution conditions, including guards. They compile workflows enumerated from
 the graph into browser tests and use it as a coverage denominator \cite{rima2026e2e}.
 This account draws on the publisher's abstract, the replication package's operational specification
-(\path{softscanner-sw/softscanner_fa}, \path{docs/paper/approach.md}), and the anonymised
-manuscript in the same repository (\path{docs/paper/main.pdf}). The published chapter was
+\path{softscanner-sw/softscanner_fa}/\path{docs/paper/approach.md}, and the anonymised
+manuscript \path{docs/paper/main.pdf} in the same repository. The published chapter was
 unavailable and may differ from both documents. Both describe attribution beyond containment:
 active components include those activated by the route and its ancestors, closed under
 composition, plus bootstrap components. This covers the attribution of the \emph{rooted} and
@@ -159,7 +159,7 @@ by crawling instead. Their graph is an over-approximation and is not narrowed. T
 not explain source-screen attribution; guards remain unmodelled runtime conditions
 \cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth derived from
 their pipeline's output and annotated by hand. Neither work classifies losses by construct
-or measures them across a corpus. The problem is therefore neither new nor settled;
+or measures them across a corpus. The problem is therefore neither new nor settled, and
 Section~\ref{sec:gap} identifies the remaining gap.
 
 \section{Static analysis of JavaScript and TypeScript source}
@@ -167,20 +167,20 @@ Section~\ref{sec:gap} identifies the remaining gap.
 
 The analysis in Chapter~\ref{ch:analysis} uses the TypeScript compiler application programming
 interface (API) to analyse source-level abstract syntax trees rather than compiled artefacts.
-Baxter et al.\ used this approach for C clone detection \cite{baxter1998clone}; SPOON
+Baxter et al.\ used this approach for C clone detection \cite{baxter1998clone}, and SPOON
 provides a reusable Java library \cite{pawlak2016spoon}. Source-level analysis preserves
 the connection to the developer's code, allowing results to cite source locations, but is
 limited to the program as written. Jensen et al.\ show that abstract interpretation can
-infer sound type information for full JavaScript \cite{jensen2009type}. Thus the framework
-of Section~\ref{sec:formal} applies to individual values, a harder problem than scope
-attribution (Section~\ref{sec:scope}), which uses a much coarser domain.
+infer sound type information for full JavaScript \cite{jensen2009type}. The framework
+of Section~\ref{sec:formal} thus applies to individual values, a harder problem than scope
+attribution, whose much coarser domain is defined in Section~\ref{sec:scope}.
 
 TypeScript lets an analysis use declared types instead of inferring them. Its type system
 is deliberately unsound \cite{bierman2014understanding,richards2015concrete}, so a declaration
 is evidence, not a guarantee. Flow and TypeScript detected only about 15\% of fixed bugs in
 JavaScript project histories \cite{gao2017type}. Across 604 GitHub projects, TypeScript was
 associated with better code quality and understandability but not lower bug proneness
-\cite{bogner2022type}. Declarations for untyped libraries can also be wrong: TSCheck found
+\cite{bogner2022type}. Declarations for untyped libraries can also be wrong, as TSCheck found
 142 errors in those of 10 libraries \cite{feldthaus2014checking}. Declared types narrow a
 call's candidate implementations, as used in the call graph of Section~\ref{sec:angular},
 but do not guarantee a unique target. An unresolved or ambiguous type must therefore widen
@@ -191,7 +191,7 @@ applications depend on large frameworks whose behaviour static analyses must mod
 hand-written models are tedious, incomplete and sometimes wrong \cite{madsen2013practical}.
 They also model implicit Node.js control flow through an \emph{event-based call graph}
 \cite{madsen2015static}. Angular poses a similar problem through its router, template event
-bindings and observable subscriptions. Alongside the navigation analyses of Oshima and Kishi
+bindings and observable subscriptions. Besides the navigation analyses of Oshima and Kishi
 (Section~\ref{sec:dynamic-spa}) and Rima et al.\ \cite{rima2026e2e}, Aurebesh checks consistency
 in AngularJS \cite{ocariza2015detecting}. It checks identifiers and types across models,
 views and controllers in AngularJS 1.x, whose template language, component model and injector
@@ -199,16 +199,14 @@ differ from Angular's. It does not address navigation.
 \section{Formal foundations}
 \label{sec:formal}
 
-The analysis builds on modal transition systems, an explicit account of practical
-soundness limits, and dataflow analysis.
 
 \subsection{Modal transition systems}
 
 The \emph{modal transition system} of Larsen and Thomsen labels each transition as
-either required (\emph{must}) or merely permitted (\emph{may})
+either required, a \emph{must} edge, or merely permitted, a \emph{may} edge
 \cite{larsen1988modal}. The graph model in Chapter~\ref{ch:analysis} adopts this
 distinction and adds \emph{unknown} for edges whose modality could not be determined.
-The thesis claims soundness for the must tier only. The evaluation distinguishes the tiers
+The thesis claims soundness for the must tier alone, and the evaluation distinguishes the tiers
 because may edges have weaker supporting evidence.
 
 With one edge kind, an unresolved transition must either be included, reducing precision,
@@ -221,8 +219,8 @@ select a tier. Chapter~\ref{ch:results} therefore reports the tiers separately.
 Livshits et al.\ argue that practical static analyses are inevitably sound only for a
 language subset. They recommend declaring approximated features rather than claiming general
 soundness \cite{livshits2015soundiness}. Section~\ref{sec:model} states this thesis's position.
-Sections~\ref{sec:asttools} to~\ref{sec:angular} explain the limits here: TypeScript annotations
-are not guarantees; framework configuration determines call targets; and reactive firing
+Sections~\ref{sec:asttools} to~\ref{sec:angular} explain the limits: TypeScript annotations
+are not guarantees, framework configuration determines call targets, and reactive firing
 conditions are not written in the program text.
 
 \subsection{Dataflow analysis and abstract interpretation}
@@ -231,7 +229,7 @@ Kildall expressed many program analyses as fixpoint computations over lattices o
 values. A join combines information, which propagates along graph edges until stable
 \cite{kildall1973unified}. A finite-height lattice and monotone transfer functions ensure
 termination and an order-independent result. Cousot and Cousot developed the general theory
-of abstract interpretation \cite{cousot1977abstract}; Nielson et al.\ provide a textbook
+of abstract interpretation \cite{cousot1977abstract}, and Nielson et al.\ provide a textbook
 account \cite{nielson1999principles}. Scope attribution in Chapter~\ref{ch:analysis} uses
 this framework, with abstract values and join defined in Section~\ref{sec:scope}.
 
@@ -251,10 +249,10 @@ to~\ref{lst:service} introduce a running example.
 
 Angular declares screens through a tree of route objects. Each has a \texttt{path} pattern
 and a \texttt{component}, \texttt{redirectTo} target or \texttt{children} list. A route with
-children but no component provides a path prefix, not a screen. Routes can load lazily through
+children but no component provides a path prefix and no screen. Routes can load lazily through
 \texttt{loadChildren} or \texttt{loadComponent}. Guards include \texttt{canMatch},
-\texttt{canActivate}, \texttt{canActivateChild} and \texttt{canDeactivate}; they return a
-boolean, redirect, or Promise or Observable of either. When \texttt{canMatch} returns false,
+\texttt{canActivate}, \texttt{canActivateChild} and \texttt{canDeactivate}, and they return a
+boolean, a redirect, or a Promise or Observable of either. When \texttt{canMatch} returns false,
 the router tries the next matching route rather than cancelling navigation. Resolvers fetch
 data that the router awaits before activation. Paths need not be string literals: resolving
 \texttt{path: routes.about.path}, for example, requires tracing the constant to its definition.
@@ -266,8 +264,8 @@ every screen; those below a routed component are present only on that screen. St
 directives such as \texttt{@if} and \texttt{*ngIf} make nesting conditional. Components can
 also be created programmatically at run time.
 
-Templates express navigation through \texttt{routerLink}; class code uses
-\texttt{Router.navigate} or \texttt{Router.navigateByUrl}. The \texttt{relativeTo} option
+A template expresses navigation with the directive \texttt{routerLink}, whereas class code
+calls \texttt{Router.navigate} or \texttt{Router.navigateByUrl}. The option \texttt{relativeTo}
 permits targets relative to the current route. Navigation sites can occur in components,
 injectable services, guards, interceptors and resolvers. Their source screens are not
 explicitly declared and must be derived.
@@ -279,9 +277,8 @@ Angular creates services and supplies them to components and services that decla
 dependencies. This is dependency injection, a form of inversion of control
 \cite{johnson1988reusable,fowler2004injection}. Dependencies are requested by type or injection
 token. A token can have different implementations in different injector scopes, bound through
-\texttt{useClass}, \texttt{useExisting} or a factory. The pattern is common outside Angular;
-its use and anti-patterns have been detected statically in Java
-\cite{yang2008empirical,laigner2022cataloging}. Configuration is statically available but
+\texttt{useClass}, \texttt{useExisting} or a factory. The pattern is common outside Angular, and its use and anti-patterns have been detected
+statically in Java \cite{yang2008empirical,laigner2022cataloging}. Configuration is statically available but
 does not directly identify the binding at each call site.
 
 For static analysis, this makes a method call a dispatch problem. Resolving
@@ -292,16 +289,15 @@ Approaches include class hierarchy analysis \cite{dean1995cha}, rapid type analy
 and Chambers \cite{grove2001callgraph}. For JavaScript, Feldthaus et al.\ show that approximate
 call graphs can be precise enough for practical tools \cite{feldthaus2013jscg}.
 
-The Java literature models frameworks explicitly to resolve configuration-dependent bindings.
-Sridharan et al.\ derive framework specifications from application code and configuration
-\cite{sridharan2011f4f}. Antoniadis et al.\ model shared enterprise-framework concepts
+The Java literature models frameworks explicitly to resolve bindings that depend on configuration. Sridharan et al.\ derive framework specifications from application code and
+configuration \cite{sridharan2011f4f}. Antoniadis et al.\ model shared enterprise-framework concepts
 declaratively, measuring about four times higher completeness \cite{antoniadis2020enterprise}.
-Chen et al.'s Jasmine extends Soot to improve Spring call graph completeness
-\cite{chen2022jasmine}. Limits remain: reflection cannot be ignored in 78\% of Java projects,
-and resolving it requires unsound assumptions \cite{landman2017challenges}. In Angular,
-provider arrays belong to modules, routes or components. A token's implementation therefore
-depends on the injection site. Resolution is relative to an injector, making the provider
-hierarchy an input to the explicit framework model (Section~\ref{sec:inputs}).
+Chen et al.'s Jasmine extends Soot to improve Spring call graph completeness \cite{chen2022jasmine}. Limits remain, because reflection
+cannot be ignored in 78\% of Java projects and resolving it requires unsound assumptions
+\cite{landman2017challenges}. In Angular, provider arrays belong to modules, routes or
+components, so a token's implementation depends on the injection site. Resolution is relative
+to an injector, which makes the provider hierarchy an input to the explicit framework model
+(Section~\ref{sec:inputs}).
 
 \subsection{Reactive state}
 \label{sec:signals}
@@ -309,9 +305,9 @@ hierarchy an input to the explicit framework model (Section~\ref{sec:inputs}).
 Recent Angular versions include signals, values that change over time, and effects,
 computations that rerun when a signal they read changes \cite{angulareffects}. This is reactive
 programming \cite{elliott1997frp,bainomugisha2013survey}: dependencies between values are
-recorded at run time. Navigation inside an effect therefore depends on the reactive graph,
-not a control-flow condition. Static analysis can identify the signals read but cannot
-generally determine when the effect runs; this thesis does not attempt to bound it. Angular
+recorded at run time. Navigation inside an effect therefore depends on the reactive graph
+instead of a control-flow condition. Static analysis can identify the signals read but cannot
+generally determine when the effect runs, and this thesis does not attempt to bound it. Angular
 applications also use Reactive Extensions for JavaScript (RxJS) observables for this purpose.
 
 \section{Reactive programming and the limits of static dataflow}
@@ -350,8 +346,7 @@ response rather than a test suite's.
 
 Mutation testing introduces small syntactic changes and measures the share detected by a test
 suite. It rests on DeMillo et al.'s \emph{coupling effect}: tests that detect simple errors
-are often effective against more complex errors \cite{demillo1978hints}. This assumption
-connects mutants to developer faults. Jia and Harman provide the standard survey
+are often effective against more complex errors \cite{demillo1978hints}. This assumption connects mutants to developer faults. Jia and Harman provide the standard survey
 \cite{jia2011mutation}; a study of 357 real faults found a correlation between mutant and
 real-fault detection \cite{just2014mutants}. Operators exist for JavaScript and web applications
 \cite{mirshokraie2013efficient,mirshokraie2015guided,praphamontripong2010applying}.
@@ -383,12 +378,11 @@ in this review combines cross-class and service attribution under provider bindi
 scope-uncertain transitions, and construct-level loss measurement on applications large enough
 to contain difficult constructs.
 
-Android provides the closest static techniques. They resolve navigation's owning object and
-use runtime traces when resolution is imprecise. Web navigation sites often have no such
-object. In Android, a handler's owning object usually identifies its window; attribution
-therefore commonly reduces to object resolution. Fragments, background tasks and aliased
-widgets are exceptions handled with dynamic evidence. These differences prevent direct reuse
-of Android techniques.
+Android provides the closest static techniques. They resolve navigation's owning object,
+which usually identifies the window, and use runtime traces when resolution is imprecise.
+Fragments, background tasks and aliased widgets are exceptions handled with dynamic evidence.
+Web navigation sites often have no such object, which prevents direct reuse of Android
+techniques.
 
 Sections~\ref{sec:asttools} to~\ref{sec:mutation} identify established methods and remaining
 limits. JavaScript abstract interpretation is established \cite{jensen2009type}, as is
