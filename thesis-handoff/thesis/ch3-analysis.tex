@@ -221,13 +221,12 @@ classifier derives it independently. The declared artificial intelligence (AI) a
 constructs against source with the extractor's decisions visible. This tests whether the
 decisions are defensible, but not whether an independent reading reproduces them
 (Section~\ref{sec:res-round2}). An earlier review of a development tier found condition-rule
-defects that the witness check missed (Section~\ref{app:repairs}). That check establishes only source-site existence and target agreement. The stronger claim rests on the demotion rules
+defects that the witness check missed (Appendix~\ref{app:corrections}). That check establishes only source-site existence and target agreement. The stronger claim rests on the demotion rules
 and remains independently unverified.
 
 \textbf{Scope of the claim.} This thesis claims soundness for the must tier alone. A may witness establishes that a call site exists, not that its
 transition ever occurs. Target agreement at the witness location is meaningful for must
-edges and literal-target may edges, but not for over-approximated edges, where applying it produces spurious failures (Section~\ref{app:repairs},
-Table~\ref{tab:repairs}). No soundness property is claimed for may or unknown.
+edges and literal-target may edges, but not for over-approximated edges, where applying it produces spurious failures (Table~\ref{tab:repairs}). No soundness property is claimed for may or unknown.
 
 \textbf{The may tier as a design intent.} Following modal transition systems
 \cite{larsen1988modal}, must and may together are intended to over-approximate every

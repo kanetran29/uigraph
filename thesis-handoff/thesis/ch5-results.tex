@@ -2,7 +2,7 @@
 \label{ch:results}
 % Numerical tables are generated. Each generated file identifies its evaluated snapshot.
 % The main RQ1--RQ3 tables use the final snapshot with attribution off and on.
-% Development versions appear only in the corrections table of Chapter 4 (tab:repairs).
+% Development versions are described in Section 4.3.2; the corrections table (tab:repairs) is in Appendix A.
 
 This chapter reports measurements from the harness of Section~\ref{sec:protocol} on the corpus of
 Section~\ref{sec:corpus}. Sections~\ref{sec:res-baseline}--\ref{sec:res-mutation} answer RQ1--RQ4:
@@ -10,7 +10,7 @@ losses, defect classes, scope attribution and mutation sensitivity, respectively
 Section~\ref{sec:res-round2} traces loss causes (RQ5), and Section~\ref{sec:deadlinks} reports
 dead-link candidates. Section~\ref{sec:res-summary} gives a short answer to each research question.
 
-The numerical tables are generated from the harness result files, and hand-compiled summaries are marked. The development versions and the corrections between them are listed in Section~\ref{app:repairs}.
+The numerical tables are generated from the harness result files, and hand-compiled summaries are marked. The development versions are described in Section~\ref{sec:corrections}, and the corrections between them in Appendix~\ref{app:corrections}.
 
 All extractions use source trees without installed dependencies. The corpus was selected with tool
 support in view, so results are likely optimistic for Angular applications generally.
@@ -101,7 +101,7 @@ It remains a candidate and has no instances in the final version.
 \toprule
 Class & Evidence & Methods & All \\
 \midrule
-Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph; multi-mount edge absent; manual audit; an application, k8s dashboard, with nodes and no edges on the early development version of Section~\ref{app:repairs} & 1 & 4 \\
+Attribution: navigation outside route components is invisible & mutants excluded on the baseline graph; multi-mount edge absent; manual audit; an application, k8s dashboard, with nodes and no edges on the early development version of Section~\ref{sec:corrections} & 1 & 4 \\
 Lazy module boundary not followed & independent route parser; test-source cross-check; mutation & 3 & 3 \\
 Guards unreliable in both directions & red-team panels and a source survey of the guard factory and the call-form \texttt{canActivate}
 (Section~\ref{sec:res-losses}) & 0 & 2 \\

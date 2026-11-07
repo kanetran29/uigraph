@@ -77,7 +77,7 @@ count leaves renames out. The other three operators are restricted to represente
 the simplest supported form. On their \MutFallibleScored{} scored mutants, which are the
 \MutScored{} of Section~\ref{sec:res-mutation} without the renames, the attributed graph detects
 \MutFallibleDetected{}. The harness was corrected after its misses were examined
-(Section~\ref{app:repairs}), so the result is not independent and need not generalise to a larger
+(Appendix~\ref{app:corrections}), so the result is not independent and need not generalise to a larger
 or differently drawn sample. Every scored change to a represented construct was visible, and RQ1
 measures how often constructs are represented. Change impact queries are likewise limited to the represented part of an application.
 
@@ -153,7 +153,7 @@ Threat & Effect on the results & Mitigation, and what remains open \\
 \addlinespace[2pt]
 Tool developed on its evaluation corpus
 & Every figure on the six applications is in-sample, because the extractor, parser, mutation harness
-and structural reference were corrected against their inputs (Section~\ref{app:repairs}). The
+and structural reference were corrected against their inputs (Appendix~\ref{app:corrections} and Section~\ref{sec:res-groundtruth}). The
 reference guided two repairs and the end-to-end check three. Corpus figures therefore do not
 estimate performance elsewhere.
 & The end-to-end check came closest to an out-of-sample corpus test: before its logs were read, the
@@ -282,7 +282,7 @@ Experimenter bias
 the last after initial observations. The experimenter was unblinded.
 & Commits and harness are pinned. Tables are generated from results (Section~\ref{sec:protocol})
 except the hand-compiled defect-class and witness/test-source summaries, and all protocol
-corrections are reported, unfavourable ones included (Section~\ref{app:repairs}). \emph{Open:}
+corrections are reported, unfavourable ones included (Appendix~\ref{app:corrections}). \emph{Open:}
 the loss classification had no second annotator, and residual constructs had no independent audit. \\
 AI-assistant reading of the final must tier
 & The declared AI assistant, which also helped write the extractor and the

@@ -79,13 +79,12 @@ can fire. Section~\ref{sec:angular} gives a running example.
 The model contains the attribution rules of the earlier Angular extractions of Oshima and Kishi and of Rima et al.\ as levels. It adds
 a member-level service call graph, a fallback join and stand-ins for guards and effects, which
 attribute the navigation in services, guards and effects to screens. The thesis measures what each
-level adds (Section~\ref{sec:res-ablation}). Most of the recovery comes from the earlier
-mechanisms, and the added levels contribute a smaller part.
+level adds (Section~\ref{sec:res-ablation}).
 
 Besides scope attribution, the extractor handles nested, parameterised and lazily loaded route
 trees (Section~\ref{sec:res-earlier} compares it with the approach of Oshima and Kishi). It was developed and evaluated on the same corpus, so its
 measurements describe these applications and are not estimates of performance on Angular
-applications in general. Section~\ref{app:repairs} records the corrections made during
+applications in general. Appendix~\ref{app:corrections} records the corrections made during
 development, and Section~\ref{sec:limitations} discusses what they imply.
 Chapter~\ref{ch:discussion} separates gaps in the implementation from limits of the approach.
 

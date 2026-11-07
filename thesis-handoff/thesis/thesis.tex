@@ -88,14 +88,13 @@ methods. Every unrecovered navigation construct was classified.
 Every screen readable from route tables has a node. Only \CensusMustSites\ constructs yield
 deterministic transitions under stated assumptions, largely because the study defines them strictly. Under the study's classification order, the largest loss
 category is navigation outside components that routes render directly. Scope attribution
-recovers a per-application median of \AttrRecoveredMedian\ of these constructs (\AttrRecoveredShare\ pooled, most of them in the largest application). Almost all become possible transitions, mostly
+recovers a per-application median of \AttrRecoveredMedian\ of these constructs (\AttrRecoveredShare\ pooled, most of them in one application). Almost all become possible transitions, mostly
 through mechanisms from earlier work. The added step, for services, guards and effects, places
 \AblationFullAddedSites\ further cited source locations, \AblationFullAddedShare\ of all placed source locations.
 \abspar
 On a reference that applies the
 analysis's own relations to one application's source, the added step trades precision for recall. A comparison with
-Rima et al.'s tool shows a similar trade-off and no overall ranking, with this extractor far less
-precise on the largest application. Both comparisons rest on small samples read by an artificial
+Rima et al.'s tool gives no overall ranking: this extractor recalls as much or more at similar precision, except on one application, where it is far less precise. Both comparisons rest on small samples read by an artificial
 intelligence model, and one subgroup was formed after reading. Mutation testing only sanity-checks
 the mapping between source and witnesses.
 \abspar
