@@ -70,10 +70,12 @@ by construct.
 This thesis therefore builds an Angular extractor to measure how much navigation is recovered and
 to classify the losses. Navigation in code outside the components that routes render directly, such
 as services, guards and shared components, can be recovered only if each navigation site is
-attributed to the screens it belongs to. For this the thesis proposes \emph{scope attribution}, a
+attributed to the screens it belongs to. For example, a navigation call in a service method can fire on
+any screen whose components call that method, directly or through other services. To attribute
+such sites, the thesis proposes \emph{scope attribution}, a
 formal model specified independently of the extractor. It is a dataflow analysis over screen sets
 that computes for each navigation site a scope, a candidate set of the screens from which the site
-can fire.
+can fire. Section~\ref{sec:angular} gives a running example.
 The model contains the attribution rules of the earlier Angular extractions of Oshima and Kishi and of Rima et al.\ as levels. It adds
 a member-level service call graph, a fallback join and stand-ins for guards and effects, which
 attribute the navigation in services, guards and effects to screens. The thesis measures what each

@@ -288,8 +288,8 @@ domain of the analysis is $\mathcal{P}(S)$ ordered by inclusion, with set union 
 \[
   X \sqsubseteq Y \iff X \subseteq Y, \qquad X \sqcup Y \;=\; X \cup Y ,
 \]
-the powerset lattice over the screens. Its least element is the empty scope
-$\bot = \varnothing$, a site that fires from no screen at all. Its greatest element is
+the powerset lattice over the screens. Its least element is the empty screen set
+$\bot = \varnothing$. Its greatest element is
 $\top = S$, every screen.
 
 \textbf{True, computed and reference scope.} The thesis distinguishes two scopes.
@@ -320,10 +320,12 @@ and no screen can reach it, so contributing no edge is the correct answer.
 analysis reaches it (a navigation in a service nothing is known to inject, or behind a construct
 the reader could not follow). The true scope is unknown.
 \end{itemize}
-Both yield $\bot$, which cannot distinguish them, so the extractor
-anchors a site in an unplaced component at an unplaced-origin node recording its file, with
+Both yield $\bot$, which cannot distinguish them: an empty computed scope means only that the
+analysis has assigned no source screen to the site, not that the site is unreachable. The extractor
+therefore anchors a site in an unplaced component at an unplaced-origin node recording its file, with
 edges labelled \emph{may}. A site in any other component with empty scope contributes no edge, but
-a note records its file and reason. These traces let Chapter~\ref{ch:results} count unresolved sites apart from unreachable code.
+a note records its file and reason. These traces keep such sites in the construct accounting of
+Section~\ref{sec:res-accounting}, which does not tell unresolved sites from unreachable ones.
 
 \textbf{Named elements.} Three elements of the domain are named, because attribution anchors
 edges at them. Write $r' \succeq r$ for the reflexive ancestor relation on routes: $r'$ is $r$

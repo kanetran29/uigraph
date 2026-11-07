@@ -547,8 +547,10 @@ resulting tests find web application faults, and the work appeared at a workshop
 Stryker is a mutation testing framework for JavaScript and TypeScript, with further
 implementations for C\# and Scala. Its documentation lists more than 30 supported mutations and a
 design that works with any test runner \cite{stryker}. No peer-reviewed publication describing
-Stryker was found, and the project cites none. For that reason, the mutation procedure of
-Chapter~\ref{ch:evaluation} is specified explicitly instead of delegated to a tool's defaults.
+Stryker was found, and the project cites none. Stryker counts a mutant as detected when a test
+fails or times out with the mutant active \cite{stryker}. This thesis instead scores a mutant by
+whether the extracted graph shows the change the mutation predicts, so
+Chapter~\ref{ch:evaluation} specifies its operators, sampling and scoring.
 
 \subsubsection{Reporting a mutation experiment}
 

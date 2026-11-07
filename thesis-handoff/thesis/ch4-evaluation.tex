@@ -153,8 +153,8 @@ per-locale build is incompatible with this harness, so only this check excludes 
 \textbf{The ablation and the structural reference (RQ3).} These measurements test whether attribution
 improves agreement with a structural reference or merely produces larger screen sets.
 
-The ablation withholds the mechanisms of Section~\ref{sec:attribution} one at a time and extracts
-the whole corpus at each level:
+The ablation extracts the whole corpus at \AblationLevels{} cumulative levels of the mechanisms of
+Section~\ref{sec:attribution}, each adding mechanisms to the one before:
 \begin{itemize}
 \item \emph{Owned}: a site belongs to the screen whose routed component's own file holds it, the
 direct ownership of the Android literature.
@@ -166,12 +166,13 @@ screen. Oshima and Kishi assemble their page information from the root component
 \item \emph{Full}: adds the member-level call graph, with its fallback join and the stand-ins for
 guards and effects.
 \end{itemize}
-Each level adds to its predecessor; \emph{full} adds several mechanisms. A sixth level,
+A difference between two levels is the effect of the added mechanisms given those before them,
+and \emph{full} adds several at once. A sixth level,
 \emph{class}, replaces the call graph with the per-class rule, joining a navigating service to every
 component that injects its class. The harness verifies nesting on the application graphs and refuses
 to produce a table if any (site, screen) pair disappears at the next level.
 
-The structural reference supports scoring in both directions. For one application, source inspection
+Scoring against the structural reference counts (site, screen) pairs in both directions, at the sites the reference lists. For one application, source inspection
 identified each site's screens with a derivation in \path{route-oracle/ground-truth/realworld.json}.
 This is the structural reference of Section~\ref{sec:scope}, termed ground truth below. A missing
 reference pair indicates under-attribution and an extra pair over-attribution, both relative to the reference. Four limits apply.
@@ -183,8 +184,9 @@ its reasoning so a reader can check it.
 admits a screen only in one sign-in state does not narrow a scope. The ground truth therefore tests
 whether the implementation applies the relations correctly and does not test whether they match what
 the running application renders.
-\item It is checked in one direction only: the scorer reports every site the graph places
-that the ground truth omits.
+\item The completeness of its site inventory is checked in one direction only: the scorer reports
+every site the graph places that the ground truth omits. This inventory check is separate from
+precision and recall, and it cannot reveal a site that both the graph and the reference omit.
 \end{itemize}
 
 \textbf{The end-to-end navigation check (RQ3).} This check takes its reference from execution, so it can show a navigation that the
@@ -349,9 +351,9 @@ literal, so an edge to the screen a redirect lands on is reported as a failure. 
 \addlinespace
 Differential test & Disagreements with a separately written route-configuration
 parser. &
-Diagnostic, not a metric. The independent route parser is independent, not stronger, and for the path
-forms added during development (Table~\ref{tab:repairs}) it is no longer independent of the extractor at
-all. \\
+Diagnostic, not a metric. The parser is written separately but is not necessarily more capable than
+the extractor. Both use the same resolution rules for the path forms added during development
+(Table~\ref{tab:repairs}), so agreement on those forms is not independent validation. \\
 \addlinespace
 Test-source cross-check & Node-level recall against a fourth reader of the source. The URL literals in
 the application's end-to-end specifications are collected; a URL its own test suite names is an
@@ -433,4 +435,4 @@ an extractor commit. The latter are compared with the final graph (Section~\ref{
 \subsection{Summary}
 \label{sec:eval-summary}
 
-The corpus is six open-source Angular applications pinned to commits, chosen by criteria fixed before any result was seen, and its limits are those of an open-source sample selected with tool support in view. The measures of Table~\ref{tab:ratios} answer the research questions: node coverage, node-level recall, must conversion and recovered share answer RQ1, and the loss categories and accounted share answer RQ2. Attribution recovery, must-edge target consistency, scope width and agreement with the structural reference and the end-to-end suites answer RQ3, the detection rate answers RQ4, and the cause trace answers RQ5. Four of the five evaluation methods check the extractor against other readings of the same sources, and the fifth, the runtime route oracle, checks it against the framework. Four further checks, the rendered-interface check, the ablation, the structural reference and the end-to-end check, test the attribution. No method sees everything, and Table~\ref{tab:methods} states the blind spot of each.
+The corpus is six open-source Angular applications pinned to commits, selected by explicit criteria with the departures stated in Section~\ref{sec:corpus}, including tool support as a rejection criterion added during screening. Table~\ref{tab:ratios} maps each research question to its measures. Five evaluation methods check the extractor: four against other readings of the same sources, and the runtime route oracle against the framework. Four further checks test the attribution: the rendered-interface check, the ablation, the structural reference and the end-to-end check. Table~\ref{tab:methods} states the blind spot of each method, and together the methods and checks do not amount to a complete correctness test.

@@ -368,14 +368,14 @@ Containment adds the most sites. The pre-existing shell rule adds the most (site
 reference recall. Outlet descent mostly widens scopes; counts alone cannot validate this width, which the next subsection evaluates. Full adds the member-level service call graph, fallback join
 and guard/effect stand-ins, which only full and its class variant include. Relative to the class
 rule it replaced, the call graph adds \AblationCallGraphNetSites{} sites
-(\AblationCallGraphNetShare{} of the corpus) and \AblationCallGraphNetPairs{} pairs.
+(\AblationCallGraphNetShare{} of all sites the \emph{full} level places) and \AblationCallGraphNetPairs{} pairs.
 The class rule remains the fallback for members without identified callers.
 
 Comparison with earlier work uses two levels. The shell rule is pre-existing; Rima et al.'s
 specification also includes ancestor-route components, as \emph{outlet} does. These levels
 reimplement earlier mechanisms inside this extractor; they do not run the earlier tools or show
 that those tools would place fewer sites. Against the closest level, \emph{outlet}, full adds
-\AblationFullAddedSites{} sites (\AblationFullAddedShare{} of the corpus), all in services,
+\AblationFullAddedSites{} sites (\AblationFullAddedShare{} of all sites the \emph{full} level places), all in services,
 guards or effects rather than components.
 
 \subsubsection{Agreement with a structural reference}
@@ -686,9 +686,10 @@ This comparison runs their tool at \texttt{f33003f}. Its static extraction and w
 stages ran on their seven subjects and the six corpus applications; backend-dependent test stages
 did not run. Preregistration preceded inspection of its corpus output. Workflow counts match their
 reference on every subject; start and terminal routes also match on the six with the same reference
-format. Only triggers resolved to navigation claim transitions. Other workflows record the start
-as terminal and are excluded. Each claimed transition is paired with every start route; this
-extractor uses scope-expanded edges. Relative recall concerns real pairs in the tools' union, not
+format. Their output lists workflows, which the comparison converts to pairs: a workflow whose trigger
+resolves to a navigation gives one pair from each of its start routes to its terminal route. Other workflows record their start route
+as terminal and are excluded. This extractor's pairs come from its edges once scope nodes are
+expanded. Relative recall concerns real pairs in the tools' union, not
 all real transitions. Proposing more pairs enlarges that reference union. Within each application,
 pairs are stratified as shared, only-theirs or only-ours. An only-ours stratum exceeding 1000 pairs
 is split into shell-only and other pairs. Every pair in each stratum, or a seeded sample of 12 when
@@ -737,18 +738,25 @@ Application & pairs & precision & recall & pairs & precision & recall \\
 
 Table~\ref{tab:h2h} reports point estimates. On their seven subjects, the tools are close: theirs
 recalls \HHRimaTheirsRecall{} at \HHRimaTheirsPrecision{} precision; this extractor recalls
-\HHRimaOursRecall{} at \HHRimaOursPrecision{}. Excluding mifos, a post-hoc grouping, this extractor
-recalls \HHCorpusNoMifosOursRecall{} of real union pairs versus \HHCorpusNoMifosTheirsRecall{},
-at \HHCorpusNoMifosOursPrecision{} versus \HHCorpusNoMifosTheirsPrecision{} precision. They propose
-\HHCorpusNoMifosOursPairs{} and \HHCorpusNoMifosTheirsPairs{} pairs, with estimated real counts
-of \HHCorpusNoMifosOursReal{} and \HHCorpusNoMifosTheirsReal{}. Setting each stratum's rate to its
-Wilson interval endpoints gives bounds, not a joint 95\,\% interval, and the recall bounds stay separate: \HHCorpusNoMifosOursRecallRange{}
-versus \HHCorpusNoMifosTheirsRecallRange{}. On mifos, this extractor proposes \HHMifosOursPairs{}
-pairs, theirs \HHMifosTheirsPairs{}, and both share \HHMifosBoth{}. Most of this extractor's pairs are shell-only
-(Section~\ref{sec:res-e2e}); precision is \HHMifosOursPrecision{} versus \HHMifosTheirsPrecision{}.
-The pooled corpus recall ranges, \HHCorpusOursRecallRange{} versus
-\HHCorpusTheirsRecallRange{}, therefore rest mostly on mifos (Section~\ref{sec:res-baseline}) and
-do not rank the tools. They also depend on how unclear verdicts count: \HHReadUnclear{} sampled pair, in mifos's
+\HHRimaOursRecall{} at \HHRimaOursPrecision{}.
+
+Without mifos, a post-hoc group, this extractor finds a larger share of the pairs judged real at
+similar estimated precision. It recalls \HHCorpusNoMifosOursRecall{} of real union pairs versus
+\HHCorpusNoMifosTheirsRecall{}, at \HHCorpusNoMifosOursPrecision{} versus
+\HHCorpusNoMifosTheirsPrecision{} precision. This extractor proposes \HHCorpusNoMifosOursPairs{} pairs and theirs
+\HHCorpusNoMifosTheirsPairs{}, with estimated real counts of \HHCorpusNoMifosOursReal{} and
+\HHCorpusNoMifosTheirsReal{}.
+
+On mifos, this extractor trades precision for recall. It proposes \HHMifosOursPairs{} pairs,
+theirs \HHMifosTheirsPairs{}, and both share \HHMifosBoth{}. Most of this extractor's pairs are
+shell-only (Section~\ref{sec:res-e2e}); recall is \HHMifosOursRecall{} versus
+\HHMifosTheirsRecall{} and precision \HHMifosOursPrecision{} versus \HHMifosTheirsPrecision{}.
+
+Setting each stratum's rate to its Wilson interval endpoints gives bounds, not a joint 95\,\%
+interval. Without mifos, the recall bounds stay separate: \HHCorpusNoMifosOursRecallRange{} versus
+\HHCorpusNoMifosTheirsRecallRange{}. The pooled corpus recall ranges, \HHCorpusOursRecallRange{}
+versus \HHCorpusTheirsRecallRange{}, rest mostly on mifos (Section~\ref{sec:res-baseline}) and do
+not rank the tools. They also depend on how unclear verdicts count: \HHReadUnclear{} sampled pair, in mifos's
 shell-only stratum, was judged unclear. Counted as real, it would put this extractor at
 \HHCorpusOursPrecisionUnclearReal{} precision and \HHCorpusOursRecallUnclearReal{} recall on the
 pooled corpus and their tool at \HHCorpusTheirsRecallUnclearReal{} recall; the figures without mifos
@@ -990,17 +998,17 @@ the list therefore establishes neither runtime occurrence nor confirmed defects.
 \path{/accounting/}\allowbreak\path{journal-entry/}\allowbreak\path{view/:id}. The link omits the parent
 prefix, and mifos's catch-all route renders the not-found screen, which a user can mistake for missing data rather than a broken link.\par}
 
-The list is not one defect class, and the parts differ in worth.
+The list is not one defect class, and its groups differ in the strength of their evidence.
 
 \begin{itemize}
 \item \RoundTwoDeadLinkAbsolute{} of the candidates are an absolute link written against a path the
 application does not mount, usually the name the server uses rather than the one the router does.
-Those are the application's.
+These originate in application code; whether users encounter them is untested.
 \item \RoundTwoDeadLinkRelative{} come from a \emph{relative} \texttt{routerLink}, such as
 \texttt{[routerLink]="'edit'"} or \texttt{[routerLink]="['../../transactions']"}. Their target
 depends on the route the link resolves against, that of the component holding it
-(Section~\ref{sec:anchored}), so a wrong base is the analysis's question before it is the
-application's defect.
+(Section~\ref{sec:anchored}), so the extractor's resolution of that base must be verified before
+such a candidate can be attributed to an application defect.
 \item \RoundTwoDeadLinkBaseUnknown{} cannot be classified because the result files preserve
 insufficient construct text. They are counted separately.
 \end{itemize}

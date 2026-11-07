@@ -3,16 +3,15 @@
 
 This thesis measured how much navigation static extraction recovers from six Angular
 applications, classified the navigation it loses and evaluated scope attribution as a way to
-recover part of that loss. Section~\ref{sec:res-summary} answers each of the five research
-questions with the figures that decide it and its main limit, and Chapter~\ref{ch:discussion}
-interprets the answers.
+recover part of that loss. Section~\ref{sec:res-summary} answers the five research questions
+with their main limits, and Chapter~\ref{ch:discussion} interprets the answers.
 
 \paragraph{Contributions.} The thesis makes two contributions. The first is scope attribution, a
 formal model of the screens from which a navigation site can fire, which contains the attribution
-rules of earlier Angular extractions as levels. The second is a measurement of what each level
-adds and of what static extraction loses. The measurement covers six pinned applications, uses five evaluation methods
+rules of earlier Angular extractions as levels. The second measures what each level
+adds and what static extraction loses. The measurement covers six pinned applications, uses five evaluation methods
 with different blind spots and four further scope checks, and classifies every lost construct. The extractor also supports nested and parameterised
-route trees, which the restrictions of Oshima and Kishi exclude (Section~\ref{sec:res-earlier}).
+route trees, which Oshima and Kishi exclude (Section~\ref{sec:res-earlier}).
 
 The apparatus makes the measurements inspectable: tables are generated from harness
 results, and the source-based methods re-run from pinned commits. Runtime reproduction is partial:
@@ -24,9 +23,10 @@ three of its five input relations (Section~\ref{sec:attribution}). Its added ste
 navigation in services, guards and effects. The step's service join is type-directed and transitive,
 so it generalises the router-service tracing in Rima et al.'s implementation, which is bounded
 to one level and matches by name. With a fallback join and stand-ins for guards and effects, the
-step adds \AblationFullAddedSites{} sites (\AblationFullAddedShare{}) over outlet descent, and the
-call graph alone adds \AblationCallGraphNetSites{} sites (\AblationCallGraphNetShare{}) over the
-per-class rule it replaced (Section~\ref{sec:res-ablation}).
+step places \AblationFullAddedSites{} further cited source locations beyond outlet descent, and the
+call graph alone \AblationCallGraphNetSites{} beyond the per-class rule it replaced:
+\AblationFullAddedShare{} and \AblationCallGraphNetShare{} of all locations the full level places
+(Section~\ref{sec:res-ablation}).
 
 \paragraph{What remains open.} Dispatch is specified but not implemented, guards use a stand-in,
 and the call graph ignores the injector hierarchy. Screen sets were checked in both directions
