@@ -2,9 +2,9 @@
 \label{ch:conclusion}
 
 This thesis measured how much navigation static extraction recovers from six Angular
-applications, classified the navigation it loses and evaluated scope attribution as a way to
-recover part of that loss. Section~\ref{sec:res-summary} answers the five research questions
-with their main limits, and Chapter~\ref{ch:discussion} interprets the answers.
+applications, classified its losses and evaluated scope attribution as a way to
+recover some. Section~\ref{sec:res-summary} answers the research questions, and
+Chapter~\ref{ch:discussion} interprets the answers.
 
 \paragraph{Contributions.} The thesis makes two contributions. The first is scope attribution, a
 formal model of the screens from which a navigation site can fire, which contains the attribution
@@ -26,7 +26,8 @@ to one level and matches by name. With a fallback join and stand-ins for guards 
 step places \AblationFullAddedSites{} further cited source locations beyond outlet descent, and the
 call graph alone \AblationCallGraphNetSites{} beyond the per-class rule it replaced:
 \AblationFullAddedShare{} and \AblationCallGraphNetShare{} of all locations the full level places
-(Section~\ref{sec:res-ablation}).
+(Section~\ref{sec:res-ablation}). On the alfresco reference, the step raises recall at a cost in
+precision (Section~\ref{sec:res-groundtruth}).
 
 \paragraph{What remains open.} Dispatch is specified but not implemented, guards use a stand-in,
 and the call graph ignores the injector hierarchy. Screen sets were checked in both directions
