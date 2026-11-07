@@ -35,14 +35,17 @@ finds no failure among the must edges, but it cannot read the destinations of ab
 application's must edges, all of them toolbar edges.
 
 \paragraph{RQ2: what remains is lost at the edge.}
-Under the precedence of the loss rules, most constructs lost before attribution are attribution
-losses (Table~\ref{tab:loss}): the site is represented, but the extractor cannot determine which
-screens contain it. The attribution losses that stay lost (Table~\ref{tab:remaining}) show three
-failure modes: a source scope that is still not found; a target whose text matches no node's
-address, such as the name of a field holding the route, mostly in ghostfolio; and a fully dynamic
-target, while \AttrRemainingUnexplained{} have no diagnosed cause. The node and edge levels depend on each other. Attribution needs destination
-nodes, and complete nodes yield few transitions while sites outside routed components remain
-unattributed, so Chapter~\ref{ch:results} reports node coverage beside must conversion.
+After scope attribution, the attribution losses that remain (Table~\ref{tab:remaining}) show three
+failure modes:
+\begin{itemize}
+\item a source scope that is still not found;
+\item a target whose text matches no node's address, mostly in ghostfolio, such as the name of a
+field holding the route;
+\item a fully dynamic target.
+\end{itemize}
+The other \AttrRemainingUnexplained{} have no diagnosed cause. The node and edge levels depend on each other. Attribution needs destination
+nodes. Complete nodes, in turn, yield few transitions while sites outside routed components remain
+unattributed. Chapter~\ref{ch:results} therefore reports node coverage beside must conversion.
 
 Under the chosen rule order, which is part of the measure (Section~\ref{sec:limitations}), the
 largest loss category in every application is the one that scope attribution addresses

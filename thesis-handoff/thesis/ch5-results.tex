@@ -1007,8 +1007,8 @@ These originate in application code; whether users encounter them is untested.
 \item \RoundTwoDeadLinkRelative{} come from a \emph{relative} \texttt{routerLink}, such as
 \texttt{[routerLink]="'edit'"} or \texttt{[routerLink]="['../../transactions']"}. Their target
 depends on the route the link resolves against, that of the component holding it
-(Section~\ref{sec:anchored}), so the extractor's resolution of that base must be verified before
-such a candidate can be attributed to an application defect.
+(Section~\ref{sec:anchored}). The extractor's resolution of that base must therefore be verified
+before such a candidate can be attributed to an application defect.
 \item \RoundTwoDeadLinkBaseUnknown{} cannot be classified because the result files preserve
 insufficient construct text. They are counted separately.
 \end{itemize}
