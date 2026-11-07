@@ -35,10 +35,12 @@ finds no failure among the must edges, but it cannot read the destinations of ab
 application's must edges, all of them toolbar edges.
 
 \paragraph{RQ2: what remains is lost at the edge.}
-In most remaining losses, both the site and its screens are represented, but the extractor cannot
-determine which screens contain the site. The exception is target screens without
-nodes, a category that also includes targets stored in fields and lies mostly in ghostfolio
-(Table~\ref{tab:remaining}). The two levels depend on each other. Attribution needs destination
+Under the precedence of the loss rules, most constructs lost before attribution are attribution
+losses (Table~\ref{tab:loss}): the site is represented, but the extractor cannot determine which
+screens contain it. The attribution losses that stay lost (Table~\ref{tab:remaining}) show three
+failure modes: a source scope that is still not found; a target whose text matches no node's
+address, such as the name of a field holding the route, mostly in ghostfolio; and a fully dynamic
+target, while \AttrRemainingUnexplained{} have no diagnosed cause. The node and edge levels depend on each other. Attribution needs destination
 nodes, and complete nodes yield few transitions while sites outside routed components remain
 unattributed, so Chapter~\ref{ch:results} reports node coverage beside must conversion.
 

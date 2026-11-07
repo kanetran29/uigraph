@@ -416,8 +416,8 @@ several implementations the analysis joins over all of them, a source of \emph{m
 modality.
 \end{itemize}
 
-Algorithm~\ref{alg:attribution} adds screens only along $N$, $\mathit{Mem}$ or $\mathit{CG}$,
-and scopes only grow. It therefore computes the least solution of the constraints in Table~\ref{tab:scopes}. A component mounted by a route and rendered in another component's template
+Algorithm~\ref{alg:attribution} adds screens only along $N$, $\mathit{Mem}$, $\mathit{CG}$ and the
+model-only relations $D$ and $T$. No update removes a screen, so scopes only grow. It therefore computes the least solution of the constraints in Table~\ref{tab:scopes} together with those that $D$ and $T$ add (Section~\ref{sec:extensions}). A component mounted by a route and rendered in another component's template
 receives the join of both scopes. The prototype instead blocks propagation into routed
 components and adds fallbacks outside these constraints (Section~\ref{sec:implementation}).
 Its result is not the least solution of this system or of any restriction of it.
