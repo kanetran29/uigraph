@@ -16,7 +16,7 @@
     "sha": "c42f2204802a32fe50f0aecfedc0faef1eefb61b",
     "date": "2026-11-02",
     "note": "This is the commit every figure in the thesis is measured on, and the provenance line of each generated table names it. packages/ has not changed since it, so a later commit of the repository reproduces the same graphs; the harness HAS changed after it, and each result file records the harness version that produced it. The figures were produced by two runs of run-all.mjs over this commit, with the attribution pass disabled and enabled. An earlier revision of this manifest named eb9dab80, which predates the member-level call graph; the generated tables are stamped c42f2204. The earlier pinned commit c4f8b833 was the pre-attribution parent and never produced a published figure; 4505fd2a, which earlier revisions of this manifest named, exists in no clone the project holds.",
-    "reachability": "Pushed to origin on branch thesis-final-2026-11 with tag thesis-eval-final. Reproduce by checking out this sha or that tag; the older remote tag thesis-eval still points at dd28cc2, the first attribution commit, and must not be used to reproduce the thesis figures.",
+    "reachability": "Pushed to origin with tag thesis-eval-final. Reproduce by checking out this sha or that tag; the older remote tag thesis-eval still points at dd28cc2, the first attribution commit, and must not be used to reproduce the thesis figures.",
     "evalTag": "thesis-eval-final",
     "evalTagNote": "thesis-eval-final is created at extractor.sha. thesis-eval (dd28cc2) is superseded and left in place because it has been pushed."
   },
