@@ -22,7 +22,7 @@ analysis supports and has to approximate the targets it cannot resolve.
 The two approaches complement each other. Much of the navigation in the applications studied here
 is behind authentication guards. A static graph can give a crawler candidate screens, transitions
 and guards, and execution can confirm the transitions the crawler observes. This thesis evaluates
-static extraction alone and leaves the combination to future work (Section~\ref{sec:future}).
+static extraction alone and leaves the combination to future work.
 
 Navigation graphs also have uses beyond model-based testing. GPTDroid runs a question-and-answer
 loop with a large language model over the current mobile screen and reports higher activity
@@ -57,7 +57,6 @@ tests \cite{rima2026e2e}.
 \item Zhang et al.\ analyse compiled single-page application bundles to check access-control
 policies against reachable screens \cite{zhang2025veriflow}.
 \end{itemize}
-Section~\ref{sec:dynamic-spa} compares these approaches.
 
 Early Ajax (asynchronous JavaScript and XML) applications had no declarative route tables, so crawlers observed navigation through
 DOM states. In Angular, React Router and Vue Router, route tables, template navigation and service
@@ -74,18 +73,15 @@ any screen whose components call that method, directly or through other services
 such sites, the thesis proposes \emph{scope attribution}, a
 formal model specified independently of the extractor. It is a dataflow analysis over screen sets
 that computes for each navigation site a scope, a candidate set of the screens from which the site
-can fire. Section~\ref{sec:angular} gives a running example.
+can fire.
 The model contains the attribution rules of the earlier Angular extractions of Oshima and Kishi and of Rima et al.\ as levels. It adds
 a member-level service call graph, a fallback join and stand-ins for guards and effects, which
-attribute the navigation in services, guards and effects to screens. The thesis measures what each
-level adds (Section~\ref{sec:res-ablation}).
+attribute the navigation in services, guards and effects to screens.
 
 Besides scope attribution, the extractor handles nested, parameterised and lazily loaded route
-trees (Section~\ref{sec:res-earlier} compares it with the approach of Oshima and Kishi). It was developed and evaluated on the same corpus, so its
+trees. It was developed and evaluated on the same corpus, so its
 measurements describe these applications and are not estimates of performance on Angular
-applications in general. Appendix~\ref{app:corrections} records the corrections made during
-development, and Section~\ref{sec:limitations} discusses what they imply.
-Chapter~\ref{ch:discussion} separates gaps in the implementation from limits of the approach.
+applications in general.
 
 \subsection{Research questions and scope}
 \label{sec:rqs}
@@ -106,10 +102,10 @@ applications, why it fails where it does, and what scope attribution adds. Five 
 \end{description}
 
 The questions are answered with the final version of the extractor on six open-source Angular
-applications pinned to fixed commits (Chapter~\ref{ch:evaluation}). The thesis does not claim
+applications pinned to fixed commits. The thesis does not claim
 completeness. It states a soundness property for the edges labelled must, which are claimed to
 fire for every input on which their enclosing code executes. The property is conditional on stated
-assumptions (Claim~\ref{claim:must}). The thesis also lists what the analysis approximates
+assumptions. The thesis also lists what the analysis approximates
 (Appendix~\ref{app:approx}). It does not measure the graph's effect on any consumer, and it
 evaluates Angular alone. Because the extractor was developed on the corpus, its figures on that
 corpus are in-sample.

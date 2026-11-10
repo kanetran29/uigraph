@@ -14,7 +14,6 @@ The numerical tables are generated from the harness result files, and hand-compi
 
 All extractions use source trees without installed dependencies. The corpus was selected with tool
 support in view, so results are likely optimistic for Angular applications generally.
-Section~\ref{sec:limitations} discusses both conditions.
 
 \subsection{The two levels of loss (RQ1)}
 \label{sec:res-baseline}
@@ -67,8 +66,7 @@ The two readers still disagree about a handful of addresses. Two qualifications 
 the running framework mounts, the same node set is \ProbeNodes{}/\ProbeScreens{}
 (Section~\ref{sec:res-probe}). Almost all of the difference is one construct in one application
 that the extractor declares unread.
-\item The two static readers were partly corrected against each other, so their agreement is weaker evidence
-(Section~\ref{sec:limitations}). The runtime route oracle is the external
+\item The two static readers were partly corrected against each other, so their agreement is weaker evidence. The runtime route oracle is the external
 check, and it finds no node at an address where the framework mounts nothing
 (Section~\ref{sec:res-unmounted}).
 \end{itemize}
@@ -144,7 +142,7 @@ Category interactions mean that the \AttrLost{} attribution constructs neither l
 upper-bound attribution's recoveries (Section~\ref{sec:res-after}).
 
 Table~\ref{tab:oracles} reports the witness check on the final attributed tier and the
-test-source cross-check. Section~\ref{sec:res-round2} treats the must tier separately. \RoundTwoOutsideWitness{} edges in \RoundTwoOutsideWitnessApps{} applications have their only witness outside the application directory. Both tools read those files, so their agreement there is not independent evidence.
+test-source cross-check. \RoundTwoOutsideWitness{} edges in \RoundTwoOutsideWitnessApps{} applications have their only witness outside the application directory. Both tools read those files, so their agreement there is not independent evidence.
 
 \begin{table}[t]\small
 \caption{Results of the witness check on the final attributed tier, and of the test-source cross-check.}
@@ -199,9 +197,7 @@ unknown edges, all to dynamic targets, occur in \CensusUnknownApps{} of \CensusA
 the harness rejects any graph in which the unknown edges and the edges to nonscreen targets differ.
 \CensusMaySourceNotScreen{} of the may edges leave an unplaced origin. The
 attributed graphs hold \CensusNodes{} nodes: \CensusScreens{} screens, \CensusAnchors{} anchor nodes (each stores the edges anchored at one scope, Section~\ref{sec:anchored}) and
-\CensusOtherNodes{} unplaced origins or dynamic targets. Section~\ref{sec:res-ablation} measures what the
-\emph{full} step adds beyond the levels that reimplement earlier work and what its call graph adds
-over the class rule it replaced.
+\CensusOtherNodes{} unplaced origins or dynamic targets.
 
 Measured by RQ1's must conversion, the gain is far smaller. The recovered
 constructs divide into \AttrRecoveredMust{} at must and \AttrRecoveredMay{} at may, and must
@@ -219,7 +215,6 @@ Construct identifiers are tracked across the two runs. The number of conversion 
 show is \AttrRegressed{}, and the number of must-to-may demotions is \AttrDemoted{}. No baseline
 must conversion was lost. The tracking measures recovery and does not test whether targets stay
 the same.
-Section~\ref{sec:res-soundness} assesses the must tier and remaining edges.
 
 Claim~\ref{claim:expansion} requires anchored-edge expansion to equal the materialised edge set.
 A separate implementation expands each scope-anchored edge over its member screens and
@@ -301,7 +296,7 @@ under-attribution.
 The check covers \ScopeJudged{}/\ScopeScreens{} screens; \ScopeUnjudged{} redirect to sign-in
 without a backend. It includes \ScopeApps{} of six applications, excluding ghostfolio because its
 per-locale bundles do not fit the harness's single served directory. These restrictions leave only
-one direction tested (Section~\ref{sec:limitations}).
+one direction tested.
 
 The \ScopeUnpredicted{} unpredicted links share one cause. The graph holds their edges, with the
 right witness, but anchors them at an unplaced origin instead of a screen, because attribution
@@ -433,9 +428,8 @@ levels, but is less precise than both those levels and the class join.
   attribution decides.
 \item \emph{Two repairs were guided by the reference:} the call graph, written after the \GTApp{}
   reference exposed the class-level defect, and the rule that places an empty-path child on the
-  screen above it (Section~\ref{sec:approximations}). The \GTFullPrecision{} precision and the recall of
-  \emph{full} are scored on the same reference and test neither repair independently
-  (Section~\ref{sec:limitations}).
+  screen above it. The \GTFullPrecision{} precision and the recall of
+  \emph{full} are scored on the same reference and test neither repair independently.
 \item \emph{The class join's excess on \GTApp{}} is \GTClassExcess{} pairs, all at the
   \texttt{navigate} inside \texttt{UserService.logout}. The class join attributes the service to
   every screen whose components inject it, but its only caller is a button on the settings screen.
@@ -475,7 +469,7 @@ misses three source forms the extractor did not support, rather than destination
 time, and each form was then repaired with a test (Table~\ref{tab:repairs}). The repairs apply
 general Angular rules without naming sites, but this check found and evaluated them. Only the frozen
 figure is therefore independent of these repairs, and no other runnable suite remains for an
-independent test (Section~\ref{sec:limitations}).
+independent test.
 
 \begin{table}[t]\footnotesize
 \caption{The graph against the pairs of screens the applications' own end-to-end suites navigate between.}
@@ -525,7 +519,7 @@ misses are not classified further. The other classes were defined after the miss
 before the repairs. Every remaining miss is in the redirect class
 (\EtoEMifosMissRedirect{}/\EtoEMifosMiss{}): the graph holds the pair on the screen the redirect
 lands on. For \CeilEtoEMifosInside{} of them a better reader would also hold the address asked for
-(Section~\ref{sec:may-incomplete}). The dynamic test is also met by \EtoEMifosMissDynamicAny{} of them.
+(cf.~Section~\ref{sec:may-incomplete}). The dynamic test is also met by \EtoEMifosMissDynamicAny{} of them.
 The test fires on any unresolved site in the source component or above it, so it does not show that
 a missed navigation is that site. The preregistered five-class scheme, and its prediction that
 misses would mostly be a scope too narrow or a site not read, are not scored.
@@ -590,8 +584,7 @@ establish over-attribution. Full produces no excess reference pair on \GTApp{}. 
 produces \GTAlfFullExcess{} excess pairs, all at the configuration-driven site of
 Section~\ref{sec:res-groundtruth}, and it places an undetermined site at $\top$. Both references
 cover two applications and share the limit stated in Section~\ref{sec:res-groundtruth}.
-Over-attribution can pass witness checks, and the suites test omissions alone
-(Section~\ref{sec:limitations}).
+Over-attribution can pass witness checks, and the suites test omissions alone.
 
 \subsubsection{On the applications of Rima et al.}
 \label{sec:res-rima}
@@ -819,8 +812,7 @@ and full paths identify screens (Section~\ref{sec:model}). The other operators a
 restricted. Deletion samples only \texttt{routerLink} lines cited by existing edges. Retargeting
 requires a cited \texttt{navigate} call beginning with a plain absolute string. Guard removal is
 scored only if an edge carries that guard into the guarded screen; detection is conditional on that
-edge existing. Exclusions are few with attribution but more numerous without it. Samples are small
-(Section~\ref{sec:limitations}), favouring interpretation by operator pattern rather than rate.
+edge existing. Exclusions are few with attribution but more numerous without it. Samples are small, favouring interpretation by operator pattern rather than rate.
 RQ4 checks witness-to-source mapping, not change-impact accuracy: only cited lines can fail, and
 the harness was corrected after inspecting misses (Table~\ref{tab:repairs}). The headline uses
 scored mutants, \MutDetected{}/\MutScored{}; the paired row includes only mutants scored by both graphs.
@@ -906,7 +898,7 @@ they are mutable; resolving them as constants would turn runtime values into mus
 Table~\ref{tab:round2acct} separates four outcomes. A site is \emph{recovered} when a must or may
 edge from a placed screen witnesses it with a destination. It is \emph{dynamic} when the destination
 is unresolved: backend values, history entries, fields treated as mutable despite route-table
-initialisation, or commands-array template literals (Section~\ref{sec:approximations}). These yield
+initialisation, or commands-array template literals. These yield
 unknown-modality edges to a screen's \texttt{u\_}\,sink. A site is \emph{unplaced} when its target
 is resolvable but its source screen is not; its edge uses an \texttt{o\_}\,origin. Remaining sites
 have a recorded reason but no transition. The check enforces reason presence, not correctness.
@@ -951,7 +943,7 @@ unread destinations are toolbar edges in one application, and they rely on the t
 computed scope, which no check tested, and on the route-order assumption. The check compares construct and edge
 destinations. It does not test unconditional execution or router admission, which the demotion
 rules address.
-Neither source inspection (Section~\ref{sec:limitations}) nor this mechanical check independently
+Neither source inspection nor this mechanical check independently
 proves Claim~\ref{claim:must}.
 
 Most of the must tier rests on the route-order assumption A1 (Section~\ref{sec:model}). Of the

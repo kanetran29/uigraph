@@ -70,17 +70,17 @@ $S$:
 Angular rejects \texttt{redirectTo} combined with \texttt{children} or \texttt{component},
 as verified in the configuration validator of the vendored Angular~18.2.14. Other routers
 differ: Vue Router applies a redirect only to the last matched record, so a redirecting
-parent renders its component for a matching child (Section~\ref{sec:transfer}).
+parent renders its component for a matching child (cf.~Section~\ref{sec:transfer}).
 
 Angular permits component-bearing routes with the same full path, distinguished at run time
 by \texttt{pathMatch} or \texttt{canMatch}. The model assumes no such duplicates. The extractor
-keeps only the first route, silently for Angular and with a note for Vue and React
-(Section~\ref{sec:transfer}). Different paths that render the same component produce distinct
+keeps only the first route, silently for Angular and with a note for Vue and React.
+Different paths that render the same component produce distinct
 screens, which requires the attribution of Section~\ref{sec:attribution}.
 
 \textbf{Witnesses.} Each static or runtime edge has a witness: its generating construct's file
 and line, or an observation identifier. When constructs produce the same edge, one becomes
-the primary witness and the others are recorded as merged witnesses (Section~\ref{sec:metrics}).
+the primary witness and the others are recorded as merged witnesses.
 The base graph requires witnesses, and manual edges stay in a separate overlay. The first
 evaluation method checks this mechanically.
 
@@ -105,8 +105,7 @@ navigates.
 \item[A4. Execution model.] The event is a plain primary activation that navigates the current
 browsing context. No other listener that the event reaches starts a navigation, and all
 synchronous evaluation that precedes the navigation completes normally. The counterexamples are
-an activation with a modifier key, navigation into another browsing context
-(Section~\ref{sec:approximations}), and a second listener on the element or an ancestor. An
+an activation with a modifier key, navigation into another browsing context, and a second listener on the element or an ancestor. An
 exception before the navigation is another, whether it comes from a call or from the evaluation
 of an expression.
 \end{description}
@@ -127,8 +126,8 @@ Claim~\ref{claim:must} does not cover that case. If the claim holds, the must ti
 to A1 to A4, on the navigations that occur whenever their triggering code runs.
 
 \textbf{What the evaluation tests.} The evaluation tests only a necessary condition of
-Claim~\ref{claim:must}, which limits the reading of Chapter~\ref{ch:results}. The witness check
-(Section~\ref{sec:protocol}) inspects every cited source location for agreement with the
+Claim~\ref{claim:must}. The witness check
+inspects every cited source location for agreement with the
 edge's destination. If the construct supporting a must label names another destination,
 the claim fails there. Agreement does not establish the claim. Other cited constructs
 support may edges only and are not judged against it.
@@ -194,8 +193,7 @@ through a navigation call, including in a branch or callback, or through a call 
 of the class, a function in the file or an injected service's method whose body navigates. An awaited
 navigation finishes before its function continues, so subsequent code in that function does
 not count. Callers continue at its first await, so their subsequent code still counts.
-Calls without resolvable application bodies are taken not to navigate, which is assumption A3
-(Section~\ref{sec:approximations}).
+Calls without resolvable application bodies are taken not to navigate, which is assumption A3.
 
 Exceptions before the site are not counted, because almost any evaluation can throw and
 Claim~\ref{claim:must} assumes normal completion in A4. An \texttt{await} is counted because request
@@ -207,8 +205,7 @@ mutation sweep deletes each rule in turn and requires a test failure
 (Table~\ref{tab:repairs}). The tests share the extractor's interpretation, and no second
 classifier derives it independently. The declared artificial intelligence (AI) assistant checked final must-tier
 constructs against source with the extractor's decisions visible. This tests whether the
-decisions are defensible, but not whether an independent reading reproduces them
-(Section~\ref{sec:res-round2}). An earlier review of a development tier found condition-rule
+decisions are defensible, but not whether an independent reading reproduces them. An earlier review of a development tier found condition-rule
 defects that the witness check missed (Appendix~\ref{app:corrections}). That check establishes only source-site existence and target agreement. The stronger claim rests on the demotion rules
 and remains independently unverified.
 
@@ -223,12 +220,7 @@ rules under-approximate: selecting the first matching route, treating interpolat
 path segment, ordering catch-all routes last, placing dispatch and dialogs, and assuming
 calls without application bodies do not navigate. The graph can therefore omit intended
 transitions. An infeasible may edge costs precision, whereas an omitted actual transition is a
-defect. No completeness theorem is claimed. The end-to-end check (Section~\ref{sec:res-e2e})
-measures omissions against the transitions of test suites. The structural references
-(Section~\ref{sec:res-groundtruth}) also count omissions, within the limit stated where
-Section~\ref{sec:scope} defines them.
-Section~\ref{sec:may-incomplete} sorts what is still missing by whether it lies inside the static
-boundary.
+defect. No completeness theorem is claimed.
 
 \subsection{Scope attribution}
 \label{sec:attribution}
@@ -247,15 +239,12 @@ $\mathit{Mem}$ links components to their members.
 
 The analysis computes a fixpoint over these relations, and the prototype then adds fallbacks
 after the fixpoint, one of them nonmonotone. Termination and the least-solution property of
-Section~\ref{sec:scope} hold for the fixpoint alone. The evaluation in
-Chapters~\ref{ch:evaluation} and~\ref{ch:results} therefore covers three relations, two
-stand-ins and a fallback post-pass.
+Section~\ref{sec:scope} hold for the fixpoint alone.
 
 Guards returning \texttt{UrlTree}, the injector hierarchy, and navigation inside signal effects
 and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) are model-only
-features that the extractor approximates or omits, as listed in
-Section~\ref{sec:approximations}. A site assigned no scope by implemented relations contributes
-no edge and counts as ``Attribution, service'' in Table~\ref{tab:loss-rules}.
+features that the extractor approximates or omits. A site assigned no scope by implemented relations contributes
+no edge and counts as lost to service attribution.
 
 \subsubsection{The defect being addressed}
 
@@ -293,7 +282,7 @@ one in $\mathit{scope}(x) \setminus \mathit{scope}^{*}(x)$ indicates a scope too
 thesis establishes no true scope. For two applications, source inspection defines a third set,
 the \emph{structural reference} $\mathit{scope}^{R}(x)$. The author constructed it for one
 application and the AI assistant for the other. It applies the analysis's own relations,
-independently of the implementation (Section~\ref{sec:res-groundtruth}). Agreement with
+independently of the implementation. Agreement with
 $\mathit{scope}^{R}$ therefore shows that the implementation applies the specified relations.
 It does not show that the computed scope equals $\mathit{scope}^{*}$, and it cannot reveal a
 navigation that the relations themselves miss. Every scope reported elsewhere is a computed
@@ -311,8 +300,8 @@ Both yield $\bot$, which cannot distinguish them: an empty computed scope means 
 analysis has assigned no source screen to the site, not that the site is unreachable. The extractor
 therefore anchors a site in an unplaced component at an unplaced-origin node recording its file, with
 edges labelled \emph{may}. A site in any other component with empty scope contributes no edge, but
-a note records its file and reason. These traces keep such sites in the construct accounting of
-Section~\ref{sec:res-accounting}, which does not tell unresolved sites from unreachable ones.
+a note records its file and reason. These traces keep such sites in the construct accounting,
+which does not tell unresolved sites from unreachable ones.
 
 \textbf{Named elements.} Three elements of the domain are named, because attribution anchors
 edges at them. Write $r' \succeq r$ for the reflexive ancestor relation on routes: $r'$ is $r$
@@ -433,7 +422,7 @@ router guards run during navigation (Section~\ref{sec:model}). The measured grap
 this conjunction: structural conditions and enclosing \texttt{if} statements demote edges
 to may but are not included in the guard. Screen-to-screen edges record only router guards,
 so they identify conditional navigation without its full condition. An optional mode retains
-enclosing conditions, but no Chapter~\ref{ch:results} table uses it.
+enclosing conditions.
 
 \subsubsection{Boundary}
 \label{sec:boundary}
@@ -447,7 +436,7 @@ attempt to determine when they fire.
 \label{sec:anchored}
 
 Explicit attribution would create one edge per screen for a shell link. For the largest
-application, the bound is its screen count (Table~\ref{tab:conversion}) times its
+application, the bound is its screen count times its
 \ConstructsMifos{} constructs. Anchoring removes this source-scope factor: edges are stored
 once at their scopes, and outgoing edges are computed on demand:
 \[
@@ -463,9 +452,7 @@ and included through $E_{\{\mathit{screen}(r)\}}$ in $\mathit{edgesFrom}(r)$.
 \label{claim:expansion}
 The expansion of the anchored edge set equals the materialised edge set.
 \end{claim}
-
-\noindent Section~\ref{sec:res-after} tests, rather than proves, this claim by comparing
-the sets on the corpus and fixtures.
+\noindent The claim is tested on the corpus and on fixtures, not proved.
 
 \textbf{Relative targets.} Attribution to several screens represents possible firing from each,
 but relative targets do not resolve against each source screen. Angular resolves a
@@ -495,8 +482,7 @@ instead (Section~\ref{sec:implementation}).
 \subsection{Implementation}
 \label{sec:implementation}
 
-The accompanying extractor was built for this thesis and evaluated at commit \texttt{a9d29df}
-(Chapter~\ref{ch:evaluation}). A framework-independent core defines the graph model and
+The accompanying extractor was built for this thesis and evaluated at commit \texttt{a9d29df}. A framework-independent core defines the graph model and
 operations; framework adapters map source constructs to that model. The Angular adapter uses
 the TypeScript compiler API to analyse routes, templates and class code. It emits screens and
 edges for \texttt{routerLink} attributes and \texttt{Router.navigate} calls, with the generating
@@ -506,7 +492,6 @@ The Angular adapter's separate attribution pass is enabled with \texttt{-{}-attr
 Disabling it reproduces the baseline edge set on every corpus application. The pass implements
 component nesting, router outlets and the call graph, with stand-ins for $D$ and $T$ below.
 
-The evaluation enables these mechanisms cumulatively (Section~\ref{sec:res-ablation}).
 Figure~\ref{fig:lattice} distinguishes levels representing earlier work from this thesis's additions.
 
 \begin{figure}[t]
@@ -532,7 +517,7 @@ Figure~\ref{fig:lattice} distinguishes levels representing earlier work from thi
 \end{tikzpicture}
 \caption{Attribution levels: ownership and containment baselines $\subset \dots \subset$ full analysis.}
 \label{fig:lattice}
-\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions compared in Section~\ref{sec:res-ablation}. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what this thesis adds; \emph{class} is the per-class variant of the service join. Both orange levels also carry the fallback join and the stand-ins for guards and effects. The levels nest by construction: each withholds every mechanism above it (Section~\ref{sec:res-ablation}).}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what this thesis adds; \emph{class} is the per-class variant of the service join. Both orange levels also carry the fallback join and the stand-ins for guards and effects. The levels nest by construction: each withholds every mechanism above it.}
 \end{figure}
 
 \textbf{Component nesting.} The pass analyses each component's selectors and template, excluding test hosts and stories. It adds $A \to B$ when $A$'s template contains an element
@@ -564,7 +549,7 @@ primary outlet, are treated as shell and given $\top$, with their edges capped a
 Claim~\ref{claim:must} excludes.
 \end{itemize}
 A smaller scope loses edges without inventing them, so this restriction affects recall
-and leaves Claim~\ref{claim:must} intact. Chapter~\ref{ch:results} counts the constructs it leaves unplaced.
+and leaves Claim~\ref{claim:must} intact.
 
 Second, the call graph differs from Section~\ref{sec:inputs}. The pass operates on class
 members, assigning component members their component's screens. A call \texttt{this.f.g()}
@@ -582,8 +567,7 @@ The seeded call-graph iteration reaches its constraints' least solution. Service
 then receive two fallbacks:
 \begin{itemize}
 \item a member no caller reaches falls back to the join over every component that injects its
-class, the per-class approximation that the \emph{class} level of the ablation applies to every service
-(Section~\ref{sec:res-ablation});
+class, the per-class approximation that the \emph{class} level of Figure~\ref{fig:lattice} applies to every service;
 \item a member reached by the iteration receives additional screens from callers not represented
 in the graph: that caller's class join is added, or this class's own join if the caller is unplaced.
 \end{itemize}
@@ -597,8 +581,7 @@ Edges scoped to exactly $\mathit{subtree}(r)$, where $r$ is a screen with a desc
 stored once at a node listing its screens. Prefix routes that are not screens are not anchored; other sets are stored per
 screen. The core provides $\mathit{edgesFrom}(r)$ and expands anchored edges.
 
-\textbf{Stand-ins for $D$ and $T$.} Two approximations replace unimplemented relations and are withheld below Figure~\ref{fig:lattice}'s \emph{full} level in
-Section~\ref{sec:res-ablation}, so that lower levels exclude their sites.
+\textbf{Stand-ins for $D$ and $T$.} Two approximations replace unimplemented relations and are withheld below Figure~\ref{fig:lattice}'s \emph{full} level, so that lower levels exclude their sites.
 \begin{itemize}
 \item \emph{Guards (for $T$).} A guard receives the screens of routes naming it as a bare
 identifier in \texttt{canActivate}, \texttt{canActivateChild}, \texttt{canMatch} or
@@ -610,7 +593,7 @@ when it does not start at the guarded route.
 \item \emph{Effects (for $D$).} An effect lives as long as the application and is given $\top$.
 \end{itemize}
 Both produce \emph{may} edges only. Classes not reached by calls or injection remain without
-scope and count as ``Attribution, service'' in Table~\ref{tab:loss-rules}. Moving
+scope and count as ``Attribution, service''. Moving
 inline-template witnesses from the template's first line to the construct's own line leaves the
 baseline graphs on the corpus unchanged. Unit tests cover
 each case above.
@@ -621,4 +604,4 @@ The graph model uses three modality labels. Its must-tier soundness claim rests 
 assumptions about routes and route order, selectors, unresolved calls and the execution model.
 The evaluation tests a necessary condition of the claim. Scope attribution computes screen sets as a least fixpoint over five relations.
 The prototype implements three, substitutes stand-ins for dispatch and guards, and adds
-fallbacks outside the model. Chapter~\ref{ch:evaluation} describes the measurement.
+fallbacks outside the model.
