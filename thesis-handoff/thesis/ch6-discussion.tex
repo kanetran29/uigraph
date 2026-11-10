@@ -56,11 +56,11 @@ failure modes:
 field holding the route;
 \item a fully dynamic target.
 \end{itemize}
-The other \AttrRemainingUnexplained{} have no diagnosed cause. The node and edge levels depend on each other. Attribution needs destination
+\AttrRemainingUnexplained{} of the \AttrRemaining{} remaining constructs have no diagnosed cause. The node and edge levels depend on each other. Attribution needs destination
 nodes. Complete nodes, in turn, yield few transitions while sites outside routed components remain
 unattributed. Chapter~\ref{ch:results} therefore reports node coverage beside must conversion.
 
-Under the chosen rule order, which is part of the measure (Section~\ref{sec:limitations}), the
+The rule order is part of the measure (cf.~Section~\ref{sec:limitations}). Under that order, the
 largest loss category in every application is the one that scope attribution addresses
 (Table~\ref{tab:loss}). The ranking is a property of this implementation. A lost
 construct enters the first category that applies (Table~\ref{tab:loss-rules}), so a
@@ -72,8 +72,8 @@ can recover.
 \label{sec:rq3}
 
 Scope attribution recovers a per-application median of \AttrRecoveredMedian{} (range
-\AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{} pooled. No
-check establishes that the computed scopes are not too large.
+\AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{} pooled. On the one reference that can tell, the step above \emph{outlet} lowers precision, and no check
+establishes that the computed scopes are not too large.
 
 Scope attribution is one model whose lower levels reimplement the mechanisms of earlier work: the
 shell rule is the \emph{rooted} level, and the enclosing-route components of Rima et al.'s
@@ -101,7 +101,7 @@ the simplest supported form. On their \MutFallibleScored{} scored mutants, which
 \MutScored{} of Section~\ref{sec:res-mutation} without the renames, the attributed graph detects
 \MutFallibleDetected{}. The harness was corrected after its misses were examined
 (Appendix~\ref{app:corrections}), so the result is not independent and need not generalise to a larger
-or differently drawn sample. RQ1 measures how often constructs are represented. Change impact queries are likewise limited to the represented part of an application.
+or differently drawn sample. RQ1 measures how often constructs are represented. Change impact queries, too, are limited to the represented part of an application.
 
 Guard mutants are observable only if an edge enters a screen of the guarded route
 (Section~\ref{sec:res-mutation}). The class ``guards unreliable in both directions'' in
@@ -114,11 +114,10 @@ run neither confirms nor refutes the class.
 \label{sec:rq5}
 
 The cause trace of Section~\ref{sec:res-losses} assigns every repaired class to the tool, and two
-open causes as well: the named outlets and ghostfolio's computed routes. The losses that this study
-can explain are therefore mostly limits of this extractor rather than of static extraction. The
-evidence for a limit of the approach is narrow. It consists of the two causes beyond any reader of
-a route table, each found in one application. The rest is open, and no measurement here assigns
-it. Assigning the remaining attribution losses would need a check that separates tool gaps from
+open causes as well: the named outlets and ghostfolio's computed routes. Two other causes lie beyond
+any reader of a route table, each found in one application; they are the only evidence for a limit
+of the approach. The rest is unassigned. The losses that this study can explain are therefore
+mostly limits of this extractor rather than of static extraction. Assigning the remaining attribution losses would need a check that separates tool gaps from
 components that no screen may render. Assigning the may-only locations behind application decisions
 would need rules that test whether a decision can vary. The harness also checks only that every
 construct has a label, not that the label is correct.

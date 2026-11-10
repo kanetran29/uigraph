@@ -1,7 +1,7 @@
 {
  "app": "alfresco",
  "root": "",
- "derivedBy": "hand, from the application sources at the pinned commit b88d47f (projects/aca-content)",
+ "derivedBy": "an AI assistant reading the application sources by hand, not with the analyzer (R5), at the pinned commit b88d47f (projects/aca-content)",
  "method": [
   "R1 A navigation site is a routerLink attribute or binding, or a Router.navigate / navigateByUrl call, in a file under the application directory; test and spec files are excluded. navigate([], ...) that only changes the query string of the current screen is excluded and recorded with its reason.",
   "R2 The screens a site fires from are the screens whose routed component renders, transitively through template element selectors, the component whose file holds the site. What the shell renders around the primary outlet is on every screen.",

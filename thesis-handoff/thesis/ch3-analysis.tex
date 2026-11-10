@@ -82,7 +82,7 @@ screens, which requires the attribution of Section~\ref{sec:attribution}.
 and line, or an observation identifier. When constructs produce the same edge, one becomes
 the primary witness and the others are recorded as merged witnesses.
 The base graph requires witnesses, and manual edges stay in a separate overlay. The first
-evaluation method checks this mechanically.
+evaluation method checks this mechanically (cf.~Section~\ref{sec:protocol}).
 
 \textbf{The soundness claim.} The thesis takes the soundiness position of
 Section~\ref{sec:soundiness} and states its claim relative to four assumptions. For each
@@ -226,7 +226,7 @@ defect. No completeness theorem is claimed.
 \label{sec:attribution}
 
 Scope attribution uses five \emph{input relations}. The evaluated analysis implements three
-of them:
+of them, the call graph without per-injector bindings:
 \begin{itemize}
 \item component nesting ($N$): which component's template instantiates which;
 \item router outlets: which components lie on the path from the root to an outlet, and below a
@@ -242,8 +242,9 @@ after the fixpoint, one of them nonmonotone. Termination and the least-solution 
 Section~\ref{sec:scope} hold for the fixpoint alone.
 
 Guards returning \texttt{UrlTree}, the injector hierarchy, and navigation inside signal effects
-and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) are model-only
-features that the extractor approximates or omits. A site assigned no scope by implemented relations contributes
+and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) are features
+that the extractor approximates or omits; the parts of Algorithm~\ref{alg:attribution} marked
+\emph{model only} are listed in Section~\ref{sec:inputs}. A site assigned no scope by implemented relations contributes
 no edge and counts as lost to service attribution.
 
 \subsubsection{The defect being addressed}
@@ -398,7 +399,7 @@ receives the join of both scopes. The prototype instead blocks propagation into 
 components and adds fallbacks outside these constraints (Section~\ref{sec:implementation}).
 Its result is not the least solution of this system or of any restriction of it.
 
-Four parts of Algorithm~\ref{alg:attribution} are marked \emph{model only}: they belong to the
+Five parts of Algorithm~\ref{alg:attribution} are marked \emph{model only}: they belong to the
 analysis, but the prototype evaluated in this thesis does not implement them. Two are seed scopes:
 leave guards, which run as the user leaves a route, and HTTP interceptors, which are registered for
 the whole application. The other two are the input relations dispatch ($D$) and entry guards ($T$,
@@ -406,7 +407,8 @@ Section~\ref{sec:extensions}). The prototype replaces both guard rules with one 
 a guard the screen of each route naming it, and gives effects $\top$ in place of $D$. It has no
 interceptor rule: an interceptor is scoped like any other service, through its callers and the
 components that inject it, so an interceptor with neither gets no scope
-(Section~\ref{sec:implementation}).
+(Section~\ref{sec:implementation}). The fifth is the per-injector scoping of bindings in the call
+graph $\mathit{CG}$: the prototype collects bindings application-wide.
 
 \input{figures/alg-attribution}
 
@@ -593,7 +595,7 @@ when it does not start at the guarded route.
 \item \emph{Effects (for $D$).} An effect lives as long as the application and is given $\top$.
 \end{itemize}
 Both produce \emph{may} edges only. Classes not reached by calls or injection remain without
-scope and count as ``Attribution, service''. Moving
+scope and count as lost to service attribution. Moving
 inline-template witnesses from the template's first line to the construct's own line leaves the
 baseline graphs on the corpus unchanged. Unit tests cover
 each case above.
@@ -603,5 +605,5 @@ each case above.
 The graph model uses three modality labels. Its must-tier soundness claim rests on four
 assumptions about routes and route order, selectors, unresolved calls and the execution model.
 The evaluation tests a necessary condition of the claim. Scope attribution computes screen sets as a least fixpoint over five relations.
-The prototype implements three, substitutes stand-ins for dispatch and guards, and adds
+The prototype implements three (the call graph without per-injector bindings), substitutes stand-ins for dispatch and guards, and adds
 fallbacks outside the model.

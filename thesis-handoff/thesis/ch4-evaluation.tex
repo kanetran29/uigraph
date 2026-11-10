@@ -81,7 +81,7 @@ share of declared screens with a node and the share of navigation constructs yie
 must transition. Both are needed because a transition requires its endpoint screens.
 For RQ2, a defect class requires two lines of evidence, at least one from an evaluation method
 (Section~\ref{sec:protocol}), except the guard class, which was accepted on source review alone
-(Table~\ref{tab:defects}). Every unrecovered construct is assigned to one loss category.
+(cf.~Table~\ref{tab:defects}). Every unrecovered construct is assigned to one loss category.
 RQ3 compares the same extractor with the analysis disabled and enabled, using the references below.
 RQ4 uses mutation testing as a witness-mapping sanity check, not an independent test.
 For RQ5, source analysis assigns each defect class to one of three causes:
@@ -392,6 +392,41 @@ is scope and not reading. Its result files record no extractor commit or runtime
 \end{xltabular}
 \endgroup
 
+\begin{table}[!htbp]\small
+\caption{Source readings by the AI assistant: how each was checked and what was not.}
+\label{tab:ai-readings}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.2\textwidth}YY@{}}
+\toprule
+Reading & Checked & Not checked \\
+\midrule
+Final must tier (Section~\ref{sec:model}) & Checked against source by the declared AI assistant, with the extractor's decisions visible. & No independent reading that reproduces the decisions is recorded, and no second reading, by a person or a model. \\
+\addlinespace
+Structural reference on alfresco (Section~\ref{sec:res-groundtruth}) & Built from the sources
+without the graph, under a protocol committed before scoring. A second assistant run read the four
+placed lines the reference omits, from line numbers only and without graph placements. & No second
+reading of the \GTAlfSites{} listed sites' screen sets is recorded, by a person or a model. \\
+\addlinespace
+First comparison with Rima et al.\ (Section~\ref{sec:res-rima}) & A stronger model re-read every
+miss, every pair not judged real and every sixth real pair: \RimaGated{} pairs, \RimaGateChanged{}
+verdicts changed. One batch was rerun because its first response omitted its extra pairs. After
+adversarial review, \RimaCorrected{} verdicts and \RimaRecited{} citation were corrected against the
+source. A script confirms that the site cited for each of the \RimaJudgedReal{} real pairs exists
+at the commit used for the comparison with a navigation token (link, router call, event binding, redirect, dispatch, emit or location) within two lines (a token match). &
+No re-read by a person is recorded. The script does not test that the construct leads to the target
+or renders on the start screen. \\
+\addlinespace
+Head-to-head with their tool (Section~\ref{sec:res-h2h}) & A stronger model re-read \HHGated{} of
+the \HHRead{} pairs and changed \HHGateChanged{} verdicts. I re-read \HHAuthorJudged{} sampled
+assessments from the corpus applications other than mifos and agreed on \HHAuthorAgree{} of them. The
+preregistered script check, run only after scoring, finds a navigation token near
+\HHSitesToken{} of the \HHReadReal{} sites cited for real pairs. & My re-read was not blind: the
+model's verdict was visible. No person re-read the mifos sample, the sample on Rima et al.'s
+subjects, or the \HHSitesNoToken{} cited sites without a matching token, which use other forms such
+as a configuration entry or a service call. The other assessments behind the five-application figures were not re-read by a person. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \subsubsection{Preconditions}
 
 Two properties of the extractor were checked before any measurement. \emph{Determinism}: two
@@ -428,55 +463,23 @@ file paths named in this thesis are relative to its \texttt{thesis-handoff} dire
 Scripts generate numerical macros; \texttt{REPRODUCE.md} lists each table's script and commit.
 The final results use extractor \texttt{a9d29df}, after repairs prompted by Rima et al.'s subjects
 (Table~\ref{tab:repairs}), with harness \HarnessVersion{} and mutation harness \HarnessVersionMutation{}.
-The demotion-rule sweep and may-reason census use the same commit. The pre-repair end-to-end figure
+The pre-repair end-to-end figure
 (Table~\ref{tab:repairs}) uses the archived graph from \texttt{c42f220}. The first Rima comparison
 uses \texttt{2aac284}, frozen before its evaluation-driven repairs as preregistered.
-Two observations were recorded once, without an extractor commit:
-the links of the rendered-interface check and the runtime route configurations of 29--30 October.
-Both are compared with the final graph.
+The links of the rendered-interface check and the runtime route configurations of 29--30 October
+were recorded once, without an extractor commit, and are compared with the final graph.
 
 \subsubsection{Source readings by an AI assistant}
 \label{sec:ai-readings}
 
-Three checks of scope attribution rest on source readings made by the AI assistant: the structural
+Four checks rest on source readings made by the AI assistant: the final must tier, the structural
 reference on alfresco and the two comparisons with the work of Rima et al.
-Table~\ref{tab:ai-readings} states how each reading was checked and what was not. All readings come
-from one model family, so agreement between them establishes consistency rather than correctness.
+Table~\ref{tab:ai-readings} states how each reading was checked and what was not. The readings
+come from one model family (named in the head-to-head run logs, and otherwise on my own record), so agreement between them establishes consistency rather
+than correctness.
 
-\begin{table}[htbp]\small
-\caption{Source readings by the AI assistant: how each was checked and what was not.}
-\label{tab:ai-readings}
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.2\textwidth}YY@{}}
-\toprule
-Reading & Checked & Not checked \\
-\midrule
-Structural reference on alfresco (Section~\ref{sec:res-groundtruth}) & Built from the sources
-without the graph, under a protocol committed before scoring. A second assistant run read the four
-placed lines the reference omits, from line numbers only and without graph placements. & No second
-reading of the \GTAlfSites{} listed sites' screen sets is recorded, by a person or a model. \\
-\addlinespace
-First comparison with Rima et al.\ (Section~\ref{sec:res-rima}) & A stronger model re-read every
-miss, every pair not judged real and every sixth real pair: \RimaGated{} pairs, \RimaGateChanged{}
-verdicts changed. One batch was rerun because its first response omitted all its pairs. After
-adversarial review, \RimaCorrected{} verdicts and \RimaRecited{} citation were corrected against the
-source. A script confirms that the site cited for each of the \RimaJudgedReal{} real pairs exists
-at the pinned commit with a link, router call or event binding within two lines (a token match). &
-No re-read by a person is recorded. The script does not test that the construct leads to the target
-or renders on the start screen. \\
-\addlinespace
-Head-to-head with their tool (Section~\ref{sec:res-h2h}) & A stronger model re-read \HHGated{} of
-the \HHRead{} pairs and changed \HHGateChanged{} verdicts. I re-read \HHAuthorJudged{} sampled
-assessments from the corpus applications other than mifos and agreed with \HHAuthorAgree{}. The
-preregistered script check, run only after scoring, finds a link, router call or event binding near
-\HHSitesToken{} of the \HHReadReal{} sites cited for real pairs. & My re-read was not blind: the
-model's verdict was visible. No person re-read the mifos sample, the sample on Rima et al.'s
-subjects, or the \HHSitesNoToken{} cited sites without a matching token, which use other forms such
-as a configuration entry or a service call. \\
-\bottomrule
-\end{tabularx}
-\end{table}
 
 \subsection{Summary}
 \label{sec:eval-summary}
 
-The corpus is six open-source Angular applications pinned to commits, selected by explicit criteria with the departures stated in Section~\ref{sec:corpus}, including tool support as a rejection criterion added during screening. Table~\ref{tab:ratios} maps each research question to its measures. Five evaluation methods check the extractor: four against other readings of the same sources, and the runtime route oracle against the framework. Four further checks test the attribution: the rendered-interface check, the ablation, the structural reference and the end-to-end check. Table~\ref{tab:methods} states the blind spot of each method, and together the methods and checks do not amount to a complete correctness test.
+The corpus is six open-source Angular applications pinned to commits, selected by explicit criteria with the departures stated in Section~\ref{sec:corpus}. Table~\ref{tab:ratios} maps each research question to its measures. Five evaluation methods check the extractor: four against other readings of the same sources, and the runtime route oracle against the framework. Four further checks test the attribution: the rendered-interface check, the ablation, the structural reference and the end-to-end check. Table~\ref{tab:methods} states the blind spot of each method and Table~\ref{tab:ai-readings} how the AI-assisted readings were checked; together they do not amount to a complete correctness test.

@@ -27,13 +27,13 @@ earn must number \CensusBaseMustSites{} in the whole corpus without attribution 
 \CensusMustSites{} with it, \RoundTwoMustConv{} of the in-scope constructs. With attribution they lie in \CensusMustApps{} of the six applications,
 and none lies in the other \CensusZeroMustApps{}. Edge counts should be read per tier and not summed as distinct constructs, because one unresolved site can produce many over-approximated may edges.
 An optional measurement switch records every condition that demotes a may witness. Disabling it
-leaves output unchanged on all six applications (Section~\ref{sec:reproducibility}).
+leaves output unchanged on all six applications (\path{route-oracle/results-may-reasons/equivalence.json}).
 Table~\ref{tab:mayreasons} groups reasons for \MayOnlyConstructs{} may-only witness locations.
 \MayAppAny{} involve an application decision identified by the extractor: a guard or resolver,
 branch, callback or template condition. The number of locations that stay at may solely through
 extractor uncertainty is \MayToolOnly{}. Under the present rules, better resolution alone could promote at
 most those to must. Proving that a guard always admits or that a branch always executes could
-promote more. The small must tier thus follows largely from its definition. A guard that always
+promote more. A guard that always
 admits still causes demotion, because the census identifies decision constructs and does not test
 whether they vary at run time.
 
@@ -64,15 +64,15 @@ The two readers still disagree about a handful of addresses. Two qualifications 
 \begin{itemize}
 \item The denominator is the screens a \emph{static reader} can enumerate. Against the addresses
 the running framework mounts, the same node set is \ProbeNodes{}/\ProbeScreens{}
-(Section~\ref{sec:res-probe}). Almost all of the difference is one construct in one application
+(cf.~Section~\ref{sec:res-probe}). Almost all of the difference is one construct in one application
 that the extractor declares unread.
 \item The two static readers were partly corrected against each other, so their agreement is weaker evidence. The runtime route oracle is the external
 check, and it finds no node at an address where the framework mounts nothing
-(Section~\ref{sec:res-unmounted}).
+(cf.~Section~\ref{sec:res-unmounted}).
 \end{itemize}
 
 This completeness concerns only resolvable screens. Blind-spot counts identify but do not bound
-omissions: one unresolved route entry can conceal many screens (Section~\ref{sec:res-probe}).
+omissions: one unresolved route entry can conceal many screens (cf.~Section~\ref{sec:res-probe}).
 
 \begin{table}[t]\footnotesize
 \caption{Node extraction against the independent route parser, in both directions.}
@@ -134,12 +134,12 @@ literal test; reversing this order would make target losses larger than attribut
 \AttrOrderFlipWhere{}.
 
 Constant paths, lazy boundaries and unlinked components have no instances in Table~\ref{tab:loss}
-because the final extractor resolves their causes (Section~\ref{sec:res-losses}). Under the stated
+because the final extractor resolves their causes (cf.~Section~\ref{sec:res-losses}). Under the stated
 precedence, the remaining unplaced navigation mostly lacks a single owning screen, motivating
 scope attribution.
 
 Category interactions mean that the \AttrLost{} attribution constructs neither lower-bound nor
-upper-bound attribution's recoveries (Section~\ref{sec:res-after}).
+upper-bound attribution's recoveries (cf.~Section~\ref{sec:res-after}).
 
 Table~\ref{tab:oracles} reports the witness check on the final attributed tier and the
 test-source cross-check. \RoundTwoOutsideWitness{} edges in \RoundTwoOutsideWitnessApps{} applications have their only witness outside the application directory. Both tools read those files, so their agreement there is not independent evidence.
@@ -166,7 +166,7 @@ negative test excluded. & \EtoERowsAlfresco{} \\
 \label{sec:res-after}
 
 The evaluation covers the scopes, attribution rules and anchored representation defined in
-Sections~\ref{sec:scope}, \ref{sec:attribution} and~\ref{sec:anchored} of Chapter~\ref{ch:analysis}.
+Chapter~\ref{ch:analysis} (Sections~\ref{sec:scope}, \ref{sec:attribution} and~\ref{sec:anchored}).
 The section first reports what attribution recovers on the whole corpus and checks the anchored
 edge set. Sections~\ref{sec:res-scope} to~\ref{sec:res-e2e} then check the computed scopes against the
 rendered interface and the widest possible assignment, measure what each mechanism contributes,
@@ -286,7 +286,7 @@ not repeated: without a sign-in, a new run would redirect the same screens.
 
 \paragraph{Scopes too small.} Of the \ScopePairs{} (screen, target pattern) pairs that the running
 applications render on the judged screens, \ScopeConfirmed{} are predicted by the computed scope
-(\ScopeConfirmedShare{}). Behind these predictions stand \ScopeAnchors{} raw anchors. On
+(\ScopeConfirmedShare{}). The \ScopePairs{} rendered pairs stand for \ScopeAnchors{} raw anchors. On
 realworld, which renders most of its screens without a backend, every rendered pair on every
 judged screen is predicted. The pairs that are not predicted are all bitwarden's.
 
@@ -336,18 +336,16 @@ The lower bound limits RQ3: on \BaselineBluntest{}, the average site is attribut
 \BaselineBluntestScope{}/\BaselineBluntestScreens{} screens (\BaselineBluntestShare{}), excluding
 only about two screens in five.
 
-The comparison has two implications.
+The comparison yields two observations.
 
 \begin{enumerate}
-\item The trivial baseline is not a competitor for the must tier. An unguarded site in a shared
-component attributed to every screen would yield a must edge from screens that never render it, so
-Claim~\ref{claim:must} would fail by construction. That none of the readable must edges attribution
-added fails the witness check is meaningful only where the attribution is narrow. Of the
+\item None of the readable must edges that attribution added fails the witness check for
+Claim~\ref{claim:must}. Of the
 \the\numexpr\AttrMustAfter-\AttrMustBefore\relax{} must edges it added, \MustWitnessUnread{} are
 unread, all on \BaselineBluntest{}, where the scopes are widest.
-\item Some recovery relies on broad scopes. Attributing a site to three fifths of an application
-provides little discrimination. The evaluation neither validates nor refutes these scopes because
-the rendered-interface check cannot test over-attribution.
+\item Some recovery relies on broad scopes: on \BaselineBluntest{}, the average site is attributed to
+three fifths of the screens.
+The rendered-interface check cannot test over-attribution, so these scopes are neither validated nor refuted.
 \end{enumerate}
 
 \subsubsection{What each mechanism contributes}
@@ -525,7 +523,7 @@ a missed navigation is that site. The preregistered five-class scheme, and its p
 misses would mostly be a scope too narrow or a site not read, are not scored.
 \end{itemize}
 
-\subsubsection{What scope attribution adds}
+\subsubsection{Comparison with earlier mechanisms}
 \label{sec:res-earlier}
 
 Table~\ref{tab:earlier} compares no attribution, earlier work's mechanism (\emph{rooted}) and full
@@ -553,7 +551,7 @@ Sites placed in services, guards and effects & -- & -- & \AblationFullAddedSites
 \par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Suite transitions} are the distinct pairs of screens the application's own end-to-end suite navigates between (Section~\ref{sec:res-e2e}); \emph{graph pairs} are those the graph holds. Only the full column of the suite rows was preregistered. The no-attribution graphs and realworld's rooted graph come from existing measurements; the mifos rooted graph was mapped for this comparison after the suites had been scored. The row for Rima et al.'s subjects is out-of-sample (Section~\ref{sec:res-rima}). A dash marks a figure not measured. All cells are generated figures.}
 \end{table}
 
-Three things follow, with the figures in Table~\ref{tab:earlier}.
+Table~\ref{tab:earlier} gives three observations.
 
 \begin{itemize}
 \item \emph{Attribution puts more of the suites' transitions into the graph, in a wider graph.}
@@ -769,7 +767,7 @@ Table~\ref{tab:ai-readings} states. My re-read took up to three assessments per 
 five-application figures and agreed with \HHAuthorAgree{} of \HHAuthorJudged{} (Wilson 95\,\%
 interval \HHAuthorAgreeRange{}). The model verdict was visible, so this measures agreement rather
 than correctness. An initial pass incorrectly paired start routes of non-navigating workflows.
-It was withdrawn; valid remaining assessments were reused and 108 new sample pairs assessed.
+It was withdrawn; valid remaining assessments were reused and new sample pairs assessed.
 Mifos estimates reuse those samples after excluding cross-mount moves. Preregistration deviations
 are recorded with the results.
 
@@ -845,8 +843,7 @@ the decision can vary. The lists count causes; Tables~\ref{tab:remaining} and~\r
 including \AttrRemainingUnexplained{}/\AttrRemaining{} residual attribution constructs without
 a recorded reason.
 
-\paragraph{Read by the final version.} The information was in the source, so the loss was the
-tool's.
+\paragraph{Read by the final version.} The information was in the source.
 
 \begin{itemize}
 \item \emph{Lazy module boundary} and \emph{constant-valued route paths}: causes in the extractor,
@@ -939,7 +936,7 @@ route oracle of Section~\ref{sec:res-probe} exposed the error.
 \paragraph{The final tier.} Among the \MustWitnessEdges{} must edges of the attributed tier, the
 number of witness-check failures is \MustWitnessViolations{}. The checker cannot read the
 destination of \MustWitnessUnread{} of them, so those edges are neither passes nor failures. All
-unread destinations are toolbar edges in one application, and they rely on the toolbar component's
+unread destinations are toolbar edges in one application, k8s dashboard: \CensusMustKdash{} of the \CensusMust{} must edges come from its toolbar. They rely on the toolbar component's
 computed scope, which no check tested, and on the route-order assumption. The check compares construct and edge
 destinations. It does not test unconditional execution or router admission, which the demotion
 rules address.
@@ -997,16 +994,16 @@ the list therefore establishes neither runtime occurrence nor confirmed defects.
 
 {\sloppy The clearest case is mifos, where a transactions tab links to \path{/journal-entry/}\allowbreak\path{view/:id} although the application declares that screen at
 \path{/accounting/}\allowbreak\path{journal-entry/}\allowbreak\path{view/:id}. The link omits the parent
-prefix, and mifos's catch-all route renders the not-found screen, which a user can mistake for missing data rather than a broken link.\par}
+prefix, so mifos's catch-all route renders the not-found screen.\par}
 
 The list is not one defect class, and its groups differ in the strength of their evidence.
 
 \begin{itemize}
 \item \RoundTwoDeadLinkAbsolute{} of the candidates are an absolute link written against a path the
-application does not mount, usually the name the server uses rather than the one the router does.
-These originate in application code; whether users encounter them is untested.
+application does not mount, usually the name the server uses rather than the one the router does; whether users encounter
+them is untested.
 \item \RoundTwoDeadLinkRelative{} come from a \emph{relative} \texttt{routerLink}, such as
-\texttt{[routerLink]="'edit'"} or \texttt{[routerLink]="['../../transactions']"}. Their target
+\texttt{[routerLink]="'edit'"}. Their target
 depends on the route the link resolves against, that of the component holding it
 (Section~\ref{sec:anchored}). The extractor's resolution of that base must therefore be verified
 before such a candidate can be attributed to an application defect.
@@ -1030,21 +1027,18 @@ would otherwise be labelled dead.
 
 The measurements for each research question are, in brief:
 \begin{description}[nosep,leftmargin=2.6em,labelwidth=2.2em]
-\item[RQ1] Every screen that a static reader can enumerate has a node; the screens the running
-framework mounts without a node lie almost entirely behind one construct in ghostfolio
-(Section~\ref{sec:res-probe}). \CensusMustSites{} constructs earn must, and \CensusMustKdash{} of
-the \CensusMust{} must edges come from one toolbar in k8s dashboard (Section~\ref{sec:res-soundness}).
+\item[RQ1] Every screen a static reader can enumerate has a node; the mounted screens without a
+node lie almost entirely behind one construct in ghostfolio. \CensusMustSites{} constructs earn
+must, and \CensusMustKdash{} of the \CensusMust{} must edges come from one toolbar in k8s dashboard
+(Section~\ref{sec:res-soundness}).
 \item[RQ2] Under the precedence of the loss rules, attribution is the largest loss category in every
-application. Five defect classes and
-one candidate class were found; the lazy-boundary, constant-path and unlinked-component classes
-have no instances on the final version
-(Section~\ref{sec:res-defects}).
+application. Of five defect classes and one candidate class, the lazy-boundary, constant-path and
+unlinked-component classes have no instances on the final version (Section~\ref{sec:res-defects}).
 \item[RQ3] Scope attribution recovers a per-application median of \AttrRecoveredMedian{} (range
 \AttrRecoveredRange{}) of the constructs lost to attribution, \AttrRecoveredShare{} pooled, almost
 all at the may tier (Section~\ref{sec:res-after}). On the alfresco reference, the full level raises
 recall and lowers precision (Section~\ref{sec:res-groundtruth}).
-\item[RQ4] The graph responded to \MutDetected{} of the \MutScored{} scored mutants
-(Section~\ref{sec:res-mutation}).
+\item[RQ4] The graph responded to \MutDetected{} of \MutScored{} scored mutants (Section~\ref{sec:res-mutation}).
 \item[RQ5] The cause trace assigns every repaired class to the tool, and two causes lie beyond any
 reader of a route table. \AttrRemainingUnexplained{} of the \AttrRemaining{} constructs still
 lost to attribution have no reason found (Section~\ref{sec:res-round2}).

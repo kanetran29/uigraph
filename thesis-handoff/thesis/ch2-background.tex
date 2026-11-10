@@ -95,7 +95,7 @@ navigation state machines on the fly for model checking \cite{sitehopper2013}.
 
 These approaches target server-rendered frameworks, where pages correspond to files and links
 to anchor elements. They do not address client-side routers, component trees or dependency
-injection. Section~\ref{sec:dynamic-spa} reviews work that does.
+injection (cf.~Section~\ref{sec:dynamic-spa}).
 
 \subsection{Dynamic state models for single-page applications}
 \label{sec:dynamic-spa}
@@ -156,8 +156,7 @@ by crawling instead. Their graph is an over-approximation and is not narrowed. T
 not explain source-screen attribution, and guards remain unmodelled runtime conditions
 \cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth derived from
 their pipeline's output and annotated by hand. Neither work classifies losses by construct
-or measures them across a corpus. The problem is therefore neither new nor settled, and
-Section~\ref{sec:gap} identifies the remaining gap.
+or measures them across a corpus. The problem is therefore neither new nor settled (cf.~Section~\ref{sec:gap}).
 
 \subsection{Static analysis of JavaScript and TypeScript source}
 \label{sec:asttools}
@@ -429,8 +428,7 @@ graph instead of a control-flow condition. Static analysis can identify the sign
 reads but cannot in general determine when the effect runs, and this thesis does not attempt to
 bound it. Angular applications also use observables of Reactive Extensions for JavaScript (RxJS)
 for the same purpose, in subscriptions to router events, in responses from the server and in
-state containers. Section~\ref{sec:reactive} reviews what the reactive programming literature
-establishes about this boundary.
+state containers (cf.~Section~\ref{sec:reactive}).
 
 \subsection{Reactive programming and the limits of static dataflow}
 \label{sec:reactive}

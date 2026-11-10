@@ -2,45 +2,40 @@
 \label{ch:conclusion}
 
 This thesis measured how much navigation static extraction recovers from six Angular
-applications, classified its losses and evaluated scope attribution as a way to
-recover some. Section~\ref{sec:findings} answers the research questions; in brief:
+applications, classified its losses and evaluated scope attribution as a way to recover some. Section~\ref{sec:findings} answers the research questions:
 \begin{description}[nosep,leftmargin=2.6em,labelwidth=2.2em]
-\item[RQ1] Few deterministic transitions: \CensusMustSites{} constructs earn must, and their edges
-hold only under the assumptions of Claim~\ref{claim:must} (Section~\ref{sec:rq1}).
-\item[RQ2] Mostly at the edge, in placing navigation on the screens it fires from (Section~\ref{sec:rq2}).
+\item[RQ1] Few transitions are deterministic: \CensusMustSites{} constructs earn must, and their
+edges hold only under the assumptions of Claim~\ref{claim:must} (Section~\ref{sec:rq1}).
+\item[RQ2] Extraction fails mostly at the edge, in placing navigation on the screens it fires from
+(Section~\ref{sec:rq2}).
 \item[RQ3] Scope attribution recovers a median of \AttrRecoveredMedian{} of the constructs lost to
 attribution, almost all as may edges; on the alfresco reference its added step trades precision
 for recall (Section~\ref{sec:rq3}).
-\item[RQ4] It responded to all \MutScored{} scored mutants, for the constructs it represents;
+\item[RQ4] The graph responded to all \MutScored{} scored mutants in the constructs it represents;
 change-impact accuracy is unmeasured (Section~\ref{sec:rq4}).
-\item[RQ5] Mostly of the tool among the losses explained; two causes lie beyond any route table,
-and the rest is unassigned (Section~\ref{sec:rq5}).
+\item[RQ5] The explained losses are mostly the tool's; two causes lie beyond any reader of a route table, and
+the rest is unassigned (Section~\ref{sec:rq5}).
 \end{description}
 
-\paragraph{Contributions.} The thesis makes two contributions. The first is scope attribution, a
-formal model of the screens from which a navigation site can fire, which contains the attribution
-rules of earlier Angular extractions as levels. The second measures what each level
+\paragraph{Contributions.} The thesis makes two contributions: the first is scope attribution, a
+formal model of the screens a navigation site can fire from, which contains the attribution
+rules of earlier Angular extractions as levels, and the second measures what each level
 adds and what static extraction loses. The measurement covers six pinned applications, uses five evaluation methods
-with different blind spots and four further scope checks, and classifies every lost construct. The extractor also supports nested and parameterised
+with different blind spots and four further scope checks, and classifies every lost construct. The extractor also handles nested and parameterised
 route trees, which Oshima and Kishi exclude (Section~\ref{sec:res-earlier}).
 
-The apparatus makes the measurements inspectable: tables are generated from harness
-results, and the source-based methods re-run from pinned commits. Runtime reproduction is partial:
-the route oracle re-runs in part, the realworld end-to-end check uses an unpinned public
-backend, and superseded figures cannot be regenerated.
+Tables are generated from harness results, and the source-based methods re-run from pinned
+commits; runtime reproduction is partial (Section~\ref{sec:reproducibility}).
 
 \paragraph{What remains open.} Dispatch is specified but not implemented, guards use a stand-in,
 and the call graph ignores the injector hierarchy. Screen sets were checked in both directions
 on two applications only, against references that apply the analysis's own relations.
-Rendered-interface checks covered only the screens reachable without signing in, so testing the rest
-needs signed-in execution (Section~\ref{sec:future}). Consumer benefit remains unmeasured.
+Rendered-interface checks covered only screens reachable without signing in; the rest
+needs signed-in execution (Section~\ref{sec:future}). Consumer benefit is unmeasured.
 
-The main corpus results, and those on the subjects of Rima et al. after the extractor was repaired on them, are in-sample
-(Section~\ref{sec:limitations} and Appendix~\ref{app:corrections}).
-
-Part of the evidence rests on AI readings. The must-tier judgments were made by the AI
-assistant, and two readings by one model measure consistency rather than correctness. The
+Part of the evidence rests on AI readings: the AI assistant checked the must tier against the source, and two readings by one model family measure consistency rather than correctness. The
 comparison with Rima et al.'s tool uses small AI-read samples, and I agreed with
 \HHAuthorAgree{} of the \HHAuthorJudged{} cases I re-read (Section~\ref{sec:res-h2h}).
 
-A route table alone is insufficient for static navigation extraction.
+The main corpus results, and those on the subjects of Rima et al. after the extractor was repaired on them, are in-sample
+(Section~\ref{sec:limitations} and Appendix~\ref{app:corrections}). A route table alone is insufficient for static navigation extraction.

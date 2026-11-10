@@ -36,7 +36,7 @@
   \ForAll{members $m$ of $x$, if $x$ is a component} \Comment{a member runs where its component is shown}
     \State \Call{Propagate}{$x, m$}
   \EndFor
-  \ForAll{$y$ with $(x,y) \in \mathit{CG} \cup D \cup T$} \Comment{$\mathit{CG}$: member level, bindings per injector; $D$, $T$: \emph{model only}}
+  \ForAll{$y$ with $(x,y) \in \mathit{CG} \cup D \cup T$} \Comment{$\mathit{CG}$: member level, bindings per injector (\emph{model only}); $D$, $T$: \emph{model only}}
     \State \Call{Propagate}{$x, y$}
   \EndFor
 \EndWhile
