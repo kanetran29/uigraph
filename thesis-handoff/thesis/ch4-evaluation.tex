@@ -49,12 +49,15 @@ mifos & \texttt{7f781796} & MPL-2.0 & \RoundTwoRoutesMifos{} & size ceiling \\
 \end{table}
 
 
-Four candidates were rejected. The counts below were read from the repositories and are not generated.
-\texttt{angular/components} is a component library with no product router. \texttt{vendure} has 169
-end-to-end specifications, all of which exercise the GraphQL server and none the user interface.
-\texttt{gravitee} declares 618 routes but has 14 UI specifications. \texttt{SAP/spartacus} has a
-large Cypress suite, but the extractor does not support its configuration-driven routing. Tool
-support was not one of the six criteria but became a rejection criterion after screening began.
+Four candidates were rejected (counts read from the repositories, not generated):
+\begin{itemize}
+\item \texttt{angular/components}: a component library with no product router (criterion~1);
+\item \texttt{vendure}: 169 end-to-end specifications, all for the GraphQL server and none for the
+user interface;
+\item \texttt{gravitee}: 618 routes but 14 UI specifications (criterion~4, applied as noted above);
+\item \texttt{SAP/spartacus}: configuration-driven routing that the extractor does not support. Tool
+support was not one of the six criteria; it became a rejection criterion after screening began.
+\end{itemize}
 
 \subsubsection{Validity of an open-source corpus}
 

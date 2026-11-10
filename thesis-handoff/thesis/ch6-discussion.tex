@@ -7,13 +7,20 @@ Section~\ref{sec:limitations} records the threats to validity. Section~\ref{sec:
 declares what the analysis approximates, Section~\ref{sec:transfer} considers other routers, and
 Section~\ref{sec:future} sets priorities for future work.
 
-\subsection{Key findings}
+\subsection{Answers to the research questions}
 \label{sec:findings}
 
 The results locate extraction losses at two levels, the nodes and the edges, and each level limits
 the other.
 
-\paragraph{RQ1: the node level.}
+\subsubsection{RQ1: deterministic transitions}
+\label{sec:rq1}
+
+On the six applications, the extractor recovers every screen that a static reader can enumerate
+but few deterministic transitions: \CensusMustSites{} constructs earn must (\RoundTwoMustConv{} of
+the in-scope constructs), and their edges hold only under the assumptions of Claim~\ref{claim:must}.
+
+\paragraph{The node level.}
 Node completeness has two definitions. Against the static readers of the route configuration,
 extraction is complete on all six applications (Table~\ref{tab:coverage}), and the loss
 classification uses this weaker definition. The runtime route oracle finds no node at an unmounted
@@ -23,7 +30,7 @@ have a node for every mounted leaf screen. The constant-path and lazy-boundary d
 Section~\ref{sec:res-defects} are resolved in the final version, and their loss categories are
 empty (Section~\ref{sec:res-round2}).
 
-\paragraph{RQ1: the must tier.}
+\paragraph{The must tier.}
 The demotion rules explain most of the must tier's small size, since guards, branches, callbacks and
 template conditions account for most demotions (Table~\ref{tab:mayreasons}). Proving that a guard
 always admits could enlarge the tier: ignoring all guards while keeping the other demotions raises
@@ -34,7 +41,13 @@ were developed partly in response to red-team panels run with the AI assistant. 
 finds no failure among the must edges, but it cannot read the destinations of about half of that
 application's must edges, all of them toolbar edges.
 
-\paragraph{RQ2: what remains is lost at the edge.}
+\subsubsection{RQ2: where and why extraction fails}
+\label{sec:rq2}
+
+Under the chosen rule order, extraction fails mostly at the edge, in placing navigation on the
+screens it fires from. The
+evidence supports five defect classes and one candidate class (Table~\ref{tab:defects}).
+
 After scope attribution, the attribution losses that remain (Table~\ref{tab:remaining}) show three
 failure modes:
 \begin{itemize}
@@ -55,7 +68,13 @@ shared-component construct rendered only on screens without nodes is an attribut
 attribution alone cannot recover. The categories diagnose losses and do not bound what attribution
 can recover.
 
-\paragraph{RQ3: what scope attribution achieved.}
+\subsubsection{RQ3: the effect of scope attribution}
+\label{sec:rq3}
+
+Scope attribution recovers a per-application median of \AttrRecoveredMedian{} (range
+\AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{} pooled. No
+check establishes that the computed scopes are not too large.
+
 Scope attribution is one model whose lower levels reimplement the mechanisms of earlier work: the
 shell rule is the \emph{rooted} level, and the enclosing-route components of Rima et al.'s
 specification are the \emph{outlet} level (Section~\ref{sec:res-ablation}). Most of what
@@ -70,7 +89,12 @@ contribution of scope attribution is therefore this model and the measurement of
 levels adds. Section~\ref{sec:limitations} states what
 the references and suites can establish.
 
-\paragraph{RQ4: a sanity check, conditional on RQ1.}
+\subsubsection{RQ4: response to source changes}
+\label{sec:rq4}
+
+Within the constructs it represents, the graph responded to every scored change
+(\MutDetected{} of \MutScored{}).
+
 The mutation test checks whether witness mapping reacts to injected edits, and it does not measure
 change-impact accuracy. Rename detection is almost guaranteed by construction, so the informative
 count leaves renames out. The other three operators are restricted to represented constructs in
@@ -78,8 +102,7 @@ the simplest supported form. On their \MutFallibleScored{} scored mutants, which
 \MutScored{} of Section~\ref{sec:res-mutation} without the renames, the attributed graph detects
 \MutFallibleDetected{}. The harness was corrected after its misses were examined
 (Appendix~\ref{app:corrections}), so the result is not independent and need not generalise to a larger
-or differently drawn sample. Every scored change to a represented construct was visible, and RQ1
-measures how often constructs are represented. Change impact queries are likewise limited to the represented part of an application.
+or differently drawn sample. RQ1 measures how often constructs are represented. Change impact queries are likewise limited to the represented part of an application.
 
 Guard mutants are observable only if an edge enters a screen of the guarded route
 (Section~\ref{sec:res-mutation}). The class ``guards unreliable in both directions'' in
@@ -88,7 +111,9 @@ guard on a route returned by a wrapper function, and a \texttt{canActivate} elem
 call. Red-team source review found these defects, which the witness check missed, and the mutation
 run neither confirms nor refutes the class.
 
-\paragraph{RQ5: whose losses they are.}
+\subsubsection{RQ5: the applications or the tool}
+\label{sec:rq5}
+
 The cause trace of Section~\ref{sec:res-losses} assigns every repaired class to the tool, and two
 open causes as well: the named outlets and ghostfolio's computed routes. The losses that this study
 can explain are therefore mostly limits of this extractor rather than of static extraction. The
@@ -96,9 +121,12 @@ evidence for a limit of the approach is narrow. It consists of the two causes be
 a route table, each found in one application. The rest is open, and no measurement here assigns
 it. Assigning the remaining attribution losses would need a check that separates tool gaps from
 components that no screen may render. Assigning the may-only locations behind application decisions
-would need rules that test whether a decision can vary.
+would need rules that test whether a decision can vary. The harness also checks only that every
+construct has a label, not that the label is correct.
 
-\paragraph{Two uses of the graph.}
+\subsubsection{Uses of the graph}
+\label{sec:uses}
+
 The graph is meant for two uses, neither of which was tested with consumers. The first is change
 impact analysis. Each edge records its construct's file and line, which links changed lines to
 edges and to their source and destination screens. This screen-level counterpart of Chianti
@@ -432,12 +460,6 @@ Priorities, ordered by their potential effect on the claims, are:
 
 \subsection{Summary}
 
-Node extraction is complete against the route configuration that static readers can read, although
-some running applications mount leaf screens that have no node, and most remaining losses occur at the
-edge. Scope attribution states the mechanisms of earlier work as nested levels of one model. The
-added step places navigation in services, guards and
-effects, at a cost in precision on the one reference that can tell, and adds no transition that the suites exercised. The graph responds
-to changes in the constructs it represents, and the repaired losses were the tool's. The heaviest
-threat is that every corpus figure is in-sample, and transfer to other routers remains unmeasured.
-The priorities are an oracle for screen sets on a large application and a runtime tier that extends
-the graph to signed-in use.
+The heaviest threat to the answers of Section~\ref{sec:findings} is that every corpus figure is
+in-sample, and transfer to other routers remains unmeasured. The priorities are an oracle for screen sets on a
+large application and a runtime tier that extends the graph to signed-in use.

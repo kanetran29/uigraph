@@ -421,6 +421,16 @@ receives the join of both scopes. The prototype instead blocks propagation into 
 components and adds fallbacks outside these constraints (Section~\ref{sec:implementation}).
 Its result is not the least solution of this system or of any restriction of it.
 
+Four parts of Algorithm~\ref{alg:attribution} are marked \emph{model only}: they belong to the
+analysis, but the prototype evaluated in this thesis does not implement them. Two are seed scopes:
+leave guards, which run as the user leaves a route, and HTTP interceptors, which are registered for
+the whole application. The other two are the input relations dispatch ($D$) and entry guards ($T$,
+Section~\ref{sec:extensions}). The prototype replaces both guard rules with one stand-in that gives
+a guard the screen of each route naming it, and gives effects $\top$ in place of $D$. It has no
+interceptor rule: an interceptor is scoped like any other service, through its callers and the
+components that inject it, so an interceptor with neither gets no scope
+(Section~\ref{sec:implementation}).
+
 \input{figures/alg-attribution}
 
 \subsubsection{Guards as program points}

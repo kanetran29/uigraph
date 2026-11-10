@@ -5,10 +5,10 @@
 % Development versions are described in Section 4.3.2; the corrections table (tab:repairs) is in Appendix A.
 
 This chapter reports measurements from the harness of Section~\ref{sec:protocol} on the corpus of
-Section~\ref{sec:corpus}. Sections~\ref{sec:res-baseline}--\ref{sec:res-mutation} answer RQ1--RQ4:
-losses, defect classes, scope attribution and mutation sensitivity, respectively.
-Section~\ref{sec:res-round2} traces loss causes (RQ5), and Section~\ref{sec:deadlinks} reports
-dead-link candidates. Section~\ref{sec:res-summary} gives a short answer to each research question.
+Section~\ref{sec:corpus}. Sections~\ref{sec:res-baseline}--\ref{sec:res-round2} report the
+measurements for RQ1--RQ5: losses, defect classes, scope attribution, mutation sensitivity and loss
+causes. Section~\ref{sec:deadlinks} reports dead-link candidates, and Section~\ref{sec:res-summary}
+summarises the results per research question.
 
 The numerical tables are generated from the harness result files, and hand-compiled summaries are marked. The development versions are described in Section~\ref{sec:corrections}, and the corrections between them in Appendix~\ref{app:corrections}.
 
@@ -831,7 +831,7 @@ load the same file. No edge enters \path{/editor}, but one enters \path{/editor/
 empty-path guard is consequently scored and missed rather than excluded: the sole paired
 disagreement reflects the harness, not the graph.
 
-The mutation run neither confirms nor contradicts the defect class \emph{guards unreliable in both directions}; Chapter~\ref{ch:discussion} gives the reading. In this sample the graph responded to every scored change (\MutDetected{}/\MutScored{}) in the constructs it represents, a result the construction makes close to certain.
+In this sample the graph responded to every scored change (\MutDetected{}/\MutScored{}) in the constructs it represents.
 
 \subsection{What the losses were (RQ5)}
 \label{sec:res-round2}
@@ -844,11 +844,10 @@ using the three outcomes defined in Section~\ref{sec:metrics}.
 
 A \emph{class} is a row of Table~\ref{tab:defects}; a \emph{cause} is its explanation from source review.
 
-The three-part answer attributes repaired classes to tool defects, without extending that conclusion
-to all constructs. The \MayAppAny{}/\MayOnlyConstructs{} may-only witness locations involving
+The trace below assigns each repaired class to a cause in the tool; the remaining attribution
+losses and may-only locations are not assigned. The \MayAppAny{}/\MayOnlyConstructs{} may-only witness locations involving
 application decisions (Table~\ref{tab:mayreasons}) remain may under rules that do not test whether
-the decision can vary. They therefore do not establish inherent application uncertainty.
-The lists count causes; Tables~\ref{tab:remaining} and~\ref{tab:round2acct} count constructs,
+the decision can vary. The lists count causes; Tables~\ref{tab:remaining} and~\ref{tab:round2acct} count constructs,
 including \AttrRemainingUnexplained{}/\AttrRemaining{} residual attribution constructs without
 a recorded reason.
 
@@ -947,7 +946,7 @@ route oracle of Section~\ref{sec:res-probe} exposed the error.
 number of witness-check failures is \MustWitnessViolations{}. The checker cannot read the
 destination of \MustWitnessUnread{} of them, so those edges are neither passes nor failures. All
 unread destinations are toolbar edges in one application, and they rely on the toolbar component's
-computed scope and on the route-order assumption. The check compares construct and edge
+computed scope, which no check tested, and on the route-order assumption. The check compares construct and edge
 destinations. It does not test unconditional execution or router admission, which the demotion
 rules address.
 Neither source inspection (Section~\ref{sec:limitations}) nor this mechanical check independently
@@ -1027,43 +1026,24 @@ would otherwise be labelled dead.
 \subsection{Summary}
 \label{sec:res-summary}
 
-This section answers each research question briefly. The sections cited give the figures and
-the limits.
-
-\paragraph{RQ1.} Every screen that a static reader can enumerate has a node, and the runtime route
-oracle finds no node at an address where the framework mounts nothing. Against the addresses the
-running framework mounts, the missing nodes lie almost entirely behind one construct in ghostfolio
-that the extractor declares unread. Deterministic transitions are rare: \CensusMustSites{}
-constructs earn must, and \CensusMustKdash{} of the \CensusMust{} must edges come from one toolbar
-in k8s dashboard. That toolbar's computed scope is untested, and most must edges hold only under
-the unvalidated route-order assumption A1 (Sections~\ref{sec:model} and~\ref{sec:res-soundness}). Most
-may-only witness locations involve a guard, branch or other
-application decision, and the demotion rules do not test whether that decision can vary
-(Section~\ref{sec:res-baseline}).
-
-\paragraph{RQ2.} Under the precedence of the loss rules, attribution is the largest loss category
-in every application. An attribution loss is a construct that the extractor, without attribution,
-cannot place on a screen it fires from. The evidence supports five defect classes and one candidate
-class (Table~\ref{tab:defects}). The lazy-boundary, constant-path and unlinked-component classes
-have no instances on the final version (Section~\ref{sec:res-defects}).
-
-\paragraph{RQ3.} Scope attribution recovers a per-application median of \AttrRecoveredMedian{}
-(range \AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{}
-pooled. Almost all recovered constructs are at the may tier, so the gain in must conversion is
-small. Most of the recovery comes from mechanisms of earlier work, which the analysis includes as
-levels. Its added step places navigation in services, guards and effects, and on the alfresco
-reference it raises recall at a cost in precision. No check establishes that the computed scopes
-are not too large (Section~\ref{sec:res-after}).
-
-\paragraph{RQ4.} The graph responded to \MutDetected{} of the \MutScored{} scored mutants. The
-operators act only at constructs the graph already cites, so the result is a conditional check of
-the mapping from witnesses to source, and change-impact accuracy remains unmeasured
+The measurements for each research question are, in brief:
+\begin{description}[nosep,leftmargin=2.6em,labelwidth=2.2em]
+\item[RQ1] Every screen that a static reader can enumerate has a node; the screens the running
+framework mounts without a node lie almost entirely behind one construct in ghostfolio
+(Section~\ref{sec:res-probe}). \CensusMustSites{} constructs earn must, and \CensusMustKdash{} of
+the \CensusMust{} must edges come from one toolbar in k8s dashboard (Section~\ref{sec:res-soundness}).
+\item[RQ2] Under the precedence of the loss rules, attribution is the largest loss category in every
+application. Five defect classes and
+one candidate class were found; the lazy-boundary, constant-path and unlinked-component classes
+have no instances on the final version
+(Section~\ref{sec:res-defects}).
+\item[RQ3] Scope attribution recovers a per-application median of \AttrRecoveredMedian{} (range
+\AttrRecoveredRange{}) of the constructs lost to attribution, \AttrRecoveredShare{} pooled, almost
+all at the may tier (Section~\ref{sec:res-after}). On the alfresco reference, the full level raises
+recall and lowers precision (Section~\ref{sec:res-groundtruth}).
+\item[RQ4] The graph responded to \MutDetected{} of the \MutScored{} scored mutants
 (Section~\ref{sec:res-mutation}).
-
-\paragraph{RQ5.} The repaired classes were defects of the tool, the attribution losses remain
-open, and two causes lie beyond any reader of a route table (Section~\ref{sec:res-round2}).
-\AttrRemainingUnexplained{} of the \AttrRemaining{} constructs still lost to attribution are
-labelled as having no reason found. The harness checks that every construct has a label, not that
-the label is correct.
-
-Chapter~\ref{ch:discussion} interprets these answers and their limits.
+\item[RQ5] The cause trace assigns every repaired class to the tool, and two causes lie beyond any
+reader of a route table. \AttrRemainingUnexplained{} of the \AttrRemaining{} constructs still
+lost to attribution have no reason found (Section~\ref{sec:res-round2}).
+\end{description}

@@ -45,9 +45,8 @@ and a patent describes a fully static method \cite{tkachuk2013patent}.
 Modern single-page applications, by contrast, have mostly been modelled dynamically. Crawljax
 builds a state flow graph by firing events against the running Document Object Model (DOM)
 \cite{crawljax2012}. FeedEx and FRAGGEN improve the exploration but still build the model from
-execution \cite{feedex2013,fraggen2022}. Of the tools listed in a survey of model-based web testing
-covering 2014--2025 \cite{websurvey2025}, every one whose model construction was examined for this
-thesis executes the application. Framework-specific static analyses remain few. One builds a
+execution \cite{feedex2013,fraggen2022}. So do the model-based tools of a recent survey that were
+examined here \cite{websurvey2025}. Framework-specific static analyses remain few. One builds a
 dependency graph of React components that leaves out routing \cite{kurant2025}, and three others
 extract navigation:
 \begin{itemize}
@@ -93,8 +92,7 @@ Chapter~\ref{ch:discussion} separates gaps in the implementation from limits of 
 
 The aim is to measure how far static extraction of a UI transition graph gets on real Angular
 applications, why it fails where it does, and what scope attribution adds. Five research questions
-(RQs) follow from this aim. Section~\ref{sec:metrics} defines their measures, and
-Chapter~\ref{ch:results} answers them.
+(RQs) follow from this aim.
 
 \begin{description}[nosep,leftmargin=2.6em,labelwidth=2.2em]
 \item[RQ1] How much of the navigation in Angular applications can static analysis recover as
@@ -125,7 +123,7 @@ Figure~\ref{fig:overview} summarises the study.
 Chapter~\ref{ch:background} reviews transition graphs, related extraction methods, Angular and
 the analysis foundations. Chapter~\ref{ch:analysis} defines the graph model, its conditional
 soundness claim and scope attribution, and describes the implementation. Chapter~\ref{ch:evaluation} describes the corpus,
-metrics, evaluation methods and protocol corrections. Chapter~\ref{ch:results} answers the research
-questions and reports statically detected dead-link candidates. Chapter~\ref{ch:discussion}
-interprets the results and discusses limitations, framework transfer and future work.
-Chapter~\ref{ch:conclusion} summarises the contributions.
+metrics, evaluation methods and protocol corrections. Chapter~\ref{ch:results} reports the measurements
+and statically detected dead-link candidates. Chapter~\ref{ch:discussion} answers the research
+questions and discusses limitations, framework transfer and future work.
+Chapter~\ref{ch:conclusion} restates the answers and summarises the contributions.

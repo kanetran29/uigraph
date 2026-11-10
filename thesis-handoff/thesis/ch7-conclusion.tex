@@ -3,8 +3,19 @@
 
 This thesis measured how much navigation static extraction recovers from six Angular
 applications, classified its losses and evaluated scope attribution as a way to
-recover some. Section~\ref{sec:res-summary} answers the research questions, and
-Chapter~\ref{ch:discussion} interprets the answers.
+recover some. Section~\ref{sec:findings} answers the research questions; in brief:
+\begin{description}[nosep,leftmargin=2.6em,labelwidth=2.2em]
+\item[RQ1] Few deterministic transitions: \CensusMustSites{} constructs earn must, and their edges
+hold only under the assumptions of Claim~\ref{claim:must} (Section~\ref{sec:rq1}).
+\item[RQ2] Mostly at the edge, in placing navigation on the screens it fires from (Section~\ref{sec:rq2}).
+\item[RQ3] Scope attribution recovers a median of \AttrRecoveredMedian{} of the constructs lost to
+attribution, almost all as may edges; on the alfresco reference its added step trades precision
+for recall (Section~\ref{sec:rq3}).
+\item[RQ4] It responded to all \MutScored{} scored mutants, for the constructs it represents;
+change-impact accuracy is unmeasured (Section~\ref{sec:rq4}).
+\item[RQ5] Mostly of the tool among the losses explained; two causes lie beyond any route table,
+and the rest is unassigned (Section~\ref{sec:rq5}).
+\end{description}
 
 \paragraph{Contributions.} The thesis makes two contributions. The first is scope attribution, a
 formal model of the screens from which a navigation site can fire, which contains the attribution
@@ -18,23 +29,11 @@ results, and the source-based methods re-run from pinned commits. Runtime reprod
 the route oracle re-runs in part, the realworld end-to-end check uses an unpinned public
 backend, and superseded figures cannot be regenerated.
 
-Scope attribution is specified as a dataflow analysis over screen sets and implemented over
-three of its five input relations (Section~\ref{sec:attribution}). Its added step places
-navigation in services, guards and effects. The step's service join is type-directed and transitive,
-so it generalises the router-service tracing in Rima et al.'s implementation, which is bounded
-to one level and matches by name. With a fallback join and stand-ins for guards and effects, the
-step places \AblationFullAddedSites{} further cited source locations beyond outlet descent, and the
-call graph alone \AblationCallGraphNetSites{} beyond the per-class rule it replaced:
-\AblationFullAddedShare{} and \AblationCallGraphNetShare{} of all locations the full level places
-(Section~\ref{sec:res-ablation}). On the alfresco reference, the step raises recall at a cost in
-precision (Section~\ref{sec:res-groundtruth}).
-
 \paragraph{What remains open.} Dispatch is specified but not implemented, guards use a stand-in,
 and the call graph ignores the injector hierarchy. Screen sets were checked in both directions
 on two applications only, against references that apply the analysis's own relations.
 Rendered-interface checks covered only the screens reachable without signing in, so testing the rest
-needs signed-in execution (Section~\ref{sec:future}). Consumer benefit, including support for UI
-agents and test generation, remains unmeasured.
+needs signed-in execution (Section~\ref{sec:future}). Consumer benefit remains unmeasured.
 
 The main corpus results, and those on the subjects of Rima et al. after the extractor was repaired on them, are in-sample
 (Section~\ref{sec:limitations} and Appendix~\ref{app:corrections}).
@@ -44,6 +43,4 @@ assistant, and two readings by one model measure consistency rather than correct
 comparison with Rima et al.'s tool uses small AI-read samples, and I confirmed
 \HHAuthorAgree{} of the \HHAuthorJudged{} cases I re-read (Section~\ref{sec:res-h2h}).
 
-A route table alone is insufficient for static navigation extraction. May edges are candidates
-that need further checks. The must transitions, which come from \CensusMustSites{}
-constructs, hold only under the assumptions of Claim~\ref{claim:must}.
+A route table alone is insufficient for static navigation extraction.
