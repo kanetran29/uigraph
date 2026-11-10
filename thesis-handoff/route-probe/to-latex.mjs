@@ -7,7 +7,8 @@
  * the chapter can say how many addresses the static readers agreed on that the application mounts
  * none of, without that number being typed by hand.
  *
- * Usage: node to-latex.mjs --results <dir> [--before <dir>] --out <file>
+ * Usage: node to-latex.mjs --results <dir> [--scope <dir>] [--before <dir>] --out <file>
+ * (--scope: where the scope check results are, default --results)
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -218,7 +219,7 @@ const macros = {
  * is most of them. Both are published, so the share is never read as covering the corpus.
  */
 function scopeMacros() {
-  const files = rows.map((r) => ({ slug: r.slug, path: join(a.results, `${r.slug}.scope.json`) })).filter((f) => existsSync(f.path))
+  const files = rows.map((r) => ({ slug: r.slug, path: join(a.scope ?? a.results, `${r.slug}.scope.json`) })).filter((f) => existsSync(f.path))
   if (!files.length) return {}
   const rs = files.map((f) => ({ slug: f.slug, ...JSON.parse(readFileSync(f.path, 'utf8')) }))
   // One measurement means one harness. A file with no stamp predates the version that reads a

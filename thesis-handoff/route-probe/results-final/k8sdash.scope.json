@@ -1,0 +1,1761 @@
+{
+  "scopeHarness": "1.3.0",
+  "rescore": {
+    "graph": "final (packages/ as at a9d29df)",
+    "observationsFrom": "/Users/kanetran29/personal/uigraph/thesis-handoff/route-probe/results/k8sdash.scope.json"
+  },
+  "slug": "k8sdash",
+  "dist": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/dist/k8sdash",
+  "dbPath": "/Users/kanetran29/personal/uigraph-corpus/k8sdash/modules/web/uigraph.db",
+  "screensInGraph": 67,
+  "visited": 67,
+  "usable": 1,
+  "redirectedAway": 66,
+  "errors": 0,
+  "pairs": 0,
+  "pairsConfirmed": 0,
+  "pairsUnpredicted": 0,
+  "observedLinks": 0,
+  "confirmed": 0,
+  "unpredicted": 0,
+  "unrendered": 0,
+  "predictedDefinite": 0,
+  "predictedApprox": 0,
+  "overAttributed": 0,
+  "opaqueLinks": 0,
+  "rows": [
+    {
+      "address": "/login",
+      "landed": "/login",
+      "stayed": true,
+      "predicted": [],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [],
+      "definite": [],
+      "approximated": [],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/workloads",
+        "/"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/error",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/cluster",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/clusterrolebinding",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/clusterrolebinding/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/clusterrole",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/clusterrole/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/event",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/namespace",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/namespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/networkpolicy",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/networkpolicy/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/node",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/node/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/persistentvolume",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/persistentvolume/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/",
+        "/workloads"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/",
+        "/workloads"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/serviceaccount",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/serviceaccount/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/role",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/role/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/rolebinding",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/rolebinding/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/overview",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/workloads",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/workloads",
+        "/"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/cronjob",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/cronjob/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/daemonset",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/daemonset/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/deployment",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/deployment/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/job",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/job/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/pod",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/pod/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/replicaset",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/replicaset/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/replicationcontroller",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/replicationcontroller/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/statefulset",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/statefulset/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/discovery",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/ingress",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/ingress/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/ingressclass",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/ingressclass/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/service",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/service/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/config",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/configmap",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/configmap/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/persistentvolumeclaim",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/secret",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/secret/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/storageclass",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/storageclass/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/customresourcedefinition",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/customresourcedefinition/:crdName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/customresourcedefinition/:crdName/:namespace/:objectName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/customresourcedefinition/:crdName/:objectName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/settings",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/create",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/workloads",
+        "/"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/log/:resourceNamespace/:resourceName/:resourceType",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/shell/:resourceNamespace/:resourceName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/shell/:resourceNamespace/:resourceName/:containerName",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/workloads"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/search",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/workloads",
+        "/"
+      ],
+      "observed": [],
+      "confirmed": [],
+      "unpredicted": [],
+      "unrendered": [
+        "/workloads",
+        "/"
+      ],
+      "definite": [],
+      "approximated": [
+        "/workloads",
+        "/"
+      ],
+      "overAttributed": [],
+      "patterns": [],
+      "patternsConfirmed": [],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    }
+  ]
+}

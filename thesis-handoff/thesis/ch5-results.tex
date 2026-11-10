@@ -276,14 +276,17 @@ node.
 
 Recovery does not establish whether a site's computed scope matches its actual screens. The
 rendered-interface check (Section~\ref{sec:metrics}) tests one direction. Table~\ref{tab:scope}
-reports an earlier graph's observations: neither the browser experiment nor its predictions were
-recomputed for the final call graph. These findings concern that earlier graph.
+gives the final graph's predictions. The browser step ran once, against an earlier graph whose
+extractor commit was not recorded, and it recorded the links each screen renders. Those links
+depend on the application and not on the graph, and the final graph has the same screens, so the
+predictions were re-scored against them (\path{route-probe/rescore-final.mjs}). The browser step was
+not repeated: without a sign-in, a new run would redirect the same screens.
 
 \begin{table}[t]\small
-\caption{Recorded scope predictions of an earlier graph against the rendered interface, on the \ScopeApps{} applications the harness could serve.}
+\caption{Scope predictions of the final graph against the rendered interface, on the \ScopeApps{} applications the harness could serve.}
 \label{tab:scope}
 \TabScope
-\par\smallskip{\footnotesize\noindent\emph{Note.} These predictions were not recomputed for the final call graph. \emph{Judged} counts screens that rendered themselves rather than redirecting to a sign-in page; the rest cannot be judged from what rendered, because a redirected screen shows another screen's links. \emph{Not predicted} is the only column that counts against the analysis; the other direction is reported in the text, because it can be judged only where the graph names a destination exactly.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The rendered links were recorded once, against an earlier graph, and are re-scored here against the final graph. \emph{Judged} counts screens that rendered themselves rather than redirecting to a sign-in page; the rest cannot be judged from what rendered, because a redirected screen shows another screen's links. \emph{Not predicted} is the only column that counts against the analysis; the other direction is reported in the text, because it can be judged only where the graph names a destination exactly.}
 \end{table}
 
 \paragraph{Scopes too small.} Of the \ScopePairs{} (screen, target pattern) pairs that the running
@@ -301,9 +304,10 @@ per-locale bundles do not fit the harness's single served directory. These restr
 one direction tested (Section~\ref{sec:limitations}).
 
 The \ScopeUnpredicted{} unpredicted links share one cause. The graph holds their edges, with the
-right witness, but anchors them at an origin node instead of a screen. The component that renders
-them lives in a workspace library outside the application directory, and attribution computed the
-empty scope for it. These sites belong to the \emph{unplaced} class of Table~\ref{tab:round2acct}.
+right witness, but anchors them at an unplaced origin instead of a screen, because attribution
+computed the empty scope for the component that renders them: a sign-in component in a workspace
+library outside the application directory, and the explainer of the send-access screen. These sites
+belong to the \emph{unplaced} class of Table~\ref{tab:round2acct}.
 
 \paragraph{Scopes too large.} The \ScopeUnrendered{} predicted but unrendered links combine three
 causes. Two are not defects: realworld's header hides links from unsigned users, and a tag page

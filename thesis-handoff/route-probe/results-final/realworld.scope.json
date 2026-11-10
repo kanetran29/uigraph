@@ -1,0 +1,654 @@
+{
+  "scopeHarness": "1.3.0",
+  "rescore": {
+    "graph": "final (packages/ as at a9d29df)",
+    "observationsFrom": "/Users/kanetran29/personal/uigraph/thesis-handoff/route-probe/results/realworld.scope.json"
+  },
+  "slug": "realworld",
+  "dist": "/private/tmp/claude-501/-Users-kanetran29-personal-uigraph/d25f151e-9d40-4c0d-b297-fe3be149d56e/scratchpad/dist/realworld/angular-conduit/browser",
+  "dbPath": "/Users/kanetran29/personal/uigraph-corpus/realworld/./uigraph.db",
+  "screensInGraph": 10,
+  "visited": 10,
+  "usable": 7,
+  "redirectedAway": 3,
+  "errors": 0,
+  "pairs": 25,
+  "pairsConfirmed": 25,
+  "pairsUnpredicted": 0,
+  "observedLinks": 59,
+  "confirmed": 59,
+  "unpredicted": 0,
+  "unrendered": 26,
+  "predictedDefinite": 6,
+  "predictedApprox": 45,
+  "overAttributed": 0,
+  "opaqueLinks": 0,
+  "rows": [
+    {
+      "address": "/",
+      "landed": "/",
+      "stayed": true,
+      "predicted": [
+        "/",
+        "/tag/:tag",
+        "/article/:slug",
+        "/profile/:username",
+        "/login",
+        "/register",
+        "/editor",
+        "/settings"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register",
+        "/profile/johndoe",
+        "/article/how-to-learn-javascript-efficiently",
+        "/profile/janesmith",
+        "/article/react-hooks-best-practices",
+        "/profile/mikewilson",
+        "/article/building-scalable-apis-with-node-js",
+        "/profile/sarahchen",
+        "/article/introduction-to-machine-learning-for-developers",
+        "/tag/ai",
+        "/tag/api",
+        "/tag/architecture",
+        "/tag/backend",
+        "/tag/beginners",
+        "/tag/datascience",
+        "/tag/frontend",
+        "/tag/hooks",
+        "/tag/javascript",
+        "/tag/machinelearning",
+        "/tag/nodejs",
+        "/tag/programming",
+        "/tag/python",
+        "/tag/react",
+        "/tag/webdev"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register",
+        "/profile/johndoe",
+        "/article/how-to-learn-javascript-efficiently",
+        "/profile/janesmith",
+        "/article/react-hooks-best-practices",
+        "/profile/mikewilson",
+        "/article/building-scalable-apis-with-node-js",
+        "/profile/sarahchen",
+        "/article/introduction-to-machine-learning-for-developers",
+        "/tag/ai",
+        "/tag/api",
+        "/tag/architecture",
+        "/tag/backend",
+        "/tag/beginners",
+        "/tag/datascience",
+        "/tag/frontend",
+        "/tag/hooks",
+        "/tag/javascript",
+        "/tag/machinelearning",
+        "/tag/nodejs",
+        "/tag/programming",
+        "/tag/python",
+        "/tag/react",
+        "/tag/webdev"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/editor",
+        "/settings"
+      ],
+      "definite": [],
+      "approximated": [
+        "/",
+        "/tag/:tag",
+        "/article/:slug",
+        "/profile/:username",
+        "/login",
+        "/register",
+        "/editor",
+        "/settings"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register",
+        "/profile/:username",
+        "/article/:slug",
+        "/tag/:tag"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register",
+        "/profile/:username",
+        "/article/:slug",
+        "/tag/:tag"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/tag/:tag",
+      "landed": "/tag/probe-value",
+      "stayed": true,
+      "predicted": [
+        "/",
+        "/tag/:tag",
+        "/article/:slug",
+        "/profile/:username",
+        "/login",
+        "/register",
+        "/editor",
+        "/settings"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register",
+        "/tag/ai",
+        "/tag/api",
+        "/tag/architecture",
+        "/tag/backend",
+        "/tag/beginners",
+        "/tag/datascience",
+        "/tag/frontend",
+        "/tag/hooks",
+        "/tag/javascript",
+        "/tag/machinelearning",
+        "/tag/nodejs",
+        "/tag/programming",
+        "/tag/python",
+        "/tag/react",
+        "/tag/webdev"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register",
+        "/tag/ai",
+        "/tag/api",
+        "/tag/architecture",
+        "/tag/backend",
+        "/tag/beginners",
+        "/tag/datascience",
+        "/tag/frontend",
+        "/tag/hooks",
+        "/tag/javascript",
+        "/tag/machinelearning",
+        "/tag/nodejs",
+        "/tag/programming",
+        "/tag/python",
+        "/tag/react",
+        "/tag/webdev"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/article/:slug",
+        "/profile/:username",
+        "/editor",
+        "/settings"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/tag/:tag",
+        "/article/:slug",
+        "/profile/:username",
+        "/login",
+        "/register",
+        "/editor",
+        "/settings"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register",
+        "/tag/:tag"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register",
+        "/tag/:tag"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/login",
+      "landed": "/login",
+      "stayed": true,
+      "predicted": [
+        "/login",
+        "/register",
+        "/",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/login",
+        "/register",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/register",
+      "landed": "/register",
+      "stayed": true,
+      "predicted": [
+        "/login",
+        "/register",
+        "/",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/login",
+        "/register",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/settings",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/",
+        "/login",
+        "/register",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/login",
+        "/register",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/profile/:username",
+      "landed": "/profile/probe-value",
+      "stayed": true,
+      "predicted": [
+        "/settings",
+        "/profile/:username",
+        "/profile/:username/favorites",
+        "/",
+        "/article/:slug",
+        "/login",
+        "/register",
+        "/editor"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/settings",
+        "/profile/:username",
+        "/profile/:username/favorites",
+        "/article/:slug",
+        "/editor"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/settings",
+        "/profile/:username",
+        "/profile/:username/favorites",
+        "/article/:slug",
+        "/login",
+        "/register",
+        "/editor"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/profile/:username/favorites",
+      "landed": "/profile/probe-value/favorites",
+      "stayed": true,
+      "predicted": [
+        "/settings",
+        "/profile/:username",
+        "/profile/:username/favorites",
+        "/",
+        "/article/:slug",
+        "/login",
+        "/register",
+        "/editor"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/settings",
+        "/profile/:username",
+        "/profile/:username/favorites",
+        "/article/:slug",
+        "/editor"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/settings",
+        "/profile/:username",
+        "/profile/:username/favorites",
+        "/article/:slug",
+        "/login",
+        "/register",
+        "/editor"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/editor",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/",
+        "/login",
+        "/register",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/login",
+        "/register",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/editor/:slug",
+      "landed": "/login",
+      "stayed": false,
+      "predicted": [
+        "/",
+        "/login",
+        "/register",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/login",
+        "/register",
+        "/editor",
+        "/settings",
+        "/profile/:username"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    },
+    {
+      "address": "/article/:slug",
+      "landed": "/article/probe-value",
+      "stayed": true,
+      "predicted": [
+        "/editor/:slug",
+        "/login",
+        "/register",
+        "/profile/:username",
+        "/",
+        "/editor",
+        "/settings"
+      ],
+      "observed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "confirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "unpredicted": [],
+      "unrendered": [
+        "/editor/:slug",
+        "/profile/:username",
+        "/editor",
+        "/settings"
+      ],
+      "definite": [
+        "/"
+      ],
+      "approximated": [
+        "/editor/:slug",
+        "/login",
+        "/register",
+        "/profile/:username",
+        "/editor",
+        "/settings"
+      ],
+      "overAttributed": [],
+      "patterns": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsConfirmed": [
+        "/",
+        "/login",
+        "/register"
+      ],
+      "patternsUnpredicted": [],
+      "opaque": 0
+    }
+  ]
+}
