@@ -35,22 +35,16 @@ $(s, \sigma, g, s')$. The paragraph on witnesses below says how constructs are t
 \textbf{Nodes outside the model.} The extractor emits two nonscreen node kinds outside the
 edge relation. An \emph{unplaced origin} represents a component and navigation sites that
 could not be assigned to a screen. A \emph{dynamic target} represents an unresolved
-destination. These preserve unplaced sites for the loss counts in Chapter~\ref{ch:results}
-and unresolved destinations that may still occur at run time. Section~\ref{sec:res-after} counts
-both kinds.
-Of \CensusEdges{} edges, \CensusTargetNotScreen{} reach a dynamic target. Another
-\CensusMaySourceNotScreen{} leave an unplaced origin and are labelled \emph{may}, so
-Chapter~\ref{ch:results} includes them in that tier despite their nonscreen sources.
-An edge to a dynamic target records outgoing navigation without identifying the destination
+destination. These preserve unplaced sites, which the loss counts need, and unresolved destinations that may
+still occur at run time. An edge from an unplaced origin is labelled \emph{may}, or \emph{unknown}
+if it reaches a dynamic target, and counts in its tier despite its nonscreen source. An edge to a dynamic target records outgoing navigation without identifying the destination
 screen. Claim~\ref{claim:must} and must conversion (RQ1) concern only edges between screens.
 
 \textbf{Modalities.} A \emph{must} edge is claimed to fire for every input on which the
 enclosing code executes. A \emph{may} edge is possible but conditional. \emph{Unknown} marks an
-edge whose modality could not be determined, including unresolved destinations. In the
-measured graphs it labels exactly the edges to a dynamic target, the \texttt{u\_}\,sink
-(Section~\ref{sec:res-round2}) that records events with unresolved targets. Such edges occur in
-\CensusUnknownApps{} of \CensusApps{} applications, and the census rejects any graph in which
-the unknown edges and the edges to nonscreen targets differ. Unknown edges count towards totals
+edge whose modality could not be determined, including unresolved destinations. The
+extractor uses it for exactly the edges to a dynamic target, the \texttt{u\_}\,sink that records
+events with unresolved targets. Unknown edges count towards totals
 but towards no rate. The model also assigns \emph{unknown} to navigation inside signal effects
 (Section~\ref{sec:boundary}), but this version emits none.
 
@@ -99,15 +93,11 @@ fails and the claim can fail with it.
 catch-all route in a separately registered route table is matched after every route of the
 other tables. A route added at run time is a counterexample, and so is a registration order
 that puts such a catch-all earlier. Table~\ref{tab:approximations} lists the matching order
-among the declared approximations. Most of the must tier rests on A1. Of the \RouteOrderMust{}
-must edges, \RouteOrderResting{} hold only under A1, and these come from
-\RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications. Without A1, \RouteOrderMustWithout{} must
-edges remain, on \RouteOrderSitesWithout{} of the \RouteOrderSites{} constructs.
+among the declared approximations.
 \item[A2. Selectors.] The component of a must edge's site is not placed by a join over an ambiguous selector,
 the fallback of the nesting relation when no import resolves the selector
 (Sections~\ref{sec:inputs} and~\ref{sec:implementation}). A join that places a component on a
-screen that never renders it is a counterexample. Such joins occur in k8s dashboard (the Kubernetes dashboard) and
-bitwarden, but no final must edge cites a construct placed through one.
+screen that never renders it is a counterexample.
 \item[A3. Calls.] In handling the event of a must edge, no call that the reader cannot resolve to a body in the application starts a
 navigation, and no work that the handler schedules for later starts one. A library call that
 navigates is a counterexample, and so is a callback that the handler schedules and that
@@ -120,8 +110,6 @@ an activation with a modifier key, navigation into another browsing context
 exception before the navigation is another, whether it comes from a call or from the evaluation
 of an expression.
 \end{description}
-The edges that rest on A3 and A4 are not counted, and neither assumption is checked against a
-run.
 
 \begin{claim}[Soundness of the must tier]
 \label{claim:must}

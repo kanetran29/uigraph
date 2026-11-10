@@ -359,8 +359,8 @@ a literal route. The extractor instead prefers exact paths. Separately registere
 provider order, which is unresolved. The extractor assumes their catch-alls follow all other tables'
 routes and records each dismissed catch-all in a note.
 & Overlapping routes or redirects keep edges at \emph{may}, potentially naming Angular's unchosen route.
-The catch-all exception is the route-order assumption. Section~\ref{sec:model} counts the
-must edges relying on it, with Claim~\ref{claim:must}. \\
+The catch-all exception is the route-order assumption. Section~\ref{sec:res-soundness} counts the
+must edges relying on it. \\
 Ambiguous selectors in the nesting relation
 & Shared selectors are narrowed to components the rendering file imports. If it imports none, all
 candidates are joined.

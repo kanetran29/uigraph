@@ -195,6 +195,9 @@ Most recoveries occur on mifos. Excluding it reduces the share to \AttrRecovered
 recovery stays under half on \AttrUnderHalfApps{} of the six applications. Edge counts rise from
 \AttrEdgesBefore{} to \AttrEdgesAfter{} (per application in the \emph{anchored} column of
 Table~\ref{tab:expansion}): \CensusMust{} must, \CensusMay{} may and \CensusUnknown{} unknown. The
+unknown edges, all to dynamic targets, occur in \CensusUnknownApps{} of \CensusApps{} applications;
+the harness rejects any graph in which the unknown edges and the edges to nonscreen targets differ.
+\CensusMaySourceNotScreen{} of the may edges leave an unplaced origin. The
 attributed graphs hold \CensusNodes{} nodes: \CensusScreens{} screens, \CensusAnchors{} anchor nodes (each stores the edges anchored at one scope, Section~\ref{sec:anchored}) and
 \CensusOtherNodes{} unplaced origins or dynamic targets. Section~\ref{sec:res-ablation} measures what the
 \emph{full} step adds beyond the levels that reimplement earlier work and what its call graph adds
@@ -951,6 +954,14 @@ destinations. It does not test unconditional execution or router admission, whic
 rules address.
 Neither source inspection (Section~\ref{sec:limitations}) nor this mechanical check independently
 proves Claim~\ref{claim:must}.
+
+Most of the must tier rests on the route-order assumption A1 (Section~\ref{sec:model}). Of the
+\RouteOrderMust{} must edges, \RouteOrderResting{} hold only under A1, and these come from
+\RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications. Without A1,
+\RouteOrderMustWithout{} must edges remain, on \RouteOrderSitesWithout{} of the \RouteOrderSites{}
+constructs. Joins over an ambiguous selector, which A2 excludes from the sites of must edges, occur
+in k8s dashboard and bitwarden, but no final must edge cites a construct placed through one. The
+edges that rest on A3 and A4 are not counted, and neither assumption is checked against a run.
 
 \paragraph{The whole graph.} The \RoundTwoEdges{} edges carry \RoundTwoSites{} witness citations,
 including merged witnesses and repeated locations. Sites producing more edges therefore receive
