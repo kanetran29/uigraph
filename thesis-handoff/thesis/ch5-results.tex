@@ -437,9 +437,9 @@ levels, but is less precise than both those levels and the class join.
   every screen whose components inject it, but its only caller is a button on the settings screen.
 \item \emph{An AI assistant built the alfresco reference without the graph,} using realworld's rules
   under a protocol committed before scoring (\path{ground-truth/ALFRESCO-PROTOCOL.txt}).
-  \GTAlfUndetermined{} undetermined sites are not scored. Afterwards, four lines reported by the
-  scorer as placed but unlisted were inspected using only line numbers, without graph placements.
-  None was a navigation site. They were added as excluded, a protocol deviation: only adding missed
+  \GTAlfUndetermined{} undetermined sites are not scored. Afterwards, a second assistant run read the four lines
+  that the scorer reported as placed but unlisted, using only line numbers and no graph placements
+  (Table~\ref{tab:ai-readings}). None was a navigation site. They were added as excluded, a protocol deviation: only adding missed
   sites was permitted. The addition changes no figure because unlisted lines are not scored.
 \item \emph{A configuration-driven site accounts for all full-level excess on alfresco.}
   The number of sites with full-level excess is \GTAlfFullExcessSites{}:
@@ -599,7 +599,7 @@ is this thesis's only out-of-sample measurement: preregistration preceded the sc
 results, and the extractor was frozen before extraction. The second uses the extractor repaired
 after the first (Table~\ref{tab:repairs}) and is therefore in-sample. Their registry pins no
 commits, so each subject uses its last commit before its ground-truth date. The AI assistant
-assessed both comparisons, and a stronger model reassessed a gated subset specified below.
+assessed both comparisons, and a stronger model reassessed a gated subset (Table~\ref{tab:ai-readings}).
 
 The preregistered unit is a reference pair: when an entry's terminal differs from every start
 route, each start is paired with the terminal. Their tool contains every reference pair by
@@ -666,17 +666,13 @@ screen, where the component holding it is not shown, accounts for the other
 \RimaJudgedSpurious{} spurious pairs are at the may tier: the number with a must edge is
 \RimaSpuriousMust{}.
 
-All assessments use one AI model family, so they establish consistency rather than correctness. The
+The
 run logs of the head-to-head comparison record Claude Sonnet 5.5 as the reader and Claude Opus 5.5
 as the stronger model. The archived records of the other readings do not name the model, so for
-them the model family rests on my own record. A
-stronger model reassessed every miss, every pair not judged real and every sixth real pair. It
-reassessed \RimaGated{} pairs and changed \RimaGateChanged{} of the verdicts. One batch was
-repeated because its first response omitted all 20 additional pairs. Adversarial review later
-found that the second response wrongly classified a shell bar as rendered on sign-in and
-password-reset screens, where a guard hides it (Section~\ref{sec:approximations}). Manual
-correction changed \RimaCorrected{} of the verdicts and \RimaRecited{} of the citations. A script
-verifies the cited navigation sites but not their rendering on start screens.
+them the model rests on my own record. Table~\ref{tab:ai-readings} states how the
+assessments were checked. Adversarial review found that one response wrongly classified a shell bar
+as rendered on sign-in and password-reset screens, where a guard hides it, and the affected assessments
+were corrected.
 
 The comparison prompted four repairs (Table~\ref{tab:repairs}), after which the post-hoc
 re-extraction holds \RimaRepHitFull{}/\RimaPairs{} reference pairs and \RimaRepExtra{} additional
@@ -771,12 +767,11 @@ Three predictions were preregistered. The first, that this extractor's recall on
 at the point estimate, and its bounds separate only without mifos, a group formed after reading. The second, that their
 precision on their subjects is at least this extractor's, did not hold, and neither did the third, that their tool fails on some application.
 
-Assessment follows the first comparison's rules. It covers \HHRead{} pairs, of which a stronger
-model reassessed \HHGated{}, changing \HHGateChanged{} of the verdicts. I checked \HHAuthorSample{} sampled assessments
-underlying the five-application figures, three per stratum, against source. The model verdict was
-visible, so this was not blind and measures agreement rather than correctness.
-I judged \HHAuthorJudged{} cases and agreed on \HHAuthorAgree{} (Wilson 95\,\% interval
-\HHAuthorAgreeRange{}). An initial pass incorrectly paired start routes of non-navigating workflows.
+Assessment of \HHRead{} pairs follows the first comparison's rules and was checked as
+Table~\ref{tab:ai-readings} states. My re-read took up to three assessments per stratum of the
+five-application figures and agreed with \HHAuthorAgree{} of \HHAuthorJudged{} (Wilson 95\,\%
+interval \HHAuthorAgreeRange{}). The model verdict was visible, so this measures agreement rather
+than correctness. An initial pass incorrectly paired start routes of non-navigating workflows.
 It was withdrawn; valid remaining assessments were reused and 108 new sample pairs assessed.
 Mifos estimates reuse those samples after excluding cross-mount moves. Preregistration deviations
 are recorded with the results.

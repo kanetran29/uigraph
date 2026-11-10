@@ -441,6 +441,47 @@ uses \texttt{2aac284}, frozen before its evaluation-driven repairs as preregiste
 (Table~\ref{tab:scope}) and the runtime route configurations recorded on 29--30 October without
 an extractor commit. The latter are compared with the final graph (Section~\ref{sec:res-probe}).
 
+\subsubsection{Source readings by an AI assistant}
+\label{sec:ai-readings}
+
+Three checks of scope attribution rest on source readings made by the AI assistant: the structural
+reference on alfresco and the two comparisons with the work of Rima et al.
+Table~\ref{tab:ai-readings} states how each reading was checked and what was not. All readings come
+from one model family, so agreement between them establishes consistency rather than correctness.
+
+\begin{table}[htbp]\small
+\caption{Source readings by the AI assistant: how each was checked and what was not.}
+\label{tab:ai-readings}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.2\textwidth}YY@{}}
+\toprule
+Reading & Checked & Not checked \\
+\midrule
+Structural reference on alfresco (Section~\ref{sec:res-groundtruth}) & Built from the sources
+without the graph, under a protocol committed before scoring. A second assistant run read the four
+placed lines the reference omits, from line numbers only and without graph placements. & No second
+reading of the \GTAlfSites{} listed sites' screen sets is recorded, by a person or a model. \\
+\addlinespace
+First comparison with Rima et al.\ (Section~\ref{sec:res-rima}) & A stronger model re-read every
+miss, every pair not judged real and every sixth real pair: \RimaGated{} pairs, \RimaGateChanged{}
+verdicts changed. One batch was rerun because its first response omitted all its pairs. After
+adversarial review, \RimaCorrected{} verdicts and \RimaRecited{} citation were corrected against the
+source. A script confirms that the site cited for each of the \RimaJudgedReal{} real pairs exists
+at the pinned commit with a link, router call or event binding within two lines (a token match). &
+No re-read by a person is recorded. The script does not test that the construct leads to the target
+or renders on the start screen. \\
+\addlinespace
+Head-to-head with their tool (Section~\ref{sec:res-h2h}) & A stronger model re-read \HHGated{} of
+the \HHRead{} pairs and changed \HHGateChanged{} verdicts. I re-read \HHAuthorJudged{} sampled
+assessments from the corpus applications other than mifos and agreed with \HHAuthorAgree{}. The
+preregistered script check, run only after scoring, finds a link, router call or event binding near
+\HHSitesToken{} of the \HHReadReal{} sites cited for real pairs. & My re-read was not blind: the
+model's verdict was visible. No person re-read the mifos sample, the sample on Rima et al.'s
+subjects, or the \HHSitesNoToken{} cited sites without a matching token, which use other forms such
+as a configuration entry or a service call. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \subsection{Summary}
 \label{sec:eval-summary}
 
