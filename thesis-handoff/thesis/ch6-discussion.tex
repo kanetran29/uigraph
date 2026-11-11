@@ -32,14 +32,14 @@ empty (Section~\ref{sec:res-round2}).
 
 \paragraph{The must tier.}
 The demotion rules explain most of the must tier's small size, since guards, branches, callbacks and
-template conditions account for most demotions (Table~\ref{tab:mayreasons}). Proving that a guard
+template conditions account for most demotions (Table~\ref{tab:mayreasons}). Under the demotion rules as evaluated, the \CensusMustSitesKdash{} toolbar
+constructs on k8s dashboard that attribution raises to must yield \CensusMustKdash{} of the corpus's \CensusMust{} must edges (Section~\ref{sec:res-soundness}). Proving that a guard
 always admits could enlarge the tier: ignoring all guards while keeping the other demotions raises
 it from \CensusMust{} to \GuardOnlyMust{} edges in a separate corpus extraction
-(\texttt{route-oracle/guard-only.mjs}). On k8s dashboard, the \CensusMustSitesKdash{} toolbar
-constructs that attribution places yield \CensusMustKdash{} of the \CensusMust{} must edges under these rules (Section~\ref{sec:res-soundness}). The rules
+(\texttt{route-oracle/guard-only.mjs}). The rules
 were developed partly in response to red-team panels run with the AI assistant. The witness check
-finds no failure among the must edges, but it cannot read the destinations of about half of that
-application's must edges, all of them toolbar edges.
+finds no failure among the must edges, but it cannot read the destinations of \MustWitnessUnread{} of k8s
+dashboard's \CensusMustKdash{} must edges, all of them toolbar edges.
 
 \subsubsection{RQ2: where and why extraction fails}
 \label{sec:rq2}
@@ -124,7 +124,7 @@ open causes as well: the named outlets and ghostfolio's computed routes. Two oth
 any reader of a route table, each found in one application; they are the only evidence for a limit
 of the approach. The rest is unassigned. The losses that this study can explain are therefore
 mostly limits of this extractor rather than of static extraction. Assigning the remaining attribution losses would need a check that separates extractor gaps from
-components that no screen may render. Assigning the may-only constructs behind application decisions
+components that no screen may render. Assigning the may-only witness locations behind application decisions
 would need rules that test whether a decision can vary. The harness also checks only that every
 construct has a label, not that the label is correct.
 
@@ -343,13 +343,13 @@ Configuration, not rendered page; workspace scope; development build
 mount routes outside the measured library, as in two of alfresco's three differences. A production
 build removes the required debug interface, so all builds are development builds.
 & \emph{Open:} the first two enlarge the mounted set beyond reachable screens, which eases
-containment. A production configuration may add or remove routes in no fixed direction. \\
+placing graph nodes inside the mounted set. A production configuration may add or remove routes in no fixed direction. \\
 \end{xltabular}
 \endgroup
 
 These oracle threats enlarge the mounted set and do not mark mounted addresses as unmounted. Under
 the abstraction of Section~\ref{sec:res-probe} and the recorded development configuration, the
-graph contains \ProbeInvented{} unmounted addresses, so no containment failure was observed there.
+graph contains \ProbeInvented{} unmounted addresses, so no node at an unmounted address was observed there.
 The observation does not prove failures impossible.
 
 \subsection{Soundiness and declared approximations}

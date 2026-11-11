@@ -89,9 +89,9 @@ methods. Every unrecovered navigation construct was classified.
 Every screen readable from route tables has a node. Only \CensusMustSites\ constructs yield
 deterministic transitions under stated assumptions, largely because the study defines them strictly. Under the study's classification order, the largest loss
 category is navigation outside components that routes render directly. Scope attribution
-recovers a per-application median of \AttrRecoveredMedian\ of these constructs (\AttrRecoveredShare\ pooled, most of them in one application). Almost all become possible transitions, mostly
-through the simpler rules below the added step, which, for services, guards and effects, places
-\AblationFullAddedSites\ more navigation sites (\AblationFullAddedShare\ of all placed).
+recovers a per-application median of \AttrRecoveredMedian\ of these constructs (\AttrRecoveredShare\ pooled, most of them in one application). Almost all become possible transitions.
+Counted in navigation sites, simpler rules place most of what attribution adds; the added step, for
+services, guards and effects, places \AblationFullAddedSites\ more (\AblationFullAddedShare\ of all placed).
 \abspar
 On a reference that applies the
 analysis's own relations to one application's source, the added step trades precision for recall. A comparison with
@@ -186,7 +186,7 @@ once per screen (Section~\ref{sec:anchored}).
 \item[Attribution level] One of the nested configurations at which the ablation extracts the
 corpus. The levels \emph{owned}, \emph{nesting}, \emph{rooted}, \emph{outlet} and \emph{full}
 are nested, each adding mechanisms to the one before. \emph{Class} replaces the call graph of \emph{full} with a
-per-class join (Section~\ref{sec:metrics} and Figure~\ref{fig:lattice}).
+class join (Section~\ref{sec:metrics} and Figure~\ref{fig:lattice}).
 \item[Attribution loss] A lost navigation construct in one of the two attribution categories. It
 has no owning component, is owned by a class that is not a component, such as a service or guard,
 or lies in a component that no route renders directly (Table~\ref{tab:loss-rules}).

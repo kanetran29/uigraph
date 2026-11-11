@@ -17,6 +17,10 @@ import { EXCLUSIONS, routeBuckets, unaddressableScreens } from './buckets.mjs'
 import { frameworkAnswer, matches } from './framework-answer.mjs'
 
 const HERE = fileURLToPath(new URL('.', import.meta.url))
+// Macro-name suffixes for slugs that contain a digit, which a LaTeX control sequence cannot.
+const SCOPE_MACRO_NAME = { k8sdash: 'Dashboard' }
+const cap = (s) => s[0].toUpperCase() + s.slice(1)
+
 const LABEL = {
   realworld: 'realworld',
   alfresco: 'alfresco',
@@ -213,7 +217,7 @@ const macros = {
 }
 
 /**
- * The scope oracle's figures and its table. Only the direction "rendered but not predicted" is
+ * The scope oracle's figures, one unrendered-prediction macro per application, and its table. Only the direction "rendered but not predicted" is
  * evidence against the analysis, and the bound is as important as the figure: a screen the
  * router redirects away from without a backend cannot be judged at all, and on this corpus that
  * is most of them. Both are published, so the share is never read as covering the corpus.
@@ -229,10 +233,10 @@ function scopeMacros() {
     throw new Error(`the scope results come from ${versions.join(' and ')}; re-run scope-check.mjs for every application so the table is one measurement`)
   }
   const sum = (k) => rs.reduce((t, r) => t + (r[k] || 0), 0)
-  // The unit is a (screen, target pattern) pair, because that is what a scope claims. The raw
-  // anchor count is published beside it and never as the headline: one tag list renders fifteen
-  // anchors answering one pattern, and a shared header's links are rendered again on every
-  // screen, so anchors overstate the number of facts by roughly a factor of two here.
+  // The unit is a (screen, target pattern) pair, because that is what a scope claims. The count
+  // of rendered link elements is published beside it and never as the headline: one tag list
+  // renders fifteen elements answering one pattern, and a shared header's links are rendered
+  // again on every screen, so elements overstate the number of facts by roughly a factor of two.
   const pairs = sum('pairs')
   const confirmed = sum('pairsConfirmed')
   const unpredicted = sum('pairsUnpredicted')
@@ -254,7 +258,7 @@ function scopeMacros() {
     throw new Error(`${over} predictions were judged over-attributed out of ${exact} that carry an exact destination`)
   }
   scopeTable.push('\\newcommand{\\TabScope}{%', '\\begin{tabular}{@{}lrrrrrr@{}}', '\\toprule')
-  scopeTable.push('Application & Screens & Judged & \\shortstack[r]{Pairs\\\\rendered} & \\shortstack[r]{Predicted\\\\by the scope} & \\shortstack[r]{Not\\\\predicted} & \\shortstack[r]{Raw\\\\anchors} \\\\', '\\midrule')
+  scopeTable.push('Application & Screens & Judged & \\shortstack[r]{Pairs\\\\rendered} & \\shortstack[r]{Predicted\\\\by the scope} & \\shortstack[r]{Not\\\\predicted} & \\shortstack[r]{Rendered\\\\link elements} \\\\', '\\midrule')
   for (const r of rs) scopeTable.push(`${LABEL[r.slug] ?? r.slug} & ${r.screensInGraph} & ${r.usable} & ${r.pairs} & ${r.pairsConfirmed} & ${r.pairsUnpredicted} & ${r.observedLinks} \\\\`)
   scopeTable.push('\\midrule', `All & ${sum('screensInGraph')} & ${sum('usable')} & ${pairs} & ${confirmed} & ${unpredicted} & ${anchors} \\\\`)
   scopeTable.push('\\bottomrule', '\\end{tabular}}')
@@ -269,6 +273,8 @@ function scopeMacros() {
     ScopeAnchors: anchors,
     ScopeUnpredicted: unpredicted,
     ScopeUnrendered: sum('unrendered'),
+    // One macro per application: the unrendered predictions are not examined evenly.
+    ...Object.fromEntries(rs.map((r) => [`ScopeUnrendered${SCOPE_MACRO_NAME[r.slug] ?? cap(r.slug)}`, r.unrendered || 0])),
     ScopeExact: exact,
     ScopeApprox: sum('predictedApprox'),
     ScopeOverAttributed: over,

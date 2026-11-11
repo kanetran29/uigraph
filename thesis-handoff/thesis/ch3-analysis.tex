@@ -157,7 +157,7 @@ URL, which the router ignores or follows only when a parameter or the query diff
 & The source is never displayed at its own address & a redirect answers the source's address \\
 & Two declared routes, or a route and a redirect, can answer the address & two routes matching one path \\
 & The base a relative target resolves against cannot be read & a relative target with an unreadable base \\
-& The URL names an auxiliary outlet & a URL with a named-outlet segment, whose route the adapter does not read \\
+& The URL names an auxiliary outlet & a URL with a named-outlet segment, whose route the extractor does not read \\
 \midrule
 Conditional execution & The site is under a template control-flow construct & a control-flow block, a structural directive, a container that renders lazily \\
 & The site is in a template fragment that need not render & \texttt{<ng-template>}, an International Components for Unicode (ICU) case \\
@@ -244,8 +244,8 @@ Section~\ref{sec:scope} hold for the fixpoint alone.
 Guards returning \texttt{UrlTree}, the injector hierarchy, and navigation inside signal effects
 and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) are features
 that the extractor approximates or omits; the parts of Algorithm~\ref{alg:attribution} marked
-\emph{model only} are listed in Section~\ref{sec:inputs}. A construct assigned no scope by the implemented relations contributes
-no edge and counts as lost to service attribution.
+\emph{model only} are listed in Section~\ref{sec:inputs}. A site assigned no scope by the implemented relations contributes
+no edge, and its construct counts as lost to service attribution.
 
 \subsubsection{The defect being addressed}
 
@@ -383,7 +383,7 @@ resolved within the correct import scope. Matching selector text globally is uns
 components may share a selector string in different scopes.
 \item \emph{Router outlets.} Components on the path from the root to the outlet form the shell
 and take $\top$. Components below the component of route $r$ take its scope
-$\mathit{subtree}(r)$. A named outlet carries a second mount, which makes auxiliary routes
+$\mathit{subtree}(r)$; this step is called \emph{outlet descent}. A named outlet carries a second mount, which makes auxiliary routes
 representable without separate treatment.
 \item \emph{Call graph with dependency injection.} A call links to a method only after resolving
 the receiver's type and its binding in the relevant injector. Resolution follows class hierarchy analysis \cite{dean1995cha}. Angular's provider declarations are modelled explicitly as the source
@@ -431,7 +431,7 @@ enclosing conditions.
 
 Navigation inside a signal effect depends on a reactive graph whose read set alone is
 statically visible (Section~\ref{sec:angular}). The model labels these edges \emph{unknown}
-and records the signals read as a symbolic guard. This version emits none and does not
+and records the signals read as a symbolic guard. The extractor emits none and does not
 attempt to determine when they fire.
 
 \subsubsection{Anchored edges}
@@ -464,7 +464,7 @@ also renders on descendant screens, where links still resolve against that compo
 Write $\mathit{holder}(s, c)$ for the nearest route at or above screen $s$ whose component is
 $c$. A relative target at a site in component $c$ that fires on $s$ resolves against the path of $\mathit{holder}(s, c)$. If no route on that chain renders $c$, as with template-nested
 components, the full target's base is unresolved and the edge is may
-(Table~\ref{tab:demotion}). A target prefix, the static text before the first non-literal part of a target, falls back to $s$'s address, and all prefix edges are may.
+(Table~\ref{tab:demotion}). A target prefix, the leading part of a target up to its trailing unresolved part (it may contain single-segment parameters, Table~\ref{tab:approximations}), falls back to $s$'s address, and all prefix edges are may.
 
 \subsubsection{Extensions not evaluated}
 \label{sec:extensions}
